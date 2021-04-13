@@ -14,80 +14,80 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./constant]
+  [constant]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./constant_ref]
+  [constant_ref]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./diff]
+  [diff]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./const_AuxK]
+  [const_AuxK]
     type = FunctionAux
     variable = constant
     function = const_fcn
-  [../]
+  []
 
-  [./const_ref_AuxK]
+  [const_ref_AuxK]
     type = FunctionAux
     variable = constant_ref
     function = const_ref
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = ParsedAux
     variable = diff
     function = 'constant - constant_ref'
     args = 'constant constant_ref'
-  [../]
+  []
 []
 
 
 [Functions]
-  [./const_fcn]
+  [const_fcn]
     type = PiecewiseMulticonstant
     direction = 'left right'
     data_file = twoD_const.txt
-  [../]
+  []
 
-  [./const_ref]
+  [const_ref]
     type = ParsedFunction
     value = '
             ix := if(x < 0.5, 0, if(x < 1, 1, 2));
             iy := if(y > 0, 2, if(y > -0.5, 1, 0));
             iy * 3 + ix
             '
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./diff_pp]
+  [diff_pp]
     type = ElementIntegralVariablePostprocessor
     variable = diff
-  [../]
+  []
 []
 
 [Executioner]

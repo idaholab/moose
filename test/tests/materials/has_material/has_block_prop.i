@@ -4,48 +4,48 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
   active = 'u_diff'
-  [./u_diff]
+  [u_diff]
     type = MatCoefDiffusion
     variable = u
     block = '1 2'
     conductivity = k
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = NeumannBC
     variable = u
     boundary = 1
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./right]
+  [right]
     type = GenericConstantMaterial
     block = 2
     prop_names = 'k k_right'
     prop_values = '1 2'
-  [../]
-  [./left]
+  []
+  [left]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'k'
     prop_values = '0.1'
-  [../]
+  []
 []
 
 [Executioner]

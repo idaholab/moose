@@ -11,46 +11,46 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     function = time_function
-  [../]
+  []
 []
 
 [Functions]
-  [./time_function]
+  [time_function]
     type = ParsedFunction
     value = 't+1'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left right bottom top'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./norm]
+  [norm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

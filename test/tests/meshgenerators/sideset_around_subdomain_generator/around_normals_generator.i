@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = twoblocks.e
   []
 
-  [./top_block1]
+  [top_block1]
     type = SideSetsAroundSubdomainGenerator
     input = fmg
     block = 'left'
@@ -12,7 +12,7 @@
     normal = '0 0 1'
   []
 
-  [./bottom_block2]
+  [bottom_block2]
     type = SideSetsAroundSubdomainGenerator
     input = top_block1
     block = 'right'
@@ -20,7 +20,7 @@
     normal = '0 0 -1'
   []
 
-  [./right_block1]
+  [right_block1]
     type = SideSetsAroundSubdomainGenerator
     input = bottom_block2
     block = 'left'
@@ -28,7 +28,7 @@
     normal = '1 0 0'
   []
 
-  [./right_block2]
+  [right_block2]
     type = SideSetsAroundSubdomainGenerator
     input = right_block1
     block = 'right'

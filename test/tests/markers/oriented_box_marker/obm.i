@@ -15,8 +15,8 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Problem]
@@ -33,8 +33,8 @@
 
 [Adaptivity]
   marker = obm
-  [./Markers]
-    [./obm]
+  [Markers]
+    [obm]
       type = OrientedBoxMarker
       center = '-1 4 1'
       width = 5
@@ -44,8 +44,8 @@
       length_direction = '-1 2 2'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

@@ -13,62 +13,62 @@
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [ICs]
-  [./T_IC]
+  [T_IC]
     type = FunctionIC
     variable = T
     function = '100*sin(pi*x/80)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./HeatDiff]
+  [HeatDiff]
     type = ADHeatConduction
     variable = T
-  [../]
-  [./HeatTdot]
+  []
+  [HeatTdot]
     type = ADHeatConductionTimeDerivative
     variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./sides]
+  [sides]
     type = DirichletBC
     variable = T
     boundary = 'left right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '0.95' #copper in cal/(cm sec C)
-  [../]
-  [./cp]
+  []
+  [cp]
     type = ADGenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '0.092' #copper in cal/(g C)
-  [../]
-  [./rho]
+  []
+  [rho]
     type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '8.92' #copper in g/(cm^3)
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = NodalL2Error
     function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
-  [../]
+  []
 []
 
 [Executioner]

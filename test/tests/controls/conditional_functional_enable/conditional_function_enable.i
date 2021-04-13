@@ -31,76 +31,76 @@ v_growth = 2
 []
 
 [Variables]
-  [./u]
+  [u]
     family = SCALAR
     order = FIRST
-  [../]
-  [./v]
+  []
+  [v]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ScalarConstantIC
     variable = u
     value = ${u_initial}
-  [../]
-  [./v_ic]
+  []
+  [v_ic]
     type = ScalarConstantIC
     variable = v
     value = ${v_initial}
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./u_time]
+  [u_time]
     type = ODETimeDerivative
     variable = u
-  [../]
-  [./u_src]
+  []
+  [u_src]
     type = ParsedODEKernel
     variable = u
     function = '-${u_growth}'
-  [../]
+  []
 
-  [./v_time]
+  [v_time]
     type = ODETimeDerivative
     variable = v
     enable = false
-  [../]
-  [./v_src]
+  []
+  [v_src]
     type = ParsedODEKernel
     variable = v
     function = '-${v_growth}'
     enable = false
-  [../]
-  [./v_constraint]
+  []
+  [v_constraint]
     type = ParsedODEKernel
     variable = v
     args = 'u'
     function = 'v - u'
-  [../]
+  []
 []
 
 [Functions]
-  [./conditional_function]
+  [conditional_function]
     type = ParsedFunction
     vars = 'u_sol'
     vals = 'u'
     value = 'u_sol >= ${u_threshold}'
-  [../]
+  []
 []
 
 [Controls]
-  [./u_threshold]
+  [u_threshold]
     type = ConditionalFunctionEnableControl
     conditional_function = conditional_function
     enable_objects = 'ScalarKernel::v_time ScalarKernel::v_src'
     disable_objects = 'ScalarKernel::v_constraint'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]

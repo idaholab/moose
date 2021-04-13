@@ -8,66 +8,66 @@
 ###########################################################
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
-  [./bf]
+  []
+  [bf]
     type = ADBodyForce
     variable = u
     postprocessor = ramp
-  [../]
+  []
 []
 
 [Functions]
-  [./ramp]
+  [ramp]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./ramp]
+  [ramp]
     type = FunctionValuePostprocessor
     function = ramp
     execute_on = linear
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

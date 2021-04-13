@@ -7,57 +7,57 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./layered_integral]
+  [layered_integral]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./liaux]
+  [liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
     boundary = right
     user_object = layered_integral
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_integral]
+  [layered_integral]
     type = LayeredSideIntegral
     direction = y
     num_layers = 3
     variable = u
     execute_on = linear
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

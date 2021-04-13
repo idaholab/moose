@@ -24,276 +24,276 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
-  [./bottomz]
+  []
+  [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
-  [./topx]
+  [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = 8*t
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = 6*t
-  [../]
-  [./topz]
+  []
+  [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = t
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_xx]
+  []
+  [strainp_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_xy]
+  []
+  [strainp_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_xz]
+  []
+  [strainp_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_yy]
+  []
+  [strainp_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_yz]
+  []
+  [strainp_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strainp_zz]
+  []
+  [strainp_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./strainp_xx]
+  []
+  [strainp_xx]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./strainp_xy]
+  []
+  [strainp_xy]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./strainp_xz]
+  []
+  [strainp_xz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./strainp_yy]
+  []
+  [strainp_yy]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./strainp_yz]
+  []
+  [strainp_yz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./strainp_zz]
+  []
+  [strainp_zz]
     type = RankTwoAux
     rank_two_tensor = combined_inelastic_strain
     variable = strainp_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_xx]
+  [stress_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./strainp_xx]
+  []
+  [strainp_xx]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xx
-  [../]
-  [./strainp_xy]
+  []
+  [strainp_xy]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xy
-  [../]
-  [./strainp_xz]
+  []
+  [strainp_xz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_xz
-  [../]
-  [./strainp_yy]
+  []
+  [strainp_yy]
     type = PointValue
     point = '0 0 0'
     variable = strainp_yy
-  [../]
-  [./strainp_yz]
+  []
+  [strainp_yz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_yz
-  [../]
-  [./strainp_zz]
+  []
+  [strainp_zz]
     type = PointValue
     point = '0 0 0'
     variable = strainp_zz
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = ''
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Executioner]

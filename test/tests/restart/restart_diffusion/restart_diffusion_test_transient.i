@@ -3,43 +3,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_from_file_var = u
     initial_from_file_timestep = 2
-  [../]
+  []
 []
 
 [Kernels]
   active = 'bodyforce ie'
 
-  [./bodyforce]
+  [bodyforce]
     type = BodyForce
     variable = u
     value = 10.0
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

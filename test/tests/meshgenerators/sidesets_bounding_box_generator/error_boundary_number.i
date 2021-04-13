@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
@@ -7,7 +7,7 @@
     parallel_type = replicated
   []
 
-  [./createNewSidesetOne]
+  [createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
     boundary_id_old = 'right'
@@ -17,7 +17,7 @@
     block_id = 0
   []
 
-  [./createNewSidesetTwo]
+  [createNewSidesetTwo]
     type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     boundary_id_old = 'left'
@@ -26,7 +26,7 @@
     top_right = '0.3 0.3 0'
     block_id = 0
     boundary_id_overlap = true
-  [../]
+  []
 []
 
 [Outputs]

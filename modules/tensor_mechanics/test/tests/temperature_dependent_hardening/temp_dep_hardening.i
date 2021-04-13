@@ -46,108 +46,108 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 500.0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./temp_aux]
+  [temp_aux]
     type = FunctionAux
     variable = temp
     function = temp_hist
-  [../]
+  []
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = PiecewiseLinear
     x = '0 1     2    4    5    6'
     y = '0 0.025 0.05 0.05 0.06 0.085'
-  [../]
-  [./hf1]
+  []
+  [hf1]
     type = PiecewiseLinear
     x = '0.0  0.01 0.02 0.03 0.1'
     y = '5000 5030 5060 5090 5300'
-  [../]
-  [./hf2]
+  []
+  [hf2]
     type = PiecewiseLinear
     x = '0.0  0.01 0.02 0.03 0.1'
     y = '4000 4020 4040 4060 4200'
-  [../]
-  [./temp_hist]
+  []
+  [temp_hist]
     type = PiecewiseLinear
     x = '0   1   2   3   4'
     y = '500 500 500 600 400'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_yy strain_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
-  [../]
+  []
 []
 
 
 [BCs]
-  [./y_pull_function]
+  [y_pull_function]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 3
     function = top_pull
-  [../]
-  [./x_bot]
+  []
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_yy_el]
+  [stress_yy_el]
     type = ElementalVariableValue
     variable = stress_yy
     elementid = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.3
-  [../]
-  [./temp_dep_hardening]
+  []
+  [temp_dep_hardening]
     type = TemperatureDependentHardeningStressUpdate
     hardening_functions = 'hf1 hf2'
     temperatures = '300.0 800.0'
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
     temperature = temp
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'temp_dep_hardening'
-  [../]
+  []
 []
 
 [Executioner]
@@ -172,7 +172,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

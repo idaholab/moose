@@ -29,10 +29,10 @@
 []
 
 [AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
+  [saved_x]
+  []
+  [saved_y]
+  []
 []
 
 [AuxKernels]
@@ -60,35 +60,35 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
-  [../]
-  [./right_shear_y]
+  []
+  [right_shear_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = right
     function = '0.001*t'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -110,15 +110,15 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
-  [./torque]
+  []
+  [torque]
     type = TorqueReaction
     boundary = right
     reaction_force_variables = 'saved_x saved_y'
     direction_vector = '0. 0. 1.'
-  [../]
+  []
 []
 
 [Outputs]

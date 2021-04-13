@@ -14,28 +14,28 @@
 []
 
 [AuxVariables]
-  [./multi_layered_average]
+  [multi_layered_average]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [UserObjects]
-  [./multi_layered_average]
+  [multi_layered_average]
     type = LayeredAverage
     variable = power_density
     direction = y
     num_layers = 4
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./layered_aux]
+  [layered_aux]
     type = SpatialUserObjectAux
     variable = multi_layered_average
     execute_on = 'nonlinear TIMESTEP_END'
     user_object = multi_layered_average
-  [../]
+  []
 []
 
 [Functions]

@@ -41,68 +41,68 @@
 []
 
 [Functions]
-  [./rampConstant1]
+  [rampConstant1]
     type = PiecewiseLinear
     x = '0.00 1.00  2.0   3.00'
     y = '0.00 0.25  0.0  -0.25'
     scale_factor = 1
-  [../]
+  []
 [] # Functions
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./bot_x]
+  [bot_x]
     type = DirichletBC
     variable = disp_x
     value = 0.0
-  [../]
-  [./bot_y]
+  []
+  [bot_y]
     type = DirichletBC
     variable = disp_y
     value = 0
-  [../]
-  [./bot_z]
+  []
+  [bot_z]
     type = DirichletBC
     variable = disp_z
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionDirichletBC
     preset = false
     function = rampConstant1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
-  [./small_strain]
+  [small_strain]
     type = ComputeSmallStrain
     block = ' 1 2 3 4 5 6 7'
-  [../]
+  []
 
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,16 +121,16 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./Mass]
+  [Mass]
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

@@ -1,22 +1,22 @@
 [Tests]
-  [./Conserved]
+  [Conserved]
     type = RunApp
     input = 'Conserved.i'
     check_input = True
     fparser_jit = True
-  [../]
-  [./EBSD_reconstruction_grain_growth_mech]
+  []
+  [EBSD_reconstruction_grain_growth_mech]
     type = RunApp
     input = 'EBSD_reconstruction_grain_growth_mech.i'
     check_input = True
     skip = 'Broken!'
-  [../]
-  [./Nonconserved]
+  []
+  [Nonconserved]
     type = RunApp
     input = 'Nonconserved.i'
     check_input = True
-  [../]
-  [./Pattern1]
+  []
+  [Pattern1]
     type = RunApp
     input = 'Pattern1.i'
     # Note: we use a smaller mesh, as this does not affect the
@@ -25,25 +25,25 @@
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
     fparser_jit = True
-  [../]
-  [./grain_texture]
+  []
+  [grain_texture]
     type = RunApp
     input = 'grain_texture.i'
     method = '!DBG'
     check_input = True
-  [../]
-  [./hex_grain_growth_2D_eldrforce]
+  []
+  [hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     method = '!DBG'
     check_input = True
-  [../]
-  [./poly_grain_growth_2D_eldrforce]
+  []
+  [poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     method = '!DBG'
     check_input = True
-  [../]
+  []
 []

@@ -18,67 +18,67 @@
 [Functions]
   active = 'u_func'
 
-  [./u_func]
+  [u_func]
     type = ParsedFunction
     value = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
 
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = TEIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   active = 'td diff ffn'
 
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = TEJumpFFN
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'dt l2'
 
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 
-  [./l2]
+  [l2]
     type = ElementL2Error
     variable = u
     function = u_func
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,12 +95,12 @@
   num_steps = 500000
   dtmax = 0.25
 
-  [./TimeStepper]
+  [TimeStepper]
     type = DT2
     dt = 0.1
     e_max = 3e-1
     e_tol = 1e-1
-  [../]
+  []
 []
 
 [Outputs]

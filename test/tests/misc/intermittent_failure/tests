@@ -1,5 +1,5 @@
 [Tests]
-  [./intermittent_failure]
+  [intermittent_failure]
     type = 'RunApp'
     input = 'intermittent_failure.i'
     max_time = 10
@@ -10,5 +10,5 @@
 
     valgrind = 'NONE'
     method = '!dbg'
-  [../]
+  []
 []

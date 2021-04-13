@@ -10,39 +10,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxKernels]
-  [./one]
+  [one]
     type = ConstantAux
     variable = v
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   # This postprocessor is listed first on purpose to give the resolver something to do
-  [./diff]
+  [diff]
     type = DifferencePostprocessor
     value1 = nodes
     value2 = elems
     execute_on = 'initial timestep_end'
-  [../]
-  [./nodes]
+  []
+  [nodes]
     type = NumNodes
     execute_on = 'initial timestep_end'
-  [../]
-  [./elems]
+  []
+  [elems]
     type = NumElems
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]

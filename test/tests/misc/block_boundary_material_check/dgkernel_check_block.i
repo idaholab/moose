@@ -4,17 +4,17 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [DGKernels]
-  [./dg]
+  [dg]
     type = MatDGKernel
     mat_prop = 'foo'
     variable = u
     block = 0
-  [../]
+  []
 []
 
 [Problem]

@@ -6,7 +6,7 @@
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = CartesianMeshGenerator
     dim = 3
     dx = 0.01
@@ -15,8 +15,8 @@
     iz = 1
     ix = 1
     iy = 1
-  [../]
-  [./extra_nodeset]
+  []
+  [extra_nodeset]
     type = ExtraNodesetGenerator
     input = msh
     new_boundary = 'origin'
@@ -32,111 +32,111 @@
 []
 
 [Functions]
-  [./Q_gtn]
+  [Q_gtn]
     type = ParsedFunction
     vars = 'avg_vonmises gtn_gauge_stress'
     vals = 'avg_vonmises gtn_gauge_stress'
     value = 'avg_vonmises/gtn_gauge_stress'
-  [../]
-  [./M_gtn]
+  []
+  [M_gtn]
     type = ParsedFunction
     vars = 'avg_hydro gtn_gauge_stress'
     vals = 'avg_hydro gtn_gauge_stress'
     value = 'abs(avg_hydro) / gtn_gauge_stress'
-  [../]
-  [./Q_ten]
+  []
+  [Q_ten]
     type = ParsedFunction
     vars = 'avg_vonmises ten_gauge_stress'
     vals = 'avg_vonmises ten_gauge_stress'
     value = 'avg_vonmises/ten_gauge_stress'
-  [../]
-  [./M_ten]
+  []
+  [M_ten]
     type = ParsedFunction
     vars = 'avg_hydro ten_gauge_stress'
     vals = 'avg_hydro ten_gauge_stress'
     value = 'abs(avg_hydro) / ten_gauge_stress'
-  [../]
-  [./Q_five]
+  []
+  [Q_five]
     type = ParsedFunction
     vars = 'avg_vonmises five_gauge_stress'
     vals = 'avg_vonmises five_gauge_stress'
     value = 'avg_vonmises/five_gauge_stress'
-  [../]
-  [./M_five]
+  []
+  [M_five]
     type = ParsedFunction
     vars = 'avg_hydro five_gauge_stress'
     vals = 'avg_hydro five_gauge_stress'
     value = 'abs(avg_hydro) / five_gauge_stress'
-  [../]
-  [./Q_three]
+  []
+  [Q_three]
     type = ParsedFunction
     vars = 'avg_vonmises three_gauge_stress'
     vals = 'avg_vonmises three_gauge_stress'
     value = 'avg_vonmises / three_gauge_stress'
-  [../]
-  [./M_three]
+  []
+  [M_three]
     type = ParsedFunction
     vars = 'avg_hydro three_gauge_stress'
     vals = 'avg_hydro three_gauge_stress'
     value = 'abs(avg_hydro) / three_gauge_stress'
-  [../]
-  [./Q_two]
+  []
+  [Q_two]
     type = ParsedFunction
     vars = 'avg_vonmises two_gauge_stress'
     vals = 'avg_vonmises two_gauge_stress'
     value = 'avg_vonmises/two_gauge_stress'
-  [../]
-  [./M_two]
+  []
+  [M_two]
     type = ParsedFunction
     vars = 'avg_hydro two_gauge_stress'
     vals = 'avg_hydro two_gauge_stress'
     value = 'abs(avg_hydro) / two_gauge_stress'
-  [../]
-  [./Q_onepointfive]
+  []
+  [Q_onepointfive]
     type = ParsedFunction
     vars = 'avg_vonmises onepointfive_gauge_stress'
     vals = 'avg_vonmises onepointfive_gauge_stress'
     value = 'avg_vonmises / onepointfive_gauge_stress'
-  [../]
-  [./M_onepointfive]
+  []
+  [M_onepointfive]
     type = ParsedFunction
     vars = 'avg_hydro onepointfive_gauge_stress'
     vals = 'avg_hydro onepointfive_gauge_stress'
     value = 'abs(avg_hydro) / onepointfive_gauge_stress'
-  [../]
-  [./Q_one]
+  []
+  [Q_one]
     type = ParsedFunction
     vars = 'avg_vonmises one_gauge_stress'
     vals = 'avg_vonmises one_gauge_stress'
     value = 'avg_vonmises / one_gauge_stress'
-  [../]
-  [./M_one]
+  []
+  [M_one]
     type = ParsedFunction
     vars = 'avg_hydro one_gauge_stress'
     vals = 'avg_hydro one_gauge_stress'
     value = 'abs(avg_hydro) / one_gauge_stress'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = 'gtn lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
     outputs = all
     extra_stress_names = extra_stress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = ADPorosityFromStrain
     initial_porosity = 1e-3
     inelastic_strain = 'combined_inelastic_strain'
     outputs = 'all'
-  [../]
-  [./gtn]
+  []
+  [gtn]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 1 # arbitrary
@@ -144,89 +144,89 @@
     base_name = gtn
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_ten]
+  []
+  [lps_ten]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 10
     base_name = ten
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_five]
+  []
+  [lps_five]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 5
     base_name = five
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_three]
+  []
+  [lps_three]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 3
     base_name = three
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_two]
+  []
+  [lps_two]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 2
     base_name = two
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_onepointfive]
+  []
+  [lps_onepointfive]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 1.5
     base_name = onepointfive
     outputs = all
     relative_tolerance = 1e-30
-  [../]
-  [./lps_one]
+  []
+  [lps_one]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
     power = 1
     base_name = one
     outputs = all
     relative_tolerance = 1e-30
-  [../]
+  []
 
-  [./const_stress]
+  [const_stress]
     type = ComputeExtraStressConstant
     extra_stress_tensor = '1 1 1 1 1 1 1 1 1'
     outputs = all
-  [../]
+  []
 []
 
 [BCs]
-  [./no_disp_x]
+  [no_disp_x]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./no_disp_y]
+  []
+  [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./no_disp_z]
+  []
+  [no_disp_z]
     type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
-  [./Pressure]
-    [./bcs]
+  []
+  [Pressure]
+    [bcs]
       boundary = 'top right front'
       function = '10^(t/4.5)'
       use_automatic_differentiation = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -237,105 +237,105 @@
 []
 
 [Postprocessors]
-  [./avg_hydro]
+  [avg_hydro]
     type = ElementAverageValue
     variable = hydrostatic_stress
-  [../]
-  [./avg_vonmises]
+  []
+  [avg_vonmises]
     type = ElementAverageValue
     variable = vonmises_stress
-  [../]
-  [./gtn_gauge_stress]
+  []
+  [gtn_gauge_stress]
     type = ElementAverageValue
     variable = gtn_gauge_stress
     outputs = none
-  [../]
-  [./0Q_gtn]
+  []
+  [0Q_gtn]
     type = FunctionValuePostprocessor
     function = Q_gtn
-  [../]
-  [./0M_gtn]
+  []
+  [0M_gtn]
     type = FunctionValuePostprocessor
     function = M_gtn
-  [../]
-  [./ten_gauge_stress]
+  []
+  [ten_gauge_stress]
     type = ElementAverageValue
     variable = ten_gauge_stress
     outputs = none
-  [../]
-  [./1Q_ten]
+  []
+  [1Q_ten]
     type = FunctionValuePostprocessor
     function = Q_ten
-  [../]
-  [./1M_ten]
+  []
+  [1M_ten]
     type = FunctionValuePostprocessor
     function = M_ten
-  [../]
-  [./five_gauge_stress]
+  []
+  [five_gauge_stress]
     type = ElementAverageValue
     variable = five_gauge_stress
     outputs = none
-  [../]
-  [./2Q_five]
+  []
+  [2Q_five]
     type = FunctionValuePostprocessor
     function = Q_five
-  [../]
-  [./2M_five]
+  []
+  [2M_five]
     type = FunctionValuePostprocessor
     function = M_five
-  [../]
-  [./three_gauge_stress]
+  []
+  [three_gauge_stress]
     type = ElementAverageValue
     variable = three_gauge_stress
     outputs = none
-  [../]
-  [./3Q_three]
+  []
+  [3Q_three]
     type = FunctionValuePostprocessor
     function = Q_three
-  [../]
-  [./3M_three]
+  []
+  [3M_three]
     type = FunctionValuePostprocessor
     function = M_three
-  [../]
-  [./two_gauge_stress]
+  []
+  [two_gauge_stress]
     type = ElementAverageValue
     variable = two_gauge_stress
     outputs = none
-  [../]
-  [./4Q_two]
+  []
+  [4Q_two]
     type = FunctionValuePostprocessor
     function = Q_two
-  [../]
-  [./4M_two]
+  []
+  [4M_two]
     type = FunctionValuePostprocessor
     function = M_two
-  [../]
-  [./onepointfive_gauge_stress]
+  []
+  [onepointfive_gauge_stress]
     type = ElementAverageValue
     variable = onepointfive_gauge_stress
     outputs = none
-  [../]
-  [./5Q_onepointfive]
+  []
+  [5Q_onepointfive]
     type = FunctionValuePostprocessor
     function = Q_onepointfive
-  [../]
-  [./5M_onepointfive]
+  []
+  [5M_onepointfive]
     type = FunctionValuePostprocessor
     function = M_onepointfive
-  [../]
-  [./one_gauge_stress]
+  []
+  [one_gauge_stress]
     type = ElementAverageValue
     variable = one_gauge_stress
     outputs = none
-  [../]
-  [./6Q_one]
+  []
+  [6Q_one]
     type = FunctionValuePostprocessor
     function = Q_one
-  [../]
-  [./6M_one]
+  []
+  [6M_one]
     type = FunctionValuePostprocessor
     function = M_one
-  [../]
+  []
 []
 
 [Outputs]

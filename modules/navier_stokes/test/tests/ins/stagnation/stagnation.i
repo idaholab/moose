@@ -15,11 +15,11 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -37,45 +37,45 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./p]
+  []
+  [p]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
-  [./u_in]
+  [u_in]
     type = FunctionDirichletBC
     boundary = 'top'
     variable = vel_x
     function = vel_x_inlet
-  [../]
-  [./v_in]
+  []
+  [v_in]
     type = FunctionDirichletBC
     boundary = 'top'
     variable = vel_y
     function = vel_y_inlet
-  [../]
-  [./vel_x_no_slip]
+  []
+  [vel_x_no_slip]
     type = DirichletBC
     boundary = 'left bottom'
     variable = vel_x
     value = 0
-  [../]
-  [./vel_y_no_slip]
+  []
+  [vel_y_no_slip]
     type = DirichletBC
     boundary = 'bottom'
     variable = vel_y
     value = 0
-  [../]
+  []
   # Note: setting INSMomentumNoBCBC on the outlet boundary causes the
   # matrix to be singular.  The natural BC, on the other hand, is
   # sufficient to specify the value of the pressure without requiring
@@ -83,78 +83,78 @@
 []
 
 [Functions]
-  [./vel_x_inlet]
+  [vel_x_inlet]
     type = ParsedFunction
     value = 'k*x'
     vars = 'k'
     vals = '1'
-  [../]
-  [./vel_y_inlet]
+  []
+  [vel_y_inlet]
     type = ParsedFunction
     value = '-k*y'
     vars = 'k'
     vals = '1'
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./x_momentum_time]
+  [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
-  [./y_momentum_time]
+  []
+  [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
-  [./mass]
+  []
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
-  [./x_momentum_space]
+  []
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
-  [./y_momentum_space]
+  []
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1 .01389' # 2/144
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
-  [./out]
+  [out]
     type = CSV
     execute_on = 'final'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./nodal_sample]
+  [nodal_sample]
     # Pick off the wall pressure values.
     type = NodalValueSampler
     variable = p
     boundary = 'bottom'
     sort_by = x
-  [../]
+  []
 []

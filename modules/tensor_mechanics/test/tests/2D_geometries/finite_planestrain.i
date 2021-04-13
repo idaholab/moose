@@ -13,51 +13,51 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     planar_formulation = PLANE_STRAIN
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
-  [../]
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
     value ='0.005 * t'
-  [../]
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./pull]
+  []
+  [pull]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
+  []
 []
 
 [Executioner]

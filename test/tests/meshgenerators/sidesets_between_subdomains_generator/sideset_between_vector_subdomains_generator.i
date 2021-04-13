@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
@@ -10,7 +10,7 @@
     elem_type = QUAD4
   []
 
-  [./subdomain_id]
+  [subdomain_id]
     type = ElementSubdomainIDGenerator
     input = gmg
     subdomain_ids = '0 0 0 0
@@ -19,7 +19,7 @@
                      1 2 3 3'
   []
 
-  [./interface]
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain_id
     primary_block = '0 1'
@@ -27,7 +27,7 @@
     new_boundary = 'in_between'
   []
 
-  [./emperty_interface]
+  [emperty_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
     primary_block = '0'

@@ -1,29 +1,29 @@
 [Tests]
   design = 'InternalVolume.md'
   issues = '#7061'
-  [./rspherical]
+  [rspherical]
     type = 'CSVDiff'
     input = 'rspherical.i'
     csvdiff = 'rspherical_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for spherical coordinates'
-  [../]
+  []
 
-  [./rspherical_error]
+  [rspherical_error]
     type = RunException
     input = 'rspherical.i'
     cli_args = 'Postprocessors/intVolTotal/component=1'
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
     requirement = 'The system shall report an error if component is not 0 in InternalVolume for spherical coordinates'
-  [../]
+  []
 
-  [./rz]
+  [rz]
     type = 'CSVDiff'
     input = 'rz.i'
     csvdiff = 'rz_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates'
-  [../]
+  []
 
-  [./rz2]
+  [rz2]
     type = 'CSVDiff'
     input = 'rz.i'
     csvdiff = 'rz2_out.csv'
@@ -31,57 +31,57 @@
                 Outputs/file_base=rz2_out'
     prereq = rz
     requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and with the y coordinate used in the integration over the sideset'
-  [../]
+  []
 
-  [./rz_error]
+  [rz_error]
     type = RunException
     input = 'rz.i'
     cli_args = 'Postprocessors/internalVolume/component=2'
     expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
     requirement = 'The system shall report an error if component is not 0 or 1 in InternalVolume for axisymmetric coordinates'
-  [../]
+  []
 
-  [./hex20]
+  [hex20]
     type = 'CSVDiff'
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
     compiler = 'GCC CLANG' # this may not be related to superlu_dist, but we need to move forward #10084
     requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates and hex20 elements'
-  [../]
+  []
 
-  [./rz_quad8]
+  [rz_quad8]
     type = 'CSVDiff'
     input = 'rz_quad8.i'
     csvdiff = 'rz_quad8_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and quad8 elements'
-  [../]
+  []
 
-  [./rz_cone]
+  [rz_cone]
     type = 'CSVDiff'
     input = 'rz_cone.i'
     csvdiff = 'rz_cone_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for meshes with non axis-aligned geometries'
-  [../]
+  []
 
-  [./hex8]
+  [hex8]
     type = 'CSVDiff'
     input = 'hex8.i'
     csvdiff = 'hex8_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for mechanics models'
-  [../]
+  []
 
-  [./rz_displaced]
+  [rz_displaced]
     type = 'CSVDiff'
     input = 'rz_displaced.i'
     csvdiff = 'rz_displaced_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and changing geometry'
-  [../]
+  []
 
-  [./rz_displaced_quad8]
+  [rz_displaced_quad8]
     type = 'CSVDiff'
     input = 'rz_displaced_quad8.i'
     csvdiff = 'rz_displaced_quad8_out.csv'
     requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates, changing geometry, and quad8 elements'
-  [../]
+  []
 
 []

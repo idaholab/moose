@@ -8,37 +8,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./m1]
+  [m1]
     type = PiecewiseLinearInterpolationMaterial
     property = m1
     variable = u
@@ -46,9 +46,9 @@
                1 1'
     block = 0
     outputs = all
-  [../]
+  []
 
-  [./m2]
+  [m2]
     type = PiecewiseLinearInterpolationMaterial
     property = m2
     variable = u
@@ -56,7 +56,7 @@
     y = '0 1'
     block = 0
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

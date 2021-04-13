@@ -1,7 +1,7 @@
 [Tests]
   design = "C0TimoshenkoBeam.md"
   issues = "#10313"
-  [./dyn_euler]
+  [dyn_euler]
     type = 'Exodiff'
     input = 'dyn_euler_small.i'
     exodiff = 'dyn_euler_small_out.e'
@@ -9,8 +9,8 @@
     requirement = "The mechanics system shall correctly predict the natural frequencies"
                   " of an Euler-Bernoulli beam modeled using beam elements with"
                   " consistent mass/inertia."
-  [../]
-  [./dyn_timoshenko]
+  []
+  [dyn_timoshenko]
     type = 'Exodiff'
     input = 'dyn_timoshenko_small.i'
     exodiff = 'dyn_timoshenko_small_out.e'
@@ -18,8 +18,8 @@
     requirement = "The mechanics system shall correctly predict the natural frequencies"
                   " of a Timoshenko beam modeled using beam elements with consistent"
                   " mass/inertia."
-  [../]
-  [./dyn_euler_rayleigh_hht]
+  []
+  [dyn_euler_rayleigh_hht]
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
@@ -28,8 +28,8 @@
                   " presence of Rayleigh damping and numerical damping introduced"
                   " by Hilber-Hughes-Taylor (HHT) time integration."
     rel_err = 2e-5
-  [../]
-  [./dyn_euler_rayleigh_hht_ti]
+  []
+  [dyn_euler_rayleigh_hht_ti]
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht_ti.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
@@ -43,8 +43,8 @@
                   " velocity and acceleration computed using the Newmark-Beta time integrator."
     issues = "#12185"
     prereq = 'dyn_euler_rayleigh_hht_action'
-  [../]
-  [./dyn_euler_added_mass]
+  []
+  [dyn_euler_added_mass]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass.i'
     exodiff = 'dyn_euler_small_added_mass_out.e'
@@ -54,8 +54,8 @@
                   " with a nodal masses placed at the ends."
     verification = 'beam_vandv.md'
     petsc_version = '>=3.8'
-  [../]
-  [./dyn_euler_added_mass_file]
+  []
+  [dyn_euler_added_mass_file]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_file.i'
     cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv"
@@ -66,8 +66,8 @@
                   " of a massless Euler-Bernoulli beam modeled using beam elements"
                   " with added nodal masses when the location and values of the"
                   " masses are provided using a csv file."
-  [../]
-  [./dyn_euler_added_mass_gravity]
+  []
+  [dyn_euler_added_mass_gravity]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "NodalKernels/force_y2/mass=0.01899772"
@@ -77,8 +77,8 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements when gravitational force"
                   " (proportional to nodal mass) is applied to the beam."
-  [../]
-  [./dyn_euler_added_mass_gravity_2]
+  []
+  [dyn_euler_added_mass_gravity_2]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv"
@@ -88,8 +88,8 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements under gravitational force when"
                   " the nodal mass distribution is provided using a csv file."
-  [../]
-  [./add_dynamic_variables_action]
+  []
+  [add_dynamic_variables_action]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_dyn_variable_action.i'
     exodiff = 'dyn_euler_small_added_mass_out.e'
@@ -99,8 +99,8 @@
                   " velocities and accelerations required for a dynamic simulation"
                   " using beam elements."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
-  [../]
-  [./dyn_euler_added_mass_inertia_damping]
+  []
+  [dyn_euler_added_mass_inertia_damping]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
@@ -110,8 +110,8 @@
                   " nodal inertia and Rayleigh damping."
     verification = 'beam_vandv.md'               
     petsc_version = '>=3.8'
-  [../]
-  [./dyn_euler_added_mass_inertia_damping_ti]
+  []
+  [dyn_euler_added_mass_inertia_damping_ti]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping_ti.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
@@ -122,8 +122,8 @@
                   " accelerations computed by the Newmark-Beta time integrator."
     issues = "#12185"
     prereq = "dyn_euler_added_mass_inertia_damping_action"
-  [../]
-  [./dyn_euler_rayleigh_hht_action]
+  []
+  [dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht_action.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
@@ -134,8 +134,8 @@
                   " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
     rel_err = 2e-5
-  [../]
-  [./dyn_euler_added_mass_inertia_damping_action]
+  []
+  [dyn_euler_added_mass_inertia_damping_action]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
@@ -146,16 +146,16 @@
                   " matrix in the presence of Rayleigh damping and numerical damping"
                   " in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
-  [../]
-  [./dyn_euler_added_mass2]
+  []
+  [dyn_euler_added_mass2]
     type = 'CSVDiff'
     input = 'dyn_euler_small_added_mass2.i'
     csvdiff = 'dyn_euler_small_added_mass2_out.csv'
 
     requirement = "The mechanics system shall correctly predict the natural frequency"
                   " of a cantilever beam modeled using beam elements with a mass at the free end."
-  [../]
-  [./error_1]
+  []
+  [error_1]
     type = 'RunException'
     input = 'dyn_euler_small.i'
     cli_args = "Kernels/inertial_force_x/rotations='rot_x rot_y' Outputs/csv=false Outputs/exodus=false"
@@ -163,8 +163,8 @@
 
     requirement = "The InertialForceBeam class shall produce an error if the number of"
                   " variables provided for rotations differs from that provided for displacements."
-  [../]
-  [./error_2]
+  []
+  [error_2]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     cli_args = "NodalKernels/rot_x_inertial/rotational_velocities='rot_vel_x rot_vel_y' Outputs/csv=false Outputs/exodus=false"
@@ -173,8 +173,8 @@
     requirement = "The NodalRotatioanlInertia class shall produce an error if"
                   " the number of rotational velocities and accelerations provided"
                   " as input differ from the number of rotations."
-  [../]
-  [./error_3]
+  []
+  [error_3]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     cli_args = "NodalKernels/rot_x_inertial/Ixx=1 NodalKernels/rot_x_inertial/Iyy=1 NodalKernels/rot_x_inertial/Izz=1 NodalKernels/rot_x_inertial/Ixy=1 Outputs/csv=false Outputs/exodus=false"
@@ -182,8 +182,8 @@
     superlu = true
     requirement = "The NodalRotationalInertia class shall produce an error if the"
                   " user provided nodal inertia is not positive definite."
-  [../]
-  [./error_4]
+  []
+  [error_4]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     cli_args = "NodalKernels/rot_x_inertial/x_orientation='2 0 0' NodalKernels/rot_x_inertial/y_orientation='0 1 0' Outputs/csv=false Outputs/exodus=false"
@@ -191,8 +191,8 @@
     superlu = true
     requirement = "The NodalRotatioanlInertia class shall produce an error if the"
                   " user provided x and y orientations are not unit vectors."
-  [../]
-  [./error_5]
+  []
+  [error_5]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     cli_args = "NodalKernels/rot_x_inertial/x_orientation='1 0 0' NodalKernels/rot_x_inertial/y_orientation='1 0 0' Outputs/csv=false Outputs/exodus=false"
@@ -201,8 +201,8 @@
     requirement = "The NodalRotatioanlInertia class shall produce an error if the"
                   " user provided x and y orientations are not perpendicular to each"
                   " other."
-  [../]
-  [./error_6]
+  []
+  [error_6]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     cli_args = "NodalKernels/rot_x_inertial/x_orientation='1 0 0' Outputs/csv=false Outputs/exodus=false"
@@ -210,8 +210,8 @@
     superlu = trues
     requirement = "The NodalRotatioanlInertia class shall produce an error if only"
                   " x or y orientation is provided as input by the user."
-  [../]
-  [./error_7]
+  []
+  [error_7]
     type = 'RunException'
     input = 'dyn_euler_small.i'
     cli_args = "Kernels/inertial_force_x/accelerations='accel_x accel_y' Outputs/csv=false Outputs/exodus=false"
@@ -220,8 +220,8 @@
     requirement = "The InertialForceBeam class shall produce an error if the"
                   " number of translational and rotational velocities and accelerations"
                   " provided as input differ from the number of displacement variables."
-  [../]
-  [./error_8]
+  []
+  [error_8]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_file.i'
     cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv NodalKernels/x_inertial/mass=2.0 Outputs/csv=false Outputs/exodus=false"
@@ -230,8 +230,8 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is provided as input both as a constant value"
                   " and also using a csv file."
-  [../]
-  [./error_9]
+  []
+  [error_9]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_file.i'
     cli_args = "Outputs/csv=false Outputs/exodus=false"
@@ -240,8 +240,8 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is not provided as input either as a constant value"
                   " or using a csv file."
-  [../]
-  [./error_10]
+  []
+  [error_10]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_file.i'
     cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass_col_test.csv Outputs/csv=false Outputs/exodus=false"
@@ -249,8 +249,8 @@
     superlu = true
     requirement = "The NodalTranslationalInertia class shall produce an error"
                   " if the number of columns in the nodal mass file is not 4."
-  [../]
-  [./error_11]
+  []
+  [error_11]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_file.i'
     cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv NodalKernels/x_inertial/boundary='right' Outputs/csv=false Outputs/exodus=false"
@@ -259,8 +259,8 @@
     requirement = "The NodalTranslationalInertia class shall produce an error"
                   " if all the nodal positions provided in the nodal mass file"
                   " cannot be found in the given boundary or mesh block."
-  [../]
-  [./error_12]
+  []
+  [error_12]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv NodalKernels/force_y2/mass=2.0 Outputs/csv=false Outputs/exodus=false"
@@ -269,8 +269,8 @@
     requirement = "The NodalGravity class shall produce an error if"
                   " nodal mass is provided as input both as a constant value"
                   " and also using a csv file."
-  [../]
-  [./error_13]
+  []
+  [error_13]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "Outputs/csv=false Outputs/exodus=false"
@@ -279,8 +279,8 @@
     requirement = "The NodalGravity class shall produce an error if"
                   " nodal mass is not provided as input either as a constant value"
                   " or using a csv file."
-  [../]
-  [./error_14]
+  []
+  [error_14]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass_col_test.csv Outputs/csv=false Outputs/exodus=false"
@@ -288,8 +288,8 @@
     superlu = true
     requirement = "The NodalGravity class shall produce an error"
                   " if the number of columns in the nodal mass file is not 4."
-  [../]
-  [./error_15]
+  []
+  [error_15]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_gravity.i'
     cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv NodalKernels/force_y2/boundary='right' Outputs/csv=false Outputs/exodus=false"
@@ -298,8 +298,8 @@
     requirement = "The NodalGravity class shall produce an error"
                   " if all the nodal positions provided in the nodal mass file"
                   " cannot be found in the given boundary or mesh block."
-  [../]
-  [./error_16]
+  []
+  [error_16]
     type = 'RunException'
     input = 'dyn_euler_small_rayleigh_hht_action.i'
     cli_args = 'Modules/TensorMechanics/LineElementMaster/all/add_dynamic_variables=false Outputs/csv=false Outputs/exodus=false'
@@ -310,8 +310,8 @@
                   " `dynamic_nodal_rotational_inertia` or `dynamic_nodal_translational_inertia`"
                   " options are set to true."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
-  [../]
-  [./error_17]
+  []
+  [error_17]
     type = 'RunException'
     input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
     cli_args = 'Modules/TensorMechanics/LineElementMaster/all/nodal_mass_file=nodal_mass.csv Outputs/csv=false Outputs/exodus=false'
@@ -320,5 +320,5 @@
     requirement = "The NodalTranslationalInertia class shall produce an error if"
                   " nodal mass is provided as input both as constant value and"
                   " also using a csv file."
-  [../]
+  []
 []

@@ -16,46 +16,46 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time_u]
+  []
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = CoefDiffusion
     variable = v
     coef = 0.2
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,28 +72,28 @@
 []
 
 [Functions]
-  [./func_coef]
+  [func_coef]
     type = ParsedFunction
     value = '2*t + 0.1'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u_coef]
+  [u_coef]
     type = RealControlParameterReporter
     parameter = 'Kernels/diff_u/coef'
-  [../]
-  [./v_coef]
+  []
+  [v_coef]
     type = RealControlParameterReporter
     parameter = 'Kernels/diff_v/coef'
-  [../]
+  []
 []
 
 [Controls]
-  [./func_control]
+  [func_control]
     type = RealFunctionControl
     parameter = '*/*/coef'
     function = 'func_coef'
     execute_on = 'timestep_begin'
-  [../]
+  []
 []

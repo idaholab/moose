@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'no_coverage_check.i'
     exodiff = 'no_coverage_check_out.e'
@@ -8,5 +8,5 @@
                   ' PDE operators in all or some parts of the domain.'
     issues = '#2291'
     design = 'Problem/index.md'
-  [../]
+  []
 []

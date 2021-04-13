@@ -1,74 +1,74 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./nodal_aux]
+  [nodal_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./elemental_aux]
+  [elemental_aux]
 #    order = FIRST
 #    family = LAGRANGE
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nodal]
+  [nodal]
     type = CoupledAux
     variable = nodal_aux
     coupled = elemental_aux
-  [../]
+  []
 
-  [./elemental]
+  [elemental]
     type = ConstantAux
     variable = elemental_aux
     value = 6
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

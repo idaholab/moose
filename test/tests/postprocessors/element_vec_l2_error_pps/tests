@@ -2,11 +2,11 @@
   issues = '#2838'
   design = 'ElementVectorL2Error.md'
 
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'element_vec_l2_error.i'
     csvdiff = 'out.csv'
 
     requirement = 'The system shall compute the Vector L2 Error of three scalar variables simultaneously as three orthogonal components of a vector.'
-  [../]
+  []
 []

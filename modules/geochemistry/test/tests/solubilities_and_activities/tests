@@ -1,13 +1,13 @@
 [Tests]
-  [./gypsum_solubility]
+  [gypsum_solubility]
     type = 'CSVDiff'
     input = 'gypsum_solubility.i'
     csvdiff = 'gypsum_solubility_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore solubilities'
     issues = '#15290 #15261'
     design = 'AddTimeDependentReactionSolverAction.md gypsum.md'
-  [../]
-  [./sebkhat_el_melah]
+  []
+  [sebkhat_el_melah]
     type = 'RunApp'
     input = 'sebkhat_el_melah.i'
     expect_out = 'Minerals:
@@ -17,5 +17,5 @@ Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.265;  SI = -1.733'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore saturation indices'
     issues = '#15290 #15261'
     design = 'AddTimeDependentReactionSolverAction.md sebkhat.md'
-  [../]
+  []
 []

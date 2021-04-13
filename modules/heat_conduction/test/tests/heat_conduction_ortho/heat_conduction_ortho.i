@@ -13,47 +13,47 @@
 []
 
 [Variables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = AnisoHeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./temps]
+  [temps]
     type = DirichletBC
     variable = temp
     boundary = 1
     value = 0
-  [../]
-  [./neum]
+  []
+  [neum]
     type = NeumannBC
     variable = temp
     boundary = 2
     value = 100
-  [../]
+  []
 []
 
 [Materials]
-  [./heat]
+  [heat]
     type = AnisoHeatConductionMaterial
     block = 1
     specific_heat = 0.116
     thermal_conductivity_x_pp = tcx
     thermal_conductivity_y_pp = tcy
     thermal_conductivity_z_pp = tcz
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'density'
     prop_values = 0.283
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,22 +74,22 @@
 []
 
 [Postprocessors]
-  [./tcx]
+  [tcx]
     type = FunctionValuePostprocessor
     function = 1000
     outputs = none
     execute_on = 'initial timestep_end'
-  [../]
-  [./tcy]
+  []
+  [tcy]
     type = FunctionValuePostprocessor
     function = 100
     outputs = none
     execute_on = 'initial timestep_end'
-  [../]
-  [./tcz]
+  []
+  [tcz]
     type = FunctionValuePostprocessor
     function = 10
     outputs = none
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

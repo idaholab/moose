@@ -17,212 +17,212 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     y = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'
     x = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = 'pwater pgas'
-  [../]
-  [./DensityWater]
+  []
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1.0E2
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 0.5
     bulk_mod = 0.5E2
-  [../]
-  [./SeffWater]
+  []
+  [SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
     al = 1
-  [../]
-  [./SeffGas]
+  []
+  [SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
     al = 1
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = RichardsRelPermPower
     simm = 0.0
     n = 3
-  [../]
-  [./SatWater]
+  []
+  [SatWater]
     type = RichardsSat
     s_res = 0.1
     sum_s_res = 0.15
-  [../]
-  [./SatGas]
+  []
+  [SatGas]
     type = RichardsSat
     s_res = 0.05
     sum_s_res = 0.15
-  [../]
-  [./SUPGwater]
+  []
+  [SUPGwater]
     type = RichardsSUPGstandard
     p_SUPG = 0.1
-  [../]
-  [./SUPGgas]
+  []
+  [SUPGgas]
     type = RichardsSUPGstandard
     p_SUPG = 0.01
-  [../]
+  []
 []
 
 [Variables]
-  [./pwater]
+  [pwater]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./pgas]
+  []
+  [pgas]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./water_ic]
+  [water_ic]
     type = ConstantIC
     value = 1
     variable = pwater
-  [../]
-  [./gas_ic]
+  []
+  [gas_ic]
     type = ConstantIC
     value = 1
     variable = pgas
-  [../]
+  []
 []
 
 
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
-  [./richardstwater]
+  [richardstwater]
     type = RichardsMassChange
     variable = pwater
-  [../]
-  [./richardsfwater]
+  []
+  [richardsfwater]
     type = RichardsFlux
     variable = pwater
-  [../]
-  [./richardstgas]
+  []
+  [richardstgas]
     type = RichardsMassChange
     variable = pgas
-  [../]
-  [./richardsfgas]
+  []
+  [richardsfgas]
     type = RichardsFlux
     variable = pgas
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./seffgas]
-  [../]
-  [./seffwater]
-  [../]
+  [seffgas]
+  []
+  [seffwater]
+  []
 []
 
 [AuxKernels]
-  [./seffgas_kernel]
+  [seffgas_kernel]
     type = RichardsSeffAux
     pressure_vars = 'pwater pgas'
     seff_UO = SeffGas
     variable = seffgas
-  [../]
-  [./seffwater_kernel]
+  []
+  [seffwater_kernel]
     type = RichardsSeffAux
     pressure_vars = 'pwater pgas'
     seff_UO = SeffWater
     variable = seffwater
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mwater_init]
+  [mwater_init]
     type = RichardsMass
     variable = pwater
     execute_on = timestep_begin
     outputs = none
-  [../]
-  [./mgas_init]
+  []
+  [mgas_init]
     type = RichardsMass
     variable = pgas
     execute_on = timestep_begin
     outputs = none
-  [../]
-  [./mwater_fin]
+  []
+  [mwater_fin]
     type = RichardsMass
     variable = pwater
     execute_on = timestep_end
     outputs = none
-  [../]
-  [./mgas_fin]
+  []
+  [mgas_fin]
     type = RichardsMass
     variable = pgas
     execute_on = timestep_end
     outputs = none
-  [../]
+  []
 
-  [./mass_error_water]
+  [mass_error_water]
     type = FunctionValuePostprocessor
     function = fcn_mass_error_w
-  [../]
-  [./mass_error_gas]
+  []
+  [mass_error_gas]
     type = FunctionValuePostprocessor
     function = fcn_mass_error_g
-  [../]
+  []
 
-  [./pw_left]
+  [pw_left]
     type = PointValue
     point = '0 0 0'
     variable = pwater
     outputs = none
-  [../]
-  [./pw_right]
+  []
+  [pw_right]
     type = PointValue
     point = '1 0 0'
     variable = pwater
     outputs = none
-  [../]
-  [./error_water]
+  []
+  [error_water]
     type = FunctionValuePostprocessor
     function = fcn_error_water
-  [../]
+  []
 []
 
 [Functions]
-  [./fcn_mass_error_w]
+  [fcn_mass_error_w]
     type = ParsedFunction
     value = 'abs(0.5*(mi-mf)/(mi+mf))'
     vars = 'mi mf'
     vals = 'mwater_init mwater_fin'
-  [../]
-  [./fcn_mass_error_g]
+  []
+  [fcn_mass_error_g]
     type = ParsedFunction
     value = 'abs(0.5*(mi-mf)/(mi+mf))'
     vars = 'mi mf'
     vals = 'mgas_init mgas_fin'
-  [../]
-  [./fcn_error_water]
+  []
+  [fcn_error_water]
     type = ParsedFunction
     value = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
     vars = 'b gdens0 p0 xval p1'
     vals = '1E2 -1 pw_left 1 pw_right'
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
@@ -235,18 +235,18 @@
     viscosity = '1E-3 0.5E-3'
     gravity = '-1 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-15 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -254,10 +254,10 @@
   solve_type = Newton
   end_time = 1E6
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]

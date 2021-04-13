@@ -11,62 +11,62 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type=ParsedFunction
     value=0
-  [../]
-  [./bc_fnt]
+  []
+  [bc_fnt]
     type = ParsedFunction
     value = 0
-  [../]
-  [./bc_fnb]
+  []
+  [bc_fnb]
     type = ParsedFunction
     value = 0
-  [../]
-  [./bc_fnl]
+  []
+  [bc_fnl]
     type = ParsedFunction
     value = 0
-  [../]
-  [./bc_fnr]
+  []
+  [bc_fnr]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
 #    type = ParsedFunction
 #    value = 0
     type = MTPiecewiseConst2D
-  [../]
+  []
 
-  [./solution]
+  [solution]
     type = MTPiecewiseConst2D
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -75,62 +75,62 @@
   #       has been designed to be zero at the boundary which is satisfied by the IC
   #       Ticket #1352
   active = ''
-  [./bc_all]
+  [bc_all]
     type=FunctionDirichletBC
     variable = u
     boundary = 'top bottom left right'
     function = bc_fn
-  [../]
-  [./bc_top]
+  []
+  [bc_top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = bc_fnt
-  [../]
-  [./bc_bottom]
+  []
+  [bc_bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bc_fnb
-  [../]
-  [./bc_left]
+  []
+  [bc_left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = bc_fnl
-  [../]
-  [./bc_right]
+  []
+  [bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = bc_fnr
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
+  []
 
-  [./h]
+  [h]
     type = AverageElementSize
-  [../]
+  []
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,16 +138,16 @@
 
   solve_type = 'PJFNK'
   nl_rel_tol = 1.e-10
-  [./Adaptivity]
+  [Adaptivity]
 
-  [../]
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   csv = true
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

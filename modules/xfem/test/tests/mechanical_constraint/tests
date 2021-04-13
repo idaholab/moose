@@ -1,5 +1,5 @@
 [Tests]
-  [./glued_penalty]
+  [glued_penalty]
     type = Exodiff
     input = glued_penalty.i
     exodiff = 'glued_penalty_out.e'
@@ -10,5 +10,5 @@
     design = 'XFEM/index.md'
     issues = '#6320'
     requirement = 'The XFEM module shall permit applying a glued constraint across the XFEM interface for 2D solid mechanics problems.'
-  [../]
+  []
 []

@@ -31,98 +31,98 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./SERD]
+  []
+  [SERD]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./temp]
+  []
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 0.1 100.0'
     y = '0. 1 1'
     scale_factor = -68.95 #MPa
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
-  [./SERD]
+  []
+  [SERD]
     type = MaterialRealAux
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 400
     value = 0.0
-  [../]
-  [./no_x1]
+  []
+  [no_x1]
     type = DirichletBC
     variable = disp_x
     boundary = 900
     value = 0.0
-  [../]
-  [./Pressure]
-    [./crack_pressure]
+  []
+  [Pressure]
+    [crack_pressure]
       boundary = 700
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 [] # BCs
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.0
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'powerlawcrp'
-  [../]
-  [./powerlawcrp]
+  []
+  [powerlawcrp]
     type = PowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
     n_exponent = 3.0
     m_exponent = 0.0
     activation_energy = 0.0
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -176,10 +176,10 @@
 
 [Preconditioning]
   active = 'smp'
-  [./smp]
+  [smp]
     type = SMP
     pc_side = left
     ksp_norm = preconditioned
     full = true
-  [../]
+  []
 []

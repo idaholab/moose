@@ -4,10 +4,10 @@
 []
 
 [AuxVariables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Problem]
@@ -17,9 +17,9 @@
 
 [Executioner]
   type = Transient
-  [./TimeStepper]
+  [TimeStepper]
     type = ExternalPetscTimeStepper
-  [../]
+  []
 []
 
 [AuxVariables]

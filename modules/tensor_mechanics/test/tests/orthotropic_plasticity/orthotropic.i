@@ -20,242 +20,242 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
-  [../]
+  []
 []
 
 [BCs]
-  [./xdisp]
+  [xdisp]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'right'
     function = '0.005*t'
-  [../]
-  [./ydisp]
+  []
+  [ydisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top'
     function = '0.005*t'
-  [../]
-  [./yfix]
+  []
+  [yfix]
     type = DirichletBC
     variable = disp_y
     #boundary = 'bottom top'
     boundary = 'bottom'
     value = 0
-  [../]
-  [./xfix]
+  []
+  [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
-  [./zfix]
+  []
+  [zfix]
     type = DirichletBC
     variable = disp_z
     #boundary = 'front back'
     boundary = 'back'
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./plastic_xx]
+  [plastic_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_xy]
+  []
+  [plastic_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_xz]
+  []
+  [plastic_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_yy]
+  []
+  [plastic_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_yz]
+  []
+  [plastic_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_zz]
+  []
+  [plastic_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f]
+  []
+  [f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./iter]
+  []
+  [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./intnl]
+  []
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./sdev]
+  []
+  [sdev]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./sdet]
+  []
+  [sdet]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./plastic_xx]
+  [plastic_xx]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./plastic_xy]
+  []
+  [plastic_xy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./plastic_xz]
+  []
+  [plastic_xz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./plastic_yy]
+  []
+  [plastic_yy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./plastic_yz]
+  []
+  [plastic_yz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./plastic_zz]
+  []
+  [plastic_zz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./f]
+  []
+  [f]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_yield_function
     variable = f
-  [../]
-  [./iter]
+  []
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = intnl
-  [../]
-  [./sdev]
+  []
+  [sdev]
     type = RankTwoScalarAux
     variable = sdev
     rank_two_tensor = stress
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sdev]
+  [sdev]
     type = PointValue
     point = '0 0 0'
     variable = sdev
-  [../]
-  [./s_xx]
+  []
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./p_xx]
+  []
+  [p_xx]
     type = PointValue
     point = '0 0 0'
     variable = plastic_xx
-  [../]
-  [./s_xy]
+  []
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
-  [./p_xy]
+  []
+  [p_xy]
     type = PointValue
     point = '0 0 0'
     variable = plastic_xy
-  [../]
-  [./p_xz]
+  []
+  [p_xz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_xz
-  [../]
-  [./p_yz]
+  []
+  [p_yz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_yz
-  [../]
-  [./s_xz]
+  []
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yy]
+  []
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./p_yy]
+  []
+  [p_yy]
     type = PointValue
     point = '0 0 0'
     variable = plastic_yy
-  [../]
-  [./s_yz]
+  []
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./p_zz]
+  []
+  [p_zz]
     type = PointValue
     point = '0 0 0'
     variable = plastic_zz
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
-  [../]
+  []
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = TensorMechanicsHardeningConstant
     value = 300
-  [../]
-  [./Orthotropic]
+  []
+  [Orthotropic]
     type = TensorMechanicsPlasticOrthotropic
     b = -0.2
     c1 = '1 1 1 1 1 1'
@@ -266,29 +266,29 @@
     internal_constraint_tolerance = 1e-9
     use_custom_returnMap = false
     use_custom_cto = false
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '121e3 80e3'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1e-9
     plastic_models = Orthotropic
     debug_fspb = crash
     tangent_operator = elastic
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

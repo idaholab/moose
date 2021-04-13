@@ -11,18 +11,18 @@
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./vec]
+  [vec]
     type = VectorFunctionAux
     variable = velocity
     function = velocity_func
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Variables]
@@ -38,10 +38,10 @@
     center = '0.5 0.75 0'
     radius = 0.15
   []
-  [./velocity_func]
+  [velocity_func]
     type = LevelSetOlssonVortex
     reverse_time = 2
-  [../]
+  []
 []
 
 [ICs]

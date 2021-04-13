@@ -13,45 +13,45 @@
 [Variables]
   active = 'Time'
 
-  [./Time]
+  [Time]
     order =  FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [Functions]
   active = 'func'
 
-  [./func]
+  [func]
     type = ParsedFunction
     value = 2.0*t
-  [../]
+  []
 []
 
 [Kernels]
   active = 't_time func_time'
 
-  [./t_time]
+  [t_time]
     type = TimeDerivative
     variable = Time
-  [../]
+  []
 
-  [./func_time]
+  [func_time]
     type = BodyForce
     variable = Time
     function = func
-  [../]
+  []
 []
 
 [BCs]
   active = 'Top_Temperature'
 
-  [./Top_Temperature]
+  [Top_Temperature]
     type = NeumannBC
     variable = Time
     boundary = 'left right'
-  [../]
+  []
 
 []
 
@@ -64,12 +64,12 @@
   nl_abs_tol = 1e-15
   petsc_options = '-snes_converged_reason'
   abort_on_solve_fail = true
- [./TimeStepper]
+ [TimeStepper]
     type = AB2PredictorCorrector
     dt = .01
     e_max = 10
     e_tol = 1
-  [../]
+  []
 []
 
 [Outputs]

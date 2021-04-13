@@ -4,64 +4,64 @@
 []    # Mesh END
 
 [Functions]
-  [./t_infinity]
+  [t_infinity]
     type = ParsedFunction
     value = '300'
-  [../]
-  [./htc]
+  []
+  [htc]
     type = ParsedFunction
     value = 10.0*5.7                 # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
-  [../]
+  []
 []
 
 [Variables]  # Variables Start
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26
-  [../]
+  []
 []    # Variables END
 
 
 [Kernels]  # Kernels Start
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []    # Kernels END
 
 
 [BCs]    # Boundary Conditions Start
 # Heat transfer coefficient on outer parallelpiped radius and ends
-  [./convective_clad_surface]    # Convective Start
+  [convective_clad_surface]    # Convective Start
     type = ConvectiveFluxFunction  # Convective flux, e.g. q'' = h*(Tw - Tf)
     boundary = 12
     variable = temp
     coefficient = htc
     T_infinity = t_infinity
-  [../]                                  # Convective End
+  []                                  # Convective End
 
-  [./fixed]
+  [fixed]
     type = DirichletBC
     variable = temp
     boundary = 10
     value = 100
-  [../]
+  []
 []    # BCs END
 
 [Materials]    # Materials Start
-  [./thermal]
+  [thermal]
     type = HeatConductionMaterial
     block = '1 2 3 4 5 6 7'
     specific_heat = 826.4
     thermal_conductivity = 57
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     block = '1 2 3 4 5 6 7'
     density = 2405.28
-  [../]
+  []
 []      # Materials END
 
 [Executioner]    # Executioner Start

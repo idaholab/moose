@@ -1,7 +1,7 @@
 [Mesh]
   type = MeshGeneratorMesh
 
-  [./uniform]
+  [uniform]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -10,47 +10,47 @@
     ymin = -0.4
     ymax = 10.4
     ny = 5
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./side_info]
+  [side_info]
     type = SidesetInfoVectorPostprocessor
     boundary = 'left right bottom'
     meta_data_types = 'centroid min max area'
-  [../]
+  []
 []
 
 [Executioner]

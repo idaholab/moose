@@ -1,38 +1,38 @@
 [Tests]
-  [./split]
+  [split]
     type = 'Exodiff'
     input = 'split.i'
     exodiff = 'split_out.e'
     requirement = 'A split Cahn-Hilliard kernel with an anisotropic mobility shall be provided'
     design = "/CahnHilliardAniso.md"
     issues = "#5596"
-  [../]
-  [./nonsplit]
+  []
+  [nonsplit]
     type = 'Exodiff'
     input = 'nonsplit.i'
     exodiff = 'nonsplit_out.e'
     requirement = 'A non-split Cahn-Hilliard kernel with an anisotropic mobility shall be provided'
     design = "/SplitCHWResAniso.md"
     issues = "#5596"
-  [../]
+  []
 
-  [./diffusion]
+  [diffusion]
     type = 'Exodiff'
     input = 'diffusion.i'
     exodiff = 'diffusion_out.e'
     requirement = 'A Diffusion kernel with an anisotropic material property diffusivity shall be provided'
     design = "/MatAnisoDiffusion.md"
     issues = "#5841"
-  [../]
-  [./ad_diffusion]
+  []
+  [ad_diffusion]
     type = 'Exodiff'
     input = 'ad_diffusion.i'
     exodiff = 'ad_diffusion_out.e'
     requirement = 'AD Diffusion with an anisotropic material property diffusivity shall agree with the non-AD version'
     design = "/ADMatAnisoDiffusion.md"
     issues = "#13632"
-  [../]
-  [./ad_diffusion_jac]
+  []
+  [ad_diffusion_jac]
   type = 'PetscJacobianTester'
     input = 'ad_diffusion.i'
     ratio_tol = 1e-8
@@ -41,5 +41,5 @@
     requirement = 'AD Diffusion with an anisotropic material property diffusivity shall have a perfect Jacobian'
     design = "/ADMatAnisoDiffusion.md"
     issues = "#13632"
-  [../]
+  []
 []

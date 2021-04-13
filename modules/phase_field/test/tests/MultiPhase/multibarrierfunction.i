@@ -12,10 +12,10 @@
 []
 
 [AuxVariables]
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 7.0
       y1 = 10.0
@@ -23,12 +23,12 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
-  [./eta2]
+    []
+  []
+  [eta2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 13.0
       y1 = 10.0
@@ -36,25 +36,25 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./multibarrier]
+  [multibarrier]
     type = MultiBarrierFunctionMaterial
     etas = 'eta1 eta2'
     function_name = g
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

@@ -109,10 +109,10 @@
 []
 
 [UserObjects]
-  [./update]
+  [update]
     type = LinearViscoelasticityManager
     viscoelastic_model = kelvin_voigt
-  [../]
+  []
 []
 
 [Postprocessors]
@@ -124,10 +124,10 @@
     type = ElementAverageValue
     variable = strain_xx
   []
-  [./creep_strain_xx]
+  [creep_strain_xx]
     type = ElementAverageValue
     variable = creep_strain_xx
-  [../]
+  []
   [damage_index]
     type = ElementAverageValue
     variable = damage_index
@@ -135,10 +135,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

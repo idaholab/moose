@@ -20,152 +20,152 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./bottom_bc_fn]
+  [bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 
-  [./right_bc_fn]
+  [right_bc_fn]
     type = ParsedFunction
     value =  2*x
-  [../]
+  []
 
-  [./top_bc_fn]
+  [top_bc_fn]
     type = ParsedFunction
     value =  2*y
-  [../]
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./disp_x_ak]
+  [disp_x_ak]
     type = ConstantAux
     variable = disp_x
     value = 0
-  [../]
-  [./disp_y_ak]
+  []
+  [disp_y_ak]
     type = ConstantAux
     variable = disp_y
     value = 0
-  [../]
+  []
 []
 
 # NL
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 
-  [./lambda]
+  [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffnk]
+  [ffnk]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 
-  [./sk_lm]
+  [sk_lm]
     type = ScalarLagrangeMultiplier
     variable = u
     lambda = lambda
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./constraint]
+  [constraint]
     type = AverageValueConstraint
     variable = lambda
     pp_name = pp
     value = 2.666666666666666
     # overrride the global setting, scalar kernels do not live on a mesh
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = '0'
     function = bottom_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = '1'
     function = right_bc_fn
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionNeumannBC
     variable = u
     boundary = '2'
     function = top_bc_fn
-  [../]
-  [./left]
+  []
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = '3'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp]
+  [pp]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
-  [./l2_err]
+  []
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     solve_type = 'PJFNK'
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Tests]
-  [./diffusion_xfem]
+  [diffusion_xfem]
     type = Exodiff
     input = diffusion.i
     exodiff = 'diffusion_out.e'
@@ -11,8 +11,8 @@
                   'discontinuous interface through mesh elements.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./diffusion_xfem_flux_bc]
+  []
+  [diffusion_xfem_flux_bc]
     type = Exodiff
     input = diffusion_flux_bc.i
     exodiff = 'diffusion_flux_bc_out.e'
@@ -26,8 +26,8 @@
                   'user object.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./levelsetcut2d]
+  []
+  [levelsetcut2d]
     type = Exodiff
     input = levelsetcut2d.i
     exodiff = 'levelsetcut2d_out.e'
@@ -40,8 +40,8 @@
                   'being a Moose Variable.'
     design = 'LevelSetCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./levelsetcut2d_aux]
+  []
+  [levelsetcut2d_aux]
     type = Exodiff
     input = levelsetcut2d_aux.i
     exodiff = 'levelsetcut2d_aux_out.e'
@@ -54,8 +54,8 @@
                   'being a Moose AuxVariable.'
     design = 'LevelSetCutUserObject.md'
     issues = '#6320'
-  [../]
-  [./levelsetcut3d]
+  []
+  [levelsetcut3d]
     type = Exodiff
     input = levelsetcut3d.i
     exodiff = 'levelsetcut3d_out.e'
@@ -68,5 +68,5 @@
                   'being a Moose AuxVariable.'
     design = 'LevelSetCutUserObject.md'
     issues = '#6320'
-  [../]
+  []
 []

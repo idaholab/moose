@@ -35,33 +35,33 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     order = SECOND
     family = LAGRANGE_VEC
-  [../]
-  [./p]
-  [../]
+  []
+  [p]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [momentum_advection]
     type = INSADMomentumAdvection
     variable = velocity
   []
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     p = p
-  [../]
+  []
 []
 
 [BCs]
@@ -77,7 +77,7 @@
     boundary = 'bottom'
     function_x = 0
     function_y = 'inlet_func'
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     variable = velocity
@@ -101,18 +101,18 @@
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     value = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADMaterial
     velocity = velocity
@@ -121,11 +121,11 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,24 +141,24 @@
 [Outputs]
   csv = true
   console = true
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flow_in]
+  [flow_in]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'bottom'
     execute_on = 'timestep_end'
-  [../]
-  [./flow_out]
+  []
+  [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

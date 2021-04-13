@@ -33,77 +33,77 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     save_in = residual_r
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_rr]
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./residual_r]
-  [../]
+  []
+  [residual_r]
+  []
 []
 
 [Postprocessors]
-  [./stress_rr]
+  [stress_rr]
     type = ElementAverageValue
     variable = stress_rr
-  [../]
-  [./residual_r]
+  []
+  [residual_r]
     type = NodalSum
     variable = residual_r
     boundary = right
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = stress_rr
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./innerDisp]
+  [innerDisp]
     type = ADDirichletBC
     boundary = left
     variable = disp_r
     value = 0.0
-  [../]
-  [./outerPressure]
+  []
+  [outerPressure]
     type = ADPressure
     boundary = right
     variable = disp_r
     component = 0
     constant = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./stress]
-  [../]
+  []
+  [stress]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

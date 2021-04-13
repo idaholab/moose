@@ -12,44 +12,44 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right top'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 2.0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = VectorNeumannBC
     variable = u
     vector_value = '1 1 0'
     boundary = 2
-  [../]
+  []
 []
 
 [Executioner]

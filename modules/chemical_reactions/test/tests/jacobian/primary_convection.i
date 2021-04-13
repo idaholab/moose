@@ -8,49 +8,49 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./a]
+  []
+  [a]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = RandomIC
     variable = pressure
     min = 1
     max = 5
-  [../]
-  [./a]
+  []
+  [a]
     type = RandomIC
     variable = a
     max = 1
     min = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = DarcyFluxPressure
     variable = pressure
-  [../]
-  [./conv]
+  []
+  [conv]
     type = PrimaryConvection
     variable = a
     p = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,8 +63,8 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

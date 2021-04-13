@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./pp_aux]
-  [../]
+  [pp_aux]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -56,20 +56,20 @@
 []
 
 [MultiApps]
-  [./quad]
+  [quad]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0.1 0.1 0 0.9 0.1 0 0.1 0.9 0 0.9 0.9 0'
     input_files = 'quad_sub1.i quad_sub1.i quad_sub2.i quad_sub2.i'
-  [../]
+  []
 []
 
 [Transfers]
-  [./sub_to_master_pp]
+  [sub_to_master_pp]
     type = MultiAppPostprocessorInterpolationTransfer
     direction = from_multiapp
     multi_app = quad
     variable = pp_aux
     postprocessor = pp
-  [../]
+  []
 []

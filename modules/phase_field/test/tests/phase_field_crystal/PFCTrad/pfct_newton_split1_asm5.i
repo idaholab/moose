@@ -8,82 +8,82 @@
 []
 
 [Variables]
-  [./n]
-    [./InitialCondition]
+  [n]
+    [InitialCondition]
       type = RandomIC
       min = -1
       max = 4
-    [../]
-  [../]
-  [./u]
+    []
+  []
+  [u]
     scaling = 1e2
-  [../]
-  [./v]
+  []
+  [v]
     scaling = 1e1
-  [../]
+  []
 []
 
 [Kernels]
-  [./ndot]
+  [ndot]
     type = TimeDerivative
     variable = n
-  [../]
-  [./n_bulk]
+  []
+  [n_bulk]
     type = CHBulkPFCTrad
     variable = n
-  [../]
-  [./u_term]
+  []
+  [u_term]
     type = MatDiffusion
     variable = n
     v = u
     diffusivity = C2
-  [../]
-  [./v_term]
+  []
+  [v_term]
     type = MatDiffusion
     variable = n
     v = v
     diffusivity = C4
-  [../]
-  [./u_rctn]
+  []
+  [u_rctn]
     type = Reaction
     variable = u
-  [../]
-  [./u_gradn]
+  []
+  [u_gradn]
     type = LaplacianSplit
     variable = u
     c = n
-  [../]
-  [./v_rctn]
+  []
+  [v_rctn]
     type = Reaction
     variable = v
-  [../]
-  [./v_gradu]
+  []
+  [v_gradu]
     type = LaplacianSplit
     variable = v
     c = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./PFCTrad]
+  [PFCTrad]
     type = PFCTradMaterial
     order = 4
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,26 +103,26 @@
 []
 
 [Splits]
-  [./nuv]
+  [nuv]
     splitting       = 'v nu'
     splitting_type  = schur
     schur_type      = full
     schur_pre       = Sp
     #petsc_options = '-dm_view'
-  [../]
-  [./nu]
+  []
+  [nu]
     vars = 'n u'
     petsc_options = '-ksp_monitor'
     petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_asm_overlap  -sub_pc_type'
     petsc_options_value =  '              101      asm               5            lu'
-  [../]
-  [./v]
+  []
+  [v]
     vars = 'v'
     #petsc_options = '-ksp_monitor'
     petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
     petsc_options_value =  'asm         101   preonly   lu      0'
     #full = true
-  [../]
+  []
 []
 
 [Outputs]

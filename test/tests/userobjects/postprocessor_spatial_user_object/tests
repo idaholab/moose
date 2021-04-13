@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = 'master.i'
     exodiff = 'master_out.e'

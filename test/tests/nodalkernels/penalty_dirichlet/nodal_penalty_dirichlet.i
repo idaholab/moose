@@ -14,72 +14,72 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -2*(x*x+y*y-2)
-  [../]
+  []
 
-  [./solution]
+  [solution]
     type = ParsedGradFunction
     value = (1-x*x)*(1-y*y)
     grad_x = 2*(x*y*y-x)
     grad_y = 2*(x*x*y-y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./forcing]
+  []
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./bc_all]
+  [bc_all]
     type = PenaltyDirichletNodalKernel
     variable = u
     value = 0
     boundary = 'top left right bottom'
     penalty = 1e10
-  [../]
+  []
 []
 
 # [BCs]
-#   [./fix]
+#   [fix]
 #     type = DirichletBC
 #     preset = true
 #     variable = u
 #     value = 0
 #     boundary = 'top left right bottom'
-#   [../]
+#   []
 # []
 
 [Postprocessors]
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]

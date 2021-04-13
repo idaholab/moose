@@ -8,165 +8,165 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
-  [./v]
+  []
+  [v]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
-  [./w]
+  []
+  [w]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
-  [./s]
+  []
+  [s]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
-  [./q]
-  [../]
+  []
+  [q]
+  []
 []
 
 [Kernels]
-  [./u_diff]
+  [u_diff]
     type = VectorDiffusion
     variable = u
-  [../]
-  [./v_diff]
+  []
+  [v_diff]
     type = VectorDiffusion
     variable = v
-  [../]
-  [./w_diff]
+  []
+  [w_diff]
     type = VectorDiffusion
     variable = w
-  [../]
-  [./s_diff]
+  []
+  [s_diff]
     type = VectorDiffusion
     variable = s
-  [../]
-  [./v_coupled_diff]
+  []
+  [v_coupled_diff]
     type = CoupledVectorDiffusion
     variable = v
     v = u
-  [../]
-  [./w_coupled_diff]
+  []
+  [w_coupled_diff]
     type = CoupledVectorDiffusion
     variable = w
     v = u
     state = old
-  [../]
-  [./s_coupled_diff]
+  []
+  [s_coupled_diff]
     type = CoupledVectorDiffusion
     variable = s
     v = u
     state = older
-  [../]
-  [./q_diff]
+  []
+  [q_diff]
     type = Diffusion
     variable = q
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = VectorDirichletBC
     variable = u
     values = '0 0 0'
     boundary = 'left'
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = VectorDirichletBC
     variable = v
     values = '0 0 0'
     boundary = 'left'
-  [../]
-  [./left_w]
+  []
+  [left_w]
     type = VectorDirichletBC
     variable = w
     values = '0 0 0'
     boundary = 'left'
-  [../]
-  [./left_s]
+  []
+  [left_s]
     type = VectorDirichletBC
     variable = s
     values = '0 0 0'
     boundary = 'left'
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = VectorFunctionDirichletBC
     variable = u
     boundary = 'right'
     function_x = 'x_exact'
     function_y = 'y_exact'
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = VectorFunctionDirichletBC
     variable = v
     boundary = 'right'
     function_x = 'x_exact'
     function_y = 'y_exact'
-  [../]
-  [./right_w]
+  []
+  [right_w]
     type = VectorFunctionDirichletBC
     variable = w
     boundary = 'right'
     function_x = 'x_exact_old'
     function_y = 'y_exact_old'
-  [../]
-  [./right_s]
+  []
+  [right_s]
     type = VectorFunctionDirichletBC
     variable = s
     boundary = 'right'
     function_x = 'x_exact_older'
     function_y = 'y_exact_older'
-  [../]
-  [./left_q]
+  []
+  [left_q]
     type = DirichletBC
     variable = q
     boundary = 'left'
     value = 1
-  [../]
-  [./right_q]
+  []
+  [right_q]
     type = NeumannBC
     variable = q
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./x_exact]
+  [x_exact]
     type = ParsedFunction
     value = 't'
-  [../]
-  [./y_exact]
+  []
+  [y_exact]
     type = ParsedFunction
     value = 't'
-  [../]
-  [./x_exact_old]
+  []
+  [x_exact_old]
     type = ParsedFunction
     value = 'if(t < 1, 0, t - 1)'
-  [../]
-  [./y_exact_old]
+  []
+  [y_exact_old]
     type = ParsedFunction
     value = 'if(t < 1, 0, t - 1)'
-  [../]
-  [./x_exact_older]
+  []
+  [x_exact_older]
     type = ParsedFunction
     value = 'if(t < 2, 0, t - 2)'
-  [../]
-  [./y_exact_older]
+  []
+  [y_exact_older]
     type = ParsedFunction
     value = 'if(t < 2, 0, t - 2)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

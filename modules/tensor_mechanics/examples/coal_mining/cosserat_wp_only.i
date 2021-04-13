@@ -126,313 +126,313 @@
 []
 
 [Variables]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
 []
 
 [Kernels]
-  [./cy_elastic]
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_x
     component = 0
-  [../]
-  [./gravity]
+  []
+  [gravity]
     type = Gravity
     use_displaced_mesh = false
     variable = disp_z
     value = -10E-6
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./wc_y]
-  [../]
-  [./wc_z]
-  [../]
-  [./stress_xx]
+  [disp_x]
+  []
+  [wc_y]
+  []
+  [wc_z]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./dp_shear]
+  []
+  [dp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./dp_tensile]
+  []
+  [dp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_shear]
+  []
+  [wp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_tensile]
+  []
+  [wp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_shear_f]
+  []
+  [wp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_tensile_f]
+  []
+  [wp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./dp_shear_f]
+  []
+  [dp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./dp_tensile_f]
+  []
+  [dp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./dp_shear]
+  []
+  [dp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = dp_plastic_internal_parameter
     variable = dp_shear
-  [../]
-  [./dp_tensile]
+  []
+  [dp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = dp_plastic_internal_parameter
     variable = dp_tensile
-  [../]
-  [./wp_shear]
+  []
+  [wp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_internal_parameter
     variable = wp_shear
-  [../]
-  [./wp_tensile]
+  []
+  [wp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_internal_parameter
     variable = wp_tensile
-  [../]
-  [./dp_shear_f]
+  []
+  [dp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = dp_plastic_yield_function
     variable = dp_shear_f
-  [../]
-  [./dp_tensile_f]
+  []
+  [dp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = dp_plastic_yield_function
     variable = dp_tensile_f
-  [../]
-  [./wp_shear_f]
+  []
+  [wp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_yield_function
     variable = wp_shear_f
-  [../]
-  [./wp_tensile_f]
+  []
+  [wp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_yield_function
     variable = wp_tensile_f
-  [../]
+  []
 []
 
 
 
 [BCs]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '11 12 16 21' # note addition of 16 and 21
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '16'
     value = 0.0
-  [../]
-  [./no_wc_x]
+  []
+  [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = '11 12'
     value = 0.0
-  [../]
-  [./roof]
+  []
+  [roof]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 21
     function = excav_sideways
-  [../]
+  []
 []
 
 [Functions]
-  [./ini_xx]
+  [ini_xx]
     type = ParsedFunction
     value = '-0.8*2500*10E-6*(400-z)'
-  [../]
-  [./ini_zz]
+  []
+  [ini_zz]
     type = ParsedFunction
     value = '-2500*10E-6*(400-z)'
-  [../]
-  [./excav_sideways]
+  []
+  [excav_sideways]
     type = ParsedFunction
     vars = 'end_t ymin ymax  e_h  closure_dist'
     vals = '1.0   0    150.0 -3.0 15.0'
     value = 'e_h*max(min((t/end_t*(ymax-ymin)+ymin-y)/closure_dist,1),0)'
-  [../]
-  [./excav_downwards]
+  []
+  [excav_downwards]
     type = ParsedFunction
     vars = 'end_t ymin ymax  e_h  closure_dist'
     vals = '1.0   0    150.0 -3.0 15.0'
     value = 'e_h*t/end_t*max(min(((ymax-ymin)+ymin-y)/closure_dist,1),0)'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dp_coh_strong_harden]
+  [dp_coh_strong_harden]
     type = TensorMechanicsHardeningExponential
     value_0 = 2.9 # MPa
     value_residual = 3.1 # MPa
     rate = 1.0
-  [../]
-  [./dp_fric]
+  []
+  [dp_fric]
     type = TensorMechanicsHardeningConstant
     value = 0.65 # 37deg
-  [../]
-  [./dp_dil]
+  []
+  [dp_dil]
     type = TensorMechanicsHardeningConstant
     value = 0.65
-  [../]
+  []
 
-  [./dp_tensile_str_strong_harden]
+  [dp_tensile_str_strong_harden]
     type = TensorMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.4 # MPa
     rate = 1.0
-  [../]
-  [./dp_compressive_str]
+  []
+  [dp_compressive_str]
     type = TensorMechanicsHardeningConstant
     value = 1.0E3 # Large!
-  [../]
+  []
 
-  [./drucker_prager_model]
+  [drucker_prager_model]
     type = TensorMechanicsPlasticDruckerPrager
     mc_cohesion = dp_coh_strong_harden
     mc_friction_angle = dp_fric
     mc_dilation_angle = dp_dil
     internal_constraint_tolerance = 1 # irrelevant here
     yield_function_tolerance = 1      # irrelevant here
-  [../]
+  []
 
-  [./wp_coh_harden]
+  [wp_coh_harden]
     type = TensorMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
-  [../]
-  [./wp_tan_fric]
+  []
+  [wp_tan_fric]
     type = TensorMechanicsHardeningConstant
     value = 0.36 # 20deg
-  [../]
-  [./wp_tan_dil]
+  []
+  [wp_tan_dil]
     type = TensorMechanicsHardeningConstant
     value = 0.18 # 10deg
-  [../]
+  []
 
-  [./wp_tensile_str_harden]
+  [wp_tensile_str_harden]
     type = TensorMechanicsHardeningCubic
     value_0 = 0.1
     value_residual = 0.1
     internal_limit = 10
-  [../]
-  [./wp_compressive_str_soften]
+  []
+  [wp_compressive_str_soften]
     type = TensorMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1.0
     internal_limit = 1.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 8E3 # MPa
     poisson = 0.25
     layer_thickness = 1.0
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3
-  [../]
+  []
 
-  [./strain]
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     eigenstrain_name = ini_stress
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticCosseratStress
     block = 0
     inelastic_models = 'wp'
@@ -441,8 +441,8 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
-  [./dp]
+  []
+  [dp]
     type = CappedDruckerPragerCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
@@ -458,8 +458,8 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0
-  [../]
-  [./wp]
+  []
+  [wp]
     type = CappedWeakPlaneCosseratStressUpdate
     block = 0
     warn_about_precision_loss = false
@@ -475,26 +475,26 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0E-3
-  [../]
+  []
 
 
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2500
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./subsidence]
+  [subsidence]
     type = PointValue
     point = '0 0 400'
     variable = disp_z
     use_displaced_mesh = false
-  [../]
+  []
 []
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -529,8 +529,8 @@
   print_linear_residuals = false
   csv = true
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = false
-  [../]
+  []
 []

@@ -11,58 +11,58 @@
 []
 
 [Functions]
-  [./bc_fn_v]
+  [bc_fn_v]
     type = ParsedFunction
     value = (x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
-  [./v]
+  [v]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_v]
+  [diff_v]
     type = CoefDiffusion
     variable = u
     coef = 0.5
-  [../]
-  [./conv_v]
+  []
+  [conv_v]
     type = CoupledConvection
     variable = v
     velocity_vector = u
     lag_coupling = true    # Here we are asking for an old value but this is a steady test!
-  [../]
+  []
 []
 
 [BCs]
-  [./top_v]
+  [top_v]
     type = FunctionDirichletBC
     variable = v
     boundary = top
     function = bc_fn_v
-  [../]
+  []
 
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

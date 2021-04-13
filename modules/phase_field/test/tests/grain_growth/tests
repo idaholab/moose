@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e-s005'
@@ -7,18 +7,18 @@
     requirement = 'MOOSE shall provide a polycrystalline material model with grain growth'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./temperature_gradient]
+  [temperature_gradient]
     type = 'Exodiff'
     input = 'temperature_gradient.i'
     exodiff = 'temperature_gradient_out.e'
     requirement = 'A flat grain boundary shall not move along a temperature gradient'
     design = 'PolycrystalKernelAction.md'
     issues = '#9507'
-  [../]
+  []
 
-  [./thumb]
+  [thumb]
     type = 'Exodiff'
     input = 'thumb.i'
     exodiff = 'thumb_out.e-s006'
@@ -26,45 +26,45 @@
     requirement = 'A thumb shaped grain IC shall be provided for direct comparison to grain boundary mobility experiments'
     design = 'ThumbIC.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./hex]
+  [hex]
     type = 'Exodiff'
     input = 'hex.i'
     exodiff = 'hex_out.e'
     requirement = 'A hexagonal grain structure IC shall be provided'
     design = 'PolycrystalHex.md'
     issues = '#8810'
-  [../]
+  []
 
-  [./boundingbox]
+  [boundingbox]
     type = 'Exodiff'
     input = 'boundingbox.i'
     exodiff = 'boundingbox_out.e-s003'
     requirement = 'A bicrystal grain IC shall be provided to set up a rectangular grain in a matrix'
     design = 'BicrystalBoundingBoxICAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./evolution]
+  [evolution]
     type = 'Exodiff'
     input = 'evolution.i'
     exodiff = 'evolution_out.e'
     requirement = 'The grain boundary evolution model shall be able to compute the grain boundary mobility based on an activation energy'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./constant_mobility]
+  [constant_mobility]
     type = 'Exodiff'
     input = 'constant_mobility.i'
     exodiff = 'constant_mobility_out.e'
     requirement = 'The grain boundary evolution model shall permit specifying a constant mobility'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./off-diagonal]
+  [off-diagonal]
     type = 'Exodiff'
     input = 'off-diagonal.i'
     exodiff = 'off-diagonal_out.e-s002'
@@ -72,27 +72,27 @@
     requirement = 'The grain boundary evolution model shall provide off-diagonal Jacobians'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./explicit]
+  [explicit]
     type = 'Exodiff'
     input = 'explicit.i'
     exodiff = 'explicit_out.e'
     requirement = 'The grain growth model shall work with explicit time integration'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 
-  [./voronoi]
+  [voronoi]
     type = 'Exodiff'
     input = 'voronoi.i'
     exodiff = 'voronoi_out.e'
     requirement = 'A voronoi tesselation grain structure IC shall be provided'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
-  [../]
+  []
 
-  [./faux_voronoi]
+  [faux_voronoi]
     type = 'Exodiff'
     input = 'voronoi.i'
     exodiff = 'voronoi_out.e'
@@ -102,9 +102,9 @@
     design = 'FauxPolycrystalVoronoi.md'
     cli_args ='UserObjects/voronoi/type=FauxPolycrystalVoronoi'
     issues = '#14697'
-  [../]
+  []
 
-  [./mesh_adaptivity]
+  [mesh_adaptivity]
     type = 'Exodiff'
     input = 'voronoi_adaptivity.i'
     exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
@@ -112,9 +112,9 @@
     requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations on a mesh generated in parallel.'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348'
-  [../]
+  []
 
-  [./mesh_adaptivity_voronoi]
+  [mesh_adaptivity_voronoi]
     type = 'Exodiff'
     input = 'voronoi_adaptivity.i'
     exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
@@ -124,9 +124,9 @@
     requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations using PolycrystalVoronoi UO on a mesh generated in parallel.'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348  #16143'
-  [../]
+  []
 
-  [./mesh_adaptivity_ghost]
+  [mesh_adaptivity_ghost]
     type = 'Exodiff'
     input = 'voronoi_adaptivity_ghost.i'
     exodiff = 'voronoi_adaptivity_ghost_out.e voronoi_adaptivity_ghost_out.e-s002'
@@ -141,18 +141,18 @@
     requirement = 'The system shall be able to apply mesh adaptivity and output evaluable and ghosting elements using distributed generator'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348  #16143'
-  [../]
+  []
 
-  [./voronoi_columnar_3D]
+  [voronoi_columnar_3D]
     type = 'Exodiff'
     input = 'voronoi_columnar_3D.i'
     exodiff = 'voronoi_columnar_3D_out.e'
     requirement = 'A columnar grain IC shall be provided based on a 2D voronoi tesselation'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
-  [../]
+  []
 
-  [./particle]
+  [particle]
     type = 'Exodiff'
     input = 'particle.i'
     exodiff = 'particle_out.e-s005'
@@ -160,5 +160,5 @@
     requirement = 'The grain boundary evolution model shall provide coupling to conserved order parameters'
     design = 'ACGBPoly.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
-  [../]
+  []
 []

@@ -5,8 +5,8 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
   [v]
     family = SCALAR
     initial_condition = 1
@@ -14,10 +14,10 @@
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [scalar]
     type = ScalarLagrangeMultiplier
     variable = u
@@ -26,18 +26,18 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [ScalarKernels]

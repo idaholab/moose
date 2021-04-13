@@ -1,5 +1,5 @@
 [Tests]
-  [./EulerAngleVariables2RGBAux]
+  [EulerAngleVariables2RGBAux]
     type = 'Exodiff'
     input = 'EulerAngleVariables2RGBAux.i'
     exodiff = 'EulerAngleVariables2RGBAux_out.e'
@@ -8,9 +8,9 @@
     design = "EulerAngleVariables2RGBAux.md"
     requirement = "The system shall output an RGB field that can be interpreted as either a component
                    or a combined Euler angle given a grain structure."
-  [../]
+  []
 
-  [./1phase_reconstruction]
+  [1phase_reconstruction]
     type = 'Exodiff'
     input = '1phase_reconstruction.i'
     exodiff = '1phase_reconstruction_out.e'
@@ -18,9 +18,9 @@
     issues = "#9110"
     design = "EBSD.md"
     requirement = "The system shall support reading EBSD data and initializing a Polycrystal grain structure with that data."
-  [../]
+  []
 
-  [./1phase_reconstruction_40x40]
+  [1phase_reconstruction_40x40]
     type = 'Exodiff'
     input = '1phase_reconstruction.i'
 
@@ -32,9 +32,9 @@
     design = "EBSD.md"
     requirement = "The system shall support reading EBSD data to initalized Polycrystal grain structures while supporting
                     reduced order parameter IC assignment."
-  [../]
+  []
 
-  [./1phase_evolution]
+  [1phase_evolution]
     type = 'Exodiff'
     input = '1phase_evolution.i'
     exodiff = '1phase_evolution_out.e'
@@ -43,9 +43,9 @@
     issues = "#9110"
     design = "EBSD.md"
     requirement = "The system shall support grain evolution when beginning from EBSD ICs."
-  [../]
+  []
 
-  [./2phase_reconstruction]
+  [2phase_reconstruction]
     type = 'Exodiff'
     input = '2phase_reconstruction.i'
     exodiff = '2phase_reconstruction_out.e'
@@ -54,9 +54,9 @@
     issues = "#9110 #5920"
     design = "EBSD.md"
     requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs."
-  [../]
+  []
 
-  [./2phase_reconstruction2]
+  [2phase_reconstruction2]
     type = 'Exodiff'
     input = '2phase_reconstruction2.i'
     exodiff = '2phase_reconstruction2_out.e'
@@ -66,9 +66,9 @@
     design = "EBSD.md"
     requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
                    while supporting reduced order parameter IC assignment."
-  [../]
+  []
 
-  [./2phase_reconstruction3]
+  [2phase_reconstruction3]
     type = 'Exodiff'
     input = '2phase_reconstruction3.i'
     exodiff = '2phase_reconstruction3_out.e'
@@ -77,9 +77,9 @@
     issues = "#9110 #5920"
     design = "EBSD.md"
     requirement = "The system shall support reading EBSD data to initialize PolycrystalICs with discontinuous numbering."
-  [../]
+  []
 
-  [./2phase_reconstruction4]
+  [2phase_reconstruction4]
     type = 'Exodiff'
     input = '2phase_reconstruction4.i'
     exodiff = '2phase_reconstruction4_out.e'
@@ -89,9 +89,9 @@
     design = "EBSD.md"
     requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
                    while supporting reduced order parameter IC assignment and display the coloring."
-  [../]
+  []
 
-  [./regions_without_grains]
+  [regions_without_grains]
     type = 'CSVDiff'
     input = 'euler2rgb_no_grain_region.i'
     csvdiff = 'euler2rgb_no_grain_region_out.csv'
@@ -101,8 +101,8 @@
     design = "EBSD.md"
     requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
                    and support regions within the domain that contain no grains at all."
-  [../]
-  [./average_orientation]
+  []
+  [average_orientation]
     type = 'Exodiff'
     input = 'euler2rgb_non_uniform_orientation.i'
     exodiff = 'euler2rgb_non_uniform_orientation_out.e'
@@ -112,5 +112,5 @@
     method = "!dbg"
     requirement = "The system shall support grain evolution when beginning from EBSD ICs and compute average orientation
                    of non-uniformly oriented grains."
-  [../]
+  []
 []

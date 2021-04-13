@@ -12,98 +12,98 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./T]
-  [../]
-  [./stress_rr]
+  [T]
+  []
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_tt]
+  []
+  [stress_tt]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./T_IC]
+  [T_IC]
     type = FunctionIC
     variable = T
     function = '1000-0.7*sqrt(x^2+y^2)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = CylindricalRankTwoAux
     variable = stress_rr
     rank_two_tensor = stress
     index_j = 0
     index_i = 0
     center_point = '0 0 0'
-  [../]
-  [./stress_tt]
+  []
+  [stress_tt]
     type = CylindricalRankTwoAux
     variable = stress_tt
     rank_two_tensor = stress
     index_j = 1
     index_i = 1
     center_point = '0 0 0'
-  [../]
+  []
 []
 
 [BCs]
-  [./outer_x]
+  [outer_x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0
-  [../]
-  [./outer_y]
+  []
+  [outer_y]
     type = DirichletBC
     variable = disp_y
     boundary = '2 10'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./iso_C]
+  [iso_C]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '2.15e5 0.74e5'
     block = 1
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
     block = 1
     eigenstrain_names = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type= ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     temperature = T
     stress_free_temperature = 273
     block = 1
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]

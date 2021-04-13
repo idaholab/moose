@@ -6,17 +6,17 @@
   cracks_start = '0.25 0.5 0'
   cracks_end = '0.75 0.5 0'
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 50
     ny = 50
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

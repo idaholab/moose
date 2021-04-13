@@ -1,17 +1,17 @@
 [Tests]
-  [./constant]
+  [constant]
     type = 'Exodiff'
     input = 'constant.i'
     exodiff = 'constant_out.e'
-  [../]
-  [./linear]
+  []
+  [linear]
     type = 'Exodiff'
     input = 'linear.i'
     exodiff = 'linear_out.e'
-  [../]
-  [./maier_kelly]
+  []
+  [maier_kelly]
     type = 'Exodiff'
     input = 'maier_kelly.i'
     exodiff = 'maier_kelly_out.e'
-  [../]
+  []
 []

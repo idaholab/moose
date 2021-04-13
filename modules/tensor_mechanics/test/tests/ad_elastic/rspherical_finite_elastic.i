@@ -14,57 +14,57 @@
 
 [Variables]
   # scale with one over Young's modulus
-  [./disp_r]
+  [disp_r]
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Kernels]
-  [./stress_r]
+  [stress_r]
     type = ADStressDivergenceRSphericalTensors
     component = 0
     variable = disp_r
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./center]
+  [center]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0
-  [../]
-  [./rdisp]
+  []
+  [rdisp]
     type = DirichletBC
     variable = disp_r
     boundary = right
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
+  []
 []
 
 [Materials]
-  [./strain]
+  [strain]
     type = ADComputeRSphericalFiniteStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -21,92 +21,92 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dummy1]
+  [dummy1]
     type = ADDiffusion
     variable = c
-  [../]
-  [./dummy2]
+  []
+  [dummy2]
     type = ADTimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
   # derivatives used both before and after being declared
-  [./sum_a_1]
+  [sum_a_1]
     type = ADDerivativeSumMaterial
     f_name = Fa1
     sum_materials = 'Fa'
     args = 'c'
     outputs = exodus
-  [../]
-  [./free_energy_a]
+  []
+  [free_energy_a]
     type = ADDerivativeParsedMaterial
     f_name = Fa
     args = 'c'
     function = 'c^4'
-  [../]
-  [./sum_a_2]
+  []
+  [sum_a_2]
     type = ADDerivativeSumMaterial
     f_name = Fa2
     sum_materials = 'Fa'
     args = 'c'
     outputs = exodus
-  [../]
+  []
 
   # derivatives declared after being used
-  [./sum_b_1]
+  [sum_b_1]
     type = ADDerivativeSumMaterial
     f_name = Fb1
     sum_materials = 'Fb'
     args = 'c'
     outputs = exodus
-  [../]
-  [./free_energy_b]
+  []
+  [free_energy_b]
     type = ADDerivativeParsedMaterial
     f_name = Fb
     args = 'c'
     function = 'c^4'
-  [../]
+  []
 
   # derivatives declared before being used
-  [./free_energy_c]
+  [free_energy_c]
     type = ADDerivativeParsedMaterial
     f_name = Fc
     args = 'c'
     function = 'c^4'
-  [../]
-  [./sum_c_2]
+  []
+  [sum_c_2]
     type = ADDerivativeSumMaterial
     f_name = Fc2
     sum_materials = 'Fc'
     args = 'c'
     outputs = exodus
-  [../]
+  []
 
   # non-existing derivatives
-  [./free_energy_d]
+  [free_energy_d]
     type = ADParsedMaterial
     f_name = Fd
     args = 'c'
     function = 'c^4'
-  [../]
-  [./sum_d_1]
+  []
+  [sum_d_1]
     type = ADDerivativeSumMaterial
     f_name = Fd1
     sum_materials = 'Fd'
     args = 'c'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

@@ -20,66 +20,66 @@
 []
 
 [Functions]
-  [./exact_sln]
+  [exact_sln]
     type = ParsedFunction
     value = y
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
-  [./lm_u]
+  [lm_u]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
-  [./lm_v]
+  [lm_v]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
 
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./coupled_u]
+  []
+  [coupled_u]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 []
 
 [Constraints]
-  [./ced_u]
+  [ced_u]
     type = EqualValueConstraint
     variable = lm_u
     secondary_variable = u
@@ -87,8 +87,8 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-  [../]
-  [./ced_v]
+  []
+  [ced_v]
     type = EqualValueConstraint
     variable = lm_v
     secondary_variable = v
@@ -96,46 +96,46 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 2 3 4'
     function = exact_sln
-  [../]
-  [./allv]
+  []
+  [allv]
     type = DirichletBC
     variable = v
     boundary = '1 2 3 4'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = ElementL2Error
     variable = u
     function = exact_sln
     block = '1 2'
     execute_on = 'initial timestep_end'
-  [../]
-  [./l2_v]
+  []
+  [l2_v]
     type = ElementL2Norm
     variable = v
     block = '1 2'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,14 +1,14 @@
 [Tests]
   design = 'modules/navier_stokes/index.md'
-  [./lid_driven]
+  [lid_driven]
     type = 'Exodiff'
     input = 'lid_driven.i'
     exodiff = 'lid_driven_out.e'
     custom_cmp = 'lid_driven.cmp'
     issues = '#000'
     requirement = 'We shall be able to solve a canonical lid-driven problem without stabilization, using mixed order finite elements for velocity and pressure.'
-  [../]
-  [./ad_lid_driven]
+  []
+  [ad_lid_driven]
     type = 'Exodiff'
     input = 'ad_lid_driven.i'
     exodiff = 'lid_driven_out.e'
@@ -19,16 +19,16 @@
     issues = '#13025'
     requirement = 'We shall be able to reproduce the results from the hand-coded lid-driven simulation using automatic differentiation objects.'
     recover = false # Same output as lid_driven
-  [../]
-  [./ad_lid_driven_mean_zero_pressure]
+  []
+  [ad_lid_driven_mean_zero_pressure]
     type = 'Exodiff'
     input = 'ad_lid_driven_mean_zero_pressure.i'
     exodiff = 'ad_lid_driven_mean_zero_pressure_out.e'
     method = 'OPT'
     issues = '#15549'
     requirement = 'We shall be able to run lid-dirven simulation using a global mean-zero pressure constraint approach.'
-  [../]
-  [./ad_lid_driven_jacobian]
+  []
+  [ad_lid_driven_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_lid_driven.i'
     cli_args = 'Outputs/exodus=false Mesh/gen/nx=3 Mesh/gen/ny=3'
@@ -36,16 +36,16 @@
     difference_tol = 1e-7
     issues = '#13025'
     requirement = 'The Jacobian for the mixed-order INS problem shall be perfect when provided through automatic differentiation.'
-  [../]
-  [./lid_driven_stabilized]
+  []
+  [lid_driven_stabilized]
     type = 'Exodiff'
     input = 'lid_driven_stabilized.i'
     exodiff = 'lid_driven_stabilized_out.e'
     custom_cmp = 'lid_driven_stabilized.cmp'
     issues = '#9687'
     requirement = 'We shall be able to solve the lid-driven problem using equal order shape functions with pressure-stabilized petrov-galerkin stabilization. We shall also demonstrate SUPG stabilization.'
-  [../]
-  [./ad_lid_driven_stabilized]
+  []
+  [ad_lid_driven_stabilized]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -54,8 +54,8 @@
     issues = '#13025'
     requirement = 'We shall be able to reproduce the hand-coded stabilized results with automatic differentiation objects.'
     recover = false # Same output as lid_driven_stabilized
-  [../]
-  [./ad_lid_driven_stabilized_jacobian]
+  []
+  [ad_lid_driven_stabilized_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_lid_driven_stabilized.i'
     run_sim = True
@@ -63,8 +63,8 @@
     difference_tol = 1e-7
     issues = '#13025'
     requirement = 'The Jacobian for the automatic differentiation stabilized lid-driven problem shall be perfect.'
-  [../]
-  [./still_unstable]
+  []
+  [still_unstable]
     type = 'RunApp'
     input = 'lid_driven_stabilized.i'
     expect_out = 'Aborting as solve did not converge'
@@ -72,16 +72,16 @@
     method = 'OPT'
     issues = '#9687'
     requirement = 'Simulation with equal-order shape functions without pressure stabilization shall be unstable.'
-  [../]
-  [./lid_driven_chorin]
+  []
+  [lid_driven_chorin]
     type = 'Exodiff'
     input = 'lid_driven_chorin.i'
     exodiff = 'lid_driven_chorin_out.e'
     issues = '#000'
     requirement = 'We shall be able to solve the INS equations using the classical Chorin splitting algorithm.'
-  [../]
+  []
 
-  [./lid_driven_action]
+  [lid_driven_action]
     type = 'Exodiff'
     input = 'lid_driven_action.i'
     exodiff = 'lid_driven_out.e'
@@ -90,8 +90,8 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce unstabilized incompressible Navier-Stokes results with hand-coded Jacobian using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven
-  [../]
-  [./lid_driven_stabilized_action]
+  []
+  [lid_driven_stabilized_action]
     type = 'Exodiff'
     input = 'lid_driven_stabilized_action.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -100,8 +100,8 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with hand-coded Jacobian using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven_stabilized
-  [../]
-  [./ad_lid_driven_action]
+  []
+  [ad_lid_driven_action]
     type = 'Exodiff'
     input = 'ad_lid_driven_action.i'
     exodiff = 'lid_driven_out.e'
@@ -111,8 +111,8 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce unstabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven
-  [../]
-  [./ad_lid_driven_stabilized_action]
+  []
+  [ad_lid_driven_stabilized_action]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized_action.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -121,7 +121,7 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven_stabilized
-  [../]
+  []
   [ad_stabilized_energy_steady]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized_with_temp.i'

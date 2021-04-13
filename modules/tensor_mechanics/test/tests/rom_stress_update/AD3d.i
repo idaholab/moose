@@ -11,79 +11,79 @@
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = 900.0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'vonmises_stress'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
-  [./pressure_x]
+  []
+  [pressure_x]
     type = ADPressure
     variable = disp_x
     component = 0
     boundary = right
     constant = 1.0e5
-  [../]
-  [./pressure_y]
+  []
+  [pressure_y]
     type = ADPressure
     variable = disp_y
     component = 1
     boundary = top
     constant = -1.0e5
-  [../]
-  [./pressure_z]
+  []
+  [pressure_z]
     type = ADPressure
     variable = disp_z
     component = 2
     boundary = front
     constant = -1.0e5
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 3.30e11
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
-  [../]
-  [./rom_stress_prediction]
+  []
+  [rom_stress_prediction]
     type = ADSS316HLAROMANCEStressUpdateTest
     temperature = temperature
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,22 +99,22 @@
 []
 
 [Postprocessors]
-  [./effective_strain_avg]
+  [effective_strain_avg]
     type = ElementAverageValue
     variable = effective_creep_strain
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementAverageValue
     variable = temperature
-  [../]
-  [./cell_dislocations]
+  []
+  [cell_dislocations]
     type = ElementAverageValue
     variable = cell_dislocations
-  [../]
-  [./wall_disloactions]
+  []
+  [wall_disloactions]
     type = ElementAverageValue
     variable = wall_dislocations
-  [../]
+  []
 []
 
 [Outputs]

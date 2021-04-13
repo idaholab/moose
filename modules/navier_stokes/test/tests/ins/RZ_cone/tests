@@ -1,35 +1,35 @@
 [Tests]
   design = 'navier_stokes/index.md'
-  [./RZ_cone_no_parts]
+  [RZ_cone_no_parts]
     type = 'Exodiff'
     input = 'RZ_cone_no_parts.i'
     exodiff = 'RZ_cone_no_parts_out.e'
     issues = '#7651'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system while not integrating the pressure term by parts.'
-  [../]
-  [./RZ_cone_by_parts]
+  []
+  [RZ_cone_by_parts]
     type = 'Exodiff'
     input = 'RZ_cone_by_parts.i'
     exodiff = 'RZ_cone_by_parts_out.e'
     issues = '#7651'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system while integrating the pressure term by parts.'
-  [../]
-  [./high_re]
+  []
+  [high_re]
     type = 'Exodiff'
     input = 'RZ_cone_high_reynolds.i'
     exodiff = 'steady_linear.e'
     cli_args = 'Outputs/out/file_base=steady_linear'
     issues = '#7651'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations for a high Reynolds number in an RZ coordinate system.'
-  [../]
-  [./jac]
+  []
+  [jac]
     type = 'PetscJacobianTester'
     input = 'RZ_cone_stab_jac_test.i'
     ratio_tol = 1e-7
     difference_tol = 1e-5
     issues = '#7651'
     requirement = 'The system shall be able to compute an accurate Jacobian for the incompressible Navier-Stokes equations in an RZ coordinate system.'
-  [../]
+  []
   [ad_rz_cone_by_parts]
     type = 'Exodiff'
     input = 'ad_rz_cone_by_parts.i'
@@ -174,7 +174,7 @@
     run_sim = True
     issues = '#14901'
     requirement = 'The system shall compute an accurate Jacobian using automatic differentiation when solving the incompressible Navier Stokes equations in an axisymmetric coordinate system with SUPG and PSPG stabilization'
-  [../]
+  []
   [ad_rz_cone_by_parts_traction_steady_supg_pspg]
     type = 'Exodiff'
     input = 'ad_rz_cone_by_parts_traction_steady_stabilized.i'

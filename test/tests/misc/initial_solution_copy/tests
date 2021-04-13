@@ -1,5 +1,5 @@
 [Tests]
-  [./equal_solutions]
+  [equal_solutions]
     type = 'RunException'
     input = 'solutions_equal.i'
     expect_err = "Solutions are equal"
@@ -7,5 +7,5 @@
     requirement = 'The system shall verify equality among the current, old, and older solution vectors prior to running the simulation.'
     issues = '#1396'
     design = 'syntax/ICs/index.md'
-  [../]
+  []
 []

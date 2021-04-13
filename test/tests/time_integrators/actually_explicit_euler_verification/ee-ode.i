@@ -11,31 +11,31 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = SCALAR
     order = FIRST
     initial_condition = 0
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./time]
+  [time]
     type = ODETimeDerivative
     variable = u
-  [../]
-  [./source]
+  []
+  [source]
     type = ParsedODEKernel
     variable = u
     function = -2
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
-  [../]
+  []
   dt = 1
   num_steps = 5
 []

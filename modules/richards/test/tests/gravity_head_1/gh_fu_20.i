@@ -19,80 +19,80 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     y = '1 10 100 1000 10000'
     x = '0 10 100 1000 10000'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1.0E3
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.3
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./SUPGnone]
+  []
+  [SUPGnone]
     type = RichardsSUPGnone
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
     initial_condition = -1.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFullyUpwindFlux
     variable = pressure
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = SeffVG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
@@ -100,17 +100,17 @@
     viscosity = 1E-3
     gravity = '-1 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -119,10 +119,10 @@
   dt = 1E0
   end_time = 1E5
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]

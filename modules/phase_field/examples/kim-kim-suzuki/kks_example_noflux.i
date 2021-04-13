@@ -18,189 +18,189 @@
 []
 
 [AuxVariables]
-  [./Fglobal]
+  [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # order parameter
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # solute concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # chemical potential
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # Liquid phase solute concentration
-  [./cl]
+  [cl]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
   # Solid phase solute concentration
-  [./cs]
+  [cs]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.9
-  [../]
+  []
 []
 
 [Functions]
-  [./ic_func_eta]
+  [ic_func_eta]
     type = ParsedFunction
     value = '0.5*(1.0-tanh((x)/sqrt(2.0)))'
-  [../]
-  [./ic_func_c]
+  []
+  [ic_func_c]
     type = ParsedFunction
     value = '0.9*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
-  [../]
+  []
 []
 
 
 [ICs]
-  [./eta]
+  [eta]
     variable = eta
     type = FunctionIC
     function = ic_func_eta
-  [../]
-  [./c]
+  []
+  [c]
     variable = c
     type = FunctionIC
     function = ic_func_c
-  [../]
+  []
 []
 
 [Materials]
   # Free energy of the liquid
-  [./fl]
+  [fl]
     type = DerivativeParsedMaterial
     f_name = fl
     args = 'cl'
     function = '(0.1-cl)^2'
-  [../]
+  []
 
   # Free energy of the solid
-  [./fs]
+  [fs]
     type = DerivativeParsedMaterial
     f_name = fs
     args = 'cs'
     function = '(0.9-cs)^2'
-  [../]
+  []
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
-  [../]
+  []
 
   # g(eta)
-  [./g_eta]
+  [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names  = 'M   L   eps_sq'
     prop_values = '0.7 0.7 1.0  '
-  [../]
+  []
 []
 
 [Kernels]
   active = 'PhaseConc ChemPotSolute CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
 
   # enforce c = (1-h(eta))*cl + h(eta)*cs
-  [./PhaseConc]
+  [PhaseConc]
     type = KKSPhaseConcentration
     ca       = cl
     variable = cs
     c        = c
     eta      = eta
-  [../]
+  []
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotSolute]
+  [ChemPotSolute]
     type = KKSPhaseChemicalPotential
     variable = cl
     cb       = cs
     fa_name  = fl
     fb_name  = fs
-  [../]
+  []
 
   #
   # Cahn-Hilliard Equation
   #
-  [./CHBulk]
+  [CHBulk]
     type = KKSSplitCHCRes
     variable = c
     ca       = cl
     fa_name  = fl
     w        = w
-  [../]
+  []
 
-  [./dcdt]
+  [dcdt]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./ckernel]
+  []
+  [ckernel]
     type = SplitCHWRes
     mob_name = M
     variable = w
-  [../]
+  []
 
   #
   # Allen-Cahn Equation
   #
-  [./ACBulkF]
+  [ACBulkF]
     type = KKSACBulkF
     variable = eta
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
     args = 'cl cs'
-  [../]
-  [./ACBulkC]
+  []
+  [ACBulkC]
     type = KKSACBulkC
     variable = eta
     ca       = cl
     cb       = cs
     fa_name  = fl
-  [../]
-  [./ACInterface]
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = eps_sq
-  [../]
-  [./detadt]
+  []
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./GlobalFreeEnergy]
+  [GlobalFreeEnergy]
     variable = Fglobal
     type = KKSGlobalFreeEnergy
     fa_name = fl
     fb_name = fs
     w = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -221,15 +221,15 @@
 # Precondition using handcoded off-diagonal terms
 #
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 
 [VectorPostprocessors]
-  [./c]
+  [c]
     type =  LineValueSampler
     start_point = '-25 0 0'
     end_point = '25 0 0'
@@ -237,8 +237,8 @@
     num_points = 151
     sort_by =  id
     execute_on = timestep_end
-  [../]
-  [./eta]
+  []
+  [eta]
     type =  LineValueSampler
     start_point = '-25 0 0'
     end_point = '25 0 0'
@@ -246,14 +246,14 @@
     num_points = 151
     sort_by =  id
     execute_on = timestep_end
-  [../]
+  []
 
 []
 
 [Outputs]
   exodus = true
-  [./csv]
+  [csv]
     type = CSV
     execute_on = final
-  [../]
+  []
 []

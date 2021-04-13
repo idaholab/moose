@@ -51,156 +51,156 @@
 []
 
 [Postprocessors]
-  [./disp_y_top]
+  [disp_y_top]
     type = PointValue
     point = '0.5 1 0.1'
     variable = disp_y
-  [../]
-  [./wc_z_top]
+  []
+  [wc_z_top]
     type = PointValue
     point = '0.5 1 0.1'
     variable = wc_z
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
-  [./wc_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
+  [wc_z]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./z_couple]
+  []
+  [z_couple]
     type = StressDivergenceTensors
     variable = wc_z
     displacements = 'wc_x wc_y wc_z'
     component = 2
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
-  [./z_moment]
+  []
+  [z_moment]
     type = MomentBalancing
     variable = wc_z
     component = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./y_bottom]
+  [y_bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
 
-  [./x_line]
+  [x_line]
     type = DirichletBC
     variable = disp_z
     boundary = 101
     value = 0
-  [../]
-  [./z_line]
+  []
+  [z_line]
     type = DirichletBC
     variable = disp_x
     boundary = 102
     value = 0
-  [../]
+  []
 
-  [./wc_x_bottom]
+  [wc_x_bottom]
     type = DirichletBC
     variable = wc_x
     boundary = bottom
     value = 0
-  [../]
-  [./wc_y_bottom]
+  []
+  [wc_y_bottom]
     type = DirichletBC
     variable = wc_y
     boundary = bottom
     value = 0
-  [../]
-  [./wc_z_bottom]
+  []
+  [wc_z_bottom]
     type = DirichletBC
     variable = wc_z
     boundary = bottom
     value = 0
-  [../]
-  [./top_force]
+  []
+  [top_force]
     type = NeumannBC
     variable = disp_y
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeCosseratElasticityTensor
     B_ijkl = 0.5
     E_ijkl = '1 2 1.3333'
     fill_method = 'general_isotropic'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeCosseratLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 10 1E-15 1E-10'
-  [../]
+  []
 []
 
 [Executioner]

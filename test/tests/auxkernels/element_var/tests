@@ -1,10 +1,10 @@
 [Tests]
   design = 'syntax/AuxKernels/index.md'
   issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83 #238'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'element_var_test.i'
     exodiff = 'out.e'
     requirement = "MOOSE shall support the computation of a single value per element within the auxiliary system."
-  [../]
+  []
 []

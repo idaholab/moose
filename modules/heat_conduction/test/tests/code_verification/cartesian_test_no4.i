@@ -9,63 +9,63 @@
 # A. Toptan, et al. (Mar.2020). Tech. rep. CASL-U-2020-1939-000, SAND2020-3887 R. DOI:10.2172/1614683.
 
 [Mesh]
-  [./geom]
+  [geom]
     type = GeneratedMeshGenerator
     dim = 1
     elem_type = EDGE2
     nx = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
-  [./exact]
+  [exact]
     type = ParsedFunction
     vars = 'q q0 k L uf h'
     vals = '1200 200 1 1 100 10.0'
     value = 'uf + (q0 + L * q)/h + 0.5 * ( 2 * q0 + q * (L + x)) * (L-x) / k'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = u
-  [../]
-  [./heatsource]
+  []
+  [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./ui]
+  [ui]
     type = NeumannBC
     boundary = left
     variable = u
     value = 200
-  [../]
-  [./uo]
+  []
+  [uo]
     type = CoupledConvectiveHeatFluxBC
     boundary = right
     variable = u
     htc = 10.0
     T_infinity = 100
-  [../]
+  []
 []
 
 [Materials]
-  [./property]
+  [property]
     type = GenericConstantMaterial
     prop_names = 'density specific_heat thermal_conductivity'
     prop_values = '1.0 1.0 1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,12 +73,12 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
-  [./h]
+  []
+  [h]
     type = AverageElementSize
   []
 []

@@ -12,51 +12,51 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./block1]
+  [block1]
     strain = SMALL
     add_variables = true
     generate_output = 'stress_xx vonmises_stress' #automatically creates the auxvariables and auxkernels
                                                   #needed to output these stress quanities
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0035
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

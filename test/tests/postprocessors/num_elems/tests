@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'num_elems.i'
     csvdiff = 'num_elems_out.csv'
@@ -8,9 +8,9 @@
                    (active or total) in the simulation.'
     design = '/NumElems.md'
     issues = '#2094 #8421'
-  [../]
+  []
 
-  [./test_split]
+  [test_split]
     type = 'CSVDiff'
     input = 'num_elems.i'
     cli_args = '--use-split --split-file generated.cpr Outputs/file_base=num_elems_split_out'
@@ -24,5 +24,5 @@
                    (active or total) in the simulation when using distributed (pre-split) mesh.'
     design = '/NumElems.md'
     issues = '#2094 #8421'
-  [../]
+  []
 []

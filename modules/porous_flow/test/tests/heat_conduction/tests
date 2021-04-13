@@ -1,5 +1,5 @@
 [Tests]
-  [./no_fluid]
+  [no_fluid]
     type = 'CSVDiff'
     input = 'no_fluid.i'
     csvdiff = 'no_fluid.csv'
@@ -8,8 +8,8 @@
     requirement = 'PorousFlow shall be able to simulate heat conduction in a fluid-free environment'
     design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
     issues = '#13155'
-  [../]
-  [./two_phase]
+  []
+  [two_phase]
     type = 'CSVDiff'
     input = 'two_phase.i'
     csvdiff = 'two_phase.csv'
@@ -18,5 +18,5 @@
     requirement = 'PorousFlow shall be able to simulate heat conduction for systems containing multi-phase fluids'
     design = 'porous_flow/tests/heat_conduction/heat_conduction_tests.md'
     issues = '#13155'
-  [../]
+  []
 []

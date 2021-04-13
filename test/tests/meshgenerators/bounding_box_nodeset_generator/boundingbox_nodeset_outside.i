@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -7,7 +7,7 @@
     parallel_type = replicated
   []
 
-  [./nodeset]
+  [nodeset]
     type = BoundingBoxNodeSetGenerator
     input = gmg
     new_boundary = middle_node

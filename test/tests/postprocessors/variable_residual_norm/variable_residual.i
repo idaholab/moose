@@ -11,69 +11,69 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Functions]
-  [./leg1]
+  [leg1]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 
-  [./leg2]
+  [leg2]
     type = ParsedFunction
     value = '0.5*(3.0*x*x-1.0)'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 2
     value = 1
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     preset = false
     boundary = 1
     value = 200
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     preset = false
     boundary = 2
     value = 100
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,22 +87,22 @@
 []
 
 [Postprocessors]
-  [./u_res_l2]
+  [u_res_l2]
     type = VariableResidual
     variable = u
-  [../]
+  []
 
-  [./v_res_l2]
+  [v_res_l2]
     type = VariableResidual
     variable = v
-  [../]
+  []
 []
 
 [Outputs]
   csv = true
-  [./console]
+  [console]
     type = Console
     # turn this on, so we can visually compare the postprocessor value with what is computed by the Console object
     all_variable_norms = true
-  [../]
+  []
 []

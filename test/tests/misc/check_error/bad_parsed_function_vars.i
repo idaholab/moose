@@ -7,41 +7,41 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./sin_func]
+  [sin_func]
     type = ParsedFunction
     value = sin(y)
     vars = y        # <- This is a bad - you can't specify x, y, z, or t
     vals = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffused]
+  [diffused]
     type = Diffusion
     variable = u
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = sin_func
-  [../]
+  []
 []
 
 [Executioner]

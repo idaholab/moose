@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6848'
   design = 'ComputeThermalExpansionEigenstrain.md'
-  [./thermal_strain_test]
+  [thermal_strain_test]
     type = 'Exodiff'
     input = 'thermal_strain.i'
     exodiff = 'thermal_strain_out.e'
@@ -9,5 +9,5 @@
     scale_refine = 1
     max_parallel = 1
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
-  [../]
+  []
 []

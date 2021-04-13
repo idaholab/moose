@@ -22,59 +22,59 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mat]
+  [mat]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mat]
+  [mat]
     type = MaterialRealAux
     variable = mat
     property = matp
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = MTBC
     variable = u
     boundary = 1
     grad = 8
     prop_name = matp
-  [../]
+  []
 []
 
 # Materials System
 [Materials]
-  [./mat]
+  [mat]
     type = MTMaterial
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,8 +85,8 @@
 
 [Outputs]
   file_base = out
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

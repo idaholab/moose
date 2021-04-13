@@ -19,20 +19,20 @@ num_steps=2
 []
 
 [Bounds]
-  [./u_upper_bounds]
+  [u_upper_bounds]
     type = ConstantBoundsAux
     variable = bounds
     bounded_variable = u
     bound_type = upper
     bound_value = ${l}
-  [../]
-  [./u_lower_bounds]
+  []
+  [u_lower_bounds]
     type = ConstantBoundsAux
     variable = bounds
     bounded_variable = u
     bound_type = lower
     bound_value = 0
-  [../]
+  []
 []
 
 [ICs]
@@ -133,22 +133,22 @@ num_steps=2
 []
 
 [MultiApps]
-  [./coarse]
+  [coarse]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = vi-coarse.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./mesh_function_begin]
+  [mesh_function_begin]
     type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     multi_app = coarse
     source_variable = u
     variable = u
     execute_on = timestep_begin
-  [../]
+  []
 []

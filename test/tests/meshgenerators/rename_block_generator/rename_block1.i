@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 2
@@ -13,7 +13,7 @@
     zmax = 1
   []
 
-  [./subdomain0]
+  [subdomain0]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
@@ -21,42 +21,42 @@
     top_right = '0 0 0'
   []
 
-  [./re_id]
+  [re_id]
     type = RenameBlockGenerator
     input = subdomain0
     old_block_id = '0 1'
     new_block_id = '2 3'
   []
 
-  [./rename_no_effect]
+  [rename_no_effect]
     type = RenameBlockGenerator
     input = re_id
     old_block_id = '5 0 1'
     new_block_name = 'five zero one'
   []
 
-  [./rename]
+  [rename]
     type = RenameBlockGenerator
     input = rename_no_effect
     old_block_id = '2'
     new_block_name = 'two_was_zero'
   []
 
-  [./rename_block2]
+  [rename_block2]
     type = RenameBlockGenerator
     input = rename
     old_block_name = 'two_was_zero'
     new_block_name = 'simply_two'
   []
 
-  [./rename_blockID3]
+  [rename_blockID3]
     type = RenameBlockGenerator
     input = rename_block2
     old_block_id = '3'
     new_block_name = 'three'
   []
 
-  [./three_to_4]
+  [three_to_4]
     type = RenameBlockGenerator
     input = rename_blockID3
     old_block_name = 'three'
@@ -65,30 +65,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

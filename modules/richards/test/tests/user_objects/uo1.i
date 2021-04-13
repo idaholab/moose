@@ -8,669 +8,669 @@
 # and finally add a NodalL2Error that compares this with the Function.
 
 [UserObjects]
-  [./RelPermPower]
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./RelPermPower5]
+  []
+  [RelPermPower5]
     type = RichardsRelPermPower
     simm = 0.0
     n = 5
-  [../]
-  [./RelPermVG]
+  []
+  [RelPermVG]
     type = RichardsRelPermVG
     simm = 0.0
     m = 0.8
-  [../]
-  [./RelPermVG1]
+  []
+  [RelPermVG1]
     type = RichardsRelPermVG1
     simm = 0.0
     m = 0.8
     scut = 1E-6 # then we get a cubic
-  [../]
-  [./RelPermBW]
+  []
+  [RelPermBW]
     type = RichardsRelPermBW
     Sn = 0.05
     Ss = 0.95
     Kn = 0.0
     Ks = 1.0
     C = 1.5
-  [../]
-  [./RelPermMonomial]
+  []
+  [RelPermMonomial]
     type = RichardsRelPermMonomial
     simm = 0.0
     n = 3
-  [../]
-  [./RelPermPowerGas]
+  []
+  [RelPermPowerGas]
     type = RichardsRelPermPowerGas
     simm = 0.0
     n = 5
-  [../]
-  [./Q2PRelPermPowerGas]
+  []
+  [Q2PRelPermPowerGas]
     type = Q2PRelPermPowerGas
     simm = 0.0
     n = 5
-  [../]
-  [./RelPermMonomial_zero]
+  []
+  [RelPermMonomial_zero]
     type = RichardsRelPermMonomial
     simm = 0.1
     n = 0
     zero_to_the_zero = 0
-  [../]
+  []
 
   # following are unimportant in this test
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E6
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-6
-  [../]
-  [./RelPermPower_unimportant]
+  []
+  [RelPermPower_unimportant]
     type = RichardsRelPermPower
     simm = 0.10101
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.054321
     sum_s_res = 0.054321
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1E5
-  [../]
+  []
 []
 
 [Functions]
-  [./initial_pressure]
+  [initial_pressure]
     type = ParsedFunction
     value = x
-  [../]
+  []
 
-  [./answer_RelPermPower]
+  [answer_RelPermPower]
     type = ParsedFunction
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '2'
-  [../]
-  [./answer_dRelPermPower]
+  []
+  [answer_dRelPermPower]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '2'
-  [../]
-  [./answer_d2RelPermPower]
+  []
+  [answer_d2RelPermPower]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '2'
-  [../]
+  []
 
-  [./answer_RelPermPower5]
+  [answer_RelPermPower5]
     type = ParsedFunction
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_dRelPermPower5]
+  []
+  [answer_dRelPermPower5]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_d2RelPermPower5]
+  []
+  [answer_d2RelPermPower5]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = ((n+1)*(x^n))-(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
+  []
 
-  [./answer_RelPermVG]
+  [answer_RelPermVG]
     type = ParsedFunction
     value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
     vars = 'm'
     vals = '0.8'
-  [../]
-  [./answer_dRelPermVG]
+  []
+  [answer_dRelPermVG]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
     vars = 'm'
     vals = '0.8'
-  [../]
-  [./answer_d2RelPermVG]
+  []
+  [answer_d2RelPermVG]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
     vars = 'm'
     vals = '0.8'
-  [../]
+  []
 
-  [./answer_RelPermVG1]
+  [answer_RelPermVG1]
     type = ParsedFunction
     value = x^3
-  [../]
-  [./answer_dRelPermVG1]
+  []
+  [answer_dRelPermVG1]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = x^3
-  [../]
-  [./answer_d2RelPermVG1]
+  []
+  [answer_d2RelPermVG1]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = x^3
-  [../]
+  []
 
-  [./answer_RelPermBW]
+  [answer_RelPermBW]
     type = ParsedFunction
     value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
     vars = 'kn ks c sn ss'
     vals = '0 1 1.5 0.05 0.95'
-  [../]
-  [./answer_dRelPermBW]
+  []
+  [answer_dRelPermBW]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
     vars = 'kn ks c sn ss'
     vals = '0 1 1.5 0.05 0.95'
-  [../]
-  [./answer_d2RelPermBW]
+  []
+  [answer_d2RelPermBW]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
     vars = 'kn ks c sn ss'
     vals = '0 1 1.5 0.05 0.95'
-  [../]
+  []
 
-  [./answer_RelPermMonomial]
+  [answer_RelPermMonomial]
     type = ParsedFunction
     value = x^n
     vars = 'n'
     vals = '3'
-  [../]
-  [./answer_dRelPermMonomial]
+  []
+  [answer_dRelPermMonomial]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = x^n
     vars = 'n'
     vals = '3'
-  [../]
-  [./answer_d2RelPermMonomial]
+  []
+  [answer_d2RelPermMonomial]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
     value = x^n
     vars = 'n'
     vals = '3'
-  [../]
+  []
 
-  [./answer_RelPermMonomial_zero]
+  [answer_RelPermMonomial_zero]
     type = ParsedFunction
     value = if(x>simm,1,0)
     vars = 'simm'
     vals = '0.1'
-  [../]
-  [./answer_dRelPermMonomial_zero]
+  []
+  [answer_dRelPermMonomial_zero]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = if(x>simm,1,0)
     vars = 'simm'
     vals = '0.1'
-  [../]
-  [./answer_d2RelPermMonomial_zero]
+  []
+  [answer_d2RelPermMonomial_zero]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
     value = if(x>simm,1,0)
     vars = 'simm'
     vals = '0.1'
-  [../]
+  []
 
-  [./answer_RelPermPowerGas]
+  [answer_RelPermPowerGas]
     type = ParsedFunction
     value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_dRelPermPowerGas]
+  []
+  [answer_dRelPermPowerGas]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_d2RelPermPowerGas]
+  []
+  [answer_d2RelPermPowerGas]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
+  []
 
-  [./answer_Q2PRelPermPowerGas]
+  [answer_Q2PRelPermPowerGas]
     type = ParsedFunction
     value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_dQ2PRelPermPowerGas]
+  []
+  [answer_dQ2PRelPermPowerGas]
     type = GradParsedFunction
     direction = '1E-4 0 0'
     value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
-  [./answer_d2Q2PRelPermPowerGas]
+  []
+  [answer_d2Q2PRelPermPowerGas]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./RelPermPower_Aux]
-  [../]
-  [./dRelPermPower_Aux]
-  [../]
-  [./d2RelPermPower_Aux]
-  [../]
+  [RelPermPower_Aux]
+  []
+  [dRelPermPower_Aux]
+  []
+  [d2RelPermPower_Aux]
+  []
 
-  [./RelPermPower5_Aux]
-  [../]
-  [./dRelPermPower5_Aux]
-  [../]
-  [./d2RelPermPower5_Aux]
-  [../]
+  [RelPermPower5_Aux]
+  []
+  [dRelPermPower5_Aux]
+  []
+  [d2RelPermPower5_Aux]
+  []
 
-  [./RelPermVG_Aux]
-  [../]
-  [./dRelPermVG_Aux]
-  [../]
-  [./d2RelPermVG_Aux]
-  [../]
+  [RelPermVG_Aux]
+  []
+  [dRelPermVG_Aux]
+  []
+  [d2RelPermVG_Aux]
+  []
 
-  [./RelPermVG1_Aux]
-  [../]
-  [./dRelPermVG1_Aux]
-  [../]
-  [./d2RelPermVG1_Aux]
-  [../]
+  [RelPermVG1_Aux]
+  []
+  [dRelPermVG1_Aux]
+  []
+  [d2RelPermVG1_Aux]
+  []
 
-  [./RelPermBW_Aux]
-  [../]
-  [./dRelPermBW_Aux]
-  [../]
-  [./d2RelPermBW_Aux]
-  [../]
+  [RelPermBW_Aux]
+  []
+  [dRelPermBW_Aux]
+  []
+  [d2RelPermBW_Aux]
+  []
 
-  [./RelPermMonomial_Aux]
-  [../]
-  [./dRelPermMonomial_Aux]
-  [../]
-  [./d2RelPermMonomial_Aux]
-  [../]
+  [RelPermMonomial_Aux]
+  []
+  [dRelPermMonomial_Aux]
+  []
+  [d2RelPermMonomial_Aux]
+  []
 
-  [./RelPermPowerGas_Aux]
-  [../]
-  [./dRelPermPowerGas_Aux]
-  [../]
-  [./d2RelPermPowerGas_Aux]
-  [../]
+  [RelPermPowerGas_Aux]
+  []
+  [dRelPermPowerGas_Aux]
+  []
+  [d2RelPermPowerGas_Aux]
+  []
 
-  [./Q2PRelPermPowerGas_Aux]
-  [../]
-  [./dQ2PRelPermPowerGas_Aux]
-  [../]
-  [./d2Q2PRelPermPowerGas_Aux]
-  [../]
+  [Q2PRelPermPowerGas_Aux]
+  []
+  [dQ2PRelPermPowerGas_Aux]
+  []
+  [d2Q2PRelPermPowerGas_Aux]
+  []
 
-  [./RelPermMonomial_zero_Aux]
-  [../]
-  [./dRelPermMonomial_zero_Aux]
-  [../]
-  [./d2RelPermMonomial_zero_Aux]
-  [../]
+  [RelPermMonomial_zero_Aux]
+  []
+  [dRelPermMonomial_zero_Aux]
+  []
+  [d2RelPermMonomial_zero_Aux]
+  []
 
-  [./check_Aux]
-  [../]
+  [check_Aux]
+  []
 []
 
 [AuxKernels]
-  [./RelPermPower_AuxK]
+  [RelPermPower_AuxK]
     type = RichardsRelPermAux
     variable = RelPermPower_Aux
     relperm_UO = RelPermPower
     seff_var = pressure
-  [../]
-  [./dRelPermPower_AuxK]
+  []
+  [dRelPermPower_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermPower_Aux
     relperm_UO = RelPermPower
     seff_var = pressure
-  [../]
-  [./d2RelPermPower_AuxK]
+  []
+  [d2RelPermPower_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermPower_Aux
     relperm_UO = RelPermPower
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermPower5_AuxK]
+  [RelPermPower5_AuxK]
     type = RichardsRelPermAux
     variable = RelPermPower5_Aux
     relperm_UO = RelPermPower5
     seff_var = pressure
-  [../]
-  [./dRelPermPower5_AuxK]
+  []
+  [dRelPermPower5_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermPower5_Aux
     relperm_UO = RelPermPower5
     seff_var = pressure
-  [../]
-  [./d2RelPermPower5_AuxK]
+  []
+  [d2RelPermPower5_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermPower5_Aux
     relperm_UO = RelPermPower5
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermVG_AuxK]
+  [RelPermVG_AuxK]
     type = RichardsRelPermAux
     variable = RelPermVG_Aux
     relperm_UO = RelPermVG
     seff_var = pressure
-  [../]
-  [./dRelPermVG_AuxK]
+  []
+  [dRelPermVG_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermVG_Aux
     relperm_UO = RelPermVG
     seff_var = pressure
-  [../]
-  [./d2RelPermVG_AuxK]
+  []
+  [d2RelPermVG_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermVG_Aux
     relperm_UO = RelPermVG
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermVG1_AuxK]
+  [RelPermVG1_AuxK]
     type = RichardsRelPermAux
     variable = RelPermVG1_Aux
     relperm_UO = RelPermVG1
     seff_var = pressure
-  [../]
-  [./dRelPermVG1_AuxK]
+  []
+  [dRelPermVG1_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermVG1_Aux
     relperm_UO = RelPermVG1
     seff_var = pressure
-  [../]
-  [./d2RelPermVG1_AuxK]
+  []
+  [d2RelPermVG1_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermVG1_Aux
     relperm_UO = RelPermVG1
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermBW_AuxK]
+  [RelPermBW_AuxK]
     type = RichardsRelPermAux
     variable = RelPermBW_Aux
     relperm_UO = RelPermBW
     seff_var = pressure
-  [../]
-  [./dRelPermBW_AuxK]
+  []
+  [dRelPermBW_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermBW_Aux
     relperm_UO = RelPermBW
     seff_var = pressure
-  [../]
-  [./d2RelPermBW_AuxK]
+  []
+  [d2RelPermBW_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermBW_Aux
     relperm_UO = RelPermBW
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermMonomial_AuxK]
+  [RelPermMonomial_AuxK]
     type = RichardsRelPermAux
     variable = RelPermMonomial_Aux
     relperm_UO = RelPermMonomial
     seff_var = pressure
-  [../]
-  [./dRelPermMonomial_AuxK]
+  []
+  [dRelPermMonomial_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermMonomial_Aux
     relperm_UO = RelPermMonomial
     seff_var = pressure
-  [../]
-  [./d2RelPermMonomial_AuxK]
+  []
+  [d2RelPermMonomial_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermMonomial_Aux
     relperm_UO = RelPermMonomial
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermPowerGas_AuxK]
+  [RelPermPowerGas_AuxK]
     type = RichardsRelPermAux
     variable = RelPermPowerGas_Aux
     relperm_UO = RelPermPowerGas
     seff_var = pressure
-  [../]
-  [./dRelPermPowerGas_AuxK]
+  []
+  [dRelPermPowerGas_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermPowerGas_Aux
     relperm_UO = RelPermPowerGas
     seff_var = pressure
-  [../]
-  [./d2RelPermPowerGas_AuxK]
+  []
+  [d2RelPermPowerGas_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermPowerGas_Aux
     relperm_UO = RelPermPowerGas
     seff_var = pressure
-  [../]
+  []
 
-  [./Q2PRelPermPowerGas_AuxK]
+  [Q2PRelPermPowerGas_AuxK]
     type = RichardsRelPermAux
     variable = Q2PRelPermPowerGas_Aux
     relperm_UO = Q2PRelPermPowerGas
     seff_var = pressure
-  [../]
-  [./dQ2PRelPermPowerGas_AuxK]
+  []
+  [dQ2PRelPermPowerGas_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dQ2PRelPermPowerGas_Aux
     relperm_UO = Q2PRelPermPowerGas
     seff_var = pressure
-  [../]
-  [./d2Q2PRelPermPowerGas_AuxK]
+  []
+  [d2Q2PRelPermPowerGas_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2Q2PRelPermPowerGas_Aux
     relperm_UO = Q2PRelPermPowerGas
     seff_var = pressure
-  [../]
+  []
 
-  [./RelPermMonomial_zero_AuxK]
+  [RelPermMonomial_zero_AuxK]
     type = RichardsRelPermAux
     variable = RelPermMonomial_zero_Aux
     relperm_UO = RelPermMonomial_zero
     seff_var = pressure
-  [../]
-  [./dRelPermMonomial_zero_AuxK]
+  []
+  [dRelPermMonomial_zero_AuxK]
     type = RichardsRelPermPrimeAux
     variable = dRelPermMonomial_zero_Aux
     relperm_UO = RelPermMonomial_zero
     seff_var = pressure
-  [../]
-  [./d2RelPermMonomial_zero_AuxK]
+  []
+  [d2RelPermMonomial_zero_AuxK]
     type = RichardsRelPermPrimePrimeAux
     variable = d2RelPermMonomial_zero_Aux
     relperm_UO = RelPermMonomial_zero
     seff_var = pressure
-  [../]
+  []
 
-  [./check_AuxK]
+  [check_AuxK]
     type = FunctionAux
     variable = check_Aux
     function = answer_RelPermBW
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cf_RelPermPower]
+  [cf_RelPermPower]
     type = NodalL2Error
     function = answer_RelPermPower
     variable = RelPermPower_Aux
-  [../]
-  [./cf_dRelPermPower]
+  []
+  [cf_dRelPermPower]
     type = NodalL2Error
     function = answer_dRelPermPower
     variable = dRelPermPower_Aux
-  [../]
-  [./cf_d2RelPermPower]
+  []
+  [cf_d2RelPermPower]
     type = NodalL2Error
     function = answer_d2RelPermPower
     variable = d2RelPermPower_Aux
-  [../]
+  []
 
-  [./cf_RelPermPower5]
+  [cf_RelPermPower5]
     type = NodalL2Error
     function = answer_RelPermPower5
     variable = RelPermPower5_Aux
-  [../]
-  [./cf_dRelPermPower5]
+  []
+  [cf_dRelPermPower5]
     type = NodalL2Error
     function = answer_dRelPermPower5
     variable = dRelPermPower5_Aux
-  [../]
-  [./cf_d2RelPermPower5]
+  []
+  [cf_d2RelPermPower5]
     type = NodalL2Error
     function = answer_d2RelPermPower5
     variable = d2RelPermPower5_Aux
-  [../]
+  []
 
-  [./cf_RelPermVG]
+  [cf_RelPermVG]
     type = NodalL2Error
     function = answer_RelPermVG
     variable = RelPermVG_Aux
-  [../]
-  [./cf_dRelPermVG]
+  []
+  [cf_dRelPermVG]
     type = NodalL2Error
     function = answer_dRelPermVG
     variable = dRelPermVG_Aux
-  [../]
-  [./cf_d2RelPermVG]
+  []
+  [cf_d2RelPermVG]
     type = NodalL2Error
     function = answer_d2RelPermVG
     variable = d2RelPermVG_Aux
-  [../]
+  []
 
-  [./cf_RelPermVG1]
+  [cf_RelPermVG1]
     type = NodalL2Error
     function = answer_RelPermVG1
     variable = RelPermVG1_Aux
-  [../]
-  [./cf_dRelPermVG1]
+  []
+  [cf_dRelPermVG1]
     type = NodalL2Error
     function = answer_dRelPermVG1
     variable = dRelPermVG1_Aux
-  [../]
-  [./cf_d2RelPermVG1]
+  []
+  [cf_d2RelPermVG1]
     type = NodalL2Error
     function = answer_d2RelPermVG1
     variable = d2RelPermVG1_Aux
-  [../]
+  []
 
-  [./cf_RelPermBW]
+  [cf_RelPermBW]
     type = NodalL2Error
     function = answer_RelPermBW
     variable = RelPermBW_Aux
-  [../]
-  [./cf_dRelPermBW]
+  []
+  [cf_dRelPermBW]
     type = NodalL2Error
     function = answer_dRelPermBW
     variable = dRelPermBW_Aux
-  [../]
-  [./cf_d2RelPermBW]
+  []
+  [cf_d2RelPermBW]
     type = NodalL2Error
     function = answer_d2RelPermBW
     variable = d2RelPermBW_Aux
-  [../]
+  []
 
-  [./cf_RelPermMonomial]
+  [cf_RelPermMonomial]
     type = NodalL2Error
     function = answer_RelPermMonomial
     variable = RelPermMonomial_Aux
-  [../]
-  [./cf_dRelPermMonomial]
+  []
+  [cf_dRelPermMonomial]
     type = NodalL2Error
     function = answer_dRelPermMonomial
     variable = dRelPermMonomial_Aux
-  [../]
-  [./cf_d2RelPermMonomial]
+  []
+  [cf_d2RelPermMonomial]
     type = NodalL2Error
     function = answer_d2RelPermMonomial
     variable = d2RelPermMonomial_Aux
-  [../]
+  []
 
-  [./cf_RelPermPowerGas]
+  [cf_RelPermPowerGas]
     type = NodalL2Error
     function = answer_RelPermPowerGas
     variable = RelPermPowerGas_Aux
-  [../]
-  [./cf_dRelPermPowerGas]
+  []
+  [cf_dRelPermPowerGas]
     type = NodalL2Error
     function = answer_dRelPermPowerGas
     variable = dRelPermPowerGas_Aux
-  [../]
-  [./cf_d2RelPermPowerGas]
+  []
+  [cf_d2RelPermPowerGas]
     type = NodalL2Error
     function = answer_d2RelPermPowerGas
     variable = d2RelPermPowerGas_Aux
-  [../]
+  []
 
-  [./cf_Q2PRelPermPowerGas]
+  [cf_Q2PRelPermPowerGas]
     type = NodalL2Error
     function = answer_Q2PRelPermPowerGas
     variable = Q2PRelPermPowerGas_Aux
-  [../]
-  [./cf_dQ2PRelPermPowerGas]
+  []
+  [cf_dQ2PRelPermPowerGas]
     type = NodalL2Error
     function = answer_dQ2PRelPermPowerGas
     variable = dQ2PRelPermPowerGas_Aux
-  [../]
-  [./cf_d2Q2PRelPermPowerGas]
+  []
+  [cf_d2Q2PRelPermPowerGas]
     type = NodalL2Error
     function = answer_d2Q2PRelPermPowerGas
     variable = d2Q2PRelPermPowerGas_Aux
-  [../]
+  []
 
-  [./cf_RelPermMonomial_zero]
+  [cf_RelPermMonomial_zero]
     type = NodalL2Error
     function = answer_RelPermMonomial_zero
     variable = RelPermMonomial_zero_Aux
-  [../]
-  [./cf_dRelPermMonomial_zero]
+  []
+  [cf_dRelPermMonomial_zero]
     type = NodalL2Error
     function = answer_dRelPermMonomial_zero
     variable = dRelPermMonomial_zero_Aux
-  [../]
-  [./cf_d2RelPermMonomial_zero]
+  []
+  [cf_d2RelPermMonomial_zero]
     type = NodalL2Error
     function = answer_d2RelPermMonomial_zero
     variable = d2RelPermMonomial_zero_Aux
-  [../]
+  []
 
 []
 
@@ -690,32 +690,32 @@
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = initial_pressure
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     richardsVarNames_UO = PPNames
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     richardsVarNames_UO = PPNames
     variable = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./unimportant_material]
+  [unimportant_material]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
@@ -729,17 +729,17 @@
     viscosity = 1E-3
     gravity = '0 0 -10'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./does_nothing]
+  [does_nothing]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E50 1E50 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -753,11 +753,11 @@
   execute_on = 'timestep_end'
   active = 'csv'
   file_base = uo1
-  [./csv]
+  [csv]
     type = CSV
-    [../]
-  [./exodus]
+    []
+  [exodus]
     type = Exodus
     hide = pressure
-  [../]
+  []
 []

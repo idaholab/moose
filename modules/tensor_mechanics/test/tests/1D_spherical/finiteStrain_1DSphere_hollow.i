@@ -38,62 +38,62 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_rr]
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_rr]
+  [stress_rr]
     type = ElementAverageValue
     variable = stress_rr
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = RankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = stress_rr
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./innerDisp]
+  [innerDisp]
     type = DirichletBC
     boundary = left
     variable = disp_r
     value = 0.0
-  [../]
-  [./outerPressure]
+  []
+  [outerPressure]
     type = Pressure
     boundary = right
     variable = disp_r
     component = 0
     factor = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]

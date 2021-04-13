@@ -9,85 +9,85 @@
 []
 
 [Variables]
-  [./phi]
-  [../]
+  [phi]
+  []
 []
 
 [AuxVariables]
-  [./vx]
-  [../]
+  [vx]
+  []
 
-  [./force]
-  [../]
+  [force]
+  []
 []
 
 [ICs]
-  [./vx]
+  [vx]
     type = FunctionIC
     variable = vx
     function = vx_function
-  [../]
+  []
 
-  [./force]
+  [force]
     type = FunctionIC
     variable = force
     function = forcing
-  [../]
+  []
 []
 
 [Kernels]
-  [./advection]
+  [advection]
     type = MassConvectiveFlux
     variable = phi
     vel_x = vx
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = CoupledForce
     variable = phi
     v = force
-  [../]
+  []
 []
 
 [BCs]
-  [./inflow_enthalpy]
+  [inflow_enthalpy]
     type = DirichletBC
     variable = phi
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./outflow_term]
+  [outflow_term]
     type = AdvectionBC
     variable = phi
     velocity_vector = 'vx'
     boundary = 'right'
-  [../]
+  []
 []
 
 [Functions]
-  [./vx_function]
+  [vx_function]
     type = ParsedFunction
     value = '1 + x * x'
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 
-  [./analytical]
+  [analytical]
     type = ParsedFunction
     value = '(1 + 0.5 * x * x) / (1 + x * x)'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = phi
     function = analytical
-  [../]
+  []
 []
 
 [Executioner]

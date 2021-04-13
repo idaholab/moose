@@ -8,12 +8,12 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = 0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = 0
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -21,67 +21,67 @@
 []
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./fp_yy]
+  []
+  [fp_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./rotout]
+  []
+  [rotout]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./gss1]
+  []
+  [gss1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./euler1]
+  []
+  [euler1]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./euler2]
+  []
+  [euler2]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./euler3]
+  []
+  [euler3]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     value = 0.01*t
-  [../]
+  []
 []
 
 [UserObjects]
-  [./prop_read]
+  [prop_read]
     type = ElementPropertyReadFile
     prop_file_name = 'euler_ang_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
     nprop = 3
     read_type = element
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
@@ -89,8 +89,8 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     type = RankTwoAux
     variable = e_yy
     rank_two_tensor = lage
@@ -98,8 +98,8 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
-  [./fp_yy]
+  []
+  [fp_yy]
     type = RankTwoAux
     variable = fp_yy
     rank_two_tensor = fp
@@ -107,64 +107,64 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
-  [./gss1]
+  []
+  [gss1]
     type = MaterialStdVectorAux
     variable = gss1
     property = gss
     index = 0
     execute_on = timestep_end
     block = 0
-  [../]
-  [./euler1]
+  []
+  [euler1]
     type = MaterialRealVectorValueAux
     variable = euler1
     property = Euler_angles
     component = 0
     execute_on = timestep_end
     block = 0
-  [../]
-  [./euler2]
+  []
+  [euler2]
     type = MaterialRealVectorValueAux
     variable = euler2
     property = Euler_angles
     component = 1
     execute_on = timestep_end
     block = 0
-  [../]
-  [./euler3]
+  []
+  [euler3]
     type = MaterialRealVectorValueAux
     variable = euler3
     property = Euler_angles
     component = 2
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
     gtol = 1e-2
@@ -175,49 +175,49 @@
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y'
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     type = ElementAverageValue
     variable = e_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./fp_yy]
+  []
+  [fp_yy]
     type = ElementAverageValue
     variable = fp_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./gss1]
+  []
+  [gss1]
     type = ElementAverageValue
     variable = gss1
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -245,8 +245,8 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
     use_displaced_mesh = true
-  [../]
+  []
 []

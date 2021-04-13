@@ -8,44 +8,44 @@
 []
 
 [Variables]
-  [./empty]
-  [../]
+  [empty]
+  []
 []
 
 [AuxVariables]
-  [./s]
+  [s]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./m_in]
+  []
+  [m_in]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./null_kernel]
+  [null_kernel]
     type = NullKernel
     variable = empty
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./reconstruct_m_in]
+  [reconstruct_m_in]
     type = FunctionSeriesToAux
     function = FX_Basis_Value_Sub
     variable = m_in
-  [../]
-  [./calculate_s]
+  []
+  [calculate_s]
     type = ParsedAux
     variable = s
     args = m_in
     function = '2*exp(-m_in/0.8)'
-  [../]
+  []
 []
 
 [Functions]
-  [./FX_Basis_Value_Sub]
+  [FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3'
@@ -53,15 +53,15 @@
     x = Legendre
     generation_type = 'sqrt_mu'
     expansion_type = 'sqrt_mu'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Sub]
+  [FX_Value_UserObject_Sub]
     type = FXVolumeUserObject
     function = FX_Basis_Value_Sub
     variable = s
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,67 +11,67 @@
 []
 
 [Functions]
-  [./fn_exact]
+  [fn_exact]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 []
 
 [UserObjects]
-  [./isuo]
+  [isuo]
     type = InsideUserObject
     variable = u
     diffusivity = diffusivity
     execute_on = 'initial timestep_end'
 #    use_old_prop = true # Access a stateful material on an internal side
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = fn_exact
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./value]
+  [value]
     type = InsideValuePPS
     user_object = isuo
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,10 +81,10 @@
 []
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = StatefulMaterial
     block = 0
-  [../]
+  []
 []
 
 [Outputs]

@@ -38,23 +38,23 @@
 
 [Functions]
 
-  [./temp]
+  [temp]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '100 200 200'
-  [../]
+  []
 []
 
 [Modules/HeatConduction/ThermalContact/BC]
-  [./thermal_contact]
+  [thermal_contact]
     type = GapHeatTransfer
     variable = temp
     primary = 3
     secondary = 2
     emissivity_primary = 0
     emissivity_secondary = 0
-  [../]
-  [./awesomium_contact]
+  []
+  [awesomium_contact]
     type = GapHeatTransfer
     variable = awesomium
     primary = 3
@@ -63,101 +63,101 @@
     emissivity_secondary = 0
     gap_conductivity = 10
     appended_property_name = _awesomium
-  [../]
+  []
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
-  [./awesomium]
+  []
+  [awesomium]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./gap_cond]
+  [gap_cond]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./gap_cond_awesomium]
+  []
+  [gap_cond_awesomium]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
-  [./awe]
+  []
+  [awe]
     type = HeatConduction
     variable = awesomium
-  [../]
+  []
 []
 
 
 [BCs]
-  [./temp_far_left]
+  [temp_far_left]
     type = FunctionDirichletBC
     boundary = 1
     variable = temp
     function = temp
-  [../]
-  [./temp_far_right]
+  []
+  [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
-  [./awesomium_far_left]
+  []
+  [awesomium_far_left]
     type = FunctionDirichletBC
     boundary = 1
     variable = awesomium
     function = temp
-  [../]
-  [./awesomium_far_right]
+  []
+  [awesomium_far_right]
     type = DirichletBC
     boundary = 4
     variable = awesomium
     value = 100
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./conductance]
+  [conductance]
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_cond
     boundary = 2
-  [../]
-  [./conductance_awe]
+  []
+  [conductance_awe]
     type = MaterialRealAux
     property = gap_conductance_awesomium
     variable = gap_cond_awesomium
     boundary = 2
-  [../]
+  []
 []
 
 [Materials]
 
-  [./heat1]
+  [heat1]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 100000000.0
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
     prop_values = '1.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -178,65 +178,65 @@
 
 [Postprocessors]
 
-  [./temp_left]
+  [temp_left]
     type = SideAverageValue
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./temp_right]
+  [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./flux_left]
+  [flux_left]
     type = SideFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./flux_right]
+  [flux_right]
     type = SideFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./awe_left]
+  [awe_left]
     type = SideAverageValue
     boundary = 2
     variable = awesomium
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./awe_right]
+  [awe_right]
     type = SideAverageValue
     boundary = 3
     variable = awesomium
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./awe_flux_left]
+  [awe_flux_left]
     type = SideFluxIntegral
     variable = awesomium
     boundary = 2
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./awe_flux_right]
+  [awe_flux_right]
     type = SideFluxIntegral
     variable = awesomium
     boundary = 3
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

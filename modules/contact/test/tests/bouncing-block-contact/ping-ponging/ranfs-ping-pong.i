@@ -10,19 +10,19 @@ offset = 1e-2
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 2
     variable = disp_y
     value = ${fparse starting_point + offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -45,49 +45,49 @@ offset = 1e-2
 []
 
 [Constraints]
-  [./disp_x]
+  [disp_x]
     type = RANFSNormalMechanicalContact
     secondary = 10
     primary = 20
     variable = disp_x
     primary_variable = disp_x
     component = x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RANFSNormalMechanicalContact
     secondary = 10
     primary = 20
     variable = disp_y
     primary_variable = disp_y
     component = y
-  [../]
+  []
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
-  [../]
-  [./leftx]
+  []
+  [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
     function = '1e-2 * t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -117,8 +117,8 @@ offset = 1e-2
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

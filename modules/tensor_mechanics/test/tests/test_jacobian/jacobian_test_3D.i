@@ -23,54 +23,54 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
-  [../]
+  [all]
+  []
 []
 
 [BCs]
-  [./y_force]
+  [y_force]
     type = NeumannBC
     variable = disp_y
     boundary = top
     value = -1.0
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
-  [../]
-  [./stress]
+  []
+  [stress]
     block = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'smp'
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

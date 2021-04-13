@@ -1,37 +1,37 @@
 [Tests]
-  [./water_60degC]
+  [water_60degC]
     type = CSVDiff
     input = water_60degC.i
     csvdiff = water_60degC_out.csv
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./water_60_to_220degC]
+  []
+  [water_60_to_220degC]
     type = CSVDiff
     input = water_60_to_220degC.i
     csvdiff = water_60_to_220degC_out.csv
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./kinetic]
+  []
+  [kinetic]
     type = CSVDiff
     input = kinetic.i
     csvdiff = kinetic_out.csv
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with kinetic minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./water_3]
+  []
+  [water_3]
     type = CSVDiff
     input = water_3.i
     csvdiff = water_3_out.csv
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems with varying temperatures and varying pH"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./natural_reservoir]
+  []
+  [natural_reservoir]
     type = CSVDiff
     input = natural_reservoir.i
     csvdiff = natural_reservoir_out.csv
@@ -39,8 +39,8 @@
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./reservoir_and_water_3]
+  []
+  [reservoir_and_water_3]
     type = CSVDiff
     input = reservoir_and_water_3.i
     csvdiff = reservoir_and_water_3_out.csv
@@ -48,8 +48,8 @@
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./porous_flow]
+  []
+  [porous_flow]
     type = CSVDiff
     input = porous_flow.i
     csvdiff = porous_flow_out.csv
@@ -57,8 +57,8 @@
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
-  [./aquifer_geochemistry_alone]
+  []
+  [aquifer_geochemistry_alone]
     type = CSVDiff
     input = aquifer_geochemistry.i
     csvdiff = aquifer_geochemistry_out.csv
@@ -66,5 +66,5 @@
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'
-  [../]
+  []
 []

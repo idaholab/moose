@@ -11,125 +11,125 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     initial_condition = 2e6
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 350
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./rho]
+  []
+  [rho]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./mu]
+  []
+  [mu]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./e]
+  []
+  [e]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./h]
+  []
+  [h]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./s]
+  []
+  [s]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./rho]
+  [rho]
     type = MaterialRealAux
     variable = rho
     property = density
-  [../]
-  [./my]
+  []
+  [my]
     type = MaterialRealAux
     variable = mu
     property = viscosity
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = MaterialRealAux
     variable = e
     property = e
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = MaterialRealAux
     variable = h
     property = h
-  [../]
-  [./entropy]
+  []
+  [entropy]
     type = MaterialRealAux
     variable = s
     property = s
-  [../]
-  [./cv]
+  []
+  [cv]
     type = MaterialRealAux
     variable = cv
     property = cv
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
     variable = cp
     property = cp
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
     variable = c
     property = c
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./tabulated]
+    []
+    [tabulated]
       type = TabulatedFluidProperties
       fp = co2
       fluid_property_file = fluid_properties.csv
-    [../]
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = FluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     fp = tabulated
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,46 +138,46 @@
 []
 
 [Postprocessors]
-  [./rho]
+  [rho]
     type = ElementalVariableValue
     elementid = 0
     variable = rho
-  [../]
-  [./mu]
+  []
+  [mu]
     type = ElementalVariableValue
     elementid = 0
     variable = mu
-  [../]
-  [./e]
+  []
+  [e]
     type = ElementalVariableValue
     elementid = 0
     variable = e
-  [../]
-  [./h]
+  []
+  [h]
     type = ElementalVariableValue
     elementid = 0
     variable = h
-  [../]
-  [./s]
+  []
+  [s]
     type = ElementalVariableValue
     elementid = 0
     variable = s
-  [../]
-  [./cv]
+  []
+  [cv]
     type = ElementalVariableValue
     elementid = 0
     variable = cv
-  [../]
-  [./cp]
+  []
+  [cp]
     type = ElementalVariableValue
     elementid = 0
     variable = cp
-  [../]
-  [./c]
+  []
+  [c]
     type = ElementalVariableValue
     elementid = 0
     variable = c
-  [../]
+  []
 []
 
 [Outputs]

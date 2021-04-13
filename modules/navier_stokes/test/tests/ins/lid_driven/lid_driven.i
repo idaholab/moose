@@ -14,166 +14,166 @@
     ny = 16
     elem_type = QUAD9
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./vel_y]
+  [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./T]
+  [T]
     order = SECOND
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 1.0
-    [../]
-  [../]
+    []
+  []
 
-  [./p]
+  [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   # mass
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
+  []
 
   # x-momentum, time
-  [./x_momentum_time]
+  [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
+  []
 
   # x-momentum, space
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
+  []
 
   # y-momentum, time
-  [./y_momentum_time]
+  [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
+  []
 
   # y-momentum, space
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 
  # temperature
- [./temperature_time]
+ [temperature_time]
    type = INSTemperatureTimeDerivative
    variable = T
- [../]
+ []
 
- [./temperature_space]
+ [temperature_space]
    type = INSTemperature
    variable = T
    u = vel_x
    v = vel_y
- [../]
+ []
 []
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
-  [./lid]
+  [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
-  [../]
+  []
 
-  [./y_no_slip]
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
-  [./T_hot]
+  [T_hot]
     type = DirichletBC
     variable = T
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
-  [./T_cold]
+  [T_cold]
     type = DirichletBC
     variable = T
     boundary = 'top'
     value = 0
-  [../]
+  []
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
-  [../]
+  []
 []
 
 [Functions]
-  [./lid_function]
+  [lid_function]
     # We pick a function that is exactly represented in the velocity
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
     type = ParsedFunction
     value = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

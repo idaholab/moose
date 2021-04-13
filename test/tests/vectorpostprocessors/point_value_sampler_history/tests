@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'point_value_sampler_history.i'
     csvdiff = 'point_value_sampler_history_out_point_sample.csv'
@@ -8,5 +8,5 @@
                    " left alone between invocations resulting in a single CSV output file."
     issues = "#11300"
     design = "VectorPostprocessors/index.md"
-  [../]
+  []
 []

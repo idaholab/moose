@@ -1,20 +1,20 @@
 [Tests]
   issues = '#5676'
   design = 'syntax/Controls/index.md source/outputs/ControlOutput.md'
-  [./test]
+  [test]
     type = RunApp
     input = controllable.i
     expect_out = "Controls:.*Active Controls:.*Active Controls:"
     requirement = "The Control system shall include a means to output information regarding the controlled parameters."
-  [../]
-  [./clear]
+  []
+  [clear]
     type = RunApp
     input = controllable_clear.i
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
     requirement = "The Control system shall include a means to output information regarding the controlled parameters, including only showing information regarding a parameter if it has changed since the last output."
-  [../]
-  [./cli_args]
+  []
+  [cli_args]
     type = RunApp
     input = controllable.i
     cli_args = "--show-controls"
@@ -22,11 +22,11 @@
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
     requirement = "MOOSE shall include a command line flag for displaying controllable parameter information."
 
-  [../]
-  [./active]
+  []
+  [active]
     type = RunApp
     input = controllable.i
     expect_out = "Active\sObjects:.*Problem::"
     requirement = "The Control system shall include a means to output information regarding the objects with controllable parameters."
-  [../]
+  []
 []

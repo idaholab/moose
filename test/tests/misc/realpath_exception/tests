@@ -2,10 +2,10 @@
   design = 'Parser.md'
   issues = '#15718'
 
-  [./except01]
+  [except01]
     type = RunException
     input = not_exist.i
     expect_err = 'Failed to get real path for'
     requirement = "The system shall print an understandable message when a user-specified path/file does not exist."
-  [../]
+  []
 []

@@ -12,11 +12,11 @@
 []
 
 [VectorPostprocessors]
-  [./reader]
+  [reader]
     type = CSVReader
     csv_file = 'example.csv'
     force_preic = true
-  [../]
+  []
 []
 
 [Outputs]

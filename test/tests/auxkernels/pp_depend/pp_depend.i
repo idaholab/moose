@@ -6,59 +6,59 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./pp_aux]
-  [../]
+  [pp_aux]
+  []
 []
 
 [Functions]
-  [./t_func]
+  [t_func]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.01
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./pp_aux]
+  [pp_aux]
     type = PostprocessorAux
     variable = pp_aux
     execute_on = timestep_end
     pp = t_pp
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./t_pp]
+  [t_pp]
     type = FunctionValuePostprocessor
     function = t_func
-  [../]
+  []
 []
 
 [Problem]

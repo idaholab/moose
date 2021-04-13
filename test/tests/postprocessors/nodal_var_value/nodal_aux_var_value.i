@@ -16,89 +16,89 @@
 [Variables]
   active = 'v'
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   active = 'v1'
 
-  [./v1]
+  [v1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 
 [Functions]
   active = 'left_bc'
 
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
   active = 'time_v diff_v'
 
-  [./time_v]
+  [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
   active = 'ak1'
 
-  [./ak1]
+  [ak1]
     type = CoupledAux
     variable = v1
     coupled = v
     value = 1
     operator = '+'
-  [../]
+  []
 []
 
 [BCs]
   active = 'left_v right_v'
 
-  [./left_v]
+  [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = '1'
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'node4v node4v1'
 
-  [./node4v]
+  [node4v]
     type = NodalVariableValue
     variable = v
     nodeid = 3
-  [../]
+  []
 
-  [./node4v1]
+  [node4v1]
     type = NodalVariableValue
     variable = v1
     nodeid = 3
-  [../]
+  []
 []
 
 [Executioner]

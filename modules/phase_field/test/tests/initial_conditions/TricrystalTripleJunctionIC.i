@@ -26,61 +26,61 @@
 []
 
 [Variables]
-  [./gr0]
+  [gr0]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
        type = TricrystalTripleJunctionIC
        op_index = 1
-    [../]
-  [../]
+    []
+  []
 
-  [./gr1]
+  [gr1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
        type = TricrystalTripleJunctionIC
        op_index = 2
-    [../]
-  [../]
+    []
+  []
 
-  [./gr2]
+  [gr2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
        type = TricrystalTripleJunctionIC
        op_index = 3
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   # Kernels block where the kernels defining the residual equations are set up
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Materials]
-  [./material]
+  [material]
     # Material properties
     type = GBEvolution
     T = 450 # Constant temperature of the simulation (for mobility calculation)
@@ -88,14 +88,14 @@
     GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997
     Q = 0.23 #eV for copper from Schoenfelder1997
     GBenergy = 0.708 #J/m^2 from Schoenfelder1997
-  [../]
+  []
 []
 
 [Postprocessors]
   # Scalar postprocessors
-  [./grain_tracker]
+  [grain_tracker]
     type = FauxGrainTracker
-  [../]
+  []
 []
 
 [Executioner]

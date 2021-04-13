@@ -16,99 +16,99 @@
 []
 
 [Functions]
-  [./aux_v_fn]
+  [aux_v_fn]
     type = ParsedFunction
     value = x*(y-0.5)/5
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'udiff uie vdiff vconv vie'
 
-  [./udiff]
+  [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./uie]
+  [uie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./vdiff]
+  [vdiff]
     type = Diffusion
     variable = v
-  [../]
+  []
 
-  [./vconv]
+  [vconv]
     type = Convection
     variable = v
     velocity = '-10 1 0'
-  [../]
+  []
 
-  [./vie]
+  [vie]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'uleft uright vleft vright'
 
-  [./uleft]
+  [uleft]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./uright]
+  [uright]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0.1
-  [../]
+  []
 
-  [./vleft]
+  [vleft]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./vright]
+  [vright]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./aux_v]
+  [aux_v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./aux_k_1]
+  [aux_k_1]
     type = FunctionAux
     variable = aux_v
     function = aux_v_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -120,17 +120,17 @@
   num_steps = 2
   dt = .1
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
-  [./displaced]
+  [displaced]
     type = Exodus
     use_displaced = true
-  [../]
+  []
 []

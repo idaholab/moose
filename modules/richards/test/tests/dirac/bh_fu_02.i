@@ -25,77 +25,77 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E9
-  [../]
-  [./Seff1VG]
+  []
+  [Seff1VG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-5
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0
     sum_s_res = 0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1E8
-  [../]
+  []
 
-  [./borehole_total_outflow_mass]
+  [borehole_total_outflow_mass]
     type = RichardsSumQuantity
-  [../]
+  []
 []
 
 
 [Variables]
   active = 'pressure'
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = FunctionIC
     variable = pressure
     function = initial_pressure
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./bh]
+  [bh]
     type = RichardsBorehole
     bottom_pressure = 0
     point_file = bh02.bh
@@ -104,60 +104,60 @@
     unit_weight = '0 0 0'
     character = 1
     fully_upwind = true
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./bh_report]
+  [bh_report]
     type = RichardsPlotQuantity
     uo = borehole_total_outflow_mass
-  [../]
+  []
 
-  [./fluid_mass0]
+  [fluid_mass0]
     type = RichardsMass
     variable = pressure
     execute_on = timestep_begin
-  [../]
+  []
 
-  [./fluid_mass1]
+  [fluid_mass1]
     type = RichardsMass
     variable = pressure
     execute_on = timestep_end
-  [../]
+  []
 
-  [./zmass_error]
+  [zmass_error]
     type = FunctionValuePostprocessor
     function = mass_bal_fcn
     execute_on = timestep_end
-  [../]
+  []
 
-  [./p0]
+  [p0]
     type = PointValue
     variable = pressure
     point = '1 1 1'
     execute_on = timestep_end
-  [../]
+  []
 []
 
 
 [Functions]
-  [./initial_pressure]
+  [initial_pressure]
     type = ParsedFunction
     value = 1E7
-  [../]
+  []
 
-  [./mass_bal_fcn]
+  [mass_bal_fcn]
     type = ParsedFunction
     value = abs((a-c+d)/2/(a+c))
     vars = 'a c d'
     vals = 'fluid_mass1 fluid_mass0 bh_report'
-  [../]
+  []
 []
 
 
 [Materials]
-  [./all]
+  [all]
     type = RichardsMaterial
     block = 0
     viscosity = 1E-3
@@ -165,27 +165,27 @@
     mat_permeability = '1E-12 0 0  0 1E-12 0  0 0 1E-12'
     gravity = '0 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = Seff1VG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
-  [../]
+  []
 []
 
 

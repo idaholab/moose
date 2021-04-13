@@ -13,102 +13,102 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 # Monomial variable types
 [AuxVariables]
-  [./first]
+  [first]
     family = MONOMIAL
-  [../]
-  [./second]
+  []
+  [second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./third]
+  []
+  [third]
     order = THIRD
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./first]
+  [first]
     type = ParsedFunction
     value = 1+2*x+2*y
-  [../]
-  [./second]
+  []
+  [second]
     type = ParsedFunction
     value = 1+2*x+4*x*x+2*y+4*y*y+4*x*y
-  [../]
-  [./third]
+  []
+  [third]
     type = ParsedFunction
     value = 1+2*x+4*x*x+8*x*x*x+2*y+4*y*y+8*y*y*y+4*x*y+8*x*x*y
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./first]
+  [first]
     type = FunctionAux
     variable = first
     function = first
     execute_on = timestep_end
-  [../]
-  [./second]
+  []
+  [second]
     type = FunctionAux
     variable = second
     function = second
     execute_on = timestep_end
-  [../]
-  [./third]
+  []
+  [third]
     type = FunctionAux
     variable = third
     function = third
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./first_error]
+  [first_error]
     type = ElementL2Error
     variable = first
     function = first
     execute_on = 'initial timestep_end'
-  [../]
-  [./second_error]
+  []
+  [second_error]
     type = ElementL2Error
     variable = second
     function = second
     execute_on = 'initial timestep_end'
-  [../]
-  [./third_error]
+  []
+  [third_error]
     type = ElementL2Error
     variable = third
     function = third
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

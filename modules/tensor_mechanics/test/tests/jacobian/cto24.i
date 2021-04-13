@@ -19,75 +19,75 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
-  [./mc_coh]
+  []
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
-  [./phi]
+  []
+  [phi]
     type = TensorMechanicsHardeningConstant
     value = 0.8
-  [../]
-  [./psi]
+  []
+  [psi]
     type = TensorMechanicsHardeningConstant
     value = 0.4
-  [../]
-  [./dp]
+  []
+  [dp]
     type = TensorMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
     mc_dilation_angle = psi
     yield_function_tolerance = 1E-11     # irrelevant here
     internal_constraint_tolerance = 1E-9 # irrelevant here
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     lambda = 0.7
     shear_modulus = 1.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = dp
-  [../]
-  [./dp]
+  []
+  [dp]
     type = CappedDruckerPragerStressUpdate
     DP_model = dp
     tensile_strength = ts
@@ -95,16 +95,16 @@
     yield_function_tol = 1E-11
     tip_smoother = 1
     smoothing_tol = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -33,7 +33,7 @@
 []
 
 [VectorPostprocessors]
-  [./histo]
+  [histo]
     type = VolumeHistogram
     variable = u_vww
     min_value = 0
@@ -41,7 +41,7 @@
     bin_number = 100
     execute_on = initial
     outputs = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,8 +49,8 @@
 []
 
 [Outputs]
-  [./initial]
+  [initial]
     type = CSV
     execute_on = initial
-  [../]
+  []
 []

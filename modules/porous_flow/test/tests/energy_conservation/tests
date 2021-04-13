@@ -1,5 +1,5 @@
 [Tests]
-  [./except01]
+  [except01]
     type = 'RunException'
     input = 'except01.i'
     expect_err = 'The Dictator proclaims that the phase index 1 is greater than the largest phase index possible, which is 0'
@@ -7,8 +7,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall produce an error if the user specifies a phase number that is too large for the simulation according to the PorousFlowDictator'
-  [../]
-  [./except02]
+  []
+  [except02]
     type = 'RunException'
     input = 'except02.i'
     expect_err = 'The Dictator pronounces that the number of PorousFlow variables is 2, however you have used 2. This is an error'
@@ -16,8 +16,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall produce an error if the user specifies a porous-flow variable that is too large for the simulation according to the PorousFlowDictator'
-  [../]
-  [./heat01]
+  []
+  [heat01]
     type = 'CSVDiff'
     input = 'heat01.i'
     csvdiff = 'heat01.csv'
@@ -26,8 +26,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate the heat energy using the heat-energy postprocessor when there are no fluids and constant porosity'
-  [../]
-  [./heat02]
+  []
+  [heat02]
     type = 'CSVDiff'
     input = 'heat02.i'
     csvdiff = 'heat02.csv'
@@ -36,8 +36,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate the heat energy using the heat-energy postprocessor when there is 1 fluid phase and constant porosity'
-  [../]
-  [./heat03]
+  []
+  [heat03]
     type = 'CSVDiff'
     input = 'heat03.i'
     csvdiff = 'heat03.csv'
@@ -46,8 +46,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly conserve heat energy in a THM simulation when the model is squashed mechanically'
-  [../]
-  [./heat04]
+  []
+  [heat04]
     type = 'CSVDiff'
     input = 'heat04.i'
     csvdiff = 'heat04.csv'
@@ -56,8 +56,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate time-varying temperature, porepressure, stress and porosity in a model containing a source of heat energy'
-  [../]
-  [./heat04_action]
+  []
+  [heat04_action]
     type = 'CSVDiff'
     input = 'heat04_action.i'
     csvdiff = 'heat04_action.csv'
@@ -66,8 +66,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate time-varying temperature, porepressure, stress and porosity in a model containing a source of heat energy, when using the PorousFlowUnsaturated Action'
-  [../]
-  [./heat04_fullysat_action]
+  []
+  [heat04_fullysat_action]
     type = 'CSVDiff'
     input = 'heat04_fullysat_action.i'
     csvdiff = 'heat04_fullysat_action.csv'
@@ -76,8 +76,8 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate time-varying temperature, porepressure, stress and porosity in a model containing a source of heat energy, when using the PorousFlowFullySaturated Action'
-  [../]
-  [./heat04_action_KT]
+  []
+  [heat04_action_KT]
     type = 'CSVDiff'
     input = 'heat04_action_KT.i'
     csvdiff = 'heat04_action.csv'
@@ -87,8 +87,8 @@
     issues = '#8123 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'PorousFlow shall correctly calculate time-varying temperature, porepressure, stress and porosity in a model containing a source of heat energy, when using the PorousFlowUnsaturated Action with Kuzmin-Turek stabilization'
-  [../]
-  [./heat05]
+  []
+  [heat05]
     type = 'CSVDiff'
     input = 'heat05.i'
     csvdiff = 'heat05.csv'
@@ -96,5 +96,5 @@
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
     requirement = 'In fully-coupled THM situations, PorousFlow shall correctly initialize the porosity when it depends on all Variables'
-  [../]
+  []
 []

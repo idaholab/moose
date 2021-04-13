@@ -8,40 +8,40 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = (x-0.5)^2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./time_u]
+  []
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
-  [./shape_u]
+  []
+  [shape_u]
     type = SimpleTestShapeElementKernel
     user_object = example_uo
     variable = u
-  [../]
+  []
 []
 
 [UserObjects]
-  [./example_uo]
+  [example_uo]
     type = SimpleTestShapeElementUserObject
     u = u
     # as this userobject computes quantities for both the residual AND the jacobian
     # it needs to have these execute_on flags set.
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []
 
 [Executioner]

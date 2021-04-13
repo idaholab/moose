@@ -6,34 +6,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,10 +52,10 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     positions_file = positions.txt
     type = TransientMultiApp
     input_files = 'dt_from_multi_sub.i'
     app_type = MooseTestApp
-  [../]
+  []
 []

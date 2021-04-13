@@ -32,57 +32,57 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_finite_deform_jacobian = true
     volumetric_locking_correction = false
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-  [../]
+  []
 []
 
 [BCs]
- [./fix_corner_x]
+ [fix_corner_x]
    type = ADDirichletBC
    variable = disp_x
    boundary = 101
    value = 0
- [../]
- [./fix_corner_y]
+ []
+ [fix_corner_y]
    type = ADDirichletBC
    variable = disp_y
    boundary = 101
    value = 0
- [../]
- [./fix_side_y]
+ []
+ [fix_side_y]
    type = ADDirichletBC
    variable = disp_y
    boundary = 102
    value = 0
- [../]
- [./fix_z]
+ []
+ [fix_z]
    type = ADDirichletBC
    variable = disp_z
    boundary = back
    value = 0
- [../]
- [./move_z]
+ []
+ [move_z]
    type = ADFunctionDirichletBC
    variable = disp_z
    boundary = front
    function = 't'
- [../]
+ []
 []
 
 [Executioner]
@@ -105,10 +105,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

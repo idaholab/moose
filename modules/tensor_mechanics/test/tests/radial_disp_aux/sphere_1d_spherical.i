@@ -23,65 +23,65 @@
 []
 
 [AuxVariables]
-  [./temp]
-  [../]
-  [./rad_disp]
-  [../]
+  [temp]
+  []
+  [rad_disp]
+  []
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     value = t+300.0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
     use_displaced_mesh = false
-  [../]
-  [./raddispaux]
+  []
+  [raddispaux]
     type = RadialDisplacementSphereAux
     variable = rad_disp
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./small_stress]
+  []
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./thermal_expansion]
+  []
+  [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'constant_dt_regrowth.i'
     exodiff = 'constant_dt_regrowth_out.e'
@@ -7,5 +7,5 @@
     design = 'Executioner/TimeStepper/index.md'
     issues = '#3765 #3764'
     requirement = 'The system shall support the ability to regrow a time step that has been previously cut due to a solve failure.'
-  [../]
+  []
 []

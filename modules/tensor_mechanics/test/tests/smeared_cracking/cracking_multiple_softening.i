@@ -21,92 +21,92 @@
 []
 
 [Functions]
-  [./displx]
+  [displx]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 1 1 1'
-  [../]
-  [./disply]
+  []
+  [disply]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 1 1'
-  [../]
-  [./displz]
+  []
+  [displz]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 0 1'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [BCs]
-  [./pullx]
+  [pullx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = displx
-  [../]
-  [./pully]
+  []
+  [pully]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = disply
-  [../]
-  [./pullz]
+  []
+  [pullz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = displz
-  [../]
-  [./left]
+  []
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.8e7
     poissons_ratio = 0
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
     softening_models = 'power_law_softening exponential_softening abrupt_softening'
     prescribed_crack_directions = 'x y z'
-  [../]
-  [./power_law_softening]
+  []
+  [power_law_softening]
     type = PowerLawSoftening
     stiffness_reduction = 0.3333
-  [../]
-  [./exponential_softening]
+  []
+  [exponential_softening]
     type = ExponentialSoftening
-  [../]
-  [./abrupt_softening]
+  []
+  [abrupt_softening]
     type = AbruptSoftening
-  [../]
+  []
 []
 
 [Executioner]

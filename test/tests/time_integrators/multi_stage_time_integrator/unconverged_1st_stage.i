@@ -14,68 +14,68 @@
 []
 
 [Functions]
-  [./ic]
+  [ic]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = x
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./body]
+  [body]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = u
     function = ic
-  [../]
+  []
 []
 
 [BCs]
-  [./bcs]
+  [bcs]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = LStableDirk2
-  [../]
+  []
   num_steps = 1
   abort_on_solve_fail = true
 

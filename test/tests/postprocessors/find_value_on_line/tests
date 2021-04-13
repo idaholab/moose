@@ -2,84 +2,84 @@
   issues = '#6389 #7864'
   design = 'FindValueOnLine.md'
 
-  [./find_value_on_line]
+  [find_value_on_line]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     csvdiff = 'findvalueonline_out.csv'
 
     requirement = "The system shall be capable of find a value on a monotonically changing line."
-  [../]
+  []
 
-  [./below_min]
+  [below_min]
     type = 'RunException'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=-2 Outputs/csv=false'
     expect_err = "Target value \S+ is less than the minimum sampled value"
 
     requirement = 'The system shall report and error when the target value is lower than one of the sampled endpoints.'
-  [../]
+  []
 
-  [./above_max]
+  [above_max]
     type = 'RunException'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=1.1 Outputs/csv=false'
     expect_err = "Target value \S+ is greater than the maximum sampled value"
 
     requirement = 'The system shall report and error when the target value is greater than one of the sampled endpoints.'
-  [../]
+  []
 
-  [./below_min_default_continue]
+  [below_min_default_continue]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=-2 Postprocessors/pos/error_if_not_found=false Outputs/file_base="findvalueonline_flag_below_out"'
     csvdiff = 'findvalueonline_flag_below_out.csv'
 
     requirement = 'The system shall return the default flag value when the target value is lower than one of the sampled endpoints and error_if_not_found is false.'
-  [../]
+  []
 
-  [./above_max_default_continue]
+  [above_max_default_continue]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=1.1 Postprocessors/pos/error_if_not_found=false Outputs/file_base="findvalueonline_flag_above_out"'
     csvdiff = 'findvalueonline_flag_above_out.csv'
 
     requirement = 'The system shall return the default flag value when the target value is greater than one of the sampled endpoints and error_if_not_found is false.'
-  [../]
+  []
 
-  [./below_min_user_continue]
+  [below_min_user_continue]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=-2 Postprocessors/pos/error_if_not_found=false Postprocessors/pos/default_value=-10 Outputs/file_base="findvalueonline_flag_below_user_out"'
     csvdiff = 'findvalueonline_flag_below_user_out.csv'
 
     requirement = 'The system shall return user specified flag value when the target value is lower than one of the sampled endpoints and error_if_not_found is false.'
-  [../]
+  []
 
-  [./above_max_user_continue]
+  [above_max_user_continue]
     type = 'CSVDiff'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/target=1.1 Postprocessors/pos/error_if_not_found=false Postprocessors/pos/default_value=-10 Outputs/file_base="findvalueonline_flag_above_user_out"'
     csvdiff = 'findvalueonline_flag_above_user_out.csv'
 
     requirement = 'The system shall return user specified flag value when the target value is greater than one of the sampled endpoints and error_if_not_found is false.'
-  [../]
+  []
 
-  [./line_out_of_bounds]
+  [line_out_of_bounds]
     type = 'RunException'
     input = 'findvalueonline.i'
     cli_args = "\"Postprocessors/pos/end_point='11 0 0' Outputs/csv=false\""
     expect_err = "No element found at the current search point"
 
     requirement = 'The system shall report and error when the sampling line extends beyond the mesh bounding box.'
-  [../]
+  []
 
-  [./depth_exceeded]
+  [depth_exceeded]
     type = 'RunException'
     input = 'findvalueonline.i'
     cli_args = 'Postprocessors/pos/depth=20 Outputs/csv=false'
     expect_err = "Target value \S+ not found on line within tolerance"
 
     requirement = 'The system shall report and error when the line sampling algorithm fails to converge within the desired depth.'
-  [../]
+  []
 
 []

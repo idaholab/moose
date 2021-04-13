@@ -16,29 +16,29 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
-  [./x_momentum_space]
+  []
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
@@ -46,8 +46,8 @@
     p = p
     component = 0
     integrate_p_by_parts = false
-  [../]
-  [./y_momentum_space]
+  []
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
@@ -55,52 +55,52 @@
     p = p
     component = 1
     integrate_p_by_parts = false
-  [../]
+  []
 []
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'top bottom'
     value = 0.0
-  [../]
-  [./y_no_slip]
+  []
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'left top bottom'
     value = 0.0
-  [../]
-  [./inlet_p]
+  []
+  [inlet_p]
     type = DirichletBC
     variable = p
     boundary = left
     value = 1.0
-  [../]
-  [./outlet_p]
+  []
+  [outlet_p]
     type = DirichletBC
     variable = p
     boundary = right
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = FSP
-  [./FSP]
+  [FSP]
     type = FSP
     # It is the starting point of splitting
     topsplit = 'up' # 'up' should match the following block name
-    [./up]
+    [up]
       splitting = 'u p' # 'u' and 'p' are the names of subsolvers
       splitting_type  = schur
       # Splitting type is set as schur, because the pressure part of Stokes-like systems
@@ -132,8 +132,8 @@
       # The preconditioning matrix is set as selfp, which means we explicitly form a
       # matrix \hat{S} = C(diag(A))^{-1}B. We do not compute the inverse of A, but instead, we compute
       # the inverse of diag(A).
-    [../]
-    [./u]
+    []
+    [u]
       vars = 'vel_x vel_y'
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
@@ -142,16 +142,16 @@
       # Specify options to solve A^{-1} in the steps (1), (2) and (3).
       # Solvers for A^{-1} could be different in different steps. We could
       # choose in the following pressure block.
-    [../]
-    [./p]
+    []
+    [p]
       vars = 'p'
       # PETSc options for this subsolver in the step (2)
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol'
       petsc_options_value = '   jacobi    gmres     1e-4'
       # Use -inner_ksp_type and -inner_pc_type to override A^{-1} in the step (2)
       # Use -lower_ksp_type and -lower_pc_type to override A^{-1} in the step (1)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

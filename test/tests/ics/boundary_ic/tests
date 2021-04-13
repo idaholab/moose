@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'boundary_ic.i'
     exodiff = 'boundary_ic_out.e'
@@ -7,5 +7,5 @@
     requirement = 'The system shall support setting initial conditions on boundaries.'
     design = 'syntax/ICs/index.md'
     issues = '#534'
-  [../]
+  []
 []

@@ -19,116 +19,116 @@
 []
 
 [Functions]
-  [./sphere]
+  [sphere]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2); if(r>1,0,1-3*r^2+2*r^3)'
-  [../]
+  []
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./eta]
-    [./InitialCondition]
+  [eta]
+    [InitialCondition]
       type = FunctionIC
       function = sphere
-    [../]
+    []
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./s00]
-  [../]
-  [./s01]
-  [../]
-  [./s02]
-  [../]
-  [./s10]
-  [../]
-  [./s11]
-  [../]
-  [./s12]
-  [../]
-  [./s20]
-  [../]
-  [./s21]
-  [../]
-  [./s22]
-  [../]
+  []
+  [s00]
+  []
+  [s01]
+  []
+  [s02]
+  []
+  [s10]
+  []
+  [s11]
+  []
+  [s12]
+  []
+  [s20]
+  []
+  [s21]
+  []
+  [s22]
+  []
 []
 
 [AuxKernels]
-  [./s00]
+  [s00]
     type = RankTwoAux
     variable = s00
     index_i = 0
     index_j = 0
-  [../]
-  [./s01]
+  []
+  [s01]
     type = RankTwoAux
     variable = s01
     index_i = 0
     index_j = 1
-  [../]
-  [./s02]
+  []
+  [s02]
     type = RankTwoAux
     variable = s02
     index_i = 0
     index_j = 2
-  [../]
-  [./s10]
+  []
+  [s10]
     type = RankTwoAux
     variable = s10
     index_i = 1
     index_j = 0
-  [../]
-  [./s11]
+  []
+  [s11]
     type = RankTwoAux
     variable = s11
     index_i = 1
     index_j = 1
-  [../]
-  [./s12]
+  []
+  [s12]
     type = RankTwoAux
     variable = s12
     index_i = 1
     index_j = 2
-  [../]
-  [./s20]
+  []
+  [s20]
     type = RankTwoAux
     variable = s20
     index_i = 2
     index_j = 0
-  [../]
-  [./s21]
+  []
+  [s21]
     type = RankTwoAux
     variable = s21
     index_i = 2
     index_j = 1
-  [../]
-  [./s22]
+  []
+  [s22]
     type = RankTwoAux
     variable = s22
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./interface]
+  [interface]
     type = ComputeInterfaceStress
     v = eta
     stress = 3.0
-  [../]
+  []
 []
 
 [Executioner]

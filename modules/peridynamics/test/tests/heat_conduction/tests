@@ -1,5 +1,5 @@
 [Tests]
-  [./2D_steady_state_BPD]
+  [2D_steady_state_BPD]
     type = 'Exodiff'
     input = '2D_steady_state_BPD.i'
     exodiff = '2D_steady_state_BPD.e'
@@ -8,5 +8,5 @@
                    peridynamics model.'
     design = 'modules/peridynamics/HeatConductionBPD.md'
     issues = '#11561'
-  [../]
+  []
 []

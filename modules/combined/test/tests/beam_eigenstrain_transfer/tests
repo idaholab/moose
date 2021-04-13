@@ -1,22 +1,22 @@
 [Tests]
-  [./transfer]
+  [transfer]
     design = 'MultiAppUserObjectTransfer.md LineValueSampler.md'
     issues = '#10313'
     requirement = 'The system shall use transfer values from multiple sub applications to an auxvariable in the master action'
-    [./test]
+    [test]
       type = Exodiff
       input = 'master_uo_transfer.i'
       exodiff = 'master_uo_transfer_out.e'
       detail = 'using MultiAppUserObjectTransfer.'
-    [../]
-    [./error_1]
+    []
+    [error_1]
       type = RunException
       input = 'subapp1_uo_transfer.i'
       cli_args = "VectorPostprocessors/axial_str/end_point='0.5 0 0' Outputs/csv=false Outputs/exodus=false"
       expect_err = 'LineValueSampler: `start_point` and `end_point` must be different.'
       detail = 'and LineValueSampler shall report an error if the line segment provided as input has zero length.'
-    [../]
-    [./error_2]
+    []
+    [error_2]
       type = RunException
       input = 'master_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_2.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
@@ -25,16 +25,16 @@
       detail = 'and LineValueSampler shall report an error if multiple variables'
                     ' are provided as input to the sampler when it is used with'
                     ' MultiAppUserObjectTransfer.'
-    [../]
-    [./error_3]
+    []
+    [error_3]
       type = RunException
       input = 'master_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_3.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, `sort_by` should be set to `id`.'
       detail = 'and LineValueSampler shall report an error if sorting method'
                     ' is not set to `id` when it is used with MultiAppUserObjectTransfer.'
-    [../]
-    [./error_4]
+    []
+    [error_4]
       type = RunException
       input = 'master_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_4.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
@@ -42,6 +42,6 @@
       detail = 'and LineValueSampler shall report an return value of infinity'
                     ' when the projection of the queried point onto the line'
                     ' segment lies outside the limits of the line segment.'
-    [../]
-  [../]
+    []
+  []
 []

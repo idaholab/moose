@@ -4,28 +4,28 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./u_dt]
+  [u_dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./u_source]
+  []
+  [u_source]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [Dampers]
-  [./limit]
+  [limit]
     type = ConstantDamper
     damping = 0.25
     min_damping = 0.5
-  [../]
+  []
 []
 
 [Executioner]
@@ -36,11 +36,11 @@
 []
 
 [Postprocessors]
-  [./u_avg]
+  [u_avg]
     type = ElementAverageValue
     variable = u
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []

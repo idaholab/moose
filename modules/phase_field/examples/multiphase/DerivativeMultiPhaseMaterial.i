@@ -25,30 +25,30 @@
 # simulation cell. They are provided for visualization purposes.
 #
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./cross_energy]
+  []
+  [cross_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./local_free_energy]
+  [local_free_energy]
     type = TotalFreeEnergy
     variable = local_energy
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
     additional_free_energy = cross_energy
-  [../]
+  []
 
   #
   # Helper kernel to cpompute the gradient contribution from interfaces of order
   # parameters evolved using the ACMultiInterface kernel
   #
-  [./cross_terms]
+  [cross_terms]
     type = CrossTermGradientFreeEnergy
     variable = cross_energy
     interfacial_vars = 'eta1 eta2 eta3'
@@ -58,11 +58,11 @@
     kappa_names = 'kappa11 kappa12 kappa13
                    kappa21 kappa22 kappa23
                    kappa31 kappa32 kappa33'
-  [../]
+  []
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     #
@@ -70,7 +70,7 @@
     # The concentration will quickly change to adapt to the preset order
     # parameters eta1, eta2, and eta3
     #
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0.0
       y1 = 0.0
@@ -78,13 +78,13 @@
       invalue = 1.0
       outvalue = 0.01
       int_width = 10.0
-    [../]
-  [../]
+    []
+  []
 
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       #
       # Note: this initial conditions sets up a _sharp_ interface. Ideally
@@ -92,24 +92,24 @@
       # with the kappa parameter supplied for the given interface.
       #
       function = 'r:=sqrt(x^2+y^2);if(r<=4,1,0)'
-    [../]
-  [../]
-  [./eta2]
+    []
+  []
+  [eta2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = 'r:=sqrt(x^2+y^2);if(r>4&r<=7,1,0)'
-    [../]
-  [../]
-  [./eta3]
+    []
+  []
+  [eta3]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = 'r:=sqrt(x^2+y^2);if(r>7,1,0)'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
@@ -120,16 +120,16 @@
   # to use a direct solve using the CahnHilliard kernel _despite_ only using first
   # order elements.
   #
-  [./c_res]
+  [c_res]
     type = CahnHilliard
     variable = c
     f_name = F
     args = 'eta1 eta2 eta3'
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   #
   # Order parameter eta1
@@ -141,94 +141,94 @@
   #  4. A penalty contribution that forces the interface contributions h(eta)
   #     to sum up to unity
   #
-  [./deta1dt]
+  [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
-  [./ACBulk1]
+  []
+  [ACBulk1]
     type = AllenCahn
     variable = eta1
     args = 'eta2 eta3 c'
     mob_name = L1
     f_name = F
-  [../]
-  [./ACInterface1]
+  []
+  [ACInterface1]
     type = ACMultiInterface
     variable = eta1
     etas = 'eta1 eta2 eta3'
     mob_name = L1
     kappa_names = 'kappa11 kappa12 kappa13'
-  [../]
-  [./penalty1]
+  []
+  [penalty1]
     type = SwitchingFunctionPenalty
     variable = eta1
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 
   #
   # Order parameter eta2
   #
-  [./deta2dt]
+  [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
-  [./ACBulk2]
+  []
+  [ACBulk2]
     type = AllenCahn
     variable = eta2
     args = 'eta1 eta3 c'
     mob_name = L2
     f_name = F
-  [../]
-  [./ACInterface2]
+  []
+  [ACInterface2]
     type = ACMultiInterface
     variable = eta2
     etas = 'eta1 eta2 eta3'
     mob_name = L2
     kappa_names = 'kappa21 kappa22 kappa23'
-  [../]
-  [./penalty2]
+  []
+  [penalty2]
     type = SwitchingFunctionPenalty
     variable = eta2
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 
   #
   # Order parameter eta3
   #
-  [./deta3dt]
+  [deta3dt]
     type = TimeDerivative
     variable = eta3
-  [../]
-  [./ACBulk3]
+  []
+  [ACBulk3]
     type = AllenCahn
     variable = eta3
     args = 'eta1 eta2 c'
     mob_name = L3
     f_name = F
-  [../]
-  [./ACInterface3]
+  []
+  [ACInterface3]
     type = ACMultiInterface
     variable = eta3
     etas = 'eta1 eta2 eta3'
     mob_name = L3
     kappa_names = 'kappa31 kappa32 kappa33'
-  [../]
-  [./penalty3]
+  []
+  [penalty3]
     type = SwitchingFunctionPenalty
     variable = eta3
     etas    = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
@@ -236,79 +236,79 @@
   # gradient prefactors. For this example we use arbitrary numbers. In an actual simulation
   # physical mobilities would be used, and the interface gradient prefactors would
   # be readjusted to the free energy magnitudes.
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c L1 L2 L3  kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0.2 0.75    1  1  1   0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75    0.75   '
-  [../]
+  []
 
   # This material sums up the individual phase contributions. It is written to the output file
   # (see GlobalParams section above) and can be used to check the constraint enforcement.
-  [./etasummat]
+  [etasummat]
     type = ParsedMaterial
     f_name = etasum
     args = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     function = 'h1+h2+h3'
-  [../]
+  []
 
   # The phase contribution factors for each material point are computed using the
   # SwitchingFunctionMaterials. Each phase with an order parameter eta contributes h(eta)
   # to the global free energy density. h is a function that switches smoothly from 0 to 1
-  [./switching1]
+  [switching1]
     type = SwitchingFunctionMaterial
     function_name = h1
     eta = eta1
     h_order = SIMPLE
-  [../]
-  [./switching2]
+  []
+  [switching2]
     type = SwitchingFunctionMaterial
     function_name = h2
     eta = eta2
     h_order = SIMPLE
-  [../]
-  [./switching3]
+  []
+  [switching3]
     type = SwitchingFunctionMaterial
     function_name = h3
     eta = eta3
     h_order = SIMPLE
-  [../]
+  []
 
   # The barrier function adds a phase transformation energy barrier. It also
   # Drives order parameters toward the [0:1] interval to avoid negative or larger than 1
   # order parameters (these are set to 0 and 1 contribution by the switching functions
   # above)
-  [./barrier]
+  [barrier]
     type = MultiBarrierFunctionMaterial
     etas = 'eta1 eta2 eta3'
-  [../]
+  []
 
   # We use DerivativeParsedMaterials to specify three (very) simple free energy
   # expressions for the three phases. All necessary derivatives are built automatically.
   # In a real problem these expressions can be arbitrarily complex (or even provided
   # by custom kernels).
-  [./phase_free_energy_1]
+  [phase_free_energy_1]
     type = DerivativeParsedMaterial
     f_name = F1
     function = '(c-1)^2'
     args = 'c'
-  [../]
-  [./phase_free_energy_2]
+  []
+  [phase_free_energy_2]
     type = DerivativeParsedMaterial
     f_name = F2
     function = '(c-0.5)^2'
     args = 'c'
-  [../]
-  [./phase_free_energy_3]
+  []
+  [phase_free_energy_3]
     type = DerivativeParsedMaterial
     f_name = F3
     function = 'c^2'
     args = 'c'
-  [../]
+  []
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.
   # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
-  [./free_energy]
+  [free_energy]
     type = DerivativeMultiPhaseMaterial
     f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
@@ -317,31 +317,31 @@
     etas     = 'eta1 eta2 eta3'
     args = 'c'
     W = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   # The total free energy of the simulation cell to observe the energy reduction.
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
 
   # for testing we also monitor the total solute amount, which should be conserved.
-  [./total_solute]
+  [total_solute]
     type = ElementIntegralVariablePostprocessor
     variable = c
-  [../]
+  []
 []
 
 [Preconditioning]
   # This preconditioner makes sure the Jacobian Matrix is fully populated. Our
   # kernels compute all Jacobian matrix entries.
   # This allows us to use the Newton solver below.
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -362,10 +362,10 @@
   start_time = 0.0
   end_time   = 150.0
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.1
-  [../]
+  []
 []
 
 [Debug]
@@ -375,8 +375,8 @@
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
-  [./table]
+  [table]
     type = CSV
     delimiter = ' '
-  [../]
+  []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  [./bulk_constraints]
+  [bulk_constraints]
     type = 'RunApp'
     input = 'bulk_constraints.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -23,8 +23,8 @@ NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  a
     requirement = "Differences between the geochemistry module and GWB shall be able explored, such as the differences in meaning when setting bulk constraints"
     issues = '#15641'
     design = 'gwb_diff.md'
-  [../]
-  [./ph_constraint]
+  []
+  [ph_constraint]
     type = 'RunApp'
     input = 'ph_constraint.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -51,8 +51,8 @@ CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln
     requirement = "Differences between the geochemistry module and GWB shall be able explored, such as when setting activity constraints"
     issues = '#15641'
     design = 'gwb_diff.md'
-  [../]
-  [./seawater_no_precip]
+  []
+  [seawater_no_precip]
     type = 'RunApp'
     input = 'seawater_no_precip.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -123,8 +123,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7277V
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems with no precipitation"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md seawater.md'
-  [../]
-  [./seawater_precip]
+  []
+  [seawater_precip]
     type = 'RunApp'
     input = 'seawater_precip.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -168,8 +168,8 @@ CaHCO3+;  molality = 2.69e-05mol/kg(solvent water);  free_conc = 2.624mg/kg(soln
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems including mineral precipitation"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md seawater.md'
-  [../]
-  [./amazon]
+  []
+  [amazon]
     type = 'RunApp'
     input = 'amazon.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -230,8 +230,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md amazon.md'
-  [../]
-  [./amazon_with_minerals]
+  []
+  [amazon_with_minerals]
     type = 'RunApp'
     input = 'amazon_with_minerals.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -285,8 +285,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed and minerals precipitate"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md amazon.md'
-  [../]
-  [./red_sea_no_precip]
+  []
+  [red_sea_no_precip]
     type = 'RunApp'
     input = 'red_sea_no_precip.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -369,8 +369,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
-  [../]
-  [./red_sea_precip]
+  []
+  [red_sea_precip]
     type = 'RunApp'
     input = 'red_sea_precip.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -451,8 +451,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature, including when mineral precipitate"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
-  [../]
-  [./HCl]
+  []
+  [HCl]
     type = 'CSVDiff'
     input = 'HCl.i'
     csvdiff = 'HCl_out.csv'
@@ -460,8 +460,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'Time-indpendent problems involving fixing pH should be solvable using an Action'
     issues = '#15290 #15261'
     design = 'HCl.md GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./HCl_no_action]
+  []
+  [HCl_no_action]
     type = 'CSVDiff'
     input = 'HCl.i'
     csvdiff = 'HCl_out.csv'
@@ -470,8 +470,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'Time-indpendent problems involving fixing pH should be solvable without using an Action'
     issues = '#15290 #15261'
     design = 'HCl.md GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except1]
+  []
+  [except1]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -480,8 +480,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record solvent mass in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except2]
+  []
+  [except2]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -490,8 +490,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record pH in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except3]
+  []
+  [except3]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -500,8 +500,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record molality in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except4]
+  []
+  [except4]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -510,8 +510,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record mg/kg in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except5]
+  []
+  [except5]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -520,8 +520,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record activity in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except6]
+  []
+  [except6]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -530,8 +530,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record bulk moles in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
-  [./except7]
+  []
+  [except7]
     type = RunException
     input = 'HCl.i'
     prereq = 'HCl'
@@ -540,5 +540,5 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     requirement = 'It shall be possible to record aqueous solution temperature in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
-  [../]
+  []
 []

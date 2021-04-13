@@ -10,61 +10,61 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./the_linear_combo]
-  [../]
+  [the_linear_combo]
+  []
 []
 
 [AuxKernels]
-  [./the_linear_combo]
+  [the_linear_combo]
     type = FunctionAux
     variable = the_linear_combo
     function = the_linear_combo
-  [../]
+  []
 []
 
 
 [Functions]
-  [./twoxplus1]
+  [twoxplus1]
     type = ParsedFunction
     value = 2*x+1
-  [../]
+  []
 
-  [./xsquared]
+  [xsquared]
     type = ParsedFunction
     value = x*x
-  [../]
+  []
 
-  [./the_linear_combo]
+  [the_linear_combo]
     type = LinearCombinationFunction
     functions = 'x twoxplus1 xsquared'
     w = '0.5 5 0.4 0.3'
-  [../]
+  []
 
-  [./should_be_answer]
+  [should_be_answer]
     type = ParsedFunction
     value = 0.5*x+5*(2*x+1)*0.4*x*x+0.3*7
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./should_be_zero]
+  [should_be_zero]
     type = NodalL2Error
     function = should_be_answer
     variable = the_linear_combo
-  [../]
+  []
 []
 
 [Executioner]

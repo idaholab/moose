@@ -12,71 +12,71 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-    [./InitialCondition]
+  [v]
+    [InitialCondition]
       type = FunctionIC
       function = set_v
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
-  [./set_v]
+  [set_v]
     type = ParsedFunction
     value = 'x + 2 * y'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./sample_points]
+  [sample_points]
     type = PointValueSampler
     variable = v
     points = '0.25 1.25 0 0.5 1.5 0'
     sort_by = x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./receive_values]
+  [receive_values]
     type = PointValueSampler
     variable = v
     points = '0.25 1.25 0 0.5 1.5 0'
     sort_by = x
     execute_on = initial
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     input_files = 'sub.i'
     positions = '0.25 1.25 0 0.5 1.5 0'
     max_procs_per_app = 1
-  [../]
+  []
 []
 
 [Transfers]
-  [./send]
+  [send]
     type = MultiAppVectorPostprocessorTransfer
     vector_postprocessor = sample_points
     postprocessor = receive
     vector_name = v
     direction = to_multiapp
     multi_app = sub
-  [../]
+  []
 
-  [./receive]
+  [receive]
     type = MultiAppVectorPostprocessorTransfer
     vector_postprocessor = receive_values
     postprocessor = send
     vector_name = v
     direction = from_multiapp
     multi_app = sub
-  [../]
+  []
 []
 
 [Executioner]

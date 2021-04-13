@@ -9,55 +9,55 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./layered_average_value]
+  [layered_average_value]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./layered_aux]
+  [layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
     execute_on = timestep_end
     user_object = layered_average
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_average]
+  [layered_average]
     type = LayeredAverage
     variable = u
     direction = y
     num_layers = 4
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,28 +76,28 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     execute_on = timestep_end
     positions = '0.3 0.1 0.3 0.7 0.1 0.3'
     type = TransientMultiApp
     input_files = tosub_sub.i
     app_type = MooseTestApp
-  [../]
+  []
 []
 
 [Transfers]
-  [./layered_transfer]
+  [layered_transfer]
     direction = to_multiapp
     user_object = layered_average
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
     multi_app = sub_app
-  [../]
-  [./element_layered_transfer]
+  []
+  [element_layered_transfer]
     direction = to_multiapp
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer
     multi_app = sub_app
-  [../]
+  []
 []

@@ -9,30 +9,30 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
-  [../]
+  []
 []
 
 [BCs]
-  [./obstruction]
+  [obstruction]
     type = StickyBC
     variable = disp_y
     boundary = bottom
     min_value = 1
     max_value = -1
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.2
-  [../]
+  []
 []
 
 [Executioner]

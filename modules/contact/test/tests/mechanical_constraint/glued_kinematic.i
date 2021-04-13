@@ -8,112 +8,112 @@
 []
 
 [AuxVariables]
-  [./penetration]
-  [../]
-  [./inc_slip_x]
-  [../]
-  [./inc_slip_y]
-  [../]
-  [./accum_slip_x]
-  [../]
-  [./accum_slip_y]
-  [../]
+  [penetration]
+  []
+  [inc_slip_x]
+  []
+  [inc_slip_y]
+  []
+  [accum_slip_x]
+  []
+  [accum_slip_y]
+  []
 []
 
 [Functions]
-  [./vertical_movement]
+  [vertical_movement]
     type = ParsedFunction
     value = -t
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./zeroslip_x]
+  [zeroslip_x]
     type = ConstantAux
     variable = inc_slip_x
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
-  [./zeroslip_y]
+  []
+  [zeroslip_y]
     type = ConstantAux
     variable = inc_slip_y
     boundary = 3
     execute_on = timestep_begin
     value = 0.0
-  [../]
-  [./accum_slip_x]
+  []
+  [accum_slip_x]
     type = AccumulateAux
     variable = accum_slip_x
     accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-  [../]
-  [./accum_slip_y]
+  []
+  [accum_slip_y]
     type = AccumulateAux
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-  [../]
-  [./penetration]
+  []
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     #Initial gap is 0.01
     value = -0.01
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
-  [./left]
+  [left]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e7
     poissons_ratio = 0.3
-  [../]
-  [./right]
+  []
+  [right]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -136,28 +136,28 @@
   nl_abs_tol = 1e-8
   dtmin = 0.01
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     primary = 2
     secondary = 3
     model = glued
     penalty = 1e+6
-  [../]
+  []
 []

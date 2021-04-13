@@ -19,144 +19,144 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = 'pwater pgas'
-  [../]
-  [./DensityWater]
+  []
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E9
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 2E6
-  [../]
-  [./SeffWater]
+  []
+  [SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
     al = 1E-5
-  [../]
-  [./SeffGas]
+  []
+  [SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
     al = 1E-5
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = RichardsRelPermPower
     simm = 0.0
     n = 3
-  [../]
-  [./SatWater]
+  []
+  [SatWater]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SatGas]
+  []
+  [SatGas]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SUPGwater]
+  []
+  [SUPGwater]
     type = RichardsSUPGstandard
     p_SUPG = 1E3
-  [../]
-  [./SUPGgas]
+  []
+  [SUPGgas]
     type = RichardsSUPGstandard
     p_SUPG = 1E3
-  [../]
+  []
 []
 
 [Variables]
-  [./pwater]
+  [pwater]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./pgas]
+  []
+  [pgas]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 
 [ICs]
-  [./water_ic]
+  [water_ic]
     type = ConstantIC
     value = 2E6
     variable = pwater
-  [../]
-  [./gas_ic]
+  []
+  [gas_ic]
     type = ConstantIC
     value = 2E6
     variable = pgas
-  [../]
+  []
 []
 
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     value = 3E6
     variable = pwater
-  [../]
-  [./left_gas]
+  []
+  [left_gas]
     type = DirichletBC
     boundary = left
     value = 3E6
     variable = pgas
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas pconstraint'
-  [./richardstwater]
+  [richardstwater]
     type = RichardsMassChange
     variable = pwater
-  [../]
-  [./richardsfwater]
+  []
+  [richardsfwater]
     type = RichardsFullyUpwindFlux
     variable = pwater
-  [../]
-  [./richardstgas]
+  []
+  [richardstgas]
     type = RichardsMassChange
     variable = pgas
-  [../]
-  [./richardsfgas]
+  []
+  [richardsfgas]
     type = RichardsFullyUpwindFlux
     variable = pgas
-  [../]
-  [./pconstraint]
+  []
+  [pconstraint]
     type = RichardsPPenalty
     variable = pgas
     a = 1E-8
     lower_var = pwater
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = SeffWater
     pressure_vars = 'pwater pgas'
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
@@ -164,17 +164,17 @@
     viscosity = '1E-3 1E-5'
     gravity = '0 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-pc_factor_shift_type'
     petsc_options_value = 'nonzero'
-  [../]
+  []
 []
 
 [Executioner]

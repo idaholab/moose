@@ -1,13 +1,13 @@
 [Tests]
-  [./radiative_bc_cyl]
+  [radiative_bc_cyl]
     type = CSVDiff
     input = 'radiative_bc_cyl.i'
     csvdiff = 'radiative_bc_cyl_out.csv'
     requirement = "Moose shall be able to model radiative transfer from a cylindrical surface as boundary condition."
     design = 'source/bcs/InfiniteCylinderRadiativeBC.md'
     issues = "#13053"
-  [../]
-  [./function_radiative_bc]
+  []
+  [function_radiative_bc]
     type = Exodiff
     input = 'function_radiative_bc.i'
     exodiff = 'function_radiative_bc_out.e'
@@ -15,5 +15,5 @@
     design = 'source/bcs/FunctionRadiativeBC.md'
     issues = "#13053"
     mesh_mode = REPLICATED
-  [../]
+  []
 []

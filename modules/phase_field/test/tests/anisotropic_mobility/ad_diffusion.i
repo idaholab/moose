@@ -8,37 +8,37 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = ADMatAnisoDiffusion
     diffusivity = D
     variable = c
-  [../]
-  [./time]
+  []
+  [time]
     type = ADTimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./D]
+  [D]
     type = ADConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
     M_name = D
-  [../]
+  []
 []
 
 [Executioner]

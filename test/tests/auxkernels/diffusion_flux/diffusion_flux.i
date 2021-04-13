@@ -8,78 +8,78 @@
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [AuxVariables]
-  [./flux_x]
+  [flux_x]
       order = FIRST
       family = MONOMIAL
-  [../]
-  [./flux_y]
+  []
+  [flux_y]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest # A Laplacian operator
     variable = T
     prop_name = 'thermal_conductivity'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./flux_x]
+  [flux_x]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_x
     diffusion_variable = T
     component = x
-  [../]
-  [./flux_y]
+  []
+  [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_y
     diffusion_variable = T
     component = y
-  [../]
+  []
 []
 
 [BCs]
-  [./inlet]
+  [inlet]
     type = DirichletBC # Simple u=value BC
     variable = T
     boundary = left
     value = 4000 # K
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = DirichletBC
     variable = T
     boundary = right
     value = 400 # K
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10' # in W/mK
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = LineValueSampler
     variable = 'T flux_x flux_y'
     start_point = '0 0. 0'
     end_point = '1.0 0. 0'
     num_points = 11
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]

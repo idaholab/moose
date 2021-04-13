@@ -48,84 +48,84 @@
 []
 
 [Functions]
-  [./disp_x]
+  [disp_x]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 0.5380168369562588'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./volumetric_strain]
+  [volumetric_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     volumetric_locking_correction = false
     decomposition_method = EigenSolution
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./fred]
+  [fred]
     type = RankTwoScalarAux
     rank_two_tensor = total_strain
     variable = volumetric_strain
     scalar_type = VolumetricStrain
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
-  [./x]
+  [x]
     type = FunctionDirichletBC
     boundary = 3
     variable = disp_x
     function = disp_x
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,21 +138,21 @@
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
-  [./volStrain0]
+  []
+  [volStrain0]
     type = ElementalVariableValue
     elementid = 0
     variable = volumetric_strain
-  [../]
-  [./volStrain1]
+  []
+  [volStrain1]
     type = ElementalVariableValue
     elementid = 1
     variable = volumetric_strain
-  [../]
+  []
 []
 
 [Outputs]

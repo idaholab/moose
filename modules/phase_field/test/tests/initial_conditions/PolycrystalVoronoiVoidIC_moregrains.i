@@ -23,39 +23,39 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./PolycrystalVariables]
-  [../]
+  [c]
+  []
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+  [PolycrystalICs]
+    [PolycrystalVoronoiVoidIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
-  [./c_IC]
+    []
+  []
+  [c_IC]
     variable = c
     type = PolycrystalVoronoiVoidIC
     structure_type = voids
     polycrystal_ic_uo = voronoi
-  [../]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     int_width = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Problem]

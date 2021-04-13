@@ -69,7 +69,7 @@
                   "not contained within any sub application domains."
   []
 
-  [./two_pipes]
+  [two_pipes]
     type = 'Exodiff'
     input = 'two_pipe_master.i'
     exodiff = 'two_pipe_master_out.e'
@@ -77,5 +77,5 @@
     mesh_mode = replicated
     issues = "#13701"
     recover = false
-  [../]
+  []
 []

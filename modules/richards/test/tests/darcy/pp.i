@@ -17,60 +17,60 @@
 
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2E6
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     value = 3E6
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_deriv]
+  [time_deriv]
     type = TimeDerivative
-  [../]
-  [./darcy]
+  []
+  [darcy]
     type = DarcyFlux
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./f_0]
+  [f_0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./f_0]
+  [f_0]
     type = DarcyFluxComponent
     component = x
     variable = f_0
     porepressure = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./solid]
+  [solid]
     type = DarcyMaterial
     block = 0
     mat_permeability = '2E-5 0 0  0 2E-5 0  0 0 2E-5' # this is the permeability (1E-15) multiplied by the bulk modulus (2E9) divided by the porosity (0.1)
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

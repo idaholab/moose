@@ -18,59 +18,59 @@
 []
 
 [AuxVariables]
-  [./ph]
-  [../]
-  [./total_ca++]
-  [../]
-  [./total_h+]
-  [../]
-  [./total_hco3-]
-  [../]
+  [ph]
+  []
+  [total_ca++]
+  []
+  [total_h+]
+  []
+  [total_hco3-]
+  []
 []
 
 [AuxKernels]
-  [./ph]
+  [ph]
     type = PHAux
     variable = ph
     h_conc = h+
-  [../]
-  [./total_ca++]
+  []
+  [total_ca++]
     type = TotalConcentrationAux
     variable = total_ca++
     primary_species = ca++
     v = 'caco3_aq cahco3+ caoh+'
     sto_v = '1 1 1'
-  [../]
-  [./total_h+]
+  []
+  [total_h+]
     type = TotalConcentrationAux
     variable = total_h+
     primary_species = h+
     v = 'co2_aq co3-- caco3_aq oh-'
     sto_v = '1 -1 -1 -1'
-  [../]
-  [./total_hco3-]
+  []
+  [total_hco3-]
     type = TotalConcentrationAux
     variable = total_hco3-
     primary_species = hco3-
     v = 'co2_aq co3-- caco3_aq cahco3+'
     sto_v = '1 1 1 1'
-  [../]
+  []
 []
 
 [Variables]
-  [./ca++]
+  [ca++]
     initial_condition = 1.0e-5
-  [../]
-  [./h+]
+  []
+  [h+]
     initial_condition = 1.0e-5
-  [../]
-  [./hco3-]
+  []
+  [hco3-]
     initial_condition = 3.0e-5
-  [../]
+  []
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = 'ca++ hco3- h+'
     secondary_species = 'co2_aq co3-- caco3_aq cahco3+ caoh+ oh-'
     reactions = 'h+ + hco3- = co2_aq 6.3447,
@@ -79,30 +79,30 @@
                  ca++ + hco3- = cahco3+ 1.0467,
                  ca++ - h+ = caoh+ -12.85,
                  - h+ = oh- -13.9951'
-  [../]
+  []
 []
 
 [Kernels]
-  [./ca++_ie]
+  [ca++_ie]
     type = PrimaryTimeDerivative
     variable = ca++
-  [../]
-  [./h+_ie]
+  []
+  [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
-  [../]
-  [./hco3-_ie]
+  []
+  [hco3-_ie]
     type = PrimaryTimeDerivative
     variable = hco3-
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity porosity'
     prop_values = '1e-7 0.25'
-  [../]
+  []
 []
 
 [Executioner]
@@ -113,78 +113,78 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./ca++]
+  [ca++]
     type = ElementIntegralVariablePostprocessor
     variable = ca++
     execute_on = 'initial timestep_end'
-  [../]
-  [./h+]
+  []
+  [h+]
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
-  [../]
-  [./hco3-]
+  []
+  [hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = hco3-
     execute_on = 'initial timestep_end'
-  [../]
-  [./co2_aq]
+  []
+  [co2_aq]
     type = ElementIntegralVariablePostprocessor
     variable = co2_aq
     execute_on = 'initial timestep_end'
-  [../]
-  [./co3--]
+  []
+  [co3--]
     type = ElementIntegralVariablePostprocessor
     variable = co3--
     execute_on = 'initial timestep_end'
-  [../]
-  [./caco3_aq]
+  []
+  [caco3_aq]
     type = ElementIntegralVariablePostprocessor
     variable = caco3_aq
     execute_on = 'initial timestep_end'
-  [../]
-  [./cahco3+]
+  []
+  [cahco3+]
     type = ElementIntegralVariablePostprocessor
     variable = cahco3+
     execute_on = 'initial timestep_end'
-  [../]
-  [./caoh+]
+  []
+  [caoh+]
     type = ElementIntegralVariablePostprocessor
     variable = caoh+
     execute_on = 'initial timestep_end'
-  [../]
-  [./oh-]
+  []
+  [oh-]
     type = ElementIntegralVariablePostprocessor
     variable = oh-
     execute_on = 'initial timestep_end'
-  [../]
-  [./ph]
+  []
+  [ph]
     type = ElementIntegralVariablePostprocessor
     variable = ph
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_ca++]
+  []
+  [total_ca++]
     type = ElementIntegralVariablePostprocessor
     variable = total_ca++
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_hco3-]
+  []
+  [total_hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = total_hco3-
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_h+]
+  []
+  [total_h+]
     type = ElementIntegralVariablePostprocessor
     variable = total_h+
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

@@ -26,119 +26,119 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 # [Modules/TensorMechanics/Master]
-#   [./block1]
+#   [block1]
 #     strain = FINITE
 #     add_variables = true
 #     #block = 1
 #     use_automatic_differentiation = true
-#   [../]
-#   [./block2]
+#   []
+#   [block2]
 #     strain = SMALL
 #     add_variables = true
 #     block = 2
 #     use_automatic_differentiation = true
-#   [../]
+#   []
 # []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = ADStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = ADStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_theta]
+  [stress_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_theta]
+  []
+  [strain_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_theta]
+  [stress_theta]
     type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_theta
     execute_on = timestep_end
-  [../]
-  [./strain_theta]
+  []
+  [strain_theta]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
     index_i = 2
     index_j = 2
     variable = strain_theta
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
-  [./block_1]
+  [block_1]
     type = ADComputeFiniteStrain
     block = 1
-  [../]
-  [./block_2]
+  []
+  [block_2]
     type = ADComputeSmallStrain
     block = 2
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
-  [./_elastic_stress1]
+  []
+  [_elastic_stress1]
     type = ADComputeFiniteStrainElasticStress
     block = 1
-  [../]
-  [./_elastic_stress2]
+  []
+  [_elastic_stress2]
     type = ADComputeLinearElasticStress
     block = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = 'left'
     variable = disp_x
     value = 0.0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     boundary = 'right'
     variable = disp_x
     value = 0.01
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
     value = 0.01
-  [../]
+  []
 []
 
 [Debug]
@@ -146,10 +146,10 @@
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

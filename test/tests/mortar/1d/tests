@@ -2,7 +2,7 @@
   design = 'NodalEqualValueConstraint.md OneDEqualValueConstraintBC.md'
   issues = '#4211'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '1d.i'
     exodiff = '1d_out.e'
@@ -11,5 +11,5 @@
     compiler = 'GCC CLANG'
 
     requirement = 'The system shall support the use of constrains using the mortar method in 1D.'
-  [../]
+  []
 []

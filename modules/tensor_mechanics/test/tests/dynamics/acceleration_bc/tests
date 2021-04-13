@@ -1,5 +1,5 @@
 [tests]
-  [./acceleration_bc]
+  [acceleration_bc]
     type = 'Exodiff'
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
@@ -10,8 +10,8 @@
                   " acceleration at the given boundary."
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#7642"
-  [../]
-  [./acceleration_bc_ti]
+  []
+  [acceleration_bc_ti]
     type = 'Exodiff'
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
@@ -24,5 +24,5 @@
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#12185"
     prereq = "acceleration_bc"
-  [../]
+  []
 []

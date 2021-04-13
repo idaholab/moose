@@ -3,40 +3,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./elem_quality_check]
+  [elem_quality_check]
     type = ElementQualityChecker
     metric_type = STRETCH
     failure_type = ERROR
     upper_bound = 1.0
     lower_bound = 0.5
-  [../]
+  []
 []
 
 [Executioner]

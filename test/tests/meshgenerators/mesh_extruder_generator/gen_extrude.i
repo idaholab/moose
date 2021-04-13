@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 6
@@ -10,7 +10,7 @@
     elem_type = QUAD4
   []
 
-  [./extrude]
+  [extrude]
     type = MeshExtruderGenerator
     input = gmg
     num_layers = 6
@@ -21,33 +21,33 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./first]
+  [first]
     type = DirichletBC
     variable = u
     boundary = 'new_front'
     value = 0
-  [../]
+  []
 
-  [./second]
+  [second]
     type = DirichletBC
     variable = u
     boundary = 'new_back'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -8,14 +8,14 @@
 []
 
 [Variables]
-  [./w]
-  [../]
-  [./T]
-  [../]
+  [w]
+  []
+  [T]
+  []
 []
 
 [ICs]
-  [./wIC]
+  [wIC]
     type = SmoothCircleIC
     variable = w
     int_width = 0.1
@@ -24,49 +24,49 @@
     radius = 0.08
     outvalue = 0
     invalue = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./w_dot]
+  [w_dot]
     type = TimeDerivative
     variable = w
-  [../]
-  [./anisoACinterface1]
+  []
+  [anisoACinterface1]
     type = ACInterfaceKobayashi1
     variable = w
     mob_name = M
-  [../]
-  [./anisoACinterface2]
+  []
+  [anisoACinterface2]
     type = ACInterfaceKobayashi2
     variable = w
     mob_name = M
-  [../]
-  [./AllenCahn]
+  []
+  [AllenCahn]
     type = AllenCahn
     variable = w
     mob_name = M
     f_name = fbulk
     args = 'T'
-  [../]
-  [./T_dot]
+  []
+  [T_dot]
     type = TimeDerivative
     variable = T
-  [../]
-  [./CoefDiffusion]
+  []
+  [CoefDiffusion]
     type = Diffusion
     variable = T
-  [../]
-  [./w_dot_T]
+  []
+  [w_dot_T]
     type = CoefCoupledTimeDerivative
     variable = T
     v = w
     coef = -1.8 #This is -K from kobayashi's paper
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = fbulk
     args = 'w T'
@@ -75,23 +75,23 @@
     function = 'm:=alpha/pi * atan(gamma * (T_e - T)); 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'
     derivative_order = 2
     outputs = exodus
-  [../]
-  [./material]
+  []
+  [material]
     type = InterfaceOrientationMaterial
     op = w
-  [../]
-  [./consts]
+  []
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M'
     prop_values = '3333.333'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

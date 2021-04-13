@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'selective_reinit_test.i'
     exodiff = 'selective_reinit_test_out.e'
@@ -12,5 +12,5 @@
     requirement = 'The system shall only reinitialize variables values that are consumed by other active objects in the system.'
     design = 'FEProblemBase.md'
     issues = '#1386'
-  [../]
+  []
 []

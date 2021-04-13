@@ -2,10 +2,10 @@
   design = 'VariableInnerProduct.md'
   issues = '#7532'
 
-  [./variable_inner_product_test]
+  [variable_inner_product_test]
     type = 'CSVDiff'
     input = 'variable_inner_product.i'
     csvdiff = 'variable_inner_product.csv'
     requirement = 'The system shall include the ability to compute the inner product of two variables.'
-  [../]
+  []
 []

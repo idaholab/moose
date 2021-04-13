@@ -13,42 +13,42 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 2.8
-    [../]
-  [../]
+    []
+  []
 
-  [./v]
+  [v]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 5.4
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
   active = 'force_fn exact_fn left_bc'
 
-  [./force_fn]
+  [force_fn]
     type = ParsedFunction
     value = '1-x*x+2*t'
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = '(1-x*x)*t'
-  [../]
+  []
 
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -56,72 +56,72 @@
     time_u diff_u ffn_u
     time_v diff_v'
 
-  [./time_u]
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn_u]
+  [ffn_u]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 
-  [./time_v]
+  [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'all_u left_v right_v'
 
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = '1'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
 
-  [./sidepp]
+  [sidepp]
     type = SideIntegralVariablePostprocessor
     variable = v
     execute_on = timestep_end
     boundary = '0 1 2 3'
-  [../]
+  []
 
-  [./passsidepp]
+  [passsidepp]
     type = ElementSidePP
     side_pp = sidepp
     execute_on = timestep_end
-  [../]
+  []
 
 []
 

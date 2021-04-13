@@ -2,7 +2,7 @@
   issues = '#1873'
   design = 'syntax/MultiApps/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
@@ -10,5 +10,5 @@
     recover = false
 
     requirement = "The system shall support limiting the number of processors for sub-applications."
-  [../]
+  []
 []

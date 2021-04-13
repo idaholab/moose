@@ -13,35 +13,35 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./strain11]
+  [strain11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress11]
+  []
+  [stress11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./c]
-  [../]
-  [./eigenstrain00]
+  []
+  [c]
+  []
+  [eigenstrain00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     int_width = 0.15
     x1 = 0
     y1 = 0
@@ -50,46 +50,46 @@
     variable = c
     invalue = 1
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [AuxKernels]
-  [./strain11]
+  [strain11]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
     variable = strain11
-  [../]
-  [./stress11]
+  []
+  [stress11]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
     variable = stress11
-  [../]
-  [./eigenstrain00]
+  []
+  [eigenstrain00]
     type = RankTwoAux
     variable = eigenstrain00
     rank_two_tensor = eigenstrain
     index_j = 0
     index_i = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
-  [./var_dependence]
+  []
+  [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
     function = 0.01*c^2
@@ -99,53 +99,53 @@
     f_name = var_dep
     enable_jit = true
     derivative_order = 2
-  [../]
-  [./eigenstrain]
+  []
+  [eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
     args = c
     prefactor = var_dep
     eigenstrain_name = eigenstrain
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./left_x]
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = 0.0005*t
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

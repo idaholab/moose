@@ -20,10 +20,10 @@
 []
 
 [AuxVariables]
-  [./from_sub_app_var]
+  [from_sub_app_var]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [UserObjects]

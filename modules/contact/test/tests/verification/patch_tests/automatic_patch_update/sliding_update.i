@@ -6,10 +6,10 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [GlobalParams]
@@ -17,26 +17,26 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e5
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     secondary = 3
     primary = 2
     normalize_penalty = true
@@ -44,7 +44,7 @@
     penalty = 1e+4
     model = frictionless
     formulation = penalty
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,45 +63,45 @@
 []
 
 [BCs]
-  [./fixed_1_2x]
+  [fixed_1_2x]
     type = DirichletBC
     boundary = '1'
     value = 0.0
     variable = disp_x
-  [../]
-  [./fixed_1_2y]
+  []
+  [fixed_1_2y]
     type = DirichletBC
     boundary = '1'
     value = 0.0
     variable = disp_y
-  [../]
-  [./sliding_1]
+  []
+  [sliding_1]
     type = FunctionDirichletBC
     function = sliding_fn
     variable = disp_x
     boundary = '4'
-  [../]
-  [./normal_y]
+  []
+  [normal_y]
     type = DirichletBC
     variable = disp_y
     boundary = '4'
     value = -0.01
-  [../]
-#  [./Pressure]
-#    [./normal_pressure]
+  []
+#  [Pressure]
+#    [normal_pressure]
 #      disp_x = disp_x
 #      disp_y = disp_y
 #      factor = 100.0
 #      boundary = 4
-#    [../]
-#  [../]
+#    []
+#  []
 []
 
 [Functions]
-  [./sliding_fn]
+  [sliding_fn]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [Outputs]

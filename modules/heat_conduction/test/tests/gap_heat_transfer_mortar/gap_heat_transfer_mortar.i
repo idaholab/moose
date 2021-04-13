@@ -25,46 +25,46 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  [../]
+  []
 
-  [./lm]
+  [lm]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
-  [../]
+  []
 []
 
 [Materials]
-  [./left]
+  [left]
     type = HeatConductionMaterial
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = HeatConductionMaterial
     block = 2
     thermal_conductivity = 500
     specific_heat = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
     block = '1 2'
-  [../]
+  []
 []
 
 [Constraints]
-  [./ced]
+  [ced]
     type = GapConductanceConstraint
     variable = lm
     secondary_variable = temp
@@ -73,30 +73,30 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

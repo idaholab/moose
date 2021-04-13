@@ -1,7 +1,7 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [./test]
+  [test]
     type = Exodiff
     input = 'gap_heat_transfer_mortar.i'
     exodiff = 'gap_heat_transfer_mortar_out.e'
@@ -9,9 +9,9 @@
     partial = True
     map = False
     requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method.'
-  [../]
+  []
 
-  [./displaced]
+  [displaced]
     type = Exodiff
     input = 'gap_heat_transfer_mortar_displaced.i'
     exodiff = 'gap_heat_transfer_mortar_displaced_out.e'
@@ -19,7 +19,7 @@
     partial = True
     map = False
     requirement = 'We shall be able to run the mortar method on a displaced mesh, supplying the displacements with **constant** auxiliary variables'
-  [../]
+  []
 
   [displaced_rz]
     type = Exodiff

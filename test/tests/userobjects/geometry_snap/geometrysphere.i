@@ -4,9 +4,9 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -19,27 +19,27 @@
 []
 
 [UserObjects]
-  [./sphere]
+  [sphere]
     type = GeometrySphere
     boundary = 'left right top bottom'
     center = '0.5 0.5 0'
     radius = 0.7071
-  [../]
+  []
 []
 
 [Adaptivity]
-  [./Markers]
-    [./const]
+  [Markers]
+    [const]
       type = UniformMarker
       mark = REFINE
-    [../]
-  [../]
+    []
+  []
   marker = const
   steps = 3
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

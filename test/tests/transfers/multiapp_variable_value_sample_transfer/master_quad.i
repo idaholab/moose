@@ -6,57 +6,57 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./master_aux]
+  [master_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./func]
+  [func]
     type = ParsedFunction
     value = x*y*t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./func_aux]
+  [func_aux]
     type = FunctionAux
     variable = master_aux
     function = func
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,20 +74,20 @@
 []
 
 [MultiApps]
-  [./quad]
+  [quad]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0.05 0.05 0 0.95 0.05 0 0.05 0.95 0 0.95 0.95 0'
     input_files = quad_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./master_to_sub]
+  [master_to_sub]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     direction = to_multiapp
     multi_app = quad
     source_variable = master_aux
     postprocessor = pp
-  [../]
+  []
 []

@@ -15,12 +15,12 @@
     ymax = 1.1
     elem_type = QUAD9
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Problem]
@@ -28,11 +28,11 @@
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -42,12 +42,12 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
-  [../]
+  []
 []
 
 
@@ -63,10 +63,10 @@
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
@@ -80,16 +80,16 @@
     type = INSADMomentumAdvection
     variable = velocity
   []
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     p = p
-  [../]
+  []
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
@@ -104,7 +104,7 @@
     boundary = 'bottom'
     function_x = 0
     function_y = 1
-  [../]
+  []
   [wall]
     type = VectorFunctionDirichletBC
     variable = velocity
@@ -138,11 +138,11 @@
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1.1 1.1'
-  [../]
+  []
   [ins_mat]
     type = INSADTauMaterial
     velocity = velocity

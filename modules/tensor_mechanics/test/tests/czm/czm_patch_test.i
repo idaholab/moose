@@ -1,20 +1,20 @@
 # Patch test for cohesive zone modeling to check convergence
 [Mesh]
-  [./msh]
+  [msh]
   type = FileMeshGenerator
   file = patch_mesh.e
   []
-  [./transform]
+  [transform]
   type = TransformGenerator
   input = msh
   transform = TRANSLATE
   vector_value = '-0.5 -0.5 -0.5'
   []
-  [./split]
+  [split]
     type = BreakMeshByBlockGenerator
     input = transform
   []
-  [./add_surfaces]
+  [add_surfaces]
     type = SideSetsFromNormalsGenerator
     input = split
     normals = '0  0  1
@@ -33,47 +33,47 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = FINITE
         add_variables = true
         use_finite_deform_jacobian = true
         use_automatic_differentiation = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 
 [Functions]
-  [./angles]
+  [angles]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0'
-  [../]
+  []
 
-  [./stretch]
+  [stretch]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.01'
-  [../]
+  []
 
-  [./move_y]
+  [move_y]
     type = ParsedFunction
     value = 'y*cos(theta) - z * (1 + a)*sin(theta) - y'
     vars = 'a theta'
     vals = 'stretch angles'
-  [../]
+  []
 
-  [./move_z]
+  [move_z]
     type = ParsedFunction
     value = 'y*sin(theta) + z*(1+a)*cos(theta) - z'
     vars = 'a theta'
     vals = 'stretch angles'
-  [../]
+  []
 
-  [./dt_fun]
+  [dt_fun]
     type = PiecewiseConstant
     x = '0 1'
     y = '0.25 0.25'
@@ -81,76 +81,76 @@
 []
 
 [BCs]
-  [./fix]
+  [fix]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = left
     variable = disp_x
-  [../]
+  []
 
-  [./front_y]
+  [front_y]
     type = FunctionDirichletBC
     boundary = front
     variable = disp_y
     function = move_y
     preset = true
-  [../]
+  []
 
-  [./back_y]
+  [back_y]
     type = FunctionDirichletBC
     boundary = back
     variable = disp_y
     function = move_y
     preset = true
-  [../]
+  []
 
-  [./front_z]
+  [front_z]
     type = FunctionDirichletBC
     boundary = front
     variable = disp_z
     function = move_z
     preset = true
-  [../]
+  []
 
-  [./back_z]
+  [back_z]
     type = FunctionDirichletBC
     boundary = back
     variable = disp_z
     function = move_z
     preset = true
-  [../]
+  []
 
 []
 
 
 [Modules/TensorMechanics/CohesiveZoneMaster]
-  [./czm_ik]
+  [czm_ik]
     boundary = 'interface'
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-  [../]
-  [./czm_mat]
+  []
+  [czm_mat]
     boundary = 'interface'
-  [../]
+  []
 []
 
 
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -173,9 +173,9 @@
 []
 
 [Postprocessors]
-  [./nonlin]
+  [nonlin]
     type = NumNonlinearIterations
-  [../]
+  []
 []
 
 

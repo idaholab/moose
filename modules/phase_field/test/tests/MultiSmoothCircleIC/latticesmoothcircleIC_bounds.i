@@ -11,14 +11,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
      type = LatticeSmoothCircleIC
      variable = c
      invalue = 1.0
@@ -29,23 +29,23 @@
      int_width = 5.0
      radius_variation_type = uniform
      avoid_bounds = false
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./c]
+  [Periodic]
+    [c]
       variable = c
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [Problem]

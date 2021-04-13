@@ -18,40 +18,40 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./w]
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./eta0]
-  [../]
-  [./eta1]
-  [../]
+  []
+  [eta0]
+  []
+  [eta1]
+  []
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     args = 'eta0 eta1'
     w = w
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./motion]
+  []
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -59,12 +59,12 @@
     grain_force = grain_force
     grain_tracker_object = grain_center
     grain_volumes = grain_volumes
-  [../]
-  [./eta0_dot]
+  []
+  [eta0_dot]
     type = TimeDerivative
     variable = eta0
-  [../]
-  [./vadv_eta]
+  []
+  [vadv_eta]
     type = SingleGrainRigidBodyMotion
     variable = eta0
     c = c
@@ -73,26 +73,26 @@
     grain_tracker_object = grain_center
     grain_volumes = grain_volumes
     op_index = 0
-  [../]
-  [./acint_eta0]
+  []
+  [acint_eta0]
     type = ACInterface
     variable = eta0
     mob_name = M
     #args = c
     kappa_name = kappa_eta
-  [../]
-  [./acbulk_eta0]
+  []
+  [acbulk_eta0]
     type = AllenCahn
     variable = eta0
     mob_name = M
     f_name = F
     args = 'c eta1'
-  [../]
-  [./eta1_dot]
+  []
+  [eta1_dot]
     type = TimeDerivative
     variable = eta1
-  [../]
-  [./vadv_eta1]
+  []
+  [vadv_eta1]
     type = SingleGrainRigidBodyMotion
     variable = eta1
     c = c
@@ -101,30 +101,30 @@
     grain_force = grain_force
     grain_tracker_object = grain_center
     grain_volumes = grain_volumes
-  [../]
-  [./acint_eta1]
+  []
+  [acint_eta1]
     type = ACInterface
     variable = eta1
     mob_name = M
     #args = c
     kappa_name = kappa_eta
-  [../]
-  [./acbulk_eta1]
+  []
+  [acbulk_eta1]
     type = AllenCahn
     variable = eta1
     mob_name = M
     f_name = F
     args = 'c eta0'
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '1.0  0.5      0.5'
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c eta0 eta1'
@@ -132,108 +132,108 @@
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
     derivative_order = 2
-  [../]
-  [./force_density]
+  []
+  [force_density]
     type = ForceDensityMaterial
     c = c
     etas ='eta0 eta1'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
-  [./df00]
+  [bnds]
+  []
+  [df00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./df01]
+  []
+  [df01]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./df10]
+  []
+  [df10]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./df11]
+  []
+  [df11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./centroids]
+  []
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
     op_num = 2
     v = 'eta0 eta1'
-  [../]
-  [./df01]
+  []
+  [df01]
     type = MaterialStdVectorRealGradientAux
     variable = df01
     index = 0
     component = 1
     property = force_density
-  [../]
-  [./df11]
+  []
+  [df11]
     type = MaterialStdVectorRealGradientAux
     variable = df11
     index = 1
     component = 1
     property = force_density
-  [../]
-  [./df00]
+  []
+  [df00]
     type = MaterialStdVectorRealGradientAux
     variable = df00
     index = 0
     component = 0
     property = force_density
-  [../]
-  [./df10]
+  []
+  [df10]
     type = MaterialStdVectorRealGradientAux
     variable = df10
     index = 1
     component = 0
     property = force_density
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
     execute_on = timestep_begin
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_center
     field_display = VARIABLE_COLORING
     execute_on = timestep_begin
-  [../]
-  [./centroids]
+  []
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_begin
     field_display = CENTROID
     flood_counter = grain_center
-  [../]
+  []
 []
 
 [ICs]
-  [./ic_eta0]
+  [ic_eta0]
     int_width = 1.0
     x1 = 20.0
     y1 = 0.0
@@ -242,8 +242,8 @@
     variable = eta0
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
-  [./IC_eta1]
+  []
+  [IC_eta1]
     int_width = 1.0
     x1 = 30.0
     y1 = 25.0
@@ -252,8 +252,8 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
-  [./ic_c]
+  []
+  [ic_c]
     type = SpecifiedSmoothCircleIC
     invalue = 1.0
     outvalue = 0.1
@@ -265,43 +265,43 @@
     3D_spheres = false
     variable = c
     block = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-  [../]
-  [./grain_volumes]
+  []
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
-  [../]
-  [./grain_force]
+  []
+  [grain_force]
     type = ComputeGrainForceAndTorque
     execute_on = 'linear nonlinear'
     grain_data = grain_center
     force_density = force_density
     c = c
     etas = 'eta0 eta1'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

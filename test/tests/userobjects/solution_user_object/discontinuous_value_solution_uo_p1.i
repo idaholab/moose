@@ -10,66 +10,66 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./discontinuous_variable]
+  [discontinuous_variable]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./continuous_variable]
+  [continuous_variable]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./discontinuous_function]
+  [discontinuous_function]
     type = ParsedFunction
     value = 'if(x<0.5,3,5)'
-  [../]
-  [./continuous_function]
+  []
+  [continuous_function]
     type = ParsedFunction
     value = 'if(x<0.5,x,2*x-0.5)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [ICs]
-  [./discontinuous_variable]
+  [discontinuous_variable]
     type = FunctionIC
     variable = discontinuous_variable
     function = discontinuous_function
-  [../]
-  [./continuous_variable]
+  []
+  [continuous_variable]
     type = FunctionIC
     variable = continuous_variable
     function = continuous_function
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./one]
+  []
+  [one]
     type = DirichletBC
     variable = u
     boundary = 'right top bottom'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

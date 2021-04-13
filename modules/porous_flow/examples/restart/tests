@@ -1,5 +1,5 @@
 [Tests]
-  [./gravity_eq]
+  [gravity_eq]
     type = Exodiff
     input = gravityeq.i
     exodiff = gravityeq_out.e
@@ -7,8 +7,8 @@
     requirement = "PorousFlow shall be able to establish gravity equilibrium as the first part of a two-part simulation"
     issues = '#13071'
     design = 'porous_flow/restart.md'
-  [../]
-  [./gas_injection]
+  []
+  [gas_injection]
     type = RunApp
     input = gas_injection.i
     check_input = true
@@ -17,8 +17,8 @@
     requirement = "PorousFlow shall be able to restart using a previous result"
     issues = '#13071'
     design = 'porous_flow/restart.md'
-  [../]
-  [./gas_injection_new_mesh]
+  []
+  [gas_injection_new_mesh]
     type = RunApp
     input = gas_injection_new_mesh.i
     check_input = true
@@ -27,5 +27,5 @@
     requirement = "PorousFlow shall be able to restart using a previous result"
     issues = '#13071'
     design = 'porous_flow/restart.md'
-  [../]
+  []
 []

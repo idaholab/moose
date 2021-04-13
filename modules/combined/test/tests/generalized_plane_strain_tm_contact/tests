@@ -1,5 +1,5 @@
 [Tests]
- [./generalized_plane_strain_tm_contact]
+ [generalized_plane_strain_tm_contact]
    type = 'Exodiff'
    input = 'generalized_plane_strain_tm_contact.i'
    exodiff = 'generalized_plane_strain_tm_contact_out.e'
@@ -7,11 +7,11 @@
    custom_cmp = 'generalized.exodiff'
    superlu = true
 #   deleted = '#6924'
- [../]
- [./out_of_plane_pressure]
+ []
+ [out_of_plane_pressure]
    type = 'Exodiff'
    input = 'out_of_plane_pressure.i'
    exodiff = 'out_of_plane_pressure_out.e'
    abs_zero = 1e-9
- [../]
+ []
 []

@@ -14,22 +14,22 @@
     zmax = 5
     nz = 5
   []
-  [./blocks]
+  [blocks]
     input = gen
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '1 1 0'
     top_right = '4 4 5'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./from_sub_app_var]
+  [from_sub_app_var]
     order = CONSTANT
     family = MONOMIAL
     block = 1
     initial_condition = 0
-  [../]
+  []
 []
 
 [Variables]

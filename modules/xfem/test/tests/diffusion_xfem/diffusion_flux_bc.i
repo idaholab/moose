@@ -25,41 +25,41 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5  1.0  0.5  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
 # Define boundary conditions
-  [./top_u]
+  [top_u]
     type = NeumannBC
     variable = u
     boundary = 2
     value = -1.0
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,8 +83,8 @@
   interval = 1
   execute_on = timestep_end
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

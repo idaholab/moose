@@ -14,10 +14,10 @@
 []
 
 [Variables] # produce smooth initial GB
-  [./gr0]
+  [gr0]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SpecifiedSmoothCircleIC
       x_positions = '250.0  750.0'
       y_positions = '300.0  300.0'
@@ -26,12 +26,12 @@
       invalue = 0.0
       outvalue = 1.0
       int_width = 50.0
-    [../]
-  [../]
-  [./gr1]
+    []
+  []
+  [gr1]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 250.0
       y1 = 300.0
@@ -39,12 +39,12 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 50.0
-    [../]
-  [../]
-  [./gr2]
+    []
+  []
+  [gr2]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 750.0
       y1 = 300.0
@@ -52,52 +52,52 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 50.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
   var_name_base = gr
   op_num = 3
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
     var_name_base = gr
     op_num = 3
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./CuGrGranisotropic]
+  [CuGrGranisotropic]
     type = GBAnisotropy
     T = 600 # K
 
@@ -110,23 +110,23 @@
     # molar_volume_value = 7.11e-6 #Units:m^3/mol
     Anisotropic_GB_file_name = anisotropy_mobility.txt
     inclination_anisotropy = false
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
+  []
 
-  [./gr1_area]
+  [gr1_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
-  [./gr2_area]
+  []
+  [gr2_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr2
-  [../]
+  []
 []
 
 [Executioner]

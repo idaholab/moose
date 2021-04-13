@@ -10,27 +10,27 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./temp]
+  []
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     value = 10.0*(2*x/504)
-  [../]
-  [./cte_func_mean]
+  []
+  [cte_func_mean]
     type = ParsedFunction
     vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-6'
     value = 'scale * (0.5 * t^2 - 0.5 * tsf^2) / (t - tref)'
-  [../]
+  []
 []
 
 [DomainIntegral]
@@ -48,64 +48,64 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = thermal_expansion
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
-  [./tempfuncaux]
+  []
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     block = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./crack_y]
+  [crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
+  []
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 400
     value = 0.0
-  [../]
+  []
 
-  [./no_x1]
+  [no_x1]
     type = DirichletBC
     variable = disp_x
     boundary = 900
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./thermal_expansion_strain]
+  []
+  [thermal_expansion_strain]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func_mean
@@ -113,7 +113,7 @@
     thermal_expansion_function_reference_temperature = 0.5
     temperature = temp
     eigenstrain_name = thermal_expansion
-  [../]
+  []
 []
 
 [Executioner]
@@ -145,10 +145,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     pc_side = left
     ksp_norm = preconditioned
     full = true
-  [../]
+  []
 []

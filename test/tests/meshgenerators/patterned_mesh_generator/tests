@@ -1,5 +1,5 @@
 [Tests]
-  [./patterned_mesh_generator_test]
+  [patterned_mesh_generator_test]
     type = 'Exodiff'
     input = 'patterned_mesh_generator.i'
     exodiff = 'patterned_mesh_generator_out.e'
@@ -9,5 +9,5 @@
     requirement = 'The system shall have the ability to stetch multiple input meshes together into a new mesh based upon a user-defined pattern.'
     design = 'meshgenerators/PatternedMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

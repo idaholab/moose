@@ -8,54 +8,54 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 2
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./bc_sum]
+  [bc_sum]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./sk]
+  [sk]
     type = SumNodalValuesAux
     variable = bc_sum
     nodes = '0 10'
     sum_var = u
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sum]
+  [sum]
     type = ScalarVariable
     variable = bc_sum
-  [../]
+  []
 []
 
 [Executioner]

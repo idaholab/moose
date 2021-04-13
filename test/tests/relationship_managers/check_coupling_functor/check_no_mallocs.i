@@ -14,9 +14,9 @@
 []
 
 [Testing]
-  [./LotsOfDiffusion]
-    [./vars]
+  [LotsOfDiffusion]
+    [vars]
       number = 1
-    [../]
-  [../]
+    []
+  []
 []

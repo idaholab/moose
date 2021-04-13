@@ -8,64 +8,64 @@
 []
 
 [Functions]
-  [./up]
+  [up]
     type = PiecewiseLinear
     x = '0 1      2 3'
     y = '0 0.0001 0 -.0001'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
   []
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 2
     secondary = 3
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01
-  [../]
+  []
 []
 
 [BCs]
-  [./lateral]
+  [lateral]
     type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0
-  [../]
+  []
 
-  [./bottom_up]
+  [bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stiffStuff1_stress]
+  []
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,10 +85,10 @@
   dtmin = 0.2
   end_time = 3
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]

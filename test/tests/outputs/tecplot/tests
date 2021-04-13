@@ -1,24 +1,24 @@
 [Tests]
   issues = '#440 #1927'
   design = 'Tecplot.md'
-  [./test]
+  [test]
     # Tests the for existence of ASCII tecplot files
     type = 'CheckFiles'
     input = 'tecplot.i'
     check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
 
     requirement = "The system shall support Tecplot output."
-  [../]
+  []
 
-  [./test_append]
+  [test_append]
     type = 'CheckFiles'
     input = 'tecplot_append.i'
     check_files = 'tecplot_append_out.dat'
 
     requirement = "The system shall support appending Tecplot output files."
-  [../]
+  []
 
-  [./test_binary]
+  [test_binary]
     # Tests the for existence of binary tecplot files.  This requires libmesh
     # to be configured with --enable-tecplot or --enable-tecio.
     type = 'CheckFiles'
@@ -27,5 +27,5 @@
     tecplot = true
 
     requirement = "The system shall optionally support writing binary Teckplot files."
-  [../]
+  []
 []

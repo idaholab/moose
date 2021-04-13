@@ -17,58 +17,58 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr3]
+  []
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_1]
+  [force_1]
     type = ConstantRate
     variable = disp_y
     boundary = 2
     rate = 1e-4
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,7 +85,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./block_1]
+  [block_1]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -97,8 +97,8 @@
     y_orientation = '0.0 1.0 0.0'
 
     block = 1
-  [../]
-  [./block_2]
+  []
+  [block_2]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -110,34 +110,34 @@
     y_orientation = '0.0 1.0 0.0'
 
     block = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeBeamResultants
     block = '1 2'
-  [../]
-  [./elasticity_1]
+  []
+  [elasticity_1]
     type = ComputeElasticityBeam
     youngs_modulus = 2.0
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = '1 2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_y_1]
+  [disp_y_1]
     type = PointValue
     point = '1.0 0.0 0.0'
     variable = disp_y
-  [../]
-  [./disp_y_2]
+  []
+  [disp_y_2]
     type = PointValue
     point = '1.0 1.0 0.0'
     variable = disp_y
-  [../]
+  []
 []
 
 [Outputs]

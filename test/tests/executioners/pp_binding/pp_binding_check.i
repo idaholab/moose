@@ -4,14 +4,14 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Postprocessors]
-  [./ndofs]
+  [ndofs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Problem]

@@ -46,134 +46,134 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     initial_condition = 1e6
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./temperature]
+  []
+  [temperature]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./rho]
+  []
+  [rho]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./mu]
+  []
+  [mu]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./e]
+  []
+  [e]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./h]
+  []
+  [h]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./s]
+  []
+  [s]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Functions]
-  [./tic]
+  [tic]
     type = ParsedFunction
     value = if(x<1,280,if(x<2,360,500))
-  [../]
+  []
 []
 
 [ICs]
-  [./t_ic]
+  [t_ic]
     type = FunctionIC
     function = tic
     variable = temperature
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./rho]
+  [rho]
     type = MaterialRealAux
     variable = rho
     property = density
-  [../]
-  [./my]
+  []
+  [my]
     type = MaterialRealAux
     variable = mu
     property = viscosity
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = MaterialRealAux
     variable = e
     property = e
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = MaterialRealAux
     variable = h
     property = h
-  [../]
-  [./entropy]
+  []
+  [entropy]
     type = MaterialRealAux
     variable = s
     property = s
-  [../]
-  [./cv]
+  []
+  [cv]
     type = MaterialRealAux
     variable = cv
     property = cv
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
     variable = cp
     property = cp
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
     variable = c
     property = c
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = FluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     fp = co2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -182,126 +182,126 @@
 []
 
 [Postprocessors]
-  [./rho0]
+  [rho0]
     type = ElementalVariableValue
     elementid = 0
     variable = rho
-  [../]
-  [./rho1]
+  []
+  [rho1]
     type = ElementalVariableValue
     elementid = 1
     variable = rho
-  [../]
-  [./rho2]
+  []
+  [rho2]
     type = ElementalVariableValue
     elementid = 2
     variable = rho
-  [../]
-  [./mu0]
+  []
+  [mu0]
     type = ElementalVariableValue
     elementid = 0
     variable = mu
-  [../]
-  [./mu1]
+  []
+  [mu1]
     type = ElementalVariableValue
     elementid = 1
     variable = mu
-  [../]
-  [./mu2]
+  []
+  [mu2]
     type = ElementalVariableValue
     elementid = 2
     variable = mu
-  [../]
-  [./e0]
+  []
+  [e0]
     type = ElementalVariableValue
     elementid = 0
     variable = e
-  [../]
-  [./e1]
+  []
+  [e1]
     type = ElementalVariableValue
     elementid = 1
     variable = e
-  [../]
-  [./e2]
+  []
+  [e2]
     type = ElementalVariableValue
     elementid = 2
     variable = e
-  [../]
-  [./h0]
+  []
+  [h0]
     type = ElementalVariableValue
     elementid = 0
     variable = h
-  [../]
-  [./h1]
+  []
+  [h1]
     type = ElementalVariableValue
     elementid = 1
     variable = h
-  [../]
-  [./h2]
+  []
+  [h2]
     type = ElementalVariableValue
     elementid = 2
     variable = h
-  [../]
-  [./s0]
+  []
+  [s0]
     type = ElementalVariableValue
     elementid = 0
     variable = s
-  [../]
-  [./s1]
+  []
+  [s1]
     type = ElementalVariableValue
     elementid = 1
     variable = s
-  [../]
-  [./s2]
+  []
+  [s2]
     type = ElementalVariableValue
     elementid = 2
     variable = s
-  [../]
-  [./cv0]
+  []
+  [cv0]
     type = ElementalVariableValue
     elementid = 0
     variable = cv
-  [../]
-  [./cv1]
+  []
+  [cv1]
     type = ElementalVariableValue
     elementid = 1
     variable = cv
-  [../]
-  [./cv2]
+  []
+  [cv2]
     type = ElementalVariableValue
     elementid = 2
     variable = cv
-  [../]
-  [./cp0]
+  []
+  [cp0]
     type = ElementalVariableValue
     elementid = 0
     variable = cp
-  [../]
-  [./cp1]
+  []
+  [cp1]
     type = ElementalVariableValue
     elementid = 1
     variable = cp
-  [../]
-  [./cp2]
+  []
+  [cp2]
     type = ElementalVariableValue
     elementid = 2
     variable = cp
-  [../]
-  [./c0]
+  []
+  [c0]
     type = ElementalVariableValue
     elementid = 0
     variable = c
-  [../]
-  [./c1]
+  []
+  [c1]
     type = ElementalVariableValue
     elementid = 1
     variable = c
-  [../]
-  [./c2]
+  []
+  [c2]
     type = ElementalVariableValue
     elementid = 2
     variable = c
-  [../]
+  []
 []
 
 [Outputs]

@@ -35,32 +35,32 @@
 []
 
 [Variables]
-  [./tracer]
-  [../]
-  [./ca2+]
-  [../]
-  [./h+]
+  [tracer]
+  []
+  [ca2+]
+  []
+  [h+]
     initial_condition = 1.0e-7
     scaling = 1e6
-  [../]
-  [./hco3-]
-  [../]
+  []
+  [hco3-]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./pressure_ic]
+  [pressure_ic]
     type = FunctionIC
     variable = pressure
     function = pic
-  [../]
-  [./hco3_ic]
+  []
+  [hco3_ic]
     type = BoundingBoxIC
     variable = hco3-
     x1 = 0.0
@@ -69,8 +69,8 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
-  [./ca2_ic]
+  []
+  [ca2_ic]
     type = BoundingBoxIC
     variable = ca2+
     x1 = 0.0
@@ -79,8 +79,8 @@
     y2 = 0.25
     inside = 1.0e-6
     outside = 5.0e-2
-  [../]
-  [./tracer_ic]
+  []
+  [tracer_ic]
     type = BoundingBoxIC
     variable = tracer
     x1 = 0.0
@@ -89,18 +89,18 @@
     y2 = 0.25
     inside = 1.0
     outside = 0.0
-  [../]
+  []
 []
 
 [Functions]
-  [./pic]
+  [pic]
     type = ParsedFunction
     value = 60-50*x
-  [../]
+  []
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = 'ca2+ hco3- h+'
     secondary_species = 'co2_aq co32- caco3_aq cahco3+ caoh+ oh-'
     pressure = pressure
@@ -110,8 +110,8 @@
                  ca2+ + hco3- = cahco3+ -0.653,
                  ca2+ - h+ = caoh+ -12.85,
                  - h+ = oh- -13.991'
-  [../]
-  [./SolidKineticReactions]
+  []
+  [SolidKineticReactions]
     primary_species = 'ca2+ hco3- h+'
     kin_reactions = 'ca2+ + hco3- - h+ = caco3_s'
     secondary_species = caco3_s
@@ -122,121 +122,121 @@
     specific_reactive_surface_area = 4.61e-4
     kinetic_rate_constant = 6.456542e-7
     activation_energy = 1.5e4
-  [../]
+  []
 []
 
 [Kernels]
-  [./tracer_ie]
+  [tracer_ie]
     type = PrimaryTimeDerivative
     variable = tracer
-  [../]
-  [./tracer_pd]
+  []
+  [tracer_pd]
     type = PrimaryDiffusion
     variable = tracer
-  [../]
-  [./tracer_conv]
+  []
+  [tracer_conv]
     type = PrimaryConvection
     variable = tracer
     p = pressure
-  [../]
-  [./ca2+_ie]
+  []
+  [ca2+_ie]
     type = PrimaryTimeDerivative
     variable = ca2+
-  [../]
-  [./ca2+_pd]
+  []
+  [ca2+_pd]
     type = PrimaryDiffusion
     variable = ca2+
-  [../]
-  [./ca2+_conv]
+  []
+  [ca2+_conv]
     type = PrimaryConvection
     variable = ca2+
     p = pressure
-  [../]
-  [./h+_ie]
+  []
+  [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
-  [../]
-  [./h+_pd]
+  []
+  [h+_pd]
     type = PrimaryDiffusion
     variable = h+
-  [../]
-  [./h+_conv]
+  []
+  [h+_conv]
     type = PrimaryConvection
     variable = h+
     p = pressure
-  [../]
-  [./hco3-_ie]
+  []
+  [hco3-_ie]
     type = PrimaryTimeDerivative
     variable = hco3-
-  [../]
-  [./hco3-_pd]
+  []
+  [hco3-_pd]
     type = PrimaryDiffusion
     variable = hco3-
-  [../]
-  [./hco3-_conv]
+  []
+  [hco3-_conv]
     type = PrimaryConvection
     variable = hco3-
     p = pressure
-  [../]
+  []
 []
 
 [BCs]
-  [./tracer_left]
+  [tracer_left]
     type = DirichletBC
     variable = tracer
     boundary = left
     value = 1.0
-  [../]
-  [./tracer_right]
+  []
+  [tracer_right]
     type = ChemicalOutFlowBC
     variable = tracer
     boundary = right
-  [../]
-  [./ca2+_left]
+  []
+  [ca2+_left]
     type = SinDirichletBC
     variable = ca2+
     boundary = left
     initial = 5.0e-2
     final = 1.0e-6
     duration = 1
-  [../]
-  [./ca2+_right]
+  []
+  [ca2+_right]
     type = ChemicalOutFlowBC
     variable = ca2+
     boundary = right
-  [../]
-  [./hco3-_left]
+  []
+  [hco3-_left]
     type = SinDirichletBC
     variable = hco3-
     boundary = left
     initial = 1.0e-6
     final = 5.0e-2
     duration = 1
-  [../]
-  [./hco3-_right]
+  []
+  [hco3-_right]
     type = ChemicalOutFlowBC
     variable = hco3-
     boundary = right
-  [../]
-  [./h+_left]
+  []
+  [h+_left]
     type = DirichletBC
     variable = h+
     boundary = left
     value = 1.0e-7
-  [../]
-  [./h+_right]
+  []
+  [h+_right]
     type = ChemicalOutFlowBC
     variable = h+
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-7 2e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -247,17 +247,17 @@
   nl_max_its = 10
   nl_rel_tol = 1e-5
   end_time = 10
-  [./TimeStepper]
+  [TimeStepper]
     type = ConstantDT
     dt = 0.1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

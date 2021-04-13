@@ -24,11 +24,11 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     block = '1 2'
-  [../]
+  []
 []
 
 [Variables]
@@ -38,44 +38,44 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = horizontal_movement
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
-  [./left]
+  [left]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     constant_on = SUBDOMAIN
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -122,18 +122,18 @@
 []
 
 [Functions]
-  [./vertical_movement]
+  [vertical_movement]
     type = ParsedFunction
     value = -t
-  [../]
-  [./horizontal_movement]
+  []
+  [horizontal_movement]
     type = ParsedFunction
     value = -0.04*sin(4*t)+0.02
-  [../]
+  []
 []
 
 [Constraints]
-  [./lm]
+  [lm]
     type = NormalNodalLMMechanicalContact
     secondary = 3
     primary = 2
@@ -142,7 +142,7 @@
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
-  [../]
+  []
   [normal_x]
     type = NormalMortarMechanicalContact
     primary_boundary = '2'
@@ -170,9 +170,9 @@
 []
 
 [Postprocessors]
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
+  []
   [lin]
     type = NumLinearIterations
   []

@@ -15,42 +15,42 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./inner]
+  [inner]
     type = DirichletBC
     variable = u
     value = -5.0
     boundary = rmin
-  [../]
-  [./outer]
+  []
+  [outer]
     type = FunctionDirichletBC
     variable = u
     function = 0
     boundary = rmax
-  [../]
-  [./tmin]
+  []
+  [tmin]
     type = FunctionDirichletBC
     variable = u
     function = '-5.0+sqrt(x*x + y*y)'
     boundary = tmin
-  [../]
-  [./tmax]
+  []
+  [tmax]
     type = FunctionDirichletBC
     variable = u
     function = '-5.0+pow(x*x + y*y, 2)/125'
     boundary = tmax
-  [../]
+  []
 []
 
 [Executioner]

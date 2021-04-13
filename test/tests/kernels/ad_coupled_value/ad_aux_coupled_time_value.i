@@ -13,70 +13,70 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./u]
+  [u]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./u]
+  [u]
     type = FunctionAux
     variable = u
     function = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_v]
+  [time_v]
     type = ADCoupledTimeDerivative
     variable = v
     v = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = ADDiffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = v
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
   []
 []
 
 [Postprocessors]
-  [./l2]
+  [l2]
     type = ElementL2Error
     variable = v
     function = '1/2 * (x^2 + x)'
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,36 +7,36 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 10
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = -1
-  [../]
+  []
 []
 
 [Executioner]
@@ -49,19 +49,19 @@
   line_search = none
   nl_rel_tol = 1e-8
   end_time = 20.0
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1.0
     optimal_iterations = 10
     time_t = '0.0 5.0'
     time_dt = '1.0 5.0'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

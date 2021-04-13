@@ -1,5 +1,5 @@
 [Tests]
-  [./use_displaced]
+  [use_displaced]
     # Test the displaced mesh output; the gold file for this was generated from
     # moose_test/tests/mesh/adapt/displaced_adapt_test.i
     type = 'Exodiff'
@@ -10,18 +10,18 @@
     requirement = "The system shall be able to output the ~displaced~ mesh for a model with adaptive mesh refinement."
     design = "syntax/Outputs/index.md syntax/Adaptivity/index.md"
     issues = "#1927"
-  [../]
+  []
 
-  [./non_displaced_fallback]
+  [non_displaced_fallback]
     type = 'RunException'
     input = 'non_displaced_fallback.i'
     expect_err = "Parameter 'use_displaced' ignored, there is no displaced problem in your simulation."
     requirement = "If the user requested the output of a displaced problem and there is none present, the system shall fallback to using the non-displaced problem."
     design = "syntax/Outputs/index.md"
     issues = "#11309"
-  [../]
+  []
 
-  [./mesh_use_displaced_mesh_false]
+  [mesh_use_displaced_mesh_false]
     prereq = non_displaced_fallback
     type = 'RunException'
     input = 'non_displaced_fallback.i'
@@ -30,5 +30,5 @@
     requirement = "If the user asks for no displaced mesh to be created, even though displacements are provided in the mesh block, the system shall not create a displaced mesh"
     design = "syntax/Mesh/index.md"
     issues = "#12580"
-  [../]
+  []
 []

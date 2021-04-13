@@ -20,77 +20,77 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./x_disp]
-  [../]
-  [./y_disp]
-  [../]
+  [x_disp]
+  []
+  [y_disp]
+  []
 []
 
 [AuxKernels]
-  [./x_disp]
+  [x_disp]
     type = FunctionAux
     variable = x_disp
     function = x_disp_func
-  [../]
-  [./y_disp]
+  []
+  [y_disp]
     type = FunctionAux
     variable = y_disp
     function = y_disp_func
-  [../]
+  []
 []
 
 [Functions]
-  [./x_disp_func]
+  [x_disp_func]
     type = ParsedFunction
     value = 0
-  [../]
-  [./y_disp_func]
+  []
+  [y_disp_func]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff rea rhs'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./rea]
+  [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = MassEigenKernel
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
   active = 'homogeneous'
 
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -113,19 +113,19 @@
 [Postprocessors]
   active = 'unorm udiff'
 
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./udiff]
+  [udiff]
     type = ElementL2Diff
     variable = u
     execute_on = 'linear timestep_end'
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Outputs]

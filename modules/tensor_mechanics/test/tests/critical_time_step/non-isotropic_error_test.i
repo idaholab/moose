@@ -20,57 +20,57 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./2_x]
+  [2_x]
     type = DirichletBC
     variable = disp_x
     boundary = 3
     value = 0.0
-  [../]
-  [./2_y]
+  []
+  [2_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
-  [./2_z]
+  []
+  [2_z]
     type = DirichletBC
     variable = disp_z
     boundary = 3
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
   C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   fill_method = symmetric9
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8050.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,9 +88,9 @@
 []
 
 [Postprocessors]
-  [./time_step]
+  [time_step]
     type = CriticalTimeStep
-  [../]
+  []
 []
 
 [Outputs]

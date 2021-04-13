@@ -1,5 +1,5 @@
 [Tests]
-  [./testdirichlet]
+  [testdirichlet]
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
@@ -7,9 +7,9 @@
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
     issues = '#6397'
     design = '/DirichletBC.md'
-  [../]
+  []
 
-  [./testneumann]
+  [testneumann]
     type = 'Exodiff'
     input = '2d_diffusion_neumannbc_test.i'
     exodiff = 'neumannbc_out.e'
@@ -17,18 +17,18 @@
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
     issues = '#1410'
     design = '/NeumannBC.md'
-  [../]
+  []
 
-  [./testmatdiffusion]
+  [testmatdiffusion]
     type = 'Exodiff'
     input = 'matdiffusion.i'
     exodiff = 'matdiffusion_out.e'
     requirement = 'MOOSE shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
     issues = '#12074'
     design = '/MatDiffusion.md'
-  [../]
+  []
 
-  [./testbodyforce]
+  [testbodyforce]
     type = 'Exodiff'
     input = '2d_diffusion_bodyforce_test.i'
     exodiff = 'bodyforce_out.e'
@@ -36,9 +36,9 @@
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
     issues = '#6136'
     design = '/BodyForce.md'
-  [../]
+  []
 
-  [./test_jacobian]
+  [test_jacobian]
     type = 'PetscJacobianTester'
     input = '2d_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
@@ -46,9 +46,9 @@
     requirement = 'MOOSE shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     issues = '#2337'
     design = 'framework_stp.md'
-  [../]
+  []
 
-  [./test_force_iteration]
+  [test_force_iteration]
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
@@ -58,9 +58,9 @@
     requirement = 'MOOSE shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     issues = '#10594'
     design = 'Transient.md'
-  [../]
+  []
 
-  [./actual_linear_solver]
+  [actual_linear_solver]
     type = RunApp
     input = '2d_diffusion_test.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
@@ -68,5 +68,5 @@
     requirement = 'MOOSE should not compute an extra residual if the linear solver is used'
     issues = '#11760'
     design = 'FEProblem.md'
-  [../]
+  []
 []

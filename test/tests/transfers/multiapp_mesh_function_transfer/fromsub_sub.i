@@ -11,38 +11,38 @@
 []
 
 [Variables]
-  [./sub_u]
-  [../]
+  [sub_u]
+  []
 []
 
 [AuxVariables]
-  [./x_disp]
+  [x_disp]
     initial_condition = 0.2
-  [../]
-  [./y_disp]
-  [../]
+  []
+  [y_disp]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = sub_u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = sub_u
     boundary = left
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = sub_u
     boundary = right
     value = 4
-  [../]
+  []
 []
 
 [Executioner]

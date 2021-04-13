@@ -5,7 +5,7 @@
   # At this point, we test against min, max, average, sum
   # Hopefully these measurements are good enough and also platform independent
 
-  [./ptscotch]
+  [ptscotch]
     requirement = 'Make MOOSE support ptscotch via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -21,9 +21,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_elment]
+  [ptscotch_weight_elment]
     requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -39,9 +39,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_side]
+  [ptscotch_weight_side]
     requirement = 'ptscotch shall support side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -57,9 +57,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_both]
+  [ptscotch_weight_both]
     requirement = 'ptscotch shall take both side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -75,9 +75,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis]
+  [parmetis]
     requirement = 'Make MOOSE support parmetis via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -90,9 +90,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_element]
+  [parmetis_weight_element]
     requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -106,9 +106,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_side]
+  [parmetis_weight_side]
     requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -122,9 +122,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_both]
+  [parmetis_weight_both]
     requirement = 'Parmetis shall take side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -138,9 +138,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_presplit_mesh]
+  [parmetis_presplit_mesh]
     requirement = 'Parmetis shall support presplit'
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
@@ -152,9 +152,9 @@
     petsc_version = '>=3.9.3'
     min_parallel = 2
     max_parallel = 2
-  [../]
+  []
 
-  [./chaco]
+  [chaco]
     requirement = 'MOOSE shall support a serial partitioner Chaco'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
@@ -168,9 +168,9 @@
     dof_id_bytes = 4
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 
-  [./party]
+  [party]
     requirement = 'MOOSE shall support a serial partitioner party'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
@@ -180,5 +180,5 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 []

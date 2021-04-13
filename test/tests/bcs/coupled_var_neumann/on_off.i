@@ -10,67 +10,67 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./coupled_bc_var]
-  [../]
+  [coupled_bc_var]
+  []
 
-  [./active]
+  [active]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./active_right]
+  [active_right]
     type = ConstantAux
     variable = active
     value = 0.5
     boundary = 1
-  [../]
+  []
 []
 
 [ICs]
-  [./coupled_bc_var]
+  [coupled_bc_var]
     type = FunctionIC
     variable = coupled_bc_var
     function = set_coupled_bc_var
-  [../]
+  []
 []
 
 [Functions]
-  [./set_coupled_bc_var]
+  [set_coupled_bc_var]
     type = ParsedFunction
     value = 'y - 0.5'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = CoupledVarNeumannBC
     variable = u
     boundary = 1
     v = coupled_bc_var
     scale_factor = active
-  [../]
+  []
 []
 
 [Executioner]

@@ -21,57 +21,57 @@
 []
 
 [Functions]
-  [./disply]
+  [disply]
     type = PiecewiseLinear
     x = '0 1       2  3      4 5       6'
     y = '0 0.00175 0 -0.0001 0 0.00175 0.0035'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [BCs]
-  [./pully]
+  [pully]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = disply
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./sides]
+  [sides]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 186.5e9
     poissons_ratio = 0.316
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 119.3e6
     softening_models = exponential_softening
-  [../]
-  [./exponential_softening]
+  []
+  [exponential_softening]
     type = ExponentialSoftening
-  [../]
+  []
 []
 
 [Executioner]

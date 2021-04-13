@@ -1,7 +1,7 @@
 [Tests]
   issues = '#2617'
   design = 'syntax/Outputs/index.md'
-  [./exodus]
+  [exodus]
     type = 'Exodiff'
     input = 'iterative.i'
     exodiff = 'iterative_out.e'
@@ -11,12 +11,12 @@
     max_threads = 1
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the ExodusII format."
-  [../]
+  []
 
   [iterative]
     requirement = "The system shall support output during linear and non-linear iterations during steady simulations using the ExodusII format:"
 
-    [./exodus_steady]
+    [exodus_steady]
       type = 'Exodiff'
       input = 'iterative_steady.i'
       exodiff = 'iterative_steady_out.e'
@@ -26,8 +26,8 @@
       max_threads = 1
 
       detail = 'in a single file or'
-    [../]
-    [./exodus_steady_sequence]
+    []
+    [exodus_steady_sequence]
       # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
       type = 'Exodiff'
       input = 'iterative_steady_sequence.i'
@@ -51,9 +51,9 @@
       max_threads = 1
 
       detail = 'in a sequence of files.'
-    [../]
+    []
   []
-  [./vtk]
+  [vtk]
     type = 'XMLDiff'
     input = 'iterative_vtk.i'
     xmldiff = 'iterative_vtk_out_003_0.vtu'
@@ -65,8 +65,8 @@
     mesh_mode = REPLICATED
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the VTK format."
-  [../]
-  [./csv]
+  []
+  [csv]
     type = 'CSVDiff'
     input = 'iterative_csv.i'
     csvdiff = 'iterative_csv_out.csv'
@@ -83,7 +83,7 @@
     compiler = '!INTEL'
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the CSV format."
-  [../]
+  []
 
   [start_stop]
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations:"

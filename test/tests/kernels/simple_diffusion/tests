@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
@@ -7,5 +7,5 @@
     issues = '#1493'
     design = 'kernels/Diffusion.md'
     requirement = 'The system shall run a simple 2D linear diffusion problem with Dirichlet boundary conditions on a regular mesh.'
-  [../]
+  []
 []

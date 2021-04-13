@@ -1,29 +1,29 @@
 [Tests]
-  [./except01]
+  [except01]
     type = 'RunException'
     input = 'except01.i'
     expect_err = 'The Dictator proclaims that the number of fluid phases is 1 while you have foolishly entered 1 for your liquid phase number.  Remember that indexing starts at 0.  Be aware that the Dictator does not tolerate mistakes.'
     requirement = 'If the liquid phase number exceeds the number of phases in the system, PorousFlow shall produce an appropriate error message and exit'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except02]
+  []
+  [except02]
     type = 'RunException'
     input = 'except02.i'
     expect_err = 'The initial order must be less than the max order, which is hard-coded to 3'
     requirement = 'The maximum order for hysteretic relative permeabilities and capillary pressures is 3 and if the user specifies an initial order greater than this amount, an error shall be thrown'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except03]
+  []
+  [except03]
     type = 'RunException'
     input = 'except03.i'
     expect_err = 'previous_turning_points: initial_order is 1 so there must be this many previous_turning_points'
     requirement = 'An error shall be thrown if the initial order of hysteresis is incommensurate with previous_turning_points'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except04]
+  []
+  [except04]
     type = 'RunException'
     input = 'except04.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
@@ -31,8 +31,8 @@
     requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range [0, 1]'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except05]
+  []
+  [except05]
     type = 'RunException'
     input = 'except05.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
@@ -40,8 +40,8 @@
     requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range [0, 1]'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except06]
+  []
+  [except06]
     type = 'RunException'
     input = 'except06.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
@@ -49,8 +49,8 @@
     requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except07]
+  []
+  [except07]
     type = 'RunException'
     input = 'except07.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
@@ -58,8 +58,8 @@
     requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except08]
+  []
+  [except08]
     type = 'RunException'
     input = 'except08.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
@@ -67,16 +67,16 @@
     requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./except09]
+  []
+  [except09]
     type = 'RunException'
     input = 'except09.i'
     expect_err = 'The maximum number of hysteresis turning points is 3'
     requirement = 'An error shall be thrown if the hysteresis turning-point information is requested for the Nth turning point, when N exceeds the maximum number of turning points'
     design = 'PorousFlowHysteresisOrder.md PorousFlowPropertyAux.md'
     issues = '#16021'
-  [../]
-  [./except10]
+  []
+  [except10]
     type = 'RunException'
     input = 'except10.i'
     expect_err = 'Must be less than 1 - S_l_min'
@@ -84,8 +84,8 @@
     requirement = 'An error shall be thrown if the maximum gas residual saturation is greater than 1 - minimum_liquid_saturation in hysteretic problems'
     design = 'hysteresis.md'
     issues = '#16129'
-  [../]
-  [./except11]
+  []
+  [except11]
     type = 'RunException'
     input = 'except11.i'
     expect_err = 'Should be chosen sufficiently close to 1 so that the high extension does not interfere with the low extension.  Instead, you may have chosen Pc_max too low'
@@ -93,8 +93,8 @@
     requirement = 'An error shall be thrown if parameters are chosen such that the high and low extension regions of the hysteretic capillary pressure overlap'
     design = 'hysteresis.md'
     issues = '#16129'
-  [../]
-  [./except12]
+  []
+  [except12]
     type = 'RunException'
     input = 'except12.i'
     expect_err = 'S_lr should usually be greater than S_l_min'
@@ -103,8 +103,8 @@
     requirement = 'A warning shall be produced if the residual saturation is not greater than the minimum saturation in hysteretic simulations'
     design = 'hysteresis.md'
     issues = '#16129'
-  [../]
-  [./except13]
+  []
+  [except13]
     type = 'RunException'
     input = 'except13.i'
     expect_err = 'The Dictator proclaims that the number of phases is 2 whereas PorousFlow1PhaseHysP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.'
@@ -112,8 +112,8 @@
     requirement = 'An exception shall be thrown if a single-phase hysteretic capillary-pressure Material is used in situations with more than one fluid phase'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./except14]
+  []
+  [except14]
     type = 'RunException'
     input = 'except14.i'
     expect_err = 'The Dictator announces that the number of phases is 1 whereas PorousFlow2PhaseHysPP can only be used for 2-phase simulation.  When you have efficient government, you have dictatorship.'
@@ -121,8 +121,8 @@
     requirement = 'An exception shall be thrown if a two-phase PP hysteretic capillary-pressure Material is used in models that do not have exactly 2 phases'
     design = 'PorousFlow2PhaseHysPP.md'
     issues = '#16260'
-  [../]
-  [./except15]
+  []
+  [except15]
     type = 'RunException'
     input = 'except15.i'
     expect_err = 'The Dictator announces that the number of phases is 1 whereas PorousFlow2PhaseHysPS can only be used for 2-phase simulation.  The Dictator is always watching.'
@@ -130,8 +130,8 @@
     requirement = 'An exception shall be thrown if a two-phase PS hysteretic capillary-pressure Material is used in models that do not have exactly 2 phases'
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16260'
-  [../]
-  [./except16]
+  []
+  [except16]
     type = 'RunException'
     input = 'except16.i'
     expect_err = 'Must be less than 1 - S_lr'
@@ -139,128 +139,128 @@
     requirement = 'When using hysteretic relative permeabilities, an exception shall be thrown if the gas residual saturation is not less than 1 - liquid_residual_saturation'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./hys_order_01]
+  []
+  [hys_order_01]
     type = CSVDiff
     input = 'hys_order_01.i'
     csvdiff = 'hys_order_01_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_02]
+  []
+  [hys_order_02]
     type = CSVDiff
     input = 'hys_order_02.i'
     csvdiff = 'hys_order_02_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_03]
+  []
+  [hys_order_03]
     type = CSVDiff
     input = 'hys_order_03.i'
     csvdiff = 'hys_order_03_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_04]
+  []
+  [hys_order_04]
     type = CSVDiff
     input = 'hys_order_04.i'
     csvdiff = 'hys_order_04_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_05]
+  []
+  [hys_order_05]
     type = CSVDiff
     input = 'hys_order_05.i'
     csvdiff = 'hys_order_05_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_06]
+  []
+  [hys_order_06]
     type = CSVDiff
     input = 'hys_order_06.i'
     csvdiff = 'hys_order_06_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_07]
+  []
+  [hys_order_07]
     type = CSVDiff
     input = 'hys_order_07.i'
     csvdiff = 'hys_order_07_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_08]
+  []
+  [hys_order_08]
     type = CSVDiff
     input = 'hys_order_08.i'
     csvdiff = 'hys_order_08_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, and jumps of greater than 2 in hysteresis order shall be allowed within one time-step'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_order_09]
+  []
+  [hys_order_09]
     type = CSVDiff
     input = 'hys_order_09.i'
     csvdiff = 'hys_order_09_csv.csv'
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, and jumps of greater than 2 in hysteresis order shall be allowed within one time-step, and turning points shall be correctly identified in such situations'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
-  [../]
-  [./hys_sat_01]
+  []
+  [hys_sat_01]
     type = CSVDiff
     input = 'hys_sat_01.i'
     csvdiff = 'hys_sat_01_out_sat_0001.csv'
     requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_02]
+  []
+  [hys_sat_02]
     type = CSVDiff
     input = 'hys_sat_02.i'
     csvdiff = 'hys_sat_02_out_sat_0001.csv'
     requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_03]
+  []
+  [hys_sat_03]
     type = CSVDiff
     input = 'hys_sat_03.i'
     csvdiff = 'hys_sat_03_out_sat_0001.csv'
     requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_01]
+  []
+  [hys_pc_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_pc_01_out_pc_0001.csv'
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_02]
+  []
+  [hys_pc_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_pc_02_out_pc_0001.csv'
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_03]
+  []
+  [hys_pc_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_pc_03_out_pc_0001.csv'
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_none_none]
+  []
+  [hys_pc_1_w_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_none_none_pc_0001.csv'
@@ -268,8 +268,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_none_power]
+  []
+  [hys_pc_1_w_none_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_none_power_pc_0001.csv'
@@ -277,8 +277,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_quadratic_none]
+  []
+  [hys_pc_1_w_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_quadratic_none_pc_0001.csv'
@@ -286,8 +286,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_quadratic_power]
+  []
+  [hys_pc_1_w_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_quadratic_power_pc_0001.csv'
@@ -295,8 +295,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_exponential_none]
+  []
+  [hys_pc_1_w_exponential_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_exponential_none_pc_0001.csv'
@@ -304,8 +304,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_w_exponential_power]
+  []
+  [hys_pc_1_w_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_w_exponential_power_pc_0001.csv'
@@ -313,8 +313,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_none_none]
+  []
+  [hys_pc_1_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_none_none_pc_0001.csv'
@@ -322,8 +322,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_none_power]
+  []
+  [hys_pc_1_none_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_none_power_pc_0001.csv'
@@ -331,8 +331,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_quadratic_none]
+  []
+  [hys_pc_1_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_quadratic_none_pc_0001.csv'
@@ -340,8 +340,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_quadratic_power]
+  []
+  [hys_pc_1_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_quadratic_power_pc_0001.csv'
@@ -349,8 +349,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_exponential_none]
+  []
+  [hys_pc_1_exponential_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_exponential_none_pc_0001.csv'
@@ -358,8 +358,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_1_exponential_power]
+  []
+  [hys_pc_1_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_pc_p_1_exponential_power_pc_0001.csv'
@@ -367,8 +367,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_none_none]
+  []
+  [hys_pc_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_none_none_pc_0001.csv'
@@ -376,8 +376,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_none_power]
+  []
+  [hys_pc_2_none_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_none_power_pc_0001.csv'
@@ -385,8 +385,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_quadratic_none]
+  []
+  [hys_pc_2_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_quadratic_none_pc_0001.csv'
@@ -394,8 +394,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_quadratic_power]
+  []
+  [hys_pc_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_quadratic_power_pc_0001.csv'
@@ -403,8 +403,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_exponential_none]
+  []
+  [hys_pc_2_exponential_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_exponential_none_pc_0001.csv'
@@ -412,8 +412,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_2_exponential_power]
+  []
+  [hys_pc_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_pc_p_2_exponential_power_pc_0001.csv'
@@ -421,8 +421,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_none_none]
+  []
+  [hys_pc_3_none_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_none_none_pc_0001.csv'
@@ -430,8 +430,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_none_power]
+  []
+  [hys_pc_3_none_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_none_power_pc_0001.csv'
@@ -439,8 +439,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_quadratic_none]
+  []
+  [hys_pc_3_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_quadratic_none_pc_0001.csv'
@@ -448,8 +448,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_quadratic_power]
+  []
+  [hys_pc_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_quadratic_power_pc_0001.csv'
@@ -457,8 +457,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_exponential_none]
+  []
+  [hys_pc_3_exponential_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_exponential_none_pc_0001.csv'
@@ -466,8 +466,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_pc_3_exponential_power]
+  []
+  [hys_pc_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_pc_p_3_exponential_power_pc_0001.csv'
@@ -475,8 +475,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_prim_01]
+  []
+  [hys_sat_prim_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_sat_01_none_pc_0001.csv'
@@ -484,8 +484,8 @@
     requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_prim_02]
+  []
+  [hys_sat_prim_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_sat_02_quad_pc_0001.csv'
@@ -493,8 +493,8 @@
     requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_prim_03]
+  []
+  [hys_sat_prim_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_sat_03_exp_pc_0001.csv'
@@ -502,8 +502,8 @@
     requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_none_none]
+  []
+  [hys_sat_1_w_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_none_none_pc_0001.csv'
@@ -511,8 +511,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_none_power]
+  []
+  [hys_sat_1_w_none_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_none_power_pc_0001.csv'
@@ -520,8 +520,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_quadratic_none]
+  []
+  [hys_sat_1_w_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_quadratic_none_pc_0001.csv'
@@ -529,8 +529,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_quadratic_power]
+  []
+  [hys_sat_1_w_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_quadratic_power_pc_0001.csv'
@@ -538,8 +538,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_exponential_none]
+  []
+  [hys_sat_1_w_exponential_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_exponential_none_pc_0001.csv'
@@ -547,8 +547,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_1_w_exponential_power]
+  []
+  [hys_sat_1_w_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_sat_p_w_exponential_power_pc_0001.csv'
@@ -556,8 +556,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_none_none]
+  []
+  [hys_sat_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_none_none_pc_0001.csv'
@@ -565,8 +565,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_none_power]
+  []
+  [hys_sat_2_none_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_none_power_pc_0001.csv'
@@ -574,8 +574,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_quadratic_none]
+  []
+  [hys_sat_2_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_quadratic_none_pc_0001.csv'
@@ -583,8 +583,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_quadratic_power]
+  []
+  [hys_sat_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_quadratic_power_pc_0001.csv'
@@ -592,8 +592,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_exponential_none]
+  []
+  [hys_sat_2_exponential_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_exponential_none_pc_0001.csv'
@@ -601,8 +601,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_2_exponential_power]
+  []
+  [hys_sat_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_sat_p_2_exponential_power_pc_0001.csv'
@@ -610,8 +610,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_3_none_power]
+  []
+  [hys_sat_3_none_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_sat_p_3_none_power_pc_0001.csv'
@@ -619,8 +619,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using no low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_3_quadratic_none]
+  []
+  [hys_sat_3_quadratic_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_sat_p_3_quadratic_none_pc_0001.csv'
@@ -628,8 +628,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_3_quadratic_power]
+  []
+  [hys_sat_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_sat_p_3_quadratic_power_pc_0001.csv'
@@ -637,8 +637,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_3_exponential_none]
+  []
+  [hys_sat_3_exponential_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_sat_p_3_exponential_none_pc_0001.csv'
@@ -646,8 +646,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_sat_3_exponential_power]
+  []
+  [hys_sat_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_sat_p_3_exponential_power_pc_0001.csv'
@@ -655,8 +655,8 @@
     requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_prim_01]
+  []
+  [hys_dpc_prim_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_dpc_01_none_pc_0001.csv'
@@ -665,8 +665,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_prim_02]
+  []
+  [hys_dpc_prim_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_dpc_02_quad_pc_0001.csv'
@@ -675,8 +675,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_prim_03]
+  []
+  [hys_dpc_prim_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_dpc_03_exp_pc_0001.csv'
@@ -685,8 +685,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_1_none_none]
+  []
+  [hys_dpc_1_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dpc_p_1_none_none_pc_0001.csv'
@@ -695,8 +695,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_1_quadratic_power]
+  []
+  [hys_dpc_1_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dpc_p_1_quadratic_power_pc_0001.csv'
@@ -705,8 +705,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_1_exponential_power]
+  []
+  [hys_dpc_1_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dpc_p_1_exponential_power_pc_0001.csv'
@@ -715,8 +715,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_2_none_none]
+  []
+  [hys_dpc_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dpc_p_2_none_none_pc_0001.csv'
@@ -725,8 +725,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_2_quadratic_power]
+  []
+  [hys_dpc_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dpc_p_2_quadratic_power_pc_0001.csv'
@@ -735,8 +735,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_2_exponential_power]
+  []
+  [hys_dpc_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dpc_p_2_exponential_power_pc_0001.csv'
@@ -745,8 +745,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_3_none_none]
+  []
+  [hys_dpc_3_none_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dpc_p_3_none_none_pc_0001.csv'
@@ -755,8 +755,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_3_quadratic_power]
+  []
+  [hys_dpc_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dpc_p_3_quadratic_power_pc_0001.csv'
@@ -765,8 +765,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dpc_3_exponential_power]
+  []
+  [hys_dpc_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dpc_p_3_exponential_power_pc_0001.csv'
@@ -775,8 +775,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_prim_01]
+  []
+  [hys_d2pc_prim_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_d2pc_01_none_pc_0001.csv'
@@ -785,8 +785,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_prim_02]
+  []
+  [hys_d2pc_prim_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_d2pc_02_quad_pc_0001.csv'
@@ -795,8 +795,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_prim_03]
+  []
+  [hys_d2pc_prim_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_d2pc_03_exp_pc_0001.csv'
@@ -805,8 +805,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_1_none_none]
+  []
+  [hys_d2pc_1_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2pc_p_1_none_none_pc_0001.csv'
@@ -815,8 +815,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_1_quadratic_power]
+  []
+  [hys_d2pc_1_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2pc_p_1_quadratic_power_pc_0001.csv'
@@ -825,8 +825,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_1_exponential_power]
+  []
+  [hys_d2pc_1_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2pc_p_1_exponential_power_pc_0001.csv'
@@ -835,8 +835,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_2_none_none]
+  []
+  [hys_d2pc_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2pc_p_2_none_none_pc_0001.csv'
@@ -845,8 +845,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_2_quadratic_power]
+  []
+  [hys_d2pc_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2pc_p_2_quadratic_power_pc_0001.csv'
@@ -855,8 +855,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_2_exponential_power]
+  []
+  [hys_d2pc_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2pc_p_2_exponential_power_pc_0001.csv'
@@ -865,8 +865,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_3_none_none]
+  []
+  [hys_d2pc_3_none_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2pc_p_3_none_none_pc_0001.csv'
@@ -875,8 +875,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_3_quadratic_power]
+  []
+  [hys_d2pc_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2pc_p_3_quadratic_power_pc_0001.csv'
@@ -885,8 +885,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2pc_3_exponential_power]
+  []
+  [hys_d2pc_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2pc_p_3_exponential_power_pc_0001.csv'
@@ -895,8 +895,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_prim_01]
+  []
+  [hys_dsat_prim_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_dsat_01_none_pc_0001.csv'
@@ -905,8 +905,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_prim_02]
+  []
+  [hys_dsat_prim_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_dsat_02_quad_pc_0001.csv'
@@ -915,8 +915,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_prim_03]
+  []
+  [hys_dsat_prim_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_dsat_03_exp_pc_0001.csv'
@@ -925,8 +925,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_1_none_none]
+  []
+  [hys_dsat_1_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dsat_p_1_none_none_pc_0001.csv'
@@ -935,8 +935,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_1_quadratic_power]
+  []
+  [hys_dsat_1_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dsat_p_1_quadratic_power_pc_0001.csv'
@@ -945,8 +945,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_1_exponential_power]
+  []
+  [hys_dsat_1_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_dsat_p_1_exponential_power_pc_0001.csv'
@@ -955,8 +955,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_2_none_none]
+  []
+  [hys_dsat_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dsat_p_2_none_none_pc_0001.csv'
@@ -965,8 +965,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_2_quadratic_power]
+  []
+  [hys_dsat_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dsat_p_2_quadratic_power_pc_0001.csv'
@@ -975,8 +975,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_2_exponential_power]
+  []
+  [hys_dsat_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_dsat_p_2_exponential_power_pc_0001.csv'
@@ -985,8 +985,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_3_none_none]
+  []
+  [hys_dsat_3_none_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dsat_p_3_none_none_pc_0001.csv'
@@ -995,8 +995,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_3_quadratic_power]
+  []
+  [hys_dsat_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dsat_p_3_quadratic_power_pc_0001.csv'
@@ -1005,8 +1005,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_dsat_3_exponential_power]
+  []
+  [hys_dsat_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_dsat_p_3_exponential_power_pc_0001.csv'
@@ -1015,8 +1015,8 @@
     requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_prim_01]
+  []
+  [hys_d2sat_prim_01]
     type = CSVDiff
     input = 'hys_pc_01.i'
     csvdiff = 'hys_d2sat_01_none_pc_0001.csv'
@@ -1025,8 +1025,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using no low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_prim_02]
+  []
+  [hys_d2sat_prim_02]
     type = CSVDiff
     input = 'hys_pc_02.i'
     csvdiff = 'hys_d2sat_02_quad_pc_0001.csv'
@@ -1035,8 +1035,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using quadratic low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_prim_03]
+  []
+  [hys_d2sat_prim_03]
     type = CSVDiff
     input = 'hys_pc_03.i'
     csvdiff = 'hys_d2sat_03_exp_pc_0001.csv'
@@ -1045,8 +1045,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using exponential low extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_1_none_none]
+  []
+  [hys_d2sat_1_none_none]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2sat_p_1_none_none_pc_0001.csv'
@@ -1055,8 +1055,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_1_quadratic_power]
+  []
+  [hys_d2sat_1_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2sat_p_1_quadratic_power_pc_0001.csv'
@@ -1065,8 +1065,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_1_exponential_power]
+  []
+  [hys_d2sat_1_exponential_power]
     type = CSVDiff
     input = 'hys_pc_1.i'
     csvdiff = 'hys_d2sat_p_1_exponential_power_pc_0001.csv'
@@ -1075,8 +1075,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_2_none_none]
+  []
+  [hys_d2sat_2_none_none]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2sat_p_2_none_none_pc_0001.csv'
@@ -1085,8 +1085,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_2_quadratic_power]
+  []
+  [hys_d2sat_2_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2sat_p_2_quadratic_power_pc_0001.csv'
@@ -1095,8 +1095,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_2_exponential_power]
+  []
+  [hys_d2sat_2_exponential_power]
     type = CSVDiff
     input = 'hys_pc_2.i'
     csvdiff = 'hys_d2sat_p_2_exponential_power_pc_0001.csv'
@@ -1105,8 +1105,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_3_none_none]
+  []
+  [hys_d2sat_3_none_none]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2sat_p_3_none_none_pc_0001.csv'
@@ -1115,8 +1115,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_3_quadratic_power]
+  []
+  [hys_d2sat_3_quadratic_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2sat_p_3_quadratic_power_pc_0001.csv'
@@ -1125,8 +1125,8 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./hys_d2sat_3_exponential_power]
+  []
+  [hys_d2sat_3_exponential_power]
     type = CSVDiff
     input = 'hys_pc_3.i'
     csvdiff = 'hys_d2sat_p_3_exponential_power_pc_0001.csv'
@@ -1135,16 +1135,16 @@
     requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./vary_sat_1a]
+  []
+  [vary_sat_1a]
     type = CSVDiff
     input = 'vary_sat_1.i'
     csvdiff = 'vary_sat_1_out.csv'
     requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./vary_sat_1b]
+  []
+  [vary_sat_1b]
     type = CSVDiff
     input = 'vary_sat_1.i'
     csvdiff = 'vary_sat_1b.csv'
@@ -1152,8 +1152,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve and then the primary wetting curve'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./vary_sat_1c]
+  []
+  [vary_sat_1c]
     type = CSVDiff
     input = 'vary_sat_1.i'
     csvdiff = 'vary_sat_1c.csv'
@@ -1161,8 +1161,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve and then the first-order wetting'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./vary_sat_1d]
+  []
+  [vary_sat_1d]
     type = CSVDiff
     input = 'vary_sat_1.i'
     csvdiff = 'vary_sat_1d.csv'
@@ -1170,8 +1170,8 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve, then first-order wetting, and then second-order drying'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./vary_sat_1e]
+  []
+  [vary_sat_1e]
     type = CSVDiff
     input = 'vary_sat_1.i'
     csvdiff = 'vary_sat_1e.csv'
@@ -1179,24 +1179,24 @@
     requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve, then first-order wetting, and then second-order drying, and then third-order'
     design = 'PorousFlowHystereticInfo.md'
     issues = '#16129'
-  [../]
-  [./1phase]
+  []
+  [1phase]
     type = CSVDiff
     input = '1phase.i'
     csvdiff = '1phase_out.csv'
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along a first-order wetting curve'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./1phase_3rd]
+  []
+  [1phase_3rd]
     type = CSVDiff
     input = '1phase_3rd.i'
     csvdiff = '1phase_3rd_out.csv'
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along first, second and third order curves'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
-  [../]
-  [./2phasePP_jacobian]
+  []
+  [2phasePP_jacobian]
     type = PetscJacobianTester
     input = '2phasePP_jac.i'
     ratio_tol = 1E-6
@@ -1204,24 +1204,24 @@
     requirement = 'PorousFlow shall be able to compute the full Jacobian entries in 2-phase hysteretic systems when using a PP formulation'
     design = 'PorousFlow2PhaseHysPP.md'
     issues = '#16129'
-  [../]
-  [./2phasePP_1]
+  []
+  [2phasePP_1]
     type = CSVDiff
     input = '2phasePP.i'
     csvdiff = '2phasePP_out.csv'
     requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PP formulation, as the system evolves in time along the primary drying curve and then along a first-order curve'
     design = 'PorousFlow2PhaseHysPP.md'
     issues = '#16129'
-  [../]
-  [./2phasePP_2]
+  []
+  [2phasePP_2]
     type = CSVDiff
     input = '2phasePP_2.i'
     csvdiff = '2phasePP_2_out.csv'
     requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PP formulation, as the system evolves in time along the primary drying curve and then along a first-order curve and then along a second-order drying curve until it meets the primary drying curve'
     design = 'PorousFlow2PhaseHysPP.md'
     issues = '#16129'
-  [../]
-  [./2phasePS_jacobian]
+  []
+  [2phasePS_jacobian]
     type = PetscJacobianTester
     input = '2phasePS_jac.i'
     ratio_tol = 1E-6
@@ -1229,48 +1229,48 @@
     requirement = 'PorousFlow shall be able to compute the full Jacobian entries in 2-phase hysteretic systems when using a PS formulation'
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16129'
-  [../]
-  [./2phasePS_1]
+  []
+  [2phasePS_1]
     type = CSVDiff
     input = '2phasePS.i'
     csvdiff = '2phasePS_out.csv'
     requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PS formulation, as the system evolves in time along the primary drying curve and then along a first-order curve'
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16129'
-  [../]
-  [./2phasePS_2]
+  []
+  [2phasePS_2]
     type = CSVDiff
     input = '2phasePS_2.i'
     csvdiff = '2phasePS_2_out.csv'
     requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PS formulation, as the system evolves in time along the primary drying curve and then along a first-order curve and then along a second-order drying curve until it meets the primary drying curve'
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16129'
-  [../]
-  [./1phase_relperm]
+  []
+  [1phase_relperm]
     type = CSVDiff
     input = '1phase_relperm.i'
     csvdiff = '1phase_relperm_out.csv'
     requirement = 'PorousFlow shall be able to compute hysteretic relative permeability in 1-phase systems as the system evolves in time along the primary drying curve and then along a first-order wetting curve'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md'
     issues = '#16324'
-  [../]
-  [./1phase_relperm_2]
+  []
+  [1phase_relperm_2]
     type = CSVDiff
     input = '1phase_relperm_2.i'
     csvdiff = '1phase_relperm_2_csv.csv'
     requirement = 'PorousFlow shall be able to compute hysteretic relative permeability in 1-phase systems as the saturation cycles between high and low values, including going below the residual saturation'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md'
     issues = '#16324'
-  [../]
-  [./2phasePS_relperm]
+  []
+  [2phasePS_relperm]
     type = CSVDiff
     input = '2phasePS_relperm.i'
     csvdiff = '2phasePS_relperm_out.csv'
     requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system evolves in time along the primary drying curve and then along first-order wetting curves'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./2phasePS_relperm_2_linear_like]
+  []
+  [2phasePS_relperm_2_linear_like]
     type = CSVDiff
     input = '2phasePS_relperm_2.i'
     csvdiff = '2phasePS_relperm_2_linear_like.csv'
@@ -1278,8 +1278,8 @@
     requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations using a linear-like extension'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./2phasePS_relperm_2_cubic]
+  []
+  [2phasePS_relperm_2_cubic]
     type = CSVDiff
     input = '2phasePS_relperm_2.i'
     csvdiff = '2phasePS_relperm_2_cubic.csv'
@@ -1287,8 +1287,8 @@
     requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations using a cubic extension'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./2phasePS_relperm_2_none]
+  []
+  [2phasePS_relperm_2_none]
     type = CSVDiff
     input = '2phasePS_relperm_2.i'
     csvdiff = '2phasePS_relperm_2_none.csv'
@@ -1296,8 +1296,8 @@
     requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations by assuming is is unity'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./relperm_jac]
+  []
+  [relperm_jac]
     type = PetscJacobianTester
     input = 'relperm_jac.i'
     ratio_tol = 1E-6
@@ -1305,8 +1305,8 @@
     requirement = 'PorousFlow shall be able to compute the full Jacobian entries when using hysteretic relative permeabilities, as the system evolves along a zeroth order curve'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
-  [./relperm_jac_1]
+  []
+  [relperm_jac_1]
     type = PetscJacobianTester
     input = 'relperm_jac_1.i'
     ratio_tol = 1E-6
@@ -1314,5 +1314,5 @@
     requirement = 'PorousFlow shall be able to compute the full Jacobian entries when using hysteretic relative permeabilities, as the system evolves along a first-order curve'
     design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
     issues = '#16324'
-  [../]
+  []
 []

@@ -7,49 +7,49 @@
 []
 
 [Variables]
-  [./phi]
-    [./InitialCondition]
+  [phi]
+    [InitialCondition]
       type = FunctionIC
       function = if(x<1,1-x,0)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = phi
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 []
 
 [BCs]
-  [./influx]
+  [influx]
     type = NeumannBC
     boundary = left
     variable = phi
     value = 1
-  [../]
-  [./fix]
+  []
+  [fix]
     type = DirichletBC
     boundary = right
     variable = phi
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pos]
+  [pos]
     type = FindValueOnLine
     target = 0.5
     v = phi
     start_point = '0 0 0'
     end_point = '10 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

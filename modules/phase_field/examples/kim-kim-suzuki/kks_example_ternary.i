@@ -19,171 +19,171 @@
 []
 
 [AuxVariables]
-  [./Fglobal]
+  [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # order parameter
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # solute 1 concentration
-  [./c1]
+  [c1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # solute 2 concentration
-  [./c2]
+  [c2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 
   # chemical potential solute 1
-  [./w1]
+  [w1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # chemical potential solute 2
-  [./w2]
+  [w2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 
   # Liquid phase solute 1 concentration
-  [./c1l]
+  [c1l]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 
   # Liquid phase solute 2 concentration
-  [./c2l]
+  [c2l]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.05
-  [../]
+  []
 
   # Solid phase solute 1 concentration
-  [./c1s]
+  [c1s]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.8
-  [../]
+  []
 
   # Solid phase solute 2 concentration
-  [./c2s]
+  [c2s]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 
 []
 
 [Functions]
-  [./ic_func_eta]
+  [ic_func_eta]
     type = ParsedFunction
     value = '0.5*(1.0-tanh((x)/sqrt(2.0)))'
-  [../]
-  [./ic_func_c1]
+  []
+  [ic_func_c1]
     type = ParsedFunction
     value = '0.8*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
-  [../]
-  [./ic_func_c2]
+  []
+  [ic_func_c2]
     type = ParsedFunction
     value = '0.1*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.05*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
-  [../]
+  []
 
 []
 
 
 [ICs]
-  [./eta]
+  [eta]
     variable = eta
     type = FunctionIC
     function = ic_func_eta
-  [../]
-  [./c1]
+  []
+  [c1]
     variable = c1
     type = FunctionIC
     function = ic_func_c1
-  [../]
-  [./c2]
+  []
+  [c2]
     variable = c2
     type = FunctionIC
     function = ic_func_c2
-  [../]
+  []
 
 []
 
 [Materials]
   # Free energy of the liquid
-  [./fl]
+  [fl]
     type = DerivativeParsedMaterial
     f_name = fl
     args = 'c1l c2l'
     function = '(0.1-c1l)^2+(0.05-c2l)^2'
-  [../]
+  []
 
   # Free energy of the solid
-  [./fs]
+  [fs]
     type = DerivativeParsedMaterial
     f_name = fs
     args = 'c1s c2s'
     function = '(0.8-c1s)^2+(0.1-c2s)^2'
-  [../]
+  []
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
-  [../]
+  []
 
   # g(eta)
-  [./g_eta]
+  [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names  = 'M   L   eps_sq'
     prop_values = '0.7 0.7 1.0  '
-  [../]
+  []
 []
 
 [Kernels]
   # enforce c1 = (1-h(eta))*c1l + h(eta)*c1s
-  [./PhaseConc1]
+  [PhaseConc1]
     type = KKSPhaseConcentration
     ca       = c1l
     variable = c1s
     c        = c1
     eta      = eta
-  [../]
+  []
 
   # enforce c2 = (1-h(eta))*c2l + h(eta)*c2s
-  [./PhaseConc2]
+  [PhaseConc2]
     type = KKSPhaseConcentration
     ca       = c2l
     variable = c2s
     c        = c2
     eta      = eta
-  [../]
+  []
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotSolute1]
+  [ChemPotSolute1]
     type = KKSPhaseChemicalPotential
     variable = c1l
     cb       = c1s
@@ -191,8 +191,8 @@
     fb_name  = fs
     args_a   = 'c2l'
     args_b   = 'c2s'
-  [../]
-  [./ChemPotSolute2]
+  []
+  [ChemPotSolute2]
     type = KKSPhaseChemicalPotential
     variable = c2l
     cb       = c2s
@@ -201,97 +201,97 @@
     args_a   = 'c1l'
     args_b   = 'c1s'
 
-  [../]
+  []
 
   #
   # Cahn-Hilliard Equations
   #
-  [./CHBulk1]
+  [CHBulk1]
     type = KKSSplitCHCRes
     variable = c1
     ca       = c1l
     fa_name  = fl
     w        = w1
     args_a   = 'c2l'
-  [../]
-  [./CHBulk2]
+  []
+  [CHBulk2]
     type = KKSSplitCHCRes
     variable = c2
     ca       = c2l
     fa_name  = fl
     w        = w2
     args_a   = 'c1l'
-  [../]
+  []
 
-  [./dc1dt]
+  [dc1dt]
     type = CoupledTimeDerivative
     variable = w1
     v = c1
-  [../]
-  [./dc2dt]
+  []
+  [dc2dt]
     type = CoupledTimeDerivative
     variable = w2
     v = c2
-  [../]
+  []
 
-  [./w1kernel]
+  [w1kernel]
     type = SplitCHWRes
     mob_name = M
     variable = w1
-  [../]
-  [./w2kernel]
+  []
+  [w2kernel]
     type = SplitCHWRes
     mob_name = M
     variable = w2
-  [../]
+  []
 
 
   #
   # Allen-Cahn Equation
   #
-  [./ACBulkF]
+  [ACBulkF]
     type = KKSACBulkF
     variable = eta
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
     args = 'c1l c1s c2l c2s'
-  [../]
-  [./ACBulkC1]
+  []
+  [ACBulkC1]
     type = KKSACBulkC
     variable = eta
     ca       = c1l
     cb       = c1s
     fa_name  = fl
     args     = 'c2l'
-  [../]
-  [./ACBulkC2]
+  []
+  [ACBulkC2]
     type = KKSACBulkC
     variable = eta
     ca       = c2l
     cb       = c2s
     fa_name  = fl
     args     = 'c1l'
-  [../]
-  [./ACInterface]
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = eps_sq
-  [../]
-  [./detadt]
+  []
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./GlobalFreeEnergy]
+  [GlobalFreeEnergy]
     variable = Fglobal
     type = KKSGlobalFreeEnergy
     fa_name = fl
     fb_name = fs
     w = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -312,10 +312,10 @@
 # Precondition using handcoded off-diagonal terms
 #
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

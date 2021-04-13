@@ -15,46 +15,46 @@
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = T
     diffusivity = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./zero]
+  [zero]
     type = DirichletBC
     variable = T
     boundary = 'left right bottom'
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./nodal_error]
+  [nodal_error]
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
-  [./elemental_error]
+  []
+  [elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
+  []
 []
 
 [Executioner]

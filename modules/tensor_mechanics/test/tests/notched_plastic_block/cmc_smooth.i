@@ -64,160 +64,160 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_zz'
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./uz]
+  [uz]
     type = PointValue
     point = '0 0 0.1'
     use_displaced_mesh = false
     variable = disp_z
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = ElementAverageValue
     use_displaced_mesh = false
     variable = stress_zz
-  [../]
-  [./num_res]
+  []
+  [num_res]
     type = NumResidualEvaluations
-  [../]
-  [./nr_its] # num_iters is the average number of NR iterations encountered per element in this timestep
+  []
+  [nr_its] # num_iters is the average number of NR iterations encountered per element in this timestep
     type = ElementAverageValue
     variable = num_iters
-  [../]
-  [./max_nr_its] # max_num_iters is the maximum number of NR iterations encountered in the element during the whole simulation
+  []
+  [max_nr_its] # max_num_iters is the maximum number of NR iterations encountered in the element during the whole simulation
     type = ElementExtremeValue
     variable = max_num_iters
-  [../]
-  [./runtime]
+  []
+  [runtime]
     type = PerfGraphData
     data_type = TOTAL
     section_name = 'Root'
-  [../]
+  []
 []
 
 [BCs]
   # back=zmin, front=zmax, bottom=ymin, top=ymax, left=xmin, right=xmax
-  [./xmin_xzero]
+  [xmin_xzero]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./xmax_xzero]
+  []
+  [xmax_xzero]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.0
-  [../]
-  [./ymin_yzero]
+  []
+  [ymin_yzero]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./ymax_yzero]
+  []
+  [ymax_yzero]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0
-  [../]
-  [./zmin_zzero]
+  []
+  [zmin_zzero]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = '0'
-  [../]
-  [./zmax_disp]
+  []
+  [zmax_disp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '1E-6*max(t,0)'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mc_int]
+  [mc_int]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./num_iters]
+  []
+  [num_iters]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./max_num_iters]
+  []
+  [max_num_iters]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./yield_fcn]
+  []
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mc_int_auxk]
+  [mc_int_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = mc_int
-  [../]
-  [./num_iters_auxk]
+  []
+  [num_iters_auxk]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = num_iters
-  [../]
-  [./max_num_iters_auxk]
+  []
+  [max_num_iters_auxk]
     type = MaterialRealAux
     property = max_plastic_NR_iterations
     variable = max_num_iters
-  [../]
-  [./yield_fcn_auxk]
+  []
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 3E6
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 1E16
-  [../]
-  [./mc_coh]
+  []
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 5E6
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 16E9
     poissons_ratio = 0.25
-  [../]
-  [./mc]
+  []
+  [mc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -227,24 +227,24 @@
     smoothing_tol = 0.2E6
     yield_function_tol = 1E-5
     perfect_guess = false # this is so we can observe some Newton-Raphson iterations, for comparison with other models, and it is not optimal in any real-life simulations
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     perform_finite_strain_rotations = false
-  [../]
-  [./strain_from_initial_stress]
+  []
+  [strain_from_initial_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '2.5E6 0 0  0 2.5E6 0  0 0 2.5E6'
     eigenstrain_name = ini_stress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

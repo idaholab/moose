@@ -27,66 +27,66 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 1
     value = 0.0
-  [../]
-  [./fixr3]
+  []
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = UserForcingFunctionNodalKernel
     variable = disp_y
     boundary = 2
     function = force
-  [../]
+  []
 []
 
 [Functions]
-  [./force]
+  [force]
     type = PiecewiseLinear
     x = '0.0 2.0  8.0'
     y = '0.0 300.0 300.0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -105,7 +105,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./all]
+  [all]
   add_variables = true
   displacements = 'disp_x disp_y disp_z'
   rotations = 'rot_x rot_y rot_z'
@@ -117,39 +117,39 @@
   Iy = 0.16
   Iz = 0.16
   y_orientation = '0.0 1.0 0.0'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1e4
     poissons_ratio = -0.99995
     shear_coefficient = 1.0
     block = 1
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeBeamResultants
     block = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_y
-  [../]
-  [./rot_z]
+  []
+  [rot_z]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = rot_z
-  [../]
+  []
 []
 
 [Outputs]

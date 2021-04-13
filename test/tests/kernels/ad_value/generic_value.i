@@ -6,65 +6,65 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./u_jac]
-  [../]
-  [./v_jac]
-  [../]
+  [u_jac]
+  []
+  [v_jac]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./value_test_v]
+  []
+  [value_test_v]
     type = GenericValueTest
     variable = v
     diag_save_in = v_jac
-  [../]
-  [./ad_value_test]
+  []
+  [ad_value_test]
     type = ADGenericValueTest
     variable = u
     diag_save_in = u_jac
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

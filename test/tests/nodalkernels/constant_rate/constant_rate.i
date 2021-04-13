@@ -6,49 +6,49 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./nodal_ode]
-  [../]
+  [u]
+  []
+  [nodal_ode]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./td]
+  [td]
     type = TimeDerivativeNodalKernel
     variable = nodal_ode
-  [../]
-  [./constant_rate]
+  []
+  [constant_rate]
     type = ConstantRate
     variable = nodal_ode
     rate = 1.0
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

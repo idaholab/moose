@@ -6,7 +6,7 @@
   # timestep.  This example requires PETSc >= 3.6, otherwise you get:
   # PETSC ERROR: Petsc has generated inconsistent data
   # PETSC ERROR: Computed Nan differencing parameter h
-  [./parallel_exception_residual_transient]
+  [parallel_exception_residual_transient]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
@@ -15,9 +15,9 @@
 
     requirement = 'The system shall support throwing an exception during the residual '
                   'calculation, which will cut back the time step.'
-  [../]
+  []
 
-  [./parallel_exception_residual_transient_non_zero_rank]
+  [parallel_exception_residual_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
@@ -31,12 +31,12 @@
 
     requirement = 'The system shall support throwing an exception during the residual '
                   'calculation on a non-zero rank, which will cut back the time step.'
-  [../]
+  []
 
   # This example throws an exception during computeJacobian() in the
   # first timestep, and then continues running with a reduced
   # timestep.
-  [./parallel_exception_jacobian_transient]
+  [parallel_exception_jacobian_transient]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
     petsc_version = '>=3.6.0'
@@ -45,9 +45,9 @@
 
     requirement = 'The system shall support throwing an exception during the Jacboain '
                   'calculation, which will cut back the time step.'
-  [../]
+  []
 
-  [./parallel_exception_jacobian_transient_non_zero_rank]
+  [parallel_exception_jacobian_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
     petsc_version = '>=3.6.0'
@@ -61,9 +61,9 @@
 
     requirement = 'The system shall support throwing an exception during the Jacobian '
                   'calculation on a non-zero rank, which will cut back the time step.'
-  [../]
+  []
 
-  [./parallel_exception_initial_condition]
+  [parallel_exception_initial_condition]
     type = RunApp
     input = 'parallel_exception_initial_condition.i'
     petsc_version = '>=3.5.0'
@@ -71,10 +71,10 @@
 
     requirement = 'The system shall support throwing an exception during the initial condition '
                   'calculation, which will terminate the solve.'
-  [../]
+  []
 
   # Test that we can trigger an error on a non-zero rank and exit as expected
-  [./parallel_error_residual_transient_non_zero_rank]
+  [parallel_error_residual_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
@@ -86,9 +86,9 @@
 
     requirement = 'The system shall support throwing an error during a residual '
                   'calculation, which will terminate the solve.'
-  [../]
+  []
 
-  [./parallel_error_jacobian_transient_non_zero_rank]
+  [parallel_error_jacobian_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
@@ -100,14 +100,14 @@
 
     requirement = 'The system shall support throwing an error during a Jacobian '
                   'calculation, which will terminate the solve.'
-  [../]
+  []
 
-  [./skip_exception_check]
+  [skip_exception_check]
     type = 'Exodiff'
     input = '2d_diffusion_skip_exception.i'
     exodiff = '2d_diffusion_skip_exception_out.e'
     expect_out = 'MOOSE may fail to catch an exception when the "skip_exception_check" parameter is used. If you receive a terse MPI error during execution, remove this parameter and rerun your simulation'
     allow_warnings = true
     requirement = "The system shall allow users to skip exception checks to avoid global communication."
-  [../]
+  []
 []

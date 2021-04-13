@@ -1,14 +1,14 @@
 [Tests]
   design = "ADPiecewiseLinearInterpolationMaterial.md"
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'piecewise_linear_interpolation_material.i'
     exodiff = 'piecewise_linear_interpolation_material_out.e'
     custom_cmp = custom.cmp
     issues = "#8265"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation of a variable'
-  [../]
-  [./test_scale_factor]
+  []
+  [test_scale_factor]
     type = 'Exodiff'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test
@@ -17,8 +17,8 @@
     custom_cmp = custom.cmp
     issues = "#8265"
     requirement = 'PiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation of a variable and perform approriate scaling'
-  [../]
-  [./test_extrapolation]
+  []
+  [test_extrapolation]
     type = 'Exodiff'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test
@@ -28,8 +28,8 @@
     custom_cmp = custom.cmp
     design = "ADPiecewiseLinearInterpolationMaterial.md"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation and extrapolation of a variable'
-  [../]
-  [./test_err1]
+  []
+  [test_err1]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test_scale_factor
@@ -37,8 +37,8 @@
     expect_err = "Cannot specify 'x', 'y', and 'xy_data' together."
     issues = "#8265"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall throw an error if x, y, and xy_data are all specified'
-  [../]
-  [./test_err2]
+  []
+  [test_err2]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test_err1
@@ -46,8 +46,8 @@
     expect_err = "Both 'x' and 'y' must be specified if either one is specified."
     issues = "#8265"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall throw an error if x and xy_data are both specified'
-  [../]
-  [./test_err3]
+  []
+  [test_err3]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test_err2
@@ -55,8 +55,8 @@
     expect_err = "Vectors are not the same length"
     issues = "#8265"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall throw an error if x and y vectors are different lengths'
-  [../]
-  [./test_err4]
+  []
+  [test_err4]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
     prereq = test_err3
@@ -64,8 +64,8 @@
     expect_err = "Length of data provided in 'xy_data' must be a multiple of 2."
     issues = "#8265"
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall throw an error if xy_data vector is not a multiple of two'
-  [../]
-  [./test-jac]
+  []
+  [test-jac]
     type = 'PetscJacobianTester'
     input = 'piecewise_linear_interpolation_material.i'
     ratio_tol = 1e-7
@@ -74,5 +74,5 @@
     petsc_version = '>=3.9'
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall calculate perfect Jacobians'
     issues = "#5658"
-  [../]
+  []
 []

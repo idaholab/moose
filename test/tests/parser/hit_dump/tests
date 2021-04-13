@@ -1,7 +1,7 @@
 [Tests]
   design = 'MooseApp.md'
 
-  [./hit_registry]
+  [hit_registry]
     # Make sure --registry-hit CLI option is working
     type = RunApp
     cli_args = '--registry-hit'
@@ -12,8 +12,8 @@
 
     requirement = "The system shall output all registered objects in HIT format."
     issues = '#10952'
-  [../]
-  [./registry]
+  []
+  [registry]
     # Make sure --registry CLI option is working
     type = RunApp
     cli_args = '--registry'
@@ -24,5 +24,5 @@
 
     requirement = "The system shall output all registered objects in single line format."
     issues = '#10952'
-  [../]
+  []
 []

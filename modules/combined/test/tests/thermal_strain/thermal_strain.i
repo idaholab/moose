@@ -19,24 +19,24 @@
 []
 
 [Functions]
-  [./tempFunc]
+  [tempFunc]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '117.56 217.56'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 
-  [./temp]
+  [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -45,217 +45,217 @@
   incremental = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 
-  [./block1]
+  [block1]
     eigenstrain_names = eigenstrain1
     block = 1
-  [../]
-  [./block2]
+  []
+  [block2]
     eigenstrain_names = eigenstrain2
     block = 2
-  [../]
-  [./block3]
+  []
+  [block3]
     eigenstrain_names = eigenstrain3
     block = 3
-  [../]
-  [./block4]
+  []
+  [block4]
     eigenstrain_names = eigenstrain4
     block = 4
-  [../]
-  [./block5]
+  []
+  [block5]
     eigenstrain_names = eigenstrain5
     block = 5
-  [../]
-  [./block6]
+  []
+  [block6]
     eigenstrain_names = eigenstrain6
     block = 6
-  [../]
-  [./block7]
+  []
+  [block7]
     eigenstrain_names = eigenstrain7
     block = 7
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 10
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 9
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 14
     value = 0
-  [../]
+  []
 
-  [./temp]
+  [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = '10 12'
     function = tempFunc
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor1]
+  [elasticity_tensor1]
     type = ComputeIsotropicElasticityTensor
     block = 1
     bulk_modulus = 0.333333333333e6
     poissons_ratio = 0.0
-  [../]
-  [./thermal_strain1]
+  []
+  [thermal_strain1]
     type = ComputeThermalExpansionEigenstrain
     block = 1
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain1
-  [../]
-  [./stress1]
+  []
+  [stress1]
     type = ComputeStrainIncrementBasedStress
     block = 1
-  [../]
+  []
 
-  [./elasticity_tensor2]
+  [elasticity_tensor2]
     type = ComputeIsotropicElasticityTensor
     block = 2
     bulk_modulus = 0.333333333333e6
     lambda = 0.0
-  [../]
-  [./thermal_strain2]
+  []
+  [thermal_strain2]
     type = ComputeThermalExpansionEigenstrain
     block = 2
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain2
-  [../]
-  [./stress2]
+  []
+  [stress2]
     type = ComputeStrainIncrementBasedStress
     block = 2
-  [../]
+  []
 
-  [./elasticity_tensor3]
+  [elasticity_tensor3]
     type = ComputeIsotropicElasticityTensor
     block = 3
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./thermal_strain3]
+  []
+  [thermal_strain3]
     type = ComputeThermalExpansionEigenstrain
     block = 3
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain3
-  [../]
-  [./stress3]
+  []
+  [stress3]
     type = ComputeStrainIncrementBasedStress
     block = 3
-  [../]
+  []
 
-  [./elasticity_tensor4]
+  [elasticity_tensor4]
     type = ComputeIsotropicElasticityTensor
     block = 4
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./thermal_strain4]
+  []
+  [thermal_strain4]
     type = ComputeThermalExpansionEigenstrain
     block = 4
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain4
-  [../]
-  [./stress4]
+  []
+  [stress4]
     type = ComputeStrainIncrementBasedStress
     block = 4
-  [../]
+  []
 
-  [./elasticity_tensor5]
+  [elasticity_tensor5]
     type = ComputeIsotropicElasticityTensor
     block = 5
     youngs_modulus = 1e6
     lambda = 0.0
-  [../]
-  [./thermal_strain5]
+  []
+  [thermal_strain5]
     type = ComputeThermalExpansionEigenstrain
     block = 5
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain5
-  [../]
-  [./stress5]
+  []
+  [stress5]
     type = ComputeStrainIncrementBasedStress
     block = 5
-  [../]
+  []
 
-  [./elasticity_tensor6]
+  [elasticity_tensor6]
     type = ComputeIsotropicElasticityTensor
     block = 6
     youngs_modulus = 1e6
     shear_modulus = 5e5
-  [../]
-  [./thermal_strain6]
+  []
+  [thermal_strain6]
     type = ComputeThermalExpansionEigenstrain
     block = 6
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain6
-  [../]
-  [./stress6]
+  []
+  [stress6]
     type = ComputeStrainIncrementBasedStress
     block = 6
-  [../]
+  []
 
-  [./elasticity_tensor7]
+  [elasticity_tensor7]
     type = ComputeIsotropicElasticityTensor
     block = 7
     shear_modulus = 5e5
     poissons_ratio = 0.0
-  [../]
-  [./thermal_strain7]
+  []
+  [thermal_strain7]
     type = ComputeThermalExpansionEigenstrain
     block = 7
     temperature = temp
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain7
-  [../]
-  [./stress7]
+  []
+  [stress7]
     type = ComputeStrainIncrementBasedStress
     block = 7
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     block = '1 2 3 4 5 6 7'
     specific_heat = 1.0
     thermal_conductivity = 1.0
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     block = '1 2 3 4 5 6 7'
     density = 1.0
-  [../]
+  []
 []
 
 [Executioner]

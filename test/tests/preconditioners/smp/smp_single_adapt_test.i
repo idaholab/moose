@@ -16,81 +16,81 @@
 []
 
 [Functions]
-  [./exact_v]
+  [exact_v]
     type = ParsedFunction
     value = sin(pi*x)*sin(pi*y)
-  [../]
-  [./force_fn_v]
+  []
+  [force_fn_v]
     type = ParsedFunction
     value = 2*pi*pi*sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     off_diag_row    = 'u'
     off_diag_column = 'v'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./conv_u]
+  []
+  [conv_u]
     type = CoupledForce
     variable = u
     v = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./ffn_v]
+  []
+  [ffn_v]
     type = BodyForce
     variable = v
     function = force_fn_v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./all_v]
+  [all_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '0 1 2 3'
     function = exact_v
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,12 +99,12 @@
 
   solve_type = 'PJFNK'
 
-  [./Adaptivity]
+  [Adaptivity]
     steps = 3
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  [../]
+  []
 []
 
 [Outputs]

@@ -5,69 +5,69 @@
     nx = 41
     ny = 41
   []
-  [./image]
+  [image]
     input = gen
     type = ImageSubdomainGenerator
     file = kitten.png
     threshold = 100
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
-  [./v]
+  []
+  [v]
     order = FIRST
     family = LAGRANGE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./conv_v]
+  []
+  [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'left_u left_v right_u'
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 100
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Problem]
@@ -85,11 +85,11 @@
 []
 
 [Preconditioning]
-  [./FSP]
+  [FSP]
     # It is the starting point of splitting
     type = FSP
     topsplit = 'uv' # 'uv'
-    [./uv]
+    [uv]
       # Generally speaking, there are four types of splitting we could choose
       # <additive,multiplicative,symmetric_multiplicative,schur>
       # An approximate solution to the original system
@@ -103,21 +103,21 @@
       # petsc_options_value = 'full selfp'
       splitting = 'u v' # 'u' and 'v'
       splitting_type = additive
-    [../]
-    [./u]
+    []
+    [u]
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
       vars = u
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
-    [../]
-    [./v]
+    []
+    [v]
       # PETSc options for this subsolver
       vars = v
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

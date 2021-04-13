@@ -6,86 +6,86 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
     order = SECOND
     family = SCALAR
-  [../]
-  [./aux1]
+  []
+  [aux1]
     family = SCALAR
     initial_condition = 5
-  [../]
-  [./aux2]
+  []
+  [aux2]
     family = SCALAR
     initial_condition = 10
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = CoefDiffusion
     variable = v
     coef = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_u]
+  []
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 3
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./num_vars]
+  [num_vars]
     type = NumVars
     system = 'ALL'
     outputs = 'exodus2 console'
-  [../]
-  [./num_aux]
+  []
+  [num_aux]
     type = NumVars
     system = 'AUX'
     outputs = 'exodus'
-  [../]
-  [./num_nonlinear]
+  []
+  [num_nonlinear]
     type = NumVars
     system = 'NL'
     outputs = 'all'
-  [../]
-  [./num_dofs]
+  []
+  [num_dofs]
     type = NumDOFs
     outputs = 'none'
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,18 +97,18 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./exodus]
+  [exodus]
     type = Exodus
-  [../]
-  [./exodus2]
+  []
+  [exodus2]
     type = Exodus
-  [../]
+  []
 []
 
 [ICs]
-  [./aux0_IC]
+  [aux0_IC]
     variable = aux0
     values = '12 13'
     type = ScalarComponentIC
-  [../]
+  []
 []

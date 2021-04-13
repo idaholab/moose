@@ -11,66 +11,66 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*t*(x*x+y*y)
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = 2*t*(x*x+y*y)-4*t*t
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [ICs]
   active = ''
-  [./u_var]
+  [u_var]
     type = FunctionIC
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./average]
+  [average]
     type = ElementAverageValue
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,22 +81,22 @@
 []
 
 [MultiApps]
-  [./full_solve]
+  [full_solve]
     type = FullSolveMultiApp
     execute_on = initial
     positions = '0 0 0'
     # input file will come from cli-args
-  [../]
+  []
 []
 
 [Transfers]
-  [./transfer_u]
+  [transfer_u]
     type = MultiAppProjectionTransfer
     multi_app = full_solve
     direction = FROM_MULTIAPP
     variable = u
     source_variable = u
-  [../]
+  []
 []
 
 [Outputs]

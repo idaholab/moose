@@ -8,34 +8,34 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
   active = 'force_fn exact_fn left_bc'
 
-  [./force_fn]
+  [force_fn]
     type = ParsedFunction
     value = '1-x*x+2*t'
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = '(1-x*x)*t'
-  [../]
+  []
 
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
@@ -43,78 +43,78 @@
     time_u diff_u ffn_u
     time_v diff_v'
 
-  [./time_u]
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn_u]
+  [ffn_u]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 
-  [./time_v]
+  [time_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'all_u left_v right_v'
 
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'
     function = exact_fn
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '3'
     function = left_bc
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = '2'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'l2 node1 node4'
 
-  [./l2]
+  [l2]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 
-  [./node1]
+  [node1]
     type = NodalVariableValue
     variable = u
     nodeid = 15
-  [../]
+  []
 
-  [./node4]
+  [node4]
     type = NodalVariableValue
     variable = v
     nodeid = 10
-  [../]
+  []
 []
 
 [Executioner]
@@ -130,8 +130,8 @@
 [Outputs]
   interval = 4
   exodus = true
-  [./console]
+  [console]
     type = Console
     interval = 3
-  [../]
+  []
 []

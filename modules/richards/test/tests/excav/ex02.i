@@ -23,13 +23,13 @@
 # All it does is to set the pressure to p_excav=0
 # at places on excav_bdy wherever excav_fcn tells it to.
 [BCs]
-  [./excav_bdy]
+  [excav_bdy]
     type = RichardsExcav
     boundary = excav_bdy
     p_excav = 0.0
     variable = pressure
     excav_geom_function = excav_fcn
-  [../]
+  []
 []
 
 
@@ -39,28 +39,28 @@
 # You supply start and end positions and times and
 # by a linear interpolation these define the position
 # of the coal face at all times
-  [./excav_fcn]
+  [excav_fcn]
     type = RichardsExcavGeom
     start_posn = '0 -500 0'
     start_time = 0
     end_posn = '0 500 0'
     end_time = 3E7
     active_length = 1E4
-  [../]
+  []
 
 # mass_bal_fcn calculates the mass balance
-  [./mass_bal_fcn]
+  [mass_bal_fcn]
     type = ParsedFunction
     value = abs((mi-fout-mf)/2/(mi+mf))
     vars = 'mi mf fout'
     vals = 'mass_init mass_final flux_out'
-  [../]
+  []
 
 # initial pressure - unimportant in this example
-  [./initial_pressure]
+  [initial_pressure]
     type = ParsedFunction
     value = -10000*(z-100)
-  [../]
+  []
 []
 
 
@@ -80,34 +80,34 @@
 [Postprocessors]
 
 # note that this is calculated at beginning of timestep
-  [./mass_init]
+  [mass_init]
     type = RichardsMass
     variable = pressure
     execute_on = timestep_begin
-  [../]
+  []
 
 # note this is calculated at end of timestep
-  [./mass_final]
+  [mass_final]
     type = RichardsMass
     variable = pressure
     execute_on = timestep_end
-  [../]
+  []
 
 # this is what calculates the mass flux to the excavation
 # it is calculating it for boundary=excav_bdy, and the
 # excavation time-dependence is set through the excav_fcn
-  [./flux_out]
+  [flux_out]
     type = RichardsExcavFlow
     boundary = excav_bdy
     variable = pressure
     excav_geom_function = excav_fcn
-  [../]
+  []
 
 # mass_bal just outputs the result to screen
-  [./mass_bal]
+  [mass_bal]
     type = FunctionValuePostprocessor
     function = mass_bal_fcn
-  [../]
+  []
 []
 
 
@@ -121,74 +121,74 @@
 
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E9
-  [../]
-  [./Seff1VG]
+  []
+  [Seff1VG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-5
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0
     sum_s_res = 0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1E+2
-  [../]
+  []
 []
 
 
 [Variables]
   active = 'pressure'
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = FunctionIC
     variable = pressure
     function = initial_pressure
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 
 [Materials]
-  [./all]
+  [all]
     type = RichardsMaterial
     block = '1 2 3 4'
     viscosity = 1E-3
@@ -201,27 +201,27 @@
     SUPG_UO = SUPGstandard
     gravity = '0 0 -10'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = Seff1VG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
-  [../]
+  []
 []
 
 

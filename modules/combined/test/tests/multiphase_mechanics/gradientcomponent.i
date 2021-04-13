@@ -6,10 +6,10 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-    [./InitialCondition]
+  [u]
+  []
+  [v]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0.5
       y1 = 0.5
@@ -17,25 +17,25 @@
       invalue = 1
       outvalue = 0
       int_width = 0.2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = v
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = v
-  [../]
-  [./gradientcomponent]
+  []
+  [gradientcomponent]
     type = GradientComponent
     variable = u
     v = v
     component = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -46,10 +46,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

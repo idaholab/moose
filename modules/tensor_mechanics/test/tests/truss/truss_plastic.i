@@ -10,90 +10,90 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
- [./axial_stress]
+ [axial_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e_over_l]
+  []
+  [e_over_l]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./area]
+  []
+  [area]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./react_x]
+  []
+  [react_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./hf]
+  [hf]
     type = PiecewiseLinear
     x = '0    0.0001  0.0003  0.0023'
     y = '50e6 52e6    54e6    56e6'
-  [../]
+  []
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./load]
+  []
+  [load]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
     function = 't'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./axial_stress]
+  [axial_stress]
     type = MaterialRealAux
     property = axial_stress
     variable = axial_stress
-  [../]
-  [./e_over_l]
+  []
+  [e_over_l]
     type = MaterialRealAux
     property = e_over_l
     variable = e_over_l
-  [../]
-  [./area]
+  []
+  [area]
     type = ConstantAux
     variable = area
     value = 1.0
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = ElementIntegralMaterialProperty
     mat_prop = axial_stress
-  [../]
-  [./e_xx]
+  []
+  [e_xx]
     type = ElementIntegralMaterialProperty
     mat_prop = total_stretch
-  [../]
-  [./ee_xx]
+  []
+  [ee_xx]
     type = ElementIntegralMaterialProperty
     mat_prop = elastic_stretch
-  [../]
-  [./ep_xx]
+  []
+  [ep_xx]
     type = ElementIntegralMaterialProperty
     mat_prop = plastic_stretch
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,22 +109,22 @@
 []
 
 [Kernels]
-  [./solid]
+  [solid]
     type = StressDivergenceTensorsTruss
     component = 0
     variable = disp_x
     area = area
     save_in = react_x
-  [../]
+  []
 []
 
 [Materials]
-  [./truss]
+  [truss]
     type = PlasticTruss
     youngs_modulus = 2.0e11
     yield_stress = 500e5
     outputs = exodus
-  [../]
+  []
 []
 
 [Outputs]

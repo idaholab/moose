@@ -1,10 +1,10 @@
 [Tests]
   issues = "#1700"
   design = "syntax/Adaptivity/index.md syntax/Adaptivity/Markers/index.md"
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'initial_marker.i'
     exodiff = 'initial_marker_out.e-s003'
     requirement = "The Adaptivity system shall support marking elements for refinement during initial setup using a different marker than used during execution."
-  [../]
+  []
 []

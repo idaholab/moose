@@ -1,10 +1,10 @@
 [Tests]
   issues = '#5680'
   design = 'source/bcs/PostprocessorNeumannBC.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'pp_neumann.i'
     exodiff = 'pp_neumann_out.e'
     requirement = "MOOSE shall support the application of a Neumann boundary condition computed via Postprocessor object."
-  [../]
+  []
 []

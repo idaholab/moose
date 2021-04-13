@@ -13,60 +13,60 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = fbulk
         mobility = M
         kappa = kappa_c
         solve_type = DIRECT
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./cIC]
+  [cIC]
     type = RandomIC
     variable = c
     min = -0.1
     max =  0.1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./local_energy]
+  [local_energy]
     type = TotalFreeEnergy
     variable = local_energy
     f_name = fbulk
     interfacial_vars = c
     kappa_names = kappa_c
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = fbulk
     args = c
@@ -74,19 +74,19 @@
     constant_expressions = 1.0/2^2
     function = W*(1-c)^2*(1+c)^2
     enable_jit = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./top]
+  [top]
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
-  [../]
-  [./total_free_energy]
+  []
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
+  []
 []
 
 [Executioner]

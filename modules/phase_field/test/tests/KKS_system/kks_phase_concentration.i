@@ -21,84 +21,84 @@
 [BCs]
   # (and ca for debugging purposes)
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = c
     boundary = 'left'
     value = 0.1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = c
     boundary = 'right'
     value = 0.9
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = eta
     boundary = 'top'
     value = 0.1
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = eta
     boundary = 'bottom'
     value = 0.9
-  [../]
+  []
 []
 
 [Variables]
   # concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.5
-  [../]
+  []
 
   # order parameter
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 
   # phase concentration a
-  [./ca]
+  [ca]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.2
-  [../]
+  []
 
   # phase concentration b
-  [./cb]
+  [cb]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.3
-  [../]
+  []
 []
 
 [Materials]
   # simple toy free energy
-  [./fa]
+  [fa]
     type = DerivativeParsedMaterial
     f_name = Fa
     args = 'ca'
     function = 'ca^2'
-  [../]
-  [./fb]
+  []
+  [fb]
     type = DerivativeParsedMaterial
     f_name = Fb
     args = 'cb'
     function = '(1-cb)^2'
-  [../]
+  []
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
@@ -107,42 +107,42 @@
   #active = 'cadiff cdiff etadiff phaseconcentration'
   ##active = 'cadiff cbdiff cdiff etadiff'
 
-  [./cadiff]
+  [cadiff]
     type = Diffusion
     variable = ca
-  [../]
+  []
 
-  [./cbdiff]
+  [cbdiff]
     type = Diffusion
     variable = cb
-  [../]
+  []
 
-  [./cdiff]
+  [cdiff]
     type = Diffusion
     variable = c
-  [../]
+  []
 
-  [./etadiff]
+  [etadiff]
     type = Diffusion
     variable = eta
-  [../]
+  []
 
   # ...and solve for ca and cb
-  [./phaseconcentration]
+  [phaseconcentration]
     type = KKSPhaseConcentration
     ca       = ca
     variable = cb
     c        = c
     eta      = eta
-  [../]
+  []
 
-  [./chempot]
+  [chempot]
     type = KKSPhaseChemicalPotential
     variable = ca
     cb       = cb
     fa_name  = Fa
     fb_namee  = Fb
-  [../]
+  []
 []
 
 [Executioner]
@@ -157,14 +157,14 @@
   active = 'full'
   #active = 'mydebug'
   #active = ''
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
-  [./mydebug]
+  []
+  [mydebug]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

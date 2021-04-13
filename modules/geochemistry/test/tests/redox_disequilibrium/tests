@@ -1,5 +1,5 @@
 [Tests]
-  [./morro]
+  [morro]
     type = 'RunApp'
     input = 'morro.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -40,8 +40,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems'
     issues = '#15290 #15261'
     design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
-  [../]
-  [./morro_disequilibrium]
+  []
+  [morro_disequilibrium]
     type = 'RunApp'
     input = 'morro_disequilibrium.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -84,8 +84,8 @@ e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3074V
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium'
     issues = '#15290 #15261'
     design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
-  [../]
-  [./microbial]
+  []
+  [microbial]
     type = 'RunApp'
     input = 'microbial.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -140,5 +140,5 @@ e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
     issues = '#15290 #15261'
     design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md microbial_redox.md'
-  [../]
+  []
 []

@@ -9,44 +9,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./force]
+  [force]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     function = force
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left]
+  []
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,29 +64,29 @@
   max_h_level = 2
   initial_steps = 4
   initial_marker = initial_box
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '0.3 0.3 0'
       inside = refine
       top_right = '0.6 0.6 0'
       outside = dont_mark
       type = BoxMarker
-    [../]
-    [./initial_box]
+    []
+    [initial_box]
       type = BoxMarker
       bottom_left = '0.8 0.1 0'
       top_right = '0.9 0.2 0'
       inside = refine
       outside = dont_mark
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./adaptivity_cycles]
+  [adaptivity_cycles]
     type = NumAdaptivityCycles
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

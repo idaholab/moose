@@ -23,106 +23,106 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./wc_z]
-  [../]
+  [wc_z]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningCubic
     value_0 = 1
     value_residual = 0
     internal_limit = 2E-3
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./ang]
+  []
+  [ang]
     type = TensorMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 3E3
     poisson = 0.2
     layer_thickness = 1.0
     joint_normal_stiffness = 1.0E3
     joint_shear_stiffness = 2.0E3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '2 -1 0.5  1 1.9 0  0.5 0 3'
     eigenstrain_name = ini_stress
-  [../]
-  [./cmc]
+  []
+  [cmc]
     type = CappedMohrCoulombCosseratStressUpdate
     host_youngs_modulus = 3E3
     host_poissons_ratio = 0.2
@@ -133,21 +133,21 @@
     dilation_angle = ang
     smoothing_tol = 0.1
     yield_function_tol = 1.0E-12
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -37,7 +37,7 @@
 
   # For NodalVariableValue to work with distributed mesh
   allow_renumbering = false
-[../]
+[]
 
 [Functions]
   [disp_y]
@@ -152,7 +152,7 @@
     use_displaced_mesh = true
     compute_lm_residuals = true
   []
-[../]
+[]
 
 [UserObjects]
   [slip_rate_gss]

@@ -6,46 +6,46 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = c
     boundary = left
     function = x
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionDirichletBC
     variable = c
     boundary = right
     function = x
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = RegularSolutionFreeEnergy
     f_name = F
     c = c
     outputs = out
     log_tol = 0.2
-  [../]
+  []
 []
 
 [Executioner]
@@ -58,8 +58,8 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = Exodus
     execute_on = timestep_end
-  [../]
+  []
 []

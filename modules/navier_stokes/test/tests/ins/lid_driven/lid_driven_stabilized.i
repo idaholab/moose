@@ -35,111 +35,111 @@
     ny = 64
     elem_type = QUAD4
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
-  [./vel_x]
-  [../]
+  [vel_x]
+  []
 
-  [./vel_y]
-  [../]
+  [vel_y]
+  []
 
-  [./p]
-  [../]
+  [p]
+  []
 []
 
 [Kernels]
   # mass
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
+  []
 
   # x-momentum, space
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
+  []
 
   # y-momentum, space
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
-  [./lid]
+  [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
-  [../]
+  []
 
-  [./y_no_slip]
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Functions]
-  [./lid_function]
+  [lid_function]
     # We pick a function that is exactly represented in the velocity
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
     type = ParsedFunction
     value = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

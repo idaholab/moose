@@ -5,17 +5,17 @@
 []
 
 [AuxVariables]
-  [./a]
-  [../]
+  [a]
+  []
 []
 
 [AuxKernels]
-  [./a_ak]
+  [a_ak]
     type = ConstantAux
     variable = a
     value = 1.
     execute_on = initial
-  [../]
+  []
 []
 
 [Problem]
@@ -27,8 +27,8 @@
 []
 
 [Outputs]
-  [./exodus]
+  [exodus]
     type = Exodus
     use_displaced = true
-  [../]
+  []
 []

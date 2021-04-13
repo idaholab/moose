@@ -1,11 +1,11 @@
 [Tests]
-  [./2D]
+  [2D]
     type = 'Exodiff'
     input = 'stagnation.i'
     cli_args = 'Outputs/file_base=2D_out'
     exodiff = '2D_out.e'
-  [../]
-  [./axisymmetric]
+  []
+  [axisymmetric]
     type = 'Exodiff'
     input = 'stagnation.i'
     # Note: We need to specify a slightly different vertical velocity
@@ -14,5 +14,5 @@
     # constraint.
     cli_args = 'Outputs/file_base=axisymmetric_out Problem/coord_type=RZ Kernels/mass/type=INSMassRZ Kernels/x_momentum_space/type=INSMomentumLaplaceFormRZ Kernels/y_momentum_space/type=INSMomentumLaplaceFormRZ Functions/vel_y_inlet/value=-2*k*y'
     exodiff = 'axisymmetric_out.e'
-  [../]
+  []
 []

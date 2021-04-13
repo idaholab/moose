@@ -13,38 +13,38 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff forcing dot'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = GaussContForcing
     variable = u
-  [../]
+  []
 
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

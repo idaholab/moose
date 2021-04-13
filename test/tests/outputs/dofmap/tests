@@ -5,7 +5,7 @@
   [group]
     requirement = "The system shall support the ability to output the degree-of-freedom information:"
 
-    [./simple]
+    [simple]
       # Test basic operation
       type = CheckFiles
       input = simple.i
@@ -13,16 +13,16 @@
       file_expect_out = '{"ndof": 242'
 
       detail = "to a json file,"
-    [../]
-    [./simple_screen]
+    []
+    [simple_screen]
       # Test the ability to write to the screen
       type = RunApp
       input = simple_screen.i
       expect_out = '{"ndof": 242'
 
       detail = "to the screen,"
-    [../]
-    [./uniform_refine]
+    []
+    [uniform_refine]
       type = CheckFiles
       input = simple.i
       cli_args = 'Mesh/uniform_refine=1 Outputs/file_base=simple_dofmap_refine'
@@ -30,13 +30,13 @@
       file_expect_out = '{"ndof": 882'
 
       detail = "with uniform refinement, and"
-    [../]
-    [./transient]
+    []
+    [transient]
       type = CheckFiles
       input = simple_transient.i
       check_files = 'simple_transient_dofmap.json simple_transient_dofmap_1.json'
 
       detail = "with transient adaptivity."
-    [../]
+    []
   []
 []

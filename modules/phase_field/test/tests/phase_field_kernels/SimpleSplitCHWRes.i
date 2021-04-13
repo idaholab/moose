@@ -21,10 +21,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 125.0
       y1 = 125.0
@@ -32,42 +32,42 @@
       invalue = 1.0
       outvalue = 0.1
       int_width = 30.0
-    [../]
-  [../]
-  [./w]
+    []
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SimpleSplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1e-3 0.1'
-  [../]
+  []
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c'
@@ -75,15 +75,15 @@
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

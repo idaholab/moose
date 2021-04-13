@@ -11,187 +11,187 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./temp]
-  [../]
-  [./scalar_strain_zz]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [temp]
+  []
+  [scalar_strain_zz]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./react_z]
+  [react_z]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
-  [../]
-  [./heat]
+  []
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps]
+  [TensorMechanics]
+    [GeneralizedPlaneStrain]
+      [gps]
         use_displaced_mesh = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Functions]
-  [./tempramp]
+  [tempramp]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = DirichletBC
     boundary = '4 6'
     variable = disp_x
     value = 0.0
-  [../]
-  [./y]
+  []
+  [y]
     type = DirichletBC
     boundary = '4 6'
     variable = disp_y
     value = 0.0
-  [../]
-  [./t]
+  []
+  [t]
     type = DirichletBC
     boundary = '4'
     variable = temp
     value = 0.0
-  [../]
-  [./tramp]
+  []
+  [tramp]
     type = FunctionDirichletBC
     variable = temp
     boundary = '6'
     function = tempramp
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     off_diag_row =    'disp_x disp_y'
     off_diag_column = 'disp_y disp_x'
-  [../]
+  []
 []
 
 [Contact]
-  [./mech]
+  [mech]
     primary = 8
     secondary = 2
     penalty = 1e+10
@@ -200,11 +200,11 @@
     normal_smoothing_distance = .1
     model = frictionless
     formulation = kinematic
-  [../]
+  []
 []
 
 [ThermalContact]
-  [./thermal]
+  [thermal]
     type = GapHeatTransfer
     primary = 8
     secondary = 2
@@ -216,46 +216,46 @@
     gap_conductivity = 0.01
     min_gap = 0.001
     quadrature = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     block = '1 2'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputePlaneSmallStrain
     eigenstrain_names = eigenstrain
     block = '1 2'
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.0
     eigenstrain_name = eigenstrain
     block = '1 2'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
 
-  [./heatcond]
+  [heatcond]
     type = HeatConductionMaterial
     thermal_conductivity = 3.0
     specific_heat = 300.0
     block = '1 2'
-  [../]
+  []
 
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '1'
-  [../]
+  []
 []
 
 [Executioner]

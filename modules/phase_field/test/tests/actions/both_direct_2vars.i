@@ -11,31 +11,31 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = F
         mobility = 1.0
         kappa = 20.0
         args = 'eta'
         solve_type = direct
-      [../]
-    [../]
-    [./Nonconserved]
-      [./eta]
+      []
+    []
+    [Nonconserved]
+      [eta]
         free_energy = F
         mobility = 1.0
         kappa = 20
         args = 'c'
         family = HERMITE
         order = THIRD
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = BoundingBoxIC
     variable = c
     x1 = 10
@@ -44,28 +44,28 @@
     y2 = 35
     inside = 0.1
     outside = 0.9
-  [../]
-  [./eta_IC]
+  []
+  [eta_IC]
     type = ConstantIC
     variable = eta
     value = 0.5
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'eta c'
     function = '(1 - eta)*10.0*(c - 0.1)^2 + eta*(8.0*(c - 0.9)^2) + 10.0*eta^2*(1-eta)^2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,8 +89,8 @@
 
 [Outputs]
   perf_graph = true
-  [./out]
+  [out]
     type = Exodus
     refinements = 2
-  [../]
+  []
 []

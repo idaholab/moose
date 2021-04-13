@@ -14,93 +14,93 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type = ParsedGradFunction
     value = -sin(pi*x)*sin(pi*y)
     grad_x = -pi*cos(pi*x)*sin(pi*y)
     grad_y = -pi*sin(pi*x)*cos(pi*y)
-  [../]
-  [./bc_fnt]
+  []
+  [bc_fnt]
     type = ParsedFunction
     value = -pi*sin(pi*x)*cos(pi*y)
-  [../]
-  [./bc_fnb]
+  []
+  [bc_fnb]
     type = ParsedFunction
     value = pi*sin(pi*x)*cos(pi*y)
-  [../]
-  [./forcing_fn]
+  []
+  [forcing_fn]
     type = ParsedFunction
     value = -2*pi*pi*sin(pi*x)*sin(pi*y)-sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./reaction]
+  []
+  [reaction]
     type = Reaction
     variable = u
-  [../]
-  [./forcing]
+  []
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction= 'x y'
-    [../]
-  [../]
-  [./bc_top]
+    []
+  []
+  [bc_top]
     type=FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = bc_fnt
-  [../]
-  [./bc_bottom]
+  []
+  [bc_bottom]
     type=FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bc_fnb
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
-  [./h]
+  []
+  [h]
     type = AverageElementSize
-  [../]
-  [./L2error]
+  []
+  [L2error]
     type = ElementL2Error
     variable = u
     function = bc_fn
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = bc_fn
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,20 +109,20 @@
 
   # We use higher-order quadrature to ensure that the forcing function
   # is integrated accurately.
-  [./Quadrature]
+  [Quadrature]
     order=ELEVENTH
-  [../]
+  []
 []
 
 [Adaptivity]
   steps = 2
   marker = uniform
-  [./Markers]
-    [./uniform]
+  [Markers]
+    [uniform]
       type = UniformMarker
       mark = refine
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

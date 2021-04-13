@@ -1,5 +1,5 @@
 [Tests]
-  [./generate_radiation_patch]
+  [generate_radiation_patch]
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_in.e'
@@ -9,9 +9,9 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_linear]
+  [generate_radiation_patch_linear]
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_linear.e'
@@ -21,9 +21,9 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_centroid]
+  [generate_radiation_patch_centroid]
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_centroid.e'
@@ -33,9 +33,9 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_centroid_error]
+  [generate_radiation_patch_centroid_error]
     type = RunException
     input = 'generate_radiation_patch.i'
     expect_err = "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!"
@@ -45,9 +45,9 @@
     mesh_mode = REPLICATED
     issues = "#14000"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_grid]
+  [generate_radiation_patch_grid]
     type = 'Exodiff'
     input = 'generate_radiation_patch.i'
     exodiff = 'generate_radiation_patch_grid.e'
@@ -57,9 +57,9 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_grid_2D]
+  [generate_radiation_patch_grid_2D]
     type = 'Exodiff'
     input = 'generate_radiation_patch_grid_2D.i'
     exodiff = 'generate_radiation_patch_grid_2D_in.e'
@@ -69,9 +69,9 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 
-  [./generate_radiation_patch_grid_2D_overpart]
+  [generate_radiation_patch_grid_2D_overpart]
     type = 'Exodiff'
     input = 'generate_radiation_patch_grid_2D.i'
     exodiff = 'generate_radiation_patch_grid_2D_overpart.e'
@@ -81,5 +81,5 @@
     mesh_mode = REPLICATED
     issues = "#15829"
     recover = false
-  [../]
+  []
 []

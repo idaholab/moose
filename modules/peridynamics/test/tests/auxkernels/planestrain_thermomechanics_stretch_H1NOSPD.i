@@ -7,122 +7,122 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 6
     ny = 6
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./total_stretch]
+  [total_stretch]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mechanical_stretch]
+  []
+  [mechanical_stretch]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON_I
     eigenstrain_names = thermal_strain
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 
-  [./total_stretch]
+  [total_stretch]
     type = MaterialRealAux
     variable = total_stretch
     property = total_stretch
-  [../]
-  [./mechanical_stretch]
+  []
+  [mechanical_stretch]
     type = MaterialRealAux
     variable = mechanical_stretch
     property = mechanical_stretch
-  [../]
+  []
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     boundary = 1003
     preset = false
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = 1000
     preset = false
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputePlaneSmallStrainNOSPD
     stabilization = BOND_HORIZON_I
     eigenstrain_names = thermal_strain
     plane_strain = true
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 0.0002
     stress_free_temperature = 0.0
     eigenstrain_name = thermal_strain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -137,10 +137,10 @@
   start_time = 0.0
   end_time = 1.0
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS_LOBATTO
     order = FIRST
-  [../]
+  []
 []
 
 [Outputs]

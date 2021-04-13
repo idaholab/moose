@@ -1,5 +1,5 @@
 [Tests]
-  [./parsed_subdomain_mg_test]
+  [parsed_subdomain_mg_test]
     type = 'Exodiff'
     input = 'parsed_subdomain_mg.i'
     cli_args = '--mesh-only'
@@ -10,5 +10,5 @@
     requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions.'
     design = 'meshgenerators/ParsedSubdomainMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

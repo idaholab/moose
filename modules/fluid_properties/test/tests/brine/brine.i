@@ -44,111 +44,111 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./temperature]
+  []
+  [temperature]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./density]
+  []
+  [density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Functions]
-  [./pic]
+  [pic]
     type = ParsedFunction
     value = 'if(x<2,20e6, 40e6)'
-  [../]
-  [./tic]
+  []
+  [tic]
     type = ParsedFunction
     value = 'if(x<1, 323.15, 473.15)'
-  [../]
-  [./xic]
+  []
+  [xic]
     type = ParsedFunction
     value = 'if(x<2,0.1047, 0.2261)'
-  [../]
+  []
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = FunctionIC
     function = pic
     variable = pressure
-  [../]
-  [./t_ic]
+  []
+  [t_ic]
     type = FunctionIC
     function = tic
     variable = temperature
-  [../]
-  [./x_ic]
+  []
+  [x_ic]
     type = FunctionIC
     function = xic
     variable = xnacl
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./density]
+  [density]
     type = MaterialRealAux
      variable = density
      property = density
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = MaterialRealAux
      variable = enthalpy
      property = enthalpy
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = MaterialRealAux
      variable = internal_energy
      property = e
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./brine]
+  [FluidProperties]
+    [brine]
       type = BrineFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = MultiComponentFluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     xmass = xnacl
     fp = brine
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -157,51 +157,51 @@
 []
 
 [Postprocessors]
-  [./density0]
+  [density0]
     type = ElementalVariableValue
     variable = density
     elementid = 0
-  [../]
-  [./density1]
+  []
+  [density1]
     type = ElementalVariableValue
     variable = density
     elementid = 1
-  [../]
-  [./density2]
+  []
+  [density2]
     type = ElementalVariableValue
     variable = density
     elementid = 2
-  [../]
-  [./enthalpy0]
+  []
+  [enthalpy0]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 0
-  [../]
-  [./enthalpy1]
+  []
+  [enthalpy1]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 1
-  [../]
-  [./enthalpy2]
+  []
+  [enthalpy2]
     type = ElementalVariableValue
     variable = enthalpy
     elementid = 2
-  [../]
-  [./e0]
+  []
+  [e0]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 0
-  [../]
-  [./e1]
+  []
+  [e1]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 1
-  [../]
-  [./e2]
+  []
+  [e2]
     type = ElementalVariableValue
     variable = internal_energy
     elementid = 2
-  [../]
+  []
 []
 
 [Outputs]

@@ -6,61 +6,61 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./initial_func]
+  [initial_func]
     type = ParsedFunction
     value = sin(pi*x)*sin(pi*y)
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./source]
+  []
+  [source]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [BCs]
   active = 'func_bc'
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./func_bc]
+  []
+  [func_bc]
     type = FunctionDirichletBC
     variable = u
     boundary = 'bottom right top left'
     function = initial_func
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./test_pp]
+  [test_pp]
     type = TestCopyInitialSolution
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,9 +78,9 @@
 []
 
 [ICs]
-  [./initial]
+  [initial]
     function = initial_func
     variable = u
     type = FunctionIC
-  [../]
+  []
 []

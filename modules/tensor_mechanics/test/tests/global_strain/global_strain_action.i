@@ -26,91 +26,91 @@
 []
 
 [Variables]
-  [./global_strain]
+  [global_strain]
     order = SIXTH
     family = SCALAR
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
+  [TensorMechanics]
     # Master action for generating the tensor mechanics kernels, variables,
     # strain calculation material, and the auxilliary system for visualization
-    [./Master]
-      [./stress_div]
+    [Master]
+      [stress_div]
         strain = SMALL
         add_variables = true
         global_strain = global_strain #global strain contribution
         generate_output = 'strain_xx strain_xy strain_yy stress_xx stress_xy
                            stress_yy vonmises_stress'
-      [../]
-    [../]
+      []
+    []
     # GlobalStrain action for generating the objects associated with the global
     # strain calculation and associated displacement visualization
-    [./GlobalStrain]
-      [./global_strain]
+    [GlobalStrain]
+      [global_strain]
         scalar_global_strain = global_strain
         displacements = 'u_x u_y u_z'
         auxiliary_displacements = 'disp_x disp_y disp_z'
         global_displacements = 'ug_x ug_y ug_z'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'z'
       variable = 'u_x u_y u_z'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
-  [../]
-  [./centerfix_z]
+  []
+  [centerfix_z]
     type = DirichletBC
     boundary = 100
     variable = u_z
     value = 0
-  [../]
+  []
   # applied displacement
-  [./appl_y]
+  [appl_y]
     type = DirichletBC
     boundary = top
     variable = u_y
     value = 0.033
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     boundary = bottom
     variable = u_y
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '7 0.33'
     fill_method = symmetric_isotropic_E_nu
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

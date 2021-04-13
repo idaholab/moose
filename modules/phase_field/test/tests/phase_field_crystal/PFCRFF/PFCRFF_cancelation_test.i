@@ -13,55 +13,55 @@
 []
 
 [Variables]
-  [./PFCRFFVariables]
-  [../]
-  [./n]
-    [./InitialCondition]
+  [PFCRFFVariables]
+  []
+  [n]
+    [InitialCondition]
       type = RandomIC
       max = 0.8
       min = .2
       seed = 12345
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./PFCRFFKernel]
+  [PFCRFFKernel]
     n_name = n
     log_approach = cancelation
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./PFC]
+  [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
-  [./FDP]
+  []
+  [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -89,7 +89,7 @@
 
 [ICs]
   active = ''
-  [./density_IC]
+  [density_IC]
     y2 = 10.5
     lc = 6
     y1 = 1.5
@@ -100,5 +100,5 @@
     variable = n
     x1 = 1.5
     type = PFCFreezingIC
-  [../]
+  []
 []

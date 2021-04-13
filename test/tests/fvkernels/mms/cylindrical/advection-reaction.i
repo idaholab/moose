@@ -1,7 +1,7 @@
 a=1.1
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 2
@@ -10,7 +10,7 @@ a=1.1
     ymax = 1
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -19,21 +19,21 @@ a=1.1
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
     initial_condition = 1
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection]
+  [advection]
     type = FVAdvection
     variable = v
     velocity = '${a} ${a} 0'
     advected_interp_method = 'average'
-  [../]
+  []
   [reaction]
     type = FVReaction
     variable = v
@@ -82,13 +82,13 @@ a=1.1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

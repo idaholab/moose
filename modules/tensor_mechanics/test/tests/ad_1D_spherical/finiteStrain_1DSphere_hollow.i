@@ -38,70 +38,70 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_rr]
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_rr]
+  [stress_rr]
     type = ElementAverageValue
     variable = stress_rr
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     variable = stress_rr
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./innerDisp]
+  [innerDisp]
     type = ADDirichletBC
     boundary = left
     variable = disp_r
     value = 0.0
-  [../]
-  [./outerPressure]
+  []
+  [outerPressure]
     type = ADPressure
     boundary = right
     variable = disp_r
     component = 0
     constant = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

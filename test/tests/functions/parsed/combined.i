@@ -7,47 +7,47 @@
 []
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 
-  [./sv]
+  [sv]
     family = SCALAR
     order = FIRST
     initial_condition = 100
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./function_aux]
+  [function_aux]
     type = FunctionAux
     variable = f
     function = fn
-  [../]
+  []
 []
 
 [Functions]
-  [./pp_fn]
+  [pp_fn]
     type = ParsedFunction
     value = '2*(t+1)'
-  [../]
-  [./cos_fn]
+  []
+  [cos_fn]
     type = ParsedFunction
     value = 'cos(pi*x)'
-  [../]
-  [./fn]
+  []
+  [fn]
     type = ParsedFunction
     value = 'scalar_value * func / pp'
     vars = 'scalar_value func   pp'
     vals = 'sv           cos_fn pp'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp]
+  [pp]
     type = FunctionValuePostprocessor
     function = pp_fn
     execute_on = initial
-  [../]
+  []
 []
 
 [Problem]

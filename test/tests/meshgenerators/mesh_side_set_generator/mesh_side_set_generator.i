@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 4
@@ -8,7 +8,7 @@
     elem_type = TET4
   []
 
-  [./left_block]
+  [left_block]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
@@ -17,7 +17,7 @@
     top_right = '0.5 1 1'
   []
 
-  [./right_block]
+  [right_block]
     type = SubdomainBoundingBoxGenerator
     input = left_block
     block_id = 2
@@ -26,7 +26,7 @@
     top_right = '1 1 1'
   []
 
-  [./center_side_set]
+  [center_side_set]
     type = SideSetsBetweenSubdomainsGenerator
     input = right_block
     primary_block = left_block
@@ -34,7 +34,7 @@
     new_boundary = center_side_set
   []
 
-  [./center_mesh]
+  [center_mesh]
     type = MeshSideSetGenerator
     input = center_side_set
     boundaries = center_side_set
@@ -44,41 +44,41 @@
 []
 
 [Variables]
-  [./c_volume]
-    [./InitialCondition]
+  [c_volume]
+    [InitialCondition]
       type = FunctionIC
       function = '1-(x-0.5)^2+(y-0.5)^2+(z-0.5)^2'
-    [../]
-  [../]
-  [./c_plane]
+    []
+  []
+  [c_plane]
     block = 'center_mesh'
-  [../]
+  []
 []
 
 [Kernels]
-  [./volume_diff]
+  [volume_diff]
     type = Diffusion
     variable = c_volume
     block = 'left_block right_block'
-  [../]
-  [./volume_dt]
+  []
+  [volume_dt]
     type = TimeDerivative
     variable = c_volume
     block = 'left_block right_block'
-  [../]
+  []
 
   # couple the lower dimensional variable to the volume variable
-  [./plane_reaction]
+  [plane_reaction]
     type = Reaction
     variable = c_plane
     block = 'center_mesh'
-  [../]
-  [./plane_coupled]
+  []
+  [plane_coupled]
     type = CoupledForce
     variable = c_plane
     v = c_volume
     block = 'center_mesh'
-  [../]
+  []
 []
 
 [Executioner]

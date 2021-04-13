@@ -13,7 +13,7 @@
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionRasterizer
     system_variables = 'c'
     mesh = diffuse_out.e
@@ -26,5 +26,5 @@
     # raster_mode = MAP
     raster_mode = FILTER
     threshold = 0.5
-  [../]
+  []
 []

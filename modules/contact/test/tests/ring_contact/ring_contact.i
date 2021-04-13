@@ -15,95 +15,95 @@
 []
 
 [Functions]
-  [./ring_y]
+  [ring_y]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 1'
     scale_factor = -0.2
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
-  [../]
+  []
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 3
     secondary = 2
     penalty = 1e3
     tension_release = -1
-  [../]
+  []
 []
 
 [BCs]
-  [./plane]
+  [plane]
     type = DirichletBC
     variable = disp_z
     boundary = 10
     value = 0.0
-  [../]
+  []
 
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./ring_x]
+  [ring_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
 
-  [./ring_y]
+  [ring_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = ring_y
-  [../]
+  []
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stiffStuff2]
+  []
+  [stiffStuff2]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e3
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []  # Materials
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -122,9 +122,9 @@
   dt = 0.1
   end_time = 0.5
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Outputs]

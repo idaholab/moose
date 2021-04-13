@@ -29,9 +29,9 @@
 [Variables]
   # Solve for the temperature and the displacements
   # Displacements are not specified because the TensorMechanics/Master Action sets them up
-  [./temp]
+  [temp]
     initial_condition = 300
-  [../]
+  []
 []
 
 [XFEM]
@@ -41,102 +41,102 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '1.0  0.5  0.8  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
-  [./xfem_marker_uo]
+  []
+  [xfem_marker_uo]
     type = XFEMRankTwoTensorMarkerUserObject
     execute_on = timestep_end
     tensor = stress
     scalar_type = MaxPrincipal
     threshold = 5e+1
     average = true
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
     eigenstrain_names = eigenstrain
-  [../]
+  []
 []
 
 [Kernels]
-  [./htcond]
+  [htcond]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./topx]
+  []
+  [topx]
     type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     boundary = top
     variable = disp_y
     value = 0.0
-  [../]
-  [./topt]
+  []
+  [topt]
     type = FunctionDirichletBC
     boundary = top
     variable = temp
     function = 273-t*27.3
-  [../]
-  [./bott]
+  []
+  [bott]
     type = FunctionDirichletBC
     boundary = bottom
     variable = temp
     function = 273
 #    value = 273.0
-  [../]
+  []
 []
 
 [Materials]
-  [./thcond]
+  [thcond]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '5e-6'
-  [../]
+  []
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
-  [./_elastic_strain]
+  [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
-  [./thermal_strain]
+  [thermal_strain]
     type= ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 10e-6
     temperature = temp
     stress_free_temperature = 273
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]
@@ -148,10 +148,10 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -173,8 +173,8 @@
 [Outputs]
   exodus = true
   execute_on = timestep_end
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

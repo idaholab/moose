@@ -23,43 +23,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./grain_auxvar]
+  [grain_auxvar]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nodal_flood_aux]
+  [nodal_flood_aux]
     variable = grain_auxvar
     type = FeatureFloodCountAux
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./centroids]
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     flood_counter = flood_count_pp
     field_display = CENTROID
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Functions]
-  [./tif]
+  [tif]
     # ImageFunction gets its file range parameters from ImageMesh,
     # when it is present.  This prevents duplicating information in
     # input files.
@@ -68,39 +68,39 @@
     # In these sample images the features we want to analyze are RED (or close to pure red). The
     # background is BLUE so we can easily distinguish between the two by selecting only the red channel.
     component = 0
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = tif
     variable = u
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flood_count_pp]
+  [flood_count_pp]
     type = FeatureFloodCount
     variable = u
     threshold = 1.0
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./grain_volumes]
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Steady

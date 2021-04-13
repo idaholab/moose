@@ -13,14 +13,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 5.0
@@ -30,7 +30,7 @@
     invalue = 1.0
     outvalue = 0.0
     int_width = 1.0
-  [../]
+  []
 []
 
 [Executioner]

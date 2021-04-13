@@ -7,52 +7,52 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./force_u]
+  []
+  [force_u]
     type = CoupledForce
     variable = u
     v = 'v'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./picard_its]
+  [picard_its]
     type = NumPicardIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,7 +71,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
@@ -80,22 +80,22 @@
     max_failures = 100
     catch_up = true
     keep_solution_during_restore = true
-  [../]
+  []
 []
 
 [Transfers]
-  [./v_from_sub]
+  [v_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = v
     variable = v
-  [../]
-  [./u_to_sub]
+  []
+  [u_to_sub]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = u
-  [../]
+  []
 []

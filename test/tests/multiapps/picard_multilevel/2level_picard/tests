@@ -1,7 +1,7 @@
 [Tests]
    design = 'multiapps/TransientMultiApp.md'
 
-  [./restart_from_latest_solution]
+  [restart_from_latest_solution]
     type = 'Exodiff'
     input = 'mutilevel_app.i'
     exodiff = 'mutilevel_app_out.e 	mutilevel_app_out_level1-0.e 	mutilevel_app_out_level1-0_level2-0.e'
@@ -9,9 +9,9 @@
     recover = false
     issues = '#14056'
     requirement = 'The system should be able to restart from the latest solution'
-  [../]
+  []
 
-  [./parameter_error]
+  [parameter_error]
     type = 'RunException'
     input = 'mutilevel_app.i'
     expect_err = 'This parameter should be provided in only master app'
@@ -20,5 +20,5 @@
     prereq = 'restart_from_latest_solution'
     issues = '#14056'
     requirement = 'The system should be able to check if users provide valid parameter to restart app using the latest solution'
-  [../]
+  []
 []

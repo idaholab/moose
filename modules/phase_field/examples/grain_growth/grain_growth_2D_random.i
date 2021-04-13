@@ -31,56 +31,56 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
     # Custom action that created all of the grain variables and sets their initial condition
-  [../]
+  []
 []
 
 [AuxVariables]
   # Dependent variables
-  [./bnds]
+  [bnds]
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalRandomIC]
+  [PolycrystalICs]
+    [PolycrystalRandomIC]
       random_type = discrete
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
   # Boundary Condition block
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       auto_direction = 'x y' # Makes problem periodic in the x and y directions
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     GBmob0 = 2.5e-6 # Mobility prefactor for Cu from Schonfelder1997
@@ -88,23 +88,23 @@
     Q = 0.23 # Activation energy for grain growth from Schonfelder 1997
     T = 450 # Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # Width of the diffuse GB
-  [../]
+  []
 []
 
 [Postprocessors]
   # Scalar postprocessors
-  [./dt]
+  [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
-  [./num_nodes]
+  []
+  [num_nodes]
     type = NumNodes
-  [../]
-  [./num_grains]
+  []
+  [num_grains]
     type = FeatureFloodCount
     variable = bnds
     threshold = 0.7
-  [../]
+  []
 []
 
 [Executioner]
@@ -125,27 +125,27 @@
   start_time = 0.0
   end_time = 4000
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 5 # Initial time step.  In this simulation it changes.
     optimal_iterations = 8 # Time step will adapt to maintain this number of nonlinear iterations
     growth_factor = 1.25
-  [../]
+  []
 
-  [./Adaptivity]
+  [Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
     initial_adaptivity = 0 # Number of times mesh is adapted to initial condition
     refine_fraction = 0.7 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
     max_h_level = 4 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
   csv = true
-  [./console]
+  [console]
     type = Console
     max_rows = 20
-  [../]
+  []
 []

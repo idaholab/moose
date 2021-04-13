@@ -9,101 +9,101 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./w]
-  [../]
+  [c]
+  []
+  [w]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = CrossIC
     variable = c
     x1 = 0
     x2 = 25
     y1 = 0
     y2 = 25
-  [../]
+  []
 []
 
 [Kernels]
-  [./cdot]
+  [cdot]
     type = TimeDerivative
     variable = c
-  [../]
-  [./grad_w]
+  []
+  [grad_w]
     type = MatDiffusion
     variable = c
     v = w
     diffusivity = 1.0
-  [../]
-  [./grad_c]
+  []
+  [grad_c]
     type = MatDiffusion
     variable = w
     v = c
     diffusivity = 2.0
-  [../]
-  [./w2]
+  []
+  [w2]
     type = CoupledMaterialDerivative
     variable = w
     v = c
     f_name = F
-  [../]
-  [./w3]
+  []
+  [w3]
     type = CoefReaction
     variable = w
     coefficient = -1.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./local_energy]
+  [local_energy]
     type = TotalFreeEnergy
     variable = local_energy
     f_name = F
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Materials]
-  [./kappa_c]
+  [kappa_c]
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     args = c
     function = '(1 - c)^2 * (1 + c)^2'
     f_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
-  [./total_c]
+  []
+  [total_c]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

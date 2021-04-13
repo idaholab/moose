@@ -1,5 +1,5 @@
 [Tests]
-  [./test_nodal]
+  [test_nodal]
     type = 'Exodiff'
     input = 'grain_tracker_nodal.i'
     exodiff = 'grain_tracker_nodal_out.e'
@@ -12,9 +12,9 @@
     requirement = 'The system shall properly create and track grains when using the Nodal mode of the GrainTracker algorithm.'
     issues = '#4765'
     design = 'GrainTracker.md'
-  [../]
+  []
 
-  [./test_elemental]
+  [test_elemental]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
@@ -25,9 +25,9 @@
     requirement = 'The system shall properly create and track grains when using the Elemental mode of the GrainTracker algorithm.'
     issues = '#4881'
     design = 'GrainTracker.md'
-  [../]
+  []
 
-  [./test_advanced_op_assignment]
+  [test_advanced_op_assignment]
     type = 'CSVDiff'
     input = 'grain_tracker_advanced_op.i'
     csvdiff = 'grain_tracker_advanced_op_out.csv'
@@ -37,9 +37,9 @@
     requirement = "The PolycrystalVoronoi object shall create a valid coloring for a given number of grains and order parameters."
     issues = '#7005 #9018'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_advanced_op_assignment_bt_error]
+  [test_advanced_op_assignment_bt_error]
     type = 'RunException'
     input = 'grain_tracker_advanced_op.i'
     expect_err = "Unable to find a valid grain to op coloring"
@@ -50,9 +50,9 @@
                   "when using the simple back-tracking algorithm."
     issues = '#7005 #8804'
     design = "PolycrystalICs.md"
-  [../]
+  []
 
-  [./test_advanced_op_assignment_petsc_error]
+  [test_advanced_op_assignment_petsc_error]
     type = 'RunException'
     input = 'grain_tracker_advanced_op.i'
     expect_err = "Unable to find a valid grain to op coloring"
@@ -63,9 +63,9 @@
                   "when using the built-in PETSc based stochastic algorithms."
     issues = '#7005 #8804'
     design = "PolycrystalICs.md"
-  [../]
+  []
 
-  [./test_halo_periodic_bc]
+  [test_halo_periodic_bc]
     type = 'Exodiff'
     input = 'grain_halo_over_bc.i'
     exodiff = 'grain_halo_over_bc_out.e'
@@ -78,9 +78,9 @@
     design = "GrainTracker.md"
     abs_zero = 1e-7
     rel_err = 4e-5
-  [../]
+  []
 
-  [./test_remapping_serial]
+  [test_remapping_serial]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
@@ -92,9 +92,9 @@
     requirement = "The GrainTracker object shall support remapping order parameter values."
     issues = '#1298'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_remapping_parallel]
+  [test_remapping_parallel]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
@@ -111,9 +111,9 @@
                   "number of order parameters for efficiency."
     issues = '#11805'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_recovery_serial_part1]
+  [test_recovery_serial_part1]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
     cli_args = 'Outputs/file_base=gt_recover_serial_out Outputs/checkpoint=true --half-transient'
@@ -125,9 +125,9 @@
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in serial."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_recovery_serial_part2]
+  [test_recovery_serial_part2]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'gt_recover_serial_out.csv'
@@ -142,9 +142,9 @@
     requirement = "The GrainTracker object shall properly recover unique grain information in serial."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_recovery_parallel_part1]
+  [test_recovery_parallel_part1]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
     cli_args = 'Outputs/file_base=gt_recover_parallel_out Outputs/checkpoint=true --half-transient'
@@ -158,9 +158,9 @@
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in parallel."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_recovery_parallel_part2]
+  [test_recovery_parallel_part2]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'gt_recover_parallel_out.csv'
@@ -177,9 +177,9 @@
     requirement = "The GrainTracker object shall properly recover unique grain information in parallel."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_poly_ic_handoff]
+  [test_poly_ic_handoff]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'test_poly_ic_handoff_out.csv'
@@ -195,9 +195,9 @@
                   " initial condition for efficiency."
     issues = '#8810'
     design = "PolycrystalICs.md"
-  [../]
+  []
 
-  [./remapping_with_reserve]
+  [remapping_with_reserve]
     type = 'Exodiff'
     input = 'grain_tracker_reserve.i'
     exodiff = 'grain_tracker_reserve_out.e'
@@ -208,9 +208,9 @@
     requirement = "The GrainTracker shall support maintaining reserve order parameters for simulations where new grains can form."
     issues = '#7605'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./start_with_zero_grains]
+  [start_with_zero_grains]
     type = 'Exodiff'
     input = 'grain_tracker_reserve.i'
     exodiff = 'start_with_zero_grains_out.e'
@@ -223,9 +223,9 @@
     requirement = "The GrainTracker shall support beginning a simulation with no active grain structure."
     issues = "#12200"
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./test_ebsd]
+  [test_ebsd]
     type = 'Exodiff'
     input = 'grain_tracker_ebsd.i'
     exodiff = 'grain_tracker_ebsd_out.e'
@@ -233,9 +233,9 @@
     requirement = "The GrainTracker shall support reading EBSD data to create initial conditions."
     issues = '#5067 #9060'
     design = "PolycrystalICs.md"
-  [../]
+  []
 
-  [./test_ebsd_adapt]
+  [test_ebsd_adapt]
     type = 'Exodiff'
     input = 'grain_tracker_ebsd.i'
     exodiff = 'grain_tracker_ebsd_adapt_out.e'
@@ -244,9 +244,9 @@
     requirement = "The GrainTracker shall support reading EBSD data to create initial conditions while supporting initial condition refinement."
     issues = '#5067 #9060'
     design = "PolycrystalICs.md"
-  [../]
+  []
 
-  [./split_grain]
+  [split_grain]
     type = 'CSVDiff'
     # Make sure that this simulation hits the "split grain" logic branch
     expect_out = 'Split Grain Detected'
@@ -262,9 +262,9 @@
     issues = '#7875'
     design = "GrainTracker.md"
 
-  [../]
+  []
 
-  [./changing_avg_volume]
+  [changing_avg_volume]
     type = 'CSVDiff'
     input = 'grain_tracker_volume_changing.i'
     csvdiff = 'grain_tracker_volume_changing_out.csv'
@@ -277,9 +277,9 @@
     requirement = "The AverageFeatureVolume Postprocessor shall calculate the average volume of each active grain in a simulation."
     issues = '#11822'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./tolerate_remap_failure]
+  [tolerate_remap_failure]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
     cli_args = 'UserObjects/grain_tracker/tolerate_failure=true UserObjects/voronoi/grain_num=16 Executioner/num_steps=6 UserObjects/voronoi/coloring_algorithm=bt Outputs/exodus=false Outputs/csv=false'
@@ -292,9 +292,9 @@
     requirement = "The GrainTracker shall support a mode where it can continue even when it fails to remap for post-modern analysis and debugging."
     issues = '#11843'
     design = "GrainTracker.md"
-  [../]
+  []
 
-  [./distributed_poly_ic]
+  [distributed_poly_ic]
     type = 'CSVDiff'
     input = 'distributed_poly_ic.i'
     csvdiff = 'distributed_poly_ic_out.csv'
@@ -306,9 +306,9 @@
     requirement = 'The system shall properly create PolycrystalICs with halo extensions (elements) when using DistributedMesh.'
     issues = '#12216'
     design = 'PolycrystalICs.md'
-  [../]
+  []
 
-  [./one_grain]
+  [one_grain]
     type = 'CSVDiff'
     input = 'one_grain.i'
     csvdiff = 'one_grain_out.csv'
@@ -317,12 +317,12 @@
     requirement = 'The system shall properly handle a single feature or grain taking up the entire domain.'
     issues = '#12216'
     design = 'GrainTracker.md'
-  [../]
+  []
 
   ###################################################
   # Faux grain tracker
   ###################################################
-  [./test_faux_nodal]
+  [test_faux_nodal]
     type = 'Exodiff'
     input = 'grain_tracker_nodal.i'
     cli_args = 'Outputs/file_base=gt_faux_nodal_out UserObjects/grain_tracker/type=FauxGrainTracker'
@@ -335,9 +335,9 @@
                   "of order parameters when using mode Nodal."
     issues = '#5453'
     design = 'GrainTracker.md'
-  [../]
+  []
 
-  [./test_faux_element]
+  [test_faux_element]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     cli_args = 'Outputs/file_base=gt_faux_elemental_out UserObjects/grain_tracker/type=FauxGrainTracker'
@@ -351,9 +351,9 @@
                   "of order parameters when using mode Elemental."
     issues = '#5453'
     design = 'GrainTracker.md'
-  [../]
+  []
 
-  [./grain_tracker_volume]
+  [grain_tracker_volume]
     type = 'CSVDiff'
     input = 'grain_tracker_volume.i'
     csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv grain_tracker_volume_out.csv'
@@ -365,9 +365,9 @@
     requirement = "The system shall output individual grain tracker volumes."
     issues = '#7769'
     design = 'GrainTracker.md'
-  [../]
+  []
 
-  [./grain_tracker_volume_single]
+  [grain_tracker_volume_single]
     type = 'CSVDiff'
     input = 'grain_tracker_volume_single.i'
     csvdiff = 'grain_tracker_volume_single_out_grain_volumes_0000.csv'
@@ -379,10 +379,10 @@
     requirement = "The system shall output individual grain tracker volumes assigning each element to only one grain (conservative)."
     issues = '#7769'
     design = 'GrainTracker.md'
-  [../]
+  []
 
   # This test should work the same with the FeatureFloodCount object
-  [./feature_flood_volume]
+  [feature_flood_volume]
     type = 'CSVDiff'
     input = 'grain_tracker_volume.i'
     cli_args = 'Postprocessors/grain_tracker/type=FeatureFloodCount'
@@ -396,5 +396,5 @@
     requirement = "The system shall output individual grain tracker volumes when the number of order parameters equals the number of grains."
     issues = '#5453'
     design = 'GrainTracker.md'
-  [../]
+  []
 []

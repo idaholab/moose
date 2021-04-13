@@ -2,7 +2,7 @@
   design = "Eigenvalue.md"
   issues = "#7398"
 
-  [./newton_pbp]
+  [newton_pbp]
     type = 'CSVDiff'
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
@@ -10,9 +10,9 @@
     slepc_version = '>=3.8.0'
     expect_out = 'type: moosepc'
     requirement = "Eigen solver should work with a physics-based preconditioner "
-  [../]
+  []
 
-  [./JFNK_pbp]
+  [JFNK_pbp]
     type = 'CSVDiff'
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
@@ -21,9 +21,9 @@
     expect_out = 'type: moosepc'
     prereq = 'newton_pbp'
     requirement = "The system shall support a physics-based preconditioner with using JFNK "
-  [../]
+  []
 
-  [./newton_pbp_shell_precond]
+  [newton_pbp_shell_precond]
     type = 'CSVDiff'
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
@@ -31,9 +31,9 @@
     prereq = 'JFNK_pbp'
     slepc_version = '>=3.8.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with a shell preconditioning matrix"
-  [../]
+  []
 
-  [./newton_pbp_shell_precond_shell_matrix]
+  [newton_pbp_shell_precond_shell_matrix]
     type = 'RunApp'
     input = 'ne_pbp.i'
     cli_args = 'Executioner/precond_matrix_free=true -eps_view'
@@ -41,9 +41,9 @@
     expect_out = 'type: shell'
     petsc_version = '>=3.13.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with a PETSc shell matrix"
-  [../]
+  []
 
-  [./newton_pbp_precond_include_eigen_kernels]
+  [newton_pbp_precond_include_eigen_kernels]
     type = 'CSVDiff'
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
@@ -57,5 +57,5 @@
     # SLEPc older than 3.13 can not take initial guess from moose
     slepc_version = '>=3.13.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with including eigen kernels in the preconditioning matrix"
-  [../]
+  []
 []

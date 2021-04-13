@@ -22,68 +22,68 @@
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = 1e4
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
-  [./Pressure]
-    [./the_pressure]
+  [Pressure]
+    [the_pressure]
       boundary = 3
       function = pressure
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,17 +94,17 @@
   dt = 1.0
   end_time = 1.0
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

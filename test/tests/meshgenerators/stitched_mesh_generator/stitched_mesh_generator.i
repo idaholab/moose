@@ -1,20 +1,20 @@
 [Mesh]
-  [./fmg_left]
+  [fmg_left]
     type = FileMeshGenerator
     file = left.e
   []
 
-  [./fmg_center]
+  [fmg_center]
     type = FileMeshGenerator
     file = center.e
   []
 
-  [./fmg_right]
+  [fmg_right]
     type = FileMeshGenerator
     file = right.e
   []
 
-  [./smg]
+  [smg]
     type = StitchedMeshGenerator
     inputs = 'fmg_left fmg_center fmg_right'
     clear_stitched_boundary_ids = true

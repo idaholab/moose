@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CheckFiles'
     input = 'time-adaptive.i'
     check_files = 'out.e'
@@ -7,5 +7,5 @@
     design = 'Executioner/TimeStepper/index.md'
     issues = '#2288'
     requirement = 'The system shall support the ability to select time step sizes based upon the ratio of the real (wall) time of the solve and the size of the time step.'
-  [../]
+  []
 []

@@ -19,203 +19,203 @@
 
 [Functions]
   # Functions
-  [./x_200]
+  [x_200]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
-  [../]
-  [./y_200]
+  []
+  [y_200]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
-  [../]
-  [./x_300]
+  []
+  [x_300]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
-  [../]
-  [./y_300]
+  []
+  [y_300]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
-  [../]
-  [./x_400]
+  []
+  [x_400]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
-  [../]
-  [./y_400]
+  []
+  [y_400]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '-1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
-  [../]
+  []
 []
 
 [Variables]
   # Variables
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
   # AuxVariables
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernels
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
+  []
 []
 
 [BCs]
   # BCs
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
-  [./x_200]
+  []
+  [x_200]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 200
     function = x_200
-  [../]
-  [./y_200]
+  []
+  [y_200]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 200
     function = y_200
-  [../]
-  [./x_300]
+  []
+  [x_300]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 300
     function = x_300
-  [../]
-  [./y_300]
+  []
+  [y_300]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 300
     function = y_300
-  [../]
-  [./x_400]
+  []
+  [x_400]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 400
     function = x_400
-  [../]
-  [./y_400]
+  []
+  [y_400]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 400
     function = y_400
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '100 200 300 400'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 1
     C_ijkl = '1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
     fill_method = symmetric9
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 1
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_xx]
+  [stress_xx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = ElementAverageValue
     variable = stress_xy
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

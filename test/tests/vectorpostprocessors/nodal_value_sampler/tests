@@ -2,15 +2,15 @@
   design = 'NodalValueSampler.md'
   issues = '#3087'
 
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'nodal_value_sampler.i'
     csvdiff = 'nodal_value_sampler_out_nodal_sample_0001.csv'
     mesh_mode = REPLICATED
 
     requirement = 'The system shall support sampling of a field variable at every node in the domain.'
-  [../]
-  [./not_nodal]
+  []
+  [not_nodal]
     type = 'RunException'
     input = 'nodal_value_sampler.i'
     cli_args = 'Variables/u/family=MONOMIAL Variables/u/order=CONSTANT'
@@ -18,5 +18,5 @@
     mesh_mode = REPLICATED
 
     requirement = 'The system shall issue an error when a nodal sampler is used on a field that does not have values defined at the nodes.'
-  [../]
+  []
 []

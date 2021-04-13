@@ -9,25 +9,25 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     value = 1.2345
     variable = u
-  [../]
+  []
 []
 
 [Materials]
-  [./coupling_u]
+  [coupling_u]
     type = VarCouplingMaterial
     var = u
     declare_old = true
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

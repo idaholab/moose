@@ -9,44 +9,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./force]
+  [force]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     function = force
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left]
+  []
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -60,21 +60,21 @@
   steps = 1
   marker = box
   max_h_level = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '0.3 0.3 0'
       inside = refine
       top_right = '0.6 0.6 0'
       outside = do_nothing
       type = BoxMarker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = Exodus
     execute_scalars_on = none
-  [../]
+  []
 []

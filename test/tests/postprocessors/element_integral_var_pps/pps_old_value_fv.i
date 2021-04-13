@@ -11,62 +11,62 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
     initial_condition = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./force_fn]
+  [force_fn]
     type = ParsedFunction
     value = '1'
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [FVKernels]
-  [./diff_u]
+  [diff_u]
     type = FVDiffusion
     variable = u
     coeff = '1'
     block = '0'
-  [../]
+  []
 
-  [./ffn_u]
+  [ffn_u]
     type = FVBodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 []
 
 [FVBCs]
-  [./all_u]
+  [all_u]
     type = FVFunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./a]
+  [a]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./total_a]
+  [total_a]
     type = TotalVariableValue
     value = a
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

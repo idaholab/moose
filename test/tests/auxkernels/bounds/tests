@@ -1,5 +1,5 @@
 [Tests]
-  [./constant_bounds]
+  [constant_bounds]
     type = 'Exodiff'
     input = 'constant_bounds.i'
     exodiff = 'constant_bounds_out.e'
@@ -8,8 +8,8 @@
     issues = '#951 #14946'
     cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute a field variable with a constant upper and lower bounds."
-  [../]
-  [./constant_bounds_warning]
+  []
+  [constant_bounds_warning]
     type = 'RunApp'
     input = 'constant_bounds.i'
     expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
@@ -17,8 +17,8 @@
     design = 'ConstantBoundsAux.md'
     issues = '#14946'
     requirement = "The system shall error if a variational inequalities (VI) solver is not found when BoundsAux is provided."
-  [../]
-  [./old_value_bounds]
+  []
+  [old_value_bounds]
     type = 'Exodiff'
     input = 'old_value_bounds.i'
     exodiff = 'old_value_bounds_out.e'
@@ -27,5 +27,5 @@
     issues = '#951 #14946'
     cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute a field variable with a lower bound given by variable's old value."
-  [../]
+  []
 []

@@ -16,48 +16,48 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = TEIC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = TEJumpFFN
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = TEJumpBC
     variable = u
     boundary = '0 1 2 3'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.5
-  [../]
+  []
 
   solve_type = 'PJFNK'
 

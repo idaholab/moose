@@ -2,7 +2,7 @@
   issues = '#3418'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
 
-  [./4ElemTensionRelease]
+  [4ElemTensionRelease]
     type = 'Exodiff'
     input = 4ElemTensionRelease.i
     exodiff = 4ElemTensionRelease_out.e
@@ -12,9 +12,9 @@
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
-  [../]
+  []
 
-  [./4ElemTensionRelease_mechanical_constraint]
+  [4ElemTensionRelease_mechanical_constraint]
     type = 'Exodiff'
     input = 4ElemTensionRelease_mechanical_constraint.i
     exodiff = 4ElemTensionRelease_mechanical_constraint_out.e
@@ -24,9 +24,9 @@
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'
-  [../]
+  []
 
-  [./4ElemTensionRelease_no_new_nonzeros]
+  [4ElemTensionRelease_no_new_nonzeros]
     type = 'Exodiff'
     input = 4ElemTensionRelease_mechanical_constraint.i
     exodiff = 4ElemTensionRelease_no_new_nonzeros_out.e
@@ -38,9 +38,9 @@
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce and release contact conditions. 4 elements and ensure no new Jacobian allocations.'
 
-  [../]
+  []
 
-  [./8ElemTensionRelease]
+  [8ElemTensionRelease]
     type = 'Exodiff'
     input = 8ElemTensionRelease.i
     exodiff = 8ElemTensionRelease_out.e
@@ -53,5 +53,5 @@
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce and release contact conditions. 8 elements.'
 
-  [../]
+  []
 []

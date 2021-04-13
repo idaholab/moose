@@ -1,5 +1,5 @@
 [Tests]
-  [./sidesets_from_points_generator_test]
+  [sidesets_from_points_generator_test]
     type = 'Exodiff'
     input = 'sidesets_from_points.i'
     cli_args = '--mesh-only'
@@ -9,5 +9,5 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 []

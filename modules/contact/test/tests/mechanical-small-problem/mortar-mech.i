@@ -4,18 +4,18 @@
     type = FileMeshGenerator
     file = mesh.e
   []
-  [./primary]
+  [primary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
     input = file
-  [../]
-  [./secondary]
+  []
+  [secondary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
     input = primary
-  [../]
+  []
 []
 
 [Problem]
@@ -23,44 +23,44 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
-  [../]
-  [./lambda]
+  []
+  [lambda]
     block = '10'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'outside_left'
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'outside_left'
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'outside_right'
     function = '-5e-3 * t'
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'outside_right'
     function = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -121,10 +121,10 @@
 
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

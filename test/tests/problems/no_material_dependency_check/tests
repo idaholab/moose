@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'no_material_coverage_check.i'
     exodiff = 'no_material_coverage_check_out.e'
@@ -8,5 +8,5 @@
                   ' the existence of all dependent properties within a domain.'
     issues = '#5306'
     design = 'Problem/index.md'
-  [../]
+  []
 []

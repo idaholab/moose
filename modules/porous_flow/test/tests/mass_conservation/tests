@@ -1,5 +1,5 @@
 [Tests]
-  [./mass01]
+  [mass01]
     type = 'CSVDiff'
     input = 'mass01.i'
     csvdiff = 'mass01.csv'
@@ -8,8 +8,8 @@
     requirement = 'PorousFlow shall correctly compuate the total fluid mass in a single-phase, single-component fluid'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass02]
+  []
+  [mass02]
     type = 'CSVDiff'
     input = 'mass02.i'
     csvdiff = 'mass02.csv'
@@ -18,8 +18,8 @@
     requirement = 'PorousFlow shall correctly compuate the total fluid masses in a single-phase, multi-component fluid'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass03]
+  []
+  [mass03]
     type = 'CSVDiff'
     input = 'mass03.i'
     csvdiff = 'mass03.csv'
@@ -28,8 +28,8 @@
     requirement = 'PorousFlow shall correctly compuate the evolution of fluid mass when there is a source of fluid'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass04]
+  []
+  [mass04]
     type = 'CSVDiff'
     input = 'mass04.i'
     csvdiff = 'mass04.csv'
@@ -38,8 +38,8 @@
     requirement = 'PorousFlow shall conserve mass in a material with impermeable boundaries that is compressed mechanically'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass05]
+  []
+  [mass05]
     type = 'CSVDiff'
     input = 'mass05.i'
     csvdiff = 'mass05.csv'
@@ -47,8 +47,8 @@
     requirement = 'PorousFlow shall correctly compuate the total fluid masses in a multi-phase, multi-component fluid'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass06]
+  []
+  [mass06]
     type = 'CSVDiff'
     input = 'mass06.i'
     csvdiff = 'mass06.csv'
@@ -57,8 +57,8 @@
     requirement = 'PorousFlow shall correctly compuate the component and phase fluid masses in a multi-phase, multi-component fluid, at all saturations, and above a saturation threshold'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass07]
+  []
+  [mass07]
     type = 'RunException'
     input = 'mass07.i'
     expect_err = 'The Dictator decrees that the number of phases in this simulation is 2 but you have entered 3 phases.'
@@ -66,8 +66,8 @@
     requirement = 'If the phase number exceeds the number of phases in the system, PorousFlow shall produce an appropriate error message and exit'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass08]
+  []
+  [mass08]
     type = 'RunException'
     input = 'mass08.i'
     expect_err = 'The Dictator proclaims that the phase index 2 is greater than the largest phase index possible, which is 1'
@@ -75,8 +75,8 @@
     requirement = 'If the phase index exceeds the number of phases in the system, PorousFlow shall produce an appropriate error message and exit'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass09]
+  []
+  [mass09]
     type = 'RunException'
     input = 'mass09.i'
     expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold'
@@ -84,8 +84,8 @@
     requirement = 'If a saturation threshold is used in computing the fluid mass, and a phase index is not provided, PorousFlow shall produce an appropriate error message and exit'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
-  [./mass10]
+  []
+  [mass10]
     type = 'RunException'
     input = 'mass10.i'
     expect_err = 'The Dictator pronounces that the number of PorousFlow variables is 2, however you have used 2. This is an error'
@@ -93,5 +93,5 @@
     requirement = 'If the user enters a PorousFlow variable number that is not less than the number of PorousFlow variables, PorousFlow shall produce an appropriate error message and exit'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
-  [../]
+  []
 []

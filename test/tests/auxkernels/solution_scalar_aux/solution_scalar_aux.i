@@ -7,56 +7,56 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./a_sk]
+  [a_sk]
     type = SolutionScalarAux
     variable = a
     solution = solution_uo
     from_variable = a
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./solution_uo]
+  [solution_uo]
     type = SolutionUserObject
     mesh = build_out.e
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 2
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Executioner]

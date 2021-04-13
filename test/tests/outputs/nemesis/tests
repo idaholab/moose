@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     # Tests the for existence of Nemesis files
     type = 'CheckFiles'
     input = 'nemesis.i'
@@ -9,8 +9,8 @@
     requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
-  [./nemesis_elemental_replicated]
+  []
+  [nemesis_elemental_replicated]
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_replicated.e.4.0 nemesis_elemental_replicated.e.4.1 nemesis_elemental_replicated.e.4.2 nemesis_elemental_replicated.e.4.3'
@@ -27,8 +27,8 @@
     requirement = "The Nemesis Output object shall support writing elemental variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
-  [./nemesis_elemental_distributed]
+  []
+  [nemesis_elemental_distributed]
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_distributed.e.4.0 nemesis_elemental_distributed.e.4.1 nemesis_elemental_distributed.e.4.2 nemesis_elemental_distributed.e.4.3'
@@ -41,8 +41,8 @@
     requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
-  [../]
-  [./nemesis_scalar_replicated]
+  []
+  [nemesis_scalar_replicated]
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_replicated.e.4.0 nemesis_scalar_replicated.e.4.1 nemesis_scalar_replicated.e.4.2 nemesis_scalar_replicated.e.4.3'
@@ -60,8 +60,8 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
-  [../]
-  [./nemesis_scalar_distributed]
+  []
+  [nemesis_scalar_distributed]
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_distributed.e.4.0 nemesis_scalar_distributed.e.4.1 nemesis_scalar_distributed.e.4.2 nemesis_scalar_distributed.e.4.3'
@@ -75,5 +75,5 @@
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
-  [../]
+  []
 []

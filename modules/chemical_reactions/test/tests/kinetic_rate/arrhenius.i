@@ -11,33 +11,33 @@
 []
 
 [Variables]
-  [./a0]
+  [a0]
     initial_condition = 0.1
-  [../]
-  [./b0]
+  []
+  [b0]
     initial_condition = 0.1
-  [../]
-  [./a1]
+  []
+  [a1]
     initial_condition = 0.1
-  [../]
-  [./b1]
+  []
+  [b1]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mineral0]
-  [../]
-  [./mineral1]
-  [../]
-  [./kinetic_rate0]
-  [../]
-  [./kinetic_rate1]
-  [../]
+  [mineral0]
+  []
+  [mineral1]
+  []
+  [kinetic_rate0]
+  []
+  [kinetic_rate1]
+  []
 []
 
 [AuxKernels]
-  [./kinetic_rate0]
+  [kinetic_rate0]
     type = KineticDisPreRateAux
     variable = kinetic_rate0
     e_act = 1.5e4
@@ -49,8 +49,8 @@
     sys_temp = 298.15
     sto_v = '1 1'
     v = 'a0 b0'
-  [../]
-  [./kinetic_rate1]
+  []
+  [kinetic_rate1]
     type = KineticDisPreRateAux
     variable = kinetic_rate1
     e_act = 1.5e4
@@ -62,8 +62,8 @@
     sys_temp = 323.15
     sto_v = '1 1'
     v = 'a1 b1'
-  [../]
-  [./mineral0_conc]
+  []
+  [mineral0_conc]
     type = KineticDisPreConcAux
     variable = mineral0
     e_act = 1.5e4
@@ -75,8 +75,8 @@
     sys_temp = 298.15
     sto_v = '1 1'
     v = 'a0 b0'
-  [../]
-  [./mineral1_conc]
+  []
+  [mineral1_conc]
     type = KineticDisPreConcAux
     variable = mineral1
     e_act = 1.5e4
@@ -88,58 +88,58 @@
     sys_temp = 323.15
     sto_v = '1 1'
     v = 'a1 b1'
-  [../]
+  []
 []
 
 [Kernels]
-  [./a0_ie]
+  [a0_ie]
     type = PrimaryTimeDerivative
     variable = a0
-  [../]
-  [./b0_ie]
+  []
+  [b0_ie]
     type = PrimaryTimeDerivative
     variable = b0
-  [../]
-  [./a0_r]
+  []
+  [a0_r]
     type = CoupledBEKinetic
     variable = a0
     v = mineral0
     weight = 1
-  [../]
-  [./b0_r]
+  []
+  [b0_r]
     type = CoupledBEKinetic
     variable = b0
     v = mineral0
     weight = 1
-  [../]
-  [./a1_ie]
+  []
+  [a1_ie]
     type = PrimaryTimeDerivative
     variable = a1
-  [../]
-  [./b1_ie]
+  []
+  [b1_ie]
     type = PrimaryTimeDerivative
     variable = b1
-  [../]
-  [./a1_r]
+  []
+  [a1_r]
     type = CoupledBEKinetic
     variable = a1
     v = mineral1
     weight = 1
-  [../]
-  [./b1_r]
+  []
+  [b1_r]
     type = CoupledBEKinetic
     variable = b1
     v = mineral1
     weight = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.2
-  [../]
+  []
 []
 
 [Executioner]
@@ -150,10 +150,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

@@ -1,5 +1,5 @@
 [Tests]
-  [./00]
+  [00]
     type = Exodiff
     input = '00.i'
     exodiff = '3D_mesh.e'
@@ -7,8 +7,8 @@
     issues = '#10959'
     design = 'tutorial_00.md'
     requirement = 'PorousFlow tutorial shall explain the 3D model used during the tutorial'
-  [../]
-  [./00_2D]
+  []
+  [00_2D]
     type = Exodiff
     input = '00_2D.i'
     exodiff = '2D_mesh.e'
@@ -16,8 +16,8 @@
     issues = '#10959'
     design = 'tutorial_00.md'
     requirement = 'PorousFlow tutorial shall explain the 2D model used during the tutorial'
-  [../]
-  [./01]
+  []
+  [01]
     type = Exodiff
     input = '01.i'
     exodiff = '01_out.e'
@@ -25,8 +25,8 @@
     issues = '#10959'
     design = 'tutorial_01.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow'
-  [../]
-  [./03]
+  []
+  [03]
     type = Exodiff
     input = '03.i'
     exodiff = '03_out.e'
@@ -34,8 +34,8 @@
     issues = '#10959'
     design = 'tutorial_03.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow coupled with heat flow'
-  [../]
-  [./04]
+  []
+  [04]
     type = Exodiff
     input = '04.i'
     exodiff = '04_out.e'
@@ -45,8 +45,8 @@
     issues = '#10959'
     design = 'tutorial_04.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow coupled with heat flow coupled with solid mechanics'
-  [../]
-  [./05]
+  []
+  [05]
     type = Exodiff
     input = '05.i'
     exodiff = '05_out.e'
@@ -56,8 +56,8 @@
     issues = '#10959'
     design = 'tutorial_05.md'
     requirement = 'PorousFlow tutorial shall explain how to use realistic equations of state for the fluid'
-  [../]
-  [./05_tabulated]
+  []
+  [05_tabulated]
     type = Exodiff
     input = '05_tabulated.i'
     exodiff = '05_tabulated_out.e'
@@ -67,8 +67,8 @@
     issues = '#10959'
     design = 'tutorial_05.md'
     requirement = 'PorousFlow tutorial shall explain how to use realistic equations of state for the fluid, using Tabulated fluid properties'
-  [../]
-  [./06]
+  []
+  [06]
     type = Exodiff
     input = '06.i'
     exodiff = '06_out.e'
@@ -76,8 +76,8 @@
     issues = '#10959'
     design = 'tutorial_06.md'
     requirement = 'PorousFlow tutorial shall explain how to add a tracer in a single-phase situation and how to use the PorousFlowFullySaturated Action'
-  [../]
-  [./06_KT]
+  []
+  [06_KT]
     type = Exodiff
     input = '06_KT.i'
     exodiff = '06_KT_out.e'
@@ -87,8 +87,8 @@
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_06.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
-  [../]
-  [./07]
+  []
+  [07]
     type = Exodiff
     input = '07.i'
     exodiff = '07_out.e'
@@ -97,8 +97,8 @@
     issues = '#10959'
     design = 'tutorial_07.md'
     requirement = 'PorousFlow tutorial shall explain how to add a chemically-reactive tracer in a single-phase situation as well as porosity and permeability functions'
-  [../]
-  [./08]
+  []
+  [08]
     type = Exodiff
     input = '08.i'
     exodiff = '08_out.e'
@@ -107,8 +107,8 @@
     issues = '#10959'
     design = 'tutorial_08.md'
     requirement = 'PorousFlow tutorial shall explain how to use the PorousFlowSink as a general boundary condition that produces excellent convergence, and the PorousFlowUnsaturated Action to simulate unsaturated fluid flow'
-  [../]
-  [./08_KT]
+  []
+  [08_KT]
     type = Exodiff
     input = '08_KT.i'
     exodiff = '08_KT_out.e'
@@ -118,8 +118,8 @@
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_08.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
-  [../]
-  [./10]
+  []
+  [10]
     type = Exodiff
     input = '10.i'
     exodiff = '10_out.e'
@@ -127,8 +127,8 @@
     issues = '#10959'
     design = 'tutorial_10.md'
     requirement = 'PorousFlow tutorial shall explain how to use the PorousFlow Kernels and Materials'
-  [../]
-  [./11]
+  []
+  [11]
     type = Exodiff
     input = '11.i'
     exodiff = '11_out.e'
@@ -140,8 +140,8 @@
     issues = '#10959'
     design = 'tutorial_11.md'
     requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D'
-  [../]
-  [./11_2D]
+  []
+  [11_2D]
     type = Exodiff
     input = '11_2D.i'
     exodiff = '11_2D_out.e'
@@ -152,8 +152,8 @@
     issues = '#10959'
     design = 'tutorial_11.md'
     requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D and explain how to reduce it to 2D'
-  [../]
-  [./13]
+  []
+  [13]
     type = Exodiff
     input = '13.i'
     exodiff = '13_out.e'
@@ -161,5 +161,5 @@
     issues = '#10959'
     design = 'tutorial_13.md'
     requirement = 'PorousFlow tutorial shall explain how to include precipitation-dissolution and equilibrium chemical systems in PorousFlow simulations'
-  [../]
+  []
 []

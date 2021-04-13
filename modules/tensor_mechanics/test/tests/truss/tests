@@ -1,23 +1,23 @@
 [Tests]
   design = "source/materials/LinearElasticTruss.md source/kernels/StressDivergenceTensorsTruss.md LineElementAction.md"
   issues = "#6789 #2460 #10313 #14304"
-  [./truss_3d]
+  [truss_3d]
     type = 'Exodiff'
     input = 'truss_3d.i'
     exodiff = 'truss_3d_out.e'
     abs_zero = 1e-7
     requirement = "The mechanics system shall accurately model the axial response"
                   " of 3D truss elements."
-  [../]
-  [./truss_hex]
+  []
+  [truss_hex]
     type = 'Exodiff'
     input = 'truss_hex.i'
     exodiff = 'truss_hex_out.e'
     abs_zero = 1e-7
     requirement = "The truss element shall work correctly when hex elements are also"
                   " included in the same input or mesh file."
-  [../]
-  [./truss_2d]
+  []
+  [truss_2d]
     type = 'Exodiff'
     input = 'truss_2d.i'
     exodiff = 'truss_2d_out.e'
@@ -25,8 +25,8 @@
     max_parallel = 1
     requirement = "The mechanics system shall accurately model the static response of"
                   " a 2D frame modeled using truss elements."
-  [../]
-  [./truss_3d_action]
+  []
+  [truss_3d_action]
     type = 'Exodiff'
     input = 'truss_3d_action.i'
     exodiff = 'truss_3d_out.e'
@@ -34,8 +34,8 @@
     prereq = 'truss_3d'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using 3D truss elements."
-  [../]
-  [./truss_hex_action]
+  []
+  [truss_hex_action]
     type = 'Exodiff'
     input = 'truss_hex_action.i'
     exodiff = 'truss_hex_out.e'
@@ -43,8 +43,8 @@
     prereq = 'truss_hex'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using truss and hex elements."
-  [../]
-  [./truss_2d_action]
+  []
+  [truss_2d_action]
     type = 'Exodiff'
     input = 'truss_2d_action.i'
     exodiff = 'truss_2d_out.e'
@@ -54,24 +54,24 @@
     prereq = 'truss_2d'
     requirement = "The LineElementAction shall correctly create the objects required for"
                   " modeling the response of a mechanics system using 2D truss elements."
-  [../]
-  [./action_error_1]
+  []
+  [action_error_1]
     type = 'RunException'
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false'
     expect_err='LineElementAction: `area` should be provided as input for'
     requirement = "The LineElementAction shall produce an error if `area` is not provided"
                   " as input for truss elements."
-  [../]
-  [./action_error_2]
+  []
+  [action_error_2]
     type = 'RunException'
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false Modules/TensorMechanics/LineElementMaster/block/area=area Modules/TensorMechanics/LineElementMaster/block/rotations="rot_x"'
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
     requirement = "The LineElementAction shall produce an error if rotational variables are"
                   " provided as input for truss elements."
-  [../]
-  [./tensile]
+  []
+  [tensile]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_plastic_tensile_out Materials/truss/hardening_constant=1e7'
@@ -79,8 +79,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under tension."
-  [../]
-  [./tensile_nohardening]
+  []
+  [tensile_nohardening]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_nohardening_tension_out Materials/truss/hardening_constant=0.0'
@@ -88,8 +88,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under tension."
-  [../]
-  [./tensile_hardeningfn]
+  []
+  [tensile_hardeningfn]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_hardeningfn_tension_out Materials/truss/hardening_function=hf'
@@ -97,8 +97,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under tension."
-  [../]
-  [./compressive]
+  []
+  [compressive]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_plastic_compression_out BCs/load/function=-t Materials/truss/hardening_constant=1e7'
@@ -106,8 +106,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under compression."
-  [../]
-  [./compressive_nohardening]
+  []
+  [compressive_nohardening]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_nohardening_compression_out BCs/load/function=-t Materials/truss/hardening_constant=0.0'
@@ -115,8 +115,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under compression."
-  [../]
-  [./compressive_hardeningfn]
+  []
+  [compressive_hardeningfn]
     type = 'Exodiff'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/file_base=truss_hardeningfn_compression_out BCs/load/function=-t Materials/truss/hardening_function=hf'
@@ -124,8 +124,8 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under compression."
-  [../]
-  [./error_nohardening]
+  []
+  [error_nohardening]
     type = 'RunException'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/exodus=false Outputs/csv=false'
@@ -134,8 +134,8 @@
     requirement = "PlasticTruss material should produce error if neither the hardening"
                   " constant nor a hardening function is provided."
 
-  [../]
-  [./error_hardening]
+  []
+  [error_hardening]
     type = 'RunException'
     input = 'truss_plastic.i'
     cli_args = 'Outputs/exodus=false Outputs/csv=false Materials/truss/hardening_function=hf Materials/truss/hardening_constant=0.0'
@@ -144,5 +144,5 @@
     requirement = "PlasticTruss material should produce error if both hardening"
                   " constant and hardening function are provided."
 
-  [../]
+  []
 []

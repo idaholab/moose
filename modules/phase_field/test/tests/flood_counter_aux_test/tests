@@ -1,48 +1,48 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'flood_aux.i'
     exodiff = 'out.e'
     allow_test_objects = true
     max_parallel = 1 # See #9886
-  [../]
+  []
 
-  [./test_elemental]
+  [test_elemental]
     type = 'Exodiff'
     input = 'flood_aux_elemental.i'
     exodiff = 'flood_aux_elemental_out.e'
     allow_test_objects = true
-  [../]
+  []
 
-  [./simple]
+  [simple]
     type = 'Exodiff'
     input = 'simple.i'
     exodiff = 'simple_out.e'
     #max_parallel = 4                     # Only 4 elements
     max_parallel = 1 # See #9886
-  [../]
+  []
 
-  [./two_var]
+  [two_var]
     type = 'Exodiff'
     input = 'nodal_flood_periodic_2var.i'
     exodiff = 'out_2var.e'
     allow_test_objects = true
     max_parallel = 1 # See #9886
-  [../]
+  []
 
-  [./bound_restrict_single]
+  [bound_restrict_single]
     type = 'CSVDiff'
     input = 'flood_counter_boundary_restrictable.i'
     csvdiff = 'boundary_single.csv'
     cli_args = 'Postprocessors/bubbles/boundary=top Outputs/file_base=boundary_single'
     allow_test_objects = true
-  [../]
+  []
 
-  [./bound_restrict_all]
+  [bound_restrict_all]
     type = 'CSVDiff'
     input = 'flood_counter_boundary_restrictable.i'
     csvdiff = 'boundary_all.csv'
     cli_args = 'Outputs/file_base=boundary_all'
     allow_test_objects = true
-  [../]
+  []
 []

@@ -14,164 +14,164 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./scalar_strain_yy]
+  [disp_x]
+  []
+  [scalar_strain_yy]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 580.0
-  [../]
+  []
 []
 
 [Functions]
-  [./temp]
+  [temp]
     type = PiecewiseLinear
     x = '0   1   2'
     y = '580 580 680'
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 2e-6'
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-      [../]
-    [../]
-  [../]
+  [TensorMechanics]
+    [GeneralizedPlaneStrain]
+      [gps]
+      []
+    []
+  []
 []
 
 [AuxKernels]
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./temp]
+  []
+  [temp]
     type = FunctionAux
     variable = temp
     function = temp
     execute_on = 'timestep_begin'
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     boundary = 1
     value = 0
     variable = disp_x
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     type = FunctionDirichletBC
     boundary = 2
     function = disp_x
     variable = disp_x
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3600
     poissons_ratio = 0.2
-  [../]
+  []
 
-  [./strain]
+  [strain]
     type = ComputeAxisymmetric1DIncrementalStrain
     eigenstrain_names = eigenstrain
     scalar_out_of_plane_strain = scalar_strain_yy
-  [../]
+  []
 
-  [./thermal_strain]
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-8
     temperature = temp
     stress_free_temperature = 580
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 []
 
 [Executioner]

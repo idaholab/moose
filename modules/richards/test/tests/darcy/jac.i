@@ -15,39 +15,39 @@
 []
 
 [Variables]
-  [./pressure]
-    [./InitialCondition]
+  [pressure]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./darcy]
+  [darcy]
     type = DarcyFlux
     variable = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./solid]
+  [solid]
     type = DarcyMaterial
     block = 0
     mat_permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,64 +6,64 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./aux0]
+  [aux0]
     family = SCALAR
-  [../]
-  [./aux1]
+  []
+  [aux1]
     family = SCALAR
-  [../]
+  []
 []
 
 [Functions]
-  [./func]
+  [func]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./scalar_aux0]
+  [scalar_aux0]
     type = FunctionScalarAux
     variable = aux0
     function = func
-  [../]
-  [./scalar_aux1]
+  []
+  [scalar_aux1]
     type = FunctionScalarAux
     variable = aux1
     function = func
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -80,11 +80,11 @@
 []
 
 [Controls]
-  [./damping_control]
+  [damping_control]
     type = TimePeriod
     disable_objects = 'AuxScalarKernels/scalar_aux0 */scalar_aux1'
     start_time      = '0.25 0.45'
     end_time        = '0.55 0.75'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

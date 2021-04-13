@@ -3,10 +3,10 @@
 # from positive to negative strain.
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 3
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -14,78 +14,78 @@
 []
 
 [AuxVariables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     function = '1 + t'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./thermal_expansion_strain]
+  []
+  [thermal_expansion_strain]
     type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
     thermal_expansion_function = 4e-4
     stress_free_temperature = 1.5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_x_max]
+  [disp_x_max]
     type = SideAverageValue
     variable = disp_x
     boundary = right
-  [../]
-  [./temp_avg]
+  []
+  [temp_avg]
     type = ElementAverageValue
     variable = temp
-  [../]
+  []
 []
 
 [Executioner]

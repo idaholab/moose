@@ -8,50 +8,50 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./u_xda_func]
+  [u_xda_func]
     type = SolutionFunction
     solution = xda_u
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [UserObjects]
-  [./xda_u]
+  [xda_u]
     type = SolutionUserObject
     system = nl0
     mesh = aux_nonlinear_solution_out_0001_mesh.xda
     es = aux_nonlinear_solution_out_0001.xda
     system_variables = u
     execute_on = initial
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,15 +61,15 @@
 []
 
 [Postprocessors]
-  [./unorm]
+  [unorm]
     type = ElementL2Norm
     variable = u
-  [../]
-  [./uerror]
+  []
+  [uerror]
     type = ElementL2Error
     variable = u
     function = u_xda_func
-  [../]
+  []
 []
 
 [Outputs]

@@ -10,47 +10,47 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./c]
+  [c]
     type = Diffusion
     variable = c
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./nucleation]
+  [nucleation]
     type = DiscreteNucleation
     op_names  = c
     op_values = 1
     penalty = 10
     map = map
     outputs = exodus
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationFromFile
     hold_time = 1
     file = single.csv
     radius = 7
-  [../]
-  [./map]
+  []
+  [map]
     type = DiscreteNucleationMap
     int_width = 6
     inserter = inserter
-  [../]
+  []
 []
 
 [Executioner]

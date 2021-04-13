@@ -1,5 +1,5 @@
 [Tests]
-  [./bump]
+  [bump]
     type = 'Exodiff'
     input = 'bump.i'
     exodiff = 'bump_out.e'
@@ -9,5 +9,5 @@
     # absolute comparisons.
     custom_cmp = 'bump_out.cmp'
     threading = '!pthreads'
-  [../]
+  []
 []

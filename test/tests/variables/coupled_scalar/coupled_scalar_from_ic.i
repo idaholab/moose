@@ -9,50 +9,50 @@
 []
 
 [AuxVariables]
-  [./aux_scalar]
+  [aux_scalar]
     order = FIRST
     family = SCALAR
-  [../]
-  [./coupled]
-  [../]
+  []
+  [coupled]
+  []
 []
 
 [ICs]
-  [./aux_scalar_ic]
+  [aux_scalar_ic]
     type = ScalarConstantIC
     variable = aux_scalar
     value = 123
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./coupled]
+  [coupled]
     type = CoupledScalarAux
     variable = coupled
     coupled = aux_scalar
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

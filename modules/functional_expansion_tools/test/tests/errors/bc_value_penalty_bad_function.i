@@ -4,25 +4,25 @@
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [BCs]
-  [./this_could_be_bad]
+  [this_could_be_bad]
     type = FXValuePenaltyBC
     boundary = right
     penalty = 1.0
     function = const
     variable = v
-  [../]
+  []
 []
 
 [Functions]
-  [./const]
+  [const]
     type = ConstantFunction
     value = -1
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,46 +15,46 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff rea rhs'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./rea]
+  [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = MassEigenKernel
     variable = u
     eigen = false
-  [../]
+  []
 
-  [./rea1]
+  [rea1]
     type = CoefReaction
     variable = u
     coefficient = 1.0
-  [../]
+  []
 []
 
 [BCs]
-  [./inhomogeneous]
+  [inhomogeneous]
     type = DirichletBC
     variable = u
     boundary = '2 3'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,11 +66,11 @@
 [Postprocessors]
   active = 'unorm'
 
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Outputs]

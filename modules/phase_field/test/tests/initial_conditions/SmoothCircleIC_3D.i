@@ -11,12 +11,12 @@
 []
 
 [Variables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SmoothCircleIC
     variable = c
     x1 = 25.0
@@ -27,34 +27,34 @@
     int_width = 12
     3D_spheres = false
     z1 = 25
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
-  [./Diffusion]
+  []
+  [Diffusion]
     type = MatDiffusion
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Diffusivity]
+  [Diffusivity]
     type = GenericConstantMaterial
     prop_names = D
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Executioner]

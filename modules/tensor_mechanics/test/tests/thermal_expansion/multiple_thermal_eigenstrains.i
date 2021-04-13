@@ -25,124 +25,124 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./temp]
-  [../]
+  [temp]
+  []
 
-  [./strain_yy]
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_xx]
+  []
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     value = t*(500.0)+300.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
     use_displaced_mesh = false
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./small_strain]
+  []
+  [small_strain]
     type = ComputeIncrementalSmallStrain
     eigenstrain_names = 'eigenstrain1 eigenstrain2'
-  [../]
-  [./small_stress]
+  []
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./thermal_expansion_strain1]
+  []
+  [thermal_expansion_strain1]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.0e-5
     temperature = temp
     eigenstrain_name = eigenstrain1
-  [../]
-  [./thermal_expansion_strain2]
+  []
+  [thermal_expansion_strain2]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 298
     thermal_expansion_coeff = 0.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain2
-  [../]
+  []
 []
 
 [Executioner]
@@ -168,24 +168,24 @@
 []
 
 [Postprocessors]
-  [./strain_xx]
+  [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
     block = 0
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
     block = 0
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = ElementAverageValue
     variable = strain_zz
     block = 0
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = AverageNodalVariableValue
     variable = temp
     block = 0
-  [../]
+  []
 []

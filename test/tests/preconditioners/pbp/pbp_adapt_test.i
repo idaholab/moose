@@ -13,92 +13,92 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = ((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 
-  [./conv_v]
+  [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./PBP]
+  [PBP]
     type = PBP
     solve_order = 'u v'
     preconditioner  = 'AMG ASM'
     off_diag_row    = 'v'
     off_diag_column = 'u'
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,12 +106,12 @@
 
   solve_type = JFNK
 
-  [./Adaptivity]
+  [Adaptivity]
     steps = 3
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  [../]
+  []
 []
 
 [Outputs]

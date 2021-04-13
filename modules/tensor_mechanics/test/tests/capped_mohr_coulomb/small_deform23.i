@@ -23,131 +23,131 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '1E-6*x*t'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0.25E-6*y*sin(t)'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '1E-6*z*t'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mc_int]
+  [mc_int]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./yield_fcn]
+  []
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mc_int_auxk]
+  [mc_int_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = mc_int
-  [../]
-  [./yield_fcn_auxk]
+  []
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     index = 6
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./s_xy]
+  []
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
-  [./s_xz]
+  []
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yy]
+  []
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./s_yz]
+  []
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./internal]
+  []
+  [internal]
     type = PointValue
     point = '0 0 0'
     variable = mc_int
-  [../]
-  [./f]
+  []
+  [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./mc_coh]
+  []
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = ts
@@ -156,12 +156,12 @@
     dilation_angle = mc_psi
     smoothing_tol = 5.0
     yield_function_tol = 1.0E-12
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 

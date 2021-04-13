@@ -1,5 +1,5 @@
 [Tests]
-  [./thermo_diffusion]
+  [thermo_diffusion]
     type = 'Exodiff'
     input = 'thermo_diffusion.i'
     exodiff = 'thermo_diffusion_out.e'
@@ -7,8 +7,8 @@
     requirement = 'Thermo diffusion shall reproduce an analytical solution'
     design = "ThermoDiffusion.md"
     issues = "#3392"
-  [../]
-  [./ad_thermo_diffusion]
+  []
+  [ad_thermo_diffusion]
     type = 'Exodiff'
     input = 'ad_thermo_diffusion.i'
     exodiff = 'ad_thermo_diffusion_out.e'
@@ -17,8 +17,8 @@
     design = "ADThermoDiffusion.md"
     issues = "#12633"
     allow_test_objects = true
-  [../]
-  [./ad_thermo_diffusion_jacobian]
+  []
+  [ad_thermo_diffusion_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_thermo_diffusion.i'
     ratio_tol = 1e-7
@@ -28,5 +28,5 @@
     design = "ADThermoDiffusion.md"
     issues = "#5658"
     allow_test_objects = true
-  [../]
+  []
 []

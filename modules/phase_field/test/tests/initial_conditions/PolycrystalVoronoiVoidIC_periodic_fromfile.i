@@ -23,43 +23,43 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./w]
+  [c]
+  []
+  [w]
     scaling = 1.0e4
-  [../]
-  [./PolycrystalVariables]
-  [../]
+  []
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+  [PolycrystalICs]
+    [PolycrystalVoronoiVoidIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
-  [./c_IC]
+    []
+  []
+  [c_IC]
     variable = c
     type = PolycrystalVoronoiVoidIC
     structure_type = voids
     polycrystal_ic_uo = voronoi
-  [../]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 12444
     int_width = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Problem]

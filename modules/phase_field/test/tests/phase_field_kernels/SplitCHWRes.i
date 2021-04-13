@@ -17,98 +17,98 @@
 []
 
 [Variables]
-  [./c1]
-    [./InitialCondition]
+  [c1]
+    [InitialCondition]
       type = FunctionIC
       function = 'cos(x/60*pi)'
-    [../]
-  [../]
-  [./c2]
-    [./InitialCondition]
+    []
+  []
+  [c2]
+    [InitialCondition]
       type = FunctionIC
       function = 'cos(y/60*pi)'
-    [../]
-  [../]
-  [./w1]
-  [../]
-  [./w2]
-  [../]
+    []
+  []
+  [w1]
+  []
+  [w2]
+  []
 []
 
 [Kernels]
-  [./c1_res]
+  [c1_res]
     type = SplitCHParsed
     variable = c1
     f_name = F
     kappa_name = kappa_c
     w = w1
-  [../]
-  [./w11_res]
+  []
+  [w11_res]
     type = SplitCHWRes
     variable = w1
     mob_name = M11
-  [../]
-  [./w12_res]
+  []
+  [w12_res]
     type = SplitCHWRes
     variable = w1
     w = w2
     mob_name = M12
-  [../]
+  []
 
-  [./c2_res]
+  [c2_res]
     type = SplitCHParsed
     variable = c2
     f_name = F
     kappa_name = kappa_c
     w = w2
-  [../]
-  [./w22_res]
+  []
+  [w22_res]
     type = SplitCHWRes
     variable = w2
     mob_name = M22
-  [../]
-  [./w21_res]
+  []
+  [w21_res]
     type = SplitCHWRes
     variable = w2
     w = w1
     mob_name = M21
-  [../]
+  []
 
-  [./time1]
+  [time1]
     type = CoupledTimeDerivative
     variable = w1
     v = c1
-  [../]
-  [./time2]
+  []
+  [time2]
     type = CoupledTimeDerivative
     variable = w2
     v = c2
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M11 M12 M21 M22 kappa_c'
     prop_values = '10  2.5 20  5   40'
-  [../]
+  []
 
-  [./free_energy]
+  [free_energy]
     # equivalent to `MathFreeEnergy`
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c1 c2'
     function = '0.25*(1+c1)^2*(1-c1)^2 + 0.25*(1+c2)^2*(1-c2)^2'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

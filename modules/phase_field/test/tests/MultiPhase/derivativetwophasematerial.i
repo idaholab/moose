@@ -12,10 +12,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -23,16 +23,16 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
-    [../]
-  [../]
-  [./w]
+    []
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./eta]
+  []
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 30.0
       y1 = 25.0
@@ -40,96 +40,96 @@
       invalue = 0.9
       outvalue = 0.1
       int_width = 2.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
-  [./ACBulk]
+  []
+  [ACBulk]
     type = AllenCahn
     variable = eta
     args = c
     f_name = F
-  [../]
-  [./ACInterface]
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa_eta
-  [../]
+  []
 
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
     args = 'eta'
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'L kappa_eta'
     prop_values = '1 1        '
-  [../]
-  [./consts2]
+  []
+  [consts2]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 1'
-  [../]
+  []
 
-  [./switching]
+  [switching]
     type = SwitchingFunctionMaterial
     eta = eta
     h_order = SIMPLE
-  [../]
-  [./barrier]
+  []
+  [barrier]
     type = BarrierFunctionMaterial
     eta = eta
     g_order = SIMPLE
-  [../]
+  []
 
-  [./free_energy_A]
+  [free_energy_A]
     type = DerivativeParsedMaterial
     f_name = Fa
     args = 'c'
     function = '(c-0.1)^2*(c-1)^2 + c*0.01'
     derivative_order = 2
     enable_jit = true
-  [../]
-  [./free_energy_B]
+  []
+  [free_energy_B]
     type = DerivativeParsedMaterial
     f_name = Fb
     args = 'c'
     function = 'c^2*(c-0.9)^2 + (1-c)*0.01'
     derivative_order = 2
     enable_jit = true
-  [../]
+  []
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeTwoPhaseMaterial
     f_name = F
     fa_name = Fa
@@ -139,14 +139,14 @@
     derivative_order = 2
     outputs = exodus
     output_properties = 'F dF/dc dF/deta d^2F/dc^2 d^2F/dcdeta d^2F/deta^2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

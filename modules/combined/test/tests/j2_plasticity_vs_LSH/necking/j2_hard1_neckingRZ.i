@@ -13,135 +13,135 @@
 []
 
 [Variables]
-  [./disp_r]
+  [disp_r]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./AxisymmetricRZ]
+  [AxisymmetricRZ]
     use_displaced_mesh = true
 #    save_in_disp_r = force_r
     save_in_disp_z = force_z
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_rr]
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_rr]
+  []
+  [strain_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-#  [./force_r]
+  []
+#  [force_r]
 #    order = FIRST
 #    family = LAGRANGE
-#  [../]
-  [./force_z]
+#  []
+  [force_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_rr
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 1
     index_j = 1
-  [../]
-  [./strain_rr]
+  []
+  [strain_rr]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_rr
     index_i = 0
     index_j = 0
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_zz
     index_i = 1
     index_j = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = 't/5'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = TensorMechanicsHardeningConstant
     value = 2.4e2
-  [../]
-  [./j2]
+  []
+  [j2]
     type = TensorMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 1
     fill_method = symmetric_isotropic
     #with E = 2.1e5 and nu = 0.3
     #changed to SM values using E-nu to Lambda-G
     C_ijkl = '121154 80769.2'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeAxisymmetricRZFiniteStrain
     block = 1
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 1
     ep_plastic_tolerance = 1E-9
     plastic_models = j2
-  [../]
+  []
 []
 
 [Executioner]
@@ -166,32 +166,32 @@
 []
 
 [Postprocessors]
-  [./stress_rr]
+  [stress_rr]
     type = ElementAverageValue
     variable = stress_rr
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./strain_rr]
+  []
+  [strain_rr]
     type = ElementAverageValue
     variable = strain_rr
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = ElementAverageValue
     variable = strain_zz
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = NodalSum
     variable = disp_z
     boundary = top
-  [../]
-  [./force_z]
+  []
+  [force_z]
     type = NodalSum
     variable = force_z
     boundary = top
-  [../]
+  []
 []
 
 [Outputs]

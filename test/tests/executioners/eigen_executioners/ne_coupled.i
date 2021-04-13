@@ -13,50 +13,50 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./T]
+  [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = DiffMKernel
     variable = u
     mat_prop = diffusion
     offset = 0.0
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = MassEigenKernel
     variable = u
-  [../]
+  []
 
-  [./diff_T]
+  [diff_T]
     type = Diffusion
     variable = T
-  [../]
-  [./src_T]
+  []
+  [src_T]
     type = CoupledForce
     variable = T
     v = power
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./power_ak]
+  [power_ak]
     type = NormalizationAux
     variable = power
     source_variable = u
@@ -67,33 +67,33 @@
 
 
     execute_on = linear
-  [../]
+  []
 []
 
 [BCs]
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 
-  [./homogeneousT]
+  [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./dc]
+  [dc]
     type = VarCouplingMaterial
     var = T
     block = 0
     base = 1.0
     coef = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,18 +114,18 @@
 [Postprocessors]
   active = 'unorm udiff'
 
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
-  [./udiff]
+  [udiff]
     type = ElementL2Diff
     variable = u
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

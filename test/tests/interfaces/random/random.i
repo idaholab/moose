@@ -7,58 +7,58 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./random_nodal]
-  [../]
-  [./random_elemental]
+  [random_nodal]
+  []
+  [random_elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./random_nodal]
+  [random_nodal]
     type = RandomAux
     variable = random_nodal
     execute_on = 'LINEAR'
-  [../]
-  [./random_elemental]
+  []
+  [random_elemental]
     type = RandomAux
     variable = random_elemental
     generate_integers = true
     execute_on = 'LINEAR'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

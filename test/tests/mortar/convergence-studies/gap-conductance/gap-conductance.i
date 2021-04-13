@@ -4,7 +4,7 @@
 
 [Mesh]
   second_order = true
-  [./left_block]
+  [left_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -14,19 +14,19 @@
     nx = 2
     ny = 2
     elem_type = QUAD4
-  [../]
-  [./left_block_sidesets]
+  []
+  [left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
     old_boundary_id = '0 1 2 3'
     new_boundary_name = 'lb_bottom lb_right lb_top lb_left'
-  [../]
-  [./left_block_id]
+  []
+  [left_block_id]
     type = SubdomainIDGenerator
     input = left_block_sidesets
     subdomain_id = 1
-  [../]
-  [./right_block]
+  []
+  [right_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 2
@@ -36,28 +36,28 @@
     nx = 2
     ny = 2
     elem_type = QUAD4
-  [../]
-  [./right_block_id]
+  []
+  [right_block_id]
     type = SubdomainIDGenerator
     input = right_block
     subdomain_id = 2
-  [../]
+  []
   [right_block_change_boundary_id]
     type = RenameBoundaryGenerator
     input = right_block_id
     old_boundary_id = '0 1 2 3'
     new_boundary_id = '100 101 102 103'
   []
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'left_block_id right_block_change_boundary_id'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block_id = '1 2'
     new_block_name = 'left_block right_block'
-  [../]
+  []
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = block_rename
@@ -103,54 +103,54 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = 'left_block right_block'
     order = SECOND
-  [../]
-  [./lambda]
+  []
+  [lambda]
     block = 'secondary_lower'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln_primal
     variable = T
     boundary = 'lb_bottom lb_top lb_left rb_bottom rb_right rb_top'
-  [../]
+  []
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = 'left_block right_block'
-  [../]
-  [./sink]
+  []
+  [sink]
     type = Reaction
     variable = T
     block = 'left_block right_block'
-  [../]
-  [./forcing_function]
+  []
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = 'left_block right_block'
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     value = ''
-  [../]
-  [./exact_soln_primal]
+  []
+  [exact_soln_primal]
     type = ParsedFunction
     value = ''
-  [../]
+  []
   [exact_soln_lambda]
     type = ParsedFunction
     value = ''
@@ -170,7 +170,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = GapHeatConductanceTest
     primary_boundary = rb_left
     secondary_boundary = lb_right
@@ -182,14 +182,14 @@
     primary_gap_conductance = 1
     secondary_mms_function = mms_secondary
     primary_mms_function = mms_primary
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

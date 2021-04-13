@@ -11,81 +11,81 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./stress_x]
+  [stress_x]
     type = ADStressDivergenceTensors
     component = 0
     variable = disp_x
-  [../]
-  [./stress_y]
+  []
+  [stress_y]
     type = ADStressDivergenceTensors
     component = 1
     variable = disp_y
-  [../]
-  [./stress_z]
+  []
+  [stress_z]
     type = ADStressDivergenceTensors
     component = 2
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ADComputeLinearElasticStress
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ADComputeSmallStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

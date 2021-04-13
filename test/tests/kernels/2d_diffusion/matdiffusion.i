@@ -9,46 +9,46 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = MatDiffusion
     variable = u
     diffusivity = Du
-  [../]
-  [./ctime]
+  []
+  [ctime]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Materials]
-  [./Dc]
+  [Dc]
     type = DerivativeParsedMaterial
     f_name = Du
     function = '0.01+u^2'
     args = 'u'
     derivative_order = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

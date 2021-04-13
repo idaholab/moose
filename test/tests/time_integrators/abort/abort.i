@@ -13,45 +13,45 @@
 [Variables]
   active = 'Time'
 
-  [./Time]
+  [Time]
     order =  FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [Functions]
   active = 'func'
 
-  [./func]
+  [func]
     type = ParsedFunction
     value = 2.0*t
-  [../]
+  []
 []
 
 [Kernels]
   active = 't_time func_time'
 
-  [./t_time]
+  [t_time]
     type = TimeDerivative
     variable = Time
-  [../]
+  []
 
-  [./func_time]
+  [func_time]
     type = BodyForce
     variable = Time
     function = func
-  [../]
+  []
 []
 
 [BCs]
   active = 'Top_Temperature'
 
-  [./Top_Temperature]
+  [Top_Temperature]
     type = NeumannBC
     variable = Time
     boundary = 'left right'
-  [../]
+  []
 
 []
 
@@ -63,10 +63,10 @@
   num_steps = 4
   dt = 1000000000
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
   steady_state_tolerance = .00000000000000001
   steady_state_detection = true

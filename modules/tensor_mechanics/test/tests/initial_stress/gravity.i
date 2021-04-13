@@ -23,23 +23,23 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./weight]
+  []
+  [weight]
     type = BodyForce
     variable = disp_z
     value = -0.5 # this is density*gravity
-  [../]
+  []
 []
 
 
@@ -50,136 +50,136 @@
   # top = ymax
   # left = xmin
   # right = xmax
-  [./x]
+  [x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0
-  [../]
-  [./y]
+  []
+  [y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0
-  [../]
-  [./z]
+  []
+  [z]
     type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 
 [Functions]
-  [./weight]
+  [weight]
     type = ParsedFunction
     value = '0.5*z' # initial stress that should result from the weight force
-  [../]
-  [./kxx]
+  []
+  [kxx]
     type = ParsedFunction
     value = '0.4*z' # some arbitrary xx and yy stress that should not affect the result
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.25
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./strain_from_initial_stress]
+  []
+  [strain_from_initial_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = 'kxx 0 0  0 kxx 0  0 0 weight'
     eigenstrain_name = ini_stress
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 

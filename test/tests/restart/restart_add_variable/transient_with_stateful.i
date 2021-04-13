@@ -13,73 +13,73 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*((x*x)+(y*y))
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4+(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./diffusivity]
+  [diffusivity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./out_diffusivity]
+  [out_diffusivity]
     type = MaterialRealAux
     variable = diffusivity
     property = diffusivity
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = diffusivity
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = StatefulMaterial
     block = 0
     initial_diffusivity = 0.5
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,9 +92,9 @@
 
 [Outputs]
   checkpoint = true
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     execute_elemental_on = none
-  [../]
+  []
 []

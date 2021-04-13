@@ -12,40 +12,40 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./w]
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./eta]
+  []
+  [eta]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
     args = eta
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./motion]
+  []
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -53,12 +53,12 @@
     grain_tracker_object = grain_center
     grain_force = grain_force
     grain_volumes = grain_volumes
-  [../]
-  [./eta_dot]
+  []
+  [eta_dot]
     type = TimeDerivative
     variable = eta
-  [../]
-  [./vadv_eta]
+  []
+  [vadv_eta]
     type = SingleGrainRigidBodyMotion
     variable = eta
     c = c
@@ -66,93 +66,93 @@
     grain_tracker_object = grain_center
     grain_force = grain_force
     grain_volumes = grain_volumes
-  [../]
-  [./acint_eta]
+  []
+  [acint_eta]
     type = ACInterface
     variable = eta
     mob_name = M
     args = c
     kappa_name = kappa_eta
-  [../]
-  [./acbulk_eta]
+  []
+  [acbulk_eta]
     type = AllenCahn
     variable = eta
     mob_name = M
     f_name = F
     args = c
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     args = 'c eta'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2
     derivative_order = 2
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./centroids]
+  []
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vadv_x]
+  []
+  [vadv_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vadv_y]
+  []
+  [vadv_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./angle_initial]
+  []
+  [angle_initial]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./euler_angle]
+  []
+  [euler_angle]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
     execute_on = timestep_begin
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_center
     field_display = VARIABLE_COLORING
     execute_on = timestep_begin
-  [../]
-  [./centroids]
+  []
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_begin
     field_display = CENTROID
     flood_counter = grain_center
-  [../]
-  [./vadv_x]
+  []
+  [vadv_x]
     type = GrainAdvectionAux
     grain_force = grain_force
     grain_volumes = grain_volumes
@@ -160,8 +160,8 @@
     execute_on = timestep_begin
     component = x
     variable = vadv_x
-  [../]
-  [./vadv_y]
+  []
+  [vadv_y]
     type = GrainAdvectionAux
     grain_force = grain_force
     grain_volumes = grain_volumes
@@ -169,72 +169,72 @@
     execute_on = timestep_begin
     component = y
     variable = vadv_y
-  [../]
-  [./angle_initial]
+  []
+  [angle_initial]
     type = OutputEulerAngles
     variable = angle_initial
     euler_angle_provider = euler_angle_initial
     grain_tracker = grain_center
     output_euler_angle = phi2
     execute_on = timestep_begin
-  [../]
-  [./angle]
+  []
+  [angle]
     type = OutputEulerAngles
     variable = euler_angle
     euler_angle_provider = euler_angle
     grain_tracker = grain_center
     output_euler_angle = phi2
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-  [../]
-  [./grain_volumes]
+  []
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     variable = eta
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
-  [../]
-  [./grain_force]
+  []
+  [grain_force]
     type = ConstantGrainForceAndTorque
     execute_on = 'initial timestep_begin linear nonlinear'
     force = '0.5 0.0 0.0 '
     torque = '0.0 0.0 10.0'
-  [../]
-  [./euler_angle_initial]
+  []
+  [euler_angle_initial]
     type = RandomEulerAngleProvider
     grain_tracker_object = grain_center
     execute_on = 'initial timestep_begin'
-  [../]
-  [./euler_angle]
+  []
+  [euler_angle]
     type = EulerAngleUpdater
     grain_tracker_object = grain_center
     euler_angle_provider = euler_angle_initial
     grain_torques_object = grain_force
     grain_volumes = grain_volumes
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -257,7 +257,7 @@
 []
 
 [ICs]
-  [./rect_c]
+  [rect_c]
     y2 = 20.0
     y1 = 5.0
     inside = 1.0
@@ -265,8 +265,8 @@
     variable = c
     x1 = 10.0
     type = BoundingBoxIC
-  [../]
-  [./rect_eta]
+  []
+  [rect_eta]
     y2 = 20.0
     y1 = 5.0
     inside = 1.0
@@ -274,5 +274,5 @@
     variable = eta
     x1 = 10.0
     type = BoundingBoxIC
-  [../]
+  []
 []

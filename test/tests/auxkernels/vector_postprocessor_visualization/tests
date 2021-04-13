@@ -1,7 +1,7 @@
 [Tests]
   issues = '#11272'
   design = 'source/auxkernels/VectorPostprocessorVisualizationAux.md source/vectorpostprocessors/WorkBalance.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'vector_postprocessor_visualization.i'
     exodiff = 'vector_postprocessor_visualization_out.e'
@@ -9,5 +9,5 @@
     max_parallel = 3
     mesh_mode = replicated # Just because of the gold file
     requirement = "MOOSE shall be capable of populating an auxiliary variable from VectorPostprocessor data sized to the number of processors."
-  [../]
+  []
 []

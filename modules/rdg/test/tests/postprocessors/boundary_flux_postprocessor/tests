@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'boundary_flux_postprocessor.i'
     csvdiff = 'boundary_flux_postprocessor_out.csv'
@@ -12,5 +12,5 @@
     requirement = "BoundaryFluxPostprocessor shall output correct boundary flux values."
     issues = '#13178'
     design = '/BoundaryFluxPostprocessor.md'
-  [../]
+  []
 []

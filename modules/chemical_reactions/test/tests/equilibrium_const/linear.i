@@ -8,45 +8,45 @@
 []
 
 [AuxVariables]
-  [./logk]
-  [../]
+  [logk]
+  []
 []
 
 [AuxKernels]
-  [./logk]
+  [logk]
     type = EquilibriumConstantAux
     temperature = temperature
     temperature_points = '200 300 400'
     logk_points = '1.8 1.5 1.2'
     variable = logk
-  [../]
+  []
 []
 
 [Variables]
-  [./temperature]
-  [../]
+  [temperature]
+  []
 []
 
 [Kernels]
-  [./temperature]
+  [temperature]
     type = Diffusion
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temperature
     value = 150
     boundary = left
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = temperature
     value = 400
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

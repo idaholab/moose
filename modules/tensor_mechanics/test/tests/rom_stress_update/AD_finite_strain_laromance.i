@@ -69,22 +69,22 @@
     thermal_expansion_coeff = 1e-6 #1e-4
     temperature = temp
   []
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 3.30e11
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
-  [../]
-  [./rom_stress_prediction]
+  []
+  [rom_stress_prediction]
     type = ADSS316HLAROMANCEStressUpdateTest
     temperature = temp
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     outputs = all
-  [../]
+  []
 []
 
 [Postprocessors]

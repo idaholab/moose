@@ -13,20 +13,20 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./eta]
+  [PhaseField]
+    [Nonconserved]
+      [eta]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = SmoothCircleIC
     variable = eta
     x1 = 20.0
@@ -35,17 +35,17 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 3.0
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'eta'
     function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

@@ -16,21 +16,21 @@
 
 
 [UserObjects]
-  [./seff]
+  [seff]
     type = RichardsSeff2waterVG
     al = 1E-6
     m = 0.8
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./point_val]
+  [point_val]
     type = PointValue
     execute_on = timestep_begin
     # note this point must lie inside the mesh below
     point = '1 0 0'
     variable = seff
-  [../]
+  []
 []
 
 [Mesh]
@@ -48,49 +48,49 @@
 
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [ICs]
-  [./u_init]
+  [u_init]
     type = FunctionIC
     variable = u
     function = x
-  [../]
-  [./v_init]
+  []
+  [v_init]
     type = ConstantIC
     variable = v
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./seff]
-  [../]
+  [seff]
+  []
 []
 
 [AuxKernels]
-  [./seff_AuxK]
+  [seff_AuxK]
     type = RichardsSeffAux
     variable = seff
     seff_UO = seff
     execute_on = timestep_begin
     pressure_vars = 'v u'
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = Diffusion
     variable = u
-  [../]
-  [./dummy_v]
+  []
+  [dummy_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,11 +101,11 @@
 
 [Outputs]
   file_base = seff2
-  [./csv]
+  [csv]
     type = CSV
-  [../]
-  [./exodus]
+  []
+  [exodus]
     type = Exodus
     hide = 'u v'
-  [../]
+  []
 []

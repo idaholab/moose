@@ -12,271 +12,271 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 
-  [./scalar_strain_zz1]
+  [scalar_strain_zz1]
     order = FIRST
     family = SCALAR
-  [../]
-  [./scalar_strain_zz2]
+  []
+  [scalar_strain_zz2]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./saved_x]
+  []
+  [saved_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./saved_y]
+  []
+  [saved_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./aux_strain_zz]
+  []
+  [aux_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./saved_scalar_strain_zz1]
+  []
+  [saved_scalar_strain_zz1]
     order = FIRST
     family = SCALAR
-  [../]
-  [./saved_scalar_strain_zz2]
+  []
+  [saved_scalar_strain_zz2]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./react_z1]
+  [react_z1]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     block = 1
-  [../]
-  [./react_z2]
+  []
+  [react_z2]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     block = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps1]
+  [TensorMechanics]
+    [GeneralizedPlaneStrain]
+      [gps1]
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
         scalar_out_of_plane_strain = scalar_strain_zz1
         block = '1'
-      [../]
-      [./gps2]
+      []
+      [gps2]
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
         scalar_out_of_plane_strain = scalar_strain_zz2
         block = '2'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = false
     displacements = 'disp_x disp_y'
     temperature = temp
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     block = '1 2'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./aux_strain_zz]
+  []
+  [aux_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = aux_strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./saved_scalar_strain_zz1_ref_resid]
+  [saved_scalar_strain_zz1_ref_resid]
     type = GeneralizedPlaneStrainReferenceResidual
     variable = saved_scalar_strain_zz1
     generalized_plane_strain = gps1_GeneralizedPlaneStrainUserObject
-  [../]
-  [./saved_scalar_strain_zz2_ref_resid]
+  []
+  [saved_scalar_strain_zz2_ref_resid]
     type = GeneralizedPlaneStrainReferenceResidual
     variable = saved_scalar_strain_zz2
     generalized_plane_strain = gps2_GeneralizedPlaneStrainUserObject
-  [../]
+  []
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     value = '(1-x)*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom1x]
+  [bottom1x]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom1y]
+  []
+  [bottom1y]
     type = DirichletBC
     boundary = 1
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom2x]
+  []
+  [bottom2x]
     type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom2y]
+  []
+  [bottom2y]
     type = DirichletBC
     boundary = 2
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     block = '1 2'
-  [../]
-  [./strain1]
+  []
+  [strain1]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
     scalar_out_of_plane_strain = scalar_strain_zz1
     block = 1
     eigenstrain_names = eigenstrain
-  [../]
-  [./strain2]
+  []
+  [strain2]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
     scalar_out_of_plane_strain = scalar_strain_zz2
     block = 2
     eigenstrain_names = eigenstrain
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     block = '1 2'
     eigenstrain_name = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]

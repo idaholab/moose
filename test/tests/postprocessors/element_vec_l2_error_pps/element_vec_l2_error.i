@@ -15,15 +15,15 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
@@ -31,106 +31,106 @@
 
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
-  [./bc_u]
+  [bc_u]
     type = ParsedFunction
     value = sin(alpha*pi*x)
     vars = 'alpha'
     vals = '2'
-  [../]
+  []
 
-  [./bc_v]
+  [bc_v]
     type = ParsedFunction
     value = sin(alpha*pi*y)
     vars = 'alpha'
     vals = '2'
-  [../]
+  []
 
-  [./f_u]
+  [f_u]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '2'
-  [../]
+  []
 
-  [./f_v]
+  [f_v]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*y)
     vars = 'alpha'
     vals = '2'
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff_u diff_v forcing_u forcing_v'
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 
   # This Kernel can take a function name to use
-  [./forcing_u]
+  [forcing_u]
     type = BodyForce
     variable = u
     function = f_u
-  [../]
+  []
 
-  [./forcing_v]
+  [forcing_v]
     type = BodyForce
     variable = v
     function = f_v
-  [../]
+  []
 []
 
 [BCs]
   active = 'all_u all_v'
 
   # The BC can take a function name to use
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = 'bottom right top left'
     function = bc_u
-  [../]
+  []
 
-  [./all_v]
+  [all_v]
     type = FunctionDirichletBC
     variable = v
     boundary = 'bottom right top left'
     function = bc_v
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
 
-  [./Adaptivity]
+  [Adaptivity]
     refine_fraction = 1.0
     coarsen_fraction = 0.0
     max_h_level = 10
     steps = 3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./integral]
+  [integral]
     type = ElementVectorL2Error
     var_x = u
     var_y = v
     function_x = bc_u
     function_y = bc_v
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

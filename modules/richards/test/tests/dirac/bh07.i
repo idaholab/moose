@@ -8,94 +8,94 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     y = '1000 10000'
     x = '100 1000'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E9
-  [../]
-  [./Seff1VG]
+  []
+  [Seff1VG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-5
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0
     sum_s_res = 0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1E8
-  [../]
+  []
 
-  [./borehole_total_outflow_mass]
+  [borehole_total_outflow_mass]
     type = RichardsSumQuantity
-  [../]
+  []
 []
 
 
 [Variables]
   active = 'pressure'
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = FunctionIC
     variable = pressure
     function = initial_pressure
-  [../]
+  []
 []
 
 [BCs]
-  [./fix_outer]
+  [fix_outer]
     type = DirichletBC
     boundary = perimeter
     variable = pressure
     value = 1E7
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./bh]
+  [bh]
     type = RichardsBorehole
     bottom_pressure = 0
     point_file = bh07.bh
@@ -104,35 +104,35 @@
     unit_weight = '0 0 0'
     re_constant = 0.1594
     character = 2
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./bh_report]
+  [bh_report]
     type = RichardsPlotQuantity
     uo = borehole_total_outflow_mass
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./fluid_mass]
+  [fluid_mass]
     type = RichardsMass
     variable = pressure
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 
 [Functions]
-  [./initial_pressure]
+  [initial_pressure]
     type = ParsedFunction
     value = 1E7
-  [../]
+  []
 []
 
 
 [Materials]
-  [./all]
+  [all]
     type = RichardsMaterial
     block = 1
     viscosity = 1E-3
@@ -145,27 +145,27 @@
     SUPG_UO = SUPGstandard
     gravity = '0 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = Seff1VG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
-  [../]
+  []
 []
 
 
@@ -174,11 +174,11 @@
   end_time = 1000
   solve_type = NEWTON
 
-  [./TimeStepper]
+  [TimeStepper]
     # get only marginally better results for smaller time steps
     type = FunctionDT
     function = dts
-  [../]
+  []
 
 []
 

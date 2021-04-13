@@ -18,28 +18,28 @@
 []
 
 [AuxVariables]
-  [./Fglobal]
+  [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # gas concentration
-  [./cg]
+  [cg]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # vac concentration
-  [./cv]
+  [cv]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./cv]
+  [cv]
     variable = cv
     type = SmoothCircleIC
     x1 = -0.5
@@ -48,8 +48,8 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 0.75
-  [../]
-  [./cg]
+  []
+  [cg]
     variable = cg
     type = SmoothCircleIC
     x1 = 0.5
@@ -58,22 +58,22 @@
     invalue = 0.7
     outvalue = 0.0
     int_width = 0.75
-  [../]
+  []
 []
 
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = 'cg cv'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   # Free energy of the matrix
-  [./fm]
+  [fm]
     type = KKSXeVacSolidMaterial
     f_name = fm
     cmg = cg
@@ -81,27 +81,27 @@
     T = 300
     outputs = exodus
     derivative_order = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_g]
+  [diff_g]
     type = Diffusion
     variable = cg
-  [../]
-  [./time_g]
+  []
+  [time_g]
     type = TimeDerivative
     variable = cg
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = cv
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = TimeDerivative
     variable = cv
-  [../]
+  []
 []
 
 [Executioner]

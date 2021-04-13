@@ -22,7 +22,7 @@
     # file = wedge_32x48.e
     # file = wedge_64x96.e
   []
-  [./corner_node]
+  [corner_node]
     # Pin is on the centerline of the channel on the left-hand side of
     # the domain at r=1.  If you change the domain, you will need to
     # update this pin location for the pressure exact solution to
@@ -31,107 +31,107 @@
     new_boundary = pinned_node
     coord = '1 0'
     input = file
-  [../]
+  []
 []
 
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
-  [./x_momentum_time]
+  []
+  [x_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_x
-  [../]
-  [./x_momentum_space]
+  []
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
-  [./y_momentum_time]
+  []
+  [y_momentum_time]
     type = INSMomentumTimeDerivative
     variable = vel_y
-  [../]
-  [./y_momentum_space]
+  []
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./vel_x_no_slip]
+  [vel_x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
-  [./vel_y_no_slip]
+  []
+  [vel_y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'top_wall bottom_wall'
     value = 0.0
-  [../]
-  [./vel_x_inlet]
+  []
+  [vel_x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'inlet outlet'
     function = 'vel_x_exact'
-  [../]
-  [./vel_y_inlet]
+  []
+  [vel_y_inlet]
     type = FunctionDirichletBC
     variable = vel_y
     boundary = 'inlet outlet'
     function = 'vel_y_exact'
-  [../]
-  [./pressure_pin]
+  []
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -154,7 +154,7 @@
 []
 
 [Functions]
-  [./f_theta]
+  [f_theta]
     # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
     # alpha=15 deg, Re=30.  Note: this introduces an input file
     # ordering dependency: this Function must appear *before* the two
@@ -163,44 +163,44 @@
     type = PiecewiseLinear
     data_file = 'f.csv'
     format = 'columns'
-  [../]
-  [./vel_x_exact]
+  []
+  [vel_x_exact]
     type = WedgeFunction
     var_num = 0
     mu = 1
     rho = 1
-  [../]
-  [./vel_y_exact]
+  []
+  [vel_y_exact]
     type = WedgeFunction
     var_num = 1
     mu = 1
     rho = 1
-  [../]
-  [./p_exact]
+  []
+  [p_exact]
     type = WedgeFunction
     var_num = 2
     mu = 1
     rho = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./vel_x_L2_error]
+  [vel_x_L2_error]
     type = ElementL2Error
     variable = vel_x
     function = vel_x_exact
     execute_on = 'initial timestep_end'
-  [../]
-  [./vel_y_L2_error]
+  []
+  [vel_y_L2_error]
     type = ElementL2Error
     variable = vel_y
     function = vel_y_exact
     execute_on = 'initial timestep_end'
-  [../]
-  [./p_L2_error]
+  []
+  [p_L2_error]
     type = ElementL2Error
     variable = p
     function = p_exact
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

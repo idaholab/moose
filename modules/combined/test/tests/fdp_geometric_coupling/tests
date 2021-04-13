@@ -1,7 +1,7 @@
 [Tests]
   design = 'FiniteDifferencePreconditioner.md'
   issues = '#2816'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'fdp_geometric_coupling.i'
     exodiff = 'fdp_geometric_coupling_out.e'
@@ -9,5 +9,5 @@
     max_parallel = 1
     valgrind = 'HEAVY'
     requirement = 'The finite difference preconditioner shall allow for implicit coupling with the geometric search'
-  [../]
+  []
 []

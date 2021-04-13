@@ -1,7 +1,7 @@
 [Tests]
   issues = '#10906'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./catch_release]
+  [catch_release]
     type = 'Exodiff'
     input = 'catch_release.i'
     exodiff = 'catch_release_out.e'
@@ -12,5 +12,5 @@
     # to numerical instability.
     petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce three-dimensional block to block interaction using a penalty approach.'
-  [../]
+  []
 []

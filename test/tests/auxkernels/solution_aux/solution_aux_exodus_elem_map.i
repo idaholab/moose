@@ -9,52 +9,52 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./matid]
+  [matid]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./matid]
+  [matid]
     type = SolutionAux
     solution = soln
     variable = matid
     scale_factor = 1.0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = elem_map.e
     system_variables = MatID
     timestep = LATEST
-  [../]
+  []
 []
 
 [BCs]
-  [./stuff]
+  [stuff]
     type = DirichletBC
     variable = u
     boundary = '1'
     value = 1.0
-  [../]
+  []
 []
 
 [Executioner]

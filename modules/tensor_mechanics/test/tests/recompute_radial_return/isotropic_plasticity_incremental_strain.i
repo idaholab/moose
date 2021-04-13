@@ -29,70 +29,70 @@
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = ParsedFunction
     value = t*(0.01)
-  [../]
-  [./hf]
+  []
+  [hf]
     type = PiecewiseLinear
     x = '0  0.00004 0.0001  0.1'
     y = '50   54    56       60'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
-  [../]
+  []
 []
 
 [BCs]
-  [./y_pull_function]
+  [y_pull_function]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = top_pull
-  [../]
+  []
 
-  [./x_sides]
+  [x_sides]
     type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0.0
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./z_sides]
+  []
+  [z_sides]
     type = DirichletBC
     variable = disp_z
     boundary = 'back front'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.5e5
     poissons_ratio = 0.0
-  [../]
-  [./isotropic_plasticity]
+  []
+  [isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
     yield_stress = 25.
     hardening_constant = 1000.0
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     tangent_operator = elastic
     inelastic_models = 'isotropic_plasticity'
-  [../]
+  []
 []
 
 [Executioner]

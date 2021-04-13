@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'num_vars.i'
     csvdiff = 'num_vars_out.csv'
@@ -8,5 +8,5 @@
                    one or more equation systems in the simulation.'
     design = '/NumVars.md'
     issues = '#2094'
-  [../]
+  []
 []

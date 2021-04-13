@@ -1,13 +1,13 @@
 [Tests]
-  [./bl01]
+  [bl01]
     type = 'Exodiff'
     input = 'bl01.i'
     exodiff = 'bl01.e'
     rel_err = 1E-5
     use_old_floor = True
-  [../]
+  []
 
-  [./bl20]
+  [bl20]
     type = 'Exodiff'
     input = 'bl20.i'
     exodiff = 'bl20.e'
@@ -15,8 +15,8 @@
     use_old_floor = True
     max_parallel = 1
     allow_warnings = true
-  [../]
-  [./bl22]
+  []
+  [bl22]
     type = 'Exodiff'
     input = 'bl22.i'
     exodiff = 'bl22.e'
@@ -24,17 +24,17 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
+  []
 
-  [./bl01_lumped]
+  [bl01_lumped]
     type = 'Exodiff'
     input = 'bl01_lumped.i'
     exodiff = 'bl01_lumped.e'
     rel_err = 1E-5
     use_old_floor = True
-  [../]
+  []
 
-  [./bl20_lumped]
+  [bl20_lumped]
     type = 'Exodiff'
     input = 'bl20_lumped.i'
     exodiff = 'bl20_lumped.e'
@@ -44,8 +44,8 @@
     # Need to investigate these restrictions
     #compiler = GCC
     #platform = LINUX
-  [../]
-  [./bl22_lumped]
+  []
+  [bl22_lumped]
     type = 'Exodiff'
     input = 'bl22_lumped.i'
     exodiff = 'bl22_lumped.e'
@@ -53,17 +53,17 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
+  []
 
-  [./bl01_lumped_fu]
+  [bl01_lumped_fu]
     type = 'Exodiff'
     input = 'bl01_lumped_fu.i'
     exodiff = 'bl01_lumped_fu.e'
     rel_err = 1E-5
     use_old_floor = True
-  [../]
+  []
 
-  [./bl20_lumped_fu]
+  [bl20_lumped_fu]
     type = 'Exodiff'
     input = 'bl20_lumped_fu.i'
     exodiff = 'bl20_lumped_fu.e'
@@ -73,8 +73,8 @@
     # Need to investigate these restrictions
     #compiler = GCC
     #platform = LINUX
-  [../]
-  [./bl22_lumped_fu]
+  []
+  [bl22_lumped_fu]
     type = 'Exodiff'
     input = 'bl22_lumped_fu.i'
     exodiff = 'bl22_lumped_fu.e'
@@ -82,5 +82,5 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
+  []
 []

@@ -7,12 +7,12 @@
     exodiff = 'gap-conductance-bnd-aux-kernel_out.e'
     custom_cmp = 'exodiff.cmp'
     requirement = 'We shall be able to couple variables between boundary auxiliary kernels and mortar constraints.'
-  [../]
+  []
   [gap-conductance-bnd-material]
     type = Exodiff
     input = 'gap-conductance-bnd-material.i'
     exodiff = 'gap-conductance-bnd-material_out.e'
     custom_cmp = 'exodiff_mat.cmp'
     requirement = 'We shall be able to use boundary-restricted material properties in mortar constraints.'
-  [../]
+  []
 []

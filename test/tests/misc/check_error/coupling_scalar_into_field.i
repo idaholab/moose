@@ -4,43 +4,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./a]
+  [u]
+  []
+  [a]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./coupled]
+  [coupled]
     type = CoupledForce
     variable = u
     # this should trigger an error message, 'v' should a field variable
     v = a
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./alpha]
+  [alpha]
     type = AlphaCED
     variable = a
     value = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     boundary = 'left right top bottom'
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

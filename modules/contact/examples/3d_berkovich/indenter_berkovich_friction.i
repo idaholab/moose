@@ -10,36 +10,36 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./saved_z]
-  [../]
+  [saved_x]
+  []
+  [saved_y]
+  []
+  [saved_z]
+  []
 []
 
 [AuxKernels]
 []
 
 [Functions]
-  [./push_down]
+  [push_down]
     type = ParsedFunction
     value = 'if(t < 1.5, -t, t-3.0)'
-  [../]
+  []
 []
 
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     block = '1 2'
@@ -47,65 +47,65 @@
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_zz'
     save_in = 'saved_x saved_y saved_z'
     use_finite_deform_jacobian = true
-  [../]
+  []
 []
 
 [BCs]
-  [./botz]
+  [botz]
     type = DirichletBC
     variable = disp_z
     boundary = 101
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 101
     value = 0.0
-  [../]
-  [./botx]
+  []
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 101
     value = 0.0
-  [../]
+  []
 
-  [./boty111]
+  [boty111]
     type = DirichletBC
     variable = disp_y
     boundary = 111
     value = 0.0
-  [../]
-  [./botx111]
+  []
+  [botx111]
     type = DirichletBC
     variable = disp_x
     boundary = 111
     value = 0.0
-  [../]
+  []
 
-  [./topz]
+  [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = '201'
     function = push_down
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 201
     value = 0.0
-  [../]
-  [./topx]
+  []
+  [topx]
     type = DirichletBC
     variable = disp_x
     boundary = 201
     value = 0.0
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./slip_rate_gss]
+  [slip_rate_gss]
     type = CrystalPlasticitySlipRateGSS
     variable_size = 48
     slip_sys_file_name = input_slip_sys_bcc48.txt
@@ -114,14 +114,14 @@
     uo_state_var_name = state_var_gss
     slip_incr_tol = 10.0
     block = 1
-  [../]
-  [./slip_resistance_gss]
+  []
+  [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 48
     uo_state_var_name = state_var_gss
     block = 1
-  [../]
-  [./state_var_gss]
+  []
+  [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 48
     groups = '0 24 48'
@@ -129,19 +129,19 @@
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
     block = 1
-  [../]
-  [./state_var_evol_rate_comp_gss]
+  []
+  [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 48
     hprops = '1.4 1000 1200 2.5'
     uo_slip_rate_name = slip_rate_gss
     uo_state_var_name = state_var_gss
     block = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainUObasedCP
     block = 1
     stol = 1e-2
@@ -151,41 +151,41 @@
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
     maximum_substep_iteration = 25
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 1
     C_ijkl = '265190 113650 113650 265190 113650 265190 75769 75769 75760'
     fill_method = symmetric9
-  [../]
-  [./elasticity_tensor_indenter]
+  []
+  [elasticity_tensor_indenter]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1000000.0
     poissons_ratio = 0.3
     block = 2
-  [../]
-  [./stress_indenter]
+  []
+  [stress_indenter]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
     block = 1
-  [../]
-  [./resid_z]
+  []
+  [resid_z]
     type = NodalSum
     variable = saved_z
     boundary = 201
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = NodalMaxValue
     variable = disp_z
     boundary = 201
-  [../]
+  []
 []
 
 [Executioner]
@@ -209,37 +209,37 @@
 []
 
 [Outputs]
-  [./my_checkpoint]
+  [my_checkpoint]
     type = Checkpoint
     interval = 50
-  [../]
+  []
   exodus = true
   csv = true
   print_linear_residuals = true
   print_perf_log = true
-  [./console]
+  [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Dampers]
-  [./contact_slip]
+  [contact_slip]
     type = ContactSlipDamper
     primary = '202'
     secondary = '102'
-  [../]
+  []
 []
 
 [Contact]
-  [./ind_base]
+  [ind_base]
     primary = 202
     secondary = 102
     model = coulomb
@@ -248,5 +248,5 @@
     formulation = tangential_penalty
     penalty = 1e7
     capture_tolerance = 0.0001
-  [../]
+  []
 []

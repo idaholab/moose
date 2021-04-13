@@ -1,7 +1,7 @@
 [Tests]
-  [./arrhenius]
+  [arrhenius]
     type = 'Exodiff'
     input = 'arrhenius.i'
     exodiff = 'arrhenius_out.e'
-  [../]
+  []
 []

@@ -6,45 +6,45 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_aux]
-  [../]
+  [u_aux]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./aux_kernel]
+  [aux_kernel]
     type = FunctionAux
     function = x*y
     variable = u_aux
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -56,7 +56,7 @@
 [Outputs]
   exodus = true
   xda = true
-  [./xdr]
+  [xdr]
     type = XDR
-  [../]
+  []
 []

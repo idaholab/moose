@@ -23,83 +23,83 @@
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./exactfn]
+  [exactfn]
     type = ParsedFunction
     value = x*x+y*y
-  [../]
+  []
 
-  [./aux_exact_fn]
+  [aux_exact_fn]
     type = ParsedFunction
     value = t*(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./aux_u]
+  [aux_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./a]
+  [a]
     type = FunctionAux
     variable = aux_u
     function = aux_exact_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exactfn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./elem_56]
+  [elem_56]
     type = ElementalVariableValue
     variable = u
     elementid = 56
-  [../]
+  []
 
-  [./aux_elem_99]
+  [aux_elem_99]
     type = ElementalVariableValue
     variable = aux_u
     elementid = 99
-  [../]
+  []
 []
 
 [Executioner]

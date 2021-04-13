@@ -21,138 +21,138 @@
 []
 
 [Functions]
-  [./x101]
+  [x101]
     type = PiecewiseLinear
     x = '0 5 6'
     y = '0 0 0.24'
-  [../]
-  [./y101]
+  []
+  [y101]
     type = PiecewiseLinear
     x = '0 6'
     y = '0 0'
-  [../]
-  [./x102]
+  []
+  [x102]
     type = PiecewiseLinear
     x = '0 4 5'
     y = '0 0 0.24'
-  [../]
-  [./y102]
+  []
+  [y102]
     type = PiecewiseLinear
     x = '0 1 2 3'
     y = '0 0 0.12 0'
-  [../]
-  [./x103]
+  []
+  [x103]
     type = PiecewiseLinear
     x = '0 4 5'
     y = '0 0 0.24'
-  [../]
-  [./y103]
+  []
+  [y103]
     type = PiecewiseLinear
     x = '0 1    3    4'
     y = '0 0.12 0.12 0'
-  [../]
-  [./x104]
+  []
+  [x104]
     type = PiecewiseLinear
     x = '0 5 6'
     y = '0 0 0.24'
-  [../]
-  [./y104]
+  []
+  [y104]
     type = PiecewiseLinear
     x = '0 2 3    4'
     y = '0 0 0.12 0'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
 
-  [./101x]
+  [101x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 101
     function = x101
-  [../]
-  [./101y]
+  []
+  [101y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 101
     function = y101
-  [../]
+  []
 
-  [./102x]
+  [102x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 102
     function = x102
-  [../]
-  [./102y]
+  []
+  [102y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 102
     function = y102
-  [../]
+  []
 
-  [./103x]
+  [103x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 103
     function = x103
-  [../]
-  [./103y]
+  []
+  [103y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 103
     function = y103
-  [../]
+  []
 
-  [./104x]
+  [104x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 104
     function = x104
-  [../]
-  [./104y]
+  []
+  [104y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 104
     function = y104
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = PATCH
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
-  [./small_strain_rz]
+  [small_strain_rz]
     type = ComputeAxisymmetricRZSmallStrain
     block = PATCH
-  [../]
+  []
 
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeLinearElasticStress
     block = PATCH
-  [../]
+  []
 []
 
 [Executioner]
@@ -176,17 +176,17 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     file_base = rz_out
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mass]
+  [mass]
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

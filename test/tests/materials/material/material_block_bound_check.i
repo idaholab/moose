@@ -22,42 +22,42 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = matp
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 # Materials System
 [Materials]
-  [./mat]
+  [mat]
     type = MTMaterial
     boundary = 'bottom'
-  [../]
+  []
 []
 
 [Executioner]

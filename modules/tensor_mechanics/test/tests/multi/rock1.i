@@ -24,315 +24,315 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [ICs]
-  [./x]
+  [x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
-  [./y]
+  []
+  [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
-  [./z]
+  []
+  [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f0]
+  []
+  [f0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f1]
+  []
+  [f1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f2]
+  []
+  [f2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f3]
+  []
+  [f3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./int0]
+  []
+  [int0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./int1]
+  []
+  [int1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./int2]
+  []
+  [int2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./int3]
+  []
+  [int3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./iter]
+  []
+  [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./f0]
+  []
+  [f0]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
-  [../]
-  [./f1]
+  []
+  [f1]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
-  [../]
-  [./f2]
+  []
+  [f2]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
-  [../]
-  [./f3]
+  []
+  [f3]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 3
     variable = f3
-  [../]
-  [./int0]
+  []
+  [int0]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 0
     variable = int0
-  [../]
-  [./int1]
+  []
+  [int1]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 1
     variable = int1
-  [../]
-  [./int2]
+  []
+  [int2]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 2
     variable = int2
-  [../]
-  [./int3]
+  []
+  [int3]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     factor = 1E6
     index = 3
     variable = int3
-  [../]
-  [./iter]
+  []
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./raw_f0]
+  [raw_f0]
     type = ElementExtremeValue
     variable = f0
     outputs = console
-  [../]
-  [./raw_f1]
+  []
+  [raw_f1]
     type = ElementExtremeValue
     variable = f1
     outputs = console
-  [../]
-  [./raw_f2]
+  []
+  [raw_f2]
     type = ElementExtremeValue
     variable = f2
     outputs = console
-  [../]
-  [./raw_f3]
+  []
+  [raw_f3]
     type = ElementExtremeValue
     variable = f3
     outputs = console
-  [../]
-  [./iter]
+  []
+  [iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
-  [../]
-  [./f0]
+  []
+  [f0]
     type = FunctionValuePostprocessor
     function = should_be_zero0_fcn
-  [../]
-  [./f1]
+  []
+  [f1]
     type = FunctionValuePostprocessor
     function = should_be_zero1_fcn
-  [../]
-  [./f2]
+  []
+  [f2]
     type = FunctionValuePostprocessor
     function = should_be_zero2_fcn
-  [../]
-  [./f3]
+  []
+  [f3]
     type = FunctionValuePostprocessor
     function = should_be_zero3_fcn
-  [../]
+  []
 []
 
 [Functions]
-  [./should_be_zero0_fcn]
+  [should_be_zero0_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
     vars = 'a'
     vals = 'raw_f0'
-  [../]
-  [./should_be_zero1_fcn]
+  []
+  [should_be_zero1_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
     vars = 'a'
     vals = 'raw_f1'
-  [../]
-  [./should_be_zero2_fcn]
+  []
+  [should_be_zero2_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
     vars = 'a'
     vals = 'raw_f2'
-  [../]
-  [./should_be_zero3_fcn]
+  []
+  [should_be_zero3_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
     vars = 'a'
     vals = 'raw_f3'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 4E7
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
-  [../]
-  [./mc]
+  []
+  [mc]
     type = TensorMechanicsPlasticMohrCoulomb
     cohesion = mc_coh
     friction_angle = mc_phi
@@ -340,32 +340,32 @@
     mc_tip_smoother = 4E6
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./tensile]
+  []
+  [tensile]
     type = TensorMechanicsPlasticTensile
     tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.46630766
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.46630766
-  [../]
-  [./wps]
+  []
+  [wps]
     type = TensorMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
@@ -373,32 +373,32 @@
     smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
-  [./str]
+  []
+  [str]
     type = TensorMechanicsHardeningConstant
     value = 0.01E6
-  [../]
-  [./wpt]
+  []
+  [wpt]
     type = TensorMechanicsPlasticWeakPlaneTensile
     tensile_strength = str
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1E9 1.3E9'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./multi]
+  []
+  [multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-7
@@ -414,7 +414,7 @@
     debug_stress_change = 1E1
     debug_pm_change = '1E-6 1E-6 1E-6 1E-6'
     debug_intnl_change = '1E-6 1E-6 1E-6 1E-6'
-  [../]
+  []
 []
 
 
@@ -428,7 +428,7 @@
 [Outputs]
   file_base = rock1
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
-    [../]
+    []
 []

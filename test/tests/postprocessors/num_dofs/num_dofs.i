@@ -9,55 +9,55 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./v_aux]
+  []
+  [v_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./force]
+  [force]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     function = force
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left]
+  []
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,32 +71,32 @@
   steps = 1
   marker = box
   max_h_level = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '0.3 0.3 0'
       inside = refine
       top_right = '0.6 0.6 0'
       outside = do_nothing
       type = BoxMarker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./num_dofs_nl]
+  [num_dofs_nl]
     type = NumDOFs
     system = NL
-  [../]
-  [./num_dofs_aux]
+  []
+  [num_dofs_aux]
     type = NumDOFs
     system = AUX
-  [../]
+  []
 
   # default
-  [./num_dofs_all]
+  [num_dofs_all]
     type = NumDOFs
     system = ALL
-  [../]
+  []
 []
 
 [Outputs]

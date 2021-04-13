@@ -1,14 +1,14 @@
 [Tests]
-  [./mpf_except1]
+  [mpf_except1]
     type = 'RunException'
     input = 'mpf_except1.i'
     expect_err = 'MovingPlanarFront: start_posn and end_posn must be different points'
     threading = '!pthreads'
-  [../]
-  [./mpf1]
+  []
+  [mpf1]
     type = Exodiff
     input = 'mpf1.i'
     exodiff = 'mpf1.e'
     threading = '!pthreads'
-  [../]
+  []
 []

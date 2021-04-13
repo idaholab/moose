@@ -1,5 +1,5 @@
 [Tests]
-  [./ic_depend_on_uo]
+  [ic_depend_on_uo]
     type = 'Exodiff'
     input = 'geometric_neighbors_ic.i'
     exodiff = 'geometric_neighbors_ic_out.e'
@@ -9,9 +9,9 @@
 
     min_parallel = 2
     max_parallel = 2
-  [../]
+  []
 
-  [./scalar_ic_from_uo]
+  [scalar_ic_from_uo]
     type = 'CSVDiff'
     input = 'scalar_ic_from_uo.i'
     csvdiff = 'scalar_ic_from_uo_out.csv'
@@ -21,5 +21,5 @@
 
     min_parallel = 2
     max_parallel = 2
-  [../]
+  []
 []

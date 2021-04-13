@@ -1,21 +1,21 @@
 [Tests]
   design = 'VolumeWeightedWeibull.md'
   issues = '#10221'
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'volume_weighted_weibull.i'
     csvdiff = 'volume_weighted_weibull_initial_histo_0000.csv'
     requirement = 'VolumeWeightedWeibull shall generate a randomly distributed field that approximates the analytic expression for the Weibull distribution when the mesh is uniform and the reference volume is set equal to the element size'
-  [../]
-  [./test_finer]
+  []
+  [test_finer]
     prereq = test
     type = 'CSVDiff'
     input = 'volume_weighted_weibull.i'
     cli_args = 'Mesh/nx=200 Mesh/ny=200 Outputs/initial/file_base=volume_weighted_weibull_finer_initial ICs/u_vww/reference_volume=0.000025'
     csvdiff = 'volume_weighted_weibull_finer_initial_histo_0000.csv'
     requirement = 'VolumeWeightedWeibull shall generate a randomly distributed field that approaches the analytic expression for the Weibull distribution when the mesh is uniform and the reference volume is set equal to the element size as the mesh density is increased'
-  [../]
-  [./test_ref_vol]
+  []
+  [test_ref_vol]
     prereq = test_finer
     type = 'CSVDiff'
     input = 'volume_weighted_weibull.i'
@@ -24,5 +24,5 @@
     cli_args = 'ICs/u_vww/median=0.9548416039 ICs/u_vww/reference_volume=0.0002'
     csvdiff = 'volume_weighted_weibull_initial_histo_0000.csv'
     requirement = 'VolumeWeightedWeibull shall generate a randomly distributed field that approximates the analytic expression for the Weibull distribution when the mesh is uniform, the reference volume is set to a value different from the element size, and the median is adjusted to account for the different reference volume'
-  [../]
+  []
 []

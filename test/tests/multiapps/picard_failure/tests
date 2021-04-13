@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'picard_master.i'
     exodiff = 'picard_master_out_sub0.e picard_master_out.e'
@@ -14,9 +14,9 @@
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
     issues = '#5126'
-  [../]
+  []
 
-  [./test_csv]
+  [test_csv]
     type = 'CSVDiff'
     input = 'picard_master.i'
     csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
@@ -34,9 +34,9 @@
     design = '/MultiApps/index.md'
     requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
     issues = '#11178'
-  [../]
+  []
 
-  [./test_2subapps]
+  [test_2subapps]
     type = 'Exodiff'
     input = 'picard_master.i'
     exodiff = 'picard_master_2subapps_out_sub.e picard_master_2subapps_out_sub_no_fail.e picard_master_2subapps_out.e'
@@ -53,5 +53,5 @@
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.'
     issues = '#12477'
-  [../]
+  []
 []

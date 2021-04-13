@@ -7,24 +7,24 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -34,10 +34,10 @@
 []
 
 [Postprocessors]
-  [./integral]
+  [integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
-  [../]
+  []
 []
 
 [Outputs]

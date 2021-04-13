@@ -9,12 +9,12 @@
     nx = 64
     ny = 64
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -40,11 +40,11 @@
 []
 
 [Variables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
-  [../]
-  [./p]
-  [../]
+  []
+  [p]
+  []
 []
 
 [ICs]
@@ -57,67 +57,67 @@
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
-  [../]
-  [./mass_pspg]
+  []
+  [mass_pspg]
     type = INSADMassPSPG
     variable = p
-  [../]
+  []
 
-  [./momentum_convection]
+  [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
-  [../]
+  []
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     p = p
     integrate_p_by_parts = true
-  [../]
+  []
 
-  [./momentum_supg]
+  [momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
     velocity = velocity
-  [../]
+  []
 []
 
 [BCs]
-  [./no_slip]
+  [no_slip]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'bottom right left'
-  [../]
+  []
 
-  [./lid]
+  [lid]
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'top'
     function_x = 'lid_function'
-  [../]
+  []
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADTauMaterial
     velocity = velocity
@@ -127,21 +127,21 @@
 []
 
 [Functions]
-  [./lid_function]
+  [lid_function]
     # We pick a function that is exactly represented in the velocity
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
     type = ParsedFunction
     value = '4*x*(1-x)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

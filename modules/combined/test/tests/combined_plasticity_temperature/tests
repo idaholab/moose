@@ -1,5 +1,5 @@
 [Tests]
-  [./temp_dep_yield]
+  [temp_dep_yield]
     type = Exodiff
     input = plasticity_temperature_dep_yield.i
     exodiff = plasticity_temperature_dep_yield_out.e
@@ -7,8 +7,8 @@
     issues = '#6162'
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The MOOSE tensor mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion'
-  [../]
-  [./ad_temp_dep_yield]
+  []
+  [ad_temp_dep_yield]
     type = Exodiff
     input = ad_plasticity_temperature_dep_yield.i
     exodiff = ad_plasticity_temperature_dep_yield_out.e
@@ -17,8 +17,8 @@
     method = OPT # this test seems to have an bifurcation instability and goes the wrong way in dbg
     design = 'ADIsotropicPlasticityStressUpdate.md'
     requirement = 'The MOOSE tensor mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion and support for automatic differentiation'
-  [../]
-  [./ad_temp_dep_yield-jac]
+  []
+  [ad_temp_dep_yield-jac]
     type = 'PetscJacobianTester'
     input = 'ad_plasticity_temperature_dep_yield.i'
     run_sim = 'True'
@@ -28,5 +28,5 @@
     issues = '#13544'
     design = 'ADIsotropicPlasticityStressUpdate.md'
     requirement = 'The MOOSE tensor mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion and support for automatic differentiation with a perfect jacobian'
-  [../]
+  []
 []

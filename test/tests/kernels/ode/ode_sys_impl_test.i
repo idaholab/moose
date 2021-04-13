@@ -11,117 +11,117 @@
 []
 
 [Functions]
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     value = -4
-  [../]
-  [./bc_all_fn]
+  []
+  [bc_all_fn]
     type = ParsedFunction
     value = x*x+y*y
-  [../]
+  []
 
   # ODEs
-  [./exact_x_fn]
+  [exact_x_fn]
     type = ParsedFunction
     value = (-1/3)*exp(-t)+(4/3)*exp(5*t)
-  [../]
+  []
 []
 
 # NL
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 
   # ODE variables
-  [./x]
+  [x]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
-  [./y]
+  []
+  [y]
     family = SCALAR
     order = FIRST
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./uff]
+  []
+  [uff]
     type = BodyForce
     variable = u
     function = f_fn
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./td1]
+  [td1]
     type = ODETimeDerivative
     variable = x
-  [../]
-  [./ode1]
+  []
+  [ode1]
     type = ImplicitODEx
     variable = x
     y = y
-  [../]
+  []
 
-  [./td2]
+  [td2]
     type = ODETimeDerivative
     variable = y
-  [../]
-  [./ode2]
+  []
+  [ode2]
     type = ImplicitODEy
     variable = y
     x = x
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = bc_all_fn
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'exact_x l2err_x x y'
 
-  [./x]
+  [x]
     type = ScalarVariable
     variable = x
     execute_on = 'initial timestep_end'
-  [../]
-  [./y]
+  []
+  [y]
     type = ScalarVariable
     variable = y
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./exact_x]
+  [exact_x]
     type = FunctionValuePostprocessor
     function = exact_x_fn
     execute_on = 'initial timestep_end'
     point = '0 0 0'
-  [../]
+  []
 
-  [./l2err_x]
+  [l2err_x]
     type = ScalarL2Error
     variable = x
     function = exact_x_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

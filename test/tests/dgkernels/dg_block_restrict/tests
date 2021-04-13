@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6042'
   design = 'syntax/DGKernels/index.md'
-  [./1D_test]
+  [1D_test]
     type = 'Exodiff'
     input = '1d_dg_block_restrict.i'
     exodiff = '1d_dg_block_restrict_out.e'
@@ -9,11 +9,11 @@
     # preconditioners if they're partitioned too finely
     max_parallel = 12
     requirement = "The DGKernel system shall support restriction to subdomains, in 1D."
-  [../]
-  [./2D_test]
+  []
+  [2D_test]
     type = 'Exodiff'
     input = '2d_dg_diffusion_block_restrict.i'
     exodiff = '2d_dg_diffusion_block_restrict_out.e'
     requirement = "The DGKernel system shall support restriction to subdomains, in 2D."
-  [../]
+  []
 []

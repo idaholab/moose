@@ -8,21 +8,21 @@
 
 [Variables]
   active = 'u'
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./point_source]
+  [point_source]
     type = VectorPostprocessorPointSource
     variable = u
     vector_postprocessor = csv_reader
@@ -30,29 +30,29 @@
     y_coord_name = y3
     z_coord_name = z3
     value_name = value3
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./csv_reader]
+  [csv_reader]
     type = CSVReader
     csv_file = point_value_file.csv
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -18,70 +18,70 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables] #We added nodal AuxVariables
   active = 'nodal_aux'
 
-  [./nodal_aux]
+  [nodal_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
 
   active = 'diff implicit conv forcing reaction'
 
-  [./diff]
+  [diff]
     type = PolyDiffusion
     variable = u
-  [../]
+  []
 
-  [./implicit] #We got from MOOSE kernels
+  [implicit] #We got from MOOSE kernels
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./conv] #We created our own convection kernel
+  [conv] #We created our own convection kernel
     type = PolyConvection
     variable = u
     x = -1
     y = 2
     z = -3
-  [../]
+  []
 
-  [./forcing] #We created our own forcing kernel
+  [forcing] #We created our own forcing kernel
     type = PolyForcing
     variable = u
-  [../]
+  []
 
-  [./reaction] #We got from MOOSE kernels
+  [reaction] #We got from MOOSE kernels
     type = PolyReaction
     variable = u
-  [../]
+  []
 []
 [AuxKernels] #We created our own AuxKernel
   active = 'ConstantAux'
 
-  [./ConstantAux]
+  [ConstantAux]
     type = PolyConstantAux
     variable = nodal_aux
-  [../]
+  []
 []
 
 [BCs]
   active = 'all_u'
 
-  [./all_u]
+  [all_u]
     type = PolyCoupledDirichletBC
     variable = u
     boundary = '0 1 2 3 4 5'
-  [../]
+  []
 []
 
 [Executioner]

@@ -17,40 +17,40 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./saved_z]
-  [../]
-  [./saved_t]
-  [../]
+  [saved_x]
+  []
+  [saved_y]
+  []
+  [saved_z]
+  []
+  [saved_t]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     volumetric_locking_correction = true
     incremental = true
     save_in = 'saved_x saved_y saved_z'
@@ -58,118 +58,118 @@
     strain = FINITE
     decomposition_method = EigenSolution
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
     save_in = saved_t
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 1 1'
     scale_factor = 0.1
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./bottom_z]
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./top_x]
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value = 0.0
-  [../]
+  []
 
-  [./top_y]
+  [top_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull
-  [../]
+  []
 
-  [./top_z]
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
     value = 0.0
-  [../]
+  []
 
-  [./bottom_temp]
+  [bottom_temp]
     type = DirichletBC
     variable = temp
     boundary = bottom
     value = 10.0
-  [../]
+  []
 
-  [./top_temp]
+  [top_temp]
     type = DirichletBC
     variable = temp
     boundary = top
     value = 20.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     youngs_modulus = 1.0
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 
-  [./thermal_expansion]
+  [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     block = 0
     eigenstrain_name = thermal_expansion
     temperature = temp
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0.0
-  [../]
+  []
 
-  [./heat1]
+  [heat1]
     type = HeatConductionMaterial
     block = 0
     specific_heat = 1.0
     thermal_conductivity = 1e-3 #Tuned to give temperature reference resid close to that of solidmech
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     block = 0
     density = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -184,16 +184,16 @@
 []
 
 [Postprocessors]
-  [./res_calls]
+  [res_calls]
     type = PerfGraphData
     section_name = "ReferenceResidualProblem::computeResidualInternal"
     data_type = calls
-  [../]
-  [./elapsed]
+  []
+  [elapsed]
     type = PerfGraphData
     section_name = "Root"
     data_type = total
-  [../]
+  []
 []
 
 [Outputs]

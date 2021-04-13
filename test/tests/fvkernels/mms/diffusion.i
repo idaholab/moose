@@ -93,20 +93,20 @@
 []
 
 [Postprocessors]
-  # [./L2u]
+  # [L2u]
   #   type = ElementL2Error
   #   variable = u
   #   function = exact
   #   outputs = 'console'
   #   execute_on = 'timestep_end'
-  # [../]
-  [./error]
+  # []
+  [error]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

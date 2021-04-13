@@ -11,53 +11,53 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./icfn]
+  [icfn]
     type = ConstantFunction
     value = 1
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ConstantFunction
     value = -4
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = icfn
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   # Coupling of nonlinear to Aux
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./force]
+  []
+  [force]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]

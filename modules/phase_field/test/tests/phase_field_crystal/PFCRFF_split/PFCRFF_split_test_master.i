@@ -13,58 +13,58 @@
 []
 
 [Variables]
-  [./n]
-    [./InitialCondition]
+  [n]
+    [InitialCondition]
       type = RandomIC
       max = 0.8
       min = 0.2
       seed = 12345
-    [../]
-  [../]
-  [./CHPFCRFFSplitVariables]
+    []
+  []
+  [CHPFCRFFSplitVariables]
     sub_filenames = PFCRFF_split_test_sub.i
     n_name = n
     #sub_file_name = test_sub.i
-  [../]
+  []
 []
 
 [Kernels]
-  [./CHPFCRFFSplitKernel]
+  [CHPFCRFFSplitKernel]
     log_approach = expansion
     n_name = n
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./PFC]
+  [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
-  [./FDP]
+  []
+  [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,7 +92,7 @@
 
 [ICs]
   active = ''
-  [./density_IC]
+  [density_IC]
     y2 = 10.5
     lc = 6
     y1 = 1.5
@@ -103,5 +103,5 @@
     variable = n
     x1 = 1.5
     type = PFCFreezingIC
-  [../]
+  []
 []

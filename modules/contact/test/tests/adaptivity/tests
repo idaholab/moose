@@ -1,5 +1,5 @@
 [Tests]
-  [./contact_initial_adaptivity]
+  [contact_initial_adaptivity]
     type = 'Exodiff'
     input = 'contact_initial_adaptivity.i'
     exodiff = 'contact_initial_adaptivity_out.e'
@@ -8,5 +8,5 @@
     issues = '#6799'
     requirement = "Contact shall be enforced on new nodes created due to mesh refinement"
     design = 'Constraints/index.md'
-  [../]
+  []
 []

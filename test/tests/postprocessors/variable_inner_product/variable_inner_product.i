@@ -11,66 +11,66 @@
 []
 
 [AuxVariables]
-  [./f]
+  [f]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = leg2
-    [../]
-  [../]
-  [./g]
+    []
+  []
+  [g]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = leg1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Functions]
-  [./leg1]
+  [leg1]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 
-  [./leg2]
+  [leg2]
     type = ParsedFunction
     value = '0.5*(3.0*x*x-1.0)'
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,28 +78,28 @@
 
   solve_type = 'PJFNK'
 
-  [./Quadrature]
+  [Quadrature]
     order = fourth
   []
 []
 
 [Postprocessors]
-  [./f_dot_g]
+  [f_dot_g]
     type = VariableInnerProduct
     variable = f
     second_variable = g
-  [../]
+  []
 
-  [./f_dot_f]
+  [f_dot_f]
     type = VariableInnerProduct
     variable = f
     second_variable = f
-  [../]
+  []
 
-  [./norm_f]
+  [norm_f]
     type = ElementL2Norm
     variable = f
-  [../]
+  []
 []
 
 [Outputs]

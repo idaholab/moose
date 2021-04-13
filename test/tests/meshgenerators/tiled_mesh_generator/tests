@@ -1,5 +1,5 @@
 [Tests]
-  [./tiled_mesh_generator_test]
+  [tiled_mesh_generator_test]
     type = 'Exodiff'
     input = 'tiled_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,5 +10,5 @@
     requirement = "The system shall include the ability to create a finite element mesh by tiling existing meshes."
     design = 'meshgenerators/TiledMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

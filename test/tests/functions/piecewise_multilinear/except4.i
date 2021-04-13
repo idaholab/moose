@@ -10,37 +10,37 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 []
 
 [AuxKernels]
-  [./f_auxK]
+  [f_auxK]
     type = FunctionAux
     variable = f
     function = except4_fcn
-  [../]
+  []
 []
 
 
 [Functions]
-  [./except4_fcn]
+  [except4_fcn]
     type = PiecewiseMultilinear
     data_file = except4.txt
-  [../]
+  []
 []
 
 [Executioner]

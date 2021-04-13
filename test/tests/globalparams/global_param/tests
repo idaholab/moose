@@ -2,11 +2,11 @@
   design = 'Parser.md'
   issues = '#437'
 
-  [./global_param_test]
+  [global_param_test]
     type = 'Exodiff'
     input = 'global_param_test.i'
     exodiff = 'out.e'
 
     requirement = 'The system shall include an input file syntax that supports defining global options.'
-  [../]
+  []
 []

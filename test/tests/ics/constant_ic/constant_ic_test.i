@@ -8,69 +8,69 @@
 
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
     # Initial Condition on Nonlinear variable
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 6.2
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   active = 'u_aux'
 
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
 
     # Initial Condition on Auxiliary variable
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 9.3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

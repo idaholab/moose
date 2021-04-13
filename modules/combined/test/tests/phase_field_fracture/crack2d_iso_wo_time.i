@@ -7,13 +7,13 @@
     ny = 10
     ymax = 0.5
   []
-  [./noncrack]
+  [noncrack]
     type = BoundingBoxNodeSetGenerator
     new_boundary = noncrack
     bottom_left = '0.5 0 0'
     top_right = '1 0 0'
     input = gen
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -21,111 +21,111 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./mech]
+  [TensorMechanics]
+    [Master]
+      [mech]
         add_variables = true
         strain = SMALL
         additional_generate_output = 'stress_yy'
         save_in = 'resid_x resid_y'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./resid_x]
-  [../]
-  [./resid_y]
-  [../]
+  [resid_x]
+  []
+  [resid_y]
+  []
 []
 
 [Kernels]
-  [./solid_x]
+  [solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
     c = c
-  [../]
-  [./solid_y]
+  []
+  [solid_y]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
     c = c
-  [../]
-  [./ACBulk]
+  []
+  [ACBulk]
     type = AllenCahn
     variable = c
     f_name = F
-  [../]
+  []
 
-  [./ACInterface]
+  [ACInterface]
     type = ACInterface
     variable = c
     kappa_name = kappa_op
-  [../]
+  []
 []
 
 [BCs]
-  [./ydisp]
+  [ydisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = 't'
-  [../]
-  [./yfix]
+  []
+  [yfix]
     type = DirichletBC
     variable = disp_y
     boundary = noncrack
     value = 0
-  [../]
-  [./xfix]
+  []
+  [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./pfbulkmat]
+  [pfbulkmat]
     type = GenericConstantMaterial
     prop_names = 'gc_prop l visco'
     prop_values = '1e-3 0.04 1e-4'
-  [../]
-  [./define_mobility]
+  []
+  [define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     f_name = L
     function = '1.0/(gc_prop * visco)'
-  [../]
-  [./define_kappa]
+  []
+  [define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     f_name = kappa_op
     function = 'gc_prop * l'
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
-  [../]
-  [./elastic]
+  []
+  [elastic]
     type = ComputeLinearElasticPFFractureStress
     c = c
     E_name = 'elastic_energy'
     D_name = 'degradation'
     F_name = 'local_fracture_energy'
     decomposition_type = strain_spectral
-  [../]
-  [./degradation]
+  []
+  [degradation]
     type = DerivativeParsedMaterial
     f_name = degradation
     args = 'c'
@@ -133,42 +133,42 @@
     constant_names       = 'eta'
     constant_expressions = '0.0'
     derivative_order = 2
-  [../]
-  [./local_fracture_energy]
+  []
+  [local_fracture_energy]
     type = DerivativeParsedMaterial
     f_name = local_fracture_energy
     args = 'c'
     material_property_names = 'gc_prop l'
     function = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
-  [../]
-  [./fracture_driving_energy]
+  []
+  [fracture_driving_energy]
     type = DerivativeSumMaterial
     args = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
     f_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./resid_x]
+  [resid_x]
     type = NodalSum
     variable = resid_x
     boundary = 2
-  [../]
-  [./resid_y]
+  []
+  [resid_y]
     type = NodalSum
     variable = resid_y
     boundary = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

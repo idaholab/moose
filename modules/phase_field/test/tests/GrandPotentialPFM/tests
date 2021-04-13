@@ -1,21 +1,21 @@
 [Tests]
-  [./GrandPotentialPFM]
+  [GrandPotentialPFM]
     type = 'Exodiff'
     input = 'GrandPotentialPFM.i'
     exodiff = 'GrandPotentialPFM_out.e'
     issues = '#6977'
     design = '/GrandPotentialKernelAction.md'
     requirement = 'MOOSE shall provide classes to implement a Grand Potential phase field formulation'
-  [../]
-  [./GrandPotentialMultiphase]
+  []
+  [GrandPotentialMultiphase]
     type = 'Exodiff'
     input = 'GrandPotentialMultiphase.i'
     exodiff = 'GrandPotentialMultiphase_out.e'
     issues = '#8213'
     design = '/ACSwitching.md'
     requirement = 'MOOSE shall provide a Grand Potential based multiphase model'
-  [../]
-  [./GrandPotentialAnisotropy]
+  []
+  [GrandPotentialAnisotropy]
     type = 'Exodiff'
     input = 'GrandPotentialAnisotropy.i'
     exodiff = 'GrandPotentialAnisotropy_out.e'
@@ -23,22 +23,22 @@
     issues = '#11802 #12554'
     design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md /InterfaceOrientationMultiphaseMaterial.md'
     requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability in 2D'
-  [../]
+  []
 
-  [./GrandPotentialInterface]
+  [GrandPotentialInterface]
     type = 'CSVDiff'
     input = 'GrandPotentialInterface.i'
     csvdiff = 'GrandPotentialInterface_out_mat_0001.csv'
     issues = '#12147'
     design = '/GrandPotentialInterface.md'
     requirement = 'MOOSE shall provide a material to automatically compute grand potential model interface parameters based on provided interfacial free energies and widths'
-  [../]
-  [./GrandPotentialAnisotropyAntitrap]
+  []
+  [GrandPotentialAnisotropyAntitrap]
     type = 'Exodiff'
     input = 'GrandPotentialAnisotropyAntitrap.i'
     exodiff = 'GrandPotentialAnisotropyAntitrap_out.e'
     issues = '#13373'
     design = '/AntitrappingCurrent.md'
     requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
-  [../]
+  []
 []

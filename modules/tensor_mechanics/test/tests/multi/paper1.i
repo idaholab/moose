@@ -25,258 +25,258 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [ICs]
-  [./x]
+  [x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
-  [./y]
+  []
+  [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
-  [./z]
+  []
+  [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./linesearch]
+  []
+  [linesearch]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ld]
+  []
+  [ld]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./constr_added]
+  []
+  [constr_added]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./iter]
+  []
+  [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./linesearch]
+  []
+  [linesearch]
     type = MaterialRealAux
     property = plastic_linesearch_needed
     variable = linesearch
-  [../]
-  [./ld]
+  []
+  [ld]
     type = MaterialRealAux
     property = plastic_linear_dependence_encountered
     variable = ld
-  [../]
-  [./constr_added]
+  []
+  [constr_added]
     type = MaterialRealAux
     property = plastic_constraints_added
     variable = constr_added
-  [../]
-  [./iter]
+  []
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./max_iter]
+  [max_iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
-  [../]
-  [./av_linesearch]
+  []
+  [av_linesearch]
     type = ElementAverageValue
     variable = linesearch
     outputs = console
-  [../]
-  [./av_ld]
+  []
+  [av_ld]
     type = ElementAverageValue
     variable = ld
     outputs = console
-  [../]
-  [./av_constr_added]
+  []
+  [av_constr_added]
     type = ElementAverageValue
     variable = constr_added
     outputs = console
-  [../]
-  [./av_iter]
+  []
+  [av_iter]
     type = ElementAverageValue
     variable = iter
     outputs = console
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./simple0]
+  [simple0]
     type = TensorMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 1E9
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
-  [./simple1]
+  []
+  [simple1]
     type = TensorMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 0
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
-  [./simple2]
+  []
+  [simple2]
     type = TensorMechanicsPlasticSimpleTester
     a = 1
     b = 0
     strength = 1E-3
     yield_function_tolerance = 1.0E-6
     internal_constraint_tolerance = 1.0E-6
-  [../]
+  []
 []
 
 [Materials]
   active = 'elasticity_tensor strain single'
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5E6'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./elastic_model]
+  []
+  [elastic_model]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple0'
-  [../]
-  [./single]
+  []
+  [single]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple1'
-  [../]
-  [./double]
+  []
+  [double]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-7
     plastic_models = 'simple1 simple2'
-  [../]
+  []
 []
 
 
