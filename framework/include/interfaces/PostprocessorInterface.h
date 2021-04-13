@@ -136,8 +136,7 @@ public:
 
 protected:
   /**
-   * Helper for deriving classes to override to add dependencies when a Postprocessor
-   * is requested.
+   * Helper for deriving classes to override to add dependencies when a Postprocessor is requested.
    */
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & /* name */) const {}
 

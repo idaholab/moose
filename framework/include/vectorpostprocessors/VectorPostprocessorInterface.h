@@ -303,8 +303,8 @@ public:
 
 protected:
   /**
-   * Helper for deriving classes to override to add dependencies when a UserObject
-   * is requested.
+   * Helper for deriving classes to override to add dependencies when a VectorPostprocessor is
+   * requested.
    */
   virtual void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & /* name */) const
@@ -338,11 +338,6 @@ private:
    */
   void possiblyCheckHasVectorPostprocessor(const std::string & param_name,
                                            const std::string & vector_name) const;
-  /**
-   * Helper for checking if a VectorPostprocessor exists. This is only able to check
-   * for validity after all VectorPostprocessors have been added. If called before
-   * VectorPostprocessors have been added, this will do nothing, hence the "possibly".
-   */
   void possiblyCheckHasVectorPostprocessorByName(const VectorPostprocessorName & name,
                                                  const std::string & vector_name) const;
   ///@}
