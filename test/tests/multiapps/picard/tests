@@ -68,7 +68,7 @@
   [./steady_fixed_picard_its]
     type = RunApp
     input = 'steady_picard_master.i'
-    cli_args = 'Executioner/disable_picard_residual_norm_check=true Executioner/accept_on_max_picard_iteration=true'
+    cli_args = 'Executioner/disable_coupling_residual_norm_check=true Executioner/accept_on_max_coupling_iteration=true'
     expect_out = 'Multiapp coupling convergence reason: REACH_MAX_ITS'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
@@ -87,7 +87,7 @@
     requirement = "The system shall allow custom convergence check on Picard iteration with derived executioners"
   [../]
 
-  [./steady_with_pseudo_stransient_sub]
+  [./steady_with_pseudo_transient_sub]
     type = 'Exodiff'
     input = 'pseudo_transient_picard_master.i'
     exodiff = 'pseudo_transient_picard_master_out.e pseudo_transient_picard_master_out_sub0.e'

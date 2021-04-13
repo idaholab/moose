@@ -75,10 +75,10 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 30
+  coupling_max_its = 30
   nl_abs_tol = 1e-14
   relaxation_factor = 2.0
-  relaxed_variables = u
+  transformed_variables = u
 []
 
 [Outputs]
@@ -112,4 +112,3 @@
     variable = u
   [../]
 []
-

@@ -90,8 +90,8 @@
   solve_type = PJFNK
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-6
-  picard_max_its = 10
-  picard_rel_tol = 1e-6
+  coupling_max_its = 10
+  coupling_rel_tol = 1e-6
 []
 
 [Postprocessors]

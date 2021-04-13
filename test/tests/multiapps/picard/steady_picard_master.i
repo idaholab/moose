@@ -62,8 +62,8 @@
   nl_abs_tol = 1e-14
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 10
-  picard_rel_tol = 1e-6
+  coupling_max_its = 10
+  coupling_rel_tol = 1e-6
 []
 
 [Outputs]

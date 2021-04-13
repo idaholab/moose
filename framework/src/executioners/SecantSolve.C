@@ -96,6 +96,9 @@ void SecantSolve::updatePostprocessorsAsMainApp()
     else
       new_value = current_value;
 
+    // Relax update
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
+
     _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
 
     // Print new value
@@ -113,11 +116,15 @@ void SecantSolve::updateVariablesAsMainApp(const std::set<dof_id_type> & target_
   for (const auto & dof : target_dofs)
   {
     // Avoid 0 denominator issue
+    Real new_value = solution(dof);
     if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      solution.set(dof, transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
-                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof)));
-    else
-      solution.set(dof, solution(dof));
+      new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
+                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+
+     // Relax update
+     new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
+
+     solution.set(dof, new_value);
   }
   solution.close();
   _nl.update();
@@ -136,11 +143,15 @@ void SecantSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_transfo
     for (const auto & dof : secondary_transformed_dofs)\
     {
       // Avoid 0 denominator issue
+      Real new_value = solution(dof);
       if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      solution.set(dof, transformed_old(dof) - (solution(dof) - transformed_old(dof)) * (transformed_old(dof) - transformed_older(dof))
-          / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof)));
-      else
-        solution.set(dof, solution(dof));
+        new_value = transformed_old(dof) - (solution(dof) - transformed_old(dof)) * (transformed_old(dof) - transformed_older(dof))
+          / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+
+      // Relax update
+      new_value = _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * transformed_old(dof);
+
+      solution.set(dof, new_value);
     }
     solution.close();
     _nl.update();
@@ -161,6 +172,9 @@ void SecantSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_transfo
             (current_value + older_value - 2 * old_value);
       else
         new_value = current_value;
+
+      // Relax update
+      new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
 
       // Update the postprocessor
       _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);

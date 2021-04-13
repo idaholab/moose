@@ -96,9 +96,13 @@ void SteffensenSolve::updatePostprocessorsAsMainApp()
       // Compute and set relaxed value
       Real new_value;
       if (!MooseUtils::absoluteFuzzyEqual(current_value + older_value - 2*old_value, 0))
-        new_value = older_value - (old_value - older_value)*(old_value - older_value) / (current_value + older_value - 2*old_value);  // steffensen
+        new_value = older_value - (old_value - older_value) * (old_value - older_value) /
+            (current_value + older_value - 2*old_value);
       else
         new_value = current_value;
+
+      // Relax update
+      new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
 
       _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
 
@@ -121,11 +125,16 @@ void SteffensenSolve::updateVariablesAsMainApp(const std::set<dof_id_type> & tra
   for (const auto & dof : transformed_dofs)
   {
     // Avoid 0 denominator issue
+    Real new_value = solution(dof);
     if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      solution.set(dof, transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
-                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof)));
-    else
-      solution.set(dof, solution(dof));
+      new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) *
+          (transformed_old(dof) - transformed_older(dof)) /
+          (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+
+     // Relax update
+     new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
+
+     solution.set(dof, new_value);
   }
   solution.close();
   _nl.update();
@@ -141,14 +150,18 @@ void SteffensenSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_tra
     NumericVector<Number> & transformed_old = _nl.getVector("secondary_transformed_old");
     NumericVector<Number> & transformed_older = _nl.getVector("secondary_transformed_older");
 
-    for (const auto & dof : secondary_transformed_dofs)\
+    for (const auto & dof : secondary_transformed_dofs)
     {
       // Avoid 0 denominator issue
+      Real new_value = solution(dof);
       if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      solution.set(dof, transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
-                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof)));
-      else
-        solution.set(dof, solution(dof));
+        new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
+                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+
+      // Relax update
+      new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
+
+      solution.set(dof, new_value);
     }
     solution.close();
     _nl.update();
@@ -169,6 +182,9 @@ void SteffensenSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_tra
             (current_value + older_value - 2 * old_value);
       else
         new_value = current_value;
+
+      // Relax update
+      new_value = _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * old_value;
 
       // Update the postprocessor
       _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);

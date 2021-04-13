@@ -101,9 +101,9 @@
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-7
 
-  picard_rel_tol = 1e-7
-  picard_abs_tol = 1e-07
-  picard_max_its = 4
+  coupling_rel_tol = 1e-7
+  coupling_abs_tol = 1e-07
+  coupling_max_its = 4
 
   line_search = none
 []

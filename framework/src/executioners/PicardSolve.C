@@ -134,7 +134,7 @@ PicardSolve::useCouplingUpdateAlgorithm()
 {
   // unrelaxed Picard is the default update for multiapp coupling
   // old values are required for relaxation
-  return _relax_factor != 1. && _coupling_it > 0;/////////////////////////////////
+  return _relax_factor != 1. && _coupling_it > 0;
 }
 
 void

@@ -83,9 +83,9 @@
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-12
 
-  picard_rel_tol = 1E-7
-  picard_abs_tol = 1.0e-07
-  picard_max_its = 12
+  coupling_rel_tol = 1E-7
+  coupling_abs_tol = 1.0e-07
+  coupling_max_its = 12
 []
 
 [MultiApps]

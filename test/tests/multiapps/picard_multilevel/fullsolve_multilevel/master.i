@@ -66,9 +66,9 @@
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
 
-  picard_rel_tol = 1E-3
-  picard_abs_tol = 1.0e-05
-  picard_max_its = 12
+  coupling_rel_tol = 1E-3
+  coupling_abs_tol = 1.0e-05
+  coupling_max_its = 12
 []
 
 [MultiApps]
