@@ -38,26 +38,26 @@ UserObjectInterface::getUserObjectName(const std::string & param_name) const
   if (!params.isParamValid(param_name))
     _uoi_moose_object.mooseError("Failed to get a parameter with the name \"",
                                  param_name,
-                                 "\".",
+                                 "\" when getting a UserObjectName.",
                                  "\n\nKnown parameters:\n",
                                  _uoi_moose_object.parameters());
 
   // Other interfaces will use this interface (PostprocessorInterface, VectorPostprocessorInterface)
   // to grab UOs with a specialized name, so we need to check them all
   UserObjectName name;
-  if (params.have_parameter<UserObjectName>(param_name))
+  if (params.isType<UserObjectName>(param_name))
     name = params.get<UserObjectName>(param_name);
-  else if (params.have_parameter<PostprocessorName>(param_name))
+  else if (params.isType<PostprocessorName>(param_name))
     name = params.get<PostprocessorName>(param_name);
-  else if (params.have_parameter<VectorPostprocessorName>(param_name))
+  else if (params.isType<VectorPostprocessorName>(param_name))
     name = params.get<VectorPostprocessorName>(param_name);
-  else if (params.have_parameter<std::string>(param_name))
+  else if (params.isType<std::string>(param_name))
     name = params.get<std::string>(param_name);
   else
     _uoi_moose_object.paramError(param_name,
                                  "Parameter of type \"",
                                  params.type(param_name),
-                                 "\" is not an expected type for getting the name of a UserObject");
+                                 "\" is not an expected type for getting the name of a UserObject.");
 
   return name;
 }
@@ -80,7 +80,7 @@ UserObjectInterface::getUserObjectBase(const std::string & param_name) const
   const auto object_name = getUserObjectName(param_name);
   if (!hasUserObjectByName(object_name))
     _uoi_moose_object.paramError(
-        param_name, "The requested object with the name \"", object_name, "\" was not found.");
+        param_name, "The requested UserObject with the name \"", object_name, "\" was not found.");
 
   return getUserObjectBaseByName(object_name);
 }
@@ -90,7 +90,7 @@ UserObjectInterface::getUserObjectBaseByName(const UserObjectName & object_name)
 {
   if (!hasUserObjectByName(object_name))
     _uoi_moose_object.mooseError(
-        "The requested object with the name \"", object_name, "\" was not found.");
+        "The requested UserObject with the name \"", object_name, "\" was not found.");
 
   const auto & uo_base_tid0 = _uoi_feproblem.getUserObjectBase(object_name, /* tid = */ 0);
   addUserObjectDependencyHelper(uo_base_tid0);

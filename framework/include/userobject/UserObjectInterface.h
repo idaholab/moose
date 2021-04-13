@@ -117,9 +117,9 @@ UserObjectInterface::castUserObject(const UserObject & uo_base,
   if (!uo)
   {
     std::stringstream oss;
-    oss << "The provided object \"" << userObjectName(uo_base) << "\" of type "
+    oss << "The provided UserObject \"" << userObjectName(uo_base) << "\" of type "
         << userObjectType(uo_base)
-        << " is not derived from the required type.\n\nThe object must derive from "
+        << " is not derived from the required type.\n\nThe UserObject must derive from "
         << libMesh::demangle(typeid(T).name()) << ".";
 
     if (_uoi_moose_object.parameters().isParamValid(param_name))
