@@ -34,8 +34,6 @@ PostprocessorInterfaceErrorTest::validParams()
   params.addParam<bool>("has_early", false, "Test the error for seeing if a pp exists too early");
   params.addParam<bool>(
       "has_early_by_name", false, "Test the error for seeing if a pp exists by name too early");
-  params.addParam<bool>(
-      "has_enabled_early", false, "Test the error for seeing if an enabled pp exists too early");
 
   params.addParam<bool>(
       "missing",
@@ -66,8 +64,6 @@ PostprocessorInterfaceErrorTest::PostprocessorInterfaceErrorTest(const InputPara
     hasPostprocessor("dummy");
   if (getParam<bool>("has_early_by_name"))
     hasPostprocessorByName("dummy");
-  if (getParam<bool>("has_enabled_early"))
-    hasEnabledPostprocessorByName("dummy");
 }
 
 void

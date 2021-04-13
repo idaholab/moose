@@ -40,11 +40,20 @@ public:
   /**
    * @return Whether or not a UserObject exists with the name given by the parameter \p param_name.
    */
+  ///@{
   bool hasUserObject(const std::string & param_name) const;
+  template <class T>
+  bool hasUserObject(const std::string & param_name) const;
+  ///@}
+
   /*
    * @return Whether or not a UserObject exists with the name \p object_name.
    */
+  ///@{
   bool hasUserObjectByName(const UserObjectName & object_name) const;
+  template <class T>
+  bool hasUserObjectByName(const UserObjectName & object_name) const;
+  ///@}
 
   /**
    * Get an user object with a given parameter \p param_name
@@ -120,7 +129,7 @@ UserObjectInterface::castUserObject(const UserObject & uo_base,
     oss << "The provided UserObject \"" << userObjectName(uo_base) << "\" of type "
         << userObjectType(uo_base)
         << " is not derived from the required type.\n\nThe UserObject must derive from "
-        << libMesh::demangle(typeid(T).name()) << ".";
+        << MooseUtils::prettyCppType<T>() << ".";
 
     if (_uoi_moose_object.parameters().isParamValid(param_name))
       _uoi_moose_object.paramError(param_name, oss.str());
@@ -143,4 +152,20 @@ const T &
 UserObjectInterface::getUserObjectByName(const UserObjectName & object_name) const
 {
   return castUserObject<T>(getUserObjectBaseByName(object_name));
+}
+
+template <class T>
+bool
+UserObjectInterface::hasUserObject(const std::string & param_name) const
+{
+  return hasUserObjectByName(getUserObjectName(param_name));
+}
+
+template <class T>
+bool
+UserObjectInterface::hasUserObjectByName(const UserObjectName & object_name) const
+{
+  if (!hasUserObjectByName(object_name))
+    return false;
+  return dynamic_cast<const T *>(&_uoi_feproblem.getUserObjectBase(object_name));
 }

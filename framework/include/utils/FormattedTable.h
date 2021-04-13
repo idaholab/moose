@@ -13,7 +13,7 @@
 #include "Moose.h"
 #include "MooseEnum.h"
 #include "DataIO.h"
-#include "JsonSyntaxTree.h"
+#include "MooseUtils.h"
 
 // C++ includes
 #include <fstream>
@@ -60,9 +60,7 @@ public:
   TableValue(const T & value) : _value(value)
   {
     if (!this->isSupportedType<T>())
-      mooseError("Unsupported type ",
-                 JsonSyntaxTree::prettyCppType(demangle(typeid(T).name())),
-                 " for FormattedTable.");
+      mooseError("Unsupported type ", MooseUtils::prettyCppType<T>(), " for FormattedTable.");
   }
 
   const T & get() const { return _value; }

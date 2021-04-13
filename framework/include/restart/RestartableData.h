@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "DataIO.h"
 #include "JsonIO.h"
+#include "MooseUtils.h"
 
 // C++ includes
 #include <vector>
@@ -145,7 +146,7 @@ template <typename T>
 inline std::string
 RestartableData<T>::type()
 {
-  return typeid(T).name();
+  return MooseUtils::prettyCppType<T>();
 }
 
 template <typename T>

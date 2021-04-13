@@ -32,9 +32,8 @@ class ReporterName
 public:
   ReporterName(const std::string & object_name, const std::string & value_name);
   ReporterName(const std::string & object_and_value_name);
-  ReporterName(const ReporterName & other);
-  ReporterName & operator=(const ReporterName & other);
-  ReporterName() {} // empty constructor for InputParameters
+  ReporterName(const char * combined_name);
+  ReporterName(){}; // empty constructor for InputParameters
 
   /**
    * Return the object name that produces the Reporter value
@@ -49,7 +48,12 @@ public:
   /**
    * Return the name of the object and data as object_name/data_name
    */
-  const std::string & getCombinedName() const;
+  const std::string getCombinedName() const;
+
+  /**
+   * Return the name used for registration of this Reporter in the restartable data system.
+   */
+  std::string getRestartableName() const;
 
   /**
    * std::string operator allows this object to behave as a std::sting object
@@ -67,10 +71,72 @@ public:
    */
   bool operator<(const ReporterName & rhs) const;
 
+  /**
+   * Converts the special type to a usable name for error reporting
+   */
+  std::string specialTypeToName() const;
+
+  /**
+   * @returns True if this ReporterName represents a Postprocessor
+   */
+  bool isPostprocessor() const { return _special_type == SpecialType::POSTPROCESSOR; }
+  /**
+   * @returns True if this ReporterName represents a VectorPostprocessor
+   */
+  bool isVectorPostprocessor() const { return _special_type == SpecialType::VECTORPOSTPROCESSOR; }
+
+  /**
+   * Sets the special type to a Postprocessor.
+   *
+   * See ReporterData::declareReporterValue.
+   */
+  void setIsPostprocessor() { _special_type = SpecialType::POSTPROCESSOR; }
+  /**
+   * Sets the special type to a VectorPostprocessor.
+   *
+   * See ReporterData::declareReporterValue.
+   */
+  void setIsVectorPostprocessor() { _special_type = SpecialType::VECTORPOSTPROCESSOR; }
+
 private:
+  /**
+   * Enum for storing a "special" type for this Reporter.
+   * This is used to designate Reporters that represent Postprocessors
+   * and VectorPostprocessors in output and error handling.
+   */
+  enum class SpecialType
+  {
+    ANY = 0,
+    POSTPROCESSOR = 1,
+    VECTORPOSTPROCESSOR = 2
+  };
+
+  /// The "special" type for this Reporter, used for identifying Postprocesors and VectorPostprocessors.
+  ReporterName::SpecialType _special_type = ReporterName::SpecialType::ANY;
+
+  /// The object name
   std::string _object_name;
+  /// The value name
   std::string _value_name;
-  std::string _combined_name;
+};
+
+/**
+ * A ReporterName that represents a Postprocessor.
+ */
+class PostprocessorReporterName : public ReporterName
+{
+public:
+  PostprocessorReporterName(const PostprocessorName & name);
+};
+
+/**
+ * A ReporterName that represents a VectorPostprocessor.
+ */
+class VectorPostprocessorReporterName : public ReporterName
+{
+public:
+  VectorPostprocessorReporterName(const VectorPostprocessorName & name,
+                                  const std::string & vector_name);
 };
 
 // This with the operator== allow this to be used as a key in a std::unordered_map

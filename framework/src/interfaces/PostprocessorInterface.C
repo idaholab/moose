@@ -99,24 +99,7 @@ PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name) c
         "Cannot call hasPostprocessorByName() until all Postprocessors have been constructed.");
 
   return _ppi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(
-      ReporterName(name, "value"));
-}
-
-bool
-PostprocessorInterface::hasEnabledPostprocessorByName(const PostprocessorName & name) const
-{
-  if (!postprocessorsAdded())
-    _ppi_moose_object.mooseError("Cannot call hasEnabledPostprocessorByName() until all "
-                                 "Postprocessors have been constructed.");
-
-  if (_ppi_feproblem.hasUserObject(name) &&
-      dynamic_cast<const Postprocessor *>(&_ppi_feproblem.getUserObjectBase(name)))
-  {
-    mooseAssert(hasPostprocessorByName(name), "Postprocessor UO does not have a Reporter value");
-    return true;
-  }
-
-  return false;
+      PostprocessorReporterName(name));
 }
 
 std::size_t
@@ -237,7 +220,7 @@ PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorNam
     addPostprocessorDependencyHelper(name);
 
   return _ppi_feproblem.getReporterData().getReporterValue<PostprocessorValue>(
-      ReporterName(name, "value"), name, REPORTER_MODE_ROOT, t_index);
+      PostprocessorReporterName(name), _ppi_moose_object, REPORTER_MODE_ROOT, t_index);
 }
 
 bool

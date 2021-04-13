@@ -64,9 +64,14 @@ public:
   /**
    * Get the name of the object
    * @return The name of the object
-   * TODO:MooseVariableToMooseObject (see #10601)
    */
   virtual const std::string & name() const { return _name; }
+
+  /**
+   * Get the object's combined type and name; useful in error handling.
+   * @return The type and name of this object in the form '<type()> "<name()>"'.
+   */
+  std::string typeAndName() const;
 
   /**
    * Get the parameters of the object

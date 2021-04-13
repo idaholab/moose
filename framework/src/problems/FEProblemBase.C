@@ -3477,12 +3477,6 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     if (guo && !tguo)
       break;
   }
-
-  // Ideally the call to initPostprocssorData would be within the addPostprocessor method, but
-  // to maintain support for including Postprocessor objects within the [UserObjects] block
-  // (e.g., FeatureFloadCount) the data must be initialized here.
-  if (parameters.get<std::string>("_moose_base") == "Postprocessor")
-    initPostprocessorData(name);
 }
 
 const UserObject &
@@ -3512,16 +3506,6 @@ FEProblemBase::hasUserObject(const std::string & name) const
       .condition<AttribName>(name)
       .queryInto(objs);
   return !objs.empty();
-}
-
-void
-FEProblemBase::initPostprocessorData(const std::string & name)
-{
-  ReporterName r_name(name, "value");
-  if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
-    _reporter_data
-        .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
-            r_name, REPORTER_MODE_UNSET);
 }
 
 const PostprocessorValue &

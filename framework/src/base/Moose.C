@@ -199,7 +199,6 @@ addActionTypes(Syntax & syntax)
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
-  registerTask("setup_postprocessor_data", false);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -271,7 +270,6 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
-                           "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
                            "(check_integrity_early)"
@@ -457,7 +455,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
 
-  registerSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
   syntax.registerSyntaxType("Postprocessors/*", "UserObjectName");

@@ -18,7 +18,6 @@ class InputParameters;
 class MooseObject;
 template <typename T>
 class VectorPostprocessorContext;
-class ReporterData;
 
 class VectorPostprocessorInterface
 {

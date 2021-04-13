@@ -1155,6 +1155,24 @@ buildBoundingBox(const Point & p1, const Point & p2)
   return bb;
 }
 
+std::string
+prettyCppType(const std::string & cpp_type)
+{
+  // On mac many of the std:: classes are inline namespaced with __1
+  // On linux std::string can be inline namespaced with __cxx11
+  std::string s = cpp_type;
+  pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
+  // It would be nice if std::string actually looked normal
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+      .GlobalReplace("std::string", &s);
+  // It would be nice if std::vector looked normal
+  pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
+  r.GlobalReplace("std::vector<\\1>", &s);
+  // Do it again for nested vectors
+  r.GlobalReplace("std::vector<\\1>", &s);
+  return s;
+}
+
 } // MooseUtils namespace
 
 std::string

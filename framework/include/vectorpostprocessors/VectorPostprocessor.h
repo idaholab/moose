@@ -39,7 +39,7 @@ class VectorPostprocessor : public OutputInterface
 public:
   static InputParameters validParams();
 
-  VectorPostprocessor(const InputParameters & parameters);
+  VectorPostprocessor(const MooseObject * moose_object);
 
   virtual ~VectorPostprocessor() = default;
 
@@ -81,6 +81,8 @@ protected:
   friend class SamplerBase;
 
 private:
+  const MooseObject & _vpp_moose_object;
+
   const THREAD_ID _vpp_tid;
 
   const bool _contains_complete_history;

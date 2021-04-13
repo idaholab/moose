@@ -113,8 +113,6 @@ public:
    */
   bool hasPostprocessorByName(const PostprocessorName & name) const;
 
-  bool hasEnabledPostprocessorByName(const PostprocessorName & name) const;
-
   /**
    * Returns number of Postprocessors coupled under parameter name
    * @param param_name The name of the Postprocessor parameter
