@@ -46,7 +46,7 @@ Executioner::validParams()
 
 Executioner::Executioner(const InputParameters & parameters)
   : MooseObject(parameters),
-    Reporter(parameters),
+    Reporter(this),
     ReporterInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),

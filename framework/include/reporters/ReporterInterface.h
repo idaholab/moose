@@ -7,11 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
+
 #include "MooseTypes.h"
 #include "ReporterData.h"
+#include "MooseObject.h"
 
-class InputParameters;
+// Forward declarations
 class FEProblemBase;
+class InputParameters;
 
 /**
  * Interface to allow object to consume Reporter values.
@@ -77,6 +80,13 @@ protected:
   ///@}
 
   /**
+   * @returns The ReporterName associated with the parametre \p param_name.
+   *
+   * Performs error checking to mak sure that the parameter is valid.
+   */
+  const ReporterName & getReporterName(const std::string & param_name) const;
+
+  /**
    * A method that can be overridden to update the UO dependencies.
    *
    * This is needed because the get methods for this interface cannot be virtual because of the
@@ -85,20 +95,35 @@ protected:
   virtual void addReporterDependencyHelper(const ReporterName & /*state_name*/) {}
 
 private:
+  /**
+   * @returns True if all Reporters have been added (the task associated with adding them is
+   * complete)
+   */
+  bool reportersAdded() const;
+
+  /**
+   * Helpers for "possibly" checking if a Reporter value exists. This is only
+   * able to check for existance after all Reporters have been added (after
+   * the task creating them has been called). If called before said task, this
+   * will do nothing, hence the "possibly". This allows us to have errors reported
+   * directly by the object requesting the Reporter instead of through a system with
+   * less context.
+   */
+  template <typename T>
+  void possiblyCheckHasReporter(const ReporterName & reporter_name,
+                                const std::string & param_name = "") const;
+
   /// Parameters for the MooseObject inherting from this interface
   const InputParameters & _ri_params;
 
   /// Provides access to FEProblemBase::getReporterData
   FEProblemBase & _ri_fe_problem_base;
 
-  /// Non-const access to Reporter data (keep it private please)
-  ReporterData & _ri_reporter_data;
+  /// The ReporterData
+  const ReporterData & _ri_reporter_data;
 
-  /// The name of the object
-  const std::string & _ri_name;
-
-  /// A few helpers to avoid cyclic include problems
-  const ReporterName & getReporterNameHelper(const std::string & param_name) const;
+  /// The MooseObject needing this interface
+  const MooseObject & _ri_moose_object;
 };
 
 template <typename T>
@@ -114,7 +139,10 @@ ReporterInterface::getReporterValue(const std::string & param_name,
                                     ReporterMode mode,
                                     const std::size_t time_index)
 {
-  const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
+  const auto & reporter_name = getReporterName(param_name);
+
+  possiblyCheckHasReporter<T>(reporter_name, param_name);
+
   return getReporterValueByName<T>(reporter_name, mode, time_index);
 }
 
@@ -132,21 +160,49 @@ ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
                                           ReporterMode mode,
                                           const std::size_t time_index)
 {
+  possiblyCheckHasReporter<T>(reporter_name);
+
   addReporterDependencyHelper(reporter_name);
-  return _ri_reporter_data.getReporterValue<T>(reporter_name, _ri_name, mode, time_index);
+
+  return _ri_reporter_data.getReporterValue<T>(reporter_name, _ri_moose_object, mode, time_index);
 }
 
 template <typename T>
 bool
 ReporterInterface::hasReporterValue(const std::string & param_name) const
 {
-  const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
-  return hasReporterValueByName<T>(reporter_name);
+  if (!reportersAdded())
+    _ri_moose_object.mooseError(
+        "Cannot call hasReporterValue() until all Reporters have been constructed.");
+
+  return hasReporterValueByName<T>(getReporterName(param_name));
 }
 
 template <typename T>
 bool
 ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) const
 {
+  if (!reportersAdded())
+    _ri_moose_object.mooseError(
+        "Cannot call hasReporterValueByName() until all Reporters have been constructed.");
+
   return _ri_reporter_data.hasReporterValue<T>(reporter_name);
+}
+
+template <typename T>
+void
+ReporterInterface::possiblyCheckHasReporter(const ReporterName & reporter_name,
+                                            const std::string & param_name /* = "" */) const
+{
+  if (reportersAdded() && !hasReporterValueByName<T>(reporter_name))
+  {
+    std::stringstream oss;
+    oss << "A Reporter value with the name \"" << reporter_name << "\" and type \""
+        << MooseUtils::prettyCppType<T>() << "\" was not found.";
+
+    if (_ri_params.isParamValid(param_name))
+      _ri_moose_object.paramError(param_name, oss.str());
+    else
+      _ri_moose_object.mooseError(oss.str());
+  }
 }

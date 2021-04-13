@@ -12,6 +12,9 @@
 #include "ReporterData.h"
 #include "FEProblemBase.h"
 
+// Forward declarations
+class Transfer;
+
 /*
  * This transfer serves as a base class for transferring reporter values between
  * multiapps. This includes reporters, vector postprocessors, and postprocessors.
@@ -25,7 +28,7 @@ class ReporterTransferInterface
 {
 public:
   static InputParameters validParams();
-  ReporterTransferInterface(const InputParameters & parameters);
+  ReporterTransferInterface(const Transfer * transfer);
 
 protected:
   /*
@@ -131,4 +134,19 @@ protected:
   std::vector<ReporterName> getReporterNamesHelper(std::string prefix,
                                                    const std::string & obj_name,
                                                    const std::vector<ReporterName> & rep_names);
+
+  /**
+   * Checks if the problem \p problem has a Reporter value with the name \p reporter.
+   */
+  void checkHasReporterValue(const ReporterName & reporter, const FEProblemBase & problem) const;
+
+private:
+  /**
+   * Helper for hiding the variables in the problem \p problem if the Reporter with name
+   * \p reporter is associated with a Reporter object (not a PP or VPP)
+   */
+  void hideVariableHelper(const ReporterName & reporter, FEProblemBase & problem);
+
+  /// The Transfer that this interface is associated with
+  const Transfer & _rti_transfer;
 };

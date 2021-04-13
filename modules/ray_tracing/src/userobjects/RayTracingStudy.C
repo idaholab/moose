@@ -120,7 +120,6 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _mesh(_fe_problem.mesh()),
     _comm(_mesh.comm()),
     _pid(_comm.rank()),
-    _error_prefix(type() + " '" + name() + "'"),
 
     _ray_kernel_coverage_check(getParam<bool>("ray_kernel_coverage_check")),
     _warn_non_planar(getParam<bool>("warn_non_planar")),
@@ -575,7 +574,7 @@ RayTracingStudy::registeredRaySetup()
         const auto id = registeredRayID(ray_name, /* graceful = */ true);
         if (ray_names.size() && id == Ray::INVALID_RAY_ID)
           rto->paramError(
-              "rays", "Supplied ray '", ray_name, "' is not a registered Ray in ", _error_prefix);
+              "rays", "Supplied ray '", ray_name, "' is not a registered Ray in ", typeAndName());
         registration[id].insert(rto);
       }
     }

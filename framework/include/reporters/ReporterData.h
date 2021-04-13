@@ -10,6 +10,8 @@
 #pragma once
 
 #include "RestartableData.h"
+
+#include "MooseUtils.h"
 #include "ReporterState.h"
 #include "ReporterContext.h"
 #include "libmesh/parallel_object.h"
@@ -57,7 +59,7 @@ public:
      */
     WriteKey() {} // private constructor
     friend class Reporter;
-    friend class ReporterInterface;
+    friend class Postprocessor;
     friend class VectorPostprocessor;
     friend class ReporterTransferInterface;
   };
@@ -76,6 +78,18 @@ public:
   bool hasReporterValue(const ReporterName & reporter_name) const;
 
   /**
+   * @returns True if a ReporterState is defined for the Reporter with name \p reporter_name
+   * and the given type.
+   */
+  template <typename T>
+  bool hasReporterState(const ReporterName & reporter_name) const;
+
+  /**
+   * @returns True if a ReporterState is defined for the Reporter with name \p reporter_name.
+   */
+  bool hasReporterState(const ReporterName & reporter_name) const;
+
+  /**
    * Return a list of all reporter names
    */
   std::set<ReporterName> getReporterNames() const;
@@ -85,7 +99,7 @@ public:
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
-   * @param object_name The name of the object consuming the Reporter value (for error reporting)
+   * @param consumer The MooseObject consuming the Reporter value (for error reporting)
    * @param mode The mode that the value will be consumed by the by the ReporterInterface object
    * @param time_index (optional) When not provided or zero is provided the current value is
    *                   returned. If an index greater than zero is provided then the corresponding
@@ -93,7 +107,7 @@ public:
    */
   template <typename T>
   const T & getReporterValue(const ReporterName & reporter_name,
-                             const std::string & object_name,
+                             const MooseObject & consumer,
                              const ReporterMode & mode,
                              const std::size_t time_index = 0) const;
 
@@ -141,6 +155,7 @@ public:
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
    * @param mode The mode that the produced value will be computed by the Reporter object
+   * @param producer The MooseObject that produces this value
    * @param args (optional) Any number of optional arguments passed into the Context type given
    *             by the S template parameter. If S = ReporterContext then the first argument
    *             can be used as the default value (see ReporterContext.h).
@@ -155,6 +170,7 @@ public:
   template <typename T, typename S, typename... Args>
   T & declareReporterValue(const ReporterName & reporter_name,
                            const ReporterMode & mode,
+                           const MooseObject & producer,
                            Args &&... args);
 
   /**
@@ -179,13 +195,6 @@ public:
   void copyValuesBack();
 
   /**
-   * Return a set of undeclared names
-   *
-   * @see FEProblemBase::checkPostprocessors
-   */
-  std::set<ReporterName> getUndeclaredNames() const;
-
-  /**
    * Perform integrity check for get/declare calls
    */
   void check() const;
@@ -198,54 +207,20 @@ public:
   bool hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const;
 
   /**
-   * Helper for performing generic Reporter value transfers.
-   * @param from_name The name of the Reporter, within this instance, to transfer from
-   * @param to_name The name of the reporter to transfer into
-   * @param to_data The ReporterData object to transfer into   *
-   * @param to_index The time index of the reporter to transfer into
-   *
-   * This relies on the virtual ReporterContextBase::transfer method to allow this method to
-   * operate without knowledge of the type being transferred
-   *
-   * see ReporterTransferInterface ReporterContext
+   * @returns The ReporterContextBase associated with the Reporter with name \p reporter_name.
    */
-  void transfer(const ReporterName & from_name,
-                const ReporterName & to_name,
-                ReporterData & to_data,
-                unsigned int to_index = 0) const;
+  ///@{
+  const ReporterContextBase & getReporterContextBase(const ReporterName & reporter_name) const;
+  ReporterContextBase & getReporterContextBase(const ReporterName & reporter_name);
+  ///@}
 
   /**
-   * Helper for resizing vector reporter data
-   *
-   * @param name The name of the vector reporter value
-   * @param n New size
-   *
-   * This relies on the virtual ReporterContextBase::resize method to allow this method to
-   * operate without knowledge of the type being transferred
-   *
-   * see ReporterTransferInterface ReporterContext
+   * @Returns The ReporterStateBase associated with the Reporter with name \p reporter_name.
    */
-  void resize(const ReporterName & name, dof_id_type n);
-
-  /**
-   * Helper for performing generic Reporter value transfers.
-   * @param mode The desired consumer mode to be attached to reporter
-   * @param object_name The reporter name to attach the mode
-   *
-   * This relies on the virtual ReporterContextBase::addConsumerMode method to allow this method
-   * to operate without knowledge of the type being transferred. It is needed by the Transfer to
-   * mark reporter values consumer mode to ensure that the correct parallel operations will
-   * occur prior to transfer.
-   *
-   * see ReporterTransferInterface ReporterContext
-   */
-  void addConsumerMode(ReporterMode mode, const std::string & object_name);
-
-  /**
-   * Helper method for returning the ReporterContextBase object, if it exists.
-   * @param reporter_name Object/data name for the Reporter value
-   */
-  const ReporterContextBase * getReporterContextBase(const ReporterName & reporter_name) const;
+  ///@{
+  const ReporterStateBase & getReporterStateBase(const ReporterName & reporter_name) const;
+  ReporterStateBase & getReporterStateBase(const ReporterName & reporter_name);
+  ///@}
 
   /**
    * Return the ReporterProducerEnum for an existing ReporterValue
@@ -253,6 +228,14 @@ public:
    *                      data name.
    */
   const ReporterProducerEnum & getReporterMode(const ReporterName & reporter_name) const;
+
+  /**
+   * Gets information pertaining to the Reporter with name \p reporter_name.
+   *
+   * See ReporterState::getInfo. This is redeclared in ReporterData because it adds
+   * additional context about the context type if available.
+   */
+  std::string getReporterInfo(const ReporterName & reporter_name) const;
 
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
@@ -265,10 +248,12 @@ private:
    * @param declare Flag indicating if the ReporterValue is being declared or read. This flag
    *                is passed to the existing MooseApp restart/recover system that errors if a
    *                value is declared multiple times.
+   * @param moose_object The object requesting/declaring the state, used in error handling.
    */
   template <typename T>
-  ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare) const;
-  friend class VectorPostprocessorInterface;
+  ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name,
+                                            bool declare,
+                                            const MooseObject & moose_object) const;
 
   /**
    * Helper for registering data with the MooseApp to avoid cyclic includes
@@ -276,86 +261,147 @@ private:
   RestartableDataValue & getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
                                                   bool declare) const;
 
+  /// Map from ReporterName -> Reporter state. We need to keep track of all of the states that are
+  /// created so that we can check them after Reporter declaration to make sure all states have
+  /// a producer (are delcared). We cannot check _context_ptrs, because a context is only
+  /// defined for Reporters that have been declared. This is mutable so that it can be inserted
+  /// into when requesting Reporter values.
+  mutable std::map<ReporterName, ReporterStateBase *> _states;
+
   /// The ReporterContext objects are created when a value is declared. The context objects
   /// include a reference to the associated ReporterState values. This container stores the
   /// context object for each Reporter value.
-  ///
-  /// This container must be consistently sorted across processors to achieve a consistent iteration
-  /// order for parallel operations as well as for output. Objects are inserted based
-  /// on the combined ReporterName. A std::list was selected to achieve fast insert times
-  /// without re-allocating. A std::vector can also be used, but this was more fun. Do not use a
-  /// std::set, like I did initially, since the order is actually differs in each rank because it
-  /// is sorted by the pointer which causes all sorts of problems.
-  std::list<std::unique_ptr<ReporterContextBase>> _context_ptrs;
-
-  /// Names of objects that have been declared
-  std::set<ReporterName> _declare_names;
-  /// Names of objects that have been requested. This is mutable so that names can be requested early
-  /// in const methods before they are declared
-  mutable std::set<ReporterName> _get_names;
+  std::map<ReporterName, std::unique_ptr<ReporterContextBase>> _context_ptrs;
 };
 
 template <typename T>
 ReporterState<T> &
-ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool declare) const
+ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
+                                     bool declare,
+                                     const MooseObject & moose_object) const
 {
-  // Creates the RestartableData object for storage in the MooseApp restart/recover system
-  auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
-  RestartableDataValue & value = getRestartableDataHelper(std::move(data_ptr), declare);
-  auto & state_ref = static_cast<ReporterState<T> &>(value);
-  return state_ref;
+  if (hasReporterState(reporter_name))
+  {
+    const auto error_helper =
+        [this, &reporter_name, &moose_object, &declare](const std::string & suffix) {
+          std::stringstream oss;
+          oss << "While " << (declare ? "declaring" : "requesting") << " a "
+              << reporter_name.specialTypeToName() << " value with the name \""
+              << reporter_name.getValueName() << "\"";
+          if (!reporter_name.isPostprocessor() && !reporter_name.isVectorPostprocessor())
+            oss << " and type \"" << MooseUtils::prettyCppType<T>() << "\"";
+          oss << ",\na Reporter with the same name " << suffix << ".\n\n";
+          oss << getReporterInfo(reporter_name);
+
+          moose_object.mooseError(oss.str());
+        };
+
+    if (declare && hasReporterValue(reporter_name))
+      error_helper("has already been declared");
+    if (!hasReporterState<T>(reporter_name))
+    {
+      std::stringstream oss;
+      oss << "has been " << (declare || !hasReporterValue(reporter_name) ? "requested" : "declared")
+          << " with a different type";
+      error_helper(oss.str());
+    }
+  }
+
+  // Reporter states are stored as restartable data. The act of registering restartable data
+  // may be done multiple times with the same name, which will happen when more than one
+  // get value is done, or a get value and a declare is done. With this, we create a new
+  // state every time, but said created state may not be the actual state if this state
+  // is already registered as restartable data. Therefore, we create a state, and then
+  // cast the restartable data received back to a state (which may be different than
+  // the one we created, but that's okay)
+  auto state_unique_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
+  auto & restartable_value = getRestartableDataHelper(std::move(state_unique_ptr), declare);
+
+  auto * state = dynamic_cast<ReporterState<T> *>(&restartable_value);
+  mooseAssert(state, "Cast failed. The check above must be broken!");
+
+  // See declareReporterValue for a comment on what happens if a state for the same
+  // name is requested but with different special types. TLDR: ReporterNames with
+  // different special types are not unique so they'll be the same entry
+  _states.emplace(reporter_name, state);
+
+  return *state;
 }
 
 template <typename T>
 const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
-                               const std::string & object_name,
+                               const MooseObject & consumer,
                                const ReporterMode & mode,
-                               const std::size_t time_index) const
+                               const std::size_t time_index /* = 0 */) const
 {
-  _get_names.insert(reporter_name);
-  ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);
-  if (mode != REPORTER_MODE_UNSET)
-    state_ref.addConsumerMode(mode, object_name);
-  return state_ref.value(time_index);
+  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ false, consumer);
+  state.addConsumer(mode, consumer);
+  return state.value(time_index);
 }
 
 template <typename T, typename S, typename... Args>
 T &
 ReporterData::declareReporterValue(const ReporterName & reporter_name,
                                    const ReporterMode & mode,
+                                   const MooseObject & producer,
                                    Args &&... args)
 {
-  // Update declared names list
-  _declare_names.insert(reporter_name);
-
   // Get/create the ReporterState
-  ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
+  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ true, producer);
+  state.setProducer(producer);
+
+  // They key in _states (ReporterName) is not unique. This is done on purpose
+  // because we want to store reporter names a single name regardless of type.
+  // Beacuse of this, we have the case where someone could request a reporter value
+  // that is later declared as a pp or a vpp value. In this case, when it is first
+  // requested, the _state entry will have a key and name with a special type of ANY.
+  // When it's declared here (later), we will still find the correct entry because
+  // we don't check the special type in the key/name. But... we want the actual
+  // key and name to represent a pp or a vpp. Therefore, we'll set it properly,
+  // remove the entry in the map (which has the ANY key), and re-add it so that it
+  // has the pp/vpp key. This allows us to identify Reporters that really represent
+  // pps/vpps in output and in error reporting.
+  if (reporter_name.isPostprocessor() && !state.getReporterName().isPostprocessor())
+  {
+    state.setIsPostprocessor();
+    _states.erase(reporter_name);
+    _states.emplace(reporter_name, &state);
+  }
+  else if (reporter_name.isVectorPostprocessor() &&
+           !state.getReporterName().isVectorPostprocessor())
+  {
+    state.setIsVectorPostprocessor();
+    _states.erase(reporter_name);
+    _states.emplace(reporter_name, &state);
+  }
+
+  mooseAssert(!_context_ptrs.count(reporter_name), "Context already exists");
 
   // Create the ReporterContext
-  auto context_ptr = libmesh_make_unique<S>(_app, state_ref, args...);
+  auto context_ptr = libmesh_make_unique<S>(_app, state, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
+  _context_ptrs.emplace(reporter_name, std::move(context_ptr));
 
-  // Locate the insert position (see comment for _context_ptrs in ReporterData.h))
-  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
-    return reporter_name < ptr->name();
-  };
-  const auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  _context_ptrs.emplace(ptr, std::move(context_ptr));
-  return state_ref.value();
+  return state.value();
 }
 
 template <typename T>
 bool
 ReporterData::hasReporterValue(const ReporterName & reporter_name) const
 {
-  auto ptr = getReporterContextBase(reporter_name);
-  if (ptr != nullptr)
-  {
-    auto context = dynamic_cast<const ReporterContext<T> *>(ptr);
-    return context != nullptr;
-  }
-  return false;
+  if (!hasReporterValue(reporter_name))
+    return false;
+  return dynamic_cast<const ReporterContext<T> *>(&getReporterContextBase(reporter_name));
+}
+
+template <typename T>
+bool
+ReporterData::hasReporterState(const ReporterName & reporter_name) const
+{
+  if (!hasReporterState(reporter_name))
+    return false;
+  return dynamic_cast<const ReporterState<T> *>(&getReporterStateBase(reporter_name));
 }
 
 template <typename T>
@@ -363,11 +409,16 @@ const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const std::size_t time_index) const
 {
-  auto ptr = getReporterContextBase(reporter_name);
-  if (ptr == nullptr)
-    mooseError("The desired Reporter value '", reporter_name, "' does not exist.");
-  auto context_ptr = static_cast<const ReporterContext<T> *>(ptr);
-  return context_ptr->state().value(time_index);
+  if (!hasReporterValue<T>(reporter_name))
+    mooseError("Reporter name \"",
+               reporter_name,
+               "\" with type \"",
+               MooseUtils::prettyCppType<T>(),
+               " is not declared.");
+
+  return static_cast<const ReporterContext<T> *>(&getReporterContextBase(reporter_name))
+      ->state()
+      .value(time_index);
 }
 
 template <typename T>
@@ -413,9 +464,10 @@ template <typename T>
 void
 ReporterGeneralContext<T>::declareClone(ReporterData & r_data,
                                         const ReporterName & r_name,
-                                        const ReporterMode & mode) const
+                                        const ReporterMode & mode,
+                                        const MooseObject & producer) const
 {
-  r_data.declareReporterValue<T, ReporterGeneralContext<T>>(r_name, mode);
+  r_data.declareReporterValue<T, ReporterGeneralContext<T>>(r_name, mode, producer);
 }
 
 // This is defined here to avoid cyclic includes, see ReporterContext.h
@@ -423,9 +475,10 @@ template <typename T>
 void
 ReporterGeneralContext<T>::declareVectorClone(ReporterData & r_data,
                                               const ReporterName & r_name,
-                                              const ReporterMode & mode) const
+                                              const ReporterMode & mode,
+                                              const MooseObject & producer) const
 {
-  r_data.declareReporterValue<std::vector<T>, ReporterVectorContext<T>>(r_name, mode);
+  r_data.declareReporterValue<std::vector<T>, ReporterVectorContext<T>>(r_name, mode, producer);
 }
 
 // This is defined here to avoid cyclic includes, see ReporterContext.h
@@ -433,7 +486,8 @@ template <typename T>
 void
 ReporterVectorContext<T>::declareClone(ReporterData &,
                                        const ReporterName &,
-                                       const ReporterMode &) const
+                                       const ReporterMode &,
+                                       const MooseObject &) const
 {
   mooseError("Cannot create clone with ReporterVectorContext.");
 }
@@ -443,7 +497,8 @@ template <typename T>
 void
 ReporterVectorContext<T>::declareVectorClone(ReporterData &,
                                              const ReporterName &,
-                                             const ReporterMode &) const
+                                             const ReporterMode &,
+                                             const MooseObject &) const
 {
   mooseError("Cannot create clone with ReporterVectorContext.");
 }

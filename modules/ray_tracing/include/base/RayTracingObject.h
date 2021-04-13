@@ -68,11 +68,6 @@ public:
    */
   virtual void postExecuteStudy(){};
 
-  /**
-   * Gets the error prefix (type() + " '" + name() "'")
-   */
-  const std::string & errorPrefix() const { return _error_prefix; }
-
 protected:
   /**
    * Gets the current Ray that this is working on
@@ -100,9 +95,6 @@ protected:
 
   /// The thread id
   const THREAD_ID _tid;
-
-  /// Prefix used in errors (type() 'name()')
-  const std::string _error_prefix;
 
   /// The current Elem that _current_ray is tracing through
   const Elem * const & _current_elem;

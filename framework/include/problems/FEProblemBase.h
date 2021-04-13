@@ -900,14 +900,6 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
-   * Initializes the postprocessor data
-   *
-   * This is needed to correctly handle the default values
-   * @see SetupPostprocessorDataAction, PostprocessorInterface
-   */
-  void initPostprocessorData(const std::string & name);
-
-  /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
    * @partm t_index Flag for getting current (0), old (1), or older (2) values

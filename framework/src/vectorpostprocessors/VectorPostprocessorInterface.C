@@ -154,7 +154,7 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostproce
                               "VectorPostprocessors have been constructed.");
 
   const bool has_vpp = _vpi_feproblem.getReporterData().hasReporterValue<VectorPostprocessorValue>(
-      ReporterName(name, vector_name));
+      VectorPostprocessorReporterName(name, vector_name));
 
   if (has_vpp)
     mooseAssert(_vpi_feproblem.hasUserObject(name) && dynamic_cast<const VectorPostprocessor *>(
@@ -277,7 +277,7 @@ VectorPostprocessorInterface::getVectorPostprocessorByNameHelper(
 
   const ReporterMode mode = broadcast ? REPORTER_MODE_REPLICATED : REPORTER_MODE_ROOT;
   return _vpi_feproblem.getReporterData().getReporterValue<VectorPostprocessorValue>(
-      ReporterName(name, vector_name), name, mode, t_index);
+      VectorPostprocessorReporterName(name, vector_name), _vpi_moose_object, mode, t_index);
 }
 
 const VectorPostprocessorContext<VectorPostprocessorValue> &
@@ -288,17 +288,16 @@ VectorPostprocessorInterface::getVectorPostprocessorContextByNameHelper(
   addVectorPostprocessorDependencyHelper(name);
 
   // The complete name of the store Reporter value
-  const ReporterName r_name(name, vector_name);
+  const VectorPostprocessorReporterName r_name(name, vector_name);
 
   // Indicate the scatter value is desired, so the the VectorPostprocessorContext will do scatter
   _vpi_feproblem.getReporterData().getReporterValue<VectorPostprocessorValue>(
-      r_name, name, REPORTER_MODE_VPP_SCATTER, 0);
+      r_name, _vpi_moose_object, REPORTER_MODE_VPP_SCATTER, 0);
 
   // Retrieve the VectorPostprocessorContext which contains the scattered value to be referenced
-  const ReporterContextBase * context_ptr =
-      _vpi_feproblem.getReporterData().getReporterContextBase(r_name);
+  const auto & context = _vpi_feproblem.getReporterData().getReporterContextBase(r_name);
   auto vpp_context_ptr =
-      dynamic_cast<const VectorPostprocessorContext<VectorPostprocessorValue> *>(context_ptr);
+      dynamic_cast<const VectorPostprocessorContext<VectorPostprocessorValue> *>(&context);
   mooseAssert(vpp_context_ptr, "Failed to get the VectorPostprocessorContext");
   return *vpp_context_ptr;
 }

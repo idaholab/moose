@@ -2107,7 +2107,7 @@ TraceRay::onBoundary(const std::shared_ptr<Ray> & ray, const bool external)
       for (const RayBoundaryConditionBase * rbc : _on_boundary_ray_bcs)
         for (const auto & bnd_elem : _boundary_elems)
           if (rbc->hasBoundary(bnd_elem.bnd_id))
-            oss << "  " << rbc->errorPrefix() << " on boundary " << bnd_elem.bnd_id << " ("
+            oss << "  " << rbc->typeAndName() << " on boundary " << bnd_elem.bnd_id << " ("
                 << _mesh.getBoundaryName(bnd_elem.bnd_id) << ")\n";
       oss << "\n";
     }
@@ -2155,14 +2155,14 @@ TraceRay::postRayTracingObject(const std::shared_ptr<Ray> & ray, const RayTracin
       _should_continue = false;
   }
   else if (!_should_continue)
-    failTrace(rto->errorPrefix() +
+    failTrace(rto->typeAndName() +
                   " set a Ray to continue that was previously set to not continue.\n\n" +
                   "Once a Ray has been set to not continue, its continue status cannot change.",
               /* warning = */ false,
               __LINE__);
 
   if (!_should_continue && ray->trajectoryChanged())
-    failTrace(rto->errorPrefix() +
+    failTrace(rto->typeAndName() +
                   " changed the trajectory of a Ray that was set to not continue,\n" +
                   "or set a Ray whose trajectory was changed to not continue.",
               /* warning = */ false,

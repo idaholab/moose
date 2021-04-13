@@ -37,7 +37,7 @@ MultiAppReporterTransfer::validParams()
 
 MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    ReporterTransferInterface(parameters),
+    ReporterTransferInterface(this),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_reporter_names(getParam<std::vector<ReporterName>>("to_reporters")),
     _subapp_index(getParam<unsigned int>("subapp_index"))

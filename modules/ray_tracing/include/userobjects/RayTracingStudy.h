@@ -681,11 +681,6 @@ public:
    */
   bool warnNonPlanar() const { return _warn_non_planar; }
 
-  /**
-   * Gets the error prefix (type() + " '" + name() "'")
-   */
-  const std::string & errorPrefix() const { return _error_prefix; }
-
 protected:
   /**
    * Subclasses should override this to determine how to generate Rays.
@@ -873,8 +868,6 @@ protected:
   const Parallel::Communicator & _comm;
   /// The rank of this processor (this actually takes time to lookup - so just do it once)
   const processor_id_type _pid;
-  /// Prefix used in errors (type() 'name()':)
-  const std::string _error_prefix;
 
   /// Whether or not to perform coverage checks on RayKernels
   const bool _ray_kernel_coverage_check;

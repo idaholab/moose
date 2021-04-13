@@ -14,7 +14,7 @@
     [no_registration]
       type = RunException
       input = 'ray_data_value_errors.i'
-      expect_err = 'LotsOfRaysRayStudy \'lots\' does not support Ray registration'
+      expect_err = 'LotsOfRaysRayStudy "lots" does not support Ray registration'
       cli_args = 'UserObjects/active=lots Postprocessors/active=no_registration'
       allow_test_objects = true
 
@@ -23,7 +23,7 @@
     [no_banking]
       type = RunException
       input = 'ray_data_value_errors.i'
-      expect_err = "DisableRayBankingStudy 'no_banking_study' does not bank Rays on completion."
+      expect_err = "DisableRayBankingStudy \"no_banking_study\" does not bank Rays on completion."
       cli_args = 'UserObjects/active=no_banking_study Postprocessors/active=no_banking'
       allow_test_objects = true
 
@@ -41,7 +41,7 @@
     [data_name_not_found]
       type = RunException
       input = 'ray_data_value_errors.i'
-      expect_err = "The RepeatableRayStudy 'repeatable' does not have Ray data associated with the name 'dummy'"
+      expect_err = "The RepeatableRayStudy \"repeatable\" does not have Ray data associated with the name 'dummy'"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=data_name_not_found'
       allow_test_objects = true
 
@@ -50,7 +50,7 @@
     [aux_data_name_not_found]
       type = RunException
       input = 'ray_data_value_errors.i'
-      expect_err = "The RepeatableRayStudy 'repeatable' does not have Ray aux data associated with the name 'dummy'"
+      expect_err = "The RepeatableRayStudy \"repeatable\" does not have Ray aux data associated with the name 'dummy'"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=aux_data_name_not_found'
       allow_test_objects = true
 

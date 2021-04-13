@@ -84,3 +84,9 @@ MooseObject::errorPrefix(const std::string & error_type) const
       << "\", of type \"" << type() << "\".\n\n";
   return oss.str();
 }
+
+std::string
+MooseObject::typeAndName() const
+{
+  return type() + std::string(" \"") + name() + std::string("\"");
+}

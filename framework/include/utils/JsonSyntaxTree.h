@@ -77,7 +77,6 @@ public:
   /**
    * Utilities for making sense of c++ types
    */
-  static std::string prettyCppType(const std::string & cpp_type);
   static std::string basicCppType(const std::string & cpp_type);
 
 protected:

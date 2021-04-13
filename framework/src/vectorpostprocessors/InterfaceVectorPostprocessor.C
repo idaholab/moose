@@ -18,6 +18,6 @@ InterfaceVectorPostprocessor::validParams()
 }
 
 InterfaceVectorPostprocessor::InterfaceVectorPostprocessor(const InputParameters & parameters)
-  : InterfaceUserObject(parameters), VectorPostprocessor(parameters)
+  : InterfaceUserObject(parameters), VectorPostprocessor(this)
 {
 }

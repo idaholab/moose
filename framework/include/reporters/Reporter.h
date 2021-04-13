@@ -47,7 +47,7 @@ class Reporter : public OutputInterface
 {
 public:
   static InputParameters validParams();
-  Reporter(const InputParameters & parameters);
+  Reporter(const MooseObject * moose_object);
   virtual ~Reporter() = default;
   virtual void store(nlohmann::json & json) const;
 
@@ -148,6 +148,16 @@ private:
     T value;
   };
 
+  /**
+   * @returns The ReporterValueName associated with the parameter \p param_name.
+   *
+   * Performs error checking on if the parameter is valid.
+   */
+  const ReporterValueName & getReporterValueName(const std::string & param_name) const;
+
+  /// The MooseObject creating this Reporter
+  const MooseObject & _reporter_moose_object;
+
   /// Ref. to MooseObject params
   const InputParameters & _reporter_params;
 
@@ -189,8 +199,7 @@ template <typename T, typename S, typename... Args>
 T &
 Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
 {
-  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
-  return declareValueByName<T, S>(value_name, mode, args...);
+  return declareValueByName<T, S>(getReporterValueName(param_name), mode, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
@@ -222,9 +231,12 @@ Reporter::declareValueByName(const ReporterValueName & value_name,
                              ReporterMode mode,
                              Args &&... args)
 {
-  ReporterName state_name(_reporter_name, value_name);
+  const ReporterName state_name(_reporter_name, value_name);
+
   buildOutputHideVariableList({state_name.getCombinedName()});
-  return _reporter_data.declareReporterValue<T, S>(state_name, mode, args...);
+
+  return _reporter_data.declareReporterValue<T, S>(
+      state_name, mode, _reporter_moose_object, args...);
 }
 
 template <typename T, typename... Args>
