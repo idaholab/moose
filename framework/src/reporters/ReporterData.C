@@ -79,11 +79,8 @@ ReporterData::check() const
 {
   std::string missing;
   for (const auto & name_state_pair : _states)
-  {
-    std::cerr << getReporterInfo(name_state_pair.first) << std::endl;
     if (!name_state_pair.second->hasProducer())
       missing += getReporterInfo(name_state_pair.first) + "\n";
-  }
 
   if (missing.size())
     mooseError("The following Reporter(s) were not declared:\n\n", missing);
@@ -126,4 +123,13 @@ ReporterData::getReporterInfo(const ReporterName & reporter_name) const
   const ReporterContextBase * context =
       hasReporterValue(reporter_name) ? &getReporterContextBase(reporter_name) : nullptr;
   return getReporterStateBase(reporter_name).getInfo(context);
+}
+
+std::string
+ReporterData::getReporterInfo() const
+{
+  std::string out = _states.empty() ? "No reporters were requested or declared." : "";
+  for (const auto & name : getReporterNames())
+    out += getReporterInfo(name) + "\n";
+  return out;
 }
