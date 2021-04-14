@@ -472,7 +472,7 @@ Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp) c
 const VariableValue &
 Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
 {
-  const auto * var = getVar(var_name, comp);
+  const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
