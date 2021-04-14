@@ -31,4 +31,25 @@
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
   []
+  [sources_give_hllc_problems]
+    requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver'
+    [hllc_with_volume_source]
+      type = Exodiff
+      input = 'straight-channel-hllc.i'
+      exodiff = straight-channel-hllc_out.e
+      detail = 'when the source has a cell-centered volumetric discretization'
+    []
+    [hllcs]
+      type = Exodiff
+      input = 'straight-channel-hllcs.i'
+      exodiff = straight-channel-hllcs_out.e
+      detail = 'when the source has a wave-speed based discretization (can thinking of upwinding here)'
+    []
+    [centered]
+      type = Exodiff
+      input = 'straight-channel-centered.i'
+      exodiff = 'straight-channel-centered_out.e'
+      detail = 'However, a centered (average) discretization, not based on Godunov/Riemann shows what the correct solution should be.'
+    []
+  []
 []
