@@ -120,18 +120,21 @@ SamplerPostprocessorTransfer::initializeFromMultiapp()
 void
 SamplerPostprocessorTransfer::executeFromMultiapp()
 {
-  const dof_id_type n = _multi_app->numGlobalApps();
-  for (MooseIndex(n) i = 0; i < n; i++)
+  if (_multi_app->isRootProcessor())
   {
-    if (_multi_app->hasLocalApp(i))
+    const dof_id_type n = _multi_app->numGlobalApps();
+    for (MooseIndex(n) i = 0; i < n; i++)
     {
-      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      if (app_problem.converged() || _keep_diverge)
-        for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
-          _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
-      else
-        for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
-          _current_data[j].emplace_back(std::numeric_limits<double>::quiet_NaN());
+      if (_multi_app->hasLocalApp(i))
+      {
+        FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+        if (app_problem.converged() || _keep_diverge)
+          for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+            _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+        else
+          for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+            _current_data[j].emplace_back(std::numeric_limits<double>::quiet_NaN());
+      }
     }
   }
 }
