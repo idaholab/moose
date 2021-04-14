@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "CNSFVHLLCBCBase.h"
+#include "CNSFVHLLCBase.h"
 
 class SinglePhaseFluidProperties;
 
 /**
  * Base clase for HLLC boundary condition for Euler equation
  */
-class CNSFVHLLCBC : public FVFluxBC // Kernel
+class CNSFVHLLCBC : public CNSFVHLLCBCBase // Kernel
 {
 public:
   CNSFVHLLCBC(const InputParameters & parameters);
@@ -25,12 +26,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-
-  /**
-   * this function is a call back for setting quantities for
-   * computing wave speed before calling the wave speed routine
-   */
-  virtual void preComputeWaveSpeed() = 0;
 
   ///@{ flux functions on elem & from boundary
   virtual ADReal fluxElem() = 0;
@@ -45,38 +40,5 @@ protected:
   ///@{ conserved variable of this equation from elem and boundary
   virtual ADReal conservedVariableElem() = 0;
   virtual ADReal conservedVariableBoundary() = 0;
-  ///@}
-
-  /// fluid properties
-  const SinglePhaseFluidProperties & _fluid;
-
-  ///@{ material properties on the elem side of the boundary
-  const ADMaterialProperty<Real> & _specific_internal_energy_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<Real> & _speed_elem;
-  const ADMaterialProperty<Real> & _rho_elem;
-  const ADMaterialProperty<Real> & _pressure_elem;
-  const ADMaterialProperty<Real> & _rho_et_elem;
-  const ADMaterialProperty<Real> & _ht_elem;
-  ///@}
-
-  ///@{ the wave speeds
-  ADReal _SL;
-  ADReal _SM;
-  ADReal _SR;
-  ///@}
-
-  /// speeds normal to the interface on the element side
-  ADReal _normal_speed_elem;
-
-  ///@{ these quantities must be computed in preComputeWaveSpeed
-  ADReal _normal_speed_boundary;
-  ADReal _rho_boundary;
-  ADRealVectorValue _vel_boundary;
-  ADReal _specific_internal_energy_boundary;
-  ADReal _pressure_boundary;
-  ADReal _ht_boundary;
-  ADReal _et_boundary;
-  ADReal _rho_et_boundary;
   ///@}
 };

@@ -15,23 +15,10 @@
 InputParameters
 CNSFVHLLCBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
-  return params;
+  return CNSFVHLLCBCBase::validParams();
 }
 
-CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters)
-  : FVFluxBC(parameters),
-    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
-    _specific_internal_energy_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
-    _vel_elem(getADMaterialProperty<RealVectorValue>(NS::velocity)),
-    _speed_elem(getADMaterialProperty<Real>(NS::speed)),
-    _rho_elem(getADMaterialProperty<Real>(NS::density)),
-    _pressure_elem(getADMaterialProperty<Real>(NS::pressure)),
-    _rho_et_elem(getADMaterialProperty<Real>(NS::total_energy_density)),
-    _ht_elem(getADMaterialProperty<Real>(NS::specific_total_enthalpy))
-{
-}
+CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters) : CNSFVHLLCBCBase(parameters) {}
 
 ADReal
 CNSFVHLLCBC::computeQpResidual()
@@ -42,14 +29,8 @@ CNSFVHLLCBC::computeQpResidual()
   _normal_speed_elem = _normal * _vel_elem[_qp];
   preComputeWaveSpeed();
 
-  const auto & wave_speeds = CNSFVHLLC::waveSpeed(_rho_elem[_qp],
-                                                  _vel_elem[_qp],
-                                                  _specific_internal_energy_elem[_qp],
-                                                  _rho_boundary,
-                                                  _vel_boundary,
-                                                  _specific_internal_energy_boundary,
-                                                  _fluid,
-                                                  _normal);
+  const auto & wave_speeds = CNSFVHLLCBase::waveSpeed(_tid, *_face_info, hllcData(), _normal);
+
   _SL = wave_speeds[0];
   _SM = wave_speeds[1];
   _SR = wave_speeds[2];
