@@ -237,6 +237,11 @@ public:
    */
   std::string getReporterInfo(const ReporterName & reporter_name) const;
 
+  /**
+   * Gets information about all declared/requested Reporters.
+   */
+  std::string getReporterInfo() const;
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;

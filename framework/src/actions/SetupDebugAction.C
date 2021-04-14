@@ -40,6 +40,8 @@ SetupDebugAction::validParams()
       "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
   params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
   params.addParam<bool>(
+      "show_reporters", false, "Print out information about the declared and requested Reporters");
+  params.addParam<bool>(
       "pid_aux",
       false,
       "Add a AuxVariable named \"pid\" that shows the processors and partitioning");
@@ -92,6 +94,14 @@ SetupDebugAction::act()
       if (it->first == MooseApp::MESH_META_DATA)
         for (auto & pair : it->second.first)
           _console << " " << pair.first << std::endl;
+  }
+
+  // Print Reporter information
+  if (getParam<bool>("show_reporters"))
+  {
+    const std::string type = "ReporterDebugOutput";
+    auto params = _factory.getValidParams(type);
+    _problem->addOutput(type, "_moose_reporter_debug_output", params);
   }
 
   // Add pid aux
