@@ -106,7 +106,7 @@
     diffusivity = thermal_conductivity
   [../]
   [./picard_iterations]
-    type = NumPicardIterations
+    type = NumCouplingIterations
     execute_on = 'initial timestep_end'
   [../]
 []

@@ -91,7 +91,7 @@
     variable = m
   [../]
   [./picard_iterations]
-    type = NumPicardIterations
+    type = NumCouplingIterations
   [../]
 []
 

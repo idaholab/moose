@@ -93,7 +93,7 @@
     diffusivity = 0.1
   [../]
   [./picard_iterations]
-    type = NumPicardIterations
+    type = NumCouplingIterations
     execute_on = 'initial timestep_end'
   [../]
 []

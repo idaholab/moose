@@ -1,114 +1,89 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 5
+  ny = 5
   parallel_type = replicated
+  uniform_refine = 1
 []
 
 [Variables]
-  [./u]
-  [../]
-[]
-
-[AuxVariables]
-  [./v]
-    initial_condition = 1
-  [../]
-  [./inverse_v]
-    initial_condition = 1
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = CoefDiffusion
+  [diff]
+    type = Diffusion
     variable = u
-    coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./force_u]
-    type = CoupledForce
-    variable = u
-    v = inverse_v
-  [../]
-[]
-
-[AuxKernels]
-  [./invert_v]
-    type = QuotientAux
-    variable = inverse_v
-    denominator = v
-    numerator = 20.0
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  [left]
+    type = PostprocessorDirichletBC
     variable = u
     boundary = left
-    value = 0
-  [../]
-  [./Neumann_right]
-    type = NeumannBC
+    postprocessor = 'from_sub'
+  []
+  [right]
+    type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [picard_its]
     type = NumCouplingIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
+
 []
 
 [Executioner]
   type = Transient
-  num_steps = 4
-  dt = 0.5
+  num_steps = 20
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   coupling_max_its = 30
   nl_abs_tol = 1e-14
-  relaxation_factor = 2.0
-  transformed_variables = u
 []
 
 [Outputs]
   exodus = true
-  execute_on = 'INITIAL TIMESTEP_END'
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep_begin
     positions = '0 0 0'
-    input_files = picard_relaxed_sub.i
-  [../]
+    input_files = picard_sub.i
+    clone_master_mesh = true
+  []
 []
 
 [Transfers]
-  [./v_from_sub]
+  [v_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = v
     variable = v
-  [../]
-  [./u_to_sub]
+  []
+  [u_to_sub]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = u
-  [../]
+  []
 []

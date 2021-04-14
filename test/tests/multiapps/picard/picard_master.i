@@ -50,8 +50,8 @@
 []
 
 [Postprocessors]
-  [./picard_its]
-    type = NumPicardIterations
+  [picard_its]
+    type = NumCouplingIterations
     execute_on = 'initial timestep_end'
   [../]
 []
