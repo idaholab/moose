@@ -75,7 +75,7 @@ each addition to the MOOSE framework or its modules.
   versions of Linux.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
 - 100 GB disk space
-- C++11 compatible compiler (GCC, Clang)
+- C++14 compatible compiler (GCC, Clang)
 - Python 3.6+
 - Git
 !template-end!
