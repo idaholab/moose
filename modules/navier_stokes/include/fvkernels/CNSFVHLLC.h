@@ -9,26 +9,13 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "CNSFVHLLCBase.h"
 
-class HLLCUserObject;
-class SinglePhaseFluidProperties;
-
-class CNSFVHLLC : public FVFluxKernel
+class CNSFVHLLC : public CNSFVHLLCBase
 {
 public:
   static InputParameters validParams();
   CNSFVHLLC(const InputParameters & params);
-
-  /// helper function for computing wave speed
-  static std::vector<ADReal> waveSpeed(const ADReal & rho_elem,
-                                const ADRealVectorValue & vel_elem,
-                                const ADReal & e_elem,
-                                const ADReal & rho_neighbor,
-                                const ADRealVectorValue & vel_neighbor,
-                                const ADReal & e_neighbor,
-                                const SinglePhaseFluidProperties & fluid,
-                                const ADRealVectorValue & normal);
 
 protected:
   virtual ADReal computeQpResidual() override;
@@ -48,47 +35,4 @@ protected:
   virtual ADReal conservedVariableElem() = 0;
   virtual ADReal conservedVariableNeighbor() = 0;
   ///@}
-
-  ///@{ the wave speeds
-  ADReal _SL;
-  ADReal _SM;
-  ADReal _SR;
-  ///@}
-
-  ///@{ speeds normal to the interface
-  ADReal _normal_speed_elem;
-  ADReal _normal_speed_neighbor;
-  ///@}
-
-  /// fluid properties
-  const SinglePhaseFluidProperties & _fluid;
-
-  ///@{ internal energies left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _specific_internal_energy_elem;
-  const ADMaterialProperty<Real> & _specific_internal_energy_neighbor;
-  ///@}
-
-  const ADMaterialProperty<Real> & _rho_et_elem;
-  const ADMaterialProperty<Real> & _rho_et_neighbor;
-
-  ///@{ velocities left == elem, right == neighbor
-  const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
-  ///@}
-
-  ///@{ speeds left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _speed_elem;
-  const ADMaterialProperty<Real> & _speed_neighbor;
-  ///@}
-
-  ///@{ densities left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _rho_elem;
-  const ADMaterialProperty<Real> & _rho_neighbor;
-  ///@}
-
-  ///@{ pressures left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _pressure_elem;
-  const ADMaterialProperty<Real> & _pressure_neighbor;
-  ///@}
-
 };
