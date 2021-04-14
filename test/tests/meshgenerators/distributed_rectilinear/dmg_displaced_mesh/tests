@@ -39,17 +39,13 @@
       type = 'Exodiff'
       input = 'pbc_adaptivity.i'
       exodiff = 'pbc_adaptivity_out.e.4.0 pbc_adaptivity_out.e.4.1 pbc_adaptivity_out.e.4.2 '
-                'pbc_adaptivity_out.e.4.3
-               pbc_adaptivity_out.e-s0002.4.0 '
+                'pbc_adaptivity_out.e.4.3 pbc_adaptivity_out.e-s0002.4.0 '
                 'pbc_adaptivity_out.e-s0002.4.1 pbc_adaptivity_out.e-s0002.4.2 '
-                'pbc_adaptivity_out.e-s0002.4.3
-               pbc_adaptivity_out.e-s0003.4.0 '
+                'pbc_adaptivity_out.e-s0002.4.3 pbc_adaptivity_out.e-s0003.4.0 '
                 'pbc_adaptivity_out.e-s0003.4.1 pbc_adaptivity_out.e-s0003.4.2 '
-                'pbc_adaptivity_out.e-s0003.4.3
-               pbc_adaptivity_out.e-s0004.4.0 '
+                'pbc_adaptivity_out.e-s0003.4.3 pbc_adaptivity_out.e-s0004.4.0 '
                 'pbc_adaptivity_out.e-s0004.4.1 pbc_adaptivity_out.e-s0004.4.2 '
-                'pbc_adaptivity_out.e-s0004.4.3
-               pbc_adaptivity_out.e-s0005.4.0 '
+                'pbc_adaptivity_out.e-s0004.4.3 pbc_adaptivity_out.e-s0005.4.0 '
                 'pbc_adaptivity_out.e-s0005.4.1 pbc_adaptivity_out.e-s0005.4.2 '
                 'pbc_adaptivity_out.e-s0005.4.3'
       # We use 'partition=linear' here, so that the tests are platform independent
