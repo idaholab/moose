@@ -226,13 +226,13 @@ MultiApp::MultiApp(const InputParameters & parameters)
 {
 }
 
-LocalRankConfig
+void
 MultiApp::init(unsigned int num_apps, bool batch_mode)
 {
   TIME_SECTION(_perf_init);
 
   _total_num_apps = num_apps;
-  auto rank_config = buildComm(batch_mode);
+  _rank_config = buildComm(batch_mode);
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
@@ -243,7 +243,6 @@ MultiApp::init(unsigned int num_apps, bool batch_mode)
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
     paramError("cli_args",
                "The number of items supplied must be 1 or equal to the number of sub apps.");
-  return rank_config;
 }
 
 void
@@ -804,22 +803,12 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     return _cli_args[local_app + _first_local_app];
 }
 
-unsigned int
-nSlots(unsigned int nprocs,
-       unsigned int napps,
-       unsigned int min_app_procs,
-       unsigned int max_app_procs)
-{
-  auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
-  return std::min(nprocs / slot_size, napps);
-}
-
 LocalRankConfig
-rankConfig(unsigned int rank,
-           unsigned int nprocs,
-           unsigned int napps,
-           unsigned int min_app_procs,
-           unsigned int max_app_procs,
+rankConfig(dof_id_type rank,
+           dof_id_type nprocs,
+           dof_id_type napps,
+           dof_id_type min_app_procs,
+           dof_id_type max_app_procs,
            bool batch_mode)
 {
   if (min_app_procs > nprocs)
@@ -833,15 +822,15 @@ rankConfig(unsigned int rank,
   // single (sub)app/sim in parallel.
 
   auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
-  unsigned int nslots = std::min(nprocs / slot_size, napps);
+  dof_id_type nslots = std::min(nprocs / slot_size, napps);
   auto leftover_procs = nprocs - nslots * slot_size;
   auto apps_per_slot = napps / nslots;
   auto leftover_apps = napps % nslots;
 
   std::vector<int> slot_for_rank(nprocs);
-  unsigned int slot = 0;
-  unsigned int procs_in_slot = 0;
-  for (unsigned int rankiter = 0; rankiter <= rank; rankiter++)
+  dof_id_type slot = 0;
+  dof_id_type procs_in_slot = 0;
+  for (dof_id_type rankiter = 0; rankiter <= rank; rankiter++)
   {
     if (slot < nslots)
       slot_for_rank[rankiter] = slot;
@@ -861,13 +850,13 @@ rankConfig(unsigned int rank,
   if (slot_for_rank[rank] < 0)
     // ranks assigned a negative slot don't have any apps running on them.
     return {0, 0, 0, 0, false};
-  unsigned int slot_num = slot_for_rank[rank];
+  dof_id_type slot_num = slot_for_rank[rank];
 
   bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
   auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
 
-  unsigned int app_index = 0;
-  for (unsigned int slot = 0; slot < slot_num; slot++)
+  dof_id_type app_index = 0;
+  for (dof_id_type slot = 0; slot < slot_num; slot++)
   {
     auto num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
     app_index += num_slot_apps;
@@ -933,8 +922,17 @@ MultiApp::globalAppToLocal(unsigned int global_app)
   if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps - 1))
     return global_app - _first_local_app;
 
-  _console << _first_local_app << " " << global_app << '\n';
-  mooseError("Invalid global_app!");
+  std::stringstream ss;
+  ss << "Requesting app " << global_app << ", but processor " << processor_id() << " ";
+  if (_my_num_apps == 0)
+    ss << "does not own any apps";
+  else if (_my_num_apps == 1)
+    ss << "owns app " << _first_local_app;
+  else
+    ss << "owns apps " << _first_local_app << "-" << _first_local_app + (_my_num_apps - 1);
+  ss << ".";
+  mooseError("Invalid global_app!\n", ss.str());
+  return 0;
 }
 
 void
