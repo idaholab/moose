@@ -31,8 +31,8 @@
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
   []
-  [sources_give_hllc_problems]
-    requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver'
+  [sources_give_hllc_problems_irregular]
+    requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
     [hllc_with_volume_source]
       type = Exodiff
       input = 'straight-channel-hllc.i'
@@ -50,6 +50,30 @@
       input = 'straight-channel-centered.i'
       exodiff = 'straight-channel-centered_out.e'
       detail = 'However, a centered (average) discretization, not based on Godunov/Riemann shows what the correct solution should be.'
+    []
+  []
+  [sources_give_hllc_problems_regular]
+    requirement = 'On a regular grid, using a HLLC scheme to calculate inter-cell fluxes, the system shall show, via the momentum variable'
+    [conserved]
+      type = Exodiff
+      input = 'regular-straight-channel.i'
+      exodiff = 'regular-straight-channel_out.e'
+      detail = 'conservation of mass when no sources are present'
+      cli_args = "FVKernels/inactive='drag'"
+    []
+    [non_conserved]
+      input = 'regular-straight-channel.i'
+      exodiff = 'regular-straight-channel-sources_out.e'
+      detail = 'violation of conservation of mass when sources are present'
+      type = Exodiff
+      cli_args = 'Outputs/file_base=regular-straight-channel-sources_out'
+    []
+    [non_conserved_finer]
+      input = 'regular-straight-channel.i'
+      exodiff = 'regular-straight-channel-sources-nx-150_out.e'
+      detail = 'lesser violation of conservation of mass when sources are present and the mesh is refined'
+      type = Exodiff
+      cli_args = 'Outputs/file_base=regular-straight-channel-sources-nx-150_out Mesh/gen_mesh/nx=150'
     []
   []
 []
