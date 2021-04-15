@@ -1,5 +1,5 @@
 [Tests]
-  [taolmvm_iterOutput]
+  [iterOutput]
     requirement = "This tests that a linear and constant function can be scaled in" 
                   "two seperate functionNeumannBCs both applied to the same sideset using "
                   " two parsed functions.  The scale of the linear and constant functions "
@@ -7,9 +7,9 @@
     type = CSVDiff
     rel_err = 0.0000001
     input = master.i
-    csvdiff = master_out.csv
+    csvdiff = master_out_optInfo_0001.csv
   []
-  [taolmvm_par]
+  [par]
     requirement = "Make sure everything is working in parallel, like the constantvectorpostprocessor"
                   " and the vectorpostprocessor dirac kernel" 
     type = CSVDiff

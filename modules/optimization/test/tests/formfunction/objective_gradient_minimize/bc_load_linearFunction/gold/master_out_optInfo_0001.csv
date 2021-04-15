@@ -1,0 +1,6 @@
+current_iterate,gradient_iterate,hessian_iterate,objective_iterate
+0,1,0,1
+1,2,0,2
+2,1,0,1
+3,3,0,3
+4,1,0,1

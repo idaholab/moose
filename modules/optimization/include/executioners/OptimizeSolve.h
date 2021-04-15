@@ -20,14 +20,15 @@ public:
 
   const FormFunction & getFormFunction() const { return *_form_function; }
 
-  void getTaoSolutionStatus(int & tot_iters,
-                            double & gnorm,
-                            int & obj_iters,
-                            double & cnorm,
-                            int & grad_iters,
-                            double & xdiff,
-                            int & hess_iters,
-                            double & f) const;
+  // fixme lynn I wish this were all a struct
+  void getTaoSolutionStatus(std::vector<int> & tot_iters,
+                            std::vector<double> & gnorm,
+                            std::vector<int> & obj_iters,
+                            std::vector<double> & cnorm,
+                            std::vector<int> & grad_iters,
+                            std::vector<double> & xdiff,
+                            std::vector<int> & hess_iters,
+                            std::vector<double> & f) const;
 
 protected:
   /// Bounds routine
@@ -55,15 +56,19 @@ protected:
   Tao _tao;
 
 private:
+  bool _verbose;
   /// tao solver info
-  int _total_iterate = 0;
   int _obj_iterate = 0;
   int _grad_iterate = 0;
   int _hess_iterate = 0;
-  double _f = 0;
-  double _gnorm = 0;
-  double _cnorm = 0;
-  double _xdiff = 0;
+  std::vector<int> _total_iterate_vec;
+  std::vector<int> _obj_iterate_vec;
+  std::vector<int> _grad_iterate_vec;
+  std::vector<int> _hess_iterate_vec;
+  std::vector<double> _f_vec;
+  std::vector<double> _gnorm_vec;
+  std::vector<double> _cnorm_vec;
+  std::vector<double> _xdiff_vec;
 
   /// Here is where we call tao and solve
   PetscErrorCode taoSolve();
@@ -71,7 +76,7 @@ private:
   /// output optimization iteration solve data
   static PetscErrorCode monitor(Tao tao, void * ctx);
 
-  void setTaoSolutionStatus(Tao tao);
+  void setTaoSolutionStatus(double f, int its, double gnorm, double cnorm, double xdiff);
 
   ///@{
   /// Function wrappers for tao

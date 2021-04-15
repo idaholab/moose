@@ -29,14 +29,14 @@ private:
   Optimize * _optimization_executioner = nullptr;
   const MultiMooseEnum & _items;
 
-  int & _currentIterate;
-  int & _objectiveIterate;
-  int & _gradientIterate;
-  int & _hessianIterate;
-  double & _functionValue;
-  double & _gnorm;
-  double & _cnorm;
-  double & _xdiff;
+  std::vector<int> & _currentIterate;
+  std::vector<int> & _objectiveIterate;
+  std::vector<int> & _gradientIterate;
+  std::vector<int> & _hessianIterate;
+  std::vector<double> & _functionValue;
+  std::vector<double> & _gnorm;
+  std::vector<double> & _cnorm;
+  std::vector<double> & _xdiff;
 
   // Helper to perform optional declaration based on "_items" from MeshInfo.h
   template <typename T>

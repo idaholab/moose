@@ -24,6 +24,7 @@ OptimizeSolve::OptimizeSolve(Executioner * ex)
   : SolveObject(ex),
     _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
+    _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
     _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm)),
     _hessian(_my_comm)
@@ -65,11 +66,7 @@ OptimizeSolve::taoSolve()
   ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
 
-  // Print optimization data every step
-  if (getParam<bool>("verbose"))
-  {
-    TaoSetMonitor(_tao, monitor, nullptr, nullptr);
-  }
+  TaoSetMonitor(_tao, monitor, this, nullptr);
 
   switch (_tao_solver_enum)
   {
@@ -140,9 +137,8 @@ OptimizeSolve::taoSolve()
   ierr = TaoSolve(_tao);
   CHKERRQ(ierr);
 
-  // Setting data on reporter fixme lynn  this uses a custom execution flag to only call one
-  // reporter,  maybe there will be more
-  setTaoSolutionStatus(_tao);
+  // Setting data on reporter
+  //  setTaoSolutionStatus(_tao);  fixme lynn
 
   // Print solve statistics
   if (getParam<bool>("verbose"))
@@ -158,67 +154,78 @@ OptimizeSolve::taoSolve()
 }
 
 void
-OptimizeSolve::getTaoSolutionStatus(int & tot_iters,
-                                    double & gnorm,
-                                    int & obj_iters,
-                                    double & cnorm,
-                                    int & grad_iters,
-                                    double & xdiff,
-                                    int & hess_iters,
-                                    double & f) const
+OptimizeSolve::getTaoSolutionStatus(std::vector<int> & tot_iters,
+                                    std::vector<double> & gnorm,
+                                    std::vector<int> & obj_iters,
+                                    std::vector<double> & cnorm,
+                                    std::vector<int> & grad_iters,
+                                    std::vector<double> & xdiff,
+                                    std::vector<int> & hess_iters,
+                                    std::vector<double> & f) const
 {
-  tot_iters = _total_iterate;
-  obj_iters = _obj_iterate;
-  grad_iters = _grad_iterate;
-  hess_iters = _hess_iterate;
-  f = _f;
-  gnorm = _gnorm;
-  cnorm = _cnorm;
-  xdiff = _xdiff;
+  size_t num = _total_iterate_vec.size();
+  tot_iters.resize(num);
+  obj_iters.resize(num);
+  grad_iters.resize(num);
+  hess_iters.resize(num);
+  f.resize(num);
+  gnorm.resize(num);
+  cnorm.resize(num);
+  xdiff.resize(num);
+
+  for (size_t i = 0; i < num; ++i)
+  {
+    tot_iters[i] = _total_iterate_vec[i];
+    obj_iters[i] = _obj_iterate_vec[i];
+    grad_iters[i] = _grad_iterate_vec[i];
+    hess_iters[i] = _hess_iterate_vec[i];
+    f[i] = _f_vec[i];
+    gnorm[i] = _gnorm_vec[i];
+    cnorm[i] = _cnorm_vec[i];
+    xdiff[i] = _xdiff_vec[i];
+  }
 }
 
 void
-OptimizeSolve::setTaoSolutionStatus(Tao tao)
+OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnorm, double xdiff)
 {
-  TaoConvergedReason reason;
-  PetscInt its;
-  PetscReal f, gnorm, cnorm, xdiff;
-
-  TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
-
-  _total_iterate = (int)its;
-  _f = double(f);
-  _gnorm = double(gnorm);
-  _cnorm = double(cnorm);
-  _xdiff = double(xdiff);
+  // set data from TAO
+  _total_iterate_vec.push_back(its);
+  _f_vec.push_back(f);
+  _gnorm_vec.push_back(gnorm);
+  _cnorm_vec.push_back(cnorm);
+  _xdiff_vec.push_back(xdiff);
+  // set data we collect on this optimization iteration and then reset for next iteration
+  _obj_iterate_vec.push_back(_obj_iterate);
+  _grad_iterate_vec.push_back(_grad_iterate);
+  _hess_iterate_vec.push_back(_hess_iterate);
+  _obj_iterate = 0;
+  _grad_iterate = 0;
+  _hess_iterate = 0;
+  // print verbose per iteration output
+  if (_verbose)
+    _console << "****************** TAO SOLVER OUTPUT: iteration=" << its << "\tf=" << f
+             << "\tgnorm=" << gnorm << "\tcnorm=" << cnorm << "\txdiff=" << xdiff << std::endl;
 }
 
 PetscErrorCode
-OptimizeSolve::monitor(Tao tao, void * /*ctx*/)
+OptimizeSolve::monitor(Tao tao, void * ctx)
 {
   TaoConvergedReason reason;
   PetscInt its;
   PetscReal f, gnorm, cnorm, xdiff;
 
   TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
-  unsigned int print_nsteps = 1;
-  if (!(its % print_nsteps))
-  {
-    PetscPrintf(
-        PETSC_COMM_WORLD,
-        "****************** TAO SOLVER OUTPUT: iteration=%D\tf=%g\tgnorm=%g\tcnorm=%g\txdiff=%g\n",
-        its,
-        f,
-        gnorm,
-        cnorm,
-        xdiff);
-  }
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  solver->setTaoSolutionStatus((double)f, (int)its, (double)gnorm, (double)cnorm, (double)xdiff);
+
   return 0;
 }
 
 PetscErrorCode
 OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, void * ctx)
 {
+
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
