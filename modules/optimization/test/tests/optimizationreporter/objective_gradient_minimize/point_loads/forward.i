@@ -2,20 +2,30 @@
   type = GeneratedMesh
   dim = 2
   nx = 10
-  ny = 20
+  ny = 10
   xmax = 1
-  ymax = 2
+  ymax = 1.4
 []
 
 [Variables]
   [temperature]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[AuxVariables]
+  [saved_t]
+    order = FIRST
+    family = LAGRANGE
   []
 []
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temperature
+    save_in = saved_t
   []
 []
 
@@ -35,31 +45,31 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 0
+    value = 300
   []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
-    value = 0
+    value = 300
   []
   [bottom]
     type = DirichletBC
     variable = temperature
     boundary = bottom
-    value = 0
+    value = 300
   []
   [top]
     type = DirichletBC
     variable = temperature
     boundary = top
-    value = 0
+    value = 300
   []
 []
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []

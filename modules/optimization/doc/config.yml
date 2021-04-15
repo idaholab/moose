@@ -1,24 +1,47 @@
 Content:
-    isopod:
-        root_dir: ${ROOT_DIR}/doc/content
-    moose:
-        root_dir: ${MOOSE_DIR}/framework/doc/content
-        content:
-            - js/*
-            - css/*
-            - contrib/**
-            - media/**
+  - ${ROOT_DIR}/examples
+  - ${ROOT_DIR}/doc/content
+  - ${MOOSE_DIR}/framework/doc/content
+  - ${MOOSE_DIR}/modules/heat_conduction/doc/content
+  - ${MOOSE_DIR}/modules/stochastic_tools/doc/content
 
 Renderer:
-    type: MooseDocs.base.MaterializeRenderer
+  type: MooseDocs.base.MaterializeRenderer
 
 Extensions:
-    MooseDocs.extensions.navigation:
-        name: isopod
-    MooseDocs.extensions.appsyntax:
-        executable: ${ROOT_DIR}
-        hide:
-            framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
-        remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
-        includes:
-            - include
+  MooseDocs.extensions.navigation:
+    name: Isopod
+    repo: https://github.com/zachmprince/isopod
+    home: https://mooseframework.inl.gov/
+    menu:
+      Getting Started:
+        Theory: getting_started/InvOptTheory.md
+        Running Isopod: getting_started/RunningIsopod.md
+        Input Structure: getting_started/IsopodInputStructure.md
+      Syntax: syntax/index.md
+      Examples: examples/index.md
+
+  MooseDocs.extensions.appsyntax:
+    executable: ${ROOT_DIR}
+    remove:
+      framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+
+  MooseDocs.extensions.common:
+    shortcuts: !include ${MOOSE_DIR}/framework/doc/globals.yml
+
+  MooseDocs.extensions.acronym:
+    acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+
+  MooseDocs.extensions.template:
+        active: True
+  MooseDocs.extensions.sqa:
+      active: False
+      reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
+      repos:
+          default: https://github.com/idaholab/isopod
+          moose: https://github.com/idaholab/moose
+      categories:
+          framework: !include ${MOOSE_DIR}/framework/doc/sqa_framework.yml
+          stochastic_tools: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/sqa_stochastic_tools.yml
+          heat_conduction: !include ${MOOSE_DIR}/modules/heat_conduction/doc/sqa_heat_conduction.yml
+          isopod: !include ${ROOT_DIR}/doc/sqa_isopod.yml

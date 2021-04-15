@@ -14,11 +14,11 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temperature
   []
   [./heat_source]
-    type = ADMatHeatSource
+    type = MatHeatSource
     material_property = volumetric_heat
     variable = temperature
   [../]
@@ -62,12 +62,12 @@
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []
   [volumetric_heat]
-    type = ADGenericFunctionMaterial
+    type = GenericFunctionMaterial
     prop_names = 'volumetric_heat'
     prop_values = volumetric_heat_func
   []

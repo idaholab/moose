@@ -1,0 +1,33 @@
+Applications:
+    isopod:
+        exe_directory: ${ROOT_DIR}
+        exe_name: isopod
+        app_types:
+            - isopodApp
+        content_directory: doc/content
+
+Documents:
+    software_requirements_specification: sqa/isopod_srs.md
+    software_design_description: sqa/isopod_sdd.md
+    software_test_plan: sqa/isopod_stp.md
+    requirements_traceablity_matrix: sqa/isopod_rtm.md
+    verification_validation_report: sqa/isopod_vvr.md
+    failure_analysis_report: sqa/isopod_vvr.md
+    log_safety_software_determination: WARNING
+    log_quality_level_determination: WARNING
+    log_enterprise_architecture_entry: WARNING
+    log_project_management_plan: WARNING
+    log_software_quality_plan: WARNING
+    log_configuration_management_plan: WARNING
+    log_asset_management_plan: WARNING
+    log_verification_validation_plan: WARNING
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+    show_warning: false
+
+Requirements:
+    isopod:
+        directories:
+            - test/tests
+        log_testable: WARNING
+        show_warning: false

@@ -1,0 +1,4 @@
+specs:
+    - tests
+directories:
+    - ${ISOPOD_DIR}/test/tests

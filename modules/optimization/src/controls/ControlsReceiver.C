@@ -16,7 +16,9 @@ InputParameters
 ControlsReceiver::validParams()
 {
   InputParameters params = SamplerReceiver::validParams();
-  params.addClassDescription("Control for receiving data from an Optimization Transfer.");
+  params.addClassDescription(
+      "Control for receiving data from an Optimization Transfer.  Copy of SamplerReceiever with "
+      "OptimizationParameterTransfer added as friend class");
   return params;
 }
 
