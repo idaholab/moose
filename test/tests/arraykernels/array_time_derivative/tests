@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#14057'
+  design = '/variables/ArrayMooseVariable.md'
+
   [test_diffusion_reaction_transient]
     type = 'Exodiff'
     input = 'array_diffusion_reaction_transient.i'

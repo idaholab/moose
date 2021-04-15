@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#6881'
+  design = '/variables/ArrayMooseVariable.md'
+
+  [save_in]
+    requirement = 'MOOSE shall provide residual save-in and Jacobian diagonal save-in for'
+    [array]
+      type = 'Exodiff'
+      input = 'array_save_in.i'
+      exodiff = 'array_save_in_out.e'
+
+      detail = 'array and'
+    []
+    [test_standard_save_in]
+      # using standard variables to produce the exact output of the previous test
+      type = 'Exodiff'
+      input = 'standard_save_in.i'
+      exodiff = 'array_save_in_out.e'
+      prereq = save_in/array
+
+      detail = 'standard variables.'
+    []
+  []
+[]
