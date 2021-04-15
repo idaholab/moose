@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldTransfer.md'
+
+  [./tosub]
+    type = 'Exodiff'
+    input = 'tosub.i'
+    exodiff = 'tosub_out.e tosub_out_sub0.e tosub_out_sub1.e tosub_out_sub2.e'
+    requirement = "The system shall support general field transfer"
+  [../]
+[]
