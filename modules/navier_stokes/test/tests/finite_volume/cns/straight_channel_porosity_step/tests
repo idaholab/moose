@@ -1,8 +1,14 @@
 [Tests]
-  [step]
+  [step_ik]
     type = Exodiff
     input = mass-flux-impl-fvik.i
     exodiff = mass-flux-impl-fvik_out.e
-    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity.'
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using interface kernel objects.'
+  []
+  [step_fk]
+    type = Exodiff
+    input = mass-flux-impl-fvfk.i
+    exodiff = mass-flux-impl-fvfk_out.e
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using flux kernel objects.'
   []
 []
