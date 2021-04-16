@@ -80,7 +80,7 @@ SamplerTester::execute()
     DenseMatrix<Real> global = _sampler.getGlobalSamples();
 
     // Iterate through some
-    for (dof_id_type i = _sampler.getLocalRowBegin(); i < 7; ++i)
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(7); ++i)
     {
       std::vector<Real> row = _sampler.getNextLocalRow();
       for (unsigned int j = 0; j < 8; j++)
@@ -93,7 +93,7 @@ SamplerTester::execute()
     DenseMatrix<Real> local = _sampler.getLocalSamples();
 
     // Continue iteration
-    for (dof_id_type i = 7; i < _sampler.getLocalRowEnd(); ++i)
+    for (dof_id_type i = _sampler.getLocalRowBegin(7); i < _sampler.getLocalRowEnd(); ++i)
     {
       std::vector<Real> row = _sampler.getNextLocalRow();
       for (unsigned int j = 0; j < 8; j++)

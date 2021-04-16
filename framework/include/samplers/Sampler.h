@@ -109,6 +109,8 @@ public:
    */
   dof_id_type getLocalRowBegin() const;
   dof_id_type getLocalRowEnd() const;
+  dof_id_type getLocalRowBegin(const dof_id_type positive_offset) const;
+  dof_id_type getLocalRowEnd(const dof_id_type negative_offset) const;
   ///@}
 
 protected:

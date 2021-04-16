@@ -279,8 +279,11 @@ Sampler::getNextLocalRow()
   }
 
   if ((_next_local_row - _previous_next_local_row) != 1)
-    mooseError(
-        "The 'Sampler::getNextLocalRow' method must be called once, and only once per iteration.");
+  {
+    mooseError("The 'Sampler::getNextLocalRow' method must be called once, and only once per "
+               "iteration. To operate correctly the `Sampler::getLocalRowBegin()` and "
+               "`Sampler::getLocalRowEnd()` methods should be utilzed.");
+  }
 
   std::vector<Real> output(_n_cols);
   computeSampleRow(_next_local_row, output);
@@ -411,18 +414,34 @@ Sampler::getNumberOfLocalRows() const
 dof_id_type
 Sampler::getLocalRowBegin() const
 {
-  checkReinitStatus();
-  _next_local_row = _local_row_begin;
-  _previous_next_local_row = _next_local_row - 1;
-  return _local_row_begin;
+  return getLocalRowBegin(0);
 }
 
 dof_id_type
 Sampler::getLocalRowEnd() const
 {
+  return getLocalRowEnd(0);
+}
+
+dof_id_type
+Sampler::getLocalRowBegin(const dof_id_type positive_offset) const
+{
+  mooseAssert(positive_offset < _n_local_rows,
+              "The supplied positive offset must be less then the number of local rows");
+  checkReinitStatus();
+  _next_local_row = _local_row_begin + positive_offset;
+  _previous_next_local_row = _next_local_row;
+  return _local_row_begin;
+}
+
+dof_id_type
+Sampler::getLocalRowEnd(const dof_id_type negative_offset) const
+{
+  mooseAssert(negative_offset < _n_local_rows,
+              "The supplied negative offset must be less then the number of local rows");
   checkReinitStatus();
   _next_local_row++;
-  return _local_row_end;
+  return _local_row_end - negative_offset;
 }
 
 void
