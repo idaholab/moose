@@ -184,25 +184,25 @@ public:
   bool shouldHealMesh() const { return _heal_always; };
 
   /**
-   * Get an unsigned integer telling which side the node belongs to relative to the cut.
+   * Get CutSubdomainID telling which side the node belongs to relative to the cut.
    * The returned ID contains no physical meaning, but should be consistent throughout the
    * simulation.
    * @param node   Pointer to the node
    * @return       An unsigned int indicating the side
    */
-  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * /*node*/) const
+  virtual CutSubdomainID getCutSubdomainID(const Node * /*node*/) const
   {
     mooseError("Objects that inherit from GeometricCutUserObject should override the "
-               "getGeometricCutSubdomainID method");
+               "getCutSubdomainID method");
     return 0;
   }
 
   /**
-   * Get the GeometricCutSubdomainID for the given element.
+   * Get the CutSubdomainID for the given element.
    * @param node   Pointer to the element
-   * @return       The GeometricCutSubdomainID
+   * @return       The CutSubdomainID
    */
-  GeometricCutSubdomainID getGeometricCutSubdomainID(const Elem * elem) const;
+  CutSubdomainID getCutSubdomainID(const Elem * elem) const;
 
 protected:
   /// Pointer to the XFEM controller object

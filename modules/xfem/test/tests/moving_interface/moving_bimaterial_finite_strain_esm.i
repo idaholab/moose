@@ -18,7 +18,7 @@
     heal_always = true
   []
   [esm]
-    type = GeometricCutElementSubdomainModifier
+    type = CutElementSubdomainModifier
     geometric_cut_userobject = level_set_cut_uo
     apply_initial_conditions = false
   []

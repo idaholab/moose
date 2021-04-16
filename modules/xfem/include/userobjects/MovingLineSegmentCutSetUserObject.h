@@ -34,7 +34,7 @@ public:
 
   virtual Real cutFraction(unsigned int cut_num, Real time) const override;
 
-  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * node) const override;
+  virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
 
 protected:
   /// Calculate the signed distance function at a point
@@ -43,9 +43,9 @@ protected:
   /// Pointer to XFEMMovingInterfaceVelocityBase object
   const XFEMMovingInterfaceVelocityBase * _interface_velocity;
 
-  /// The GeometricCutSubdomainID for the negative side of the cut
-  const GeometricCutSubdomainID _negative_id;
+  /// The CutSubdomainID for the negative side of the cut
+  const CutSubdomainID _negative_id;
 
-  /// The GeometricCutSubdomainID for the positive side of the cut
-  const GeometricCutSubdomainID _positive_id;
+  /// The CutSubdomainID for the positive side of the cut
+  const CutSubdomainID _positive_id;
 };

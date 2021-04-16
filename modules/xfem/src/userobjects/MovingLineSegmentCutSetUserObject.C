@@ -19,12 +19,10 @@ MovingLineSegmentCutSetUserObject::validParams()
                                           "The name of userobject that computes the velocity.");
   params.addClassDescription(
       "Creates a UserObject for a moving line segment cut on 2D meshes for XFEM");
-  params.addParam<GeometricCutSubdomainID>(
-      "negative_id",
-      0,
-      "The GeometricCutSubdomainID corresponding to a non-positive signed distance");
-  params.addParam<GeometricCutSubdomainID>(
-      "positive_id", 1, "The GeometricCutSubdomainID corresponding to a positive signed distance");
+  params.addParam<CutSubdomainID>(
+      "negative_id", 0, "The CutSubdomainID corresponding to a non-positive signed distance");
+  params.addParam<CutSubdomainID>(
+      "positive_id", 1, "The CutSubdomainID corresponding to a positive signed distance");
   return params;
 }
 
@@ -32,8 +30,8 @@ MovingLineSegmentCutSetUserObject::MovingLineSegmentCutSetUserObject(
     const InputParameters & parameters)
   : LineSegmentCutSetUserObject(parameters),
     _interface_velocity(&getUserObject<XFEMMovingInterfaceVelocityBase>("interface_velocity")),
-    _negative_id(getParam<GeometricCutSubdomainID>("negative_id")),
-    _positive_id(getParam<GeometricCutSubdomainID>("positive_id"))
+    _negative_id(getParam<CutSubdomainID>("negative_id")),
+    _positive_id(getParam<CutSubdomainID>("positive_id"))
 {
 }
 
@@ -111,8 +109,8 @@ MovingLineSegmentCutSetUserObject::cutFraction(unsigned int /*cut_num*/, Real /*
   return 1;
 }
 
-GeometricCutSubdomainID
-MovingLineSegmentCutSetUserObject::getGeometricCutSubdomainID(const Node * node) const
+CutSubdomainID
+MovingLineSegmentCutSetUserObject::getCutSubdomainID(const Node * node) const
 {
   return calculateSignedDistance(*node) > 0.0 ? _positive_id : _negative_id;
 }

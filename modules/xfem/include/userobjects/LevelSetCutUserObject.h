@@ -43,7 +43,7 @@ public:
    * @param node Pointer to the node
    * @return an unsigned int indicating the side
    */
-  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * node) const override;
+  virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
 
 protected:
   /// The variable number of the level set variable we using to define the cuts
@@ -56,8 +56,8 @@ protected:
   const NumericVector<Number> & _solution;
 
   /// The ID for the negative side of the cut
-  const GeometricCutSubdomainID _negative_id;
+  const CutSubdomainID _negative_id;
 
   /// The ID for the positive side of the cut
-  const GeometricCutSubdomainID _positive_id;
+  const CutSubdomainID _positive_id;
 };

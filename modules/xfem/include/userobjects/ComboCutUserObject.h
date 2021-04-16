@@ -77,13 +77,13 @@ public:
     mooseError("getCrackFrontPoints() is not implemented for this object.");
   }
 
-  // Get the GeometricCutSubdomainID for each provided geometric cut, then lookup the resulting
-  // combo GeometricCutSubdomainID in the user-specified dictionary.
-  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * node) const override;
+  // Get the CutSubdomainID for each provided geometric cut, then lookup the resulting
+  // combo CutSubdomainID in the user-specified dictionary.
+  virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
 
 protected:
 private:
-  /// Helper function to build the dictionary for composite GeometricCutSubdomainID look-up
+  /// Helper function to build the dictionary for composite CutSubdomainID look-up
   void buildMap();
 
   /// Vector of names of GeometricCutUserObjects to be combined
@@ -96,14 +96,14 @@ private:
   std::vector<const GeometricCutUserObject *> _cuts;
 
   /// Keys read from the input file, to be parsed by buildMap()
-  std::vector<GeometricCutSubdomainID> _keys;
+  std::vector<CutSubdomainID> _keys;
 
   /// Values read from the input file, to be parsed by buildMap()
-  std::vector<GeometricCutSubdomainID> _vals;
+  std::vector<CutSubdomainID> _vals;
 
   /**
-   * The dictionary for composite GeometricCutSubdomainID look-up. Keys are combinations of the
-   * GeometricCutSubdomainIDs, values are the composite GeometricCutSubdomainIDs.
+   * The dictionary for composite CutSubdomainID look-up. Keys are combinations of the
+   * CutSubdomainIDs, values are the composite CutSubdomainIDs.
    */
-  std::map<std::vector<GeometricCutSubdomainID>, GeometricCutSubdomainID> _combo_ids;
+  std::map<std::vector<CutSubdomainID>, CutSubdomainID> _combo_ids;
 };

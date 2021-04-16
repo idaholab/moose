@@ -280,8 +280,8 @@ GeometricCutUserObject::finalize()
   _marked_elems_3d.clear();
 }
 
-GeometricCutSubdomainID
-GeometricCutUserObject::getGeometricCutSubdomainID(const Elem * elem) const
+CutSubdomainID
+GeometricCutUserObject::getCutSubdomainID(const Elem * elem) const
 {
-  return _xfem->getGeometricCutSubdomainID(this, elem);
+  return _xfem->getCutSubdomainID(this, elem);
 }

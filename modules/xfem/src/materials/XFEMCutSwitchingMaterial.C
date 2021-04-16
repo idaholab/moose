@@ -7,33 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GeometricCutSwitchingMaterial.h"
+#include "XFEMCutSwitchingMaterial.h"
 
-registerMooseObject("XFEMApp", GeometricCutSwitchingMaterialReal);
-registerMooseObject("XFEMApp", GeometricCutSwitchingMaterialRankTwoTensor);
-registerMooseObject("XFEMApp", GeometricCutSwitchingMaterialRankThreeTensor);
-registerMooseObject("XFEMApp", GeometricCutSwitchingMaterialRankFourTensor);
+registerMooseObject("XFEMApp", XFEMCutSwitchingMaterialReal);
+registerMooseObject("XFEMApp", XFEMCutSwitchingMaterialRankTwoTensor);
+registerMooseObject("XFEMApp", XFEMCutSwitchingMaterialRankThreeTensor);
+registerMooseObject("XFEMApp", XFEMCutSwitchingMaterialRankFourTensor);
 
-registerMooseObject("XFEMApp", ADGeometricCutSwitchingMaterialReal);
-registerMooseObject("XFEMApp", ADGeometricCutSwitchingMaterialRankTwoTensor);
-registerMooseObject("XFEMApp", ADGeometricCutSwitchingMaterialRankThreeTensor);
-registerMooseObject("XFEMApp", ADGeometricCutSwitchingMaterialRankFourTensor);
+registerMooseObject("XFEMApp", ADXFEMCutSwitchingMaterialReal);
+registerMooseObject("XFEMApp", ADXFEMCutSwitchingMaterialRankTwoTensor);
+registerMooseObject("XFEMApp", ADXFEMCutSwitchingMaterialRankThreeTensor);
+registerMooseObject("XFEMApp", ADXFEMCutSwitchingMaterialRankFourTensor);
 
 template <typename T, bool is_ad>
 InputParameters
-GeometricCutSwitchingMaterialTempl<T, is_ad>::validParams()
+XFEMCutSwitchingMaterialTempl<T, is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Switch the material property based on the GeometricCutSubdomainID.");
+  params.addClassDescription("Switch the material property based on the CutSubdomainID.");
   params.addRequiredParam<UserObjectName>("geometric_cut_userobject",
                                           "The geometric cut userobject");
-  params.addRequiredParam<std::vector<GeometricCutSubdomainID>>(
-      "base_name_keys",
-      "The keys of the base_name map. Keys are GeometricCutSubdomainIDs set by the geometric cut "
-      "userobject.");
+  params.addRequiredParam<std::vector<CutSubdomainID>>(
+      "cut_subdomain_ids", "The CutSubdomainIDs that the geometric_cut_userobject may provide.");
   params.addRequiredParam<std::vector<std::string>>(
-      "base_name_vals",
-      "The values of the base_name map. Values are base_names for each of the material property.");
+      "base_names", "The base_names for each of the cut subdomain.");
   params.addParam<std::string>("base_name",
                                "Base name to prepend for the computed material property.");
   params.addRequiredParam<std::string>("prop_name", "name of the material property to switch");
@@ -41,12 +38,12 @@ GeometricCutSwitchingMaterialTempl<T, is_ad>::validParams()
 }
 
 template <typename T, bool is_ad>
-GeometricCutSwitchingMaterialTempl<T, is_ad>::GeometricCutSwitchingMaterialTempl(
+XFEMCutSwitchingMaterialTempl<T, is_ad>::XFEMCutSwitchingMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _cut(&getUserObject<GeometricCutUserObject>("geometric_cut_userobject")),
-    _keys(getParam<std::vector<GeometricCutSubdomainID>>("base_name_keys")),
-    _vals(getParam<std::vector<std::string>>("base_name_vals")),
+    _keys(getParam<std::vector<CutSubdomainID>>("cut_subdomain_ids")),
+    _vals(getParam<std::vector<std::string>>("base_names")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _prop_name(getParam<std::string>("prop_name")),
     _prop(declareGenericProperty<T, is_ad>(_base_name + _prop_name))
@@ -70,9 +67,9 @@ GeometricCutSwitchingMaterialTempl<T, is_ad>::GeometricCutSwitchingMaterialTempl
 
 template <typename T, bool is_ad>
 void
-GeometricCutSwitchingMaterialTempl<T, is_ad>::computeProperties()
+XFEMCutSwitchingMaterialTempl<T, is_ad>::computeProperties()
 {
-  GeometricCutSubdomainID key = _xfem->getGeometricCutSubdomainID(_cut, _current_elem);
+  CutSubdomainID key = _xfem->getCutSubdomainID(_cut, _current_elem);
 
   // We may run into situations where the key doesn't exist in the base_name_map. This may happen
   // when the problem is not well defined, or the level-set variables are very nonlinear, so that
@@ -84,7 +81,7 @@ GeometricCutSwitchingMaterialTempl<T, is_ad>::computeProperties()
   }
   catch (std::out_of_range &)
   {
-    throw MooseException(name() + ": Unknown GeometricCutSubdomainID: " + Moose::stringify(key) +
+    throw MooseException(name() + ": Unknown CutSubdomainID: " + Moose::stringify(key) +
                          ", which is not "
                          "provided in the base_name_keys");
   }
@@ -92,12 +89,12 @@ GeometricCutSwitchingMaterialTempl<T, is_ad>::computeProperties()
   Material::computeProperties();
 }
 
-template class GeometricCutSwitchingMaterialTempl<Real, false>;
-template class GeometricCutSwitchingMaterialTempl<RankTwoTensor, false>;
-template class GeometricCutSwitchingMaterialTempl<RankThreeTensor, false>;
-template class GeometricCutSwitchingMaterialTempl<RankFourTensor, false>;
+template class XFEMCutSwitchingMaterialTempl<Real, false>;
+template class XFEMCutSwitchingMaterialTempl<RankTwoTensor, false>;
+template class XFEMCutSwitchingMaterialTempl<RankThreeTensor, false>;
+template class XFEMCutSwitchingMaterialTempl<RankFourTensor, false>;
 
-template class GeometricCutSwitchingMaterialTempl<Real, true>;
-template class GeometricCutSwitchingMaterialTempl<RankTwoTensor, true>;
-template class GeometricCutSwitchingMaterialTempl<RankThreeTensor, true>;
-template class GeometricCutSwitchingMaterialTempl<RankFourTensor, true>;
+template class XFEMCutSwitchingMaterialTempl<Real, true>;
+template class XFEMCutSwitchingMaterialTempl<RankTwoTensor, true>;
+template class XFEMCutSwitchingMaterialTempl<RankThreeTensor, true>;
+template class XFEMCutSwitchingMaterialTempl<RankFourTensor, true>;

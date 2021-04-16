@@ -50,40 +50,40 @@ enum XFEM_QRULE
 typedef std::array<std::unordered_map<unsigned int, std::string>, 2> CachedMaterialProperties;
 
 /**
- * Information about a geometrically cut element. This is a tuple of (0) the parent
- * element, (1) the geometric cut userobject that cuts the element, (2) the geometric cut
+ * Information about a cut element. This is a tuple of (0) the parent
+ * element, (1) the geometric cut userobject that cuts the element, (2) the cut
  * subdomain ID, and (3) the stateful material properties.
  */
-struct GeometricCutElemInfo
+struct CutElemInfo
 {
   const Elem * _parent_elem;
   const GeometricCutUserObject * _geometric_cut;
-  GeometricCutSubdomainID _geometric_cut_subdomain_id;
+  CutSubdomainID _cut_subdomain_id;
   CachedMaterialProperties _elem_material_properties;
   CachedMaterialProperties _bnd_material_properties;
   // TODO: add neighbor material properties
   // CachedMaterialProperties _neighbor_material_properties;
 
-  GeometricCutElemInfo()
+  CutElemInfo()
     : _parent_elem(nullptr),
       _geometric_cut(nullptr),
-      _geometric_cut_subdomain_id(std::numeric_limits<GeometricCutSubdomainID>::max())
+      _cut_subdomain_id(std::numeric_limits<CutSubdomainID>::max())
   {
   }
 
-  GeometricCutElemInfo(const Elem * parent_elem,
-                       const GeometricCutUserObject * geometric_cut,
-                       GeometricCutSubdomainID geometric_cut_subdomain_id)
-    : _parent_elem(parent_elem),
-      _geometric_cut(geometric_cut),
-      _geometric_cut_subdomain_id(geometric_cut_subdomain_id)
+  CutElemInfo(const Elem * parent_elem,
+              const GeometricCutUserObject * geometric_cut,
+              CutSubdomainID cut_subdomain_id)
+    : _parent_elem(parent_elem), _geometric_cut(geometric_cut), _cut_subdomain_id(cut_subdomain_id)
   {
   }
 
-  bool match(const GeometricCutElemInfo & rhs)
+  // A new child element is said to be previously healed if an entry in the old CutElemInfo has the
+  // same parent element ID, the same cut, AND the same cut subdomain ID.
+  bool match(const CutElemInfo & rhs)
   {
     return _parent_elem == rhs._parent_elem && _geometric_cut == rhs._geometric_cut &&
-           _geometric_cut_subdomain_id == rhs._geometric_cut_subdomain_id;
+           _cut_subdomain_id == rhs._cut_subdomain_id;
   }
 };
 } // namespace Xfem
@@ -303,14 +303,14 @@ public:
   }
 
   /**
-   * Determine which cut subdomain of the element belongs to relative to the cut
+   * Determine which cut subdomain the element belongs to relative to the cut
    * @param gcuo        The GeometricCutUserObject for the cut
    * @param cut_elem    The element being cut
    * @param parent_elem The parent element
    */
-  GeometricCutSubdomainID getGeometricCutSubdomainID(const GeometricCutUserObject * gcuo,
-                                                     const Elem * cut_elem,
-                                                     const Elem * parent_elem = nullptr) const;
+  CutSubdomainID getCutSubdomainID(const GeometricCutUserObject * gcuo,
+                                   const Elem * cut_elem,
+                                   const Elem * parent_elem = nullptr) const;
 
 private:
   bool _has_secondary_cut;
@@ -376,16 +376,16 @@ private:
   std::map<unique_id_type, std::vector<Real>> _cached_aux_solution;
 
   /**
-   * All geometrically cut elements and their GeometricCutElemInfo during the current execution of
+   * All geometrically cut elements and their CutElemInfo during the current execution of
    * XFEM_MARK. This data structure is updated everytime a new cut element is created.
    */
-  std::unordered_map<const Elem *, Xfem::GeometricCutElemInfo> _geom_cut_elems;
+  std::unordered_map<const Elem *, Xfem::CutElemInfo> _geom_cut_elems;
 
   /**
-   * All geometrically cut elements and their GeometricCutElemInfo before the current execution of
+   * All geometrically cut elements and their CutElemInfo before the current execution of
    * XFEM_MARK.
    */
-  std::unordered_map<const Elem *, Xfem::GeometricCutElemInfo> _old_geom_cut_elems;
+  std::unordered_map<const Elem *, Xfem::CutElemInfo> _old_geom_cut_elems;
 
   /**
    * Store the solution in stored_solution for a given node
@@ -515,12 +515,12 @@ private:
    * Helper function to store the material properties of a healed element
    * @param elem         The cut element to restore material properties to.
    * @param elem_from    The element to copy material properties from.
-   * @param cached_gcei  The material properties cache to use.
+   * @param cached_cei   The material properties cache to use.
    */
   void loadMaterialPropertiesForElement(
       const Elem * elem,
       const Elem * elem_from,
-      std::unordered_map<const Elem *, Xfem::GeometricCutElemInfo> & cached_gcei) const;
+      std::unordered_map<const Elem *, Xfem::CutElemInfo> & cached_cei) const;
 
   /**
    * Return the first node in the provided element that is found to be in the physical domain
@@ -528,5 +528,5 @@ private:
    * @param e0 Constant pointer to the parent element whose nodes will be querried
    * @return A constant pointer to the node
    */
-  const Node * pickOnePhysicalNode(const Elem * e, const Elem * e0) const;
+  const Node * pickFirstPhysicalNode(const Elem * e, const Elem * e0) const;
 };

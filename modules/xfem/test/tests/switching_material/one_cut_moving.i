@@ -43,7 +43,7 @@
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [cut_id]
-    type = GeometricCutSubdomainIDAux
+    type = CutSubdomainIDAux
     variable = cut_id
     cut = cut
   []
@@ -61,9 +61,9 @@
     prop_values = '0.5'
   []
   [diff_combined]
-    type = GeometricCutSwitchingMaterialReal
-    base_name_keys = '1 33'
-    base_name_vals = 'A B'
+    type = XFEMCutSwitchingMaterialReal
+    cut_subdomain_ids = '1 33'
+    base_names = 'A B'
     prop_name = D
     geometric_cut_userobject = cut
     outputs = 'exodus'

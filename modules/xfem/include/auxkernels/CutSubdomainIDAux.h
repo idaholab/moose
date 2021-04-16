@@ -9,18 +9,20 @@
 
 #pragma once
 
-#include "ElementSubdomainModifier.h"
-#include "XFEM.h"
+#include "AuxKernel.h"
+#include "GeometricCutUserObject.h"
 
-class GeometricCutElementSubdomainModifier : public ElementSubdomainModifier
+class XFEM;
+
+class CutSubdomainIDAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  GeometricCutElementSubdomainModifier(const InputParameters & parameters);
+  CutSubdomainIDAux(const InputParameters & parameters);
 
 protected:
-  virtual SubdomainID computeSubdomainID() override;
+  virtual Real computeValue();
 
 private:
   /// Pointer to the GeometricCutUserObject

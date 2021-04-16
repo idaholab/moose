@@ -112,7 +112,7 @@
     unique_id = true
     requirement = 'The XFEM module shall provide an ability to modify subdomain IDs based on an XFEM '
                   'interface.'
-    design = 'GeometricCutElementSubdomainModifier.md'
+    design = 'CutElementSubdomainModifier.md'
     issues = '#15817'
   []
   [moving_diffusion]

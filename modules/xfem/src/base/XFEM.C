@@ -955,8 +955,8 @@ XFEM::healMesh()
 
         if (_geometric_cuts[i]->shouldHealMesh())
           // If the parent element will not be re-cut, then all of its nodes must have the same
-          // GeometricCutSubdomainID. Therefore, just query the first node in this parent element to
-          // get its GeometricCutSubdomainID.
+          // CutSubdomainID. Therefore, just query the first node in this parent element to
+          // get its CutSubdomainID.
           for (auto e : healed_elems)
             if (elem1->processor_id() == _mesh->processor_id() &&
                 e->processor_id() == _mesh->processor_id())
@@ -964,9 +964,9 @@ XFEM::healMesh()
               storeMaterialPropertiesForElement(/*parent_elem = */ elem1, /*child_elem = */ e);
               // In case the healed element is not re-cut, copy the corresponding material
               // properties to the parent element now than later.
-              GeometricCutSubdomainID parent_gcsid =
-                  _geometric_cuts[i]->getGeometricCutSubdomainID(elem1->node_ptr(0));
-              GeometricCutSubdomainID gcsid = _geom_cut_elems[e]._geometric_cut_subdomain_id;
+              CutSubdomainID parent_gcsid =
+                  _geometric_cuts[i]->getCutSubdomainID(elem1->node_ptr(0));
+              CutSubdomainID gcsid = _geom_cut_elems[e]._cut_subdomain_id;
               if (parent_gcsid == gcsid)
                 loadMaterialPropertiesForElement(elem1, e, _geom_cut_elems);
             }
@@ -1387,17 +1387,17 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       const GeometricCutUserObject * gcuo = getGeometricCutForElem(parent_elem);
       if (gcuo && gcuo->shouldHealMesh())
       {
-        GeometricCutSubdomainID gcsid = getGeometricCutSubdomainID(gcuo, libmesh_elem, parent_elem);
-        Xfem::GeometricCutElemInfo gcei(parent_elem, gcuo, gcsid);
-        _geom_cut_elems.emplace(libmesh_elem, gcei);
+        CutSubdomainID gcsid = getCutSubdomainID(gcuo, libmesh_elem, parent_elem);
+        Xfem::CutElemInfo cei(parent_elem, gcuo, gcsid);
+        _geom_cut_elems.emplace(libmesh_elem, cei);
         // Find the element to copy data from.
         // Iterate through the old geometrically cut elements, if its parent element AND the
-        // geometric cut user object AND the geometric cut subdomain ID are the same as the
+        // geometric cut user object AND the cut subdomain ID are the same as the
         // current element, then that must be it.
-        for (auto old_gcei : _old_geom_cut_elems)
-          if (gcei.match(old_gcei.second))
+        for (auto old_cei : _old_geom_cut_elems)
+          if (cei.match(old_cei.second))
           {
-            loadMaterialPropertiesForElement(libmesh_elem, old_gcei.first, _old_geom_cut_elems);
+            loadMaterialPropertiesForElement(libmesh_elem, old_cei.first, _old_geom_cut_elems);
             if (_debug_output_level > 1)
               _console << "XFEM set material properties for element: " << libmesh_elem->id()
                        << "\n";
@@ -2205,15 +2205,15 @@ void
 XFEM::loadMaterialPropertiesForElement(
     const Elem * elem,
     const Elem * elem_from,
-    std::unordered_map<const Elem *, Xfem::GeometricCutElemInfo> & cached_gcei) const
+    std::unordered_map<const Elem *, Xfem::CutElemInfo> & cached_cei) const
 {
   // Restore the element material properties
-  mooseAssert(cached_gcei.count(elem_from) > 0, "XFEM: Unable to find cached material properties.");
-  Xfem::GeometricCutElemInfo & gcei = cached_gcei[elem_from];
+  mooseAssert(cached_cei.count(elem_from) > 0, "XFEM: Unable to find cached material properties.");
+  Xfem::CutElemInfo & cei = cached_cei[elem_from];
 
   // Load element material properties from cached properties
   loadMaterialPropertiesForElementHelper(
-      elem, gcei._elem_material_properties, (*_material_data)[0]->getMaterialPropertyStorage());
+      elem, cei._elem_material_properties, (*_material_data)[0]->getMaterialPropertyStorage());
 
   // Check if any of the element side need material properties
   bool need_boundary_materials = false;
@@ -2228,26 +2228,25 @@ XFEM::loadMaterialPropertiesForElement(
 
   // Load boundary material properties from cached properties
   if (need_boundary_materials)
-    loadMaterialPropertiesForElementHelper(elem,
-                                           gcei._bnd_material_properties,
-                                           (*_bnd_material_data)[0]->getMaterialPropertyStorage());
+    loadMaterialPropertiesForElementHelper(
+        elem, cei._bnd_material_properties, (*_bnd_material_data)[0]->getMaterialPropertyStorage());
 }
 
-GeometricCutSubdomainID
-XFEM::getGeometricCutSubdomainID(const GeometricCutUserObject * gcuo,
-                                 const Elem * cut_elem,
-                                 const Elem * parent_elem) const
+CutSubdomainID
+XFEM::getCutSubdomainID(const GeometricCutUserObject * gcuo,
+                        const Elem * cut_elem,
+                        const Elem * parent_elem) const
 {
   if (!parent_elem)
     parent_elem = cut_elem;
   // Pick any node from the parent element that is inside the physical domain and return its
-  // GeometricCutSubdomainID.
-  const Node * node = pickOnePhysicalNode(cut_elem, parent_elem);
-  return gcuo->getGeometricCutSubdomainID(node);
+  // CutSubdomainID.
+  const Node * node = pickFirstPhysicalNode(cut_elem, parent_elem);
+  return gcuo->getCutSubdomainID(node);
 }
 
 const Node *
-XFEM::pickOnePhysicalNode(const Elem * e, const Elem * e0) const
+XFEM::pickFirstPhysicalNode(const Elem * e, const Elem * e0) const
 {
   for (auto i : e0->node_index_range())
     if (isPointInsidePhysicalDomain(e, e0->node_ref(i)))

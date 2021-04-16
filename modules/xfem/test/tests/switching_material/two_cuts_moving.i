@@ -24,12 +24,9 @@
   []
   [combo]
     type = ComboCutUserObject
-    cuts = 'cut1 cut2'
-    keys = '1 5
-            1 16
-            33 5
-            33 16'
-    vals = '1 3 5 7'
+    geometric_cut_userobjects = 'cut1 cut2'
+    cut_subdomain_combinations = '1 5 1 16 33 5 33 16'
+    cut_subdomains = '1 3 5 7'
     heal_always = true
   []
 []
@@ -76,17 +73,17 @@
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [cut1_id]
-    type = GeometricCutSubdomainIDAux
+    type = CutSubdomainIDAux
     variable = cut1_id
     cut = cut1
   []
   [cut2_id]
-    type = GeometricCutSubdomainIDAux
+    type = CutSubdomainIDAux
     variable = cut2_id
     cut = cut2
   []
   [combo_id]
-    type = GeometricCutSubdomainIDAux
+    type = CutSubdomainIDAux
     variable = combo_id
     cut = combo
   []
@@ -114,9 +111,9 @@
     prop_values = '9'
   []
   [diff_combined]
-    type = GeometricCutSwitchingMaterialReal
-    base_name_keys = '1 3 5 7'
-    base_name_vals = 'A B C D'
+    type = XFEMCutSwitchingMaterialReal
+    cut_subdomain_ids = '1 3 5 7'
+    base_names = 'A B C D'
     prop_name = D
     geometric_cut_userobject = combo
     outputs = 'exodus'
