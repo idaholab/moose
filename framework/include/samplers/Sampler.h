@@ -286,8 +286,14 @@ private:
   /// Number of seeds
   std::size_t _n_seeds;
 
+  /// The following two members are marked mutable to allow for the getLocalRowBegin/End to operate
+  /// correctly for const object/functions, this index is to track the iteration for the
+  /// getNextLocalRow, it doesn't affect the state of the sampler.
   /// Iterator index for getNextLocalRow method
-  dof_id_type _next_local_row;
+  mutable dof_id_type _next_local_row;
+
+  /// Iterator index to make sure getNextLocalRow is called only once per iteration
+  mutable dof_id_type _previous_next_local_row;
 
   /// Flag for restoring state during getNextLocalRow iteration
   bool _next_local_row_requires_state_restore;

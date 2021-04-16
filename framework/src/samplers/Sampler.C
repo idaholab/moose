@@ -59,6 +59,8 @@ Sampler::Sampler(const InputParameters & parameters)
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),
+    _next_local_row(0),
+    _previous_next_local_row(0),
     _next_local_row_requires_state_restore(true),
     _initialized(false),
     _needs_reinit(true),
@@ -152,9 +154,6 @@ Sampler::reinit()
   else
     MooseUtils::linearPartitionItems(
         _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
-
-  // Set the next row iterator index
-  _next_local_row = _local_row_begin;
 
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
@@ -279,10 +278,13 @@ Sampler::getNextLocalRow()
                  ".");
   }
 
+  if ((_next_local_row - _previous_next_local_row) != 1)
+    mooseError(
+        "The 'Sampler::getNextLocalRow' method must be called once, and only once per iteration.");
+
   std::vector<Real> output(_n_cols);
   computeSampleRow(_next_local_row, output);
   mooseAssert(output.size() == _n_cols, "The row of sample data is not sized correctly.");
-  _next_local_row++;
 
   if (_next_local_row == _local_row_end)
   {
@@ -292,6 +294,7 @@ Sampler::getNextLocalRow()
     _next_local_row_requires_state_restore = true;
   }
 
+  _previous_next_local_row = _next_local_row;
   return output;
 }
 
@@ -409,6 +412,8 @@ dof_id_type
 Sampler::getLocalRowBegin() const
 {
   checkReinitStatus();
+  _next_local_row = _local_row_begin;
+  _previous_next_local_row = _next_local_row - 1;
   return _local_row_begin;
 }
 
@@ -416,6 +421,7 @@ dof_id_type
 Sampler::getLocalRowEnd() const
 {
   checkReinitStatus();
+  _next_local_row++;
   return _local_row_end;
 }
 
