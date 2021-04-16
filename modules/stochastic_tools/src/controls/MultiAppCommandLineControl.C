@@ -103,64 +103,36 @@ MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
 
-  // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
-  // store only param_names once in "cli_args". For other MultApp, we store the full information
-  // of params_names and values for each sampler.
+  // To avoid storing duplicated param_names for each sampler, we store only param_names once in
+  // "cli_args".
 
-  if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
+  // Handle a couple errors up front regarding bracket expressions
+  bool has_brackets = false;
+  if (_param_names.size())
   {
-    if (_sampler.getNumberOfCols() != _param_names.size())
-      paramError("param_names",
-                 "The number of columns (",
-                 _sampler.getNumberOfCols(),
-                 ") must match the number of parameters (",
-                 _param_names.size(),
-                 ").");
-
-    for (dof_id_type row = _sampler.getLocalRowBegin(); row < _sampler.getLocalRowEnd(); ++row)
-    {
-      std::vector<Real> data = _sampler.getNextLocalRow();
-      std::ostringstream oss;
-      for (std::size_t col = 0; col < data.size(); ++col)
-      {
-        if (col > 0)
-          oss << ";";
-        oss << _param_names[col] << "=" << Moose::stringify(data[col]);
-      }
-
-      cli_args.push_back(oss.str());
-    }
+    has_brackets = _param_names[0].find("[") != std::string::npos;
+    for (unsigned int i = 1; i < _param_names.size(); ++i)
+      if (has_brackets != (_param_names[i].find("[") != std::string::npos))
+        paramError("param_names",
+                   "If the bracket is used, it must be provided to every parameter.");
   }
-  else
+  if (!has_brackets && _sampler.getNumberOfCols() != _param_names.size())
+    paramError("param_names",
+               "The number of columns (",
+               _sampler.getNumberOfCols(),
+               ") must match the number of parameters (",
+               _param_names.size(),
+               ").");
+
+  std::ostringstream oss;
+  for (dof_id_type col = 0; col < _param_names.size(); ++col)
   {
-    // Handle a couple errors up front regarding bracket expressions
-    bool has_brackets = false;
-    if (_param_names.size())
-    {
-      has_brackets = _param_names[0].find("[") != std::string::npos;
-      for (unsigned int i = 1; i < _param_names.size(); ++i)
-        if (has_brackets != (_param_names[i].find("[") != std::string::npos))
-          paramError("param_names",
-                     "If the bracket is used, it must be provided to every parameter.");
-    }
-    if (!has_brackets && _sampler.getNumberOfCols() != _param_names.size())
-      paramError("param_names",
-                 "The number of columns (",
-                 _sampler.getNumberOfCols(),
-                 ") must match the number of parameters (",
-                 _param_names.size(),
-                 ").");
-
-    std::ostringstream oss;
-    for (dof_id_type col = 0; col < _param_names.size(); ++col)
-    {
-      if (col > 0)
-        oss << ";";
-      oss << _param_names[col];
-    }
-
-    cli_args.push_back(oss.str());
+    if (col > 0)
+      oss << ";";
+    oss << _param_names[col];
   }
+
+  cli_args.push_back(oss.str());
 
   setControllableValueByName<std::vector<std::string>>(
       "MultiApp", _multi_app->name(), "cli_args", cli_args);

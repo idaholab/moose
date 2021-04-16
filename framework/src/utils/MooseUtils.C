@@ -215,7 +215,10 @@ pathExists(const std::string & path)
 }
 
 bool
-checkFileReadable(const std::string & filename, bool check_line_endings, bool throw_on_unreadable)
+checkFileReadable(const std::string & filename,
+                  bool check_line_endings,
+                  bool throw_on_unreadable,
+                  bool check_for_git_lfs_pointer)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
@@ -239,9 +242,29 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
         mooseError(filename + " contains Windows(DOS) line endings which are not supported.");
   }
 
+  if (check_for_git_lfs_pointer && checkForGitLFSPointer(in))
+    mooseError(filename + " appears to be a Git-LFS pointer. Make sure you have \"git-lfs\" "
+                          "installed so that you may pull this file.");
   in.close();
 
   return true;
+}
+
+bool
+checkForGitLFSPointer(std::ifstream & file)
+{
+  mooseAssert(file.is_open(), "Passed in file handle is not open");
+
+  std::string line;
+
+  // git-lfs pointer files contain several name value pairs. The specification states that the
+  // first name/value pair must be "version {url}". We'll do a simplified check for that.
+  file.seekg(0);
+  std::getline(file, line);
+  if (line.find("version https://") != std::string::npos)
+    return true;
+  else
+    return false;
 }
 
 bool

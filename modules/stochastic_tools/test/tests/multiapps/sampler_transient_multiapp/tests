@@ -21,8 +21,8 @@
               'master_transient_cmd_control_out_runner4.e'
 
     requirement = 'The system shall provide the ability to set a transient sub-application command '
-                  'line parameters from a sample distributio.'
+                  'line parameters from a sample distribution.'
 
-    issues = '#17486'
+    issues = '#17486 #17548'
   []
 []

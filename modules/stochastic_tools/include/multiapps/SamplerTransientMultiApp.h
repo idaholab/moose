@@ -74,5 +74,6 @@ private:
   const PerfID _perf_solve_step;
   const PerfID _perf_solve_batch_step;
   const PerfID _perf_initial_setup;
+  const PerfID _perf_command_line_args;
   ///@}
 };
