@@ -37,4 +37,3 @@ protected:
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
 };
-

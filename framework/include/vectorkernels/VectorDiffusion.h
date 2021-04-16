@@ -32,4 +32,3 @@ protected:
 
   virtual Real computeQpJacobian() override;
 };
-
