@@ -42,6 +42,68 @@ class NumericVector;
 template <>
 InputParameters validParams<MultiApp>();
 
+/// Holds app partitioning information relevant to the a particular rank for a
+/// multiapp scenario.
+struct LocalRankConfig
+{
+  /// The number of simulations that should/will be run locally on this rank.
+  unsigned int num_local_sims;
+  /// The (global) index of the first local simulation for this rank.  All
+  /// ranks that are used to perform multi-proc parallel runs for a given
+  /// simulation will have the same first_local_sim_index as each other.
+  unsigned int first_local_sim_index;
+  /// The number of (sub)apps that should/will be run locally on this rank.
+  /// This will generally be identical to num_local_sims unless operating in
+  /// some sort of "batch" mode where a single subapp is reused for multiple
+  /// simulations.
+  unsigned int num_local_apps;
+  /// The (global) index of the first local app for this rank.  All ranks that
+  /// are used to perform multi-proc parallel runs for a given app will have
+  /// the same first_local_app_index as each other.  This will generally be
+  /// identical to num_local_sims unless operating in some sort of "batch" mode
+  /// where a single subapp is reused for multiple simulations.
+  unsigned int first_local_app_index;
+  /// This is true if this rank is the primary/zero rank for a (sub)app slot.
+  /// A slot is all ranks that are grouped together to run a single (sub)app
+  /// together.  This field will be true for exactly one rank in each slot.
+  /// This is important for things like multiapp transfers where you want to
+  /// only transfer data to a given subapp once even though it may be running on
+  /// multiple procs/ranks.
+  bool is_first_local_rank;
+};
+
+inline bool
+operator==(const LocalRankConfig & lhs, const LocalRankConfig & rhs)
+{
+  return (lhs.num_local_apps == rhs.num_local_apps) &&
+         (lhs.first_local_app_index == rhs.first_local_app_index) &&
+         (lhs.is_first_local_rank == rhs.is_first_local_rank);
+}
+
+inline bool
+operator!=(const LocalRankConfig & lhs, const LocalRankConfig & rhs)
+{
+  return !(lhs == rhs);
+}
+
+/// Returns app partitioning information relevant to the given rank for a
+/// multiapp scenario with the given number of apps (napps) and parallel/mpi
+/// procs (nprocs).  min_app_procs and max_app_procs define the min and max
+/// number of procs that must/can be used in parallel to run a given (sub)app.
+/// batch_mode affects whether 1 subapp is assigned per rank to be re-used to
+/// run each of the (napps) simulations or whether 1 subapp is created for
+/// each napps simulation (globally).
+///
+/// Each proc calls this function in order to determine which (sub)apps among
+/// the global list of all subapps for a multiapp should be run by the given
+/// rank.
+LocalRankConfig rankConfig(unsigned int rank,
+                           unsigned int nprocs,
+                           unsigned int napps,
+                           unsigned int min_app_procs,
+                           unsigned int max_app_procs,
+                           bool batch_mode = false);
+
 /**
  * Helper class for holding Sub-app backups
  */
@@ -314,7 +376,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  void buildComm();
+  LocalRankConfig buildComm(bool batch_mode);
 
   /**
    * Map a global App number to the local number.
@@ -338,7 +400,7 @@ protected:
   /**
    * Build communicators and reserve backups.
    */
-  void init(unsigned int num);
+  LocalRankConfig init(unsigned int num_apps, bool batch_mode = false);
 
   /**
    * Create the provided number of apps.
@@ -418,6 +480,9 @@ protected:
 
   /// Maximum number of processors to give to each app
   unsigned int _max_procs_per_app;
+
+  /// Minimum number of processors to give to each app
+  unsigned int _min_procs_per_app;
 
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
