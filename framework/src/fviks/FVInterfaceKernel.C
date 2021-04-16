@@ -120,7 +120,7 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
 }
 
 void
-FVInterfaceKernel::computeResidual(const FaceInfo & fi)
+FVInterfaceKernel::setupData(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -137,38 +137,42 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
                   (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
               "These seem like the reasonable combinations of face types.");
 #endif
+}
+
+void
+FVInterfaceKernel::processResidual(const Real resid,
+                                   const unsigned int var_num,
+                                   const bool neighbor)
+{
+  neighbor ? prepareVectorTagNeighbor(_assembly, var_num) : prepareVectorTag(_assembly, var_num);
+  _local_re(0) = resid;
+  accumulateTaggedLocalResidual();
+}
+
+void
+FVInterfaceKernel::processDerivatives(const ADReal & resid, const dof_id_type dof_index)
+{
+  _assembly.processDerivatives(resid, dof_index, _matrix_tags);
+}
+
+void
+FVInterfaceKernel::computeResidual(const FaceInfo & fi)
+{
+  setupData(fi);
 
   const auto var_elem_num = _elem_is_one ? _var1.number() : _var2.number();
   const auto var_neigh_num = _elem_is_one ? _var2.number() : _var1.number();
 
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
-  prepareVectorTag(_assembly, var_elem_num);
-  _local_re(0) = r;
-  accumulateTaggedLocalResidual();
-  prepareVectorTagNeighbor(_assembly, var_neigh_num);
-  _local_re(0) = -r;
-  accumulateTaggedLocalResidual();
+  processResidual(r, var_elem_num, false);
+  processResidual(-r, var_neigh_num, true);
 }
 
 void
 FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 {
-  _face_info = &fi;
-  _normal = fi.normal();
-  _elem_is_one = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
-
-#ifndef NDEBUG
-  const auto ft1 = fi.faceType(_var1.name());
-  const auto ft2 = fi.faceType(_var2.name());
-  constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
-  constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
-  constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-  mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
-                  (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
-                  (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "These seem like the reasonable combinations of face types.");
-#endif
+  setupData(fi);
 
   const auto & elem_dof_indices = _elem_is_one ? _var1.dofIndices() : _var2.dofIndices();
   const auto & neigh_dof_indices =
@@ -178,6 +182,6 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  _assembly.processDerivatives(r, elem_dof_indices[0], _matrix_tags);
-  _assembly.processDerivatives(-r, neigh_dof_indices[0], _matrix_tags);
+  processDerivatives(r, elem_dof_indices[0]);
+  processDerivatives(-r, neigh_dof_indices[0]);
 }
