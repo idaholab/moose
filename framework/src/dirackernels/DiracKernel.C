@@ -201,8 +201,7 @@ DiracKernel::addPoint(Point p, unsigned id)
   // If id == libMesh::invalid_uint (the default), the user is not
   // enabling caching when they add Dirac points.  So all we can do is
   // the PointLocator lookup, and call the other addPoint() method.
-  const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
-                                        : _dirac_kernel_info.findPoint(p, _mesh);
+  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
   addPoint(elem, p, id);
   return elem;
 }
@@ -231,8 +230,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   // safe, because all processors have the same value of we_found_it.
   if (!we_found_it)
   {
-    const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
-                                          : _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
 
     // Only add the point to the cache on this processor if the Elem is local
     if (elem && (elem->processor_id() == processor_id()))
@@ -378,8 +376,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   if (we_need_find_point)
   {
     // findPoint() is a parallel-only function
-    const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
-                                          : _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
 
     updateCaches(cached_elem, elem, p, id);
     addPoint(elem, p, id);
