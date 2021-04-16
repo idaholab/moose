@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#10050'
+  issues = '#10050 #17625'
   design = 'auxkernels/DiffusionFluxAux.md'
   [./test]
     type = 'Exodiff'
@@ -7,5 +7,12 @@
     exodiff = 'diffusion_flux_out.e'
     abs_zero = 1e-9
     requirement = "The `DiffusionFluxAux` object shall compute the components of the flux vector for diffusion problems."
+  [../]
+  [./normal_diffusion_flux]
+    type = 'Exodiff'
+    input = 'normal_diffusion_flux.i'
+    exodiff = 'normal_diffusion_flux_out.e'
+    abs_zero = 1e-9
+    requirement = "The `DiffusionFluxAux` object shall compute the normal component of the flux vector for diffusion problems."
   [../]
 []
