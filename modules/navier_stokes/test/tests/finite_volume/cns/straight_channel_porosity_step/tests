@@ -3,12 +3,19 @@
     type = Exodiff
     input = mass-flux-impl-fvik.i
     exodiff = mass-flux-impl-fvik_out.e
-    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using interface kernel objects.'
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using interface kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms.'
   []
   [step_fk]
     type = Exodiff
     input = mass-flux-impl-fvfk.i
     exodiff = mass-flux-impl-fvfk_out.e
-    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using flux kernel objects.'
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms.'
+  []
+  [step_p_jumps_fk]
+    type = Exodiff
+    input = mass-flux-impl-p-jumps-fvfk.i
+    exodiff = mass-flux-impl-p-jumps-fvfk_out.e
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is not integrated by parts.'
+    rel_err = 5e-4
   []
 []
