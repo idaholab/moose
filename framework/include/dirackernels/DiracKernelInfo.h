@@ -44,7 +44,7 @@ public:
    * @param elem Pointer to the geometric element in which the point is located
    * @param p The (x,y,z) location of the Dirac point
    */
-  void addPoint(const Elem * elem, Point p);
+  void addPoint(const Elem * elem, const Point & p);
 
   /**
    * Remove all of the current points and elements.
@@ -54,7 +54,7 @@ public:
   /**
    * Return true if we have Point 'p' in Element 'elem'
    */
-  bool hasPoint(const Elem * elem, Point p);
+  bool hasPoint(const Elem * elem, const Point & p);
 
   /**
    * Returns a writeable reference to the _elements container.
@@ -80,7 +80,7 @@ public:
    * the Point p resides.  Uses the PointLocator owned by this object.
    */
   const Elem *
-  findPoint(Point p, const MooseMesh & mesh, const std::set<SubdomainID> * blocks = nullptr);
+  findPoint(const Point & p, const MooseMesh & mesh, const std::set<SubdomainID> & blocks);
 
 protected:
   /**
