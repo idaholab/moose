@@ -21,7 +21,7 @@ SamplerTester::validParams()
 
   MooseEnum test_type(
       "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getGlobalSamples "
-      "getLocalSamples getNextLocalRow");
+      "getLocalSamples getNextLocalRow getNextLocalRow_call_twice getNextLocalRow_call_zero");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.suppressParameter<std::vector<OutputName>>("outputs");
@@ -53,6 +53,24 @@ SamplerTester::execute()
   if (_test_type == "getNextLocalRow")
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
       std::vector<Real> row = _sampler.getNextLocalRow();
+
+  if (_test_type == "getNextLocalRow_call_twice")
+  {
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+    {
+      _sampler.getNextLocalRow();
+      _sampler.getNextLocalRow();
+    }
+  }
+
+  if (_test_type == "getNextLocalRow_call_zero")
+  {
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+    {
+      if (i != 10)
+        _sampler.getNextLocalRow();
+    }
+  }
 
   if (_test_type == "rand_global_vs_next")
   {
