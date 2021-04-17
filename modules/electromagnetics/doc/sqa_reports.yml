@@ -1,0 +1,23 @@
+Applications:
+    electromagnetics:
+        exe_directory: ${MOOSE_DIR}/modules/electromagnetics
+        content_directory: ${MOOSE_DIR}/modules/electromagnetics/doc/content
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+
+Documents:
+    software_requirements_specification: sqa/electromagnetics_srs.md
+    software_design_description: sqa/electromagnetics_sdd.md
+    software_test_plan: sqa/electromagnetics_stp.md
+    requirements_traceablity_matrix: sqa/electromagnetics_rtm.md
+    verification_validation_report: sqa/electromagnetics_vvr.md
+    failure_analysis_report: sqa/electromagnetics_far.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    electromagnetics:
+        directories:
+            - ${MOOSE_DIR}/modules/electromagnetics/test
+        log_default: WARNING
+        show_warning: false

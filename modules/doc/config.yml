@@ -4,6 +4,7 @@ Content:
     - modules/chemical_reactions/doc/content
     - modules/combined/doc/content
     - modules/contact/doc/content
+    - modules/electromagnetics/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
     - modules/fsi/doc/content
@@ -138,6 +139,7 @@ Extensions:
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
+            electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects
