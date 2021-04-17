@@ -67,7 +67,7 @@ public:
    */
   virtual void init() {}
   virtual void preSolve() {}
-  virtual void preStep();
+  virtual void preStep() {}
 
   /**
    * Solves the time step and sets the number of nonlinear and linear iterations.
