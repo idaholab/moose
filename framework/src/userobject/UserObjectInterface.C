@@ -54,10 +54,11 @@ UserObjectInterface::getUserObjectName(const std::string & param_name) const
   else if (params.isType<std::string>(param_name))
     name = params.get<std::string>(param_name);
   else
-    _uoi_moose_object.paramError(param_name,
-                                 "Parameter of type \"",
-                                 params.type(param_name),
-                                 "\" is not an expected type for getting the name of a UserObject.");
+    _uoi_moose_object.paramError(
+        param_name,
+        "Parameter of type \"",
+        params.type(param_name),
+        "\" is not an expected type for getting the name of a UserObject.");
 
   return name;
 }

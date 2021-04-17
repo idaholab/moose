@@ -32,9 +32,11 @@ ReporterInterfaceErrorTest::validParams()
                         false,
                         "Test the error after reporters are added and requesting a reporter value "
                         "by name that does not exist");
-  params.addParam<bool>("has_early", false, "Test the error for seeing if a Reporter exists too early");
   params.addParam<bool>(
-      "has_early_by_name", false, "Test the error for seeing if a Reporter exists by name too early");
+      "has_early", false, "Test the error for seeing if a Reporter exists too early");
+  params.addParam<bool>("has_early_by_name",
+                        false,
+                        "Test the error for seeing if a Reporter exists by name too early");
   return params;
 }
 

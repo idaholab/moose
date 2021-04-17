@@ -23,7 +23,7 @@ public:
 
   void initialSetup() override;
 
-  void initialize() override {};
-  void execute() override {};
-  void finalize()override{};
+  void initialize() override{};
+  void execute() override{};
+  void finalize() override{};
 };
