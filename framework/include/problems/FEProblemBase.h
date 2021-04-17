@@ -900,6 +900,11 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
+   * No longer used. To be removed after application patching
+   */
+  void initPostprocessorData(const std::string &) {}
+
+  /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
    * @partm t_index Flag for getting current (0), old (1), or older (2) values
