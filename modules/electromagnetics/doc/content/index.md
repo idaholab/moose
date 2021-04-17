@@ -1,3 +1,1 @@
-!config navigation breadcrumbs=False scrollspy=False
-
-# ElectromagneticsApp
+[modules/electromagnetics/index.md]
