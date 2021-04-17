@@ -30,11 +30,9 @@ VectorPostprocessorInterfaceErrorTest::validParams()
   params.addParam<bool>("has_value_early_by_name",
                         false,
                         "Test the error for seeing if a vpp value exists by name too early");
+  params.addParam<bool>("has_early", false, "Test the error for seeing if a vpp exists too early");
   params.addParam<bool>(
-      "has_early", false, "Test the error for seeing if a vpp exists too early");
-  params.addParam<bool>("has_early_by_name",
-                        false,
-                        "Test the error for seeing if a vpp exists by name too early");
+      "has_early_by_name", false, "Test the error for seeing if a vpp exists by name too early");
 
   params.addParam<bool>(
       "missing_vpp",
