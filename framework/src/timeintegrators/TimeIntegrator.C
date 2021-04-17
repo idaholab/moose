@@ -51,16 +51,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
 }
 
 void
-TimeIntegrator::preStep()
-{
-  // If nothing else (children TimeIntegrators) associated these tags, associate them now
-  if (!_nl.hasVector(_u_dot_factor_tag))
-    _nl.associateVectorToTag(*_nl.solutionUDot(), _u_dot_factor_tag);
-  if (!_nl.hasVector(_u_dotdot_factor_tag) && _fe_problem.uDotDotRequested())
-    _nl.associateVectorToTag(*_nl.solutionUDotDot(), _u_dotdot_factor_tag);
-}
-
-void
 TimeIntegrator::solve()
 {
   _nl.system().solve();
