@@ -19,13 +19,7 @@ namespace RayTracingPackingUtils
  * Like std::copy, but passes the input iterator by reference
  */
 template <class Cont, class InputIt>
-void
-unpackCopy(Cont & container, InputIt & input_iterator)
-{
-  auto first = container.begin();
-  while (first != container.end())
-    *first++ = *input_iterator++;
-}
+void unpackCopy(Cont & container, InputIt & input_iterator);
 
 /**
  * Packs the data in \p values into the iterator \p out and minimizes memory
@@ -35,6 +29,162 @@ unpackCopy(Cont & container, InputIt & input_iterator)
  * if sizeof(ValueType) == 4 and sizeof(BufferType) == 8, two values of type ValueType
  * objects will be stored in a single value of type BufferType.
  */
+template <typename BufferType, typename BufferIter, typename ValueType>
+void reinterpretPackCopy(const std::vector<ValueType> & values, BufferIter & out);
+
+/**
+ * Packs the data from \p in into the vector \p values.
+ *
+ * \p values MUST be resized ahead of time in order to know how much to advance \p in.
+ *
+ * This is to be used in the unpacking of values stored by reinterpretPackCopy().
+ */
+template <typename BufferType, typename BufferIter, typename ValueType>
+void reinterpretUnpackCopy(std::vector<ValueType> & values, BufferIter & in);
+
+/**
+ * Gets the minimum number of values of BufferType needed to represent
+ * \p input_size values of ValueType
+ *
+ * To be used with sizing for reinterpretPackCopy() and reinterpretUnpackCopy().
+ */
+template <typename ValueType, typename BufferType>
+std::size_t reinterpretCopySize(const std::size_t input_size);
+
+/**
+ * Unpacks the mixed-values from \p in into \p values that were packed with mixedPack().
+ */
+template <typename BufferType, typename BufferIter, typename... ValueTypes>
+void mixedUnpack(BufferIter & in, ValueTypes &... values);
+
+/**
+ * Packs the mixed-type values in \p values into \p out to be unpacked with mixedUnpack().
+ *
+ * Uses as few entries in \p out needed to represent \p values in order.
+ */
+template <typename BufferType, typename BufferIter, typename... ValueTypes>
+void mixedPack(BufferIter & out, ValueTypes const &... values);
+
+/**
+ * Gets the number of BufferType required to store the expanded InputTypes for use with
+ * mixedPack() and mixedUnpack().
+ *
+ * Can be stored as constexpr to evaluate the size at compile time only.
+ */
+template <typename BufferType, typename... InputTypes>
+constexpr std::size_t mixedPackSize();
+
+/**
+ * Packs \p value into a value of type BufferType at a byte level, to be unpacked with
+ * the unpack() routines in this namespace.
+ */
+template <typename BufferType, typename ValueType>
+BufferType pack(const ValueType value);
+
+/**
+ * Unpacks \p value_as_buffer_type (which is packed with pack()) into \p value at a byte level.
+ */
+template <typename BufferType, typename ValueType>
+void unpack(const BufferType value_as_buffer_type, ValueType & value);
+
+/**
+ * Packs the ID of \p elem into a type of BufferType to be unpacked later into another const Elem *
+ * with unpack().
+ */
+template <typename BufferType>
+BufferType pack(const Elem * elem, MeshBase * mesh_base = nullptr);
+
+/**
+ * Unpacks the const Elem * from \p id_as_buffer_type (packed using pack()) into \p elem.
+ */
+template <typename BufferType>
+void unpack(const Elem *& elem, const BufferType id_as_buffer_type, MeshBase * mesh_base);
+
+namespace detail
+{
+
+/**
+ * Helper for mixedPackSize().
+ *
+ * Called after evaluating the last InputType, and increases the size
+ * if any offset remains
+ */
+template <typename BufferType>
+constexpr std::size_t
+mixedPackSizeHelper(const std::size_t offset, const std::size_t size)
+{
+  return offset ? size + 1 : size;
+}
+
+/**
+ * Recursive helper for mixedPackSize().
+ *
+ * Recurses through the types (in InputType and rest), and increments the
+ * offset and size as needed
+ */
+template <typename BufferType, typename InputType, typename... Rest>
+constexpr std::size_t
+mixedPackSizeHelper(std::size_t offset, std::size_t size)
+{
+  return offset + sizeof(InputType) > sizeof(BufferType)
+             ? mixedPackSizeHelper<BufferType, Rest...>(sizeof(InputType), ++size)
+             : mixedPackSizeHelper<BufferType, Rest...>(offset + sizeof(InputType), size);
+}
+
+/**
+ * Helper for mixedUnpack()
+ */
+template <typename BufferType, typename BufferIter, typename ValueType>
+void
+mixedUnpackHelper(BufferIter & in,
+                  const BufferType *& src,
+                  std::size_t & src_offset,
+                  ValueType & output)
+{
+  static_assert(sizeof(ValueType) <= sizeof(BufferType), "ValueType will not fit into BufferType");
+
+  if (src_offset + sizeof(ValueType) > sizeof(BufferType))
+  {
+    src = &(*in++);
+    src_offset = 0;
+  }
+
+  std::memcpy(&output, (char *)src + src_offset, sizeof(ValueType));
+  src_offset += sizeof(ValueType);
+}
+
+/**
+ * Helper for mixedPack()
+ */
+template <typename BufferIter, typename BufferType, typename ValueType>
+void
+mixedPackHelper(BufferIter & out,
+                BufferType & dest,
+                std::size_t & dest_offset,
+                const ValueType & input)
+{
+  static_assert(sizeof(ValueType) <= sizeof(BufferType), "ValueType will not fit into BufferType");
+
+  if (dest_offset + sizeof(ValueType) > sizeof(BufferType))
+  {
+    out++ = dest;
+    dest_offset = 0;
+  }
+
+  std::memcpy((char *)&dest + dest_offset, &input, sizeof(ValueType));
+  dest_offset += sizeof(ValueType);
+}
+}
+
+template <class Cont, class InputIt>
+void
+unpackCopy(Cont & container, InputIt & input_iterator)
+{
+  auto first = container.begin();
+  while (first != container.end())
+    *first++ = *input_iterator++;
+}
+
 template <typename BufferType, typename BufferIter, typename ValueType>
 void
 reinterpretPackCopy(const std::vector<ValueType> & values, BufferIter & out)
@@ -61,13 +211,6 @@ reinterpretPackCopy(const std::vector<ValueType> & values, BufferIter & out)
     out++ = dest;
 }
 
-/**
- * Packs the data from \p in into the vector \p values.
- *
- * \p values MUST be resized ahead of time in order to know how much to advance \p in.
- *
- * This is to be used in the unpacking of values stored by reinterpretPackCopy().
- */
 template <typename BufferType, typename BufferIter, typename ValueType>
 void
 reinterpretUnpackCopy(std::vector<ValueType> & values, BufferIter & in)
@@ -91,12 +234,6 @@ reinterpretUnpackCopy(std::vector<ValueType> & values, BufferIter & in)
   }
 }
 
-/**
- * Gets the minimum number of values of BufferType needed to represent
- * \p input_size values of ValueType
- *
- * To be used with sizing for reinterpretPackCopy() and reinterpretUnpackCopy().
- */
 template <typename ValueType, typename BufferType>
 std::size_t
 reinterpretCopySize(const std::size_t input_size)
@@ -105,31 +242,6 @@ reinterpretCopySize(const std::size_t input_size)
   return (std::size_t)std::ceil((double)input_size / input_per_output);
 }
 
-/**
- * Helper for mixedUnpack()
- */
-template <typename BufferType, typename BufferIter, typename ValueType>
-void
-mixedUnpackHelper(BufferIter & in,
-                  const BufferType *& src,
-                  std::size_t & src_offset,
-                  ValueType & output)
-{
-  static_assert(sizeof(ValueType) <= sizeof(BufferType), "ValueType will not fit into BufferType");
-
-  if (src_offset + sizeof(ValueType) > sizeof(BufferType))
-  {
-    src = &(*in++);
-    src_offset = 0;
-  }
-
-  std::memcpy(&output, (char *)src + src_offset, sizeof(ValueType));
-  src_offset += sizeof(ValueType);
-}
-
-/**
- * Unpacks the mixed-values from \p in into \p values that were packed with mixedPack().
- */
 template <typename BufferType, typename BufferIter, typename... ValueTypes>
 void
 mixedUnpack(BufferIter & in, ValueTypes &... values)
@@ -138,37 +250,12 @@ mixedUnpack(BufferIter & in, ValueTypes &... values)
   const BufferType * src = nullptr;
 
   int expander[] = {
-      0, ((void)mixedUnpackHelper(in, src, src_offset, std::forward<ValueTypes &>(values)), 0)...};
+      0,
+      ((void)detail::mixedUnpackHelper(in, src, src_offset, std::forward<ValueTypes &>(values)),
+       0)...};
   (void)expander;
 }
 
-/**
- * Helper for mixedPack()
- */
-template <typename BufferIter, typename BufferType, typename ValueType>
-void
-mixedPackHelper(BufferIter & out,
-                BufferType & dest,
-                std::size_t & dest_offset,
-                const ValueType & input)
-{
-  static_assert(sizeof(ValueType) <= sizeof(BufferType), "ValueType will not fit into BufferType");
-
-  if (dest_offset + sizeof(ValueType) > sizeof(BufferType))
-  {
-    out++ = dest;
-    dest_offset = 0;
-  }
-
-  std::memcpy((char *)&dest + dest_offset, &input, sizeof(ValueType));
-  dest_offset += sizeof(ValueType);
-}
-
-/**
- * Packs the mixed-type values in \p values into \p out to be unpacked with mixedUnpack().
- *
- * Uses as few entries in \p out needed to represent \p values in order.
- */
 template <typename BufferType, typename BufferIter, typename... ValueTypes>
 void
 mixedPack(BufferIter & out, ValueTypes const &... values)
@@ -176,56 +263,24 @@ mixedPack(BufferIter & out, ValueTypes const &... values)
   std::size_t dest_offset = 0;
   BufferType dest;
 
-  int expander[] = {
-      0,
-      ((void)mixedPackHelper(out, dest, dest_offset, std::forward<ValueTypes const &>(values)),
-       0)...};
+  int expander[] = {0,
+                    ((void)detail::mixedPackHelper(
+                         out, dest, dest_offset, std::forward<ValueTypes const &>(values)),
+                     0)...};
   (void)expander;
 
   if (dest_offset)
     out++ = dest;
 }
 
-/**
- * Helper for mixedPackSize()
- */
-template <typename BufferType, typename InputType>
-constexpr void
-mixedPackSizeHelper(std::size_t & offset, std::size_t & size)
-{
-  if (offset + sizeof(InputType) > sizeof(BufferType))
-  {
-    ++size;
-    offset = sizeof(InputType);
-  }
-  else
-    offset += sizeof(InputType);
-}
-
-/**
- * Gets the number of BufferType required to store the expanded InputTypes for use with
- * mixedPack() and mixedUnpack()
- */
 template <typename BufferType, typename... InputTypes>
 constexpr std::size_t
 mixedPackSize()
 {
-  std::size_t size = 0;
-  std::size_t offset = 0;
-
-  int expander[] = {0, (mixedPackSizeHelper<BufferType, InputTypes>(offset, size), 0)...};
-  (void)expander;
-
-  if (offset)
-    ++size;
-
-  return size;
+  // Call the recursive helper with an initial offset and size of 0
+  return detail::mixedPackSizeHelper<BufferType, InputTypes...>(/* offset = */ 0, /* size = */ 0);
 }
 
-/**
- * Packs \p value into a value of type BufferType at a byte level, to be unpacked with
- * the unpack() routines in this namespace.
- */
 template <typename BufferType, typename ValueType>
 BufferType
 pack(const ValueType value)
@@ -237,9 +292,6 @@ pack(const ValueType value)
   return value_as_buffer_type;
 }
 
-/**
- * Unpacks \p value_as_buffer_type (which is packed with pack()) into \p value at a byte level.
- */
 template <typename BufferType, typename ValueType>
 void
 unpack(const BufferType value_as_buffer_type, ValueType & value)
@@ -248,13 +300,9 @@ unpack(const BufferType value_as_buffer_type, ValueType & value)
   std::memcpy(&value, &value_as_buffer_type, sizeof(ValueType));
 }
 
-/**
- * Packs the ID of \p elem into a type of BufferType to be unpacked later into another const Elem *
- * with unpack().
- */
 template <typename BufferType>
 BufferType
-pack(const Elem * elem, MeshBase * libmesh_dbg_var(mesh_base = nullptr))
+pack(const Elem * elem, MeshBase * libmesh_dbg_var(mesh_base /* = nullptr */))
 {
   const dof_id_type id = elem ? elem->id() : DofObject::invalid_id;
   mooseAssert(mesh_base ? mesh_base->query_elem_ptr(id) == elem : true,
@@ -263,9 +311,6 @@ pack(const Elem * elem, MeshBase * libmesh_dbg_var(mesh_base = nullptr))
   return pack<BufferType>(id);
 }
 
-/**
- * Unpacks the const Elem * from \p id_as_buffer_type (packed using pack()) into \p elem.
- */
 template <typename BufferType>
 void
 unpack(const Elem *& elem, const BufferType id_as_buffer_type, MeshBase * mesh_base)

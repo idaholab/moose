@@ -525,18 +525,16 @@ namespace Parallel
 unsigned int
 Packing<std::shared_ptr<Ray>>::size(const std::size_t data_size, const std::size_t aux_data_size)
 {
-  // First value: Data lengths, current point and direction, current element id, distance,
-  // max_distance, ray ID
-  // Second value: Current incoming side, end_set, processor crossings, intersections, trajectory
+  // Current incoming side, end_set, processor crossings, intersections, trajectory
   // changes (packed into as few buffer_type as possible: 5 values stored as 2 Reals)
-  constexpr unsigned int base_size = 12 + RayTracingPackingUtils::mixedPackSize<buffer_type,
-                                                                                unsigned short,
-                                                                                bool,
-                                                                                unsigned int,
-                                                                                unsigned int,
-                                                                                unsigned int>();
+  constexpr unsigned int mixed_size = RayTracingPackingUtils::
+      mixedPackSize<buffer_type, unsigned short, bool, unsigned int, unsigned int, unsigned int>();
+  mooseAssert(mixed_size == 2, "Mixed size should be 2");
 
-  auto size = base_size;
+  // First value: size of data, size of aux data, id, current point (3 values), direction (3
+  // values), current element, distance, max distance
+  // Second value: mixed size (see above)
+  auto size = 12 + mixed_size;
 
 #ifdef SINGLE_PRECISION_RAY
   if (data_size)
