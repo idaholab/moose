@@ -114,6 +114,7 @@ public:
   getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
                                        const std::string & vector_name) const;
 
+  // doco-normal-methods-begin
   /**
    * Retrieve the value of a VectorPostprocessor
    * @param param_name The name of the VectorPostprocessor parameter (see below)
@@ -133,6 +134,7 @@ public:
   const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & param_name,
                                                                const std::string & vector_name,
                                                                bool needs_broadcast) const;
+  // doco-normal-methods-end
 
   /**
    * Retrieve the value of the VectorPostprocessor

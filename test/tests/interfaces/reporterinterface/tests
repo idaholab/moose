@@ -1,6 +1,6 @@
 [Tests]
   design = 'ReporterInterface.md'
-  issues = '#17512'
+  issues = '#17512 #17605'
 
   [param_errors]
     requirement = 'The system shall report a reasonable error when requesting a Reporter value from a parameter when'
