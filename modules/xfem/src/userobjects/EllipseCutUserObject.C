@@ -100,3 +100,9 @@ EllipseCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
 }
+
+const std::vector<RealVectorValue>
+EllipseCutUserObject::getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackPlaneNormals() is not implemented for this object.");
+}

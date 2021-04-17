@@ -1,18 +1,22 @@
 libMesh-0.7.0+
-4	 # number of elements
-6	 # number of nodes
-n/a	 # boundary condition specification file 
+6	 # number of elements
+8	 # number of nodes
+n/a	 # boundary condition specification file
 n/a	 # subdomain id specification file
 n/a	 # processor id specification file
 n/a	 # p-level specification file
-4	 # n_elem at level 0, [ type (n0 ... nN-1) ]
-3 0 4 5
-3 0 5 3
-3 4 1 2
-3 4 2 5
+6	 # n_elem at level 0, [ type (n0 ... nN-1) ]
+3 0 1 2
+3 0 2 3
+3 1 4 5
+3 1 5 6
+3 1 6 7
+3 1 7 2
 -0.001 0.5 -0.001
-0.401 0.5 -0.001
-0.401 0.5  0.201
--0.001 0.5  0.201
 0.21 0.5 -0.001
 0.21 0.5 0.201
+-0.001 0.5 0.201
+0.401 0.5 -0.001
+0.401 0.5 0.0663333
+0.401 0.5 0.133667
+0.401 0.5 0.201

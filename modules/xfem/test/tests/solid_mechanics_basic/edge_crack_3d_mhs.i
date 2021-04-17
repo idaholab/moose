@@ -28,13 +28,14 @@
   [./cut_mesh]
     type = CrackMeshCut3DUserObject
     mesh_file = mesh_edge_crack.xda
-    growth_dir_method = 'function'
-    size_control = 0.1
+    growth_dir_method = 'max_hoop_stress'
+    size_control = 1
     n_step_growth = 1
     function_x = growth_func_x
     function_y = growth_func_y
     function_z = growth_func_z
     function_v = growth_func_v
+    crack_front_nodes = '7 6 5 4'
   [../]
 []
 
@@ -57,6 +58,20 @@
   [../]
 []
 
+[DomainIntegral]
+  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
+  displacements = 'disp_x disp_y disp_z'
+  crack_front_points_provider = cut_mesh
+  number_points_from_provider = 4
+  crack_direction_method = CurvedCrackFront
+  radius_inner = '0.15'
+  radius_outer = '0.45'
+  poissons_ratio = 0.3
+  youngs_modulus = 207000
+  block = 0
+  incremental = true
+[]
+
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE
@@ -66,14 +81,24 @@
 []
 
 [Functions]
+  [./top_trac_x]
+    type = ConstantFunction
+    value = 100
+  [../]
   [./top_trac_y]
     type = ConstantFunction
-    value = 10
+    value = 0
   [../]
 []
 
 
 [BCs]
+  [./top_x]
+    type = FunctionNeumannBC
+    boundary = top
+    variable = disp_x
+    function = top_trac_x
+  [../]
   [./top_y]
     type = FunctionNeumannBC
     boundary = top
@@ -139,12 +164,12 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 3.0
+  end_time = 4.0
   max_xfem_update = 1
 []
 
 [Outputs]
-  file_base = edge_crack_3d_propagation_out
+  file_base = edge_crack_3d_mhs_out
   execute_on = 'timestep_end'
   exodus = true
   [./console]

@@ -24,6 +24,10 @@ public:
 
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  virtual const std::vector<RealVectorValue>
+
+  getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
+
   /**
    * Get the cut location information
    */
