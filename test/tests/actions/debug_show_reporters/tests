@@ -1,4 +1,7 @@
 [Tests]
+  design = 'Reporters/index.md'
+  issues = '#17605'
+
   [test]
     type = RunApp
     input = 'debug_show_reporters.i'

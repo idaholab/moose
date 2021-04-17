@@ -28,6 +28,7 @@ public:
 protected:
   ///@{
   /**
+   * doco-normal-methods-begin
    * Returns read-only reference to a Reporter value that is provided by an input parameter.
    * @tparam T The C++ type of the Reporter value being consumed
    * @param param_name The name of the parameter that gives the name of the Reporter, which
@@ -43,6 +44,7 @@ protected:
   const T & getReporterValue(const std::string & param_name,
                              ReporterMode mode,
                              const std::size_t time_index = 0);
+  // doco-normal-methods-end
   ///@}
 
   ///@{
