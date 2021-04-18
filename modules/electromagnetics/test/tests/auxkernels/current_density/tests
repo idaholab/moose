@@ -1,6 +1,6 @@
 [Tests]
   design = 'CurrentDensity.md'
-  issues = '#30'
+  issues = '#13744'
   [ad_exodiff]
     type = Exodiff
     input = current_density.i

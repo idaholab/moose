@@ -6,7 +6,7 @@
     requirement = 'The system shall calculate the static far field pattern of a half-wave dipole antenna.'
     design = 'benchmarks/DipoleAntenna.md'
     validation = 'benchmarks/DipoleAntenna.md'
-    issues = '#15'
+    issues = '#13744'
   [../]
   [./transient]
     type = Exodiff
@@ -16,6 +16,6 @@
     requirement = 'The system shall calculate the transient far field pattern of a half-wave dipole antenna.'
     design = 'benchmarks/DipoleAntenna.md'
     validation = 'benchmarks/DipoleAntenna.md'
-    issues = '#15'
+    issues = '#13744'
   [../]
 []
