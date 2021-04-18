@@ -43,7 +43,6 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
 Real
 SideIntegralVariablePostprocessor::computeQpIntegral()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
@@ -51,6 +50,5 @@ SideIntegralVariablePostprocessor::computeQpIntegral()
     return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
   }
   else
-#endif
     return _u[_qp];
 }
