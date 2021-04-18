@@ -37,16 +37,18 @@ Postprocessor::Postprocessor(const MooseObject * moose_object)
 
   const PostprocessorReporterName r_name(moose_object->name());
 
-  mooseAssert(!fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
-              "Postprocessor Reporter value is already declared");
-
   // Declare the Reporter value on thread 0 only; this lets us add error checking to
   // make sure that it really is added only once
-  const auto tid = moose_object->parameters().isParamValid("_tid")
-                       ? moose_object->parameters().get<THREAD_ID>("_tid")
-                       : 0;
-  if (tid == 0)
+  if (moose_object->parameters().get<THREAD_ID>("_tid") == 0)
+  {
+    mooseAssert(!fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
+                "Postprocessor Reporter value is already declared");
+
     fe_problem.getReporterData(ReporterData::WriteKey())
         .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
             r_name, REPORTER_MODE_UNSET, *moose_object);
+  }
+  else
+    mooseAssert(fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
+                "Postprocessor Reporter value is not declared");
 }
