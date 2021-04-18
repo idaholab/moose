@@ -1,9 +1,9 @@
 #include "VectorTransientAbsorbingBC.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", VectorTransientAbsorbingBC);
+registerMooseObject("ElectromagneticsApp", VectorTransientAbsorbingBC);
 
 InputParameters
 VectorTransientAbsorbingBC::validParams()
@@ -48,7 +48,7 @@ VectorTransientAbsorbingBC::computeQpResidual()
   std::complex<double> field_dot_2(0, 0);
 
   // Create E_dot for residual based on component parameter
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     field_dot_0.real(_u_dot[_qp](0));
     field_dot_0.imag(_coupled_dot[_qp](0));
@@ -79,7 +79,7 @@ VectorTransientAbsorbingBC::computeQpResidual()
 
   std::complex<double> res = -p_dot_test;
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     return res.real();
   }

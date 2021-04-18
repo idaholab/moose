@@ -1,8 +1,8 @@
 #include "MMSTestFunc.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElkTestApp", MMSTestFunc);
+registerMooseObject("ElectromagneticsTestApp", MMSTestFunc);
 
 InputParameters
 MMSTestFunc::validParams()
@@ -75,7 +75,7 @@ MMSTestFunc::value(Real t, const Point & p) const
        c_2 * ((c_second * p(0) + 2.0 * c_grad) * std::cos(c * p(0)) -
               (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::sin(c * p(0)));
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     val = F.real();
   }

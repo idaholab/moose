@@ -1,6 +1,6 @@
 #include "CoupledCoeffTimeDerivative.h"
 
-registerMooseObject("ElkApp", CoupledCoeffTimeDerivative);
+registerMooseObject("ElectromagneticsApp", CoupledCoeffTimeDerivative);
 
 InputParameters
 CoupledCoeffTimeDerivative::validParams()

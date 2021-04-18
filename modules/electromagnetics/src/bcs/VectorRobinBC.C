@@ -1,9 +1,9 @@
 #include "VectorRobinBC.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", VectorRobinBC);
+registerMooseObject("ElectromagneticsApp", VectorRobinBC);
 
 InputParameters
 VectorRobinBC::validParams()
@@ -49,7 +49,7 @@ VectorRobinBC::VectorRobinBC(const InputParameters & parameters)
   bool real_incoming_was_set = parameters.isParamSetByUser("real_incoming");
   bool imag_incoming_was_set = parameters.isParamSetByUser("imag_incoming");
 
-  if (_mode == elk::ABSORBING && (real_incoming_was_set || imag_incoming_was_set))
+  if (_mode == electromagnetics::ABSORBING && (real_incoming_was_set || imag_incoming_was_set))
   {
     mooseError(
         "In ",
@@ -69,7 +69,7 @@ VectorRobinBC::computeQpResidual()
   std::complex<double> field_2(0, 0);
 
   // Create E and ncrossE for residual based on component parameter
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     field_0.real(_u[_qp](0));
     field_0.imag(_coupled_val[_qp](0));
@@ -113,13 +113,13 @@ VectorRobinBC::computeQpResidual()
   std::complex<double> u_inc_dot_test = 0.0;
   switch (_mode)
   {
-    case elk::PORT:
+    case electromagnetics::PORT:
       // Calculate incoming wave contribution to BC residual
       u_inc_dot_test = _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
                        _jay * _beta.value(_t, _q_point[_qp]) *
                            (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_inc));
       break;
-    case elk::ABSORBING:
+    case electromagnetics::ABSORBING:
       break;
   }
 
@@ -132,10 +132,10 @@ VectorRobinBC::computeQpResidual()
   Real res = 0.0;
   switch (_component)
   {
-    case elk::REAL:
+    case electromagnetics::REAL:
       res = diff.real();
       break;
-    case elk::IMAGINARY:
+    case electromagnetics::IMAGINARY:
       res = diff.imag();
       break;
   }
@@ -154,11 +154,11 @@ VectorRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);
 
-  if (_component == elk::REAL && jvar == _coupled_var_num)
+  if (_component == electromagnetics::REAL && jvar == _coupled_var_num)
   {
     return off_diag_jac;
   }
-  else if (_component == elk::IMAGINARY && jvar == _coupled_var_num)
+  else if (_component == electromagnetics::IMAGINARY && jvar == _coupled_var_num)
   {
     return -off_diag_jac;
   }

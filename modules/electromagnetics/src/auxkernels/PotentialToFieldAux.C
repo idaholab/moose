@@ -1,6 +1,6 @@
 #include "PotentialToFieldAux.h"
 
-registerMooseObject("ElkApp", PotentialToFieldAux);
+registerMooseObject("ElectromagneticsApp", PotentialToFieldAux);
 
 InputParameters
 PotentialToFieldAux::validParams()

@@ -3,7 +3,7 @@
 #include <complex>
 #include "libmesh/quadrature.h"
 
-registerMooseObject("ElkApp", ReflectionCoefficient);
+registerMooseObject("ElectromagneticsApp", ReflectionCoefficient);
 
 InputParameters
 ReflectionCoefficient::validParams()

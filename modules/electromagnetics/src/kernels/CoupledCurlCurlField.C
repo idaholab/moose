@@ -1,6 +1,6 @@
 #include "CoupledCurlCurlField.h"
 
-registerMooseObject("ElkApp", CoupledCurlCurlField);
+registerMooseObject("ElectromagneticsApp", CoupledCurlCurlField);
 
 InputParameters
 CoupledCurlCurlField::validParams()

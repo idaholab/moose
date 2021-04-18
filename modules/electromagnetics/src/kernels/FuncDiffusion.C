@@ -1,7 +1,7 @@
 #include "FuncDiffusion.h"
 #include "Function.h"
 
-registerMooseObject("ElkApp", FuncDiffusion);
+registerMooseObject("ElectromagneticsApp", FuncDiffusion);
 
 InputParameters
 FuncDiffusion::validParams()

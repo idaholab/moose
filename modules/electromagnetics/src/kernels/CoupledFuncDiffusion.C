@@ -1,7 +1,7 @@
 #include "CoupledFuncDiffusion.h"
 #include "Function.h"
 
-registerMooseObject("ElkApp", CoupledFuncDiffusion);
+registerMooseObject("ElectromagneticsApp", CoupledFuncDiffusion);
 
 InputParameters
 CoupledFuncDiffusion::validParams()

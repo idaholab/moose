@@ -1,6 +1,6 @@
 #include "PEC.h"
 
-registerMooseObject("ElkApp", PEC);
+registerMooseObject("ElectromagneticsApp", PEC);
 
 InputParameters
 PEC::validParams()

@@ -1,6 +1,6 @@
 #include "CosTheta.h"
 
-registerMooseObject("ElkApp", CosTheta);
+registerMooseObject("ElectromagneticsApp", CosTheta);
 
 InputParameters
 CosTheta::validParams()
