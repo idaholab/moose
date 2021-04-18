@@ -162,12 +162,19 @@ MultiApp::validParams()
                                     "relaxation_factor>0 & relaxation_factor<2",
                                     "Fraction of newly computed value to keep."
                                     "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("relaxed_variables",
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "relaxed_variables",
+      std::vector<std::string>(),
+      "Use transformed_variables.",
+      "List of subapp variables to relax during Multiapp coupling iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_variables",
+      std::vector<std::string>(),
+      "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
+  params.addParam<std::vector<std::string>>("transformed_postprocessors",
                                             std::vector<std::string>(),
-                                            "List of subapp variables to relax during Multiapp coupling iterations");
-  params.addParam<std::vector<std::string>>("relaxed_postprocessors",
-                                            std::vector<std::string>(),
-                                            "List of subapp postprocessors to relax during Multiapp coupling iterations");
+                                            "List of subapp postprocessors to use coupling "
+                                            "algorithm on during Multiapp coupling iterations");
 
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
@@ -782,18 +789,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->runInputFile();
 
   // Transfer coupling relaxation information to the subapps
-  auto iterative_multiapp_solve = _apps[i]->getExecutioner()->iterativeMultiAppSolve();   // FIXME For secant solve, pass the 'relaxed' too
+  auto iterative_multiapp_solve = _apps[i]->getExecutioner()->iterativeMultiAppSolve();
   iterative_multiapp_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  iterative_multiapp_solve->setMultiAppRelaxationVariables(
-      getParam<std::vector<std::string>>("relaxed_variables"));
-  iterative_multiapp_solve->setMultiAppRelaxationPostprocessors(
-      getParam<std::vector<std::string>>("relaxed_postprocessors"));
-  if (getParam<Real>("relaxation_factor") != 1.0)
-  {
-    // Store a copy of the previous solution here
-    FEProblemBase & fe_problem_base = _apps[i]->getExecutioner()->feProblem();
-    fe_problem_base.getNonlinearSystemBase().addVector("self_relax_previous", false, PARALLEL);
-  }
+  iterative_multiapp_solve->setMultiAppTransformedVariables(
+      getParam<std::vector<std::string>>("transformed_variables"));
+  // Handle deprecated parameter
+  if (!parameters().isParamSetByAddParam("relaxed_variables"))
+    iterative_multiapp_solve->setMultiAppTransformedVariables(
+        getParam<std::vector<std::string>>("relaxed_variables"));
+  iterative_multiapp_solve->setMultiAppTransformedPostprocessors(
+      getParam<std::vector<std::string>>("transformed_postprocessors"));
+  iterative_multiapp_solve->allocateStorageForSecondaryTransformed();
 }
 
 std::string

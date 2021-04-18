@@ -23,7 +23,8 @@ ChangeOverPicardPostprocessor::validParams()
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
   params.addParam<bool>("change_with_respect_to_initial",
                         false,
-                        "Compute change with respect to value at the beginning of the Picard iterations instead of previous value");
+                        "Compute change with respect to value at the beginning of the Picard "
+                        "iterations instead of previous value");
   params.addParam<bool>(
       "compute_relative_change", false, "Compute magnitude of relative change instead of change");
   params.addParam<bool>("take_absolute_value", false, "Option to take absolute value of change");
@@ -40,7 +41,7 @@ ChangeOverPicardPostprocessor::ChangeOverPicardPostprocessor(const InputParamete
     _compute_relative_change(getParam<bool>("compute_relative_change")),
     _take_absolute_value(getParam<bool>("take_absolute_value")),
     _pps_value(getPostprocessorValue("postprocessor")),
-    _pps_value_old(getPostprocessorValueOld("postprocessor")),
+    _pps_value_old(0),
     _pps_value_initial(declareRestartableData<Real>("pps_value_initial")),
     _t_step_old(-1)
 {
@@ -78,7 +79,7 @@ ChangeOverPicardPostprocessor::getValue()
   // detect the beginning of a new Picard iteration process
   // it can either a new time step or a failed time step
   bool new_time_step = false;
-  if (dynamic_cast<Transient *>(_app.getExecutioner())->iterativeMultiAppSolve()->numCouplingIts() == 1)
+  if (_app.getExecutioner()->iterativeMultiAppSolve()->numCouplingIts() == 1)
   {
     // new time step
     if (_t_step != _t_step_old)
@@ -91,8 +92,8 @@ ChangeOverPicardPostprocessor::getValue()
       _pps_value_initial = _pps_value;
     }
     // failed time step
-    // else
-    //   _pps_value_old = _pps_value_initial;
+    else
+      _pps_value_old = _pps_value_initial;
   }
 
   // determine value which change is measured against
@@ -101,20 +102,15 @@ ChangeOverPicardPostprocessor::getValue()
     base_value = _pps_value_initial;
   else
   {
-    // Currently post-processors do not copy the values to old and older;
-    // _pps_value_old will therefore always be zero for _t_step = 0.
-    if (_t_step == 0)
-      base_value = _pps_value;
+    // for a new time step, initial value is the reference
+    if (new_time_step)
+      base_value = _pps_value_initial;
     else
-    {
-      if (new_time_step)
-        base_value = _pps_value;
-      else
-        base_value = _pps_value_old;
-    }
+      base_value = _pps_value_old;
   }
-  std::cout << "Change over Picard " << _t_step << " " << dynamic_cast<Transient *>(_app.getExecutioner())->iterativeMultiAppSolve()->numCouplingIts()
-            << " : " << base_value << " -> " << _pps_value << " (" << (_pps_value - base_value) / base_value << ")" << std::endl;
+
+  // Update previous value
+  _pps_value_old = _pps_value;
 
   // compute change in value
   Real change;

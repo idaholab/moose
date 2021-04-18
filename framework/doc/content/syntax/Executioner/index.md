@@ -11,14 +11,16 @@ Executioner block. Please see the online
 [PETSc documentation](http://www.mcs.anl.gov/petsc/documentation/index.html) for
 detailed information about these options.
 
-MOOSE provides Picard iterations in all its executioners for tightly-coupled multiphysics simulations.
-MultiApps of two groups of before and after master app and master app are solved sequentially within one Picard iteration.
-The execution order of MutliApps within one group is undefined.
+MOOSE provides MultiApp coupling algorithms in all its executioners for tightly-coupled multiphysics simulations.
+MultiApps of two groups of before and after master app and master app are solved sequentially within one app coupling iteration.
+The execution order of MultiApps within one group is undefined.
 Relevant data transfers happen before and after each of the two groups of MultiApps runs.
-Because MultiApp allows wrapping another level of MultiApps, the design enables multi-level Picard iterations automatically.
-Picard iterations can be relaxed to improve the stability of the convergence.
+
+Because MultiApp allows wrapping another levels of MultiApps, the design enables multi-level app coupling iterations automatically.
+App coupling iterations can be relaxed to improve the stability of the convergence.
 When a MultiApp is a subapp of a master and a master of its own subapps, MOOSE allows relaxation of the MultiApp solution
-within the master Picard iterations and within the Picard iterations, where the MultiApp is the master, independently.
+within the master coupling iterations and within the coupling iterations, where the MultiApp is the master, independently.
+More details about the MultiApp coupling algorithms may be found in [CouplingIterations/index.md])
 
 ## Automatic and Default Preconditioning
 

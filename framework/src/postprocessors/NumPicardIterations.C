@@ -27,6 +27,7 @@ NumPicardIterations::validParams()
 NumPicardIterations::NumPicardIterations(const InputParameters & parameters)
   : GeneralPostprocessor(parameters), _transient_executioner(NULL)
 {
+  mooseDeprecated("Use NumCouplingIterations.");
 }
 
 void

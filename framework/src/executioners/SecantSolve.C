@@ -24,181 +24,230 @@ SecantSolve::validParams()
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner * ex)
-  : IterativeMultiAppSolve(ex)
+SecantSolve::SecantSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
 {
-  // Store a copy of the solution before the previous solution here
-  _problem.getNonlinearSystemBase().addVector("transformed_older", false, PARALLEL);
+  // TODO: We would only need to store the solution for the degrees of freedom that
+  // will be transformed, not the entire solution.
+  // Store solution vectors for the two previous points and their evaluation
+  _problem.getNonlinearSystemBase().addVector("xn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("fxn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("xn_m2", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("fxn_m2", false, PARALLEL);
 
-  _old_transformed_pps_values.resize(_transformed_pps.size());
-  _older_transformed_pps_values.resize(_transformed_pps.size());
+  // Allocate storage for the previous values of the postprocessors to transform
+  _transformed_pps_values.resize(_transformed_pps.size());
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
+    _transformed_pps_values[i].resize(4);
 }
 
-void SecantSolve::savePreviousValuesAsSubApp()
+void
+SecantSolve::savePreviousVariableValuesAsSubApp()
 {
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("secondary_transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("secondary_transformed_older");
-  transformed_older = transformed_old;
-  transformed_old = solution;
+  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
+  NumericVector<Number> & fxn_m2 = _nl.getVector("secondary_fxn_m2");
+  NumericVector<Number> & xn_m2 = _nl.getVector("secondary_xn_m2");
 
+  // Advance one step
+  xn_m2 = xn_m1;
+  fxn_m2 = fxn_m1;
+
+  // Before a solve, solution is a sequence term, after a solve, solution is the evaluated term
+  xn_m1 = solution;
+}
+
+void
+SecantSolve::savePreviousPostprocessorValuesAsSubApp()
+{
   // Save previous postprocessor values
-  for (size_t i=0; i<_secondary_transformed_pps.size(); i++)
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
   {
-    _older_secondary_transformed_pps_values[i] = _old_secondary_transformed_pps_values[i];
-    _old_secondary_transformed_pps_values[i] = getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    // Advance one step
+    _secondary_transformed_pps_values[i][3] = _secondary_transformed_pps_values[i][1];
+    _secondary_transformed_pps_values[i][2] = _secondary_transformed_pps_values[i][0];
+
+    // Secondary postprocessors are saved after a solve, but transfers from the main app have not
+    // been received yet
+    _secondary_transformed_pps_values[i][1] =
+        getPostprocessorValueByName(_secondary_transformed_pps[i]);
   }
 }
 
-void SecantSolve::savePreviousValuesAsMainApp()
+void
+SecantSolve::savePreviousValuesAsMainApp()
 {
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("transformed_older");
+  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
+  NumericVector<Number> & fxn_m2 = _nl.getVector("fxn_m2");
+  NumericVector<Number> & xn_m2 = _nl.getVector("xn_m2");
 
-  // Save off the current and previous solutions
-  transformed_older = transformed_old;
-  transformed_old = solution;
+  // Advance one step
+  xn_m2 = xn_m1;
+  fxn_m2 = fxn_m1;
+
+  // Before a solve (here), solution is a sequence term, after a solve, solution is the evaluated
+  // term
+  xn_m1 = solution;
 
   // Set postprocessor previous values
-  for (size_t i=0; i<_transformed_pps.size(); i++)
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
   {
-    _older_transformed_pps_values[i] = _old_transformed_pps_values[i];
-    _old_transformed_pps_values[i] = getPostprocessorValueByName(_transformed_pps[i]);
+    // Advance one step
+    _transformed_pps_values[i][3] = _transformed_pps_values[i][1];
+    _transformed_pps_values[i][2] = _transformed_pps_values[i][0];
+
+    // Primary postprocessors are saved before a solve
+    _transformed_pps_values[i][1] = getPostprocessorValueByName(_transformed_pps[i]);
   }
 }
 
-
-bool SecantSolve::useCouplingUpdateAlgorithm()
+bool
+SecantSolve::useCouplingAlgorithmUpdate(bool as_main_app)
 {
-  // Need at least two values to compute the Secant slope
-  return _coupling_it > 1;
+  // Need at least two evaluations to compute the Secant slope
+  if (as_main_app)
+    return _coupling_it > 1;
+  else
+    return _main_coupling_it > 1;
 }
 
-void SecantSolve::updatePostprocessorsAsMainApp()
+void
+SecantSolve::transformPostprocessorsAsMainApp()
 {
   // Relax postprocessors for the main application
-  std::cout << "Secant method iteration: " << _coupling_it << std::endl;
-  for (size_t i=0; i<_transformed_pps.size(); i++)
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
   {
     // Get new postprocessor value
     const Real current_value = getPostprocessorValueByName(_transformed_pps[i]);
-    const Real old_value = _old_transformed_pps_values[i];
-    const Real older_value = _older_transformed_pps_values[i];
+    const Real xn_m1 = _transformed_pps_values[i][1];
+    const Real fxn_m2 = _transformed_pps_values[i][2];
+    const Real xn_m2 = _transformed_pps_values[i][3];
+
+    // Save fxn_m1, received or computed before the solve
+    _transformed_pps_values[i][0] = current_value;
 
     // Compute and set relaxed value
-    Real new_value;
-    if (!MooseUtils::absoluteFuzzyEqual(current_value + older_value - 2*old_value, 0))
-      new_value = old_value - (current_value - old_value) * (old_value - older_value) /
-          (current_value - 2*old_value + older_value);
-    else
-      new_value = current_value;
+    Real new_value = current_value;
+    if (!MooseUtils::absoluteFuzzyEqual(current_value - xn_m1 - fxn_m2 + xn_m2, 0))
+      new_value = xn_m1 - (current_value - xn_m1) * (xn_m1 - xn_m2) /
+                              (current_value - xn_m1 - fxn_m2 + xn_m2);
 
-    // Relax update
-    new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
+    // Relax update if desired
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * xn_m1;
 
     _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
-
-    // Print new value
-    std::cout << _transformed_pps[i] << " " << current_value << " & " << old_value << " & " << older_value << " -> " << new_value << std::endl;
   }
 }
 
-void SecantSolve::updateVariablesAsMainApp(const std::set<dof_id_type> & target_dofs)
+void
+SecantSolve::transformPostprocessorsAsSubApp()
 {
-  std::cout << "Relaxing IN STEP " << std::endl;
+  // Update the postprocessors
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+  {
+    // Get new, previous and the one before postprocessor values
+    const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    const Real xn_m1 = _secondary_transformed_pps_values[i][1];
+    const Real fxn_m2 = _secondary_transformed_pps_values[i][2];
+    const Real xn_m2 = _secondary_transformed_pps_values[i][3];
+
+    // Save fxn_m1, received or computed before the solve
+    _secondary_transformed_pps_values[i][0] = current_value;
+
+    // Compute the Secant method update
+    Real new_value = current_value;
+    if (!MooseUtils::absoluteFuzzyEqual(current_value - xn_m1 - fxn_m2 + xn_m2, 0))
+      new_value = xn_m1 - (current_value - xn_m1) * (xn_m1 - xn_m2) /
+                              (current_value - xn_m1 - fxn_m2 + xn_m2);
+
+    // Relax update if desired
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * xn_m1;
+
+    // Update the postprocessor
+    _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
+  }
+}
+
+void
+SecantSolve::transformVariablesAsMainApp(const std::set<dof_id_type> & target_dofs)
+{
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("transformed_older");
+  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
+  NumericVector<Number> & fxn_m2 = _nl.getVector("fxn_m2");
+  NumericVector<Number> & xn_m2 = _nl.getVector("xn_m2");
+
+  // Save the most recent evaluation of the coupled problem
+  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
+  fxn_m1 = solution;
 
   for (const auto & dof : target_dofs)
   {
     // Avoid 0 denominator issue
-    Real new_value = solution(dof);
-    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
-                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+    Real new_value = fxn_m1(dof);
+    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) - xn_m1(dof) - fxn_m2(dof) + xn_m2(dof), 0))
+      new_value = xn_m1(dof) - (solution(dof) - xn_m1(dof)) * (xn_m1(dof) - xn_m2(dof)) /
+                                   (solution(dof) - xn_m1(dof) - fxn_m2(dof) + xn_m2(dof));
 
-     // Relax update
-     new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
+    // Relax update
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * xn_m1(dof);
 
-     solution.set(dof, new_value);
+    solution.set(dof, new_value);
   }
   solution.close();
   _nl.update();
 }
 
-void SecantSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs)
+void
+SecantSolve::transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs)
 {
-  std::cout << "RELAXING POST SECANT" << std::endl;
-  if (_old_entering_time == _problem.time())
+  // Update the variables
+  NumericVector<Number> & solution = _nl.solution();
+  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
+  NumericVector<Number> & fxn_m2 = _nl.getVector("secondary_fxn_m2");
+  NumericVector<Number> & xn_m2 = _nl.getVector("secondary_xn_m2");
+
+  // Save the most recent evaluation of the coupled problem
+  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
+  fxn_m1 = solution;
+
+  for (const auto & dof : secondary_transformed_dofs)
   {
-    // Update the variables
-    NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & transformed_old = _nl.getVector("secondary_transformed_old");
-    NumericVector<Number> & transformed_older = _nl.getVector("secondary_transformed_older");
+    // Avoid 0 denominator issue
+    Real new_value = fxn_m1(dof);
+    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) - xn_m1(dof) - fxn_m2(dof) + xn_m2(dof), 0))
+      new_value = xn_m1(dof) - (solution(dof) - xn_m1(dof)) * (xn_m1(dof) - xn_m2(dof)) /
+                                   (solution(dof) - xn_m1(dof) - fxn_m2(dof) + xn_m2(dof));
 
-    for (const auto & dof : secondary_transformed_dofs)\
-    {
-      // Avoid 0 denominator issue
-      Real new_value = solution(dof);
-      if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-        new_value = transformed_old(dof) - (solution(dof) - transformed_old(dof)) * (transformed_old(dof) - transformed_older(dof))
-          / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+    // Relax update
+    new_value =
+        _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * xn_m1(dof);
 
-      // Relax update
-      new_value = _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * transformed_old(dof);
-
-      solution.set(dof, new_value);
-    }
-    solution.close();
-    _nl.update();
-
-    // Update the postprocessors
-    std::cout << "Sub-Secant method iteration: " << _coupling_it << std::endl;
-    for (size_t i=0; i<_secondary_transformed_pps.size(); i++)
-    {
-      // Get new, previous and the one before postprocessor values
-      const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
-      const Real old_value = _old_secondary_transformed_pps_values[i];
-      const Real older_value = _older_secondary_transformed_pps_values[i];
-
-      // Compute the Secant method value
-      Real new_value = current_value;
-      if (!MooseUtils::absoluteFuzzyEqual(current_value + older_value - 2 * old_value, 0))
-        new_value = old_value - (current_value - old_value) * (old_value - older_value) /
-            (current_value + older_value - 2 * old_value);
-      else
-        new_value = current_value;
-
-      // Relax update
-      new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
-
-      // Update the postprocessor
-      _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
-
-      std::cout << _secondary_transformed_pps[i] << " " << current_value << " & " << old_value  << " " << _problem.getPostprocessorValueByName(_secondary_transformed_pps[i], 1) << " -> " << new_value << std::endl;
-    }
+    solution.set(dof, new_value);
   }
-  _old_entering_time = _problem.time();
+  solution.close();
+  _nl.update();
 }
 
-void SecantSolve::printCouplingConvergenceHistory()
+void
+SecantSolve::printCouplingConvergenceHistory()
 {
-  _console << "\n 0 Secant method    |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm)
-           << '\n';
+  _console << "\n 0 Secant initialization |R| = "
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm) << '\n';
 
   for (unsigned int i = 0; i <= _coupling_it; ++i)
   {
     Real max_norm = std::max(_coupling_timestep_begin_norm[i], _coupling_timestep_end_norm[i]);
     std::stringstream secant_prefix;
-    secant_prefix << " Secant step      |R| = ";
+    if (i < 1)
+      secant_prefix << " Secant initialization |R| = ";
+    else
+      secant_prefix << " Secant step           |R| = ";
 
-    _console << std::setw(2) << i + 1
-             << secant_prefix.str() << Console::outputNorm(_coupling_initial_norm, max_norm)
-             << '\n';
+    _console << std::setw(2) << i + 1 << secant_prefix.str()
+             << Console::outputNorm(_coupling_initial_norm, max_norm) << '\n';
   }
 }

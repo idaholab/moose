@@ -12,23 +12,30 @@
   []
 []
 
+[AuxVariables]
+  [v]
+  []
+[]
+
 [Kernels]
   [diff]
-    type = Diffusion
+    type = CoefDiffusion
     variable = u
+    coef = 0.1
   []
-  [time]
-    type = TimeDerivative
+  [force_u]
+    type = CoupledForce
     variable = u
+    v = v
   []
 []
 
 [BCs]
   [left]
-    type = PostprocessorDirichletBC
+    type = DirichletBC
     variable = u
     boundary = left
-    postprocessor = 'from_sub'
+    value = 0
   []
   [right]
     type = DirichletBC
@@ -39,35 +46,39 @@
 []
 
 [Postprocessors]
-  [picard_its]
-    type = NumCouplingIterations
-    execute_on = 'initial timestep_end'
+  [unorm]
+    type = ElementL2Norm
+    variable = u
   []
-
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 20
-  dt = 0.1
+  type = Steady
+
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  coupling_max_its = 30
   nl_abs_tol = 1e-14
+
+  coupling_algorithm = 'secant'
+  coupling_max_its = 30
+  transformed_variables = 'u'
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+  exodus = false
 []
 
 [MultiApps]
   [sub]
-    type = TransientMultiApp
+    type = FullSolveMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
-    input_files = picard_sub.i
+    input_files = 'steady_sub.i'
     clone_master_mesh = true
+
+    transformed_variables = 'v'
   []
 []
 

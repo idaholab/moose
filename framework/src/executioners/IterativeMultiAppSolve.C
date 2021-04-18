@@ -17,14 +17,15 @@
 #include "Console.h"
 #include "EigenExecutionerBase.h"
 
-
 InputParameters
 IterativeMultiAppSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<unsigned int>("coupling_min_its", 0, "Specifies the minimum number of coupling iterations.");
-  params.addParam<unsigned int>("coupling_max_its", 1, "Specifies the maximum number of coupling iterations.");
+  params.addParam<unsigned int>(
+      "coupling_min_its", 0, "Specifies the minimum number of coupling iterations.");
+  params.addParam<unsigned int>(
+      "coupling_max_its", 1, "Specifies the maximum number of coupling iterations.");
   params.addParam<bool>(
       "accept_on_max_coupling_iteration",
       false,
@@ -37,18 +38,19 @@ IterativeMultiAppSolve::validParams()
                         1e-8,
                         "The relative nonlinear residual drop to shoot for "
                         "during coupling iterations. This check is "
-                        "performed based on the Master app's nonlinear "
+                        "performed based on the main app's nonlinear "
                         "residual.");
   params.addParam<Real>("coupling_abs_tol",
                         1e-50,
                         "The absolute nonlinear residual to shoot for "
                         "during coupling iterations. This check is "
-                        "performed based on the Master app's nonlinear "
+                        "performed based on the main app's nonlinear "
                         "residual.");
-  params.addParam<bool>("coupling_force_norms",
-                        false,
-                        "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-                        "existence of active MultiApps with those execute_on flags, default: false.");
+  params.addParam<bool>(
+      "coupling_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existence of active MultiApps with those execute_on flags, default: false.");
 
   // Parameters for using a custom postprocessor for convergence checks
   params.addParam<PostprocessorName>("coupling_custom_pp",
@@ -78,26 +80,30 @@ IterativeMultiAppSolve::validParams()
                                     "relaxation_factor>0 & relaxation_factor<2",
                                     "Fraction of newly computed value to keep."
                                     "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("transformed_variables",
-                                            std::vector<std::string>(),
-                                            "List of master app variables to transform during coupling iterations");
-  params.addParam<std::vector<std::string>>("transformed_postprocessors",
-                                            std::vector<std::string>(),
-                                            "List of master app postprocessors to transform during coupling iterations");
-  params.addDeprecatedParam<std::vector<std::string>>("relaxed_variables",
-                                                      std::vector<std::string>(),
-                                                      "Relaxed variables is deprecated, use transformed_variables instead.",
-                                                      "List of master app variables to relax during coupling iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_variables",
+      std::vector<std::string>(),
+      "List of main app variables to transform during coupling iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_postprocessors",
+      std::vector<std::string>(),
+      "List of main app postprocessors to transform during coupling iterations");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "relaxed_variables",
+      std::vector<std::string>(),
+      "Relaxed variables is deprecated, use transformed_variables instead.",
+      "List of master app variables to relax during coupling iterations");
 
   params.addParam<bool>("auto_advance",
                         "Whether to automatically advance sub-applications regardless of whether "
                         "their solve converges.");
 
-  params.addParamNamesToGroup("coupling_min_its coupling_max_its accept_on_max_coupling_iteration "
-                              "disable_coupling_residual_norm_check coupling_rel_tol coupling_abs_tol "
-                              "coupling_force_norms coupling_custom_pp coupling_rel_tol coupling_abs_tol direct_pp_value "
-                              "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
-                              "Multiapp coupling");
+  params.addParamNamesToGroup(
+      "coupling_min_its coupling_max_its accept_on_max_coupling_iteration "
+      "disable_coupling_residual_norm_check coupling_rel_tol coupling_abs_tol "
+      "coupling_force_norms coupling_custom_pp coupling_rel_tol coupling_abs_tol direct_pp_value "
+      "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
+      "Multiapp coupling");
 
   params.addParam<unsigned int>(
       "max_xfem_update",
@@ -124,8 +130,9 @@ IterativeMultiAppSolve::IterativeMultiAppSolve(Executioner * ex)
     _coupling_abs_tol(getParam<Real>("coupling_abs_tol")),
     _coupling_force_norms(getParam<bool>("coupling_force_norms")),
 
-    _coupling_custom_pp(isParamValid("coupling_custom_pp") ? &getPostprocessorValue("coupling_custom_pp")
-                                                       : nullptr),
+    _coupling_custom_pp(isParamValid("coupling_custom_pp")
+                            ? &getPostprocessorValue("coupling_custom_pp")
+                            : nullptr),
     _custom_rel_tol(getParam<Real>("custom_rel_tol")),
     _custom_abs_tol(getParam<Real>("custom_abs_tol")),
     _pp_old(0.0),
@@ -155,25 +162,13 @@ IterativeMultiAppSolve::IterativeMultiAppSolve(Executioner * ex)
     _transformed_vars = getParam<std::vector<std::string>>("relaxed_variables");
 
   if (_coupling_min_its > _coupling_max_its)
-    paramError("coupling_min_its", "The minimum number of coupling iterations may not exceed the maximum.");
-
-  if (_relax_factor != 1 || !dynamic_cast<PicardSolve *>(this))
-    // Store a copy of the previous solution here
-    _problem.getNonlinearSystemBase().addVector("transformed_old", false, PARALLEL);
+    paramError("coupling_min_its",
+               "The minimum number of coupling iterations may not exceed the maximum.");
 
   if (_transformed_vars.size() > 0 && _transformed_pps.size() > 0)
-    mooseWarning("Both variable and postprocessor transformation are active. If the two share dofs, the "
-                 "transformation will not be correct.");
-
-  //TODO Check that pps are executed at timestep_end
-  // Variables dont care as much, as the relaxation seems to be caught before the transfers are done
-  // to the other application
-  // for (size_t i=0; i<_transformed_pps.size(); i++)
-  // {
-  //   const ExecFlagEnum & exec_flags = _problem.getUserObject<UserObject>(_transformed_pps[i]).getExecuteOnEnum();
-  //
-  //   //
-  // }
+    mooseWarning(
+        "Both variable and postprocessor transformation are active. If the two share dofs, the "
+        "transformation will not be correct.");
 }
 
 bool
@@ -195,9 +190,9 @@ IterativeMultiAppSolve::solve()
   _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
   _problem.backupMultiApps(EXEC_TIMESTEP_END);
 
-  // Prepare to relax variables as a master
+  // Prepare to relax variables as a main app
   std::set<dof_id_type> transformed_dofs;
-  if (_relax_factor != 1.0)
+  if (_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
   {
     // Snag all of the local dof indices for all of these variables
     System & libmesh_nl_system = _nl.system();
@@ -210,7 +205,7 @@ IterativeMultiAppSolve::solve()
 
   // Prepare to relax variables as a subapp
   std::set<dof_id_type> secondary_transformed_dofs;
-  if (_secondary_relaxation_factor != 1.0)
+  if (_secondary_relaxation_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
   {
     // Snag all of the local dof indices for all of these variables
     System & libmesh_nl_system = _nl.system();
@@ -220,8 +215,17 @@ IterativeMultiAppSolve::solve()
 
     secondary_transformed_dofs = aldit.getDofIndices();
 
+    // To detect a new time step
     if (_old_entering_time == _problem.time())
-      savePreviousValuesAsSubApp();
+    {
+      // Keep track of the iteration number of the main app
+      _main_coupling_it++;
+
+      // Save variable values before the solve. Solving will provide new values
+      savePreviousVariableValuesAsSubApp();
+    }
+    else
+      _main_coupling_it = 0;
   }
 
   for (_coupling_it = 0; _coupling_it < _coupling_max_its; ++_coupling_it)
@@ -266,13 +270,12 @@ IterativeMultiAppSolve::solve()
     if (_coupling_custom_pp)
       computeCustomConvergencePostprocessor();
 
-    std::cout << solve_converged << " " << _has_coupling_its << " " << _has_coupling_norm << std::endl;
     if (solve_converged)
     {
       if (_has_coupling_its)
       {
         if (_has_coupling_norm)
-          // Print the evolution of the master app residual over the coupling iterations
+          // Print the evolution of the main app residual over the coupling iterations
           printCouplingConvergenceHistory();
 
         // Examine convergence metrics & properties and set the convergence reason
@@ -293,10 +296,17 @@ IterativeMultiAppSolve::solve()
         current_dt; // _dt might be smaller than this at this point for multistep methods
   }
 
+  // Save postprocessors after the solve and their potential timestep_end execution
+  // The postprocessors could be overwritten at timestep_begin, which is why they are saved now
+  if (_old_entering_time == _problem.time())
+    savePreviousPostprocessorValuesAsSubApp();
+
   if (converged)
   {
     // Update the subapp using the coupling algorithm
-    updateAsSubApp(secondary_transformed_dofs);
+    if (_secondary_transformed_variables.size() > 0 && useCouplingAlgorithmUpdate(false) &&
+        _old_entering_time == _problem.time())
+      transformVariablesAsSubApp(secondary_transformed_dofs);
 
     // Update the entering time, used to detect failed solves
     _old_entering_time = _problem.time();
@@ -317,9 +327,9 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
 
   // Compute previous norms for coloring the norm output
   Real begin_norm_old = (_coupling_it > 0 ? _coupling_timestep_begin_norm[_coupling_it - 1]
-                                        : std::numeric_limits<Real>::max());
+                                          : std::numeric_limits<Real>::max());
   Real end_norm_old = (_coupling_it > 0 ? _coupling_timestep_end_norm[_coupling_it - 1]
-                                      : std::numeric_limits<Real>::max());
+                                        : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
 
@@ -329,6 +339,14 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
     _coupling_status = MooseCouplingConvergenceReason::DIVERGED_FAILED_MULTIAPP;
     return false;
   }
+
+  // Transform the coupling postprocessors before solving, but after the timestep_begin transfers
+  // have been received
+  if (_transformed_pps.size() > 0 && useCouplingAlgorithmUpdate(true))
+    transformPostprocessorsAsMainApp();
+  if (_secondary_transformed_pps.size() > 0 && useCouplingAlgorithmUpdate(false) &&
+      _problem.time() == _old_entering_time)
+    transformPostprocessorsAsSubApp();
 
   if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
     _problem.updateMeshXFEM();
@@ -354,7 +372,7 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
   savePreviousValuesAsMainApp();
 
   if (_has_coupling_its)
-    _console << COLOR_MAGENTA << "\nMaster solve:\n" << COLOR_DEFAULT;
+    _console << COLOR_MAGENTA << "\nMain app solve:\n" << COLOR_DEFAULT;
   if (!_inner_solve->solve())
   {
     _coupling_status = MooseCouplingConvergenceReason::DIVERGED_NONLINEAR;
@@ -370,8 +388,8 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
   _console << COLOR_GREEN << ' ' << _solve_message << COLOR_DEFAULT << std::endl;
 
   // Use the coupling algorithm if the conditions (availability of values, etc) are met
-  if (useCouplingUpdateAlgorithm())
-    updateVariablesAsMainApp(transformed_dofs);
+  if (_transformed_vars.size() > 0 && useCouplingAlgorithmUpdate(true))
+    transformVariablesAsMainApp(transformed_dofs);
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
@@ -419,7 +437,8 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
   return true;
 }
 
-void IterativeMultiAppSolve::computeCustomConvergencePostprocessor()
+void
+IterativeMultiAppSolve::computeCustomConvergencePostprocessor()
 {
   if ((_coupling_it == 0 && getParam<bool>("direct_pp_value")) ||
       !getParam<bool>("direct_pp_value"))
@@ -432,9 +451,10 @@ void IterativeMultiAppSolve::computeCustomConvergencePostprocessor()
   _console << _pp_history.str();
 }
 
-bool IterativeMultiAppSolve::examineCouplingConvergence(bool & converged)
+bool
+IterativeMultiAppSolve::examineCouplingConvergence(bool & converged)
 {
-  if  (_coupling_it + 2 > _coupling_min_its)
+  if (_coupling_it + 2 > _coupling_min_its)
   {
     Real max_norm = std::max(_coupling_timestep_begin_norm[_coupling_it],
                              _coupling_timestep_end_norm[_coupling_it]);
@@ -484,7 +504,8 @@ bool IterativeMultiAppSolve::examineCouplingConvergence(bool & converged)
   return false;
 }
 
-void IterativeMultiAppSolve::printCouplingConvergenceReason()
+void
+IterativeMultiAppSolve::printCouplingConvergenceReason()
 {
   _console << "Multiapp coupling convergence reason: ";
   switch (_coupling_status)

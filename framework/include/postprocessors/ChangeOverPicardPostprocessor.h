@@ -45,7 +45,7 @@ protected:
   const PostprocessorValue & _pps_value;
 
   /// post-processor value at the previous Picard iteration
-  const PostprocessorValue & _pps_value_old;
+  Real _pps_value_old;
 
   /// initial post-processor value
   Real & _pps_value_initial;

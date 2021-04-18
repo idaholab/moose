@@ -21,7 +21,7 @@
     input = 'master.i'
     exodiff = 'keep_solution_master_out_sub0.e keep_solution_master_out.e'
     allow_warnings = true
-    cli_args = "MultiApps/sub/keep_solution_during_restore=true Executioner/num_steps=4 MultiApps/sub/input_files='sub_failing_problem.i'"
+    cli_args = "MultiApps/sub/keep_solution_during_restore=true Executioner/num_steps=4 MultiApps/sub/input_files='sub_failing_problem.i' Outputs/file_base='keep_solution_master_out'"
     detail = 'or re-using the previous solution as the initial condition for subsequent iterations.'
   []
 []

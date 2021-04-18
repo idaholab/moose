@@ -22,196 +22,203 @@ SteffensenSolve::validParams()
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner * ex)
-  : IterativeMultiAppSolve(ex)
+SteffensenSolve::SteffensenSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
 {
-  // Store a copy of the previous solution here
-  _problem.getNonlinearSystemBase().addVector("transformed_old", false, PARALLEL);
-  // Store a copy of the solution before the previous solution here
-  _problem.getNonlinearSystemBase().addVector("transformed_older", false, PARALLEL);
+  // Store a copy of the state and its first evaluation in the coupled problem
+  _problem.getNonlinearSystemBase().addVector("xn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("fxn_m1", false, PARALLEL);
 
-  _old_transformed_pps_values.resize(_transformed_pps.size());
-  _older_transformed_pps_values.resize(_transformed_pps.size());
+  // Allocate storage for the previous values of the postprocessors to transform
+  _transformed_pps_values.resize(_transformed_pps.size());
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
+    _transformed_pps_values[i].resize(2);
 
   // Steffensen method uses half-steps
   _coupling_min_its *= 2;
   _coupling_max_its *= 2;
 }
 
-void SteffensenSolve::savePreviousValuesAsSubApp()
+void
+SteffensenSolve::savePreviousVariableValuesAsSubApp()
 {
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("secondary_transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("secondary_transformed_older");
-  transformed_older = transformed_old;
-  transformed_old = solution;
+  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
 
+  // What 'solution' is with regards to the Steffensen solve depends on the step
+  if (_main_coupling_it % 2 == 1)
+    xn_m1 = solution;
+  else
+    fxn_m1 = solution;
+}
+
+void
+SteffensenSolve::savePreviousPostprocessorValuesAsSubApp()
+{
   // Save previous postprocessor values
-  for (size_t i=0; i<_secondary_transformed_pps.size(); i++)
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
   {
-    _older_secondary_transformed_pps_values[i] = _old_secondary_transformed_pps_values[i];
-    _old_secondary_transformed_pps_values[i] = getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    if (_main_coupling_it % 2 == 0)
+      _secondary_transformed_pps_values[i][1] =
+          getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    else
+      _secondary_transformed_pps_values[i][0] =
+          getPostprocessorValueByName(_secondary_transformed_pps[i]);
   }
 }
 
-bool SteffensenSolve::useCouplingUpdateAlgorithm()
+bool
+SteffensenSolve::useCouplingAlgorithmUpdate(bool as_main_app)
 {
   // Need at least two values to compute the Steffensen update, and the update is only performed
-  // every other iteration
-  return _coupling_it > 1 && (_coupling_it % 2 == 0);
+  // every other iteration as two evaluations of the coupled problem are necessary
+  if (as_main_app)
+    return _coupling_it > 1 && (_coupling_it % 2 == 0);
+  else
+    return _main_coupling_it > 1 && (_main_coupling_it % 2 == 0);
 }
 
-void SteffensenSolve::savePreviousValuesAsMainApp()
+void
+SteffensenSolve::savePreviousValuesAsMainApp()
 {
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("transformed_older");
+  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
 
-  // Save off the current and previous solutions
-  transformed_older = transformed_old;
-  transformed_old = solution;
+  // What solution is with regards to the Steffensen solve depends on the step
+  if (_coupling_it % 2 == 1)
+    xn_m1 = solution;
+  else
+    fxn_m1 = solution;
 
   // Set postprocessor previous values
-  for (size_t i=0; i<_transformed_pps.size(); i++)
-  {
-    _older_transformed_pps_values[i] = _old_transformed_pps_values[i];
-    _old_transformed_pps_values[i] = getPostprocessorValueByName(_transformed_pps[i]);
-  }
-}
-
-void SteffensenSolve::updatePostprocessorsAsMainApp()
-{
-  // Relax postprocessors for the main application
-  std::cout << "Steffensen method iteration: " << _coupling_it << std::endl;
-  for (size_t i=0; i<_transformed_pps.size(); i++)
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
   {
     if (_coupling_it % 2 == 0)
-    {
-      // Get new postprocessor value
-      const Real current_value = getPostprocessorValueByName(_transformed_pps[i]);
-      const Real old_value = _old_transformed_pps_values[i];
-      const Real older_value = _older_transformed_pps_values[i];
-
-      // Compute and set relaxed value
-      Real new_value;
-      if (!MooseUtils::absoluteFuzzyEqual(current_value + older_value - 2*old_value, 0))
-        new_value = older_value - (old_value - older_value) * (old_value - older_value) /
-            (current_value + older_value - 2*old_value);
-      else
-        new_value = current_value;
-
-      // Relax update
-      new_value = _relax_factor * new_value + (1 - _relax_factor) * old_value;
-
-      _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
-
-      // Print new value
-      std::cout << _transformed_pps[i] << " " << current_value << " & " << old_value << " & " << older_value << " -> " << new_value << std::endl;
-    }
-    // Keep track of postprocessor values for the next iteration
-    // _older_transformed_pps_values[i] = _old_transformed_pps_values[i];
-    // _old_transformed_pps_values[i] = getPostprocessorValueByName(_transformed_pps[i]);
+      _transformed_pps_values[i][1] = getPostprocessorValueByName(_transformed_pps[i]);
+    else
+      _transformed_pps_values[i][0] = getPostprocessorValueByName(_transformed_pps[i]);
   }
 }
 
-void SteffensenSolve::updateVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs)
+void
+SteffensenSolve::transformPostprocessorsAsMainApp()
 {
-  std::cout << "Relaxing IN STEP " << std::endl;
+  // Relax postprocessors for the main application
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
+  {
+    // Get new postprocessor value
+    const Real current_value = getPostprocessorValueByName(_transformed_pps[i]);
+    const Real fxn_m1 = _transformed_pps_values[i][0];
+    const Real xn_m1 = _transformed_pps_values[i][1];
+
+    // Compute and set relaxed value
+    Real new_value = current_value;
+    if (!MooseUtils::absoluteFuzzyEqual(current_value + xn_m1 - 2 * fxn_m1, 0))
+      new_value =
+          xn_m1 - (fxn_m1 - xn_m1) * (fxn_m1 - xn_m1) / (current_value + xn_m1 - 2 * fxn_m1);
+
+    // Relax update
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * fxn_m1;
+
+    _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
+  }
+}
+
+void
+SteffensenSolve::transformPostprocessorsAsSubApp()
+{
+  // Update the postprocessors
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+  {
+    // Get new, previous and the one before postprocessor values
+    const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    const Real fxn_m1 = _secondary_transformed_pps_values[i][0];
+    const Real xn_m1 = _secondary_transformed_pps_values[i][1];
+
+    // Compute the Steffensen method value
+    Real new_value = current_value;
+    if (!MooseUtils::absoluteFuzzyEqual(current_value + xn_m1 - 2 * fxn_m1, 0))
+      new_value =
+          xn_m1 - (fxn_m1 - xn_m1) * (fxn_m1 - xn_m1) / (current_value + xn_m1 - 2 * fxn_m1);
+
+    // Relax update
+    new_value =
+        _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * fxn_m1;
+
+    // Update the postprocessor
+    _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
+  }
+}
+
+void
+SteffensenSolve::transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs)
+{
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("transformed_old");
-  NumericVector<Number> & transformed_older = _nl.getVector("transformed_older");
+  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
 
   for (const auto & dof : transformed_dofs)
   {
     // Avoid 0 denominator issue
     Real new_value = solution(dof);
-    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-      new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) *
-          (transformed_old(dof) - transformed_older(dof)) /
-          (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof), 0))
+      new_value = xn_m1(dof) - (fxn_m1(dof) - xn_m1(dof)) * (fxn_m1(dof) - xn_m1(dof)) /
+                                   (solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof));
 
-     // Relax update
-     new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
+    // Relax update
+    new_value = _relax_factor * new_value + (1 - _relax_factor) * fxn_m1(dof);
 
-     solution.set(dof, new_value);
+    solution.set(dof, new_value);
   }
   solution.close();
   _nl.update();
 }
 
-void SteffensenSolve::updateAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs)
+void
+SteffensenSolve::transformVariablesAsSubApp(
+    const std::set<dof_id_type> & secondary_transformed_dofs)
 {
-  std::cout << "RELAXING POST SECANT" << std::endl;
-  if (_old_entering_time == _problem.time())
+  // Update the variables
+  NumericVector<Number> & solution = _nl.solution();
+  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
+  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
+
+  for (const auto & dof : secondary_transformed_dofs)
   {
-    // Update the variables
-    NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & transformed_old = _nl.getVector("secondary_transformed_old");
-    NumericVector<Number> & transformed_older = _nl.getVector("secondary_transformed_older");
+    // Avoid 0 denominator issue
+    Real new_value = solution(dof);
+    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof), 0))
+      new_value = xn_m1(dof) - (fxn_m1(dof) - xn_m1(dof)) * (fxn_m1(dof) - xn_m1(dof)) /
+                                   (solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof));
 
-    for (const auto & dof : secondary_transformed_dofs)
-    {
-      // Avoid 0 denominator issue
-      Real new_value = solution(dof);
-      if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + transformed_older(dof) - 2*transformed_old(dof) , 0))
-        new_value = transformed_older(dof) - (transformed_old(dof) - transformed_older(dof)) * (transformed_old(dof) - transformed_older(dof))
-                   / (solution(dof) + transformed_older(dof) - 2*transformed_old(dof));
+    // Relax update
+    new_value =
+        _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * fxn_m1(dof);
 
-      // Relax update
-      new_value = _relax_factor * new_value + (1 - _relax_factor) * transformed_old(dof);
-
-      solution.set(dof, new_value);
-    }
-    solution.close();
-    _nl.update();
-
-    // Update the postprocessors
-    std::cout << "Sub-Steffensen method iteration: " << _coupling_it << std::endl;
-    for (size_t i=0; i<_secondary_transformed_pps.size(); i++)
-    {
-      // Get new, previous and the one before postprocessor values
-      const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
-      const Real old_value = _old_secondary_transformed_pps_values[i];
-      const Real older_value = _older_secondary_transformed_pps_values[i];
-
-      // Compute the Steffensen method value
-      Real new_value = current_value;
-      if (!MooseUtils::absoluteFuzzyEqual(current_value + older_value - 2 * old_value, 0))
-        new_value = older_value - (old_value - older_value) * (old_value - older_value) /
-            (current_value + older_value - 2 * old_value);
-      else
-        new_value = current_value;
-
-      // Relax update
-      new_value = _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * old_value;
-
-      // Update the postprocessor
-      _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
-
-      std::cout << _secondary_transformed_pps[i] << " " << current_value << " & " << old_value  << " " << _problem.getPostprocessorValueByName(_secondary_transformed_pps[i], 1) << " -> " << new_value << std::endl;
-    }
+    solution.set(dof, new_value);
   }
-  _old_entering_time = _problem.time();
+  solution.close();
+  _nl.update();
 }
 
-void SteffensenSolve::printCouplingConvergenceHistory()
+void
+SteffensenSolve::printCouplingConvergenceHistory()
 {
   _console << "\n 0 Steffensen method    |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm)
-           << '\n';
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm) << '\n';
 
   for (unsigned int i = 0; i <= _coupling_it; ++i)
   {
     Real max_norm = std::max(_coupling_timestep_begin_norm[i], _coupling_timestep_end_norm[i]);
     std::stringstream steffensen_prefix;
-    if (_coupling_it % 2 == 1)
+    if (i % 2 == 0)
       steffensen_prefix << " Steffensen half-step |R| = ";
     else
       steffensen_prefix << " Steffensen step      |R| = ";
 
-    _console << std::setw(2) << i + 1
-             << steffensen_prefix.str() << Console::outputNorm(_coupling_initial_norm, max_norm)
-             << '\n';
+    _console << std::setw(2) << i + 1 << steffensen_prefix.str()
+             << Console::outputNorm(_coupling_initial_norm, max_norm) << '\n';
   }
 }

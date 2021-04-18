@@ -10,6 +10,7 @@
 #pragma once
 
 #include "IterativeMultiAppSolve.h"
+#include "NonlinearSystem.h"
 
 class SteffensenSolve : public IterativeMultiAppSolve
 {
@@ -18,39 +19,46 @@ public:
 
   static InputParameters validParams();
 
-  /// Set relaxation postprocessors for the current solve as a SubApp
-  virtual void setMultiAppRelaxationPostprocessors(const std::vector<std::string> & pps)
+  /// Allocate storage for secondary transformed objects
+  virtual void allocateStorageForSecondaryTransformed() override final
   {
-    _secondary_transformed_pps = pps;
-    _old_secondary_transformed_pps_values.resize(pps.size());
-    _older_secondary_transformed_pps_values.resize(pps.size());
+    // Store a copy of the previous solution here
+    _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
+    _problem.getNonlinearSystemBase().addVector("secondary_fxn_m1", false, PARALLEL);
+
+    // Allocate storage for the previous postprocessor values
+    _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+    for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+      _secondary_transformed_pps_values[i].resize(2);
   }
 
 private:
-  /// Save the variable and postprocessor values as a SubApp
-  virtual void savePreviousValuesAsSubApp();
+  /// Save the variable values as a SubApp
+  virtual void savePreviousVariableValuesAsSubApp() override final;
 
-  /// Whether to use the coupling algorithm (relaxed Picard, Steffensen, ...) instead of Picard
-  virtual bool useCouplingUpdateAlgorithm();
+  /// Save the postprocessor values as a SubApp
+  virtual void savePreviousPostprocessorValuesAsSubApp() override final;
 
-  /// Save the previous values for the variables
-  virtual void savePreviousValuesAsMainApp();
+  /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
+  virtual bool useCouplingAlgorithmUpdate(bool as_main_app) override final;
+
+  /// Save the previous variables and postprocessors as the main application
+  virtual void savePreviousValuesAsMainApp() override final;
 
   /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected
-  virtual void updatePostprocessorsAsMainApp();
+  virtual void transformPostprocessorsAsMainApp() override final;
 
-  /// Compute the new value variable values based on the coupling algorithm selected
-  virtual void updateVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs);
+  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected as a SubApp
+  virtual void transformPostprocessorsAsSubApp() override final;
 
-  /// Update variables and postprocessors as a SubApp
-  virtual void updateAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs);
+  /// Compute the new variable values based on the coupling algorithm selected
+  virtual void
+  transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) override final;
+
+  /// Compute the new variable values based on the coupling algorithm selected as a SubApp
+  virtual void transformVariablesAsSubApp(
+      const std::set<dof_id_type> & secondary_transformed_dofs) override final;
 
   /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printCouplingConvergenceHistory();
-
-  /// Values of the relaxed postprocessors from two iterations prior
-  std::vector<PostprocessorValue> _older_transformed_pps_values;
-
-  /// Values of the postprocessors to relax outside of coupling iterations from two iterations prior (used as a subapp)
-  std::vector<PostprocessorValue> _older_secondary_transformed_pps_values;
+  virtual void printCouplingConvergenceHistory() override final;
 };

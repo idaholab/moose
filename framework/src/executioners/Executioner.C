@@ -28,12 +28,10 @@ Executioner::validParams()
   InputParameters params = MooseObject::validParams();
   params += FEProblemSolve::validParams();
   params += PicardSolve::validParams();
-  params += SecantSolve::validParams();
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
 
-  MooseEnum MultiAppIterationMethod(
-      "picard secant steffensen", "picard");
+  MooseEnum MultiAppIterationMethod("picard secant steffensen", "picard");
 
   params.addParam<MooseEnum>("coupling_algorithm",
                              MultiAppIterationMethod,
@@ -101,10 +99,14 @@ Executioner::Executioner(const InputParameters & parameters)
 
   // Instantiate the SolveObject for the multiapp coupling iteration
   if (_multiapp_iteration_method == "picard")
-    _iterative_multiapp_solve = std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<PicardSolve>(this));
+    _iterative_multiapp_solve =
+        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<PicardSolve>(this));
   else if (_multiapp_iteration_method == "secant")
-    _iterative_multiapp_solve = std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SecantSolve>(this));
-
+    _iterative_multiapp_solve =
+        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SecantSolve>(this));
+  else if (_multiapp_iteration_method == "steffensen")
+    _iterative_multiapp_solve =
+        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SteffensenSolve>(this));
 }
 
 Problem &

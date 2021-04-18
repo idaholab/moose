@@ -18,6 +18,7 @@
 #include "IterativeMultiAppSolve.h"
 #include "PicardSolve.h"
 #include "SecantSolve.h"
+#include "SteffensenSolve.h"
 #include "Reporter.h"
 #include "ReporterInterface.h"
 
@@ -116,7 +117,8 @@ public:
   FEProblemSolve & feProblemSolve() { return _feproblem_solve; }
 
   /// Return underlying PicardSolve object.
-  PicardSolve & picardSolve() {
+  PicardSolve & picardSolve()
+  {
     mooseDeprecated("picardSolve() is deprecated. Use iterativeMultiAppSolve() instead.");
     if (_multiapp_iteration_method == "picard")
       return *(std::dynamic_pointer_cast<PicardSolve>(_iterative_multiapp_solve));
@@ -125,12 +127,16 @@ public:
   }
 
   /// Return a pointer to the underlying iterative multiapp solve object.
-  std::shared_ptr<IterativeMultiAppSolve> iterativeMultiAppSolve() { return _iterative_multiapp_solve; }
+  std::shared_ptr<IterativeMultiAppSolve> iterativeMultiAppSolve()
+  {
+    return _iterative_multiapp_solve;
+  }
 
   /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const
   {
-    mooseDeprecated("augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
+    mooseDeprecated(
+        "augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
     return false;
   }
 

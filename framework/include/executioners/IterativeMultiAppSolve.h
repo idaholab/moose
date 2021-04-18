@@ -81,23 +81,28 @@ public:
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
 
   /// Set relaxation variables for the current solve as a SubApp
-  void setMultiAppRelaxationVariables(const std::vector<std::string> & vars)
+  void setMultiAppTransformedVariables(const std::vector<std::string> & vars)
   {
     _secondary_transformed_variables = vars;
   }
 
   /// Set relaxation postprocessors for the current solve as a SubApp
-  virtual void setMultiAppRelaxationPostprocessors(const std::vector<std::string> & pps)
+  virtual void setMultiAppTransformedPostprocessors(const std::vector<std::string> & pps)
   {
     _secondary_transformed_pps = pps;
-    _old_secondary_transformed_pps_values.resize(pps.size());
   }
 
-  /// Save the variable and postprocessor values as a SubApp
-  virtual void savePreviousValuesAsSubApp() = 0;
+  /// Allocate storage for secondary transformed stuff
+  virtual void allocateStorageForSecondaryTransformed() = 0;
+
+  /// Save the variable values as a SubApp
+  virtual void savePreviousVariableValuesAsSubApp() = 0;
+
+  /// Save the postprocessor values as a SubApp
+  virtual void savePreviousPostprocessorValuesAsSubApp() = 0;
 
   /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useCouplingUpdateAlgorithm() = 0;
+  virtual bool useCouplingAlgorithmUpdate(bool as_main_app) = 0;
 
   /**
    * Perform one coupling iteration or a full solve.
@@ -112,21 +117,24 @@ public:
    * state.
    * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
    */
-  virtual bool solveStep(Real & begin_norm,
-                         Real & end_norm,
-                         const std::set<dof_id_type> & transformed_dofs);
+  virtual bool
+  solveStep(Real & begin_norm, Real & end_norm, const std::set<dof_id_type> & transformed_dofs);
 
   /// Save the previous values for the variables
   virtual void savePreviousValuesAsMainApp() = 0;
 
   /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected
-  virtual void updatePostprocessorsAsMainApp() = 0;
+  virtual void transformPostprocessorsAsMainApp() = 0;
+
+  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected as a SubApp
+  virtual void transformPostprocessorsAsSubApp() = 0;
 
   /// Compute the new value variable values based on the coupling algorithm selected
-  virtual void updateVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) = 0;
+  virtual void transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) = 0;
 
-  /// Update variables and postprocessors as a SubApp
-  virtual void updateAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs) = 0;
+  /// Compute the new value variable values based on the coupling algorithm selected as a SubApp
+  virtual void
+  transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs) = 0;
 
   /// Print the convergence history of the coupling, at every coupling iteration
   virtual void printCouplingConvergenceHistory() = 0;
@@ -165,7 +173,7 @@ protected:
   bool _coupling_force_norms; // TODO: make const once picard parameters are removed
 
   /// Postprocessor value for user-defined coupling convergence check
-  const PostprocessorValue * _coupling_custom_pp; //FIXME Make const once picard_custom_pp is gone
+  const PostprocessorValue * _coupling_custom_pp; // FIXME Make const once picard_custom_pp is gone
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value
@@ -186,7 +194,7 @@ protected:
   /// The postprocessors (transferred or not) that are going to be relaxed
   const std::vector<std::string> _transformed_pps;
   /// Previous values of the relaxed postprocessors
-  std::vector<PostprocessorValue> _old_transformed_pps_values;
+  std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
 
   /// Relaxation factor outside of coupling iteration (used as a subapp)
   Real _secondary_relaxation_factor;
@@ -195,9 +203,7 @@ protected:
   /// Postprocessors to be relaxed outside of coupling iteration (used as a subapp)
   std::vector<std::string> _secondary_transformed_pps;
   /// Previous values of the postprocessors relaxed outside of the coupling iteration (used as a subapp)
-  std::vector<PostprocessorValue> _old_secondary_transformed_pps_values;
-  /// Whether previous self relaxed postprocessors have been stored
-  bool _has_old_pp_values;
+  std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
 
   /// Maximum number of xfem updates per step
   const unsigned int _max_xfem_update;
@@ -210,6 +216,8 @@ protected:
   ///@{ Variables used by the coupling iteration
   /// coupling iteration counter
   unsigned int _coupling_it;
+  /// coupling iteration counter for the main app
+  unsigned int _main_coupling_it;
   /// Initial residual norm
   Real _coupling_initial_norm;
   /// Full history of residual norm after evaluation of timestep_begin
@@ -228,13 +236,13 @@ protected:
   /// Time of previous coupling solve as a subapp
   Real _old_entering_time;
 
+  /// Console output for whether the solve is skipped or not
   const std::string _solve_message;
 
   /// force the current step to fail, triggering are repeat with a cut dt
   bool _fail_step;
 
 private:
-
   /// Whether the user has set the auto_advance parameter for handling advancement of
   /// sub-applications in multi-app contexts
   const bool _auto_advance_set_by_user;
