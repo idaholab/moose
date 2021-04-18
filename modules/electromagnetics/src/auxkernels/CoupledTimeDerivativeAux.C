@@ -1,6 +1,6 @@
 #include "CoupledTimeDerivativeAux.h"
 
-registerMooseObject("ElkApp", CoupledTimeDerivativeAux);
+registerMooseObject("ElectromagneticsApp", CoupledTimeDerivativeAux);
 
 InputParameters
 CoupledTimeDerivativeAux::validParams()

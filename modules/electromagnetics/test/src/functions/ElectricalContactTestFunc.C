@@ -1,6 +1,6 @@
 #include "ElectricalContactTestFunc.h"
 
-registerMooseObject("ElkTestApp", ElectricalContactTestFunc);
+registerMooseObject("ElectromagneticsTestApp", ElectricalContactTestFunc);
 
 InputParameters
 ElectricalContactTestFunc::validParams()

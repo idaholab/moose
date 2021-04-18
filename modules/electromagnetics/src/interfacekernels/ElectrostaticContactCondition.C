@@ -1,6 +1,6 @@
 #include "ElectrostaticContactCondition.h"
 
-registerMooseObject("ElkApp", ElectrostaticContactCondition);
+registerMooseObject("ElectromagneticsApp", ElectrostaticContactCondition);
 
 InputParameters
 ElectrostaticContactCondition::validParams()

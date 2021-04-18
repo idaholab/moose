@@ -1,8 +1,8 @@
 #include "HelmholtzTestFunc.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElkApp", HelmholtzTestFunc);
+registerMooseObject("ElectromagneticsApp", HelmholtzTestFunc);
 
 InputParameters
 HelmholtzTestFunc::validParams()
@@ -66,7 +66,7 @@ HelmholtzTestFunc::value(Real t, const Point & p) const
 
   val = c_1 * std::cos(lambda * p(0)) + c_2 * std::sin(lambda * p(0));
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     return val.real();
   }

@@ -1,8 +1,8 @@
 #include "WaveCoeff.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElkApp", WaveCoeff);
+registerMooseObject("ElectromagneticsApp", WaveCoeff);
 
 InputParameters
 WaveCoeff::validParams()
@@ -43,7 +43,7 @@ WaveCoeff::value(Real t, const Point & p) const
 
   std::complex<double> val = std::pow(_k, 2) * mu_r * eps_r;
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     return val.real();
   }

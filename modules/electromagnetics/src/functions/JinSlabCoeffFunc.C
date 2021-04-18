@@ -1,8 +1,8 @@
 #include "JinSlabCoeffFunc.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElkApp", JinSlabCoeffFunc);
+registerMooseObject("ElectromagneticsApp", JinSlabCoeffFunc);
 
 InputParameters
 JinSlabCoeffFunc::validParams()
@@ -38,7 +38,7 @@ JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
   std::complex<double> val =
       _k * std::sqrt(eps_r * mu_r - std::pow(std::sin(_theta * libMesh::pi / 180.), 2));
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     return val.real();
   }

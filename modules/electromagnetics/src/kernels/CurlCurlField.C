@@ -1,7 +1,7 @@
 #include "CurlCurlField.h"
 #include "Assembly.h"
 
-registerMooseObject("ElkApp", CurlCurlField);
+registerMooseObject("ElectromagneticsApp", CurlCurlField);
 
 InputParameters
 CurlCurlField::validParams()

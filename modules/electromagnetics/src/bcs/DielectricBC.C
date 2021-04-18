@@ -1,6 +1,6 @@
 #include "DielectricBC.h"
 
-registerMooseObject("ElkApp", DielectricBC);
+registerMooseObject("ElectromagneticsApp", DielectricBC);
 
 InputParameters
 DielectricBC::validParams()

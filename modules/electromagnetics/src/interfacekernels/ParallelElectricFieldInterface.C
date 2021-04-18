@@ -1,6 +1,6 @@
 #include "ParallelElectricFieldInterface.h"
 
-registerMooseObject("ElkApp", ParallelElectricFieldInterface);
+registerMooseObject("ElectromagneticsApp", ParallelElectricFieldInterface);
 
 InputParameters
 ParallelElectricFieldInterface::validParams()

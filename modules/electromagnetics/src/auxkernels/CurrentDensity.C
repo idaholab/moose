@@ -1,7 +1,7 @@
 #include "CurrentDensity.h"
 
-registerMooseObject("ElkApp", CurrentDensity);
-registerMooseObject("ElkApp", ADCurrentDensity);
+registerMooseObject("ElectromagneticsApp", CurrentDensity);
+registerMooseObject("ElectromagneticsApp", ADCurrentDensity);
 
 template <bool is_ad>
 InputParameters

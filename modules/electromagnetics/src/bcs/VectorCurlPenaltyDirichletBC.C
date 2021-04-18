@@ -1,7 +1,7 @@
 #include "VectorCurlPenaltyDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("ElkApp", VectorCurlPenaltyDirichletBC);
+registerMooseObject("ElectromagneticsApp", VectorCurlPenaltyDirichletBC);
 
 /**
  * Based on VectorCurlPenaltyDirichletBC in 'tests' directories in core MOOSE Framework.

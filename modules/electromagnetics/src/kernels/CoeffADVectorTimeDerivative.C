@@ -1,7 +1,7 @@
 #include "CoeffADVectorTimeDerivative.h"
 #include "Function.h"
 
-registerADMooseObject("ElkApp", CoeffADVectorTimeDerivative);
+registerADMooseObject("ElectromagneticsApp", CoeffADVectorTimeDerivative);
 
 InputParameters
 CoeffADVectorTimeDerivative::validParams()

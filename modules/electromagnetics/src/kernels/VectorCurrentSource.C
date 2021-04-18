@@ -1,9 +1,9 @@
 #include "VectorCurrentSource.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", VectorCurrentSource);
+registerMooseObject("ElectromagneticsApp", VectorCurrentSource);
 
 InputParameters
 VectorCurrentSource::validParams()
@@ -41,7 +41,7 @@ VectorCurrentSource::computeQpResidual()
 
   std::complex<double> res = jay * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
 
-  if (_component == elk::REAL)
+  if (_component == electromagnetics::REAL)
   {
     return res.real();
   }

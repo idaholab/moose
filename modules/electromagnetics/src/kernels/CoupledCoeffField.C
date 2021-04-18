@@ -1,7 +1,7 @@
 #include "CoupledCoeffField.h"
 #include "Function.h"
 
-registerMooseObject("ElkApp", CoupledCoeffField);
+registerMooseObject("ElectromagneticsApp", CoupledCoeffField);
 
 InputParameters
 CoupledCoeffField::validParams()

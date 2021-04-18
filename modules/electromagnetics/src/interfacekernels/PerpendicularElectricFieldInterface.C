@@ -1,6 +1,6 @@
 #include "PerpendicularElectricFieldInterface.h"
 
-registerMooseObject("ElkApp", PerpendicularElectricFieldInterface);
+registerMooseObject("ElectromagneticsApp", PerpendicularElectricFieldInterface);
 
 InputParameters
 PerpendicularElectricFieldInterface::validParams()

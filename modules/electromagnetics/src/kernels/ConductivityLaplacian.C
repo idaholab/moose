@@ -1,7 +1,7 @@
 #include "ConductivityLaplacian.h"
 #include "MooseMesh.h"
 
-registerMooseObject("ElkApp", ConductivityLaplacian);
+registerMooseObject("ElectromagneticsApp", ConductivityLaplacian);
 
 defineLegacyParams(ConductivityLaplacian);
 

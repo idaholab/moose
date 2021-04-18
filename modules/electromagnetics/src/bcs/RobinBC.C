@@ -1,9 +1,9 @@
 #include "RobinBC.h"
-#include "ElkEnums.h"
+#include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", RobinBC);
+registerMooseObject("ElectromagneticsApp", RobinBC);
 
 InputParameters
 RobinBC::validParams()
@@ -49,7 +49,7 @@ RobinBC::RobinBC(const InputParameters & parameters)
   bool profile_func_real_was_set = parameters.isParamSetByUser("profile_func_real");
   bool profile_func_imag_was_set = parameters.isParamSetByUser("profile_func_imag");
 
-  if (_mode == elk::ABSORBING && (profile_func_real_was_set || profile_func_imag_was_set))
+  if (_mode == electromagnetics::ABSORBING && (profile_func_real_was_set || profile_func_imag_was_set))
   {
     mooseError(
         "In ",
@@ -77,10 +77,10 @@ RobinBC::computeQpResidual()
   std::complex<double> rhs = 0.0;
   switch (_mode)
   {
-    case elk::PORT:
+    case electromagnetics::PORT:
       rhs = 2.0 * common * profile_func * std::exp(common * _q_point[_qp](0));
       break;
-    case elk::ABSORBING:
+    case electromagnetics::ABSORBING:
       break;
   }
 
@@ -88,10 +88,10 @@ RobinBC::computeQpResidual()
   Real res = 0.0;
   switch (_component)
   {
-    case elk::REAL:
+    case electromagnetics::REAL:
       res = _sign * _test[_i][_qp] * diff.real();
       break;
-    case elk::IMAGINARY:
+    case electromagnetics::IMAGINARY:
       res = _sign * _test[_i][_qp] * diff.imag();
       break;
   }

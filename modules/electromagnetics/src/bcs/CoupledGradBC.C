@@ -1,7 +1,7 @@
 #include "CoupledGradBC.h"
 #include "Function.h"
 
-registerMooseObject("ElkApp", CoupledGradBC);
+registerMooseObject("ElectromagneticsApp", CoupledGradBC);
 
 InputParameters
 CoupledGradBC::validParams()
