@@ -78,9 +78,9 @@ GeometricCutUserObject::execute()
       _xfem->getFragmentEdges(_current_elem, EFAElem, frag_edges);
 
       // mark cut edges for the element and its fragment
-      bool cut = cutElementByGeometry(_current_elem, elem_cut_edges, elem_cut_nodes, _t);
+      bool cut = cutElementByGeometry(_current_elem, elem_cut_edges, elem_cut_nodes);
       if (EFAElem->numFragments() > 0)
-        cut |= cutFragmentByGeometry(frag_edges, frag_cut_edges, _t);
+        cut |= cutFragmentByGeometry(frag_edges, frag_cut_edges);
 
       if (cut)
       {
@@ -108,7 +108,7 @@ GeometricCutUserObject::execute()
       _xfem->getFragmentFaces(_current_elem, EFAElem, frag_faces);
 
       // mark cut faces for the element and its fragment
-      bool cut = cutElementByGeometry(_current_elem, elem_cut_faces, _t);
+      bool cut = cutElementByGeometry(_current_elem, elem_cut_faces);
       // TODO: This would be done for branching, which is not yet supported in 3D
       // if (EFAElem->numFragments() > 0)
       //  cut |= cutFragmentByGeometry(frag_faces, frag_cut_faces, _t);

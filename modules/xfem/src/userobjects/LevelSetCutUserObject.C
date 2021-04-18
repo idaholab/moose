@@ -49,8 +49,7 @@ LevelSetCutUserObject::LevelSetCutUserObject(const InputParameters & parameters)
 bool
 LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
                                             std::vector<Xfem::CutEdge> & cut_edges,
-                                            std::vector<Xfem::CutNode> & /*cut_nodes*/,
-                                            Real /*time*/) const
+                                            std::vector<Xfem::CutNode> & /*cut_nodes*/) const
 {
   bool cut_elem = false;
 
@@ -93,8 +92,7 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
-                                            std::vector<Xfem::CutFace> & cut_faces,
-                                            Real /*time*/) const
+                                            std::vector<Xfem::CutFace> & cut_faces) const
 {
   bool cut_elem = false;
 
@@ -153,16 +151,14 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 LevelSetCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
-                                             std::vector<Xfem::CutEdge> & /*cut_edges*/,
-                                             Real /*time*/) const
+                                             std::vector<Xfem::CutEdge> & /*cut_edges*/) const
 {
   return false;
 }
 
 bool
 LevelSetCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                             std::vector<Xfem::CutFace> & /*cut_faces*/,
-                                             Real /*time*/) const
+                                             std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("cutFragmentByGeometry not yet implemented for 3d level set cutting");
   return false;

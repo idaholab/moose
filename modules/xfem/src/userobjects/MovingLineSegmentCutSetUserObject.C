@@ -104,7 +104,7 @@ MovingLineSegmentCutSetUserObject::finalize()
 }
 
 Real
-MovingLineSegmentCutSetUserObject::cutFraction(unsigned int /*cut_num*/, Real /*time*/) const
+MovingLineSegmentCutSetUserObject::cutFraction(unsigned int /*cut_num*/) const
 {
   return 1;
 }

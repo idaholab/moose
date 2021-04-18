@@ -22,18 +22,14 @@ public:
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutNode> & cut_nodes) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutFace> & cut_faces) const override;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutEdge> & cut_edges) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutFace> & cut_faces) const override;
 
 protected:
   Point _center;

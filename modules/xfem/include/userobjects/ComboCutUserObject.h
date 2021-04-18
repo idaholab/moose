@@ -24,13 +24,11 @@ public:
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
    * @param cut_nodes Data structure filled with information about nodes to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutNode> & cut_nodes) const override;
 
   /**
    * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
@@ -38,12 +36,10 @@ public:
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
    * @param cut_nodes Data structure filled with information about nodes to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutFace> & cut_faces) const override;
 
   /**
    * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
@@ -51,12 +47,10 @@ public:
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
    * @param cut_nodes Data structure filled with information about nodes to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutEdge> & cut_edges) const override;
 
   /**
    * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
@@ -64,12 +58,10 @@ public:
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
    * @param cut_nodes Data structure filled with information about nodes to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutFace> & cut_faces) const override;
 
   /// The ComboCutUserObject shouldn't be used to provided crack front data.
   virtual const std::vector<Point> getCrackFrontPoints(unsigned int) const override

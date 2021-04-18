@@ -69,12 +69,11 @@ ComboCutUserObject::buildMap()
 bool
 ComboCutUserObject::cutElementByGeometry(const Elem * elem,
                                          std::vector<Xfem::CutEdge> & cut_edges,
-                                         std::vector<Xfem::CutNode> & cut_nodes,
-                                         Real time) const
+                                         std::vector<Xfem::CutNode> & cut_nodes) const
 {
   unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
-    if (cut->cutElementByGeometry(elem, cut_edges, cut_nodes, time))
+    if (cut->cutElementByGeometry(elem, cut_edges, cut_nodes))
       i_want_to_cut++;
 
   // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
@@ -87,12 +86,11 @@ ComboCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 ComboCutUserObject::cutElementByGeometry(const Elem * elem,
-                                         std::vector<Xfem::CutFace> & cut_faces,
-                                         Real time) const
+                                         std::vector<Xfem::CutFace> & cut_faces) const
 {
   unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
-    if (cut->cutElementByGeometry(elem, cut_faces, time))
+    if (cut->cutElementByGeometry(elem, cut_faces))
       i_want_to_cut++;
 
   // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
@@ -105,12 +103,11 @@ ComboCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 ComboCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                          std::vector<Xfem::CutEdge> & cut_edges,
-                                          Real time) const
+                                          std::vector<Xfem::CutEdge> & cut_edges) const
 {
   unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
-    if (cut->cutFragmentByGeometry(frag_edges, cut_edges, time))
+    if (cut->cutFragmentByGeometry(frag_edges, cut_edges))
       i_want_to_cut++;
 
   // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
@@ -123,12 +120,11 @@ ComboCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag
 
 bool
 ComboCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                          std::vector<Xfem::CutFace> & cut_faces,
-                                          Real time) const
+                                          std::vector<Xfem::CutFace> & cut_faces) const
 {
   unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
-    if (cut->cutFragmentByGeometry(frag_faces, cut_faces, time))
+    if (cut->cutFragmentByGeometry(frag_faces, cut_faces))
       i_want_to_cut++;
 
   // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
