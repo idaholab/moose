@@ -5,7 +5,7 @@
     exodiff = 'coupled_diffusion_helmholtz_out.e'
     requirement = 'The system shall be capable of modeling the Helmholtz equation for scalar complex field variables, where real/imaginary coupling occurs for both the diffusion and reaction terms.'
     design = 'FuncDiffusion.md CoupledFuncDiffusion.md CoeffField.md CoupledCoeffField.md'
-    issues = '#33'
+    issues = '#13744'
   [../]
   [./coupled_field]
     type = 'Exodiff'
@@ -13,7 +13,7 @@
     exodiff = 'coupled_field_helmholtz_out.e'
     requirement = 'The system shall be capable of modeling the Helmholtz equation for scalar complex field variables, where real/imaginary coupling occurs for the reaction term only.'
     design = 'FuncDiffusion.md CoupledFuncDiffusion.md CoeffField.md CoupledCoeffField.md'
-    issues = '#33'
+    issues = '#13744'
   [../]
   [./varying_constant]
     type = 'Exodiff'
@@ -22,6 +22,6 @@
     allow_test_objects = True
     requirement = 'The system shall be capable of modeling the Helmholtz equation for scalar complex field variables, where real/imaginary coupling occurs for both the diffusion and reaction terms and coefficient values vary spatially.'
     design = 'FuncDiffusion.md CoupledFuncDiffusion.md CoeffField.md CoupledCoeffField.md'
-    issues = '#33'
+    issues = '#13744'
   [../]
 []
