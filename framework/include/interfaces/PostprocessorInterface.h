@@ -95,6 +95,17 @@ public:
                                    const unsigned int index = 0) const;
 
   /**
+   * Get the default value associated with a Postprocessor parameter.
+   * You should check isDefaultPostprocessorValue to verify that the parameter
+   * is a default value before calling this method.
+   * @param param_name The name of the Postprocessor parameter
+   * @param index The index of the postprocessor
+   * @return The default value
+   */
+  PostprocessorValue getDefaultPostprocessorValue(const std::string & param_name,
+                                                  const unsigned int index = 0) const;
+
+  /**
    * Determine if the Postprocessor data exists
    * @param param_name The name of the Postprocessor parameter
    * @param index The index of the Postprocessor
@@ -148,18 +159,40 @@ private:
   /// Reference the the FEProblemBase class
   const FEProblemBase & _ppi_feproblem;
 
-  /// Holds the default postprocessor values that are requested (key is param name, index)
-  mutable std::map<std::pair<std::string, unsigned int>, std::unique_ptr<PostprocessorValue>>
-      _default_values;
+  /// Holds the default postprocessor values that are requested (key is PostprocessorName)
+  mutable std::map<PostprocessorName, std::unique_ptr<PostprocessorValue>> _default_values;
 
-  /// Extract the value using parameter name
-  const PostprocessorValue & getPostprocessorValueHelper(const std::string & name,
-                                                         unsigned int index,
-                                                         std::size_t t_index) const;
+  /**
+   * Internal method for getting the PostprocessorName associated with a paremeter.
+   * Needed in order to allow the return of a name that is a default value.
+   */
+  const PostprocessorName &
+  getPostprocessorNameInternal(const std::string & param_name,
+                               const unsigned int index,
+                               const bool allow_default_value = true) const;
 
-  /// Extract the value using stored name
-  const PostprocessorValue & getPostprocessorValueByNameHelper(const PostprocessorName & name,
-                                                               std::size_t t_index) const;
+  /**
+   * Internal methods for getting Postprocessor values.
+   */
+  ///@{
+  const PostprocessorValue & getPostprocessorValueInternal(const std::string & param_name,
+                                                           unsigned int index,
+                                                           std::size_t t_index) const;
+  const PostprocessorValue & getPostprocessorValueByNameInternal(const PostprocessorName & name,
+                                                                 std::size_t t_index) const;
+  ///@}
+
+  /**
+   * @returns True if the PostprocessorName \p name repesents a default value: the name
+   * converts to a value (set by addParam or set via input), and a Postprocessor does not
+   * exist with the same name (we do allow Postprocessors with numbered names...)
+   */
+  bool isDefaultPostprocessorValueByName(const PostprocessorName & name) const;
+
+  /**
+   * @returns The default value stored in the PostprocessorName \p name.
+   */
+  PostprocessorValue getDefaultPostprocessorValueByName(const PostprocessorName & name) const;
 
   /**
    * Checks the parameters relating to a Postprocessor. If \p index is not set, index

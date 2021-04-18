@@ -697,56 +697,6 @@ InputParameters::getGroupName(const std::string & param_name) const
   return std::string();
 }
 
-bool
-InputParameters::isDefaultPostprocessorValue(const std::string & param_name,
-                                             unsigned int index) const
-{
-  if (!isParamValid(param_name))
-    mooseError("\"", param_name, "\" is not a valid parameter");
-
-  PostprocessorName name;
-  if (isType<PostprocessorName>(param_name))
-  {
-    if (index > 0)
-      mooseError(
-          "Requested index ", index, " for a single postprocessor parameter \"", param_name, "\"");
-    name = get<PostprocessorName>(param_name);
-  }
-  else if (isType<std::vector<PostprocessorName>>(param_name))
-  {
-    const auto & names = get<std::vector<PostprocessorName>>(param_name);
-    if (names.size() <= index)
-      mooseError("Out of range postprocessor index ", index, " for parameter \"", param_name, "\"");
-    name = get<std::vector<PostprocessorName>>(param_name)[index];
-  }
-  else
-    mooseError(type(param_name), " is not a postprocessor parameter type");
-
-  std::istringstream ss(name);
-  Real real_value = -std::numeric_limits<Real>::max();
-  return (ss >> real_value && ss.eof());
-}
-
-PostprocessorValue
-InputParameters::getDefaultPostprocessorValue(const std::string & param_name,
-                                              const unsigned int index) const
-{
-  if (!isDefaultPostprocessorValue(param_name, index))
-    mooseError("Postprocessor with parameter name \"",
-               param_name,
-               "\" and index ",
-               index,
-               " is not a default value");
-
-  Real real_value = -std::numeric_limits<Real>::max();
-  std::istringstream ss(isType<PostprocessorName>(param_name)
-                            ? get<PostprocessorName>(param_name)
-                            : get<std::vector<PostprocessorName>>(param_name)[index]);
-
-  ss >> real_value;
-  return real_value;
-}
-
 void
 InputParameters::applyParameters(const InputParameters & common,
                                  const std::vector<std::string> exclude)

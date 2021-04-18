@@ -646,27 +646,6 @@ public:
    */
   std::map<std::string, std::pair<std::string, std::string>> getAutoBuildVectors() const;
 
-  /**
-   * Whether or not a postprocessor parameter is a default value (not a name)
-   * @param param_name The name of the postprocessor parameter
-   * @param index The index in the default postprocessor vector
-   * @return True if the postprocessor is a default value
-   */
-  bool isDefaultPostprocessorValue(const std::string & param_name, unsigned int index = 0) const;
-
-  /**
-   * Get the default value for a postprocessor added with addPostprocessor
-   *
-   * This does _not_ return a reference. If you want to hand it out as a reference, you need
-   * to store it on your own.
-   *
-   * @param param_name The name of the postprocessor parameter
-   * @param index The index in the default postprocessor vector
-   * @return The default value for the postprocessor
-   */
-  Real getDefaultPostprocessorValue(const std::string & param_name,
-                                    const unsigned int index = 0) const;
-
   // BEGIN APPLY PARAMETER METHODS
   /**
    * Method for applying common parameters
