@@ -72,10 +72,17 @@ ComboCutUserObject::cutElementByGeometry(const Elem * elem,
                                          std::vector<Xfem::CutNode> & cut_nodes,
                                          Real time) const
 {
+  unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
     if (cut->cutElementByGeometry(elem, cut_edges, cut_nodes, time))
-      return true;
-  return false;
+      i_want_to_cut++;
+
+  // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
+  // to remove this limitation once we add the ability to handle multiple cuts.
+  if (i_want_to_cut > 1)
+    mooseError("More than one GeometricCutUserObject want to cut the same element.");
+
+  return i_want_to_cut > 0;
 }
 
 bool
@@ -83,10 +90,17 @@ ComboCutUserObject::cutElementByGeometry(const Elem * elem,
                                          std::vector<Xfem::CutFace> & cut_faces,
                                          Real time) const
 {
+  unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
     if (cut->cutElementByGeometry(elem, cut_faces, time))
-      return true;
-  return false;
+      i_want_to_cut++;
+
+  // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
+  // to remove this limitation once we add the ability to handle multiple cuts.
+  if (i_want_to_cut > 1)
+    mooseError("More than one GeometricCutUserObject want to cut the same element.");
+
+  return i_want_to_cut > 0;
 }
 
 bool
@@ -94,10 +108,17 @@ ComboCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag
                                           std::vector<Xfem::CutEdge> & cut_edges,
                                           Real time) const
 {
+  unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
     if (cut->cutFragmentByGeometry(frag_edges, cut_edges, time))
-      return true;
-  return false;
+      i_want_to_cut++;
+
+  // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
+  // to remove this limitation once we add the ability to handle multiple cuts.
+  if (i_want_to_cut > 1)
+    mooseError("More than one GeometricCutUserObject want to cut the same fragment.");
+
+  return i_want_to_cut > 0;
 }
 
 bool
@@ -105,10 +126,17 @@ ComboCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag
                                           std::vector<Xfem::CutFace> & cut_faces,
                                           Real time) const
 {
+  unsigned int i_want_to_cut = 0;
   for (auto cut : _cuts)
     if (cut->cutFragmentByGeometry(frag_faces, cut_faces, time))
-      return true;
-  return false;
+      i_want_to_cut++;
+
+  // TODO: Currently we error out if more than one cut userobject wants to do the cutting. We need
+  // to remove this limitation once we add the ability to handle multiple cuts.
+  if (i_want_to_cut > 1)
+    mooseError("More than one GeometricCutUserObject want to cut the same fragment.");
+
+  return i_want_to_cut > 0;
 }
 
 CutSubdomainID

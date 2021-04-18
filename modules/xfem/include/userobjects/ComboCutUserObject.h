@@ -19,7 +19,7 @@ public:
   ComboCutUserObject(const InputParameters & parameters);
 
   /**
-   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on the first
+   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
    * cut that wants to cut this 2D element.
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
@@ -33,7 +33,7 @@ public:
                                     Real time) const override;
 
   /**
-   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on the first
+   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
    * cut that wants to cut this 3D element.
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
@@ -46,7 +46,7 @@ public:
                                     Real time) const override;
 
   /**
-   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on the first
+   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
    * cut that wants to cut this fragment of 2D element.
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
@@ -59,7 +59,7 @@ public:
                                      Real time) const override;
 
   /**
-   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on the first
+   * Loop over all the provided GeometricCutUserObjects, fill the data structures based on each
    * cut that wants to cut this fragment of 3D element.
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut

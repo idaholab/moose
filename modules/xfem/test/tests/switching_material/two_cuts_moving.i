@@ -124,7 +124,7 @@
 [Executioner]
   type = Transient
 
-  dt = 0.25
+  dt = 0.05
   num_steps = 2
 
   max_xfem_update = 1
