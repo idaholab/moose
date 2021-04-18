@@ -43,7 +43,7 @@
     type = RunException
     input = 'ppi_errors.i'
     cli_args = 'UserObjects/error_test/name_for_default=true'
-    expect_err = 'Cannot get the name because the Postprocessor is a defualt value.'
+    expect_err = 'Cannot get the name associated with PostprocessorName parameter "pps" at index 1,.*because said parameter is a default Postprocessor value.'
 
     requirement = 'The system shall report a reasonable error when requesting a Postprocessor name from a parameter in which the postprocessor is a default value and not a name.'
   []

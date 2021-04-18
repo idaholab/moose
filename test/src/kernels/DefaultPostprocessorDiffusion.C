@@ -22,7 +22,7 @@ DefaultPostprocessorDiffusion::validParams()
       "found a default value of 0.1 is utlized for the postprocessor value");
   params.addParam<bool>("test_default_error",
                         false,
-                        "Set this to true to test the hasDefaultPostprocessorValue error message");
+                        "Set this to true to test the getDefaultPostprocessorValue error message");
   return params;
 }
 
@@ -31,7 +31,7 @@ DefaultPostprocessorDiffusion::DefaultPostprocessorDiffusion(const InputParamete
 {
   // Test the error message for defaultPostprocessorValue
   if (getParam<bool>("test_default_error"))
-    parameters.getDefaultPostprocessorValue("invalid_postprocessor_name");
+    getDefaultPostprocessorValue("pps_name");
 }
 
 Real

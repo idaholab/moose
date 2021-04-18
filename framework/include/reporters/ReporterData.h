@@ -18,6 +18,7 @@
 #include "libmesh/auto_ptr.h"
 
 class MooseApp;
+class Receiver;
 
 /**
  * This is a helper class for managing the storage of declared Reporter object values. This design
@@ -60,6 +61,7 @@ public:
     WriteKey() {} // private constructor
     friend class Reporter;
     friend class Postprocessor;
+    friend class Receiver;
     friend class VectorPostprocessor;
     friend class ReporterTransferInterface;
   };
@@ -144,13 +146,23 @@ public:
                         const T & value,
                         const std::size_t time_index = 0);
 
+  /**
+   * Method for setting that a specific time index is requested for a Reporter value.
+   * @tparam T The Reporter value C++ type.
+   * @param reporter_name The name of the reporter value, which includes the object name and the
+   *                      data name.
+   * @param time_index The time index that is needed
+   */
+  template <typename T>
+  void needReporterTimeIndex(const ReporterName & reporter_name, const std::size_t time_index);
+
   ///@{
   /**
    * Method for returning a writable reference to the current Reporter value. This method is
    * used by the Reporter class to produce values.
    * @tparam T The Reporter value C++ type.
-   * @tparam S (optional) The ReporterContext for performing specialized actions after the values
-   *           have been computed. For example, ReporterBroadcastContext automatically broadcasts
+   * @tparam S (optional) The ReporterContext for performing specialized actions after the
+   * values have been computed. For example, ReporterBroadcastContext automatically broadcasts
    *           the computed value. See ReporterState.C/h for more information.
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
@@ -160,12 +172,13 @@ public:
    *             by the S template parameter. If S = ReporterContext then the first argument
    *             can be used as the default value (see ReporterContext.h).
    *
-   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the value).
-   * The get/declare methods can be called in any order thus an the underlying RestartableData
-   * object is often created by the get method before it is declared. Therefore the custom
-   * functionality cannot be handled by specializing the RestartableData/ReporterState object
-   * directly because the state is often created prior to the declaration that dictates how the
-   * produced value shall be computed. Thus, the reason for the separate ReporterContext objects.
+   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the
+   * value). The get/declare methods can be called in any order thus an the underlying
+   * RestartableData object is often created by the get method before it is declared. Therefore
+   * the custom functionality cannot be handled by specializing the
+   * RestartableData/ReporterState object directly because the state is often created prior to
+   * the declaration that dictates how the produced value shall be computed. Thus, the reason
+   * for the separate ReporterContext objects.
    */
   template <typename T, typename S, typename... Args>
   T & declareReporterValue(const ReporterName & reporter_name,
@@ -258,7 +271,7 @@ private:
   template <typename T>
   ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name,
                                             bool declare,
-                                            const MooseObject & moose_object) const;
+                                            const MooseObject * moose_object = nullptr) const;
 
   /**
    * Helper for registering data with the MooseApp to avoid cyclic includes
@@ -283,7 +296,7 @@ template <typename T>
 ReporterState<T> &
 ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
                                      bool declare,
-                                     const MooseObject & moose_object) const
+                                     const MooseObject * moose_object /* = nullptr */) const
 {
   if (hasReporterState(reporter_name))
   {
@@ -298,7 +311,10 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
           oss << ",\na Reporter with the same name " << suffix << ".\n\n";
           oss << getReporterInfo(reporter_name);
 
-          moose_object.mooseError(oss.str());
+          if (moose_object)
+            moose_object->mooseError(oss.str());
+          else
+            mooseError(oss.str());
         };
 
     if (declare && hasReporterValue(reporter_name))
@@ -330,6 +346,12 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
   // different special types are not unique so they'll be the same entry
   _states.emplace(reporter_name, state);
 
+  if (declare)
+  {
+    mooseAssert(moose_object, "Declaring a Reporter requires a MooseObject as a producer");
+    state->setProducer(*moose_object);
+  }
+
   return *state;
 }
 
@@ -340,7 +362,7 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const ReporterMode & mode,
                                const std::size_t time_index /* = 0 */) const
 {
-  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ false, consumer);
+  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ false, &consumer);
   state.addConsumer(mode, consumer);
   return state.value(time_index);
 }
@@ -353,8 +375,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
                                    Args &&... args)
 {
   // Get/create the ReporterState
-  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ true, producer);
-  state.setProducer(producer);
+  auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ true, &producer);
 
   // They key in _states (ReporterName) is not unique. This is done on purpose
   // because we want to store reporter names a single name regardless of type.
@@ -419,10 +440,11 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
                reporter_name,
                "\" with type \"",
                MooseUtils::prettyCppType<T>(),
-               " is not declared.");
+               "\" is not declared.");
 
-  return static_cast<const ReporterContext<T> *>(&getReporterContextBase(reporter_name))
-      ->state()
+  // Force the const version of value, which does not allow for increasing time index
+  return static_cast<const ReporterState<T> &>(
+             getReporterStateHelper<T>(reporter_name, /* declare = */ false))
       .value(time_index);
 }
 
@@ -435,6 +457,15 @@ ReporterData::setReporterValue(const ReporterName & reporter_name,
   // https://stackoverflow.com/questions/123758/how-do-i-remove-code-duplication-between-similar-const-and-non-const-member-func
   const auto & me = *this;
   const_cast<T &>(me.getReporterValue<T>(reporter_name, time_index)) = value;
+}
+
+template <typename T>
+void
+ReporterData::needReporterTimeIndex(const ReporterName & reporter_name,
+                                    const std::size_t time_index)
+{
+  getReporterValue<T>(reporter_name, 0); // for error checking that it is declared
+  getReporterStateHelper<T>(reporter_name, /* declare = */ false).value(time_index);
 }
 
 // This is defined here to avoid cyclic includes, see ReporterContext.h

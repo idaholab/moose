@@ -8,11 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PostprocessorInterface.h"
+
 #include "FEProblem.h"
-#include "Postprocessor.h"
-#include "MooseTypes.h"
 #include "MooseObject.h"
-#include "UserObject.h"
 
 InputParameters
 PostprocessorInterface::validParams()
@@ -31,48 +29,88 @@ const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & param_name,
                                               const unsigned int index /* = 0 */) const
 {
-  return getPostprocessorValueHelper(param_name, index, 0);
+  return getPostprocessorValueInternal(param_name, index, /* t_index = */ 0);
 }
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & param_name,
                                                  const unsigned int index /* = 0 */) const
 {
-  return getPostprocessorValueHelper(param_name, index, 1);
+  return getPostprocessorValueInternal(param_name, index, /* t_index = */ 1);
 }
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOlder(const std::string & param_name,
                                                    const unsigned int index /* = 0 */) const
 {
-  return getPostprocessorValueHelper(param_name, index, 2);
+  return getPostprocessorValueInternal(param_name, index, /* t_index = */ 2);
 }
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name) const
 {
-  return getPostprocessorValueByNameHelper(name, 0);
+  return getPostprocessorValueByNameInternal(name, /* t_index = */ 0);
 }
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name) const
 {
-  return getPostprocessorValueByNameHelper(name, 1);
+  return getPostprocessorValueByNameInternal(name, /* t_index = */ 1);
 }
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName & name) const
 {
-  return getPostprocessorValueByNameHelper(name, 2);
+  return getPostprocessorValueByNameInternal(name, /* t_index = */ 2);
 }
 
 bool
 PostprocessorInterface::isDefaultPostprocessorValue(const std::string & param_name,
                                                     const unsigned int index /* = 0 */) const
 {
-  checkParam(param_name, index);
+  return isDefaultPostprocessorValueByName(getPostprocessorNameInternal(param_name, index));
+}
 
-  return _ppi_params.isDefaultPostprocessorValue(param_name, index);
+bool
+PostprocessorInterface::isDefaultPostprocessorValueByName(const PostprocessorName & name) const
+{
+  // We do allow actual Postprocessor objects to have names that will succeed in being
+  // represented as a double... so if the name does actually exist as a PP, it's not a default
+  if (_ppi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(
+          PostprocessorReporterName(name)))
+    return false;
+
+  std::istringstream ss(name);
+  Real real_value = -std::numeric_limits<Real>::max();
+  return (ss >> real_value && ss.eof());
+}
+
+PostprocessorValue
+PostprocessorInterface::getDefaultPostprocessorValue(const std::string & param_name,
+                                                     const unsigned int index /* = 0 */) const
+{
+  const auto & name = getPostprocessorNameInternal(param_name, index);
+
+  if (!isDefaultPostprocessorValueByName(name))
+    _ppi_moose_object.mooseError(
+        "When getting the default Postprocessor value for parameter \"",
+        param_name,
+        "\" at index ",
+        index,
+        ",\nthe parameter does not represent a default Postprocessor value.");
+
+  return getDefaultPostprocessorValueByName(name);
+}
+
+PostprocessorValue
+PostprocessorInterface::getDefaultPostprocessorValueByName(const PostprocessorName & name) const
+{
+  mooseAssert(isDefaultPostprocessorValueByName(name), "Not a default value");
+
+  Real real_value = -std::numeric_limits<Real>::max();
+  std::istringstream ss(name);
+  ss >> real_value;
+  return real_value;
 }
 
 bool
@@ -83,12 +121,7 @@ PostprocessorInterface::hasPostprocessor(const std::string & param_name,
     _ppi_moose_object.mooseError(
         "Cannot call hasPostprocessor() until all Postprocessors have been constructed.");
 
-  // If the parameter is a default value, we don't actually create a Postprocessor object
-  // for it, therefore this will be false
-  if (isDefaultPostprocessorValue(param_name, index))
-    return false;
-
-  return hasPostprocessorByName(getPostprocessorName(param_name, index));
+  return hasPostprocessorByName(getPostprocessorNameInternal(param_name, index));
 }
 
 bool
@@ -162,55 +195,69 @@ const PostprocessorName &
 PostprocessorInterface::getPostprocessorName(const std::string & param_name,
                                              const unsigned int index /* = 0 */) const
 {
-  // If the Postprocessor is a default value, its name is actually the default value,
-  // therefore we shouldn't be getting a name associated with it
-  if (isDefaultPostprocessorValue(param_name, index))
-    _ppi_moose_object.mooseError(
-        "While getting the name of the Postprocessor from parameter \"",
-        param_name,
-        "\" at index ",
-        index,
-        ":\nCannot get the name because the Postprocessor is a defualt value.");
+  return getPostprocessorNameInternal(param_name, index, /* allow_default_value = */ false);
+}
 
-  return _ppi_params.isType<PostprocessorName>(param_name)
-             ? _ppi_params.get<PostprocessorName>(param_name)
-             : _ppi_params.get<std::vector<PostprocessorName>>(param_name)[index];
+const PostprocessorName &
+PostprocessorInterface::getPostprocessorNameInternal(
+    const std::string & param_name,
+    const unsigned int index,
+    const bool allow_default_value /* = true */) const
+{
+  checkParam(param_name, index);
+
+  const auto & name = _ppi_params.isType<PostprocessorName>(param_name)
+                          ? _ppi_params.get<PostprocessorName>(param_name)
+                          : _ppi_params.get<std::vector<PostprocessorName>>(param_name)[index];
+
+  if (!allow_default_value && isDefaultPostprocessorValueByName(name))
+  {
+    std::stringstream oss;
+    oss << "Cannot get the name associated with PostprocessorName parameter \"" << param_name
+        << "\"";
+    if (index)
+      oss << " at index " << index;
+    oss << ",\nbecause said parameter is a default Postprocessor value.";
+    _ppi_moose_object.paramError(param_name, oss.str());
+  }
+
+  return name;
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueHelper(const std::string & param_name,
-                                                    unsigned int index,
-                                                    std::size_t t_index) const
+PostprocessorInterface::getPostprocessorValueInternal(const std::string & param_name,
+                                                      unsigned int index,
+                                                      std::size_t t_index) const
 {
+  const auto & name = getPostprocessorNameInternal(param_name, index);
+
   // If the Postprocessor is a default value (either set by addParam or set to a constant
   // value by the user in input/an action), we covert the name to a value, store said
   // value locally, and return it so that it fits in with the rest of the interface
   // (needing a reference to a value)
-  if (isDefaultPostprocessorValue(param_name, index))
+  if (isDefaultPostprocessorValueByName(name))
   {
-    const auto key = std::make_pair(param_name, index);
-    const auto value = _ppi_params.getDefaultPostprocessorValue(param_name, index);
+    const auto value = getDefaultPostprocessorValueByName(name);
     const auto & value_ref =
-        *_default_values.emplace(key, libmesh_make_unique<PostprocessorValue>(value))
+        *_default_values.emplace(name, libmesh_make_unique<PostprocessorValue>(value))
              .first->second; // first is inserted pair, second is value in pair
     mooseAssert(value == value_ref, "Inconsistent default value");
     return value_ref;
   }
   // If not a default and all pps have been added, we check check for existance
-  else if (postprocessorsAdded() && !hasPostprocessor(param_name, index))
-    _ppi_moose_object.paramError(param_name,
-                                 "A Postprocessor with the name \"",
-                                 getPostprocessorName(param_name, index),
-                                 "\" was not found.");
+  else if (postprocessorsAdded() && !hasPostprocessorByName(name))
+    _ppi_moose_object.paramError(
+        param_name, "A Postprocessor with the name \"", name, "\" was not found.");
 
-  return getPostprocessorValueByNameHelper(getPostprocessorName(param_name, index), t_index);
+  return getPostprocessorValueByNameInternal(name, t_index);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorName & name,
-                                                          std::size_t t_index) const
+PostprocessorInterface::getPostprocessorValueByNameInternal(const PostprocessorName & name,
+                                                            std::size_t t_index) const
 {
   mooseAssert(t_index < 3, "Invalid time index");
+  mooseAssert(!isDefaultPostprocessorValueByName(name), "Should not be default");
 
   // If all pps have been added, we can check for existance
   if (postprocessorsAdded() && !hasPostprocessorByName(name))
