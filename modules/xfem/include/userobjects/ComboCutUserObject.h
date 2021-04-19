@@ -88,10 +88,10 @@ private:
   std::vector<const GeometricCutUserObject *> _cuts;
 
   /// Keys read from the input file, to be parsed by buildMap()
-  std::vector<CutSubdomainID> _keys;
+  const std::vector<std::vector<CutSubdomainID>> _keys;
 
   /// Values read from the input file, to be parsed by buildMap()
-  std::vector<CutSubdomainID> _vals;
+  const std::vector<CutSubdomainID> _vals;
 
   /**
    * The dictionary for composite CutSubdomainID look-up. Keys are combinations of the

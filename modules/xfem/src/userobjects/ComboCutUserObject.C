@@ -18,10 +18,11 @@ ComboCutUserObject::validParams()
   params.addClassDescription("Combine multiple geometric cut userobjects.");
   params.addRequiredParam<std::vector<UserObjectName>>(
       "geometric_cut_userobjects", "Vector of geometric cut userobjects to combine");
-  params.addRequiredParam<std::vector<CutSubdomainID>>(
+  params.addRequiredParam<std::vector<std::vector<CutSubdomainID>>>(
       "cut_subdomain_combinations",
       "Possible combinations of the cut subdomain IDs. The sequence of each combination should "
-      "follow the sequence provided in the geometric_cut_userobjects parameter.");
+      "follow the sequence provided in the geometric_cut_userobjects parameter. Use semicolons to "
+      "separate different combinations.");
   params.addRequiredParam<std::vector<CutSubdomainID>>(
       "cut_subdomains", "Resulting combined cut subdomain IDs for each of the combination.");
 
@@ -33,7 +34,7 @@ ComboCutUserObject::ComboCutUserObject(const InputParameters & parameters)
     _cut_names(getParam<std::vector<UserObjectName>>("geometric_cut_userobjects")),
     _num_cuts(_cut_names.size()),
     _cuts(_num_cuts),
-    _keys(getParam<std::vector<CutSubdomainID>>("cut_subdomain_combinations")),
+    _keys(getParam<std::vector<std::vector<CutSubdomainID>>>("cut_subdomain_combinations")),
     _vals(getParam<std::vector<CutSubdomainID>>("cut_subdomains"))
 {
   for (unsigned int i = 0; i < _num_cuts; i++)
@@ -45,10 +46,11 @@ ComboCutUserObject::ComboCutUserObject(const InputParameters & parameters)
 void
 ComboCutUserObject::buildMap()
 {
-  if (_keys.size() % _num_cuts != 0)
-    mooseError("Expected multiples of ", _num_cuts, " keys, but got ", _keys.size(), " keys.");
+  for (const auto & combo : _keys)
+    if (combo.size() != _num_cuts)
+      mooseError("Expected multiples of ", _num_cuts, " keys, but got ", combo.size(), " keys.");
 
-  unsigned int num_combos = _keys.size() / _num_cuts;
+  unsigned int num_combos = _keys.size();
 
   if (_vals.size() != num_combos)
     mooseError("Expected one value for each of the combination, got ",
@@ -58,12 +60,7 @@ ComboCutUserObject::buildMap()
                " values.");
 
   for (unsigned int i = 0; i < num_combos; i++)
-  {
-    std::vector<CutSubdomainID> combo_key;
-    for (unsigned int j = 0; j < _num_cuts; j++)
-      combo_key.push_back(_keys[i * _num_cuts + j]);
-    _combo_ids.emplace(combo_key, _vals[i]);
-  }
+    _combo_ids.emplace(_keys[i], _vals[i]);
 }
 
 bool

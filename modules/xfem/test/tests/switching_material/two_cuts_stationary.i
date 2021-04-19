@@ -25,7 +25,10 @@
   [combo]
     type = ComboCutUserObject
     geometric_cut_userobjects = 'cut1 cut2'
-    cut_subdomain_combinations = '1 5 1 16 33 5 33 16'
+    cut_subdomain_combinations = '1 5;
+                                  1 16;
+                                  33 5;
+                                  33 16'
     cut_subdomains = '1 3 5 7'
   []
 []
