@@ -1,15 +1,13 @@
-# This test is for two layer materials with different youngs modulus
+# This test is for two layer materials with different youngs modulus with AD
 # The global stress is determined by switching the stress based on level set values
 # The material interface is marked by a level set function
 # The two layer materials are glued together
 
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
+  displacements = 'disp_x disp_y'
 []
 
 [XFEM]
-  qrule = volfrac
   output_cut_plane = true
 []
 
@@ -22,44 +20,36 @@
 []
 
 [Mesh]
-  displacements = 'disp_x disp_y'
+  use_displaced_mesh = true
   [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 5
-    ny = 5
-    xmin = 0.0
-    xmax = 5.
-    ymin = 0.0
-    ymax = 5.
+    nx = 10
+    ny = 10
+    xmin = 0
+    xmax = 5
+    ymin = 0
+    ymax = 5
     elem_type = QUAD4
   []
   [left_bottom]
     type = ExtraNodesetGenerator
     new_boundary = 'left_bottom'
-    coord = '0.0 0.0'
+    coord = '0 0'
     input = generated_mesh
   []
   [left_top]
     type = ExtraNodesetGenerator
     new_boundary = 'left_top'
-    coord = '0.0 5.'
+    coord = '0 5'
     input = left_bottom
   []
 []
 
-[AuxVariables]
-  [ls]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
-[AuxKernels]
-  [ls_function]
-    type = FunctionAux
-    variable = ls
-    function = ls_func
+[Functions]
+  [ls_func]
+    type = ParsedFunction
+    value = 'y-2.73+t'
   []
 []
 
@@ -70,25 +60,8 @@
   []
 []
 
-[Functions]
-  [ls_func]
-    type = ParsedFunction
-    value = 'y-3.153 + t'
-  []
-[]
-
 [AuxVariables]
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
+  [ls]
   []
   [a_strain_xx]
     order = CONSTANT
@@ -113,78 +86,105 @@
   [b_strain_xy]
     order = CONSTANT
     family = MONOMIAL
+  []
+  [stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+
+[]
+
+[AuxKernels]
+  [ls_function]
+    type = FunctionAux
+    variable = ls
+    function = ls_func
+  []
+  [a_strain_xx]
+    type = RankTwoAux
+    variable = a_strain_xx
+    rank_two_tensor = A_total_strain
+    index_i = 0
+    index_j = 0
+  []
+  [a_strain_yy]
+    type = RankTwoAux
+    variable = a_strain_yy
+    rank_two_tensor = A_total_strain
+    index_i = 1
+    index_j = 1
+  []
+  [a_strain_xy]
+    type = RankTwoAux
+    variable = a_strain_xy
+    rank_two_tensor = A_total_strain
+    index_i = 0
+    index_j = 1
+  []
+  [b_strain_xx]
+    type = RankTwoAux
+    variable = b_strain_xx
+    rank_two_tensor = B_total_strain
+    index_i = 0
+    index_j = 0
+  []
+  [b_strain_yy]
+    type = RankTwoAux
+    variable = b_strain_yy
+    rank_two_tensor = B_total_strain
+    index_i = 1
+    index_j = 1
+  []
+  [b_strain_xy]
+    type = RankTwoAux
+    variable = b_strain_xy
+    rank_two_tensor = B_total_strain
+    index_i = 0
+    index_j = 1
+  []
+  [stress_xx]
+    type = RankTwoAux
+    variable = stress_xx
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 0
+  []
+  [stress_xy]
+    type = RankTwoAux
+    variable = stress_xy
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 1
+  []
+  [stress_yy]
+    type = RankTwoAux
+    variable = stress_yy
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
   []
 []
 
 [Kernels]
-  [TensorMechanics]
-    displacements = 'disp_x disp_y'
+  [solid_x]
+    type = StressDivergenceTensors
+    variable = disp_x
+    component = 0
+    use_displaced_mesh = true
   []
-[]
-
-[AuxKernels]
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = stress_xx
-  []
-  [stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-    variable = stress_yy
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 1
-    variable = stress_xy
-  []
-  [a_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = A_total_strain
-    index_i = 0
-    index_j = 0
-    variable = a_strain_xx
-  []
-  [a_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = A_total_strain
-    index_i = 1
-    index_j = 1
-    variable = a_strain_yy
-  []
-  [a_strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = A_total_strain
-    index_i = 0
-    index_j = 1
-    variable = a_strain_xy
-  []
-  [b_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = B_total_strain
-    index_i = 0
-    index_j = 0
-    variable = b_strain_xx
-  []
-  [b_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = B_total_strain
-    index_i = 1
-    index_j = 1
-    variable = b_strain_yy
-  []
-  [b_strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = B_total_strain
-    index_i = 0
-    index_j = 1
-    variable = b_strain_xy
+  [solid_y]
+    type = StressDivergenceTensors
+    variable = disp_y
+    component = 1
+    use_displaced_mesh = true
   []
 []
 
@@ -242,7 +242,6 @@
   [strain_A]
     type = ComputeFiniteStrain
     base_name = A
-    displacements = 'disp_x disp_y'
   []
   [stress_A]
     type = ComputeFiniteStrainElasticStress
@@ -257,7 +256,6 @@
   [strain_B]
     type = ComputeFiniteStrain
     base_name = B
-    displacements = 'disp_x disp_y'
   []
   [stress_B]
     type = ComputeFiniteStrainElasticStress
@@ -270,12 +268,23 @@
     level_set_var = ls
     prop_name = stress
   []
-  [combined_dstressdstrain]
+  [combined_jacob_mult]
     type = LevelSetBiMaterialRankFour
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = ls
     prop_name = Jacobian_mult
+  []
+[]
+
+[Postprocessors]
+  [disp_x_norm]
+    type = ElementL2Norm
+    variable = disp_x
+  []
+  [disp_y_norm]
+    type = ElementL2Norm
+    variable = disp_y
   []
 []
 
@@ -285,22 +294,22 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  automatic_scaling = true
 
   # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-13
   nl_abs_tol = 1e-50
 
   # time control
   start_time = 0.0
-  dt = 0.15
-  num_steps = 3
+  dt = 0.1
+  num_steps = 4
 
   max_xfem_update = 1
 []
 
 [Outputs]
+  print_linear_residuals = false
   exodus = true
-  execute_on = timestep_end
-  csv = true
 []

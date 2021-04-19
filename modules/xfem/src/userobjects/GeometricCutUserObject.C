@@ -12,9 +12,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "XFEM.h"
-//#include "XFEMParallel.h"
 #include "DataIO.h"
-#include "XFEMAppTypes.h"
 #include "EFAElement2D.h"
 #include "EFAElement3D.h"
 #include "XFEMElementPairLocator.h"
@@ -30,7 +28,6 @@ GeometricCutUserObject::validParams()
   exec.addAvailableFlags(EXEC_XFEM_MARK);
   params.setDocString("execute_on", exec.getDocString());
   params.set<ExecFlagEnum>("execute_on") = EXEC_XFEM_MARK;
-  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   return params;
 }
@@ -81,9 +78,9 @@ GeometricCutUserObject::execute()
       _xfem->getFragmentEdges(_current_elem, EFAElem, frag_edges);
 
       // mark cut edges for the element and its fragment
-      bool cut = cutElementByGeometry(_current_elem, elem_cut_edges, elem_cut_nodes, _t);
+      bool cut = cutElementByGeometry(_current_elem, elem_cut_edges, elem_cut_nodes);
       if (EFAElem->numFragments() > 0)
-        cut |= cutFragmentByGeometry(frag_edges, frag_cut_edges, _t);
+        cut |= cutFragmentByGeometry(frag_edges, frag_cut_edges);
 
       if (cut)
       {
@@ -111,7 +108,7 @@ GeometricCutUserObject::execute()
       _xfem->getFragmentFaces(_current_elem, EFAElem, frag_faces);
 
       // mark cut faces for the element and its fragment
-      bool cut = cutElementByGeometry(_current_elem, elem_cut_faces, _t);
+      bool cut = cutElementByGeometry(_current_elem, elem_cut_faces);
       // TODO: This would be done for branching, which is not yet supported in 3D
       // if (EFAElem->numFragments() > 0)
       //  cut |= cutFragmentByGeometry(frag_faces, frag_cut_faces, _t);
@@ -281,4 +278,10 @@ GeometricCutUserObject::finalize()
 
   _marked_elems_2d.clear();
   _marked_elems_3d.clear();
+}
+
+CutSubdomainID
+GeometricCutUserObject::getCutSubdomainID(const Elem * elem) const
+{
+  return _xfem->getCutSubdomainID(this, elem);
 }

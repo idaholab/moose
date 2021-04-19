@@ -15,4 +15,4 @@
 extern const ExecFlagType EXEC_XFEM_MARK;
 
 // XFEM typedefs
-typedef unsigned int GeometricCutSubdomainID;
+typedef unsigned int CutSubdomainID;
