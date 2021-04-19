@@ -944,7 +944,11 @@ public:
   void setPostprocessorValueByName(const PostprocessorName & name,
                                    const PostprocessorValue & value,
                                    std::size_t t_index = 0);
-  ///@}
+
+  /**
+   * Deprecated. Use hasPostprocessorValueByName
+   */
+  bool hasPostprocessor(const std::string & name) const;
 
   /**
    * Get a read-only reference to the vector value associated with the VectorPostprocessor.

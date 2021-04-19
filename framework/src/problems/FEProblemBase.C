@@ -3531,6 +3531,14 @@ FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
       PostprocessorReporterName(name), value, t_index);
 }
 
+bool
+FEProblemBase::hasPostprocessor(const std::string & name) const
+{
+  mooseDeprecated(
+      "FEProblemBase::hasPostprocssor is being removed; use hasPostprocessorValueByName instead.");
+  return hasPostprocessorValueByName(name);
+}
+
 const VectorPostprocessorValue &
 FEProblemBase::getVectorPostprocessorValueByName(const std::string & object_name,
                                                  const std::string & vector_name,
