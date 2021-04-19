@@ -97,21 +97,21 @@ TEST_F(SodiumSaturationFluidPropertiesTest, density)
   const Real p = 101325;
 
   // Fink and Leibowitz (1979) list density at 370.98 K is 927.3, so the fit agrees well
-  ABS_TEST(_fp->rho_from_p_T(p, Tm), 923.3571594322216, 1e-7);
+  ABS_TEST(_fp->rho_from_p_T(p, Tm), 923.3571594322216, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->rho_from_p_T, p, Tm, REL_TOL_DERIVATIVE);
-  ABS_TEST(_fp->v_from_p_T(p, Tm), 0.001083004544649772, 1e-7);
+  ABS_TEST(_fp->v_from_p_T(p, Tm), 0.001083004544649772, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->v_from_p_T, p, Tm, REL_TOL_DERIVATIVE);
 
   // Fink and Leibowitz (1979) list density at 800 K is 825.6, so the fit agrees well
-  ABS_TEST(_fp->rho_from_p_T(p, T), 826.04056, 1e-7);
+  ABS_TEST(_fp->rho_from_p_T(p, T), 826.04056, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->rho_from_p_T, p, T, REL_TOL_DERIVATIVE);
-  ABS_TEST(_fp->v_from_p_T(p, T), 0.0012105943078630425, 1e-7);
+  ABS_TEST(_fp->v_from_p_T(p, T), 0.0012105943078630425, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->v_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   // Fink and Leibowitz (1979) list density at 1156.5 K is 739.4, so the fit agrees well
-  ABS_TEST(_fp->rho_from_p_T(p, Tb), 742.0807106065, 1e-7);
+  ABS_TEST(_fp->rho_from_p_T(p, Tb), 742.0807106065, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->rho_from_p_T, p, Tb, REL_TOL_DERIVATIVE);
-  ABS_TEST(_fp->v_from_p_T(p, Tb), 0.0013475623145933863, 1e-7);
+  ABS_TEST(_fp->v_from_p_T(p, Tb), 0.0013475623145933863, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->v_from_p_T, p, Tb, REL_TOL_DERIVATIVE);
 }
 
