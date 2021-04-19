@@ -28,13 +28,14 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::validParams()
       "The name of the variable on the secondary side of the interface. By default, "
       "the primary side variable name is used for the secondary side");
   params.addRequiredParam<MaterialPropertyName>(
-      "diffusivity",
-      "The name of the diffusivity property on the primary side of the interface");
-  params.addParam<MaterialPropertyName>(
-      "neighbor_diffusivity",
-      "The name of the diffusivity property on the secondary side of the interface. By default, the "
-      "primary side material property name is used for the secondary side. Only needed for finite volume");
+      "diffusivity", "The name of the diffusivity property on the primary side of the interface");
+  params.addParam<MaterialPropertyName>("neighbor_diffusivity",
+                                        "The name of the diffusivity property on the secondary "
+                                        "side of the interface. By default, the "
+                                        "primary side material property name is used for the "
+                                        "secondary side. Only needed for finite volume");
   params.addClassDescription("Computes the diffusive flux on the interface.");
+  params.set<unsigned short>("ghost_layers") = 2;
 
   return params;
 }
@@ -54,11 +55,13 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
             ? dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("neighbor_variable", 0))
             : dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("variable", 0))),
     _fv(_fv_variable),
-    _diffusion_coef(getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("diffusivity"))),
-    _diffusion_coef_neighbor(
-        parameters.isParamSetByUser("neighbor_diffusivity")
-            ? getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("neighbor_diffusivity"))
-            : getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("diffusivity")))
+    _diffusion_coef(
+        getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("diffusivity"))),
+    _diffusion_coef_neighbor(parameters.isParamSetByUser("neighbor_diffusivity")
+                                 ? getGenericNeighborMaterialProperty<Real, is_ad>(
+                                       getParam<MaterialPropertyName>("neighbor_diffusivity"))
+                                 : getGenericNeighborMaterialProperty<Real, is_ad>(
+                                       getParam<MaterialPropertyName>("diffusivity")))
 {
   addMooseVariableDependency(&mooseVariableField());
 
@@ -68,6 +71,12 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
         (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
       mooseError("For the InterfaceDiffusiveFluxIntegral, variable and "
                  "neighbor_variable should be of a similar variable type.");
+
+  // Warn that we are not using the same gradient to compute the diffusive flux here
+  if (_fv && (_fv_variable == _neighbor_fv_variable))
+    mooseWarning("Only one finite volume variable was specified. InterfaceDiffusiveFluxIntegral is "
+                 "only accurate at a "
+                 "FVDiffusionInterface, not with a regular diffusion kernel.");
 }
 
 template <bool is_ad>
@@ -76,24 +85,26 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
   if (_fv)
   {
-    // Get the face info
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
+    const auto normal = fi->normal();
 
-    // Get the gradient of the variables on the face
-    const auto & grad_u1 = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
-    const auto & grad_u2 = MetaPhysicL::raw_value(_neighbor_fv_variable->adGradSln(*fi));
+    // Form a finite difference gradient across the interface
+    Point du = _current_elem->centroid() - _neighbor_elem->centroid();
+    du /= (du * du);
+    const auto gradient = (_fv_variable->getElemValue(_current_elem) -
+                           _neighbor_fv_variable->getElemValue(_neighbor_elem)) *
+                          du;
 
-    // Interpolate diffusive flux on the face
-    Real diffusive_flux;
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                          diffusive_flux,
-                          -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * grad_u1 * _normals[_qp],
-                          -MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]) * grad_u2 * _normals[_qp],
-                          *fi,
-                          true);
+    Real diffusivity;
+    interpolate(Moose::FV::InterpMethod::Average,
+                diffusivity,
+                MetaPhysicL::raw_value(_diffusion_coef[_qp]),
+                MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
+                *fi,
+                true);
 
-    return diffusive_flux;
+    return -diffusivity * MetaPhysicL::raw_value(gradient * normal);
   }
   else
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * _grad_u[_qp] * _normals[_qp];

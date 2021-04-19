@@ -19,9 +19,6 @@ class InterfaceDiffusiveFluxIntegralTempl;
 typedef InterfaceDiffusiveFluxIntegralTempl<false> InterfaceDiffusiveFluxIntegral;
 typedef InterfaceDiffusiveFluxIntegralTempl<true> ADInterfaceDiffusiveFluxIntegral;
 
-template <>
-InputParameters validParams<InterfaceDiffusiveFluxIntegral>();
-
 /**
  * This postprocessor computes an integral of the diffusive flux over an interface.
  */

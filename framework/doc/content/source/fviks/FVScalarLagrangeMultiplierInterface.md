@@ -1,0 +1,3 @@
+# FVScalarLagrangeMultiplierInterface
+
+!syntax description /FVInterfaceKernels/FVScalarLagrangeMultiplierInterface

@@ -72,12 +72,17 @@ public:
   /**
    * Compute the residual on the supplied face
    */
-  void computeResidual(const FaceInfo & fi);
+  virtual void computeResidual(const FaceInfo & fi);
 
   /**
    * Compute the jacobian on the supplied face
    */
-  void computeJacobian(const FaceInfo & fi);
+  virtual void computeJacobian(const FaceInfo & fi);
+
+  /**
+   * Compute the off-diagonal contributions to the jacobian on the interface
+   */
+  virtual void computeOffDiagJacobian(const FaceInfo &){};
 
 protected:
   /**
@@ -106,7 +111,7 @@ protected:
   /**
    * @return Whether the \p FaceInfo element is on the 1st side of the interface
    */
-  bool elemIsOne() const { return _elem_is_one; }
+  virtual bool elemIsOne() const { return _elem_is_one; }
 
   /**
    * @return Variable 1
@@ -156,4 +161,6 @@ private:
   bool _elem_is_one;
 
   const MooseMesh & _mesh;
+
+  friend class FVScalarLagrangeMultiplierInterface;
 };

@@ -135,7 +135,7 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
   mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
                   (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
                   (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "These seem like the reasonable combinations of face types.");
+              "Face type was not recognized. Check that the specified boundaries are interfaces.");
 #endif
 
   const auto var_elem_num = _elem_is_one ? _var1.number() : _var2.number();

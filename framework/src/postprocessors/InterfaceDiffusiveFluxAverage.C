@@ -21,7 +21,8 @@ InterfaceDiffusiveFluxAverageTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-InterfaceDiffusiveFluxAverageTempl<is_ad>::InterfaceDiffusiveFluxAverageTempl(const InputParameters & parameters)
+InterfaceDiffusiveFluxAverageTempl<is_ad>::InterfaceDiffusiveFluxAverageTempl(
+    const InputParameters & parameters)
   : InterfaceDiffusiveFluxIntegralTempl<is_ad>(parameters), _volume(0)
 {
 }
@@ -58,7 +59,8 @@ void
 InterfaceDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
   InterfaceDiffusiveFluxIntegralTempl<is_ad>::threadJoin(y);
-  const InterfaceDiffusiveFluxAverageTempl<is_ad> & pps = static_cast<const InterfaceDiffusiveFluxAverageTempl<is_ad> &>(y);
+  const InterfaceDiffusiveFluxAverageTempl<is_ad> & pps =
+      static_cast<const InterfaceDiffusiveFluxAverageTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 
