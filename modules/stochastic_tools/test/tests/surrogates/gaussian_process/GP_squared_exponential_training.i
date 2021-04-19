@@ -63,10 +63,8 @@
     covariance_function = 'covar'             #Choose a squared exponential for the kernel
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'k_dist q_dist'
     sampler = train_sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg
   []
 []
 

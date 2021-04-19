@@ -52,17 +52,17 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = sample
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg'
+    stochastic_reporter = results
+    from_reporter = 'avg/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [results]
-    type = StochasticResults
+    type = StochasticReporter
   []
 []
 
@@ -73,10 +73,8 @@
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg:value
     tao_options = '-tao_bncg_type gd'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-3'

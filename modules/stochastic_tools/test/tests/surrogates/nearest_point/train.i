@@ -24,8 +24,7 @@
   [train]
     type = NearestPointTrainer
     sampler = sample
-    results_vpp = values
-    results_vector = g_values
+    response = values/g_values
   []
 []
 

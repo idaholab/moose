@@ -16,22 +16,23 @@ class NearestPointTrainer : public SurrogateTrainer
 public:
   static InputParameters validParams();
   NearestPointTrainer(const InputParameters & parameters);
-  virtual void initialSetup() override;
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+  virtual void preTrain() override;
+  virtual void train() override;
+  virtual void postTrain() override;
 
 protected:
   /// Map containing sample points and the results
   std::vector<std::vector<Real>> & _sample_points;
 
-private:
-  /// Sampler from which the parameters were perturbed
-  Sampler * _sampler = nullptr;
+  /// Data from the current sampler row
+  const std::vector<Real> & _sampler_row;
 
-  /// Vector postprocessor of the results from perturbing the model with _sampler
-  const VectorPostprocessorValue * _values_ptr = nullptr;
+  /// Response value
+  const Real & _response;
 
-  /// True when _sampler data is distributed
-  bool _values_distributed = false; // default to false; set in initialSetup
+  /// Columns from sampler for predictors
+  std::vector<unsigned int> _predictor_cols;
+
+  /// Predictor values from reporters
+  std::vector<const Real *> _predictors;
 };

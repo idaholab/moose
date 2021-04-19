@@ -28,15 +28,19 @@ GaussianProcessTrainer::validParams()
   params += CovarianceInterface::validParams();
   params.addClassDescription(
       "Provides data preperation and training for a Gaussian Process surrogate model.");
-  params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
-  params.addRequiredParam<VectorPostprocessorName>(
-      "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
-  params.addRequiredParam<std::string>(
-      "results_vector",
-      "Name of vector from vectorpostprocessor with results of samples created by trainer");
+  params.addRequiredParam<ReporterName>(
+      "response", "Reporter value of response results, can be vpp with <vpp_name>/<vector_name>.");
+  params.addParam<std::vector<ReporterName>>(
+      "predictors",
+      std::vector<ReporterName>(),
+      "Reporter values used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  params.addParam<std::vector<unsigned int>>(
+      "predictor_cols",
+      std::vector<unsigned int>(),
+      "Sampler columns used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
   params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
-  params.addRequiredParam<std::vector<DistributionName>>(
-      "distributions", "Names of the distributions samples were taken from.");
   params.addParam<bool>(
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
@@ -58,16 +62,15 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     CovarianceInterface(parameters),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _training_data(),
     _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(declareModelData<RealEigenMatrix>("_K")),
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
     _K_cho_decomp(declareModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _covar_type(declareModelData<std::string>("_covar_type")),
     _covariance_function(
         getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"))),
+    _covar_type(declareModelData<std::string>("_covar_type", _covariance_function->type())),
 #ifdef LIBMESH_HAVE_PETSC
     _do_tuning(isParamValid("tune_parameters")),
     _tao_options(getParam<std::string>("tao_options")),
@@ -75,10 +78,26 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _tao_comm(MPI_COMM_SELF),
 #endif
     _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(
-        declareModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
-
+    _hyperparam_vec_map(declareModelData<std::unordered_map<std::string, std::vector<Real>>>(
+        "_hyperparam_vec_map")),
+    _sampler_row(getSamplerData()),
+    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
+    _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
+    _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
+                                                 : (_pvals.size() + _pcols.size()))
 {
+  const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
+  for (unsigned int i = 0; i < pnames.size(); ++i)
+    _pvals[i] = &getTrainingData<Real>(pnames[i]);
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_pvals.empty() && _pcols.empty())
+  {
+    _pcols.resize(_sampler.getNumberOfCols());
+    std::iota(_pcols.begin(), _pcols.end(), 0);
+  }
+
 #ifdef LIBMESH_HAVE_PETSC
   _num_tunable = 0;
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
@@ -112,70 +131,27 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
 }
 
 void
-GaussianProcessTrainer::initialSetup()
+GaussianProcessTrainer::preTrain()
 {
-
-  // Results VPP
-  _values_distributed = isVectorPostprocessorDistributed("results_vpp");
-  _values_ptr = &getVectorPostprocessorValue(
-      "results_vpp", getParam<std::string>("results_vector"), !_values_distributed);
-
-  // Sampler
-  _sampler = &getSamplerByName(getParam<SamplerName>("sampler"));
-  _n_params = _sampler->getNumberOfCols();
-
-  // Check if sampler dimension matches number of distributions
-  std::vector<DistributionName> dname = getParam<std::vector<DistributionName>>("distributions");
-  if (dname.size() != _n_params)
-    mooseError("Sampler number of columns does not match number of inputted distributions.");
+  _training_params.setZero(_sampler.getNumberOfRows(), _n_params);
+  _training_data.setZero(_sampler.getNumberOfRows(), 1);
 }
 
 void
-GaussianProcessTrainer::initialize()
+GaussianProcessTrainer::train()
 {
-  // Check if results of samples matches number of samples
-  __attribute__((unused)) dof_id_type num_rows =
-      _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
+  unsigned int d = 0;
+  for (const auto & val : _pvals)
+    _training_params(_row, d++) = *val;
+  for (const auto & col : _pcols)
+    _training_params(_row, d++) = _sampler_row[col];
 
-  if (num_rows != _values_ptr->size())
-    paramError("results_vpp",
-               "The number of elements in '",
-               getParam<VectorPostprocessorName>("results_vpp"),
-               "/",
-               getParam<std::string>("results_vector"),
-               "' is not equal to the number of samples in '",
-               getParam<SamplerName>("sampler"),
-               "'!");
-
-  _covar_type = _covariance_function->type();
-
-  mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
-              "Number of sampler rows not equal to number of results in selected VPP.");
+  // Loading result data from response reporter
+  _training_data(_row, 0) = _rval;
 }
 
 void
-GaussianProcessTrainer::execute()
-{
-  dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
-
-  // Consider the possibility of a very large matrix load.
-  _training_params.setZero(_sampler->getNumberOfRows(), _sampler->getNumberOfCols());
-  _training_data.setZero(_sampler->getNumberOfRows(), 1);
-  for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
-  {
-    // Loading parameters from sampler
-    std::vector<Real> data = _sampler->getNextLocalRow();
-    for (unsigned int d = 0; d < data.size(); ++d)
-      _training_params(p, d) = data[d];
-
-    // Loading result data from VPP
-    _training_data(p, 0) = (*_values_ptr)[p - offset];
-  }
-}
-
-void
-
-GaussianProcessTrainer::finalize()
+GaussianProcessTrainer::postTrain()
 {
   for (unsigned int ii = 0; ii < _training_params.rows(); ++ii)
   {
