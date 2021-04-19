@@ -9,7 +9,6 @@
 
 #pragma once
 
-// moose includes
 #include "Control.h"
 
 /**
@@ -19,12 +18,12 @@
 class PIDTransientControl : public Control
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
-  static InputParameters validParams();
-
   PIDTransientControl(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -34,8 +33,6 @@ private:
   const PostprocessorValue & _current;
   /// The target 1D time-dependent function for the postprocessor
   const Function & _target;
-  /// Integral of the error
-  Real _integral;
   /// The coefficient multiplying the integral of the error
   const Real _Kint;
   /// The coefficient multiplying the error
@@ -50,6 +47,8 @@ private:
   const bool _reset_every_timestep;
   /// Whether to reset the PID integral error when the error crosses 0, to avoid windup
   const bool _reset_integral_windup;
+  /// Integral of the error
+  Real _integral;
   /// Saved value of the integral at the beginning of a timestep, to recover from a failed solve
   Real _integral_old;
   /// Saved value of the controlled parameter at the beginning of a timestep, to recover from a failed solve

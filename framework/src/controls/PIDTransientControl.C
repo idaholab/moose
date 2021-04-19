@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "PIDTransientControl.h"
 #include "Function.h"
 #include "Transient.h"
@@ -20,8 +19,7 @@ PIDTransientControl::validParams()
   InputParameters params = Control::validParams();
   params.addClassDescription(
       "Sets the value of a 'Real' input parameter (or postprocessor) based on a Proportional "
-      "Integral "
-      "Derivative control of a postprocessor to match a target a target value.");
+      "Integral Derivative control of a postprocessor to match a target a target value.");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "The postprocessor to watch for controlling the specified parameter.");
   params.addRequiredParam<FunctionName>("target",
@@ -63,14 +61,13 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     _start_time(getParam<Real>("start_time")),
     _stop_time(getParam<Real>("stop_time")),
     _reset_every_timestep(getParam<bool>("reset_every_timestep")),
-    _reset_integral_windup(getParam<bool>("reset_integral_windup"))
+    _reset_integral_windup(getParam<bool>("reset_integral_windup")),
+    _integral(0),
+    _integral_old(0),
+    _value_old(0),
+    _t_step_old(-1),
+    _old_delta(0)
 {
-  _integral = 0;
-
-  // To keep the previous values if a multiapp coupling iteration fails
-  _value_old = 0;
-  _integral_old = 0;
-
   if (isParamValid("parameter") && isParamValid("parameter_pp"))
     paramError("parameter_pp",
                "Either a controllable parameter or a postprocessor to control should be specified, "
@@ -81,6 +78,10 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
     paramError(
         "reset_every_timestep",
         "Resetting the PID every time step is only supported using controlled postprocessors");
+  if (!dynamic_cast<Transient *>(_app.getExecutioner()))
+    mooseError(
+        "PIDTransientControl is only supported by a Transient Executioner. If using a Steady "
+        "Executioner, add a minimum number of Picard iterations and comment this error.");
 }
 
 void
@@ -114,7 +115,7 @@ PIDTransientControl::execute()
     // If there were coupling/Picard iterations during the transient and they failed,
     // we need to reset the controlled value and the error integral to their initial value at the
     // beginning of the coupling process
-    if (dynamic_cast<Transient *>(_app.getExecutioner())->picardSolve().numPicardIts() == 1)
+    if (_app.getExecutioner()->picardSolve().numPicardIts() == 1)
     {
       _integral = _integral_old;
       value = _value_old;
@@ -125,9 +126,7 @@ PIDTransientControl::execute()
 
     // If desired, reset integral of the error if the error crosses zero
     if (_reset_integral_windup && delta * _old_delta < 0)
-    {
       _integral = 0;
-    }
 
     // Compute the three error terms and add them to the controlled value
     _integral += delta * _dt;
@@ -135,11 +134,10 @@ PIDTransientControl::execute()
     if (_dt > 0)
       value += _Kder * delta / _dt;
 
+    // Set the new value of the postprocessor
     if (isParamValid("parameter"))
-      // Set the new value using the Control system
       setControllableValue<Real>("parameter", value);
     else
-      // Set the new postprocessor value using the FE Problem
       _fe_problem.setPostprocessorValueByName(getParam<std::string>("parameter_pp"), value);
 
     // Keep track of the previous delta for integral windup control
