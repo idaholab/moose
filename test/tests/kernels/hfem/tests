@@ -49,6 +49,7 @@
     exodiff = 'robin_displaced_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with displaced meshes.'
     mesh_mode = replicated
+    mumps = true
   []
   [robin_adpatation]
     type = 'RunException'
