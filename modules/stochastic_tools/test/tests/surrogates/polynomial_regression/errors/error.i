@@ -30,8 +30,7 @@
     type = PolynomialRegressionTrainer
     regression_type = "ols"
     sampler = sample
-    results_vpp = values
-    results_vector = g_values
+    response = values/g_values
     max_degree = 3
   []
 []

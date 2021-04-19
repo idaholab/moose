@@ -88,10 +88,8 @@
     covariance_function = 'covar'             #Choose a squared exponential for the kernel
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'k_dist q_dist'
     sampler = train_sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg
     tao_options = '-tao_bncg_type ssml_bfgs'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-9'

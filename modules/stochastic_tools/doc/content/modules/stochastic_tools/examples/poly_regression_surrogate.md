@@ -111,17 +111,17 @@ to match the number of samples in the tensor-product quadrature set of [Quadratu
 
 !listing surrogates/polynomial_regression/normal_train.i block=Samplers  
 
-The objects in blocks `Controls`, `MultiApps`, `Transfers` and `VectorPostprocessors`
+The objects in blocks `Controls`, `MultiApps`, `Transfers` and `Reporters`
 are responsible for managing the communication between master and sub-applications,
 execution of the sub-applications and the collection of the results.
 For a more detailed description of these blocks see [examples/parameter_study.md]
 and [surrogate_training.md].
 
-!listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers VectorPostprocessors
+!listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers Reporters
 
 The next step is to set up two `Trainer` objects to generate the surrogate models
 from the available data. This can be done in the `Trainers` block. It is visible that
-both examples use the data from `Sampler` and `VectorPostprocessor` objects. A polynomial chaos surrogate of
+both examples use the data from `Sampler` and `Reporter` objects. A polynomial chaos surrogate of
 order 8 and a polynomial regression surrogate with a
 polynomial of degree at most 4 is used in this study.
 The [PolynomialChaosTrainer.md] also needs knowledge about the underlying parameter distributions
@@ -181,7 +181,7 @@ The statistical moments obtained by the execution of the
 
 It can be observed that the polynomial chaos surrogate gives results closer to the reference values.
 It is also visible that by increasing the polynomial order for the regression, the accuracy
-in the standard deviation slightly decreases. 
+in the standard deviation slightly decreases.
 The histogram of the results is presented in [uniform_hist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
 It is apparent that the two methods give similar solutions.

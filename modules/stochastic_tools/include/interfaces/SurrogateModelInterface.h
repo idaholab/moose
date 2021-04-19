@@ -15,7 +15,7 @@
 
 // Forward declarations
 class SurrogateModel;
-class SurrogateTrainer;
+class SurrogateTrainerBase;
 class SurrogateModelInterface;
 
 template <>
@@ -53,7 +53,7 @@ public:
    */
   template <typename T = SurrogateModel>
   T & getSurrogateModel(const std::string & name) const;
-  template <typename T = SurrogateTrainer>
+  template <typename T = SurrogateTrainerBase>
   T & getSurrogateTrainer(const std::string & name) const;
   ///@}
 
@@ -65,7 +65,7 @@ public:
    */
   template <typename T = SurrogateModel>
   T & getSurrogateModelByName(const UserObjectName & name) const;
-  template <typename T = SurrogateTrainer>
+  template <typename T = SurrogateTrainerBase>
   T & getSurrogateTrainerByName(const UserObjectName & name) const;
 
   ///@}
@@ -114,7 +114,8 @@ template <typename T>
 T &
 SurrogateModelInterface::getSurrogateTrainerByName(const UserObjectName & name) const
 {
-  SurrogateTrainer * base_ptr = &_smi_feproblem.getUserObject<SurrogateTrainer>(name, _smi_tid);
+  SurrogateTrainerBase * base_ptr =
+      &_smi_feproblem.getUserObject<SurrogateTrainerBase>(name, _smi_tid);
   T * obj_ptr = dynamic_cast<T *>(base_ptr);
   if (!obj_ptr)
     mooseError("Failed to find a SurrogateTrainer object of type " + std::string(typeid(T).name()) +

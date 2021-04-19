@@ -23,10 +23,9 @@ class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterfa
 public:
   static InputParameters validParams();
   GaussianProcessTrainer(const InputParameters & parameters);
-  virtual void initialSetup() override;
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+  virtual void preTrain() override;
+  virtual void train() override;
+  virtual void postTrain() override;
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
@@ -54,26 +53,11 @@ public:
 #endif
 
 private:
-  /// Sampler from which the parameters were perturbed
-  Sampler * _sampler = nullptr;
-
-  /// Vector postprocessor of the results from perturbing the model with _sampler
-  const VectorPostprocessorValue * _values_ptr = nullptr;
-
-  /// True when _sampler data is distributed
-  bool _values_distributed;
-
-  /// Total number of parameters/dimensions
-  unsigned int _n_params;
-
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
 
   /// Standardizer for use with params (x)
   StochasticTools::Standardizer & _param_standardizer;
-
-  /// Data (y) used for training
-  RealEigenMatrix _training_data;
 
   /// Standardizer for use with data (y)
   StochasticTools::Standardizer & _data_standardizer;
@@ -93,11 +77,11 @@ private:
   /// Switch for training data(y) standardization
   bool _standardize_data;
 
+  /// Covariance function object
+  CovarianceFunctionBase * _covariance_function;
+
   /// Type of covariance function used for this surrogate
   std::string & _covar_type;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function = nullptr;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// Flag to toggle hyperparameter tuning/optimization
@@ -124,6 +108,24 @@ private:
 
   /// Vector hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
+
+  /// Data from the current sampler row
+  const std::vector<Real> & _sampler_row;
+
+  /// Response value
+  const Real & _rval;
+
+  /// Predictor values from reporters
+  std::vector<const Real *> _pvals;
+
+  /// Columns from sampler for predictors
+  std::vector<unsigned int> _pcols;
+
+  /// Total number of parameters/dimensions
+  unsigned int _n_params;
+
+  /// Data (y) used for training
+  RealEigenMatrix _training_data;
 };
 
 template <>

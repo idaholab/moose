@@ -46,7 +46,7 @@ Because PC expansion uses very specific types of polynomials, using numerical qu
 
 Running the sub app and transferring data back and forth for PC is exactly the same as any other type of surrogate. See [Training a surrogate model](/examples/surrogate_training.md) on more details on setting up this part of the input file.
 
-!listing examples/surrogates/poly_chaos_uniform_quad.i block=MultiApps Controls Transfers VectorPostprocessors
+!listing examples/surrogates/poly_chaos_uniform_quad.i block=MultiApps Controls Transfers Reporters
 
 
 ### Trainers
@@ -55,8 +55,7 @@ The PC training object is defined within the [Trainers](Trainers/index.md) block
 
 - [!param](/Trainers/PolynomialChaosTrainer/distributions) specify the type of polynomials to use for the expansion, it is very import that these distributions match the distributions given to the sampler.
 - [!param](/Trainers/PolynomialChaosTrainer/sampler) is the object that will provide sample points which are given to the sub app during execution.
-- [!param](/Trainers/PolynomialChaosTrainer/results_vpp) specifies the result object for storing the computed values.
-- [!param](/Trainers/PolynomialChaosTrainer/results_vector) specifies the result vector, within the result object, for storing the computed values.
+- [!param](/Trainers/PolynomialChaosTrainer/response) specifies the result vector for storing the computed values.
 - [!param](/Trainers/PolynomialChaosTrainer/order) defines the maximum order of the PC expansion, this parameter ultimately defines the accuracy and complexity of the surrogate model.
 
 !listing examples/surrogates/poly_chaos_uniform_mc.i block=Trainers

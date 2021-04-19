@@ -70,9 +70,6 @@ protected:
   /// Name of the reporter value for multiapp convergence
   const ReporterName _converged_name;
 
-  /// Whether or not reporter values have been cloned
-  bool _initialized;
-
   /// StochasticReporter object where values are being transferred
   StochasticReporter * _results = nullptr;
 };

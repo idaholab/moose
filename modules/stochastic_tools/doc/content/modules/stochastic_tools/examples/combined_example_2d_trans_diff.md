@@ -91,16 +91,16 @@ It is not visible, but the sampler prepares 216 parameter vectors altogether.
 
 !listing surrogates/combined/trans_diff_2d/trans_diff_trainer.i block=Samplers  
 
-The objects in blocks `Controls`, `MultiApps`, `Transfers` and `VectorPostprocessors`
+The objects in blocks `Controls`, `MultiApps`, `Transfers` and `Reporters`
 are responsible for managing the communication between the trainer and sub-applications,
 execution of the sub-applications and the collection of the results.
 For a more detailed description of these blocks see [examples/parameter_study.md]
 and [surrogate_training.md].
 
-!listing surrogates/combined/trans_diff_2d/trans_diff_trainer.i block=MultiApps Controls Transfers VectorPostprocessors
+!listing surrogates/combined/trans_diff_2d/trans_diff_trainer.i block=MultiApps Controls Transfers Reporters
 
 Next, six trainers (three different surrogates for each QoI) are defined in the `Trainers` block.
-These objects use the data from `Samplers` and `VectorPostprocessors`.
+These objects use the data from `Samplers` and `Reporters`.
 A polynomial chaos surrogate of
 order 5, a polynomial regression surrogate with a
 polynomial of degree at most 4 and a nearest point surrogate is used for both QoIs in this work.

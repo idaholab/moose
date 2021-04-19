@@ -12,6 +12,7 @@
 registerMooseObject("MooseTestApp", TestDeclareReporter);
 registerMooseObject("MooseTestApp", TestGetReporter);
 registerMooseObject("MooseTestApp", TestDeclareInitialSetupReporter);
+registerMooseObject("MooseTestApp", TestGetReporterDeclaredInInitialSetupReporter);
 
 InputParameters
 TestDeclareReporter::validParams()
@@ -148,4 +149,27 @@ TestDeclareInitialSetupReporter::initialSetup()
 {
   Real & value = declareValueByName<Real>("value");
   value = getParam<Real>("value");
+}
+
+InputParameters
+TestGetReporterDeclaredInInitialSetupReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<ReporterName>("other_reporter",
+                                        "The reporter name that was declared in initialSetup");
+  return params;
+}
+
+TestGetReporterDeclaredInInitialSetupReporter::TestGetReporterDeclaredInInitialSetupReporter(
+    const InputParameters & parameters)
+  : GeneralReporter(parameters),
+    _value_declared_in_initial_setup(getReporterValue<Real>("other_reporter")),
+    _the_value_of_the_reporter(declareValueByName<Real>("other_value"))
+{
+}
+
+void
+TestGetReporterDeclaredInInitialSetupReporter::execute()
+{
+  _the_value_of_the_reporter = _value_declared_in_initial_setup;
 }

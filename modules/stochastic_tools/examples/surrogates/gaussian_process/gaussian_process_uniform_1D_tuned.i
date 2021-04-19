@@ -57,11 +57,17 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = train_sample
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg'
+    stochastic_reporter = results
+    from_reporter = 'avg/value'
+  []
+[]
+
+[Reporters]
+  [results]
+    type = StochasticReporter
   []
 []
 
@@ -72,10 +78,8 @@
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'q_dist'
     sampler = train_sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg:value
     tao_options = '-tao_bncg_type kd'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-9'
@@ -101,9 +105,6 @@
 
 # # Computing statistics
 [VectorPostprocessors]
-  [results]
-    type = StochasticResults
-  []
   [hyperparams]
     type = GaussianProcessData
     gp_name = 'gauss_process_avg'

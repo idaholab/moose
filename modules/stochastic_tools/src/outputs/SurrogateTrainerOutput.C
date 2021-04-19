@@ -41,7 +41,7 @@ SurrogateTrainerOutput::output(const ExecFlagType & /*type*/)
     RestartableDataIO restartable_data_io(_app);
     for (const auto & surrogate_name : _trainers)
     {
-      const SurrogateTrainer & trainer = getSurrogateTrainerByName(surrogate_name);
+      const SurrogateTrainerBase & trainer = getSurrogateTrainerByName(surrogate_name);
       const std::string filename =
           this->filename() + "_" + surrogate_name + restartable_data_io.getRestartableDataExt();
 

@@ -51,15 +51,15 @@ SurrogateModelInterface::getSurrogateModel(const std::string & name) const
 }
 
 template <>
-SurrogateTrainer &
+SurrogateTrainerBase &
 SurrogateModelInterface::getSurrogateTrainerByName(const UserObjectName & name) const
 {
-  return _smi_feproblem.getUserObject<SurrogateTrainer>(name);
+  return _smi_feproblem.getUserObject<SurrogateTrainerBase>(name);
 }
 
 template <>
-SurrogateTrainer &
+SurrogateTrainerBase &
 SurrogateModelInterface::getSurrogateTrainer(const std::string & name) const
 {
-  return getSurrogateTrainerByName<SurrogateTrainer>(_smi_params.get<UserObjectName>(name));
+  return getSurrogateTrainerByName<SurrogateTrainerBase>(_smi_params.get<UserObjectName>(name));
 }
