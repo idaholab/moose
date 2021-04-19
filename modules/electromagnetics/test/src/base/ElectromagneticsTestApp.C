@@ -20,6 +20,8 @@ ElectromagneticsTestApp::validParams()
   return params;
 }
 
+registerKnownLabel("ElectromagneticsTestApp");
+
 ElectromagneticsTestApp::ElectromagneticsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   ElectromagneticsTestApp::registerAll(
@@ -44,6 +46,23 @@ ElectromagneticsTestApp::registerApps()
 {
   registerApp(ElectromagneticsApp);
   registerApp(ElectromagneticsTestApp);
+}
+
+void
+ElectromagneticsTestApp::registerObjects(Factory & factory)
+{
+  Registry::registerObjectsTo(factory, {"ElectromagneticsTestApp"});
+}
+
+void
+ElectromagneticsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
+{
+  Registry::registerActionsTo(action_factory, {"ElectromagneticsTestApp"});
+}
+
+void
+ElectromagneticsTestApp::registerExecFlags(Factory & /*factory*/)
+{
 }
 
 /***************************************************************************************************

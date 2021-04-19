@@ -20,6 +20,8 @@ ElectromagneticsApp::validParams()
   return params;
 }
 
+registerKnownLabel("ElectromagneticsApp");
+
 ElectromagneticsApp::ElectromagneticsApp(InputParameters parameters) : MooseApp(parameters)
 {
   ElectromagneticsApp::registerAll(_factory, _action_factory, _syntax);
@@ -30,7 +32,6 @@ ElectromagneticsApp::~ElectromagneticsApp() {}
 void
 ElectromagneticsApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
-  /* ModulesApp::registerAll(f, af, s); */
   Registry::registerObjectsTo(f, {"ElectromagneticsApp"});
   Registry::registerActionsTo(af, {"ElectromagneticsApp"});
 
@@ -41,6 +42,26 @@ void
 ElectromagneticsApp::registerApps()
 {
   registerApp(ElectromagneticsApp);
+}
+
+void
+ElectromagneticsApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"ElectromagneticsApp"});
+}
+
+void
+ElectromagneticsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"ElectromagneticsApp"});
+}
+
+void
+ElectromagneticsApp::registerExecFlags(Factory & /*factory*/)
+{
+  mooseDeprecated("use registerAll instead of registerExecFlags");
 }
 
 /***************************************************************************************************
