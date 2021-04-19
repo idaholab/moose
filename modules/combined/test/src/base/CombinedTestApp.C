@@ -16,6 +16,7 @@
 
 #include "ChemicalReactionsTestApp.h"
 #include "ContactTestApp.h"
+#include "ElectromagneticsTestApp.h"
 #include "FluidPropertiesTestApp.h"
 #include "HeatConductionTestApp.h"
 #include "MiscTestApp.h"
@@ -59,6 +60,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     Registry::registerActionsTo(af, {"CombinedTestApp"});
     ChemicalReactionsTestApp::registerAll(f, af, s, use_test_objs);
     ContactTestApp::registerAll(f, af, s, use_test_objs);
+    ElectromagneticsTestApp::registerAll(f, af, s, use_test_objs);
     FluidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
     HeatConductionTestApp::registerAll(f, af, s, use_test_objs);
     MiscTestApp::registerAll(f, af, s, use_test_objs);
@@ -89,6 +91,7 @@ CombinedTestApp::registerObjects(Factory & factory)
 {
   ChemicalReactionsTestApp::registerObjects(factory);
   ContactTestApp::registerObjects(factory);
+  ElectromagneticsTestApp::registerObjects(factory);
   FluidPropertiesTestApp::registerObjects(factory);
   HeatConductionTestApp::registerObjects(factory);
   MiscTestApp::registerObjects(factory);
@@ -110,6 +113,7 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 {
   ChemicalReactionsTestApp::associateSyntax(syntax, action_factory);
   ContactTestApp::associateSyntax(syntax, action_factory);
+  ElectromagneticsTestApp::associateSyntax(syntax, action_factory);
   FluidPropertiesTestApp::associateSyntax(syntax, action_factory);
   HeatConductionTestApp::associateSyntax(syntax, action_factory);
   MiscTestApp::associateSyntax(syntax, action_factory);
@@ -131,6 +135,7 @@ CombinedTestApp::registerExecFlags(Factory & factory)
 {
   ChemicalReactionsTestApp::registerExecFlags(factory);
   ContactTestApp::registerExecFlags(factory);
+  ElectromagneticsTestApp::registerExecFlags(factory);
   FluidPropertiesTestApp::registerExecFlags(factory);
   HeatConductionTestApp::registerExecFlags(factory);
   MiscTestApp::registerExecFlags(factory);
