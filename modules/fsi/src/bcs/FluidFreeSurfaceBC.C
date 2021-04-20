@@ -16,7 +16,7 @@ FluidFreeSurfaceBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Applies a mixed Dirichlet-Neumann BC on the fluid surface.");
-  params.addParam<Real>("alpha", 0.1, "Inverse of the acceleration due to gravity.");
+  params.addRangeCheckedParam<Real>("alpha", 0.1, "alpha>0","Inverse of the acceleration due to gravity.");
   return params;
 }
 
@@ -31,11 +31,11 @@ FluidFreeSurfaceBC::FluidFreeSurfaceBC(const InputParameters & parameters)
 Real
 FluidFreeSurfaceBC::computeQpResidual()
 {
-  return _test[_i][_qp] * _alpha * _u_dotdot[_qp] / 1.;
+  return _test[_i][_qp] * _alpha * _u_dotdot[_qp];
 }
 
 Real
 FluidFreeSurfaceBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * _alpha * _du_dotdot_du[_qp] * _phi[_j][_qp] / 1.;
+  return _test[_i][_qp] * _alpha * _du_dotdot_du[_qp] * _phi[_j][_qp];
 }

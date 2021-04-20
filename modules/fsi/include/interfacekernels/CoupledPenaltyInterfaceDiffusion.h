@@ -11,9 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class CoupledPenaltyInterfaceDiffusion;
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */

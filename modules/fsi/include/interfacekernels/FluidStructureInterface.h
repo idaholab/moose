@@ -25,5 +25,5 @@ protected:
   const MaterialProperty<Real> & _D;
   const VariableValue & _neighbor_dotdot;
   const VariableValue & _neighbor_dotdot_du;
-  unsigned int _component;
+  const unsigned int _component;
 };

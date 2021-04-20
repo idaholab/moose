@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// Ratio of u to du/dn. alpha is the inverse of acceleration due to gravity
-  Real _alpha;
+  const Real _alpha;
   const VariableValue & _u_dotdot;
   const VariableValue & _du_dotdot_du;
 };

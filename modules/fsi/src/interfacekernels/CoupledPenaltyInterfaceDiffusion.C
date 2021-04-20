@@ -67,19 +67,14 @@ Real
 CoupledPenaltyInterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType type,
                                                            unsigned int jvar)
 {
-  Real jac = 0;
   if (jvar == _primary_coupled_id)
   {
     switch (type)
     {
       case Moose::ElementElement:
-        jac = _test[_i][_qp] * _penalty * _phi[_j][_qp];
-        break;
-
+        return _test[_i][_qp] * _penalty * _phi[_j][_qp];
       case Moose::NeighborElement:
-        jac = _test_neighbor[_i][_qp] * -_penalty * _phi[_j][_qp];
-        break;
-
+        return _test_neighbor[_i][_qp] * -_penalty * _phi[_j][_qp];
       case Moose::ElementNeighbor:
       case Moose::NeighborNeighbor:
         break;
@@ -90,20 +85,15 @@ CoupledPenaltyInterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType
     switch (type)
     {
       case Moose::ElementNeighbor:
-        jac = _test[_i][_qp] * _penalty * -_phi_neighbor[_j][_qp];
-        break;
-
+        return _test[_i][_qp] * _penalty * -_phi_neighbor[_j][_qp];
       case Moose::NeighborNeighbor:
-        jac = _test_neighbor[_i][_qp] * -_penalty * -_phi_neighbor[_j][_qp];
-        break;
-
+        return _test_neighbor[_i][_qp] * -_penalty * -_phi_neighbor[_j][_qp];
       case Moose::ElementElement:
       case Moose::NeighborElement:
         break;
     }
   }
-
-  return jac;
+  return 0;
 }
 
 void

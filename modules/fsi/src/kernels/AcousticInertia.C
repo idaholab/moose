@@ -20,7 +20,6 @@ AcousticInertia::validParams()
   InputParameters params = TimeKernel::validParams();
   params.addClassDescription("Calculates the residual for the inertial force "
                              "which is the double time derivative of pressure.");
-  params.set<bool>("use_displaced_mesh") = true;
   params.addParam<MaterialPropertyName>(
       "inv_co_sq", "inv_co_sq", "Inverse of sqaure of the fluid's speed of sound.");
   return params;
@@ -29,17 +28,14 @@ AcousticInertia::validParams()
 AcousticInertia::AcousticInertia(const InputParameters & parameters)
   : TimeKernel(parameters),
     _inv_co_sq(getMaterialProperty<Real>("inv_co_sq")),
-    _time_integrator(*_sys.getTimeIntegrator())
+    _u_dot_old(_var.uDotOld()),
+    _du_dot_du(_var.duDotDu()),
+    _du_dotdot_du(_var.duDotDotDu()),
+    _u_dot_factor(_var.vectorTagValue(_sys.getTimeIntegrator()->uDotFactorTag())),
+    _u_dotdot_factor(_var.vectorTagValue(_sys.getTimeIntegrator()->uDotDotFactorTag()))
 {
-  _u_dot_old = &(_var.uDotOld());
-  _du_dot_du = &(_var.duDotDu());
-  _du_dotdot_du = &(_var.duDotDotDu());
-
-  addFEVariableCoupleableVectorTag(_time_integrator.uDotFactorTag());
-  addFEVariableCoupleableVectorTag(_time_integrator.uDotDotFactorTag());
-
-  _u_dot_factor = &_var.vectorTagValue(_time_integrator.uDotFactorTag());
-  _u_dotdot_factor = &_var.vectorTagValue(_time_integrator.uDotDotFactorTag());
+  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator()->uDotFactorTag());
+  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator()->uDotDotFactorTag());
 }
 
 Real
@@ -48,8 +44,8 @@ AcousticInertia::computeQpResidual()
   if (_dt == 0)
     return 0;
   else
-    return _test[_i][_qp] * _inv_co_sq[_qp] *
-           ((*_u_dotdot_factor)[_qp] + (*_u_dot_factor)[_qp] - (*_u_dot_old)[_qp]);
+  return _test[_i][_qp] * _inv_co_sq[_qp] *
+         (_u_dotdot_factor[_qp] + _u_dot_factor[_qp] - _u_dot_old[_qp]);
 }
 
 Real
@@ -58,6 +54,6 @@ AcousticInertia::computeQpJacobian()
   if (_dt == 0)
     return 0;
   else
-    return _test[_i][_qp] * _inv_co_sq[_qp] * (*_du_dotdot_du)[_qp] * _phi[_j][_qp] +
-           _test[_i][_qp] * _inv_co_sq[_qp] * (*_du_dot_du)[_qp] * _phi[_j][_qp];
+  return _test[_i][_qp] * _inv_co_sq[_qp] * _du_dotdot_du[_qp] * _phi[_j][_qp] +
+         _test[_i][_qp] * _inv_co_sq[_qp] * _du_dot_du[_qp] * _phi[_j][_qp];
 }
