@@ -18,7 +18,7 @@ that class' documentation for more detailed information.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/misc_bcs/weak_gradient_bc_test.i start=[./top] end=[../] include-end=true
+!listing test/tests/bcs/misc_bcs/weak_gradient_bc_test.i start=[top] end=[] include-end=true
 
 !syntax parameters /BCs/WeakGradientBC
 

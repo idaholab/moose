@@ -35,7 +35,7 @@ condition is better.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/matched_value_bc/matched_value_bc_test.i start=[./right_v] end=[../] include-end=true
+!listing test/tests/bcs/matched_value_bc/matched_value_bc_test.i start=[right_v] end=[] include-end=true
 
 !syntax parameters /BCs/DirichletBC
 

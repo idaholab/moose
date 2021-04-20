@@ -14,7 +14,7 @@ the screen and Moose will halt execution.
 
 The input file `two_block_new.i` is a test for the TensorMechanics master action, an action
 that sets up (aux)variables, (aux)kernels, and materials for mechanics probems. Let's
-see if we can examine what exactly a particular action block (`[./block2]`) in this file sets
+see if we can examine what exactly a particular action block (`[block2]`) in this file sets
 up.
 
 Compile the tensor_mechanics module executable and run
@@ -27,7 +27,7 @@ You should obtain the output
 
 ```
 [AuxKernels]
-  [./stress_xx_block2]
+  [stress_xx_block2]
     type = RankTwoAux
     block = 2
     execute_on = TIMESTEP_END
@@ -35,8 +35,8 @@ You should obtain the output
     index_j = 0
     rank_two_tensor = stress
     variable = stress_xx
-  [../]
-  [./strain_yy_block2]
+  []
+  [strain_yy_block2]
     type = RankTwoAux
     block = 2
     execute_on = TIMESTEP_END
@@ -44,56 +44,56 @@ You should obtain the output
     index_j = 1
     rank_two_tensor = total_strain
     variable = strain_yy
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     blocks = '1 2'
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     blocks = '1 2'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./TM_block20]
+  [TM_block20]
     type = StressDivergenceTensors
     block = 2
     component = 0
     displacements = 'disp_x disp_y'
     use_displaced_mesh = true
     variable = disp_x
-  [../]
-  [./TM_block21]
+  []
+  [TM_block21]
     type = StressDivergenceTensors
     block = 2
     component = 1
     displacements = 'disp_x disp_y'
     use_displaced_mesh = true
     variable = disp_y
-  [../]
+  []
 []
 
 [Materials]
-  [./block2_strain]
+  [block2_strain]
     type = ComputeFiniteStrain
     block = 2
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     blocks = '1 2'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     blocks = '1 2'
-  [../]
+  []
 []
 ```
 

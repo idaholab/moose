@@ -82,11 +82,11 @@ If the test did fail, chances are your test and our test is failing for the same
 
     ```pre
     [Tests]
-      [./timeout]
+      [timeout]
         type = RunApp
         input = my_input_file.i
         max_time = 300   <-- time in seconds before a timeout occurs. 300 is the default for all tests.
-      [../]
+      []
     []
     ```
 

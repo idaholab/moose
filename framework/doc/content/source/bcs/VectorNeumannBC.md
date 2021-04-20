@@ -28,7 +28,7 @@ outward normals as necessary.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/misc_bcs/vector_neumann_bc_test.i start=[./top] end=[../] include-end=true
+!listing test/tests/bcs/misc_bcs/vector_neumann_bc_test.i start=[top] end=[] include-end=true
 
 !syntax parameters /BCs/VectorNeumannBC
 

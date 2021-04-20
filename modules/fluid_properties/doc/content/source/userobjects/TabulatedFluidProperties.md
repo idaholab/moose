@@ -79,11 +79,11 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
 
 ```
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./tabulated]
+    []
+    [tabulated]
       type = TabulatedFluidProperties
       fp = co2
       fluid_property_file = fluid_properties.csv
@@ -94,7 +94,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
       pressure_max = 10e6
       num_T = 50
       num_p = 100
-    [../]
+    []
   []
 []
 ```

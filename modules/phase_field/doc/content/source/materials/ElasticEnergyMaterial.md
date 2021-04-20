@@ -26,10 +26,10 @@ derivatives of $E$, which are required by the phase field equations.
   # material subblocks that define stress and elasticity tensor properties
   # (and necessary derivatives) are omitted
 
-  [./elasticenergy]
+  [elasticenergy]
     type = ElasticEnergyMaterial
     args = 'c'
-  [../]
+  []
 []
 ```
 

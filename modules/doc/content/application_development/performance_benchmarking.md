@@ -61,7 +61,7 @@ The format for these files is:
         cumulative_dur = 100 # default 60 sec
     []
 
-    [./benchmark2-name]
+    [benchmark2-name]
         type = SpeedTest
         input = another-input-file-name.i
         cli_args = 'some/cli/arg=bar'
@@ -86,21 +86,21 @@ along with any optional arguments.  The `bench.list` file has the following form
 
 ```text
 [benchmarks]
-    [./simple_diffusion_refine3]
+    [simple_diffusion_refine3]
         binary = test/moose_test-opt
         input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=3'
-    [../]
-    [./simple_diffusion_refine4]
+    []
+    [simple_diffusion_refine4]
         binary = test/moose_test-opt
         input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=4'
-    [../]
-    [./simple_diffusion_ref5]
+    []
+    [simple_diffusion_ref5]
         binary = test/moose_test-opt
         input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=5'
-    [../]
+    []
     # ... add as many as you want
 []
 ```

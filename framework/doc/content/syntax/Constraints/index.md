@@ -41,16 +41,16 @@ shown in the below input file snippet:
 
 ```
 [Mesh]
-  [./primary]
+  [primary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
-  [./secondary]
+  []
+  [secondary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
+  []
 []
 ```
 

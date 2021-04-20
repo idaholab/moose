@@ -89,21 +89,21 @@ An illustration for mesh in UNV file format for having names for blocks and boun
 []
 ...
 [BCs]
-  [./left_bc] #Temperature on left edge is fixed at 800K
+  [left_bc] #Temperature on left edge is fixed at 800K
     type = DirichletBC
     preset = true
     variable = T
     #boundary = '1'
     boundary = 'left'
     value = 800
-  [../]
-  [./right_x] #Temperature in the right sideset is fixed at 298 K
+  []
+  [right_x] #Temperature in the right sideset is fixed at 298 K
     type = DirichletBC
     variable = T
     #boundary = '2'
     boundary = 'right'
     value = 298.0
-  [../]
+  []
 []
 ```
 
@@ -126,21 +126,21 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
 []
 ...
 [BCs]
-  [./left_bc] #Temperature on left edge is fixed at 800K
+  [left_bc] #Temperature on left edge is fixed at 800K
     type = DirichletBC
     preset = true
     variable = T
     #boundary = '7'
     boundary = 'left'
     value = 800
-  [../]
-  [./right_x] #Temperature in the right sideset is fixed at 298 K
+  []
+  [right_x] #Temperature in the right sideset is fixed at 298 K
     type = DirichletBC
     variable = T
     #boundary = '48'
     boundary = 'right'
     value = 298.0
-  [../]
+  []
 []
 ```
 

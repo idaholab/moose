@@ -11,7 +11,7 @@ Indentation tests are often used to characterize the behavior of materials at sm
 
 Mechanical contact can be enforced on lower-dimensional domains in a weak sense. This type of approach is usually referred to as mortar. To employ this approach, the user can manually build the lower-dimensional subdomains. `primary` and `secondary` subdomains are created from mesh sidesets. 
 
-!listing modules/contact/examples/2d_indenter/indenter_rz_fine.i start=[Mesh] end=[../]
+!listing modules/contact/examples/2d_indenter/indenter_rz_fine.i start=[Mesh] end=[]
 
 !alert note
 Mortar-based mechanical contact can be defined through the contact action. Here, a more manual, user-driven definition is used.
@@ -20,7 +20,7 @@ Mortar-based mechanical contact can be defined through the contact action. Here,
 
 For frictionless contact in two dimensions, three blocks need to be defined. First, the `NormalNodalLMMechanicalContact` constraint is used to enforce the Karush-Kuhn-Tucker contact conditions. Then, `NormalMortarMechanicalContact` enforces contact constaints in an integral or weak sense in both problem dimensions.
 
-!listing modules/contact/examples/2d_indenter/indenter_rz_fine.i start=[Constraints] end=[../]
+!listing modules/contact/examples/2d_indenter/indenter_rz_fine.i start=[Constraints] end=[]
 
 Note that the subdomain blocks had been created in the mesh input using `LowerDBlockFromSidesetGenerator`.
 

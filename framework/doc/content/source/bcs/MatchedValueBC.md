@@ -27,7 +27,7 @@ happens to be `v` as well.
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/matched_value_bc/matched_value_bc_test.i start=[./left_u] end=[../] include-end=true
+!listing test/tests/bcs/matched_value_bc/matched_value_bc_test.i start=[left_u] end=[] include-end=true
 
 !syntax parameters /BCs/MatchedValueBC
 

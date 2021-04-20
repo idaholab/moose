@@ -103,11 +103,11 @@ Any input file parameters can be overriden/set from the command-line.  This is i
 
 ```conf
 [Kernels]
-  [./akernel]
+  [akernel]
     type = MyKernel
     variable = somevar
     coefficient = 0.2
-  [../]
+  []
 []
 ```
 

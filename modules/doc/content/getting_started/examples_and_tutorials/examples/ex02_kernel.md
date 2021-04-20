@@ -45,15 +45,15 @@ similar syntax to the `Diffusion` kernel. Thus, the `[Kernels]` block in the inp
 
 ```puppet
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = convected
-  [../]
-  [./conv]
+  []
+  [conv]
     type = ExampleConvection
     variable = convected
     velocity = '0.0 0.0 1.0'
-  [../]
+  []
 []
 ```
 
