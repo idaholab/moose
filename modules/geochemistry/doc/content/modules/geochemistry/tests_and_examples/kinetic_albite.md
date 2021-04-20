@@ -43,7 +43,7 @@ The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defin
 !listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i block=TimeDependentReactionSolver
 
 !alert note
-The bulk composition for Na+ is 0.1 moles.  This means there are 0.1 moles in the aqueous solution (some will be free, others will be bound into secondary species such as NaCl).  In addition to this, there is Na+ bound inside the 0.953387 moles of Albite.  If you wish to define the entire bulk composition (aqueous plus kinetic) you should use the `bulk_composition_with_kinetic` keyword, which would be set to 1.053387 moles in this case.  The other species (H$_{2}$O, Al$^{3+}$, SiO$_{2}$(aq) and H$^{+}$) do not have bulk mole number constraints so they aren't impacted by the Albite.
+The bulk composition for Na+ is 0.1 moles.  This means there are 0.1 moles in the aqueous solution (some will be free, others will be bound into secondary species such as NaCl).  In addition to this, there is Na+ bound inside the 250g (0.953387 moles) of Albite.  If you wish to define the entire bulk composition (aqueous plus kinetic) you should use the `bulk_composition_with_kinetic` keyword, which would be set to 1.053387 moles in this case.  The other species (H$_{2}$O, Al$^{3+}$, SiO$_{2}$(aq) and H$^{+}$) do not have bulk mole number constraints so they aren't impacted by the Albite.
 
 The `Executioner` defines the time-stepping (time is measured in days in this input file)
 

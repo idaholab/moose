@@ -7,7 +7,7 @@ r = kA[M] \left( \prod_{\alpha}m_{\alpha}^{P_{\alpha}} \right) \left|1 - \left(Q
 This is a rather complicated equation, and simple examples are given below.  In this equation:
 
 - $r$ (units: mol.s$^{-1}$) is the rate of the kinetic reaction.  If it is positive then the kinetic species' mass will be decreasing (eg, dissolution).  If it is negative then the kinetic species' mass will be increasing (eg, precipitation).
-- $k$ is the intrinsic rate constant.  The product $kA[M]$ has units mol.s$^{-1}$ (assuming the simulation's time units are seconds).  Examples are given below.
+- $k$ is the intrinsic rate constant.  The product $kA[M]$ has units mol.s$^{-1}$ (assuming the simulation's time units are seconds).  Note that mole units are used, even if the initial amount of the kinetic species is given in mass or volume units.  Examples of $k$ are given below.
 - $A$ is either the surface area (units: m$^{2}$) for the kinetic species, or the specific surface area (units: m$^{2}$.g$^{-1}$)
 - $[M]$ (units: g) is the mass of the kinetic species.  It is optional.  Examples are given below.
 - $\alpha$ is a label denoting a promoting species

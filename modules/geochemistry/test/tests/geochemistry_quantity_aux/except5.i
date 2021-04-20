@@ -7,7 +7,8 @@
   constraint_meaning = "kg_solvent_water bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition"
   constraint_unit = "kg moles moles moles moles moles"
   kinetic_species_name = "Fe(OH)3(ppd)"
-  kinetic_species_initial_moles = "1.0"
+  kinetic_species_initial_value = "1.0"
+  kinetic_species_unit = "moles"
 []
 
 [UserObjects]

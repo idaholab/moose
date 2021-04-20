@@ -10,7 +10,8 @@
   ramp_max_ionic_strength_initial = 0
   ramp_max_ionic_strength_subsequent = 1 # so can see the solver_info in the GeochemistryConsoleOutput
   kinetic_species_name = "Fe(OH)3(ppd)_nosorb"
-  kinetic_species_initial_moles = "1.0E-6"
+  kinetic_species_initial_value = "1.0E-6"
+  kinetic_species_unit = moles
   execute_console_output_on = 'final' # can compare with the specially_added one, below
 []
 

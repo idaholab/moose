@@ -32,7 +32,8 @@
   initial_temperature = 70.0
   temperature = 70.0
   kinetic_species_name = Quartz
-  kinetic_species_initial_moles = 226.992243
+  kinetic_species_initial_value = 226.992243
+  kinetic_species_unit = moles
   evaluate_kinetic_rates_always = true # implicit time-marching used for stability
   close_system_at_time = 0.0
   remove_fixed_activity_name = "H+"

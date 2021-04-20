@@ -27,7 +27,8 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      unsigned iters_to_make_consistent,
                                      Real min_initial_molality,
                                      const std::vector<std::string> & kin_name,
-                                     const std::vector<Real> & kin_initial_moles)
+                                     const std::vector<Real> & kin_initial,
+                                     const MultiMooseEnum & kin_unit)
   : _mgd(mgd),
     _num_basis(mgd.basis_species_index.size()),
     _num_eqm(mgd.eqm_species_index.size()),
@@ -79,7 +80,11 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
   for (unsigned i = 0; i < constraint_unit.size(); ++i)
     _constraint_unit[i] =
         static_cast<GeochemistryUnitConverter::GeochemistryUnit>(constraint_unit.get(i));
-  checkAndInitialize(kin_name, kin_initial_moles);
+  const unsigned ku_size = kin_unit.size();
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> k_unit(ku_size);
+  for (unsigned i = 0; i < ku_size; ++i)
+    k_unit[i] = static_cast<GeochemistryUnitConverter::GeochemistryUnit>(kin_unit.get(i));
+  checkAndInitialize(kin_name, kin_initial, k_unit);
 }
 
 GeochemicalSystem::GeochemicalSystem(
@@ -98,7 +103,8 @@ GeochemicalSystem::GeochemicalSystem(
     unsigned iters_to_make_consistent,
     Real min_initial_molality,
     const std::vector<std::string> & kin_name,
-    const std::vector<Real> & kin_initial_moles)
+    const std::vector<Real> & kin_initial,
+    const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & kin_unit)
   : _mgd(mgd),
     _num_basis(mgd.basis_species_index.size()),
     _num_eqm(mgd.eqm_species_index.size()),
@@ -144,30 +150,50 @@ GeochemicalSystem::GeochemicalSystem(
     _min_initial_molality(min_initial_molality),
     _original_redox_lhs()
 {
-  checkAndInitialize(kin_name, kin_initial_moles);
+  checkAndInitialize(kin_name, kin_initial, kin_unit);
 }
 
 void
-GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
-                                      const std::vector<Real> & kin_initial_moles)
+GeochemicalSystem::checkAndInitialize(
+    const std::vector<std::string> & kin_name,
+    const std::vector<Real> & kin_initial,
+    const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & kin_unit)
 {
   // initialize every the kinetic species
   const unsigned num_kin_name = kin_name.size();
-  if (!(_num_kin == num_kin_name && _num_kin == kin_initial_moles.size()))
-    mooseError("Initial mole number must be provided for each kinetic species ",
+  if (!(_num_kin == num_kin_name && _num_kin == kin_initial.size() && _num_kin == kin_unit.size()))
+    mooseError("Initial mole number (or mass or volume) and a unit must be provided for each "
+               "kinetic species ",
                _num_kin,
                " ",
                num_kin_name,
                " ",
-               kin_initial_moles.size());
+               kin_initial.size(),
+               " ",
+               kin_unit.size());
   for (const auto & name_index : _mgd.kin_species_index)
   {
     const unsigned ind = std::distance(
         kin_name.begin(), std::find(kin_name.begin(), kin_name.end(), name_index.first));
     if (ind < num_kin_name)
-      setKineticMoles(name_index.second, kin_initial_moles[ind]);
+    {
+      if (!(kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::MOLES ||
+            kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::KG ||
+            kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::G ||
+            kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::MG ||
+            kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::UG ||
+            kin_unit[ind] == GeochemistryUnitConverter::GeochemistryUnit::CM3))
+        mooseError("Kinetic species ",
+                   name_index.first,
+                   ": units must be moles or mass, or volume in the case of minerals");
+      const Real moles = GeochemistryUnitConverter::toMoles(
+          kin_initial[ind], kin_unit[ind], name_index.first, _mgd);
+      setKineticMoles(name_index.second, moles);
+    }
     else
-      mooseError("Initial mole number for kinetic species ", name_index.first, " must be provided");
+      mooseError("Initial mole number or mass or volume for kinetic species ",
+                 name_index.first,
+                 " must be provided");
   }
 
   // check sanity of swaps

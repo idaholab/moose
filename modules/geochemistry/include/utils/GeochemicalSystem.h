@@ -105,7 +105,9 @@ public:
    * @param min_initial_molality Minimum value of equilibrium molality used in the initial condition
    * @param kin_name Names of the kinetic species that are provided with initial conditions in
   kin_initial_moles.  All kinetic species must be provided with an initial condition
-   * @param kin_initial_moles values of the initial mole number for the kinetic species
+   * @param kin_initial Values of the initial mole number or mass or volume (depending on
+  kin_unit) for the kinetic species
+   * @param kin_unit The units of the numbers given in kin_initial
    */
   GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                     GeochemistryActivityCoefficients & gac,
@@ -122,7 +124,8 @@ public:
                     unsigned iters_to_make_consistent,
                     Real min_initial_molality,
                     const std::vector<std::string> & kin_name,
-                    const std::vector<Real> & kin_initial_moles);
+                    const std::vector<Real> & kin_initial_moles,
+                    const MultiMooseEnum & kin_unit);
 
   GeochemicalSystem(
       ModelGeochemicalDatabase & mgd,
@@ -140,7 +143,8 @@ public:
       unsigned iters_to_make_consistent,
       Real min_initial_molality,
       const std::vector<std::string> & kin_name,
-      const std::vector<Real> & kin_initial_moles);
+      const std::vector<Real> & kin_initial,
+      const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & kin_unit);
 
   /**
    * Copy assignment operator.  Almost all of the following is trivial.  The most important
@@ -1031,14 +1035,18 @@ private:
    * Used during construction: checks for sane inputs and initializes molalities, etc, using the
    * initialize() method
    * @param kin_name names of kinetic species
-   * @param kin_initial_moles initial mole numbers of the species named in kin_name
+   * @param kin_initial initial mole numbers (or mass or volume, depending on kin_unit) of the
+   * species named in kin_name
+   * @param kin_unit units of the numbers provided in kin_initial
    */
-  void checkAndInitialize(const std::vector<std::string> & kin_name,
-                          const std::vector<Real> & kin_initial_moles);
+  void
+  checkAndInitialize(const std::vector<std::string> & kin_name,
+                     const std::vector<Real> & kin_initial,
+                     const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & kin_unit);
 
   /**
-   * Set the charge-balance species to the basis index provided.  No checks are made on the sanity
-   * of the desired change. Before setting, the _constraint_value mole number of the old
+   * Set the charge-balance species to the basis index provided.  No checks are made on the
+   * sanity of the desired change. Before setting, the _constraint_value mole number of the old
    * charge-balance species is set to the value provided in the constructor.  Then
    * _charge_balance_basis_index and _charge_balance_species is set appropriately
    */
