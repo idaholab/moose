@@ -19,12 +19,19 @@ MovingLineSegmentCutSetUserObject::validParams()
                                           "The name of userobject that computes the velocity.");
   params.addClassDescription(
       "Creates a UserObject for a moving line segment cut on 2D meshes for XFEM");
+  params.addParam<CutSubdomainID>(
+      "negative_id", 0, "The CutSubdomainID corresponding to a non-positive signed distance");
+  params.addParam<CutSubdomainID>(
+      "positive_id", 1, "The CutSubdomainID corresponding to a positive signed distance");
   return params;
 }
 
 MovingLineSegmentCutSetUserObject::MovingLineSegmentCutSetUserObject(
     const InputParameters & parameters)
-  : LineSegmentCutSetUserObject(parameters)
+  : LineSegmentCutSetUserObject(parameters),
+    _interface_velocity(&getUserObject<XFEMMovingInterfaceVelocityBase>("interface_velocity")),
+    _negative_id(getParam<CutSubdomainID>("negative_id")),
+    _positive_id(getParam<CutSubdomainID>("positive_id"))
 {
 }
 
@@ -38,15 +45,6 @@ MovingLineSegmentCutSetUserObject::getCrackFrontPoints(
 void
 MovingLineSegmentCutSetUserObject::initialize()
 {
-  const UserObject * uo =
-      &(_fe_problem.getUserObjectBase(getParam<UserObjectName>("interface_velocity")));
-
-  if (dynamic_cast<const XFEMMovingInterfaceVelocityBase *>(uo) == nullptr)
-    mooseError("UserObject casting to XFEMMovingInterfaceVelocityBase in "
-               "MovingLineSegmentCutSetUserObject");
-
-  _interface_velocity = dynamic_cast<const XFEMMovingInterfaceVelocityBase *>(uo);
-
   const_cast<XFEMMovingInterfaceVelocityBase *>(_interface_velocity)->initialize();
 }
 
@@ -106,7 +104,64 @@ MovingLineSegmentCutSetUserObject::finalize()
 }
 
 Real
-MovingLineSegmentCutSetUserObject::cutFraction(unsigned int /*cut_num*/, Real /*time*/) const
+MovingLineSegmentCutSetUserObject::cutFraction(unsigned int /*cut_num*/) const
 {
   return 1;
+}
+
+CutSubdomainID
+MovingLineSegmentCutSetUserObject::getCutSubdomainID(const Node * node) const
+{
+  return calculateSignedDistance(*node) > 0.0 ? _positive_id : _negative_id;
+}
+
+Real
+MovingLineSegmentCutSetUserObject::calculateSignedDistance(Point p) const
+{
+  const int line_cut_data_len = 6;
+
+  Real min_dist = std::numeric_limits<Real>::max();
+
+  for (unsigned int i = 0; i < _cut_data.size() / line_cut_data_len; ++i)
+  {
+    Point a = Point(_cut_data[i * line_cut_data_len + 0], _cut_data[i * line_cut_data_len + 1], 0);
+    Point b = Point(_cut_data[i * line_cut_data_len + 2], _cut_data[i * line_cut_data_len + 3], 0);
+
+    Point c = p - a;
+    Point v = (b - a) / (b - a).norm();
+    Real d = (b - a).norm();
+    Real t = v * c;
+
+    Real dist;
+    Point nearest_point;
+
+    if (t < 0)
+    {
+      dist = (p - a).norm();
+      nearest_point = a;
+    }
+    else if (t > d)
+    {
+      dist = (p - b).norm();
+      nearest_point = b;
+    }
+    else
+    {
+      v *= t;
+      dist = (p - a - v).norm();
+      nearest_point = (a + v);
+    }
+
+    Point p_nearest_point = nearest_point - p;
+
+    Point normal_ab = Point(-(b - a)(1), (b - a)(0), 0);
+
+    if (normal_ab * p_nearest_point < 0)
+      dist = -dist;
+
+    if (std::abs(dist) < std::abs(min_dist))
+      min_dist = dist;
+  }
+
+  return min_dist;
 }

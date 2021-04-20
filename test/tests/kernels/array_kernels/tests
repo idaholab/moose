@@ -56,4 +56,10 @@
     exodiff = 'array_diffusion_reaction_transient_out.e'
     requirement = 'MOOSE shall provide array time derivative kernels on an array variable.'
   []
+  [test_body_force]
+    type = 'Exodiff'
+    input = 'array_body_force.i'
+    exodiff = 'array_body_force_out.e'
+    requirement = 'MOOSE shall provide array body-force kernels on an array variable.'
+  []
 []

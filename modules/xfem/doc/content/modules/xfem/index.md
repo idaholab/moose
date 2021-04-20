@@ -7,7 +7,8 @@ be used in conjuction with any number of other physics modules to enrich the sol
 differential equations (PDEs) with some form of discontinuity. XFEM theory and implementation are
 detailed in the theory manual:
 
-- [Theory Manual](xfem/theory/theory.md)
+- [XFEM Theory Manual](xfem/theory/theory.md)
+- [Embedded Interface](xfem/theory/embedded_interface.md)
 
 Tables provided in the [Objects, Actions, and Syntax](#objects-actions-and-syntax) section list
 objects contained within the XFEM module followed by short explanations of the objects' purposes.

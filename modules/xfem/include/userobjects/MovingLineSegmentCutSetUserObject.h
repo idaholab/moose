@@ -32,8 +32,20 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
-  virtual Real cutFraction(unsigned int cut_num, Real time) const override;
+  virtual Real cutFraction(unsigned int cut_num) const override;
+
+  virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
+
+protected:
+  /// Calculate the signed distance function at a point
+  virtual Real calculateSignedDistance(Point p) const;
 
   /// Pointer to XFEMMovingInterfaceVelocityBase object
   const XFEMMovingInterfaceVelocityBase * _interface_velocity;
+
+  /// The CutSubdomainID for the negative side of the cut
+  const CutSubdomainID _negative_id;
+
+  /// The CutSubdomainID for the positive side of the cut
+  const CutSubdomainID _positive_id;
 };

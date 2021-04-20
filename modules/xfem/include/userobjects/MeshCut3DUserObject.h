@@ -35,17 +35,13 @@ public:
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutNode> & cut_nodes) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutFace> & cut_faces) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutEdge> & cut_edges) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutFace> & cut_faces) const override;
 
 protected:
   /// The cutter mesh
@@ -101,7 +97,7 @@ protected:
   virtual bool intersectWithEdge(const Point & p1,
                                  const Point & p2,
                                  const std::vector<Point> & _vertices,
-                                 Point & pint) const;
+                                 Point & point) const;
 
   /**
     Find directional intersection along the positive extension of the vector from p1 to p2
@@ -109,7 +105,7 @@ protected:
   bool findIntersection(const Point & p1,
                         const Point & p2,
                         const std::vector<Point> & vertices,
-                        Point & pint) const;
+                        Point & point) const;
 
   /**
     Check if point p is inside the edge p1-p2

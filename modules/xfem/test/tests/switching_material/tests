@@ -1,0 +1,44 @@
+[Tests]
+  [one_cut_stationary]
+    type = Exodiff
+    input = one_cut_stationary.i
+    exodiff = 'one_cut_stationary_out.e'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to switch materials for one stationary '
+                  'cut.'
+    design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md'
+    issues = '#17041'
+  []
+  [one_cut_moving]
+    type = Exodiff
+    input = one_cut_moving.i
+    exodiff = 'one_cut_moving_out.e one_cut_moving_out.e-s002 one_cut_moving_out.e-s003'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to switch materials for one moving cut.'
+    design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md'
+    issues = '#17041'
+  []
+  [two_cuts_stationary]
+    type = Exodiff
+    input = two_cuts_stationary.i
+    exodiff = 'two_cuts_stationary_out.e'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to switch materials for two stationary '
+                  'cuts.'
+    design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md ComboCutUserObject.md'
+    issues = '#17041'
+  []
+  [two_cuts_moving]
+    type = Exodiff
+    input = two_cuts_moving.i
+    exodiff = 'two_cuts_moving_out.e two_cuts_moving_out.e-s002 two_cuts_moving_out.e-s003'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to switch materials for two moving cuts.'
+    design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md ComboCutUserObject.md'
+    issues = '#17041'
+  []
+[]
