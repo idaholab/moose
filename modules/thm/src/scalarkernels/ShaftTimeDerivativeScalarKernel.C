@@ -1,5 +1,6 @@
 #include "ShaftTimeDerivativeScalarKernel.h"
 #include "ShaftConnectableUserObjectInterface.h"
+#include "UserObject.h"
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 
