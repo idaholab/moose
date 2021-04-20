@@ -1,4 +1,5 @@
 #include "THMProblem.h"
+#include "AddPostprocessorAction.h"
 
 registerMooseObject("THMApp", THMProblem);
 
@@ -67,6 +68,20 @@ THMProblem::advanceState()
 bool
 THMProblem::hasPostprocessor(const std::string & name) const
 {
-  ReporterName r_name(name, "value");
-  return _reporter_data.hasReporterValue(r_name);
+  if (_reporter_data.hasReporterValue(ReporterName(name, "value")))
+    return true;
+
+  // Sometimes we want to know if a Postprocessor exists well before Postprocessor objects
+  // are actually constructed (within check() in Components) in order to provide a better
+  // error than MOOSE (which checks for Postprocessor existence well after objects are added).
+  // Therefore, if we can't find that we have a Reporter value that represents the PP,
+  // this method might have been called before the add_postprocessor task that sets up the
+  // Reporter values for the postprocessors. Therefore, let's also see which Postprocessors
+  // are slated to be constructed in the future (via the AddPostprocessorAction actions,
+  // in which the names are the PP names themselves)
+  for (const auto & action : getMooseApp().actionWarehouse().getActions<AddPostprocessorAction>())
+    if (action->name() == name)
+      return true;
+
+  return false;
 }
