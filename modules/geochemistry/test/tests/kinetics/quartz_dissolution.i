@@ -10,7 +10,8 @@
   initial_temperature = 100.0
   temperature = 100.0
   kinetic_species_name = Quartz
-  kinetic_species_initial_moles = 83.216414271 # Quartz has 60.0843g/mol
+  kinetic_species_initial_value = 5
+  kinetic_species_unit = kg
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
   execute_console_output_on = '' # only CSV output for this example

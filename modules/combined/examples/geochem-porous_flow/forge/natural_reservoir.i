@@ -154,7 +154,8 @@
   initial_temperature = 220
   temperature = 220
   kinetic_species_name = '         Albite             Anorthite          K-feldspar         Quartz             Phlogopite         Paragonite         Calcite            Anhydrite          Chalcedony         Illite             Kaolinite          Clinochl-7A        Zoisite            Laumontite'
-  kinetic_species_initial_moles = '4.324073236492E+02 4.631370307325E+01 2.685015418378E+02 7.720095013956E+02 1.235192062541E+01 7.545461404965E-01 4.234651808835E-04 4.000485907930E-04 4.407616361072E+00 1.342524904876E+01 1.004823151125E+00 4.728132387707E-01 7.326007326007E-01 4.818116116598E-01'
+  kinetic_species_initial_value = '4.324073236492E+02 4.631370307325E+01 2.685015418378E+02 7.720095013956E+02 1.235192062541E+01 7.545461404965E-01 4.234651808835E-04 4.000485907930E-04 4.407616361072E+00 1.342524904876E+01 1.004823151125E+00 4.728132387707E-01 7.326007326007E-01 4.818116116598E-01'
+  kinetic_species_unit = '         moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles'
   evaluate_kinetic_rates_always = true # otherwise will easily "run out" of dissolving species
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   execute_console_output_on = ''
