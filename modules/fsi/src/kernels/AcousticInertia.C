@@ -44,8 +44,8 @@ AcousticInertia::computeQpResidual()
   if (_dt == 0)
     return 0;
   else
-  return _test[_i][_qp] * _inv_co_sq[_qp] *
-         (_u_dotdot_factor[_qp] + _u_dot_factor[_qp] - _u_dot_old[_qp]);
+    return _test[_i][_qp] * _inv_co_sq[_qp] *
+           (_u_dotdot_factor[_qp] + _u_dot_factor[_qp] - _u_dot_old[_qp]);
 }
 
 Real
@@ -54,6 +54,6 @@ AcousticInertia::computeQpJacobian()
   if (_dt == 0)
     return 0;
   else
-  return _test[_i][_qp] * _inv_co_sq[_qp] * _du_dotdot_du[_qp] * _phi[_j][_qp] +
-         _test[_i][_qp] * _inv_co_sq[_qp] * _du_dot_du[_qp] * _phi[_j][_qp];
+    return _test[_i][_qp] * _inv_co_sq[_qp] * _du_dotdot_du[_qp] * _phi[_j][_qp] +
+           _test[_i][_qp] * _inv_co_sq[_qp] * _du_dot_du[_qp] * _phi[_j][_qp];
 }
