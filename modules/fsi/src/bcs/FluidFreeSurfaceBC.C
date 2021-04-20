@@ -16,7 +16,8 @@ FluidFreeSurfaceBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Applies a mixed Dirichlet-Neumann BC on the fluid surface.");
-  params.addRangeCheckedParam<Real>("alpha", 0.1, "alpha>0","Inverse of the acceleration due to gravity.");
+  params.addRangeCheckedParam<Real>(
+      "alpha", 0.1, "alpha>0", "Inverse of the acceleration due to gravity.");
   return params;
 }
 
