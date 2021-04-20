@@ -8,40 +8,40 @@
 
 [Variables]
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
 
 
-  [./u]
+  [u]
     type = PiecewiseBilinear
     #x = '0 1 3' # Testing this error
     y = '0 1 3'
     z = '0 0 0 0 1 3 0 5 7'
     axis = 0
-  [../]
+  []
 [] # End Functions
 
 [Kernels]
 
-  [./diffu]
+  [diffu]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
 
-  [./u]
+  [u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1'
     function = u
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,60 +10,60 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     value = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u_avg]
+  [u_avg]
     type = ElementAverageValue
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./scaled_u]
+  [scaled_u]
     type = ScalePostprocessor
     value = u_avg
     scaling_factor = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./scaled_scaled_u]
+  [scaled_scaled_u]
     type = ScalePostprocessor
     value = scaled_u
     scaling_factor = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

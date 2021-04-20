@@ -6,52 +6,52 @@
 []
 
 [Functions]
-  [./test_function]
+  [test_function]
     type = ParsedFunction
     value = '2.5*x^2 + 0.75*y^2 + 0.15*x*y'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
+  [from_sub]
     family = monomial
     order = first
-  [../]
-  [./test_var]
+  []
+  [test_var]
     family = monomial
     order = first
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = test_function
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,31 +65,31 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     app_type = MooseTestApp
     execute_on = initial
     positions = '0.0 0.0 0.0'
     input_files = high_order_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from]
+  [from]
     type = MultiAppProjectionTransfer
     direction = from_multiapp
     execute_on = same_as_multiapp
     multi_app = sub
     source_variable = test_var
     variable = from_sub
-  [../]
-  [./to]
+  []
+  [to]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     execute_on = same_as_multiapp
     multi_app = sub
     source_variable = test_var
     variable = from_master
-  [../]
+  []
 []
 

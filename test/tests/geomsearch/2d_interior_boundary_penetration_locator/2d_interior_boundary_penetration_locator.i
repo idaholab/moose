@@ -5,53 +5,53 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./gap_distance]
-  [../]
-  [./gap_value]
-  [../]
+  [gap_distance]
+  []
+  [gap_value]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./penetration]
+  [penetration]
     type = PenetrationAux
     variable = gap_distance
     boundary = 2
     paired_boundary = 3
-  [../]
-  [./gap_value]
+  []
+  [gap_value]
     type = GapValueAux
     variable = gap_value
     boundary = 2
     paired_variable = u
     paired_boundary = 3
-  [../]
+  []
 []
 
 [Executioner]

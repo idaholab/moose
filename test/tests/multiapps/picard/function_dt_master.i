@@ -10,55 +10,55 @@
 []
 
 [Functions]
-  [./v_fn]
+  [v_fn]
     type = ParsedFunction
     value = t*x
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = ParsedFunction
     value = x
-  [../]
+  []
 
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0.1  10'
     y = '0.1  10'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./ufn]
+  []
+  [ufn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = v_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,10 +70,10 @@
   picard_max_its = 2
   start_time = 0
   num_steps = 3
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]
@@ -81,21 +81,21 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     app_type = MooseTestApp
     type = TransientMultiApp
     input_files = 'function_dt_sub.i'
     execute_on = timestep_end
     positions = '0 -1 0'
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub_app
     source_variable = u
     variable = v
-  [../]
+  []
 []

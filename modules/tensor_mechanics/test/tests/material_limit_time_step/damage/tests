@@ -1,5 +1,5 @@
 [Tests]
-  [./scalar_damage_material_limit]
+  [scalar_damage_material_limit]
     type = 'CSVDiff'
     input = 'scalar_material_damage_timestep_limit.i'
     csvdiff = 'scalar_material_damage_timestep_limit_out.csv'
@@ -7,9 +7,9 @@
     requirement = 'The ScalarMaterialDamage model shall be capable of informing the material-based time step calculation based on the damage evolution'
     issues = '#11662'
     design = 'ScalarMaterialDamage.md'
-  [../]
+  []
 
-  [./elements_damage_limit]
+  [elements_damage_limit]
     type = 'Exodiff'
     input = 'elements_changed_timestep_limit.i'
     exodiff = 'elements_changed_timestep_limit_out.e'
@@ -17,9 +17,9 @@
     requirement = 'The ScalarMaterialDamage model shall be capable of informing the material-based time step calculation based on the number of elements changing damage state in a step'
     issues = '#11662'
     design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
-  [../]
+  []
 
-  [./mixed_timestep_limit]
+  [mixed_timestep_limit]
     type = 'Exodiff'
     input = 'elements_changed_timestep_limit.i'
     exodiff = 'mixed_timestep_limit_out.e'
@@ -29,9 +29,9 @@
     requirement = 'The MaterialTimeStepPostprocessor model shall be capable of computing a time step based on both the material time step limited by damage evoluation and the number of elements changing damage state in a step'
     issues = '#11662'
     design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
-  [../]
+  []
 
-  [./elements_damage_limit_unknown_prop]
+  [elements_damage_limit_unknown_prop]
     type = 'RunException'
     prereq = elements_damage_limit
     input = 'elements_changed_timestep_limit.i'
@@ -40,9 +40,9 @@
     requirement = "The MaterialTimeStepPostprocessor shall generate an error if an unknown property is requested with the 'time_step_limit' parameter"
     issues = '#11662'
     design = 'MaterialTimeStepPostprocessor.md'
-  [../]
+  []
 
-  [./e]
+  [e]
     type = 'RunException'
     prereq = scalar_damage_material_limit
     input = 'scalar_material_damage_timestep_limit.i'
@@ -51,6 +51,6 @@
     requirement = "The MaterialTimeStepPostprocessor shall generate an error if neither the material time step limit nor the elements changed limit is specified."
     issues = '#11662'
     design = 'MaterialTimeStepPostprocessor.md'
-  [../]
+  []
 
 []

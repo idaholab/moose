@@ -1,18 +1,18 @@
 [Tests]
   issues = '#11971'
   design = 'actions/Action.md'
-  [./test_show_actions_dependency]
+  [test_show_actions_dependency]
     type = RunApp
     input = 'debug_print_actions_test.i'
     expect_out = '[DBG][ACT] Action Dependency Sets'
     match_literal = true
     requirement = "The system shall be capable of reporting `Action` object dependencies."
-  [../]
-  [./test_show_actions_tasks]
+  []
+  [test_show_actions_tasks]
     type = RunApp
     input = 'debug_print_actions_test.i'
     expect_out = '[DBG][ACT] TASK'
     match_literal = true
     requirement = "The system shall be capable of reporting `Action` object task information."
-  [../]
+  []
 []

@@ -11,33 +11,33 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./features]
+  [features]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ghosts]
+  []
+  [ghosts]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./halos]
+  []
+  [halos]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./proc_id]
+  []
+  [proc_id]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     type = LatticeSmoothCircleIC
     variable = c
     invalue = 1.0
@@ -48,60 +48,60 @@
     int_width = 5.0
     radius_variation_type = uniform
     avoid_bounds = false
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./c]
+  [Periodic]
+    [c]
       variable = c
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./features]
+  [features]
     type = FeatureFloodCountAux
     variable = features
     execute_on = 'initial timestep_end'
     flood_counter = features
-  [../]
-  [./ghosts]
+  []
+  [ghosts]
     type = FeatureFloodCountAux
     variable = ghosts
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
     flood_counter = features
-  [../]
-  [./halos]
+  []
+  [halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
     flood_counter = features
-  [../]
-  [./proc_id]
+  []
+  [proc_id]
     type = ProcessorIDAux
     variable = proc_id
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./features]
+  [features]
     type = FeatureFloodCount
     variable = c
     flood_entity_type = ELEMENTAL
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'num_residual_eval.i'
     csvdiff = 'out.csv'
@@ -17,5 +17,5 @@
     requirement = 'The system shall be capable of outputting the number of Residual evaluations'
     issues = '#2089'
     design = 'NumResidualEvaluations.md'
-  [../]
+  []
 []

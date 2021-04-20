@@ -30,93 +30,93 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '1.0  0.5  0.7  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
-  [./line_seg_cut_uo2]
+  []
+  [line_seg_cut_uo2]
     type = LineSegmentCutUserObject
     cut_data = '0.0  0.5  0.3  0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
-  [./line_seg_cut_uo3]
+  []
+  [line_seg_cut_uo3]
     type = LineSegmentCutUserObject
     cut_data = '0.5  0.0  0.5  0.3'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
-  [./line_seg_cut_uo4]
+  []
+  [line_seg_cut_uo4]
     type = LineSegmentCutUserObject
     cut_data = '0.5  1.0  0.5  0.7'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     planar_formulation = plane_strain
     add_variables = true
-  [../]
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x='0  50   100'
     y='0  0.02 0.1'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./topx]
+  []
+  [topx]
     type = DirichletBC
     boundary = top
     variable = disp_x
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pull
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = 0
-  [../]
+  []
 
-  [./_elastic_strain]
+  [_elastic_strain]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./number_of_cracks]
+  [number_of_cracks]
     type = TestCrackCounter
-  [../]
+  []
 []
 
 [Executioner]

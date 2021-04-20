@@ -1,11 +1,11 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = poly2.msh
     #parallel_type = replicated
   []
 
-  [./breakmesh]
+  [breakmesh]
     type = BreakMeshByBlockGenerator
     input = fmg
     split_interface = true

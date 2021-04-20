@@ -6,64 +6,64 @@
 []
 
 [Variables]
-  [./s]
-  [../]
-  [./t]
-  [../]
-  [./u]
-  [../]
-  [./u2]
-  [../]
-  [./v]
-  [../]
+  [s]
+  []
+  [t]
+  []
+  [u]
+  []
+  [u2]
+  []
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./w]
-  [../]
+  [w]
+  []
 []
 
 [Kernels]
-  [./diffs]
+  [diffs]
     type = WrongJacobianDiffusion
     variable = s
     jfactor = 0.995
-  [../]
-  [./difft]
+  []
+  [difft]
     type = WrongJacobianDiffusion
     variable = t
     jfactor = 2.0
-  [../]
-  [./diffu]
+  []
+  [diffu]
     type = WrongJacobianDiffusion
     variable = u
     error = factor
     jfactor = 0.0
-  [../]
-  [./diffu2]
+  []
+  [diffu2]
     type = WrongJacobianDiffusion
     variable = u2
     rfactor = 0.0
-  [../]
-  [./diffv]
+  []
+  [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

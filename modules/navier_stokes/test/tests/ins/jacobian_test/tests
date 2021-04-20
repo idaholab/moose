@@ -1,6 +1,6 @@
 [Tests]
    design = 'modules/navier_stokes/index.md'
-  [./jacobian_test]
+  [jacobian_test]
     type = AnalyzeJacobian
     input = jacobian_test.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -9,8 +9,8 @@
     mesh_mode = REPLICATED
     issues = '#13025'
     requirement = 'The system shall compute accurate Jacobians for the incompressible Navier-Stokes equation.'
-  [../]
-  [./jacobian_stabilized_test]
+  []
+  [jacobian_stabilized_test]
     type = AnalyzeJacobian
     input = jacobian_stabilized_test.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -19,8 +19,8 @@
     mesh_mode = REPLICATED
     issues = '#13025'
     requirement = 'The system shall compute accurate Jacobians for the incompressible Navier-Stokes equation with stabilization.'
-  [../]
-  [./jacobian_traction_stabilized_test]
+  []
+  [jacobian_traction_stabilized_test]
     type = AnalyzeJacobian
     input = jacobian_traction_stabilized.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -30,5 +30,5 @@
     issues = '#13025'
     requirement = 'The system shall compute accurate Jacobians for the incompressible Navier-Stokes
                    equation with stabilization with a traction boundary condition.'
-  [../]
+  []
 []

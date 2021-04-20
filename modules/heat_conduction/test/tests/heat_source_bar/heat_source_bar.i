@@ -23,45 +23,45 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 300.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
-  [./heatsource]
+  []
+  [heatsource]
     type = HeatSource
     function = volumetric_heat
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./lefttemp]
+  [lefttemp]
     type = DirichletBC
     boundary = left
     variable = temp
     value = 600
-  [../]
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density  thermal_conductivity'
     prop_values = '10431.0 3.0'
-  [../]
+  []
 []
 
 [Functions]
-  [./volumetric_heat]
+  [volumetric_heat]
      type = ParsedFunction
      value = 3.8e+8
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,16 +69,16 @@
 []
 
 [Postprocessors]
-  [./right]
+  [right]
     type = SideAverageValue
     variable = temp
     boundary = right
-  [../]
-  [./error]
+  []
+  [error]
     type = NodalL2Error
     function = '-3.8e+8/(2*3) * (x^2 - 2*x*0.01) + 600'
     variable = temp
-  [../]
+  []
 []
 
 [Outputs]

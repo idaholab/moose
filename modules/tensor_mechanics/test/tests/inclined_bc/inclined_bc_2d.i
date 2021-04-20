@@ -28,35 +28,35 @@
 []
 
 [BCs]
-  [./Pressure]
-    [./top]
+  [Pressure]
+    [top]
       boundary = top
       function = '-1000*t'
-    [../]
-  [../]
-  [./InclinedNoDisplacementBC]
-    [./right]
+    []
+  []
+  [InclinedNoDisplacementBC]
+    [right]
       boundary = right
       penalty = 1.0e8
       displacements = 'disp_x disp_y'
-    [../]
-    [./bottom]
+    []
+    [bottom]
       boundary = bottom
       penalty = 1.0e8
       displacements = 'disp_x disp_y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,10 +83,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

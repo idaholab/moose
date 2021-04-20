@@ -41,7 +41,7 @@
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]

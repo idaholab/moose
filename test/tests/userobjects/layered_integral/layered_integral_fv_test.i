@@ -18,60 +18,60 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./layered_integral]
+  [layered_integral]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./liaux]
+  [liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
     execute_on = timestep_end
     user_object = layered_integral
-  [../]
+  []
 []
 
 [FVBCs]
-  [./bottom]
+  [bottom]
     type = FVDirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = FVDirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_integral]
+  [layered_integral]
     type = LayeredIntegral
     direction = y
     num_layers = 3
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]

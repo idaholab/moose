@@ -30,175 +30,175 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     eigenstrain_names = ini_stress
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = 0
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = 0
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./yield_fcn_dp]
+  [yield_fcn_dp]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./yield_fcn_wp]
+  []
+  [yield_fcn_wp]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./yield_fcn_dp_auxk]
+  [yield_fcn_dp_auxk]
     type = MaterialStdVectorAux
     index = 1    # this is the tensile yield function - it should be zero
     property = cdp_plastic_yield_function
     variable = yield_fcn_dp
-  [../]
-  [./yield_fcn_wp_auxk]
+  []
+  [yield_fcn_wp_auxk]
     type = MaterialStdVectorAux
     index = 1    # this is the tensile yield function - it should be zero
     property = cwp_plastic_yield_function
     variable = yield_fcn_wp
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_xx]
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./s_xy]
+  []
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
-  [./s_xz]
+  []
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yy]
+  []
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./s_yz]
+  []
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./f_dp]
+  []
+  [f_dp]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn_dp
-  [../]
-  [./f_wp]
+  []
+  [f_wp]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn_wp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 300
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 1E4
-  [../]
-  [./mc_coh]
+  []
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 1E4
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 20
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 0
-  [../]
-  [./dp]
+  []
+  [dp]
     type = TensorMechanicsPlasticDruckerPrager
     mc_cohesion = mc_coh
     mc_friction_angle = mc_phi
     mc_dilation_angle = mc_psi
     internal_constraint_tolerance = 1 # irrelevant here
     yield_function_tolerance = 1      # irrelevant here
-  [../]
-  [./wp_coh]
+  []
+  [wp_coh]
     type = TensorMechanicsHardeningConstant
     value = 1E4
-  [../]
-  [./wp_tanphi]
+  []
+  [wp_tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./wp_tanpsi]
+  []
+  [wp_tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.1111077
-  [../]
-  [./wp_t_strength]
+  []
+  [wp_t_strength]
     type = TensorMechanicsHardeningConstant
     value = 0
-  [../]
-  [./wp_c_strength]
+  []
+  [wp_c_strength]
     type = TensorMechanicsHardeningConstant
     value = 1E4
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.2
     youngs_modulus = 1E7
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '1E3 0 0  0 1E3 0  0 0 1E3'
     eigenstrain_name = ini_stress
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     relative_tolerance = 1E4
     absolute_tolerance = 2
     inelastic_models = 'cdp cwp'
     perform_finite_strain_rotations = false
-  [../]
-  [./cdp]
+  []
+  [cdp]
     type = CappedDruckerPragerStressUpdate
     base_name = cdp
     DP_model = dp
@@ -207,8 +207,8 @@
     yield_function_tol = 1E-5
     tip_smoother = 1E3
     smoothing_tol = 1E3
-  [../]
-  [./cwp]
+  []
+  [cwp]
     type = CappedWeakPlaneStressUpdate
     base_name = cwp
     cohesion = wp_coh
@@ -219,7 +219,7 @@
     tip_smoother = 1E3
     smoothing_tol = 1E3
     yield_function_tol = 1E-5
-  [../]
+  []
 []
 
 

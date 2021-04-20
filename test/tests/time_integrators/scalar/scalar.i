@@ -11,29 +11,29 @@
 []
 
 [Variables]
-  [./n]
+  [n]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./dn]
+  [dn]
     type = ODETimeDerivative
     variable = n
-  [../]
-  [./ode1]
+  []
+  [ode1]
     type = ParsedODEKernel
     function = '-n'
     variable = n
     # implicit = false
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-  [./TimeIntegrator]
+  [TimeIntegrator]
     # type = ImplicitEuler
     # type = BDF2
     type = CrankNicolson
@@ -48,7 +48,7 @@
     # type = ExplicitMidpoint
     # type = Heun
     # type = Ralston
-  [../]
+  []
   start_time = 0
   end_time = 1
   dt = 0.001
@@ -59,14 +59,14 @@
 []
 
 [Functions]
-  [./exact_solution]
+  [exact_solution]
     type = ParsedFunction
     value = exp(t)
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error_n]
+  [error_n]
     # Post processor that computes the difference between the computed
     # and exact solutions.  For the exact solution used here, the
     # error at the final time should converge at O(dt^p), where p is
@@ -76,7 +76,7 @@
     function = exact_solution
     # final is not currently supported for Postprocessor execute_on...
     # execute_on = 'final'
-  [../]
+  []
 []
 
 [Outputs]

@@ -1,5 +1,5 @@
 [Tests]
-  [./crack2d]
+  [crack2d]
     type = 'Exodiff'
     input = 'crack2d.i'
     exodiff = 'crack2d_out.e'
@@ -7,5 +7,5 @@
     use_old_floor = True
     valgrind = 'HEAVY'
     max_time = 500
-  [../]
-[../]
+  []
+[]

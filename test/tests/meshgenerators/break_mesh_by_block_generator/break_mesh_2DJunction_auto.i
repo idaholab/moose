@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = 4ElementJunction.e
   []
 
-  [./breakmesh]
+  [breakmesh]
     type = BreakMeshByBlockGenerator
     input = fmg
   []

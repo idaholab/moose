@@ -4,8 +4,8 @@
 []
 
 [Variables]
-  [./dummy1]
-  [../]
+  [dummy1]
+  []
 []
 
 [Problem]
@@ -13,12 +13,12 @@
 []
 
 [Functions]
-  [./left_bc]
+  [left_bc]
     type = ParsedFunction
     value = dummy2
     vals = invalid
     vars = dummy2
-  [../]
+  []
 []
 
 [Executioner]

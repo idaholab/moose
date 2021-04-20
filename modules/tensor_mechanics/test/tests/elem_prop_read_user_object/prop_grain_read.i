@@ -8,12 +8,12 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = 0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = 0
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -21,27 +21,27 @@
 []
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     value = 0.05*t
-  [../]
+  []
 []
 
 [UserObjects]
-  [./prop_read]
+  [prop_read]
     type = ElementPropertyReadFile
     prop_file_name = 'input_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
@@ -50,11 +50,11 @@
     ngrain = 3
     rand_seed = 25346
     rve_type = periodic
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
@@ -62,8 +62,8 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     type = RankTwoAux
     variable = e_yy
     rank_two_tensor = elastic_strain
@@ -71,67 +71,67 @@
     index_i = 1
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_with_Euler]
+  [elasticity_tensor_with_Euler]
     type = ComputeElasticityTensorCP
     block = 0
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./e_yy]
+  []
+  [e_yy]
     type = ElementAverageValue
     variable = e_yy
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -159,8 +159,8 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
     use_displaced_mesh = true
-  [../]
+  []
 []

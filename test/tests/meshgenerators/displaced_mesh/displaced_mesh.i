@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  [./mg]
+  [mg]
     type = AnnularMeshGenerator
     rmin = 1.0
     rmax = 2.0

@@ -11,80 +11,80 @@
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4+x*x+y*y
-  [../]
+  []
 
-  [./solution]
+  [solution]
     type = ParsedGradFunction
     value = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = HIERARCHIC
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
   active = 'bc_all'
-  [./bc_all]
+  [bc_all]
     type = FunctionPenaltyDirichletBC
     variable = u
     function = solution
     boundary = 'top left right bottom'
     penalty = 1e6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
+  []
 
-  [./h]
+  [h]
     type = AverageElementSize
-  [../]
+  []
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]

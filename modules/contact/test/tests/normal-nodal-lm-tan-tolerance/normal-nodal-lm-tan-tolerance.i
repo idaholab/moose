@@ -11,28 +11,28 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     displacements = 'disp_x disp_y'
     strain = FINITE
     add_variables = true
     block = '1 2'
     use_automatic_differentiation = true
     scaling = 1e-4
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e5
     poissons_ratio = 0.345
     block = '1 2'
-  [../]
+  []
 
-  [./_elastic_strain]
+  [_elastic_strain]
     type = ADComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Contact]
@@ -49,47 +49,47 @@
 []
 
 [Functions]
-  [./disp_bc]
+  [disp_bc]
     type = PiecewiseLinear
     x = '0 10.0'
     y = '0 -0.30'
-  [../]
+  []
 
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'left'
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'right'
     function = disp_bc # '-30e-3 * t'
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'right'
     function = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./fmp]
+  [fmp]
     type = FDP
     full = true
     finite_difference_type = standard
-  [../]
+  []
 []
 
 [Executioner]

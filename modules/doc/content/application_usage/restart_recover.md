@@ -24,21 +24,21 @@
 []
 
 [Variables]
-  [./nodal]
+  [nodal]
      family = LAGRANGE
      order = FIRST
      initial_from_file_var = nodal
      initial_from_file_timestep = 10
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./elemental]
+  [elemental]
      family = MONOMIAL
      order = CONSTANT
      initial_from_file_var = elemental
      initial_from_file_timestep = 10
-  [../]
+  []
 []
 ```
 
@@ -59,11 +59,11 @@ For a complete list see the Doxygen page for Checkpoint. * You should always set
 
 ```puppet
 [Outputs]
-  [./my_checkpoint]
+  [my_checkpoint]
     type = Checkpoint
     num_files = 4
     interval = 5
-  [../]
+  []
 []
 ```
 

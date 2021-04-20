@@ -35,52 +35,52 @@
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = horizontal_movement
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     block = '1 2'
-  [../]
+  []
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     constant_on = SUBDOMAIN
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -105,10 +105,10 @@
   timestep_tolerance = 1e-6
   snesmf_reuse_base = false
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Debug]
@@ -132,18 +132,18 @@
 []
 
 [Functions]
-  [./vertical_movement]
+  [vertical_movement]
     type = ParsedFunction
     value = -t
-  [../]
-  [./horizontal_movement]
+  []
+  [horizontal_movement]
     type = ParsedFunction
     value = -0.04*sin(4*t)+0.02
-  [../]
+  []
 []
 
 [Constraints]
-  [./lm]
+  [lm]
     type = NormalNodalLMMechanicalContact
     secondary = 3
     primary = 2
@@ -153,7 +153,7 @@
     ncp_function_type = min
     use_displaced_mesh = true
     c = 1e6 # relative scale difference between pressure and gap
-  [../]
+  []
   [normal_x]
     type = NormalMortarMechanicalContact
     primary_boundary = '2'
@@ -221,13 +221,13 @@
 []
 
 [Postprocessors]
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
   [lin]
     type = NumLinearIterations
   []

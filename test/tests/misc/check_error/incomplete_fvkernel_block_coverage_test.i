@@ -5,47 +5,47 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
   active = 'diff body_force'
 
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     block = 1
     coeff = 1
-  [../]
+  []
 
-  [./body_force]
+  [body_force]
     type = FVBodyForce
     variable = u
     block = 1
     value = 10
-  [../]
+  []
 []
 
 [FVBCs]
   active = 'right'
 
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,34 +10,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./b]
+  [b]
     family = SCALAR
     order = FIFTH
-  [../]
+  []
 []
 
 [ICs]
-  [./ic]
+  [ic]
     type = ScalarComponentIC
     variable = b
     values = '1.0 2.0 3.0 4.0 5.0'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = u
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

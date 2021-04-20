@@ -58,7 +58,7 @@
     boundary = left
     value = 0
   []
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right

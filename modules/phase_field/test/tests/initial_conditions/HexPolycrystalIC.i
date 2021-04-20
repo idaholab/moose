@@ -12,31 +12,31 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [UserObjects]
-  [./hex_ic]
+  [hex_ic]
     type = PolycrystalHex
     coloring_algorithm = bt
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = hex_ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -50,8 +50,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     execute_on = final
-  [../]
+  []
 []

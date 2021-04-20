@@ -24,7 +24,7 @@
     mesh_mode = 'replicated'
     cli_args = "Outputs/active='out'"
   []
-  [./frictional_02_penalty]
+  [frictional_02_penalty]
     type = 'Exodiff'
     input = 'frictional_02_penalty.i'
     exodiff = 'frictional_02_penalty_out.e'
@@ -35,8 +35,8 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .2'
-  [../]
-  [./frictional_04_penalty]
+  []
+  [frictional_04_penalty]
     type = 'Exodiff'
     input = 'frictional_04_penalty.i'
     exodiff = 'frictional_04_penalty_out.e'
@@ -47,8 +47,8 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the Coulomb friction sliding block problem using the penalty method and a friction coefficient of .4'
-  [../]
-  [./frictionless_kinematic]
+  []
+  [frictionless_kinematic]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
     exodiff = 'frictionless_kinematic_out.e'
@@ -60,8 +60,8 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem using a kinematic constraint formulation.'
-  [../]
-  [./frictionless_kinematic_scaling]
+  []
+  [frictionless_kinematic_scaling]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
     exodiff = 'frictionless_kinematic_out.e'
@@ -76,8 +76,8 @@
                    variable scaling is used or not"
     design = 'MechanicalContactConstraint.md'
     issues = '#11601'
-  [../]
-  [./frictionless_penalty]
+  []
+  [frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
@@ -89,8 +89,8 @@
     issues = '#2816'
     design = 'MechanicalContactConstraint.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem using a penalty constraint formulation.'
-  [../]
-  [./frictionless_penalty_contact_line_search]
+  []
+  [frictionless_penalty_contact_line_search]
     type = 'Exodiff'
     input = 'frictionless_penalty_contact_line_search.i'
     exodiff = 'frictionless_penalty_contact_line_search_out.e'
@@ -104,5 +104,5 @@
     issues = '#10950'
     design = 'ContactLineSearch.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem with a line serach customized for mechanical contact.'
-  [../]
+  []
 []

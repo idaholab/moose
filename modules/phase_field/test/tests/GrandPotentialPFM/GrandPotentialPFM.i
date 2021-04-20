@@ -18,111 +18,111 @@
 []
 
 [Variables]
-  [./w]
-  [../]
-  [./eta]
-  [../]
+  [w]
+  []
+  [eta]
+  []
 []
 
 [ICs]
-  [./w]
+  [w]
     type = SmoothCircleIC
     variable = w
     # note w = A*(c-cleq), A = 1.0, cleq = 0.0 ,i.e., w = c (in the matrix/liquid phase)
     outvalue = -0.2
     invalue = 0.2
-  [../]
-  [./eta]
+  []
+  [eta]
     type = SmoothCircleIC
     variable = eta
     outvalue = 0.0
     invalue = 1.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./w_dot]
+  [w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
     args = '' # in this case chi (the susceptibility) is simply a constant
-  [../]
-  [./Diffusion]
+  []
+  [Diffusion]
     type = MatDiffusion
     variable = w
     diffusivity = D
     args = ''
-  [../]
-  [./coupled_etadot]
+  []
+  [coupled_etadot]
     type = CoupledSusceptibilityTimeDerivative
     variable = w
     v = eta
     f_name = ft
     args = 'eta'
-  [../]
-  [./AC_bulk]
+  []
+  [AC_bulk]
     type = AllenCahn
     variable = eta
     f_name = F
     args = 'w'
-  [../]
-  [./AC_int]
+  []
+  [AC_int]
     type = ACInterface
     variable = eta
-  [../]
-  [./e_dot]
+  []
+  [e_dot]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names  = 'kappa_op  D    L    chi  cseq   cleq   A'
     prop_values = '4.0       1.0  1.0  1.0  0.0  1.0  1.0'
-  [../]
+  []
 
-  [./liquid_GrandPotential]
+  [liquid_GrandPotential]
     type = DerivativeParsedMaterial
     function = '-0.5 * w^2/A - cleq * w'
     args = 'w'
     f_name = f1
     material_property_names = 'cleq A'
-  [../]
-  [./solid_GrandPotential]
+  []
+  [solid_GrandPotential]
     type = DerivativeParsedMaterial
     function = '-0.5 * w^2/A - cseq * w'
     args = 'w'
     f_name = f2
     material_property_names = 'cseq A'
-  [../]
-  [./switching_function]
+  []
+  [switching_function]
     type = SwitchingFunctionMaterial
     eta = eta
     h_order = HIGH
-  [../]
-  [./barrier_function]
+  []
+  [barrier_function]
     type = BarrierFunctionMaterial
     eta = eta
-  [../]
-  [./cs]
+  []
+  [cs]
     type = DerivativeParsedMaterial
     args = 'w'
     f_name = cs
     material_property_names = 'A cseq'
     function = 'w/A + cseq' # since w = A*(c-cseq)
     derivative_order = 2
-  [../]
-  [./cl]
+  []
+  [cl]
     type = DerivativeParsedMaterial
     args = 'w'
     f_name = cl
     material_property_names = 'A cleq'
     function = 'w/A + cleq' # since w = A*(c-cleq)
     derivative_order = 2
-  [../]
-  [./total_GrandPotential]
+  []
+  [total_GrandPotential]
     type = DerivativeTwoPhaseMaterial
     args = 'w'
     eta = eta
@@ -130,8 +130,8 @@
     fb_name = f2
     derivative_order = 2
     W = 1.0
-  [../]
-  [./coupled_eta_function]
+  []
+  [coupled_eta_function]
     type = DerivativeParsedMaterial
     function = '(cs - cl) * dh'
     args = 'eta w'
@@ -139,30 +139,30 @@
     material_property_names = 'cs cl dh:=D[h,eta]'
     derivative_order = 1
     outputs = exodus
-  [../]
+  []
 
-  [./concentration]
+  [concentration]
     type = ParsedMaterial
     f_name = c
     material_property_names = 'dF:=D[F,w]'
     function = '-dF'
     outputs = exodus
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./C]
+  [C]
     type = ElementIntegralMaterialProperty
     mat_prop = c
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,49 +10,49 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     block = 0
     value = -1
-  [../]
+  []
 
-  [./u_ic_bnd]
+  [u_ic_bnd]
     type = ConstantIC
     variable = u
     boundary = 'left right'
     value = -2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

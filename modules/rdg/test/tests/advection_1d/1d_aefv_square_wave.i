@@ -16,86 +16,86 @@
 []
 ############################################################
 [Functions]
-  [./ic_u]
+  [ic_u]
     type = PiecewiseConstant
     axis = x
     direction = right
     xy_data = '0.1 0.5
                0.6 1.0
                1.0 0.5'
-  [../]
+  []
 []
 ############################################################
 [UserObjects]
-  [./lslope]
+  [lslope]
     type = AEFVSlopeLimitingOneD
     execute_on = 'linear'
     scheme = 'none' #none | minmod | mc | superbee
-  [../]
+  []
 
-  [./internal_side_flux]
+  [internal_side_flux]
     type = AEFVUpwindInternalSideFlux
     execute_on = 'linear'
-  [../]
+  []
 
-  [./free_outflow_bc]
+  [free_outflow_bc]
     type = AEFVFreeOutflowBoundaryFlux
     execute_on = 'linear'
-  [../]
+  []
 []
 ############################################################
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 ############################################################
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'u'
     function = ic_u
-  [../]
+  []
 []
 ############################################################
 [Kernels]
-  [./time_u]
+  [time_u]
     implicit = true
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 ############################################################
 [DGKernels]
-  [./concentration]
+  [concentration]
     type = AEFVKernel
     variable = u
     component = 'concentration'
     flux = internal_side_flux
-  [../]
+  []
 []
 ############################################################
 [BCs]
-  [./concentration]
+  [concentration]
     type = AEFVBC
     boundary = 'left right'
     variable = u
     component = 'concentration'
     flux = free_outflow_bc
-  [../]
+  []
 []
 ############################################################
 [Materials]
-  [./aefv]
+  [aefv]
     type = AEFVMaterial
     block = 0
-  [../]
+  []
 []
 ############################################################
 [Executioner]
   type = Transient
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ExplicitMidpoint
-  [../]
+  []
   solve_type = 'LINEAR'
 
   l_tol = 1e-4
@@ -110,10 +110,10 @@
 []
 
 [Outputs]
-  [./Exodus]
+  [Exodus]
     type = Exodus
     file_base = 1d_aefv_square_wave_none_out
     interval = 2
-  [../]
+  []
   perf_graph = true
 []

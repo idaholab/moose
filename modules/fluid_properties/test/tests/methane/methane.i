@@ -19,129 +19,129 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 10.0e6
-  [../]
-  [./temperature]
+  []
+  [temperature]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 350
-  [../]
-  [./density]
+  []
+  [density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./entropy]
+  []
+  [entropy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./thermal_cond]
+  []
+  [thermal_cond]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./density]
+  [density]
     type = MaterialRealAux
      variable = density
      property = density
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     type = MaterialRealAux
      variable = viscosity
      property = viscosity
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
      variable = cp
      property = cp
-  [../]
-  [./cv]
+  []
+  [cv]
     type = MaterialRealAux
      variable = cv
      property = cv
-  [../]
-  [./e]
+  []
+  [e]
     type = MaterialRealAux
      variable = internal_energy
      property = e
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = MaterialRealAux
      variable = enthalpy
      property = h
-  [../]
-  [./entropy]
+  []
+  [entropy]
     type = MaterialRealAux
      variable = entropy
      property = s
-  [../]
-  [./thermal_cond]
+  []
+  [thermal_cond]
     type = MaterialRealAux
      variable = thermal_cond
      property = k
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
      variable = c
      property = c
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./methane]
+  [FluidProperties]
+    [methane]
       type = MethaneFluidProperties
-    [../]
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = FluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     fp = methane
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [Executioner]

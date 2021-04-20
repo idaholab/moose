@@ -1,76 +1,76 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff_u conv_v diff_v'
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./conv_v]
+  [conv_v]
     type = CoupledForce
     variable = v
     v = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'left_u right_u left_v'
 
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 100
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,11 +85,11 @@
 [Preconditioning]
   active = 'FSP'
 
-  [./FSP]
+  [FSP]
     type = FSP
     # It is the starting point of splitting
     topsplit = 'uv' # 'uv' should match the following block name
-    [./uv]
+    [uv]
       splitting = 'u v' # 'u' and 'v' are the names of subsolvers
       # Generally speaking, there are four types of splitting we could choose
       # <additive,multiplicative,symmetric_multiplicative,schur>
@@ -103,21 +103,21 @@
       # control how schur works using PETSc options
       # petsc_options_iname = '-pc_fieldsplit_schur_fact_type -pc_fieldsplit_schur_precondition'
       # petsc_options_value = 'full selfp'
-    [../]
-    [./u]
+    []
+    [u]
       vars = 'u'
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
-    [../]
-    [./v]
+    []
+    [v]
       vars = 'v'
       # PETSc options for this subsolver
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

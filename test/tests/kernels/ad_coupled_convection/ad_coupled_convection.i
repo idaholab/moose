@@ -6,60 +6,60 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
-  [./convection]
+  []
+  [convection]
     type = ADCoupledConvection
     variable = u
     velocity_vector = v
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = ADDiffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

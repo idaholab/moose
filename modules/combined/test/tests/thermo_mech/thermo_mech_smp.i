@@ -8,94 +8,94 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./bottom_temp]
+  [bottom_temp]
     type = DirichletBC
     variable = temp
     boundary = 1
     value = 10.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = eigenstrain
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 0.0
     thermal_expansion_coeff = 1e-5
     eigenstrain_name = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     specific_heat = 1.0
     thermal_conductivity = 1.0
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     density = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -116,9 +116,9 @@
 
 [Outputs]
   file_base = thermo_mech_smp_out
-  [./exodus]
+  [exodus]
     type = Exodus
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
-  [../]
+  []
 []

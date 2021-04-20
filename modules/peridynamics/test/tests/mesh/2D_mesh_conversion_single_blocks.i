@@ -7,11 +7,11 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = 2D_4blocks.e
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = false
@@ -20,7 +20,7 @@
     connect_block_id_pairs = '1 2 2 3 3 4'
     single_interface_block = true
     construct_peridynamics_sideset = true
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

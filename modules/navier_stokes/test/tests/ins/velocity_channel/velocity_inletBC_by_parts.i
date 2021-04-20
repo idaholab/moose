@@ -19,82 +19,82 @@
 
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
-  [./x_momentum_space]
+  []
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
-  [./y_momentum_space]
+  []
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'top bottom'
     value = 0.0
-  [../]
-  [./y_no_slip]
+  []
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'left top bottom'
     value = 0.0
-  [../]
-  [./x_inlet]
+  []
+  [x_inlet]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'left'
     function = 'inlet_func'
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,14 +109,14 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     value = '-4 * (y - 0.5)^2 + 1'
-  [../]
+  []
 []

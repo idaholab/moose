@@ -6,35 +6,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,22 +51,22 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '1. 0. 0.'
     input_files = sub.i
     execute_on = 'initial timestep_end'
     output_in_position = true
-  [../]
+  []
 []
 
 [Controls]
-  [./multiapp]
+  [multiapp]
     type = TimePeriod
     disable_objects = 'MultiApps::sub'
     start_time = '0'
     end_time = '0.25'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []

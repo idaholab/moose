@@ -7,50 +7,50 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./layered_integral]
+  [layered_integral]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./liaux]
+  [liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
     execute_on = timestep_end
     user_object = layered_integral
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_integral]
+  [layered_integral]
     type = LayeredIntegral
     direction = y
     num_layers = 5
@@ -58,7 +58,7 @@
     execute_on = linear
     sample_type = average
     average_radius = 2
-  [../]
+  []
 []
 
 [Executioner]

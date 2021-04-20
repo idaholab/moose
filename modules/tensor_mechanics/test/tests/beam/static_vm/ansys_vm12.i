@@ -26,7 +26,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./all]
+  [all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -38,85 +38,85 @@
     Iy = 23.3505405
     Iz = 23.3505405
     y_orientation = '0 1.0 0.0'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 30.0e6
     poissons_ratio = 0.3
     shear_coefficient = 1.0
     block = 0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 'left'
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 'left'
     value = 0.0
-  [../]
+  []
 
-  [./fixrx]
+  [fixrx]
     type = DirichletBC
     variable = rot_x
     boundary = 'left'
     value = 0.0
-  [../]
-  [./fixry]
+  []
+  [fixry]
     type = DirichletBC
     variable = rot_y
     boundary = 'left'
     value = 0.0
-  [../]
-  [./fixrz]
+  []
+  [fixrz]
     type = DirichletBC
     variable = rot_z
     boundary = 'left'
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_z]
+  [force_z]
     type = ConstantRate
     variable = disp_z
     boundary = 'right'
     rate = 250
-  [../]
+  []
 
-  [./force_rx]
+  [force_rx]
     type = ConstantRate
     variable = rot_x
     boundary = 'right'
     rate = 9000
-  [../]
+  []
 
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 [Executioner]
   type = Transient
@@ -132,31 +132,31 @@
 []
 
 [Postprocessors]
-  [./disp_y]
+  [disp_y]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = disp_y
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = disp_z
-  [../]
-  [./disp_rx]
+  []
+  [disp_rx]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_x
-  [../]
-  [./disp_ry]
+  []
+  [disp_ry]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_y
-  [../]
-  [./disp_rz]
+  []
+  [disp_rz]
     type = PointValue
     point = '300.0 0.0 0.0'
     variable = rot_z
-  [../]
+  []
 []
 [Debug]
  show_var_residual_norms = true

@@ -9,21 +9,21 @@ temp_ref=${fparse hot_temp / 2.}
     nx = 100
     ny = 100
   []
-  [./bottom_left]
+  [bottom_left]
     type = ExtraNodesetGenerator
     new_boundary = corner
     coord = '0 0'
     input = gen
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./Newton_SMP]
+  [Newton_SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,52 +65,52 @@ temp_ref=${fparse hot_temp / 2.}
 []
 
 [BCs]
-  [./velocity_dirichlet]
+  [velocity_dirichlet]
     type = VectorDirichletBC
     boundary = 'left right bottom top'
     variable = velocity
     # The third entry is to satisfy RealVectorValue
     values = '0 0 0'
-  [../]
+  []
   # Even though we are integrating by parts, because there are no integrated
   # boundary conditions on the velocity p doesn't appear in the system of
   # equations. Thus we must pin the pressure somewhere in order to ensure a
   # unique solution
-  [./p_zero]
+  [p_zero]
     type = DirichletBC
     boundary = corner
     variable = p
     value = 0
-  [../]
-  [./hot]
+  []
+  [hot]
     type = DirichletBC
     variable = temp
     boundary = left
     value = ${hot_temp}
-  [../]
-  [./cold]
+  []
+  [cold]
     type = DirichletBC
     variable = temp
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
   [mass_pspg]
     type = INSADMassPSPG
     variable = p
   []
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
   [momentum_advection]
     type = INSADMomentumAdvection
     variable = velocity
@@ -121,17 +121,17 @@ temp_ref=${fparse hot_temp / 2.}
     p = p
     integrate_p_by_parts = true
   []
-  [./buoyancy]
+  [buoyancy]
     type = INSADBoussinesqBodyForce
     variable = velocity
     temperature = temp
     gravity = '0 -1 0'
-  [../]
-  [./gravity]
+  []
+  [gravity]
     type = INSADGravityForce
     variable = velocity
     gravity = '0 -1 0'
-  [../]
+  []
   [supg]
     type = INSADMomentumSUPG
     variable = velocity
@@ -146,7 +146,7 @@ temp_ref=${fparse hot_temp / 2.}
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = 'k'
-  [../]
+  []
   [temp_supg]
     type = INSADEnergySUPG
     variable = temp
@@ -155,17 +155,17 @@ temp_ref=${fparse hot_temp / 2.}
 []
 
 [Materials]
-  [./ad_const]
+  [ad_const]
     type = ADGenericConstantMaterial
     # alpha = coefficient of thermal expansion where rho  = rho0 -alpha * rho0 * delta T
     prop_names =  'mu        rho   alpha   k        cp'
     prop_values = '1         1     1       1        1'
-  [../]
-  [./const]
+  []
+  [const]
     type = GenericConstantMaterial
     prop_names =  'temp_ref'
     prop_values = '${temp_ref}'
-  [../]
+  []
   [ins_mat]
     type = INSADStabilized3Eqn
     velocity = velocity

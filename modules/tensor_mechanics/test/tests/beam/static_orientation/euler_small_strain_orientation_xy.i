@@ -28,7 +28,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./all]
+  [all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -40,76 +40,76 @@
     Iy = 0.0141889
     Iz = 0.0141889
     y_orientation = '-0.7071067812 0.7071067812 0.0'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 2.60072400269
     poissons_ratio = -0.9998699638
     shear_coefficient = 0.85
     block = 0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 0
     value = 0.0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 0
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = 0
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = 0
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = 0
     value = 0.0
-  [../]
-  [./fixr3]
+  []
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_z2]
+  [force_z2]
     type = ConstantRate
     variable = disp_z
     boundary = 1
     rate = 1.0e-4
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 [Executioner]
   type = Transient
@@ -125,11 +125,11 @@
 []
 
 [Postprocessors]
-  [./disp_z]
+  [disp_z]
     type = PointValue
     point = '2.8284271  2.8284271 0.0'
     variable = disp_z
-  [../]
+  []
 []
 
 [Outputs]

@@ -21,47 +21,47 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [UserObjects]
-  [./arnold]
+  [arnold]
     type = Terminator
     expression = 'dt > 20'
     fail_mode = SOFT
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = Diffusion
     variable = c
-  [../]
+  []
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./c]
+  [c]
     type = DirichletBC
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

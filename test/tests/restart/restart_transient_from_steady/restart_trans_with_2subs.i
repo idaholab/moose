@@ -110,14 +110,14 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0   0 0
                  0.5 0 0'
     input_files  = restart_trans_with_sub_sub.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]

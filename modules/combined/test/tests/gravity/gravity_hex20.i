@@ -42,12 +42,12 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -57,52 +57,52 @@
 []
 
 [Kernels]
-  [./gravity]
+  [gravity]
     type = Gravity
     variable = disp_x
     value = 20
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 5
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticty_tensor]
+  [elasticty_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     bulk_modulus = 0.333333333333333e6
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     density = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -115,15 +115,15 @@
   start_time = 0.0
   end_time = 1.0
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Outputs]
   file_base = gravity_hex20_out
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

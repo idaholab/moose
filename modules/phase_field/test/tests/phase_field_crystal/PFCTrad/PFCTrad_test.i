@@ -8,89 +8,89 @@
 []
 
 [Variables]
-  [./n]
-    [./InitialCondition]
+  [n]
+    [InitialCondition]
       type = RandomIC
       min = -1
       max = 4
-    [../]
-  [../]
-  [./u]
+    []
+  []
+  [u]
     scaling = 1e2
-  [../]
-  [./v]
+  []
+  [v]
     scaling = 1e1
-  [../]
+  []
 []
 
 [Kernels]
-  [./ndot]
+  [ndot]
     type = TimeDerivative
     variable = n
-  [../]
-  [./n_bulk]
+  []
+  [n_bulk]
     type = CHBulkPFCTrad
     variable = n
-  [../]
-  [./u_term]
+  []
+  [u_term]
     type = MatDiffusion
     variable = n
     v = u
     diffusivity = C2
-  [../]
-  [./v_term]
+  []
+  [v_term]
     type = MatDiffusion
     variable = n
     v = v
     diffusivity = C4
-  [../]
-  [./u_rctn]
+  []
+  [u_rctn]
     type = Reaction
     variable = u
-  [../]
-  [./u_gradn]
+  []
+  [u_gradn]
     type = LaplacianSplit
     variable = u
     c = n
-  [../]
-  [./v_rctn]
+  []
+  [v_rctn]
     type = Reaction
     variable = v
-  [../]
-  [./v_gradu]
+  []
+  [v_gradu]
     type = LaplacianSplit
     variable = v
     c = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./PFCTrad]
+  [PFCTrad]
     type = PFCTradMaterial
     order = FOURTH
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     off_diag_row    = 'u n n v'
     off_diag_column = 'n u v u'
-  [../]
-  [./FDP]
+  []
+  [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

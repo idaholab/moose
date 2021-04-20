@@ -1,13 +1,13 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
     requirement = 'MOOSE shall allow to sample variables at equally spaced points for outputting.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
-  [../]
-  [./parallel]
+  []
+  [parallel]
     # This ensures that PointSamplerBase is properly handling unique point finding
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
@@ -17,8 +17,8 @@
     requirement = 'MOOSE shall allow to sample variables at equally spaced points in parallel.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
-  [../]
-  [./scaling]
+  []
+  [scaling]
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_scaling_line_sample_0001.csv'
@@ -27,8 +27,8 @@
     requirement = 'MOOSE shall allow to scale the line value sampler with a postprocessor.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#12314'
-  [../]
-  [./delimiter]
+  []
+  [delimiter]
     type = 'CheckFiles'
     input = 'csv_delimiter.i'
     check_files = 'csv_delimiter_csv_line_sample_0001.csv'
@@ -36,5 +36,5 @@
     requirement = 'MOOSE shall allow to sample auxvariables at equally spaced points with CSV delimiter and precision setting.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3593'
-  [../]
+  []
 []

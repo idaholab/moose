@@ -11,18 +11,18 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     family = HERMITE
     order = THIRD
-  [../]
-  [./T]
+  []
+  [T]
     initial_condition = 1000.0
     scaling = 1.0e5
-  [../]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 125.0
     y1 = 0.0
@@ -31,58 +31,58 @@
     outvalue = 0.1
     int_width = 100.0
     variable = c
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_int]
+  [c_int]
     type = CHInterface
     variable = c
     kappa_name = kappa
     mob_name = M
-  [../]
-  [./c_bulk]
+  []
+  [c_bulk]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
-  [../]
-  [./c_soret]
+  []
+  [c_soret]
     type = SoretDiffusion
     variable = c
     T = T
     diff_name = D
     Q_name = Qstar
-  [../]
-  [./c_dot]
+  []
+  [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
-  [./HtCond]
+  []
+  [HtCond]
     type = MatDiffusion
     variable = T
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [BCs]
-  [./Left_T]
+  [Left_T]
     type = DirichletBC
     variable = T
     boundary = left
     value = 1000.0
-  [../]
+  []
 
-  [./Right_T]
+  [Right_T]
     type = DirichletBC
     variable = T
     boundary = right
     value = 1015.0
-  [../]
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = PFParamsPolyFreeEnergy
     c = c
     T = T # K
@@ -93,26 +93,26 @@
     Em = 0.71 # in eV, from Balluffi1978 Table 2
     Ef = 1.28 # in eV, from Balluffi1978 Table 2
     surface_energy = 0.708 # Total guess
-  [../]
-  [./thcond]
+  []
+  [thcond]
     type = ParsedMaterial
     args = 'c'
     function = 'if(c>0.7,1e-8,4e-8)'
     f_name = thermal_conductivity
     outputs = exodus
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = PolynomialFreeEnergy
     c = c
     derivative_order = 3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

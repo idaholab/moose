@@ -4,16 +4,16 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./coupled]
+  [coupled]
     type = CoupledForce
     variable = u
     v = u
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,29 +6,29 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ADFunctionDirichletBC
     variable = u
     boundary = left
     function = '1'
-  [../]
-  [./right]
+  []
+  [right]
     type = ADRobinBC
     variable = u
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

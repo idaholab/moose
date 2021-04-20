@@ -17,44 +17,44 @@
 []
 
 [Variables]
-  [./copied_var]
-  [../]
+  [copied_var]
+  []
 []
 
 [AuxVariables]
-  [./test_var]
+  [test_var]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./test_var_aux]
+  [test_var_aux]
     type = GetElementalValueAux
     variable = test_var
     copied_variable = copied_var
     # The parameter "time_level" is provided by tests file
-  [../]
+  []
 []
 
 [ICs]
-  [./copied_var_ic]
+  [copied_var_ic]
     type = ConstantIC
     variable = copied_var
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_der]
+  [time_der]
     type = TimeDerivative
     variable = copied_var
-  [../]
-  [./src]
+  []
+  [src]
     type = BodyForce
     variable = copied_var
     function = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -68,10 +68,10 @@
 []
 
 [Postprocessors]
-  [./test_pp]
+  [test_pp]
     type = ElementAverageValue
     variable = test_var
-  [../]
+  []
 []
 
 [Outputs]

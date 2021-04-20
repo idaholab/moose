@@ -1,5 +1,5 @@
 [Tests]
-  [./order3]
+  [order3]
     type = CSVDiff
     input = 'order5.i'
     csvdiff = 'order5_out.csv'
@@ -8,8 +8,8 @@
                   ' the quadrature order used for numerical integration on the entire mesh.'
     issues = '#3380'
     design = 'Quadrature/index.md'
-  [../]
-  [./per-block-order]
+  []
+  [per-block-order]
     type = CSVDiff
     input = 'block-order.i'
     csvdiff = 'block-order_out.csv'
@@ -20,8 +20,8 @@
                   ' the two sides.'
     issues = '#14055'
     design = 'Quadrature/index.md'
-  [../]
-  [./code-order-bump]
+  []
+  [code-order-bump]
     type = CSVDiff
     input = 'code-order-bump.i'
     csvdiff = 'code-order-bump_out.csv'
@@ -30,8 +30,8 @@
                   ' in code during runtime.'
     issues = '#14055'
     design = 'Quadrature/index.md'
-  [../]
-  [./elem5_side7]
+  []
+  [elem5_side7]
     type = CSVDiff
     input = 'elem5_side7.i'
     csvdiff = 'elem5_side7_out.csv'
@@ -41,8 +41,8 @@
                   ' numerical integration on the entire mesh.'
     issues = '#3380'
     design = 'Quadrature/index.md'
-  [../]
-  [./material-bumps-block-order]
+  []
+  [material-bumps-block-order]
     type = CSVDiff
     input = 'material_with_order.i'
     csvdiff = 'material_with_order_out.csv'
@@ -51,5 +51,5 @@
                   ' the quadrature order used for numerical integration on a per-block basis.'
     issues = '#14055 #15072'
     design = 'Quadrature/index.md'
-  [../]
+  []
 []

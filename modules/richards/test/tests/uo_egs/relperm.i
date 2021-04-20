@@ -13,20 +13,20 @@
 
 
 [UserObjects]
-  [./relperm]
+  [relperm]
     type = RichardsRelPermPower
     simm = 0.1
     n = 3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./point_val]
+  [point_val]
     type = PointValue
     execute_on = timestep_begin
     point = '0.5 0 0'
     variable = relperm
-  [../]
+  []
 []
 
 
@@ -43,38 +43,38 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_init]
+  [u_init]
     type = FunctionIC
     variable = u
     function = x
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./relperm]
-  [../]
+  [relperm]
+  []
 []
 
 [AuxKernels]
-  [./relperm_AuxK]
+  [relperm_AuxK]
     type = RichardsRelPermAux
     variable = relperm
     relperm_UO = relperm
     execute_on = timestep_begin
     seff_var = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,11 +85,11 @@
 
 [Outputs]
   file_base = relperm
-  [./csv]
+  [csv]
     type = CSV
-  [../]
-  [./exodus]
+  []
+  [exodus]
     type = Exodus
     hide = u
-  [../]
+  []
 []

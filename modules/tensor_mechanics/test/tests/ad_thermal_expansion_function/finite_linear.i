@@ -26,64 +26,64 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     eigenstrain_names = eigenstrain
     generate_output = 'strain_xx strain_yy strain_zz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
-  [./back]
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     block = '1 2'
     function = temp_func
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./small_stress]
+  []
+  [small_stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./thermal_expansion_strain1]
+  []
+  [thermal_expansion_strain1]
     type = ADComputeMeanThermalExpansionFunctionEigenstrain
     block = 1
     thermal_expansion_function = cte_func_mean
@@ -91,50 +91,50 @@
     stress_free_temperature = 0.0
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
-  [./thermal_expansion_strain2]
+  []
+  [thermal_expansion_strain2]
     type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Functions]
-  [./cte_func_mean]
+  [cte_func_mean]
     type = ParsedFunction
     vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-4'
     value = 'scale * (0.5 * t^2 - 0.5 * tsf^2) / (t - tref)'
-  [../]
-  [./cte_func_inst]
+  []
+  [cte_func_inst]
     type = PiecewiseLinear
     xy_data = '0 0.0
                2 2.0'
     scale_factor = 1e-4
-  [../]
+  []
 
-  [./temp_func]
+  [temp_func]
     type = PiecewiseLinear
     xy_data = '0 1
                1 2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_1]
+  [disp_1]
     type = NodalMaxValue
     variable = disp_x
     boundary = 101
-  [../]
+  []
 
-  [./disp_2]
+  [disp_2]
     type = NodalMaxValue
     variable = disp_x
     boundary = 102
-  [../]
+  []
 []
 
 [Executioner]

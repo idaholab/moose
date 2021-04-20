@@ -1,5 +1,5 @@
 [Mesh]
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 2
     dx = '4 2 3'
@@ -10,36 +10,36 @@
                     2 2 2'
   []
 
-  [./ed0]
+  [ed0]
     type = BlockDeletionGenerator
     input = cmg
     block = '1 3'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

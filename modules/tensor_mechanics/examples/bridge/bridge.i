@@ -17,132 +17,132 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./gravity_y]
+  [gravity_y]
     #Gravity is applied to bridge
     type = Gravity
     variable = disp_y
     value = -9.81
-  [../]
-  [./TensorMechanics]
+  []
+  [TensorMechanics]
     #Stress divergence kernels
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./von_mises]
+  [von_mises]
     #Dependent variable used to visualize the Von Mises stress
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./von_mises_kernel]
+  [von_mises_kernel]
     #Calculates the von mises stress and assigns it to von_mises
     type = RankTwoScalarAux
     variable = von_mises
     rank_two_tensor = stress
     execute_on = timestep_end
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [BCs]
-  [./Pressure]
-    [./load]
+  [Pressure]
+    [load]
       #Applies the pressure
       boundary = top
       factor = 5e5 # Pa
-    [../]
-  [../]
-  [./anchor_x]
+    []
+  []
+  [anchor_x]
     #Anchors the bottom and sides against deformation in the x-direction
     type = DirichletBC
     variable = disp_x
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
-  [./anchor_y]
+  []
+  [anchor_y]
     #Anchors the bottom and sides against deformation in the y-direction
     type = DirichletBC
     variable = disp_y
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
-  [./anchor_z]
+  []
+  [anchor_z]
     #Anchors the bottom and sides against deformation in the z-direction
     type = DirichletBC
     variable = disp_z
     boundary = 'left right bottom1 bottom2 bottom3'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
   active = 'density_concrete stress strain elasticity_tensor_concrete'
-  [./elasticity_tensor_steel]
+  [elasticity_tensor_steel]
     #Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
-  [./elasticity_tensor_concrete]
+  []
+  [elasticity_tensor_concrete]
     #Creates the elasticity tensor using concrete parameters
     youngs_modulus = 16.5e9 #Pa
     poissons_ratio = 0.2
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
-  [./strain]
+  []
+  [strain]
     #Computes the strain, assuming small strains
     type = ComputeSmallStrain
     block = 1
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     #Computes the stress, using linear elasticity
     type = ComputeLinearElasticStress
     block = 1
-  [../]
-  [./density_steel]
+  []
+  [density_steel]
     #Defines the density of steel
     type = GenericConstantMaterial
     block = 1
     prop_names = density
     prop_values = 7850 # kg/m^3
-  [../]
-  [./density_concrete]
+  []
+  [density_concrete]
     #Defines the density of concrete
     type = GenericConstantMaterial
     block = 1
     prop_names = density
     prop_values = 2400 # kg/m^3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     #Creates the entire Jacobian, for the Newton solve
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

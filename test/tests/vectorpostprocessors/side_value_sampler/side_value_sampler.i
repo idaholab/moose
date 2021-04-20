@@ -7,57 +7,57 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./side_sample]
+  [side_sample]
     type = SideValueSampler
     variable = 'u v'
     boundary = top
     sort_by = x
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,7 +69,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./vpp_csv]
+  [vpp_csv]
     type = CSV
-  [../]
+  []
 []

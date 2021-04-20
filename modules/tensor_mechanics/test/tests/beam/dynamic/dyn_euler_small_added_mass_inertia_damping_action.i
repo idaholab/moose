@@ -41,66 +41,66 @@
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = left
     value = 0.0
-  [../]
-  [./fixz1]
+  []
+  [fixz1]
     type = DirichletBC
     variable = disp_z
     boundary = left
     value = 0.0
-  [../]
-  [./fixr1]
+  []
+  [fixr1]
     type = DirichletBC
     variable = rot_x
     boundary = left
     value = 0.0
-  [../]
-  [./fixr2]
+  []
+  [fixr2]
     type = DirichletBC
     variable = rot_y
     boundary = left
     value = 0.0
-  [../]
-  [./fixr3]
+  []
+  [fixr3]
     type = DirichletBC
     variable = rot_z
     boundary = left
     value = 0.0
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./force_y2]
+  [force_y2]
     type = UserForcingFunctionNodalKernel
     variable = disp_y
     boundary = right
     function = force
-  [../]
+  []
 []
 
 [Functions]
-  [./force]
+  [force]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 10.0'
     y = '0.0 1e-2  0.0  0.0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -116,7 +116,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./all]
+  [all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -148,44 +148,44 @@
 
     # optional parameters for Rayleigh damping
     eta = 0.1 # Mass proportional Rayleigh damping
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1.0e4
     poissons_ratio = -0.999875
     shear_coefficient = 1.0
     block = 0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeBeamResultants
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_y
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = vel_y
-  [../]
-  [./accel_y]
+  []
+  [accel_y]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = accel_y
-  [../]
+  []
 []
 
 [Outputs]

@@ -15,158 +15,158 @@
 
 
 [Variables]
-  [./x_disp]
-  [../]
-  [./y_disp]
-  [../]
-  [./z_disp]
-  [../]
+  [x_disp]
+  []
+  [y_disp]
+  []
+  [z_disp]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     variable = x_disp
     boundary = back
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     variable = y_disp
     boundary = back
     value = 0.0
-  [../]
-  [./bottomz]
+  []
+  [bottomz]
     type = DirichletBC
     variable = z_disp
     boundary = back
     value = 0.0
-  [../]
+  []
 
-  [./topx]
+  [topx]
     type = DirichletBC
     variable = x_disp
     boundary = front
     value = 8E-6
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     variable = y_disp
     boundary = front
     value = 6E-6
-  [../]
-  [./topz]
+  []
+  [topz]
     type = DirichletBC
     variable = z_disp
     boundary = front
     value = 1E-6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xz]
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./yield_fcn]
+  []
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xz]
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./yield_fcn_auxk]
+  []
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_xz]
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yz]
+  []
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./f]
+  []
+  [f]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.55
-  [../]
-  [./wps]
+  []
+  [wps]
     type = TensorMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
@@ -174,27 +174,27 @@
     smoother = 0
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3
-  [../]
+  []
 []
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     plastic_models = wps
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-3
-  [../]
+  []
 []
 
 
@@ -208,7 +208,7 @@
 [Outputs]
   file_base = except
   exodus = true
-  [./csv]
+  [csv]
     type = CSV
-    [../]
+    []
 []

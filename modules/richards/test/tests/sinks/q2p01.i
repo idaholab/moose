@@ -15,41 +15,41 @@
 
 
 [UserObjects]
-  [./DensityWater]
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 0.5
     bulk_mod = 0.5
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = Q2PRelPermPowerGas
     simm = 0.0
     n = 3
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = FunctionIC
       function = 1
-    [../]
-  [../]
-  [./sat]
-    [./InitialCondition]
+    []
+  []
+  [sat]
+    [InitialCondition]
       type = FunctionIC
       function = 0.5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Q2P]
@@ -70,7 +70,7 @@
 []
 
 [Postprocessors]
-  [./left_water_out]
+  [left_water_out]
     type = Q2PPiecewiseLinearSinkFlux
     boundary = left
     porepressure = pp
@@ -78,8 +78,8 @@
     bare_fluxes = '0 1.5'
     multiplying_fcn = 0.1
     execute_on = 'initial timestep_end'
-  [../]
-  [./right_water_out]
+  []
+  [right_water_out]
     type = Q2PPiecewiseLinearSinkFlux
     boundary = right
     porepressure = pp
@@ -90,8 +90,8 @@
     fluid_relperm = RelPermWater
     saturation = sat
     execute_on = 'initial timestep_end'
-  [../]
-  [./right_gas_out]
+  []
+  [right_gas_out]
     type = Q2PPiecewiseLinearSinkFlux
     boundary = right
     porepressure = pp
@@ -102,35 +102,35 @@
     fluid_relperm = RelPermGas
     saturation = sat
     execute_on = 'initial timestep_end'
-  [../]
-  [./p_left]
+  []
+  [p_left]
     type = PointValue
     point = '0 0 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./sat_left]
+  []
+  [sat_left]
     type = PointValue
     point = '0 0 0'
     variable = sat
     execute_on = 'initial timestep_end'
-  [../]
-  [./p_right]
+  []
+  [p_right]
     type = PointValue
     point = '1 0 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./sat_right]
+  []
+  [sat_right]
     type = PointValue
     point = '1 0 0'
     variable = sat
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_water]
+  [left_water]
     type = Q2PPiecewiseLinearSink
     boundary = left
     pressures = '0 1'
@@ -144,8 +144,8 @@
     fluid_density = DensityWater
     fluid_viscosity = 0.8
     fluid_relperm = RelPermWater
-  [../]
-  [./right_water]
+  []
+  [right_water]
     type = Q2PPiecewiseLinearSink
     boundary = right
     pressures = '0 1'
@@ -158,8 +158,8 @@
     fluid_density = DensityWater
     fluid_viscosity = 0.8
     fluid_relperm = RelPermWater
-  [../]
-  [./right_gas]
+  []
+  [right_gas]
     type = Q2PPiecewiseLinearSink
     boundary = right
     pressures = '0 1'
@@ -172,34 +172,34 @@
     fluid_density = DensityGas
     fluid_viscosity = 0.5
     fluid_relperm = RelPermGas
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./one]
+  [one]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = Q2PMaterial
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-2 0 0  0 1E-2 0  0 0 1E-2'
     gravity = '0 0 0'
-  [../]
+  []
 []
 
 
 [Preconditioning]
   active = 'andy'
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-12 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -212,7 +212,7 @@
 [Outputs]
   file_base = q2p01
   exodus = true
-  [./CSV]
+  [CSV]
     type = CSV
-  [../]
+  []
 []

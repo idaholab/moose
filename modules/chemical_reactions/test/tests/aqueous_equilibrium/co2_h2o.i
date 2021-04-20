@@ -14,72 +14,72 @@
 []
 
 [AuxVariables]
-  [./ph]
-  [../]
-  [./total_h+]
-  [../]
-  [./total_hco3-]
-  [../]
+  [ph]
+  []
+  [total_h+]
+  []
+  [total_hco3-]
+  []
 []
 
 [AuxKernels]
-  [./ph]
+  [ph]
     type = PHAux
     variable = ph
     h_conc = h+
-  [../]
-  [./total_h+]
+  []
+  [total_h+]
     type = TotalConcentrationAux
     variable = total_h+
     primary_species = h+
     v = 'oh- co3-- co2_aq'
     sto_v = '-1 1 1'
-  [../]
-  [./total_hco3-]
+  []
+  [total_hco3-]
     type = TotalConcentrationAux
     variable = total_hco3-
     primary_species = hco3-
     v = 'co2_aq co3--'
     sto_v = '1 1'
-  [../]
+  []
 []
 
 [Variables]
-  [./h+]
+  [h+]
     initial_condition = 1e-5
-  [../]
-  [./hco3-]
+  []
+  [hco3-]
     initial_condition = 1e-5
-  [../]
+  []
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = 'hco3- h+'
     secondary_species = 'co2_aq co3-- oh-'
     reactions = 'hco3- + h+ = co2_aq 6.3447,
                  hco3- - h+ = co3-- -10.3288,
                  - h+ = oh- -13.9951'
-  [../]
+  []
 []
 
 [Kernels]
-  [./h+_ie]
+  [h+_ie]
     type = PrimaryTimeDerivative
     variable = h+
-  [../]
-  [./hco3-_ie]
+  []
+  [hco3-_ie]
     type = PrimaryTimeDerivative
     variable = hco3-
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity porosity'
     prop_values = '1e-7 0.25'
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,53 +90,53 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./h+]
+  [h+]
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
-  [../]
-  [./hco3-]
+  []
+  [hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = hco3-
     execute_on = 'initial timestep_end'
-  [../]
-  [./co2_aq]
+  []
+  [co2_aq]
     type = ElementIntegralVariablePostprocessor
     variable = co2_aq
     execute_on = 'initial timestep_end'
-  [../]
-  [./co3--]
+  []
+  [co3--]
     type = ElementIntegralVariablePostprocessor
     variable = co3--
     execute_on = 'initial timestep_end'
-  [../]
-  [./oh-]
+  []
+  [oh-]
     type = ElementIntegralVariablePostprocessor
     variable = oh-
     execute_on = 'initial timestep_end'
-  [../]
-  [./ph]
+  []
+  [ph]
     type = ElementIntegralVariablePostprocessor
     variable = ph
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_h+]
+  []
+  [total_h+]
     type = ElementIntegralVariablePostprocessor
     variable = total_h+
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_hco3-]
+  []
+  [total_hco3-]
     type = ElementIntegralVariablePostprocessor
     variable = total_hco3-
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

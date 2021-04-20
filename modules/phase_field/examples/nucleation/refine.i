@@ -18,33 +18,33 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = F
         mobility = M
         kappa = kappa_c
         solve_type = REVERSE_SPLIT
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = ConstantIC
     variable = c
     value = 0.2
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 25'
-  [../]
-  [./chemical_free_energy]
+  []
+  [chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
     f_name = Fc
@@ -54,8 +54,8 @@
     function = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
     derivative_order = 2
     outputs = exodus
-  [../]
-  [./probability]
+  []
+  [probability]
     # This is a made up toy nucleation rate it should be replaced by
     # classical nucleation theory in a real simulation.
     type = ParsedMaterial
@@ -63,8 +63,8 @@
     args = c
     function = 'if(c<0.21,c*1e-8,0)'
     outputs = exodus
-  [../]
-  [./nucleation]
+  []
+  [nucleation]
     # The nucleation material is configured to insert nuclei into the free energy
     # tht force the concentration to go to 0.95, and holds this enforcement for 500
     # time units.
@@ -76,26 +76,26 @@
     penalty_mode = MIN
     map = map
     outputs = exodus
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
     derivative_order = 2
     args = c
     sum_materials = 'Fc Fn'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     # The inserter runs at the end of each time step to add nucleation events
     # that happened during the timestep (if it converged) to the list of nuclei
     type = DiscreteNucleationInserter
     hold_time = 50
     probability = P
     radius = 10
-  [../]
-  [./map]
+  []
+  [map]
     # The map UO runs at the beginning of a timestep and generates a per-element/qp
     # map of nucleus locations. The map is only regenerated if the mesh changed or
     # the list of nuclei was modified.
@@ -103,77 +103,77 @@
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
-  [./ndof]
+  []
+  [ndof]
     type = NumDOFs
-  [../]
-  [./rate]
+  []
+  [rate]
     type = DiscreteNucleationData
     value = RATE
     inserter = inserter
-  [../]
-  [./dtnuc]
+  []
+  [dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
     p2nucleus = 0.0005
     dt_max = 10
-  [../]
-  [./update]
+  []
+  [update]
     type = DiscreteNucleationData
     value = UPDATE
     inserter = inserter
-  [../]
-  [./count]
+  []
+  [count]
     type = DiscreteNucleationData
     value = COUNT
     inserter = inserter
-  [../]
+  []
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./jump]
+  [Indicators]
+    [jump]
       type = GradientJumpIndicator
       variable = c
-    [../]
-  [../]
-  [./Markers]
-    [./nuc]
+    []
+  []
+  [Markers]
+    [nuc]
       type = DiscreteNucleationMarker
       map = map
-    [../]
-    [./grad]
+    []
+    [grad]
       type = ValueThresholdMarker
       variable = jump
       coarsen = 0.1
       refine = 0.2
-    [../]
-    [./combo]
+    []
+    [combo]
       type = ComboMarker
       markers = 'nuc grad'
-    [../]
-  [../]
+    []
+  []
   marker = combo
   cycles_per_step = 3
   recompute_markers_during_cycles = true
@@ -194,7 +194,7 @@
   start_time = 0.0
   num_steps = 120
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
     growth_factor = 1.5
@@ -202,7 +202,7 @@
     optimal_iterations = 8
     iteration_window = 2
     timestep_limiting_postprocessor = dtnuc
-  [../]
+  []
 []
 
 [Outputs]

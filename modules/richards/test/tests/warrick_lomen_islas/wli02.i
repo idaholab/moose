@@ -14,94 +14,94 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 10
     bulk_mod = 2E9
-  [../]
-  [./SeffBW]
+  []
+  [SeffBW]
     type = RichardsSeff1BWsmall
     Sn = 0.0
     Ss = 1.0
     C = 1.5
     las = 2
-  [../]
-  [./RelPermBW]
+  []
+  [RelPermBW]
     type = RichardsRelPermBW
     Sn = 0.0
     Ss = 1.0
     Kn = 0
     Ks = 1
     C = 1.5
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1.0E2
-  [../]
+  []
 []
 
 
 [Variables]
   active = 'pressure'
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
     initial_condition = -1E-4
-  [../]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = SeffBW
     pressure_vars = pressure
-  [../]
+  []
 []
 
 
 [BCs]
   active = 'base'
-  [./base]
+  [base]
     type = DirichletBC
     variable = pressure
     boundary = 'left'
     value = -1E-4
-  [../]
+  []
 []
 
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.25
@@ -114,19 +114,19 @@
     viscosity = 4
     gravity = '-0.1 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'andy'
 
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = ''
     petsc_options_iname = '-ksp_type -pc_type -ksp_rtol -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 1E-10 10000'
-  [../]
+  []
 []
 
 

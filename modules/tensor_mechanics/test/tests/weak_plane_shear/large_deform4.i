@@ -24,115 +24,115 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
-  [./bottomz]
+  []
+  [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
   # the following are "random" deformations
   # each is O(1E-1) to provide large deformations
-  [./topx]
+  [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = '(sin(0.1*t)+x)/1E1'
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = '(cos(t)+x*y)/1E1'
-  [../]
-  [./topz]
+  []
+  [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 'sin(0.4321*t)*x*y*z/1E1'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./yield_fcn]
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./yield_fcn_auxk]
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./yield_fcn_at_zero]
+  [yield_fcn_at_zero]
     type = PointValue
     point = '0 0 0'
     variable = yield_fcn
     outputs = 'console'
-  [../]
-  [./should_be_zero]
+  []
+  [should_be_zero]
     type = FunctionValuePostprocessor
     function = should_be_zero_fcn
-  [../]
+  []
 []
 
 [Functions]
-  [./should_be_zero_fcn]
+  [should_be_zero_fcn]
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
     vars = 'a'
     vals = 'yield_fcn_at_zero'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1E3
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.577350269
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.08748866
-  [../]
-  [./wps]
+  []
+  [wps]
     type = TensorMechanicsPlasticWeakPlaneShear
     cohesion = coh
     tan_friction_angle = tanphi
@@ -143,23 +143,23 @@
     cap_start = 0.0
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     # the following is transversely isotropic, i think.
     fill_method = symmetric9
     C_ijkl = '3E9 1E9 3E9 3E9 3E9 6E9 1E9 1E9 9E9'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     block = 0
     plastic_models = wps
@@ -167,7 +167,7 @@
     max_NR_iterations = 100
     ep_plastic_tolerance = 1E-3
     debug_fspb = crash
-  [../]
+  []
 []
 
 
@@ -181,7 +181,7 @@
 [Outputs]
   file_base = large_deform4
   exodus = false
-  [./csv]
+  [csv]
     type = CSV
-    [../]
+    []
 []

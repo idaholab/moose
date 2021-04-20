@@ -13,60 +13,60 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = ((x*x)+(y*y))
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./e]
+  [e]
     order = CONSTANT
     family = MONOMIAL
     initial_from_file_var = e
     initial_from_file_timestep = 6
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./ak]
+  [ak]
     type = SelfAux
     variable = e
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

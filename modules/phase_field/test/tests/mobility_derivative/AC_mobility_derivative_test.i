@@ -6,12 +6,12 @@
 []
 
 [Variables]
-  [./op]
-  [../]
+  [op]
+  []
 []
 
 [ICs]
-  [./op_IC]
+  [op_IC]
     type = SmoothCircleIC
     x1 = 0.0
     y1 = 0.0
@@ -20,30 +20,30 @@
     outvalue = 0
     int_width = 3.0
     variable = op
-  [../]
+  []
 []
 
 [Kernels]
-  [./op_dot]
+  [op_dot]
     type = TimeDerivative
     variable = op
-  [../]
-  [./op_bulk]
+  []
+  [op_bulk]
     type = AllenCahn
     variable = op
     f_name = F
     mob_name = L
-  [../]
-  [./op_interface]
+  []
+  [op_interface]
     type = ACInterface
     variable = op
     kappa_name = 1
     mob_name = L
-  [../]
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = DerivativeParsedMaterial
     f_name  = L
     function = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
@@ -51,14 +51,14 @@
     outputs = exodus
     output_properties = 'L dL/dop dL/dv'
     derivative_order = 2
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'op'
     function = '2*op^2*(1-op)^2 - 0.2*op'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

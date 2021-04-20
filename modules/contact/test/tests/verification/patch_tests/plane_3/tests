@@ -1,7 +1,7 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./glued_kin]
+  [glued_kin]
     type = 'CSVDiff'
     input = 'plane3_template1.i'
     csvdiff = 'plane3_glued_kin_check.csv plane3_glued_kin_check_cont_press_0001.csv plane3_glued_kin_check_x_disp_0001.csv'
@@ -14,8 +14,8 @@
     petsc_version = '>=3.7.6'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
-  [./glued_pen]
+  []
+  [glued_pen]
     type = 'CSVDiff'
     input = 'plane3_template1.i'
     csvdiff = 'plane3_glued_pen_check.csv plane3_glued_pen_check_cont_press_0001.csv plane3_glued_pen_check_x_disp_0001.csv'
@@ -27,8 +27,8 @@
     superlu = true
     requirement = "The Contact system shall enforce glued, penalty contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
-  [./frictionless_kin]
+  []
+  [frictionless_kin]
     type = 'CSVDiff'
     input = 'plane3_template1.i'
     csvdiff = 'plane3_frictionless_kin_check.csv plane3_frictionless_kin_check_cont_press_0001.csv plane3_frictionless_kin_check_x_disp_0001.csv'
@@ -40,8 +40,8 @@
     petsc_version = '>=3.7.6'
     requirement = "The Contact system shall enforce frictionless, kinematic contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
-  [./frictionless_pen]
+  []
+  [frictionless_pen]
     type = 'CSVDiff'
     input = 'plane3_template1.i'
     csvdiff = 'plane3_frictionless_pen_check.csv plane3_frictionless_pen_check_cont_press_0001.csv plane3_frictionless_pen_check_x_disp_0001.csv'
@@ -53,8 +53,8 @@
     superlu = true
     requirement = "The Contact system shall enforce frictionless, penalty contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
-  [../]
-  [./frictionless_aug]
+  []
+  [frictionless_aug]
     type = 'CSVDiff'
     input = 'plane3_template2.i'
     csvdiff = 'plane3_frictionless_aug_check.csv plane3_frictionless_aug_check_cont_press_0001.csv plane3_frictionless_aug_check_x_disp_0001.csv'
@@ -67,8 +67,8 @@
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test
     with matched nodes)."
-  [../]
-  [./mu_0_2_aug]
+  []
+  [mu_0_2_aug]
     type = 'CSVDiff'
     input = 'plane3_template2.i'
     csvdiff = 'plane3_mu_0_2_aug_check.csv plane3_mu_0_2_aug_check_cont_press_0001.csv plane3_mu_0_2_aug_check_x_disp_0001.csv'
@@ -81,8 +81,8 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test
     with matched nodes)."
-  [../]
-  [./mu_0_2_pen]
+  []
+  [mu_0_2_pen]
     type = 'CSVDiff'
     input = 'plane3_mu_0_2_pen.i'
     csvdiff = 'plane3_mu_0_2_pen_check.csv plane3_mu_0_2_pen_check_cont_press_0001.csv plane3_mu_0_2_pen_check_x_disp_0001.csv'
@@ -94,5 +94,5 @@
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched
     nodes)."
-  [../]
+  []
 []

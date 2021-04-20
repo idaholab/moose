@@ -18,45 +18,45 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     # second order is way better than first order
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./uic]
+  [uic]
     type = RandomIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff rhs'
 
-  [./diff]
+  [diff]
     type = PHarmonic
     variable = u
     p = 3
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = PMassEigenKernel
     variable = u
     p = 3
-  [../]
+  []
 []
 
 [BCs]
   active = 'homogeneous'
 
-  [./homogeneous]
+  [homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0 2'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,18 +81,18 @@
 [Postprocessors]
   active = 'unorm udiff'
 
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     # execute on residual is important for nonlinear eigen solver!
     execute_on = linear
-  [../]
+  []
 
-  [./udiff]
+  [udiff]
     type = ElementL2Diff
     variable = u
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]

@@ -27,10 +27,10 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -39,64 +39,64 @@
       inside = 1.0e-2
       outside = 1.0e-10
       variable = a
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = FunctionIC
     variable = pressure
     function = 2-x
-  [../]
+  []
 []
 
 [ReactionNetwork]
-  [./AqueousEquilibriumReactions]
+  [AqueousEquilibriumReactions]
     primary_species = a
     reactions = '2a = pa2 1'
     secondary_species = pa2
     pressure = pressure
-  [../]
+  []
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
-  [./a_diff]
+  []
+  [a_diff]
     type = PrimaryDiffusion
     variable = a
-  [../]
-  [./a_conv]
+  []
+  [a_conv]
     type = PrimaryConvection
     variable = a
     p = pressure
-  [../]
+  []
 []
 
 [BCs]
-  [./a_right]
+  [a_right]
     type = ChemicalOutFlowBC
     variable = a
     boundary = right
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = 'diffusivity conductivity porosity'
     prop_values = '1e-4 1e-4 0.2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,8 +118,8 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []

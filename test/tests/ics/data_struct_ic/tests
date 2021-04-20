@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'data_struct_ic_test.i'
     exodiff = 'data_struct_ic_test_out.e'
@@ -8,5 +8,5 @@
                   ' when possible when evaluating initial conditions at a point in the domain.'
     issues = '#4953'
     design = 'syntax/ICs/index.md'
-  [../]
+  []
 []

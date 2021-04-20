@@ -8,63 +8,63 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-    [./InitialCondition]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = CahnHilliardAniso
     variable = c
     mob_name = M
     f_name = F
-  [../]
-  [./int]
+  []
+  [int]
     type = CHInterfaceAniso
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
-  [../]
-  [./mob]
+  []
+  [mob]
     type = ConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'
     M_name = M
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = MathEBFreeEnergy
     f_name = F
     c = c
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -9,62 +9,62 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./nn]
+  [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./en]
+  []
+  [en]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nn]
+  [nn]
     type = SolutionAux
     solution = soln
     variable = nn
     scale_factor = 2.0
-  [../]
-  [./en]
+  []
+  [en]
     type = SolutionAux
     solution = soln
     variable = en
     scale_factor = 2.0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = cubesource.e-s003
     system_variables = source_nodal
     timestep = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./stuff]
+  [stuff]
     type = DirichletBC
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 
 []
 

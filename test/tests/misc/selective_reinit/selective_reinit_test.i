@@ -6,54 +6,54 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./dummy]
+  [dummy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./constant_dummy]
+  [constant_dummy]
     type = ConstantAux
     variable = dummy
     execute_on = 'initial timestep_end'
     value = 4
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u_integral]
+  [u_integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,21 +66,21 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./indicator]
+  [Indicators]
+    [indicator]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
-  [./Markers]
-    [./box]
+    []
+  []
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.2 0.2 0'
       top_right = '0.8 0.8 0'
       inside = refine
       outside = coarsen
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
@@ -89,7 +89,7 @@
 []
 
 [LotsOfAuxVariables]
-  [./avar]
+  [avar]
     number = 2000
-  [../]
+  []
 []

@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = concentric_circle_mesh_in.e
   []
 
-  [./smooth]
+  [smooth]
     type = SmoothMeshGenerator
     input = fmg
     iterations = 3

@@ -21,131 +21,131 @@
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 1.'
     scale_factor = 1.0
-  [../]
-  [./zeroRamp]
+  []
+  [zeroRamp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0. 1.'
     scale_factor = 2.0
-  [../]
-  [./rampUnramp]
+  []
+  [rampUnramp]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 1. 0.'
     scale_factor = 10.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pressure_1]
-  [../]
-  [./pressure_2]
-  [../]
-  [./pressure_3]
-  [../]
+  [pressure_1]
+  []
+  [pressure_2]
+  []
+  [pressure_3]
+  []
 []
 
 [AuxKernels]
-  [./side1_pressure_ak]
+  [side1_pressure_ak]
     type = FunctionAux
     variable = pressure_1
     boundary = 1
     function = rampConstant
-  [../]
-  [./side2_pressure_ak]
+  []
+  [side2_pressure_ak]
     type = FunctionAux
     variable = pressure_2
     boundary = 2
     function = zeroRamp
-  [../]
-  [./side3_pressure_ak]
+  []
+  [side3_pressure_ak]
     type = FunctionAux
     variable = pressure_3
     boundary = 3
     function = rampUnramp
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = SMALL
         add_variables = true
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = 6
     value = 0.0
-  [../]
-  [./CoupledPressure]
-    [./Side1]
+  []
+  [CoupledPressure]
+    [Side1]
       boundary = '1'
       pressure = pressure_1
       displacements = 'disp_x disp_y disp_z'
-    [../]
-    [./Side2]
+    []
+    [Side2]
       boundary = '2'
       pressure = pressure_2
       displacements = 'disp_x disp_y disp_z'
-    [../]
-  [../]
+    []
+  []
 
-  [./side3_x]
+  [side3_x]
     type = CoupledPressureBC
     variable = 'disp_x'
     boundary = '3'
     pressure = pressure_3
     component = 0
-  [../]
-  [./side3_y]
+  []
+  [side3_y]
     type = CoupledPressureBC
     variable = 'disp_y'
     boundary = '3'
     pressure = pressure_3
     component = 1
-  [../]
-  [./side3_z]
+  []
+  [side3_z]
     type = CoupledPressureBC
     variable = 'disp_z'
     boundary = '3'
     pressure = pressure_3
     component = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -160,8 +160,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

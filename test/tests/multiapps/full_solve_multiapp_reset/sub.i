@@ -14,7 +14,7 @@
   [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
   [td]
     type = ADTimeDerivative
     variable = u

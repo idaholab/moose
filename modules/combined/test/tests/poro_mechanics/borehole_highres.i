@@ -47,15 +47,15 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
     scaling = 1E9  # Notice the scaling, to make porepressure's kernels roughly of same magnitude as disp's kernels
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -63,632 +63,632 @@
 []
 
 [ICs]
-  [./initial_p]
+  [initial_p]
     type = ConstantIC
     variable = porepressure
     value = 1E6
-  [../]
+  []
 []
 
 [BCs]
-  [./fixed_outer_x]
+  [fixed_outer_x]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = outer
-  [../]
-  [./fixed_outer_y]
+  []
+  [fixed_outer_y]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = outer
-  [../]
-  [./plane_strain]
+  []
+  [plane_strain]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'zmin zmax'
-  [../]
-  [./borehole_wall]
+  []
+  [borehole_wall]
     type = DirichletBC
     variable = porepressure
     value = 0
     boundary = bh_wall
-  [../]
+  []
 []
 
 
 
 [AuxVariables]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./tot_yy]
+  []
+  [tot_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./tot_yy]
+  []
+  [tot_yy]
     type = ParsedAux
     args = 'stress_yy porepressure'
     execute_on = timestep_end
     variable = tot_yy
     function = 'stress_yy-0.65*porepressure'
-  [../]
+  []
 []
 
 
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./poro_x]
+  []
+  [poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
     component = 2
-  [../]
-  [./poro_timederiv]
+  []
+  [poro_timederiv]
     type = PoroFullSatTimeDerivative
     variable = porepressure
-  [../]
-  [./darcy_flow]
+  []
+  [darcy_flow]
     type = CoefDiffusion
     variable = porepressure
     coef = 1E-12
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '0.5E9 1.5E9'
     # bulk modulus is lambda + 2*mu/3 = 0.5 + 2*1.5/3 = 1.5E9
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '-1.35E6 0 0  0 -3.35E6 0  0 0 0' # remember this is the effective stress
     eigenstrain_name = ini_stress
-  [../]
-  [./no_plasticity]
+  []
+  [no_plasticity]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./poro_material]
+  []
+  [poro_material]
     type = PoroFullSatMaterial
     porosity0 = 0.3
     biot_coefficient = 0.65
     solid_bulk_compliance = 0.6666666666667E-9
     fluid_bulk_compliance = 1.3944444444444E-9
     constant_porosity = false
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p00]
+  [p00]
     type = PointValue
     variable = porepressure
     point = '1.00 0 0'
     outputs = csv_p
-  [../]
-  [./p01]
+  []
+  [p01]
     type = PointValue
     variable = porepressure
     point = '1.01 0 0'
     outputs = csv_p
-  [../]
-  [./p02]
+  []
+  [p02]
     type = PointValue
     variable = porepressure
     point = '1.02 0 0'
     outputs = csv_p
-  [../]
-  [./p03]
+  []
+  [p03]
     type = PointValue
     variable = porepressure
     point = '1.03 0 0'
     outputs = csv_p
-  [../]
-  [./p04]
+  []
+  [p04]
     type = PointValue
     variable = porepressure
     point = '1.04 0 0'
     outputs = csv_p
-  [../]
-  [./p05]
+  []
+  [p05]
     type = PointValue
     variable = porepressure
     point = '1.05 0 0'
     outputs = csv_p
-  [../]
-  [./p06]
+  []
+  [p06]
     type = PointValue
     variable = porepressure
     point = '1.06 0 0'
     outputs = csv_p
-  [../]
-  [./p07]
+  []
+  [p07]
     type = PointValue
     variable = porepressure
     point = '1.07 0 0'
     outputs = csv_p
-  [../]
-  [./p08]
+  []
+  [p08]
     type = PointValue
     variable = porepressure
     point = '1.08 0 0'
     outputs = csv_p
-  [../]
-  [./p09]
+  []
+  [p09]
     type = PointValue
     variable = porepressure
     point = '1.09 0 0'
     outputs = csv_p
-  [../]
-  [./p10]
+  []
+  [p10]
     type = PointValue
     variable = porepressure
     point = '1.10 0 0'
     outputs = csv_p
-  [../]
-  [./p11]
+  []
+  [p11]
     type = PointValue
     variable = porepressure
     point = '1.11 0 0'
     outputs = csv_p
-  [../]
-  [./p12]
+  []
+  [p12]
     type = PointValue
     variable = porepressure
     point = '1.12 0 0'
     outputs = csv_p
-  [../]
-  [./p13]
+  []
+  [p13]
     type = PointValue
     variable = porepressure
     point = '1.13 0 0'
     outputs = csv_p
-  [../]
-  [./p14]
+  []
+  [p14]
     type = PointValue
     variable = porepressure
     point = '1.14 0 0'
     outputs = csv_p
-  [../]
-  [./p15]
+  []
+  [p15]
     type = PointValue
     variable = porepressure
     point = '1.15 0 0'
     outputs = csv_p
-  [../]
-  [./p16]
+  []
+  [p16]
     type = PointValue
     variable = porepressure
     point = '1.16 0 0'
     outputs = csv_p
-  [../]
-  [./p17]
+  []
+  [p17]
     type = PointValue
     variable = porepressure
     point = '1.17 0 0'
     outputs = csv_p
-  [../]
-  [./p18]
+  []
+  [p18]
     type = PointValue
     variable = porepressure
     point = '1.18 0 0'
     outputs = csv_p
-  [../]
-  [./p19]
+  []
+  [p19]
     type = PointValue
     variable = porepressure
     point = '1.19 0 0'
     outputs = csv_p
-  [../]
-  [./p20]
+  []
+  [p20]
     type = PointValue
     variable = porepressure
     point = '1.20 0 0'
     outputs = csv_p
-  [../]
-  [./p21]
+  []
+  [p21]
     type = PointValue
     variable = porepressure
     point = '1.21 0 0'
     outputs = csv_p
-  [../]
-  [./p22]
+  []
+  [p22]
     type = PointValue
     variable = porepressure
     point = '1.22 0 0'
     outputs = csv_p
-  [../]
-  [./p23]
+  []
+  [p23]
     type = PointValue
     variable = porepressure
     point = '1.23 0 0'
     outputs = csv_p
-  [../]
-  [./p24]
+  []
+  [p24]
     type = PointValue
     variable = porepressure
     point = '1.24 0 0'
     outputs = csv_p
-  [../]
-  [./p25]
+  []
+  [p25]
     type = PointValue
     variable = porepressure
     point = '1.25 0 0'
     outputs = csv_p
-  [../]
+  []
 
-  [./s00]
+  [s00]
     type = PointValue
     variable = disp_x
     point = '1.00 0 0'
     outputs = csv_s
-  [../]
-  [./s01]
+  []
+  [s01]
     type = PointValue
     variable = disp_x
     point = '1.01 0 0'
     outputs = csv_s
-  [../]
-  [./s02]
+  []
+  [s02]
     type = PointValue
     variable = disp_x
     point = '1.02 0 0'
     outputs = csv_s
-  [../]
-  [./s03]
+  []
+  [s03]
     type = PointValue
     variable = disp_x
     point = '1.03 0 0'
     outputs = csv_s
-  [../]
-  [./s04]
+  []
+  [s04]
     type = PointValue
     variable = disp_x
     point = '1.04 0 0'
     outputs = csv_s
-  [../]
-  [./s05]
+  []
+  [s05]
     type = PointValue
     variable = disp_x
     point = '1.05 0 0'
     outputs = csv_s
-  [../]
-  [./s06]
+  []
+  [s06]
     type = PointValue
     variable = disp_x
     point = '1.06 0 0'
     outputs = csv_s
-  [../]
-  [./s07]
+  []
+  [s07]
     type = PointValue
     variable = disp_x
     point = '1.07 0 0'
     outputs = csv_s
-  [../]
-  [./s08]
+  []
+  [s08]
     type = PointValue
     variable = disp_x
     point = '1.08 0 0'
     outputs = csv_s
-  [../]
-  [./s09]
+  []
+  [s09]
     type = PointValue
     variable = disp_x
     point = '1.09 0 0'
     outputs = csv_s
-  [../]
-  [./s10]
+  []
+  [s10]
     type = PointValue
     variable = disp_x
     point = '1.10 0 0'
     outputs = csv_s
-  [../]
-  [./s11]
+  []
+  [s11]
     type = PointValue
     variable = disp_x
     point = '1.11 0 0'
     outputs = csv_s
-  [../]
-  [./s12]
+  []
+  [s12]
     type = PointValue
     variable = disp_x
     point = '1.12 0 0'
     outputs = csv_s
-  [../]
-  [./s13]
+  []
+  [s13]
     type = PointValue
     variable = disp_x
     point = '1.13 0 0'
     outputs = csv_s
-  [../]
-  [./s14]
+  []
+  [s14]
     type = PointValue
     variable = disp_x
     point = '1.14 0 0'
     outputs = csv_s
-  [../]
-  [./s15]
+  []
+  [s15]
     type = PointValue
     variable = disp_x
     point = '1.15 0 0'
     outputs = csv_s
-  [../]
-  [./s16]
+  []
+  [s16]
     type = PointValue
     variable = disp_x
     point = '1.16 0 0'
     outputs = csv_s
-  [../]
-  [./s17]
+  []
+  [s17]
     type = PointValue
     variable = disp_x
     point = '1.17 0 0'
     outputs = csv_s
-  [../]
-  [./s18]
+  []
+  [s18]
     type = PointValue
     variable = disp_x
     point = '1.18 0 0'
     outputs = csv_s
-  [../]
-  [./s19]
+  []
+  [s19]
     type = PointValue
     variable = disp_x
     point = '1.19 0 0'
     outputs = csv_s
-  [../]
-  [./s20]
+  []
+  [s20]
     type = PointValue
     variable = disp_x
     point = '1.20 0 0'
     outputs = csv_s
-  [../]
-  [./s21]
+  []
+  [s21]
     type = PointValue
     variable = disp_x
     point = '1.21 0 0'
     outputs = csv_s
-  [../]
-  [./s22]
+  []
+  [s22]
     type = PointValue
     variable = disp_x
     point = '1.22 0 0'
     outputs = csv_s
-  [../]
-  [./s23]
+  []
+  [s23]
     type = PointValue
     variable = disp_x
     point = '1.23 0 0'
     outputs = csv_s
-  [../]
-  [./s24]
+  []
+  [s24]
     type = PointValue
     variable = disp_x
     point = '1.24 0 0'
     outputs = csv_s
-  [../]
-  [./s25]
+  []
+  [s25]
     type = PointValue
     variable = disp_x
     point = '1.25 0 0'
     outputs = csv_s
-  [../]
+  []
 
-  [./t00]
+  [t00]
     type = PointValue
     variable = tot_yy
     point = '1.00 0 0'
     outputs = csv_t
-  [../]
-  [./t01]
+  []
+  [t01]
     type = PointValue
     variable = tot_yy
     point = '1.01 0 0'
     outputs = csv_t
-  [../]
-  [./t02]
+  []
+  [t02]
     type = PointValue
     variable = tot_yy
     point = '1.02 0 0'
     outputs = csv_t
-  [../]
-  [./t03]
+  []
+  [t03]
     type = PointValue
     variable = tot_yy
     point = '1.03 0 0'
     outputs = csv_t
-  [../]
-  [./t04]
+  []
+  [t04]
     type = PointValue
     variable = tot_yy
     point = '1.04 0 0'
     outputs = csv_t
-  [../]
-  [./t05]
+  []
+  [t05]
     type = PointValue
     variable = tot_yy
     point = '1.05 0 0'
     outputs = csv_t
-  [../]
-  [./t06]
+  []
+  [t06]
     type = PointValue
     variable = tot_yy
     point = '1.06 0 0'
     outputs = csv_t
-  [../]
-  [./t07]
+  []
+  [t07]
     type = PointValue
     variable = tot_yy
     point = '1.07 0 0'
     outputs = csv_t
-  [../]
-  [./t08]
+  []
+  [t08]
     type = PointValue
     variable = tot_yy
     point = '1.08 0 0'
     outputs = csv_t
-  [../]
-  [./t09]
+  []
+  [t09]
     type = PointValue
     variable = tot_yy
     point = '1.09 0 0'
     outputs = csv_t
-  [../]
-  [./t10]
+  []
+  [t10]
     type = PointValue
     variable = tot_yy
     point = '1.10 0 0'
     outputs = csv_t
-  [../]
-  [./t11]
+  []
+  [t11]
     type = PointValue
     variable = tot_yy
     point = '1.11 0 0'
     outputs = csv_t
-  [../]
-  [./t12]
+  []
+  [t12]
     type = PointValue
     variable = tot_yy
     point = '1.12 0 0'
     outputs = csv_t
-  [../]
-  [./t13]
+  []
+  [t13]
     type = PointValue
     variable = tot_yy
     point = '1.13 0 0'
     outputs = csv_t
-  [../]
-  [./t14]
+  []
+  [t14]
     type = PointValue
     variable = tot_yy
     point = '1.14 0 0'
     outputs = csv_t
-  [../]
-  [./t15]
+  []
+  [t15]
     type = PointValue
     variable = tot_yy
     point = '1.15 0 0'
     outputs = csv_t
-  [../]
-  [./t16]
+  []
+  [t16]
     type = PointValue
     variable = tot_yy
     point = '1.16 0 0'
     outputs = csv_t
-  [../]
-  [./t17]
+  []
+  [t17]
     type = PointValue
     variable = tot_yy
     point = '1.17 0 0'
     outputs = csv_t
-  [../]
-  [./t18]
+  []
+  [t18]
     type = PointValue
     variable = tot_yy
     point = '1.18 0 0'
     outputs = csv_t
-  [../]
-  [./t19]
+  []
+  [t19]
     type = PointValue
     variable = tot_yy
     point = '1.19 0 0'
     outputs = csv_t
-  [../]
-  [./t20]
+  []
+  [t20]
     type = PointValue
     variable = tot_yy
     point = '1.20 0 0'
     outputs = csv_t
-  [../]
-  [./t21]
+  []
+  [t21]
     type = PointValue
     variable = tot_yy
     point = '1.21 0 0'
     outputs = csv_t
-  [../]
-  [./t22]
+  []
+  [t22]
     type = PointValue
     variable = tot_yy
     point = '1.22 0 0'
     outputs = csv_t
-  [../]
-  [./t23]
+  []
+  [t23]
     type = PointValue
     variable = tot_yy
     point = '1.23 0 0'
     outputs = csv_t
-  [../]
-  [./t24]
+  []
+  [t24]
     type = PointValue
     variable = tot_yy
     point = '1.24 0 0'
     outputs = csv_t
-  [../]
-  [./t25]
+  []
+  [t25]
     type = PointValue
     variable = tot_yy
     point = '1.25 0 0'
     outputs = csv_t
-  [../]
+  []
 
-  [./dt]
+  [dt]
     type = FunctionValuePostprocessor
     outputs = console
     function = 2*t
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = '-snes_monitor -snes_linesearch_monitor'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
     petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'
-  [../]
+  []
 []
 
 [Executioner]
@@ -697,11 +697,11 @@
   start_time = 0
   end_time = 0.3
   dt = 0.1
-  #[./TimeStepper]
+  #[TimeStepper]
   #  type = PostprocessorDT
   #  postprocessor = dt
   #  dt = 0.003
-  #[../]
+  #[]
 []
 
 [Outputs]
@@ -709,16 +709,16 @@
   file_base = borehole_highres
   exodus = true
   sync_times = '0.003 0.3'
-  [./csv_p]
+  [csv_p]
     file_base = borehole_highres_p
     type = CSV
-  [../]
-  [./csv_s]
+  []
+  [csv_s]
     file_base = borehole_highres_s
     type = CSV
-  [../]
-  [./csv_t]
+  []
+  [csv_t]
     file_base = borehole_highres_t
     type = CSV
-  [../]
+  []
 []

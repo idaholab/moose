@@ -58,403 +58,403 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '3*x-y+z'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '3*x-4*y'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = 'x-2*z'
-  [../]
-  [./wc_x]
+  []
+  [wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = 'front back'
     value = 0.0
-  [../]
-  [./wc_y]
+  []
+  [wc_y]
     type = DirichletBC
     variable = wc_y
     boundary = 'front back'
     value = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./wc_z]
-  [../]
-  [./stress_I]
+  [wc_z]
+  []
+  [stress_I]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_II]
+  []
+  [stress_II]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_III]
+  []
+  [stress_III]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f0]
+  []
+  [f0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f1]
+  []
+  [f1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./f2]
+  []
+  [f2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./iter]
+  []
+  [iter]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./intnl]
+  []
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_I]
+  [stress_I]
     type = RankTwoScalarAux
     scalar_type = MaxPrincipal
     rank_two_tensor = stress
     variable = stress_I
     selected_qp = 0
-  [../]
-  [./stress_II]
+  []
+  [stress_II]
     type = RankTwoScalarAux
     scalar_type = MidPrincipal
     rank_two_tensor = stress
     variable = stress_II
     selected_qp = 0
-  [../]
-  [./stress_III]
+  []
+  [stress_III]
     type = RankTwoScalarAux
     scalar_type = MinPrincipal
     rank_two_tensor = stress
     variable = stress_III
     selected_qp = 0
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yx
     index_i = 1
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zy
     index_i = 2
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./f0_auxk]
+  []
+  [f0_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
-  [../]
-  [./f1_auxk]
+  []
+  [f1_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
-  [../]
-  [./f2_auxk]
+  []
+  [f2_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
-  [../]
-  [./iter]
+  []
+  [iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
-  [../]
-  [./intnl_auxk]
+  []
+  [intnl_auxk]
     type = MaterialStdVectorAux
     property = plastic_internal_parameter
     index = 1
     variable = intnl
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_I]
+  [s_I]
     type = PointValue
     point = '0 0 0'
     variable = stress_I
-  [../]
-  [./s_II]
+  []
+  [s_II]
     type = PointValue
     point = '0 0 0'
     variable = stress_II
-  [../]
-  [./s_III]
+  []
+  [s_III]
     type = PointValue
     point = '0 0 0'
     variable = stress_III
-  [../]
-  [./s_xx]
+  []
+  [s_xx]
     type = PointValue
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./s_xy]
+  []
+  [s_xy]
     type = PointValue
     point = '0 0 0'
     variable = stress_xy
-  [../]
-  [./s_xz]
+  []
+  [s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yx]
+  []
+  [s_yx]
     type = PointValue
     point = '0 0 0'
     variable = stress_yx
-  [../]
-  [./s_yy]
+  []
+  [s_yy]
     type = PointValue
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./s_yz]
+  []
+  [s_yz]
     type = PointValue
     point = '0 0 0'
     variable = stress_yz
-  [../]
-  [./s_zx]
+  []
+  [s_zx]
     type = PointValue
     point = '0 0 0'
     variable = stress_zx
-  [../]
-  [./s_zy]
+  []
+  [s_zy]
     type = PointValue
     point = '0 0 0'
     variable = stress_zy
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./f0]
+  []
+  [f0]
     type = PointValue
     point = '0 0 0'
     variable = f0
-  [../]
-  [./f1]
+  []
+  [f1]
     type = PointValue
     point = '0 0 0'
     variable = f1
-  [../]
-  [./f2]
+  []
+  [f2]
     type = PointValue
     point = '0 0 0'
     variable = f2
-  [../]
-  [./iter]
+  []
+  [iter]
     type = PointValue
     point = '0 0 0'
     variable = iter
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = PointValue
     point = '0 0 0'
     variable = intnl
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./ang]
+  []
+  [ang]
     type = TensorMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 1
     poisson = 0.25
     layer_thickness = 1.0
     joint_normal_stiffness = 1.0
     joint_shear_stiffness = 2.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
-  [../]
-  [./tensile]
+  []
+  [tensile]
     type = CappedMohrCoulombCosseratStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -465,12 +465,12 @@
     yield_function_tol = 1.0E-12
     host_youngs_modulus = 1.0
     host_poissons_ratio = 0.25
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = tensile
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 

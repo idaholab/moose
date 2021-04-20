@@ -17,10 +17,10 @@ add the following block to your input:
 
 ```style=background:#666
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 ```
 !alert-end!

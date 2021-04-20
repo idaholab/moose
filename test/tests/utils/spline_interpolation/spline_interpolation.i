@@ -8,49 +8,49 @@
 []
 
 [Functions]
-  [./spline_fn]
+  [spline_fn]
     type = SplineFunction
     x = '-1  0 3'
     y = '0.5 0 3'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ufn]
+  [ufn]
     type = SplineFFn
     variable = u
     function = spline_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./sides]
+  [sides]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1'
     function = spline_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = spline_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

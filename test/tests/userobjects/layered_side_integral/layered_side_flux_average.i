@@ -7,59 +7,59 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./layered_side_flux_average]
+  [layered_side_flux_average]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./lsfa]
+  [lsfa]
     type = SpatialUserObjectAux
     variable = layered_side_flux_average
     boundary = top
     user_object = layered_side_flux_average
-  [../]
+  []
 []
 
 [Materials]
-  [./gcm]
+  [gcm]
     type = GenericConstantMaterial
     prop_values = 2
     prop_names = diffusivity
     boundary = 'right top'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_side_flux_average]
+  [layered_side_flux_average]
     type = LayeredSideFluxAverage
     direction = y
     diffusivity = diffusivity
@@ -67,7 +67,7 @@
     variable = u
     execute_on = linear
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

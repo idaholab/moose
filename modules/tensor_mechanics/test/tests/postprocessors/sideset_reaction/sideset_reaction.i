@@ -17,12 +17,12 @@
 []
 
 [Postprocessors]
-  [./react_x]
+  [react_x]
     type = SidesetReaction
     direction = '1 0 0'
     stress_tensor = stress
     boundary = right
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]

@@ -11,119 +11,119 @@
 []
 
 [Functions]
-  [./v_fn]
+  [v_fn]
     type = ParsedFunction
     value = -4+(x*x+y*y)+1
-  [../]
+  []
 
-  [./left_u_bc_fn]
+  [left_u_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
-  [./top_u_bc_fn]
+  []
+  [top_u_bc_fn]
     type = ParsedFunction
     value = 2*y
-  [../]
-  [./right_u_bc_fn]
+  []
+  [right_u_bc_fn]
     type = ParsedFunction
     value = 2*x
-  [../]
-  [./bottom_u_bc_fn]
+  []
+  [bottom_u_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     order = SECOND
-  [../]
-  [./v]
+  []
+  [v]
     order = SECOND
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./ak_a]
+  [ak_a]
     type = QuotientAux
     variable = a
     numerator = v
     denominator = u
-  [../]
+  []
 
-  [./ak_v]
+  [ak_v]
     type = FunctionAux
     variable = v
     function = v_fn
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./react]
+  []
+  [react]
     type = Reaction
     variable = u
-  [../]
-  [./cv_u]
+  []
+  [cv_u]
     type = CoupledForceLagged
     variable = u
     v = v
-  [../]
+  []
 []
 
 [BCs]
-  [./u_bc_left]
+  [u_bc_left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_u_bc_fn
-  [../]
+  []
 
-  [./u_bc_top]
+  [u_bc_top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_u_bc_fn
-  [../]
+  []
 
-  [./u_bc_right]
+  [u_bc_right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_u_bc_fn
-  [../]
+  []
 
-  [./u_bc_bottom]
+  [u_bc_bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bottom_u_bc_fn
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     solve_type = PJFNK
-  [../]
+  []
 []
 
 [Executioner]
@@ -135,8 +135,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     execute_on = 'nonlinear'
-  [../]
+  []
 []

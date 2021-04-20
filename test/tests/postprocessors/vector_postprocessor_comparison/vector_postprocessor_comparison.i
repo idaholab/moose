@@ -11,19 +11,19 @@
 
 [Functions]
   # Sampled values will be [2, 2, 2]
-  [./a_fn]
+  [a_fn]
     type = ConstantFunction
     value = 2
-  [../]
+  []
   # Sampled values will be [0, 1, 2]
-  [./b_fn]
+  [b_fn]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./a_vpp]
+  [a_vpp]
     type = LineFunctionSampler
     functions = 'a_fn'
     num_points = 3
@@ -31,8 +31,8 @@
     end_point = '2 0 0'
     sort_by = x
     execute_on = 'initial'
-  [../]
-  [./b_vpp]
+  []
+  [b_vpp]
     type = LineFunctionSampler
     functions = 'b_fn'
     num_points = 3
@@ -40,11 +40,11 @@
     end_point = '2 0 0'
     sort_by = x
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./vpp_comparison]
+  [vpp_comparison]
     type = VectorPostprocessorComparison
     vectorpostprocessor_a = a_vpp
     vectorpostprocessor_b = b_vpp
@@ -52,7 +52,7 @@
     vector_name_b = b_fn
     comparison_type = greater_than_equals
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

@@ -7,51 +7,51 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./nodal_source_from_master_nodal]
+  [nodal_source_from_master_nodal]
     family = LAGRANGE
     order = FIRST
-  [../]
-  [./nodal_source_from_master_elemental]
+  []
+  [nodal_source_from_master_elemental]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./elemental_source_from_master_nodal]
+  []
+  [elemental_source_from_master_nodal]
     family = LAGRANGE
     order = FIRST
-  [../]
-  [./elemental_source_from_master_elemental]
+  []
+  [elemental_source_from_master_elemental]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

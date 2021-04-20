@@ -12,58 +12,58 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./initial_cond_aux]
+  [initial_cond_aux]
     type = SolutionAux
     solution = xda_soln
     execute_on = initial
     variable = u_aux
     direct = false
-  [../]
+  []
 []
 
 [UserObjects]
-  [./xda_soln]
+  [xda_soln]
     type = SolutionUserObject
     mesh = build_out_0001_mesh.xda
     es = build_out_0001.xda
     system_variables = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,56 +1,56 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
   uniform_refine = 4
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./vpp_point_source]
+  [vpp_point_source]
     type = VectorPostprocessorPointSource
     variable = u
     value_name = 'u'
     vector_postprocessor = csv_reader
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./csv_reader]
+  [csv_reader]
     type = CSVReader
     csv_file = point_value_file.csv
-  [../]
+  []
 []
 
 [Executioner]

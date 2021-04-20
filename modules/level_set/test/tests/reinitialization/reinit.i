@@ -11,36 +11,36 @@
 []
 
 [Variables]
-  [./phi]
-  [../]
+  [phi]
+  []
 []
 
 [AuxVariables]
-  [./phi_0]
-  [../]
+  [phi_0]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = phi
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
-  [../]
+  []
 
-  [./reinit]
+  [reinit]
     type = LevelSetOlssonReinitialization
     variable = phi
     phi_0 = phi_0
     epsilon = 0.05
-  [../]
+  []
 []
 
 [Problem]
@@ -48,10 +48,10 @@
 []
 
 [UserObjects]
-  [./arnold]
+  [arnold]
     type = LevelSetOlssonTerminator
     tol = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,12 +64,12 @@
   scheme = crank-nicolson
   petsc_options_iname = '-pc_type -pc_sub_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg    300'
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.001
     optimal_iterations = 5
     growth_factor = 5
-  [../]
+  []
 []
 
 [Outputs]

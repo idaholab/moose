@@ -12,65 +12,65 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 500
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = L2_LAGRANGE
     initial_condition = 350
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
-  [./heat_source_fuel]
+  []
+  [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = 'power'
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = temp
     boundary = 'bottom top left right'
     value = 300
-  [../]
+  []
 []
 
 [Materials]
-  [./heat_material]
+  [heat_material]
     type = HeatConductionMaterial
     temp = temp
     specific_heat = 1000
     thermal_conductivity = 500
-  [../]
-  [./density]
+  []
+  [density]
     type = Density
     density = 2000
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./avg_temp]
+  [avg_temp]
     type = ElementAverageValue
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
-  [./avg_power]
+  []
+  [avg_power]
     type = ElementAverageValue
     variable = power
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,21 +101,21 @@
 []
 
 [MultiApps]
-  [./bison]
+  [bison]
     type = FullSolveMultiApp
     positions = '0 0 0'
     input_files = 'sub_ss.i'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./to_bison_mechanics]
+  [to_bison_mechanics]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
     multi_app = bison
     variable = temp
     source_variable = temp
     execute_on = 'timestep_end'
-  [../]
+  []
 []

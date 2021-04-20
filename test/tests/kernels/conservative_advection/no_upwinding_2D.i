@@ -10,28 +10,28 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_blob]
+  [u_blob]
     type = FunctionIC
     variable = u
     function = 'if(x<0.2,if(y<0.2,1,0),0)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./udot]
+  [udot]
     type = TimeDerivative
     variable = u
-  [../]
-  [./advection]
+  []
+  [advection]
     type = ConservativeAdvection
     variable = u
     velocity = '2 1 0'
-  [../]
+  []
 []
 
 [Executioner]

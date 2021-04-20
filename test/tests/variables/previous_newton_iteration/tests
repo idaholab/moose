@@ -2,7 +2,7 @@
   issues = '#6101'
   design = 'syntax/Variables/index.md'
 
-  [./test]
+  [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
@@ -12,5 +12,5 @@
     max_threads = 1
 
     requirement = 'The system shall support the ability to couple to a previous field variable calculation to produce another field such that there is no Jacobian contribution due to the lagged coupling.'
-  [../]
+  []
 []

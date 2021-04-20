@@ -8,27 +8,27 @@
 
 [Mesh]
   type = MeshGeneratorMesh
-  [./cartesian]
+  [cartesian]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1'
     ix = '1 10'
     dy = '1 1'
     subdomain_id = '1 2 1 2'
-  [../]
+  []
 
-  [./remove_1]
+  [remove_1]
     type = BlockDeletionGenerator
     block = 1
     input = cartesian
-  [../]
+  []
 
-  [./readd_left]
+  [readd_left]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'abs(x - 1) < 1e-4'
     new_sideset_name = left
     input = remove_1
-  [../]
+  []
 []
 
 [Problem]
@@ -36,27 +36,27 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 800.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./lefttemp]
+  [lefttemp]
     type = DirichletBC
     boundary = left
     variable = temp
     value = 800
-  [../]
+  []
 
-  [./radiative_bc]
+  [radiative_bc]
     type = InfiniteCylinderRadiativeBC
     boundary = right
     variable = temp
@@ -65,22 +65,22 @@
     cylinder_radius = 3
     cylinder_emissivity = 0.7
     Tinfinity = 500
-  [../]
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density  thermal_conductivity'
     prop_values = '1 1.0e5'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,24 +92,24 @@
 []
 
 [Postprocessors]
-  [./right]
+  [right]
     type = SideFluxAverage
     variable = temp
     boundary = right
     diffusivity = thermal_conductivity
-  [../]
+  []
 
-  [./min_temp]
+  [min_temp]
     type = ElementExtremeValue
     variable = temp
     value_type = min
-  [../]
+  []
 
-  [./max_temp]
+  [max_temp]
     type = ElementExtremeValue
     variable = temp
     value_type = max
-  [../]
+  []
 []
 
 [Outputs]

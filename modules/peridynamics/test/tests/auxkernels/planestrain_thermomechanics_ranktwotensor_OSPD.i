@@ -12,249 +12,249 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 8
     ny = 8
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./tstrain_xx]
+  [tstrain_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./tstrain_yy]
+  []
+  [tstrain_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./tstrain_zz]
+  []
+  [tstrain_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./tstrain_xy]
+  []
+  [tstrain_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./mstrain_xx]
+  [mstrain_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./mstrain_yy]
+  []
+  [mstrain_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./mstrain_zz]
+  []
+  [mstrain_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./mstrain_xy]
+  []
+  [mstrain_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
 
-  [./stress_xx]
+  [stress_xx]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./von_mises]
+  [von_mises]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/Peridynamics/Mechanics/Master]
-  [./all]
+  [all]
     formulation = ORDINARY_STATE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 
-  [./tstrain_xx]
+  [tstrain_xx]
     type = NodalRankTwoPD
     variable = tstrain_xx
     rank_two_tensor = total_strain
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
-  [./tstrain_yy]
+  []
+  [tstrain_yy]
     type = NodalRankTwoPD
     variable = tstrain_yy
     rank_two_tensor = total_strain
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
-  [./tstrain_zz]
+  []
+  [tstrain_zz]
     type = NodalRankTwoPD
     variable = tstrain_zz
     rank_two_tensor = total_strain
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
-  [./tstrain_xy]
+  []
+  [tstrain_xy]
     type = NodalRankTwoPD
     variable = tstrain_xy
     rank_two_tensor = total_strain
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./mstrain_xx]
+  [mstrain_xx]
     type = NodalRankTwoPD
     variable = mstrain_xx
     rank_two_tensor = mechanical_strain
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
-  [./mstrain_yy]
+  []
+  [mstrain_yy]
     type = NodalRankTwoPD
     variable = mstrain_yy
     rank_two_tensor = mechanical_strain
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
-  [./mstrain_zz]
+  []
+  [mstrain_zz]
     type = NodalRankTwoPD
     variable = mstrain_zz
     rank_two_tensor = mechanical_strain
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
-  [./mstrain_xy]
+  []
+  [mstrain_xy]
     type = NodalRankTwoPD
     variable = mstrain_xy
     rank_two_tensor = mechanical_strain
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./stress_xx]
+  [stress_xx]
     type = NodalRankTwoPD
     variable = stress_xx
     rank_two_tensor = stress
     output_type = component
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = NodalRankTwoPD
     variable = stress_yy
     rank_two_tensor = stress
     output_type = component
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = NodalRankTwoPD
     variable = stress_zz
     rank_two_tensor = stress
     output_type = component
     index_i = 2
     index_j = 2
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = NodalRankTwoPD
     variable = stress_xy
     rank_two_tensor = stress
     output_type = component
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./vonmises]
+  [vonmises]
     type = NodalRankTwoPD
     variable = von_mises
     rank_two_tensor = stress
     output_type = scalar
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     boundary = 1003
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = 1000
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-  [../]
+  []
 
-  [./force_density]
+  [force_density]
     type = ComputeSmallStrainConstantHorizonMaterialOSPD
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

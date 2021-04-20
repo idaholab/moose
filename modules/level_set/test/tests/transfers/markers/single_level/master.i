@@ -8,46 +8,46 @@
 [Adaptivity]
   marker = marker
   max_h_level = 1
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = BoxMarker
       bottom_left = '0.25 0.25 0'
       top_right = '0.75 0.75 0'
       outside =  DO_NOTHING
       inside = REFINE
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -63,20 +63,20 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = LevelSetReinitializationMultiApp
     input_files = 'sub.i'
     execute_on = TIMESTEP_BEGIN
-  [../]
+  []
 []
 
 [Transfers]
-  [./marker_to_sub]
+  [marker_to_sub]
     type = LevelSetMeshRefinementTransfer
     multi_app = sub
     source_variable = marker
     variable = marker
-  [../]
+  []
 []
 
 [Outputs]

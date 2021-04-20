@@ -6,60 +6,60 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat_props]
+  [mat_props]
     type = GenericConstantMaterial
     block = 0
     prop_names = diffusivity
     prop_values = 2
-  [../]
+  []
 
-  [./mat_props_bnd]
+  [mat_props_bnd]
     type = GenericConstantMaterial
     boundary = right
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./avg_flux_right]
+  [avg_flux_right]
     # Computes flux integral on the boundary, which should be -1
     type = SideFluxAverage
     variable = u
     boundary = right
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [Executioner]

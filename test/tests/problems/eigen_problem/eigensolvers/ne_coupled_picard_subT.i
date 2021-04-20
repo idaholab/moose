@@ -11,39 +11,39 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_T]
+  [diff_T]
     type = Diffusion
     variable = T
-  [../]
-  [./src_T]
+  []
+  [src_T]
     type = CoupledForce
     variable = T
     v = power
-  [../]
+  []
 []
 
 [BCs]
-  [./homogeneousT]
+  [homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -56,31 +56,31 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     keep_solution_during_restore = true
     input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Transfers]
-  [./T_to_sub]
+  [T_to_sub]
     type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = T
     variable = T
     execute_on = timestep_end
-  [../]
-  [./power_from_sub]
+  []
+  [power_from_sub]
     type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = power
     variable = power
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Outputs]

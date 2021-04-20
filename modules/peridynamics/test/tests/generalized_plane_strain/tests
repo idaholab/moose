@@ -1,5 +1,5 @@
 [Tests]
-  [./gps_OSPD]
+  [gps_OSPD]
     type = 'Exodiff'
     input = 'generalized_plane_strain_OSPD.i'
     exodiff = 'generalized_plane_strain_OSPD.e'
@@ -10,9 +10,9 @@
                    of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
-  [./gps_squares_OSPD]
+  [gps_squares_OSPD]
     type = 'Exodiff'
     input = 'generalized_plane_strain_squares_OSPD.i'
     exodiff = 'generalized_plane_strain_squares_OSPD.e'
@@ -22,9 +22,9 @@
                    of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
-  [./out_of_plane_pressure_OSPD]
+  [out_of_plane_pressure_OSPD]
     type = 'Exodiff'
     input = 'out_of_plane_pressure_OSPD.i'
     exodiff = 'out_of_plane_pressure_OSPD.e'
@@ -33,9 +33,9 @@
                    pressure for the ordinary state-based formulation of generalized plane strain problem.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
-  [./planestrain_prescribed_OSPD]
+  [planestrain_prescribed_OSPD]
     type = 'Exodiff'
     input = 'planestrain_prescribed_OSPD.i'
     exodiff = 'planestrain_prescribed_OSPD.e'
@@ -45,9 +45,9 @@
                    of generalized plane strain problem.'
     design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
-  [../]
+  []
 
-  [./gps_H1NOSPD]
+  [gps_H1NOSPD]
     type = 'Exodiff'
     input = 'generalized_plane_strain_H1NOSPD.i'
     exodiff = 'generalized_plane_strain_H1NOSPD.e'
@@ -58,5 +58,5 @@
                    the horizon stabilized correspondence model.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectNOSPD.md'
     issues = '#11561'
-  [../]
+  []
 []

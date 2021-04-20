@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'hierarchical_grid_partitioner.i'
     exodiff = 'hierarchical_grid_partitioner_out.e'
@@ -10,5 +10,5 @@
 
     min_parallel = 16
     max_parallel = 16
-  [../]
+  []
 []

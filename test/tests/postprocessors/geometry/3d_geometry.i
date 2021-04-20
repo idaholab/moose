@@ -21,94 +21,94 @@ area_correction = ${fparse alpha / sin(alpha)}
 []
 
 [Postprocessors]
-  [./circle_side_area]
+  [circle_side_area]
     type = AreaPostprocessor
     boundary = circle_side
-  [../]
-  [./inside_side_area]
+  []
+  [inside_side_area]
     type = AreaPostprocessor
     boundary = inside_side
-  [../]
-  [./outside_side_area]
+  []
+  [outside_side_area]
     type = AreaPostprocessor
     boundary = outside_side
-  [../]
-  [./circle_volume]
+  []
+  [circle_volume]
     type = VolumePostprocessor
     block = circle
-  [../]
-  [./inside_volume]
+  []
+  [inside_volume]
     type = VolumePostprocessor
     block = inside
-  [../]
-  [./outside_volume]
+  []
+  [outside_volume]
     type = VolumePostprocessor
     block = outside
-  [../]
-  [./total_volume]
+  []
+  [total_volume]
     type = VolumePostprocessor
     block = 'circle inside outside'
-  [../]
+  []
 
-  [./circle_side_area_exact]
+  [circle_side_area_exact]
     type = FunctionValuePostprocessor
     function = 'circle_side_area_exact'
-  [../]
-  [./inside_side_area_exact]
+  []
+  [inside_side_area_exact]
     type = FunctionValuePostprocessor
     function = 'inside_side_area_exact'
-  [../]
-  [./outside_side_area_exact]
+  []
+  [outside_side_area_exact]
     type = FunctionValuePostprocessor
     function = 'outside_side_area_exact'
-  [../]
-  [./circle_volume_exact]
+  []
+  [circle_volume_exact]
     type = FunctionValuePostprocessor
     function = 'circle_volume_exact'
-  [../]
-  [./inside_volume_exact]
+  []
+  [inside_volume_exact]
     type = FunctionValuePostprocessor
     function = 'inside_volume_exact'
-  [../]
-  [./outside_volume_exact]
+  []
+  [outside_volume_exact]
     type = FunctionValuePostprocessor
     function = 'outside_volume_exact'
-  [../]
-  [./total_volume_exact]
+  []
+  [total_volume_exact]
     type = FunctionValuePostprocessor
     function = 'total_volume_exact'
-  [../]
+  []
 []
 
 [Functions]
-  [./circle_side_area_exact]
+  [circle_side_area_exact]
     type = ParsedFunction
     value = '2 * pi * ${radius} / ${perimeter_correction} * ${depth}'
-  [../]
-  [./inside_side_area_exact]
+  []
+  [inside_side_area_exact]
     type = ParsedFunction
     value = '${inner_box_length} * ${depth} * 4'
-  [../]
-  [./outside_side_area_exact]
+  []
+  [outside_side_area_exact]
     type = ParsedFunction
     value = '${outer_box_length} * ${depth} * 4'
-  [../]
-  [./circle_volume_exact]
+  []
+  [circle_volume_exact]
     type = ParsedFunction
     value = 'pi * ${radius}^2 * ${depth} / ${area_correction}'
-  [../]
-  [./inside_volume_exact]
+  []
+  [inside_volume_exact]
     type = ParsedFunction
     value = '${inner_box_length}^2 * ${depth} - pi * ${radius}^2 * ${depth} / ${area_correction}'
-  [../]
-  [./outside_volume_exact]
+  []
+  [outside_volume_exact]
     type = ParsedFunction
     value = '${outer_box_length}^2 * ${depth} - ${inner_box_length}^2 * ${depth}'
-  [../]
-  [./total_volume_exact]
+  []
+  [total_volume_exact]
     type = ParsedFunction
     value = '${outer_box_length}^2 * ${depth}'
-  [../]
+  []
 
 []
 

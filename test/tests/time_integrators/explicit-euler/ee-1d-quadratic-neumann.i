@@ -12,89 +12,89 @@
 []
 
 [Functions]
-  [./ic]
+  [ic]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = x*x-2*t+t*x*x
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*x*x
-  [../]
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -t*2*x
-  [../]
-  [./right_bc_fn]
+  []
+  [right_bc_fn]
     type = ParsedFunction
     value = t*2*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
     implicit = true
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./abs]
+  [abs]
     type = Reaction
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = '0'
     function = left_bc_fn
-  [../]
+  []
 
-  [./right]
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = '1'
     function = right_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -110,8 +110,8 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

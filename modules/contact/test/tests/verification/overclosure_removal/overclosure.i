@@ -21,147 +21,147 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./penetration]
+  [penetration]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
+  []
+  [saved_x]
+  []
+  [saved_y]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     use_finite_deform_jacobian = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./penetration]
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 4
     paired_boundary = 3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./bot_react_x]
+  [bot_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 1
-  [../]
-  [./bot_react_y]
+  []
+  [bot_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 1
-  [../]
-  [./top_react_x]
+  []
+  [top_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 5
-  [../]
-  [./top_react_y]
+  []
+  [top_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 5
-  [../]
-  [./ref_resid_x]
+  []
+  [ref_resid_x]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_x
-  [../]
-  [./ref_resid_y]
+  []
+  [ref_resid_y]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_y
-  [../]
-  [./_dt]
+  []
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [BCs]
-  [./bot_y]
+  [bot_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./side1_x]
+  []
+  [side1_x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0.0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 5
     value = 0.0
-  [../]
-  [./top_x]
+  []
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1001    #nodeset 1001 top central node
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./bot_elas_tens]
+  [bot_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./bot_strain]
+  []
+  [bot_strain]
     type = ComputeFiniteStrain
     decomposition_method = EigenSolution
     block = '1'
-  [../]
-  [./bot_stress]
+  []
+  [bot_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
-  [../]
+  []
 
-  [./top_elas_tens]
+  [top_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e5
     poissons_ratio = 0.3
-  [../]
-  [./top_strain]
+  []
+  [top_strain]
     type = ComputeFiniteStrain
     decomposition_method = EigenSolution
     block = '2'
-  [../]
-  [./top_stress]
+  []
+  [top_stress]
     type = ComputeFiniteStrainElasticStress
     block = '2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -188,18 +188,18 @@
 [Outputs]
   print_linear_residuals = true
   perf_graph = true
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     secondary = 4
     primary = 3
     model = frictionless
@@ -207,5 +207,5 @@
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+9
-  [../]
+  []
 []

@@ -6,66 +6,66 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./real_property]
+  [real_property]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./real_property]
+  [real_property]
     type = MaterialRealAux
     variable = real_property
     property = real_property
     boundary = '1 2'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./boundary_1]
+  [boundary_1]
     type = OutputTestMaterial
     boundary = 1
     real_factor = 2
     variable = u
-  [../]
-  [./boundary_2]
+  []
+  [boundary_2]
     type = OutputTestMaterial
     boundary = 2
     real_factor = 2
     variable = u
- [../]
+ []
 []
 
 [Executioner]

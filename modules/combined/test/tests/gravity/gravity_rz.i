@@ -42,10 +42,10 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -56,36 +56,36 @@
 []
 
 [Kernels]
-  [./gravity]
+  [gravity]
     type = Gravity
     variable = disp_y
     value = 20
-  [../]
+  []
 []
 
 [BCs]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     shear_modulus = 0.5e6
     lambda = 0.0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     density = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,8 +98,8 @@
 
 [Outputs]
   file_base = gravity_rz_out
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

@@ -10,74 +10,74 @@
   nx = 2
   ny = 2
   nz = 2
-[../]
+[]
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vector_x]
+  [vector_x]
     initial_condition = 2
-  [../]
-  [./vector_y]
+  []
+  [vector_y]
     initial_condition = 1
-  [../]
-  [./vector_z]
+  []
+  [vector_z]
     initial_condition = 2
-  [../]
+  []
 
-  [./magnitude]
-  [../]
+  [magnitude]
+  []
 []
 
 [AuxKernels]
-  [./vx]
+  [vx]
     type = ConstantAux
     variable = vector_x
     value = 2
-  [../]
-  [./vy]
+  []
+  [vy]
     type = ConstantAux
     variable = vector_y
     value = 1
-  [../]
-  [./vz]
+  []
+  [vz]
     type = ConstantAux
     variable = vector_z
     value = 2
-  [../]
+  []
 
-  [./magnitude]
+  [magnitude]
     type = VectorMagnitudeAux
     variable = magnitude
     x = vector_x
     y = vector_y
     z = vector_z
-  [../]
+  []
 []
 
 [Executioner]

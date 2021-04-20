@@ -12,20 +12,20 @@
 []
 
 [UserObjects]
-  [./tester]
+  [tester]
     type = TestCSVReader
     vectorpostprocessor = reader
     vector = year
     gold = '1980 1980 2011 2013'
     rank = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./reader]
+  [reader]
     type = CSVReader
     csv_file = example.csv
-  [../]
+  []
 []
 
 [Outputs]

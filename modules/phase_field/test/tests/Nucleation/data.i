@@ -12,47 +12,47 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationInserter
     hold_time = 0.5
     probability = 0.0076
     radius = 3.27
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./nuc_count]
+  [nuc_count]
     type = DiscreteNucleationData
     inserter = inserter
     value = COUNT
-  [../]
-  [./nuc_update]
+  []
+  [nuc_update]
     type = DiscreteNucleationData
     inserter = inserter
     value = UPDATE
-  [../]
-  [./nuc_rate]
+  []
+  [nuc_rate]
     type = DiscreteNucleationData
     inserter = inserter
     value = RATE
-  [../]
-  [./nuc_insertions]
+  []
+  [nuc_insertions]
     type = DiscreteNucleationData
     inserter = inserter
     value = INSERTIONS
-  [../]
-  [./nuc_deletions]
+  []
+  [nuc_deletions]
     type = DiscreteNucleationData
     inserter = inserter
     value = DELETIONS
-  [../]
+  []
 []
 
 [Executioner]

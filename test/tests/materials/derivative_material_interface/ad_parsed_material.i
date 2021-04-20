@@ -8,35 +8,35 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusion
     variable = eta
     diffusivity = F
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = ADParsedMaterial
     args  = 'eta'
     function ='(eta-0.5)^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,73 +10,73 @@
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./vec]
+  [vec]
     type = VectorFunctionAux
     variable = velocity
     function = velocity_func
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Variables]
-  [./phi]
+  [phi]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Functions]
-  [./phi_exact]
+  [phi_exact]
     type = LevelSetOlssonBubble
     epsilon = 0.01184
     center = '0.5 0.75 0'
     radius = 0.15
-  [../]
-  [./velocity_func]
+  []
+  [velocity_func]
     type = LevelSetOlssonVortex
     reverse_time = 2
-  [../]
+  []
 []
 
 [ICs]
-  [./phi_ic]
+  [phi_ic]
     type = FunctionIC
     function = phi_exact
     variable = phi
-  [../]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = phi
-  [../]
-  [./advection]
+  []
+  [advection]
     type = LevelSetAdvection
     velocity = velocity
     variable = phi
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./area]
+  [area]
     type = LevelSetVolume
     threshold = 0.5
     variable = phi
     location = outside
     execute_on = 'initial timestep_end'
-  [../]
-  [./cfl]
+  []
+  [cfl]
     type = LevelSetCFLCondition
     velocity = velocity
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,11 +87,11 @@
   scheme = crank-nicolson
   petsc_options_iname = '-pc_type -pc_sub_type'
   petsc_options_value = 'asm      ilu'
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl
     scale = 0.8
-  [../]
+  []
 []
 
 [Outputs]

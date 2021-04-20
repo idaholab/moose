@@ -1,5 +1,5 @@
 [Tests]
-  [./brine]
+  [brine]
     type = CSVDiff
     input = 'brine.i'
     csvdiff = 'brine_out.csv'
@@ -8,8 +8,8 @@
     requirement = 'The system shall compute properties of brine'
     design = 'BrineFluidProperties.md'
     issues = '#6972'
-  [../]
-  [./brine_tabulated]
+  []
+  [brine_tabulated]
     type = CSVDiff
     input = 'brine_tabulated.i'
     csvdiff = 'brine_out.csv'
@@ -19,5 +19,5 @@
     requirement = 'The system shall compute properties of brine using tabulated water properties'
     design = 'BrineFluidProperties.md'
     issues = '#6972 #12812'
-  [../]
+  []
 []

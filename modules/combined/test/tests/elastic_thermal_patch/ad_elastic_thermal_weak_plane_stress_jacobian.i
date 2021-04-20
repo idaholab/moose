@@ -5,63 +5,63 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./strain_zz]
-  [../]
-  [./temp]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [strain_zz]
+  []
+  [temp]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./plane_stress]
+  [plane_stress]
     planar_formulation = WEAK_PLANE_STRESS
     strain = SMALL
     eigenstrain_names = thermal_eigenstrain
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0
     eigenstrain_name = thermal_eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 
-  [./conductivity]
+  [conductivity]
     type = HeatConductionMaterial
     thermal_conductivity = 1
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Executioner]

@@ -24,90 +24,90 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
-  [../]
+  []
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     variable = disp_x
     boundary = back
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     variable = disp_y
     boundary = back
     value = 0.0
-  [../]
-  [./bottomz]
+  []
+  [bottomz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
-  [./topx]
+  [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = front
     function = 0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = front
     function = 0
-  [../]
-  [./topz]
+  []
+  [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = t
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 20
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.1
-  [../]
-  [./t_strength]
+  []
+  [t_strength]
     type = TensorMechanicsHardeningCubic
     value_0 = 1
     value_residual = 2
     internal_limit = 1
-  [../]
-  [./c_strength]
+  []
+  [c_strength]
     type = TensorMechanicsHardeningConstant
     value = 100
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1'
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
-  [../]
-  [./stress]
+  []
+  [stress]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -118,7 +118,7 @@
     tip_smoother = 5
     smoothing_tol = 5
     yield_function_tol = 1E-10
-  [../]
+  []
 []
 
 [Executioner]

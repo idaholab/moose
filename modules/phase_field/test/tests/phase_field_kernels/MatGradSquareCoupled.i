@@ -18,12 +18,12 @@
 []
 
 [Variables]
-  [./w]
-  [../]
-  [./eta]
+  [w]
+  []
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -31,71 +31,71 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 3.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
-  [./ACBulk]
+  []
+  [ACBulk]
     type = CoupledAllenCahn
     variable = w
     v = eta
     f_name = F
     mob_name = 1
-  [../]
-  [./W]
+  []
+  [W]
     type = MatReaction
     variable = w
     mob_name = -1
-  [../]
-  [./CoupledBulk]
+  []
+  [CoupledBulk]
     type = MatReaction
     variable = eta
     v = w
     mob_name = L
-  [../]
-  [./ACInterface]
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 1
     mob_name = L
     args = w
-  [../]
+  []
 # MatGradSquareCoupled kernel
-  [./nabla_eta]
+  [nabla_eta]
     type = MatGradSquareCoupled
     variable = w
     elec_potential = eta
     prefactor = 0.5
-  [../]
+  []
 []
 
 [Materials]
-  [./mobility]
+  [mobility]
     type = DerivativeParsedMaterial
     f_name  = L
     args = 'eta w'
     function = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'eta'
     function = 'eta^2 * (1-eta)^2'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

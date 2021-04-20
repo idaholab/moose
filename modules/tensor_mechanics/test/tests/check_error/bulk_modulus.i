@@ -7,52 +7,52 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./2_x]
+  [2_x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0.0
-  [../]
-  [./2_y]
+  []
+  [2_y]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
-  [./2_z]
+  []
+  [2_z]
     type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = -1e6
     poissons_ratio = 0.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,14 +1,14 @@
 [Tests]
   issues = '#3492 #12658'
   design = '/kernels/Kernel.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'kernel_precompute_test.i'
     exodiff = 'out.e'
     scale_refine = 5
     requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out.'
-  [../]
-  [./adtest]
+  []
+  [adtest]
     type = 'Exodiff'
     input = 'adkernel_precompute_test.i'
     exodiff = 'out.e'
@@ -16,13 +16,13 @@
     scale_refine = 5
     requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out in the automatic differentiation system.'
     allow_test_objects = true
-  [../]
-  [./adtest-jac]
+  []
+  [adtest-jac]
     type = 'PetscJacobianTester'
     input = 'adkernel_precompute_test.i'
     prereq = 'adtest'
     run_sim = 'True'
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
     allow_test_objects = true
-  [../]
+  []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'file_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,8 +10,8 @@
     requirement = 'The system shall have the ability to generate a mesh by reading it from a file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#11640'
-  [../]
-  [./extra_integer_test]
+  []
+  [extra_integer_test]
     type = 'Exodiff'
     input = 'exodus_file_mesh_with_id.i'
     exodiff = 'exodus_file_mesh_with_id_out.e'
@@ -20,9 +20,9 @@
     requirement = 'The system shall have the ability to assign element extra integers with elemental variables in an Exodus mesh file.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#14916'
-  [../]
+  []
 
-  [./pre_checkpoint_load_test]
+  [pre_checkpoint_load_test]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
     expect_out = 'Solve Converged'
@@ -33,7 +33,7 @@
     issues = '#16192'
   []
 
-  [./checkpoint_load_test]
+  [checkpoint_load_test]
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'

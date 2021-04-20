@@ -6,56 +6,56 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temp]
-  [../]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
+  [temp]
+  []
+  [saved_x]
+  []
+  [saved_y]
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = tempfunc
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Functions]
-  [./tempfunc]
+  [tempfunc]
     type = ParsedFunction
     value = '(1-x)*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottomx]
+  [bottomx]
     type = DirichletBC
     boundary = 0
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     temperature = temp
@@ -63,34 +63,34 @@
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = eigenstrain
     save_in = 'saved_x saved_y'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 0.02
     temperature = temp
     stress_free_temperature = 0.5
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./react_z]
+  [react_z]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Executioner]

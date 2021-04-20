@@ -7,59 +7,59 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = left
-  [../]
-  [./v]
+  []
+  [v]
     block = right
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
     block = left
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
     block = right
-  [../]
+  []
 []
 
 [BCs]
   active = 'right left'
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = v
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Constraints]
-  [./value]
+  [value]
     type = CoupledTiedValueConstraint
     variable = u
     secondary = 2
     primary = 3
     primary_variable = v
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Tests]
-  [./gmsh_test]
+  [gmsh_test]
     type = 'Exodiff'
     input = 'gmsh_test.i'
     exodiff = 'gmsh_test_in.e'
@@ -9,5 +9,5 @@
     requirement = 'The system shall read GMesh (.msh) format file meshes.'
     issues = '#2105'
     design = 'FileMesh.md'
-  [../]
+  []
 []

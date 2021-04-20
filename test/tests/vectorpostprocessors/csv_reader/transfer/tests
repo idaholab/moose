@@ -1,5 +1,5 @@
 [Tests]
-  [./csv_reader_in_transfer]
+  [csv_reader_in_transfer]
     # A user was looking for an example of how to use CSVReader with MultiAppUserObjectTransfer,
     # this provide an example. It is an error because the CSVReader will need to override the
     # spatialValue method.
@@ -10,5 +10,5 @@
     issues = '#9860'
     design = 'CSVReader.md'
     requirement = 'The system shall issue an error if the CSVReader is used in a UserObjectTransfer because the former does not have any notion of "spatial" information.'
-  [../]
+  []
 []

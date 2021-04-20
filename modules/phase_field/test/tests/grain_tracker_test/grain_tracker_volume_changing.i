@@ -25,21 +25,21 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
+  [PolycrystalVariables]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     grain_num = 12 # Number of grains
     coloring_algorithm = jp
     rand_seed = 15
     output_adjacency_matrix = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     threshold = 0.2
     verbosity_level = 1
@@ -48,173 +48,173 @@
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = voronoi
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   # Dependent variables
-  [./bnds]
+  [bnds]
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./unique_grains]
-  [../]
+  [unique_grains]
+  []
 
-  [./var_indices]
-  [../]
+  [var_indices]
+  []
 
-  [./ghost_regions]
-  [../]
+  [ghost_regions]
+  []
 
-  [./halos]
-  [../]
+  [halos]
+  []
 
-  [./halo0]
-  [../]
+  [halo0]
+  []
 
-  [./halo1]
-  [../]
+  [halo1]
+  []
 
-  [./halo2]
-  [../]
+  [halo2]
+  []
 
-  [./halo3]
-  [../]
+  [halo3]
+  []
 
-  [./halo4]
-  [../]
+  [halo4]
+  []
 
-  [./halo5]
-  [../]
+  [halo5]
+  []
 
-  [./halo6]
-  [../]
+  [halo6]
+  []
 
-  [./halo7]
-  [../]
+  [halo7]
+  []
 
-  [./centroids]
+  [centroids]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_end'
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
-  [../]
-  [./ghosted_entities]
+  []
+  [ghosted_entities]
     type = FeatureFloodCountAux
     variable = ghost_regions
     flood_counter = grain_tracker
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
-  [../]
-  [./halos]
+  []
+  [halos]
     type = FeatureFloodCountAux
     variable = halos
     flood_counter = grain_tracker
     field_display = HALOS
     execute_on = 'initial timestep_end'
-  [../]
-  [./halo0]
+  []
+  [halo0]
     type = FeatureFloodCountAux
     variable = halo0
     map_index = 0
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo1]
+  []
+  [halo1]
     type = FeatureFloodCountAux
     variable = halo1
     map_index = 1
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo2]
+  []
+  [halo2]
     type = FeatureFloodCountAux
     variable = halo2
     map_index = 2
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo3]
+  []
+  [halo3]
     type = FeatureFloodCountAux
     variable = halo3
     map_index = 3
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo4]
+  []
+  [halo4]
     type = FeatureFloodCountAux
     variable = halo4
     map_index = 4
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo5]
+  []
+  [halo5]
     type = FeatureFloodCountAux
     variable = halo5
     map_index = 5
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo6]
+  []
+  [halo6]
     type = FeatureFloodCountAux
     variable = halo6
     map_index = 6
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo7]
+  []
+  [halo7]
     type = FeatureFloodCountAux
     variable = halo7
     map_index = 7
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./centroids]
+  []
+  [centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = timestep_end
     field_display = CENTROID
     flood_counter = grain_tracker
-  [../]
+  []
 []
 
 [BCs]
@@ -222,7 +222,7 @@
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution
     T = 450 # Constant temperature of the simulation (for mobility calculation)
@@ -230,20 +230,20 @@
     GBmob0 = 2.5e-6 # m^4(Js) for copper from Schoenfelder1997
     Q = 0.23 # eV for copper from Schoenfelder1997
     GBenergy = 0.708 # J/m^2 from Schoenfelder1997
-  [../]
+  []
 []
 
 [Postprocessors]
   # Scalar postprocessors
-  [./dt]
+  [dt]
     # Outputs the current time step
     type = TimestepSize
-  [../]
-  [./avg_grain_volumes]
+  []
+  [avg_grain_volumes]
     type = AverageGrainVolume
     feature_counter = grain_tracker
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

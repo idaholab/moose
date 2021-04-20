@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 5
@@ -8,7 +8,7 @@
     ymax = 1
   []
 
-  [./subdomain_lower]
+  [subdomain_lower]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     bottom_left = '0.2 0.2 0'
@@ -17,7 +17,7 @@
   []
 
   # Independent Tree of Generators
-  [./gmg2]
+  [gmg2]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 5
@@ -26,7 +26,7 @@
     ymax = 1
   []
 
-  [./subdomain_upper]
+  [subdomain_upper]
     type = SubdomainBoundingBoxGenerator
     input = gmg2
     bottom_left = '0.6 0.6 0'

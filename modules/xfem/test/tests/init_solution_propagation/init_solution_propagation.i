@@ -32,108 +32,108 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_set_uo]
+  [line_seg_cut_set_uo]
     type = LineSegmentCutSetUserObject
     cut_data ='0.0000e+000  0.0000e+000  5.5000e+000  0.0000e+000  0.0   0.0
                5.5000e+000  0.0000e+000  2.5500e+001  0.0000e+000  0.05  1.05'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./const_monomial]
+  [const_monomial]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./first_monomial]
+  []
+  [first_monomial]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./first_linear]
+  []
+  [first_linear]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./const_monomial]
+  [const_monomial]
     type = FunctionAux
     function = 'dummy'
     variable = const_monomial
     execute_on = 'initial'
-  [../]
-  [./first_monomial]
+  []
+  [first_monomial]
     type = FunctionAux
     function = 'dummy'
     variable = first_monomial
     execute_on = 'initial'
-  [../]
-  [./first_linear]
+  []
+  [first_linear]
     type = FunctionAux
     function = 'dummy'
     variable = first_linear
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Functions]
-  [./dummy]
+  [dummy]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
-  [./disp_top_y]
+  []
+  [disp_top_y]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 0.1'
-  [../]
+  []
 []
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = FunctionDirichletBC
     boundary = 2
     variable = disp_y
     function = disp_top_y
-  [../]
+  []
 
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 
-  [./right_x]
+  [right_x]
     type = DirichletBC
     boundary = 1
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -160,8 +160,8 @@
 [Outputs]
   exodus = true
   csv = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

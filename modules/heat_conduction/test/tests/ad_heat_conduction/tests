@@ -1,5 +1,5 @@
 [Tests]
-  [./jacobian_test]
+  [jacobian_test]
     type = 'PetscJacobianTester'
     input = 'test.i'
     ratio_tol = 1e-7
@@ -9,5 +9,5 @@
     design = "ADHeatConduction.md"
     issues = "#5658 #12633"
     allow_test_objects = true
-  [../]
+  []
 []

@@ -22,32 +22,32 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 105
     grain_num = 4
     coloring_algorithm = bt
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
   [ghosting0]
     order = CONSTANT
     family = MONOMIAL
@@ -150,52 +150,52 @@
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
   active = ''
-  [./ngrains]
+  [ngrains]
     type = FeatureFloodCount
     variable = bnds
     threshold = 0.7
-  [../]
+  []
 []
 
 [Preconditioning]
   active = ''
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -214,12 +214,12 @@
   num_steps = 2
   dt = 80.0
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 1
-  [../]
+  []
 []
 
 [Outputs]

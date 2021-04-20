@@ -2,7 +2,7 @@
   issues = '#1927'
   design = 'syntax/Outputs/index.md'
 
-  [./dt_from_master]
+  [dt_from_master]
     type = 'CheckFiles'
     input = 'dt_from_master_master.i'
     check_files =      'dt_from_master_master_out.e
@@ -16,5 +16,5 @@
     recover = false
 
     requirement = "The system shall support the ability to limit output to certain sub-applications based on name."
-  [../]
+  []
 []

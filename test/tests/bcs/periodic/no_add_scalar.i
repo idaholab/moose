@@ -8,41 +8,41 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
-  [./scalar]
+    []
+  []
+  [scalar]
     family = SCALAR
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = c
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./scalar]
+  [scalar]
     type = ODETimeDerivative
     variable = scalar
-  [../]
+  []
 []
 
 [Executioner]

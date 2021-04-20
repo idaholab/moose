@@ -1,5 +1,5 @@
 [Tests]
-  [./earth_tide_fullsat]
+  [earth_tide_fullsat]
     type = CSVDiff
     input = 'earth_tide_fullsat.i'
     csvdiff = 'earth_tide_fullsat_1step.csv'
@@ -9,8 +9,8 @@
     issues = '#13867'
     design = 'tidal.md'
     requirement = 'PorousFlow shall be able to simulate the porepressure response to earth tides'
-  [../]
-  [./barometric_fully_confined]
+  []
+  [barometric_fully_confined]
     type = CSVDiff
     input = 'barometric_fully_confined.i'
     csvdiff = 'barometric_fully_confined_out.csv'
@@ -19,8 +19,8 @@
     issues = '#13867'
     design = 'tidal.md'
     requirement = 'PorousFlow shall be able to simulate the porepressure response to barometric loading for a fully confined aquifer'
-  [../]
-  [./atm_tides]
+  []
+  [atm_tides]
     type = CSVDiff
     input = 'atm_tides.i'
     csvdiff = 'atm_tides_10step.csv'
@@ -30,8 +30,8 @@
     issues = '#13867'
     design = 'tidal.md'
     requirement = 'PorousFlow shall be able to simulate the porepressure response to barometric loading on an unconfined aquifer'
-  [../]
-  [./atm_tides_open_hole]
+  []
+  [atm_tides_open_hole]
     type = CSVDiff
     input = 'atm_tides_open_hole.i'
     csvdiff = 'atm_tides_open_hole_3step.csv'
@@ -41,5 +41,5 @@
     issues = '#13867'
     design = 'tidal.md'
     requirement = 'PorousFlow shall be able to simulate the porepressure response to barometric loading on an unconfined aquifer including an open borehole'
-  [../]
+  []
 []

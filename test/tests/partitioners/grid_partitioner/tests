@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     requirement = 'MOOSE shall provide a simple regular grid-based partitioner'
     design = '/GridPartitioner.md'
     issues = '#11437'
@@ -8,5 +8,5 @@
     exodiff = 'grid_partitioner_out.e'
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 []

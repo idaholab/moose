@@ -12,49 +12,49 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
+  [disp_x]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./2_x]
+  [2_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 []
 
 [Functions]
-  [./prefac]
+  [prefac]
     type = ParsedFunction
     value = '1+2*x'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.1
     youngs_modulus = 1e6
     elasticity_tensor_prefactor = prefac
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8050.0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,9 +72,9 @@
 []
 
 [Postprocessors]
-  [./time_step]
+  [time_step]
     type = CriticalTimeStep
-  [../]
+  []
 []
 
 [Outputs]

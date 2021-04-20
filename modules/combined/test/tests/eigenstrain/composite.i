@@ -10,136 +10,136 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [AuxVariables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
-  [./s11]
+    []
+  []
+  [s11]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./s22]
+  []
+  [s22]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./ds11]
+  []
+  [ds11]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./ds22]
+  []
+  [ds22]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./s11]
+  [s11]
     type = RankTwoAux
     variable = s11
     rank_two_tensor = eigenstrain
     index_i = 0
     index_j = 0
-  [../]
-  [./s22]
+  []
+  [s22]
     type = RankTwoAux
     variable = s22
     rank_two_tensor = eigenstrain
     index_i = 1
     index_j = 1
-  [../]
-  [./ds11]
+  []
+  [ds11]
     type = RankTwoAux
     variable = ds11
     rank_two_tensor = delastic_strain/dc
     index_i = 0
     index_j = 0
-  [../]
-  [./ds22]
+  []
+  [ds22]
     type = RankTwoAux
     variable = ds22
     rank_two_tensor = delastic_strain/dc
     index_i = 1
     index_j = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
     eigenstrain_names = 'eigenstrain'
-  [../]
-  [./eigen1]
+  []
+  [eigen1]
     type = GenericConstantRankTwoTensor
     tensor_values = '1 -1 0 0 0 0'
     tensor_name = eigen1
-  [../]
-  [./eigen2]
+  []
+  [eigen2]
     type = GenericConstantRankTwoTensor
     tensor_values = '-1 1 0 0 0 0'
     tensor_name = eigen2
-  [../]
-  [./weight1]
+  []
+  [weight1]
     type = DerivativeParsedMaterial
     function = 0.02*c^2
     f_name = weight1
     args = c
-  [../]
-  [./weight2]
+  []
+  [weight2]
     type = DerivativeParsedMaterial
     function = 0.02*(1-c)^2
     f_name = weight2
     args = c
-  [../]
+  []
 
-  [./eigenstrain]
+  [eigenstrain]
     type = CompositeEigenstrain
     tensors = 'eigen1  eigen2'
     weights = 'weight1 weight2'
     args = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./left_x]
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,71 +7,71 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
-  [./exact_fn]
+  []
+  [exact_fn]
     type = ParsedGradFunction
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
-  [../]
-  [./disp_func]
+  []
+  [disp_func]
     type = ParsedFunction
     value = x
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./abs]
+  []
+  [abs]
     type = Reaction
     variable = u
-  [../]
-  [./forcing]
+  []
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     epsilon = -1
     sigma = 6
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
     epsilon = -1
     sigma = 6
-  [../]
+  []
 []
 
 [Executioner]
@@ -87,10 +87,10 @@
 []
 
 [ICs]
-  [./disp_x_ic]
+  [disp_x_ic]
     function = disp_func
     variable = disp_x
     type = FunctionIC
-  [../]
+  []
 []
 

@@ -8,46 +8,46 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = diffused
     preset = false
     boundary = 'left'
     value = 1.0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = diffused
     preset = false
     boundary = 'right'
     value = 0.0
-  [../]
+  []
 []
 
 # Constraint System
 [Constraints]
-  [./y_top]
+  [y_top]
     type = EqualValueBoundaryConstraint
     variable = diffused
     primary = '45'    # node on boundary
     secondary = 'top'    # boundary
     penalty = 10e6
-  [../]
+  []
 []
 
 [Executioner]
@@ -64,17 +64,17 @@
 [Postprocessors]
   active = ' '
 
-  [./residual]
+  [residual]
     type = Residual
-  [../]
+  []
 
-  [./nl_its]
+  [nl_its]
     type = NumNonlinearIterations
-  [../]
+  []
 
-  [./lin_its]
+  [lin_its]
     type = NumLinearIterations
-  [../]
+  []
 []
 
 [Outputs]

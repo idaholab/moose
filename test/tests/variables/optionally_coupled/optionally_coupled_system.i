@@ -7,60 +7,60 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./v]
+  []
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./coupled]
+  []
+  [coupled]
     type = OptionallyCoupledForce
     variable = u
     v = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 2
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Executioner]

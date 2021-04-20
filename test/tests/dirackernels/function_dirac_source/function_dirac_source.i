@@ -10,53 +10,53 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./point_source]
+  [point_source]
     type = FunctionDiracSource
     variable = u
     function = switch_off
     point = '0.1 0.2 0.0'
-  [../]
+  []
 []
 
 [Functions]
-  [./switch_off]
+  [switch_off]
     type = ParsedFunction
     value = 'if(t < 1.0001, 1, 0)'
-  [../]
+  []
 []
 
 [BCs]
-  [./external]
+  [external]
     type = NeumannBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_internal_energy]
+  [total_internal_energy]
     type = ElementIntegralVariablePostprocessor
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

@@ -25,75 +25,75 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.5
     al = 1 # same deal with PETSc constant state
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.1
     sum_s_res = 0.2
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 0.1
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
-  [../]
+  [pressure]
+  []
 []
 
 [ICs]
-  [./pressure]
+  [pressure]
     type = ConstantIC
     variable = pressure
     value = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./area_left]
+  [area_left]
     type = AreaPostprocessor
     boundary = left
     execute_on = initial
-  [../]
-  [./area_right]
+  []
+  [area_right]
     type = AreaPostprocessor
     boundary = right
     execute_on = initial
-  [../]
-  [./mass_fin]
+  []
+  [mass_fin]
     type = RichardsMass
     variable = pressure
     execute_on = 'initial timestep_end'
-  [../]
-  [./p0]
+  []
+  [p0]
     type = PointValue
     point = '0 0 0'
     variable = pressure
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_flux]
+  [left_flux]
     type = RichardsPiecewiseLinearSink
     boundary = left
     pressures = '0'
@@ -103,8 +103,8 @@
     use_relperm = false
     area_pp = area_left
     fully_upwind = true
-  [../]
-  [./right_flux]
+  []
+  [right_flux]
     type = RichardsPiecewiseLinearSink
     boundary = right
     pressures = '0'
@@ -114,35 +114,35 @@
     use_relperm = false
     area_pp = area_right
     fully_upwind = true
-  [../]
+  []
 []
 
 [Kernels]
   active = 'richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-5 0 0  0 1E-5 0  0 0 1E-5'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-12 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

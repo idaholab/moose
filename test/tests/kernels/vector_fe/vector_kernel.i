@@ -11,55 +11,55 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorFEWave
     variable = u
     x_forcing_func = 'x_ffn'
     y_forcing_func = 'y_ffn'
-  [../]
+  []
 []
 
 [BCs]
-  [./bnd]
+  [bnd]
     type = VectorCurlPenaltyDirichletBC
     boundary = 'left right top bottom'
     penalty = 1e10
     function_x = 'x_sln'
     function_y = 'y_sln'
     variable = u
-  [../]
+  []
 []
 
 [Functions]
-  [./x_ffn]
+  [x_ffn]
     type = ParsedFunction
     value = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
-  [../]
-  [./y_ffn]
+  []
+  [y_ffn]
     type = ParsedFunction
     value = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
-  [../]
-  [./x_sln]
+  []
+  [x_sln]
     type = ParsedFunction
     value = 'cos(pi*x)*sin(pi*y)'
-  [../]
-  [./y_sln]
+  []
+  [y_sln]
     type = ParsedFunction
     value = '-sin(pi*x)*cos(pi*y)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pre]
+  [pre]
     type = SMP
-  [../]
+  []
 []
 
 [Executioner]

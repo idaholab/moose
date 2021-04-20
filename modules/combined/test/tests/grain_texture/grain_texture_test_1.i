@@ -25,61 +25,61 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [UserObjects]
-  [./euler_angle_file]
+  [euler_angle_file]
     type = EulerAngleFileReader
     file_name = grn_3_rand_2D.tex
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = FauxGrainTracker
     outputs = none
-  [../]
-  [./voronoi]
+  []
+  [voronoi]
     type = PolycrystalVoronoi
     coloring_algorithm = bt
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   # Dependent variables
-  [./unique_grains]
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./unique_grains]
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     block = 0 # Block ID (only one block in this problem)
@@ -88,16 +88,16 @@
     Q = 0.23 #Activation energy for grain growth from Schonfelder 1997
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm    #Width of the diffuse GB
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./textureInfo]
+  [textureInfo]
     type = GrainTextureVectorPostprocessor
     unique_grains = unique_grains
     euler_angle_provider = euler_angle_file
     sort_by = id # sort output by elem id
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,58 +6,58 @@
 []
 
 [Functions]
-  [./fn]
+  [fn]
     type = ParsedFunction
     value = 'if(a < 0.8625, 1, 0)'
     vars = 'a'
     vals = 'a_avg'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./rhs]
+  []
+  [rhs]
     type = BodyForce
     variable = u
     function = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./fn_pps]
+  [fn_pps]
     type = FunctionValuePostprocessor
     function = fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./a_avg]
+  [a_avg]
     type = ElementAverageValue
     variable = a
-  [../]
+  []
 []
 
 [UserObjects]
-  [./fn_uo]
+  [fn_uo]
     type = PostprocessorSpatialUserObject
     postprocessor = fn_pps
-  [../]
+  []
 []
 
 [Executioner]

@@ -7,10 +7,10 @@
 
 [Variables]
   # Create two variables
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Problem]
@@ -27,22 +27,22 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]
   # Transfer both variables by inputting a vector of their names
-  [./from_sub]
+  [from_sub]
     type = MultiAppCopyTransfer
     direction = from_multiapp
     source_variable = 'u v'
     variable = 'u v'
     multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

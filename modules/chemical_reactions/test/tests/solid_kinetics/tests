@@ -1,27 +1,27 @@
 [Tests]
-  [./2species]
+  [2species]
     type = 'Exodiff'
     input = '2species.i'
     exodiff = '2species_out.e'
     # Diffs with parallel that aren't worth customizing tolerances over
     max_parallel = 1
-  [../]
-  [./2species_without_action]
+  []
+  [2species_without_action]
     type = 'Exodiff'
     input = '2species_without_action.i'
     exodiff = '2species_out.e'
     prereq = 2species
     # Diffs with parallel that aren't worth customizing tolerances over
     max_parallel = 1
-  [../]
-  [./calcite_precipitation]
+  []
+  [calcite_precipitation]
     type = 'CSVDiff'
     input = 'calcite_precipitation.i'
     csvdiff = 'calcite_precipitation_out.csv'
-  [../]
-  [./calcite_dissolution]
+  []
+  [calcite_dissolution]
     type = 'CSVDiff'
     input = 'calcite_dissolution.i'
     csvdiff = 'calcite_dissolution_out.csv'
-  [../]
+  []
 []

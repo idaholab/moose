@@ -9,65 +9,65 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./test_object]
+  [test_object]
     type = MaterialPointSource
     point = '0.5 0.5 0'
     variable = diffused
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_diffused]
+  [bottom_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom'
     value = 2
-  [../]
+  []
 
-  [./top_diffused]
+  [top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'matp'
     prop_values = '1'
     block = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./test_object]
+  [test_object]
     type = FunctionValuePostprocessor
     function = '2*(x+y)'
     point = '0.5 0.5 0'
     control_tags = 'tag'
-  [../]
-  [./other_point_test_object]
+  []
+  [other_point_test_object]
     type = FunctionValuePostprocessor
     function = '3*(x+y)'
     point = '0.5 0.5 0'
     control_tags = 'tag'
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,10 +81,10 @@
 []
 
 [Controls]
-  [./point_control]
+  [point_control]
     type = TestControl
     test_type = 'point'
     parameter = 'tag/*/point'
     execute_on = 'initial'
-  [../]
+  []
 []

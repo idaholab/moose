@@ -100,10 +100,10 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

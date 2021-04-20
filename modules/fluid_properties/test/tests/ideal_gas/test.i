@@ -7,144 +7,144 @@
 []
 
 [Functions]
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     value = -4
-  [../]
-  [./bc_fn]
+  []
+  [bc_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./e]
+  [e]
     initial_condition = 6232.5
-  [../]
-  [./v]
+  []
+  [v]
     initial_condition = 0.02493
-  [../]
+  []
 
-  [./p]
+  [p]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T]
+  []
+  [T]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./mu]
+  []
+  [mu]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./k]
+  []
+  [k]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./g]
+  []
+  [g]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./p]
+  [p]
     type = MaterialRealAux
      variable = p
      property = pressure
-  [../]
-  [./T]
+  []
+  [T]
     type = MaterialRealAux
      variable = T
      property = temperature
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
      variable = cp
      property = cp
-  [../]
-  [./cv]
+  []
+  [cv]
     type = MaterialRealAux
      variable = cv
      property = cv
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
      variable = c
      property = c
-  [../]
-  [./mu]
+  []
+  [mu]
     type = MaterialRealAux
      variable = mu
      property = mu
-  [../]
-  [./k]
+  []
+  [k]
     type = MaterialRealAux
      variable = k
      property = k
-  [../]
-  [./g]
+  []
+  [g]
     type = MaterialRealAux
      variable = g
      property = g
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./ideal_gas]
+  [FluidProperties]
+    [ideal_gas]
       type = IdealGasFluidProperties
       gamma = 1.4
       molar_mass = 1.000536678700361
-    [../]
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = FluidPropertiesMaterial
     e = e
     v = v
     fp = ideal_gas
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = BodyForce
     variable = u
     function = f_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]

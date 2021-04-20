@@ -1,5 +1,5 @@
 [Tests]
-[./regular_grid]
+[regular_grid]
   type = Exodiff
   input = regular_grid.i
   exodiff = regular_grid_out.e
@@ -8,8 +8,8 @@
   requirement = "PorousFlow shall be able to create a heterogeneous model using supplied heterogeneity data"
   issues = '#13XXX'
   design = 'porous_flow/heterogeneous_models.md'
-[../]
-[./field_model]
+[]
+[field_model]
   type = Exodiff
   input = field_model.i
   exodiff = field_model_out.e
@@ -17,5 +17,5 @@
   requirement = "PorousFlow shall be able to create a heterogeneous model using data from a supplied mesh"
   issues = '#13XXX'
   design = 'porous_flow/heterogeneous_models.md'
-[../]
+[]
 []

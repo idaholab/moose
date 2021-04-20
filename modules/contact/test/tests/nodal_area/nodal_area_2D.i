@@ -7,42 +7,42 @@
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./nodal_area]
+  [nodal_area]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [UserObjects]
-  [./nodal_area]
+  [nodal_area]
     type = NodalArea
     variable = nodal_area
     boundary = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./dummy]
+  [dummy]
     type = DirichletBC
     variable = dummy
     boundary = 1
     value = 100
-  [../]
+  []
 []
 
 [Executioner]

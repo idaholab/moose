@@ -151,18 +151,18 @@ velocity_interp_method='average'
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2p]
+  []
+  [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

@@ -13,86 +13,86 @@
 []
 
 [Variables]
-  [./tracer]
+  [tracer]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./tracer]
+  [tracer]
     type = FunctionIC
     variable = tracer
     function = 'if(x<0.1,0,if(x>0.3,0,1))'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./lslope]
+  [lslope]
     type = AEFVSlopeLimitingOneD
     execute_on = 'linear'
     scheme = 'none' #none | minmod | mc | superbee
     u = tracer
-  [../]
+  []
 
-  [./internal_side_flux]
+  [internal_side_flux]
     type = AEFVUpwindInternalSideFlux
     execute_on = 'linear'
     velocity = 0.1
-  [../]
+  []
 
-  [./free_outflow_bc]
+  [free_outflow_bc]
     type = AEFVFreeOutflowBoundaryFlux
     execute_on = 'linear'
     velocity = 0.1
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = tracer
-  [../]
+  []
 []
 [DGKernels]
-  [./concentration]
+  [concentration]
     type = AEFVKernel
     variable = tracer
     component = 'concentration'
     flux = internal_side_flux
     u = tracer
-  [../]
+  []
 []
 
 [BCs]
-  [./concentration]
+  [concentration]
     type = AEFVBC
     boundary = 'left right'
     variable = tracer
     component = 'concentration'
     flux = free_outflow_bc
     u = tracer
-  [../]
+  []
 []
 
 [Materials]
-  [./aefv]
+  [aefv]
     type = AEFVMaterial
     slope_limiting = lslope
     u = tracer
-  [../]
+  []
 []
 
 
 [VectorPostprocessors]
-  [./tracer]
+  [tracer]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
     num_points = 100
     sort_by = x
     variable = tracer
-  [../]
+  []
 []
 
 [Executioner]

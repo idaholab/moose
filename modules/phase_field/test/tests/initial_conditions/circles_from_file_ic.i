@@ -13,26 +13,26 @@
 []
 
 [Variables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [ICs]
-  [./IC_c]
+  [IC_c]
     type = SmoothCircleFromFileIC
     file_name = 'circles.txt'
     invalue = 1
     outvalue = 0
     variable = c
     int_width = 6
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_dot]
+  [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Executioner]

@@ -17,39 +17,39 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
+  [from_sub]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 2.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -68,16 +68,16 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = boundary_tomaster_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub
@@ -85,5 +85,5 @@
     source_boundary = right
     target_boundary = left
     variable = from_sub
-  [../]
+  []
 []

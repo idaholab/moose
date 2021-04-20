@@ -1,14 +1,14 @@
 [Tests]
-  [./desorption01]
+  [desorption01]
     type = 'Exodiff'
     input = 'desorption01.i'
     exodiff = 'desorption01_out.e'
     threading = '!pthreads'
-  [../]
-  [./desorption02]
+  []
+  [desorption02]
     type = 'Exodiff'
     input = 'desorption02.i'
     exodiff = 'desorption02_out.e'
     threading = '!pthreads'
-  [../]
+  []
 []

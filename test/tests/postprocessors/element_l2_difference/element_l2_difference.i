@@ -7,48 +7,48 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
+  [u]
+  []
+  [v]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./force_u]
+  []
+  [force_u]
     type = BodyForce
     variable = u
     function = 'x*x*x+y*y*y'
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./force_v]
+  []
+  [force_v]
     type = BodyForce
     variable = v
     function = 'x*x*x+y*y*y'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 'left bottom right top'
     value = 0
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 'left bottom right top'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -62,11 +62,11 @@
 []
 
 [Postprocessors]
-  [./l2_difference]
+  [l2_difference]
     type = ElementL2Difference
     variable = u
     other_variable = v
-  [../]
+  []
 []
 
 [Outputs]

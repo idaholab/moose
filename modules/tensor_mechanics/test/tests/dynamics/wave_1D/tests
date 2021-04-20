@@ -1,7 +1,7 @@
 [tests]
   design = "Dynamics.md"
   issues = "#5559"
-  [./hht]
+  [hht]
     type = 'Exodiff'
     input = 'wave_hht.i'
     exodiff = 'wave_hht_out.e'
@@ -10,8 +10,8 @@
     requirement = "The mechanics system shall correctly predict 1D wave propagation"
                    " in a linear elastic material with numerical damping resulting"
                    " from Hilber-Hughes-Taylor (HHT) time integration."
-  [../]
-  [./newmark]
+  []
+  [newmark]
     type = 'Exodiff'
     input = 'wave_newmark.i'
     exodiff = 'wave_newmark_out.e'
@@ -20,8 +20,8 @@
     requirement = "The mechanics system shall correctly predict 1D wave propagation"
                    " in a linear elastic material with no numerical or structural"
                    " damping."
-  [../]
-  [./rayleigh_hht]
+  []
+  [rayleigh_hht]
     type = 'Exodiff'
     input = 'wave_rayleigh_hht.i'
     exodiff = 'wave_rayleigh_hht_out.e'
@@ -30,8 +30,8 @@
     requirement = "The mechanics system shall correctly predict 1D wave propagation"
                    " in a linear elastic material with both Rayleigh damping and"
                    " numerical damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
-  [../]
-  [./rayleigh_hht_ad]
+  []
+  [rayleigh_hht_ad]
     type = 'Exodiff'
     input = 'wave_rayleigh_hht_AD.i'
     exodiff = 'wave_rayleigh_hht_out.e'
@@ -42,8 +42,8 @@
                    " numerical damping resulting from Hilber-Hughes-Taylor (HHT)"
                    " time integration when automatic differentiation is used."
     prereq = "rayleigh_hht"
-  [../]
-  [./rayleigh_hht_ad_jac]
+  []
+  [rayleigh_hht_ad_jac]
     type = 'PetscJacobianTester'
     input = 'wave_rayleigh_hht_AD.i'
 
@@ -52,8 +52,8 @@
                  " both Rayleigh damping and numerical damping resulting from"
                  " Hilber-Hughes-Taylor (HHT) time integration when automatic"
                  " differentiation is used."
-  [../]
-  [./rayleigh_hht_ti]
+  []
+  [rayleigh_hht_ti]
     type = 'Exodiff'
     input = 'wave_rayleigh_hht_ti.i'
     exodiff = 'wave_rayleigh_hht_out.e'
@@ -67,8 +67,8 @@
                    " integrator."
     issues = "#12185"
     prereq = "rayleigh_hht_ad"
-  [../]
-  [./rayleigh_newmark]
+  []
+  [rayleigh_newmark]
     type = 'Exodiff'
     input = 'wave_rayleigh_newmark.i'
     exodiff = 'wave_rayleigh_newmark_out.e'
@@ -76,5 +76,5 @@
 
     requirement = "The mechanics system shall correctly predict 1D wave propagation"
                    " in a linear elastic material with Rayleigh damping."
-  [../]
+  []
 []

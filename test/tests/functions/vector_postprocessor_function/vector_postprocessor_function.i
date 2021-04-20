@@ -13,72 +13,72 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./v]
+  [v]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./ramp_u]
+  [ramp_u]
     type = ParsedFunction
     value = 't'
-  [../]
-  [./point_value_function_u]
+  []
+  [point_value_function_u]
     type = VectorPostprocessorFunction
     component = y
     argument_column = y
     value_column = u
     vectorpostprocessor_name = point_value_vector_postprocessor_u
-  [../]
-  [./line_value_function_v]
+  []
+  [line_value_function_v]
     type = VectorPostprocessorFunction
     component = y
     argument_column = y
     value_column = v
     vectorpostprocessor_name = line_value_vector_postprocessor_v
-  [../]
-  [./function_v]
+  []
+  [function_v]
     type = PiecewiseLinear
     x = '0 0.008'
     y = '1 2'
     axis = y
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffusion_u]
+  [diffusion_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-[./aux_v]
+[aux_v]
   type = FunctionAux
   variable = v
   function = function_v
-[../]
+[]
 []
 
 [BCs]
-  [./top_u]
+  [top_u]
     type = FunctionDirichletBC
     boundary = top
     variable = u
     function = ramp_u
-  [../]
-  [./bottom_u]
+  []
+  [bottom_u]
     type = DirichletBC
     boundary = bottom
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,35 +98,35 @@
   dt = 1
 []
 [Postprocessors]
-  [./point_value_postprocessor_u]
+  [point_value_postprocessor_u]
     type = FunctionValuePostprocessor
     function = point_value_function_u
     point = '0.002 0.004 0'
-  [../]
-  [./line_value_postprocessor_v]
+  []
+  [line_value_postprocessor_v]
     type = FunctionValuePostprocessor
     function = line_value_function_v
     point = '0.002 0.004 0'
-  [../]
-  [./postprocessor_average_u]
+  []
+  [postprocessor_average_u]
     type = ElementAverageValue
     variable = u
-  [../]
-  [./postprocessor_average_v]
+  []
+  [postprocessor_average_v]
     type = ElementAverageValue
     variable = v
-  [../]
+  []
 []
 [VectorPostprocessors]
-  [./point_value_vector_postprocessor_u]
+  [point_value_vector_postprocessor_u]
     type = PointValueSampler
     variable = u
     points = '0 0.001 0 0 0.004 0 0 0.008 0'
     #points = '0.001 0 0 0.002 0 0'
     sort_by = y
     execute_on = linear
-  [../]
-  [./line_value_vector_postprocessor_v]
+  []
+  [line_value_vector_postprocessor_v]
     type = LineValueSampler
     variable = v
     start_point = '0 0.001 0'
@@ -134,16 +134,16 @@
     num_points = 5
     sort_by = y
     execute_on = linear
-  [../]
+  []
 []
 [Outputs]
   interval = 1
   csv = false
   exodus = true
   file_base = out
-  [./console]
+  [console]
     type = Console
     output_linear = true
     max_rows = 10
-  [../]
+  []
 []

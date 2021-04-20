@@ -4,10 +4,10 @@
 []
 
 [AuxVariables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Problem]
@@ -18,9 +18,9 @@
 [Executioner]
   type = Transient
   num_steps = 10
-  [./TimeStepper]
+  [TimeStepper]
     type = ExternalPetscTimeStepper
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -43,19 +43,19 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     type = TransientMultiApp
     input_files = 'moose_as_sub.i'
     app_type = ExternalPetscSolverTestApp
-  [../]
+  []
 []
 
 [Transfers]
-  [./tosub]
+  [tosub]
     type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
     multi_app = sub_app
     source_variable = u
     variable = v
-  [../]
+  []
 []

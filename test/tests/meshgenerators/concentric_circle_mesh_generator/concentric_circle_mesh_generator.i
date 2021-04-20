@@ -1,5 +1,5 @@
 [Mesh]
-  [./ccmg]
+  [ccmg]
     type = ConcentricCircleMeshGenerator
     num_sectors = 6
     radii = '0.2546 0.3368 0.3600 0.3818 0.3923 0.4025 0.4110 0.4750'

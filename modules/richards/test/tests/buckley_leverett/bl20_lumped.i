@@ -18,170 +18,170 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     y = '0.1 0.5 0.5 1 2  4'
     x = '0   0.1 1   5 40 42'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = 'pwater pgas'
-  [../]
-  [./DensityWater]
+  []
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E6
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 2E6
-  [../]
-  [./SeffWater]
+  []
+  [SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
     al = 1E-5
-  [../]
-  [./SeffGas]
+  []
+  [SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
     al = 1E-5
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./SatWater]
+  []
+  [SatWater]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SatGas]
+  []
+  [SatGas]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SUPGwater]
+  []
+  [SUPGwater]
     type = RichardsSUPGstandard
     p_SUPG = 1E-5
-  [../]
-  [./SUPGgas]
+  []
+  [SUPGgas]
     type = RichardsSUPGstandard
     p_SUPG = 1E-5
-  [../]
+  []
 []
 
 [Variables]
-  [./pwater]
+  [pwater]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./pgas]
+  []
+  [pgas]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./w_aux_seff]
-  [../]
+  [w_aux_seff]
+  []
 []
 
 
 
 [Kernels]
-  [./richardstwater]
+  [richardstwater]
     type = RichardsLumpedMassChange
     variable = pwater
-  [../]
-  [./richardsfwater]
+  []
+  [richardsfwater]
     type = RichardsFlux
     variable = pwater
-  [../]
-  [./richardstgas]
+  []
+  [richardstgas]
     type = RichardsLumpedMassChange
     variable = pgas
-  [../]
-  [./richardsfgas]
+  []
+  [richardsfgas]
     type = RichardsFlux
     variable = pgas
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./w_aux_seff_auxk]
+  [w_aux_seff_auxk]
     type = RichardsSeffAux
     seff_UO = SeffWater
     pressure_vars = 'pwater pgas'
     variable = w_aux_seff
-  [../]
+  []
 []
 
 
 [ICs]
-  [./water_ic]
+  [water_ic]
     type = FunctionIC
     variable = pwater
     function = initial_water
-  [../]
-  [./gas_ic]
+  []
+  [gas_ic]
     type = FunctionIC
     variable = pgas
     function = initial_gas
-  [../]
+  []
 []
 
 [BCs]
-  [./left_w]
+  [left_w]
     type = DirichletBC
     variable = pwater
     boundary = left
     value = 1E6
-  [../]
-  [./left_g]
+  []
+  [left_g]
     type = DirichletBC
     variable = pgas
     boundary = left
     value = 1000
-  [../]
-  [./right_w]
+  []
+  [right_w]
     type = DirichletBC
     variable = pwater
     boundary = right
     value = -300000
-  [../]
-  [./right_g]
+  []
+  [right_g]
     type = DirichletBC
     variable = pgas
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 
 [Functions]
-  [./initial_water]
+  [initial_water]
     type = ParsedFunction
     value = 1000000*(1-min(x/5,1))-if(x<5,0,300000)
-  [../]
-  [./initial_gas]
+  []
+  [initial_gas]
     type = ParsedFunction
     value = 1000
-  [../]
+  []
 []
 
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.15
@@ -189,27 +189,27 @@
     viscosity = '1E-3 1E-6'
     gravity = '0 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
   active = 'standard'
 
-  [./bounded]
+  [bounded]
   # must use --use-petsc-dm command line argument
     type = SMP
     full = true
     petsc_options_iname = '-snes_type   -pc_factor_shift_type'
     petsc_options_value = 'vinewtonssls nonzero'
-  [../]
+  []
 
-  [./standard]
+  [standard]
     type = SMP
     full = true
     petsc_options_iname = '-pc_factor_shift_type'
     petsc_options_value = 'nonzero'
-  [../]
+  []
 
 []
 
@@ -221,10 +221,10 @@
   nl_rel_tol = 1.e-9
   nl_max_its = 10
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]
@@ -233,8 +233,8 @@
   interval = 100000
   exodus = true
   hide = pgas
-  [./console_out]
+  [console_out]
     type = Console
     interval = 1
-  [../]
+  []
 []

@@ -15,49 +15,49 @@
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
-  [./u_z]
-  [../]
-  [./global_strain]
+  [u_x]
+  []
+  [u_y]
+  []
+  [u_z]
+  []
+  [global_strain]
     order = SIXTH
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     type = GlobalDisplacementAux
     variable = disp_x
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = GlobalDisplacementAux
     variable = disp_z
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 2
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -66,89 +66,89 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [ScalarKernels]
-  [./global_strain]
+  [global_strain]
     type = GlobalStrain
     variable = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y z'
       variable = ' u_x u_y u_z'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
-  [../]
-  [./centerfix_y]
+  []
+  [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = u_y
     value = 0
-  [../]
-  [./centerfix_z]
+  []
+  [centerfix_z]
     type = DirichletBC
     boundary = 100
     variable = u_z
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '70e9 0.33'
     fill_method = symmetric_isotropic_E_nu
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     global_strain = global_strain
-  [../]
-  [./global_strain]
+  []
+  [global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [UserObjects]
-  [./global_strain_uo]
+  [global_strain_uo]
     type = GlobalStrainUserObject
     applied_stress_tensor = '-5e9 -5e9 -5e9 0 0 0'
     execute_on = 'Initial Linear Nonlinear'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2err]
+  [l2err]
     type = ScalarL2Error
     variable = global_strain
     function = -0.02428571 #strain = E*(1-2*nu)/sigma
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

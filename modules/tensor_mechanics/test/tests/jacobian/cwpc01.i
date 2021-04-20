@@ -18,112 +18,112 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./wc_z]
-  [../]
+  [wc_z]
+  []
 []
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 20
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 2.055555555556E-01
-  [../]
-  [./t_strength]
+  []
+  [t_strength]
     type = TensorMechanicsHardeningConstant
     value = 1
-  [../]
-  [./c_strength]
+  []
+  [c_strength]
     type = TensorMechanicsHardeningConstant
     value = 100
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 10.0
     poisson = 0.25
     layer_thickness = 10.0
     joint_normal_stiffness = 2.5
     joint_shear_stiffness = 2.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
-  [../]
-  [./stress]
+  []
+  [stress]
     type = CappedWeakPlaneCosseratStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -133,16 +133,16 @@
     tip_smoother = 1
     smoothing_tol = 1
     yield_function_tol = 1E-11
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

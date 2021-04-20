@@ -13,77 +13,77 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         solve_type = FORWARD_SPLIT
         mobility = 1.0
         kappa = kappa_c
         free_energy = F
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = CrossIC
     variable = c
     x1 = 0.0
     x2 = 25.0
     y1 = 0.0
     y2 = 25.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./local_energy]
+  [local_energy]
     type = TotalFreeEnergy
     variable = local_energy
     f_name = F
     kappa_names = kappa_c
     interfacial_vars = c
-  [../]
+  []
 []
 
 [Materials]
-  [./kappa_c]
+  [kappa_c]
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     args = c
     function = '(1 - c)^2 * (1 + c)^2'
     f_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     variable = local_energy
-  [../]
-  [./total_c]
+  []
+  [total_c]
     type = ElementIntegralVariablePostprocessor
     variable = c
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

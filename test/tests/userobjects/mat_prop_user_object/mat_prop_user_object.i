@@ -6,66 +6,66 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./uo_e]
+  [uo_e]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./uo_reporter]
+  [uo_reporter]
     type = MatPropUserObjectAux
     variable = uo_e
     material_user_object = uo
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./material]
+  [material]
     block = 0
     type = GenericConstantMaterial
     prop_names = 'e'
     prop_values = 2.718281828459
-  [../]
+  []
 []
 
 [UserObjects]
-  [./uo]
+  [uo]
     type = MaterialPropertyUserObject
     mat_prop = 'e'
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Executioner]

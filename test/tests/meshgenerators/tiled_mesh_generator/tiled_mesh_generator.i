@@ -1,10 +1,10 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = cube.e
   []
 
-  [./tmg]
+  [tmg]
     type = TiledMeshGenerator
     input = fmg
 

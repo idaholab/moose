@@ -11,19 +11,19 @@
 []
 
 [AuxVariables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [Variables]
-  [./gr0]
-  [../]
-  [./gr1]
-  [../]
+  [gr0]
+  []
+  [gr1]
+  []
 []
 
 [ICs]
-  [./gr0]
+  [gr0]
     type = MultiSmoothCircleIC
     variable = gr0
     invalue = 1.0
@@ -34,8 +34,8 @@
     int_width = 12.0
     radius_variation = 0.2
     radius_variation_type = uniform
-  [../]
-  [./c_IC]
+  []
+  [c_IC]
     type = SmoothCircleIC
     int_width = 12.0
     x1 = 50
@@ -44,45 +44,45 @@
     outvalue = 0
     variable = c
     invalue = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie_gr0]
+  [ie_gr0]
     type = TimeDerivative
     variable = gr0
-  [../]
-  [./diff_gr0]
+  []
+  [diff_gr0]
     type = Diffusion
     variable = gr0
-  [../]
-  [./ie_gr1]
+  []
+  [ie_gr1]
     type = TimeDerivative
     variable = gr1
-  [../]
-  [./diff_gr1]
+  []
+  [diff_gr1]
     type = Diffusion
     variable = gr1
-  [../]
-  [./source]
+  []
+  [source]
     type = MaskedBodyForce
     variable = gr1
     function = t
     mask = mask
-  [../]
+  []
 []
 
 [Materials]
-  [./mask]
+  [mask]
     type = ParsedMaterial
     function = 'c'
     f_name = mask
     args = 'c'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./grain_tracker]
+  [grain_tracker]
     type = GrainTracker
 
     # Reserve the first "op" variable
@@ -91,7 +91,7 @@
     connecting_threshold = 0.001
     variable = 'gr0 gr1'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

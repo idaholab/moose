@@ -6,40 +6,40 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   # BCs cannot be preset due to Jacobian test
-  [./left]
+  [left]
     type = DirichletBC
     preset = false
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     preset = false
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pre]
+  [pre]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,13 +59,13 @@
   max_h_level = 1
   initial_steps = 1
 
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.5 0 0'
       top_right = '1 1 0'
       inside = 'refine'
       outside = 'do_nothing'
-    [../]
-  [../]
+    []
+  []
 []

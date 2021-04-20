@@ -40,82 +40,82 @@
 []
 
 [Functions]
-  [./rampConstant1]
+  [rampConstant1]
     type = PiecewiseLinear
     x = '0.00 1.00  2.0   3.00'
     y = '0.00 0.25  0.0  -0.25'
     scale_factor = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./bot_x]
+  [bot_x]
     type = DirichletBC
     variable = disp_x
     value = 0.0
-  [../]
-  [./bot_y]
+  []
+  [bot_y]
     type = DirichletBC
     variable = disp_y
     value = 0
-  [../]
-  [./bot_z]
+  []
+  [bot_z]
     type = DirichletBC
     variable = disp_z
     value = 0
-  [../]
+  []
 
-  [./top_x]
+  [top_x]
     variable = disp_x
     preset = false
-  [../]
-  [./top_y]
+  []
+  [top_y]
     variable = disp_y
     preset = false
-  [../]
-  [./top_z]
+  []
+  [top_z]
     variable = disp_z
     preset = false
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
-  [./small_strain]
+  [small_strain]
     type = ComputeSmallStrain
     block = ' 1 2 3 4 5 6 7'
-  [../]
+  []
 
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
-  [../]
+  []
 []
 
 [Executioner]
@@ -134,16 +134,16 @@
 [] # Executioner
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 [] # Outputs
 
 [Postprocessors]
-  [./Mass]
+  [Mass]
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

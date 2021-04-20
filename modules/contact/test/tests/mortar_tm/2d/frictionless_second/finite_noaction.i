@@ -7,7 +7,7 @@ name = 'finite_noaction'
 [Mesh]
   patch_size = 80
   patch_update_strategy = auto
-  [./plank]
+  [plank]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = -0.3
@@ -18,14 +18,14 @@ name = 'finite_noaction'
     ny = 67
     elem_type = ${elem}
     boundary_name_prefix = plank
-  [../]
-  [./plank_id]
+  []
+  [plank_id]
     type = SubdomainIDGenerator
     input = plank
     subdomain_id = 1
-  [../]
+  []
 
-  [./block]
+  [block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0.31
@@ -37,38 +37,38 @@ name = 'finite_noaction'
     elem_type = ${elem}
     boundary_name_prefix = block
     boundary_id_offset = 10
-  [../]
-  [./block_id]
+  []
+  [block_id]
     type = SubdomainIDGenerator
     input = block
     subdomain_id = 2
-  [../]
+  []
 
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'plank_id block_id'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block_id = '1 2'
     new_block_name = 'plank block'
-  [../]
+  []
 
-  [./secondary]
+  [secondary]
     input = block_rename
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'block_left'
     new_block_id = '30'
     new_block_name = 'frictionless_secondary_subdomain'
-  [../]
-  [./primary]
+  []
+  [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'plank_right'
     new_block_id = '20'
     new_block_name = 'frictionless_primary_subdomain'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -76,32 +76,32 @@ name = 'finite_noaction'
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = ${order}
     block = 'plank block'
     scaling = ${fparse 2.0 / (E_plank + E_block)}
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = ${order}
     block = 'plank block'
     scaling = ${fparse 2.0 / (E_plank + E_block)}
-  [../]
-  [./frictionless_normal_lm]
+  []
+  [frictionless_normal_lm]
     order = ${order}
     block = 'frictionless_secondary_subdomain'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./action]
+  [action]
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
-  [../]
+  []
 []
 
 [Constraints]
-  [./lm]
+  [lm]
     type = NormalNodalLMMechanicalContact
     secondary = block_left
     primary = plank_right
@@ -110,8 +110,8 @@ name = 'finite_noaction'
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
-  [../]
-  [./normal_x]
+  []
+  [normal_x]
     type = NormalMortarMechanicalContact
     primary_boundary = plank_right
     secondary_boundary = block_left
@@ -122,8 +122,8 @@ name = 'finite_noaction'
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-  [../]
-  [./normal_y]
+  []
+  [normal_y]
     type = NormalMortarMechanicalContact
     primary_boundary = plank_right
     secondary_boundary = block_left
@@ -134,57 +134,57 @@ name = 'finite_noaction'
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = plank_left
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = plank_bottom
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = block_right
     function = '-0.04*sin(4*(t+1.5))+0.02'
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = block_right
     function = '-t'
-  [../]
+  []
 []
 
 [Materials]
-  [./plank]
+  [plank]
     type = ComputeIsotropicElasticityTensor
     block = 'plank'
     poissons_ratio = 0.3
     youngs_modulus = ${E_plank}
-  [../]
-  [./block]
+  []
+  [block]
     type = ComputeIsotropicElasticityTensor
     block = 'block'
     poissons_ratio = 0.3
     youngs_modulus = ${E_block}
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 'plank block'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -209,70 +209,70 @@ name = 'finite_noaction'
 []
 
 [Postprocessors]
-  [./nl_its]
+  [nl_its]
     type = NumNonlinearIterations
-  [../]
-  [./total_nl_its]
+  []
+  [total_nl_its]
     type = CumulativeValuePostprocessor
     postprocessor = nl_its
-  [../]
-  [./l_its]
+  []
+  [l_its]
     type = NumLinearIterations
-  [../]
-  [./total_l_its]
+  []
+  [total_l_its]
     type = CumulativeValuePostprocessor
     postprocessor = l_its
-  [../]
-  [./contact]
+  []
+  [contact]
     type = ContactDOFSetSize
     variable = frictionless_normal_lm
     subdomain = frictionless_secondary_subdomain
-  [../]
-  [./avg_hydro]
+  []
+  [avg_hydro]
     type = ElementAverageValue
     variable = hydrostatic_stress
     block = 'block'
-  [../]
-  [./max_hydro]
+  []
+  [max_hydro]
     type = ElementExtremeValue
     variable = hydrostatic_stress
     block = 'block'
-  [../]
-  [./min_hydro]
+  []
+  [min_hydro]
     type = ElementExtremeValue
     variable = hydrostatic_stress
     block = 'block'
     value_type = min
-  [../]
-  [./avg_vonmises]
+  []
+  [avg_vonmises]
     type = ElementAverageValue
     variable = vonmises_stress
     block = 'block'
-  [../]
-  [./max_vonmises]
+  []
+  [max_vonmises]
     type = ElementExtremeValue
     variable = vonmises_stress
     block = 'block'
-  [../]
-  [./min_vonmises]
+  []
+  [min_vonmises]
     type = ElementExtremeValue
     variable = vonmises_stress
     block = 'block'
     value_type = min
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
   file_base = ${name}
-  [./comp]
+  [comp]
     type = CSV
     show = 'contact'
-  [../]
-  [./out]
+  []
+  [out]
     type = CSV
     file_base = '${name}_out'
-  [../]
+  []
 []
 
 [Debug]

@@ -10,195 +10,195 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);0.1+0.01*v'
-    [../]
-  [../]
-  [./mu]
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+    []
+  []
+  [mu]
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./gb]
+  [gb]
     family = LAGRANGE
     order  = FIRST
-  [../]
-  [./eigen_strain_xx]
+  []
+  [eigen_strain_xx]
     family = MONOMIAL
     order  = CONSTANT
-  [../]
-  [./eigen_strain_yy]
+  []
+  [eigen_strain_yy]
     family = MONOMIAL
     order  = CONSTANT
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     family = MONOMIAL
     order  = CONSTANT
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     family = MONOMIAL
     order  = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./conc]
+  [conc]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
-  [../]
-  [./chempot]
+  []
+  [chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
-  [./TensorMechanics]
+  []
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./gb]
+  [gb]
     type = FunctionAux
     variable = gb
     function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);v'
-  [../]
-  [./eigenstrain_xx]
+  []
+  [eigenstrain_xx]
     type = RankTwoAux
     variable = eigen_strain_xx
     rank_two_tensor = eigenstrain
     index_i = 0
     index_j = 0
-  [../]
-  [./eigenstrain_yy]
+  []
+  [eigenstrain_yy]
     type = RankTwoAux
     variable = eigen_strain_yy
     rank_two_tensor = eigenstrain
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     variable = stress_xx
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     variable = stress_yy
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./chemical_potential]
+  [chemical_potential]
     type = DerivativeParsedMaterial
     block = 0
     f_name = mu_prop
     args = c
     function = 'c'
     derivative_order = 1
-  [../]
-  [./var_dependence]
+  []
+  [var_dependence]
     type = DerivativeParsedMaterial
     block = 0
     function = 'c*(1.0-c)'
     args = c
     f_name = var_dep
     derivative_order = 1
-  [../]
-  [./mobility]
+  []
+  [mobility]
     type = CompositeMobilityTensor
     block = 0
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
     args = c
-  [../]
-  [./phase_normal]
+  []
+  [phase_normal]
     type = PhaseNormalTensor
     phase = gb
     normal_tensor_name = gb_normal
-  [../]
-  [./aniso_tensor]
+  []
+  [aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
     bulk_parameter = 0.1
     gb_parameter = 1
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
-  [../]
-  [./diffusivity]
+  []
+  [diffusivity]
     type = GBDependentDiffusivity
     gb = gb
     bulk_parameter = 0.1
     gb_parameter = 1
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
-  [../]
-  [./eigenstrain_prefactor]
+  []
+  [eigenstrain_prefactor]
     type = DerivativeParsedMaterial
     block = 0
     function = 'c-0.1'
     args = c
     f_name = eigenstrain_prefactor
     derivative_order = 1
-  [../]
-  [./eigenstrain]
+  []
+  [eigenstrain]
     type = ComputeVariableBaseEigenStrain
     base_tensor_property_name = aniso_tensor
     prefactor = eigenstrain_prefactor
     eigenstrain_name = eigenstrain
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./cbc]
+  [Periodic]
+    [cbc]
       auto_direction = 'x y'
       variable = c
-    [../]
-  [../]
-  [./fix_x]
+    []
+  []
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -219,10 +219,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
      type = SMP
      full = true
-  [../]
+  []
 []
 
 [Outputs]

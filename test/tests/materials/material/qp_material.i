@@ -7,50 +7,50 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat1]
+  [mat1]
     type = QpMaterial
     block = 0
     outputs = all
     constant_on = ELEMENT
     property_name = 'zero_prop'
-  [../]
+  []
   # The second copy of QpMaterial is not constant_on_elem.
-  [./mat2]
+  [mat2]
     type = QpMaterial
     block = 0
     outputs = all
     property_name = 'nonzero_prop'
-  [../]
+  []
 []
 
 [Executioner]

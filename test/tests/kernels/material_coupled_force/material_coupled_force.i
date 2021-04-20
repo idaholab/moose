@@ -10,68 +10,68 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v1]
+  [v1]
     initial_condition = 3
-  [../]
+  []
 
-  [./v2]
-  [../]
+  [v2]
+  []
 []
 
 [ICs]
-  [./v2_ic]
+  [v2_ic]
     type = FunctionIC
     variable = v2
     function = v2_func
-  [../]
+  []
 []
 
 [Functions]
-  [./v2_func]
+  [v2_func]
     type = ParsedFunction
     value = 'x + 2 * y'
-  [../]
+  []
 
-  [./reference]
+  [reference]
     type = ParsedFunction
     value = '3 * (-1) * 3.5 + (x + 2 * y) * 15 * 1.2'
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'm1 m2'
     prop_values = '-1 15'
-  [../]
+  []
 []
 
 [Kernels]
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
-  [./coupled]
+  [coupled]
     type = MatCoupledForce
     variable = u
     v = 'v1 v2'
     coef = '3.5 1.2'
     material_properties = 'm1 m2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = reference
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

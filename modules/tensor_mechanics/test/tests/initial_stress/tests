@@ -1,45 +1,45 @@
 [Tests]
-  [./except01]
+  [except01]
     type = 'RunException'
     input = 'except01.i'
     expect_err = 'ComputeEigenstrainFromInitialStress: 9 initial stress functions must be provided.  You supplied 3'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "TensorMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of functions to define the initial stress tensor"
-  [../]
-  [./except02]
+  []
+  [except02]
     type = 'RunException'
     input = 'except02.i'
     expect_err = 'ComputeEigenstrainFromInitialStress: If you supply initial_stress_aux, 9 values must be given.  You supplied 3'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
     requirement = "TensorMechanics shall allow users to specify initial stresses, but shall error-out with appropriate message if the user does not supply the correct number of AuxVariables to define the initial stress tensor"
-  [../]
-  [./gravity]
+  []
+  [gravity]
     type = 'Exodiff'
     input = 'gravity.i'
     exodiff = 'gravity.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "TensorMechanics shall allow users to specify initial stresses using Functions"
-  [../]
-  [./gravity_with_aux]
+  []
+  [gravity_with_aux]
     type = 'Exodiff'
     input = 'gravity_with_aux.i'
     exodiff = 'gravity_with_aux.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#13087"
     requirement = "TensorMechanics shall allow users to specify initial stresses using AuxVariables"
-  [../]
-  [./gravity_cosserat]
+  []
+  [gravity_cosserat]
     type = 'Exodiff'
     input = 'gravity_cosserat.i'
     exodiff = 'gravity_cosserat.e'
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "TensorMechanics shall allow users to specify initial stresses for problems with Cosserat mechanics"
-  [../]
-  [./mc_tensile]
+  []
+  [mc_tensile]
     type = 'CSVDiff'
     input = 'mc_tensile.i'
     csvdiff = 'mc_tensile.csv'
@@ -49,5 +49,5 @@
     design = 'ComputeEigenstrainFromInitialStress.md'
     issues = "#9749"
     requirement = "TensorMechanics shall allow users to specify initial stresses for problems with plasticity, and if the initial stresses are inadmissible, the return-map algorithm will be applied, perhaps incrementally, to bring the initial stresses back to the admissible region"
-  [../]
+  []
 []

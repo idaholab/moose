@@ -12,11 +12,11 @@
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -36,22 +36,22 @@
 [Outputs]
   csv = true
   console = true
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
     # Velocity in radial (r) direction
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     # Velocity in axial (z) direction
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -74,84 +74,84 @@
     family = LAGRANGE_VEC
     order = SECOND
   []
-  [./p]
+  [p]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
-  [./p_corner]
+  [p_corner]
     # This is required because of the no bcs
     type = DirichletBC
     boundary = top_right
     value = 0
     variable = p
-  [../]
-  [./velocity_out]
+  []
+  [velocity_out]
     type = INSADMomentumNoBCBC
     boundary = top
     variable = velocity
     p = p
-  [../]
-  [./velocity_in]
+  []
+  [velocity_in]
     type = VectorFunctionDirichletBC
     boundary = bottom
     variable = velocity
     function_x = 0
     function_y = 'inlet_func'
-  [../]
-  [./wall]
+  []
+  [wall]
     type = VectorFunctionDirichletBC
     boundary = 'right'
     variable = velocity
     function_x = 0
     function_y = 0
-  [../]
-  [./axis]
+  []
+  [axis]
     type = ADVectorFunctionDirichletBC
     boundary = 'left'
     variable = velocity
     set_y_comp = false
     function_x = 0
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSADMass
     variable = p
-  [../]
+  []
 
-  [./momentum_time]
+  [momentum_time]
     type = INSADMomentumTimeDerivative
     variable = velocity
-  [../]
+  []
 
-  [./momentum_convection]
+  [momentum_convection]
     type = INSADMomentumAdvection
     variable = velocity
-  [../]
+  []
 
-  [./momentum_viscous]
+  [momentum_viscous]
     type = INSADMomentumViscous
     variable = velocity
-  [../]
+  []
 
-  [./momentum_pressure]
+  [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
     p = p
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
   [ins_mat]
     type = INSADMaterial
     velocity = velocity
@@ -160,27 +160,27 @@
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     value = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flow_in]
+  [flow_in]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'bottom'
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./flow_out]
+  []
+  [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

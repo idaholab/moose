@@ -25,135 +25,135 @@
 
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 
 [ICs]
-  [./x]
+  [x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
-  [./y]
+  []
+  [y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
-  [./z]
+  []
+  [z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./x]
+  [x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'front back'
     function = '0'
-  [../]
-  [./y]
+  []
+  [y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'front back'
     function = '0'
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front back'
     function = '0'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Smax]
+  [Smax]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./Smid]
+  []
+  [Smid]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./Smin]
+  []
+  [Smin]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Smax]
+  [Smax]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = Smax
     scalar_type = MaxPrincipal
-  [../]
-  [./Smid]
+  []
+  [Smid]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = Smid
     scalar_type = MidPrincipal
-  [../]
-  [./Smin]
+  []
+  [Smin]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = Smin
     scalar_type = MinPrincipal
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningConstant
     value = 1.5
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 3.0
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1.0
-  [../]
-  [./phi]
+  []
+  [phi]
     type = TensorMechanicsHardeningConstant
     value = 20
     convert_to_radians = true
-  [../]
-  [./psi]
+  []
+  [psi]
     type = TensorMechanicsHardeningConstant
     value = 3
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./capped_mc]
+  []
+  [capped_mc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -163,12 +163,12 @@
     smoothing_tol = 0.2
     yield_function_tol = 1.0E-12
     max_NR_iterations = 1000
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = capped_mc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 

@@ -19,20 +19,20 @@ num_steps=2
 []
 
 [Bounds]
-  [./u_upper_bounds]
+  [u_upper_bounds]
     type = ConstantBoundsAux
     variable = bounds
     bounded_variable = u
     bound_type = upper
     bound_value = ${l}
-  [../]
-  [./u_lower_bounds]
+  []
+  [u_lower_bounds]
     type = ConstantBoundsAux
     variable = bounds
     bounded_variable = u
     bound_type = lower
     bound_value = 0
-  [../]
+  []
 []
 
 [ICs]

@@ -10,59 +10,59 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*((x*x)+(y*y))
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4+(x*x+y*y)
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'ie diff ffn'
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,9 +78,9 @@
 [Outputs]
   file_base = out_gen
   exodus = true
-  [./oversampling]
+  [oversampling]
     file_base = out_gen_oversample
     type = Exodus
     refinements = 3
-  [../]
+  []
 []

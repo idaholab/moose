@@ -7,37 +7,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = 10
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = -1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,9 +55,9 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

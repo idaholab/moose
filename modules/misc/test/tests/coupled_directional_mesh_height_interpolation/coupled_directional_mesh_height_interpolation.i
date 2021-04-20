@@ -9,65 +9,65 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./stretch]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [stretch]
+  []
 []
 
 [Functions]
-  [./stretch_func]
+  [stretch_func]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./interpolation]
+  [interpolation]
     type = CoupledDirectionalMeshHeightInterpolation
     variable = disp_x
     direction = x
     execute_on = timestep_begin
     coupled_var = stretch
-  [../]
-  [./stretch_aux]
+  []
+  [stretch_aux]
     type = FunctionAux
     variable = stretch
     function = stretch_func
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
     use_displaced_mesh = true
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 1
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]

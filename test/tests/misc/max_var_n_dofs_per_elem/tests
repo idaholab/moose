@@ -1,5 +1,5 @@
 [Tests]
-  [./1d]
+  [1d]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = '1d.e'
@@ -7,8 +7,8 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 1D EDGE2 elem shall be 2"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
-  [./2d]
+  []
+  [2d]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = '2d.e'
@@ -16,8 +16,8 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD4 elem shall be 4"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
-  [./2d_high_order]
+  []
+  [2d_high_order]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = '2d_high_order.e'
@@ -25,8 +25,8 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD9 elem shall be 9"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
-  [./triangles]
+  []
+  [triangles]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = 'triangles.e'
@@ -34,8 +34,8 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI3 elem shall be 3"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
-  [./triangles_high_order]
+  []
+  [triangles_high_order]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = 'triangles_high_order.e'
@@ -43,8 +43,8 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI6 elem shall be 6"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
-  [./3d]
+  []
+  [3d]
     type = 'Exodiff'
     input = 'max_var_n_dofs_per_elem.i'
     exodiff = '3d.e'
@@ -52,5 +52,5 @@
     requirement = "The maximum number of degrees of freedom for a single variable on a 3D HEX8 elem shall be 8"
     design = "MaxVarNDofsPerElem.md"
     issues = "#5658"
-  [../]
+  []
 []

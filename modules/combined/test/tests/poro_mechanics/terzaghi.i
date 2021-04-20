@@ -65,205 +65,205 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./confinex]
+  [confinex]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./confiney]
+  []
+  [confiney]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top'
-  [../]
-  [./basefixed]
+  []
+  [basefixed]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = back
-  [../]
-  [./topdrained]
+  []
+  [topdrained]
     type = DirichletBC
     variable = porepressure
     value = 0
     boundary = front
-  [../]
-  [./topload]
+  []
+  [topload]
     type = NeumannBC
     variable = disp_z
     value = -1
     boundary = front
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-    [./poro_x]
+  []
+    [poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PoroMechanicsCoupling
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PoroMechanicsCoupling
     variable = disp_z
     component = 2
-  [../]
-  [./poro_timederiv]
+  []
+  [poro_timederiv]
     type = PoroFullSatTimeDerivative
     variable = porepressure
-  [../]
-  [./darcy_flow]
+  []
+  [darcy_flow]
     type = CoefDiffusion
     variable = porepressure
     coef = 1.5
-  [../]
+  []
 []
 
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '2 3'
     # bulk modulus is lambda + 2*mu/3 = 2 + 2*3/3 = 4
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./poro_material]
+  []
+  [poro_material]
     type = PoroFullSatMaterial
     porosity0 = 0.1
     biot_coefficient = 0.6
     solid_bulk_compliance = 0.25
     fluid_bulk_compliance = 0.125
     constant_porosity = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = porepressure
-  [../]
-  [./p1]
+  []
+  [p1]
     type = PointValue
     outputs = csv
     point = '0 0 1'
     variable = porepressure
-  [../]
-  [./p2]
+  []
+  [p2]
     type = PointValue
     outputs = csv
     point = '0 0 2'
     variable = porepressure
-  [../]
-  [./p3]
+  []
+  [p3]
     type = PointValue
     outputs = csv
     point = '0 0 3'
     variable = porepressure
-  [../]
-  [./p4]
+  []
+  [p4]
     type = PointValue
     outputs = csv
     point = '0 0 4'
     variable = porepressure
-  [../]
-  [./p5]
+  []
+  [p5]
     type = PointValue
     outputs = csv
     point = '0 0 5'
     variable = porepressure
-  [../]
-  [./p6]
+  []
+  [p6]
     type = PointValue
     outputs = csv
     point = '0 0 6'
     variable = porepressure
-  [../]
-  [./p7]
+  []
+  [p7]
     type = PointValue
     outputs = csv
     point = '0 0 7'
     variable = porepressure
-  [../]
-  [./p8]
+  []
+  [p8]
     type = PointValue
     outputs = csv
     point = '0 0 8'
     variable = porepressure
-  [../]
-  [./p9]
+  []
+  [p9]
     type = PointValue
     outputs = csv
     point = '0 0 9'
     variable = porepressure
-  [../]
-  [./p99]
+  []
+  [p99]
     type = PointValue
     outputs = csv
     point = '0 0 10'
     variable = porepressure
-  [../]
-  [./zdisp]
+  []
+  [zdisp]
     type = PointValue
     outputs = csv
     point = '0 0 10'
     variable = disp_z
-  [../]
-  [./dt]
+  []
+  [dt]
     type = FunctionValuePostprocessor
     outputs = console
     function = if(0.5*t<0.1,0.5*t,0.1)
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -271,17 +271,17 @@
   solve_type = Newton
   start_time = 0
   end_time = 10
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = dt
     dt = 0.0001
-  [../]
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   file_base = terzaghi
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

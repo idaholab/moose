@@ -1,7 +1,7 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./glued_kin]
+  [glued_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_kin.csv'
@@ -16,8 +16,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane strain single point contact model."
-  [../]
-  [./glued_pen]
+  []
+  [glued_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_pen.csv'
@@ -31,8 +31,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_kin]
+  []
+  [frictionless_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_frictionless_kin.csv'
@@ -45,8 +45,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_pen]
+  []
+  [frictionless_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_frictionless_pen.csv'
@@ -59,8 +59,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_pen_contact_line_search]
+  []
+  [frictionless_pen_contact_line_search]
     type = 'CSVDiff'
     input = 'single_point_2d_contact_line_search.i'
     csvdiff = 'single_point_2d_contact_line_search_out.csv'
@@ -74,8 +74,8 @@
     for 2D plane strain single point contact model using the contact line
     search solver options."
     compiler = 'GCC CLANG'
-  [../]
-  [./mu_0_0_kin]
+  []
+  [mu_0_0_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_fric_0_0_kin.csv'
@@ -88,8 +88,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane strain single point contact model."
-  [../]
-  [./mu_0_0_pen]
+  []
+  [mu_0_0_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_fric_0_0_pen.csv'
@@ -102,8 +102,8 @@
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane strain single point contact model."
-  [../]
-  [./mu_0_2_kin]
+  []
+  [mu_0_2_kin]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
     csvdiff = 'single_point_2d_out_frictional_0_2_kin.csv'
@@ -117,8 +117,8 @@
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane strain single point contact model with a non-zero friction
     coefficient."
-  [../]
-  [./mu_0_2_pen]
+  []
+  [mu_0_2_pen]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
     csvdiff = 'single_point_2d_out_frictional_0_2_pen.csv'
@@ -133,5 +133,5 @@
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane strain single point contact model with a non-zero friction
     coefficient."
-  [../]
+  []
 []

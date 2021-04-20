@@ -20,12 +20,12 @@
 []
 
 [Variables]
-  [./w]
-  [../]
-  [./eta]
+  [w]
+  []
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
@@ -33,62 +33,62 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 5.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./detadt]
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 
-  [./ACBulk]
+  [ACBulk]
     type = AllenCahn
     variable = eta
     f_name = F
-  [../]
+  []
 
-  [./CoupledBulk]
+  [CoupledBulk]
     type = MatReaction
     variable = eta
     v = w
-  [../]
+  []
 
-  [./W]
+  [W]
     type = Reaction
     variable = w
-  [../]
+  []
 
-  [./CoupledACInterface]
+  [CoupledACInterface]
     type = SimpleCoupledACInterface
     variable = w
     v = eta
     kappa_name = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'L'
     prop_values = '1'
-  [../]
+  []
 
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'eta'
     function = 'eta^2 * (1-eta)^2'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

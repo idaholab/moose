@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunApp'
     cli_args = '--type'
     expect_out = "MooseTestApp"
@@ -8,5 +8,5 @@
     issues = '#11337'
     design = MooseApp.md
     requirement = "The compiled application shall be capable of returning the name used for registering objects."
-  [../]
+  []
 []

@@ -1,15 +1,15 @@
 [Tests]
   design = "MultiApps/index.md"
-  [./input_file]
+  [input_file]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'missing required parameter'
 
     issues = "#4101 #4113"
     requirement = "The system shall detect input file problems with sub app input files."
-  [../]
+  []
 
-  [./unused_subapp_param]
+  [unused_subapp_param]
     type = 'RunException'
     input = 'check_error.i'
     cli_args = 'MultiApps/multi/input_files="sub_unused.i"'
@@ -17,9 +17,9 @@
 
     issues = "#4101 #4113"
     requirement = "The system shall CLI argument problems related to sub app input files."
-  [../]
+  []
 
-  [./positions]
+  [positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Not enough positions for the number of input files'
@@ -27,9 +27,9 @@
 
     issues = "#1845 #3556 #5784"
     requirement = "The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions."
-  [../]
+  []
 
-  [./not_enough_positions]
+  [not_enough_positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Not enough positions for the number of input files'
@@ -37,9 +37,9 @@
 
     issues = "#1845 #3556 #5784"
     requirement = "The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides."
-  [../]
+  []
 
-  [./not_enough_position_files]
+  [not_enough_position_files]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of input_files for MultiApp'
@@ -47,9 +47,9 @@
 
     issues = "#1845 #3556 #5784"
     requirement = "The system shall error when the number of sub app input files doesn't match the number of provided positions files."
-  [../]
+  []
 
-  [./both_positions]
+  [both_positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
@@ -57,9 +57,9 @@
 
     issues = "#1845 #3556 #5784"
     requirement = "The system shall error when both positions are provided in the input file along with a separate file of positions."
-  [../]
+  []
 
-  [./bad_positions]
+  [bad_positions]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of entries in \'positions_file\''
@@ -67,9 +67,9 @@
 
     issues = "#1845 #3556 #5784"
     requirement = "The system shall error when the multiapp positions file is malformed."
-  [../]
+  []
 
-  [./sub_cycling_and_catch_up]
+  [sub_cycling_and_catch_up]
     type = 'RunException'
     input = 'check_error.i'
     expect_err = '"sub_cycling" and "catch_up" cannot both be set to true'
@@ -77,5 +77,5 @@
 
     issues = "#6127"
     requirement = "The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true."
-  [../]
+  []
 []

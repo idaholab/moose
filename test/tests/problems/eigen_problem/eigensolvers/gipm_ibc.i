@@ -13,83 +13,83 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = first
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./x_disp]
-  [../]
-  [./y_disp]
-  [../]
+  [x_disp]
+  []
+  [y_disp]
+  []
 []
 
 [AuxKernels]
-  [./x_disp]
+  [x_disp]
     type = FunctionAux
     variable = x_disp
     function = x_disp_func
-  [../]
-  [./y_disp]
+  []
+  [y_disp]
     type = FunctionAux
     variable = y_disp
     function = y_disp_func
-  [../]
+  []
 []
 
 [Functions]
-  [./x_disp_func]
+  [x_disp_func]
     type = ParsedFunction
     value = 0
-  [../]
-  [./y_disp_func]
+  []
+  [y_disp_func]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./rea]
+  [rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./rhs]
+  [rhs]
     type = CoefReaction
     variable = u
     use_displaced_mesh = true
     coefficient = -1.0
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [BCs]
-  [./nbc_homogeneous]
+  [nbc_homogeneous]
     type = DirichletBC
     variable = u
     boundary = '0'
     value = 0
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./nbc_eigen]
+  [nbc_eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0'
     use_displaced_mesh = true
-  [../]
+  []
 
-  [./ibc]
+  [ibc]
     type = VacuumBC
     variable = u
     boundary = '1 2 3'
@@ -109,17 +109,17 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
   csv = true
   execute_on = 'timestep_end'
-  [./console]
+  [console]
     type = Console
     outlier_variable_norms = false
-  [../]
+  []
 []

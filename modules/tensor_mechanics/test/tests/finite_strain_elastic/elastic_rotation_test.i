@@ -23,129 +23,129 @@
 []
 
 [Functions]
-  [./x_200]
+  [x_200]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
-  [../]
-  [./y_200]
+  []
+  [y_200]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
-  [../]
-  [./x_300]
+  []
+  [x_300]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
-  [../]
-  [./y_300]
+  []
+  [y_300]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
-  [../]
-  [./x_400]
+  []
+  [x_400]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
-  [../]
-  [./y_400]
+  []
+  [y_400]
     type = ParsedFunction
     vars = 'delta t0'
     vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = FINITE
         add_variables = true
         generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
-  [./x_200]
+  []
+  [x_200]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 200
     function = x_200
-  [../]
-  [./y_200]
+  []
+  [y_200]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 200
     function = y_200
-  [../]
-  [./x_300]
+  []
+  [x_300]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 300
     function = x_300
-  [../]
-  [./y_300]
+  []
+  [y_300]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 300
     function = y_300
-  [../]
-  [./x_400]
+  []
+  [x_400]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 400
     function = x_400
-  [../]
-  [./y_400]
+  []
+  [y_400]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 400
     function = y_400
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '100 200 300 400'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.5e6 0.75e6 0.75e6 1.5e6 0.75e6 1.5e6 0.375e6 0.375e6 0.375e6'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

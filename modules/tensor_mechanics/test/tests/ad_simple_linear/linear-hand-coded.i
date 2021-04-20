@@ -11,55 +11,55 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0e10
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,48 +6,48 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = u
     boundary = left
     value = 2
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

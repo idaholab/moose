@@ -7,42 +7,42 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0     1'
     y = '0.25  1'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,25 +55,25 @@
   petsc_options_value = 'hypre boomeramg'
 
   dt = 0.25
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
-  [./out]
+  [out]
     type = Console
     output_file = true
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0 0.5 0.5 0'
     input_files = time_dt_from_master_sub.i
-  [../]
+  []
 []

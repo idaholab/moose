@@ -1,7 +1,7 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./ring_contact]
+  [ring_contact]
     type = 'Exodiff'
     input = 'ring_contact.i'
     exodiff = 'ring_contact_out.e'
@@ -9,5 +9,5 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The contact system shall enforce contact between three-dimensional non-conformal surfaces with Hex20 elements.'
-  [../]
+  []
 []

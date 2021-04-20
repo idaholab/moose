@@ -10,60 +10,60 @@
 []
 
 [Functions]
-  [./initial_value]
+  [initial_value]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = initial_value
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
   active = 'diff ie'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = SinDirichletBC
     variable = u
     boundary = 3
     initial = 0.0
     final = 1.0
     duration = 10.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = SinDirichletBC
     variable = u
     boundary = 1
     initial = 1.0
     final = 0.0
     duration = 10.0
-  [../]
+  []
 []
 
 [Executioner]

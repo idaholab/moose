@@ -9,154 +9,154 @@
     ymin = -0.5
     ymax = 0.5
   []
-  [./cnode]
+  [cnode]
     input = gen
     type = ExtraNodesetGenerator
     coord = '0.0 0.0'
     new_boundary = 100
-  [../]
+  []
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
-  [./global_strain]
+  [u_x]
+  []
+  [u_y]
+  []
+  [global_strain]
     order = THIRD
     family = SCALAR
-  [../]
-  [./c]
-    [./InitialCondition]
+  []
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = 'sin(2*x*pi)*sin(2*y*pi)*0.05+0.6'
-    [../]
-  [../]
-  [./w]
-  [../]
+    []
+  []
+  [w]
+  []
 []
 
 [AuxVariables]
-  [./local_energy]
+  [local_energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./s00]
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [s00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./s01]
+  []
+  [s01]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./s10]
+  []
+  [s10]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./s11]
+  []
+  [s11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e00]
+  []
+  [e00]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e01]
+  []
+  [e01]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e10]
+  []
+  [e10]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e11]
+  []
+  [e11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     type = GlobalDisplacementAux
     variable = disp_x
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
-  [./local_free_energy]
+  []
+  [local_free_energy]
     type = TotalFreeEnergy
     execute_on = 'initial LINEAR'
     variable = local_energy
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
-  [../]
-  [./s00]
+  []
+  [s00]
     type = RankTwoAux
     variable = s00
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
-  [../]
-  [./s01]
+  []
+  [s01]
     type = RankTwoAux
     variable = s01
     rank_two_tensor = stress
     index_i = 0
     index_j = 1
-  [../]
-  [./s10]
+  []
+  [s10]
     type = RankTwoAux
     variable = s10
     rank_two_tensor = stress
     index_i = 1
     index_j = 0
-  [../]
-  [./s11]
+  []
+  [s11]
     type = RankTwoAux
     variable = s11
     rank_two_tensor = stress
     index_i = 1
     index_j = 1
-  [../]
-  [./e00]
+  []
+  [e00]
     type = RankTwoAux
     variable = e00
     rank_two_tensor = total_strain
     index_i = 0
     index_j = 0
-  [../]
-  [./e01]
+  []
+  [e01]
     type = RankTwoAux
     variable = e01
     rank_two_tensor = total_strain
     index_i = 0
     index_j = 1
-  [../]
-  [./e10]
+  []
+  [e10]
     type = RankTwoAux
     variable = e10
     rank_two_tensor = total_strain
     index_i = 1
     index_j = 0
-  [../]
-  [./e11]
+  []
+  [e11]
     type = RankTwoAux
     variable = e11
     rank_two_tensor = total_strain
     index_i = 1
     index_j = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -167,200 +167,200 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 
   # Cahn-Hilliard kernels
-  [./c_dot]
+  [c_dot]
     type = CoupledTimeDerivative
     variable = w
     v = c
     block = 0
-  [../]
-  [./c_res]
+  []
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
     block = 0
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
     block = 0
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./global_strain]
+  [global_strain]
     type = GlobalStrain
     variable = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
       variable = 'c w u_x u_y'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
-  [../]
-  [./centerfix_y]
+  []
+  [centerfix_y]
     type = DirichletBC
     boundary = 100
     variable = u_y
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
-  [../]
+  []
 
-  [./shear1]
+  [shear1]
     type = GenericConstantRankTwoTensor
     tensor_values = '0 0 0 0 0 0.5'
     tensor_name = shear1
-  [../]
-  [./shear2]
+  []
+  [shear2]
     type = GenericConstantRankTwoTensor
     tensor_values = '0 0 0 0 0 -0.5'
     tensor_name = shear2
-  [../]
-  [./expand3]
+  []
+  [expand3]
     type = GenericConstantRankTwoTensor
     tensor_values = '1 1 0 0 0 0'
     tensor_name = expand3
-  [../]
+  []
 
-  [./weight1]
+  [weight1]
     type = DerivativeParsedMaterial
     function = '0.3*c^2'
     f_name = weight1
     args = c
-  [../]
-  [./weight2]
+  []
+  [weight2]
     type = DerivativeParsedMaterial
     function = '0.3*(1-c)^2'
     f_name = weight2
     args = c
-  [../]
-  [./weight3]
+  []
+  [weight3]
     type = DerivativeParsedMaterial
     function = '4*(0.5-c)^2'
     f_name = weight3
     args = c
-  [../]
+  []
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     global_strain = global_strain
     eigenstrain_names = eigenstrain
-  [../]
+  []
 
-  [./eigenstrain]
+  [eigenstrain]
     type = CompositeEigenstrain
     tensors = 'shear1  shear2  expand3'
     weights = 'weight1 weight2 weight3'
     args = c
     eigenstrain_name = eigenstrain
-  [../]
+  []
 
-  [./global_strain]
+  [global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
   # chemical free energies
-  [./chemical_free_energy]
+  [chemical_free_energy]
     type = DerivativeParsedMaterial
     f_name = Fc
     function = '4*c^2*(1-c)^2'
     args = 'c'
     outputs = exodus
     output_properties = Fc
-  [../]
+  []
 
   # elastic free energies
-  [./elastic_free_energy]
+  [elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
     args = 'c'
     outputs = exodus
     output_properties = Fe
-  [../]
+  []
 
   # free energy (chemical + elastic)
-  [./free_energy]
+  [free_energy]
     type = DerivativeSumMaterial
     block = 0
     f_name = F
     sum_materials = 'Fc Fe'
     args = 'c'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./global_strain_uo]
+  [global_strain_uo]
     type = GlobalStrainUserObject
     execute_on = 'Initial Linear Nonlinear'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_free_energy]
+  [total_free_energy]
     type = ElementIntegralVariablePostprocessor
     execute_on = 'initial TIMESTEP_END'
     variable = local_energy
-  [../]
-  [./total_solute]
+  []
+  [total_solute]
     type = ElementIntegralVariablePostprocessor
     execute_on = 'initial TIMESTEP_END'
     variable = c
-  [../]
-  [./min]
+  []
+  [min]
     type = ElementExtremeValue
     execute_on = 'initial TIMESTEP_END'
     value_type = min
     variable = c
-  [../]
-  [./max]
+  []
+  [max]
     type = ElementExtremeValue
     execute_on = 'initial TIMESTEP_END'
     value_type = max
     variable = c
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -384,22 +384,22 @@
   start_time = 0.0
   end_time = 2.0
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.01
     growth_factor = 1.5
     cutback_factor = 0.8
     optimal_iterations = 9
     iteration_window = 2
-  [../]
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   print_linear_residuals = false
   exodus = true
-  [./table]
+  [table]
     type = CSV
     delimiter = ' '
-  [../]
+  []
 []

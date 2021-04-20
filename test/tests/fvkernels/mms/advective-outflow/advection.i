@@ -5,13 +5,13 @@ a=1.1
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0.1
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -19,40 +19,40 @@ a=1.1
 []
 
 [Variables]
-  [./u]
+  [u]
     family = MONOMIAL
     order = CONSTANT
     fv = true
     two_term_boundary_expansion = false
     type = MooseVariableFVReal
-  [../]
-  [./v]
+  []
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection_u]
+  [advection_u]
     type = FVAdvection
     variable = u
     velocity = '${a} 0 0'
     force_boundary_execution = true
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
     function = 'forcing'
   []
-  [./advection_v]
+  [advection_v]
     type = FVAdvection
     variable = v
     velocity = '${a} 0 0'
     force_boundary_execution = true
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -97,20 +97,20 @@ a=1.1
 []
 
 [Postprocessors]
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2v]
+  []
+  [L2v]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

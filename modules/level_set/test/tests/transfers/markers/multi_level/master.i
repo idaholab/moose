@@ -10,51 +10,51 @@
   marker = marker
   max_h_level = 2
   cycles_per_step = 2
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = GradientJumpIndicator
       variable = u
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       coarsen = 0.4
       refine = 0.5
       indicator = error
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./time]
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -71,21 +71,21 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     input_files = 'sub.i'
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Transfers]
-  [./marker_to_sub]
+  [marker_to_sub]
     type = LevelSetMeshRefinementTransfer
     multi_app = sub
     source_variable = marker
     variable = marker
     check_multiapp_execute_on = false
-  [../]
+  []
 []
 
 [Outputs]

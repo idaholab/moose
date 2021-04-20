@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = single.i
     exodiff = 'single_out.e'
@@ -8,5 +8,5 @@
     requirement = 'MOOSE shall be able to simulate convective flow through lower-dimensional fractures embedded in a higher-dimensional solid'
     design = 'misc/index.md'
     issues = '#13318'
-  [../]
+  []
 []

@@ -13,28 +13,28 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Nonconserved]
-      [./eta1]
+  [PhaseField]
+    [Nonconserved]
+      [eta1]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
         args = 'eta2'
-      [../]
-      [./eta2]
+      []
+      [eta2]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
         args = 'eta1'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./eta1_IC]
+  [eta1_IC]
     type = SmoothCircleIC
     variable = eta1
     x1 = 20.0
@@ -43,8 +43,8 @@
     invalue = 1.0
     outvalue = 0.0
     int_width = 3.0
-  [../]
-  [./eta2_IC]
+  []
+  [eta2_IC]
     type = SmoothCircleIC
     variable = eta2
     x1 = 20.0
@@ -53,24 +53,24 @@
     invalue = 0.0
     outvalue = 1.0
     int_width = 3.0
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'eta1 eta2'
     function = '2.5 * (eta1^4/4 - eta1^2/2 + eta2^4/4 - eta2^2/2 + 3/2 * eta1^2 * eta2^2) + 1/4'
     derivative_order = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,23 +15,23 @@
 
 
 [UserObjects]
-  [./density]
+  [density]
     type = RichardsDensityVDW
     a = 0.2303
     b = 4.31E-5
     molar_mass = 16.04246E-3
     temperature = 293
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./point_val]
+  [point_val]
     type = PointValue
     execute_on = timestep_begin
     # note this point must lie inside the mesh below
     point = '1 0 0'
     variable = density
-  [../]
+  []
 []
 
 [Mesh]
@@ -49,38 +49,38 @@
 
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_init]
+  [u_init]
     type = FunctionIC
     variable = u
     function = x
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./density]
-  [../]
+  [density]
+  []
 []
 
 [AuxKernels]
-  [./density_AuxK]
+  [density_AuxK]
     type = RichardsDensityAux
     variable = density
     density_UO = density
     execute_on = timestep_begin
     pressure_var = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,11 +91,11 @@
 
 [Outputs]
   file_base = density
-  [./csv]
+  [csv]
     type = CSV
-  [../]
-  [./exodus]
+  []
+  [exodus]
     type = Exodus
     hide = u
-  [../]
+  []
 []

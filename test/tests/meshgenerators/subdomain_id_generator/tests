@@ -1,5 +1,5 @@
 [Tests]
-  [./generate_subdomain_id_test]
+  [generate_subdomain_id_test]
     type = 'Exodiff'
     input = 'generate_subdomain_id.i'
     cli_args = '--mesh-only'
@@ -10,5 +10,5 @@
     requirement = 'The system shall have the ability to change or overwrite the subdomain IDs of all elements in a mesh.'
     design = 'meshgenerators/SubdomainIDGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

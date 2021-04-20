@@ -1,5 +1,5 @@
 [Tests]
-  [./hht]
+  [hht]
     type = 'Exodiff'
     input = 'rayleigh_hht.i'
     exodiff = 'rayleigh_hht_out.e'
@@ -11,8 +11,8 @@
                   " damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
     design = "Dynamics.md"
     issues = "#5559"
-  [../]
-  [./hht_ti]
+  []
+  [hht_ti]
     type = 'Exodiff'
     input = 'rayleigh_hht_ti.i'
     exodiff = 'rayleigh_hht_out.e'
@@ -27,8 +27,8 @@
     design = "Dynamics.md"
     issues = "#12185"
     prereq = "hht"
-  [../]
-  [./newmark]
+  []
+  [newmark]
     type = 'Exodiff'
     input = 'rayleigh_newmark.i'
     exodiff = 'rayleigh_newmark_out.e'
@@ -39,8 +39,8 @@
                   " of a linear elastic system with a constant Rayleigh damping."
     design = "Dynamics.md"
     issues = "#5559"
-  [../]
-  [./newmark_material]
+  []
+  [newmark_material]
     type = 'Exodiff'
     input = 'rayleigh_newmark_material_dependent.i'
     exodiff = 'rayleigh_newmark_out.e'
@@ -53,5 +53,5 @@
                   " material property."
     design = "Dynamics.md"
     issues = "#5559"
-  [../]
+  []
 []

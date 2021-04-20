@@ -1,10 +1,10 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 10
-  [../]
+  []
   [lower_d]
     type = LowerDBlockFromSidesetGenerator
     input = square
@@ -14,20 +14,20 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 0
-  [../]
+  []
   [lower]
     block = 'lower'
   []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     block = 0
-  [../]
+  []
 []
 
 [NodalKernels]
@@ -45,18 +45,18 @@
 []
 
 [BCs]
-  [./dirichlet]
+  [dirichlet]
     type = DirichletBC
     variable = u
     boundary = 'left bottom'
     value = 0
-  [../]
-  [./neumann]
+  []
+  [neumann]
     type = ADCoupledLowerValue
     variable = u
     boundary = 'right top'
     lower_d_var = lower
-  [../]
+  []
 []
 
 [Executioner]

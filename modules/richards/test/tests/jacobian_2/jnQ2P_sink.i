@@ -16,53 +16,53 @@
 
 
 [UserObjects]
-  [./DensityWater]
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1.0 # notice small quantity, so the PETSc constant state works
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 0.5
     bulk_mod = 0.5 # notice small quantity, so the PETSc constant state works
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.2
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = Q2PRelPermPowerGas
     simm = 0.1
     n = 3
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = -1
       max = 1
-    [../]
-  [../]
-  [./sat]
+    []
+  []
+  [sat]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
-  [./gas_flux]
+  [gas_flux]
     type = Q2PPiecewiseLinearSink
     boundary = 'left right'
     pressures = '-0.9 0.9'
@@ -75,8 +75,8 @@
     other_var = sat
     var_is_porepressure = true
     fluid_viscosity = 1
-  [../]
-  [./water_flux]
+  []
+  [water_flux]
     type = Q2PPiecewiseLinearSink
     boundary = 'left right'
     pressures = '-0.9 0.9'
@@ -89,7 +89,7 @@
     other_var = pp
     var_is_porepressure = false
     fluid_viscosity = 1
-  [../]
+  []
 []
 
 [Q2P]
@@ -105,23 +105,23 @@
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = Q2PMaterial
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1.1 0 0  0 2.2 0  0 0 3.3'
     gravity = '1 2 3'
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

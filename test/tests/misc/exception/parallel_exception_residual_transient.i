@@ -3,41 +3,41 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./exception]
+  [exception]
     type = ExceptionKernel
     variable = u
     when = residual
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./time_deriv]
+  []
+  [time_deriv]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
-  [./right2]
+  []
+  [right2]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

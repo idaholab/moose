@@ -15,88 +15,88 @@
 []
 
 [Functions]
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     y = '1E-2 1 10 500 5000 5000'
     x = '0 10 100 1000 10000 100000'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1E3
     bulk_mod = 2E7
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.336
     al = 1.43E-4
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermVG1
     scut = 0.99
     simm = 0.0
     m = 0.336
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1.0E+2
-  [../]
+  []
 []
 
 
 [Variables]
   active = 'pressure'
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
     initial_condition = -72620.4
-  [../]
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [Seff1VG_AuxK]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = SeffVG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 
 [BCs]
   active = 'recharge'
-  [./recharge]
+  [recharge]
     type = RichardsPiecewiseLinearSink
     variable = pressure
     boundary = 'right'
@@ -104,12 +104,12 @@
     bare_fluxes = '-2.315E-3 -2.315E-3'
     use_relperm = false
     use_mobility = false
-  [../]
+  []
 []
 
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.33
@@ -122,20 +122,20 @@
     viscosity = 1.01E-3
     gravity = '-10 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
   active = 'andy'
 
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = ''
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-13 1E-15 10000'
-  [../]
+  []
 []
 
 
@@ -145,10 +145,10 @@
   petsc_options = '-snes_converged_reason'
   end_time = 359424
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 []
 
 

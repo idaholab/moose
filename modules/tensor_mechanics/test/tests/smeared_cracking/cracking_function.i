@@ -14,106 +14,106 @@
 []
 
 [AuxVariables]
-  [./cracking_stress_fn]
+  [cracking_stress_fn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./crack_flags2]
+  []
+  [crack_flags2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./displ]
+  [displ]
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0.001 0 -0.001 0'
-  [../]
-  [./fstress]
+  []
+  [fstress]
     type = ParsedFunction
     value = 'if(x > 0.667, 1.1e6, 1.2e6)'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx strain_xx strain_yy strain_xy strain_yz'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./cracking_stress_fn]
+  [cracking_stress_fn]
     type = FunctionAux
     variable = cracking_stress_fn
     function = fstress
     execute_on = initial
-  [../]
-  [./crack_flags2]
+  []
+  [crack_flags2]
     type = MaterialRealVectorValueAux
     property = crack_flags
     variable = crack_flags2
    component = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./pull]
+  [pull]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '3 4'
     function = displ
-  [../]
+  []
 
-  [./pin_x]
+  [pin_x]
     type = DirichletBC
     variable = disp_x
     boundary =  '1 2'
     value = 0
-  [../]
-  [./pin_y]
+  []
+  [pin_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1 4'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200.0e7
     poissons_ratio = 0.0
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = cracking_stress_fn
     softening_models = abrupt_softening
-  [../]
-  [./abrupt_softening]
+  []
+  [abrupt_softening]
     type = AbruptSoftening
     residual_stress = 0.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./elem_stress_xx]
+  [elem_stress_xx]
     type = ElementalVariableValue
     variable = stress_xx
     elementid = 2
-  [../]
-  [./elem_strain_xx]
+  []
+  [elem_strain_xx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 2
-  [../]
-  [./elem_crack_flags_x]
+  []
+  [elem_crack_flags_x]
     type = ElementalVariableValue
     variable = crack_flags2
     elementid = 2
-  [../]
+  []
 []
 
 [Executioner]

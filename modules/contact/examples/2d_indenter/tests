@@ -1,12 +1,12 @@
 [Tests]
-  [./indenter_rz_nodeface_friction]
+  [indenter_rz_nodeface_friction]
     type = RunApp
     input = 'indenter_rz_nodeface_friction.i'
     check_input = True
-  [../]
-  [./indenter_rz_fine.i]
+  []
+  [indenter_rz_fine.i]
     type = RunApp
     input = 'indenter_rz_fine.i'
     check_input = True
-  [../]
+  []
 []

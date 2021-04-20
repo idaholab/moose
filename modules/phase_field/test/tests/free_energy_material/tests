@@ -1,63 +1,63 @@
 [Tests]
-  [./IdealGasFreeEnergy]
+  [IdealGasFreeEnergy]
     type = 'Exodiff'
     input = 'IdealGasFreeEnergy.i'
     exodiff = 'IdealGasFreeEnergy_out.e'
-  [../]
+  []
 
-  [./VanDerWaalsFreeEnergy]
+  [VanDerWaalsFreeEnergy]
     type = 'Exodiff'
     input = 'VanDerWaalsFreeEnergy.i'
     exodiff = 'VanDerWaalsFreeEnergy_out.e'
-  [../]
+  []
 
-  [./MathFreeEnergy]
+  [MathFreeEnergy]
     type = 'Exodiff'
     input = 'MathFreeEnergy.i'
     exodiff = 'MathFreeEnergy_oversample.e'
-  [../]
-  [./MathFreeEnergy_split]
+  []
+  [MathFreeEnergy_split]
     type = 'Exodiff'
     input = 'MathFreeEnergy_split.i'
     exodiff = 'MathFreeEnergy_split_out.e'
     max_parallel = 1                              # -pc_type lu
-  [../]
+  []
 
-  [./MathEBFreeEnergy]
+  [MathEBFreeEnergy]
     type = 'Exodiff'
     input = 'MathEBFreeEnergy.i'
     exodiff = 'MathEBFreeEnergy_oversample.e'
-  [../]
-  [./MathEBFreeEnergy_split]
+  []
+  [MathEBFreeEnergy_split]
     type = 'Exodiff'
     input = 'MathEBFreeEnergy_split.i'
     exodiff = 'MathEBFreeEnergy_split_out.e'
     max_parallel = 1                              # -pc_type lu
-  [../]
+  []
 
-  [./RegularSolutionFreeEnergy]
+  [RegularSolutionFreeEnergy]
     type = 'Exodiff'
     input = 'RegularSolutionFreeEnergy.i'
     exodiff = 'RegularSolutionFreeEnergy_out.e'
-  [../]
+  []
 
-  [./RegularSolutionFreeEnergy_const_T_default]
+  [RegularSolutionFreeEnergy_const_T_default]
     type = 'Exodiff'
     input = 'RegularSolutionFreeEnergy_const_T.i'
     exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
-  [../]
+  []
 
-  [./RegularSolutionFreeEnergy_const_T_specified]
+  [RegularSolutionFreeEnergy_const_T_specified]
     type = 'Exodiff'
     prereq = 'RegularSolutionFreeEnergy_const_T_default'
     input = 'RegularSolutionFreeEnergy_const_T.i'
     exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
     cli_args = Materials/free_energy/T=300
-  [../]
+  []
 
-  [./RegularSolutionFreeEnergy_plog]
+  [RegularSolutionFreeEnergy_plog]
     type = 'Exodiff'
     input = 'RegularSolutionFreeEnergy_plog.i'
     exodiff = 'RegularSolutionFreeEnergy_plog_out.e'
-  [../]
+  []
 []

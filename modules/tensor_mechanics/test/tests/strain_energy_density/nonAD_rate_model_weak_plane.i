@@ -18,88 +18,88 @@
 []
 
 [Variables]
-  [./strain_zz]
+  [strain_zz]
   []
 []
 
 [AuxVariables]
-  [./SERD]
+  [SERD]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./master]
+  [master]
     strain = FINITE
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy'
     planar_formulation = WEAK_PLANE_STRESS
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./SERD]
+  [SERD]
     type = MaterialRealAux
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./Pressure]
-    [./top]
+  []
+  [Pressure]
+    [top]
       boundary = 'top'
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.0
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'powerlawcrp'
-  [../]
-  [./powerlawcrp]
+  []
+  [powerlawcrp]
     type = PowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
     n_exponent = 4.0
     m_exponent = 0.0
     activation_energy = 0.0
     # max_inelastic_increment = 0.01
-  [../]
-  [./strain_energy_rate_density]
+  []
+  [strain_energy_rate_density]
     type = StrainEnergyRateDensity
     inelastic_models = 'powerlawcrp'
-  [../]
+  []
 []
 
 [Executioner]
@@ -124,10 +124,10 @@
 []
 
 [Postprocessors]
-  [./SERD]
+  [SERD]
     type = ElementAverageValue
     variable = SERD
-  [../]
+  []
 []
 
 [Outputs]

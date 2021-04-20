@@ -22,80 +22,80 @@
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x = '0 0.1'
     y = '0 1e-5'
-  [../]
-  [./tot_effective_viscoplasticity]
+  []
+  [tot_effective_viscoplasticity]
     type = ParsedFunction
     vals = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
     vars = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
     value = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = 'one two'
     outputs = all
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = ADPorosityFromStrain
     initial_porosity = 0.1
     inelastic_strain = 'combined_inelastic_strain'
     outputs = 'all'
-  [../]
+  []
 
-  [./one]
+  [one]
     type = ADViscoplasticityStressUpdate
     coefficient = 'coef'
     power = 3
     base_name = 'lps_first'
     outputs = all
     relative_tolerance = 1e-11
-  [../]
-  [./two]
+  []
+  [two]
     type = ADViscoplasticityStressUpdate
     coefficient = 'coef'
     power = 3
     base_name = 'lps_second'
     outputs = all
     relative_tolerance = 1e-11
-  [../]
-  [./coef]
+  []
+  [coef]
     type = ADParsedMaterial
     f_name = coef
     # Example of creep power law
     function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
-  [../]
+  []
 []
 
 [BCs]
-  [./no_disp_x]
+  [no_disp_x]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./no_disp_y]
+  []
+  [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./pull_disp_y]
+  []
+  [pull_disp_y]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,53 +106,53 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [disp_x]
     type = SideAverageValue
     variable = disp_x
     boundary = right
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = SideAverageValue
     variable = disp_y
     boundary = top
-  [../]
-  [./avg_hydro]
+  []
+  [avg_hydro]
     type = ElementAverageValue
     variable = hydrostatic_stress
-  [../]
-  [./avg_vonmises]
+  []
+  [avg_vonmises]
     type = ElementAverageValue
     variable = vonmises_stress
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimestepSize
-  [../]
-  [./num_lin]
+  []
+  [num_lin]
     type = NumLinearIterations
     outputs = console
-  [../]
-  [./num_nonlin]
+  []
+  [num_nonlin]
     type = NumNonlinearIterations
     outputs = console
-  [../]
-  [./lps_1_eff_creep_strain]
+  []
+  [lps_1_eff_creep_strain]
     type = ElementAverageValue
     variable = lps_first_effective_viscoplasticity
     outputs = none
-  [../]
-  [./lps_2_eff_creep_strain]
+  []
+  [lps_2_eff_creep_strain]
     type = ElementAverageValue
     variable = lps_second_effective_viscoplasticity
     outputs = none
-  [../]
-  [./eff_creep_strain_tot]
+  []
+  [eff_creep_strain_tot]
     type = FunctionValuePostprocessor
     function = tot_effective_viscoplasticity
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = ElementAverageValue
     variable = porosity
-  [../]
+  []
 []
 
 [Outputs]

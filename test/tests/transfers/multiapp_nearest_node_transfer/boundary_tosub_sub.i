@@ -7,41 +7,41 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_master_1]
-  [../]
-  [./from_master_2]
-  [../]
-  [./from_master_3]
-  [../]
-  [./from_master_4]
-  [../]
+  [from_master_1]
+  []
+  [from_master_2]
+  []
+  [from_master_3]
+  []
+  [from_master_4]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

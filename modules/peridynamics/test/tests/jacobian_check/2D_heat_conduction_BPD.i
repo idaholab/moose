@@ -2,54 +2,54 @@
   type = PeridynamicsMesh
   horizon_number = 3
 
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
     ny = 4
-  [../]
-  [./gpd]
+  []
+  [gpd]
     type = MeshGeneratorPD
     input = gmg
     retain_fe_mesh = false
-  [../]
+  []
 []
 
 [Variables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [AuxVariables]
-  [./bond_status]
+  [bond_status]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./HeatConduction]
+  [HeatConduction]
     type = HeatConductionBPD
     variable = temp
-  [../]
+  []
 []
 
 [Materials]
-  [./thermal_mat]
+  [thermal_mat]
     type = ThermalConstantHorizonMaterialBPD
     temperature = temp
     thermal_conductivity = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_type'
     petsc_options_value = 'bcgs bjacobi test'
-  [../]
+  []
 []
 
 [Executioner]

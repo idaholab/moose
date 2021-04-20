@@ -2,108 +2,108 @@
    design = "Eigenvalue.md"
    issues = "#7398"
 
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'ipm.i'
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
     slepc = true
     requirement = "Eigenvalue system should support standard eigenvalue problems"
-  [../]
+  []
 
-  [./gipm_test]
+  [gipm_test]
     type = 'CSVDiff'
     input = 'gipm.i'
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
     slepc = true
     requirement = "Eigenvalue system should support generalized eigenvalue problems"
-  [../]
+  []
 
-  [./gipm_ibc]
+  [gipm_ibc]
     type = 'CSVDiff'
     input = 'gipm_ibc.i'
     csvdiff = 'gipm_ibc_out_eigenvalues_0001.csv'
     slepc = true
     requirement = "Eigenvalue system should support IntegratedBC"
-  [../]
+  []
 
-  [./wrong_dirichlet_value_eigen]
+  [wrong_dirichlet_value_eigen]
     type = 'RunException'
     input = 'gipm.i'
     cli_args = 'BCs/homogeneous/value=1'
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
     slepc = true
     requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
-  [../]
+  []
 
-  [./wrong_NodalBC_type_eigen]
+  [wrong_NodalBC_type_eigen]
     type = 'RunException'
     input = 'gipm.i'
     cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
     expect_err = 'Invalid NodalBC for eigenvalue problems, please use homogeneous \(array\) Dirichlet.'
     slepc = true
     requirement = "Eigenvalue system should use homogeneous boundary conditions only"
-  [../]
+  []
 
-  [./no_slepc]
+  [no_slepc]
     type = 'RunException'
     input = 'gipm.i'
     cli_args = 'Executioner/solve_type=NEWTON'
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
     slepc = false
     requirement = "Eigenvalue system requires SLEPc installed"
-  [../]
+  []
 
-  [./nonlinear_power]
+  [nonlinear_power]
     type = 'CSVDiff'
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=NONLINEAR_POWER Executioner/matrix_free=true Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
-  [../]
+  []
 
-  [./monolith_newton]
+  [monolith_newton]
     type = 'CSVDiff'
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=NEWTON Executioner/matrix_free=true Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"
-  [../]
+  []
 
-  [./ne_deficient]
+  [ne_deficient]
     type = 'CSVDiff'
     input = 'ne_deficient_b.i'
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a deficient eigenvalue problem"
-  [../]
+  []
 
-  [./nonlinear_laplace]
+  [nonlinear_laplace]
     type = 'CSVDiff'
     input = 'ane.i'
     csvdiff = 'ane_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a nonlinear eigenvalue problem"
-  [../]
+  []
 
-  [./coupled_system]
+  [coupled_system]
     type = 'CSVDiff'
     input = 'ne_coupled.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a coupled nonlinear eigenvalue problem"
-  [../]
+  []
 
-  [./eigen_scalar_kernel]
+  [eigen_scalar_kernel]
     type = 'CSVDiff'
     input = 'scalar.i'
     csvdiff = 'scalar_out_eigenvalues_0001.csv'
     slepc_version = '>=3.8.0'
     requirement = "Eigenvalue system should be able to handle scalar kernels"
-  [../]
+  []
 
-  [./dg_krylovschur]
+  [dg_krylovschur]
     type = 'CSVDiff'
     input = 'dg_krylovschur.i'
     csvdiff = 'dg_krylovschur_out_eigenvalues_0001.csv'
@@ -111,7 +111,7 @@
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
 
-  [./eigen_as_master]
+  [eigen_as_master]
     type = 'CSVDiff'
     input = 'ne_coupled_picard.i'
     csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
@@ -120,7 +120,7 @@
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master."
   []
 
-  [./eigen_as_master_exodus]
+  [eigen_as_master_exodus]
     type = 'Exodiff'
     input = 'ne_coupled_picard.i'
     exodiff = 'ne_coupled_picard_out.e ne_coupled_picard_out_sub0.e'
@@ -130,7 +130,7 @@
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master and output eigen vectors as an exodus file."
   []
 
-  [./eigen_as_sub]
+  [eigen_as_sub]
     type = 'CSVDiff'
     input = 'ne_coupled_picard_subT.i'
     csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
@@ -139,7 +139,7 @@
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app."
   []
 
-  [./eigen_as_sub_exodus]
+  [eigen_as_sub_exodus]
     type = 'Exodiff'
     input = 'ne_coupled_picard_subT.i'
     exodiff = 'ne_coupled_picard_subT_out.e ne_coupled_picard_subT_out_sub0.e'
@@ -149,7 +149,7 @@
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app and output eigen vectors as an exodus file."
   []
 
-  [./scaled_eigenvector]
+  [scaled_eigenvector]
     type = 'Exodiff'
     input = 'ne_coupled_scaled.i'
     exodiff = 'ne_coupled_scaled_out.e'

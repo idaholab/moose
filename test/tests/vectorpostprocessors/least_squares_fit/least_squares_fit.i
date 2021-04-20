@@ -6,52 +6,52 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = LineValueSampler
     variable = 'u v'
     start_point = '0 0.5 0'
@@ -59,8 +59,8 @@
     num_points = 11
     sort_by = id
     outputs = none
-  [../]
-  [./least_squares_fit_sample]
+  []
+  [least_squares_fit_sample]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -68,16 +68,16 @@
     order = 1
     num_samples = 20
     output = samples
-  [../]
-  [./least_squares_fit_coeffs]
+  []
+  [least_squares_fit_coeffs]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
     y_name = 'u'
     order = 1
     output = coefficients
-  [../]
-  [./shift_and_scale_x_least_squares_fit_sample]
+  []
+  [shift_and_scale_x_least_squares_fit_sample]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -87,8 +87,8 @@
     order = 1
     num_samples = 20
     output = samples
-  [../]
-  [./shift_and_scale_x_least_squares_fit_coeffs]
+  []
+  [shift_and_scale_x_least_squares_fit_coeffs]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -97,8 +97,8 @@
     x_scale = 10
     order = 1
     output = coefficients
-  [../]
-  [./shift_and_scale_y_least_squares_fit_sample]
+  []
+  [shift_and_scale_y_least_squares_fit_sample]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -108,8 +108,8 @@
     order = 1
     num_samples = 20
     output = samples
-  [../]
-  [./shift_and_scale_y_least_squares_fit_coeffs]
+  []
+  [shift_and_scale_y_least_squares_fit_coeffs]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
     x_name = 'id'
@@ -118,7 +118,7 @@
     y_scale = 10
     order = 1
     output = coefficients
-  [../]
+  []
 []
 
 [Executioner]

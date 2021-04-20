@@ -1,5 +1,5 @@
 [Tests]
-  [./1ph.p_T]
+  [1ph.p_T]
     type = 'RunApp'
     input = '1ph.p_T.i'
     allow_warnings = true
@@ -26,9 +26,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "fluid properties for (p, T) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.p_T.json]
+  [1ph.p_T.json]
     type = 'RunApp'
     input = '1ph.p_T.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -44,9 +44,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "fluid properties for (p, T) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_e]
+  [1ph.rho_e]
     type = 'RunApp'
     input = '1ph.rho_e.i'
     allow_warnings = true
@@ -73,9 +73,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "fluid properties for (rho, e) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_e.json]
+  [1ph.rho_e.json]
     type = 'RunApp'
     input = '1ph.rho_e.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -90,9 +90,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "fluid properties for (rho, e) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_p]
+  [1ph.rho_p]
     type = 'RunApp'
     input = '1ph.rho_p.i'
     allow_warnings = true
@@ -119,9 +119,9 @@ Volumetric expansion coefficient:              0.002867  1/K'
       "fluid properties for (rho, p) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_p.json]
+  [1ph.rho_p.json]
     type = 'RunApp'
     input = '1ph.rho_p.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -136,9 +136,9 @@ Volumetric expansion coefficient:              0.002867  1/K'
       "fluid properties for (rho, p) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_rhou_rhoE]
+  [1ph.rho_rhou_rhoE]
     type = 'RunApp'
     input = '1ph.rho_rhou_rhoE.i'
     allow_warnings = true
@@ -184,9 +184,9 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
       "and stagnation-state fluid properties for (rho, rhou, rhoE) input with a single-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./1ph.rho_rhou_rhoE.json]
+  [1ph.rho_rhou_rhoE.json]
     type = 'RunApp'
     input = '1ph.rho_rhou_rhoE.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -205,9 +205,9 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
       "a single-phase fluid properties object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph.p_T]
+  [2ph.p_T]
     type = 'RunApp'
     input = '2ph.p_T.i'
     allow_test_objects = true
@@ -261,9 +261,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "single-phase fluid properties for (p, T) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph.p_T.json]
+  [2ph.p_T.json]
     type = 'RunApp'
     input = '2ph.p_T.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -284,9 +284,9 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
       "two-phase fluid properties object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_ncg_p_T]
+  [2ph_ncg_p_T]
     type = 'RunApp'
     input = '2ph_ncg_p_T.i'
     allow_test_objects = true
@@ -338,9 +338,9 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
       "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_ncg_p_T.json]
+  [2ph_ncg_p_T.json]
     type = 'RunApp'
     input = '2ph_ncg_p_T.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -361,9 +361,9 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
       "a two-phase NCG fluid properties object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./vapor_mixture_rho_e]
+  [vapor_mixture_rho_e]
     type = 'RunApp'
     input = 'vapor_mixture_rho_e.i'
     allow_test_objects = true
@@ -389,9 +389,9 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
       "single-phase fluid properties for (rho, e) input with a vapor mixture fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./vapor_mixture_rho_e.json]
+  [vapor_mixture_rho_e.json]
     type = 'RunApp'
     input = 'vapor_mixture_rho_e.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -408,9 +408,9 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
       "fluid properties object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_p]
+  [2ph_p]
   type = 'RunApp'
   input = '2ph.p.i'
   allow_test_objects = true
@@ -427,9 +427,9 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
       "fluid properties for (p) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_p.json]
+  [2ph_p.json]
     type = 'RunApp'
     input = '2ph.p.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -444,9 +444,9 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
       "object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_T]
+  [2ph_T]
   type = 'RunApp'
   input = '2ph.T.i'
   allow_test_objects = true
@@ -464,9 +464,9 @@ Surface tension:                                   1500  N/m'
       "fluid properties for (T) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./2ph_T.json]
+  [2ph_T.json]
     type = 'RunApp'
     input = '2ph.T.i'
     cli_args = 'FluidPropertiesInterrogator/json=true'
@@ -482,9 +482,9 @@ Surface tension:                                   1500  N/m'
       "object in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./err.wrong_fp_type]
+  [err.wrong_fp_type]
     type = RunException
     input = 'err.wrong_fp_type.i'
     allow_warnings = true
@@ -496,9 +496,9 @@ Surface tension:                                   1500  N/m'
       incompatible fluid properties object is supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./err.extraneous_parameter]
+  [err.extraneous_parameter]
     type = RunException
     input = '1ph.rho_e.i'
     allow_warnings = true
@@ -511,9 +511,9 @@ Surface tension:                                   1500  N/m'
       extraneous parameter(s) are supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 
-  [./err.no_params]
+  [err.no_params]
     type = RunException
     input = 'err.no_params.i'
     allow_warnings = true
@@ -526,5 +526,5 @@ combinations of thermodynamic properties:"
       no valid input sets were supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
-  [../]
+  []
 []

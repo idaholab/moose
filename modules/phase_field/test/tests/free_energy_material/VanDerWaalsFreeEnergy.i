@@ -7,22 +7,22 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = x*0.4+0.001
-    [../]
-  [../]
-  [./T]
-    [./InitialCondition]
+    []
+  []
+  [T]
+    [InitialCondition]
       type = FunctionIC
       function = y*1999+1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type =  VanDerWaalsFreeEnergy
     f_name = Fgas
     m = 134 # Xenon
@@ -32,7 +32,7 @@
     c = c
     T = T
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

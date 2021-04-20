@@ -28,12 +28,12 @@ If different mechanics models are needed, multiple subblocks with subdomain rest
 
 ```
 [Modules/Peridynamics/Mechanics/Master]
-  [./block_a]
+  [block_a]
     ...
-  [../]
-  [./block_b]
+  []
+  [block_b]
     ...
-  [../]
+  []
 []
 ```
 

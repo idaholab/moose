@@ -4,40 +4,40 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./strain_zz]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [strain_zz]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./plane_stress]
+  [plane_stress]
     planar_formulation = WEAK_PLANE_STRESS
     strain = SMALL
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.0
     youngs_modulus = 1
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

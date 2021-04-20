@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'ad_surface_tension_material.i'
     csvdiff = 'ad_surface_tension_material_out.csv'
@@ -9,5 +9,5 @@
     requirement = 'The system shall provide an AD material that computes surface tension.'
     design = '/ADSurfaceTensionMaterial.md'
     issues = '#15308'
-  [../]
+  []
 []

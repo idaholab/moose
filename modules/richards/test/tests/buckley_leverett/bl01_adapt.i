@@ -12,98 +12,98 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2.0E6
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-4
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.0
     sum_s_res = 0.0
-  [../]
-  [./SUPGstandard]
+  []
+  [SUPGstandard]
     type = RichardsSUPGstandard
     p_SUPG = 1E-5
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
+  [Seff1VG_Aux]
+  []
 []
 
 [AuxKernels]
   active = 'calculate_seff'
-  [./calculate_seff]
+  [calculate_seff]
     type = RichardsSeffAux
     variable = Seff1VG_Aux
     seff_UO = SeffVG
     pressure_vars = pressure
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = initial_pressure
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
   active = 'left'
-  [./left]
+  [left]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 980000
-  [../]
+  []
 []
 
 [Kernels]
   active = 'richardsf richardst'
 
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 
 [Functions]
  active = 'initial_pressure'
-  [./initial_pressure]
+  [initial_pressure]
     type = ParsedFunction
     value = max((1000000-x/5*1000000)-20000,-20000)
-  [../]
+  []
 []
 
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.15
@@ -116,39 +116,39 @@
     viscosity = 1E-3
     gravity = '-1 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Adaptivity]
   marker = errorfrac
   max_h_level = 3
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = RichardsFluxJumpIndicator
       variable = pressure
-    [../]
-  [../]
-  [./Markers]
-    [./errorfrac]
+    []
+  []
+  [Markers]
+    [errorfrac]
       type = ErrorFractionMarker
       refine = 0.5
       coarsen = 0.3
       indicator = error
-   [../]
-  [../]
+   []
+  []
 []
 
 [Preconditioning]
   active = 'andy'
 
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 20'
-  [../]
+  []
 
 []
 
@@ -157,7 +157,7 @@
   end_time = 50
 
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionControlledDT
     functions = ''
     maximums = ''
@@ -169,7 +169,7 @@
     minDt = 1E-5
     adapt_log = false
     percent_change = 0.1
-  [../]
+  []
 
 []
 

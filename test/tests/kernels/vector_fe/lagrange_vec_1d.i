@@ -9,48 +9,48 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE_VEC
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorDiffusion
     variable = u
-  [../]
-  [./body_force]
+  []
+  [body_force]
     type = VectorBodyForce
     variable = u
     function_x = 'ffx'
-  [../]
+  []
 []
 
 [BCs]
-  [./bnd]
+  [bnd]
     type = VectorFunctionDirichletBC
     variable = u
     function_x = 'x_exact_sln'
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Functions]
-  [./x_exact_sln]
+  [x_exact_sln]
     type = ParsedFunction
     value = 'cos(.5*pi*x)'
-  [../]
-  [./ffx]
+  []
+  [ffx]
     type = ParsedFunction
     value = '.25*pi*pi*cos(.5*pi*x)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pre]
+  [pre]
     type = SMP
-  [../]
+  []
 []
 
 [Executioner]

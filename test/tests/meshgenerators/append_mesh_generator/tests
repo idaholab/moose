@@ -1,5 +1,5 @@
 [Tests]
-  [./append_mesh_generator_test]
+  [append_mesh_generator_test]
     type = 'Exodiff'
     input = 'append_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -9,5 +9,5 @@
     issues = '#15121'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 []

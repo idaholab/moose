@@ -18,223 +18,223 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     initial_condition = 1500.0
-  [../]
-  [./creep]
+  []
+  [creep]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./pressure]
+  []
+  [pressure]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./invariant3]
+  []
+  [invariant3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_xx]
+  []
+  [creep_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_yy]
+  []
+  [creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_zz]
+  []
+  [creep_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_xy]
+  []
+  [creep_strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_xx]
+  []
+  [elastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_yy]
+  []
+  [elastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_zz]
+  []
+  [elastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./creep_aux]
+  [creep_aux]
     type = MaterialRealAux
     property = effective_creep_strain
     variable = creep
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = VonMisesStress
-  [../]
-  [./pressure]
+  []
+  [pressure]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = pressure
     scalar_type = Hydrostatic
-  [../]
-  [./invariant3]
+  []
+  [invariant3]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = invariant3
     scalar_type = ThirdInvariant
-  [../]
-  [./creep_strain_xx]
+  []
+  [creep_strain_xx]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./creep_strain_yy]
+  []
+  [creep_strain_yy]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./creep_strain_zz]
+  []
+  [creep_strain_zz]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./creep_strain_xy]
+  []
+  [creep_strain_xy]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./elastic_str_xx_aux]
+  []
+  [elastic_str_xx_aux]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./elastic_str_yy_aux]
+  []
+  [elastic_str_yy_aux]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./elastic_str_zz_aux]
+  []
+  [elastic_str_zz_aux]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [BCs]
-  [./bot_y]
+  [bot_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./side_x]
+  []
+  [side_x]
     type = DirichletBC
     variable = disp_x
     boundary = 2
     value = 0.0
-  [../]
-  [./top_press]
+  []
+  [top_press]
     type = Pressure
     variable = disp_y
     boundary = 3
     component = 1
     factor = -100.0
-  [../]
-  [./side_press]
+  []
+  [side_press]
     type = Pressure
     variable = disp_x
     boundary = 4
     component = 0
     factor = -200.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 200e3
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputePlaneFiniteStrain
     block = 1
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     block = 1
     inelastic_models = 'powerlawcrp'
-  [../]
-  [./powerlawcrp]
+  []
+  [powerlawcrp]
     type = PowerLawCreepStressUpdate
     block = 1
     coefficient = 3.125e-14
@@ -242,7 +242,7 @@
     m_exponent = 0.0
     activation_energy = 0.0
     max_inelastic_increment = 0.01
-  [../]
+  []
 []
 
 [Executioner]
@@ -261,7 +261,7 @@
   num_steps = 10000
   l_tol = 1e-3
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e-6
     time_t = '1e-6  2e-6 3e-6 5e-6 9e-6 1.7e-5 3.3e-5 6.5e-5 1.29e-4 2.57e-4 5.13e-4 1.025e-3 2.049e-3 4.097e-3 8.193e-3 1.638e-2 3.276e-2 5.734e-2 0.106 0.180 0.291 0.457 0.706 1.08 1.64 2.48 3.74 5.63 8.46 12.7 19.1 28.7 43.0 64.5 108.0 194.0 366.0 710.0 1000.0'
@@ -271,100 +271,100 @@
     growth_factor = 2.0
     cutback_factor = 0.5
     timestep_limiting_postprocessor = matl_ts_min
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./matl_ts_min]
+  [matl_ts_min]
     type = MaterialTimeStepPostprocessor
-  [../]
-  [./sigma_xx]
+  []
+  [sigma_xx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
-  [./sigma_yy]
+  []
+  [sigma_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./sigma_zz]
+  []
+  [sigma_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     type = ElementAverageValue
     variable = vonmises
-  [../]
-  [./pressure]
+  []
+  [pressure]
     type = ElementAverageValue
     variable = pressure
-  [../]
-  [./invariant3]
+  []
+  [invariant3]
     type = ElementAverageValue
     variable = invariant3
-  [../]
-  [./eps_crp_xx]
+  []
+  [eps_crp_xx]
     type = ElementAverageValue
     variable = creep_strain_xx
-  [../]
-  [./eps_crp_yy]
+  []
+  [eps_crp_yy]
     type = ElementAverageValue
     variable = creep_strain_yy
-  [../]
-  [./eps_crp_zz]
+  []
+  [eps_crp_zz]
     type = ElementAverageValue
     variable = creep_strain_zz
-  [../]
-  [./eps_crp_mag]
+  []
+  [eps_crp_mag]
     type = ElementAverageValue
     variable = creep
-  [../]
-  [./disp_x2]
+  []
+  [disp_x2]
     type = NodalVariableValue
     nodeid = 1
     variable = disp_x
-  [../]
-  [./disp_x3]
+  []
+  [disp_x3]
     type = NodalVariableValue
     nodeid = 2
     variable = disp_x
-  [../]
-  [./disp_y3]
+  []
+  [disp_y3]
     type = NodalVariableValue
     nodeid = 2
     variable = disp_y
-  [../]
-  [./disp_y4]
+  []
+  [disp_y4]
     type = NodalVariableValue
     nodeid = 3
     variable = disp_y
-  [../]
-  [./_dt]
+  []
+  [_dt]
     type = TimestepSize
-  [../]
-  [./elas_str_xx]
+  []
+  [elas_str_xx]
     type = ElementAverageValue
     variable = elastic_strain_xx
-  [../]
-  [./elas_str_yy]
+  []
+  [elas_str_yy]
     type = ElementAverageValue
     variable = elastic_strain_yy
-  [../]
-  [./elas_str_zz]
+  []
+  [elas_str_zz]
     type = ElementAverageValue
     variable = elastic_strain_zz
-  [../]
+  []
 []
 
 [Outputs]
   print_linear_residuals = true
   perf_graph = true
   csv = true
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     max_rows = 25
-  [../]
+  []
 []

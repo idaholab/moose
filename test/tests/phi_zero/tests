@@ -1,5 +1,5 @@
 [Tests]
-  [./phi_zero_linear]
+  [phi_zero_linear]
     type = 'RunApp'
     input = 'simple_transient_diffusion.i'
     issues = '#15204'
@@ -7,8 +7,8 @@
     'functions and shape function gradients consistent with the maximum number of'
     'shape functions and quadrature points in the simulation.'
     design = 'PhiZero.md'
-  [../]
-  [./phi_zero_quadratic]
+  []
+  [phi_zero_quadratic]
     type = 'RunApp'
     input = 'simple_transient_diffusion.i'
     issues = '#15204'
@@ -18,5 +18,5 @@
     'shape functions and quadrature points in the simulation. This test checks the '
     'size of zero objects when using second-order elements and second order-variables.'
     design = 'PhiZero.md'
-  [../]
+  []
 []

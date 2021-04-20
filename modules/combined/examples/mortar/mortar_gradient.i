@@ -42,117 +42,117 @@
 []
 
 [Functions]
-  [./init_slope]
+  [init_slope]
     # slope with a concentration spike close to the lower interface
     type = ParsedFunction
     value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
-  [../]
-  [./init_flat]
+  []
+  [init_flat]
     # no-slope and the same spike
     type = ParsedFunction
     value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
-  [../]
+  []
 []
 
 [Variables]
   # gradient constrained concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     block = 0
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = init_slope
-    [../]
-  [../]
+    []
+  []
 
   # unconstrained concentrarion
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = 0
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = init_slope
-    [../]
-  [../]
+    []
+  []
 
   # flat value periodic diffusion
-  [./p]
+  [p]
     order = FIRST
     family = LAGRANGE
     block = 0
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = init_flat
-    [../]
-  [../]
+    []
+  []
 
   # Lagrange multipliers for gradient component in the horizontal directon
-  [./lm_left_right_x]
+  [lm_left_right_x]
     order = FIRST
     family = LAGRANGE
     block = "secondary_x"
-  [../]
-  [./lm_left_right_y]
+  []
+  [lm_left_right_y]
     order = FIRST
     family = LAGRANGE
     block = "secondary_x"
-  [../]
+  []
 
   # Lagrange multipliers for gradient component in the vertical directon
-  [./lm_up_down_x]
+  [lm_up_down_x]
     order = FIRST
     family = LAGRANGE
     block = "secondary_y"
-  [../]
-  [./lm_up_down_y]
+  []
+  [lm_up_down_y]
     order = FIRST
     family = LAGRANGE
     block = "secondary_y"
-  [../]
+  []
 []
 
 [Kernels]
   # the gradient constrained concentration
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
     block = 0
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = c
     block = 0
-  [../]
+  []
 
   # the un-constrained concentration
-  [./diff2]
+  [diff2]
     type = Diffusion
     variable = v
     block = 0
-  [../]
-  [./dt2]
+  []
+  [dt2]
     type = TimeDerivative
     variable = v
     block = 0
-  [../]
+  []
 
   # the value periodic concentration
-  [./diff3]
+  [diff3]
     type = Diffusion
     variable = p
     block = 0
-  [../]
-  [./dt3]
+  []
+  [dt3]
     type = TimeDerivative
     variable = p
     block = 0
-  [../]
+  []
 []
 
 [Constraints]
-  [./equaly_grad_x]
+  [equaly_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_x
     component = 0
@@ -162,8 +162,8 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
-  [./equaly_grad_y]
+  []
+  [equaly_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_y
     component = 1
@@ -173,9 +173,9 @@
     secondary_subdomain = secondary_y
     primary_subdomain = primary_y
     periodic = true
-  [../]
+  []
 
-  [./equalx_grad_x]
+  [equalx_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_x
     component = 0
@@ -185,8 +185,8 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
-  [./equalx_grad_y]
+  []
+  [equalx_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_y
     component = 1
@@ -196,97 +196,97 @@
     secondary_subdomain = secondary_x
     primary_subdomain = primary_x
     periodic = true
-  [../]
+  []
 []
 
 [BCs]
   # DiffusionFluxBC is the surface term in the weak form of the Diffusion equation
-  [./surface]
+  [surface]
     type = DiffusionFluxBC
     boundary = 'top bottom left right'
     variable = c
-  [../]
-  [./surface2]
+  []
+  [surface2]
     type = DiffusionFluxBC
     boundary = 'top bottom left right'
     variable = v
-  [../]
+  []
 
   # for the value periodic diffusion we skip the surface term and apply value PBCs
-  [./Periodic]
-    [./up_down]
+  [Periodic]
+    [up_down]
       variable = p
       primary = 0
       secondary = 2
       translation = '0 1 0'
-    [../]
-    [./left_right]
+    []
+    [left_right]
       variable = p
       primary = 1
       secondary = 3
       translation = '-1 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./diff_constraint]
+  [diff_constraint]
     block = 0
-  [../]
-  [./diff_periodic]
+  []
+  [diff_periodic]
     block = 0
-  [../]
-  [./diff_slope]
+  []
+  [diff_slope]
     block = 0
-  [../]
-  [./slope]
+  []
+  [slope]
     block = 0
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxKernels]
   # difference between the constrained and unconstrained sloped diffusions
-  [./diff_constraint]
+  [diff_constraint]
     type = ParsedAux
     variable = diff_constraint
     function = 'c-v'
     args = 'c v'
     block = 0
-  [../]
+  []
 
   # difference between the periodic gradient constrained diffusion and the flat
   # value period diffusien with a constant slope added. This should be the same,
   # but they aren't quite because the gradient constraint affects the gradient in
   # the entire elements (i.e. a larger volume is affected by the gradient constraint
   # compared to the nodal value periodicity)
-  [./diff_periodic]
+  [diff_periodic]
     type = ParsedAux
     variable = diff_periodic
     function = 'c-p-slope'
     args = 'c p slope'
     block = 0
-  [../]
+  []
 
   # subtract the constant slope from the gradient periodic simulation (should yield
   # almost p - per the argument above)
-  [./diff_slope]
+  [diff_slope]
     type = ParsedAux
     variable = diff_slope
     function = 'c-slope'
     args = 'c slope'
     block = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

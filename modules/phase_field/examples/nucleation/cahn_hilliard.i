@@ -17,34 +17,34 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./c]
+  [PhaseField]
+    [Conserved]
+      [c]
         free_energy = F
         mobility = M
         kappa = kappa_c
         solve_type = REVERSE_SPLIT
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = RandomIC
     variable = c
     min = 0.2
     max = 0.21
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 25'
-  [../]
-  [./chemical_free_energy]
+  []
+  [chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
     f_name = Fc
@@ -54,8 +54,8 @@
     function = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
     derivative_order = 2
     outputs = exodus
-  [../]
-  [./probability]
+  []
+  [probability]
     # This is a made up toy nucleation rate it should be replaced by
     # classical nucleation theory in a real simulation.
     type = ParsedMaterial
@@ -63,8 +63,8 @@
     args = c
     function = c*1e-7
     outputs = exodus
-  [../]
-  [./nucleation]
+  []
+  [nucleation]
     # The nucleation material is configured to insert nuclei into the free energy
     # tht force the concentration to go to 0.95, and holds this enforcement for 500
     # time units.
@@ -76,26 +76,26 @@
     penalty_mode = MIN
     map = map
     outputs = exodus
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
     derivative_order = 2
     args = c
     sum_materials = 'Fc Fn'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     # The inserter runs at the end of each time step to add nucleation events
     # that happend during the timestep (if it converged) to the list of nuclei
     type = DiscreteNucleationInserter
     hold_time = 100
     probability = P
     radius = 10
-  [../]
-  [./map]
+  []
+  [map]
     # The map UO runs at the beginning of a timestep and generates a per-element/qp
     # map of nucleus locations. The map is only regenerated if the mesh changed or
     # the list of nuclei was modified.
@@ -103,28 +103,28 @@
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,13 +141,13 @@
   start_time = 0.0
   num_steps = 1200
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
     growth_factor = 1.5
     cutback_factor = 0.5
     optimal_iterations = 5
-  [../]
+  []
 []
 
 [Outputs]

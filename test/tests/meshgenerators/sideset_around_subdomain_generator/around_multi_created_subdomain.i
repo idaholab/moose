@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     xmin = 0
@@ -13,7 +13,7 @@
     nz = 2
   []
 
-  [./subdomains]
+  [subdomains]
     type = ElementSubdomainIDGenerator
     input = gmg
     subdomain_ids = '0 0 0 0
@@ -25,7 +25,7 @@
                      1 1 0 0
                      0 0 0 0'
   []
-  [./interface]
+  [interface]
     type = SideSetsAroundSubdomainGenerator
     input = subdomains
     block = '1 2 3'

@@ -64,50 +64,50 @@
 [] # Mesh
 
 [Functions]
-  [./temps]
+  [temps]
     type = ParsedFunction
     value='200*x+100*y+200*z'
-  [../]
+  []
 [] # Functions
 
 [Variables]
 
-  [./temp]
+  [temp]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
 [] # Variables
 
 [Kernels]
 
-  [./heat_r]
+  [heat_r]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 
 [] # Kernels
 
 [BCs]
 
-  [./temps]
+  [temps]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
     function = temps
-  [../]
+  []
 
 [] # BCs
 
 [Materials]
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     block = 1
 
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
-  [../]
+  []
 
 [] # Materials
 
@@ -129,9 +129,9 @@
 
   l_max_its = 20
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
-  [../]
+  []
 
 [] # Executioner
 

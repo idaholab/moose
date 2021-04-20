@@ -25,7 +25,7 @@
 []
 
 [UserObjects]
-  [./cut_mesh]
+  [cut_mesh]
     type = MeshCut3DUserObject
     mesh_file = mesh_edge_crack.xda
     size_control = 0.1
@@ -33,78 +33,78 @@
     function_x = growth_func_x
     function_y = growth_func_y
     function_z = growth_func_z
-  [../]
+  []
 []
 
 [Functions]
-  [./growth_func_x]
+  [growth_func_x]
     type = ParsedFunction
     value = 1
-  [../]
-  [./growth_func_y]
+  []
+  [growth_func_y]
     type = ParsedFunction
     value = 0
-  [../]
-  [./growth_func_z]
+  []
+  [growth_func_z]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
-  [../]
+  []
 []
 
 [Functions]
-  [./top_trac_y]
+  [top_trac_y]
     type = ConstantFunction
     value = 10
-  [../]
+  []
 []
 
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = FunctionNeumannBC
     boundary = top
     variable = disp_y
     function = top_trac_y
-  [../]
-  [./bottom_x]
+  []
+  [bottom_x]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     boundary = bottom
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
     block = 0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -116,10 +116,10 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -141,8 +141,8 @@
   file_base = edge_crack_3d_propagation_out
   execute_on = 'timestep_end'
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

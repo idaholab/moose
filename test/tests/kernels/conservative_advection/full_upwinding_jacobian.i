@@ -8,30 +8,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = RandomIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./advection]
+  [advection]
     type = ConservativeAdvection
     variable = u
     upwinding_type = full
     velocity = '2 -1.1 1.23'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
-  [../]
+  []
 []
 
 [Executioner]

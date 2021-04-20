@@ -9,16 +9,16 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     family = HERMITE
     order = THIRD
-  [../]
-  [./d]
-  [../]
+  []
+  [d]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 15
     y1 = 15
@@ -27,8 +27,8 @@
     int_width = 3
     invalue = 1
     outvalue = 0
-  [../]
-  [./d_IC]
+  []
+  [d_IC]
     type = BoundingBoxIC
     x1 = 0
     x2 = 15
@@ -37,69 +37,69 @@
     inside = 1.0
     outside = 0.0
     variable = d
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_bulk]
+  [c_bulk]
     type = CahnHilliard
     variable = c
     mob_name = M
     f_name = F
     args = d
-  [../]
-  [./c_int]
+  []
+  [c_int]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
     args = d
-  [../]
-  [./c_dot]
+  []
+  [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
-  [./d_dot]
+  []
+  [d_dot]
     type = TimeDerivative
     variable = d
-  [../]
-  [./d_diff]
+  []
+  [d_diff]
     type = MatDiffusion
     variable = d
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = kappa_c
     prop_values = 2.0
-  [../]
-  [./mob]
+  []
+  [mob]
     type = DerivativeParsedMaterial
     f_name = M
     args = 'c d'
     function = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
     derivative_order = 2
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = MathEBFreeEnergy
     f_name = F
     c = c
-  [../]
-  [./d_diff]
+  []
+  [d_diff]
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,8 +121,8 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./oversample]
+  [oversample]
     refinements = 2
     type = Exodus
-  [../]
+  []
 []

@@ -2,14 +2,14 @@
   issues = '#4489'
   design = 'syntax/Materials/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
 
     requirement = 'The system shall be capable of outputting material properties through auxiliary field variables.'
-  [../]
-  [./except1]
+  []
+  [except1]
     type = 'RunException'
     input = test.i
     prereq = test
@@ -17,5 +17,5 @@
     expect_err = 'MaterialStdVectorAux.  selected_qp specified as 10 but there are only 4 quadpoints in the element'
 
     requirement = 'The system shall report and error when invalid indices are requested when attempting to output material properties through auxiliary field variables.'
-  [../]
+  []
 []

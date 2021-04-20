@@ -13,48 +13,48 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./ghosted_elements]
+  [ghosted_elements]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./proc]
+  []
+  [proc]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./random_elemental]
+  [random_elemental]
     type = ElementUOAux
     variable = ghosted_elements
     element_user_object = ghost_uo
     field_name = "ghosted"
     execute_on = initial
-  [../]
-  [./proc]
+  []
+  [proc]
     type = ProcessorIDAux
     variable = proc
     execute_on = initial
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ghost_uo]
+  [ghost_uo]
     type = ElemSideNeighborLayersGeomTester
     execute_on = initial
     element_side_neighbor_layers = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./num_elems]
+  [num_elems]
     type = NumElems
-  [../]
+  []
 []
 
 [Executioner]

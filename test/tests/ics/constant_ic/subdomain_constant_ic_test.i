@@ -4,62 +4,62 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_aux]
+  [u_aux]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./ic_u_1]
+  [ic_u_1]
     type = ConstantIC
     variable = u
     value = 42
     block = '1 2'
-  [../]
+  []
 
-  [./ic_u_aux_1]
+  [ic_u_aux_1]
     type = ConstantIC
     variable = u_aux
     value = 6.25
     block = '1'
-  [../]
-  [./ic_u_aux_2]
+  []
+  [ic_u_aux_2]
     type = ConstantIC
     variable = u_aux
     value = 9.99
     block = '2'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,47 +6,47 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 100
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 101
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

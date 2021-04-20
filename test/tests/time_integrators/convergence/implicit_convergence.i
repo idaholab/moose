@@ -13,65 +13,65 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*t*t*((x*x)+(y*y))
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff ie ffn'
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
     preset = false
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,9 +85,9 @@
   end_time = 1.0
   dt = 0.0625
 
- [./TimeIntegrator]
+ [TimeIntegrator]
    type = ImplicitMidpoint
- [../]
+ []
 []
 
 [Outputs]

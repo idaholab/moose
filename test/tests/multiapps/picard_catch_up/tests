@@ -2,7 +2,7 @@
   issues = '#10337'
   design = 'syntax/MultiApps/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out_sub0.e master_out.e'
@@ -15,5 +15,5 @@
     compiler = '!INTEL'
 
     requirement = 'The system shall support performing iterative solves of sub-applications that perform additional time steps to maintain time step consistency with the master application.'
-  [../]
+  []
 []

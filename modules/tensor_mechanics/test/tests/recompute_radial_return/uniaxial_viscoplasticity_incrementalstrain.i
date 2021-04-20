@@ -14,69 +14,69 @@
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = ParsedFunction
     value = t/100
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
-  [../]
+  []
 []
 
 [BCs]
-  [./y_pull_function]
+  [y_pull_function]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = top_pull
-  [../]
+  []
 
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = 4
     value = 0.0
-  [../]
+  []
 
-  [./y_bot]
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./z_bot]
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = 2
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1000.0
     poissons_ratio = 0.3
-  [../]
-  [./viscoplasticity]
+  []
+  [viscoplasticity]
     type = HyperbolicViscoplasticityStressUpdate
     yield_stress = 10.0
     hardening_constant = 100.0
     c_alpha = 0.2418e-6
     c_beta = 0.1135
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = 'viscoplasticity'
     tangent_operator = elastic
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,8 +103,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

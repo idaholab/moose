@@ -19,91 +19,91 @@
 []
 
 [BCs]
-  [./left1]
+  [left1]
     type = DirichletBC
     variable = eta1
     boundary = 'left'
     value = 0
-  [../]
-  [./right1]
+  []
+  [right1]
     type = DirichletBC
     variable = eta1
     boundary = 'right'
     value = 1
-  [../]
+  []
 
-  [./left2]
+  [left2]
     type = DirichletBC
     variable = eta2
     boundary = 'left'
     value = 0
-  [../]
-  [./right2]
+  []
+  [right2]
     type = DirichletBC
     variable = eta2
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Variables]
   # order parameter 1
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 2
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Materials]
-  [./h_eta1]
+  [h_eta1]
     type = SwitchingFunctionMaterial
     h_order = SIMPLE
     eta = eta1
     function_name = h1
     outputs = exodus
-  [../]
+  []
 
-  [./h_eta2]
+  [h_eta2]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta2
     function_name = h2
     outputs = exodus
-  [../]
+  []
 
-  [./g_eta1]
+  [g_eta1]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta1
     function_name = g1
     outputs = exodus
-  [../]
+  []
 
-  [./g_eta2]
+  [g_eta2]
     type = BarrierFunctionMaterial
     g_order = LOW
     eta = eta2
     function_name = g2
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
-  [./eta1diff]
+  [eta1diff]
     type = Diffusion
     variable = eta1
-  [../]
+  []
 
-  [./eta2diff]
+  [eta2diff]
     type = Diffusion
     variable = eta2
-  [../]
+  []
 []
 
 [Executioner]

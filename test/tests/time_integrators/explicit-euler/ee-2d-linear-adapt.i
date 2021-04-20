@@ -11,89 +11,89 @@
 []
 
 [Functions]
-  [./ic]
+  [ic]
     type = ParsedFunction
     value = 0
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = (x+y)
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*(x+y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = ic
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
     lumping = true
     implicit = true
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     implicit = false
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
     implicit = false
-  [../]
+  []
 []
 
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
     implicit = true
-  [../]
+  []
 []
 
 [Adaptivity]
   steps = 1
   marker = box
   max_h_level = 2
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       bottom_left = '-0.4 -0.4 0'
       inside = refine
       top_right = '0.4 0.4 0'
       outside = do_nothing
       type = BoxMarker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -107,8 +107,8 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []

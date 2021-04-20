@@ -5,13 +5,13 @@ a=1.1
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = -0.6
     xmax = 0.6
     nx = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -19,19 +19,19 @@ a=1.1
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection]
+  [advection]
     type = FVMatAdvection
     variable = v
     vel = 'fv_velocity'
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -83,13 +83,13 @@ a=1.1
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

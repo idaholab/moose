@@ -1,5 +1,5 @@
 [Tests]
-  [./test_jacobian]
+  [test_jacobian]
     type = 'PetscJacobianTester'
     input = 'material_derivatives_test.i'
     ratio_tol = 4e-7
@@ -8,5 +8,5 @@
     issues = '#8377'
     design = 'syntax/Kernels/index.md'
     requirement = 'The system shall have the ability to declare the derivatives of material properties.'
-  [../]
+  []
 []

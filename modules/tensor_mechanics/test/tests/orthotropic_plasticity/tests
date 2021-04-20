@@ -1,7 +1,7 @@
 [Tests]
   design = 'TensorMechanicsPlasticOrthotropic.md'
   issues = '#3832'
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'orthotropic.i'
     csvdiff = 'orthotropic_out.csv'
@@ -10,9 +10,9 @@
     requirement = 'Moose shall be capable of simulating materials that exhibit '
                   'orthotropic plasticity with constant hardening and linear '
                   'strain applied in the x and y directions.'
-  [../]
+  []
 
-  [./power_rule]
+  [power_rule]
     type = 'CSVDiff'
     input = 'powerRuleHardening.i'
     csvdiff = 'powerRuleHardening_out.csv'
@@ -21,5 +21,5 @@
     requirement = 'Moose shall be capable of simulating materials that exhibit '
                   'orthotropic plasticity with power rule hardening and linear '
                   'strain applied in the x direction.'
-  [../]
+  []
 []

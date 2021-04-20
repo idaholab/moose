@@ -7,13 +7,13 @@
     ny = 20
     ymax = 0.5
   []
-  [./noncrack]
+  [noncrack]
     type = BoundingBoxNodeSetGenerator
     new_boundary = noncrack
     bottom_left = '0.5 0 0'
     top_right = '1 0 0'
     input = gen
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -21,96 +21,96 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./All]
+  [TensorMechanics]
+    [Master]
+      [All]
         add_variables = true
         strain = SMALL
         additional_generate_output = 'strain_yy stress_yy'
         planar_formulation = PLANE_STRAIN
-      [../]
-    [../]
-  [../]
-  [./PhaseField]
-    [./Nonconserved]
-      [./c]
+      []
+    []
+  []
+  [PhaseField]
+    [Nonconserved]
+      [c]
         free_energy = F
         kappa = kappa_op
         mobility = L
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Kernels]
-  [./solid_x]
+  [solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
     c = c
-  [../]
-  [./solid_y]
+  []
+  [solid_y]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
     c = c
-  [../]
-  [./off_disp]
+  []
+  [off_disp]
     type = AllenCahnElasticEnergyOffDiag
     variable = c
     displacements = 'disp_x disp_y'
     mob_name = L
-  [../]
+  []
 []
 
 [BCs]
-  [./ydisp]
+  [ydisp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = top
     function = 't'
-  [../]
-  [./yfix]
+  []
+  [yfix]
     type = DirichletBC
     variable = disp_y
     boundary = noncrack
     value = 0
-  [../]
-  [./xfix]
+  []
+  [xfix]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./pfbulkmat]
+  [pfbulkmat]
     type = GenericConstantMaterial
     prop_names = 'gc_prop l visco'
     prop_values = '1e-3 0.05 1e-6'
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '127.0 70.8 70.8 127.0 70.8 127.0 73.55 73.55 73.55'
     fill_method = symmetric9
     euler_angle_1 = 30
     euler_angle_2 = 0
     euler_angle_3 = 0
-  [../]
-  [./define_mobility]
+  []
+  [define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     f_name = L
     function = '1.0/(gc_prop * visco)'
-  [../]
-  [./define_kappa]
+  []
+  [define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     f_name = kappa_op
     function = 'gc_prop * l'
-  [../]
-  [./damage_stress]
+  []
+  [damage_stress]
     type = ComputeLinearElasticPFFractureStress
     c = c
     E_name = 'elastic_energy'
@@ -118,8 +118,8 @@
     F_name = 'local_fracture_energy'
     decomposition_type = stress_spectral
     use_current_history_variable = true
-  [../]
-  [./degradation]
+  []
+  [degradation]
     type = DerivativeParsedMaterial
     f_name = degradation
     args = 'c'
@@ -127,41 +127,41 @@
     constant_names       = 'eta'
     constant_expressions = '1.0e-6'
     derivative_order = 2
-  [../]
-  [./local_fracture_energy]
+  []
+  [local_fracture_energy]
     type = DerivativeParsedMaterial
     f_name = local_fracture_energy
     args = 'c'
     material_property_names = 'gc_prop l'
     function = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
-  [../]
-  [./fracture_driving_energy]
+  []
+  [fracture_driving_energy]
     type = DerivativeSumMaterial
     args = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
     f_name = F
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./av_stress_yy]
+  [av_stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./av_strain_yy]
+  []
+  [av_strain_yy]
     type = SideAverageValue
     variable = disp_y
     boundary = top
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

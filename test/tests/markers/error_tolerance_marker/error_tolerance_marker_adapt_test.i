@@ -8,44 +8,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./solution]
+  [solution]
     type = ParsedFunction
     value = (exp(x)-1)/(exp(1)-1)
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./conv]
+  []
+  [conv]
     type = Convection
     variable = u
     velocity = '1 0 0'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -57,21 +57,21 @@
 [Adaptivity]
   steps = 1
   marker = marker
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = AnalyticalIndicator
       variable = u
       function = solution
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorToleranceMarker
       coarsen = 3e-10
       indicator = error
       refine = 7e-10
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

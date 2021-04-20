@@ -10,89 +10,89 @@
 []
 
 [Functions]
-  [./up]
+  [up]
     type = PiecewiseLinear
     x = '0 1      2 3'
     y = '0 0.0001 0 -.0001'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./status]
-  [../]
-  [./pid]
+  [status]
+  []
+  [pid]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
   []
 []
 
 [Contact]
-  [./dummy_name]
+  [dummy_name]
     primary = 2
     secondary = 3
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./pid]
+  [pid]
     type = ProcessorIDAux
     variable = pid
     execute_on = 'initial timestep_end'
-  [../]
-  [./status]
+  []
+  [status]
     type = PenetrationAux
     quantity = mechanical_status
     variable = status
     boundary = 3
     paired_boundary = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./lateral]
+  [lateral]
     type = DirichletBC
     variable = disp_x
     boundary = '1 4'
     value = 0
-  [../]
+  []
 
-  [./bottom_up]
+  [bottom_up]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = up
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stiffStuff1_stress]
+  []
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -111,10 +111,10 @@
   dt = 0.1
   num_steps = 30
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 []
 
 [Outputs]

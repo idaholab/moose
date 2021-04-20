@@ -1,20 +1,20 @@
 [Tests]
   issues = '#1570'
   design = 'source/auxkernels/NearestNodeDistanceAux.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'nearest_node_locator.i'
     exodiff = 'nearest_node_locator_out.e'
     group = 'geometric'
     requirement = "The NearestNodeDistanceAux shall be capable of computing the shortest distance between two boundaries."
-  [../]
+  []
 
-  [./adapt]
+  [adapt]
     type = 'Exodiff'
     input = 'adapt.i'
     exodiff = 'adapt_out.e-s003'
     group = 'geometric'
     valgrind = 'HEAVY'
     requirement = "The NearestNodeDistanceAux shall be capable of computing the shortest distance between two boundaries with adaptivity."
-  [../]
+  []
 []

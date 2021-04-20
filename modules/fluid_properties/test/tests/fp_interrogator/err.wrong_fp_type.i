@@ -6,9 +6,9 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./fp]
+  [FluidProperties]
+    [fp]
       type = SodiumProperties
-    [../]
-  [../]
+    []
+  []
 []

@@ -2,21 +2,21 @@
   issues = '#1405'
   design = 'syntax/ICs/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'constant_ic_test.i'
     exodiff = 'out.e'
     scale_refine = 5
 
     requirement = 'The system shall support setting initial conditions of field variables to a constant value.'
-  [../]
+  []
 
-  [./subdomain_test]
+  [subdomain_test]
     type = 'Exodiff'
     input = 'subdomain_constant_ic_test.i'
     exodiff = 'subdomain_constant_ic_test_out.e'
     scale_refine = 5
 
     requirement = 'The system shall support setting initial conditions of subdomain restricted field variables to a constant value.'
-  [../]
+  []
 []

@@ -21,42 +21,42 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 100.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = 10
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ADDirichletBC
     variable = temp
     boundary = left
     value = 100.0
-  [../]
-  [./right]
+  []
+  [right]
     type = ADConvectiveHeatFluxBC
     variable = temp
     boundary = right
     T_infinity = 200.0
     heat_transfer_coefficient = 10
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./right_flux]
+  [right_flux]
     type = SideFluxAverage
     variable = temp
     boundary = right
     diffusivity = 10
-  [../]
+  []
 []
 
 [Executioner]

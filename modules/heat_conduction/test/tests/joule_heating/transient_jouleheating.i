@@ -8,85 +8,85 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 293.0 #in K
-  [../]
-  [./elec]
-  [../]
+  []
+  [elec]
+  []
 []
 
 [Kernels]
-  [./HeatDiff]
+  [HeatDiff]
     type = HeatConduction
     variable = T
-  [../]
-  [./HeatTdot]
+  []
+  [HeatTdot]
     type = HeatConductionTimeDerivative
     variable = T
-  [../]
-  [./HeatSrc]
+  []
+  [HeatSrc]
     type = JouleHeatingSource
     variable = T
     elec = elec
-  [../]
-  [./electric]
+  []
+  [electric]
     type = HeatConduction
     variable = elec
     diffusion_coefficient = electrical_conductivity
-  [../]
+  []
 []
 
 [BCs]
-  [./lefttemp]
+  [lefttemp]
     type = DirichletBC
     boundary = left
     variable = T
     value = 293 #in K
-  [../]
-  [./elec_left]
+  []
+  [elec_left]
     type = DirichletBC
     variable = elec
     boundary = left
     value = 1 #in V
-  [../]
-  [./elec_right]
+  []
+  [elec_right]
     type = DirichletBC
     variable = elec
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '397.48' #copper in W/(m K)
     block = 0
-  [../]
-  [./cp]
+  []
+  [cp]
     type = GenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '385.0' #copper in J/(kg K)
     block = 0
-  [../]
-  [./rho]
+  []
+  [rho]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8920.0' #copper in kg/(m^3)
     block = 0
-  [../]
-  [./sigma] #copper is default material
+  []
+  [sigma] #copper is default material
     type = ElectricalConductivity
     temperature = T
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

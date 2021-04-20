@@ -14,50 +14,50 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./bilinear1_var]
-  [../]
+  [bilinear1_var]
+  []
 []
 
 [AuxKernels]
-  [./bilinear1_AuxK]
+  [bilinear1_AuxK]
     type = FunctionAux
     variable = bilinear1_var
     function = bilinear1_fcn
-  [../]
+  []
 []
 
 
 [Functions]
 # This is just f = 1 + 2x + 3y
-  [./bilinear1_fcn]
+  [bilinear1_fcn]
     type = PiecewiseMultilinear
     data_file = twoD1.txt
-  [../]
-  [./bilinear1_answer]
+  []
+  [bilinear1_answer]
     type = ParsedFunction
     value = 1+2*x+3*y
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./bilinear1_pp]
+  [bilinear1_pp]
     type = NodalL2Error
     function = bilinear1_answer
     variable = bilinear1_var
-  [../]
+  []
 []
 
 [Executioner]

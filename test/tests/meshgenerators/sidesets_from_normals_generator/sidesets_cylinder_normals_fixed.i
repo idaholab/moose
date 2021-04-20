@@ -1,11 +1,11 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = cylinder.e
     #parallel_type = replicated
   []
 
-  [./sidesets]
+  [sidesets]
     type = SideSetsFromNormalsGenerator
     input = fmg
     normals = '0  1  0
@@ -17,30 +17,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./front]
+  [front]
     type = DirichletBC
     variable = u
     boundary = front
     value = 0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = u
     boundary = back
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,7 +15,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
@@ -24,7 +24,7 @@
     # Test that stateful material properties
     # are updated properly with subcycling
     sub_cycling = true
-  [../]
+  []
 []
 
 [Outputs]

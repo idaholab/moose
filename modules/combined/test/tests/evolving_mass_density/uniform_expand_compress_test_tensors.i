@@ -39,94 +39,94 @@
 []
 
 [Functions]
-  [./rampConstant2]
+  [rampConstant2]
     type = PiecewiseLinear
     x = '0.00 1.00  2.0   3.00'
     y = '0.00 0.25  0.0  -0.25'
     scale_factor = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [BCs]
-  [./9_y]
+  [9_y]
     type = DirichletBC
     variable = disp_y
     boundary = 9
     value = 0
-  [../]
-  [./10_y]
+  []
+  [10_y]
     type = DirichletBC
     variable = disp_x
     boundary = 10
     value = 0
-  [../]
-  [./14_y]
+  []
+  [14_y]
     type = DirichletBC
     variable = disp_z
     boundary = 14
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 11
     function = rampConstant2
-  [../]
-  [./front]
+  []
+  [front]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
     boundary = 13
     function = rampConstant2
-  [../]
-  [./side]
+  []
+  [side]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 12
     function = rampConstant2
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
+  []
 
-  [./small_strain]
+  [small_strain]
     type = ComputeSmallStrain
     block = ' 1 2 3 4 5 6 7'
-  [../]
+  []
 
-  [./elastic_stress]
+  [elastic_stress]
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
-  [../]
+  []
 []
 
 [Executioner]
@@ -145,17 +145,17 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     file_base = uniform_expand_compress_test_out
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./Mass]
+  [Mass]
     type = Mass
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

@@ -2,27 +2,27 @@
   issues = '#3087 #16099'
   design = 'PointValueSampler.md'
 
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'point_value_sampler.i'
     csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
 
     requirement = 'The system shall support the ability to sample field variables at user specified points.'
-  [../]
+  []
 
-  [./test_fv]
+  [test_fv]
     type = 'CSVDiff'
     input = 'point_value_sampler_fv.i'
     csvdiff = 'point_value_sampler_fv_out_point_sample_0001.csv'
 
     requirement = 'The system shall support the ability to sample field FV variables at user specified points.'
-  [../]
+  []
 
-  [./error]
+  [error]
     type = 'RunException'
     input = 'not_found.i'
     expect_err = "sample point not found"
 
     requirement = 'The system shall report an error when requested sample points do not fall within the mesh domain.'
-  [../]
+  []
 []

@@ -1,14 +1,14 @@
 [Tests]
-  [./dynamic_load]
+  [dynamic_load]
     type = 'Exodiff'
     input = 'misc_master.i'
     exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
     allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
-  [../]
+  []
 
-  [./dynamic_load_w_name]
+  [dynamic_load_w_name]
     type = 'Exodiff'
     input = 'misc_master.i'
     exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
@@ -18,13 +18,13 @@
     method = OPT # because the library name is explicitly given
     prereq = 'dynamic_load'
     recover = false # See #5207
-  [../]
+  []
 
-  [./dynamic_load_error_check]
+  [dynamic_load_error_check]
     type = 'RunException'
     input = 'misc_master_bad.i'
     expect_err = 'Unable to locate library for "InvalidApp"'
     allow_warnings = true
     library_mode = 'DYNAMIC'
-  [../]
+  []
 []

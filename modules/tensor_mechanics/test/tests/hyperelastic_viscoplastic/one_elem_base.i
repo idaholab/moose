@@ -6,45 +6,45 @@
 []
 
 [Variables]
-  [./ux]
+  [ux]
     block = 0
-  [../]
-  [./uy]
+  []
+  [uy]
     block = 0
-  [../]
-  [./uz]
+  []
+  [uz]
     block = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'ux uy uz'
     use_displaced_mesh = true
     base_name = test
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./peeq]
+  []
+  [peeq]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
-  [./fp_zz]
+  []
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = test_stress
@@ -52,8 +52,8 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
-  [./fp_zz]
+  []
+  [fp_zz]
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = test_fp
@@ -61,77 +61,77 @@
     index_i = 2
     execute_on = timestep_end
     block = 0
-  [../]
-  [./peeq]
+  []
+  [peeq]
     type = MaterialRealAux
     variable = peeq
     property = ep_eqv
     execute_on = timestep_end
     block = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = DirichletBC
     variable = uz
     boundary = back
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = uz
     boundary = front
     function = '0.01*t'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./flowstress]
+  [flowstress]
     type = HEVPRambergOsgoodHardening
     yield_stress = 100
     hardening_exponent = 0.1
     reference_plastic_strain = 0.002
     intvar_prop_name = ep_eqv
-  [../]
-  [./flowrate]
+  []
+  [flowrate]
     type = HEVPFlowRatePowerLawJ2
     reference_flow_rate = 0.0001
     flow_rate_exponent = 50.0
     flow_rate_tol = 1
     strength_prop_name = flowstress
     base_name = test
-  [../]
-  [./ep_eqv]
+  []
+  [ep_eqv]
      type = HEVPEqvPlasticStrain
      intvar_rate_prop_name = ep_eqv_rate
-  [../]
-  [./ep_eqv_rate]
+  []
+  [ep_eqv_rate]
      type = HEVPEqvPlasticStrainRate
      flow_rate_prop_name = flowrate
-  [../]
+  []
 []
 
 [Materials]
-  [./strain]
+  [strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'ux uy uz'
     base_name = test
-  [../]
-  [./viscop]
+  []
+  [viscop]
     type = FiniteStrainHyperElasticViscoPlastic
     block = 0
     resid_abs_tol = 1e-18
@@ -143,39 +143,39 @@
     internal_var_user_objects = 'ep_eqv'
     internal_var_rate_user_objects = 'ep_eqv_rate'
     base_name = test
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '2.8e5 1.2e5 1.2e5 2.8e5 1.2e5 2.8e5 0.8e5 0.8e5 0.8e5'
     fill_method = symmetric9
     base_name = test
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./fp_zz]
+  []
+  [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
     block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./peeq]
+  []
+  [peeq]
     type = ElementAverageValue
     variable = peeq
     block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 8
@@ -10,50 +10,50 @@
     ymax = 4
   []
 
-  [./mark]
+  [mark]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
     bottom_left = '0.9 0.9 0'
     top_right = '3.1 3.1 0'
-  [../]
-  [./delete]
+  []
+  [delete]
     type = BlockDeletionGenerator
     block = 1
     input = mark
     new_boundary = cut_surface
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./outer]
+  [outer]
     type = DirichletBC
     variable = u
     boundary = 'top bottom left right'
     value = 1
-  [../]
-  [./inner]
+  []
+  [inner]
     type = DirichletBC
     variable = u
     boundary = cut_surface
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'mat_prop_block.i'
     exodiff = 'mat_prop_block_out.e'
@@ -8,5 +8,5 @@
     design = 'SetupInterface.md'
     requirement = 'The system shall support running a user-defined subroutine each time a subdomain change occurs '
                   'when iterating over the mesh.'
-  [../]
+  []
 []

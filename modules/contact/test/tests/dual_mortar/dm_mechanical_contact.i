@@ -9,82 +9,82 @@ refine = 0
 []
 
 [Mesh]
-  [./original_file_mesh]
+  [original_file_mesh]
     type = FileMeshGenerator
     file = long_short_blocks.e
-  [../]
+  []
   uniform_refine =  ${refine}
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./horizontal_movement]
+  [horizontal_movement]
     type = ParsedFunction
     value = '0.002-0.003*exp(-4.05*t)'
-  [../]
-  [./vertical_movement]
+  []
+  [vertical_movement]
     type = ParsedFunction
     value = '${vy}*t+${offset}'
-  [../]
+  []
 []
 
 [BCs]
-  [./push_left_x]
+  [push_left_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 30
     function = horizontal_movement
-  [../]
-  [./fix_right_x]
+  []
+  [fix_right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./fix_right_y]
+  []
+  [fix_right_y]
     type = DirichletBC
     variable = disp_y
     boundary = '40'
     value = 0.0
-  [../]
-  [./push_left_y]
+  []
+  [push_left_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '30'
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_left]
+  [elasticity_tensor_left]
     type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_left]
+  []
+  [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 
-  [./elasticity_tensor_right]
+  [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_right]
+  []
+  [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Contact]
@@ -97,29 +97,29 @@ refine = 0
 
     formulation = mortar
     model = frictionless
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 1
     variable = disp_y
     value = ${offset}
     type = ConstantIC
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     block = 1
     variable = disp_x
     value = ${offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -144,54 +144,54 @@ refine = 0
 
 [Outputs]
   file_base = ./dm_contact_out
-  [./comp]
+  [comp]
     type = CSV
     show = 'contact normal_lm avg_disp_x avg_disp_y max_disp_x max_disp_y min_disp_x min_disp_y'
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./contact]
+  [contact]
     type = ContactDOFSetSize
     variable = leftright_normal_lm
     subdomain = leftright_secondary_subdomain
   []
-  [./normal_lm]
+  [normal_lm]
     type = ElementAverageValue
     variable = leftright_normal_lm
     block = '4'
-  [../]
-  [./avg_disp_x]
+  []
+  [avg_disp_x]
     type = ElementAverageValue
     variable = disp_x
     block = '1 2'
-  [../]
-  [./avg_disp_y]
+  []
+  [avg_disp_y]
     type = ElementAverageValue
     variable = disp_y
     block = '1 2'
-  [../]
-  [./max_disp_x]
+  []
+  [max_disp_x]
     type = ElementExtremeValue
     variable = disp_x
     block = '1 2'
-  [../]
-  [./max_disp_y]
+  []
+  [max_disp_y]
     type = ElementExtremeValue
     variable = disp_y
     block = '1 2'
-  [../]
-  [./min_disp_x]
+  []
+  [min_disp_x]
     type = ElementExtremeValue
     variable = disp_x
     block = '1 2'
     value_type = min
-  [../]
-  [./min_disp_y]
+  []
+  [min_disp_y]
     type = ElementExtremeValue
     variable = disp_y
     block = '1 2'
     value_type = min
-  [../]
+  []
 []

@@ -1,41 +1,41 @@
 [Tests]
   issues = '#7555 #15871'
-  [./two_block_base_name]
+  [two_block_base_name]
     type = Exodiff
     input = 'two_block_base_name.i'
     exodiff = 'two_block_base_name_out.e'
     issues = '#13860'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall support changing the base name when creating a consistent strain calculator material and stress divergence kernel and shall generate different sets of outputs for different mesh subblocks with the appropriate base name.'
-  [../]
+  []
 
-  [./two_block_new]
+  [two_block_new]
     type = Exodiff
     input = 'two_block_new.i'
     exodiff = 'two_block_new_out.e'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall create a consistent strain calculator material and stress divergence kernel and shall generate different sets of outputs for different mesh subblocks.'
-  [../]
+  []
 
-  [./two_block]
+  [two_block]
     type = Exodiff
     input = 'two_block.i'
     exodiff = 'two_block_out.e'
     cli_args = 'Modules/TensorMechanics/Master/block1/block=1'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations.'
-  [../]
+  []
 
-  [./error_unrestricted]
+  [error_unrestricted]
     type = RunException
     input = 'two_block.i'
     expect_err = 'No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.'
     prereq = 'two_block'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file does not specify block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
-  [../]
+  []
 
-  [./error_overlapping]
+  [error_overlapping]
     type = RunException
     input = 'two_block.i'
     cli_args = 'Modules/TensorMechanics/Master/block1/block=2'
@@ -43,26 +43,26 @@
     prereq = 'error_unrestricted'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file specifies overlapping block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
-  [../]
+  []
 
-  [./no_block]
+  [no_block]
     type = RunException
     input = 'no_block.i'
     cli_args = '--error'
     expect_err = 'Common parameters are supplied, but not used in'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall warn if global Master action parameters are supplied but no Master action subblock have been added.'
-  [../]
+  []
 
-  [./two_coord]
+  [two_coord]
     type = Exodiff
     input = 'two_coord.i'
     exodiff = 'two_coord_out.e'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks using different coordinate systems.'
-  [../]
+  []
 
-  [./error_coord]
+  [error_coord]
     type = RunException
     input = 'two_coord.i'
     cli_args = 'Modules/TensorMechanics/Master/active=error'
@@ -70,61 +70,61 @@
     prereq = 'two_coord'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file assigns the same TensorMechanics MasterAction block to mesh blocks with different coordinate systems.'
-  [../]
+  []
 
 
 
 
-  [./eigenstrain_no_defined_block_names]
+  [eigenstrain_no_defined_block_names]
     type = RunApp
     input = 'action_eigenstrain.i'
     expect_out = 'solid: eigenstrain1,eigenstrain2'
     match_literal = true
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
-  [./eigenstrain_two_blocks_names]
+  [eigenstrain_two_blocks_names]
     type = RunApp
     input = 'action_multi_eigenstrain.i'
     expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
-  [./eigenstrain_two_blocks_one_eigenstrain]
+  [eigenstrain_two_blocks_one_eigenstrain]
     type = RunApp
     input = 'action_multi_eigenstrain_same_conditions.i'
     expect_out = 'block1: eigenstrain\n.*\nblock2: eigenstrain\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
-  [./ad_converter_eigenstrain_two_blocks_names]
+  [ad_converter_eigenstrain_two_blocks_names]
     type = RunApp
     input = 'ad_converter_action_multi_eigenstrain.i'
     expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
-  [./reduced_eigenstrain_actions_names]
+  [reduced_eigenstrain_actions_names]
     type = RunApp
     input = 'reduced_eigenstrain_action.i'
     expect_out = 'all: reduced_eigenstrain'
     match_literal = true
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
-  [./composite_eigenstrain_actions_names]
+  [composite_eigenstrain_actions_names]
     type = RunApp
     input = 'composite_eigenstrain.i'
     expect_out = 'solid: eigenstrain'
     match_literal = true
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
-  [../]
+  []
 
   [material_output_order_empty]
     type = RunApp

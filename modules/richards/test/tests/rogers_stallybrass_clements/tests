@@ -1,5 +1,5 @@
 [Tests]
-  [./rsc01]
+  [rsc01]
     type = 'Exodiff'
     input = 'rsc01.i'
     exodiff = 'rsc01.e'
@@ -7,8 +7,8 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
-  [./rsc_lumped_01]
+  []
+  [rsc_lumped_01]
     type = 'Exodiff'
     input = 'rsc_lumped_01.i'
     exodiff = 'rsc_lumped_01.e'
@@ -16,16 +16,16 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
-  [./rsc02]
+  []
+  [rsc02]
     type = 'Exodiff'
     input = 'rsc02.i'
     exodiff = 'rsc02.e'
     rel_err = 1E-5
     use_old_floor = True
-  [../]
+  []
 
-  [./rsc_fu_01]
+  [rsc_fu_01]
     type = 'Exodiff'
     input = 'rsc_fu_01.i'
     exodiff = 'rsc_fu_01.e'
@@ -33,13 +33,13 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-  [../]
-  [./rsc_fu_02]
+  []
+  [rsc_fu_02]
     type = 'Exodiff'
     input = 'rsc_fu_02.i'
     exodiff = 'rsc_fu_02.e'
     rel_err = 1E-5
     use_old_floor = True
-  [../]
+  []
 
 []

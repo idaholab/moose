@@ -10,62 +10,62 @@
 []
 
 [Functions]
-  [./f_fn]
+  [f_fn]
     type = ParsedFunction
     value = t*(x+y)
-  [../]
-  [./f_dot_fn]
+  []
+  [f_dot_fn]
     type = ParsedFunction
     value = (x+y)
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./l2_proj]
+  [l2_proj]
     type = Reaction
     variable = u
-  [../]
-  [./dck]
+  []
+  [dck]
     type = DotCouplingKernel
     variable = u
     v = f
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 
-  [./g]
-  [../]
+  [g]
+  []
 []
 
 [AuxKernels]
-  [./f_k]
+  [f_k]
     type = FunctionAux
     variable = f
     function = f_fn
-  [../]
+  []
 
   # We do not allow coupling of time derivatives of aux vars into the aux vars
-  [./g_k]
+  [g_k]
     type = DotCouplingAux
     variable = g
     v = f
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_error]
+  [l2_error]
     type = ElementL2Error
     variable = u
     function = f_dot_fn
-  [../]
+  []
 []
 
 [Executioner]

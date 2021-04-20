@@ -14,46 +14,46 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type = ParsedFunction
     value = x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./lr_u]
+  [lr_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 3'
     function = bc_fn
-  [../]
+  []
 
-  [./lr_v]
+  [lr_v]
     type = FunctionDirichletBC
     variable = v
     boundary = '1 3'
     function = bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,9 +63,9 @@
 
 [Outputs]
   console = true
-  [./out]
+  [out]
     type = Exodus
     show = 'u'
     hide = 'v'
-  [../]
+  []
 []

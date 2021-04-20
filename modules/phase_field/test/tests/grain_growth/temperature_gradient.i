@@ -18,79 +18,79 @@
 []
 
 [Functions]
-  [./TGradient]
+  [TGradient]
     type = ParsedFunction
     value = '450 + 0.1*x'
-  [../]
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
+  [PolycrystalICs]
+    [BicrystalBoundingBoxIC]
       x1 = 0.0
       x2 = 500.0
       y1 = 0.0
       y2 = 500.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
-  [./T]
-  [../]
+  [bnds]
+  []
+  [T]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     variable_mobility = true
     args = 'T'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
-  [./Tgrad]
+  []
+  [Tgrad]
     type = FunctionAux
     variable = T
     function = TGradient
-  [../]
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = T # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
     Q = 0.23 # Migration energy in eV
     GBenergy = 0.708 # GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./gr0_area]
+  [gr0_area]
     type = ElementIntegralVariablePostprocessor
     variable = gr0
     execute_on = 'initial TIMESTEP_END'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

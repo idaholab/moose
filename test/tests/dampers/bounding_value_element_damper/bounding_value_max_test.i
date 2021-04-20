@@ -19,48 +19,48 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./source]
+  [source]
     type = BodyForce
     variable = u
     function = 't'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Dampers]
-  [./bounding_value_damp]
+  [bounding_value_damp]
     type = BoundingValueElementDamper
     min_value = 0.0
     max_value = 1.0
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

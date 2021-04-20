@@ -12,84 +12,84 @@
 []
 
 [Functions]
-  [./tr_x]
+  [tr_x]
     type = ParsedFunction
     value = x
-  [../]
-  [./tr_y]
+  []
+  [tr_y]
     type = ParsedFunction
     value = y+10
-  [../]
-  [./itr_x]
+  []
+  [itr_x]
     type = ParsedFunction
     value = x
-  [../]
-  [./itr_y]
+  []
+  [itr_y]
     type = ParsedFunction
     value = y-10
-  [../]
+  []
 
-  [./tr_x2]
+  [tr_x2]
     type = ParsedFunction
     value = x+10
-  [../]
-  [./tr_y2]
+  []
+  [tr_y2]
     type = ParsedFunction
     value = y
-  [../]
-  [./itr_x2]
+  []
+  [itr_x2]
     type = ParsedFunction
     value = x-10
-  [../]
-  [./itr_y2]
+  []
+  [itr_y2]
     type = ParsedFunction
     value = y
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./forcing]
+  []
+  [forcing]
     type = GaussContForcing
     variable = u
     x_center = 2
     y_center = 1
     x_spread = 0.25
     y_spread = 0.5
-  [../]
-  [./dot]
+  []
+  [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   # active = ' '
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       primary = bottom
       secondary = top
       transform_func = 'tr_x tr_y'
       inv_transform_func = 'itr_x itr_y'
-    [../]
+    []
 
-    [./y]
+    [y]
       primary = left
       secondary = right
       transform_func = 'tr_x2 tr_y2'
       inv_transform_func = 'itr_x2 itr_y2'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

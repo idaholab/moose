@@ -1,5 +1,5 @@
 [Tests]
-  [./elastic]
+  [elastic]
     type = 'CSVDiff'
     input = 'elastic_stress.i'
     csvdiff = 'elastic_stress_out.csv'
@@ -8,8 +8,8 @@
                   " compute the stress based on the lagrangian strain."
     design = "source/materials/ComputeDeformGradBasedStress.md"
     issues = "#6604"
-  [../]
-  [./elastic_Bbar]
+  []
+  [elastic_Bbar]
     type = 'CSVDiff'
     input = 'elastic_stress.i'
     cli_args = 'Kernels/TensorMechanics/volumetric_locking_correction=true Materials/strain/volumetric_locking_correction=true'
@@ -20,8 +20,8 @@
                   " correction is used."
     design = "source/materials/ComputeDeformGradBasedStress.md VolumetricLocking.md"
     issues = "#6604"
-  [../]
-  [./interface]
+  []
+  [interface]
     type = 'CSVDiff'
     input = 'volumetric_strain_interface.i'
     csvdiff = 'volumetric_strain_interface_out.csv'
@@ -30,8 +30,8 @@
                   " the stress from previous configuration to the current configuration."
     design = "source/materials/ComputeVolumetricDeformGrad.md"
     issues = "#6604"
-  [../]
-  [./interface_Bbar]
+  []
+  [interface_Bbar]
     type = 'CSVDiff'
     input = 'volumetric_strain_interface.i'
     csvdiff = 'volumetric_strain_interface_out.csv'
@@ -43,5 +43,5 @@
                   " correction is used."
     design = "source/materials/ComputeVolumetricDeformGrad.md source/materials/VolumeDeformGradCorrectedStress.md VolumetricLocking.md"
     issues = "#6604"
-  [../]
+  []
 []

@@ -9,50 +9,50 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./right]
+  [right]
     type = AreaPostprocessor
     boundary = 'right'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./bottom]
+  [bottom]
     type = AreaPostprocessor
     boundary = 'bottom'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./all]
+  [all]
     type = AreaPostprocessor
     boundary = 'left right bottom top'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

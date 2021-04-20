@@ -1,5 +1,5 @@
 [Tests]
-  [./test_rz_tm]
+  [test_rz_tm]
     type = 'Exodiff'
     input = 'rz_tensors.i'
     exodiff = 'rz_out.e'
@@ -8,8 +8,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant with RZ formulation"
-  [../]
-  [./ad_test_rz_tm]
+  []
+  [ad_test_rz_tm]
     type = 'Exodiff'
     input = 'rz_tensors.i'
     exodiff = 'rz_out.e'
@@ -19,10 +19,10 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant with RZ formulation"
-  [../]
+  []
 
 
-  [./test_shear_z_tm]
+  [test_shear_z_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_z_test_out.e'
@@ -31,8 +31,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_shear_z_tm]
+  []
+  [ad_test_shear_z_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_z_test_out.e'
@@ -42,9 +42,9 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
-  [./test_shear_y_tm]
+  [test_shear_y_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_y_test_out.e'
@@ -54,8 +54,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_shear_y_tm]
+  []
+  [ad_test_shear_y_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_y_test_out.e'
@@ -65,9 +65,9 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
-  [./test_shear_x_tm]
+  [test_shear_x_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_x_test_out.e'
@@ -77,8 +77,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_shear_x_tm]
+  []
+  [ad_test_shear_x_tm]
     type = 'Exodiff'
     input = 'shear_test_tensors.i'
     exodiff = 'shear_x_test_out.e'
@@ -88,10 +88,10 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
 
-  [./test_uniform_tm]
+  [test_uniform_tm]
     type = 'Exodiff'
     input = 'uniform_expand_compress_test_tensors.i'
     exodiff = 'uniform_expand_compress_test_out.e'
@@ -99,8 +99,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_uniform_tm]
+  []
+  [ad_test_uniform_tm]
     type = 'Exodiff'
     input = 'uniform_expand_compress_test_tensors.i'
     exodiff = 'uniform_expand_compress_test_out.e'
@@ -109,10 +109,10 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
 
-  [./test_z_tm]
+  [test_z_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_z_test_out.e'
@@ -121,8 +121,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_z_tm]
+  []
+  [ad_test_z_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_z_test_out.e'
@@ -132,9 +132,9 @@
     issues = "#12633"
     design = "/Mass.md"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
-  [./test_y_tm]
+  [test_y_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_y_test_out.e'
@@ -144,8 +144,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_y_tm]
+  []
+  [ad_test_y_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_y_test_out.e'
@@ -155,9 +155,9 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 
-  [./test_x_tm]
+  [test_x_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_x_test_out.e'
@@ -167,8 +167,8 @@
     design = "/Mass.md"
     issues = "#6484"
     requirement = "Mass shall remain constant"
-  [../]
-  [./ad_test_x_tm]
+  []
+  [ad_test_x_tm]
     type = 'Exodiff'
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_x_test_out.e'
@@ -178,5 +178,5 @@
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
-  [../]
+  []
 []

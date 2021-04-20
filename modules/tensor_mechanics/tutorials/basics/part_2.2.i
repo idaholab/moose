@@ -17,50 +17,50 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./block1]
+  [block1]
     strain = FINITE #change to use finite strain instead of small linearized strain class
     add_variables = true #detects the change of the mesh to second order and automatically sets the variables
     generate_output = 'stress_zz vonmises_stress'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = top
     function = '0.0007*t'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

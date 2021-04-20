@@ -5,54 +5,54 @@
 []
 
 [Variables]
-  [./u]
-    [./InitialCondition]
+  [u]
+    [InitialCondition]
       type = FunctionIC
       function = cos(x*2*pi)
-    [../]
-  [../]
-  [./v]
-    [./InitialCondition]
+    []
+  []
+  [v]
+    [InitialCondition]
       type = FunctionIC
       function = sin(x*2*pi)
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dudt]
+  [dudt]
     type = ADTimeDerivative
     variable = u
-  [../]
-  [./dvdt]
+  []
+  [dvdt]
     type = ADTimeDerivative
     variable = v
-  [../]
-  [./u]
+  []
+  [u]
     type = ADMatReaction
     variable = u
     #v = v
-  [../]
-  [./v]
+  []
+  [v]
     type = ADMatReaction
     variable = v
-  [../]
+  []
 []
 
 [Materials]
-  [./L]
+  [L]
     type = ADTestDerivativeFunction
     function = F3
     f_name = L
     op = 'u v'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Debug]

@@ -6,78 +6,78 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./elapsed]
+  [elapsed]
     type = PerfGraphData
     section_name = "Root"
     data_type = total
-  [../]
-  [./res_calls]
+  []
+  [res_calls]
     type = PerfGraphData
     section_name = "FEProblem::computeResidualInternal"
     data_type = calls
-  [../]
-  [./jac_calls]
+  []
+  [jac_calls]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = calls
-  [../]
-  [./jac_total_time]
+  []
+  [jac_total_time]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = self
-  [../]
-  [./jac_average_time]
+  []
+  [jac_average_time]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = total_avg
-  [../]
-  [./jac_total_time_with_sub]
+  []
+  [jac_total_time_with_sub]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = total
-  [../]
-  [./jac_average_time_with_sub]
+  []
+  [jac_average_time_with_sub]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = total_avg
-  [../]
-  [./jac_percent_of_active_time]
+  []
+  [jac_percent_of_active_time]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = self_percent
-  [../]
-  [./jac_percent_of_active_time_with_sub]
+  []
+  [jac_percent_of_active_time_with_sub]
     type = PerfGraphData
     section_name = "FEProblem::computeJacobianInternal"
     data_type = total_percent
-  [../]
+  []
 []
 
 [Executioner]

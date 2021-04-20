@@ -21,11 +21,11 @@
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     solve_type = Newton
-  [../]
+  []
 []
 
 [Executioner]
@@ -41,106 +41,106 @@
 [Outputs]
   csv = true
   console = true
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     # Velocity in radial (r) direction
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     # Velocity in axial (z) direction
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
-  [../]
+  []
 []
 
 [BCs]
-  [./u_in]
+  [u_in]
     type = DirichletBC
     boundary = bottom
     variable = vel_x
     value = 0
-  [../]
-  [./v_in]
+  []
+  [v_in]
     type = FunctionDirichletBC
     boundary = bottom
     variable = vel_y
     function = 'inlet_func'
-  [../]
-  [./u_axis_and_walls]
+  []
+  [u_axis_and_walls]
     type = DirichletBC
     boundary = 'left right'
     variable = vel_x
     value = 0
-  [../]
-  [./v_no_slip]
+  []
+  [v_no_slip]
     type = DirichletBC
     boundary = 'right'
     variable = vel_y
     value = 0
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMassRZ
     variable = p
     u = vel_x
     v = vel_y
     p = p
-  [../]
-  [./x_momentum_space]
+  []
+  [x_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_x
     u = vel_x
     v = vel_y
     p = p
     component = 0
-  [../]
-  [./y_momentum_space]
+  []
+  [y_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_y
     u = vel_x
     v = vel_y
     p = p
     component = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 'volume'
     prop_names = 'rho mu'
     prop_values = '1  1'
-  [../]
+  []
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     value = '-4 * x^2 + 1'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flow_in]
+  [flow_in]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'bottom'
     execute_on = 'timestep_end'
-  [../]
-  [./flow_out]
+  []
+  [flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

@@ -4,46 +4,46 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./nearest_node_value]
+  [nearest_node_value]
     block = left
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 'leftbottom rightbottom'
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = 'lefttop righttop'
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nearest_node_value]
+  [nearest_node_value]
     type = NearestNodeValueAux
     variable = nearest_node_value
     boundary = leftright
     paired_variable = u
     paired_boundary = rightleft
-  [../]
+  []
 []
 
 [Executioner]

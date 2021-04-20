@@ -2,24 +2,24 @@
   issues = '#15501'
   design = 'AddPeriodicBCAction.md  DistributedRectilinearMeshGenerator.md'
 
-  [./check]
+  [check]
     type = 'RunException'
     input = 'dmg_periodic_bc.i'
     cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160'
     expect_err = 'All boundaries are ghosted to every single processor, and it is not scalable'
     requirement = "The system shall be able to determine if a non-scalable algorithm is being used for ghosting boundaries."
     max_parallel = 1
-  [../]
+  []
 
-  [./check_one_step]
+  [check_one_step]
     type = 'RunApp'
     input = 'dmg_periodic_bc.i'
     cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160 Outputs/hide="pid" Outputs/exodus=false Executioner/num_steps=1'
     requirement = "The system shall make sure that boundaries are actually distributed."
     min_parallel = 2
-  [../]
+  []
 
-  [./2d]
+  [2d]
     type = 'Exodiff'
     input = 'dmg_periodic_bc.i'
     exodiff = 'dmg_periodic_bc_out.e'
@@ -28,17 +28,17 @@
     abs_zero = 1e-6
     rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions in a parallel generated 2D mesh."
-  [../]
+  []
 
-  [./3d]
+  [3d]
     type = 'Exodiff'
     input = 'dmg_simple_periodic_bc.i'
     exodiff = 'dmg_simple_periodic_bc_out.e'
     min_parallel = 2
     requirement = "The system shall support periodic boundary conditions in a parallel generated 3D mesh."
-  [../]
+  []
 
-  [./1d]
+  [1d]
     type = 'Exodiff'
     input = 'dmg_periodic_bc.i'
     exodiff = 'dmg_periodic_bc_out_1d.e'
@@ -47,6 +47,6 @@
     abs_zero = 1e-5
     rel_err = 1e-4
     requirement = "The system shall support periodic boundary conditions in a parallel generated 1D mesh."
-  [../]
+  []
 
 []

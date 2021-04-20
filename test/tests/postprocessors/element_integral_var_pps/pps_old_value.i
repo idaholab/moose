@@ -11,64 +11,64 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./force_fn]
+  [force_fn]
     type = ParsedFunction
     value = '1'
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_u]
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn_u]
+  [ffn_u]
     type = BodyForce
     variable = u
     function = force_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./a]
+  [a]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./total_a]
+  [total_a]
     type = TotalVariableValue
     value = a
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

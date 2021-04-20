@@ -7,55 +7,55 @@
 []
 
 [Functions]
-  [./u_fn]
+  [u_fn]
     type = ParsedFunction
     value = t*x
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = ParsedFunction
     value = x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./fn]
+  []
+  [fn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = u_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,21 +70,21 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     app_type = MooseTestApp
     type = TransientMultiApp
     input_files = 'subsub.i'
     execute_on = timestep_end
     positions = '0 -1 0'
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub_app
     source_variable = u
     variable = v
-  [../]
+  []
 []

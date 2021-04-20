@@ -12,81 +12,81 @@
 
 [Variables]
   # scale with one over Young's modulus
-  [./disp_x]
+  [disp_x]
     scaling = 1e-10
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     scaling = 1e-10
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Kernels]
-  [./stress_x]
+  [stress_x]
     type = StressDivergenceTensors
     component = 0
     variable = disp_x
-  [../]
-  [./stress_y]
+  []
+  [stress_y]
     type = StressDivergenceTensors
     component = 1
     variable = disp_y
-  [../]
-  [./stress_z]
+  []
+  [stress_z]
     type = StressDivergenceTensors
     component = 2
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = DirichletBC
     variable = disp_z
     boundary = front
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

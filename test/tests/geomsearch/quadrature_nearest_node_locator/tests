@@ -1,13 +1,13 @@
 [Tests]
   design = 'source/auxkernels/NearestNodeDistanceAux.md'
-  [./qnnl]
+  [qnnl]
     type = 'Exodiff'
     input = 'quadrature_nearest_node_locator.i'
     exodiff = 'quadrature_nearest_node_locator_out.e'
     group = 'geometric'
     requirement = "The NearestNodeDistanceAux object shall compute the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
     issues = '#1462'
-  [../]
+  []
   [qnnl_ad]
     type = 'Exodiff'
     input = 'qnnl_ad.i'

@@ -31,298 +31,298 @@
 []
 
 [Functions]
-  [./tempLinear]
+  [tempLinear]
     type = ParsedFunction
     value = '715-5*x'
-  [../]
-  [./tempQuadratic]
+  []
+  [tempQuadratic]
     type = ParsedFunction
     vars = 'Tc Te'
     vals = '701 700'
     value = '(Te-Tc)/4.0*x*x+(Tc-Te)/2.0*x+Te+3.0*(Tc-Te)/4.0'
-  [../]
-  [./tempCubic]
+  []
+  [tempCubic]
     type = ParsedFunction
     value = '-1.25*x*x*x+11.25*x*x-33.75*x+733.75'
-  [../]
+  []
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 295.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./hydro_constant]
+  [hydro_constant]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./hydro_first]
+  []
+  [hydro_first]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./hydro_second]
+  []
+  [hydro_second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./sxx_constant]
+  []
+  [sxx_constant]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./sxx_first]
+  []
+  [sxx_first]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./sxx_second]
+  []
+  [sxx_second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./szz_constant]
+  []
+  [szz_constant]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./szz_first]
+  []
+  [szz_first]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./szz_second]
+  []
+  [szz_second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./thermal_constant]
+  []
+  [thermal_constant]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./thermal_first]
+  []
+  [thermal_first]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./thermal_second]
+  []
+  [thermal_second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./reduced_constant]
+  []
+  [reduced_constant]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./reduced_first]
+  []
+  [reduced_first]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./reduced_second]
+  []
+  [reduced_second]
     order = SECOND
     family = MONOMIAL
-  [../]
-  [./temp2]
+  []
+  [temp2]
     order = SECOND
     family = LAGRANGE
     initial_condition = 700
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         add_variables = true
         strain = SMALL
         incremental = true
         temperature = temp2
         #eigenstrain_names = thermal_eigenstrain
         eigenstrain_names = reduced_order_eigenstrain
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = Diffusion
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./hydro_constant_aux]
+  [hydro_constant_aux]
     type = RankTwoScalarAux
     variable = hydro_constant
     rank_two_tensor = stress
     scalar_type = Hydrostatic
     execute_on = timestep_end
-  [../]
-  [./hydro_first_aux]
+  []
+  [hydro_first_aux]
     type = RankTwoScalarAux
     variable = hydro_first
     rank_two_tensor = stress
     scalar_type = Hydrostatic
     execute_on = timestep_end
-  [../]
-  [./hydro_second_aux]
+  []
+  [hydro_second_aux]
     type = RankTwoScalarAux
     variable = hydro_second
     rank_two_tensor = stress
     scalar_type = Hydrostatic
     execute_on = timestep_end
-  [../]
-  [./sxx_constant_aux]
+  []
+  [sxx_constant_aux]
     type = RankTwoAux
     variable = sxx_constant
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./sxx_first_aux]
+  []
+  [sxx_first_aux]
     type = RankTwoAux
     variable = sxx_first
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./sxx_second_aux]
+  []
+  [sxx_second_aux]
     type = RankTwoAux
     variable = sxx_second
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./szz_constant_aux]
+  []
+  [szz_constant_aux]
     type = RankTwoAux
     variable = szz_constant
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./szz_first_aux]
+  []
+  [szz_first_aux]
     type = RankTwoAux
     variable = szz_first
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./szz_second_aux]
+  []
+  [szz_second_aux]
     type = RankTwoAux
     variable = szz_second
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./thermal_constant_aux]
+  []
+  [thermal_constant_aux]
     type = RankTwoAux
     variable = thermal_constant
     rank_two_tensor = thermal_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./thermal_first_aux]
+  []
+  [thermal_first_aux]
     type = RankTwoAux
     variable = thermal_first
     rank_two_tensor = thermal_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./thermal_second_aux]
+  []
+  [thermal_second_aux]
     type = RankTwoAux
     variable = thermal_second
     rank_two_tensor = thermal_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./reduced_constant_aux]
+  []
+  [reduced_constant_aux]
     type = RankTwoAux
     variable = reduced_constant
     rank_two_tensor = reduced_order_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./reduced_first_aux]
+  []
+  [reduced_first_aux]
     type = RankTwoAux
     variable = reduced_first
     rank_two_tensor = reduced_order_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./reduced_second_aux]
+  []
+  [reduced_second_aux]
     type = RankTwoAux
     variable = reduced_second
     rank_two_tensor = reduced_order_eigenstrain
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./temp2]
+  []
+  [temp2]
     type = FunctionAux
     variable = temp2
     function = tempQuadratic
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [BCs]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom #'bottom top'
     value = 0.0
-  [../]
+  []
 
-  [./temp_right]
+  [temp_right]
     type = DirichletBC
     variable = temp
     boundary = right
     value = 700
-  [../]
-  [./temp_left]
+  []
+  [temp_left]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 710
-  [../]
+  []
 []
 
 
 [Materials]
-  [./fuel_stress]
+  [fuel_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e8
     poissons_ratio = 0
-  [../]
-  [./fuel_thermal_expansion]
+  []
+  [fuel_thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     temperature = temp2
     stress_free_temperature = 295.0
     eigenstrain_name = 'thermal_eigenstrain'
-  [../]
-  [./reduced_order_eigenstrain]
+  []
+  [reduced_order_eigenstrain]
     type = ComputeReducedOrderEigenstrain
     input_eigenstrain_names = 'thermal_eigenstrain'
     eigenstrain_name = 'reduced_order_eigenstrain'
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -338,20 +338,20 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./hydro]
+  [hydro]
     type = LineValueSampler
     num_points = 50
     start_point = '1 0.07e-3 0'
     end_point = '3 0.07e-3 0'
     sort_by = x
     variable = 'temp2 disp_x disp_y hydro_constant hydro_first hydro_second sxx_constant sxx_first sxx_second szz_constant szz_first szz_second thermal_constant thermal_first thermal_second reduced_constant reduced_first reduced_second'
-  [../]
+  []
 []
 
 [Outputs]

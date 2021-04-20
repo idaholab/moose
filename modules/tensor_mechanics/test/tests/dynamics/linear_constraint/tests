@@ -1,5 +1,5 @@
 [tests]
-  [./linear_nodal_constraint]
+  [linear_nodal_constraint]
     type = 'Exodiff'
     input = 'disp_mid.i'
     exodiff = 'disp_mid_out.e'
@@ -10,5 +10,5 @@
                   " to move as a linear combination of the primary nodes."
     design = "LinearNodalConstraint.md"
     issues = "#5783"
-  [../]
+  []
 []

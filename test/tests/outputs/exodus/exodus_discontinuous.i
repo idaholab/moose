@@ -12,49 +12,49 @@
 []
 
 [Variables]
-  [./disc_u]
+  [disc_u]
     family = monomial
     order = first
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = disc_u
-  [../]
-  [./forcing]
+  []
+  [forcing]
     type = BodyForce
     variable = disc_u
     value = 7
-  [../]
+  []
 []
 
 [DGKernels]
-  [./diff_dg]
+  [diff_dg]
   type = DGDiffusion
   variable = disc_u
   sigma = 1
   epsilon = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./zero_fn]
+  [zero_fn]
     type = ParsedFunction
     value = 0.0
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DGFunctionDiffusionDirichletBC
     variable = disc_u
     boundary = 'left right top bottom'
     function = zero_fn
     sigma = 1
     epsilon = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,9 +66,9 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./exo_out]
+  [exo_out]
     type = Exodus
     discontinuous = true
     file_base = 'exodus_discontinuous_out'
-  [../]
+  []
 []

@@ -12,12 +12,12 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     value = 1
     variable = pressure
-  [../]
+  []
 []
 
 
@@ -26,63 +26,63 @@
 []
 
 [UserObjects]
-  [./PPNames]
+  [PPNames]
     type = RichardsVarNames
     richards_vars = pressure
-  [../]
-  [./DensityConstBulk]
+  []
+  [DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 1.0E3
-  [../]
-  [./SeffVG]
+  []
+  [SeffVG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1
-  [../]
-  [./RelPermPower]
+  []
+  [RelPermPower]
     type = RichardsRelPermPower
     simm = 0.0
     n = 2
-  [../]
-  [./Saturation]
+  []
+  [Saturation]
     type = RichardsSat
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./SUPGnone]
+  []
+  [SUPGnone]
     type = RichardsSUPGnone
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 
 [Kernels]
   active = 'richardsf richardst'
-  [./richardst]
+  [richardst]
     type = RichardsMassChange
     variable = pressure
-  [../]
-  [./richardsf]
+  []
+  [richardsf]
     type = RichardsFlux
     variable = pressure
-  [../]
+  []
 []
 
 [Materials]
-  [./rock]
+  [rock]
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
@@ -95,17 +95,17 @@
     viscosity = 1E-3
     gravity = '-1 0 0'
     linear_shape_fcns = true
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

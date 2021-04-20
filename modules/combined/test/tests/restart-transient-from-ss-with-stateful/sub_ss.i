@@ -13,18 +13,18 @@
     ymax = 82.627
     dim = 2
   []
-  [./extra_nodes_x]
+  [extra_nodes_x]
     type = ExtraNodesetGenerator
     input = 'gen'
     new_boundary = 'no_x'
     coord = '0 82.627 0'
-  [../]
-  [./extra_nodes_y]
+  []
+  [extra_nodes_y]
     type = ExtraNodesetGenerator
     input = 'extra_nodes_x'
     new_boundary = 'no_y'
     coord = '-82.627 0 0'
-  [../]
+  []
 []
 
 [Problem]
@@ -34,14 +34,14 @@
 []
 
 [AuxVariables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [Modules/TensorMechanics/Master]
   # FINITE strain when strain is large, i.e., visible movement.
   # SMALL strain when things are stressed, but may not move.
-  [./fuel]
+  [fuel]
     add_variables = true
     strain = FINITE
     temperature = temp
@@ -50,73 +50,73 @@
     extra_vector_tags = 'ref'
     use_finite_deform_jacobian = true
     incremental = true
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'no_x'
     value = 0.0
     preset = true
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = 'no_y'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3e10   # Pa
     poissons_ratio = 0.33    # unitless
-  [../]
-  [./thermal_strains]
+  []
+  [thermal_strains]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 2e-6 # 1/K
     stress_free_temperature = 500 # K
     eigenstrain_name = 'thermal_eigenstrain'
-  [../]
-  [./stress_finite] # goes with FINITE strain formulation
+  []
+  [stress_finite] # goes with FINITE strain formulation
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./avg_temp]
+  [avg_temp]
     type = ElementAverageValue
     variable = temp
-  [../]
-  [./disp_x_max_element]
+  []
+  [disp_x_max_element]
     type = ElementExtremeValue
     value_type = max
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
-  [./disp_y_max_element]
+  []
+  [disp_y_max_element]
     type = ElementExtremeValue
     value_type = max
     variable = disp_y
     execute_on = 'initial timestep_end'
-  [../]
-  [./disp_x_max_nodal]
+  []
+  [disp_x_max_nodal]
     type = NodalExtremeValue
     value_type = max
     variable = disp_x
     execute_on = 'initial timestep_end'
-  [../]
-  [./disp_y_max_nodal]
+  []
+  [disp_y_max_nodal]
     type = NodalExtremeValue
     value_type = max
     variable = disp_y
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

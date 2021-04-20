@@ -1,52 +1,52 @@
 [Mesh]
-  [./generator]
+  [generator]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 10
     ny = 10
-  [../]
-  [./block1]
+  []
+  [block1]
     type = SubdomainBoundingBoxGenerator
     input = generator
     bottom_left = '0 0 -1'
     top_right = '1 1 1'
     block_id = 1
-  [../]
-  [./block2]
+  []
+  [block2]
     type = SubdomainBoundingBoxGenerator
     input = block1
     bottom_left = '0.33 0.33 -1'
     top_right = '0.67 0.67 1'
     block_id = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = VectorConstantIC
     variable = u
     x_value = 1
     y_value = 2
     z_value = 3
     block = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADVectorDiffusion
     variable = u
-  [../]
-  [./time]
+  []
+  [time]
     type = ADVectorTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

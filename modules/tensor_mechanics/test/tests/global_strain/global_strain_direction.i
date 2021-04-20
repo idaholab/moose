@@ -18,38 +18,38 @@
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
-  [./global_strain]
+  [u_x]
+  []
+  [u_y]
+  []
+  [global_strain]
     order = THIRD
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     type = GlobalDisplacementAux
     variable = disp_x
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
     component = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -58,80 +58,80 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
+  [TensorMechanics]
+  []
 []
 
 [ScalarKernels]
-  [./global_strain]
+  [global_strain]
     type = GlobalStrain
     variable = global_strain
     global_strain_uo = global_strain_uo
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./left-right]
+  [Periodic]
+    [left-right]
       auto_direction = 'x'
       variable = 'u_x u_y'
-    [../]
-  [../]
+    []
+  []
 
   # fix center point location
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = 100
     variable = u_x
     value = 0
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     boundary = bottom
     variable = u_y
     value = 0
-  [../]
-  [./appl_y]
+  []
+  [appl_y]
     type = DirichletBC
     boundary = top
     variable = u_y
     value = -0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     global_strain = global_strain
-  [../]
-  [./global_strain]
+  []
+  [global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
     global_strain_uo = global_strain_uo
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [UserObjects]
-  [./global_strain_uo]
+  [global_strain_uo]
     type = GlobalStrainUserObject
     execute_on = 'Initial Linear Nonlinear'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

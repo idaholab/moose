@@ -21,103 +21,103 @@
 []
 
 [AuxVariables]
-  [./axial_stress]
+  [axial_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e_over_l]
+  []
+  [e_over_l]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./area]
+  []
+  [area]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./react_x]
+  []
+  [react_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./react_y]
+  []
+  [react_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./react_z]
+  []
+  [react_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./x2]
+  [x2]
     type = PiecewiseLinear
     x = '0  1 2 3'
     y = '0 .5 1 1'
-  [../]
-  [./y2]
+  []
+  [y2]
     type = PiecewiseLinear
     x = '0 1  2 3'
     y = '0 0 .5 1'
-  [../]
+  []
 []
 
 [BCs]
-  [./fixx1]
+  [fixx1]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0
-  [../]
-  [./fixy1]
+  []
+  [fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./fixy4]
+  [fixy4]
     type = DirichletBC
     variable = disp_y
     boundary = 4
     value = 0
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./pull]
+  [pull]
     type = ConstantPointSource
     value = -25
     point = '1 0 0'
     variable = disp_y
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./axial_stress]
+  [axial_stress]
     type = MaterialRealAux
     block = 1
     property = axial_stress
     variable = axial_stress
-  [../]
-  [./e_over_l]
+  []
+  [e_over_l]
     type = MaterialRealAux
     block = 1
     property = e_over_l
     variable = e_over_l
-  [../]
-  [./area]
+  []
+  [area]
     type = ConstantAux
     block = 1
     variable = area
     value = 0.8
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,7 +138,7 @@
 []
 
 [Modules/TensorMechanics/LineElementMaster]
-  [./block]
+  [block]
     truss = true
     add_variables = true
     displacements = 'disp_x disp_y'
@@ -147,16 +147,16 @@
 
     block = 1
     save_in = 'react_x react_y'
-  [../]
+  []
 []
 
 [Materials]
-  [./linelast]
+  [linelast]
     type = LinearElasticTruss
     block = 1
     youngs_modulus = 1e6
     displacements = 'disp_x disp_y'
-  [../]
+  []
 []
 
 [Outputs]

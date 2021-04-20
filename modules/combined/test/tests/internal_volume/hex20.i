@@ -17,77 +17,77 @@
 []
 
 [Functions]
-  [./step]
+  [step]
     type = PiecewiseLinear
     x = '0. 1. 2. 3.'
     y = '0. 0. 1e-2 0.'
     scale_factor = 0.5
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_z]
+  [disp_z]
     order = SECOND
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     incremental = true
     strain = FINITE
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 100
     value = 0.0
-  [../]
+  []
 
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
-  [../]
+  []
 
-  [./prescribed_z]
+  [prescribed_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 100
     function = step
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
@@ -101,23 +101,23 @@
   dt = 1.0
   end_time = 3.0
 
-  [./Quadrature]
+  [Quadrature]
     order = THIRD
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./internalVolume]
+  [internalVolume]
     type = InternalVolume
     boundary = 100
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./dispZ]
+  [dispZ]
     type = ElementAverageValue
     block = '1 2'
     variable = disp_z
-  [../]
+  []
 []
 
 [Outputs]

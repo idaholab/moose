@@ -21,10 +21,10 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -32,37 +32,37 @@
       invalue = 1.0
       outvalue = 0.0
       int_width = 10.0
-    [../]
-  [../]
-  [./disp_x]
+    []
+  []
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y'
-  [../]
+  []
 
-  [./eta_bulk]
+  [eta_bulk]
     type = AllenCahn
     variable = eta
     f_name = F
-  [../]
-  [./eta_interface]
+  []
+  [eta_interface]
     type = ACInterface
     variable = eta
     kappa_name = 1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 #
@@ -70,15 +70,15 @@
 #
 
 [Materials]
-  [./consts]
+  [consts]
     type = GenericConstantMaterial
     block = 0
     prop_names  = 'L'
     prop_values = '1'
-  [../]
+  []
 
   # matrix phase
-  [./stiffness_a]
+  [stiffness_a]
     type = ComputeElasticityTensor
     base_name = phasea
     block = 0
@@ -87,28 +87,28 @@
     # Stiffness tensor is created from lambda=7, mu=7 for symmetric_isotropic fill method
     fill_method = symmetric_isotropic
     # See RankFourTensor.h for details on fill methods
-  [../]
-  [./strain_a]
+  []
+  [strain_a]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     base_name = phasea
-  [../]
-  [./stress_a]
+  []
+  [stress_a]
     type = ComputeLinearElasticStress
     block = 0
     base_name = phasea
-  [../]
-  [./elastic_free_energy_a]
+  []
+  [elastic_free_energy_a]
     type = ElasticEnergyMaterial
     base_name = phasea
     f_name = Fea
     block = 0
     args = ''
-  [../]
+  []
 
   # oversized precipitate phase (simulated using thermal expansion)
-  [./stiffness_b]
+  [stiffness_b]
     type = ComputeElasticityTensor
     base_name = phaseb
     block = 0
@@ -117,47 +117,47 @@
     # Try reducing the precipitate stiffness (to '1 1') rather than making it oversized
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain_b]
+  []
+  [strain_b]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y'
     base_name = phaseb
     eigenstrain_names = eigenstrain
-  [../]
-  [./eigenstrain_b]
+  []
+  [eigenstrain_b]
     type = ComputeEigenstrain
     base_name = phaseb
     eigen_base = '0.1 0.1 0.1'
     eigenstrain_name = eigenstrain
-  [../]
-  [./stress_b]
+  []
+  [stress_b]
     type = ComputeLinearElasticStress
     block = 0
     base_name = phaseb
-  [../]
-  [./elastic_free_energy_b]
+  []
+  [elastic_free_energy_b]
     type = ElasticEnergyMaterial
     base_name = phaseb
     f_name = Feb
     block = 0
     args = ''
-  [../]
+  []
 
   # Generate the global free energy from the phase free energies
-  [./switching]
+  [switching]
     type = SwitchingFunctionMaterial
     block = 0
     eta = eta
     h_order = SIMPLE
-  [../]
-  [./barrier]
+  []
+  [barrier]
     type = BarrierFunctionMaterial
     block = 0
     eta = eta
     g_order = SIMPLE
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeTwoPhaseMaterial
     block = 0
     f_name = F
@@ -167,44 +167,44 @@
     args = ''
     W = 0.1
     derivative_order = 2
-  [../]
+  []
 
   # Generate the global stress from the phase stresses
-  [./global_stress]
+  [global_stress]
     type = TwoPhaseStressMaterial
     block = 0
     base_A = phasea
     base_B = phaseb
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'top'
     value = 5
-  [../]
-  [./left_x]
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   # active = ' '
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -224,10 +224,10 @@
   start_time = 0.0
   num_steps = 200
 
-  [./TimeStepper]
+  [TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.2
-  [../]
+  []
 []
 
 [Outputs]

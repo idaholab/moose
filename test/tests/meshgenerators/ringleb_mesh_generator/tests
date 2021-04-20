@@ -1,5 +1,5 @@
 [Tests]
-  [./ringleb_mesh_generator_test]
+  [ringleb_mesh_generator_test]
     type = 'Exodiff'
     input = 'ringleb_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,5 +10,5 @@
     requirement = 'The system shall support the ability to create a mesh for a "Ringleb" geometry.'
     design = 'meshgenerators/RinglebMeshGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

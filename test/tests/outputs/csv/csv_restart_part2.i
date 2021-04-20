@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mid]
+  [mid]
     type = PointValue
     variable = u
     point = '0.5 0.5 0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -56,10 +56,10 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./csv]
+  [csv]
     type = CSV
     file_base = csv_restart_part2_out
-  [../]
+  []
 []
 
 [Problem]

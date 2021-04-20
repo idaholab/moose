@@ -5,93 +5,93 @@
 
 [Variables]
   # variable in the whole domain
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 
   # subdomain restricted variable
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     block = '1'
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     # dudt = 3*t^2*(x^2 + y^2)
     value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*t*t*((x*x)+(y*y))
-  [../]
+  []
 
-  [./exact_fn_v]
+  [exact_fn_v]
     type = ParsedFunction
     value = t+1
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie_u]
+  [ie_u]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn_u]
+  [ffn_u]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 
 
-  [./ie_v]
+  [ie_v]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 
 []
 
 [BCs]
-  [./all_u]
+  [all_u]
     type = FunctionDirichletBC
     variable = u
     boundary = '1 2 3 4'
     function = exact_fn
-  [../]
+  []
 
-  [./bottom_v]
+  [bottom_v]
     type = DirichletBC
     variable = v
     boundary = 5
     value = 0
-  [../]
+  []
 
-  [./top_v]
+  [top_v]
     type = FunctionDirichletBC
     variable = v
     boundary = 6
     function = exact_fn_v
-  [../]
+  []
 []
 
 [Executioner]

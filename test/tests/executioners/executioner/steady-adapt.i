@@ -13,56 +13,56 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = ((x*x)+(y*y))
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff ffn'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
   active = 'all'
 
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,12 +70,12 @@
 
   solve_type = 'PJFNK'
 
-  [./Adaptivity]
+  [Adaptivity]
     steps = 3
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  [../]
+  []
 []
 
 [Outputs]

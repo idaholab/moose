@@ -11,23 +11,23 @@
 []
 
 [AuxVariables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./consts]
+  [consts]
     type = ParsedMaterial
     args  = 'eta'
     function ='(eta-0.5)^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

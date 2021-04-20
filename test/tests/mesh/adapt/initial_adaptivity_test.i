@@ -11,22 +11,22 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = x*x+y*y
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = -2
       y1 = -2
@@ -34,30 +34,30 @@
       y2 =  2
       inside = 1
       outside = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./udiff]
+  [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -65,12 +65,12 @@
 
   solve_type = 'PJFNK'
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 5
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]

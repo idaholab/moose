@@ -1,14 +1,14 @@
 [Tests]
-  [./material]
+  [material]
     type = 'Exodiff'
     input = 'material.i'
     exodiff = 'material_out.e'
     requirement = "The nucleation material shall generate a free energy contribution proportional to the map value"
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
-  [../]
+  []
 
-  [./parallel]
+  [parallel]
     type = 'CSVDiff'
     input = 'parallel.i'
     csvdiff = 'parallel_out.csv'
@@ -18,12 +18,12 @@
     requirement = "The nucleation system shall insert nuclei in a manner independen of the domain decomposition and parallelization"
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
-  [../]
+  []
 
   #
-  # manual recover test for [./material]
+  # manual recover test for [material]
   #
-  [./material_recover1]
+  [material_recover1]
     type = 'CheckFiles'
     input = 'material.i'
     check_files = 'material_recover_cp/0005.xdr'
@@ -33,8 +33,8 @@
     requirement = "The nucleation system shall recoverable"
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
-  [../]
-  [./material_recover2]
+  []
+  [material_recover2]
     # Recover the solve from part1 with a specified file
     type = 'Exodiff'
     input = 'material.i'
@@ -46,12 +46,12 @@
     requirement = "The nucleation system shall recoverable"
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
-  [../]
+  []
 
   #
-  # manual recover test for [./parallel]
+  # manual recover test for [parallel]
   #
-  [./parallel_recover1]
+  [parallel_recover1]
     type = 'CheckFiles'
     input = 'parallel.i'
     check_files = 'parallel_recover_cp/0005.xdr'
@@ -61,8 +61,8 @@
     requirement = "The nucleation system shall recoverable"
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
-  [../]
-  [./parallel_recover2]
+  []
+  [parallel_recover2]
     # Recover the solve from part1 with a specified file
     type = 'CSVDiff'
     input = 'parallel.i'
@@ -75,9 +75,9 @@
     requirement = "The nucleation system shall recoverable"
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'
-  [../]
+  []
 
-  [./soft]
+  [soft]
     type = 'Exodiff'
     input = 'soft.i'
     exodiff = 'soft_out.e'
@@ -85,66 +85,66 @@
     requirement = "The map shall provide the capability of defining soft interfaces for initial nuclei"
     design = 'userobjects/DiscreteNucleationMap.md'
     issues = '#5526'
-  [../]
+  []
 
-  [./marker]
+  [marker]
     type = 'Exodiff'
     input = 'marker.i'
     exodiff = 'marker_out.e-s002'
     requirement = "The marker shall trigger refinement of the nucleus insertion area"
     design = 'markers/DiscreteNucleationMarker.md'
     issues = '#12099'
-  [../]
+  []
 
-  [./timestep]
+  [timestep]
     type = 'CSVDiff'
     input = 'timestep.i'
     csvdiff = 'timestep_out.csv'
     requirement = "The nucleation time step porocessor shall return a timestep limit that can be applied to cut the simulation timestep as new nuclei are inserted"
     design = 'postprocessors/DiscreteNucleationTimeStep.md'
     issues = '#12104'
-  [../]
+  []
 
-  [./data]
+  [data]
     type = 'CSVDiff'
     input = 'data.i'
     csvdiff = 'data_out.csv'
     requirement = "The nucleation data porocessor shall return the number of currently active nuclei or whether a change to the nucleus list has occurred"
     design = 'postprocessors/DiscreteNucleationData.md'
     issues = '#12114'
-  [../]
-  [./auxkernel]
+  []
+  [auxkernel]
     type = 'Exodiff'
     input = 'auxkernel.i'
     exodiff = 'auxkernel_out.e'
     requirement = "The nucleation auxkernel evaluates the nucleation map onto an elemental aux variable"
     design = 'auxkernels/DiscreteNucleationAux.md'
     issues = '#12114'
-  [../]
-  [./force]
+  []
+  [force]
     type = 'Exodiff'
     input = 'force.i'
     exodiff = 'force_out.e'
     requirement = "The nucleation force kernel returns a forcing function based on the nucleation map"
     design = 'auxkernels/DiscreteNucleationAux.md'
     issues = '#12114'
-  [../]
+  []
 
-  [./file]
+  [file]
     type = 'Exodiff'
     input = 'file.i'
     exodiff = 'file_out.e'
     requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file. This test assigns fixed radius"
     design = 'userobjects/DiscreteNucleationFromFile.md'
     issues = '#12262'
-  [../]
+  []
 
-  [./file2]
+  [file2]
     type = 'Exodiff'
     input = 'file2.i'
     exodiff = 'file2_out.e'
     requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file. This test assigns variable radius"
     design = 'userobjects/DiscreteNucleationFromFile.md'
     issues = '#14544'
-  [../]
+  []
 []

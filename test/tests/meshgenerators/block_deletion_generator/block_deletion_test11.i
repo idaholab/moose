@@ -1,46 +1,46 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = pyramid.e
   []
 
-  [./sbb2]
+  [sbb2]
     type = SubdomainBoundingBoxGenerator
     input = fmg
     block_id = 2
     bottom_left = '-0.5 -0.5 -0.5'
     top_right = '0.5 0.5 0.5'
-  [../]
-  [./swiss_cheese2]
+  []
+  [swiss_cheese2]
     type = BlockDeletionGenerator
     block = 2
     input = 'sbb2'
-  [../]
-  [./sbb3]
+  []
+  [sbb3]
     type = SubdomainBoundingBoxGenerator
     input = swiss_cheese2
     block_id = 3
     bottom_left = '-5 -5 -3'
     top_right = '-2 -2 -1'
-  [../]
-  [./swiss_cheese3]
+  []
+  [swiss_cheese3]
     type = BlockDeletionGenerator
     block = 3
     input = 'sbb3'
-  [../]
-  [./sbb4]
+  []
+  [sbb4]
     type = SubdomainBoundingBoxGenerator
     input = swiss_cheese3
     block_id = 4
     bottom_left = '-1 2 -2'
     top_right = '1 5 0'
-  [../]
-  [./swiss_cheese4]
+  []
+  [swiss_cheese4]
     type = BlockDeletionGenerator
     block = 4
     input = 'sbb4'
-  [../]
-  [./sbb5]
+  []
+  [sbb5]
     type = OrientedSubdomainBoundingBoxGenerator
     input = swiss_cheese4
     block_id = 5
@@ -50,13 +50,13 @@
     length_direction = '-2 1 -1'
     width = 3
     width_direction = '1 2 0'
-  [../]
-  [./swiss_cheese5]
+  []
+  [swiss_cheese5]
     type = BlockDeletionGenerator
     block = 5
     input = 'sbb5'
-  [../]
-  [./sbb6]
+  []
+  [sbb6]
     type = OrientedSubdomainBoundingBoxGenerator
     input = swiss_cheese5
     block_id = 6
@@ -66,37 +66,37 @@
     length_direction = '2 -1 -1'
     width = 1
     width_direction = '1 2 0'
-  [../]
-  [./swiss_cheese6]
+  []
+  [swiss_cheese6]
     type = BlockDeletionGenerator
     block = 6
     input = 'sbb6'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

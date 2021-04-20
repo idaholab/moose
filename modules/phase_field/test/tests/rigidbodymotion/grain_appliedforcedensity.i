@@ -17,10 +17,10 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = SpecifiedSmoothCircleIC
       invalue = 1.0
       outvalue = 0.1
@@ -31,40 +31,40 @@
       radii = '14.0 14.0'
       3D_spheres = false
       variable = c
-    [../]
-  [../]
-  [./w]
+    []
+  []
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./load]
+  [load]
     type = ConstantFunction
     value = 0.01
-  [../]
+  []
 []
 
 [Kernels]
-  [./c_res]
+  [c_res]
     type = SplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
-  [../]
-  [./w_res]
+  []
+  [w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./motion]
+  []
+  [motion]
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
@@ -72,16 +72,16 @@
     grain_tracker_object = grain_center
     grain_force = grain_force
     grain_volumes = grain_volumes
-  [../]
+  []
 []
 
 [Materials]
-  [./pfmobility]
+  [pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = c
@@ -89,37 +89,37 @@
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
-  [../]
-  [./force_density_ext]
+  []
+  [force_density_ext]
     type = ExternalForceDensityMaterial
     c = c
     etas = 'eta0 eta1'
     k = 1.0
     force_y = load
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./eta0]
-  [../]
-  [./eta1]
-  [../]
-  [./bnds]
-  [../]
+  [eta0]
+  []
+  [eta1]
+  []
+  [bnds]
+  []
 []
 
 [AuxKernels]
-  [./bnds]
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
     op_num = 2
     v = 'eta0 eta1'
-  [../]
+  []
 []
 
 [ICs]
-  [./ic_eta0]
+  [ic_eta0]
     int_width = 6.0
     x1 = 20.0
     y1 = 0.0
@@ -128,8 +128,8 @@
     variable = eta0
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
-  [./IC_eta1]
+  []
+  [IC_eta1]
     int_width = 6.0
     x1 = 30.0
     y1 = 25.0
@@ -138,43 +138,43 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./forces]
+  [forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-  [../]
-  [./grain_volumes]
+  []
+  [grain_volumes]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = grain_center
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./grain_center]
+  [grain_center]
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
-  [../]
-  [./grain_force]
+  []
+  [grain_force]
     type = ComputeExternalGrainForceAndTorque
     execute_on = 'linear nonlinear'
     grain_data = grain_center
     c = c
     etas = 'eta0 eta1'
     force_density = force_density_ext
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

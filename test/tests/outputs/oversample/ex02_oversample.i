@@ -9,36 +9,36 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./foo]
+  [foo]
     variable = diffused
     type = ConstantPointSource
     value = 1
     point = '0.3 0.3 0.0'
-  [../]
+  []
 []
 
 [BCs]
   active = 'all'
-  [./all]
+  [all]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom left right top'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,12 +52,12 @@
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
-  [./os2]
+  [os2]
     type = Exodus
     refinements = 2
-  [../]
-  [./os4]
+  []
+  [os4]
     type = Exodus
     refinements = 4
-  [../]
+  []
 []

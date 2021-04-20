@@ -8,44 +8,44 @@
 []
 
 [Functions]
-  [./bc_fn]
+  [bc_fn]
     type=ParsedFunction
     value=0
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = MTPiecewiseConst1D
-  [../]
+  []
 
-  [./solution]
+  [solution]
     type = MTPiecewiseConst1D
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff forcing reaction'
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./reaction]
+  [reaction]
     type = Reaction
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
@@ -54,38 +54,38 @@
   #       has been designed to be zero at the boundary which is satisfied by the IC
   #       Ticket #1352
   active = ''
-  [./bc_all]
+  [bc_all]
     type=FunctionDirichletBC
     variable = u
     boundary = 'left right'
     function = bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
+  []
 
-  [./h]
+  [h]
     type = AverageElementSize
-  [../]
+  []
 
-  [./L2error]
+  [L2error]
     type = ElementL2Error
     variable = u
     function = solution
-  [../]
-  [./H1error]
+  []
+  [H1error]
     type = ElementH1Error
     variable = u
     function = solution
-  [../]
-  [./H1Semierror]
+  []
+  [H1Semierror]
     type = ElementH1SemiError
     variable = u
     function = solution
-  [../]
+  []
 []
 
 [Executioner]
@@ -93,16 +93,16 @@
 
   solve_type = 'PJFNK'
   nl_rel_tol = 1.e-9
-  [./Adaptivity]
+  [Adaptivity]
 
-  [../]
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   csv = true
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

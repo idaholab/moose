@@ -23,81 +23,81 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.0 0.33 0.5 0.67'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     generate_output = 'stress_xx stress_yy'
-  [../]
+  []
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 1.0 2.0'
     y = '0 500 1000'
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_y]
+  [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DirichletBC
     boundary = 2
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom_x]
+  []
+  [bottom_x]
     type = DirichletBC
     boundary = 0
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./pressure_x]
+  [pressure_x]
     type = XFEMPressure
     variable = disp_x
     component = 0
     function = pressure
-  [../]
+  []
 
-  [./pressure_y]
+  [pressure_y]
     type = XFEMPressure
     variable = disp_y
     component = 1
     function = pressure
-  [../]
+  []
 []
 
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,10 +109,10 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # controls for linear iterations
   l_max_its = 100
@@ -132,8 +132,8 @@
 [Outputs]
   file_base = inclined_edge_2d_pressure_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

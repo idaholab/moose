@@ -34,78 +34,78 @@
 []
 
 [Functions]
-  [./displ]
+  [displ]
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0.0026 0 -0.0026 0'
-  [../]
-  [./pressure]
+  []
+  [pressure]
     type = PiecewiseLinear
     x = '0 0.1 0.2 0.3 0.4'
     y = '0 0   0    0   0'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
-  [../]
+  []
 []
 
 [BCs]
-  [./pull_y]
+  [pull_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = displ
-  [../]
-  [./pin_x]
+  []
+  [pin_x]
     type = DirichletBC
     variable = disp_x
     boundary = '1  4'
     value = 0.0
-  [../]
-  [./pin_y]
+  []
+  [pin_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = '3'
     value = 0.0
-  [../]
-  [./front]
+  []
+  [front]
     type = Pressure
     variable = disp_z
     component = 2
     boundary = 6
     function = pressure
     factor   = 1.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200.0e3
     poissons_ratio = .3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 120
     shear_retention_factor = 0.1
     softening_models = exponential_softening
-  [../]
-  [./exponential_softening]
+  []
+  [exponential_softening]
     type = ExponentialSoftening
     residual_stress = 0.1
     beta = 0.1
-  [../]
+  []
 []
 
 [Executioner]

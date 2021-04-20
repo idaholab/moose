@@ -47,12 +47,12 @@
 []
 
 [Materials]
-  [./tensor]
+  [tensor]
     type = ADGenericFunctionRankTwoTensor
     tensor_name = function
     tensor_functions = 'fcn_00 fcn_01 fcn_02 fcn_10 fcn_11 fcn_12 fcn_20 fcn_21 fcn_22'
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

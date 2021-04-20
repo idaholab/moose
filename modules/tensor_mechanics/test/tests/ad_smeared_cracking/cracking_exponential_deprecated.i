@@ -18,80 +18,80 @@
 []
 
 [Functions]
-  [./displx]
+  [displx]
     type = PiecewiseLinear
     x = '0 1       2  3      4 5       6'
     y = '0 0.00175 0 -0.0001 0 0.00175 0.0035'
-  [../]
-  [./disply]
+  []
+  [disply]
     type = PiecewiseLinear
     x = '0 5 6'
     y = '0 0 .00175'
-  [../]
-  [./displz]
+  []
+  [displz]
     type = PiecewiseLinear
     x = '0 2 3'
     y = '0 0 .0035'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [BCs]
-  [./pullx]
+  [pullx]
     type = ADFunctionDirichletBC
     #type = FunctionDirichletBC
     variable = disp_x
     boundary = 4
     function = displx
-  [../]
-  [./left]
+  []
+  [left]
     type = ADDirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./fix_y]
+  [fix_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = '11 12'
     value = 0.0
-  [../]
+  []
 
-  [./move_y]
+  [move_y]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = '15 16'
     function = disply
-  [../]
+  []
 
-  [./back]
+  [back]
     type = ADDirichletBC
     variable = disp_z
     boundary = '3'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 186.5e9
     poissons_ratio = .316
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ADComputeSmearedCrackingStress
     cracking_stress = 119.3e6
     cracking_release = exponential
-  [../]
+  []
 []
 
 [Executioner]

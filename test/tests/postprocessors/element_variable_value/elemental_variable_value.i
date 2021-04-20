@@ -7,35 +7,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 10
-  [../]
+  []
 []
 
 [Executioner]
@@ -48,12 +48,12 @@
 []
 
 [Postprocessors]
-  [./elem_left]
+  [elem_left]
     type = ElementalVariableValue
     variable = u
     elementid = 0
   []
-  [./elem_right]
+  [elem_right]
     type = ElementalVariableValue
     variable = u
     elementid = 9

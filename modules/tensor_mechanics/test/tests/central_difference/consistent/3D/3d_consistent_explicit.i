@@ -15,160 +15,160 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
+  [vel_x]
+  []
+  [accel_x]
+  []
+  [vel_y]
+  []
+  [accel_y]
+  []
+  [vel_z]
+  []
+  [accel_z]
+  []
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = TestNewmarkTI
     variable = accel_x
     displacement = disp_x
     first = false
-  [../]
-  [./vel_x]
+  []
+  [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
-  [../]
-  [./accel_y]
+  []
+  [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_x
-  [../]
-  [./accel_z]
+  []
+  [accel_z]
     type = TestNewmarkTI
     variable = accel_z
     displacement = disp_z
     first = false
-  [../]
-  [./vel_z]
+  []
+  [vel_z]
     type = TestNewmarkTI
     variable = vel_z
     displacement = disp_z
-  [../]
+  []
 []
 
 [Kernels]
-  [./DynamicTensorMechanics]
+  [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./inertia_x]
+  []
+  [inertia_x]
     type = InertialForce
     variable = disp_x
-  [../]
-  [./inertia_y]
+  []
+  [inertia_y]
     type = InertialForce
     variable = disp_y
-  [../]
-  [./inertia_z]
+  []
+  [inertia_z]
     type = InertialForce
     variable = disp_z
-  [../]
+  []
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'back'
     function = dispx
     preset = false
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'back'
     function = dispy
     preset = false
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'back'
     function = dispz
     preset = false
-  [../]
-  [./Periodic]
-    [./x_dir]
+  []
+  [Periodic]
+    [x_dir]
       variable = 'disp_x disp_y disp_z'
       primary = 'left'
       secondary = 'right'
       translation = '1.0 0.0 0.0'
-    [../]
-    [./y_dir]
+    []
+    [y_dir]
       variable = 'disp_x disp_y disp_z'
       primary = 'bottom'
       secondary = 'top'
       translation = '0.0 1.0 0.0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
-  [./dispx]
+  [dispx]
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
-  [../]
-  [./dispy]
+  []
+  [dispy]
     type = ParsedFunction
     value = 0.1*t*t*sin(10*t)
-  [../]
-  [./dispz]
+  []
+  [dispz]
     type = ParsedFunction
     value = 0.1*t*t*sin(20*t)
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_block]
+  [elasticity_tensor_block]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
-  [./strain_block]
+  []
+  [strain_block]
     type = ComputeIncrementalSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
     implicit = false
-  [../]
-  [./stress_block]
+  []
+  [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 1e4
-  [../]
+  []
 []
 
 [Executioner]
@@ -177,17 +177,17 @@
   end_time = 0.1
   dt = 0.005
   timestep_tolerance = 1e-6
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = CentralDifference
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./accel_6x]
+  [accel_6x]
     type = NodalVariableValue
     nodeid = 6
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

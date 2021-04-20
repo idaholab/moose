@@ -1,10 +1,10 @@
 [Tests]
-  [./fv_2D_constant_scalar_advection]
+  [fv_2D_constant_scalar_advection]
     type = 'Exodiff'
     input = '2D_constant_scalar_advection.i'
     exodiff = '2D_constant_scalar_advection_out.e'
     requirement = 'The system shall run a 2D linear advection problems using the finite volume method a regular mesh.'
     design = 'fv_design.md'
     issues = '#14549'
-  [../]
+  []
 []

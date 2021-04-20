@@ -1,5 +1,5 @@
 [Tests]
-  [./mesh_side_set_generator_test]
+  [mesh_side_set_generator_test]
     type = 'Exodiff'
     input = 'mesh_side_set_generator.i'
     exodiff = 'mesh_side_set_generator_out.e'
@@ -9,5 +9,5 @@
     requirement = "The system shall support the generation of side sets between subdomains of a finite element mesh."
     design = 'meshgenerators/MeshSideSetGenerator.md'
     issues = '#11640'
-  [../]
+  []
 []

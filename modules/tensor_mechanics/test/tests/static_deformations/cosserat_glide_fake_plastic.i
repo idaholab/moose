@@ -38,72 +38,72 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
-  [./wc_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
+  [wc_z]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./z_couple]
+  []
+  [z_couple]
     type = StressDivergenceTensors
     variable = wc_z
     displacements = 'wc_x wc_y wc_z'
     component = 2
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     variable = wc_y
     component = 1
-  [../]
-  [./z_moment]
+  []
+  [z_moment]
     type = MomentBalancing
     variable = wc_z
     component = 2
-  [../]
+  []
 []
 
 [BCs]
@@ -113,295 +113,295 @@
   # ymax is called top
   # xmin is called left
   # xmax is called right
-  [./disp_x_zero_at_y_zero]
+  [disp_x_zero_at_y_zero]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0
-  [../]
-  [./disp_x_fixed_at_y_max]
+  []
+  [disp_x_fixed_at_y_max]
     type = DirichletBC
     variable = disp_x
     boundary = top
     value = -1.65731741465
-  [../]
-  [./no_dispy]
+  []
+  [no_dispy]
     type = DirichletBC
     variable = disp_y
     boundary = 'back front bottom top left right'
     value = 0
-  [../]
-  [./no_dispz]
+  []
+  [no_dispz]
     type = DirichletBC
     variable = disp_z
     boundary = 'back front bottom top left right'
     value = 0
-  [../]
-  [./no_wc_x]
+  []
+  [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = 'back front bottom top left right'
     value = 0
-  [../]
-  [./no_wc_y]
+  []
+  [no_wc_y]
     type = DirichletBC
     variable = wc_y
     boundary = 'back front bottom top left right'
     value = 0
-  [../]
-  [./wc_z_zero_at_y_zero]
+  []
+  [wc_z_zero_at_y_zero]
     type = DirichletBC
     variable = wc_z
     boundary = bottom
     value = 0
-  [../]
-  [./wc_z_fixed_at_y_max]
+  []
+  [wc_z_fixed_at_y_max]
     type = DirichletBC
     variable = wc_z
     boundary = top
     value = 3.626860407847
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_xx]
+  []
+  [couple_stress_xx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_xy]
+  []
+  [couple_stress_xy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_xz]
+  []
+  [couple_stress_xz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_yx]
+  []
+  [couple_stress_yx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_yy]
+  []
+  [couple_stress_yy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_yz]
+  []
+  [couple_stress_yz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_zx]
+  []
+  [couple_stress_zx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_zy]
+  []
+  [couple_stress_zy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./couple_stress_zz]
+  []
+  [couple_stress_zz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yx
     index_i = 1
     index_j = 0
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zy
     index_i = 2
     index_j = 1
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./couple_stress_xx]
+  []
+  [couple_stress_xx]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./couple_stress_xy]
+  []
+  [couple_stress_xy]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./couple_stress_xz]
+  []
+  [couple_stress_xz]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./couple_stress_yx]
+  []
+  [couple_stress_yx]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_yx
     index_i = 1
     index_j = 0
-  [../]
-  [./couple_stress_yy]
+  []
+  [couple_stress_yy]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./couple_stress_yz]
+  []
+  [couple_stress_yz]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./couple_stress_zx]
+  []
+  [couple_stress_zx]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_zx
     index_i = 2
     index_j = 0
-  [../]
-  [./couple_stress_zy]
+  []
+  [couple_stress_zy]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_zy
     index_i = 2
     index_j = 1
-  [../]
-  [./couple_stress_zz]
+  []
+  [couple_stress_zz]
     type = RankTwoAux
     rank_two_tensor = couple_stress
     variable = couple_stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeCosseratElasticityTensor
     B_ijkl = '1.1 0.6 0.6' # In Forest notation this is alpha=1.1 (this is unimportant), beta=gamma=0.6.
     fill_method_bending = 'general_isotropic'
     E_ijkl = '1 2 3' # In Forest notation this is lambda=1 (this is unimportant), mu=2, mu_c=3
     fill_method = 'general_isotropic'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
-  [../]
-  [./stress_fake_plasticity]
+  []
+  [stress_fake_plasticity]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-12
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./soln]
+  [soln]
     type = LineValueSampler
     sort_by = y
     variable = 'disp_x wc_z stress_yx couple_stress_zy'
     start_point = '0 0 0'
     end_point = '0 1 0'
     num_points = 11
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
     petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10'
-  [../]
+  []
 []
 
 [Executioner]

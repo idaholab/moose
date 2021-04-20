@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     type = SmoothCircleIC
     variable = c
     x1 = 15.0
@@ -26,15 +26,15 @@
     outvalue = -0.8
     int_width = 8.0
     profile = TANH
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]
@@ -48,8 +48,8 @@
 
 [Outputs]
   exodus = false
-  [./out]
+  [out]
     type = Exodus
     refinements = 1
-  [../]
+  []
 []

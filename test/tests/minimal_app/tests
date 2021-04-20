@@ -2,7 +2,7 @@
   design = 'MooseApp.md'
   issues = '#6126'
 
-  [./minimal]
+  [minimal]
     # Make sure --minimal flag is working
     type = RunApp
     cli_args = '--minimal --list-constructed-objects'
@@ -12,5 +12,5 @@
     display_required = True
 
     requirement = "The system shall support the programmatic creation of a simulation tools without the need of an input file."
-  [../]
+  []
 []

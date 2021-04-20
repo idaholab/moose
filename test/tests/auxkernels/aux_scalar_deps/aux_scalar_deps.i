@@ -15,54 +15,54 @@
 []
 
 [AuxVariables]
-  [./a]
+  [a]
     family = SCALAR
     order = FIRST
-  [../]
-  [./b]
+  []
+  [b]
     family = SCALAR
     order = FIRST
-  [../]
-  [./c]
+  []
+  [c]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./a_ic]
+  [a_ic]
     type = ScalarConstantIC
     variable = a
     value = 0
-  [../]
-  [./b_ic]
+  []
+  [b_ic]
     type = ScalarConstantIC
     variable = b
     value = 2
-  [../]
+  []
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t
-  [../]
+  []
 
-  [./a_fn]
+  [a_fn]
     type = ParsedFunction
     value = t
-  [../]
-  [./b_fn]
+  []
+  [b_fn]
     type = ParsedFunction
     value = (4-t)/2
-  [../]
+  []
 []
 
 # NOTE: The execute_on = 'timestep_end' is crucial for this test. Without it
@@ -72,46 +72,46 @@
 # values of 'c' will be lagged.
 
 [AuxScalarKernels]
-  [./c_saux]
+  [c_saux]
     type = QuotientScalarAux
     variable = c
     numerator = a
     denominator = b
     execute_on = 'timestep_end'
-  [../]
-  [./a_saux]
+  []
+  [a_saux]
     type = FunctionScalarAux
     variable = a
     function = a_fn
     execute_on = 'timestep_end'
-  [../]
-  [./b_saux]
+  []
+  [b_saux]
     type = FunctionScalarAux
     variable = b
     function = b_fn
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]

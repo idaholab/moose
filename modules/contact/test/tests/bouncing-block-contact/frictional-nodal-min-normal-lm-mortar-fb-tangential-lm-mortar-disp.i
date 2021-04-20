@@ -12,51 +12,51 @@ offset = 1e-2
 []
 
 [Mesh]
-  [./file_mesh]
+  [file_mesh]
     type = FileMeshGenerator
     file = long-bottom-block-1elem-blocks-coarse.e
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
     # order = SECOND
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
     # order = SECOND
-  [../]
-  [./frictional_normal_lm]
+  []
+  [frictional_normal_lm]
     block = 3
     # family = MONOMIAL
     # order = CONSTANT
-  [../]
-  [./frictional_tangential_lm]
+  []
+  [frictional_tangential_lm]
     block = 3
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 2
     variable = disp_y
     value = ${fparse starting_point + offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
+  []
 []
 
 
@@ -69,7 +69,7 @@ offset = 1e-2
     primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
-  [../]
+  []
   [normal_x]
     type = NormalMortarMechanicalContact
     primary_boundary = 20
@@ -136,30 +136,30 @@ offset = 1e-2
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
-  [../]
-  [./leftx]
+  []
+  [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
     function = '1e-2 * t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -176,10 +176,10 @@ offset = 1e-2
   line_search = 'none'
   snesmf_reuse_base = false
 
-  # [./Predictor]
+  # [Predictor]
   #   type = SimplePredictor
   #   scale = 1.0
-  # [../]
+  # []
 []
 
 [Debug]
@@ -189,27 +189,27 @@ offset = 1e-2
 [Outputs]
   exodus = true
   # checkpoint = true
-  # [./dofmap]
+  # [dofmap]
   #   type = DOFMap
   #   execute_on = 'initial'
-  # [../]
+  # []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
   [contact]
     type = ContactDOFSetSize
     variable = frictional_normal_lm

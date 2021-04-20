@@ -2,7 +2,7 @@
   design = 'CommandLine.md'
   issues = '#2137'
 
-  [./cli_override_single]
+  [cli_override_single]
     type = 'Exodiff'
     input = 'dt_from_master.i'
     exodiff = 'dt_from_master_out_sub_app0.e dt_from_master_out_sub_app1.e dt_from_master_out_sub_app2.e dt_from_master_out_sub_app3.e'
@@ -11,9 +11,9 @@
     cli_args = 'sub_app1:BCs/right/value=10 sub_app3:BCs/right/value=30'
 
     requirement = 'The system shall support the ability to change individual SubApp input file syntax from the command line.'
-  [../]
+  []
 
-  [./cli_override_error_check]
+  [cli_override_error_check]
     type = 'RunException'
     input = 'dt_from_master.i'
     expect_err = "unused command line parameter 'sub_app4:BCs/right/value=10'"
@@ -23,5 +23,5 @@
     prereq = 'cli_override_single'
 
     requirement = 'The system shall produce an error when a SubApp command line override index is not valid.'
-  [../]
+  []
 []

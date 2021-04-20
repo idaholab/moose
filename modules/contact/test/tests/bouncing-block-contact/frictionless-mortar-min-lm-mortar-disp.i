@@ -12,37 +12,37 @@ offset = 1e-2
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
-  [../]
-  [./normal_lm]
+  []
+  [normal_lm]
     block = 3
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 2
     variable = disp_y
     value = ${fparse starting_point + offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
+  []
 []
 
 
@@ -87,34 +87,34 @@ offset = 1e-2
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = 40
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = 40
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
-  [../]
-  [./leftx]
+  []
+  [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 50
     function = '1e-2 * t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,21 +141,21 @@ offset = 1e-2
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'num_nl cumulative contact'
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
   [contact]
     type = ContactDOFSetSize
     variable = normal_lm

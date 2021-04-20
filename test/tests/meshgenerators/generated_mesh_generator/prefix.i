@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3
@@ -8,7 +8,7 @@
     bias_x = 2
     bias_z = 0.5
     boundary_name_prefix = new
-  [../]
+  []
 []
 
 [Outputs]

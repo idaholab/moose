@@ -11,12 +11,12 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.0 0.5 0.5 0.5'
     time_start_cut = 0.0
     time_end_cut = 0.0
-  [../]
+  []
 []
 
 [Mesh]
@@ -32,54 +32,54 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
-  [../]
+  []
 []
 
 [BCs]
-  [./top_x]
+  [top_x]
     type = DirichletBC
     boundary = 2
     variable = disp_x
     value = 0.0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DirichletBC
     boundary = 2
     variable = disp_y
     value = 0.1
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom_x]
+  []
+  [bottom_x]
     type = DirichletBC
     boundary = 0
     variable = disp_x
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,10 +91,10 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 # max_xfem_update = 1
 
@@ -115,8 +115,8 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

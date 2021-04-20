@@ -12,29 +12,29 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Materials]
   #
-  [./funcmat]
+  [funcmat]
     type = GenericFunctionMaterial
     block = 0
     prop_names  = 'C'
     prop_values = 'x^2-y^2'
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
-  [./value]
+  [value]
     type = MaterialPropertyValue
     prop_name = C
     variable = c
-  [../]
+  []
 []
 
 [Executioner]

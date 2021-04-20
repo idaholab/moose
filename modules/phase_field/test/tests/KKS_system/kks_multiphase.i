@@ -18,77 +18,77 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./Energy]
+  [Energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 1
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 2
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 3
-  [./eta3]
+  [eta3]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 
   # phase concentration 1
-  [./c1]
+  [c1]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.2
-  [../]
+  []
 
   # phase concentration 2
-  [./c2]
+  [c2]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.5
-  [../]
+  []
 
   # phase concentration 3
-  [./c3]
+  [c3]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.8
-  [../]
+  []
 
   # Lagrange multiplier
-  [./lambda]
+  [lambda]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [ICs]
-  [./eta1]
+  [eta1]
     variable = eta1
     type = SmoothCircleIC
     x1 = 20.0
@@ -97,8 +97,8 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 4
-  [../]
-  [./eta2]
+  []
+  [eta2]
     variable = eta2
     type = SmoothCircleIC
     x1 = 20.0
@@ -107,8 +107,8 @@
     invalue = 0.1
     outvalue = 0.9
     int_width = 4
-  [../]
-  [./c]
+  []
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 20.0
@@ -117,136 +117,136 @@
     invalue = 0.2
     outvalue = 0.5
     int_width = 2
-  [../]
+  []
 []
 
 
 [Materials]
   # simple toy free energies
-  [./f1]
+  [f1]
     type = DerivativeParsedMaterial
     f_name = F1
     args = 'c1'
     function = '20*(c1-0.2)^2'
-  [../]
-  [./f2]
+  []
+  [f2]
     type = DerivativeParsedMaterial
     f_name = F2
     args = 'c2'
     function = '20*(c2-0.5)^2'
-  [../]
-  [./f3]
+  []
+  [f3]
     type = DerivativeParsedMaterial
     f_name = F3
     args = 'c3'
     function = '20*(c3-0.8)^2'
-  [../]
+  []
 
   # Switching functions for each phase
   # h1(eta1, eta2, eta3)
-  [./h1]
+  [h1]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
     f_name = h1
-  [../]
+  []
   # h2(eta1, eta2, eta3)
-  [./h2]
+  [h2]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
     f_name = h2
-  [../]
+  []
   # h3(eta1, eta2, eta3)
-  [./h3]
+  [h3]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta3
     eta_j = eta1
     eta_k = eta2
     f_name = h3
-  [../]
+  []
 
   # Coefficients for diffusion equation
-  [./Dh1]
+  [Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1'
     function = D*h1
     f_name = Dh1
-  [../]
-  [./Dh2]
+  []
+  [Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2'
     function = D*h2
     f_name = Dh2
-  [../]
-  [./Dh3]
+  []
+  [Dh3]
     type = DerivativeParsedMaterial
     material_property_names = 'D h3'
     function = D*h3
     f_name = Dh3
-  [../]
+  []
 
   # Barrier functions for each phase
-  [./g1]
+  [g1]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta1
     function_name = g1
-  [../]
-  [./g2]
+  []
+  [g2]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta2
     function_name = g2
-  [../]
-  [./g3]
+  []
+  [g3]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta3
     function_name = g3
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
     prop_names  = 'L   kappa  D'
     prop_values = '0.7 1.0    1'
-  [../]
+  []
 []
 
 [Kernels]
   #Kernels for diffusion equation
-  [./diff_time]
+  [diff_time]
     type = TimeDerivative
     variable = c
-  [../]
-  [./diff_c1]
+  []
+  [diff_c1]
     type = MatDiffusion
     variable = c
     diffusivity = Dh1
     v = c1
-  [../]
-  [./diff_c2]
+  []
+  [diff_c2]
     type = MatDiffusion
     variable = c
     diffusivity = Dh2
     v = c2
-  [../]
-  [./diff_c3]
+  []
+  [diff_c3]
     type = MatDiffusion
     variable = c
     diffusivity = Dh3
     v = c3
-  [../]
+  []
 
   # Kernels for Allen-Cahn equation for eta1
-  [./deta1dt]
+  [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
-  [./ACBulkF1]
+  []
+  [ACBulkF1]
     type = KKSMultiACBulkF
     variable  = eta1
     Fj_names  = 'F1 F2 F3'
@@ -255,8 +255,8 @@
     eta_i     = eta1
     wi        = 1.0
     args      = 'c1 c2 c3 eta2 eta3'
-  [../]
-  [./ACBulkC1]
+  []
+  [ACBulkC1]
     type = KKSMultiACBulkC
     variable  = eta1
     Fj_names  = 'F1 F2 F3'
@@ -264,25 +264,25 @@
     cj_names  = 'c1 c2 c3'
     eta_i     = eta1
     args      = 'eta2 eta3'
-  [../]
-  [./ACInterface1]
+  []
+  [ACInterface1]
     type = ACInterface
     variable = eta1
     kappa_name = kappa
-  [../]
-  [./multipler1]
+  []
+  [multipler1]
     type = MatReaction
     variable = eta1
     v = lambda
     mob_name = L
-  [../]
+  []
 
   # Kernels for Allen-Cahn equation for eta2
-  [./deta2dt]
+  [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
-  [./ACBulkF2]
+  []
+  [ACBulkF2]
     type = KKSMultiACBulkF
     variable  = eta2
     Fj_names  = 'F1 F2 F3'
@@ -291,8 +291,8 @@
     eta_i     = eta2
     wi        = 1.0
     args      = 'c1 c2 c3 eta1 eta3'
-  [../]
-  [./ACBulkC2]
+  []
+  [ACBulkC2]
     type = KKSMultiACBulkC
     variable  = eta2
     Fj_names  = 'F1 F2 F3'
@@ -300,26 +300,26 @@
     cj_names  = 'c1 c2 c3'
     eta_i     = eta2
     args      = 'eta1 eta3'
-  [../]
-  [./ACInterface2]
+  []
+  [ACInterface2]
     type = ACInterface
     variable = eta2
     kappa_name = kappa
-  [../]
-  [./multipler2]
+  []
+  [multipler2]
     type = MatReaction
     variable = eta2
     v = lambda
     mob_name = L
-  [../]
+  []
 
   # Kernels for the Lagrange multiplier equation
-  [./mult_lambda]
+  [mult_lambda]
     type = MatReaction
     variable = lambda
     mob_name = 3
-  [../]
-  [./mult_ACBulkF_1]
+  []
+  [mult_ACBulkF_1]
     type = KKSMultiACBulkF
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -329,8 +329,8 @@
     wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta2 eta3'
-  [../]
-  [./mult_ACBulkC_1]
+  []
+  [mult_ACBulkC_1]
     type = KKSMultiACBulkC
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -339,15 +339,15 @@
     eta_i     = eta1
     args      = 'eta2 eta3'
     mob_name  = 1
-  [../]
-  [./mult_CoupledACint_1]
+  []
+  [mult_CoupledACint_1]
     type = SimpleCoupledACInterface
     variable = lambda
     v = eta1
     kappa_name = kappa
     mob_name = 1
-  [../]
-  [./mult_ACBulkF_2]
+  []
+  [mult_ACBulkF_2]
     type = KKSMultiACBulkF
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -357,8 +357,8 @@
     wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta1 eta3'
-  [../]
-  [./mult_ACBulkC_2]
+  []
+  [mult_ACBulkC_2]
     type = KKSMultiACBulkC
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -367,15 +367,15 @@
     eta_i     = eta2
     args      = 'eta1 eta3'
     mob_name  = 1
-  [../]
-  [./mult_CoupledACint_2]
+  []
+  [mult_CoupledACint_2]
     type = SimpleCoupledACInterface
     variable = lambda
     v = eta2
     kappa_name = kappa
     mob_name = 1
-  [../]
-  [./mult_ACBulkF_3]
+  []
+  [mult_ACBulkF_3]
     type = KKSMultiACBulkF
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -385,8 +385,8 @@
     wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta1 eta2'
-  [../]
-  [./mult_ACBulkC_3]
+  []
+  [mult_ACBulkC_3]
     type = KKSMultiACBulkC
     variable  = lambda
     Fj_names  = 'F1 F2 F3'
@@ -395,67 +395,67 @@
     eta_i     = eta3
     args      = 'eta1 eta2'
     mob_name  = 1
-  [../]
-  [./mult_CoupledACint_3]
+  []
+  [mult_CoupledACint_3]
     type = SimpleCoupledACInterface
     variable = lambda
     v = eta3
     kappa_name = kappa
     mob_name = 1
-  [../]
+  []
 
   # Kernels for constraint equation eta1 + eta2 + eta3 = 1
   # eta3 is the nonlinear variable for the constraint equation
-  [./eta3reaction]
+  [eta3reaction]
     type = MatReaction
     variable = eta3
     mob_name = 1
-  [../]
-  [./eta1reaction]
+  []
+  [eta1reaction]
     type = MatReaction
     variable = eta3
     v = eta1
     mob_name = 1
-  [../]
-  [./eta2reaction]
+  []
+  [eta2reaction]
     type = MatReaction
     variable = eta3
     v = eta2
     mob_name = 1
-  [../]
-  [./one]
+  []
+  [one]
     type = BodyForce
     variable = eta3
     value = -1.0
-  [../]
+  []
 
   # Phase concentration constraints
-  [./chempot12]
+  [chempot12]
     type = KKSPhaseChemicalPotential
     variable = c1
     cb       = c2
     fa_name  = F1
     fb_name  = F2
-  [../]
-  [./chempot23]
+  []
+  [chempot23]
     type = KKSPhaseChemicalPotential
     variable = c2
     cb       = c3
     fa_name  = F2
     fb_name  = F3
-  [../]
-  [./phaseconcentration]
+  []
+  [phaseconcentration]
     type = KKSMultiPhaseConcentration
     variable = c3
     cj = 'c1 c2 c3'
     hj_names = 'h1 h2 h3'
     etas = 'eta1 eta2 eta3'
     c = c
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Energy_total]
+  [Energy_total]
     type = KKSMultiFreeEnergy
     Fj_names = 'F1 F2 F3'
     hj_names = 'h1 h2 h3'
@@ -464,7 +464,7 @@
     w = 1
     interfacial_vars =  'eta1  eta2  eta3'
     kappa_names =       'kappa kappa kappa'
-  [../]
+  []
 []
 
 [Executioner]
@@ -484,14 +484,14 @@
 
 [Preconditioning]
   active = 'full'
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
-  [./mydebug]
+  []
+  [mydebug]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

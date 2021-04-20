@@ -129,13 +129,13 @@ input file that is available. The syntax is
 
 ```text
 [Modules]
-  [./PhaseField]
-    [./EulerAngles2RGB]
+  [PhaseField]
+    [EulerAngles2RGB]
       crystal_structure = cubic
       euler_angle_provider = ebsd
       grain_tracker = grain_tracker
-    [../]
-  [../]
+    []
+  []
 []
 ```
 

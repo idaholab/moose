@@ -16,103 +16,103 @@
 []
 
 [Variables]
-  [./disp_r]
-  [../]
-  [./disp_z]
-  [../]
-  [./u]
+  [disp_r]
+  []
+  [disp_z]
+  []
+  [u]
     order = FIRST
-  [../]
-  [./v]
-  [../]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./disp_r]
+  [disp_r]
     type = Diffusion
     variable = disp_r
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = Diffusion
     variable = disp_z
-  [../]
-  [./u]
+  []
+  [u]
     type = ADDiffusion
     variable = u
     use_displaced_mesh = true
-  [../]
-  [./v]
+  []
+  [v]
     type = ADDiffusion
     variable = v
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
   # BCs cannot be preset due to Jacobian tests
-  [./u_left]
+  [u_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = u
-  [../]
-  [./u_right]
+  []
+  [u_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = u
-  [../]
-  [./v_left]
+  []
+  [v_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = v
-  [../]
-  [./v_right]
+  []
+  [v_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = v
-  [../]
-  [./disp_r_left]
+  []
+  [disp_r_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'left'
     variable = disp_r
-  [../]
-  [./disp_r_right]
+  []
+  [disp_r_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'right'
     variable = disp_r
-  [../]
-  [./disp_z_left]
+  []
+  [disp_z_left]
     type = DirichletBC
     preset = false
     value = 0
     boundary = 'bottom'
     variable = disp_z
-  [../]
-  [./disp_z_right]
+  []
+  [disp_z_right]
     type = DirichletBC
     preset = false
     value = 1
     boundary = 'top'
     variable = disp_z
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,36 +121,36 @@
 []
 
 [Outputs]
-  [./dofmap]
+  [dofmap]
     type = DOFMap
     execute_on = 'initial'
-  [../]
+  []
   exodus = true
 []
 
 [ICs]
-  [./disp_r]
+  [disp_r]
     type = RandomIC
     variable = disp_r
     min = 0.01
     max = 0.09
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = RandomIC
     variable = disp_z
     min = 0.01
     max = 0.09
-  [../]
-  [./u]
+  []
+  [u]
     type = RandomIC
     variable = u
     min = 0.1
     max = 0.9
-  [../]
-  [./v]
+  []
+  [v]
     type = RandomIC
     variable = v
     min = 0.1
     max = 0.9
-  [../]
+  []
 []

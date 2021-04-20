@@ -9,9 +9,9 @@
 
 # The fluid properties (equation of state) to query is defined here
 [Modules]
-  [./FluidProperties]
-    [./fp]
+  [FluidProperties]
+    [fp]
       type = IdealGasFluidProperties
-    [../]
-  [../]
+    []
+  []
 []

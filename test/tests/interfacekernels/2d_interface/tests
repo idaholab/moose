@@ -1,6 +1,6 @@
 [Tests]
   group = "InterfaceKernel with 2D Interface"
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
@@ -9,18 +9,18 @@
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall operate with coupled variables in 2D. "
                   "This uses a penalty implementation that is optimally convergent."
-  [../]
+  []
 
-  [./test_dot]
+  [test_dot]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux_dot.i'
     exodiff = 'coupled_value_coupled_flux_dot_out.e'
     issues = "#12372"
     design = "InterfaceKernels/index.md"
     requirement = "Allow the interface to impose the same time derivative on two neighboring variables. This uses a penalty implementation that is optimally convergent."
-  [../]
+  []
 
-  [./test_jump_material]
+  [test_jump_material]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux_with_jump_material.i'
     exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
@@ -28,9 +28,9 @@
     issues = "#12066"
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall use with interface material in 2D."
-  [../]
+  []
 
-  [./jacobian_test]
+  [jacobian_test]
     type = AnalyzeJacobian
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -43,7 +43,7 @@
     requirement = "The Jacobian evaluation for InterfaceKernel objects in 2D shall be analytically correct."
   []
 
-  [./parallel_fdp_test]
+  [parallel_fdp_test]
     type = 'Exodiff'
     prereq = 'test'
     exodiff = 'coupled_value_coupled_flux_out.e'
@@ -54,9 +54,9 @@
     design = '/FiniteDifferencePreconditioner.md'
     requirement = 'The finite difference preconditioner shall work in parallel.'
     allow_warnings = true
-  [../]
+  []
 
-  [./vector_2d]
+  [vector_2d]
     type = 'Exodiff'
     input = 'vector_2d.i'
     exodiff = 'vector_2d_out.e'
@@ -64,7 +64,7 @@
     issues = "#13354"
     design = "InterfaceKernels/index.md"
     requirement = "The InterfaceKernel system shall support Vector Finite Elements in 2D."
-    [../]
+    []
 
   [no_mallocs_during_scaling]
     type = 'RunApp'

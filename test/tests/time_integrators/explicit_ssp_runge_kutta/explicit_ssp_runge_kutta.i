@@ -5,65 +5,65 @@
 #   u(t) = exp(-t) + t^3
 
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./time_derivative]
+  [time_derivative]
     type = ODETimeDerivative
     variable = u
-  [../]
-  [./source_part1]
+  []
+  [source_part1]
     type = ParsedODEKernel
     variable = u
     function = 'u'
-  [../]
-  [./source_part2]
+  []
+  [source_part2]
     type = PostprocessorSinkScalarKernel
     variable = u
     postprocessor = sink_pp
-  [../]
+  []
 []
 
 [Functions]
-  [./sink_fn]
+  [sink_fn]
     type = ParsedFunction
     value = '-t^3 - 3*t^2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sink_pp]
+  [sink_pp]
     type = FunctionValuePostprocessor
     function = sink_fn
     execute_on = 'LINEAR NONLINEAR'
-  [../]
-  [./l2_err]
+  []
+  [l2_err]
     type = ScalarL2Error
     variable = u
     function = ${fparse exp(-0.5) + 0.5^3}
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ExplicitSSPRungeKutta
     order = 1
-  [../]
+  []
 
   end_time = 0.5
   dt = 0.1
@@ -72,9 +72,9 @@
 [Outputs]
   file_base = 'first_order'
   exodus = true
-  [./csv]
+  [csv]
     type = CSV
     show = 'u'
     execute_on = 'FINAL'
-  [../]
+  []
 []

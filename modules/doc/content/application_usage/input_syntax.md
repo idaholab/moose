@@ -65,7 +65,7 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   of `unit` and converts it to the unit `to_unit` using the [MooseUnit](/utils/Units.md)
   system. For example the expression `${units 1 J/mol -> eV/at}` would evaluate to the value
   `1.0364269656262e-05`. The `to_unit` argument is optional resulting in a no-op that serves
-  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`). 
+  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`).
 
 Examples:
 

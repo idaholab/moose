@@ -1,5 +1,5 @@
 [Tests]
-  [./surface_tension_KKS]
+  [surface_tension_KKS]
     type = 'Exodiff'
     input = 'surface_tension_KKS.i'
     exodiff = 'surface_tension_KKS_out.e'
@@ -7,8 +7,8 @@
     issues = '#12705'
     abs_zero = 1e-9
     requirement = 'The ComputeSurfaceTensionKKS material shall produce a hydrostatic stress state inside a precipitate'
-  [../]
-  [./surface_tension_VDWgas]
+  []
+  [surface_tension_VDWgas]
     type = 'Exodiff'
     input = 'surface_tension_VDWgas.i'
     exodiff = 'surface_tension_VDWgas_out.e'
@@ -16,5 +16,5 @@
     abs_zero = 1e-7
     issues = '#12915'
     requirement = 'The ComputeExtraStressVDWGas material shall produce a stress that counterbalances surface tension'
-  [../]
+  []
 []

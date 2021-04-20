@@ -30,7 +30,7 @@
   [solution]
      requirement = "The system shall optionally support output of solution data using the VTK format:"
 
-     [./diff_serial_mesh]
+     [diff_serial_mesh]
        # Check that actual solution, requires serial due to VTK parallel output
        type = XMLDiff
        xmldiff = 'vtk_diff_out_005.vtk vtk_diff_out_005_0.vtu'
@@ -40,8 +40,8 @@
        mesh_mode = REPLICATED
 
        detail = 'in serial with a replicated mesh,'
-     [../]
-     [./diff_serial_mesh_parallel]
+     []
+     [diff_serial_mesh_parallel]
        # Check that actual solution, in parallel with serial mesh
        type = XMLDiff
        xmldiff = 'vtk_diff_serial_mesh_parallel_out_005.pvtu vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
@@ -52,8 +52,8 @@
        mesh_mode = REPLICATED
 
        detail = 'in parallel with a replicated mesh, and'
-     [../]
-     [./diff_parallel_mesh]
+     []
+     [diff_parallel_mesh]
        # Check that actual solution, in parallel with parallel mesh
        type = XMLDiff
        xmldiff = 'vtk_diff_parallel_mesh_out_005.pvtu vtk_diff_parallel_mesh_out_005_0.vtu vtk_diff_parallel_mesh_out_005_1.vtu'
@@ -66,6 +66,6 @@
        skip = "#6149"
 
        detail = 'in parallel with a distributed mesh.'
-     [../]
+     []
   []
 []

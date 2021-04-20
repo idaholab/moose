@@ -11,63 +11,63 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = t*t*(x*x+y*y)
-  [../]
+  []
 
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     value = 2*t*(x*x+y*y)-4*t*t
-  [../]
+  []
 
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0   0.85 2'
     y = '0.2 0.2  0.2'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [ICs]
-  [./u_var]
+  [u_var]
     type = FunctionIC
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = FunctionDirichletBC
     variable = u
     boundary = 'left right top bottom'
     function = exact_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,11 +75,11 @@
 
   start_time = 0
   num_steps = 10
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
     min_dt = 0.1
-  [../]
+  []
 []
 
 [Outputs]

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#4462'
-  [./rank_two_sampler]
+  [rank_two_sampler]
     type = 'CSVDiff'
     input = 'rank_two_sampler.i'
     csvdiff = 'rank_two_sampler_out_stress_xx_0010.csv'
@@ -9,8 +9,8 @@
     requirement = "MOOSE shall allow sampling of material properties derived
                    from rank two tensors along a line and output those
                    quantities via a vectorpostprocessor."
-  [../]
-  [./rank_two_scalar_sampler]
+  []
+  [rank_two_scalar_sampler]
     type = 'CSVDiff'
     input = 'rank_two_scalar_sampler.i'
     csvdiff = 'rank_two_scalar_sampler_out_vonmises_0010.csv'
@@ -18,5 +18,5 @@
     design = 'source/vectorpostprocessors/LineMaterialRankTwoScalarSampler.md'
     requirement = "MOOSE shall allow sampling of scalar material properties along a
                    line and output those quantities via a vectorpostprocessor."
-  [../]
+  []
 []

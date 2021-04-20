@@ -18,47 +18,47 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
-  [../]
+  []
 []
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 0.5
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.1111077
-  [../]
-  [./t_strength]
+  []
+  [t_strength]
     type = TensorMechanicsHardeningConstant
     value = 1
-  [../]
-  [./c_strength]
+  []
+  [c_strength]
     type = TensorMechanicsHardeningConstant
     value = -2
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = stress
     perform_finite_strain_rotations = false
-  [../]
-  [./stress]
+  []
+  [stress]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -68,7 +68,7 @@
     tip_smoother = 0
     smoothing_tol = 1
     yield_function_tol = 1E-5
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,67 +11,67 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     variable = c
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     boundary = right
     variable = c
     value = 1
-  [../]
-  [./Periodic]
-    [./all]
+  []
+  [Periodic]
+    [all]
       auto_direction = y
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./c]
+  [c]
     type = Diffusion
     variable = c
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationInserter
     hold_time = 1
     probability = 0.0005
     radius = 3.27
-  [../]
-  [./map]
+  []
+  [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
-  [./dtnuc]
+  []
+  [dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
     p2nucleus = 0.1
     dt_max = 0.5
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,13 +79,13 @@
   solve_type = 'NEWTON'
   num_steps = 20
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 8
     iteration_window = 2
     timestep_limiting_postprocessor = dtnuc
     dt = 1
-  [../]
+  []
 []
 
 [Outputs]

@@ -2,12 +2,12 @@
   issues = '#1303'
   design = 'ComboMarker.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'combo_marker_test.i'
     exodiff = 'combo_marker_test_out.e'
     scale_refine = 2
 
     requirement = "The system shall include the ability to combine multiple mesh refinement markers into a single value."
-  [../]
+  []
 []

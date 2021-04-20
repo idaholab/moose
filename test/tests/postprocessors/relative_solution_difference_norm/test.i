@@ -7,53 +7,53 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = '2 - t'
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./rsn]
+  [rsn]
     type = RelativeSolutionDifferenceNorm
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Executioner]

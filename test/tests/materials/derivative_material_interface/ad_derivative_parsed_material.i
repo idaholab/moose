@@ -8,36 +8,36 @@
 []
 
 [Variables]
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusion
     variable = eta
     diffusivity = F
   []
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = eta
   []
 []
 
 [Materials]
-  [./Fbar]
+  [Fbar]
     type = ADDerivativeParsedMaterial
     args  = 'eta'
     f_name = Fbar
     function ='1/3*(eta-0.5)^3'
   []
-  [./F]
+  [F]
     type = ADParsedMaterial
     args  = 'eta'
     material_property_names = 'F:=D[Fbar,eta]'

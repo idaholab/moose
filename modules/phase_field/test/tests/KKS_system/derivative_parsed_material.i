@@ -18,48 +18,48 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = c1
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = c1
     boundary = 'right'
     value = 1
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = c2
     boundary = 'top'
     value = 0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = c2
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 []
 
 [Variables]
   # concentration 1
-  [./c1]
+  [c1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # concentration 2
-  [./c2]
+  [c2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Materials]
-  [./fa]
+  [fa]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c1 c2'
@@ -67,19 +67,19 @@
     constant_expressions = '400  .000086173324'
     function = 'c1^2+100*T*kB*(c2-0.5)^3+c1^4*c2^5'
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
-  [./c1diff]
+  [c1diff]
     type = Diffusion
     variable = c1
-  [../]
+  []
 
-  [./c2diff]
+  [c2diff]
     type = Diffusion
     variable = c2
-  [../]
+  []
 []
 
 [Executioner]

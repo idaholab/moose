@@ -3,10 +3,10 @@
 []
 
 [Mesh]
-  [./simple_mesh]
+  [simple_mesh]
     type = FileMeshGenerator
     file = mesh.e
-  [../]
+  []
 []
 
 [Problem]
@@ -14,39 +14,39 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'outside_left'
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'outside_left'
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'outside_right'
     function = '-5e-3 * t'
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 'outside_right'
     function = 0
-  [../]
+  []
 []
 
 [Kernels]
@@ -76,10 +76,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

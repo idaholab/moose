@@ -6,52 +6,52 @@
 []
 
 [Functions]
-  [./ic_fn]
+  [ic_fn]
     type = ParsedFunction
     value = 'x * y'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = u
     function = ic_fn
-  [../]
+  []
 
-  [./a_ic]
+  [a_ic]
     type = ConstantIC
     variable = a
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./a]
-  [../]
+  [a]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./rhs]
+  []
+  [rhs]
     type = BodyForce
     variable = u
     function = 1
-  [../]
+  []
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = 'sub.i'
@@ -59,25 +59,25 @@
       0.25 0.25 0
       0.75 0.75 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./master_to_sub]
+  [master_to_sub]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
     variable = a
-  [../]
+  []
 
-  [./sub_to_master]
+  [sub_to_master]
     type = MultiAppUserObjectTransfer
     direction = from_multiapp
     multi_app = sub
     user_object = fn_uo
     variable = a
-  [../]
+  []
 []
 
 [Executioner]

@@ -18,10 +18,10 @@
 []
 
 [FVKernels]
-  [./time]
+  [time]
     type = FVTimeKernel
     variable = v
-  [../]
+  []
   [diff]
     type = FVDiffusion
     variable = v

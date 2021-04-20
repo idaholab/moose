@@ -30,7 +30,7 @@ For example, let's consider the following input file:
 
 ```
 [Mesh]
-  [./ringleb]
+  [ringleb]
     type = RinglebMeshGenerator
     kmin = 0.7
     num_k_pts = 9

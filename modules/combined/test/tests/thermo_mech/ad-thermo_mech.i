@@ -9,94 +9,94 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_automatic_differentiation = true
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = ADHeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
+  []
 
-  [./bottom_temp]
+  [bottom_temp]
     type = DirichletBC
     variable = temp
     preset = false
     boundary = 1
     value = 10.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ADComputeSmallStrain
     eigenstrain_names = eigenstrain
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 0.0
     thermal_expansion_coeff = 1e-5
     eigenstrain_name = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = ADHeatConductionMaterial
     specific_heat = 1.0
     thermal_conductivity = 1.0
-  [../]
+  []
 
-  [./density]
+  [density]
     type = ADDensity
     density = 1.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

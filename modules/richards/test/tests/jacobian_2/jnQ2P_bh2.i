@@ -16,52 +16,52 @@
 
 
 [UserObjects]
-  [./DensityWater]
+  [DensityWater]
     type = RichardsDensityConstBulk
     dens0 = 1
     bulk_mod = 0.5 # notice small quantity, so the PETSc constant state works
-  [../]
-  [./DensityGas]
+  []
+  [DensityGas]
     type = RichardsDensityConstBulk
     dens0 = 0.5
     bulk_mod = 0.3 # notice small quantity, so the PETSc constant state works
-  [../]
-  [./RelPermWater]
+  []
+  [RelPermWater]
     type = RichardsRelPermPower
     simm = 0.2
     n = 2
-  [../]
-  [./RelPermGas]
+  []
+  [RelPermGas]
     type = Q2PRelPermPowerGas
     simm = 0.1
     n = 3
-  [../]
-  [./borehole_total_outflow_mass]
+  []
+  [borehole_total_outflow_mass]
     type = RichardsSumQuantity
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = -1
       max = 1
-    [../]
-  [../]
-  [./sat]
+    []
+  []
+  [sat]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       block = 0
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 
@@ -80,7 +80,7 @@
 
 
 [DiracKernels]
-  [./bh_water]
+  [bh_water]
     type = Q2PBorehole
     bottom_pressure = 2
     point_file = jn30.bh
@@ -93,8 +93,8 @@
     other_var = pp
     var_is_porepressure = false
     fluid_viscosity = 0.5
-  [../]
-  [./bh_gas]
+  []
+  [bh_gas]
     type = Q2PBorehole
     bottom_pressure = 1.5
     point_file = jn30.bh
@@ -107,30 +107,30 @@
     other_var = sat
     var_is_porepressure = true
     fluid_viscosity = 0.25
-  [../]
+  []
 []
 
 
 
 [Materials]
-  [./rock]
+  [rock]
     type = Q2PMaterial
     block = 0
     mat_porosity = 0 # just so we get virtually no contributions from the time derivatives
     mat_permeability = '1.1E-20 0 0  0 2.2E-20 0  0 0 3.3E-20'
     gravity = '1 2 3'
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

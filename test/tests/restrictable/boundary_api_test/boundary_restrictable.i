@@ -5,45 +5,45 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = BndTestDirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat0]
+  [mat0]
     type = GenericConstantMaterial
     boundary = 1
     prop_names = 'a'
     prop_values = '1'
-  [../]
-  [./mat1]
+  []
+  [mat1]
     type = GenericConstantMaterial
     boundary = 2
     prop_names = 'a b'
     prop_values = '10 20'
-  [../]
+  []
 []
 
 [Executioner]

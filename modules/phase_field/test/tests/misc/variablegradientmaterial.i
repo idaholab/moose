@@ -7,8 +7,8 @@
 []
 
 [AuxVariables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 0
       y1 = 0
@@ -17,17 +17,17 @@
       outvalue = 0
       radius = 0.7
       int_width = 0.5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./var_grad]
+  [var_grad]
     type = VariableGradientMaterial
     prop = grad_c
     variable = c
     outputs = exodus
-  [../]
+  []
 []
 
 [Problem]

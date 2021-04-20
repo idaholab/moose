@@ -1,7 +1,7 @@
 [Tests]
   parallel_scheduling = True
 
-  [./nemesis_out_test]
+  [nemesis_out_test]
     type = 'CheckFiles'
     input = 'output_test_nemesis.i'
     check_files = 'out.e.1.0'
@@ -13,9 +13,9 @@
     issues = '#920'
     design = 'Nemesis.md'
     requirement = 'Nemesis output shall work'
-  [../]
+  []
 
-  [./gmv_out_test]
+  [gmv_out_test]
     type = 'CheckFiles'
     input = 'output_test_gmv.i'
     check_files = 'output_test_gmv_out_0000.gmv'
@@ -23,9 +23,9 @@
     issues = '#920'
     design = 'GMVOutput.md'
     requirement = 'GMV output shall work'
-  [../]
+  []
 
-  [./yaml_dump_test]
+  [yaml_dump_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = 'START YAML DATA.*END YAML DATA'
@@ -35,9 +35,9 @@
     issues = '#920'
     design = 'YAMLFormatter.md'
     requirement = 'We shall be able to dump YAML data'
-  [../]
+  []
 
-  [./no_double_executioner_output]
+  [no_double_executioner_output]
     type = 'RunApp'
     input = 'IGNORED'
     absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
@@ -47,18 +47,18 @@
     issues = '#2855'
     design = 'YAMLFormatter.md'
     requirement = 'Executioner output shall only be given once'
-  [../]
+  []
 
-  [./tecplot_out_test]
+  [tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'
     check_files = 'output_test_tecplot_out_0000.dat'
     design = 'Tecplot.md'
     requirement = 'Tecplot output shall work'
     issues = '#920'
-  [../]
+  []
 
-  [./tecplot_bin_test]
+  [tecplot_bin_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.plt'
@@ -66,9 +66,9 @@
     issues = '#3403'
     design = 'Tecplot.md'
     requirement = 'If tecplot api is available, tecplot output will be given in tecplot binary format'
-  [../]
+  []
 
-  [./tecplot_bin_test_override]
+  [tecplot_bin_test_override]
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.dat'
@@ -77,36 +77,36 @@
     design = 'Tecplot.md'
     issues = '#3403'
     requirement = 'If tecplot api is not available, tecplot output will be given in ASCII format'
-  [../]
+  []
 
-  [./gnuplot_ps_out_test]
+  [gnuplot_ps_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot_ps.i'
     check_files = 'output_test_gnuplot_ps_out.gp output_test_gnuplot_ps_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
     requirement = 'We shall be able to generate gnuplot postscript output'
-  [../]
+  []
 
-  [./gnuplot_png_out_test]
+  [gnuplot_png_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
     check_files = 'output_test_gnuplot_out.gp output_test_gnuplot_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
     requirement = 'We shall be able to generate gnuplot png output'
-  [../]
+  []
 
-  [./gnuplot_gif_out_test]
+  [gnuplot_gif_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot_gif.i'
     check_files = 'output_test_gnuplot_gif_out.gp output_test_gnuplot_gif_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
     requirement = 'We shall be able to generate gnuplot gif output'
-  [../]
+  []
 
-  [./pps_screen_out_warn_test]
+  [pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
     expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the 'console' output object."
@@ -115,9 +115,9 @@
     issues = '#1426'
     design = 'syntax/Outputs/index.md'
     requirement = 'If a postprocessor utilizes the "outputs" parameter, but postprocessor output is disable for the console object, we shall warn the user'
-  [../]
+  []
 
-  [./show_input_test]
+  [show_input_test]
     type = 'RunApp'
     input = 'output_test_gmv.i'
     expect_out = 'type\s*=\s*GeneratedMesh'
@@ -126,27 +126,27 @@
     issues = '#1404 #1131'
     design = 'MooseApp.md'
     requirement = '--show-input shall print parameters'
-  [../]
+  []
 
-  [./sln_out_test]
+  [sln_out_test]
     type = 'CheckFiles'
     input = 'output_test_sln.i'
     check_files = 'output_test_sln_out.slh'
     design = 'SolutionHistory.md'
     requirement = 'Solution history output shall work'
     issues = '#920'
-  [../]
+  []
 
-  [./xdr_output]
+  [xdr_output]
     type = 'CheckFiles'
     input = 'output_test_xdr.i'
     check_files = 'output_test_xdr_out_0001.xdr output_test_xdr_out_0001_mesh.xdr'
     design = 'XDA.md'
     issues = '#2243'
     requirement = 'MOOSE shall support XDR output'
-  [../]
+  []
 
-  [./json_full]
+  [json_full]
     type = 'PythonUnitTest'
     input = 'test_json.py'
     test_case = "TestFull"
@@ -154,9 +154,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file syntax in JSON format'
-  [../]
+  []
 
-  [./json_no_test_objects]
+  [json_no_test_objects]
     type = 'PythonUnitTest'
     input = 'test_json.py'
     test_case = "TestNoTestObjects"
@@ -164,9 +164,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file syntax in JSON format and exclude test object syntax.'
-  [../]
+  []
 
-  [./json_search]
+  [json_search]
     type = 'PythonUnitTest'
     input = 'test_json.py'
     test_case = "TestSearch"
@@ -174,9 +174,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump a subset of JSON formatted syntax.'
-  [../]
+  []
 
-  [./json_line_info]
+  [json_line_info]
     type = 'PythonUnitTest'
     input = 'test_json.py'
     test_case = "TestLineInfo"
@@ -184,9 +184,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall dump line information along with JSON formatted syntax.'
-  [../]
+  []
 
-  [./json_no_template]
+  [json_no_template]
     type = 'PythonUnitTest'
     input = 'test_json.py'
     test_case = "TestNoTemplate"
@@ -194,9 +194,9 @@
     issues = '#12960'
     design = 'JsonInputFileFormatter.md'
     requirement = 'The system shall not include RESIDUAL and JACOBIAN template arguments in the JSON syntax format.'
-  [../]
+  []
 
-  [./hit]
+  [hit]
     type = 'PythonUnitTest'
     input = 'test_hit_output.py'
     test_case = 'TestInputFileFormat'
@@ -204,9 +204,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file (HIT) syntax.'
-  [../]
+  []
 
-  [./hit_search]
+  [hit_search]
     type = 'PythonUnitTest'
     input = 'test_hit_output.py'
     test_case = 'TestInputFileFormatSearch'
@@ -214,9 +214,9 @@
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'
-  [../]
+  []
 
-  [./definition_input_choices_test]
+  [definition_input_choices_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = 'InputChoices=\[\s*?"all"\s*?"none"\s*?PATH:"../../../../../Outputs/["*"]/decl"\s*?\]'
@@ -228,9 +228,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check InputChoices'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'HEAVY'
-  [../]
+  []
 
-  [./definition_childatleastone_test]
+  [definition_childatleastone_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside/value"\s*?\]'
@@ -242,9 +242,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ChildAtLeastOne'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_valenum_test]
+  [definition_valenum_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*} % end parameter execute_on'
@@ -256,9 +256,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ValEnums'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_active_parameter_test]
+  [definition_active_parameter_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?} % end parameter active'
@@ -270,9 +270,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check active parameter'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_normal_sub_test]
+  [definition_normal_sub_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'Indicators\'{.*?InputTmpl=MooseBlock.*?InputName="Indicators".*?InputType=normal_sub.*?InputDefault="Indicators"'
@@ -284,9 +284,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check normal_sub'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_type_sub_test]
+  [definition_type_sub_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'CircleMarker_type\'{.*?InputType=type_sub.*?InputDefault="insert_name_here".*?} % end block CircleMarker_type'
@@ -298,9 +298,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check type_sub'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_default_type_test]
+  [definition_default_type_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?} % end parameter type.*?} % end block BoxMarker_type'
@@ -312,9 +312,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default type'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_minvalinc_inputdefault_test]
+  [definition_minvalinc_inputdefault_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
@@ -326,9 +326,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check MinValInc'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_block_type_maxoccurs_nolimit_test]
+  [definition_block_type_maxoccurs_nolimit_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?ValEnums=\[ "AuxVariables" \]'
@@ -340,9 +340,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_functionname_type_maxoccurs_nolimit_test]
+  [definition_functionname_type_maxoccurs_nolimit_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'x_forcing_func\'{.*?\'value\'{.*?MaxOccurs=NoLimit.*?}.*?} % end parameter x_forcing_func'
@@ -354,9 +354,9 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 
-  [./definition_array_type_minoccurs_zero_test]
+  [definition_array_type_minoccurs_zero_test]
     type = 'RunApp'
     input = 'IGNORED'
     expect_out = '\'active\'{.*?\'value\'{.*?MinOccurs=0.*?}.*?} % end parameter active'
@@ -368,5 +368,5 @@
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
+  []
 []

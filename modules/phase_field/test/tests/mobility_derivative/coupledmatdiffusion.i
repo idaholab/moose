@@ -9,17 +9,17 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
-  [./d]
-    [./InitialCondition]
+    []
+  []
+  [d]
+    [InitialCondition]
       type = SmoothCircleIC
       x1 = 15
       y1 = 15
@@ -27,82 +27,82 @@
       int_width = 3
       invalue = 2
       outvalue = 0
-    [../]
-  [../]
-  [./u]
-  [../]
-  [./w]
-  [../]
+    []
+  []
+  [u]
+  []
+  [w]
+  []
 []
 
 [Kernels]
-  [./ctime]
+  [ctime]
     type = TimeDerivative
     variable = c
-  [../]
-  [./umat]
+  []
+  [umat]
     type = MatReaction
     variable = c
     v = u
     mob_name = 1
-  [../]
-  [./urxn]
+  []
+  [urxn]
     type = Reaction
     variable = u
-  [../]
-  [./cres]
+  []
+  [cres]
     type = MatDiffusion
     variable = u
     diffusivity = Dc
     args = d
     v = c
-  [../]
+  []
 
-  [./dtime]
+  [dtime]
     type = TimeDerivative
     variable = d
-  [../]
-  [./wmat]
+  []
+  [wmat]
     type = MatReaction
     variable = d
     v = w
     mob_name = 1
-  [../]
-  [./wrxn]
+  []
+  [wrxn]
     type = Reaction
     variable = w
-  [../]
-  [./dres]
+  []
+  [dres]
     type = MatDiffusion
     variable = w
     diffusivity = Dd
     args = c
     v = d
-  [../]
+  []
 []
 
 [Materials]
-  [./Dc]
+  [Dc]
     type = DerivativeParsedMaterial
     f_name = Dc
     function = '0.01+c^2+d'
     args = 'c d'
     derivative_order = 1
-  [../]
-  [./Dd]
+  []
+  [Dd]
     type = DerivativeParsedMaterial
     f_name = Dd
     function = 'd^2+c+1.5'
     args = 'c d'
     derivative_order = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

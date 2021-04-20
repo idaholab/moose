@@ -10,63 +10,63 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./tt]
+  [tt]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 100
-  [../]
+  []
 
-  [./ten]
+  [ten]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 1
-  [../]
+  []
 
-  [./2k]
+  [2k]
     order = CONSTANT
     family = MONOMIAL
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./all]
+  [all]
     variable = tt
     type = MultipleUpdateElemAux
     vars = 'ten 2k'
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

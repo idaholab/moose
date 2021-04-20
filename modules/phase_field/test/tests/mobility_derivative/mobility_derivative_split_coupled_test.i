@@ -9,24 +9,24 @@
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./w]
-  [../]
-  [./d]
-  [../]
+  [c]
+  []
+  [w]
+  []
+  [d]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = CrossIC
     x1 = 0.0
     x2 = 30.0
     y1 = 0.0
     y2 = 30.0
     variable = c
-  [../]
-  [./d_IC]
+  []
+  [d_IC]
     type = BoundingBoxIC
     x1 = 0.0
     x2 = 15.0
@@ -35,78 +35,78 @@
     inside = 1.0
     outside = 0.0
     variable = d
-  [../]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa_c
     w = w
     f_name = F
-  [../]
-  [./wres]
+  []
+  [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
     args = 'c d'
-  [../]
-  [./time]
+  []
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./d_dot]
+  []
+  [d_dot]
     type = TimeDerivative
     variable = d
-  [../]
-  [./d_diff]
+  []
+  [d_diff]
     type = MatDiffusion
     variable = d
     diffusivity = diffusivity
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
-  [../]
-  [./mob]
+  []
+  [mob]
     type = DerivativeParsedMaterial
     f_name = M
     args = 'c d'
     function = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
     outputs = exodus
     derivative_order = 1
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = MathEBFreeEnergy
     f_name = F
     c = c
-  [../]
-  [./d_diff]
+  []
+  [d_diff]
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
    type = SMP
    full = true
-  [../]
+  []
 []
 
 [Executioner]

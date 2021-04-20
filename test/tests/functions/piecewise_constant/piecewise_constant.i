@@ -16,100 +16,100 @@
 
 [Variables]
 
-  [./aVar]
+  [aVar]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
-  [./bVar]
+  []
+  [bVar]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
-  [./cVar]
+  []
+  [cVar]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
-  [./dVar]
+  []
+  [dVar]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Functions]
-  [./a]
+  [a]
     type = PiecewiseConstant
     xy_data = '0.5 0.1
                1.0 0.2
                1.5 0.1'
     direction = left
-  [../]
-  [./b]
+  []
+  [b]
     type = PiecewiseConstant
     x = '0.5 1.0 1.5'
     y = '0.1 0.2 0.1'
     direction = right
-  [../]
-  [./c]
+  []
+  [c]
     type = PiecewiseConstant
     data_file = pc.csv
     direction = left
     format = columns
-  [../]
-  [./d]
+  []
+  [d]
     type = PiecewiseConstant
     data_file = pc.csv
     direction = right
     format = columns
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffa]
+  [diffa]
     type = Diffusion
     variable = aVar
-  [../]
-  [./diffb]
+  []
+  [diffb]
     type = Diffusion
     variable = bVar
-  [../]
-  [./diffc]
+  []
+  [diffc]
     type = Diffusion
     variable = cVar
-  [../]
-  [./diffd]
+  []
+  [diffd]
     type = Diffusion
     variable = dVar
-  [../]
+  []
 []
 
 [BCs]
-  [./a]
+  [a]
     type = FunctionDirichletBC
     variable = aVar
     boundary = '1'
     function = a
-  [../]
-  [./b]
+  []
+  [b]
     type = FunctionDirichletBC
     variable = bVar
     boundary = '1'
     function = b
-  [../]
-  [./c]
+  []
+  [c]
     type = FunctionDirichletBC
     variable = cVar
     boundary = '1'
     function = c
-  [../]
-  [./d]
+  []
+  [d]
     type = FunctionDirichletBC
     variable = dVar
     boundary = '1'
     function = d
-  [../]
+  []
 []
 
 [Executioner]

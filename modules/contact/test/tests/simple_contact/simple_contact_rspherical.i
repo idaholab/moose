@@ -25,47 +25,47 @@
 []
 
 [Functions]
-  [./ur]
+  [ur]
     type = ParsedFunction
     value = '-3e-3*x'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz'
-  [../]
+  []
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '1 4'
     function = ur
-  [../]
+  []
 []
 
 [Contact]
-  [./fred]
+  [fred]
     primary = 2
     secondary = 3
-  [../]
+  []
 []
 
 [Materials]
-  [./stiffStuff1]
+  [stiffStuff1]
     type = ComputeIsotropicElasticityTensor
     block = '1 2 3'
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./stiffStuff1_stress]
+  []
+  [stiffStuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2 3'
-  [../]
+  []
 []
 
 

@@ -19,62 +19,62 @@
     type = FileMeshGenerator
     file = cyl2D.e
   []
-  [./rotate]
+  [rotate]
     type = TransformGenerator
     transform = ROTATE
     vector_value = '0 90 0'
     input = file
-  [../]
+  []
 []
 
 [Functions]
-  [./temp]
+  [temp]
     type = PiecewiseLinear
     x = '0   1'
     y = '100 200'
-  [../]
+  []
 []
 
 [Variables]
-  [./temp]
+  [temp]
    initial_condition = 100
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./gap_conductance]
+  [gap_conductance]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./gap_cond]
+  [gap_cond]
     type = MaterialRealAux
     property = gap_conductance
     variable = gap_conductance
     boundary = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./heat1]
+  [heat1]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
     thermal_conductivity = 1000000.0
-  [../]
+  []
 []
 
 [ThermalContact]
-  [./thermal_contact]
+  [thermal_contact]
     type = GapHeatTransfer
     variable = temp
     primary = 3
@@ -86,22 +86,22 @@
     gap_geometry_type = CYLINDER
     cylinder_axis_point_1 = '0 0 0'
     cylinder_axis_point_2 = '0 1 0'
-  [../]
+  []
 []
 
 [BCs]
-  [./mid]
+  [mid]
     type = FunctionDirichletBC
     boundary = 1
     variable = temp
     function = temp
-  [../]
-  [./temp_far_right]
+  []
+  [temp_far_right]
     type = DirichletBC
     boundary = 4
     variable = temp
     value = 100
-  [../]
+  []
 []
 
 [Executioner]
@@ -118,10 +118,10 @@
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-7
 
-  [./Quadrature]
+  [Quadrature]
      order = fifth
      side_order = seventh
-  [../]
+  []
 []
 
 [Outputs]
@@ -129,29 +129,29 @@
 []
 
 [Postprocessors]
-  [./temp_left]
+  [temp_left]
     type = SideAverageValue
     boundary = 2
     variable = temp
-  [../]
+  []
 
-  [./temp_right]
+  [temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
-  [../]
+  []
 
-  [./flux_left]
+  [flux_left]
     type = SideFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-  [../]
+  []
 
-  [./flux_right]
+  [flux_right]
     type = SideFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-  [../]
+  []
 []

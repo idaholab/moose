@@ -23,10 +23,10 @@ To make use of user-specified `computeQpOffDiagJacobian` methods, one should spe
 
 ```
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 ```
 
@@ -36,10 +36,10 @@ To build a preconditioning matrix through finite differencing of the residuals, 
 
 ```
 [Preconditioning]
-  [./fdp]
+  [fdp]
     type = FDP
     full = true
-  [../]
+  []
 []
 ```
 

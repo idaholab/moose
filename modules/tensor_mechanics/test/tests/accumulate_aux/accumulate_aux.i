@@ -4,7 +4,7 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 1
@@ -13,59 +13,59 @@
     xmax = 0.5
     ymin = -0.5
     ymax = 0.5
-  [../]
+  []
 []
 
 [Variables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxVariables]
-  [./node_accum]
-  [../]
-  [./elem_accum]
+  [node_accum]
+  []
+  [elem_accum]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./na]
+  [na]
     type = AccumulateAux
     variable = node_accum
     accumulate_from_variable = v
     execute_on = timestep_end
-  [../]
-  [./ea]
+  []
+  [ea]
     type = AccumulateAux
     variable = elem_accum
     accumulate_from_variable = v
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./b1x]
+  [b1x]
     type = DirichletBC
     variable = v
     boundary = 0
     value = 0
-  [../]
+  []
 
-  [./b2x]
+  [b2x]
     type = DirichletBC
     variable = v
     boundary = 2
     value = 2
-  [../]
+  []
 []
 
 [Executioner]

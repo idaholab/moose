@@ -3,33 +3,33 @@
   nx = 4
   ny = 4
   nz = 4
-[../]
+[]
 
 [Variables]
-  [./c]
-  [../]
+  [c]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
-    [../]
-  [../]
+  [Periodic]
+    [all]
+    []
+  []
 []
 
 [UserObjects]
-  [./test]
+  [test]
     type = PeriodicNodeMapTester
     v = c
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Executioner]

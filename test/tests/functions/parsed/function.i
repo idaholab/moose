@@ -17,7 +17,7 @@
     variable = f
     function = fn
     execute_on = initial
-  [../]
+  []
 []
 
 [Functions]

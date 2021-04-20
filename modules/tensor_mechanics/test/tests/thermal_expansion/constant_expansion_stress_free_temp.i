@@ -25,148 +25,148 @@
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     initial_condition = 300.0
-  [../]
-  [./eigenstrain_yy]
+  []
+  [eigenstrain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./eigenstrain_xx]
+  []
+  [eigenstrain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./eigenstrain_zz]
+  []
+  [eigenstrain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_yy]
+  []
+  [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_xx]
+  []
+  [total_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_zz]
+  []
+  [total_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./temperature_load]
+  [temperature_load]
     type = ParsedFunction
     value = t*(5000.0)+300.0
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = SMALL
         incremental = true
         add_variables = true
         eigenstrain_names = eigenstrain
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [AuxKernels]
-  [./tempfuncaux]
+  [tempfuncaux]
     type = FunctionAux
     variable = temp
     function = temperature_load
-  [../]
-  [./eigenstrain_yy]
+  []
+  [eigenstrain_yy]
     type = RankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_yy
     index_i = 1
     index_j = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./eigenstrain_xx]
+  []
+  [eigenstrain_xx]
     type = RankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_xx
     index_i = 0
     index_j = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./eigenstrain_zz]
+  []
+  [eigenstrain_zz]
     type = RankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_zz
     index_i = 2
     index_j = 2
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_yy]
+  []
+  [total_strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yy
     index_i = 1
     index_j = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_xx]
+  []
+  [total_strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_xx
     index_i = 0
     index_j = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_zz]
+  []
+  [total_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_zz
     index_i = 2
     index_j = 2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./small_stress]
+  []
+  [small_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./thermal_expansion_strain]
+  []
+  [thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 200
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain
-  [../]
+  []
 []
 
 [Executioner]
@@ -191,39 +191,39 @@
 []
 
 [Postprocessors]
-  [./eigenstrain_xx]
+  [eigenstrain_xx]
     type = ElementAverageValue
     variable = eigenstrain_xx
     execute_on = 'initial timestep_end'
-  [../]
-  [./eigenstrain_yy]
+  []
+  [eigenstrain_yy]
     type = ElementAverageValue
     variable = eigenstrain_yy
     execute_on = 'initial timestep_end'
-  [../]
-  [./eigenstrain_zz]
+  []
+  [eigenstrain_zz]
     type = ElementAverageValue
     variable = eigenstrain_zz
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_xx]
+  []
+  [total_strain_xx]
     type = ElementAverageValue
     variable = total_strain_xx
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_yy]
+  []
+  [total_strain_yy]
     type = ElementAverageValue
     variable = total_strain_yy
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_strain_zz]
+  []
+  [total_strain_zz]
     type = ElementAverageValue
     variable = total_strain_zz
     execute_on = 'initial timestep_end'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = AverageNodalVariableValue
     variable = temp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  [./theis_full]
+  [theis_full]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0004.csv'
@@ -7,8 +7,8 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./theis_part1]
+  []
+  [theis_part1]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0002.csv'
@@ -18,8 +18,8 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./theis_recover]
+  []
+  [theis_recover]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = 'theis_out_line_0004.csv'
@@ -29,8 +29,8 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_full]
+  []
+  [pffltvd_full]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0004.csv'
@@ -38,8 +38,8 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_part1]
+  []
+  [pffltvd_part1]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0002.csv'
@@ -49,8 +49,8 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
-  [./pffltvd_recover]
+  []
+  [pffltvd_recover]
     type = 'CSVDiff'
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0004.csv'
@@ -60,5 +60,5 @@
     requirement = "PorousFlow shall be able to recover from a checkpoint save"
     issues = '#12927'
     design = 'porous_flow/restart.md'
-  [../]
+  []
 []

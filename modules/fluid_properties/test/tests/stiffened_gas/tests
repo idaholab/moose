@@ -1,8 +1,8 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     threading = '!pthreads'
-  [../]
+  []
 []

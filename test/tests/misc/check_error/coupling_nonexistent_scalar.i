@@ -4,17 +4,17 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./slm]
+  [slm]
     type = ScalarLagrangeMultiplier
     variable = u
     # 'b' does not exist -> error
     lambda = b
-  [../]
+  []
 []
 
 [Executioner]

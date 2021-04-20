@@ -9,19 +9,19 @@
 # A. Toptan, et al. (Mar.2020). Tech. rep. CASL-U-2020-1939-000, SAND2020-3887 R. DOI:10.2172/1614683.
 
 [Mesh]
-  [./geom]
+  [geom]
     type = GeneratedMeshGenerator
     dim = 1
     elem_type = EDGE2
     xmin = 0.2
     nx = 4
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
-  [../]
+  []
 []
 
 [Problem]
@@ -29,47 +29,47 @@
 []
 
 [Functions]
-  [./exact]
+  [exact]
     type = ParsedFunction
     vars = 'q k0 ri ro beta u0'
     vals = '1200 1 0.2 1.0 1e-3 0'
     value = 'u0+(1/beta)*( ( 1 + 0.5*beta*((ro^2-x^2)-(ro^2-ri^2) * log(ro/x)/log(ro/ri))*q/k0 )^0.5  - 1)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = u
-  [../]
-  [./heatsource]
+  []
+  [heatsource]
     type = HeatSource
     function = 1200
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./uo]
+  [uo]
     type = DirichletBC
     boundary = 'left right'
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./property]
+  [property]
     type = GenericConstantMaterial
     prop_names = 'density specific_heat'
     prop_values = '1.0 1.0'
-  [../]
-  [./thermal_conductivity]
+  []
+  [thermal_conductivity]
     type = ParsedMaterial
     f_name = 'thermal_conductivity'
     args = u
     function = '1 * (1 + 1e-3*u)'
-  [../]
+  []
 []
 
 [Executioner]
@@ -77,12 +77,12 @@
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = exact
     variable = u
-  [../]
-  [./h]
+  []
+  [h]
     type = AverageElementSize
   []
 []

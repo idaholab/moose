@@ -9,70 +9,70 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./conv]
+  [conv]
     type = ConservativeAdvection
     variable = u
     velocity = '0 1 0'
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./src]
+  []
+  [src]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
-  [./diffv]
+  []
+  [diffv]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 2
-  [../]
-  [./right]
+  []
+  [right]
     type = ChannelGradientBC
     variable = u
     boundary = right
     channel_gradient_pps = channel_gradient
     axis = y
     h_name = h
-  [../]
-  [./top]
+  []
+  [top]
     type = OutflowBC
     variable = u
     boundary = top
     velocity = '0 1 0'
-  [../]
-  [./leftv]
+  []
+  [leftv]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./rightv]
+  []
+  [rightv]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'h'
 
@@ -81,7 +81,7 @@
     #half_channel_length = 0.5
     #h=Nu*k/half_channel_length
     prop_values = '8'
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,7 +94,7 @@
 []
 
 [VectorPostprocessors]
-  [./lv1]
+  [lv1]
     num_points = 30
     start_point = '0 0 0'
     end_point = '0 1 0'
@@ -102,8 +102,8 @@
     variable = u
     type = LineValueSampler
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
-  [./lv2]
+  []
+  [lv2]
     num_points = 30
     start_point = '1 0 0'
     end_point =   '1 1 0'
@@ -111,8 +111,8 @@
     variable = v
     type = LineValueSampler
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
-  [./channel_gradient]
+  []
+  [channel_gradient]
     lv1 = lv1
     lv2 = lv2
     var1 = u
@@ -120,12 +120,12 @@
     axis = y
     type = ChannelGradientVectorPostprocessor
     execute_on = 'timestep_begin nonlinear timestep_end linear'
-  [../]
+  []
 []
 
 [Functions]
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = '1'
-  [../]
+  []
 []
