@@ -1,0 +1,53 @@
+[Tests]
+  # Mesh generation
+  [mesh]
+    type = RunApp
+    cli_args = 'Mesh/parallel_type=replicated --mesh-only mesh.e'
+    input = mesh.i
+    recover = false
+  []
+  # Energy conservation
+  [phy:conservation]
+    type = CSVDiff
+    input = 'phy.conservation.i'
+    csvdiff = 'phy.conservation.csv'
+    abs_zero = 1e-9
+    prereq = mesh
+  []
+  [phy:conservation_ss]
+    type = CSVDiff
+    input = 'phy.conservation_ss.i'
+    csvdiff = 'phy.conservation_ss.csv'
+    abs_zero = 1e-6
+    prereq = mesh
+  []
+  # Error checking
+  [err:not_a_pipe]
+    type = 'RunException'
+    input = 'phy.conservation.i'
+    cli_args = "Components/ht/flow_channel=in"
+    expect_err = "ht: Coupled component 'in' must be a single phase flow channel."
+    prereq = mesh
+  []
+  [err:fch_orientation]
+    type = 'RunException'
+    input = 'phy.conservation.i'
+    cli_args = "Components/fch/orientation='1 0 1'"
+    expect_err = "ht: The flow channel component must be aligned with the x-, y-, or z- axis."
+    prereq = mesh
+  []
+  [err:not_3d_hs]
+    type = 'RunException'
+    input = 'err.not_a_3d_hs.i'
+    expect_err = "ht: The component 'blk' is not a HeatStructureFromFile3D component."
+  []
+  # Jacobians
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'jac.1phase.i'
+    ratio_tol = 1.3e-2
+    difference_tol = 35000
+    cli_args = "Debug/check_jacobian=true"
+    prereq = mesh
+  []
+[]

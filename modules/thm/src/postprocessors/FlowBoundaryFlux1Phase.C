@@ -1,5 +1,6 @@
 #include "FlowBoundaryFlux1Phase.h"
 #include "BoundaryFlux3EqnGhostBase.h"
+#include "THMIndices3Eqn.h"
 
 registerMooseObject("THMApp", FlowBoundaryFlux1Phase);
 
@@ -11,7 +12,7 @@ FlowBoundaryFlux1Phase::validParams()
   params.addRequiredParam<MooseEnum>(
       "equation", equation, "Equation for which to query flux vector");
   params.addCoupledVar("variables", "Single-phase flow variables");
-  params.set<std::vector<VariableName>>("variables") = {"rhoA", "rhouA", "rhoEA"};
+  params.set<std::vector<VariableName>>("variables") = {"rhoA", "rhouA", "rhoEA", "A"};
   params.addClassDescription(
       "Retrieves an entry of a flux vector for a connection attached to a 1-phase junction");
 
@@ -20,7 +21,7 @@ FlowBoundaryFlux1Phase::validParams()
 
 FlowBoundaryFlux1Phase::FlowBoundaryFlux1Phase(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    _n_components(3),
+    _n_components(THM3Eqn::N_CONS_VAR),
     _boundary_name(getParam<std::vector<BoundaryName>>("boundary")[0]),
     _boundary_uo_name(_boundary_name + ":boundary_uo"),
     _boundary_uo(getUserObjectByName<BoundaryFluxBase>(_boundary_uo_name)),
