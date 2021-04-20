@@ -23,8 +23,6 @@ public:
 
   WaveHeightAuxKernel(const InputParameters & parameters);
 
-  virtual ~WaveHeightAuxKernel() {}
-
 protected:
   virtual Real computeValue();
 
@@ -32,8 +30,8 @@ protected:
   const VariableValue & _pressure;
 
   /// Density of the fluid domain
-  Real _density;
+  const Real _density;
 
   /// Acceleration due to gravity
-  Real _gravity;
+  const Real _gravity;
 };

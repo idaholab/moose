@@ -12,9 +12,6 @@
 #include "TimeKernel.h"
 #include "Material.h"
 
-// Forward Declarations
-class TimeIntegrator;
-
 class AcousticInertia : public TimeKernel
 {
 public:
@@ -29,12 +26,9 @@ protected:
 
 private:
   const MaterialProperty<Real> & _inv_co_sq;
-  const VariableValue * _u_dot_factor;
-  const VariableValue * _u_dotdot_factor;
-  const VariableValue * _u_dot_old;
-  const VariableValue * _du_dot_du;
-  const VariableValue * _du_dotdot_du;
-
-  /// The TimeIntegrator
-  const TimeIntegrator & _time_integrator;
+  const VariableValue & _u_dot_old;
+  const VariableValue & _du_dot_du;
+  const VariableValue & _du_dotdot_du;
+  const VariableValue & _u_dot_factor;
+  const VariableValue & _u_dotdot_factor;
 };
