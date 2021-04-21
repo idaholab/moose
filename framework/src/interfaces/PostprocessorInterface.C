@@ -86,23 +86,6 @@ PostprocessorInterface::isDefaultPostprocessorValueByName(const PostprocessorNam
 }
 
 PostprocessorValue
-PostprocessorInterface::getDefaultPostprocessorValue(const std::string & param_name,
-                                                     const unsigned int index /* = 0 */) const
-{
-  const auto & name = getPostprocessorNameInternal(param_name, index);
-
-  if (!isDefaultPostprocessorValueByName(name))
-    _ppi_moose_object.mooseError(
-        "When getting the default Postprocessor value for parameter \"",
-        param_name,
-        "\" at index ",
-        index,
-        ",\nthe parameter does not represent a default Postprocessor value.");
-
-  return getDefaultPostprocessorValueByName(name);
-}
-
-PostprocessorValue
 PostprocessorInterface::getDefaultPostprocessorValueByName(const PostprocessorName & name) const
 {
   mooseAssert(isDefaultPostprocessorValueByName(name), "Not a default value");
