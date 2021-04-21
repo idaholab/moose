@@ -19,6 +19,7 @@
     input = 'phy.conservation_ss.i'
     csvdiff = 'phy.conservation_ss.csv'
     abs_zero = 1e-6
+    max_time = 6000
     prereq = mesh
   []
   # Error checking
