@@ -21,7 +21,7 @@ AdaptiveMonteCarloDecision::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Generic reporter which decides whether or not to accept a proposed "
-                             "sample in Adaptive Monte Carlo algorithms.");
+                             "sample in Adaptive Monte Carlo type of algorithms.");
   params += addReporterTypeParams<Real>("output");
   params += addReporterTypeParams<Real>("inputs");
   params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");

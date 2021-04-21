@@ -1,34 +1,32 @@
 [StochasticTools]
-  # auto_create_executioner = false
 []
 
 [Distributions]
   [mu1]
     type = Normal
-    mean = 0.3
-    standard_deviation = 0.045
+    mean = 0.0
+    standard_deviation = 0.5
   []
   [mu2]
     type = Normal
-    mean = 9
-    standard_deviation = 1.35
+    mean = 1
+    standard_deviation = 0.5
   []
 []
 
 [Samplers]
   [sample]
     type = AIS
-    num_rows = 1
     distributions = 'mu1 mu2'
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'PRE_MULTIAPP_SETUP'
     proposal_std = '0.5 0.5'
-    output_limit = 0.19
-    num_samples_train = 250
+    output_limit = 0.45
+    num_samples_train = 5
     std_factor = 0.8
     use_absolute_value = true
     seed = 1012
-    seeds = '0.302784298 13.36093888'
-    inputs_reporter = 'adaptive_MC/mu1 adaptive_MC/mu2'
+    initial_values = '0.0 1.0'
+    inputs_reporter = 'adaptive_MC/left adaptive_MC/right'
     output_reporter = 'adaptive_MC/output_reporter1'
   []
 []
@@ -36,9 +34,9 @@
 [MultiApps]
   [sub]
     type = SamplerFullSolveMultiApp
-    input_files = sub1.i
+    input_files = ../../multiapps/sampler_full_solve_multiapp/sub.i
     sampler = sample
-    mode = batch-reset
+    mode = normal
   []
 []
 
@@ -47,7 +45,7 @@
     type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
-    parameters = 'Kernels/nonlin_function/mu1 Kernels/nonlin_function/mu2'
+    parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
     check_multiapp_execute_on = false
   []
@@ -66,7 +64,7 @@
     type = MultiAppCommandLineControl
     multi_app = sub
     sampler = sample
-    param_names = 'Kernels/nonlin_function/mu1 Kernels/nonlin_function/mu2'
+    param_names = 'BCs/left/value BCs/right/value'
   []
 []
 
@@ -75,7 +73,7 @@
     type = AdaptiveMonteCarloDecision
     output_names = output_reporter1
     output_values = '0.0'
-    inputs_names = 'mu1 mu2'
+    inputs_names = 'left right'
     inputs_values = '0.0 0.0'
     sampler = sample
   []
@@ -83,10 +81,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1000
+  num_steps = 10
 []
 
 [Outputs]
+  file_base = ais_sp_out
   csv = true
   exodus = false
 []

@@ -37,6 +37,13 @@
   []
 []
 
+[Postprocessors]
+  [average]
+    type = ElementAverageValue
+    variable = u
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 5
@@ -44,6 +51,12 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Controls]
+  [stochastic]
+    type = SamplerReceiver
+  []
 []
 
 [Outputs]
