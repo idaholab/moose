@@ -95,17 +95,6 @@ public:
                                    const unsigned int index = 0) const;
 
   /**
-   * Get the default value associated with a Postprocessor parameter.
-   * You should check isDefaultPostprocessorValue to verify that the parameter
-   * is a default value before calling this method.
-   * @param param_name The name of the Postprocessor parameter
-   * @param index The index of the postprocessor
-   * @return The default value
-   */
-  PostprocessorValue getDefaultPostprocessorValue(const std::string & param_name,
-                                                  const unsigned int index = 0) const;
-
-  /**
    * Determine if the Postprocessor data exists
    * @param param_name The name of the Postprocessor parameter
    * @param index The index of the Postprocessor

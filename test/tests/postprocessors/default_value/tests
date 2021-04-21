@@ -22,16 +22,4 @@
       detail = 'or when that value is supplied in the input file.'
     []
   []
-
-  [default_error]
-    type = 'RunException'
-    input = 'default_value.i'
-    cli_args = 'Kernels/diff/test_default_error=true
-                Kernels/diff/pps_name=constant
-                Postprocessors/constant/type=FunctionValuePostprocessor
-                Postprocessors/constant/function=0'
-    expect_err = 'When getting the default Postprocessor value for parameter "pps_name" at index 0,.*the parameter does not represent a default Postprocessor value.'
-
-    requirement = 'The system shall report an error when a request for a non-existant default Postprocessor value is made.'
-  []
 []
