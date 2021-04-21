@@ -212,6 +212,16 @@ FEProblemBase::validParams()
                                         "by objects which compute residuals and Jacobians "
                                         "(Kernels, BCs, etc.) by setting tags on them.");
 
+  params.addParam<std::vector<TagName>>(
+      "extra_tag_solutions",
+      "Extra solution vectors to add to the system that can be used by "
+      "objects for coupling variable values stored in them.");
+
+  params.addParam<bool>("previous_nl_solution_required",
+                        false,
+                        "True to indicate that this calculation requires a solution vector for "
+                        "storing the prvious nonlinear iteration.");
+
   params.addPrivateParam<MooseMesh *>("mesh");
 
   params.declareControllable("solve");
@@ -451,6 +461,25 @@ FEProblemBase::createTagVectors()
 }
 
 void
+FEProblemBase::createTagSolutions()
+{
+  auto & vectors = getParam<std::vector<TagName>>("extra_tag_solutions");
+  for (auto & vector : vectors)
+  {
+    auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
+    _nl->addVector(tag, false, GHOSTED);
+    _aux->addVector(tag, false, GHOSTED);
+  }
+
+  if (getParam<bool>("previous_nl_solution_required"))
+  {
+    auto tag = addVectorTag(Moose::PREVIOUS_NL_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+    _nl->addVector(tag, false, GHOSTED);
+    _aux->addVector(tag, false, GHOSTED);
+  }
+}
+
+void
 FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -607,13 +636,6 @@ FEProblemBase::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
   _rz_coord_axis = rz_coord_axis;
 }
 
-void
-FEProblemBase::addExtraVectors()
-{
-  _nl->addExtraVectors();
-  _aux->addExtraVectors();
-}
-
 const ConstElemRange &
 FEProblemBase::getEvaluableElementRange()
 {
@@ -640,8 +662,6 @@ FEProblemBase::initialSetup()
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
-
-  addExtraVectors();
 
   // Setup the solution states (current, old, etc) in each system based on
   // its default and the states requested of each of its variables
@@ -5912,7 +5932,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
     }
   }
 
-  if (_needs_old_newton_iter)
+  if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
     _nl->setPreviousNewtonSolution(old_soln);
     _aux->setPreviousNewtonSolution();
@@ -6941,13 +6961,15 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID t
 bool
 FEProblemBase::needsPreviousNewtonIteration() const
 {
-  return _needs_old_newton_iter;
+  return vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG);
 }
 
 void
-FEProblemBase::needsPreviousNewtonIteration(bool state /* = true*/)
+FEProblemBase::needsPreviousNewtonIteration(bool state)
 {
-  _needs_old_newton_iter = state;
+  if (state && !vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    mooseError("Previous nonlinear solution is required but not added through "
+               "Problem/previous_nl_solution_required=true");
 }
 
 bool

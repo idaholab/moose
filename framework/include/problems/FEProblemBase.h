@@ -360,10 +360,6 @@ public:
    */
   virtual std::vector<VariableName> getVariableNames();
 
-  /**
-   * A place to add extra vectors to the simulation. It is called early during initialSetup.
-   */
-  virtual void addExtraVectors();
   virtual void initialSetup();
   virtual void timestepSetup();
 
@@ -1964,6 +1960,9 @@ public:
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
+
+  /// Create extra tagged solution vectors
+  void createTagSolutions();
 
   MooseMesh & _mesh;
   EquationSystems _eq;

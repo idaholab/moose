@@ -57,13 +57,15 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   for (auto & vector_tag_name : vector_tag_names)
   {
     const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name.name());
+    const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
     if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
       mooseError("Vector tag '",
                  vector_tag_name.name(),
                  "' for Kernel '",
                  _moose_object.name(),
                  "' is not a residual vector tag");
-    _vector_tags.insert(vector_tag_id);
+    _vector_tags.insert(tag._type_id);
+    _vector_tag_ids.insert(vector_tag_id);
   }
 
   // Add extra vector tags. These tags should be created in the System already, otherwise
@@ -73,13 +75,15 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   for (auto & vector_tag_name : extra_vector_tags)
   {
     const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name);
+    const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
     if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
       mooseError("Extra vector tag '",
                  vector_tag_name,
                  "' for Kernel '",
                  _moose_object.name(),
                  "' is not a residual vector tag");
-    _vector_tags.insert(vector_tag_id);
+    _vector_tags.insert(tag._type_id);
+    _vector_tag_ids.insert(vector_tag_id);
   }
 
   auto & matrix_tag_names = _tag_params.get<MultiMooseEnum>("matrix_tags");
@@ -105,7 +109,10 @@ TaggingInterface::useVectorTag(const TagName & tag_name)
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exsit in system");
 
-  _vector_tags.insert(_subproblem.getVectorTagID(tag_name));
+  const TagID vector_tag_id = _subproblem.getVectorTagID(tag_name);
+  const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
+  _vector_tags.insert(tag._type_id);
+  _vector_tag_ids.insert(vector_tag_id);
 }
 
 void
@@ -123,7 +130,9 @@ TaggingInterface::useVectorTag(TagID tag_id)
   if (!_subproblem.vectorTagExists(tag_id))
     mooseError("Vector tag ", tag_id, " does not exsit in system");
 
-  _vector_tags.insert(tag_id);
+  const VectorTag tag = _subproblem.getVectorTag(tag_id);
+  _vector_tags.insert(tag._type_id);
+  _vector_tag_ids.insert(tag_id);
 }
 
 void
