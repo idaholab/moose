@@ -13,6 +13,7 @@
   [../]
 
   [./replace_sidesets_test]
+    type = 'Exodiff'
     input = 'replace.i'
     cli_args = '--mesh-only'
     exodiff = 'replace_in.e'
