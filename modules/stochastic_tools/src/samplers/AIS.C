@@ -37,13 +37,13 @@ AIS::validParams()
       "Standard deviations of the proposal distributions");
   params.addRequiredParam<Real>(
       "output_limit",
-      "Limit values of the VPPs");
+      "Limiting values of the VPPs");
   params.addRequiredParam<std::vector<Real>>(
       "initial_values",
       "Initial input values to get the importance sampler started");
   params.addRequiredParam<int>(
       "num_samples_train",
-      "Number of samples");
+      "Number of samples to learn the importance distribution");
   params.addRequiredParam<Real>(
       "std_factor",
       "Factor to be multiplied to the standard deviation of the importance samples");

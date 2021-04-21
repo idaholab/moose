@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#8065'
+  issues = '#17664'
   design = 'AIS.md'
 
   [ais]
