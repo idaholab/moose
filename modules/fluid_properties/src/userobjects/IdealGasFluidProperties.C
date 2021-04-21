@@ -174,6 +174,15 @@ IdealGasFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, R
 
 Real IdealGasFluidProperties::k_from_v_e(Real, Real) const { return _k; }
 
+void
+IdealGasFluidProperties::k_from_v_e(
+    Real /*v*/, Real /*e*/, Real & k, Real & dk_dv, Real & dk_de) const
+{
+  k = _k;
+  dk_dv = 0;
+  dk_de = 0;
+}
+
 Real
 IdealGasFluidProperties::s_from_v_e(Real v, Real e) const
 {
