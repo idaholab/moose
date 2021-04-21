@@ -250,8 +250,8 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
   if (vars_to_be_zeroed.size() > 0)
   {
     NumericVector<Number> & solution = this->solution();
-
-    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed, true);
+    AllLocalDofIndicesThread aldit(
+        _app.getExecutioner()->feProblem(), system(), vars_to_be_zeroed, true);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 

@@ -29,7 +29,8 @@ class DofMap;
 class AllLocalDofIndicesThread : public ParallelObject
 {
 public:
-  AllLocalDofIndicesThread(System & sys,
+  AllLocalDofIndicesThread(FEProblemBase & problem,
+                           System & sys,
                            std::vector<std::string> vars,
                            bool include_semilocal = false);
   // Splitting Constructor
@@ -44,10 +45,13 @@ public:
   void dofIndicesSetUnion();
 
 protected:
+  FEProblemBase & _problem;
   System & _sys;
   DofMap & _dof_map;
   std::vector<std::string> _vars;
   std::vector<unsigned int> _var_numbers;
+  std::vector<unsigned int> _var_components;
+  std::vector<bool> _is_nodal;
 
   /// Whether to include semilocal dof indices
   const bool _include_semilocal;

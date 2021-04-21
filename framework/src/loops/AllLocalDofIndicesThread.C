@@ -11,6 +11,9 @@
 
 #include "FEProblem.h"
 #include "ParallelUniqueId.h"
+#include "SystemBase.h"
+#include "AuxiliarySystem.h"
+#include "NonlinearSystem.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/threads.h"
@@ -21,24 +24,50 @@
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
 
-AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys,
+AllLocalDofIndicesThread::AllLocalDofIndicesThread(FEProblemBase & problem,
+                                                   System & sys,
                                                    std::vector<std::string> vars,
                                                    bool include_semilocal)
   : ParallelObject(sys.comm()),
+    _problem(problem),
     _sys(sys),
     _dof_map(sys.get_dof_map()),
     _vars(vars),
     _include_semilocal(include_semilocal)
 {
+  // get system base to discern between variables and array variables
+  SystemBase * system_base = dynamic_cast<SystemBase *>(&_problem.getAuxiliarySystem());
+  if (!system_base->hasVariable(vars[0]))
+    system_base = dynamic_cast<SystemBase *>(&_problem.getNonlinearSystem());
+
+  // get variable numbers
   _var_numbers.resize(_vars.size());
+  _var_components.resize(_vars.size());
+  _is_nodal.resize(_vars.size());
   for (unsigned int i = 0; i < _vars.size(); i++)
-    _var_numbers[i] = _sys.variable_number(_vars[i]);
+    if (system_base->isArrayVariable(_vars[i]))
+    {
+      ArrayMooseVariable & var = _problem.getArrayVariable(0, _vars[i]);
+      _var_numbers[i] = var.number();
+      _var_components[i] = var.count();
+      _is_nodal[i] = var.isNodal();
+      if (var.numberOfDofs() > 1)
+        mooseError("I only need constant order, someone else can implement more.");
+    }
+    else
+    {
+      _var_numbers[i] = _sys.variable_number(_vars[i]);
+      _var_components[i] = 0;
+      // not used, arbitrarily set to true
+      _is_nodal[i] = true;
+    }
 }
 
 // Splitting Constructor
 AllLocalDofIndicesThread::AllLocalDofIndicesThread(AllLocalDofIndicesThread & x,
                                                    Threads::split /*split*/)
   : ParallelObject(x._sys.comm()),
+    _problem(x._problem),
     _sys(x._sys),
     _dof_map(x._dof_map),
     _vars(x._vars),
@@ -63,13 +92,31 @@ AllLocalDofIndicesThread::operator()(const ConstElemRange & range)
     // prepare variables
     for (unsigned int i = 0; i < _var_numbers.size(); i++)
     {
-      _dof_map.dof_indices(elem, dof_indices, _var_numbers[i]);
-      for (unsigned int j = 0; j < dof_indices.size(); j++)
+      // need to distinguish between array and standard variables here
+      // because interface is bad
+      if (_var_components[i] == 0)
       {
-        dof_id_type dof = dof_indices[j];
+        _dof_map.dof_indices(elem, dof_indices, _var_numbers[i]);
+        for (unsigned int j = 0; j < dof_indices.size(); j++)
+        {
+          dof_id_type dof = dof_indices[j];
 
-        if (_include_semilocal || (dof >= local_dof_begin && dof < local_dof_end))
-          _all_dof_indices.insert(dof);
+          if (_include_semilocal || (dof >= local_dof_begin && dof < local_dof_end))
+            _all_dof_indices.insert(dof);
+        }
+      }
+      else
+      {
+        if (_is_nodal[i])
+          mooseError("I only need elemental variables so that's on you now.");
+
+        dof_id_type initial_dof = elem->dof_number(_sys.number(), _var_numbers[i], 0);
+        for (unsigned int j = 0; j < _var_components[i]; ++j)
+        {
+          dof_id_type dof = initial_dof + j;
+          if (_include_semilocal || (dof >= local_dof_begin && dof < local_dof_end))
+            _all_dof_indices.insert(dof);
+        }
       }
     }
   }

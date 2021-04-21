@@ -2680,7 +2680,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 void
 NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
 {
-  AllLocalDofIndicesThread aldit(_sys.system(), {var_name});
+  AllLocalDofIndicesThread aldit(_fe_problem, _sys.system(), {var_name});
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   Threads::parallel_reduce(elem_range, aldit);
 
