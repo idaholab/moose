@@ -48,13 +48,6 @@ public:
   void addConsumer(ReporterMode mode, const MooseObject & moose_object);
 
   /**
-   * Sets the producer for this state, which is the object that is responsible for
-   * setting the value
-   * @param moose_object The producing object
-   */
-  void setProducer(const MooseObject & moose_object);
-
-  /**
    * Returns the consumers for this state; a pair that consists of the mode
    * that the state is being consumed by, and the object consuming it
    * @see ReporterContext
@@ -63,23 +56,6 @@ public:
   {
     return _consumers;
   }
-
-  /**
-   * @returns True if this state has an object that produces it
-   */
-  bool hasProducer() const { return _producer; }
-  /**
-   * @returns The producer for this state; nullptr if none
-   */
-  const MooseObject & getProducer() const { return *_producer; }
-
-  /**
-   * @returns A string containing information about this state, including
-   * its type, its producers, and its consumers.
-   *
-   * If the context is provided in \p context, the context type will also be provided.
-   */
-  std::string getInfo(const ReporterContextBase * context = nullptr) const;
 
   /**
    * @returns The type associated with this state
@@ -102,8 +78,6 @@ public:
 private:
   /// Name of data that state is associated
   ReporterName _reporter_name;
-  /// The MooseObject that is producing this ReporterState
-  const MooseObject * _producer;
 
   /// The consumers for this state; we store the MooseObject for detailed error reporting
   std::set<std::pair<ReporterMode, const MooseObject *>> _consumers;

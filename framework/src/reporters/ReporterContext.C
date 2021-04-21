@@ -9,8 +9,11 @@
 
 #include "ReporterContext.h"
 
-ReporterContextBase::ReporterContextBase(const libMesh::ParallelObject & other)
-  : libMesh::ParallelObject(other)
+#include "ReporterData.h"
+
+ReporterContextBase::ReporterContextBase(const libMesh::ParallelObject & other,
+                                         const MooseObject & producer)
+  : libMesh::ParallelObject(other), _producer(producer)
 {
 }
 
@@ -48,6 +51,6 @@ ReporterContextBase::requiresConsumerModes(const ReporterStateBase & state,
                  " mode, which is not supported.\n\nThe mode must be { ",
                  oss.str(),
                  " }.\n\n",
-                 state.getInfo(this));
+                 ReporterData::getReporterInfo(state, this));
     }
 }

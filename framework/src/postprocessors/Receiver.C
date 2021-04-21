@@ -29,8 +29,7 @@ Receiver::validParams()
 Receiver::Receiver(const InputParameters & params)
   : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(_fe_problem.getReporterData().getReporterValue<PostprocessorValue>(
-        PostprocessorReporterName(name())))
+    _my_value(getPostprocessorValueByName(name()))
 {
   const PostprocessorReporterName r_name(name());
   auto & write_data = _fe_problem.getReporterData(ReporterData::WriteKey());
