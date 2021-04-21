@@ -114,7 +114,9 @@ template <typename T>
 class VectorPostprocessorContext : public ReporterGeneralContext<T>
 {
 public:
-  VectorPostprocessorContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
+  VectorPostprocessorContext(const libMesh::ParallelObject & other,
+                             const MooseObject & producer,
+                             ReporterState<T> & state);
   virtual void finalize() override;
   virtual void copyValuesBack() override;
 

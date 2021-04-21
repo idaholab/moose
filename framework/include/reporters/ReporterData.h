@@ -243,10 +243,14 @@ public:
   const ReporterProducerEnum & getReporterMode(const ReporterName & reporter_name) const;
 
   /**
+   * Gets information pertaining to the Reporter with state \p state and possibly
+   * context \p context.
+   */
+  static std::string getReporterInfo(const ReporterStateBase & state,
+                                     const ReporterContextBase * context);
+
+  /**
    * Gets information pertaining to the Reporter with name \p reporter_name.
-   *
-   * See ReporterState::getInfo. This is redeclared in ReporterData because it adds
-   * additional context about the context type if available.
    */
   std::string getReporterInfo(const ReporterName & reporter_name) const;
 
@@ -346,12 +350,6 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
   // different special types are not unique so they'll be the same entry
   _states.emplace(reporter_name, state);
 
-  if (declare)
-  {
-    mooseAssert(moose_object, "Declaring a Reporter requires a MooseObject as a producer");
-    state->setProducer(*moose_object);
-  }
-
   return *state;
 }
 
@@ -377,8 +375,8 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   // Get/create the ReporterState
   auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ true, &producer);
 
-  // They key in _states (ReporterName) is not unique. This is done on purpose
-  // because we want to store reporter names a single name regardless of type.
+  // They key in _states (ReporterName) is not unique by special type. This is done on purpose
+  // because we want to store reporter names a single name regardless of special type.
   // Beacuse of this, we have the case where someone could request a reporter value
   // that is later declared as a pp or a vpp value. In this case, when it is first
   // requested, the _state entry will have a key and name with a special type of ANY.
@@ -405,7 +403,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   mooseAssert(!_context_ptrs.count(reporter_name), "Context already exists");
 
   // Create the ReporterContext
-  auto context_ptr = libmesh_make_unique<S>(_app, state, args...);
+  auto context_ptr = libmesh_make_unique<S>(_app, producer, state, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
   _context_ptrs.emplace(reporter_name, std::move(context_ptr));
 

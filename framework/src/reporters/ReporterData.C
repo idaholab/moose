@@ -79,7 +79,7 @@ ReporterData::check() const
 {
   std::string missing;
   for (const auto & name_state_pair : _states)
-    if (!name_state_pair.second->hasProducer())
+    if (!hasReporterValue(name_state_pair.first))
       missing += getReporterInfo(name_state_pair.first) + "\n";
 
   if (missing.size())
@@ -118,11 +118,47 @@ ReporterData::hasReporterState(const ReporterName & reporter_name) const
 }
 
 std::string
+ReporterData::getReporterInfo(const ReporterStateBase & state, const ReporterContextBase * context)
+{
+  std::stringstream oss;
+
+  const auto & name = state.getReporterName();
+
+  if (name.isPostprocessor())
+    oss << "Postprocessor \"" << name.getObjectName() << "\":\n";
+  else
+  {
+    oss << name.specialTypeToName() << " \"" << name.getCombinedName() << "\":\n  Type:\n    "
+        << state.valueType() << "\n";
+  }
+  oss << "  Producer:\n    ";
+  if (context)
+  {
+    oss << context->getProducer().type() << " \"" << context->getProducer().name() << "\"";
+    oss << "\n  Context type:\n    " << context->contextType();
+  }
+  else
+    oss << "None";
+  oss << "\n  Consumer(s):\n";
+  if (state.getConsumers().empty())
+    oss << "    None\n";
+  else
+    for (const auto & mode_object_pair : state.getConsumers())
+    {
+      const ReporterMode mode = mode_object_pair.first;
+      const MooseObject * object = mode_object_pair.second;
+      oss << "    " << object->typeAndName() << " (mode: " << mode << ")\n";
+    }
+
+  return oss.str();
+}
+
+std::string
 ReporterData::getReporterInfo(const ReporterName & reporter_name) const
 {
-  const ReporterContextBase * context =
-      hasReporterValue(reporter_name) ? &getReporterContextBase(reporter_name) : nullptr;
-  return getReporterStateBase(reporter_name).getInfo(context);
+  return getReporterInfo(getReporterStateBase(reporter_name),
+                         hasReporterValue(reporter_name) ? &getReporterContextBase(reporter_name)
+                                                         : nullptr);
 }
 
 std::string

@@ -99,8 +99,9 @@ const ReporterMode REPORTER_MODE_VPP_SCATTER("VPP_SCATTER");
 
 template <typename T>
 VectorPostprocessorContext<T>::VectorPostprocessorContext(const libMesh::ParallelObject & other,
+                                                          const MooseObject & producer,
                                                           ReporterState<T> & state)
-  : ReporterGeneralContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, producer, state)
 {
 }
 

@@ -54,7 +54,7 @@ class ReporterData;
 class ReporterContextBase : public libMesh::ParallelObject
 {
 public:
-  ReporterContextBase(const libMesh::ParallelObject & other);
+  ReporterContextBase(const libMesh::ParallelObject & other, const MooseObject & producer);
   virtual ~ReporterContextBase() = default;
 
   /// Return the ReporterName that the context is associated
@@ -99,6 +99,11 @@ public:
    * @see ReporterData::declareReporterValue
    */
   void init(const ReporterMode & mode);
+
+  /**
+   * Return the MooseObject that produces this Reporter.
+   */
+  const MooseObject & getProducer() const { return _producer; }
 
   /**
    * Return the Reporter value produced mode
@@ -170,6 +175,9 @@ protected:
   void requiresConsumerModes(const ReporterStateBase & state,
                              const std::set<ReporterMode> & modes) const;
 
+  /// The MooseObject that is producing this Reporter
+  const MooseObject & _producer;
+
   /// Defines how the Reporter value can be produced and how it is being produced
   ReporterProducerEnum _producer_enum;
 };
@@ -194,8 +202,11 @@ public:
     BROADCAST
   };
 
-  ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterContext(const libMesh::ParallelObject & other,
+                  const MooseObject & producer,
+                  ReporterState<T> & state);
+  ReporterContext(const libMesh::ParallelObject & other,
+                  const MooseObject & producer,
                   ReporterState<T> & state,
                   const T & default_value);
 
@@ -269,17 +280,20 @@ protected:
 };
 
 template <typename T>
-ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
-  : ReporterContextBase(other), _state(state)
+ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
+                                    const MooseObject & producer,
+                                    ReporterState<T> & state)
+  : ReporterContextBase(other, producer), _state(state)
 {
   _producer_enum.insert(REPORTER_MODE_ROOT, REPORTER_MODE_REPLICATED, REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename T>
 ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
+                                    const MooseObject & producer,
                                     ReporterState<T> & state,
                                     const T & default_value)
-  : ReporterContext(other, state)
+  : ReporterContext(other, producer, state)
 {
   _state.value() = default_value;
 }
@@ -362,14 +376,17 @@ template <typename T>
 class ReporterGeneralContext : public ReporterContext<T>
 {
 public:
-  ReporterGeneralContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
-    : ReporterContext<T>(other, state)
+  ReporterGeneralContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
+                         ReporterState<T> & state)
+    : ReporterContext<T>(other, producer, state)
   {
   }
   ReporterGeneralContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const T & default_value)
-    : ReporterContext<T>(other, state, default_value)
+    : ReporterContext<T>(other, producer, state, default_value)
   {
   }
 
@@ -412,8 +429,11 @@ template <typename T>
 class ReporterBroadcastContext : public ReporterGeneralContext<T>
 {
 public:
-  ReporterBroadcastContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                           const MooseObject & producer,
+                           ReporterState<T> & state);
+  ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                           const MooseObject & producer,
                            ReporterState<T> & state,
                            const T & default_value);
   virtual void finalize() override;
@@ -422,8 +442,9 @@ public:
 
 template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                                                      const MooseObject & producer,
                                                       ReporterState<T> & state)
-  : ReporterGeneralContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, producer, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -431,9 +452,10 @@ ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObj
 
 template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                                                      const MooseObject & producer,
                                                       ReporterState<T> & state,
                                                       const T & default_value)
-  : ReporterGeneralContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, producer, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -455,9 +477,11 @@ class ReporterScatterContext : public ReporterGeneralContext<T>
 {
 public:
   ReporterScatterContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const std::vector<T> & values);
   ReporterScatterContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const T & default_value,
                          const std::vector<T> & values);
@@ -472,9 +496,10 @@ private:
 
 template <typename T>
 ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject & other,
+                                                  const MooseObject & producer,
                                                   ReporterState<T> & state,
                                                   const std::vector<T> & values)
-  : ReporterGeneralContext<T>(other, state), _values(values)
+  : ReporterGeneralContext<T>(other, producer, state), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -482,10 +507,11 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
 
 template <typename T>
 ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject & other,
+                                                  const MooseObject & producer,
                                                   ReporterState<T> & state,
                                                   const T & default_value,
                                                   const std::vector<T> & values)
-  : ReporterGeneralContext<T>(other, state, default_value), _values(values)
+  : ReporterGeneralContext<T>(other, producer, state, default_value), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -512,8 +538,11 @@ template <typename T>
 class ReporterGatherContext : public ReporterGeneralContext<T>
 {
 public:
-  ReporterGatherContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<T> & state);
+  ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<T> & state,
                         const T & default_value);
 
@@ -523,8 +552,9 @@ public:
 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<T> & state)
-  : ReporterGeneralContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, producer, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -532,9 +562,10 @@ ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & 
 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<T> & state,
                                                 const T & default_value)
-  : ReporterGeneralContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, producer, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -559,8 +590,10 @@ class ReporterVectorContext : public ReporterContext<std::vector<T>>
 {
 public:
   ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<std::vector<T>> & state);
   ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<std::vector<T>> & state,
                         const std::vector<T> & default_value);
 
@@ -593,15 +626,17 @@ public:
 
 template <typename T>
 ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<std::vector<T>> & state)
-  : ReporterContext<std::vector<T>>(other, state)
+  : ReporterContext<std::vector<T>>(other, producer, state)
 {
 }
 
 template <typename T>
 ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<std::vector<T>> & state,
                                                 const std::vector<T> & default_value)
-  : ReporterContext<std::vector<T>>(other, state, default_value)
+  : ReporterContext<std::vector<T>>(other, producer, state, default_value)
 {
 }
