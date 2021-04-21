@@ -16,15 +16,11 @@ class AdaptiveMonteCarloDecision : public GeneralReporter
 public:
   static InputParameters validParams();
   AdaptiveMonteCarloDecision(const InputParameters & parameters);
-  virtual void initialize() override;
+  virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
 
 protected:
-
-  Real computeMIN(const std::vector<Real> & data);
-  std::vector<Real> sortOUTPUT(const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
-  std::vector<Real> sortINPUT(const std::vector<Real> & inputs, const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
 
   /// This will add another type of reporter to the params
   template <typename T>
@@ -34,39 +30,28 @@ protected:
   /// Helper for declaring constant reporter values
   template <typename T>
   std::vector<T *> declareAdaptiveMonteCarloDecisionValues(const std::string & prefix);
-  template <typename T>
-  std::vector<std::vector<T> *> declareAdaptiveMonteCarloDecisionVectorValues(const std::string & prefix);
-  ///@}
-  ///@{
-  /// Helper for declaring constant reporter values
-  template <typename T>
-  std::vector<T *> declareAMCSStatistics(const std::string & statistics);
   ///@}
 
-  /// Real reporter data
+  /// Model output data
   std::vector<Real *> _output;
+
+  /// Model input data
   std::vector<Real *> _inputs;
-  std::vector<unsigned int *> _subset_out;
 
 private:
+  /// Track the current step of the main App
   const int & _step;
+
+  /// The adaptive Monte Carlo sampler
   Sampler * _sampler;
-  int _ind_sto;
-  std::vector<Real> _markov_seed;
-  unsigned int _count;
-  unsigned int _count_max;
-  // std::vector<Real> _output_sorted;
-  // std::vector<Real> _outputs_sto;
-  // std::vector<std::vector<Real>> _inputs_sto;
-  // std::vector<std::vector<Real>> _inputs_sorted;
-  std::vector<Real> _output_sorted;
-  std::vector<std::vector<Real>> _inputs_sorted;
-  std::vector<std::vector<Real>> _inputs_sto;
-  std::vector<Real> _outputs_sto;
-  unsigned int _subset;
-  std::vector<Real> _output_limits;
-  int _check_even;
+
+  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
+  int _check_step;
+
+  /// Storage for previously accepted input values. This helps in making decision on the next proposed inputs.
   std::vector<Real> _prev_val;
+
+  /// Storage for previously accepted output value.
   Real _prev_val_out;
 
 };
@@ -115,8 +100,6 @@ AdaptiveMonteCarloDecision::declareAdaptiveMonteCarloDecisionValues(const std::s
                " must match number of values specified in ",
                values_param);
 
-   // std::cout << "here " << names[0] << std::endl;
-   // std::cout << "here1 " << values[0] << std::endl;
   for (unsigned int i = 0; i < names.size(); ++i)
     data.push_back(&this->declareValueByName<T>(names[i], values[i]));
 
