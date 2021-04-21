@@ -49,7 +49,7 @@
 [Components]
   [reactor]
     type = TotalPower
-    power = 0
+    power = 1e3
   []
 
   [core:pipe]
