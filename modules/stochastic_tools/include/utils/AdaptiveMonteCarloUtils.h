@@ -18,19 +18,12 @@
 // Forward Declarations
 namespace AdaptiveMonteCarloUtils
 {
-/**
- *  The responseSpectrum function calculates the response spectrum for a
- *  given acceleration history.
- */
- std::vector<Real> sortINPUT(const std::vector<Real> & inputs, const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
+  /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
+  Carlo set of algorithms.*/
+  
+ Real computeSTD(const std::vector<Real> & data, const unsigned int start_index);
 
- std::vector<Real> sortOUTPUT(const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
-
- Real computeSTD(const std::vector<Real> & data);
-
- Real computeMEAN(const std::vector<Real> & data);
-
- Real computeMIN(const std::vector<Real> & data);
+ Real computeMEAN(const std::vector<Real> & data, const unsigned int start_index);
 
 } // namespace AdaptiveMonteCarloUtils
 #endif
