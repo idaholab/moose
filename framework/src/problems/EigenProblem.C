@@ -88,6 +88,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 #endif
   // Create extra vectors and matrices if any
   createTagVectors();
+
+  // Create extra solution vectors if any
+  createTagSolutions();
 }
 
 #ifdef LIBMESH_HAVE_SLEPC

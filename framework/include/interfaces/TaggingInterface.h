@@ -48,7 +48,7 @@ public:
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
-  const std::set<TagID> & getVectorTags() const { return _vector_tags; }
+  const std::set<TagID> & getVectorTags() const { return _vector_tag_ids; }
 
   const std::set<TagID> & getMatrixTags() const { return _matrix_tags; }
 
@@ -132,6 +132,9 @@ public:
 
 protected:
   /// The vectors this Kernel will contribute to
+  std::set<TagID> _vector_tag_ids;
+
+  /// The residual tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 
   /// The matrices this Kernel will contribute to

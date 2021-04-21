@@ -122,7 +122,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _current_solution(NULL),
     _residual_ghosted(NULL),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
-    _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _u_dot(NULL),
     _u_dotdot(NULL),
@@ -240,13 +239,6 @@ NonlinearSystemBase::turnOffJacobian()
 {
   system().set_basic_system_only();
   nonlinearSolver()->jacobian = NULL;
-}
-
-void
-NonlinearSystemBase::addExtraVectors()
-{
-  if (_fe_problem.needsPreviousNewtonIteration())
-    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
 }
 
 void
@@ -3351,8 +3343,8 @@ NonlinearSystemBase::doingDG() const
 void
 NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & soln)
 {
-  if (_solution_previous_nl)
-    *_solution_previous_nl = soln;
+  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    getVector(Moose::PREVIOUS_NL_SOLUTION_TAG) = soln;
 }
 
 void

@@ -22,4 +22,8 @@ const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 const TagID INVALID_TAG_ID = static_cast<TagID>(-1);
 const TagTypeID INVALID_TAG_TYPE_ID = static_cast<TagTypeID>(-1);
+const TagName SOLUTION_TAG = "SOLUTION";
+const TagName OLD_SOLUTION_TAG = "SOLUTION_STATE_1";
+const TagName OLDER_SOLUTION_TAG = "SOLUTION_STATE_2";
+const TagName PREVIOUS_NL_SOLUTION_TAG = "U_PREVIOUS_NL_NEWTON";
 }
