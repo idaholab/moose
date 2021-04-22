@@ -1,5 +1,3 @@
-# @requirement F24.1
-
 [GlobalParams]
   gravity_vector = '0 0 0'
 
@@ -9,8 +7,6 @@
   scaling_factor_1phase = '1.e0 1.e0 1.e-2'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -87,11 +83,6 @@
 
   l_tol = 1e-3
   l_max_its = 100
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Outputs]

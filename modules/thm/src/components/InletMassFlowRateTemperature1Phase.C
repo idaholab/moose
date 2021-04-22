@@ -33,56 +33,7 @@ InletMassFlowRateTemperature1Phase::check() const
 }
 
 void
-InletMassFlowRateTemperature1Phase::setup1PhaseCG()
-{
-  Real m_dot_in = getParam<Real>("m_dot");
-  Real T_in = getParam<Real>("T");
-
-  {
-    std::string class_name = "OneDMassMassFlowRateTemperatureBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("m_dot") = m_dot_in;
-    std::string nm = genName(name(), "rhoA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot");
-  }
-  {
-    std::string class_name = "OneDMomentumMassFlowRateTemperatureBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("m_dot") = m_dot_in;
-    std::string nm = genName(name(), "rhouA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot");
-  }
-  {
-    std::string class_name = "OneDEnergyMassFlowRateTemperatureBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("m_dot") = m_dot_in;
-    params.set<Real>("T") = T_in;
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("p") = FlowModelSinglePhase::PRESSURE;
-    params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
-    params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<UserObjectName>("fp") = _fp_name;
-    std::string nm = genName(name(), "rhoEA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "m_dot");
-    connectObject(params, nm, "T");
-  }
-}
-
-void
-InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
+InletMassFlowRateTemperature1Phase::addMooseObjects()
 {
   ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
@@ -105,13 +56,4 @@ InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
 
   // BCs
   addWeakBC3Eqn();
-}
-
-void
-InletMassFlowRateTemperature1Phase::addMooseObjects()
-{
-  if (_spatial_discretization == FlowModel::CG)
-    setup1PhaseCG();
-  else if (_spatial_discretization == FlowModel::rDG)
-    setup1PhaseRDG();
 }

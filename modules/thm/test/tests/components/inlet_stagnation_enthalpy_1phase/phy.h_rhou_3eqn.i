@@ -8,8 +8,6 @@
   scaling_factor_1phase = '1.e2 1. 1.e-3'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -47,7 +45,6 @@
     type = Outlet1Phase
     input = 'pipe:out'
     p = 101325
-    legacy = true
   [../]
 []
 
@@ -74,16 +71,4 @@
 
   start_time = 0.0
   end_time = 0.2
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
-[]
-
-
-[Outputs]
-  [./out]
-    type = Exodus
-  [../]
 []

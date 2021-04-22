@@ -9,7 +9,7 @@
 
   closures = simple
 
-  spatial_discretization = cg
+  rdg_slope_reconstruction = minmod
 []
 
 [FluidProperties]
@@ -84,7 +84,8 @@
 []
 
 [Outputs]
-  file_base = 'phy.massflowrate_3eqn_cg'
+  file_base = 'phy.massflowrate_3eqn'
+
   [./exodus]
     type = Exodus
     show = 'rhouA T p'

@@ -6,43 +6,42 @@
   scaling_factor_1phase = '1e-3 1e-3 1e-8'
   scaling_factor_temperature = 1e-3
   closures = simple
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./main-material]
+  [main-material]
     type = SolidMaterialProperties
     k = 1e4
     cp = 500.0
     rho = 100.0
-  [../]
+  []
 []
 
 [Functions]
-  [./T0_fn]
+  [T0_fn]
     type = ParsedFunction
     value = '290 + 20 * (y - 1)'
-  [../]
+  []
 []
 
 [Components]
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
 
@@ -57,22 +56,22 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./right_wall]
+  [right_wall]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 
-  [./heat_transfer]
+  [heat_transfer]
     type = HeatTransferFromHeatStructure1Phase
     flow_channel = pipe
     hs = heat_structure
     hs_side = inner
     Hw = 1e3
-  [../]
+  []
 
-  [./heat_structure]
+  [heat_structure]
     #type = set externally
     num_rods = 5
 
@@ -87,40 +86,40 @@
     n_part_elems = '5'
 
     initial_T = T0_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_pipe]
+  [E_pipe]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     block = pipe
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_heat_structure]
+  []
+  [E_heat_structure]
     block = 'heat_structure:main'
     n_units = 5
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_tot]
+  []
+  [E_tot]
     type = SumPostprocessor
     values = 'E_pipe E_heat_structure'
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_tot_change]
+  []
+  [E_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = E_tot
     compute_relative_change = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -142,10 +141,10 @@
 
   abort_on_solve_fail = true
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]

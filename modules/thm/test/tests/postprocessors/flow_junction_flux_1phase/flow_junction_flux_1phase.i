@@ -12,8 +12,6 @@ p_out = 7e6
   gravity_vector = '0 0 0'
   closures = simple
   n_elems = 3
-  spatial_discretization = rDG
-  rdg_slope_reconstruction = none
   f = 0
   scaling_factor_1phase = '1 1 1e-5'
 []

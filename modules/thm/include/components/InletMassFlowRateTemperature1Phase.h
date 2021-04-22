@@ -18,9 +18,6 @@ protected:
   /// True to allow the flow to reverse, otherwise false
   bool _reversible;
 
-  void setup1PhaseCG();
-  void setup1PhaseRDG();
-
 public:
   static InputParameters validParams();
 };

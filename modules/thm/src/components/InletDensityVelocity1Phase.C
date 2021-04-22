@@ -32,59 +32,7 @@ InletDensityVelocity1Phase::check() const
 }
 
 void
-InletDensityVelocity1Phase::setupCG()
-{
-  Real rho_in = getParam<Real>("rho");
-  Real u_in = getParam<Real>("vel");
-
-  {
-    std::string class_name = "OneDAreaTimesConstantBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("value") = rho_in;
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    std::string nm = genName(name(), "rhoA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "rho", "value");
-  }
-  {
-    std::string class_name = "OneDMomentumDensityVelocityBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("rho") = rho_in;
-    params.set<Real>("vel") = u_in;
-    params.set<UserObjectName>("fp") = _fp_name;
-    params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    std::string nm = genName(name(), "rhouA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "rho");
-    connectObject(params, nm, "vel");
-  }
-  {
-    std::string class_name = "OneDEnergyDensityVelocityBC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("normal") = _normal;
-    params.set<Real>("rho") = rho_in;
-    params.set<Real>("vel") = u_in;
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<UserObjectName>("fp") = _fp_name;
-    std::string nm = genName(name(), "rhoEA_bc");
-    _sim.addBoundaryCondition(class_name, nm, params);
-    connectObject(params, nm, "rho");
-    connectObject(params, nm, "vel");
-  }
-}
-
-void
-InletDensityVelocity1Phase::setupRDG()
+InletDensityVelocity1Phase::addMooseObjects()
 {
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
@@ -108,13 +56,4 @@ InletDensityVelocity1Phase::setupRDG()
 
   // BCs
   addWeakBC3Eqn();
-}
-
-void
-InletDensityVelocity1Phase::addMooseObjects()
-{
-  if (_spatial_discretization == FlowModel::CG)
-    setupCG();
-  else if (_spatial_discretization == FlowModel::rDG)
-    setupRDG();
 }

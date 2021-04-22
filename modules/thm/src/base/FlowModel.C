@@ -18,42 +18,6 @@ FlowModel::validParams()
   return params;
 }
 
-const std::map<std::string, FlowModel::EEquationType> FlowModel::_flow_equation_type_to_enum{
-    {"CONTINUITY", CONTINUITY},
-    {"MOMENTUM", MOMENTUM},
-    {"ENERGY", ENERGY},
-    {"VOIDFRACTION", VOIDFRACTION}};
-
-MooseEnum
-FlowModel::getFlowEquationType(const std::string & name)
-{
-  return THM::getMooseEnum<EEquationType>(name, _flow_equation_type_to_enum);
-}
-
-template <>
-FlowModel::EEquationType
-THM::stringToEnum(const std::string & s)
-{
-  return stringToEnum<FlowModel::EEquationType>(s, FlowModel::_flow_equation_type_to_enum);
-}
-
-const std::map<std::string, FlowModel::ESpatialDiscretizationType>
-    FlowModel::_spatial_disc_type_to_enum{{"CG", CG}, {"RDG", rDG}};
-
-MooseEnum
-FlowModel::getSpatialDiscretizationMooseEnum(const std::string & name)
-{
-  return THM::getMooseEnum<ESpatialDiscretizationType>(name, _spatial_disc_type_to_enum);
-}
-
-template <>
-FlowModel::ESpatialDiscretizationType
-THM::stringToEnum(const std::string & s)
-{
-  return stringToEnum<FlowModel::ESpatialDiscretizationType>(s,
-                                                             FlowModel::_spatial_disc_type_to_enum);
-}
-
 const std::string FlowModel::AREA = "A";
 const std::string FlowModel::AREA_LINEAR = "A_linear";
 const std::string FlowModel::HEAT_FLUX_WALL = "q_wall";
@@ -70,7 +34,6 @@ FlowModel::FlowModel(const InputParameters & params)
     _factory(_app.getFactory()),
     _flow_channel(*params.getCheckedPointerParam<FlowChannelBase *>("_flow_channel")),
     _fe_type(_sim.getFlowFEType()),
-    _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(params.get<UserObjectName>("fp")),
     _comp_name(name()),
     _gravity_vector(_flow_channel.getParam<RealVectorValue>("gravity_vector")),
@@ -102,9 +65,7 @@ FlowModel::addCommonVariables()
 
   _sim.addSimVariable(false, AREA, _fe_type, subdomains);
   _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
-
-  if (_spatial_discretization == rDG)
-    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
+  _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
 }
 
 void
@@ -119,29 +80,23 @@ FlowModel::addCommonInitialConditions()
     {
       const Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
-      if (_spatial_discretization == rDG)
-        _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
+      _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
       // FIXME: eventually use Component::makeFunctionControllableIfConstant
       if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
         _flow_channel.connectObject(fn.parameters(), area_function, "Area", "value");
     }
     else
     {
-      if (_spatial_discretization == rDG)
-      {
-        _sim.addFunctionIC(AREA_LINEAR, area_function, block);
+      _sim.addFunctionIC(AREA_LINEAR, area_function, block);
 
-        {
-          const std::string class_name = "FunctionNodalAverageIC";
-          InputParameters params = _factory.getValidParams(class_name);
-          params.set<VariableName>("variable") = AREA;
-          params.set<std::vector<SubdomainName>>("block") = block;
-          params.set<FunctionName>("function") = area_function;
-          _sim.addSimInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
-        }
+      {
+        const std::string class_name = "FunctionNodalAverageIC";
+        InputParameters params = _factory.getValidParams(class_name);
+        params.set<VariableName>("variable") = AREA;
+        params.set<std::vector<SubdomainName>>("block") = block;
+        params.set<FunctionName>("function") = area_function;
+        _sim.addSimInitialCondition(class_name, genName(_comp_name, AREA, "ic"), params);
       }
-      else
-        _sim.addFunctionIC(AREA, area_function, block);
     }
   }
 }

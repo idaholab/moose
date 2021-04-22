@@ -8,57 +8,46 @@
   2nd_order_mesh = true
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
-[FluidProperties]
-  [./eos]
-    type = StiffenedGasFluidProperties
-    gamma = 2.35
-    cv = 1816.0
-    q = -1.167e6
-    p_inf = 1.0e9
-    q_prime = 0
-  [../]
+[HeatStructureMaterials]
+  [hs-mat]
+    type = SolidMaterialProperties
+    k = 1
+    cp = 1
+    rho = 1
+  []
 []
 
 [Components]
-  [./pipe]
-    type = FlowChannel1Phase
+  [hs]
+    type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '1 0 0'
+
     length = 1
-    n_elems = 100
+    n_elems = 2
+    names = 'blk'
+    widths = '1'
+    n_part_elems = '2'
+    materials = 'hs-mat'
 
-    A = 1.0e-4
-    D_h = 1.128379e-2
+    initial_T = 350
+  []
 
-    f = 0.0
-
-    fp = eos
-  [../]
-
-  [./inlet]
-    type = InletDensityVelocity1Phase
-    input = 'pipe:in'
-    vel = 1.0
-    rho = 972.2240858943135
-  [../]
-
-  [./outlet]
-    type = Outlet1Phase
-    input = 'pipe:out'
-    p = 1.0e6
-    legacy = true
-  [../]
+  [start]
+    type = HSBoundarySpecifiedTemperature
+    hs = hs
+    boundary = hs:start
+    T = 300
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,14 +68,14 @@
   start_time = 0.0
   end_time = 4.0
 
-  [./Quadrature]
+  [Quadrature]
     type = TRAP
     order = FIRST
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

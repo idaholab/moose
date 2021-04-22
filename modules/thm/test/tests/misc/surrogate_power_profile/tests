@@ -9,7 +9,6 @@
     type = 'Exodiff'
     input = 'surrogate_power_profile.i'
     exodiff = 'surrogate_power_profile_out.e'
-    custom_cmp = 'surrogate_power_profile.exodiff'
     prereq = 'power_profile'
   [../]
 []

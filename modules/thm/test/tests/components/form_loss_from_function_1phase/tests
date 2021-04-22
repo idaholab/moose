@@ -3,6 +3,6 @@
     type = 'CSVDiff'
     input = 'phy.form_loss_1phase.i'
     csvdiff = 'phy.form_loss_1phase_out.csv'
-    rel_err = 1e-10
+    rel_err = 1e-3
   [../]
 []

@@ -172,8 +172,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addUserObject(class_name, _numerical_flux_name, params);
   }
 
-  if (_spatial_discretization == rDG)
-    addRDGMooseObjects();
+  addRDGMooseObjects();
 
   {
     std::string class_name = "FluidProperties3EqnMaterial";
@@ -214,20 +213,6 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, genName(_comp_name, "rho_ie"), params);
   }
-  if (_spatial_discretization == CG)
-  {
-    std::string class_name = "OneD3EqnMassFlux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<std::vector<VariableName>>("arhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<MaterialPropertyName>("vel") = VELOCITY;
-    _sim.addKernel(class_name, genName(_comp_name, "rho_if"), params);
-  }
 
   // Momentum equation, for 1-D flow channel, x-momentum equation only
   // (transient term + remaining terms[advection, pressure, body force, etc])
@@ -240,23 +225,6 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, genName(_comp_name, "rhou_ie"), params);
   }
-  if (_spatial_discretization == CG)
-  {
-    std::string class_name = "OneD3EqnMomentumFlux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<std::vector<VariableName>>("arhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<MaterialPropertyName>("p") = PRESSURE;
-    _sim.addKernel(class_name, genName(_comp_name, "rhou_if"), params);
-  }
   {
     std::string class_name = "OneD3EqnMomentumAreaGradient";
     InputParameters params = _factory.getValidParams(class_name);
@@ -264,10 +232,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("arhoA") = {RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-    if (_spatial_discretization == CG)
-      params.set<std::vector<VariableName>>("A") = {AREA};
-    else if (_spatial_discretization == rDG)
-      params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
+    params.set<std::vector<VariableName>>("A") = {AREA_LINEAR};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
     params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
@@ -311,23 +276,6 @@ FlowModelSinglePhase::addMooseObjects()
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, genName(_comp_name, "rhoE_ie"), params);
-  }
-  if (_spatial_discretization == CG)
-  {
-    std::string class_name = "OneD3EqnEnergyFlux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {AREA};
-    params.set<std::vector<VariableName>>("arhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("arhoEA") = {RHOEA};
-    params.set<MaterialPropertyName>("direction") = DIRECTION;
-    params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<MaterialPropertyName>("e") = SPECIFIC_INTERNAL_ENERGY;
-    params.set<MaterialPropertyName>("p") = PRESSURE;
-    _sim.addKernel(class_name, genName(_comp_name, "rhoE_if"), params);
   }
   {
     std::string class_name = "OneD3EqnEnergyGravity";

@@ -30,14 +30,4 @@ SolidWall1Phase::addMooseObjects()
 
   // BCs
   addWeakBC3Eqn();
-
-  // Strongly impose zero velocity for CG
-  if (_spatial_discretization == FlowModel::CG)
-  {
-    InputParameters params = _factory.getValidParams("DirichletBC");
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("value") = 0.;
-    _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
-  }
 }
