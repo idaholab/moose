@@ -51,6 +51,7 @@ static const std::string specific_internal_energy = "e";
 static const std::string specific_total_energy = "et";
 static const std::string internal_energy_density = "rho_e";
 static const std::string total_energy_density = "rho_et";
+static const std::string superficial_total_energy_density = "superficial_rho_et";
 
 static const std::string specific_enthalpy = "h";
 static const std::string specific_total_enthalpy = "ht";
