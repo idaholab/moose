@@ -20,7 +20,6 @@
 #include "Control.h"
 #include "TimePeriod.h"
 #include "MooseMesh.h"
-#include "AllLocalDofIndicesThread.h"
 #include "TimeIntegrator.h"
 #include "Console.h"
 

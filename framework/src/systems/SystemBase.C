@@ -223,25 +223,13 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 void
 SystemBase::addVariableToZeroOnResidual(std::string var_name)
 {
-  unsigned int ncomp = getVariable(0, var_name).count();
-  if (ncomp > 1)
-    // need to push libMesh variable names for all components
-    for (unsigned int i = 0; i < ncomp; ++i)
-      _vars_to_be_zeroed_on_residual.push_back(_subproblem.arrayVariableComponent(var_name, i));
-  else
-    _vars_to_be_zeroed_on_residual.push_back(var_name);
+  _vars_to_be_zeroed_on_residual.push_back(var_name);
 }
 
 void
 SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 {
-  unsigned int ncomp = getVariable(0, var_name).count();
-  if (ncomp > 1)
-    // need to push libMesh variable names for all components
-    for (unsigned int i = 0; i < ncomp; ++i)
-      _vars_to_be_zeroed_on_jacobian.push_back(_subproblem.arrayVariableComponent(var_name, i));
-  else
-    _vars_to_be_zeroed_on_jacobian.push_back(var_name);
+  _vars_to_be_zeroed_on_jacobian.push_back(var_name);
 }
 
 void
@@ -251,7 +239,11 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
   {
     NumericVector<Number> & solution = this->solution();
 
-    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed, true);
+    auto problem = dynamic_cast<FEProblemBase *>(&_subproblem);
+    if (!problem)
+      mooseError("System needs to be registered in FEProblemBase for using zeroVariables.");
+
+    AllLocalDofIndicesThread aldit(*problem, vars_to_be_zeroed, true);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 

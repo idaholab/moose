@@ -19,9 +19,9 @@ ArrayTimeDerivative::validParams()
   InputParameters params = ArrayTimeKernel::validParams();
   params.addClassDescription("Array time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
-  params.addParam<MaterialPropertyName>("time_derivative_coefficient",
-                                        "The name of the time derivative coefficient. "
-                                        "Can be scalar, vector, or matrix");
+  params.addRequiredParam<MaterialPropertyName>("time_derivative_coefficient",
+                                                "The name of the time derivative coefficient. "
+                                                "Can be scalar, vector, or matrix");
   return params;
 }
 
