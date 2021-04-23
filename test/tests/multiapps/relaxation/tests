@@ -25,6 +25,14 @@
     requirement = 'The system shall provide an ability to relax sub-applications solutions along with the master solution for during iterative solves.'
   [../]
 
+  [./array_relaxed]
+    type = 'Exodiff'
+    input = 'picard_relaxed_array_master.i'
+    exodiff = 'picard_relaxed_array_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    requirement = 'The system shall provide an ability to relax solutions of array variables with iterative solves with sub-applications.'
+  [../]
+
   [./bad_relax_factor]
     type = 'RunException'
     input = 'bad_relax_factor_master.i'

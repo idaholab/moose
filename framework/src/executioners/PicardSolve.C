@@ -165,8 +165,7 @@ PicardSolve::solve()
   if (_relax_factor != 1.0)
   {
     // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl.system();
-    AllLocalDofIndicesThread aldit(libmesh_nl_system, _relaxed_vars);
+    AllLocalDofIndicesThread aldit(_problem, _relaxed_vars);
     ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
@@ -178,8 +177,7 @@ PicardSolve::solve()
   if (_picard_self_relaxation_factor != 1.0)
   {
     // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl.system();
-    AllLocalDofIndicesThread aldit(libmesh_nl_system, _picard_self_relaxed_variables);
+    AllLocalDofIndicesThread aldit(_problem, _picard_self_relaxed_variables);
     ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 

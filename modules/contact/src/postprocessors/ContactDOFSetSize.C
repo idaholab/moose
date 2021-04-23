@@ -54,7 +54,7 @@ ContactDOFSetSize::initialize()
 void
 ContactDOFSetSize::execute()
 {
-  AllLocalDofIndicesThread aldit(_fe_problem.getNonlinearSystemBase().system(), {_var.name()});
+  AllLocalDofIndicesThread aldit(_fe_problem, {_var.name()});
 
   // Get the element iterators corresponding to the subdomain id
   auto elem_begin = _mesh.active_local_subdomain_elements_begin(_subdomain_id);
