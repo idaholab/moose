@@ -10,6 +10,7 @@
 #include "PicardSolve.h"
 
 #include "Executioner.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
@@ -19,12 +20,12 @@ defineLegacyParams(PicardSolve);
 InputParameters
 PicardSolve::validParams()
 {
-  InputParameters params = IterativeMultiAppSolve::validParams();
+  InputParameters params = FixedPointSolve::validParams();
 
   params.addDeprecatedParam<unsigned int>(
       "picard_max_its",
       1,
-      "Deprecated, use coupling_max_its",
+      "Deprecated, use fixed_point_max_its",
       "Specifies the maximum number of Picard iterations. "
       "Mainly used when  wanting to do Picard iterations with MultiApps "
       "that are set to execute_on timestep_end or timestep_begin. "
@@ -32,69 +33,69 @@ PicardSolve::validParams()
   params.addDeprecatedParam<bool>(
       "accept_on_max_picard_iteration",
       false,
-      "Deprecated, use accept_on_max_coupling_iteration",
+      "Deprecated, use accept_on_max_fixed_point_iteration",
       "True to treat reaching the maximum number of Picard iterations as converged.");
   params.addDeprecatedParam<bool>(
       "disable_picard_residual_norm_check",
       false,
-      "Deprecated, use disable_coupling_residual_norm_check",
+      "Deprecated, use disable_fixed_point_residual_norm_check",
       "Disable the Picard residual norm evaluation thus the three parameters "
       "picard_rel_tol, picard_abs_tol and picard_force_norms.");
   params.addDeprecatedParam<Real>("picard_rel_tol",
                                   1e-8,
-                                  "Deprecated, use coupling_rel_tol",
+                                  "Deprecated, use fixed_point_rel_tol",
                                   "The relative nonlinear residual drop to shoot for "
                                   "during Picard iterations. This check is "
                                   "performed based on the Master app's nonlinear "
                                   "residual.");
   params.addDeprecatedParam<Real>("picard_abs_tol",
                                   1e-50,
-                                  "Deprecated, use coupling_abs_tol",
+                                  "Deprecated, use fixed_point_abs_tol",
                                   "The absolute nonlinear residual to shoot for "
                                   "during Picard iterations. This check is "
                                   "performed based on the Master app's nonlinear "
                                   "residual.");
   params.addDeprecatedParam<PostprocessorName>(
       "picard_custom_pp",
-      "Deprecated, use coupling_custom_pp",
+      "Deprecated, use custom_pp",
       "Postprocessor for custom picard convergence check.");
 
   params.addDeprecatedParam<bool>(
       "picard_force_norms",
       false,
-      "Deprecated, use coupling_force_norms",
+      "Deprecated, use fixed_point_force_norms",
       "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
       "existence of active MultiApps with those execute_on flags, default: false.");
 
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
+PicardSolve::PicardSolve(Executioner * ex) : FixedPointSolve(ex)
 {
   // Handle deprecated parameters
   if (!parameters().isParamSetByAddParam("picard_max_its"))
   {
-    _coupling_max_its = getParam<unsigned int>("picard_max_its");
-    _has_coupling_its = _coupling_max_its > 1;
+    _max_fixed_point_its = getParam<unsigned int>("picard_max_its");
+    _has_fixed_point_its = _max_fixed_point_its > 1;
   }
 
   if (!parameters().isParamSetByAddParam("accept_on_max_picard_iteration"))
     _accept_max_it = getParam<bool>("accept_on_max_picard_iteration");
 
   if (!parameters().isParamSetByAddParam("disable_picard_residual_norm_check"))
-    _has_coupling_norm = !getParam<bool>("disable_picard_residual_norm_check");
+    _has_fixed_point_norm = !getParam<bool>("disable_picard_residual_norm_check");
 
   if (!parameters().isParamSetByAddParam("picard_rel_tol"))
-    _coupling_rel_tol = getParam<Real>("picard_rel_tol");
+    _fixed_point_rel_tol = getParam<Real>("picard_rel_tol");
 
   if (!parameters().isParamSetByAddParam("picard_abs_tol"))
-    _coupling_abs_tol = getParam<Real>("picard_abs_tol");
+    _fixed_point_abs_tol = getParam<Real>("picard_abs_tol");
 
   if (isParamValid("picard_custom_pp"))
-    _coupling_custom_pp = &getPostprocessorValue("picard_custom_pp");
+    _fixed_point_custom_pp = &getPostprocessorValue("picard_custom_pp");
 
   if (!parameters().isParamSetByAddParam("picard_force_norms"))
-    _coupling_force_norms = getParam<bool>("picard_force_norms");
+    _fixed_point_force_norms = getParam<bool>("picard_force_norms");
 
   // Store a copy of the previous solution
   if (_relax_factor != 1)
@@ -104,6 +105,21 @@ PicardSolve::PicardSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)
     _transformed_pps_values[i].resize(1);
+}
+
+void
+PicardSolve::allocateStorageForSecondaryTransformed()
+{
+  if (_secondary_relaxation_factor != 1.)
+  {
+    // Store a copy of the previous solution
+    _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
+
+    // Allocate storage for the previous postprocessor values
+    _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+    for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+      _secondary_transformed_pps_values[i].resize(1);
+  }
 }
 
 void
@@ -145,14 +161,14 @@ PicardSolve::savePreviousValuesAsMainApp()
 }
 
 bool
-PicardSolve::useCouplingAlgorithmUpdate(bool as_main_app)
+PicardSolve::useFixedPointAlgorithmUpdate(bool as_main_app)
 {
-  // unrelaxed Picard is the default update for multiapp coupling
+  // unrelaxed Picard is the default update for fixed point iterations
   // old values are required for relaxation
   if (as_main_app)
-    return _relax_factor != 1. && _coupling_it > 0;
+    return _relax_factor != 1. && _fixed_point_it > 0;
   else
-    return _secondary_relaxation_factor != 1. && _main_coupling_it > 0;
+    return _secondary_relaxation_factor != 1. && _main_fixed_point_it > 0;
 }
 
 void
@@ -220,15 +236,18 @@ PicardSolve::transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_
 }
 
 void
-PicardSolve::printCouplingConvergenceHistory()
+PicardSolve::printFixedPointConvergenceHistory()
 {
   _console << "\n 0 Picard |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm) << '\n';
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
+           << '\n';
 
-  for (unsigned int i = 0; i <= _coupling_it; ++i)
+  for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm = std::max(_coupling_timestep_begin_norm[i], _coupling_timestep_end_norm[i]);
+    Real max_norm =
+        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     _console << std::setw(2) << i + 1
-             << " Picard |R| = " << Console::outputNorm(_coupling_initial_norm, max_norm) << '\n';
+             << " Picard |R| = " << Console::outputNorm(_fixed_point_initial_norm, max_norm)
+             << '\n';
   }
 }

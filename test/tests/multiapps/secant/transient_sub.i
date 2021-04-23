@@ -62,7 +62,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 
-  coupling_algorithm = 'secant'
+  fixed_point_algorithm = 'secant'
 []
 
 [Outputs]

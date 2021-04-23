@@ -33,13 +33,13 @@
 
 [Executioner]
   type = Steady
-  coupling_min_its = 10
-  coupling_max_its = 10
+  fixed_point_min_its = 10
+  fixed_point_max_its = 10
 []
 
 [Postprocessors]
   [num_coupling]
-    type = NumCouplingIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_begin timestep_end'
   []
   [norm]

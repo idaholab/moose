@@ -55,11 +55,11 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  coupling_max_its = 30
+  fixed_point_max_its = 30
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-9
-  coupling_rel_tol = 1e-8
-  coupling_abs_tol = 1e-9
+  fixed_point_rel_tol = 1e-8
+  fixed_point_abs_tol = 1e-9
 []
 
 [Outputs]

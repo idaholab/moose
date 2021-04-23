@@ -53,7 +53,5 @@ x_{n+1} = x_n - \dfrac{f(x_n)}{g(x_{n})}
 Convergence of Steffensen's method is expected to be quadratic when it converges. However because it requires two evaluations of the coupled
 problem before computing the next term, this method is expected to be slower than the secant method. A poor initial guesses can also prevent convergence.
 
-!Note
-When using the secant or Steffensen's methods, only specify variables and postprocessors from either the master application or the sub-applications to be
-accelerated. Specifying in both applications will not provide as much acceleration, due to the current implementation of the methods. Future work may remove this
-limitation.
+!alert note
+When using the secant or Steffensen's methods, only specify variables and postprocessors from either the master application or the sub-applications to be accelerated. Specifying in both applications will not provide as much acceleration, due to the current implementation of the methods. Future work may remove this limitation.

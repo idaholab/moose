@@ -73,7 +73,7 @@
 
 [Postprocessors]
   [picard_its]
-    type = NumCouplingIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
   [master_time]
@@ -99,10 +99,10 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  coupling_max_its = 2 # deliberately make it fail at 2 to test the time step rejection behavior
+  fixed_point_max_its = 2 # deliberately make it fail at 2 to test the time step rejection behavior
   nl_rel_tol = 1e-5 # loose enough to force multiple Picard iterations on this example
   l_tol = 1e-5 # loose enough to force multiple Picard iterations on this example
-  coupling_rel_tol = 1e-8
+  fixed_point_rel_tol = 1e-8
   num_steps = 2
 []
 

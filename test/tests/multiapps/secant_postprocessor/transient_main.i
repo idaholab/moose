@@ -39,7 +39,7 @@
 
 [Postprocessors]
   [coupling_its]
-    type = NumCouplingIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   []
   [from_sub]
@@ -67,8 +67,8 @@
   nl_abs_tol = 1e-14
 
   # App coupling parameters
-  coupling_algorithm = 'secant'
-  coupling_max_its = 30
+  fixed_point_algorithm = 'secant'
+  fixed_point_max_its = 30
   transformed_postprocessors = 'from_sub'
 []
 

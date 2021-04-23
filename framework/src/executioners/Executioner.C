@@ -31,11 +31,11 @@ Executioner::validParams()
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
 
-  MooseEnum MultiAppIterationMethod("picard secant steffensen", "picard");
+  MooseEnum IterationMethod("picard secant steffensen", "picard");
 
-  params.addParam<MooseEnum>("coupling_algorithm",
-                             MultiAppIterationMethod,
-                             "The algorithm to converge the multiapp coupling.");
+  params.addParam<MooseEnum>("fixed_point_algorithm",
+                             IterationMethod,
+                             "The fixed point algorithm to converge the sequence of problems.");
 
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",
@@ -61,7 +61,7 @@ Executioner::Executioner(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _feproblem_solve(this),
-    _multiapp_iteration_method(getParam<MooseEnum>("coupling_algorithm")),
+    _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
@@ -97,16 +97,13 @@ Executioner::Executioner(const InputParameters & parameters)
 
   _fe_problem.numGridSteps(_num_grid_steps);
 
-  // Instantiate the SolveObject for the multiapp coupling iteration
-  if (_multiapp_iteration_method == "picard")
-    _iterative_multiapp_solve =
-        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<PicardSolve>(this));
-  else if (_multiapp_iteration_method == "secant")
-    _iterative_multiapp_solve =
-        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SecantSolve>(this));
-  else if (_multiapp_iteration_method == "steffensen")
-    _iterative_multiapp_solve =
-        std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SteffensenSolve>(this));
+  // Instantiate the SolveObject for the fixed point iteration algorithm
+  if (_iteration_method == "picard")
+    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<PicardSolve>(this));
+  else if (_iteration_method == "secant")
+    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<SecantSolve>(this));
+  else if (_iteration_method == "steffensen")
+    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<SteffensenSolve>(this));
 }
 
 Problem &

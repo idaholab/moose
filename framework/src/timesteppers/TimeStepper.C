@@ -160,7 +160,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = _executioner.iterativeMultiAppSolve()->solve();
+  _converged = _executioner.fixedPointSolve()->solve();
 }
 
 void

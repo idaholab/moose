@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "IterativeMultiAppSolve.h"
+#include "FixedPointSolve.h"
 #include "NonlinearSystem.h"
 
 // System includes
@@ -20,7 +20,7 @@ class PicardSolve;
 template <>
 InputParameters validParams<PicardSolve>();
 
-class PicardSolve : public IterativeMultiAppSolve
+class PicardSolve : public FixedPointSolve
 {
 public:
   PicardSolve(Executioner * ex);
@@ -28,19 +28,7 @@ public:
   static InputParameters validParams();
 
   /// Allocate storage for secondary transformed objects
-  virtual void allocateStorageForSecondaryTransformed() override final
-  {
-    if (_secondary_relaxation_factor != 1.)
-    {
-      // Store a copy of the previous solution
-      _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
-
-      // Allocate storage for the previous postprocessor values
-      _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
-      for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-        _secondary_transformed_pps_values[i].resize(1);
-    }
-  }
+  virtual void allocateStorageForSecondaryTransformed() override final;
 
 protected:
   /// Save the variable values as a SubApp
@@ -50,7 +38,7 @@ protected:
   virtual void savePreviousPostprocessorValuesAsSubApp() override final;
 
   /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useCouplingAlgorithmUpdate(bool as_main_app) override final;
+  virtual bool useFixedPointAlgorithmUpdate(bool as_main_app) override final;
 
   /// Save the previous variables and postprocessors as the main application
   virtual void savePreviousValuesAsMainApp() override final;
@@ -70,5 +58,5 @@ protected:
       const std::set<dof_id_type> & secondary_transformed_dofs) override final;
 
   /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printCouplingConvergenceHistory() override final;
+  virtual void printFixedPointConvergenceHistory() override final;
 };

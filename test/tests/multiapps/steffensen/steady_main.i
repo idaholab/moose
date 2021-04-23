@@ -60,8 +60,8 @@
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-14
 
-  coupling_algorithm = 'steffensen'
-  coupling_max_its = 30
+  fixed_point_algorithm = 'steffensen'
+  fixed_point_max_its = 30
   transformed_variables = 'u'
 []
 

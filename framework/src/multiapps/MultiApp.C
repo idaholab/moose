@@ -789,17 +789,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->runInputFile();
 
   // Transfer coupling relaxation information to the subapps
-  auto iterative_multiapp_solve = _apps[i]->getExecutioner()->iterativeMultiAppSolve();
-  iterative_multiapp_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  iterative_multiapp_solve->setMultiAppTransformedVariables(
+  auto fixed_point_solve = _apps[i]->getExecutioner()->fixedPointSolve();
+  fixed_point_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
+  fixed_point_solve->setMultiAppTransformedVariables(
       getParam<std::vector<std::string>>("transformed_variables"));
   // Handle deprecated parameter
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
-    iterative_multiapp_solve->setMultiAppTransformedVariables(
+    fixed_point_solve->setMultiAppTransformedVariables(
         getParam<std::vector<std::string>>("relaxed_variables"));
-  iterative_multiapp_solve->setMultiAppTransformedPostprocessors(
+  fixed_point_solve->setMultiAppTransformedPostprocessors(
       getParam<std::vector<std::string>>("transformed_postprocessors"));
-  iterative_multiapp_solve->allocateStorageForSecondaryTransformed();
+  fixed_point_solve->allocateStorageForSecondaryTransformed();
 }
 
 std::string

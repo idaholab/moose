@@ -15,7 +15,7 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 #include "FEProblemSolve.h"
-#include "IterativeMultiAppSolve.h"
+#include "FixedPointSolve.h"
 #include "PicardSolve.h"
 #include "SecantSolve.h"
 #include "SteffensenSolve.h"
@@ -119,18 +119,15 @@ public:
   /// Return underlying PicardSolve object.
   PicardSolve & picardSolve()
   {
-    mooseDeprecated("picardSolve() is deprecated. Use iterativeMultiAppSolve() instead.");
-    if (_multiapp_iteration_method == "picard")
-      return *(std::dynamic_pointer_cast<PicardSolve>(_iterative_multiapp_solve));
+    mooseDeprecated("picardSolve() is deprecated. Use FixedPointSolve() instead.");
+    if (_iteration_method == "picard")
+      return *(std::dynamic_pointer_cast<PicardSolve>(_fixed_point_solve));
     else
       mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
   }
 
-  /// Return a pointer to the underlying iterative multiapp solve object.
-  std::shared_ptr<IterativeMultiAppSolve> iterativeMultiAppSolve()
-  {
-    return _iterative_multiapp_solve;
-  }
+  /// Return a pointer to the underlying fixed point solve object.
+  std::shared_ptr<FixedPointSolve> fixedPointSolve() { return _fixed_point_solve; }
 
   /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const
@@ -140,8 +137,8 @@ public:
     return false;
   }
 
-  /// Augmented multiapp coupling convergence check that to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedCouplingConvergenceCheck() const { return false; }
+  /// Augmented fixed point iteration convergence check that to be called by PicardSolve and can be overridden by derived executioners
+  virtual bool augmentedFixedPointConvergenceCheck() const { return false; }
 
   /**
    * Get the verbose output flag
@@ -168,8 +165,8 @@ protected:
 
   FEProblemSolve _feproblem_solve;
 
-  MooseEnum _multiapp_iteration_method;
-  std::shared_ptr<IterativeMultiAppSolve> _iterative_multiapp_solve;
+  MooseEnum _iteration_method;
+  std::shared_ptr<FixedPointSolve> _fixed_point_solve;
 
   // Restart
   std::string _restart_file_base;

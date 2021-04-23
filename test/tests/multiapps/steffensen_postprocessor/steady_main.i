@@ -59,8 +59,8 @@
   nl_abs_tol = 1e-14
 
   # App coupling parameters
-  coupling_algorithm = 'steffensen'
-  coupling_max_its = 100
+  fixed_point_algorithm = 'steffensen'
+  fixed_point_max_its = 100
   transformed_postprocessors = 'from_sub'
 []
 

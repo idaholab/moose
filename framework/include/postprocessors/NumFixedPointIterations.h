@@ -13,14 +13,14 @@
 #include "GeneralPostprocessor.h"
 
 /**
- * Returns the number of coupling iterations taken by the Executioner as a Postprocessor.
+ * Returns the number of fixed point iterations taken by the Executioner as a Postprocessor.
  */
-class NumCouplingIterations : public GeneralPostprocessor
+class NumFixedPointIterations : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  NumCouplingIterations(const InputParameters & parameters);
+  NumFixedPointIterations(const InputParameters & parameters);
 
   virtual void execute() override {}
   virtual void initialize() override{};

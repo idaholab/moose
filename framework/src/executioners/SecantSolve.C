@@ -10,6 +10,7 @@
 #include "SecantSolve.h"
 
 #include "Executioner.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
@@ -19,12 +20,12 @@ defineLegacyParams(SecantSolve);
 InputParameters
 SecantSolve::validParams()
 {
-  InputParameters params = IterativeMultiAppSolve::validParams();
+  InputParameters params = FixedPointSolve::validParams();
 
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
+SecantSolve::SecantSolve(Executioner * ex) : FixedPointSolve(ex)
 {
   // TODO: We would only need to store the solution for the degrees of freedom that
   // will be transformed, not the entire solution.
@@ -38,6 +39,21 @@ SecantSolve::SecantSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)
     _transformed_pps_values[i].resize(4);
+}
+
+void
+SecantSolve::allocateStorageForSecondaryTransformed()
+{
+  // Store a copy of the two previous solutions and their evaluations
+  _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("secondary_fxn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("secondary_xn_m2", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("secondary_fxn_m2", false, PARALLEL);
+
+  // Allocate storage for the previous postprocessor values
+  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+    _secondary_transformed_pps_values[i].resize(4);
 }
 
 void
@@ -106,13 +122,13 @@ SecantSolve::savePreviousValuesAsMainApp()
 }
 
 bool
-SecantSolve::useCouplingAlgorithmUpdate(bool as_main_app)
+SecantSolve::useFixedPointAlgorithmUpdate(bool as_main_app)
 {
   // Need at least two evaluations to compute the Secant slope
   if (as_main_app)
-    return _coupling_it > 1;
+    return _fixed_point_it > 1;
   else
-    return _main_coupling_it > 1;
+    return _main_fixed_point_it > 1;
 }
 
 void
@@ -233,14 +249,16 @@ SecantSolve::transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_
 }
 
 void
-SecantSolve::printCouplingConvergenceHistory()
+SecantSolve::printFixedPointConvergenceHistory()
 {
   _console << "\n 0 Secant initialization |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm) << '\n';
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
+           << '\n';
 
-  for (unsigned int i = 0; i <= _coupling_it; ++i)
+  for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm = std::max(_coupling_timestep_begin_norm[i], _coupling_timestep_end_norm[i]);
+    Real max_norm =
+        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     std::stringstream secant_prefix;
     if (i < 1)
       secant_prefix << " Secant initialization |R| = ";
@@ -248,6 +266,6 @@ SecantSolve::printCouplingConvergenceHistory()
       secant_prefix << " Secant step           |R| = ";
 
     _console << std::setw(2) << i + 1 << secant_prefix.str()
-             << Console::outputNorm(_coupling_initial_norm, max_norm) << '\n';
+             << Console::outputNorm(_fixed_point_initial_norm, max_norm) << '\n';
   }
 }

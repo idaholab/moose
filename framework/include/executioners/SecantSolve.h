@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "IterativeMultiAppSolve.h"
+#include "FixedPointSolve.h"
 #include "NonlinearSystem.h"
 
-class SecantSolve : public IterativeMultiAppSolve
+class SecantSolve : public FixedPointSolve
 {
 public:
   SecantSolve(Executioner * ex);
@@ -20,19 +20,7 @@ public:
   static InputParameters validParams();
 
   /// Allocate storage for secondary transformed objects
-  virtual void allocateStorageForSecondaryTransformed() override final
-  {
-    // Store a copy of the two previous solutions and their evaluations
-    _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
-    _problem.getNonlinearSystemBase().addVector("secondary_fxn_m1", false, PARALLEL);
-    _problem.getNonlinearSystemBase().addVector("secondary_xn_m2", false, PARALLEL);
-    _problem.getNonlinearSystemBase().addVector("secondary_fxn_m2", false, PARALLEL);
-
-    // Allocate storage for the previous postprocessor values
-    _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
-    for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-      _secondary_transformed_pps_values[i].resize(4);
-  }
+  virtual void allocateStorageForSecondaryTransformed() override final;
 
 private:
   /// Save the variable values as a SubApp
@@ -42,7 +30,7 @@ private:
   virtual void savePreviousPostprocessorValuesAsSubApp() override final;
 
   /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useCouplingAlgorithmUpdate(bool as_main_app) override final;
+  virtual bool useFixedPointAlgorithmUpdate(bool as_main_app) override final;
 
   /// Save the previous variables and postprocessors as the main application
   virtual void savePreviousValuesAsMainApp() override final;
@@ -62,5 +50,5 @@ private:
       const std::set<dof_id_type> & secondary_transformed_dofs) override final;
 
   /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printCouplingConvergenceHistory() override final;
+  virtual void printFixedPointConvergenceHistory() override final;
 };

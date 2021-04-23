@@ -61,8 +61,8 @@
   type = SteadyWithPicardCheck
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  coupling_max_its = 30
-  disable_coupling_residual_norm_check = true
+  fixed_point_max_its = 30
+  disable_fixed_point_residual_norm_check = true
   pp_name = unorm
   pp_step_tol = 1e-4
 []

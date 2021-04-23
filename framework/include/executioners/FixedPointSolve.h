@@ -14,17 +14,17 @@
 // System includes
 #include <string>
 
-class IterativeMultiAppSolve;
+class FixedPointSolve;
 
 template <>
-InputParameters validParams<IterativeMultiAppSolve>();
+InputParameters validParams<FixedPointSolve>();
 
-class IterativeMultiAppSolve : public SolveObject
+class FixedPointSolve : public SolveObject
 {
 public:
-  IterativeMultiAppSolve(Executioner * ex);
+  FixedPointSolve(Executioner * ex);
 
-  virtual ~IterativeMultiAppSolve() = default;
+  virtual ~FixedPointSolve() = default;
 
   static InputParameters validParams();
 
@@ -34,8 +34,8 @@ public:
    */
   virtual bool solve() override;
 
-  /// Enumeration for coupling convergence reasons
-  enum class MooseCouplingConvergenceReason
+  /// Enumeration for fixed point convergence reasons
+  enum class MooseFixedPointConvergenceReason
   {
     UNSOLVED = 0,
     CONVERGED_NONLINEAR = 1,
@@ -49,33 +49,33 @@ public:
   };
 
   /**
-   * Get the number of coupling iterations performed
-   * Because this returns the number of coupling iterations, rather than the current
+   * Get the number of fixed point iterations performed
+   * Because this returns the number of fixed point iterations, rather than the current
    * iteration count (which starts at 0), increment by 1.
    *
-   * @return Number of coupling iterations performed
+   * @return Number of fixed point iterations performed
    */
-  unsigned int numCouplingIts() const { return _coupling_it + 1; }
+  unsigned int numFixedPointIts() const { return _fixed_point_it + 1; }
 
-  /// Deprecated getter for the number of coupling iterations
+  /// Deprecated getter for the number of fixed point iterations
   unsigned int numPicardIts() const
   {
-    mooseDeprecated("numPicards() is deprecated. Please use numCouplingIts() instead.");
+    mooseDeprecated("numPicards() is deprecated. Please use numFixedPointIts() instead.");
 
-    return _coupling_it + 1;
+    return _fixed_point_it + 1;
   }
 
   /// Check the solver status
-  MooseCouplingConvergenceReason checkConvergence() const { return _coupling_status; }
+  MooseFixedPointConvergenceReason checkConvergence() const { return _fixed_point_status; }
 
   /// This function checks the _xfem_repeat_step flag set by solve.
   bool XFEMRepeatStep() const { return _xfem_repeat_step; }
 
-  /// Clear coupling status
-  void clearCouplingStatus() { _coupling_status = MooseCouplingConvergenceReason::UNSOLVED; }
+  /// Clear fixed point status
+  void clearFixedPointStatus() { _fixed_point_status = MooseFixedPointConvergenceReason::UNSOLVED; }
 
-  /// Whether or not this has coupling iterations
-  bool hasCouplingIteration() { return _has_coupling_its; }
+  /// Whether or not this has fixed point iterations
+  bool hasFixedPointIteration() { return _has_fixed_point_its; }
 
   /// Set relaxation factor for the current solve as a SubApp
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
@@ -95,21 +95,28 @@ public:
   /// Allocate storage for secondary transformed stuff
   virtual void allocateStorageForSecondaryTransformed() = 0;
 
+  /// Whether sub-applications are automatically advanced no matter what happens during their solves
+  bool autoAdvance() const;
+
+  /// Mark the current solve as failed due to external conditions
+  void failStep() { _fail_step = true; }
+
+protected:
   /// Save the variable values as a SubApp
   virtual void savePreviousVariableValuesAsSubApp() = 0;
 
   /// Save the postprocessor values as a SubApp
   virtual void savePreviousPostprocessorValuesAsSubApp() = 0;
 
-  /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useCouplingAlgorithmUpdate(bool as_main_app) = 0;
+  /// Whether to use the fixed point algorithm (relaxed Picard, Secant, ...) instead of Picard
+  virtual bool useFixedPointAlgorithmUpdate(bool as_main_app) = 0;
 
   /**
-   * Perform one coupling iteration or a full solve.
+   * Perform one fixed point iteration or a full solve.
    *
    * @param begin_norm     Residual norm after timestep_begin execution
    * @param end_norm       Residual norm after timestep_end execution
-   * @param target_dofs    DoFs targetted by the coupling algorithm
+   * @param target_dofs    DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
    *
@@ -123,57 +130,85 @@ public:
   /// Save the previous values for the variables
   virtual void savePreviousValuesAsMainApp() = 0;
 
-  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected
+  /// Compute the new value of the fixed point postprocessors based on the fixed point algorithm selected
   virtual void transformPostprocessorsAsMainApp() = 0;
 
-  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected as a SubApp
+  /// Compute the new value of the fixed point postprocessors based on the fixed point algorithm selected as a SubApp
   virtual void transformPostprocessorsAsSubApp() = 0;
 
-  /// Compute the new value variable values based on the coupling algorithm selected
+  /// Compute the new value variable values based on the fixed point algorithm selected
   virtual void transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) = 0;
 
-  /// Compute the new value variable values based on the coupling algorithm selected as a SubApp
+  /// Compute the new value variable values based on the fixed point algorithm selected as a SubApp
   virtual void
   transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs) = 0;
 
-  /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printCouplingConvergenceHistory() = 0;
+  /// Print the convergence history of the coupling, at every fixed point iteration
+  virtual void printFixedPointConvergenceHistory() = 0;
 
   /// Computes and prints the user-specified postprocessor assessing convergence
   void computeCustomConvergencePostprocessor();
 
   /// Examine the various convergence metrics
-  bool examineCouplingConvergence(bool & converged);
+  bool examineFixedPointConvergence(bool & converged);
 
-  /// Print information about the coupling convergence
-  void printCouplingConvergenceReason();
+  /// Print information about the fixed point convergence
+  void printFixedPointConvergenceReason();
 
-  /// Whether sub-applications are automatically advanced no matter what happens during their solves
-  bool autoAdvance() const;
-
-  /// Mark the current solve as failed due to external conditions
-  void failStep() { _fail_step = true; }
-
-protected:
-  /// Minimum coupling iterations
-  unsigned int _coupling_min_its;
-  /// Maximum coupling iterations
-  unsigned int _coupling_max_its;
-  /// Whether or not we activate coupling iteration
-  bool _has_coupling_its; // TODO: make const once picard parameters are removed
-  /// Whether or not to treat reaching maximum number of coupling iteration as converged
+  /// Minimum fixed point iterations
+  unsigned int _min_fixed_point_its;
+  /// Maximum fixed point iterations
+  unsigned int _max_fixed_point_its;
+  /// Whether or not we activate fixed point iteration
+  bool _has_fixed_point_its; // TODO: make const once picard parameters are removed
+  /// Whether or not to treat reaching maximum number of fixed point iteration as converged
   bool _accept_max_it; // TODO: make const once picard parameters are removed
-  /// Whether or not to use residual norm to check the coupling convergence
-  bool _has_coupling_norm; // TODO: make const once picard parameters are removed
+  /// Whether or not to use residual norm to check the fixed point convergence
+  bool _has_fixed_point_norm; // TODO: make const once picard parameters are removed
   /// Relative tolerance on residual norm
-  Real _coupling_rel_tol; // TODO: make const once picard parameters are removed
+  Real _fixed_point_rel_tol; // TODO: make const once picard parameters are removed
   /// Absolute tolerance on residual norm
-  Real _coupling_abs_tol; // TODO: make const once picard parameters are removed
+  Real _fixed_point_abs_tol; // TODO: make const once picard parameters are removed
   /// Whether or not we force evaluation of residual norms even without multiapps
-  bool _coupling_force_norms; // TODO: make const once picard parameters are removed
+  bool _fixed_point_force_norms; // TODO: make const once picard parameters are removed
 
-  /// Postprocessor value for user-defined coupling convergence check
-  const PostprocessorValue * _coupling_custom_pp; // FIXME Make const once picard_custom_pp is gone
+  /// Postprocessor value for user-defined fixed point convergence check
+  const PostprocessorValue *
+      _fixed_point_custom_pp; // FIXME Make const and private once picard_custom_pp is gone
+
+  /// Relaxation factor for fixed point Iteration
+  const Real _relax_factor;
+  /// The variables (transferred or not) that are going to be relaxed
+  std::vector<std::string> _transformed_vars; // TODO: make const once relaxed_variables is removed
+  /// The postprocessors (transferred or not) that are going to be relaxed
+  const std::vector<std::string> _transformed_pps;
+  /// Previous values of the relaxed postprocessors
+  std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
+
+  /// Relaxation factor outside of fixed point iteration (used as a subapp)
+  Real _secondary_relaxation_factor;
+  /// Variables to be relaxed outside of fixed point iteration (used as a subapp)
+  std::vector<std::string> _secondary_transformed_variables;
+  /// Postprocessors to be relaxed outside of fixed point iteration (used as a subapp)
+  std::vector<std::string> _secondary_transformed_pps;
+  /// Previous values of the postprocessors relaxed outside of the fixed point iteration (used as a subapp)
+  std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
+
+  ///@{ Variables used by the fixed point iteration
+  /// fixed point iteration counter
+  unsigned int _fixed_point_it;
+  /// fixed point iteration counter for the main app
+  unsigned int _main_fixed_point_it;
+  /// Initial residual norm
+  Real _fixed_point_initial_norm;
+  /// Full history of residual norm after evaluation of timestep_begin
+  std::vector<Real> _fixed_point_timestep_begin_norm;
+  /// Full history of residual norm after evaluation of timestep_end
+  std::vector<Real> _fixed_point_timestep_end_norm;
+  /// Status of fixed point solve
+  MooseFixedPointConvergenceReason _fixed_point_status;
+  ///@}
+private:
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value
@@ -187,53 +222,20 @@ protected:
   /// Convergence history of the custom convergence check postprocessor
   std::ostringstream _pp_history;
 
-  /// Relaxation factor for coupling Iteration
-  const Real _relax_factor;
-  /// The variables (transferred or not) that are going to be relaxed
-  std::vector<std::string> _transformed_vars; // TODO: make const once relaxed_variables is removed
-  /// The postprocessors (transferred or not) that are going to be relaxed
-  const std::vector<std::string> _transformed_pps;
-  /// Previous values of the relaxed postprocessors
-  std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
-
-  /// Relaxation factor outside of coupling iteration (used as a subapp)
-  Real _secondary_relaxation_factor;
-  /// Variables to be relaxed outside of coupling iteration (used as a subapp)
-  std::vector<std::string> _secondary_transformed_variables;
-  /// Postprocessors to be relaxed outside of coupling iteration (used as a subapp)
-  std::vector<std::string> _secondary_transformed_pps;
-  /// Previous values of the postprocessors relaxed outside of the coupling iteration (used as a subapp)
-  std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
-
   /// Maximum number of xfem updates per step
   const unsigned int _max_xfem_update;
   /// Controls whether xfem should update the mesh at the beginning of the time step
   const bool _update_xfem_at_timestep_begin;
 
-  /// Timer for coupling iteration
-  const PerfID _coupling_timer;
-
-  ///@{ Variables used by the coupling iteration
-  /// coupling iteration counter
-  unsigned int _coupling_it;
-  /// coupling iteration counter for the main app
-  unsigned int _main_coupling_it;
-  /// Initial residual norm
-  Real _coupling_initial_norm;
-  /// Full history of residual norm after evaluation of timestep_begin
-  std::vector<Real> _coupling_timestep_begin_norm;
-  /// Full history of residual norm after evaluation of timestep_end
-  std::vector<Real> _coupling_timestep_end_norm;
-  /// Status of coupling solve
-  MooseCouplingConvergenceReason _coupling_status;
-  ///@}
+  /// Timer for fixed point iteration
+  const PerfID _fixed_point_timer;
 
   /// Counter for number of xfem updates that have been performed in the current step
   unsigned int _xfem_update_count;
   /// Whether step should be repeated due to xfem modifying the mesh
   bool _xfem_repeat_step;
 
-  /// Time of previous coupling solve as a subapp
+  /// Time of previous fixed point solve as a subapp
   Real _old_entering_time;
 
   /// Console output for whether the solve is skipped or not
@@ -242,7 +244,6 @@ protected:
   /// force the current step to fail, triggering are repeat with a cut dt
   bool _fail_step;
 
-private:
   /// Whether the user has set the auto_advance parameter for handling advancement of
   /// sub-applications in multi-app contexts
   const bool _auto_advance_set_by_user;

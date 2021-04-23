@@ -59,8 +59,8 @@
   nl_abs_tol = 1e-14
 
   # App coupling parameters
-  coupling_max_its = 100
-  coupling_rel_tol = 0.5  # pseudo transient is slow to converge
+  fixed_point_max_its = 100
+  fixed_point_rel_tol = 0.5  # pseudo transient is slow to converge
   relaxation_factor = 0.8
   transformed_postprocessors = 'from_sub'
 []

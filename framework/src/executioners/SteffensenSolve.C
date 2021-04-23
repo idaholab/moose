@@ -10,6 +10,7 @@
 #include "SteffensenSolve.h"
 
 #include "Executioner.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
@@ -17,12 +18,12 @@
 InputParameters
 SteffensenSolve::validParams()
 {
-  InputParameters params = IterativeMultiAppSolve::validParams();
+  InputParameters params = FixedPointSolve::validParams();
 
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
+SteffensenSolve::SteffensenSolve(Executioner * ex) : FixedPointSolve(ex)
 {
   // Store a copy of the state and its first evaluation in the coupled problem
   _problem.getNonlinearSystemBase().addVector("xn_m1", false, PARALLEL);
@@ -34,8 +35,21 @@ SteffensenSolve::SteffensenSolve(Executioner * ex) : IterativeMultiAppSolve(ex)
     _transformed_pps_values[i].resize(2);
 
   // Steffensen method uses half-steps
-  _coupling_min_its *= 2;
-  _coupling_max_its *= 2;
+  _min_fixed_point_its *= 2;
+  _max_fixed_point_its *= 2;
+}
+
+void
+SteffensenSolve::allocateStorageForSecondaryTransformed()
+{
+  // Store a copy of the previous solution here
+  _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector("secondary_fxn_m1", false, PARALLEL);
+
+  // Allocate storage for the previous postprocessor values
+  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+    _secondary_transformed_pps_values[i].resize(2);
 }
 
 void
@@ -47,7 +61,7 @@ SteffensenSolve::savePreviousVariableValuesAsSubApp()
   NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
 
   // What 'solution' is with regards to the Steffensen solve depends on the step
-  if (_main_coupling_it % 2 == 1)
+  if (_main_fixed_point_it % 2 == 1)
     xn_m1 = solution;
   else
     fxn_m1 = solution;
@@ -59,7 +73,7 @@ SteffensenSolve::savePreviousPostprocessorValuesAsSubApp()
   // Save previous postprocessor values
   for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
   {
-    if (_main_coupling_it % 2 == 0)
+    if (_main_fixed_point_it % 2 == 0)
       _secondary_transformed_pps_values[i][1] =
           getPostprocessorValueByName(_secondary_transformed_pps[i]);
     else
@@ -69,14 +83,14 @@ SteffensenSolve::savePreviousPostprocessorValuesAsSubApp()
 }
 
 bool
-SteffensenSolve::useCouplingAlgorithmUpdate(bool as_main_app)
+SteffensenSolve::useFixedPointAlgorithmUpdate(bool as_main_app)
 {
   // Need at least two values to compute the Steffensen update, and the update is only performed
   // every other iteration as two evaluations of the coupled problem are necessary
   if (as_main_app)
-    return _coupling_it > 1 && (_coupling_it % 2 == 0);
+    return _fixed_point_it > 1 && (_fixed_point_it % 2 == 0);
   else
-    return _main_coupling_it > 1 && (_main_coupling_it % 2 == 0);
+    return _main_fixed_point_it > 1 && (_main_fixed_point_it % 2 == 0);
 }
 
 void
@@ -87,7 +101,7 @@ SteffensenSolve::savePreviousValuesAsMainApp()
   NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
 
   // What solution is with regards to the Steffensen solve depends on the step
-  if (_coupling_it % 2 == 1)
+  if (_fixed_point_it % 2 == 1)
     xn_m1 = solution;
   else
     fxn_m1 = solution;
@@ -95,7 +109,7 @@ SteffensenSolve::savePreviousValuesAsMainApp()
   // Set postprocessor previous values
   for (size_t i = 0; i < _transformed_pps.size(); i++)
   {
-    if (_coupling_it % 2 == 0)
+    if (_fixed_point_it % 2 == 0)
       _transformed_pps_values[i][1] = getPostprocessorValueByName(_transformed_pps[i]);
     else
       _transformed_pps_values[i][0] = getPostprocessorValueByName(_transformed_pps[i]);
@@ -204,14 +218,16 @@ SteffensenSolve::transformVariablesAsSubApp(
 }
 
 void
-SteffensenSolve::printCouplingConvergenceHistory()
+SteffensenSolve::printFixedPointConvergenceHistory()
 {
   _console << "\n 0 Steffensen method    |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _coupling_initial_norm) << '\n';
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
+           << '\n';
 
-  for (unsigned int i = 0; i <= _coupling_it; ++i)
+  for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm = std::max(_coupling_timestep_begin_norm[i], _coupling_timestep_end_norm[i]);
+    Real max_norm =
+        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     std::stringstream steffensen_prefix;
     if (i % 2 == 0)
       steffensen_prefix << " Steffensen half-step |R| = ";
@@ -219,6 +235,6 @@ SteffensenSolve::printCouplingConvergenceHistory()
       steffensen_prefix << " Steffensen step      |R| = ";
 
     _console << std::setw(2) << i + 1 << steffensen_prefix.str()
-             << Console::outputNorm(_coupling_initial_norm, max_norm) << '\n';
+             << Console::outputNorm(_fixed_point_initial_norm, max_norm) << '\n';
   }
 }

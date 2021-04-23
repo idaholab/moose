@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IterativeMultiAppSolve.h"
+#include "FixedPointSolve.h"
 
 #include "FEProblem.h"
 #include "Executioner.h"
@@ -18,63 +18,63 @@
 #include "EigenExecutionerBase.h"
 
 InputParameters
-IterativeMultiAppSolve::validParams()
+FixedPointSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 
   params.addParam<unsigned int>(
-      "coupling_min_its", 0, "Specifies the minimum number of coupling iterations.");
+      "fixed_point_min_its", 0, "Specifies the minimum number of fixed point iterations.");
   params.addParam<unsigned int>(
-      "coupling_max_its", 1, "Specifies the maximum number of coupling iterations.");
+      "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
   params.addParam<bool>(
-      "accept_on_max_coupling_iteration",
+      "accept_on_max_fixed_point_iteration",
       false,
-      "True to treat reaching the maximum number of coupling iterations as converged.");
-  params.addParam<bool>("disable_coupling_residual_norm_check",
+      "True to treat reaching the maximum number of fixed point iterations as converged.");
+  params.addParam<bool>("disable_fixed_point_residual_norm_check",
                         false,
                         "Disable the residual norm evaluation thus the three parameters "
-                        "coupling_rel_tol, coupling_abs_tol and coupling_force_norms.");
-  params.addParam<Real>("coupling_rel_tol",
+                        "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
+  params.addParam<Real>("fixed_point_rel_tol",
                         1e-8,
                         "The relative nonlinear residual drop to shoot for "
-                        "during coupling iterations. This check is "
+                        "during fixed point iterations. This check is "
                         "performed based on the main app's nonlinear "
                         "residual.");
-  params.addParam<Real>("coupling_abs_tol",
+  params.addParam<Real>("fixed_point_abs_tol",
                         1e-50,
                         "The absolute nonlinear residual to shoot for "
-                        "during coupling iterations. This check is "
+                        "during fixed point iterations. This check is "
                         "performed based on the main app's nonlinear "
                         "residual.");
   params.addParam<bool>(
-      "coupling_force_norms",
+      "fixed_point_force_norms",
       false,
       "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
       "existence of active MultiApps with those execute_on flags, default: false.");
 
   // Parameters for using a custom postprocessor for convergence checks
-  params.addParam<PostprocessorName>("coupling_custom_pp",
-                                     "Postprocessor for custom coupling convergence check.");
+  params.addParam<PostprocessorName>("custom_pp",
+                                     "Postprocessor for custom fixed point convergence check.");
   params.addParam<Real>("custom_rel_tol",
                         1e-8,
                         "The relative nonlinear residual drop to shoot for "
-                        "during coupling iterations. This check is "
+                        "during fixed point iterations. This check is "
                         "performed based on the postprocessor defined by "
-                        "coupling_custom_pp residual.");
+                        "custom_pp residual.");
   params.addParam<Real>("custom_abs_tol",
                         1e-50,
                         "The absolute nonlinear residual to shoot for "
-                        "during coupling iterations. This check is "
+                        "during fixed point iterations. This check is "
                         "performed based on postprocessor defined by "
-                        "the coupling_custom_pp residual.");
+                        "the custom_pp residual.");
   params.addParam<bool>("direct_pp_value",
                         false,
                         "True to use direct postprocessor value "
                         "(scaled by value on first iteration). "
                         "False (default) to use difference in postprocessor "
-                        "value between coupling iterations.");
+                        "value between fixed point iterations.");
 
-  // Parameters for relaxing the coupling process
+  // Parameters for relaxing the fixed point process
   params.addRangeCheckedParam<Real>("relaxation_factor",
                                     1.0,
                                     "relaxation_factor>0 & relaxation_factor<2",
@@ -83,27 +83,27 @@ IterativeMultiAppSolve::validParams()
   params.addParam<std::vector<std::string>>(
       "transformed_variables",
       std::vector<std::string>(),
-      "List of main app variables to transform during coupling iterations");
+      "List of main app variables to transform during fixed point iterations");
   params.addParam<std::vector<std::string>>(
       "transformed_postprocessors",
       std::vector<std::string>(),
-      "List of main app postprocessors to transform during coupling iterations");
+      "List of main app postprocessors to transform during fixed point iterations");
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
       std::vector<std::string>(),
       "Relaxed variables is deprecated, use transformed_variables instead.",
-      "List of master app variables to relax during coupling iterations");
+      "List of master app variables to relax during fixed point iterations");
 
   params.addParam<bool>("auto_advance",
                         "Whether to automatically advance sub-applications regardless of whether "
                         "their solve converges.");
 
   params.addParamNamesToGroup(
-      "coupling_min_its coupling_max_its accept_on_max_coupling_iteration "
-      "disable_coupling_residual_norm_check coupling_rel_tol coupling_abs_tol "
-      "coupling_force_norms coupling_custom_pp coupling_rel_tol coupling_abs_tol direct_pp_value "
+      "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
+      "disable_fixed_point_residual_norm_check fixed_point_rel_tol fixed_point_abs_tol "
+      "fixed_point_force_norms custom_pp fixed_point_rel_tol fixed_point_abs_tol direct_pp_value "
       "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
-      "Multiapp coupling");
+      "Fixed point iterations");
 
   params.addParam<unsigned int>(
       "max_xfem_update",
@@ -114,41 +114,38 @@ IterativeMultiAppSolve::validParams()
                         "Should XFEM update the mesh at the beginning of the timestep");
 
   params.addParamNamesToGroup("max_xfem_update update_xfem_at_timestep_begin",
-                              "XFEM multiapp coupling");
+                              "XFEM fixed point iterations");
 
   return params;
 }
 
-IterativeMultiAppSolve::IterativeMultiAppSolve(Executioner * ex)
+FixedPointSolve::FixedPointSolve(Executioner * ex)
   : SolveObject(ex),
-    _coupling_min_its(getParam<unsigned int>("coupling_min_its")),
-    _coupling_max_its(getParam<unsigned int>("coupling_max_its")),
-    _has_coupling_its(_coupling_max_its > 1),
-    _accept_max_it(getParam<bool>("accept_on_max_coupling_iteration")),
-    _has_coupling_norm(!getParam<bool>("disable_coupling_residual_norm_check")),
-    _coupling_rel_tol(getParam<Real>("coupling_rel_tol")),
-    _coupling_abs_tol(getParam<Real>("coupling_abs_tol")),
-    _coupling_force_norms(getParam<bool>("coupling_force_norms")),
-
-    _coupling_custom_pp(isParamValid("coupling_custom_pp")
-                            ? &getPostprocessorValue("coupling_custom_pp")
-                            : nullptr),
-    _custom_rel_tol(getParam<Real>("custom_rel_tol")),
-    _custom_abs_tol(getParam<Real>("custom_abs_tol")),
-    _pp_old(0.0),
-    _pp_new(std::numeric_limits<Real>::max()),
-    _pp_scaling(1),
-
+    _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
+    _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
+    _has_fixed_point_its(_max_fixed_point_its > 1),
+    _accept_max_it(getParam<bool>("accept_on_max_fixed_point_iteration")),
+    _has_fixed_point_norm(!getParam<bool>("disable_fixed_point_residual_norm_check")),
+    _fixed_point_rel_tol(getParam<Real>("fixed_point_rel_tol")),
+    _fixed_point_abs_tol(getParam<Real>("fixed_point_abs_tol")),
+    _fixed_point_force_norms(getParam<bool>("fixed_point_force_norms")),
+    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
+                                                     : nullptr),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<std::string>>("transformed_postprocessors")),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
+    _fixed_point_it(0),
+    _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
+    _custom_rel_tol(getParam<Real>("custom_rel_tol")),
+    _custom_abs_tol(getParam<Real>("custom_abs_tol")),
+    _pp_old(0.0),
+    _pp_new(std::numeric_limits<Real>::max()),
+    _pp_scaling(1),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
-    _coupling_timer(registerTimedSection("IterativeMultiAppSolve", 1)),
-    _coupling_it(0),
-    _coupling_status(MooseCouplingConvergenceReason::UNSOLVED),
+    _fixed_point_timer(registerTimedSection("FixedPointSolve", 1)),
     _xfem_update_count(0),
     _xfem_repeat_step(false),
     _old_entering_time(_problem.time() - 1),
@@ -161,9 +158,9 @@ IterativeMultiAppSolve::IterativeMultiAppSolve(Executioner * ex)
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
     _transformed_vars = getParam<std::vector<std::string>>("relaxed_variables");
 
-  if (_coupling_min_its > _coupling_max_its)
-    paramError("coupling_min_its",
-               "The minimum number of coupling iterations may not exceed the maximum.");
+  if (_min_fixed_point_its > _max_fixed_point_its)
+    paramError("fixed_point_min_its",
+               "The minimum number of fixed point iterations may not exceed the maximum.");
 
   if (_transformed_vars.size() > 0 && _transformed_pps.size() > 0)
     mooseWarning(
@@ -172,20 +169,20 @@ IterativeMultiAppSolve::IterativeMultiAppSolve(Executioner * ex)
 }
 
 bool
-IterativeMultiAppSolve::solve()
+FixedPointSolve::solve()
 {
-  TIME_SECTION(_coupling_timer);
+  TIME_SECTION(_fixed_point_timer);
 
   Real current_dt = _problem.dt();
 
-  _coupling_timestep_begin_norm.clear();
-  _coupling_timestep_end_norm.clear();
-  _coupling_timestep_begin_norm.resize(_coupling_max_its);
-  _coupling_timestep_end_norm.resize(_coupling_max_its);
+  _fixed_point_timestep_begin_norm.clear();
+  _fixed_point_timestep_end_norm.clear();
+  _fixed_point_timestep_begin_norm.resize(_max_fixed_point_its);
+  _fixed_point_timestep_end_norm.resize(_max_fixed_point_its);
 
   bool converged = true;
 
-  // need to back up multi-apps even when not doing coupling iteration for recovering from failed
+  // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
   // multiapp solve
   _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
   _problem.backupMultiApps(EXEC_TIMESTEP_END);
@@ -219,30 +216,30 @@ IterativeMultiAppSolve::solve()
     if (_old_entering_time == _problem.time())
     {
       // Keep track of the iteration number of the main app
-      _main_coupling_it++;
+      _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
       savePreviousVariableValuesAsSubApp();
     }
     else
-      _main_coupling_it = 0;
+      _main_fixed_point_it = 0;
   }
 
-  for (_coupling_it = 0; _coupling_it < _coupling_max_its; ++_coupling_it)
+  for (_fixed_point_it = 0; _fixed_point_it < _max_fixed_point_its; ++_fixed_point_it)
   {
-    if (_has_coupling_its)
+    if (_has_fixed_point_its)
     {
-      if (_coupling_it == 0)
+      if (_fixed_point_it == 0)
       {
-        if (_has_coupling_norm)
+        if (_has_fixed_point_norm)
         {
-          // First coupling iteration - need to save off the initial nonlinear residual
-          _coupling_initial_norm = _problem.computeResidualL2Norm();
-          _console << COLOR_MAGENTA << "Initial coupling residual norm: " << COLOR_DEFAULT;
-          if (_coupling_initial_norm == std::numeric_limits<Real>::max())
+          // First fixed point iteration - need to save off the initial nonlinear residual
+          _fixed_point_initial_norm = _problem.computeResidualL2Norm();
+          _console << COLOR_MAGENTA << "Initial fixed point residual norm: " << COLOR_DEFAULT;
+          if (_fixed_point_initial_norm == std::numeric_limits<Real>::max())
             _console << " MAX ";
           else
-            _console << std::scientific << _coupling_initial_norm;
+            _console << std::scientific << _fixed_point_initial_norm;
           _console << COLOR_DEFAULT << "\n\n";
         }
       }
@@ -253,33 +250,33 @@ IterativeMultiAppSolve::solve()
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
       }
 
-      _console << COLOR_MAGENTA << "Beginning coupling Iteration " << _coupling_it << COLOR_DEFAULT
-               << '\n';
+      _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
+               << COLOR_DEFAULT << '\n';
     }
 
     // Save last postprocessor value as value before solve
-    if (_coupling_custom_pp && _coupling_it > 0 && !getParam<bool>("direct_pp_value"))
-      _pp_old = *_coupling_custom_pp;
+    if (_fixed_point_custom_pp && _fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
+      _pp_old = *_fixed_point_custom_pp;
 
     // Solve a single application for one time step
-    bool solve_converged = solveStep(_coupling_timestep_begin_norm[_coupling_it],
-                                     _coupling_timestep_end_norm[_coupling_it],
+    bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
+                                     _fixed_point_timestep_end_norm[_fixed_point_it],
                                      transformed_dofs);
 
     // Get new value and print history for the custom postprocessor convergence criterion
-    if (_coupling_custom_pp)
+    if (_fixed_point_custom_pp)
       computeCustomConvergencePostprocessor();
 
     if (solve_converged)
     {
-      if (_has_coupling_its)
+      if (_has_fixed_point_its)
       {
-        if (_has_coupling_norm)
-          // Print the evolution of the main app residual over the coupling iterations
-          printCouplingConvergenceHistory();
+        if (_has_fixed_point_norm)
+          // Print the evolution of the main app residual over the fixed point iterations
+          printFixedPointConvergenceHistory();
 
         // Examine convergence metrics & properties and set the convergence reason
-        bool break_out = examineCouplingConvergence(converged);
+        bool break_out = examineFixedPointConvergence(converged);
         if (break_out)
           break;
       }
@@ -303,8 +300,8 @@ IterativeMultiAppSolve::solve()
 
   if (converged)
   {
-    // Update the subapp using the coupling algorithm
-    if (_secondary_transformed_variables.size() > 0 && useCouplingAlgorithmUpdate(false) &&
+    // Update the subapp using the fixed point algorithm
+    if (_secondary_transformed_variables.size() > 0 && useFixedPointAlgorithmUpdate(false) &&
         _old_entering_time == _problem.time())
       transformVariablesAsSubApp(secondary_transformed_dofs);
 
@@ -312,39 +309,39 @@ IterativeMultiAppSolve::solve()
     _old_entering_time = _problem.time();
   }
 
-  if (_has_coupling_its)
-    printCouplingConvergenceReason();
+  if (_has_fixed_point_its)
+    printFixedPointConvergenceReason();
 
   return converged;
 }
 
 bool
-IterativeMultiAppSolve::solveStep(Real & begin_norm,
-                                  Real & end_norm,
-                                  const std::set<dof_id_type> & transformed_dofs)
+FixedPointSolve::solveStep(Real & begin_norm,
+                           Real & end_norm,
+                           const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
 
   // Compute previous norms for coloring the norm output
-  Real begin_norm_old = (_coupling_it > 0 ? _coupling_timestep_begin_norm[_coupling_it - 1]
-                                          : std::numeric_limits<Real>::max());
-  Real end_norm_old = (_coupling_it > 0 ? _coupling_timestep_end_norm[_coupling_it - 1]
-                                        : std::numeric_limits<Real>::max());
+  Real begin_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_begin_norm[_fixed_point_it - 1]
+                                             : std::numeric_limits<Real>::max());
+  Real end_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_end_norm[_fixed_point_it - 1]
+                                           : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
   {
-    _coupling_status = MooseCouplingConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
     return false;
   }
 
-  // Transform the coupling postprocessors before solving, but after the timestep_begin transfers
+  // Transform the fixed point postprocessors before solving, but after the timestep_begin transfers
   // have been received
-  if (_transformed_pps.size() > 0 && useCouplingAlgorithmUpdate(true))
+  if (_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdate(true))
     transformPostprocessorsAsMainApp();
-  if (_secondary_transformed_pps.size() > 0 && useCouplingAlgorithmUpdate(false) &&
+  if (_secondary_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdate(false) &&
       _problem.time() == _old_entering_time)
     transformPostprocessorsAsSubApp();
 
@@ -353,12 +350,12 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
 
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  if (_has_coupling_its && _has_coupling_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _coupling_force_norms)
+  if (_has_fixed_point_its && _has_fixed_point_norm)
+    if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _fixed_point_force_norms)
     {
       begin_norm = _problem.computeResidualL2Norm();
 
-      _console << COLOR_MAGENTA << "Coupling residual norm after TIMESTEP_BEGIN MultiApps: "
+      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_BEGIN MultiApps: "
                << Console::outputNorm(begin_norm_old, begin_norm) << '\n';
     }
 
@@ -371,11 +368,11 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
   // Save previous solutions
   savePreviousValuesAsMainApp();
 
-  if (_has_coupling_its)
+  if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:\n" << COLOR_DEFAULT;
   if (!_inner_solve->solve())
   {
-    _coupling_status = MooseCouplingConvergenceReason::DIVERGED_NONLINEAR;
+    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
 
     _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
     // Perform the output of the current, failed time step (this only occurs if desired)
@@ -383,12 +380,12 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
     return false;
   }
   else
-    _coupling_status = MooseCouplingConvergenceReason::CONVERGED_NONLINEAR;
+    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_NONLINEAR;
 
   _console << COLOR_GREEN << ' ' << _solve_message << COLOR_DEFAULT << std::endl;
 
-  // Use the coupling algorithm if the conditions (availability of values, etc) are met
-  if (_transformed_vars.size() > 0 && useCouplingAlgorithmUpdate(true))
+  // Use the fixed point algorithm if the conditions (availability of values, etc) are met
+  if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdate(true))
     transformVariablesAsMainApp(transformed_dofs);
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
@@ -412,7 +409,7 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
     _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
     {
-      _coupling_status = MooseCouplingConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
     }
   }
@@ -425,12 +422,12 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
 
   _executioner.postSolve();
 
-  if (_has_coupling_its && _has_coupling_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _coupling_force_norms)
+  if (_has_fixed_point_its && _has_fixed_point_norm)
+    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
     {
       end_norm = _problem.computeResidualL2Norm();
 
-      _console << COLOR_MAGENTA << "Coupling iteration residual after TIMESTEP_END MultiApps: "
+      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_END MultiApps: "
                << Console::outputNorm(end_norm_old, end_norm) << '\n';
     }
 
@@ -438,65 +435,65 @@ IterativeMultiAppSolve::solveStep(Real & begin_norm,
 }
 
 void
-IterativeMultiAppSolve::computeCustomConvergencePostprocessor()
+FixedPointSolve::computeCustomConvergencePostprocessor()
 {
-  if ((_coupling_it == 0 && getParam<bool>("direct_pp_value")) ||
+  if ((_fixed_point_it == 0 && getParam<bool>("direct_pp_value")) ||
       !getParam<bool>("direct_pp_value"))
-    _pp_scaling = *_coupling_custom_pp;
-  _pp_new = *_coupling_custom_pp;
+    _pp_scaling = *_fixed_point_custom_pp;
+  _pp_new = *_fixed_point_custom_pp;
 
-  auto ppname = getParam<PostprocessorName>("coupling_custom_pp");
-  _pp_history << std::setw(2) << _coupling_it + 1 << " coupling " << ppname << " = "
+  auto ppname = getParam<PostprocessorName>("custom_pp");
+  _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
               << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new) << "\n";
   _console << _pp_history.str();
 }
 
 bool
-IterativeMultiAppSolve::examineCouplingConvergence(bool & converged)
+FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  if (_coupling_it + 2 > _coupling_min_its)
+  if (_fixed_point_it + 2 > _min_fixed_point_its)
   {
-    Real max_norm = std::max(_coupling_timestep_begin_norm[_coupling_it],
-                             _coupling_timestep_end_norm[_coupling_it]);
+    Real max_norm = std::max(_fixed_point_timestep_begin_norm[_fixed_point_it],
+                             _fixed_point_timestep_end_norm[_fixed_point_it]);
 
-    Real max_relative_drop = max_norm / _coupling_initial_norm;
+    Real max_relative_drop = max_norm / _fixed_point_initial_norm;
 
-    if (_has_coupling_norm && max_norm < _coupling_abs_tol)
+    if (_has_fixed_point_norm && max_norm < _fixed_point_abs_tol)
     {
-      _coupling_status = MooseCouplingConvergenceReason::CONVERGED_ABS;
+      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_ABS;
       return true;
     }
-    if (_has_coupling_norm && max_relative_drop < _coupling_rel_tol)
+    if (_has_fixed_point_norm && max_relative_drop < _fixed_point_rel_tol)
     {
-      _coupling_status = MooseCouplingConvergenceReason::CONVERGED_RELATIVE;
+      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
   }
-  if (_executioner.augmentedCouplingConvergenceCheck())
+  if (_executioner.augmentedFixedPointConvergenceCheck())
   {
-    _coupling_status = MooseCouplingConvergenceReason::CONVERGED_CUSTOM;
+    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
     return true;
   }
   if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
   {
-    _coupling_status = MooseCouplingConvergenceReason::CONVERGED_CUSTOM;
+    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
     return true;
   }
   if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
   {
-    _coupling_status = MooseCouplingConvergenceReason::CONVERGED_CUSTOM;
+    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
     return true;
   }
-  if (_coupling_it + 1 == _coupling_max_its)
+  if (_fixed_point_it + 1 == _max_fixed_point_its)
   {
     if (_accept_max_it)
     {
-      _coupling_status = MooseCouplingConvergenceReason::REACH_MAX_ITS;
+      _fixed_point_status = MooseFixedPointConvergenceReason::REACH_MAX_ITS;
       converged = true;
     }
     else
     {
-      _coupling_status = MooseCouplingConvergenceReason::DIVERGED_MAX_ITS;
+      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS;
       converged = false;
     }
     return true;
@@ -505,47 +502,47 @@ IterativeMultiAppSolve::examineCouplingConvergence(bool & converged)
 }
 
 void
-IterativeMultiAppSolve::printCouplingConvergenceReason()
+FixedPointSolve::printFixedPointConvergenceReason()
 {
-  _console << "Multiapp coupling convergence reason: ";
-  switch (_coupling_status)
+  _console << "Fixed point convergence reason: ";
+  switch (_fixed_point_status)
   {
-    case MooseCouplingConvergenceReason::CONVERGED_ABS:
+    case MooseFixedPointConvergenceReason::CONVERGED_ABS:
       _console << "CONVERGED_ABS";
       break;
-    case MooseCouplingConvergenceReason::CONVERGED_RELATIVE:
+    case MooseFixedPointConvergenceReason::CONVERGED_RELATIVE:
       _console << "CONVERGED_RELATIVE";
       break;
-    case MooseCouplingConvergenceReason::CONVERGED_CUSTOM:
+    case MooseFixedPointConvergenceReason::CONVERGED_CUSTOM:
       _console << "CONVERGED_CUSTOM";
       break;
-    case MooseCouplingConvergenceReason::REACH_MAX_ITS:
+    case MooseFixedPointConvergenceReason::REACH_MAX_ITS:
       _console << "REACH_MAX_ITS";
       break;
-    case MooseCouplingConvergenceReason::DIVERGED_MAX_ITS:
+    case MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS:
       _console << "DIVERGED_MAX_ITS";
       break;
-    case MooseCouplingConvergenceReason::DIVERGED_NONLINEAR:
+    case MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR:
       _console << "DIVERGED_NONLINEAR";
       break;
-    case MooseCouplingConvergenceReason::DIVERGED_FAILED_MULTIAPP:
+    case MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP:
       _console << "DIVERGED_FAILED_MULTIAPP";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling
       // iteration is not on here
-      mooseError("Internal error: wrong coupling status!");
+      mooseError("Internal error: wrong fixed point status!");
       break;
   }
   _console << std::endl;
 }
 
 bool
-IterativeMultiAppSolve::autoAdvance() const
+FixedPointSolve::autoAdvance() const
 {
-  bool auto_advance = !(_has_coupling_its && _problem.isTransient());
+  bool auto_advance = !(_has_fixed_point_its && _problem.isTransient());
 
-  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_coupling_its)
+  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_fixed_point_its)
     auto_advance = true;
 
   if (_auto_advance_set_by_user)

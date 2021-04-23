@@ -51,7 +51,7 @@
 
 [Postprocessors]
   [coupling_its]
-    type = NumCouplingIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   []
   [unorm]
@@ -69,8 +69,8 @@
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-14
 
-  coupling_algorithm = 'secant'
-  coupling_max_its = 30
+  fixed_point_algorithm = 'secant'
+  fixed_point_max_its = 30
   transformed_variables = 'u'
 []
 

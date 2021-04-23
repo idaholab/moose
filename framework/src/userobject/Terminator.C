@@ -126,7 +126,7 @@ Terminator::execute()
     {
       _console << name() << " is marking the current solve step as failed.\n";
       handleMessage();
-      getMooseApp().getExecutioner()->iterativeMultiAppSolve()->failStep();
+      getMooseApp().getExecutioner()->fixedPointSolve()->failStep();
     }
   }
 }

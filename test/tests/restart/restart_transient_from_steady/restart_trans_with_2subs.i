@@ -102,9 +102,9 @@
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-7
 
-  coupling_rel_tol = 1e-7
-  coupling_abs_tol = 1e-07
-  coupling_max_its = 4
+  fixed_point_rel_tol = 1e-7
+  fixed_point_abs_tol = 1e-07
+  fixed_point_max_its = 4
 
   line_search = none
 []

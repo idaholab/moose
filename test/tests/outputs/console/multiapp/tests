@@ -15,14 +15,14 @@
   [./ts_begin_multi_output]
     type = 'RunApp'
     input = 'picard_master.i'
-    absent_out = "Coupling residual norm after TIMESTEP_END"
+    absent_out = "Fixed point residual norm after TIMESTEP_END"
 
     requirement = "The system shall only output the coupling iteration residual TIMESTEP_BEGIN norms when there are no TIMESTEP_END Multiapps."
   [../]
   [./ts_end_multi_output]
     type = 'RunApp'
     input = 'picard_master.i'
-    absent_out = "Coupling residual norm after TIMESTEP_BEGIN"
+    absent_out = "Fixed point residual norm after TIMESTEP_BEGIN"
     cli_args = 'MultiApps/sub/execute_on=timestep_end'
 
     requirement = "The system shall only output the coupling iteration TIMESTEP_END norms when there are no TIMESTEP_BEGIN Multiapps."
@@ -30,7 +30,7 @@
   [./ts_both_multi_output]
     type = 'RunApp'
     input = 'picard_master_both.i'
-    expect_out = "Coupling residual norm after TIMESTEP_END.*Coupling residual norm after TIMESTEP_BEGIN"
+    expect_out = "Fixed point residual norm after TIMESTEP_BEGIN.*Fixed point residual norm after TIMESTEP_END"
 
     requirement = "The system shall output the coupling iteration residual norm for TIMESTEP_BEGIN and TIMESTEP_END Multiapps when both exist in the simulation."
   [../]

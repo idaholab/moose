@@ -25,7 +25,6 @@ public:
   virtual void execute() override;
 
 protected:
-  Transient * _transient_executioner = nullptr;
   const MultiMooseEnum & _items;
 
   // Reporter values to return (all are computed as "replicated" values)

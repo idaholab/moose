@@ -79,7 +79,7 @@ ChangeOverPicardPostprocessor::getValue()
   // detect the beginning of a new Picard iteration process
   // it can either a new time step or a failed time step
   bool new_time_step = false;
-  if (_app.getExecutioner()->iterativeMultiAppSolve()->numCouplingIts() == 1)
+  if (_app.getExecutioner()->fixedPointSolve()->numFixedPointIts() == 1)
   {
     // new time step
     if (_t_step != _t_step_old)
