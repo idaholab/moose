@@ -7,7 +7,7 @@ MOOSETOOLS_DIR = os.getenv('MOOSETOOLS_DIR', None)
 if MOOSETOOLS_DIR is not None:
     print("Testing with 'moosetools' from {}".format(MOOSETOOLS_DIR))
     sys.path.append(MOOSETOOLS_DIR)
-    from moosetools.moosetest import TestHarness
+    from moosetools.testharness import TestHarness
 else:
     sys.path.append(os.path.join(MOOSE_DIR, 'python'))
     from TestHarness import TestHarness

@@ -96,6 +96,7 @@ class Tester(MooseObject):
         params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
         params.addParam('requires', None, "A list of programs required for the test to operate, as tested with shutil.which.")
         params.addParam("working_directory", None, "When set, TestHarness will enter this directory before running test")
+        params.addParam('moosetools', None, "Flag used by 'moosetools' version.")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
