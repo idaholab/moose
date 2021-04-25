@@ -22,11 +22,14 @@ BoundaryMarker::validParams()
   params.addRequiredParam<MooseEnum>(
       "mark", marker_states, "How to mark elements adjacent to the boundary.");
   params.addRequiredParam<BoundaryName>("next_to", "Boundary to refine elements along");
+  params.addParam<Real>("distance", 0.0, "Distance from the boundary to refine within");
   return params;
 }
 
 BoundaryMarker::BoundaryMarker(const InputParameters & parameters)
   : Marker(parameters),
+    _distance(getParam<Real>("distance")),
+    _bnd_elem_ids(_mesh.getBoundariesToElems()),
     _mark(parameters.get<MooseEnum>("mark").getEnum<MarkerValue>()),
     _boundary(_mesh.getBoundaryID(getParam<BoundaryName>("next_to")))
 {
@@ -35,15 +38,28 @@ BoundaryMarker::BoundaryMarker(const InputParameters & parameters)
 Marker::MarkerValue
 BoundaryMarker::computeElementMarker()
 {
-  const auto nsides = _current_elem->n_sides();
-
-  for (unsigned int side = 0; side < nsides; ++side)
+  if (_distance == 0.0)
   {
-    auto ids = _mesh.getBoundaryIDs(_current_elem, side);
-    for (auto id : ids)
-      if (id == _boundary)
-        return _mark;
-  }
+    if (_mesh.isBoundaryElem(_current_elem->id(), _boundary))
+      return _mark;
 
-  return DONT_MARK;
+    return DONT_MARK;
+  }
+  else
+  {
+    const auto it = _bnd_elem_ids.find(_boundary);
+    if (it != _bnd_elem_ids.end())
+      for (const auto id : it->second)
+      {
+        const auto elem = _mesh.elemPtr(id);
+        if (elem)
+        {
+          const auto r = _current_elem->centroid() - elem->centroid();
+          if (r.norm() < _distance)
+            return _mark;
+        }
+      }
+
+    return DONT_MARK;
+  }
 }
