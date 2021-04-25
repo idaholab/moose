@@ -24,6 +24,8 @@ public:
 protected:
   virtual MarkerValue computeElementMarker() override;
 
+  const Real _distance;
+  const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> & _bnd_elem_ids;
   MarkerValue _mark;
   BoundaryID _boundary;
 };
