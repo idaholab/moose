@@ -182,6 +182,16 @@ protected:
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;
 
+  // @{ Point-not-found behavior
+  enum class PointNotFoundBehavior
+  {
+    ERROR,
+    WARNING,
+    IGNORE
+  };
+  const PointNotFoundBehavior _point_not_found_behavior;
+  // @}
+
 private:
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
