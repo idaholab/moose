@@ -31,6 +31,13 @@
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
   []
+  [1d-porous-kt]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DPorousKT
+    requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a Kurganov-Tadmor discretization scheme for the advection flux, with specified temperature and momentum at one boundary and specified pressure at another boundary, and including continuously varying porosity and a linear drag term.'
+    required_python_packages = 'pandas matplotlib'
+  []
   [sources_give_hllc_problems_irregular]
     requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
     [hllc_with_volume_source]
