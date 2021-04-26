@@ -501,9 +501,6 @@ Coupleable::coupledVectorTagValue(const std::string & var_name,
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledValue(var_name, comp);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
@@ -542,9 +539,6 @@ Coupleable::coupledVectorTagGradient(const std::string & var_name,
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledGradient(var_name, comp);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
@@ -576,9 +570,6 @@ Coupleable::coupledVectorTagDofValue(const std::string & var_name,
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledDofValues(var_name, comp);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
@@ -2031,9 +2022,6 @@ Coupleable::coupledVectorTagValues(const std::string & var_name, const std::stri
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledValues(var_name);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
@@ -2058,9 +2046,6 @@ Coupleable::coupledVectorTagGradients(const std::string & var_name,
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledGradients(var_name);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
@@ -2085,9 +2070,6 @@ Coupleable::coupledVectorTagDofValues(const std::string & var_name,
     mooseError("Tag name parameter '", tag_name, "' is invalid");
 
   TagName tagname = _c_parameters.get<TagName>(tag_name);
-  if (tagname == Moose::SOLUTION_TAG)
-    return coupledAllDofValues(var_name);
-
   if (!_c_fe_problem.vectorTagExists(tagname))
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 

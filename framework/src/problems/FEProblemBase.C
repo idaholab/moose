@@ -477,6 +477,10 @@ FEProblemBase::createTagSolutions()
     _nl->addVector(tag, false, GHOSTED);
     _aux->addVector(tag, false, GHOSTED);
   }
+
+  auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+  _nl->associateVectorToTag(*_nl->system().current_local_solution.get(), tag);
+  _aux->associateVectorToTag(*_aux->system().current_local_solution.get(), tag);
 }
 
 void

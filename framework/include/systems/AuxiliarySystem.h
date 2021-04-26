@@ -97,7 +97,6 @@ public:
 
   const NumericVector<Number> * const & currentSolution() const override
   {
-    _current_solution = _sys.current_local_solution.get();
     return _current_solution;
   }
 
@@ -178,7 +177,7 @@ protected:
   ExplicitSystem & _sys;
 
   /// solution vector from nonlinear solver
-  mutable const NumericVector<Number> * _current_solution;
+  const NumericVector<Number> * _current_solution;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// solution vector for u^dot
