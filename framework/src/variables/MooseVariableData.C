@@ -1917,8 +1917,21 @@ template <typename OutputType>
 const typename MooseVariableData<OutputType>::DoFValue &
 MooseVariableData<OutputType>::vectorTagDofValue(TagID tag) const
 {
-  _need_vector_tag_dof_u[tag] = true;
-  return _vector_tags_dof_u[tag];
+  // we need to check special tags until we use tagging for all evaluations
+  // otherwise we will have redundant evaluations.
+  if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+    return dofValues();
+  else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return dofValuesOld();
+  else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLDER_SOLUTION_TAG))
+    return dofValuesOlder();
+  else
+  {
+    _need_vector_tag_dof_u[tag] = true;
+    return _vector_tags_dof_u[tag];
+  }
 }
 
 template <typename OutputType>
@@ -2202,15 +2215,28 @@ MooseVariableData<OutputType>::nodalVectorTagValue(TagID tag) const
 {
   if (isNodal())
   {
-    _need_vector_tag_dof_u[tag] = true;
-
-    if (_sys.hasVector(tag) && tag < _vector_tags_dof_u.size())
-      return _vector_tags_dof_u[tag];
+    // we need to check special tags until we use tagging for all evaluations
+    // otherwise we will have redundant evaluations.
+    if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+      return dofValues();
+    else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+             tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+      return dofValuesOld();
+    else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+             tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+      return dofValuesOlder();
     else
-      mooseError("Tag is not associated with any vector or there is no any data for tag ",
-                 tag,
-                 " for nodal variable ",
-                 _var.name());
+    {
+      _need_vector_tag_dof_u[tag] = true;
+
+      if (_sys.hasVector(tag) && tag < _vector_tags_dof_u.size())
+        return _vector_tags_dof_u[tag];
+      else
+        mooseError("Tag is not associated with any vector or there is no any data for tag ",
+                   tag,
+                   " for nodal variable ",
+                   _var.name());
+    }
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -2244,30 +2270,56 @@ template <typename OutputType>
 const typename MooseVariableData<OutputType>::FieldVariableValue &
 MooseVariableData<OutputType>::vectorTagValue(TagID tag) const
 {
-  _need_vector_tag_u[tag] = true;
-
-  if (_sys.hasVector(tag) && tag < _vector_tag_u.size())
-    return _vector_tag_u[tag];
+  // we need to check special tags until we use tagging for all evaluations
+  // otherwise we will have redundant evaluations.
+  if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+    return sln(Moose::Current);
+  else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return sln(Moose::Old);
+  else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return sln(Moose::Older);
   else
-    mooseError("Tag is not associated with any vector or there is no any data for tag ",
-               tag,
-               " for variable ",
-               _var.name());
+  {
+    _need_vector_tag_u[tag] = true;
+
+    if (_sys.hasVector(tag) && tag < _vector_tag_u.size())
+      return _vector_tag_u[tag];
+    else
+      mooseError("Tag is not associated with any vector or there is no any data for tag ",
+                 tag,
+                 " for variable ",
+                 _var.name());
+  }
 }
 
 template <typename OutputType>
 const typename MooseVariableData<OutputType>::FieldVariableGradient &
 MooseVariableData<OutputType>::vectorTagGradient(TagID tag) const
 {
-  _need_vector_tag_grad[tag] = true;
-
-  if (_sys.hasVector(tag) && tag < _vector_tag_grad.size())
-    return _vector_tag_grad[tag];
+  // we need to check special tags until we use tagging for all evaluations
+  // otherwise we will have redundant evaluations.
+  if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+    return gradSln(Moose::Current);
+  else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return gradSln(Moose::Old);
+  else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return gradSln(Moose::Older);
   else
-    mooseError("Tag is not associated with any vector or there is no any data for tag ",
-               tag,
-               " for variable ",
-               _var.name());
+  {
+    _need_vector_tag_grad[tag] = true;
+
+    if (_sys.hasVector(tag) && tag < _vector_tag_grad.size())
+      return _vector_tag_grad[tag];
+    else
+      mooseError("Tag is not associated with any vector or there is no any data for tag ",
+                 tag,
+                 " for variable ",
+                 _var.name());
+  }
 }
 
 template <typename OutputType>
