@@ -47,6 +47,7 @@ class ConvergencePlot(object):
         plt.grid(True, which='both', color=[0.8]*3)
 
         self.label_to_slope = {}
+        self.label_to_intercept = {}
 
     def plot(self, df, label=None, title=None, num_fitted_points=None, slope_precision=3, **kwargs):
         num_y_columns = len(df.columns) - 1
@@ -75,11 +76,14 @@ class ConvergencePlot(object):
                 this_label = label[i-1]
 
             if num_fitted_points is not None:
-                slope = self._fit(x[-num_fitted_points:], y[-num_fitted_points:])
+                coeffs = self._fit(x[-num_fitted_points:], y[-num_fitted_points:])
             else:
-                slope = self._fit(x, y)
+                coeffs = self._fit(x, y)
 
+            slope = coeffs[0]
+            intercept = coeffs[1]
             self.label_to_slope.update({this_label:slope})
+            self.label_to_intercept.update({this_label:intercept})
 
             this_label = '{}: {:.{precision}f}'.format(this_label, slope, precision=slope_precision)
 
@@ -105,7 +109,7 @@ class ConvergencePlot(object):
 
         # Perform fit
         coefficients = np.polyfit(np.log10(x), np.log10(y), 1)
-        return coefficients[0]
+        return coefficients
 
     def save(self, filename):
         """
