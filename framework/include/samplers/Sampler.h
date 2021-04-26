@@ -310,6 +310,10 @@ private:
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
 
+  /// The minimum number of processors that are associated with a set of rows
+  /// Must be consistent with MultiApp::_min_procs_per_app
+  const dof_id_type _min_procs_per_row;
+
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;
 

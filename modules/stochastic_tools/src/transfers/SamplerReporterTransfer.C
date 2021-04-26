@@ -72,9 +72,12 @@ SamplerReporterTransfer::initializeFromMultiapp()
 void
 SamplerReporterTransfer::executeFromMultiapp()
 {
-  const dof_id_type n = _multi_app->numGlobalApps();
-  for (MooseIndex(n) i = 0; i < n; i++)
-    transferStochasticReporters(_global_index, i);
+  if (_multi_app->isRootProcessor())
+  {
+    const dof_id_type n = _multi_app->numGlobalApps();
+    for (MooseIndex(n) i = 0; i < n; i++)
+      transferStochasticReporters(_global_index, i);
+  }
 }
 
 void
@@ -100,7 +103,7 @@ SamplerReporterTransfer::intitializeStochasticReporters()
     for (MooseIndex(n) i = 0; i < n; i++)
       if (_multi_app->hasLocalApp(i))
         addReporterTransferMode(
-            _sub_reporter_names[r], REPORTER_MODE_REPLICATED, _multi_app->appProblemBase(i));
+            _sub_reporter_names[r], REPORTER_MODE_ROOT, _multi_app->appProblemBase(i));
 
   for (unsigned int r = 0; r < _sub_reporter_names.size(); ++r)
     for (MooseIndex(n) i = 0; i < n; i++)

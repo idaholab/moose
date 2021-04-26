@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "Sampler.h"
+#include "MultiApp.h"
 
 defineLegacyParams(Sampler);
 
@@ -47,6 +48,12 @@ Sampler::validParams()
       "limit_get_next_local_row",
       0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the std::vector returned by getNextLocalRow method.");
+
+  params.addParam<dof_id_type>(
+      "min_procs_per_row",
+      1,
+      "This will ensure that the sampler is partitioned properly when "
+      "'MultiApp/*/min_procs_per_app' is specified. It is not recommended to use otherwise.");
   return params;
 }
 
@@ -66,6 +73,9 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
+    _min_procs_per_row(getParam<dof_id_type>("min_procs_per_row") > n_processors()
+                           ? n_processors()
+                           : getParam<dof_id_type>("min_procs_per_row")),
     _auto_advance_generators(true),
     _perf_get_global_samples(registerTimedSection("getGlobalSamples", 1)),
     _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
@@ -107,51 +117,14 @@ Sampler::init()
 void
 Sampler::reinit()
 {
-  // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
-  if (_n_rows > 0 && n_processors() > _n_rows)
-  {
-    // This code is specifically to match what is going on in MulitApp::buildComm()
-    // This will give the minimum processors per row
-    unsigned int procs_per_row = n_processors() / _n_rows;
-    // This will give the number of rows that have one additional processor
-    unsigned int extra_proc_rows = n_processors() % _n_rows;
-
-    // Index for the processor within a block of processors for a row
-    unsigned int block_ind = 0;
-    // Sample row
-    _local_row_begin = 0;
-    for (unsigned int i = 0; i < n_processors(); ++i)
-    {
-      if (i == processor_id())
-      {
-        if (block_ind == 0)
-          _n_local_rows = 1;
-        else
-        {
-          ++_local_row_begin;
-          _n_local_rows = 0;
-        }
-        break;
-      }
-      ++block_ind;
-
-      // Reset block index and increment row index
-      if (block_ind == procs_per_row)
-      {
-        block_ind = 0;
-        ++_local_row_begin;
-
-        // Increment the number of processors for every app after this point
-        if (_local_row_begin == (_n_rows - extra_proc_rows))
-          ++procs_per_row;
-      }
-    }
-
-    _local_row_end = _local_row_begin + _n_local_rows;
-  }
-  else
-    MooseUtils::linearPartitionItems(
-        _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
+  auto rc = rankConfig(processor_id(),
+                       n_processors(),
+                       _n_rows,
+                       _min_procs_per_row,
+                       std::numeric_limits<dof_id_type>::max());
+  _n_local_rows = rc.is_first_local_rank ? rc.num_local_apps : 0;
+  _local_row_begin = rc.first_local_app_index;
+  _local_row_end = _local_row_begin + _n_local_rows;
 
   // Set the next row iterator index
   _next_local_row = _local_row_begin;
