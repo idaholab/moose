@@ -92,6 +92,7 @@ CNSFVLaxFriedrichs::computeQpResidual()
                _Sf(_index);
   else if (_eqn == "energy")
     return _adjusted_vSf_elem * _rho_ht_elem[_qp] + _adjusted_vSf_neighbor * _rho_ht_neighbor[_qp] +
+           // This term removes artifacts at boundaries in the particle velocity solution.
            _omega * (_pressure_elem[_qp] - _pressure_neighbor[_qp]);
   else
     mooseError("Unrecognized enum type ", _eqn);

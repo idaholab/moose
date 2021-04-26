@@ -163,6 +163,9 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
     const auto rho_ht_interior = rho_interior * ht_interior;
     const auto rho_ht_boundary = rho_boundary * ht_boundary;
     return adjusted_vSf_interior * rho_ht_interior + adjusted_vSf_boundary * rho_ht_boundary +
+           // This term removes artifacts at boundaries in the particle velocity solution. Note that
+           // if instead of using pressure, one uses porosity*pressure then the solution is totally
+           // wrong
            omega * (pressure_interior - pressure_boundary);
   }
   else
