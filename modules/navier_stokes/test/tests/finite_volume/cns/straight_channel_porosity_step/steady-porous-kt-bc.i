@@ -13,10 +13,7 @@ u_in=1
 mass_flux_in=${fparse u_in * rho_in}
 
 [GlobalParams]
-  vel = superficial_velocity
-  interp_method = 'upwind'
   fp = fp
-  advected_interp_method = 'upwind'
 []
 
 [Mesh]
@@ -25,7 +22,7 @@ mass_flux_in=${fparse u_in * rho_in}
     dim = 1
     xmin = 0
     xmax = 10
-    nx = 10000
+    nx = 100
   []
   [pt5]
     input = cartesian
@@ -251,47 +248,58 @@ mass_flux_in=${fparse u_in * rho_in}
 
 [FVBCs]
   [rho_left]
-    type = FVNeumannBC
+    type = PCNSFVLaxFriedrichsBC
     boundary = 'left'
     variable = rho
-    value = ${mass_flux_in}
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
+    eqn = 'mass'
   []
-  [rho_right]
-    type = FVMatAdvectionOutflowBC
-    boundary = 'right'
-    variable = rho
-  []
-  [rho_u_left]
-    type = FVDirichletBC
+  [rhou_left]
+    type = PCNSFVLaxFriedrichsBC
     boundary = 'left'
     variable = rho_u
-    value = ${mass_flux_in}
-  []
-  [rho_u_right]
-    type = FVMatAdvectionOutflowBC
-    boundary = 'right'
-    variable = rho_u
-    advected_quantity = 'rhou'
-  []
-  [rho_u_pressure_right]
-    type = PNSFVMomentumSpecifiedPressureBC
-    boundary = 'right'
-    variable = rho_u
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
+    eqn = 'momentum'
     momentum_component = 'x'
-    pressure = ${p_initial}
   []
   [rho_et_left]
-    type = PNSFVFluidEnergySpecifiedTemperatureBC
-    variable = rho_et
+    type = PCNSFVLaxFriedrichsBC
     boundary = 'left'
-    superficial_rhou = ${mass_flux_in}
-    temperature = ${T}
+    variable = rho_et
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
+    eqn = 'energy'
+  []
+  [rho_right]
+    type = PCNSFVLaxFriedrichsBC
+    boundary = 'right'
+    variable = rho
+    pressure = ${p_initial}
+    eqn = 'mass'
+  []
+  [rhou_right]
+    type = PCNSFVLaxFriedrichsBC
+    boundary = 'right'
+    variable = rho_u
+    pressure = ${p_initial}
+    eqn = 'momentum'
+    momentum_component = 'x'
   []
   [rho_et_right]
-    type = FVMatAdvectionOutflowBC
+    type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho_et
-    advected_quantity = 'rho_ht'
+    pressure = ${p_initial}
+    eqn = 'energy'
+  []
+[]
+
+[Functions]
+  [ud_in]
+    type = ParsedVectorFunction
+    value_x = '${u_in}'
   []
 []
 
@@ -339,8 +347,6 @@ mass_flux_in=${fparse u_in * rho_in}
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       mumps'
   nl_max_its = 10
 []
 
