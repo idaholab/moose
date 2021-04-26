@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'ad_convection_heat_flux_hs.i'
+    csvdiff = 'ad_convection_heat_flux_hs_out.csv'
+  []
+[]
