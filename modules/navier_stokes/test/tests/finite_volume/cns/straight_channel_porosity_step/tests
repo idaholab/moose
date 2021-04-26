@@ -30,4 +30,16 @@
     exodiff = free-flow-kt-moving-front_out.e
     requirement = 'The system shall be above to solve a transient moving front free-flow problem with the convective term discretized using the Kurganov-Tadmor scheme.'
   []
+  [transient_kt_jumps]
+    type = Exodiff
+    input = transient-kt-bc.i
+    exodiff = transient-kt-bc_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equation with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms, the convective term is discretized using the Kurganov-Tadmor scheme, and time is integrated using the explicit Euler method.'
+  []
+  [implicit_euler_kt]
+    type = Exodiff
+    input = implicit-euler-kt.i
+    exodiff = implicit-euler-kt_out.e
+    requirement = 'The system shall be able to step to steady-state the Euler equation with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms, the convective term is discretized using the Kurganov-Tadmor scheme, and time is integrated using the implicit Euler method.'
+  []
 []
