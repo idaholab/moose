@@ -64,15 +64,6 @@
     requirement = "The system shall transfer values from a SubApp boundary to the Master App."
   [../]
 
-  [./boundary_elemental]
-    type = 'Exodiff'
-    input = 'boundary_elemental_master.i'
-    exodiff = 'boundary_elemental_master_out.e boundary_elemental_master_out_sub0.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
-    issues = '#17214'
-    requirement = "The system shall transfer elemental values between Master and SubApp boundaries."
-  [../]
-
   [./two_way_many_apps]
     type = 'Exodiff'
     input = 'two_way_many_apps_master.i'
