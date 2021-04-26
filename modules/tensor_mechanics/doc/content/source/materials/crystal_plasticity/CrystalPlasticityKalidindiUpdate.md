@@ -3,11 +3,11 @@
 !syntax description /Materials/CrystalPlasticityKalidindiUpdate
 
 `CrystalPlasticityKalidindiUpdate` is designed to be used in conjunction with the
-[ComputeCrystalPlasticityStress](/ComputeCrystalPlasticityStress.md) class to calculate
+[ComputeMultipleCrystalPlasticityStress](/ComputeMultipleCrystalPlasticityStress.md) class to calculate
 the response of a FCC crystalline solid. Details about the algorithm and specific
 stress and strain measures used in the `CrystalPlasticityUpdate` base class are
 given on the documentation page for
-[ComputeCrystalPlasticityStress](/ComputeCrystalPlasticityStress.md).
+[ComputeMultipleCrystalPlasticityStress](/ComputeMultipleCrystalPlasticityStress.md).
 
 ## Constitutive Model Definition
 

@@ -5,7 +5,7 @@
     exodiff = 'update_method_test_out.e'
     issues = '#16064'
     requirement = 'MOOSE shall provide a StressUpdate material-based extensible crystal plasticity system'
-    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
   [./update_model_011orientation]
     type = 'CSVDiff'
@@ -13,7 +13,7 @@
     csvdiff = 'update_method_011orientation_out.csv'
     issues = '#16064'
     requirement = 'The material-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
-    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
   [./exception]
     type = 'Exodiff'
@@ -22,7 +22,7 @@
     allow_warnings = true
     issues = '#16064'
     requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
-    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
   [./substep]
     type = 'Exodiff'
@@ -31,7 +31,7 @@
     allow_warnings = true
     issues = '#6097'
     requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
-    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
   [./linesearch]
     type = 'Exodiff'
@@ -67,6 +67,6 @@
     allow_warnings = true
     issues = '#17340'
     requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
-    design = '/ComputeCrystalPlasticityStress.md'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
   [../]
 []
