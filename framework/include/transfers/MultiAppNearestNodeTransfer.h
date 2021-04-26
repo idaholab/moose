@@ -96,27 +96,4 @@ protected:
   std::map<processor_id_type, std::vector<dof_id_type>> & _cached_dof_ids;
   std::map<dof_id_type, unsigned int> & _cached_from_inds;
   std::map<dof_id_type, unsigned int> & _cached_qp_inds;
-
-private:
-  /**
-   * Get the local nodes on the target boundary for the transfer
-   * @param to_problem_id index of the problem transfer is sending to
-   * @return target local nodes
-   */
-  std::vector<Node *> getTargetLocalNodes(const unsigned int to_problem_id);
-
-  /**
-   * Get the local elements on the target boundary for the transfer
-   * @param to_problem_id index of the problem transfer is sending to
-   * @return target local elements
-   */
-  std::vector<Elem *> getTargetLocalElems(const unsigned int to_problem_id);
-
-  /**
-   * Get the nearest maximum bounding box distance for a given point
-   * @param[in] point Point
-   * @param[in] bboxes Bounding boxes
-   * @return nearest maximum bounding box distance to the point
-   */
-  Real getNearestMaxDistance(const Point & point, const std::vector<BoundingBox> & bboxes);
 };
