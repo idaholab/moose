@@ -36,7 +36,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<ExplicitSystem>(name)),
-    _current_solution(NULL),
+    _current_solution(_sys.current_local_solution.get()),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _u_dot(NULL),
     _u_dotdot(NULL),

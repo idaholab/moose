@@ -3088,6 +3088,9 @@ NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
 {
   _current_solution = &soln;
 
+  auto tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
+  associateVectorToTag(const_cast<NumericVector<Number> &>(soln), tag);
+
   if (_need_serialized_solution)
     serializeSolution();
 }
