@@ -24,6 +24,8 @@ keywords = {Framework, Finite-element, Parallel, Multiphysics, Multiscale}
 }
 ```
 
+## MultiApp System
+
 If your application uses the MultiApp system, please also cite the following.
 
 ```
@@ -39,7 +41,11 @@ If your application uses the MultiApp system, please also cite the following.
 publisher = {Elsevier}
 }
 ```
+
+## Automatic Differentiation
+
 If your application uses automatic differentiation, please also cite the following.
+
 ```
 @article{lindsay2021automatic,
   title={Automatic Differentiation in MetaPhysicL and Its Applications in MOOSE},
@@ -53,7 +59,7 @@ If your application uses automatic differentiation, please also cite the followi
 }
 ```
 
-## Testing and/or Documentation
+## Testing and Documentation
 
 If you are utilizing [!ac](CIVET) for testing or [MooseDocs](python/MooseDocs/index.md) for
 documentation, please also cite the following.
