@@ -51,6 +51,20 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
   []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    run_sim = 'True'
+    cli_args = "Executioner/num_steps=2 Outputs/active='' -snes_test_err 1e-12 "
+               "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
+               "Materials/inactive='trial_creep_aniso_iso' Materials/elasticity_tensor/poissons_ratio=0.25"
+    petsc_version = '>=3.9'
+    ratio_tol = 0.0054
+    difference_tol = 0.1
+    only_final_jacobian = 'True'
+    issues = '#17456'
+    requirement = 'The system shall provide a perfect Jacobian while calculating large deformation creep.'
+  []
   [ad_aniso_iso_aniso]
     type = 'CSVDiff'
     input = 'ad_aniso_iso_creep_x_3d.i'

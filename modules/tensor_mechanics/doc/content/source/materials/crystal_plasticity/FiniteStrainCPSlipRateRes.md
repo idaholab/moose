@@ -7,7 +7,7 @@
 !alert warning
 The `FiniteStrainCPSlipRateRes` model is not actively developed.
 Use of the [FiniteStrainUObasedCP](/FiniteStrainUObasedCP.md) crystal plasticity
-system or the [ComputeCrystalPlasticityStress](/ComputeCrystalPlasticityStress.md)
+system or the [ComputeMultipleCrystalPlasticityStress](/ComputeMultipleCrystalPlasticityStress.md)
 system is recommend instead.
 
 In `FiniteStrainCPSlipRateRes` the convergence of the crystal plasticity strain

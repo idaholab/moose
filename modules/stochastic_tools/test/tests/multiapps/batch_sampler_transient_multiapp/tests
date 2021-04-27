@@ -34,15 +34,4 @@
     requirement = "The SamplerTransientMultiApp object shall error if the 'batch-reset' mode is "
                   "supplied."
   []
-  [error_num_proc]
-    type = RunException
-    input = master_transient.i
-    min_parallel = 6
-    expect_err = "There appears to be more available processors \(6\) than samples \(5\), "
-                 "this is not supported in batch mode. Consider switching to "
-                 "\'normal\' to allow multiple processors per sample."
-
-    requirement = "The system shall error when more processors are supplied than "
-                  "sample rows when requesting batched sampling with SamplerTransientMultiApp."
-  []
 []

@@ -72,26 +72,13 @@ SamplerParameterTransfer::execute()
 }
 
 void
-SamplerParameterTransfer::initializeToMultiapp()
-{
-  _global_index = _sampler_ptr->getLocalRowBegin();
-}
-
-void
 SamplerParameterTransfer::executeToMultiapp()
 {
-  SamplerReceiver * ptr = getReceiver(processor_id());
-
-  std::vector<Real> row = _sampler_ptr->getNextLocalRow();
-
-  ptr->transfer(_parameter_names, row);
-
-  _global_index++;
-}
-
-void
-SamplerParameterTransfer::finalizeToMultiapp()
-{
+  if (_multi_app->isRootProcessor())
+  {
+    SamplerReceiver * ptr = getReceiver(_app_index);
+    ptr->transfer(_parameter_names, _row_data);
+  }
 }
 
 SamplerReceiver *

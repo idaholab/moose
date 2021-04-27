@@ -5,9 +5,9 @@
   [meta_data_store]
     type = 'CSVDiff'
     input = 'mesh_meta_data_store.i'
-    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv
-               mesh_meta_data_store_out_line_sampler_between_elems_0010.csv
-               mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
+    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv '
+              'mesh_meta_data_store_out_line_sampler_between_elems_0010.csv '
+              'mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
 
     issues = '#000'
     design = 'TimeDerivative.md'
@@ -49,9 +49,9 @@
   [test_meta_data_with_use_split]
     type = 'CSVDiff'
     input = 'mesh_meta_data_store.i'
-    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv
-               mesh_meta_data_store_out_line_sampler_between_elems_0010.csv
-               mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
+    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv '
+              'mesh_meta_data_store_out_line_sampler_between_elems_0010.csv '
+              'mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
     cli_args = '--use-split --split-file split2'
     requirement = 'The system shall support the ability to use the mesh meta data when using the split mesh.'
     min_parallel = 2

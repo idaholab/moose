@@ -641,11 +641,16 @@ CappedMohrCoulombStressUpdate::initializeVarsV(const std::vector<Real> & trial_s
         stress_params[0] =
             std::min(stress_params[0],
                      stress_params[2] - _shifter); // account for poor choice from user
+        // if goto_corner then the max(min()) in the subsequent line will force the solution to lie
+        // at the corner where max = mid = tensile.  This means the signs of ga0 and ga6 become
+        // irrelevant in the check below
+        const bool goto_corner = (stress_params[1] >= stress_params[2] - 0.5 * _shifter);
         stress_params[1] = std::max(std::min(stress_params[1], stress_params[2] - 0.5 * _shifter),
                                     stress_params[0] + 0.5 * _shifter);
 
         const Real new_compressive_yf = -stress_params[0] - cs;
-        if (new_compressive_yf <= _f_tol && ga0 >= 0.0 && ga6 >= 0.0) // enforce ga>0!
+        if (new_compressive_yf <= _f_tol &&
+            (goto_corner || (ga0 >= 0.0 && ga6 >= 0.0))) // enforce ga>=0 unless going to a corner
         {
           gaE = ((trial_stress_params[2] - trial_stress_params[0]) -
                  (stress_params[2] - stress_params[0])) /
