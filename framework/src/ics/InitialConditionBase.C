@@ -47,6 +47,7 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
                    .isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
+    PostprocessorInterface(this),
     BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(this, "InitialConditionBases"),
@@ -81,4 +82,11 @@ InitialConditionBase::addUserObjectDependencyHelper(const UserObject & uo) const
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(uo.name());
+}
+
+void
+InitialConditionBase::addPostprocessorDependencyHelper(const PostprocessorName & name) const
+{
+  if (!_ignore_uo_dependency)
+    _depend_uo.insert(name);
 }

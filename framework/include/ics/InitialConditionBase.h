@@ -13,6 +13,7 @@
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
@@ -43,6 +44,7 @@ class InitialConditionBase : public MooseObject,
                              public Coupleable,
                              public FunctionInterface,
                              public UserObjectInterface,
+                             public PostprocessorInterface,
                              public BoundaryRestrictable,
                              public DependencyResolverInterface,
                              public Restartable,
@@ -101,6 +103,7 @@ protected:
 
 private:
   void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
 
   /// Dependent variables
   std::set<std::string> _depend_vars;
