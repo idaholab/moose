@@ -20,6 +20,10 @@ public:
   PCNSFVLaxFriedrichsBC(const InputParameters & params);
 
 protected:
+  // We handle multiplication by area manually in computeQpResidual
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+
   virtual ADReal computeQpResidual() override;
   void computeAValues();
 

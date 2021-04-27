@@ -81,6 +81,49 @@ PCNSFVLaxFriedrichsBC::PCNSFVLaxFriedrichsBC(const InputParameters & params)
                "value for 'momentum_component'");
 }
 
+void
+PCNSFVLaxFriedrichsBC::computeResidual(const FaceInfo & fi)
+{
+  _face_info = &fi;
+  _normal = fi.normal();
+  auto ft = fi.faceType(_var.name());
+
+  const auto r = MetaPhysicL::raw_value(computeQpResidual());
+
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+    prepareVectorTag(_assembly, _var.number());
+  else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+    prepareVectorTagNeighbor(_assembly, _var.number());
+  else if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("A PCNSFVLaxFriedrichsBC is being triggered on an internal face with centroid: ",
+               fi.faceCentroid());
+  else
+    mooseError(
+        "A PCNSFVLaxFriedrichsBC is being triggered on a face which does not connect to a block ",
+        "with the relevant finite volume variable. Its centroid: ",
+        fi.faceCentroid());
+
+  _local_re(0) = r;
+  accumulateTaggedLocalResidual();
+}
+
+void
+PCNSFVLaxFriedrichsBC::computeJacobian(const FaceInfo & fi)
+{
+  _face_info = &fi;
+  _normal = fi.normal();
+  auto ft = fi.faceType(_var.name());
+
+  const auto r = computeQpResidual();
+
+  const auto & dof_indices =
+      (ft == FaceInfo::VarFaceNeighbors::ELEM) ? _var.dofIndices() : _var.dofIndicesNeighbor();
+
+  mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+
+  _assembly.processDerivatives(r, dof_indices[0], _matrix_tags);
+}
+
 ADReal
 PCNSFVLaxFriedrichsBC::computeQpResidual()
 {
@@ -137,12 +180,7 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
   adjusted_vSf_max += 0 * (adjusted_vSf_interior + adjusted_vSf_boundary);
 
   if (_eqn == "mass")
-  {
-    // std::cout << "For face centered at " << _face_info->faceCentroid() << std::endl;
-    // std::cout << "adjusted_vSf_interior: " << adjusted_vSf_interior.value() << std::endl;
-    // std::cout << "adjusted_vSf_boundary: " << adjusted_vSf_boundary.value() << std::endl;
     return adjusted_vSf_interior * rho_interior + adjusted_vSf_boundary * rho_boundary;
-  }
   else if (_eqn == "momentum")
   {
     const auto rhou_interior = u_interior(_index) * rho_interior;

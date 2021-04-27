@@ -20,6 +20,10 @@ public:
   CNSFVLaxFriedrichs(const InputParameters & params);
 
 protected:
+  // We handle multiplication by area manually in computeQpResidual
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+
   virtual ADReal computeQpResidual() override;
   void computeAValues();
 
@@ -28,8 +32,8 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
   const ADMaterialProperty<Real> & _rho_elem;
   const ADMaterialProperty<Real> & _rho_neighbor;
-  const ADMaterialProperty<Real> & _rhou_elem;
-  const ADMaterialProperty<Real> & _rhou_neighbor;
+  const ADMaterialProperty<RealVectorValue> & _rhou_elem;
+  const ADMaterialProperty<RealVectorValue> & _rhou_neighbor;
   const ADMaterialProperty<Real> & _rho_ht_elem;
   const ADMaterialProperty<Real> & _rho_ht_neighbor;
   const ADMaterialProperty<Real> & _T_fluid_elem;
