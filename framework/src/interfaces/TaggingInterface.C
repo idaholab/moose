@@ -57,15 +57,13 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   for (auto & vector_tag_name : vector_tag_names)
   {
     const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name.name());
-    const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
     if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
       mooseError("Vector tag '",
                  vector_tag_name.name(),
                  "' for Kernel '",
                  _moose_object.name(),
                  "' is not a residual vector tag");
-    _vector_tags.insert(tag._type_id);
-    _vector_tag_ids.insert(vector_tag_id);
+    _vector_tags.insert(vector_tag_id);
   }
 
   // Add extra vector tags. These tags should be created in the System already, otherwise
@@ -75,15 +73,13 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   for (auto & vector_tag_name : extra_vector_tags)
   {
     const TagID vector_tag_id = _subproblem.getVectorTagID(vector_tag_name);
-    const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
     if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
       mooseError("Extra vector tag '",
                  vector_tag_name,
                  "' for Kernel '",
                  _moose_object.name(),
                  "' is not a residual vector tag");
-    _vector_tags.insert(tag._type_id);
-    _vector_tag_ids.insert(vector_tag_id);
+    _vector_tags.insert(vector_tag_id);
   }
 
   auto & matrix_tag_names = _tag_params.get<MultiMooseEnum>("matrix_tags");
@@ -109,10 +105,7 @@ TaggingInterface::useVectorTag(const TagName & tag_name)
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exsit in system");
 
-  const TagID vector_tag_id = _subproblem.getVectorTagID(tag_name);
-  const VectorTag tag = _subproblem.getVectorTag(vector_tag_id);
-  _vector_tags.insert(tag._type_id);
-  _vector_tag_ids.insert(vector_tag_id);
+  _vector_tags.insert(_subproblem.getVectorTagID(tag_name));
 }
 
 void
@@ -130,9 +123,7 @@ TaggingInterface::useVectorTag(TagID tag_id)
   if (!_subproblem.vectorTagExists(tag_id))
     mooseError("Vector tag ", tag_id, " does not exsit in system");
 
-  const VectorTag tag = _subproblem.getVectorTag(tag_id);
-  _vector_tags.insert(tag._type_id);
-  _vector_tag_ids.insert(tag_id);
+  _vector_tags.insert(tag_id);
 }
 
 void
@@ -151,7 +142,10 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlock(ivar, *vector_tag);
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+  }
 
   _local_re.resize(_re_blocks[0]->size());
 }
@@ -163,8 +157,10 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, *vector_tag);
-
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+  }
   _local_re.resize(_re_blocks[0]->size());
 }
 
@@ -175,7 +171,10 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlockLower(ivar, *vector_tag);
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+  }
 
   _local_re.resize(_re_blocks[0]->size());
 }
