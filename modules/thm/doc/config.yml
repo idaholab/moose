@@ -60,6 +60,7 @@ Extensions:
             /FluidProperties/NaClFluidProperties: /Modules/FluidProperties/NaClFluidProperties
             /FluidProperties/NitrogenFluidProperties: /Modules/FluidProperties/NitrogenFluidProperties
             /FluidProperties/HydrogenFluidProperties: /Modules/FluidProperties/HydrogenFluidProperties
+            /FluidProperties/SodiumSaturationFluidProperties: /Modules/FluidProperties/SodiumSaturationFluidProperties
             /FluidProperties/SimpleFluidProperties: /Modules/FluidProperties/SimpleFluidProperties
             /FluidProperties/SodiumProperties: /Modules/FluidProperties/SodiumProperties
             /FluidProperties/StiffenedGasFluidProperties: /Modules/FluidProperties/StiffenedGasFluidProperties
