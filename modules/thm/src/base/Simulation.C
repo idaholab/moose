@@ -502,7 +502,7 @@ Simulation::addVariables()
   if (hasInitialConditionsFromFile())
     setupInitialConditionsFromFile();
   else
-    setupInitialConditions();
+    setupInitialConditionObjects();
 }
 
 void
@@ -549,7 +549,7 @@ Simulation::setupInitialConditionsFromFile()
 }
 
 void
-Simulation::setupInitialConditions()
+Simulation::setupInitialConditionObjects()
 {
   for (auto && i : _ics)
   {
