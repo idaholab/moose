@@ -290,85 +290,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         mortar_segment_mesh->add_point(new_pt, new_id, secondary_elem->processor_id());
     new_node->set_unique_id(new_id + node_unique_id_offset);
 
-    // Make an Elem on the left
-    Elem * new_elem_left;
-    if (order == SECOND)
-      new_elem_left = new Edge3;
-    else
-      new_elem_left = new Edge2;
-
-    new_elem_left->processor_id() = current_mortar_segment->processor_id();
-    new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
-    new_elem_left->set_id(local_id_index++);
-    new_elem_left->set_unique_id(new_elem_left->id());
-    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
-    new_elem_left->set_node(1) = new_node;
-
-    if (order == SECOND)
-    {
-      Point left_interior_point(0);
-      Real left_interior_xi = (xi1 + info->xi1_a) / 2;
-
-      // This is eta for the current mortar segment that we're splitting
-      Real current_left_interior_eta =
-          (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
-
-      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
-           n < current_mortar_segment->n_nodes();
-           ++n)
-        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
-                               current_mortar_segment->point(n);
-
-      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
-                  "new_id must be the same on all processes");
-      Node * const new_interior_node = mortar_segment_mesh->add_point(
-          left_interior_point, new_interior_id, new_elem_left->processor_id());
-      new_elem_left->set_node(2) = new_interior_node;
-      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
-    }
-
-    mortar_segment_mesh->add_elem(new_elem_left);
-
-    // Make an Elem on the right
-    Elem * new_elem_right;
-    if (order == SECOND)
-      new_elem_right = new Edge3;
-    else
-      new_elem_right = new Edge2;
-
-    new_elem_right->processor_id() = current_mortar_segment->processor_id();
-    new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
-    new_elem_right->set_id(local_id_index++);
-    new_elem_right->set_unique_id(new_elem_right->id());
-    new_elem_right->set_node(0) = new_node;
-    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
-
-    if (order == SECOND)
-    {
-      Point right_interior_point(0);
-      Real right_interior_xi = (xi1 + info->xi1_b) / 2;
-      // This is eta for the current mortar segment that we're splitting
-      Real current_right_interior_eta =
-          (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
-
-      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
-           n < current_mortar_segment->n_nodes();
-           ++n)
-        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
-                                current_mortar_segment->point(n);
-
-      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
-                  "new_id must be the same on all processes");
-      Node * const new_interior_node = mortar_segment_mesh->add_point(
-          right_interior_point, new_interior_id, new_elem_right->processor_id());
-      new_elem_right->set_node(2) = new_interior_node;
-      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
-    }
-
-    mortar_segment_mesh->add_elem(new_elem_right);
-
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the primary elems relative to the
     // new mortar segments.
@@ -453,9 +374,97 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (orientation1_valid && orientation2_valid)
       throw MooseException(
           "AutomaticMortarGeneration: Both orientations cannot simultaneously be valid.");
+
+    // We are going to treat the case where both orientations are invalid as a case in which we
+    // should not be splitting the mortar mesh to incorporate primary mesh elements.
+    // In practice, this case has appeared for very oblique projections, so we assume these cases
+    // will not be considered in mortar thermomechanical contact.
     if (!orientation1_valid && !orientation2_valid)
-      throw MooseException(
-          "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid.");
+    {
+      mooseDoOnce(mooseWarning(
+          "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid. "
+          "This can indicate there are very oblique projections between primary (mortar) "
+          "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
+          "time step is too large. This message is only printed once."));
+      break;
+    }
+
+    // Make an Elem on the left
+    Elem * new_elem_left;
+    if (order == SECOND)
+      new_elem_left = new Edge3;
+    else
+      new_elem_left = new Edge2;
+
+    new_elem_left->processor_id() = current_mortar_segment->processor_id();
+    new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
+    new_elem_left->set_id(local_id_index++);
+    new_elem_left->set_unique_id(new_elem_left->id());
+    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
+    new_elem_left->set_node(1) = new_node;
+
+    // Make an Elem on the right
+    Elem * new_elem_right;
+    if (order == SECOND)
+      new_elem_right = new Edge3;
+    else
+      new_elem_right = new Edge2;
+
+    new_elem_right->processor_id() = current_mortar_segment->processor_id();
+    new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
+    new_elem_right->set_id(local_id_index++);
+    new_elem_right->set_unique_id(new_elem_right->id());
+    new_elem_right->set_node(0) = new_node;
+    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
+
+    if (order == SECOND)
+    {
+      // left
+      Point left_interior_point(0);
+      Real left_interior_xi = (xi1 + info->xi1_a) / 2;
+
+      // This is eta for the current mortar segment that we're splitting
+      Real current_left_interior_eta =
+          (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
+        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
+                               current_mortar_segment->point(n);
+
+      const auto new_interior_left_id = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_left_id),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node_left = mortar_segment_mesh->add_point(
+          left_interior_point, new_interior_left_id, new_elem_left->processor_id());
+      new_elem_left->set_node(2) = new_interior_node_left;
+      new_interior_node_left->set_unique_id(new_interior_left_id + node_unique_id_offset);
+
+      // right
+      Point right_interior_point(0);
+      Real right_interior_xi = (xi1 + info->xi1_b) / 2;
+      // This is eta for the current mortar segment that we're splitting
+      Real current_right_interior_eta =
+          (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
+        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
+                                current_mortar_segment->point(n);
+
+      const auto new_interior_id_right = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id_right),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node_right = mortar_segment_mesh->add_point(
+          right_interior_point, new_interior_id_right, new_elem_right->processor_id());
+      new_elem_right->set_node(2) = new_interior_node_right;
+      new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
+    }
+
+    mortar_segment_mesh->add_elem(new_elem_right);
+    mortar_segment_mesh->add_elem(new_elem_left);
 
     // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
