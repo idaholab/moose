@@ -52,8 +52,7 @@ PCNSFVLaxFriedrichsBC::validParams()
 
 PCNSFVLaxFriedrichsBC::PCNSFVLaxFriedrichsBC(const InputParameters & params)
   : FVFluxBC(params),
-    _fluid(dynamic_cast<FEProblemBase *>(&_subproblem)
-               ->getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _superficial_vel_elem(getADMaterialProperty<RealVectorValue>(NS::superficial_velocity)),
     _superficial_vel_neighbor(
         getNeighborADMaterialProperty<RealVectorValue>(NS::superficial_velocity)),
@@ -138,6 +137,8 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
   const auto & rho_interior = out_of_elem ? _rho_elem[_qp] : _rho_neighbor[_qp];
   const auto eps_interior = out_of_elem ? _eps_elem[_qp] : _eps_neighbor[_qp];
   const auto u_interior = superficial_vel_interior / eps_interior;
+  const auto e_interior = _fluid.e_from_p_rho(pressure_interior, rho_interior);
+  const auto specific_volume_interior = 1. / rho_interior;
 
   const auto superficial_vel_boundary =
       _svel_provided
@@ -153,12 +154,32 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
       _implicit_state_var ? rho_interior : _fluid.rho_from_p_T(pressure_boundary, T_fluid_boundary);
   const auto eps_boundary = eps_interior;
   const auto u_boundary = superficial_vel_boundary / eps_boundary;
+  const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
+  const auto specific_volume_boundary = 1. / rho_boundary;
 
   const auto Sf = _face_info->faceArea() * _face_info->faceCoord() * normal;
   auto vSf_interior = superficial_vel_interior * Sf;
   auto vSf_boundary = superficial_vel_boundary * Sf;
-  const auto cSf_interior = _fluid.c_from_p_T(pressure_interior, T_fluid_interior) * Sf.norm();
-  const auto cSf_boundary = _fluid.c_from_p_T(pressure_boundary, T_fluid_boundary) * Sf.norm();
+
+  ADReal c_interior, c_boundary;
+  Real dc_interior_dv, dc_interior_de, dc_boundary_dv, dc_boundary_de;
+  _fluid.c_from_v_e(specific_volume_interior.value(),
+                    e_interior.value(),
+                    c_interior.value(),
+                    dc_interior_dv,
+                    dc_interior_de);
+  _fluid.c_from_v_e(specific_volume_boundary.value(),
+                    e_boundary.value(),
+                    c_boundary.value(),
+                    dc_boundary_dv,
+                    dc_boundary_de);
+  c_interior.derivatives() = dc_interior_dv * specific_volume_interior.derivatives() +
+                             dc_interior_de * e_interior.derivatives();
+  c_boundary.derivatives() = dc_boundary_dv * specific_volume_boundary.derivatives() +
+                             dc_boundary_de * e_boundary.derivatives();
+
+  const auto cSf_interior = c_interior * Sf.norm();
+  const auto cSf_boundary = c_boundary * Sf.norm();
   // Create this to avoid new nonzero mallocs
   const ADReal dummy_psi = 0 * (vSf_interior + cSf_interior + vSf_boundary + cSf_boundary);
   auto psi_interior =
@@ -192,8 +213,6 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
   }
   else if (_eqn == "energy")
   {
-    const auto e_interior = _fluid.e_from_p_rho(pressure_interior, rho_interior);
-    const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
     const auto ht_interior =
         e_interior + 0.5 * u_interior * u_interior + pressure_interior / rho_interior;
     const auto ht_boundary =

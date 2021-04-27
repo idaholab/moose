@@ -42,6 +42,8 @@ protected:
   const ADMaterialProperty<Real> & _pressure_neighbor;
   const MaterialProperty<Real> & _eps_elem;
   const MaterialProperty<Real> & _eps_neighbor;
+  const ADMaterialProperty<Real> & _e_elem;
+  const ADMaterialProperty<Real> & _e_neighbor;
   const MooseEnum _eqn;
   const unsigned int _index;
 

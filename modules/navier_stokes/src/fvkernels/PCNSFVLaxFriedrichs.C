@@ -30,8 +30,7 @@ PCNSFVLaxFriedrichs::validParams()
 
 PCNSFVLaxFriedrichs::PCNSFVLaxFriedrichs(const InputParameters & params)
   : FVFluxKernel(params),
-    _fluid(dynamic_cast<FEProblemBase *>(&_subproblem)
-               ->getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _superficial_vel_elem(getADMaterialProperty<RealVectorValue>(NS::superficial_velocity)),
     _superficial_vel_neighbor(
         getNeighborADMaterialProperty<RealVectorValue>(NS::superficial_velocity)),
@@ -47,6 +46,8 @@ PCNSFVLaxFriedrichs::PCNSFVLaxFriedrichs(const InputParameters & params)
     _pressure_neighbor(getNeighborADMaterialProperty<Real>(NS::pressure)),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
+    _e_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
+    _e_neighbor(getNeighborADMaterialProperty<Real>(NS::specific_internal_energy)),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
@@ -111,8 +112,26 @@ PCNSFVLaxFriedrichs::computeAValues()
   _Sf = _face_info->faceArea() * _face_info->faceCoord() * _face_info->normal();
   _vSf_elem = _superficial_vel_elem[_qp] * _Sf;
   _vSf_neighbor = _superficial_vel_neighbor[_qp] * _Sf;
-  _cSf_elem = _fluid.c_from_p_T(_pressure_elem[_qp], _T_fluid_elem[_qp]) * _Sf.norm();
-  _cSf_neighbor = _fluid.c_from_p_T(_pressure_neighbor[_qp], _T_fluid_neighbor[_qp]) * _Sf.norm();
+
+  const auto specific_volume_elem = 1. / _rho_elem[_qp];
+  const auto specific_volume_neighbor = 1. / _rho_neighbor[_qp];
+
+  ADReal c_elem, c_neighbor;
+  Real dc_elem_dv, dc_elem_de, dc_neighbor_dv, dc_neighbor_de;
+  _fluid.c_from_v_e(
+      specific_volume_elem.value(), _e_elem[_qp].value(), c_elem.value(), dc_elem_dv, dc_elem_de);
+  _fluid.c_from_v_e(specific_volume_neighbor.value(),
+                    _e_neighbor[_qp].value(),
+                    c_neighbor.value(),
+                    dc_neighbor_dv,
+                    dc_neighbor_de);
+  c_elem.derivatives() =
+      dc_elem_dv * specific_volume_elem.derivatives() + dc_elem_de * _e_elem[_qp].derivatives();
+  c_neighbor.derivatives() = dc_neighbor_dv * specific_volume_neighbor.derivatives() +
+                             dc_neighbor_de * _e_neighbor[_qp].derivatives();
+
+  _cSf_elem = c_elem * _Sf.norm();
+  _cSf_neighbor = c_neighbor * _Sf.norm();
   // Create this to avoid new nonzero mallocs
   const ADReal dummy_psi = 0 * (_vSf_elem + _cSf_elem + _vSf_neighbor + _cSf_neighbor);
   _psi_elem = std::max({_vSf_elem + _cSf_elem, _vSf_neighbor + _cSf_neighbor, ADReal(0)});
