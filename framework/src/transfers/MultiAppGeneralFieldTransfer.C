@@ -16,6 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
+#include "libmesh/generic_projector.h"
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
@@ -25,6 +26,188 @@
 // TIMPI includes
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
+
+
+// Anonymous namespace for functors to use with GenericProjector.
+namespace {
+
+  // We need two functors that record point (value and gradient,
+  // respectively) requests, so we know what queries we need to make
+  // to other processors
+
+  /**
+   * Value request recording base class
+   */
+  template <typename Output>
+  class RecordRequests {
+    protected:
+      typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
+
+    public:
+      typedef typename TensorTools::MakeReal<Output>::type RealType;
+      typedef DofValueType ValuePushType;
+      typedef Output FunctorValue;
+
+      RecordRequests() {}
+
+      RecordRequests(RecordRequests & primary) : _primary(&primary) {}
+
+      ~RecordRequests() {
+        if (_primary)
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            _primary->_points_requested.insert
+              (_primary->_points_requested.end(),
+	       _points_requested.begin(), _points_requested.end());
+          }
+      }
+
+      void init_context (FEMContext &) {}
+
+      Output eval_at_node (const FEMContext &,
+                           unsigned int libmesh_dbg_var(i),
+                           unsigned int /*elem_dim*/,
+                           const Node & n,
+                           bool /*extra_hanging_dofs*/,
+                           const Real /*time*/)
+      {
+        libmesh_assert_not_equal_to(i,0);
+        _points_requested.push_back(n);
+        return 0;
+      }
+
+      Output eval_at_point (const FEMContext &,
+                            unsigned int libmesh_dbg_var(i),
+                            const Point & n,
+                            const Real /*time*/,
+                            bool /*skip_context_check*/)
+      {
+        libmesh_assert_not_equal_to(i,0);
+        _points_requested.push_back(n);
+        return 0;
+      }
+
+    bool is_grid_projection() { return false; }
+
+    void eval_mixed_derivatives (const FEMContext & /*c*/,
+                                 unsigned int /*i*/,
+                                 unsigned int /*dim*/,
+                                 const Node & /*n*/,
+                                 std::vector<Output> & /*derivs*/)
+    { libmesh_error(); } // this is only for grid projections
+
+    void eval_old_dofs (const Elem &,
+                        unsigned int,
+                        unsigned int,
+                        std::vector<dof_id_type> &,
+                        std::vector<Output> &)
+    { libmesh_error(); }
+
+    void eval_old_dofs (const Elem &,
+                        const FEType &,
+                        unsigned int,
+                        unsigned int,
+                        std::vector<dof_id_type> &,
+                        std::vector<Output> &)
+    { libmesh_error(); }
+
+    private:
+      std::vector<Point> _points_requested;
+
+      RecordRequests * _primary = nullptr;
+  };
+
+
+  // We need a null action functor to use
+  // with them (because we won't be ready to set any values at that
+  // point)
+  template <typename Val>
+  class NullAction
+  {
+  public:
+    typedef Val InsertInput;
+
+    NullAction() {}
+
+    void insert(dof_id_type, Val) {}
+
+    void insert(const std::vector<dof_id_type> &,
+                const DenseVector<Val> &) {}
+  };
+
+
+  // We need two functors that respond to point (value and gradient,
+  // respectively) requests based on the cached values of queries answered by
+  // other processors.
+
+  /**
+   * Value request response base class
+   */
+  template <typename Output>
+  class CachedData {
+    protected:
+      typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
+
+      typedef std::unordered_map<Point, Output> Cache;
+
+    public:
+      typedef typename TensorTools::MakeReal<Output>::type RealType;
+      typedef DofValueType ValuePushType;
+      typedef Output FunctorValue;
+
+      CachedData(const Cache & cache) : _cache(cache) {}
+
+      CachedData(const CachedData & primary) : _cache(primary._cache) {}
+
+      void init_context (FEMContext &) {}
+
+      Output eval_at_node (const FEMContext &,
+                           unsigned int i,
+                           unsigned int /*elem_dim*/,
+                           const Node & n,
+                           bool /*extra_hanging_dofs*/,
+                           const Real /*time*/)
+      { return libmesh_map_find(_cache, n); }
+
+      Output eval_at_point (const FEMContext &,
+                            unsigned int i,
+                            const Point & n,
+                            const Real /*time*/,
+                            bool /*skip_context_check*/)
+      { return libmesh_map_find(_cache, n); }
+
+    bool is_grid_projection() { return false; }
+
+    void eval_mixed_derivatives (const FEMContext & /*c*/,
+                                 unsigned int /*i*/,
+                                 unsigned int /*dim*/,
+                                 const Node & /*n*/,
+                                 std::vector<Output> & /*derivs*/)
+    { libmesh_error(); } // this is only for grid projections
+
+    void eval_old_dofs (const Elem &,
+                        unsigned int,
+                        unsigned int,
+                        std::vector<dof_id_type> &,
+                        std::vector<Output> &)
+    { libmesh_error(); }
+
+    void eval_old_dofs (const Elem &,
+                        const FEType &,
+                        unsigned int,
+                        unsigned int,
+                        std::vector<dof_id_type> &,
+                        std::vector<Output> &)
+    { libmesh_error(); }
+
+    private:
+      const Cache & _cache;
+  };
+
+
+
+}
+
 
 registerMooseObject("MooseApp", MultiAppGeneralFieldTransfer);
 
@@ -246,7 +429,24 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
     // We do not support high-order elemental variables
     if (fe_type.order > CONSTANT && !is_nodal)
-      mooseError("We don't currently support first order or higher elemental variable ");
+    {
+      RecordRequests<Number> f;
+      RecordRequests<Gradient> g;
+      NullAction<Number> nullsetter;
+      std::vector<unsigned int> varvec(1, var_num);
+
+      libMesh::GenericProjector<RecordRequests<Number>,
+                                RecordRequests<Gradient>,
+                                Number, NullAction<Number>>
+        request_gather(*to_sys, f, &g, nullsetter, varvec);
+
+
+      ConstElemRange active_local_elem_range
+        (to_mesh.active_local_elements_begin(),
+         to_mesh.active_local_elements_end());
+
+      request_gather.project(active_local_elem_range);
+    }
 
     if (is_nodal)
     {
