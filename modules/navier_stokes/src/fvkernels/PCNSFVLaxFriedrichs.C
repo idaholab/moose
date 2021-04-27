@@ -37,8 +37,8 @@ PCNSFVLaxFriedrichs::PCNSFVLaxFriedrichs(const InputParameters & params)
         getNeighborADMaterialProperty<RealVectorValue>(NS::superficial_velocity)),
     _rho_elem(getADMaterialProperty<Real>(NS::density)),
     _rho_neighbor(getNeighborADMaterialProperty<Real>(NS::density)),
-    _rhou_elem(getADMaterialProperty<Real>(NS::momentum_x)),
-    _rhou_neighbor(getNeighborADMaterialProperty<Real>(NS::momentum_x)),
+    _rhou_elem(getADMaterialProperty<RealVectorValue>(NS::momentum)),
+    _rhou_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::momentum)),
     _rho_ht_elem(getADMaterialProperty<Real>(NS::total_enthalpy_density)),
     _rho_ht_neighbor(getNeighborADMaterialProperty<Real>(NS::total_enthalpy_density)),
     _T_fluid_elem(getADMaterialProperty<Real>(NS::T_fluid)),
@@ -54,6 +54,55 @@ PCNSFVLaxFriedrichs::PCNSFVLaxFriedrichs(const InputParameters & params)
     paramError("eqn",
                "If 'momentum' is specified for 'eqn', then you must provide a parameter "
                "value for 'momentum_component'");
+}
+
+void
+PCNSFVLaxFriedrichs::computeResidual(const FaceInfo & fi)
+{
+  if (skipForBoundary(fi))
+    return;
+
+  _face_info = &fi;
+  _normal = fi.normal();
+  const auto r = MetaPhysicL::raw_value(computeQpResidual());
+
+  const auto ft = fi.faceType(_var.name());
+  if (ft != FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("This object should only be run on internal faces. If on a boundary face, then "
+               "PCNSFVLaxFriedrichsBC should be used instead");
+
+  // residual contribution of this kernel to the elem element
+  prepareVectorTag(_assembly, _var.number());
+  _local_re(0) = r;
+  accumulateTaggedLocalResidual();
+
+  // residual contribution of this kernel to the neighbor element
+  prepareVectorTagNeighbor(_assembly, _var.number());
+  _local_re(0) = -r;
+  accumulateTaggedLocalResidual();
+}
+
+void
+PCNSFVLaxFriedrichs::computeJacobian(const FaceInfo & fi)
+{
+  if (skipForBoundary(fi))
+    return;
+
+  _face_info = &fi;
+  _normal = fi.normal();
+  const auto r = computeQpResidual();
+
+  const auto ft = fi.faceType(_var.name());
+  if (ft != FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("This object should only be run on internal faces. If on a boundary face, then "
+               "PCNSFVLaxFriedrichsBC should be used instead");
+
+  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags);
+
+  mooseAssert(_var.dofIndicesNeighbor().size() == 1,
+              "We're currently built to use CONSTANT MONOMIALS");
+  _assembly.processDerivatives(-r, _var.dofIndicesNeighbor()[0], _matrix_tags);
 }
 
 void
@@ -90,7 +139,8 @@ PCNSFVLaxFriedrichs::computeQpResidual()
   if (_eqn == "mass")
     return _adjusted_vSf_elem * _rho_elem[_qp] + _adjusted_vSf_neighbor * _rho_neighbor[_qp];
   else if (_eqn == "momentum")
-    return _adjusted_vSf_elem * _rhou_elem[_qp] + _adjusted_vSf_neighbor * _rhou_neighbor[_qp] +
+    return _adjusted_vSf_elem * _rhou_elem[_qp](_index) +
+           _adjusted_vSf_neighbor * _rhou_neighbor[_qp](_index) +
            (_alpha_elem * _eps_elem[_qp] * _pressure_elem[_qp] +
             _alpha_neighbor * _eps_neighbor[_qp] * _pressure_neighbor[_qp]) *
                _Sf(_index);

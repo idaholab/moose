@@ -24,6 +24,12 @@
     exodiff = steady-porous-kt-bc_out.e
     requirement = 'The system shall be able to solve a porous version of the steady Euler equation with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms, and in which the convective term is discretized using the Kurganov-Tadmor scheme.'
   []
+  [2d_kt_jumps]
+    type = Exodiff
+    input = 2d-steady-kt.i
+    exodiff = 2d-steady-kt_out.e
+    requirement = 'The system shall be able to solve a two-dimensional porous version of the steady Euler equation with step changes in porosity using flux kernel objects in which the epsilon grad(pressure) term is integrated by parts to generate two terms, and in which the convective term is discretized using the Kurganov-Tadmor scheme.'
+  []
   [kt_free_flow]
     type = Exodiff
     input = free-flow-kt-moving-front.i
