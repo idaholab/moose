@@ -51,14 +51,12 @@
     type = Outlet1Phase
     input = 'pipe:out'
     p = 10
-    legacy = true
   [../]
 
   [./outlet2]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 11
-    legacy = true
   [../]
 []
 

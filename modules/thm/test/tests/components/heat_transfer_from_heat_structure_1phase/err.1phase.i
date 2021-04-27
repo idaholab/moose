@@ -7,22 +7,22 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0.1 0'
     orientation = '0 0 1'
@@ -34,9 +34,9 @@
     f = 0.01
 
     fp = fp
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '0 0 1'
@@ -49,35 +49,35 @@
     materials = 'fuel-mat'
 
     initial_T = 300
-  [../]
+  []
 
-  [./hx]
+  [hx]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     hs_side = outer
     flow_channel = pipe
     P_hf = 0.029832559676
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 1e5
     T0 = 300
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

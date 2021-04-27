@@ -43,7 +43,6 @@
     type = Outlet1Phase
     input = 'pipe:out'
     p = 9.5e4
-    legacy = true
   [../]
 []
 

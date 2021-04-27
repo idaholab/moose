@@ -30,8 +30,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     _factory(_app.getFactory()),
     _pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
-    _spatial_discretization(THM::stringToEnum<FlowModel::ESpatialDiscretizationType>(
-        pars.get<MooseEnum>("spatial_discretization"))),
     _implicit_time_integration(true),
     _check_jacobian(false),
     _zero(0)
@@ -39,8 +37,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
   HeatConductionModel::_fe_type =
       second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-  if (getSpatialDiscretization() == FlowModel::CG)
-    _flow_fe_type = HeatConductionModel::_fe_type;
 
   if (Moose::_warnings_are_errors)
     _log.setWarningsAsErrors();

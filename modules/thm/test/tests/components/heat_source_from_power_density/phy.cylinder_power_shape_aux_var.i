@@ -1,62 +1,59 @@
-# @requirement F8.10
-
 [GlobalParams]
   scaling_factor_temperature = 1e1
-  spatial_discretization = cg
 []
 
 [Functions]
-  [./HeatFunction]
+  [HeatFunction]
     type = ParsedFunction
     value = 1313127093.32191
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 16
     cp = 191.67
     rho = 1.4583e4
-  [../]
-  [./gap-mat]
+  []
+  [gap-mat]
     type = SolidMaterialProperties
     k = 64
     cp = 1272
     rho = 865
-  [../]
-  [./clad-mat]
+  []
+  [clad-mat]
     type = SolidMaterialProperties
     k = 26
     cp = 638
     rho = 7.646e3
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power_density]
+  [power_density]
     family = MONOMIAL
     order = CONSTANT
     block = 'CH1:solid:fuel'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mock_power_aux]
+  [mock_power_aux]
     type = FunctionAux
     variable = power_density
     function = HeatFunction
     block = 'CH1:solid:fuel'
-  [../]
+  []
 []
 
 [Components]
-  [./total_power]
+  [total_power]
     type = TotalPower
     power = 3.0e4
-  [../]
+  []
 
-  [./CH1:solid]
+  [CH1:solid]
     type = HeatStructureCylindrical
     position = '0 -0.024 0'
     orientation = '0 0 1'
@@ -69,21 +66,21 @@
     widths = '0.003015 0.000465  0.00052'
     n_part_elems = '20 2 2'
     materials = 'fuel-mat gap-mat clad-mat'
-  [../]
+  []
 
-  [./CH1:hgen]
+  [CH1:hgen]
     type = HeatSourceFromPowerDensity
     hs = CH1:solid
     regions = 'fuel'
     power_density = power_density
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 
@@ -103,15 +100,10 @@
 
   l_tol = 1e-5
   l_max_its = 50
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

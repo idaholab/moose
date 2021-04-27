@@ -5,23 +5,21 @@
   gravity_vector = '0 0 0'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43
     cv = 1040.0
     q = 2.03e6
     p_inf = 0.0
     q_prime = -2.3e4
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
 
@@ -38,25 +36,25 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 0.95e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,7 +64,7 @@
   solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 0
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-5
   nl_max_its = 15
 
   l_tol = 1e-3
@@ -82,8 +80,11 @@
 []
 
 [Outputs]
-  [./exodus]
+  file_base = 'phy.solidwall_outlet_3eqn'
+
+  [exodus]
     type = Exodus
     show = 'p T vel'
-  [../]
+  []
+
 []

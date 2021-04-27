@@ -183,9 +183,6 @@ protected:
   /// Nodeset name for all flow channel nodes
   BoundaryName _nodeset_name;
 
-  /// The name of the user object that will set up stabilization
-  UserObjectName _stabilization_uo_name;
-
   /// True if there is one or more sources specified by wall temperature
   bool _temperature_mode;
   /// Names of the heat transfer components connected to this component

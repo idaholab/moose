@@ -1,6 +1,0 @@
-COORDINATES
-TIME STEPS
-ELEMENT VARIABLES relative 1e-6 floor 1e-6
-	p
-	T
-	vel

@@ -27,14 +27,6 @@ public:
   const FEType & getFlowFEType() const { return _flow_fe_type; }
 
   /**
-   * Gets the spatial discretization type for flow
-   */
-  const FlowModel::ESpatialDiscretizationType & getSpatialDiscretization() const
-  {
-    return _spatial_discretization;
-  }
-
-  /**
    * Sets up quadrature rules
    */
   virtual void setupQuadrature();
@@ -326,9 +318,6 @@ protected:
 
   /// finite element type for the flow in the simulation
   FEType _flow_fe_type;
-
-  /// Spatial discretization
-  FlowModel::ESpatialDiscretizationType _spatial_discretization;
 
   /**
    * Setup equations to be solved in this simulation

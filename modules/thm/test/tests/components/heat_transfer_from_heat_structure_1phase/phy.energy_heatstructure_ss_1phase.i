@@ -9,49 +9,50 @@
 
   gravity_vector = '0.0 0.0 0.0'
 
+  scaling_factor_1phase = '1 1 1e-4'
+
   closures = simple
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 3.7
     cp = 3.e2
     rho = 10.42e3
-  [../]
-  [./gap-mat]
+  []
+  [gap-mat]
     type = SolidMaterialProperties
     k = 0.7
     cp = 5e3
     rho = 1.0
-  [../]
-  [./clad-mat]
+  []
+  [clad-mat]
     type = SolidMaterialProperties
     k = 16
     cp = 356.
     rho = 6.551400E+03
-  [../]
+  []
 []
 
 [Components]
-  [./reactor]
+  [reactor]
     type = TotalPower
-    power = 0
-  [../]
+    power = 1e3
+  []
 
-  [./core:pipe]
+  [core:pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
@@ -63,9 +64,9 @@
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./core:solid]
+  [core:solid]
     type = HeatStructureCylindrical
     position = '0 -0.0071501 0'
     orientation = '0 0 1'
@@ -78,58 +79,55 @@
     materials = 'fuel-mat gap-mat clad-mat'
 
     initial_T = 513
-  [../]
+  []
 
-  [./core:hgen]
+  [core:hgen]
     type = HeatSourceFromTotalPower
     hs = core:solid
     regions = 'FUEL'
     power = reactor
     power_fraction = 1
-  [../]
+  []
 
-  [./core:hx]
+  [core:hx]
     type = HeatTransferFromHeatStructure1Phase
     flow_channel = core:pipe
     hs   = core:solid
     hs_side = outer
     Hw = 1.0e4
     P_hf = 4.4925e-2
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'core:pipe:in'
     rho = 817.382210128610836
     vel = 2.4
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'core:pipe:out'
     p = 7e6
-    legacy = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_in]
-    type = NodalEnergyFluxPostprocessor
-    arhouA = rhouA
-    H = H
+  [E_in]
+    type = FlowBoundaryFlux1Phase
     boundary = inlet
+    equation = energy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_out]
-    type = NodalEnergyFluxPostprocessor
-    arhouA = rhouA
-    H = H
+  [E_out]
+    type = FlowBoundaryFlux1Phase
     boundary = outlet
+    equation = energy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./hf_pipe]
+  [hf_pipe]
     type = HeatRateConvection1Phase
     block = core:pipe
     T_wall = T_wall
@@ -137,26 +135,26 @@
     Hw = Hw
     P_hf = P_hf
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_diff]
+  [E_diff]
     type = DifferencePostprocessor
     value1 = E_in
     value2 = E_out
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_conservation]
+  [E_conservation]
     type = SumPostprocessor
     values = 'E_diff hf_pipe'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -174,22 +172,17 @@
   l_max_its = 60
 
   start_time = 0
-  end_time = 200
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
+  end_time = 260
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     execute_on = final
     show = 'E_conservation'
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     show = 'E_conservation'
-  [../]
+  []
 []

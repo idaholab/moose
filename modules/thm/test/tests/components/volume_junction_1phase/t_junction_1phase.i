@@ -24,7 +24,6 @@ A_small = 0.5
 
   fp = fp
 
-  spatial_discretization = RDG
   rdg_slope_reconstruction = minmod
 
   closures = simple

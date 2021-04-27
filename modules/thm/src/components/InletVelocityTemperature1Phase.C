@@ -29,12 +29,10 @@ InletVelocityTemperature1Phase::check() const
   if (fm == nullptr)
     logError("Incompatible flow model. Make sure you use this component with single phase flow "
              "channel.");
-  if (_spatial_discretization == FlowModel::CG)
-    logError("Incompatible spatial discretization. Make sure you use this component with rDG.");
 }
 
 void
-InletVelocityTemperature1Phase::setup1PhaseRDG()
+InletVelocityTemperature1Phase::addMooseObjects()
 {
   ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
@@ -58,10 +56,4 @@ InletVelocityTemperature1Phase::setup1PhaseRDG()
 
   // BCs
   addWeakBC3Eqn();
-}
-
-void
-InletVelocityTemperature1Phase::addMooseObjects()
-{
-  setup1PhaseRDG();
 }

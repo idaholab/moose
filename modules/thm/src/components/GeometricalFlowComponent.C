@@ -26,7 +26,6 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
                        ? 0.0
                        : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
                              180 / M_PI),
-    _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(getParam<UserObjectName>("fp")),
     _numerical_flux_name(genName(name(), "numerical_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
@@ -37,10 +36,7 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
 bool
 GeometricalFlowComponent::usingSecondOrderMesh() const
 {
-  if (_spatial_discretization == FlowModel::rDG)
-    return false;
-  else
-    return _sim.getFlowFEType().order == SECOND;
+  return false;
 }
 
 const std::vector<GeometricalFlowComponent::Connection> &

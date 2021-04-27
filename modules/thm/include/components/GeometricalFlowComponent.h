@@ -79,9 +79,6 @@ protected:
   /// Angle between orientation vector and gravity vector, in degrees
   const Real _gravity_angle;
 
-  /// Spatial discretization
-  const FlowModel::ESpatialDiscretizationType & _spatial_discretization;
-
   /// Map of end type to a list of connections
   std::map<FlowConnection::EEndType, std::vector<Connection>> _connections;
 

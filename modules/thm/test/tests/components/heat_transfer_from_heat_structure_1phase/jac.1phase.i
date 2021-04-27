@@ -7,27 +7,25 @@
   scaling_factor_temperature = '1'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0.1 0'
     orientation = '0 0 1'
@@ -39,9 +37,9 @@
     f = 0.01
 
     fp = fp
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '0 0 1'
@@ -54,25 +52,25 @@
     materials = 'fuel-mat'
 
     initial_T = 300
-  [../]
+  []
 
-  [./hx]
+  [hx]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     hs_side = outer
     flow_channel = pipe
     Hw = 100
     P_hf = 0.029832559676
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     petsc_options_iname = '-snes_test_err'
     petsc_options_value = ' 1e-11'
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,9 +88,4 @@
 
   l_tol = 1e-3
   l_max_its = 30
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []

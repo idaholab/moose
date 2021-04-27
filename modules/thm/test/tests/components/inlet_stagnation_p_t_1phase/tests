@@ -4,43 +4,30 @@
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_steady_3eqn.i'
     exodiff = 'phy.stagnation_p_T_steady_3eqn_out.e'
-    custom_cmp = 'phy.stagnation_p_T_steady_3eqn.exodiff'
   [../]
 
   [./phy:stagnation_p_T_transient_3eqn]
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_transient_3eqn.i'
     exodiff = 'phy.stagnation_p_T_transient_3eqn_out.e'
-    custom_cmp = 'phy.stagnation_p_T_transient_3eqn.exodiff'
   [../]
 
-  [./phy:p0T0_3eqn_cg]
+  [./phy:p0T0_3eqn]
     type = 'Exodiff'
     input = 'phy.p0T0_3eqn.i'
-    exodiff = 'phy.p0T0_3eqn_out.e'
-    custom_cmp = 'phy.p0T0_3eqn.exodiff'
-  [../]
-  [./phy:p0T0_3eqn_rdg]
-    type = 'Exodiff'
-    input = 'phy.p0T0_3eqn.i'
-    exodiff = 'phy.p0T0_3eqn_rdg.e'
-    custom_cmp = 'rdg_1phase.exodiff'
-    cli_args = "
-      GlobalParams/spatial_discretization=RDG
-      GlobalParams/rdg_slope_reconstruction=MINMOD
-      Outputs/file_base='phy.p0T0_3eqn_rdg'"
+    exodiff = 'phy.p0T0_3eqn.e'
     max_time = 500
-    group = 'inlet_p0_T0 outlet pipe 1phase rdg'
+    group = 'inlet_p0_T0 outlet pipe 1phase'
   [../]
 
-  [./clg:ctrl_p0_3eqn_rdg]
+  [./clg:ctrl_p0_3eqn]
     type = 'CSVDiff'
-    input = 'clg.ctrl_p0_3eqn_rdg.i'
-    csvdiff = 'clg.ctrl_p0_3eqn_rdg_out.csv'
+    input = 'clg.ctrl_p0_3eqn.i'
+    csvdiff = 'clg.ctrl_p0_3eqn_out.csv'
   [../]
-  [./clg:ctrl_T0_3eqn_rdg]
+  [./clg:ctrl_T0_3eqn]
     type = 'CSVDiff'
-    input = 'clg.ctrl_T0_3eqn_rdg.i'
-    csvdiff = 'clg.ctrl_T0_3eqn_rdg_out.csv'
+    input = 'clg.ctrl_T0_3eqn.i'
+    csvdiff = 'clg.ctrl_T0_3eqn_out.csv'
   [../]
 []

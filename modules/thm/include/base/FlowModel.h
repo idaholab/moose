@@ -20,46 +20,10 @@ class FlowModel : public MooseObject, public NamingInterface
 public:
   FlowModel(const InputParameters & params);
 
-  /// type for the flow equation
-  enum EEquationType
-  {
-    CONTINUITY = 0,
-    MOMENTUM = 1,
-    ENERGY = 2,
-    VOIDFRACTION = 3,
-  };
-  /// map of flow equation type string to enum
-  static const std::map<std::string, EEquationType> _flow_equation_type_to_enum;
-
-  /**
-   * Gets a MooseEnum for flow equation type
-   *
-   * @param[in] name   default value
-   * @returns MooseEnum for flow equation type
-   */
-  static MooseEnum getFlowEquationType(const std::string & name = "");
-
   /**
    * Gets a vector of the solution variables
    */
   std::vector<VariableName> getSolutionVariables() const { return _solution_vars; }
-
-  /// Spatial discretization type
-  enum ESpatialDiscretizationType
-  {
-    CG, ///< Continuous Galerkin Finite Element Method
-    rDG ///< Reconstructed Discontinuous Galerkin / Finite Volume Method
-  };
-  /// map of spatial discretization type string to enum
-  static const std::map<std::string, ESpatialDiscretizationType> _spatial_disc_type_to_enum;
-
-  /**
-   * Gets a MooseEnum for spatial discretization type
-   *
-   * @param[in] name   default value
-   * @returns MooseEnum for spatial discretization type
-   */
-  static MooseEnum getSpatialDiscretizationMooseEnum(const std::string & name = "");
 
   /**
    * Initialize the model
@@ -93,9 +57,6 @@ protected:
 
   /// The type of FE used for flow
   const FEType & _fe_type;
-
-  /// Spatial discretization
-  const ESpatialDiscretizationType & _spatial_discretization;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;
@@ -154,12 +115,3 @@ public:
 
   static InputParameters validParams();
 };
-
-namespace THM
-{
-template <>
-FlowModel::EEquationType stringToEnum(const std::string & s);
-
-template <>
-FlowModel::ESpatialDiscretizationType stringToEnum(const std::string & s);
-}

@@ -25,9 +25,6 @@ THMProblem::validParams()
   params.addParam<Real>(
       "scaling_factor_temperature", 1.0, "Scaling factor for solid temperature variable.");
 
-  params.addParam<MooseEnum>("spatial_discretization",
-                             FlowModel::getSpatialDiscretizationMooseEnum("rDG"),
-                             "Spatial discretization");
   params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
 
   // bounds

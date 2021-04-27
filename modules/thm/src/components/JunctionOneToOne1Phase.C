@@ -48,9 +48,6 @@ JunctionOneToOne1Phase::check() const
 {
   FlowJunction::check();
 
-  if (_spatial_discretization != FlowModel::rDG)
-    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
-
   // Check that there are exactly 2 connections
   checkNumberOfConnections(2);
 
