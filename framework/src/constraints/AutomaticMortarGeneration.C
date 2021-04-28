@@ -382,8 +382,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (!orientation1_valid && !orientation2_valid)
     {
       mooseDoOnce(mooseWarning(
-          "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid. "
-          "This can indicate there are very oblique projections between primary (mortar) "
+          "AutomaticMortarGeneration: Unable to determine valid secondary-primary orientation. "
+          "Consequently we will consider projection of the primary node invalid and not split the "
+          "mortar segment. "
+          "This situation can indicate there are very oblique projections between primary (mortar) "
           "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
           "time step is too large. This message is only printed once."));
       break;
