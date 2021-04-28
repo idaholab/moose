@@ -411,7 +411,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 
   // Now we should have the right adjuster based on the transfered solution
-  PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+  const auto to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
 
   // decide if the adjustment should be performed
   if (!performAdjustment(from_adjuster, to_adjuster))

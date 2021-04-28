@@ -9,7 +9,6 @@
 
 #include "UserObjectInterfaceErrorTest.h"
 
-#include "NullUserObject.h"
 #include "ThreadedGeneralUserObject.h"
 
 registerMooseObject("MooseTestApp", UserObjectInterfaceErrorTest);
@@ -19,10 +18,12 @@ UserObjectInterfaceErrorTest::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
 
-  params.addRequiredParam<UserObjectName>("uo", "Test parameter for a UserObjectName");
+  params.addParam<UserObjectName>("uo", "Test parameter for a UserObjectName");
 
   params.addParam<bool>(
       "missing_parameter", false, "True to test the error for a missing parameter");
+  params.addParam<bool>(
+      "bad_parameter_type", false, "True to test the error for a bad parameter type");
   params.addParam<bool>(
       "not_found_by_param",
       false,
@@ -31,7 +32,10 @@ UserObjectInterfaceErrorTest::validParams()
       "not_found_by_name",
       false,
       "True to test the error for a missing UO when the name is directly provided");
-  params.addParam<bool>("bad_cast", false, "True to test the error for a UO that fails the cast");
+  params.addParam<bool>(
+      "bad_cast", false, "True to test the error for a UO that fails the cast via parameter");
+  params.addParam<bool>(
+      "bad_cast_by_name", false, "True to test the error for a UO that fails the cast via name");
 
   return params;
 }
@@ -40,11 +44,15 @@ UserObjectInterfaceErrorTest::UserObjectInterfaceErrorTest(const InputParameters
   : GeneralUserObject(params)
 {
   if (getParam<bool>("missing_parameter"))
-    getUserObject<NullUserObject>("bad_parameter");
+    getUserObjectBase("missing");
+  if (getParam<bool>("bad_parameter_type"))
+    getUserObjectBase("bad_parameter_type");
   if (getParam<bool>("not_found_by_param"))
-    getUserObject<NullUserObject>("uo");
+    getUserObjectBase("uo");
   if (getParam<bool>("not_found_by_name"))
-    getUserObjectByName<NullUserObject>("not_found_by_name");
+    getUserObjectBaseByName("not_found_by_name");
   if (getParam<bool>("bad_cast"))
     getUserObject<ThreadedGeneralUserObject>("uo");
+  if (getParam<bool>("bad_cast_by_name"))
+    getUserObjectByName<ThreadedGeneralUserObject>("other_uo");
 }

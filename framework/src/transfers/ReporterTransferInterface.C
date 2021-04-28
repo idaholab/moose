@@ -11,6 +11,7 @@
 
 #include "UserObject.h"
 #include "Reporter.h"
+#include "Transfer.h"
 
 InputParameters
 ReporterTransferInterface::validParams()
@@ -19,14 +20,20 @@ ReporterTransferInterface::validParams()
   return params;
 }
 
-ReporterTransferInterface::ReporterTransferInterface(const InputParameters & /*parameters*/) {}
+ReporterTransferInterface::ReporterTransferInterface(const Transfer * transfer)
+  : _rti_transfer(*transfer)
+{
+}
 
 void
 ReporterTransferInterface::addReporterTransferMode(const ReporterName & name,
                                                    const ReporterMode & mode,
                                                    FEProblemBase & problem)
 {
-  problem.getReporterData(ReporterData::WriteKey()).addConsumerMode(mode, name);
+  checkHasReporterValue(name, problem);
+  problem.getReporterData(ReporterData::WriteKey())
+      .getReporterStateBase(name)
+      .addConsumer(mode, _rti_transfer);
 }
 
 void
@@ -36,9 +43,11 @@ ReporterTransferInterface::transferReporter(const ReporterName & from_reporter,
                                             FEProblemBase & to_problem,
                                             unsigned int time_index)
 {
-  const ReporterData & from_data = from_problem.getReporterData();
-  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
-  from_data.transfer(from_reporter, to_reporter, to_data, time_index);
+  checkHasReporterValue(from_reporter, from_problem);
+  checkHasReporterValue(to_reporter, to_problem);
+  from_problem.getReporterData()
+      .getReporterContextBase(from_reporter)
+      .transfer(to_problem.getReporterData(ReporterData::WriteKey()), to_reporter, time_index);
 }
 
 void
@@ -49,10 +58,25 @@ ReporterTransferInterface::transferToVectorReporter(const ReporterName & from_re
                                                     dof_id_type index,
                                                     unsigned int time_index)
 {
-  const ReporterData & from_data = from_problem.getReporterData();
-  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
-  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
-  from_context->transferToVector(to_data, to_reporter, index, time_index);
+  checkHasReporterValue(from_reporter, from_problem);
+  checkHasReporterValue(to_reporter, to_problem);
+  from_problem.getReporterData()
+      .getReporterContextBase(from_reporter)
+      .transferToVector(
+          to_problem.getReporterData(ReporterData::WriteKey()), to_reporter, index, time_index);
+}
+
+void
+ReporterTransferInterface::hideVariableHelper(const ReporterName & reporter,
+                                              FEProblemBase & problem)
+{
+  if (problem.hasUserObject(reporter.getObjectName()))
+  {
+    Reporter * rep =
+        dynamic_cast<Reporter *>(&problem.getUserObject<UserObject>(reporter.getObjectName()));
+    if (rep)
+      rep->buildOutputHideVariableList({reporter.getCombinedName()});
+  }
 }
 
 void
@@ -62,19 +86,14 @@ ReporterTransferInterface::declareClone(const ReporterName & from_reporter,
                                         FEProblemBase & to_problem,
                                         const ReporterMode & mode)
 {
-  const ReporterData & from_data = from_problem.getReporterData();
-  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
-  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
-  from_context->declareClone(to_data, to_reporter, mode);
+  checkHasReporterValue(from_reporter, from_problem);
+  from_problem.getReporterData()
+      .getReporterContextBase(from_reporter)
+      .declareClone(
+          to_problem.getReporterData(ReporterData::WriteKey()), to_reporter, mode, _rti_transfer);
 
   // Hide variables (if requested in parameters) if name is associated with a reporter object
-  if (to_problem.hasUserObject(to_reporter.getObjectName()))
-  {
-    UserObject & uo = to_problem.getUserObject<UserObject>(to_reporter.getObjectName());
-    Reporter * rep = dynamic_cast<Reporter *>(&uo);
-    if (rep)
-      rep->buildOutputHideVariableList({to_reporter.getCombinedName()});
-  }
+  hideVariableHelper(to_reporter, to_problem);
 }
 
 void
@@ -84,19 +103,14 @@ ReporterTransferInterface::declareVectorClone(const ReporterName & from_reporter
                                               FEProblemBase & to_problem,
                                               const ReporterMode & mode)
 {
-  const ReporterData & from_data = from_problem.getReporterData();
-  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
-  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
-  from_context->declareVectorClone(to_data, to_reporter, mode);
+  checkHasReporterValue(from_reporter, from_problem);
+  from_problem.getReporterData()
+      .getReporterContextBase(from_reporter)
+      .declareVectorClone(
+          to_problem.getReporterData(ReporterData::WriteKey()), to_reporter, mode, _rti_transfer);
 
   // Hide variables (if requested in parameters) if name is associated with a reporter object
-  if (to_problem.hasUserObject(to_reporter.getObjectName()))
-  {
-    UserObject & uo = to_problem.getUserObject<UserObject>(to_reporter.getObjectName());
-    Reporter * rep = dynamic_cast<Reporter *>(&uo);
-    if (rep)
-      rep->buildOutputHideVariableList({to_reporter.getCombinedName()});
-  }
+  hideVariableHelper(to_reporter, to_problem);
 }
 
 void
@@ -104,8 +118,8 @@ ReporterTransferInterface::resizeReporter(const ReporterName & name,
                                           FEProblemBase & problem,
                                           dof_id_type n)
 {
-  ReporterData & data = problem.getReporterData(ReporterData::WriteKey());
-  data.resize(name, n);
+  checkHasReporterValue(name, problem);
+  problem.getReporterData(ReporterData::WriteKey()).getReporterContextBase(name).resize(n);
 }
 
 std::vector<ReporterName>
@@ -120,4 +134,16 @@ ReporterTransferInterface::getReporterNamesHelper(std::string prefix,
   for (const auto & rn : rep_names)
     rnames.emplace_back(obj_name, prefix + rn.getObjectName() + ":" + rn.getValueName());
   return rnames;
+}
+
+void
+ReporterTransferInterface::checkHasReporterValue(const ReporterName & reporter,
+                                                 const FEProblemBase & problem) const
+{
+  if (!problem.getReporterData().hasReporterValue(reporter))
+    _rti_transfer.mooseError("Reporter with the name \"",
+                             reporter,
+                             "\" within app \"",
+                             problem.getMooseApp().name(),
+                             "\" was not found.");
 }

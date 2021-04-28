@@ -51,7 +51,6 @@ RayTracingObject::RayTracingObject(const InputParameters & params)
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_fe_problem.mesh()),
     _tid(params.get<THREAD_ID>("_tid")),
-    _error_prefix(type() + " '" + name() + "'"),
     _current_elem(_study.traceRay(_tid).currentElem()),
     _current_subdomain_id(_study.traceRay(_tid).currentSubdomainID()),
     _current_intersected_side(_study.traceRay(_tid).currentIntersectedSide()),

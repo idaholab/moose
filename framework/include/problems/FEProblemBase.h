@@ -900,17 +900,24 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
-   * Initializes the postprocessor data
-   *
-   * This is needed to correctly handle the default values
-   * @see SetupPostprocessorDataAction, PostprocessorInterface
+   * No longer used. To be removed after application patching
    */
-  void initPostprocessorData(const std::string & name);
+  void initPostprocessorData(const std::string &) {}
+
+  /**
+   * Whether or not a Postprocessor value exists by a given name.
+   * @param name The name of the Postprocessor
+   * @return True if a Postprocessor value exists
+   *
+   * Note: You should prioritize the use of PostprocessorInterface::hasPostprocessor
+   * and PostprocessorInterface::hasPostprocessorByName over this method when possible.
+   */
+  bool hasPostprocessorValueByName(const PostprocessorName & name) const;
 
   /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    * @return The reference to the value at the given time index
    *
    * Note: This method is only for retrieving values that already exist, the Postprocessor and
@@ -937,17 +944,11 @@ public:
   void setPostprocessorValueByName(const PostprocessorName & name,
                                    const PostprocessorValue & value,
                                    std::size_t t_index = 0);
-  ///@}
 
-  ///@{
   /**
-   * Deprecated
+   * Deprecated. Use hasPostprocessorValueByName
    */
   bool hasPostprocessor(const std::string & name) const;
-  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
-  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
-  ///@}
 
   /**
    * Get a read-only reference to the vector value associated with the VectorPostprocessor.
@@ -986,24 +987,6 @@ public:
    */
   const VectorPostprocessor & getVectorPostprocessorObjectByName(const std::string & object_name,
                                                                  THREAD_ID tid = 0) const;
-
-  ///@{
-  /**
-   * DEPRECATED
-   */
-  bool hasVectorPostprocessor(const std::string & name);
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name);
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name);
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name,
-                                                         bool needs_broadcast);
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name,
-                                                            bool needs_broadcast);
-  bool vectorPostprocessorHasVectors(const std::string & vpp_name);
-  ///@}
 
   ///@{
   /**

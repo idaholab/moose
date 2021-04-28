@@ -49,13 +49,13 @@ RayDataValue::RayDataValue(const InputParameters & parameters)
 
   if (_ray_name && !_study.useRayRegistration())
     paramError("study",
-               _study.errorPrefix(),
+               _study.typeAndName(),
                " does not support Ray registration.\n\nThis is controlled by the "
                "'_use_ray_registration' private param within the study.");
 
   if (!_study.bankRaysOnCompletion())
     paramError("study",
-               _study.errorPrefix(),
+               _study.typeAndName(),
                " does not bank Rays on completion.\n\nThis is controlled by the "
                "'_bank_rays_on_completion' private param within the study.");
 }
@@ -72,7 +72,7 @@ RayDataValue::initialize()
   if (_ray_data_index == Ray::INVALID_RAY_DATA_INDEX)
     paramError("ray_name",
                "The ",
-               _study.errorPrefix(),
+               _study.typeAndName(),
                " does not have Ray ",
                (_aux ? "aux " : ""),
                "data associated with the name '",

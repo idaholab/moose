@@ -1,0 +1,74 @@
+[Tests]
+  design = 'ReporterInterface.md'
+  issues = '#17512 #17605'
+
+  [param_errors]
+    requirement = 'The system shall report a reasonable error when requesting a Reporter value from a parameter when'
+
+    [missing_parameter]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/missing_parameter=true'
+      expect_err = 'When getting a Reporter, failed to get a parameter with the name "bad_param".'
+
+      detail = 'the parameter is not found and'
+    []
+    [bad_parameter_type]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/bad_parameter_type=true'
+      expect_err = 'Supplied parameter with name "missing_parameter" of type "bool" is not an expected type for getting a Reporter.'
+
+      detail = 'the parameter does not represent a Reporter'
+    []
+  []
+
+  [other_type_requested_error]
+    type = RunException
+    input = 'ri_errors.i'
+    cli_args = 'UserObjects/error_test/other_type_requested=true'
+    expect_err = 'While requesting a Reporter value with the name "some_value" and type "int",.*a Reporter with the same name has been requested with a different type.'
+
+    requirement = 'The system shall report a reasonable error when requesting a Reporter value when a Reporter with the same name exists with a different type.'
+  []
+
+  [missing_errors]
+    requirement = 'The system shall report a reasonable error when requesting a Reporter value'
+    [param]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/missing=true'
+      expect_err = 'reporter\)\:(.*)A Reporter value with the name "dummy/value" and type "int" was not found..'
+
+      detail = 'by parameter and the Reporter value does not exist and'
+    []
+    [name]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/missing_by_name=true'
+      expect_err = 'A Reporter value with the name "some_reporter/some_value" and type "int" was not found.'
+
+      detail = 'by Reporter name and the Reporter value does not exist.'
+    []
+  []
+
+  [has_errors]
+    requirement = 'The system shall report a reasonable error when it is too early to request if a Reporter value exists'
+    [param]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/has_early=true'
+      expect_err = 'Cannot call hasReporterValue\(\) until all Reporters have been constructed.'
+
+      detail = 'by parameter name and'
+    []
+    [name]
+      type = RunException
+      input = 'ri_errors.i'
+      cli_args = 'UserObjects/error_test/has_early_by_name=true'
+      expect_err = 'Cannot call hasReporterValueByName\(\) until all Reporters have been constructed.'
+
+      detail = 'by Reporter name.'
+    []
+  []
+[]

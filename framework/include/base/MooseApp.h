@@ -164,6 +164,10 @@ public:
    * Return a writable reference to the ActionWarehouse associated with this app
    */
   ActionWarehouse & actionWarehouse() { return _action_warehouse; }
+  /**
+   * Return a const reference to the ActionWarehouse associated with this app
+   */
+  const ActionWarehouse & actionWarehouse() const { return _action_warehouse; }
 
   /**
    * Returns a writable reference to the parser

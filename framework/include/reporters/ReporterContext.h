@@ -19,6 +19,7 @@
 #include "ReporterState.h"
 #include "nlohmann/json.h"
 #include "JsonSyntaxTree.h"
+#include "MooseObject.h"
 
 class ReporterData;
 
@@ -53,7 +54,7 @@ class ReporterData;
 class ReporterContextBase : public libMesh::ParallelObject
 {
 public:
-  ReporterContextBase(const libMesh::ParallelObject & other);
+  ReporterContextBase(const libMesh::ParallelObject & other, const MooseObject & producer);
   virtual ~ReporterContextBase() = default;
 
   /// Return the ReporterName that the context is associated
@@ -62,6 +63,13 @@ public:
   /// Return the type of the data stored
   // This is a helper for ReporterData::store
   virtual std::string type() const = 0;
+
+  /**
+   * @returns The derived context type for this context.
+   *
+   * This must be overridden in every class.
+   */
+  virtual std::string contextType() const = 0;
 
   /// Called by FEProblemBase::advanceState via ReporterData
   virtual void copyValuesBack() = 0;
@@ -91,6 +99,11 @@ public:
    * @see ReporterData::declareReporterValue
    */
   void init(const ReporterMode & mode);
+
+  /**
+   * Return the MooseObject that produces this Reporter.
+   */
+  const MooseObject & getProducer() const { return _producer; }
 
   /**
    * Return the Reporter value produced mode
@@ -131,7 +144,8 @@ public:
    */
   virtual void declareClone(ReporterData & r_data,
                             const ReporterName & r_name,
-                            const ReporterMode & mode) const = 0;
+                            const ReporterMode & mode,
+                            const MooseObject & producer) const = 0;
 
   /**
    * Helper for declaring new vector reporter values based on this context
@@ -144,7 +158,8 @@ public:
    */
   virtual void declareVectorClone(ReporterData & r_data,
                                   const ReporterName & r_name,
-                                  const ReporterMode & mode) const = 0;
+                                  const ReporterMode & mode,
+                                  const MooseObject & producer) const = 0;
 
   /**
    * Helper for resizing vector data
@@ -153,18 +168,16 @@ public:
    */
   virtual void resize(dof_id_type local_size) = 0;
 
-  /**
-   * Helper for enabling generic transfer of Reporter values
-   *
-   * This allows the Transfer object to set the ReporterValue consumer mode, which ensures that
-   * the data is in the proper state prior to transfer. Doing this via the override allows it to
-   * occur without the transfer having knowledge of the types being transfered.
-   *
-   * @see MultiAppReporterTransfer
-   */
-  virtual void addConsumerMode(ReporterMode mode, const std::string & object_name) = 0;
-
 protected:
+  /**
+   * Helper for checking whether or not the state \p state has only the modes \p modes.
+   */
+  void requiresConsumerModes(const ReporterStateBase & state,
+                             const std::set<ReporterMode> & modes) const;
+
+  /// The MooseObject that is producing this Reporter
+  const MooseObject & _producer;
+
   /// Defines how the Reporter value can be produced and how it is being produced
   ReporterProducerEnum _producer_enum;
 };
@@ -189,27 +202,30 @@ public:
     BROADCAST
   };
 
-  ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterContext(const libMesh::ParallelObject & other,
+                  const MooseObject & producer,
+                  ReporterState<T> & state);
+  ReporterContext(const libMesh::ParallelObject & other,
+                  const MooseObject & producer,
                   ReporterState<T> & state,
                   const T & default_value);
 
   /**
    * Return the name of the Reporter value
    */
-  virtual const ReporterName & name() const final;
+  const ReporterName & name() const override final { return _state.getReporterName(); }
 
   /**
    * Return a reference to the ReporterState object that is storing the Reporter value
    */
-  const ReporterState<T> & state() const;
+  const ReporterState<T> & state() const { return _state; }
 
   /**
    * Return the type being stored by the associated ReporterState object.
    *
    * @see ReporterData::store
    */
-  virtual std::string type() const final;
+  std::string type() const override final { return MooseUtils::prettyCppType<T>(); }
 
   /**
    * Perform automatic parallel communication based on the producer/consumer modes
@@ -237,11 +253,6 @@ public:
                                 dof_id_type index,
                                 unsigned int time_index = 0) const override;
 
-  /**
-   * Add a consumer mode to the associate ReporterState
-   */
-  virtual void addConsumerMode(ReporterMode mode, const std::string & object_name) override;
-
 protected:
   /// For broadcasting values if it is of fundamental type
   template <typename Q = T>
@@ -256,45 +267,35 @@ protected:
     mooseError("Can only broadcast fundamental types.");
   }
 
-  /// The state on which this context object operates
-  ReporterState<T> & _state;
-
   /// Output data to JSON, see JSONOutput
   virtual void store(nlohmann::json & json) const override;
 
+  virtual std::string contextType() const override = 0;
+
   // The following are called by the ReporterData and are not indented for external use
   virtual void copyValuesBack() override;
-  friend class ReporterData;
+
+  /// The state on which this context object operates
+  ReporterState<T> & _state;
 };
 
 template <typename T>
-ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
-  : ReporterContextBase(other), _state(state)
+ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
+                                    const MooseObject & producer,
+                                    ReporterState<T> & state)
+  : ReporterContextBase(other, producer), _state(state)
 {
   _producer_enum.insert(REPORTER_MODE_ROOT, REPORTER_MODE_REPLICATED, REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename T>
 ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
+                                    const MooseObject & producer,
                                     ReporterState<T> & state,
                                     const T & default_value)
-  : ReporterContext(other, state)
+  : ReporterContext(other, producer, state)
 {
   _state.value() = default_value;
-}
-
-template <typename T>
-const ReporterName &
-ReporterContext<T>::name() const
-{
-  return _state.getReporterName();
-}
-
-template <typename T>
-const ReporterState<T> &
-ReporterContext<T>::state() const
-{
-  return _state;
 }
 
 template <typename T>
@@ -310,10 +311,10 @@ ReporterContext<T>::finalize()
 
   // Determine auto parallel operation to perform
   const auto & producer = _producer_enum; // convenience
-  for (const auto & pair : _state.getConsumerModes())
+  for (const auto & pair : _state.getConsumers())
   {
     const ReporterMode consumer = pair.first;
-    const std::string & object_name = pair.second;
+    const MooseObject * moose_object = pair.second;
 
     // The following sets up the automatic operations and performs error checking for the various
     // modes for the producer and consumer
@@ -339,13 +340,13 @@ ReporterContext<T>::finalize()
              (producer == REPORTER_MODE_REPLICATED && consumer == REPORTER_MODE_DISTRIBUTED) ||
              (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_ROOT) ||
              (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_REPLICATED))
-      mooseError("The Reporter value '",
+      mooseError("The Reporter value \"",
                  name(),
-                 "' is being produced in ",
+                 "\" is being produced in ",
                  producer,
-                 " mode, but the '",
-                 object_name,
-                 "' object is requesting to consume it in ",
+                 " mode, but the ",
+                 moose_object->typeAndName(),
+                 " is requesting to consume it in ",
                  consumer,
                  " mode, which is not supported.");
   }
@@ -372,31 +373,20 @@ ReporterContext<T>::store(nlohmann::json & json) const
 }
 
 template <typename T>
-std::string
-ReporterContext<T>::type() const
-{
-  return JsonSyntaxTree::prettyCppType(demangle(typeid(T).name()));
-}
-
-template <typename T>
-void
-ReporterContext<T>::addConsumerMode(ReporterMode mode, const std::string & object_name)
-{
-  _state.addConsumerMode(mode, object_name);
-}
-
-template <typename T>
 class ReporterGeneralContext : public ReporterContext<T>
 {
 public:
-  ReporterGeneralContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
-    : ReporterContext<T>(other, state)
+  ReporterGeneralContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
+                         ReporterState<T> & state)
+    : ReporterContext<T>(other, producer, state)
   {
   }
   ReporterGeneralContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const T & default_value)
-    : ReporterContext<T>(other, state, default_value)
+    : ReporterContext<T>(other, producer, state, default_value)
   {
   }
 
@@ -408,7 +398,8 @@ public:
    */
   virtual void declareClone(ReporterData & r_data,
                             const ReporterName & r_name,
-                            const ReporterMode & mode) const override;
+                            const ReporterMode & mode,
+                            const MooseObject & producer) const override;
   /**
    * Declare a reporter value that is a vector of the same type as this context.
    *
@@ -417,9 +408,12 @@ public:
    */
   virtual void declareVectorClone(ReporterData & r_data,
                                   const ReporterName & r_name,
-                                  const ReporterMode & mode) const override;
+                                  const ReporterMode & mode,
+                                  const MooseObject & producer) const override;
 
   virtual void resize(dof_id_type local_size) final;
+
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };
 
 template <typename T>
@@ -435,17 +429,22 @@ template <typename T>
 class ReporterBroadcastContext : public ReporterGeneralContext<T>
 {
 public:
-  ReporterBroadcastContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                           const MooseObject & producer,
+                           ReporterState<T> & state);
+  ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                           const MooseObject & producer,
                            ReporterState<T> & state,
                            const T & default_value);
   virtual void finalize() override;
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };
 
 template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                                                      const MooseObject & producer,
                                                       ReporterState<T> & state)
-  : ReporterGeneralContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, producer, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -453,9 +452,10 @@ ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObj
 
 template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
+                                                      const MooseObject & producer,
                                                       ReporterState<T> & state,
                                                       const T & default_value)
-  : ReporterGeneralContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, producer, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -465,22 +465,7 @@ template <typename T>
 void
 ReporterBroadcastContext<T>::finalize()
 {
-  for (const auto & pair : this->_state.getConsumerModes())
-  {
-    const ReporterMode consumer = pair.first;
-    const std::string & object_name = pair.second;
-    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_REPLICATED))
-      mooseError("The Reporter value '",
-                 this->name(),
-                 "' is being produced in ",
-                 REPORTER_MODE_ROOT,
-                 " mode, but the '",
-                 object_name,
-                 "' object is requesting to consume it in ",
-                 consumer,
-                 " mode, which is not supported. The mode must be UNSET or REPLICATED.");
-  }
-
+  this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_REPLICATED});
   this->broadcast();
 }
 
@@ -492,14 +477,17 @@ class ReporterScatterContext : public ReporterGeneralContext<T>
 {
 public:
   ReporterScatterContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const std::vector<T> & values);
   ReporterScatterContext(const libMesh::ParallelObject & other,
+                         const MooseObject & producer,
                          ReporterState<T> & state,
                          const T & default_value,
                          const std::vector<T> & values);
 
   virtual void finalize() override;
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 
 private:
   /// The values to scatter
@@ -508,9 +496,10 @@ private:
 
 template <typename T>
 ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject & other,
+                                                  const MooseObject & producer,
                                                   ReporterState<T> & state,
                                                   const std::vector<T> & values)
-  : ReporterGeneralContext<T>(other, state), _values(values)
+  : ReporterGeneralContext<T>(other, producer, state), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -518,10 +507,11 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
 
 template <typename T>
 ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject & other,
+                                                  const MooseObject & producer,
                                                   ReporterState<T> & state,
                                                   const T & default_value,
                                                   const std::vector<T> & values)
-  : ReporterGeneralContext<T>(other, state, default_value), _values(values)
+  : ReporterGeneralContext<T>(other, producer, state, default_value), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -531,21 +521,7 @@ template <typename T>
 void
 ReporterScatterContext<T>::finalize()
 {
-  for (const auto & pair : this->_state.getConsumerModes())
-  {
-    const ReporterMode consumer = pair.first;
-    const std::string & object_name = pair.second;
-    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_DISTRIBUTED))
-      mooseError("The Reporter value '",
-                 this->name(),
-                 "' is being produced in ",
-                 REPORTER_MODE_ROOT,
-                 " mode, but the '",
-                 object_name,
-                 "' object is requesting to consume it in ",
-                 consumer,
-                 " mode, which is not supported. The mode must be UNSET or DISTRIBUTED.");
-  }
+  this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_REPLICATED});
 
   mooseAssert(this->processor_id() == 0 ? _values.size() == this->n_processors() : true,
               "Vector to be scattered must be sized to match the number of processors");
@@ -562,18 +538,23 @@ template <typename T>
 class ReporterGatherContext : public ReporterGeneralContext<T>
 {
 public:
-  ReporterGatherContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
+                        ReporterState<T> & state);
+  ReporterGatherContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<T> & state,
                         const T & default_value);
 
   virtual void finalize() override;
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };
 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<T> & state)
-  : ReporterGeneralContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, producer, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -581,9 +562,10 @@ ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & 
 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<T> & state,
                                                 const T & default_value)
-  : ReporterGeneralContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, producer, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -593,20 +575,7 @@ template <typename T>
 void
 ReporterGatherContext<T>::finalize()
 {
-  for (const auto & pair : this->_state.getConsumerModes())
-  {
-    const ReporterMode consumer = pair.first;
-    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_ROOT))
-      mooseError("The Reporter value '",
-                 this->name(),
-                 "' is being produced in ",
-                 REPORTER_MODE_DISTRIBUTED,
-                 " mode, but the '",
-                 pair.second, // object name
-                 "' object is requesting to consume it in ",
-                 consumer,
-                 " mode, which is not supported. The mode must be UNSET or ROOT.");
-  }
+  this->requiresConsumerModes(this->_state, {REPORTER_MODE_UNSET, REPORTER_MODE_ROOT});
   this->comm().gather(0, this->_state.value());
 }
 
@@ -621,8 +590,10 @@ class ReporterVectorContext : public ReporterContext<std::vector<T>>
 {
 public:
   ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<std::vector<T>> & state);
   ReporterVectorContext(const libMesh::ParallelObject & other,
+                        const MooseObject & producer,
                         ReporterState<std::vector<T>> & state,
                         const std::vector<T> & default_value);
 
@@ -632,7 +603,8 @@ public:
    */
   virtual void declareClone(ReporterData & r_data,
                             const ReporterName & r_name,
-                            const ReporterMode & mode) const final;
+                            const ReporterMode & mode,
+                            const MooseObject & producer) const final;
 
   /**
    * This simply throws an error to avoid infinite instantiations.
@@ -640,26 +612,31 @@ public:
    */
   virtual void declareVectorClone(ReporterData & r_data,
                                   const ReporterName & r_name,
-                                  const ReporterMode & mode) const final;
+                                  const ReporterMode & mode,
+                                  const MooseObject & producer) const final;
 
   /**
    * Since we know that the _state value is a vector type, we can resize it based
    * on @param local_size
    */
   virtual void resize(dof_id_type local_size) override { this->_state.value().resize(local_size); }
+
+  virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
 };
 
 template <typename T>
 ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<std::vector<T>> & state)
-  : ReporterContext<std::vector<T>>(other, state)
+  : ReporterContext<std::vector<T>>(other, producer, state)
 {
 }
 
 template <typename T>
 ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                const MooseObject & producer,
                                                 ReporterState<std::vector<T>> & state,
                                                 const std::vector<T> & default_value)
-  : ReporterContext<std::vector<T>>(other, state, default_value)
+  : ReporterContext<std::vector<T>>(other, producer, state, default_value)
 {
 }

@@ -40,7 +40,7 @@ SamplerReporterTransfer::validParams()
 
 SamplerReporterTransfer::SamplerReporterTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
-    ReporterTransferInterface(parameters),
+    ReporterTransferInterface(this),
     _sub_reporter_names(getParam<std::vector<ReporterName>>("from_reporter")),
     _sr_name(getParam<std::string>("stochastic_reporter")),
     _reporter_names(

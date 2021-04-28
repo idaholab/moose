@@ -24,12 +24,14 @@ class ReporterStatisticsContext
 {
 public:
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
+                            const MooseObject & producer,
                             ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
                             const InType & data,
                             const ReporterProducerEnum & mode,
                             const MooseEnumItem & stat);
 
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
+                            const MooseObject & producer,
                             ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
                             const InType & data,
                             const ReporterProducerEnum & mode,
@@ -60,11 +62,12 @@ private:
 template <typename InType, typename OutType>
 ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const libMesh::ParallelObject & other,
+    const MooseObject & producer,
     ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
     const InType & data,
     const ReporterProducerEnum & mode,
     const MooseEnumItem & stat)
-  : ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>(other, state),
+  : ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>(other, producer, state),
     _data(data),
     _data_mode(mode),
     _calc_ptr(StochasticTools::makeCalculator<InType, OutType>(stat, other))
@@ -74,6 +77,7 @@ ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
 template <typename InType, typename OutType>
 ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const libMesh::ParallelObject & other,
+    const MooseObject & producer,
     ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
     const InType & data,
     const ReporterProducerEnum & mode,
@@ -82,7 +86,7 @@ ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const std::vector<Real> & ci_levels,
     unsigned int ci_replicates,
     unsigned int ci_seed)
-  : ReporterStatisticsContext<InType, OutType>(other, state, data, mode, stat)
+  : ReporterStatisticsContext<InType, OutType>(other, producer, state, data, mode, stat)
 {
   _ci_calc_ptr = StochasticTools::makeBootstrapCalculator<InType, OutType>(
       ci_method, other, ci_levels, ci_replicates, ci_seed, *_calc_ptr);

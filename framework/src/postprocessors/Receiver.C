@@ -29,18 +29,21 @@ Receiver::validParams()
 Receiver::Receiver(const InputParameters & params)
   : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(getPostprocessorValueByName(name())) // use FEProblem to avoid cyclic dependency
+    _my_value(getPostprocessorValueByName(name()))
 {
-  // Initialize old/older data
-  getPostprocessorValueOldByName(name());
-  getPostprocessorValueOlderByName(name());
+  const PostprocessorReporterName r_name(name());
+  auto & write_data = _fe_problem.getReporterData(ReporterData::WriteKey());
 
+  // Request that we need the old and older time values for this Receiver
+  write_data.needReporterTimeIndex<PostprocessorValue>(r_name, 2);
+
+  // Initialize values
   const Real & value = getParam<Real>("default");
-  _fe_problem.setPostprocessorValueByName(_pp_name, value, 0);
+  write_data.setReporterValue<PostprocessorValue>(r_name, value, 0);
   if (_initialize_old)
   {
-    _fe_problem.setPostprocessorValueByName(_pp_name, value, 1);
-    _fe_problem.setPostprocessorValueByName(_pp_name, value, 2);
+    write_data.setReporterValue<PostprocessorValue>(r_name, value, 1);
+    write_data.setReporterValue<PostprocessorValue>(r_name, value, 2);
   }
 }
 
