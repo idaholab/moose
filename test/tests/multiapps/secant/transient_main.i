@@ -50,10 +50,6 @@
 []
 
 [Postprocessors]
-  [coupling_its]
-    type = NumFixedPointIterations
-    execute_on = 'initial timestep_end'
-  []
   [unorm]
     type = ElementL2Norm
     variable = u

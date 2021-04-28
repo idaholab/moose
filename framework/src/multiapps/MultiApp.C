@@ -799,7 +799,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
         getParam<std::vector<std::string>>("relaxed_variables"));
   fixed_point_solve->setMultiAppTransformedPostprocessors(
       getParam<std::vector<std::string>>("transformed_postprocessors"));
-  fixed_point_solve->allocateStorageForSecondaryTransformed();
+  fixed_point_solve->allocateStorage(false);
 }
 
 std::string

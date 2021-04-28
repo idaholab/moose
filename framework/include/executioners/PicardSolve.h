@@ -27,35 +27,62 @@ public:
 
   static InputParameters validParams();
 
-  /// Allocate storage for secondary transformed objects
-  virtual void allocateStorageForSecondaryTransformed() override final;
+  /**
+   * Allocate storage for the fixed point algorithm.
+   * This creates the system vector of old (older, pre/post solve) variable values and the
+   * array of old (older, pre/post solve) postprocessor values.
+   *
+   * @param primary Whether this routine is to allocate storage for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void allocateStorage(const bool primary) override final;
 
-protected:
-  /// Save the variable values as a SubApp
-  virtual void savePreviousVariableValuesAsSubApp() override final;
+private:
+  /**
+   * Saves the current values of the variables, and update the old(er) vectors.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void saveVariableValues(const bool primary) override final;
 
-  /// Save the postprocessor values as a SubApp
-  virtual void savePreviousPostprocessorValuesAsSubApp() override final;
+  /**
+   * Saves the current values of the postprocessors, and update the old(er) vectors.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void savePostprocessorValues(const bool primary) override final;
 
-  /// Whether to use the coupling algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useFixedPointAlgorithmUpdate(bool as_main_app) override final;
+  /**
+   * Use the fixed point algorithm transform instead of simply using the Picard update
+   *
+   * @param primary Whether this routine is used for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary) override final;
 
-  /// Save the previous variables and postprocessors as the main application
-  virtual void savePreviousValuesAsMainApp() override final;
+  /**
+   * Use the fixed point algorithm to transform the postprocessors.
+   * If this routine is not called, the next value of the postprocessors will just be from
+   * the unrelaxed Picard fixed point algorithm.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void transformPostprocessors(const bool primary) override final;
 
-  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected
-  virtual void transformPostprocessorsAsMainApp() override final;
-
-  /// Compute the new value of the coupling postprocessors based on the coupling algorithm selected as a SubApp
-  virtual void transformPostprocessorsAsSubApp() override final;
-
-  /// Compute the new variable values based on the coupling algorithm selected
-  virtual void
-  transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) override final;
-
-  /// Compute the new variable values based on the coupling algorithm selected as a SubApp
-  virtual void transformVariablesAsSubApp(
-      const std::set<dof_id_type> & secondary_transformed_dofs) override final;
+  /**
+   * Use the fixed point algorithm to transform the variables.
+   * If this routine is not called, the next value of the variables will just be from
+   * the unrelaxed Picard fixed point algorithm.
+   *
+   * @param transformed_dofs The dofs that will be affected by the algorithm
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
+                                  const bool primary) override final;
 
   /// Print the convergence history of the coupling, at every coupling iteration
   virtual void printFixedPointConvergenceHistory() override final;

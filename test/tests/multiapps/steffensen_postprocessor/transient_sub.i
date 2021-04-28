@@ -66,6 +66,9 @@
 []
 
 [Outputs]
-  csv = true
+  [csv]
+    type = CSV
+    start_step = 6
+  []
   exodus = false
 []

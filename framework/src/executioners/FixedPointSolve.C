@@ -219,7 +219,7 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      savePreviousVariableValuesAsSubApp();
+      saveVariableValues(false);
     }
     else
       _main_fixed_point_it = 0;
@@ -296,14 +296,14 @@ FixedPointSolve::solve()
   // Save postprocessors after the solve and their potential timestep_end execution
   // The postprocessors could be overwritten at timestep_begin, which is why they are saved now
   if (_old_entering_time == _problem.time())
-    savePreviousPostprocessorValuesAsSubApp();
+    savePostprocessorValues(false);
 
   if (converged)
   {
     // Update the subapp using the fixed point algorithm
-    if (_secondary_transformed_variables.size() > 0 && useFixedPointAlgorithmUpdate(false) &&
-        _old_entering_time == _problem.time())
-      transformVariablesAsSubApp(secondary_transformed_dofs);
+    if (_secondary_transformed_variables.size() > 0 &&
+        useFixedPointAlgorithmUpdateInsteadOfPicard(false) && _old_entering_time == _problem.time())
+      transformVariables(secondary_transformed_dofs, false);
 
     // Update the entering time, used to detect failed solves
     _old_entering_time = _problem.time();
@@ -313,6 +313,13 @@ FixedPointSolve::solve()
     printFixedPointConvergenceReason();
 
   return converged;
+}
+
+void
+FixedPointSolve::saveAllValues(const bool primary)
+{
+  saveVariableValues(primary);
+  savePostprocessorValues(primary);
 }
 
 bool
@@ -339,11 +346,11 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   // Transform the fixed point postprocessors before solving, but after the timestep_begin transfers
   // have been received
-  if (_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdate(true))
-    transformPostprocessorsAsMainApp();
-  if (_secondary_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdate(false) &&
+  if (_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
+    transformPostprocessors(true);
+  if (_secondary_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(false) &&
       _problem.time() == _old_entering_time)
-    transformPostprocessorsAsSubApp();
+    transformPostprocessors(false);
 
   if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
     _problem.updateMeshXFEM();
@@ -365,8 +372,8 @@ FixedPointSolve::solveStep(Real & begin_norm,
   // Update warehouse active objects
   _problem.updateActiveObjects();
 
-  // Save previous solutions
-  savePreviousValuesAsMainApp();
+  // Save the current values of variables and postprocessors, before the solve
+  saveAllValues(true);
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:\n" << COLOR_DEFAULT;
@@ -385,8 +392,8 @@ FixedPointSolve::solveStep(Real & begin_norm,
   _console << COLOR_GREEN << ' ' << _solve_message << COLOR_DEFAULT << std::endl;
 
   // Use the fixed point algorithm if the conditions (availability of values, etc) are met
-  if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdate(true))
-    transformVariablesAsMainApp(transformed_dofs);
+  if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
+    transformVariables(transformed_dofs, true);
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {

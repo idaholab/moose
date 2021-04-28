@@ -92,8 +92,15 @@ public:
     _secondary_transformed_pps = pps;
   }
 
-  /// Allocate storage for secondary transformed stuff
-  virtual void allocateStorageForSecondaryTransformed() = 0;
+  /**
+   * Allocate storage for the fixed point algorithm.
+   * This creates the system vector of old (older, pre/post solve) variable values and the
+   * array of old (older, pre/post solve) postprocessor values.
+   *
+   * @param primary Whether this routine is to allocate storage for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void allocateStorage(const bool primary) = 0;
 
   /// Whether sub-applications are automatically advanced no matter what happens during their solves
   bool autoAdvance() const;
@@ -102,14 +109,31 @@ public:
   void failStep() { _fail_step = true; }
 
 protected:
-  /// Save the variable values as a SubApp
-  virtual void savePreviousVariableValuesAsSubApp() = 0;
+  /**
+   * Saves the current values of the variables, and update the old(er) vectors.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void saveVariableValues(const bool primary) = 0;
 
-  /// Save the postprocessor values as a SubApp
-  virtual void savePreviousPostprocessorValuesAsSubApp() = 0;
+  /**
+   * Saves the current values of the postprocessors, and update the old(er) vectors.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void savePostprocessorValues(const bool primary) = 0;
 
-  /// Whether to use the fixed point algorithm (relaxed Picard, Secant, ...) instead of Picard
-  virtual bool useFixedPointAlgorithmUpdate(bool as_main_app) = 0;
+  /**
+   * Use the fixed point algorithm transform instead of simply using the Picard update
+   * This routine can be used to alternate Picard iterations and fixed point algorithm
+   * updates based on the values of the variables before and after a solve / a Picard iteration.
+   *
+   * @param primary Whether this routine is used for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary) = 0;
 
   /**
    * Perform one fixed point iteration or a full solve.
@@ -127,21 +151,30 @@ protected:
   virtual bool
   solveStep(Real & begin_norm, Real & end_norm, const std::set<dof_id_type> & transformed_dofs);
 
-  /// Save the previous values for the variables
-  virtual void savePreviousValuesAsMainApp() = 0;
+  /// Save both the variable and postprocessor values
+  virtual void saveAllValues(const bool primary);
 
-  /// Compute the new value of the fixed point postprocessors based on the fixed point algorithm selected
-  virtual void transformPostprocessorsAsMainApp() = 0;
+  /**
+   * Use the fixed point algorithm to transform the postprocessors.
+   * If this routine is not called, the next value of the postprocessors will just be from
+   * the unrelaxed Picard fixed point algorithm.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void transformPostprocessors(const bool primary) = 0;
 
-  /// Compute the new value of the fixed point postprocessors based on the fixed point algorithm selected as a SubApp
-  virtual void transformPostprocessorsAsSubApp() = 0;
-
-  /// Compute the new value variable values based on the fixed point algorithm selected
-  virtual void transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs) = 0;
-
-  /// Compute the new value variable values based on the fixed point algorithm selected as a SubApp
-  virtual void
-  transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs) = 0;
+  /**
+   * Use the fixed point algorithm to transform the variables.
+   * If this routine is not called, the next value of the variables will just be from
+   * the unrelaxed Picard fixed point algorithm.
+   *
+   * @param transformed_dofs The dofs that will be affected by the algorithm
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
+                                  const bool primary) = 0;
 
   /// Print the convergence history of the coupling, at every fixed point iteration
   virtual void printFixedPointConvergenceHistory() = 0;

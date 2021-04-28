@@ -25,14 +25,7 @@ SteffensenSolve::validParams()
 
 SteffensenSolve::SteffensenSolve(Executioner * ex) : FixedPointSolve(ex)
 {
-  // Store a copy of the state and its first evaluation in the coupled problem
-  _problem.getNonlinearSystemBase().addVector("xn_m1", false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector("fxn_m1", false, PARALLEL);
-
-  // Allocate storage for the previous values of the postprocessors to transform
-  _transformed_pps_values.resize(_transformed_pps.size());
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
-    _transformed_pps_values[i].resize(2);
+  allocateStorage(true);
 
   // Steffensen method uses half-steps
   _min_fixed_point_its *= 2;
@@ -40,92 +33,134 @@ SteffensenSolve::SteffensenSolve(Executioner * ex) : FixedPointSolve(ex)
 }
 
 void
-SteffensenSolve::allocateStorageForSecondaryTransformed()
+SteffensenSolve::allocateStorage(const bool primary)
 {
+  std::string fxn_m1_name;
+  std::string xn_m1_name;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
+  {
+    fxn_m1_name = "fxn_m1";
+    xn_m1_name = "xn_m1";
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
+  }
+  else
+  {
+    fxn_m1_name = "secondary_fxn_m1";
+    xn_m1_name = "secondary_xn_m1";
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
+
   // Store a copy of the previous solution here
-  _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector("secondary_fxn_m1", false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector(xn_m1_name, false, PARALLEL);
+  _problem.getNonlinearSystemBase().addVector(fxn_m1_name, false, PARALLEL);
 
   // Allocate storage for the previous postprocessor values
-  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
-  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-    _secondary_transformed_pps_values[i].resize(2);
+  (*transformed_pps_values).resize((*transformed_pps).size());
+  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+    (*transformed_pps_values)[i].resize(2);
 }
 
 void
-SteffensenSolve::savePreviousVariableValuesAsSubApp()
+SteffensenSolve::saveVariableValues(const bool primary)
 {
+  unsigned int iteration;
+  std::string fxn_m1_name;
+  std::string xn_m1_name;
+  if (primary)
+  {
+    iteration = _fixed_point_it;
+    fxn_m1_name = "fxn_m1";
+    xn_m1_name = "xn_m1";
+  }
+  else
+  {
+    iteration = _main_fixed_point_it;
+    fxn_m1_name = "secondary_fxn_m1";
+    xn_m1_name = "secondary_xn_m1";
+  }
+
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
-  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
 
   // What 'solution' is with regards to the Steffensen solve depends on the step
-  if (_main_fixed_point_it % 2 == 1)
+  if (iteration % 2 == 1)
     xn_m1 = solution;
   else
     fxn_m1 = solution;
 }
 
 void
-SteffensenSolve::savePreviousPostprocessorValuesAsSubApp()
+SteffensenSolve::savePostprocessorValues(const bool primary)
 {
-  // Save previous postprocessor values
-  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+  unsigned int iteration;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
   {
-    if (_main_fixed_point_it % 2 == 0)
-      _secondary_transformed_pps_values[i][1] =
-          getPostprocessorValueByName(_secondary_transformed_pps[i]);
+    iteration = _fixed_point_it;
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
+  }
+  else
+  {
+    iteration = _main_fixed_point_it;
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
+
+  // Save previous postprocessor values
+  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  {
+    if (iteration % 2 == 0)
+      (*transformed_pps_values)[i][1] = getPostprocessorValueByName((*transformed_pps)[i]);
     else
-      _secondary_transformed_pps_values[i][0] =
-          getPostprocessorValueByName(_secondary_transformed_pps[i]);
+      (*transformed_pps_values)[i][0] = getPostprocessorValueByName((*transformed_pps)[i]);
   }
 }
 
 bool
-SteffensenSolve::useFixedPointAlgorithmUpdate(bool as_main_app)
+SteffensenSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 {
   // Need at least two values to compute the Steffensen update, and the update is only performed
   // every other iteration as two evaluations of the coupled problem are necessary
-  if (as_main_app)
+  if (primary)
     return _fixed_point_it > 1 && (_fixed_point_it % 2 == 0);
   else
     return _main_fixed_point_it > 1 && (_main_fixed_point_it % 2 == 0);
 }
 
 void
-SteffensenSolve::savePreviousValuesAsMainApp()
+SteffensenSolve::transformPostprocessors(const bool primary)
 {
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
-  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
-
-  // What solution is with regards to the Steffensen solve depends on the step
-  if (_fixed_point_it % 2 == 1)
-    xn_m1 = solution;
-  else
-    fxn_m1 = solution;
-
-  // Set postprocessor previous values
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
+  Real relaxation_factor;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
   {
-    if (_fixed_point_it % 2 == 0)
-      _transformed_pps_values[i][1] = getPostprocessorValueByName(_transformed_pps[i]);
-    else
-      _transformed_pps_values[i][0] = getPostprocessorValueByName(_transformed_pps[i]);
+    relaxation_factor = _relax_factor;
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
   }
-}
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
 
-void
-SteffensenSolve::transformPostprocessorsAsMainApp()
-{
   // Relax postprocessors for the main application
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
+  for (size_t i = 0; i < (*transformed_pps).size(); i++)
   {
     // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName(_transformed_pps[i]);
-    const Real fxn_m1 = _transformed_pps_values[i][0];
-    const Real xn_m1 = _transformed_pps_values[i][1];
+    const Real current_value = getPostprocessorValueByName((*transformed_pps)[i]);
+    const Real fxn_m1 = (*transformed_pps_values)[i][0];
+    const Real xn_m1 = (*transformed_pps_values)[i][1];
 
     // Compute and set relaxed value
     Real new_value = current_value;
@@ -134,44 +169,35 @@ SteffensenSolve::transformPostprocessorsAsMainApp()
           xn_m1 - (fxn_m1 - xn_m1) * (fxn_m1 - xn_m1) / (current_value + xn_m1 - 2 * fxn_m1);
 
     // Relax update
-    new_value = _relax_factor * new_value + (1 - _relax_factor) * fxn_m1;
+    new_value = relaxation_factor * new_value + (1 - relaxation_factor) * fxn_m1;
 
-    _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
+    _problem.setPostprocessorValueByName((*transformed_pps)[i], new_value);
   }
 }
 
 void
-SteffensenSolve::transformPostprocessorsAsSubApp()
+SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs,
+                                    const bool primary)
 {
-  // Update the postprocessors
-  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+  Real relaxation_factor;
+  std::string fxn_m1_name;
+  std::string xn_m1_name;
+  if (primary)
   {
-    // Get new, previous and the one before postprocessor values
-    const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
-    const Real fxn_m1 = _secondary_transformed_pps_values[i][0];
-    const Real xn_m1 = _secondary_transformed_pps_values[i][1];
-
-    // Compute the Steffensen method value
-    Real new_value = current_value;
-    if (!MooseUtils::absoluteFuzzyEqual(current_value + xn_m1 - 2 * fxn_m1, 0))
-      new_value =
-          xn_m1 - (fxn_m1 - xn_m1) * (fxn_m1 - xn_m1) / (current_value + xn_m1 - 2 * fxn_m1);
-
-    // Relax update
-    new_value =
-        _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * fxn_m1;
-
-    // Update the postprocessor
-    _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
+    relaxation_factor = _relax_factor;
+    fxn_m1_name = "fxn_m1";
+    xn_m1_name = "xn_m1";
   }
-}
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    fxn_m1_name = "secondary_fxn_m1";
+    xn_m1_name = "secondary_xn_m1";
+  }
 
-void
-SteffensenSolve::transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs)
-{
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector("fxn_m1");
-  NumericVector<Number> & xn_m1 = _nl.getVector("xn_m1");
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
 
   for (const auto & dof : transformed_dofs)
   {
@@ -182,34 +208,7 @@ SteffensenSolve::transformVariablesAsMainApp(const std::set<dof_id_type> & trans
                                    (solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof));
 
     // Relax update
-    new_value = _relax_factor * new_value + (1 - _relax_factor) * fxn_m1(dof);
-
-    solution.set(dof, new_value);
-  }
-  solution.close();
-  _nl.update();
-}
-
-void
-SteffensenSolve::transformVariablesAsSubApp(
-    const std::set<dof_id_type> & secondary_transformed_dofs)
-{
-  // Update the variables
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector("secondary_fxn_m1");
-  NumericVector<Number> & xn_m1 = _nl.getVector("secondary_xn_m1");
-
-  for (const auto & dof : secondary_transformed_dofs)
-  {
-    // Avoid 0 denominator issue
-    Real new_value = solution(dof);
-    if (!MooseUtils::absoluteFuzzyEqual(solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof), 0))
-      new_value = xn_m1(dof) - (fxn_m1(dof) - xn_m1(dof)) * (fxn_m1(dof) - xn_m1(dof)) /
-                                   (solution(dof) + xn_m1(dof) - 2 * fxn_m1(dof));
-
-    // Relax update
-    new_value =
-        _secondary_relaxation_factor * new_value + (1 - _secondary_relaxation_factor) * fxn_m1(dof);
+    new_value = relaxation_factor * new_value + (1 - relaxation_factor) * fxn_m1(dof);
 
     solution.set(dof, new_value);
   }

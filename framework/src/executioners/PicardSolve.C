@@ -97,140 +97,161 @@ PicardSolve::PicardSolve(Executioner * ex) : FixedPointSolve(ex)
   if (!parameters().isParamSetByAddParam("picard_force_norms"))
     _fixed_point_force_norms = getParam<bool>("picard_force_norms");
 
-  // Store a copy of the previous solution
-  if (_relax_factor != 1)
-    _problem.getNonlinearSystemBase().addVector("xn_m1", false, PARALLEL);
-
-  // Resize array for old values of postprocessors
-  _transformed_pps_values.resize(_transformed_pps.size());
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
-    _transformed_pps_values[i].resize(1);
+  allocateStorage(true);
 }
 
 void
-PicardSolve::allocateStorageForSecondaryTransformed()
+PicardSolve::allocateStorage(const bool primary)
 {
-  if (_secondary_relaxation_factor != 1.)
+  Real relaxation_factor;
+  std::string xn_m1_name;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
+  {
+    relaxation_factor = _relax_factor;
+    xn_m1_name = "xn_m1";
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
+  }
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    xn_m1_name = "secondary_xn_m1";
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
+
+  if (relaxation_factor != 1.)
   {
     // Store a copy of the previous solution
-    _problem.getNonlinearSystemBase().addVector("secondary_xn_m1", false, PARALLEL);
+    _problem.getNonlinearSystemBase().addVector(xn_m1_name, false, PARALLEL);
 
     // Allocate storage for the previous postprocessor values
-    _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
-    for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-      _secondary_transformed_pps_values[i].resize(1);
+    (*transformed_pps_values).resize((*transformed_pps).size());
+    for (size_t i = 0; i < (*transformed_pps).size(); i++)
+      (*transformed_pps_values)[i].resize(1);
   }
 }
 
 void
-PicardSolve::savePreviousVariableValuesAsSubApp()
+PicardSolve::saveVariableValues(const bool primary)
 {
-  if (_secondary_relaxation_factor != 1.)
+  Real relaxation_factor;
+  std::string old_name;
+  if (primary)
+  {
+    relaxation_factor = _relax_factor;
+    old_name = "xn_m1";
+  }
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    old_name = "secondary_xn_m1";
+  }
+
+  if (relaxation_factor != 1.)
   {
     // Save variable previous values
     NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & transformed_old = _nl.getVector("secondary_xn_m1");
+    NumericVector<Number> & transformed_old = _nl.getVector(old_name);
     transformed_old = solution;
   }
 }
 
 void
-PicardSolve::savePreviousPostprocessorValuesAsSubApp()
+PicardSolve::savePostprocessorValues(const bool primary)
 {
-  if (_secondary_relaxation_factor != 1.)
+  Real relaxation_factor;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
+  {
+    relaxation_factor = _relax_factor;
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
+  }
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
+
+  if (relaxation_factor != 1.)
     // Save postprocessor previous values
-    for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-      _secondary_transformed_pps_values[i][0] =
-          getPostprocessorValueByName(_secondary_transformed_pps[i]);
-}
-
-void
-PicardSolve::savePreviousValuesAsMainApp()
-{
-  if (_relax_factor != 1)
-  {
-    // Save variable previous values
-    NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & transformed_old = _nl.getVector("xn_m1");
-    transformed_old = solution;
-
-    // Set postprocessor previous values
-    for (size_t i = 0; i < _transformed_pps.size(); i++)
-      _transformed_pps_values[i][0] = getPostprocessorValueByName(_transformed_pps[i]);
-  }
+    for (size_t i = 0; i < (*transformed_pps).size(); i++)
+      (*transformed_pps_values)[i][0] = getPostprocessorValueByName((*transformed_pps)[i]);
 }
 
 bool
-PicardSolve::useFixedPointAlgorithmUpdate(bool as_main_app)
+PicardSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 {
   // unrelaxed Picard is the default update for fixed point iterations
   // old values are required for relaxation
-  if (as_main_app)
+  if (primary)
     return _relax_factor != 1. && _fixed_point_it > 0;
   else
     return _secondary_relaxation_factor != 1. && _main_fixed_point_it > 0;
 }
 
 void
-PicardSolve::transformPostprocessorsAsMainApp()
+PicardSolve::transformPostprocessors(const bool primary)
 {
+  Real relaxation_factor;
+  const std::vector<std::string> * transformed_pps;
+  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
+  if (primary)
+  {
+    relaxation_factor = _relax_factor;
+    transformed_pps = &_transformed_pps;
+    transformed_pps_values = &_transformed_pps_values;
+  }
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    transformed_pps = &_secondary_transformed_pps;
+    transformed_pps_values = &_secondary_transformed_pps_values;
+  }
+
   // Relax the postprocessors
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
+  for (size_t i = 0; i < (*transformed_pps).size(); i++)
   {
     // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName(_transformed_pps[i]);
-    const Real old_value = _transformed_pps_values[i][0];
+    const Real current_value = getPostprocessorValueByName((*transformed_pps)[i]);
+    const Real old_value = (*transformed_pps_values)[i][0];
 
     // Compute and set relaxed value
     Real new_value = current_value;
-    const Real factor = _relax_factor;
-    new_value = factor * current_value + (1 - factor) * old_value;
-    _problem.setPostprocessorValueByName(_transformed_pps[i], new_value);
+    new_value = relaxation_factor * current_value + (1 - relaxation_factor) * old_value;
+    _problem.setPostprocessorValueByName((*transformed_pps)[i], new_value);
   }
 }
 
 void
-PicardSolve::transformPostprocessorsAsSubApp()
+PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, const bool primary)
 {
-  // Relax the postprocessors
-  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+  Real relaxation_factor;
+  std::string old_name;
+  if (primary)
   {
-    // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName(_secondary_transformed_pps[i]);
-    const Real old_value = _secondary_transformed_pps_values[i][0];
-
-    // Compute and set relaxed value
-    Real new_value = current_value;
-    const Real factor = _secondary_relaxation_factor;
-    new_value = factor * current_value + (1 - factor) * old_value;
-
-    _problem.setPostprocessorValueByName(_secondary_transformed_pps[i], new_value);
+    relaxation_factor = _relax_factor;
+    old_name = "xn_m1";
   }
-}
+  else
+  {
+    relaxation_factor = _secondary_relaxation_factor;
+    old_name = "secondary_xn_m1";
+  }
 
-void
-PicardSolve::transformVariablesAsMainApp(const std::set<dof_id_type> & transformed_dofs)
-{
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("xn_m1");
-  const Real factor = _relax_factor;
+  NumericVector<Number> & transformed_old = _nl.getVector(old_name);
 
   for (const auto & dof : transformed_dofs)
-    solution.set(dof, (transformed_old(dof) * (1.0 - factor)) + (solution(dof) * factor));
+    solution.set(dof,
+                 (transformed_old(dof) * (1.0 - relaxation_factor)) +
+                     (solution(dof) * relaxation_factor));
 
-  solution.close();
-  _nl.update();
-}
-
-void
-PicardSolve::transformVariablesAsSubApp(const std::set<dof_id_type> & secondary_transformed_dofs)
-{
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector("secondary_xn_m1");
-  const Real factor = _secondary_relaxation_factor;
-
-  for (const auto & dof : secondary_transformed_dofs)
-    solution.set(dof, (transformed_old(dof) * (1.0 - factor)) + (solution(dof) * factor));
   solution.close();
   _nl.update();
 }

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "NumFixedPointIterations.h"
 #include "MooseApp.h"
+#include "Executioner.h"
 
 registerMooseObject("MooseApp", NumFixedPointIterations);
 registerMooseObjectRenamed("MooseApp",
