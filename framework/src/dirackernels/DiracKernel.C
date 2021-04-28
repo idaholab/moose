@@ -190,14 +190,14 @@ DiracKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 void
 DiracKernel::addPoint(const Elem * elem, Point p, unsigned /*id*/)
 {
-  if (!elem)
+  if (!elem || !hasBlocks(elem->subdomain_id()))
   {
     std::stringstream msg;
     msg << "Point " << p << " not found in block(s) " << Moose::stringify(blockIDs(), ", ") << ".";
     switch (_point_not_found_behavior)
     {
       case PointNotFoundBehavior::ERROR:
-        mooseDoOnce(mooseError(msg.str()));
+        mooseError(msg.str());
         break;
       case PointNotFoundBehavior::WARNING:
         mooseDoOnce(mooseWarning(msg.str()));
@@ -205,7 +205,7 @@ DiracKernel::addPoint(const Elem * elem, Point p, unsigned /*id*/)
       case PointNotFoundBehavior::IGNORE:
         break;
       default:
-        mooseDoOnce(mooseError("Internal enum error."));
+        mooseError("Internal enum error.");
     }
     return;
   }
