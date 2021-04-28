@@ -20,6 +20,6 @@ GeneralVectorPostprocessor::validParams()
 }
 
 GeneralVectorPostprocessor::GeneralVectorPostprocessor(const InputParameters & parameters)
-  : GeneralUserObject(parameters), VectorPostprocessor(parameters)
+  : GeneralUserObject(parameters), VectorPostprocessor(this)
 {
 }

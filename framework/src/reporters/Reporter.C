@@ -25,11 +25,13 @@ Reporter::validParams()
 // output names for the reporters are more than just the block name. The list is updated manually
 // when each value is declared.
 
-Reporter::Reporter(const InputParameters & parameters)
-  : OutputInterface(parameters, /*build_list=*/false),
-    _reporter_params(parameters),
-    _reporter_name(parameters.get<std::string>("_object_name")),
-    _reporter_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+Reporter::Reporter(const MooseObject * moose_object)
+  : OutputInterface(moose_object->parameters(), /*build_list=*/false),
+    _reporter_moose_object(*moose_object),
+    _reporter_params(_reporter_moose_object.parameters()),
+    _reporter_name(_reporter_params.get<std::string>("_object_name")),
+    _reporter_fe_problem(
+        *_reporter_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _reporter_data(_reporter_fe_problem.getReporterData(ReporterData::WriteKey()))
 {
 }
@@ -39,4 +41,26 @@ Reporter::store(nlohmann::json & json) const
 {
   json["name"] = _reporter_name;
   json["type"] = _reporter_params.get<std::string>("_type");
+}
+
+const ReporterValueName &
+Reporter::getReporterValueName(const std::string & param_name) const
+{
+  if (!_reporter_params.isParamValid(param_name))
+    _reporter_moose_object.mooseError(
+        "When getting a ReporterValueName, failed to get a parameter with the name \"",
+        param_name,
+        "\".",
+        "\n\nKnown parameters:\n",
+        _reporter_moose_object.parameters());
+
+  if (_reporter_params.isType<ReporterValueName>(param_name))
+    return _reporter_params.get<ReporterValueName>(param_name);
+
+  _reporter_moose_object.mooseError("Supplied parameter with name \"",
+                                    param_name,
+                                    "\" of type \"",
+                                    _reporter_params.type(param_name),
+                                    "\" is not an expected type for getting a Reporter value.\n\n",
+                                    "The expected type is \"ReporterValueName\".");
 }

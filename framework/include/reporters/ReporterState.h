@@ -17,6 +17,79 @@
 #include "RestartableData.h"
 #include "ReporterMode.h"
 
+// Forward declarations
+class MooseObject;
+class ReporterContextBase;
+
+/**
+ * The base class for storing a Repoter's state
+ *
+ * The base class is needed in order to store the states without a template
+ * parameter so that they can be iterated through to observe the producers
+ * and consumers.
+ */
+class ReporterStateBase
+{
+public:
+  ReporterStateBase(const ReporterName & name);
+  virtual ~ReporterStateBase() = default;
+
+  /**
+   * Return the ReporterName that this state is associated with
+   */
+  const ReporterName & getReporterName() const { return _reporter_name; }
+
+  /**
+   * Add a consumer for this ReporterState
+   * @param mode The mode that the object will consume the Reporter value
+   * @param moose_object The MooseObject doing the consuming (for error reporting)
+   * @see ReporterData
+   */
+  void addConsumer(ReporterMode mode, const MooseObject & moose_object);
+
+  /**
+   * Returns the consumers for this state; a pair that consists of the mode
+   * that the state is being consumed by, and the object consuming it
+   * @see ReporterContext
+   */
+  const std::set<std::pair<ReporterMode, const MooseObject *>> & getConsumers() const
+  {
+    return _consumers;
+  }
+
+  /**
+   * @returns The type associated with this state
+   */
+  virtual std::string valueType() const = 0;
+
+  /**
+   * Sets the special Reporter type to a Postprocessor.
+   *
+   * See ReporterData::declareReporterValue.
+   */
+  void setIsPostprocessor() { _reporter_name.setIsPostprocessor(); }
+  /**
+   * Sets the special Reporter type to a VectorPostprocessor.
+   *
+   * See ReporterData::declareReporterValue.
+   */
+  void setIsVectorPostprocessor() { _reporter_name.setIsVectorPostprocessor(); }
+
+private:
+  /// Name of data that state is associated
+  ReporterName _reporter_name;
+
+  /// The consumers for this state; we store the MooseObject for detailed error reporting
+  std::set<std::pair<ReporterMode, const MooseObject *>> _consumers;
+};
+
+/**
+ * Custom sort for ReporterState::_consumers so that they are sorted by
+ * object type, object name, and then mode, which makes for pretty output.
+ */
+bool operator<(const std::pair<ReporterMode, const MooseObject *> & a,
+               const std::pair<ReporterMode, const MooseObject *> & b);
+
 /**
  * A special version of RestartableData to aid in storing Reporter values. This object is
  * used by the ReporterData object. The objects provides a convenient method to define
@@ -33,15 +106,10 @@
  * Access to the data should be through the value() method to ensure the data is allocated correctly
  */
 template <typename T>
-class ReporterState : public RestartableData<std::list<T>>
+class ReporterState : public ReporterStateBase, public RestartableData<std::list<T>>
 {
 public:
   ReporterState(const ReporterName & name);
-
-  /**
-   * Return the ReporterName that this state is associated
-   */
-  const ReporterName & getReporterName() const;
 
   ///@{
   /**
@@ -54,23 +122,11 @@ public:
   ///@}
 
   /**
-   * Add a mode that the value is consumed
-   * @param mode The mode that the object will consume the Reporter value
-   * @param object_name The name of the object doing the consuming (for error reporting)
-   * @see ReporterData
-   */
-  void addConsumerMode(ReporterMode mode, const std::string & object_name);
-
-  /**
-   * Return the mode that the value is being consumed, see ReporterData
-   * @see ReporterContext
-   */
-  const std::set<std::pair<ReporterMode, std::string>> & getConsumerModes() const;
-
-  /**
    * Copy stored values back in time to old/older etc.
    */
   void copyValuesBack();
+
+  std::string valueType() const override final { return MooseUtils::prettyCppType<T>(); }
 
   /**
    * Load the data from stream (e.g., restart)
@@ -83,29 +139,13 @@ public:
    * Therefore, this function loads the data directly into the container to avoid this problem
    * and unnecessary copies.
    */
-  virtual void load(std::istream & stream) override;
-
-private:
-  /// Name of data that state is associated
-  const ReporterName _reporter_name;
-
-  /// The mode(s) that the value is being consumed
-  std::set<std::pair<ReporterMode, std::string>> _consumer_modes;
+  void load(std::istream & stream) override final;
 };
 
 template <typename T>
 ReporterState<T>::ReporterState(const ReporterName & name)
-  : RestartableData<std::list<T>>(
-        "ReporterData/" + name.getObjectName() + "/" + name.getValueName(), nullptr),
-    _reporter_name(name)
+  : ReporterStateBase(name), RestartableData<std::list<T>>(name.getRestartableName(), nullptr)
 {
-}
-
-template <typename T>
-const ReporterName &
-ReporterState<T>::getReporterName() const
-{
-  return _reporter_name;
 }
 
 template <typename T>
@@ -131,27 +171,12 @@ ReporterState<T>::value(const std::size_t time_index) const
     mooseError("The desired time index ",
                time_index,
                " does not exists for the '",
-               _reporter_name,
+               getReporterName(),
                "' Reporter value, which contains ",
                this->get().size(),
                " old value(s). The getReporterValue method must be called with the desired time "
                "index to be able to access data.");
   return *(std::next(this->get().begin(), time_index));
-}
-
-template <typename T>
-void
-ReporterState<T>::addConsumerMode(ReporterMode mode, const std::string & object_name)
-{
-  mooseAssert(mode != REPORTER_MODE_UNSET, "UNSET cannot be used as the consumer mode");
-  _consumer_modes.insert(std::make_pair(mode, object_name));
-}
-
-template <typename T>
-const std::set<std::pair<ReporterMode, std::string>> &
-ReporterState<T>::getConsumerModes() const
-{
-  return _consumer_modes;
 }
 
 template <typename T>
@@ -178,10 +203,6 @@ ReporterState<T>::load(std::istream & stream)
     this->set().resize(size);
 
   // Load each entry of the list directly into the storage
-  typename std::list<T>::iterator iter = this->set().begin();
-  for (unsigned int i = 0; i < size; i++)
-  {
-    loadHelper(stream, *iter, nullptr);
-    std::advance(iter, 1);
-  }
+  for (auto & val : this->set())
+    loadHelper(stream, val, nullptr);
 }

@@ -286,6 +286,21 @@ std::string baseName(const std::string & name);
 std::string hostname();
 
 /**
+ * @returns A cleaner representation of the c++ type \p cpp_type.
+ */
+std::string prettyCppType(const std::string & cpp_type);
+
+/**
+ * @returns A cleaner representation of the type for the given object
+ */
+template <typename T>
+std::string
+prettyCppType(const T * = nullptr)
+{
+  return prettyCppType(demangle(typeid(T).name()));
+}
+
+/**
  * This routine is a simple helper function for searching a map by values instead of keys
  */
 template <typename T1, typename T2>

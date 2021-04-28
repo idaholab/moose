@@ -21,7 +21,7 @@ InterfacePostprocessor::validParams()
 }
 
 InterfacePostprocessor::InterfacePostprocessor(const InputParameters & parameters)
-  : InterfaceUserObject(parameters), Postprocessor(parameters), _interface_primary_area(0.)
+  : InterfaceUserObject(parameters), Postprocessor(this), _interface_primary_area(0.)
 {
 }
 

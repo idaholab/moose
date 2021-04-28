@@ -18,7 +18,6 @@ class InputParameters;
 class MooseObject;
 template <typename T>
 class VectorPostprocessorContext;
-class ReporterData;
 
 class VectorPostprocessorInterface
 {
@@ -43,7 +42,7 @@ public:
    * not the vector must be broadcast
    *
    * Retrieve the value of a VectorPostprocessor
-   * @param name The name of the VectorPostprocessor parameter (see below)
+   * @param param_name The name of the VectorPostprocessor parameter (see below)
    * @param vector_name The name of the particular vector you want.
    * @return A reference to the desired value
    *
@@ -55,8 +54,9 @@ public:
    * see getVectorPostprocessorValueOld getVectorPostprocessorValueByName
    * getVectorPostprocessorValueOldByName
    */
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) const;
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & param_name,
+                              const std::string & vector_name) const;
 
   /**
    * DEPRECATED: Use the new version where you need to specify whether or
@@ -75,7 +75,7 @@ public:
    * see getVectorPostprocessorValue getVectorPostprocessorValueOldByName
    * getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue &
+  const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name) const;
 
@@ -84,14 +84,15 @@ public:
    * not the vector must be broadcast
    *
    * Retrieve the old value of a VectorPostprocessor
-   * @param name The name of the VectorPostprocessor parameter
+   * @param param_name The name of the VectorPostprocessor parameter
    * @param vector_name The name of the particular vector you want.
    * @return The value of the VectorPostprocessor
    *
    * see getVectorPostprocessorValue
    */
   const VectorPostprocessorValue &
-  getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name) const;
+  getVectorPostprocessorValueOld(const std::string & param_name,
+                                 const std::string & vector_name) const;
 
   /**
    * DEPRECATED: Use the new version where you need to specify whether or
@@ -113,9 +114,10 @@ public:
   getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
                                        const std::string & vector_name) const;
 
+  // doco-normal-methods-begin
   /**
    * Retrieve the value of a VectorPostprocessor
-   * @param name The name of the VectorPostprocessor parameter (see below)
+   * @param param_name The name of the VectorPostprocessor parameter (see below)
    * @param vector_name The name of the particular vector you want.
    * @param need_broadcast Whether or not this object requires the vector to
    * be replicated in parallel
@@ -129,8 +131,10 @@ public:
    * see getVectorPostprocessorValueOld getVectorPostprocessorValueByName
    * getVectorPostprocessorValueOldByName
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(
-      const std::string & name, const std::string & vector_name, bool needs_broadcast) const;
+  const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & param_name,
+                                                               const std::string & vector_name,
+                                                               bool needs_broadcast) const;
+  // doco-normal-methods-end
 
   /**
    * Retrieve the value of the VectorPostprocessor
@@ -148,14 +152,14 @@ public:
    * see getVectorPostprocessorValue getVectorPostprocessorValueOldByName
    * getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue &
+  const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name,
                                     bool needs_broadcast) const;
 
   /**
    * Retrieve the old value of a VectorPostprocessor
-   * @param name The name of the VectorPostprocessor parameter
+   * @param param_name The name of the VectorPostprocessor parameter
    * @param vector_name The name of the particular vector you want.
    * @param need_broadcast Whether or not this object requires the vector to
    * be replicated in parallel
@@ -163,8 +167,9 @@ public:
    *
    * see getVectorPostprocessorValue
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueOld(
-      const std::string & name, const std::string & vector_name, bool needs_broadcast) const;
+  const VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & param_name,
+                                                                  const std::string & vector_name,
+                                                                  bool needs_broadcast) const;
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -181,7 +186,7 @@ public:
    *
    * see getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue &
+  const VectorPostprocessorValue &
   getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
                                        const std::string & vector_name,
                                        bool needs_broadcast) const;
@@ -193,12 +198,12 @@ public:
    * In that case - this will return a reference to a value that will be _this_ processor's value
    * from that vector
    *
-   * @param name The name of the parameter holding the vpp name
+   * @param param_name The name of the parameter holding the vpp name
    * @param vector_name The name of the vector
    * @return The reference to the current scatter value
    */
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & name,
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValue(const std::string & param_name,
                                      const std::string & vector_name) const;
 
   /**
@@ -208,12 +213,12 @@ public:
    * In that case - this will return a reference to a value that will be _this_ processor's value
    * from that vector
    *
-   * @param vpp_name The name of the VectorPostprocessor
+   * @param name The name of the VectorPostprocessor
    * @param vector_name The name of the vector
    * @return The reference to the current scatter value
    */
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueByName(const std::string & name,
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                            const std::string & vector_name) const;
 
   /**
@@ -223,12 +228,12 @@ public:
    * In that case - this will return a reference to a value that will be _this_ processor's
    * value from that vector
    *
-   * @param name The name of the parameter holding the vpp name
+   * @param param_name The name of the parameter holding the vpp name
    * @param vector_name The name of the vector
    * @return The reference to the old scatter value
    */
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueOld(const std::string & name,
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValueOld(const std::string & param_name,
                                         const std::string & vector_name) const;
 
   /**
@@ -238,27 +243,30 @@ public:
    * In that case - this will return a reference to a value that will be _this_ processor's
    * value from that vector
    *
-   * @param vpp_name The name of the VectorPostprocessor
+   * @param name The name of the VectorPostprocessor
    * @param vector_name The name of the vector
    * @return The reference to the old scatter value
    */
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueOldByName(const std::string & name,
+  const ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
                                               const std::string & vector_name) const;
 
   /**
-   * Determine if the VectorPostprocessor data exists
-   * @param name The name of the VectorPostprocessor parameter
-   * @return True if the VectorPostprocessor exists
+   * Determine if the VectorPostprocessor data exists by parameter
+   * @param param_name The name of the VectorPostprocessor parameter
+   * @param vector_name The vector name within the VectorPostprocessor
+   * @return True if the VectorPostprocessor data exists
    *
    * @see hasVectorPostprocessorByName getVectorPostprocessorValue
    */
-  bool hasVectorPostprocessor(const std::string & name, const std::string & vector_name) const;
+  bool hasVectorPostprocessor(const std::string & param_name,
+                              const std::string & vector_name) const;
 
   /**
-   * Determine if the VectorPostprocessor data exists
+   * Determine if the VectorPostprocessor data exists by name
    * @param name The name of the VectorPostprocessor
-   * @return True if the VectorPostprocessor exists
+   * @param vector_name The vector name within the VectorPostprocessor
+   * @return True if the VectorPostprocessor data exists
    *
    * @see hasVectorPostprocessor getVectorPostprocessorValueByName
    */
@@ -266,34 +274,50 @@ public:
                                     const std::string & vector_name) const;
 
   /**
-   * Determine if the VectorPostprocessor object exists
+   * Determine if the VectorPostprocessor exists by parameter
    * @param name The name of the VectorPostprocessor parameter
    * @return True if the VectorPostprocessor exists
-   * @return True if the C++ object exists
    */
-  bool hasVectorPostprocessorObject(const std::string & name) const;
+  bool hasVectorPostprocessor(const std::string & param_name) const;
 
   /**
-   * Determine if the VectorPostprocessor object exists
+   * Determine if the VectorPostprocessor exists by name
    * @param name The name of the VectorPostprocessor
-   * @return True if the C++ object exists
+   * @return True if the VectorPostprocessor exists
    */
-  bool hasVectorPostprocessorObjectByName(const VectorPostprocessorName & name) const;
+  bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
   ///@{
   /**
    * Return true if the VectorPostprocessor is marked with parallel_type as DISTRIBUTED
    */
-  bool isVectorPostprocessorDistributed(const std::string & name) const;
+  bool isVectorPostprocessorDistributed(const std::string & param_name) const;
   bool isVectorPostprocessorDistributedByName(const VectorPostprocessorName & name) const;
   ///@}
+
+  /**
+   * Get the name of a VectorPostprocessor associated with a parameter.
+   * @param param_name The name of the VectorPostprocessor parameter
+   * @return The name of the given VectorPostprocessor
+   */
+  const VectorPostprocessorName & getVectorPostprocessorName(const std::string & param_name) const;
+
+protected:
+  /**
+   * Helper for deriving classes to override to add dependencies when a VectorPostprocessor is
+   * requested.
+   */
+  virtual void
+  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & /* name */) const
+  {
+  }
 
 private:
   /**
    * Helper function for extracting VPP data from ReporterData object
    */
   const VectorPostprocessorValue &
-  getVectorPostprocessorByNameHelper(const std::string & object_name,
+  getVectorPostprocessorByNameHelper(const VectorPostprocessorName & name,
                                      const std::string & vector_name,
                                      bool broadcast,
                                      std::size_t t_index) const;
@@ -301,22 +325,38 @@ private:
   /**
    * Helper for getting the VPP context that handles scatter values
    */
-  const VectorPostprocessorContext<VectorPostprocessorValue> *
-  getVectorPostprocessorContextByNameHelper(const std::string & object_name,
+  const VectorPostprocessorContext<VectorPostprocessorValue> &
+  getVectorPostprocessorContextByNameHelper(const VectorPostprocessorName & name,
                                             const std::string & vector_name) const;
+
+  ///@{
+  /**
+   * Helpers for "possibly" checking if a vpp exists. This is only able to check for
+   * existance after all vpps have been added (after the task creating them has
+   * been called). If called before said task, this will do nothing, hence the
+   * "possibly". This allows us to have errors reported directly by the object
+   * requesting the vpp instead of through a system with less context.
+   */
+  void possiblyCheckHasVectorPostprocessor(const std::string & param_name,
+                                           const std::string & vector_name) const;
+  void possiblyCheckHasVectorPostprocessorByName(const VectorPostprocessorName & name,
+                                                 const std::string & vector_name) const;
+  ///@}
+
+  /**
+   * @returns True if all vpps have been added (the task associated with adding them is complete)
+   */
+  bool vectorPostprocessorsAdded() const;
 
   /// Whether or not to force broadcasting by default
   const bool _broadcast_by_default;
 
-  /// VectorPostprocessorInterface Parameters
-  const InputParameters & _vpi_params;
+  /// The MooseObject that uses this interface
+  const MooseObject & _vpi_moose_object;
 
   /// Reference the FEProblemBase class
-  FEProblemBase & _vpi_feproblem;
+  const FEProblemBase & _vpi_feproblem;
 
   /// Thread ID
   const THREAD_ID _vpi_tid;
-
-  /// Reference to the ReporterData that stores the vector
-  ReporterData & _vpi_reporter_data;
 };

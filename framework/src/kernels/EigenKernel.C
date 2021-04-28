@@ -45,8 +45,8 @@ EigenKernel::EigenKernel(const InputParameters & parameters)
   // If the "eigen_postprocessor" is given, use it. The isParamValid does not work here because of
   // the default value, which
   // you don't want to use if an EigenExecutioner exists.
-  if (hasPostprocessor("eigen_postprocessor"))
-    eigen_pp_name = getParam<PostprocessorName>("eigen_postprocessor");
+  if (!isDefaultPostprocessorValue("eigen_postprocessor"))
+    eigen_pp_name = getPostprocessorName("eigen_postprocessor");
 
   // Attempt to extract the eigenvalue postprocessor from the Executioner
   else
@@ -59,7 +59,7 @@ EigenKernel::EigenKernel(const InputParameters & parameters)
   // If the postprocessor name was not provided and an EigenExecutionerBase is not being used,
   // use the default value from the "eigen_postprocessor" parameter
   if (eigen_pp_name.empty())
-    _eigenvalue = &getDefaultPostprocessorValue("eigen_postprocessor");
+    _eigenvalue = &getPostprocessorValue("eigen_postprocessor");
 
   // If the name does exist, then use the postprocessor value
   else

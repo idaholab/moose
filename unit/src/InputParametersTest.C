@@ -280,7 +280,8 @@ TEST(InputParameters, setPPandVofPP)
   p1.set<std::vector<PostprocessorName>>("pp_name") = {"first", "second", "third"};
 
   // check if we have a vector of pps
-  EXPECT_TRUE(!p1.isSinglePostprocessor("pp_name")) << "Failed to detect vector of PPs";
+  EXPECT_TRUE(p1.isType<std::vector<PostprocessorName>>("pp_name"))
+      << "Failed to detect vector of PPs";
 
   // check what happens if default value is requested
   /*

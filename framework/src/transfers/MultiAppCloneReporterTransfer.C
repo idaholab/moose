@@ -38,7 +38,7 @@ MultiAppCloneReporterTransfer::validParams()
 
 MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    ReporterTransferInterface(parameters),
+    ReporterTransferInterface(this),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_obj_name(getParam<std::string>("to_reporter")),
     _to_reporter_names(isParamValid("prefix")

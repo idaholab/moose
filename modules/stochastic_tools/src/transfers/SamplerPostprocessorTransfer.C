@@ -94,7 +94,7 @@ SamplerPostprocessorTransfer::initialSetup()
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
       for (const auto & sub_pp_name : _sub_pp_names)
-        if (!app_problem.hasPostprocessor(sub_pp_name))
+        if (!app_problem.hasPostprocessorValueByName(sub_pp_name))
           mooseError("Unknown postprocesssor name '",
                      sub_pp_name,
                      "' on sub-application '",
@@ -130,7 +130,8 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
         FEProblemBase & app_problem = _multi_app->appProblemBase(i);
         if (app_problem.converged() || _keep_diverge)
           for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
-            _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+            _current_data[j].emplace_back(
+                app_problem.getPostprocessorValueByName(_sub_pp_names[j]));
         else
           for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
             _current_data[j].emplace_back(std::numeric_limits<double>::quiet_NaN());
@@ -160,7 +161,7 @@ SamplerPostprocessorTransfer::execute()
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
       if (app_problem.converged() || _keep_diverge)
-        current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+        current.emplace_back(app_problem.getPostprocessorValueByName(_sub_pp_names[j]));
       else
         current.emplace_back(std::numeric_limits<double>::quiet_NaN());
     }

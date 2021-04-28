@@ -12,16 +12,18 @@
 #include "GeneralUserObject.h"
 
 /**
- * A test UserObject that does nothing.
+ * A UserObject that tests errors produced by the ReporterInterface.
  */
-class NullUserObject : public GeneralUserObject
+class ReporterInterfaceErrorTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  NullUserObject(const InputParameters & params);
+  ReporterInterfaceErrorTest(const InputParameters & params);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  void initialSetup() override;
+
+  void initialize() override{};
+  void execute() override{};
+  void finalize() override{};
 };

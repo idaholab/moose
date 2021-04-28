@@ -120,9 +120,8 @@ JSONOutput::outputReporters()
       }
 
       // Insert reporter value
-      const auto * context_ptr = _reporter_data.getReporterContextBase(r_name);
       auto & node = obj_node["values"].emplace_back();
-      context_ptr->store(node);
+      _reporter_data.getReporterContextBase(r_name).store(node);
     }
   }
 }

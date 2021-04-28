@@ -3477,12 +3477,6 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     if (guo && !tguo)
       break;
   }
-
-  // Ideally the call to initPostprocssorData would be within the addPostprocessor method, but
-  // to maintain support for including Postprocessor objects within the [UserObjects] block
-  // (e.g., FeatureFloadCount) the data must be initialized here.
-  if (parameters.get<std::string>("_moose_base") == "Postprocessor")
-    initPostprocessorData(name);
 }
 
 const UserObject &
@@ -3514,22 +3508,18 @@ FEProblemBase::hasUserObject(const std::string & name) const
   return !objs.empty();
 }
 
-void
-FEProblemBase::initPostprocessorData(const std::string & name)
+bool
+FEProblemBase::hasPostprocessorValueByName(const PostprocessorName & name) const
 {
-  ReporterName r_name(name, "value");
-  if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
-    _reporter_data
-        .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
-            r_name, REPORTER_MODE_UNSET);
+  return _reporter_data.hasReporterValue<PostprocessorValue>(PostprocessorReporterName(name));
 }
 
 const PostprocessorValue &
 FEProblemBase::getPostprocessorValueByName(const PostprocessorName & name,
                                            std::size_t t_index) const
 {
-  ReporterName r_name(name, "value");
-  return _reporter_data.getReporterValue<PostprocessorValue>(r_name, t_index);
+  return _reporter_data.getReporterValue<PostprocessorValue>(PostprocessorReporterName(name),
+                                                             t_index);
 }
 
 void
@@ -3537,44 +3527,16 @@ FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
                                            const PostprocessorValue & value,
                                            std::size_t t_index)
 {
-  ReporterName r_name(name, "value");
-  _reporter_data.setReporterValue<PostprocessorValue>(r_name, value, t_index);
+  _reporter_data.setReporterValue<PostprocessorValue>(
+      PostprocessorReporterName(name), value, t_index);
 }
 
 bool
 FEProblemBase::hasPostprocessor(const std::string & name) const
 {
-  mooseDeprecated("The 'FEProblemBase::hasPostprocssor' is being removed, use the method in the "
-                  "PostprocessorInterface");
-  ReporterName r_name(name, "value");
-  return _reporter_data.hasReporterValue(r_name);
-}
-
-PostprocessorValue &
-FEProblemBase::getPostprocessorValue(const PostprocessorName & name)
-{
-  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
-                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
-  const PostprocessorValue & value = getPostprocessorValueByName(name, 0);
-  return const_cast<PostprocessorValue &>(value);
-}
-
-PostprocessorValue &
-FEProblemBase::getPostprocessorValueOld(const std::string & name)
-{
-  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
-                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
-  const PostprocessorValue & value = getPostprocessorValueByName(name, 1);
-  return const_cast<PostprocessorValue &>(value);
-}
-
-PostprocessorValue &
-FEProblemBase::getPostprocessorValueOlder(const std::string & name)
-{
-  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
-                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
-  const PostprocessorValue & value = getPostprocessorValueByName(name, 2);
-  return const_cast<PostprocessorValue &>(value);
+  mooseDeprecated(
+      "FEProblemBase::hasPostprocssor is being removed; use hasPostprocessorValueByName instead.");
+  return hasPostprocessorValueByName(name);
 }
 
 const VectorPostprocessorValue &
@@ -3582,8 +3544,8 @@ FEProblemBase::getVectorPostprocessorValueByName(const std::string & object_name
                                                  const std::string & vector_name,
                                                  std::size_t t_index) const
 {
-  ReporterName r_name(object_name, vector_name);
-  return _reporter_data.getReporterValue<VectorPostprocessorValue>(r_name, t_index);
+  return _reporter_data.getReporterValue<VectorPostprocessorValue>(
+      VectorPostprocessorReporterName(object_name, vector_name), t_index);
 }
 
 void
@@ -3592,8 +3554,8 @@ FEProblemBase::setVectorPostprocessorValueByName(const std::string & object_name
                                                  const VectorPostprocessorValue & value,
                                                  std::size_t t_index)
 {
-  ReporterName r_name(object_name, vector_name);
-  _reporter_data.setReporterValue<VectorPostprocessorValue>(r_name, value, t_index);
+  _reporter_data.setReporterValue<VectorPostprocessorValue>(
+      VectorPostprocessorReporterName(object_name, vector_name), value, t_index);
 }
 
 const VectorPostprocessor &
@@ -3601,65 +3563,6 @@ FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_nam
                                                   THREAD_ID tid) const
 {
   return getUserObject<VectorPostprocessor>(object_name, tid);
-}
-
-bool
-FEProblemBase::hasVectorPostprocessor(const std::string & name)
-{
-  mooseDeprecated("The 'FEProblemBase::hasVectorPostprocessor() is being removed to improve "
-                  "'const' correctness. It has been replace by hasVectorPostprocessorByName.");
-  return hasUserObject(name);
-}
-
-VectorPostprocessorValue &
-FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                           const std::string & vector_name)
-{
-  mooseDeprecated("The 'FEProblemBase::getVectorPostprocessorValue() is being removed, use the "
-                  "methods in VectorPostprocessorInterface.");
-  return const_cast<VectorPostprocessorValue &>(
-      getVectorPostprocessorValueByName(name, vector_name, 0));
-}
-
-VectorPostprocessorValue &
-FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
-                                              const std::string & vector_name)
-{
-  mooseDeprecated("The 'FEProblemBase::getVectorPostprocessorValueOld() is being removed, use the "
-                  "methods in VectorPostprocessorInterface.");
-  return const_cast<VectorPostprocessorValue &>(
-      getVectorPostprocessorValueByName(name, vector_name, 1));
-}
-
-VectorPostprocessorValue &
-FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                           const std::string & vector_name,
-                                           bool /*needs_broadcast*/)
-{
-  mooseDeprecated("The 'FEProblemBase::getVectorPostprocessor() is being removed, use the methods "
-                  "in VectorPostprocessorInterface.");
-  return const_cast<VectorPostprocessorValue &>(
-      getVectorPostprocessorValueByName(name, vector_name, 0));
-}
-
-VectorPostprocessorValue &
-FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
-                                              const std::string & vector_name,
-                                              bool /*needs_broadcast*/)
-{
-  mooseDeprecated("The 'FEProblemBase::getVectorPostprocessorOld() is being removed, use the "
-                  "methods in VectorPostprocessorInterface.");
-  return const_cast<VectorPostprocessorValue &>(
-      getVectorPostprocessorValueByName(name, vector_name, 1));
-}
-
-bool
-FEProblemBase::vectorPostprocessorHasVectors(const std::string & vpp_name)
-{
-  mooseDeprecated("The 'FEProblemBase::vectorPostprocessorHasVectors() is being removed, use the "
-                  "method in VectorPostprocessor object.");
-  const VectorPostprocessor & vpp_obj = getVectorPostprocessorObjectByName(vpp_name);
-  return !vpp_obj.getVectorNames().empty();
 }
 
 void

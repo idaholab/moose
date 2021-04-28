@@ -28,7 +28,7 @@ class Postprocessor : public OutputInterface
 public:
   static InputParameters validParams();
 
-  Postprocessor(const InputParameters & parameters);
+  Postprocessor(const MooseObject * moose_object);
 
   /**
    * This will get called to actually grab the final value the postprocessor has calculated.
@@ -38,8 +38,8 @@ public:
   /**
    * Returns the name of the Postprocessor.
    */
-  std::string PPName() { return _pp_name; }
+  std::string PPName() const { return _pp_name; }
 
 protected:
-  std::string _pp_name;
+  const std::string _pp_name;
 };

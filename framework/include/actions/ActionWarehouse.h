@@ -228,6 +228,11 @@ public:
 
   std::string getCurrentActionName() const;
 
+  /**
+   * @returns True if the registered task with the name \p task is complete.
+   */
+  bool isTaskComplete(const std::string & task) const;
+
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.
@@ -250,6 +255,8 @@ protected:
   std::map<std::string, std::list<Action *>> _action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
+  /// The completed tasks
+  std::set<std::string> _completed_tasks;
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 

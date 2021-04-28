@@ -13,6 +13,7 @@ registerMooseObject("MooseTestApp", TestDeclareReporter);
 registerMooseObject("MooseTestApp", TestGetReporter);
 registerMooseObject("MooseTestApp", TestDeclareInitialSetupReporter);
 registerMooseObject("MooseTestApp", TestGetReporterDeclaredInInitialSetupReporter);
+registerMooseObject("MooseTestApp", TestDeclareErrorsReporter);
 
 InputParameters
 TestDeclareReporter::validParams()
@@ -172,4 +173,39 @@ void
 TestGetReporterDeclaredInInitialSetupReporter::execute()
 {
   _the_value_of_the_reporter = _value_declared_in_initial_setup;
+}
+
+InputParameters
+TestDeclareErrorsReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<ReporterValueName>("value", "A reporter value name");
+
+  params.addParam<bool>("missing_param", false, "True to test the error for a missing parameter");
+  params.addParam<bool>("bad_param", false, "True to test the error for a bad parameter type");
+  params.addParam<bool>("already_declared", false, "Test declaring a value multiple times");
+  params.addParam<bool>("requested_different_type",
+                        false,
+                        "Test declaring a value that has been requested with a differentt type");
+
+  return params;
+}
+
+TestDeclareErrorsReporter::TestDeclareErrorsReporter(const InputParameters & parameters)
+  : GeneralReporter(parameters)
+{
+  if (getParam<bool>("missing_param"))
+    declareValue<int>("some_missing_parm");
+  if (getParam<bool>("bad_param"))
+    declareValue<int>("bad_param");
+  if (getParam<bool>("already_declared"))
+  {
+    declareValueByName<int>("value_name");
+    declareValueByName<Real>("value_name");
+  }
+  if (getParam<bool>("requested_different_type"))
+  {
+    getReporterValueByName<int>(name() + "/value_name");
+    declareValueByName<Real>("value_name");
+  }
 }

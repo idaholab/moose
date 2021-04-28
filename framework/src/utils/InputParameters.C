@@ -697,73 +697,6 @@ InputParameters::getGroupName(const std::string & param_name) const
   return std::string();
 }
 
-const PostprocessorValue &
-InputParameters::getDefaultPostprocessorValue(const std::string & name,
-                                              bool suppress_error,
-                                              unsigned int index) const
-{
-  // Check that a default exists, error if it does not
-  auto it = _params.find(name);
-  if (!suppress_error &&
-      (it == _params.end() || !it->second._have_default_postprocessor_val[index]))
-    mooseError("A default PostprcessorValue does not exist for the given name: ", name);
-
-  if (index >= it->second._default_postprocessor_val.size())
-    mooseError("Default postprocessor with parameter name ",
-               name,
-               " requested with index ",
-               index,
-               " but only ",
-               it->second._default_postprocessor_val.size(),
-               " exists.");
-
-  return it->second._default_postprocessor_val[index];
-}
-
-void
-InputParameters::reserveDefaultPostprocessorValueStorage(const std::string & name,
-                                                         unsigned int size)
-{
-  if (_params[name]._default_postprocessor_val.size() >= size)
-    return;
-  _params[name]._default_postprocessor_val.resize(size, 0);
-  _params[name]._have_default_postprocessor_val.resize(size, false);
-}
-
-void
-InputParameters::setDefaultPostprocessorValue(const std::string & name,
-                                              const PostprocessorValue & value,
-                                              unsigned int index)
-{
-  if (_params.at(name)._default_postprocessor_val.size() <= index)
-    mooseError("Attempting to access _default_postprocessor_val with index ",
-               index,
-               " but size is ",
-               _params.at(name)._default_postprocessor_val.size());
-  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
-    mooseError("Attempting to access _have_default_postprocessor_val with index ",
-               index,
-               " but size is ",
-               _params.at(name)._have_default_postprocessor_val.size(),
-               ". This can be caused by trying to assign default postprocessor values "
-               "programmatically (by using set method).");
-  _params.at(name)._default_postprocessor_val[index] = value;
-  _params.at(name)._have_default_postprocessor_val[index] = true;
-}
-
-bool
-InputParameters::hasDefaultPostprocessorValue(const std::string & name, unsigned int index) const
-{
-  if (_params.at(name)._have_default_postprocessor_val.size() <= index)
-    mooseError("Attempting to access _have_default_postprocessor_val with index ",
-               index,
-               " but size is ",
-               _params.at(name)._have_default_postprocessor_val.size(),
-               ". This can be caused by trying to assign default postprocessor values "
-               "programmatically (by using set method).");
-  return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val[index];
-}
-
 void
 InputParameters::applyParameters(const InputParameters & common,
                                  const std::vector<std::string> exclude)
@@ -1036,18 +969,10 @@ InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(
 
 template <>
 void
-InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & name,
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & /*name*/,
                                                          PostprocessorName & l_value,
                                                          const Real & r_value)
 {
-  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
-                  _params[name]._have_default_postprocessor_val.size() == 1,
-              "Default postprocessor size is not equal to 1.");
-
-  // Store the default value
-  _params[name]._default_postprocessor_val[0] = r_value;
-  _params[name]._have_default_postprocessor_val[0] = true;
-
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
   oss << r_value;
@@ -1056,18 +981,10 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & nam
 
 template <>
 void
-InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name,
+InputParameters::setParamHelper<PostprocessorName, int>(const std::string & /*name*/,
                                                         PostprocessorName & l_value,
                                                         const int & r_value)
 {
-  mooseAssert(_params[name]._default_postprocessor_val.size() == 1 &&
-                  _params[name]._have_default_postprocessor_val.size() == 1,
-              "Default postprocessor size is not equal to 1.");
-
-  // Store the default value
-  _params[name]._default_postprocessor_val[0] = r_value;
-  _params[name]._have_default_postprocessor_val[0] = true;
-
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
   oss << r_value;
@@ -1120,13 +1037,6 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
   std::ostringstream oss;
   oss << r_value;
   l_value = oss.str();
-}
-
-template <>
-void
-InputParameters::setHelper<std::vector<PostprocessorName>>(const std::string & name)
-{
-  _params[name]._vector_of_postprocessors = true;
 }
 
 template <>

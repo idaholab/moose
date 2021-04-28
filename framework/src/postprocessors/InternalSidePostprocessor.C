@@ -20,6 +20,6 @@ InternalSidePostprocessor::validParams()
 }
 
 InternalSidePostprocessor::InternalSidePostprocessor(const InputParameters & parameters)
-  : InternalSideUserObject(parameters), Postprocessor(parameters)
+  : InternalSideUserObject(parameters), Postprocessor(this)
 {
 }
