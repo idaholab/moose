@@ -111,6 +111,8 @@ namespace {
                         std::vector<Output> &)
     { libmesh_error(); }
 
+    std::vector<Point> & points_requested() { return _points_requested; }
+
     private:
       std::vector<Point> _points_requested;
 
@@ -148,9 +150,9 @@ namespace {
     protected:
       typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
 
-      typedef std::unordered_map<Point, Output> Cache;
-
     public:
+      typedef std::unordered_map<Point, Output, MultiAppGeneralFieldTransfer::hash_point> Cache;
+
       typedef typename TensorTools::MakeReal<Output>::type RealType;
       typedef DofValueType ValuePushType;
       typedef Output FunctorValue;
@@ -316,16 +318,20 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
       };
 
   DofobjectToInterpValVec dofobject_to_valsvec;
+  InterpCaches interp_caches(_to_problems.size());
+
   // Copy data out to incoming_vals_ids
   auto action_functor =
-      [this, &i, &dofobject_to_valsvec](processor_id_type pid,
-                                        const std::vector<Point> & /*my_outgoing_points*/,
-                                        const std::vector<Real> & incoming_vals) {
+      [this, &i, &dofobject_to_valsvec, &interp_caches]
+      (processor_id_type pid,
+       const std::vector<Point> & my_outgoing_points,
+       const std::vector<Real> & incoming_vals) {
         auto & pointInfoVec = _processor_to_pointInfoVec[pid];
 
         // Cache interpolation values for each dof object
         cacheIncomingInterpVals(
-            pid, _to_var_names[i], pointInfoVec, incoming_vals, dofobject_to_valsvec);
+            pid, _to_var_names[i], pointInfoVec, my_outgoing_points,
+            incoming_vals, dofobject_to_valsvec, interp_caches);
       };
 
   // We assume incoming_vals_ids is ordered in the same way as outgoing_points
@@ -333,6 +339,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   const Real * ex = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
       comm(), outgoing_points, gather_functor, action_functor, ex);
+
+
 
   // Set cached valeus into solution vector
   setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec);
@@ -427,7 +435,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       _to_blocks.insert(ids.begin(), ids.end());
     }
 
-    // We do not support high-order elemental variables
+    // We support more general variables via libMesh GenericProjector
     if (fe_type.order > CONSTANT && !is_nodal)
     {
       RecordRequests<Number> f;
@@ -446,9 +454,20 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
          to_mesh.active_local_elements_end());
 
       request_gather.project(active_local_elem_range);
-    }
 
-    if (is_nodal)
+      for (Point p : f.points_requested())
+        {
+          // using dof_object_id 0 for value requests
+          this->cacheOutgoingPointInfor(p, 0, i_to, outgoing_points);
+        }
+
+      // This is going to require more complicated transfer work
+      if (!g.points_requested().empty())
+        {
+          mooseError("We don't currently support variables with gradient degrees of freedom");
+        }
+    }
+    else if (is_nodal)
     {
       for (const auto & node : to_mesh.local_node_ptr_range())
       {
@@ -564,8 +583,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const VariableName & var_name,
     std::vector<PointInfo> & pointInfoVec,
+    const std::vector<Point> & point_requests,
     const std::vector<Real> & incoming_vals,
-    DofobjectToInterpValVec & dofobject_to_valsvec)
+    DofobjectToInterpValVec & dofobject_to_valsvec,
+    InterpCaches & interp_caches)
 {
   mooseAssert(pointInfoVec.size() == incoming_vals.size(),
               " Number of dof objects does not equal to the number of incoming values");
@@ -573,10 +594,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
   dof_id_type val_offset = 0;
   for (auto & pointinfo : pointInfoVec)
   {
-    auto problem_id = pointinfo.problem_id;
-    auto dof_object_id = pointinfo.dof_object_id;
+    const auto problem_id = pointinfo.problem_id;
+    const auto dof_object_id = pointinfo.dof_object_id;
 
-    std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
+    const std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
 
     // libMesh EquationSystems
     auto & es = _to_problems[problem_id]->es();
@@ -590,38 +611,49 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
-    // Use this dof object pointer, so we can handle
-    // both element and node using the same code
-    DofObject * dof_object_ptr = nullptr;
-    // It is a node
-    if (is_nodal)
-      dof_object_ptr = to_mesh->node_ptr(dof_object_id);
-    // It is an element
-    else
-      dof_object_ptr = to_mesh->elem_ptr(dof_object_id);
-
-    // How many dofs for this dof object
-    auto n_dofs = dof_object_ptr->n_dofs(sys_num, var_num);
-    // Check if we visited this dof object ealier
-    auto values_ptr = dofobject_to_valsvec.find(dofobject);
-    // We did not visit this
-    if (values_ptr == dofobject_to_valsvec.end())
+    if (fe_type.order > CONSTANT && !is_nodal)
     {
-      // Values for this dof object
-      auto & val_vec = dofobject_to_valsvec[dofobject];
-      val_vec.resize(n_dofs);
-      // Interpolation Values
-      val_vec[0].first = incoming_vals[val_offset];
-      // Where these values come from
-      val_vec[0].second = pid;
+      InterpCache & cache = interp_caches[problem_id];
+      Point p = point_requests[val_offset];
+      // We should only have one value for each variable at any given point.
+      libmesh_assert(cache.count(p) == 0);
+      cache[p] = incoming_vals[val_offset];
     }
     else
     {
-      auto & val_vec = dofobject_to_valsvec[dofobject];
-      // We adopt values from the smallest rank which has a valid value
-      if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
-          incoming_vals[val_offset] != OutOfMeshValue)
+      // Use this dof object pointer, so we can handle
+      // both element and node using the same code
+      DofObject * dof_object_ptr = nullptr;
+      // It is a node
+      if (is_nodal)
+        dof_object_ptr = to_mesh->node_ptr(dof_object_id);
+      // It is an element
+      else
+        dof_object_ptr = to_mesh->elem_ptr(dof_object_id);
+
+      // How many dofs for this dof object
+      auto n_dofs = dof_object_ptr->n_dofs(sys_num, var_num);
+      // Check if we visited this dof object ealier
+      auto values_ptr = dofobject_to_valsvec.find(dofobject);
+      // We did not visit this
+      if (values_ptr == dofobject_to_valsvec.end())
+      {
+        // Values for this dof object
+        auto & val_vec = dofobject_to_valsvec[dofobject];
+        val_vec.resize(n_dofs);
+        // Interpolation Values
         val_vec[0].first = incoming_vals[val_offset];
+        // Where these values come from
+        val_vec[0].second = pid;
+      }
+      else
+      {
+        auto & val_vec = dofobject_to_valsvec[dofobject];
+        // We adopt values from the smallest rank which has a valid value
+        if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
+            incoming_vals[val_offset] != OutOfMeshValue)
+          val_vec[0].first = incoming_vals[val_offset];
+      }
     }
 
     // Move it to next position

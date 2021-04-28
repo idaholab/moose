@@ -29,6 +29,17 @@ public:
 
   virtual void execute() override;
 
+  // This needs to be moved into libMesh
+  struct hash_point {
+    std::size_t operator()(const Point & p) const
+    {
+      std::size_t seed=0;
+      Moose::hash_combine(seed, p(0), p(1), p(2));
+      return seed;
+    }
+  };
+
+
 private:
   /// A map from pid to a set of points
   typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
@@ -48,6 +59,12 @@ private:
   typedef std::unordered_map<std::pair<unsigned int, dof_id_type>,
                              std::vector<std::pair<Real, processor_id_type>>>
       DofobjectToInterpValVec;
+
+  /// A map for caching a single variable's values
+  typedef std::unordered_map<Point, Number, hash_point> InterpCache;
+
+  /// A vector of such caches, indexed by to_problem
+  typedef std::vector<InterpCache> InterpCaches;
 
   /// The number of variables to transfer
   unsigned int _var_size;
@@ -133,8 +150,10 @@ private:
   void cacheIncomingInterpVals(processor_id_type pid,
                                const VariableName & var_name,
                                std::vector<PointInfo> & pointInfoVec,
+                               const std::vector<Point> & point_requests,
                                const std::vector<Real> & incoming_vals,
-                               DofobjectToInterpValVec & dofobject_to_valsvec);
+                               DofobjectToInterpValVec & dofobject_to_valsvec,
+                               InterpCaches & interp_caches);
 
   /*
    * Set values to solution
