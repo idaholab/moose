@@ -17,9 +17,9 @@ InputParameters
 ArrayDiffusion::validParams()
 {
   InputParameters params = ArrayKernel::validParams();
-  params.addParam<MaterialPropertyName>("diffusion_coefficient",
-                                        "The name of the diffusivity, "
-                                        "can be scalar, vector, or matrix.");
+  params.addRequiredParam<MaterialPropertyName>("diffusion_coefficient",
+                                                "The name of the diffusivity, "
+                                                "can be scalar, vector, or matrix.");
   params.addClassDescription(
       "The array Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
       "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
