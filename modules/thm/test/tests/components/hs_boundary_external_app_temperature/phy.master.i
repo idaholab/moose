@@ -9,54 +9,54 @@
 []
 
 [Functions]
-  [./T_bc_fn]
+  [T_bc_fn]
     type = ParsedFunction
     value = '300+t*x*10'
-  [../]
-  [./T_ffn]
+  []
+  [T_ffn]
     type = ParsedFunction
     value = 'x*10'
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [ICs]
-  [./T_ic]
+  [T_ic]
     type = ConstantIC
     variable = T
     value = 300
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = T
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = BodyForce
     variable = T
     function = T_ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = T
     boundary = 'left right'
     function = T_bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,23 +69,23 @@
 []
 
 [MultiApps]
-  [./thm]
+  [thm]
     type = TransientMultiApp
     app_type = THMApp
     input_files = phy.slave.i
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./T_to_thm]
+  [T_to_thm]
     type = MultiAppNearestNodeTransfer
     multi_app = thm
     direction = to_multiapp
     source_variable = T
     variable = T_ext
     target_boundary = 'hs:outer'
-  [../]
+  []
 []
 
 [Outputs]

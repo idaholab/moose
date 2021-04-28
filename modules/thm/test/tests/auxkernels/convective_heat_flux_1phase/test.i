@@ -13,68 +13,68 @@
 []
 
 [AuxVariables]
-  [./q_wall]
+  [q_wall]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./T_wall]
-  [../]
+  [T_wall]
+  []
 []
 
 [ICs]
-  [./T_wall_ic]
+  [T_wall_ic]
     type = ConstantIC
     variable = T_wall
     value = 310
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sound_speed_aux]
+  [sound_speed_aux]
     type = ConvectiveHeatFlux1PhaseAux
     variable = q_wall
     Hw = Hw
     T_wall = T_wall
     T = T
-  [../]
+  []
 []
 
 [Materials]
-  [./mats]
+  [mats]
     type = GenericConstantMaterial
     prop_names = 'T Hw'
     prop_values = '300 2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./q_wall]
+  [q_wall]
     type = ElementalVariableValue
     variable = q_wall
     elementid = 0
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bcs]
+  [bcs]
     type = DirichletBC
     variable = u
     boundary = 'left right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

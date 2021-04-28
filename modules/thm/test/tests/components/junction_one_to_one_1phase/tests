@@ -1,5 +1,5 @@
 [Tests]
-  [./phy:no_junction_equivalency_1phase_normal]
+  [phy:no_junction_equivalency_1phase_normal]
     type = 'CSVDiff'
     input = 'junction_one_to_one_1phase.i'
     cli_args = "
@@ -8,9 +8,9 @@
       Postprocessors/rhouA_right/boundary=right_channel:in
       Postprocessors/rhouA_right/execute_on='initial timestep_end'"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
-  [../]
+  []
 
-  [./phy:no_junction_equivalency_1phase_flipped]
+  [phy:no_junction_equivalency_1phase_flipped]
     type = 'CSVDiff'
     input = 'junction_one_to_one_1phase.i'
     cli_args = "
@@ -30,22 +30,22 @@
       Postprocessors/rhoEA_right/boundary=right_channel:out"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
     prereq = 'phy:no_junction_equivalency_1phase_normal'
-  [../]
+  []
 
-  [./phy:unequal_area_1phase]
+  [phy:unequal_area_1phase]
     type = 'Exodiff'
     input = 'constriction_1phase.i'
     exodiff = 'constriction_1phase_out.e'
-  [../]
+  []
 
-  [./phy:no_junction_1phase_check]
+  [phy:no_junction_1phase_check]
     type = 'RunApp'
     input = 'no_junction_1phase.i'
     check_input = true
     recover = false
-  [../]
+  []
 
-  [./err:not_parallel]
+  [err:not_parallel]
     type = 'RunException'
     input = 'junction_one_to_one_1phase.i'
     cli_args = "
@@ -55,12 +55,12 @@
       Postprocessors/rhouA_right/boundary=right_channel:in
       Postprocessors/rhouA_right/execute_on='initial timestep_end'"
     expect_err = "The connected channels must be parallel at the junction"
-  [../]
+  []
 
-  [./warn:slope_reconstruction_used]
+  [warn:slope_reconstruction_used]
     type = 'RunException'
     input = 'junction_one_to_one_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "JunctionOneToOne1Phase cannot perform slope reconstruction"
-  [../]
+  []
 []

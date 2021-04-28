@@ -1,6 +1,6 @@
 [Tests]
   # minmod limiter
-  [./square_wave_minmod]
+  [square_wave_minmod]
     type = 'Exodiff'
     input = 'square_wave.i'
     exodiff = 'square_wave_minmod.e'
@@ -8,10 +8,10 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
+  []
 
   # no limiter
-  [./square_wave_none]
+  [square_wave_none]
     type = 'Exodiff'
     input = 'square_wave.i'
     exodiff = 'square_wave_none.e'
@@ -19,10 +19,10 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
+  []
 
   # MC limiter
-  [./square_wave_mc]
+  [square_wave_mc]
     type = 'Exodiff'
     input = 'square_wave.i'
     exodiff = 'square_wave_mc.e'
@@ -30,10 +30,10 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
+  []
 
   # superbee limiter
-  [./square_wave_superbee]
+  [square_wave_superbee]
     type = 'Exodiff'
     input = 'square_wave.i'
     exodiff = 'square_wave_superbee.e'
@@ -41,5 +41,5 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
+  []
 []

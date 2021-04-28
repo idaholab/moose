@@ -13,18 +13,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
@@ -36,29 +36,29 @@
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./ht_pipe]
+  [ht_pipe]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     T_wall = 550
     Hw = 1.0e3
     P_hf = 4.4925e-2
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./hf_pipe]
+  [hf_pipe]
     type = HeatRateConvection1Phase
     block = pipe
     T_wall = T_wall
@@ -66,40 +66,40 @@
     Hw = Hw
     P_hf = P_hf
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./heat_added]
+  [heat_added]
     type = TotalVariableValue
     value = hf_pipe
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E]
+  [E]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_change]
+  [E_change]
     type = ChangeOverTimePostprocessor
     postprocessor = E
     change_with_respect_to_initial = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_conservation]
+  [E_conservation]
     type = DifferencePostprocessor
     value1 = heat_added
     value2 = E_change
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -122,12 +122,12 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'E_conservation'
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     show = 'E_conservation'
-  [../]
+  []
 []

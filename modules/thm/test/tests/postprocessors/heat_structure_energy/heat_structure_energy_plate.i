@@ -30,29 +30,29 @@
 # rho2 * cp2 * int(T - T_ref) * P = 864.
 
 [HeatStructureMaterials]
-  [./region1-mat]
+  [region1-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
-  [./region2-mat]
+  []
+  [region2-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 5
     rho = 3
-  [../]
+  []
 []
 
 [Functions]
-  [./T0_fn]
+  [T0_fn]
     type = ParsedFunction
     value = '0.2 * x + 0.4 * y + 0.5'
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructurePlate
 
     position = '0 0 0'
@@ -67,16 +67,16 @@
     n_part_elems = '5 5'
 
     initial_T = T0_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_tot]
+  [E_tot]
     type = HeatStructureEnergy
     block = 'heat_structure:region2'
     plate_depth = 4.0
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

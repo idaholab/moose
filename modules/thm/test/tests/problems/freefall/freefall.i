@@ -25,18 +25,18 @@ time = ${fparse num_steps * dt}
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816
     q = -1.167e6
     q_prime = 0
     p_inf = 1e9
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
@@ -45,19 +45,19 @@ time = ${fparse num_steps * dt}
     A = 1
     f = 0
     fp = fp
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = JunctionOneToOne1Phase
     connections = 'pipe:in pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,16 +78,16 @@ time = ${fparse num_steps * dt}
 []
 
 [Postprocessors]
-  [./vel_avg]
+  [vel_avg]
     type = ElementAverageValue
     variable = 'vel'
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     execute_on = 'FINAL'
-  [../]
+  []
 []

@@ -13,15 +13,15 @@
 []
 
 [FluidProperties]
-  [./ig]
+  [ig]
     type = IdealGasFluidProperties
     gamma = 1.41
     molar_mass = 0.028966206103678928
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = ig
     # geometry
@@ -33,27 +33,27 @@
 
     length = 1
     n_elems = 100
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SupersonicInlet
     input = 'pipe:in'
     p = 101325
     T = 300.0
     vel = 522.676
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,15 +73,15 @@
   l_tol = 1e-3
   l_max_its = 100
 
-  [./Quadrature]
+  [Quadrature]
     type = TRAP
     order = FIRST
-  [../]
+  []
 []
 
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

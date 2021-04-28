@@ -7,7 +7,7 @@
 []
 
 [Materials]
-  [./f_D_mat]
+  [f_D_mat]
     type = WallFrictionFunctionMaterial
     f_D = f_D
     function = 0.01
@@ -15,14 +15,14 @@
     arhoA  = arhoA
     arhouA = arhouA
     arhoEA = arhoEA
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = f_D
     args = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []

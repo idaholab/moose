@@ -6,9 +6,9 @@
 []
 
 [UserObjects]
-  [./flux]
+  [flux]
     type = NumericalFlux3EqnCentered
     fluid_properties = fluid_properties
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []

@@ -11,7 +11,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -20,11 +20,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     # geometry
     position = '0 0 0'
@@ -36,58 +36,58 @@
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
 
     rho = 996.556340388366266
     vel = 2
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 0.1e6
-  [../]
+  []
 []
 
 [Functions]
-  [./inlet_rho_fn]
+  [inlet_rho_fn]
     type = PiecewiseLinear
     x = '0   1 '
     y = '996 997'
-  [../]
+  []
 
-  [./inlet_vel_fn]
+  [inlet_vel_fn]
     type = PiecewiseLinear
     x = '1 2'
     y = '1 2'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./inlet_rho_ctrl]
+  [inlet_rho_ctrl]
     type = TimeFunctionComponentControl
     component = inlet
     parameter = rho
     function = inlet_rho_fn
-  [../]
+  []
 
-  [./inlet_vel_ctrl]
+  [inlet_vel_ctrl]
     type = TimeFunctionComponentControl
     component = inlet
     parameter = vel
     function = inlet_vel_fn
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,16 +109,16 @@
 []
 
 [Postprocessors]
-  [./rho_inlet]
+  [rho_inlet]
     type = RealComponentParameterValuePostprocessor
     component = inlet
     parameter = rho
-  [../]
-  [./vel_inlet]
+  []
+  [vel_inlet]
     type = RealComponentParameterValuePostprocessor
     component = inlet
     parameter = vel
-  [../]
+  []
 []
 
 [Outputs]

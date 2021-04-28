@@ -7,25 +7,25 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = LinearTestFluidProperties
-  [../]
+  []
 []
 
 [Materials]
-  [./v_material]
+  [v_material]
     type = LinearTestMaterial
     vars = 'beta arhoA'
     slopes = '0.2 0.7'
     name = v
-  [../]
-  [./e_material]
+  []
+  [e_material]
     type = LinearTestMaterial
     vars = 'arhoA arhouA arhoEA'
     slopes = '0.3 1.4 2.1'
     name = e
-  [../]
-  [./mu_material]
+  []
+  [mu_material]
     type = DynamicViscosityMaterial
     mu = mu
     beta = beta
@@ -35,14 +35,14 @@
     fp_1phase = fp_1phase
     v = v
     e = e
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = mu
     args = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []

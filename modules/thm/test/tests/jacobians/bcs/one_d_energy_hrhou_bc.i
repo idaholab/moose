@@ -7,7 +7,7 @@
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDEnergyHRhoUBC
     variable = rhoEA
     boundary = 0
@@ -15,8 +15,8 @@
     H = 11
     rhou = 123
     A = A
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDEnergyHRhoUBC
     variable = rhoEA
     boundary = 1
@@ -24,5 +24,5 @@
     H = 11
     rhou = 123
     A = A
-  [../]
+  []
 []

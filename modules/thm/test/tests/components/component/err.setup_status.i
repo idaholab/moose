@@ -6,23 +6,23 @@
 # component being added before the Pipe.
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./a_test_component]
+  [a_test_component]
     type = TestSetupStatusComponent
     flow_channel = pipe
-  [../]
+  []
 
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     closures = simple
@@ -38,17 +38,17 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Problem]

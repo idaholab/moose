@@ -6,60 +6,60 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Pr]
+  [Pr]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./RPr_ak]
+  [RPr_ak]
     type = MaterialRealAux
     variable = Pr
     property = Pr
-  [../]
+  []
 []
 
 [Materials]
-  [./props]
+  [props]
     type = GenericConstantMaterial
     prop_names = 'cp mu k'
     prop_values = '1 2 4'
-  [../]
+  []
 
-  [./Pr_material]
+  [Pr_material]
     type = PrandtlNumberMaterial
     cp = cp
     k = k
     mu = mu
-  [../]
+  []
 []
 
 [Executioner]
@@ -67,11 +67,11 @@
 []
 
 [Postprocessors]
-  [./Pr]
+  [Pr]
     type = ElementalVariableValue
     elementid = 0
     variable = Pr
-  [../]
+  []
 []
 
 [Outputs]

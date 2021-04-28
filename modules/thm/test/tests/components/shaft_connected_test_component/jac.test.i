@@ -9,65 +9,65 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./sw1]
+  [sw1]
     type = SolidWall1Phase
     input = fch1:in
-  [../]
+  []
 
-  [./fch1]
+  [fch1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
     n_elems = 2
     A = 1
-  [../]
+  []
 
-  [./test_comp]
+  [test_comp]
     type = ShaftConnectedTestComponent
     position = '1 0 0'
     volume = 1
     connections = 'fch1:out fch2:in'
-  [../]
+  []
 
-  [./fch2]
+  [fch2]
     type = FlowChannel1Phase
     position = '1 0 0'
     orientation = '1 0 0'
     length = 1
     n_elems = 2
     A = 1
-  [../]
+  []
 
-  [./sw2]
+  [sw2]
     type = SolidWall1Phase
     input = fch2:out
-  [../]
+  []
 
-  [./shaft]
+  [shaft]
     type = Shaft
     connected_components = 'test_comp'
     initial_speed = 1
-  [../]
+  []
 
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

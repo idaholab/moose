@@ -10,7 +10,7 @@
 []
 
 [BCs]
-  [./bc1]
+  [bc1]
     type = JunctionOneToOne1PhaseBC
     variable = rhoA
     boundary = 1
@@ -22,8 +22,8 @@
     rhoA = rhoA
     rhouA = rhouA
     rhoEA = rhoEA
-  [../]
-  [./bc2]
+  []
+  [bc2]
     type = JunctionOneToOne1PhaseBC
     variable = rhoA
     boundary = 3
@@ -35,16 +35,16 @@
     rhoA = rhoA
     rhouA = rhouA
     rhoEA = rhoEA
-  [../]
+  []
 []
 
 [UserObjects]
-  [./numerical_flux]
+  [numerical_flux]
     type = NumericalFlux3EqnCentered
     fluid_properties = fluid_properties
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./junction_uo]
+  []
+  [junction_uo]
     type = JunctionOneToOne1PhaseUserObject
     A = A
     rhoA = rhoA
@@ -55,5 +55,5 @@
     numerical_flux = numerical_flux
     junction_name = junction
     execute_on = 'initial linear nonlinear'
-  [../]
+  []
 []

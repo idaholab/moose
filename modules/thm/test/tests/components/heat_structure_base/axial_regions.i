@@ -5,16 +5,16 @@
 # boundaries.
 
 [HeatStructureMaterials]
-  [./hs_mat]
+  [hs_mat]
     type = SolidMaterialProperties
     k = 5
     cp = 300
     rho = 100
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructurePlate
     position = '1 2 3'
     orientation = '0 0 1'
@@ -29,21 +29,21 @@
     materials = 'hs_mat'
 
     initial_T = 300
-  [../]
+  []
 
-  [./hs_boundary]
+  [hs_boundary]
     type = HSBoundaryHeatFlux
     boundary = 'hs:region1:outer hs:region2:outer'
     hs = hs
     q = 1000
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,10 +63,10 @@
   l_tol = 1e-3
   l_max_its = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 

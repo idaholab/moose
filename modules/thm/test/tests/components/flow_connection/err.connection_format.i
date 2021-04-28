@@ -1,17 +1,17 @@
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 28.964e-3
-  [../]
+  []
 []
 
 [Components]
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
-  [../]
+  []
 
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     closures = simple
@@ -27,12 +27,12 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./right_wall]
+  [right_wall]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,8 +52,8 @@
 
   abort_on_solve_fail = true
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []

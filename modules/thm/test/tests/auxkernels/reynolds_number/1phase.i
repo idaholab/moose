@@ -44,7 +44,7 @@
 []
 
 [AuxKernels]
-  [./rn_aux]
+  [rn_aux]
     type = ReynoldsNumberAux
     variable = reynolds_no
     rho = rho
@@ -53,7 +53,7 @@
     v = v
     e = e
     fp = fp
-  [../]
+  []
 []
 
 [Problem]

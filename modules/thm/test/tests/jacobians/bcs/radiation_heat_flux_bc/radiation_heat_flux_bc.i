@@ -6,27 +6,27 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 1000
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = RadiativeHeatFluxBC
     variable = T
     boundary = 0
     Tinfinity = 1500
     boundary_emissivity = 0.3
     view_factor = 0.5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

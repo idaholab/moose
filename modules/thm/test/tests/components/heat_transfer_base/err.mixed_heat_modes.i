@@ -10,18 +10,18 @@
 []
 
 [FluidProperties]
-  [./fp_water]
+  [fp_water]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp_water
     position = '0 0 0'
@@ -30,42 +30,42 @@
     f = 0
     length = 1
     n_elems = 1
-  [../]
+  []
 
-  [./ht1]
+  [ht1]
     type = HeatTransferFromHeatFlux1Phase
     flow_channel = pipe
     q_wall = 1
     P_hf = 1
     Hw = 1
-  [../]
+  []
 
-  [./ht2]
+  [ht2]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     T_wall = 300
     P_hf = 1
     Hw = 1
-  [../]
+  []
 
-  [./left]
+  [left]
     type = SolidWall
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right]
+  [right]
     type = SolidWall
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./preconditioner]
+  [preconditioner]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
     petsc_options_value = 'lu       mumps'
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,8 +85,8 @@
   l_tol = 1e-10
   l_max_its = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []

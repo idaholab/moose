@@ -14,69 +14,69 @@ htc = 100
 []
 
 [Functions]
-  [./left_bc_fn]
+  [left_bc_fn]
     type = PiecewiseLinear
     x = '0   10'
     y = '300 500'
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [AuxVariables]
-  [./htc_ext]
+  [htc_ext]
     initial_condition = ${htc}
-  [../]
+  []
 []
 
 [Functions]
-  [./source_term]
+  [source_term]
     type = ParsedFunction
     value = '20 * x * x - 40 * x + 20 - 40 * t'
-  [../]
+  []
 []
 [ICs]
-  [./T_ic]
+  [T_ic]
     type = ConstantIC
     variable = T
     value = 300
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = T
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 
-  [./source]
+  [source]
     type = BodyForce
      function = 'source_term'
      variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = T
     boundary = left
     function = left_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = T
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,29 +88,29 @@ htc = 100
 []
 
 [MultiApps]
-  [./thm]
+  [thm]
     type = TransientMultiApp
     app_type = THMApp
     input_files = plate.i
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Transfers]
-  [./T_to_slave]
+  [T_to_slave]
     type = MultiAppNearestNodeTransfer
     multi_app = thm
     direction = to_multiapp
     source_variable = T
     variable = T_ext
-  [../]
-  [./htc_to_slave]
+  []
+  [htc_to_slave]
     type = MultiAppNearestNodeTransfer
     multi_app = thm
     direction = to_multiapp
     source_variable = htc_ext
     variable = htc_ext
-  [../]
+  []
 []
 
 [Outputs]

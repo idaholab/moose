@@ -6,60 +6,60 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Hw]
+  [Hw]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Hw_ak]
+  [Hw_ak]
     type = MaterialRealAux
     variable = Hw
     property = Hw
-  [../]
+  []
 []
 
 [Materials]
-  [./props]
+  [props]
     type = GenericConstantMaterial
     prop_names = 'Nu k D_h'
     prop_values = '1000 2 20'
-  [../]
+  []
 
-  [./Hw_material]
+  [Hw_material]
     type = ConvectiveHeatTransferCoefficientMaterial
     Nu = Nu
     D_h = D_h
     k = k
-  [../]
+  []
 []
 
 [Executioner]
@@ -67,11 +67,11 @@
 []
 
 [Postprocessors]
-  [./Hw]
+  [Hw]
     type = ElementalVariableValue
     elementid = 0
     variable = Hw
-  [../]
+  []
 []
 
 [Outputs]

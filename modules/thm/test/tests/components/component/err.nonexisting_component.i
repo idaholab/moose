@@ -1,15 +1,15 @@
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
-  [../]
+  []
 []
 
 [Components]
-  [./cmp]
+  [cmp]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     T_wall = 100
-  [../]
+  []
 []
 
 [Problem]

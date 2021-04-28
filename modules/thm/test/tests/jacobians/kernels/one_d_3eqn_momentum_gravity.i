@@ -15,19 +15,19 @@
 []
 
 [Materials]
-  [./rho_material]
+  [rho_material]
     type = LinearTestMaterial
     name = rho
     vars = 'rhoA'
     slopes = '2.5'
-  [../]
-  [./dir_material]
+  []
+  [dir_material]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [Kernels]
-  [./test]
+  [test]
     type = OneD3EqnMomentumGravity
     variable = rhouA
     A = A
@@ -35,5 +35,5 @@
     direction = direction
     rho = rho
     gravity_vector = '1 2 3'
-  [../]
+  []
 []

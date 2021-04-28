@@ -11,60 +11,60 @@
 []
 
 [Functions]
-  [./sin_fn]
+  [sin_fn]
     type = ParsedFunction
     value = '1000*t*sin(pi*x)'
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [AuxVariables]
-  [./q_wall]
+  [q_wall]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./q_wal_ak]
+  [q_wal_ak]
     type = FunctionAux
     variable = q_wall
     function = sin_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [ICs]
-  [./T_ic]
+  [T_ic]
     type = ConstantIC
     variable = T
     value = 300
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = T
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = T
     boundary = 'left right'
     value = 300
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,22 +76,22 @@
 []
 
 [MultiApps]
-  [./thm]
+  [thm]
     type = TransientMultiApp
     app_type = THMApp
     input_files = phy.q_wall_transfer_3eqn.slave.i
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./q_to_thm]
+  [q_to_thm]
     type = MultiAppNearestNodeTransfer
     multi_app = thm
     direction = to_multiapp
     source_variable = q_wall
     variable = q_wall
-  [../]
+  []
 []
 
 [Outputs]

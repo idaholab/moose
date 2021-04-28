@@ -9,7 +9,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -18,11 +18,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -33,27 +33,27 @@
     f = 0.1
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
     rho = 805
     vel = 1
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7e6
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

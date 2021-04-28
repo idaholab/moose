@@ -15,16 +15,16 @@ scale = 0.8
 
 
 [HeatStructureMaterials]
-  [./hs_mat]
+  [hs_mat]
     type = SolidMaterialProperties
     rho = ${density}
     cp = ${specific_heat_capacity}
     k = ${conductivity}
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructurePlate
     orientation = '1 0 0'
     position = '0 0 0'
@@ -38,22 +38,22 @@ scale = 0.8
     names = 'region'
 
     initial_T = ${T_hs}
-  [../]
+  []
 
-  [./ambient_convection]
+  [ambient_convection]
     type = HSBoundaryExternalAppConvection
     boundary = 'hs:outer'
     hs = hs
     scale_pp = bc_scale_pp
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./bc_scale_pp]
+  [bc_scale_pp]
     type = FunctionValuePostprocessor
     function = ${scale}
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]

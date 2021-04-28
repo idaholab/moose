@@ -21,61 +21,61 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     p_inf = 0
     q = 0
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe1:in'
     rho = 1.37931034483
     vel = 1
-  [../]
+  []
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
     A = 1
     n_elems = 20
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
     position = '1 0 0'
     volume = 1e-8
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     position = '1 0 0'
     orientation = '1 0 0'
     length = 1
     A = 0.5
     n_elems = 20
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -102,27 +102,27 @@
   # These post-processors are used to test that the outlet side of the junction,
   # which has half the area of the inlet side, has twice the momentum density
   # that the inlet side does.
-  [./rhouA_pipe1]
+  [rhouA_pipe1]
     type = SideAverageValue
     variable = rhouA
     boundary = pipe1:out
-  [../]
-  [./rhouA_pipe2]
+  []
+  [rhouA_pipe2]
     type = SideAverageValue
     variable = rhouA
     boundary = pipe2:out
-  [../]
-  [./test_rel_err]
+  []
+  [test_rel_err]
     type = RelativeDifferencePostprocessor
     value1 = rhouA_pipe1
     value2 = rhouA_pipe2
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = test_rel_err
     execute_on = 'final'
-  [../]
+  []
 []

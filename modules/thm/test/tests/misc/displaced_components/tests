@@ -1,8 +1,8 @@
 [Tests]
-  [./displaced_components]
+  [displaced_components]
     type = 'Exodiff'
     input = 'displaced_components.i'
     exodiff = 'displaced_components_out.e'
     custom_cmp = 'displaced_components.exodiff'
-  [../]
+  []
 []

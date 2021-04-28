@@ -8,18 +8,18 @@
 []
 
 [FluidProperties]
-  [./water]
+  [water]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = water
     position = '0 0 0'
@@ -28,18 +28,18 @@
     n_elems = 2
     A = 1e-4
     f = 0
-  [../]
-  [./inlet_1p]
+  []
+  [inlet_1p]
     type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = 1
     T = 300
-  [../]
-  [./outlet_1p]
+  []
+  [outlet_1p]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,13 +6,13 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 300
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = ConvectionHeatTransferRZBC
     variable = T
     boundary = 2
@@ -20,14 +20,14 @@
     T_ambient = 400
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

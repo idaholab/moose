@@ -15,13 +15,13 @@
 []
 
 [Materials]
-  [./direction_mat]
+  [direction_mat]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [UserObjects]
-  [./sc_test_comp_uo]
+  [sc_test_comp_uo]
     type = ShaftConnectedTestComponentUserObject
     volume = 0.3
     rhoA = rhoA
@@ -34,29 +34,29 @@
     # note the actual names in 'numerical_flux_names' are not used for anything
     numerical_flux_names = 'numerical_flux1 numerical_flux2'
     execute_on = 'initial linear nonlinear'
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./shaft_td]
+  [shaft_td]
     type = ShaftTimeDerivativeScalarKernel
     variable = omega
     uo_names = sc_test_comp_uo
-  [../]
-  [./shaft_total_torque]
+  []
+  [shaft_total_torque]
     type = ShaftComponentTorqueScalarKernel
     variable = omega
     shaft_connected_component_uo = sc_test_comp_uo
-  [../]
+  []
 
-  [./jct_td]
+  [jct_td]
     type = ODETimeDerivative
     variable = jct_var
-  [../]
-  [./jct_ask]
+  []
+  [jct_ask]
     type = VolumeJunctionAdvectionScalarKernel
     variable = jct_var
     volume_junction_uo = sc_test_comp_uo
     equation_index = 0
-  [../]
+  []
 []

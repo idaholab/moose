@@ -21,37 +21,37 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     p_inf = 0
     q = 0
     q_prime = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./T0]
+  [T0]
     type = CosineHumpFunction
     axis = x
     hump_center_position = 1
     hump_width = 0.5
     hump_begin_value = 250
     hump_center_value = 300
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     # Stagnation property with p = 1e5 Pa, T = 250 K, vel = 1 m/s
     p0 = 100000.68965687
     T0 = 250.00049261084
-  [../]
+  []
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
 
     position = '0 0 0'
@@ -61,9 +61,9 @@
     initial_T = T0
 
     n_elems = 25
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
 
@@ -80,9 +80,9 @@
     scaling_factor_rhovV = 1
     scaling_factor_rhowV = 1
     scaling_factor_rhoEV = 1e-5
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
 
     position = '1.04 0 0'
@@ -92,20 +92,20 @@
     initial_T = T0
 
     n_elems = 24
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -126,34 +126,34 @@
   l_tol = 1e-3
   l_max_its = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./junction_rho]
+  [junction_rho]
     type = ScalarVariable
     variable = junction:rhoV
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhou]
+  []
+  [junction_rhou]
     type = ScalarVariable
     variable = junction:rhouV
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhoE]
+  []
+  [junction_rhoE]
     type = ScalarVariable
     variable = junction:rhoEV
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     execute_scalars_on = 'none'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

@@ -24,37 +24,37 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     p_inf = 0
     q = 0
     q_prime = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./T0]
+  [T0]
     type = CosineHumpFunction
     axis = x
     hump_center_position = 1
     hump_width = 0.5
     hump_begin_value = 250
     hump_center_value = 300
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     # Stagnation property with p = 1e5 Pa, T = 250 K, vel = 1 m/s
     p0 = 100000.68965687
     T0 = 250.00049261084
-  [../]
+  []
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
 
     position = '0 0 0'
@@ -64,20 +64,20 @@
     initial_T = T0
 
     n_elems = 50
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,56 +98,56 @@
   l_tol = 1e-3
   l_max_its = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./junction_rhoA]
+  [junction_rhoA]
     type = PointValue
     variable = rhoA
     point = '1.02 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhouA]
+  []
+  [junction_rhouA]
     type = PointValue
     variable = rhouA
     point = '1.02 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhoEA]
+  []
+  [junction_rhoEA]
     type = PointValue
     variable = rhoEA
     point = '1.02 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rho]
+  []
+  [junction_rho]
     type = ScalePostprocessor
     value = junction_rhoA
     scaling_factor = 0.04
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhou]
+  []
+  [junction_rhou]
     type = ScalePostprocessor
     value = junction_rhouA
     scaling_factor = 0.04
     execute_on = 'initial timestep_end'
-  [../]
-  [./junction_rhoE]
+  []
+  [junction_rhoE]
     type = ScalePostprocessor
     value = junction_rhoEA
     scaling_factor = 0.04
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'junction_rho junction_rhou junction_rhoE'
     execute_scalars_on = 'none'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []

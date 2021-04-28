@@ -15,37 +15,37 @@
 []
 
 [Materials]
-  [./rho_material]
+  [rho_material]
     type = LinearTestMaterial
     name = rho
     vars = 'rhoA'
     slopes = '1.2'
-  [../]
-  [./vel_material]
+  []
+  [vel_material]
     type = LinearTestMaterial
     name = vel
     vars = 'rhoA rhouA'
     slopes = '1.4 2.4'
-  [../]
-  [./e_material]
+  []
+  [e_material]
     type = LinearTestMaterial
     name = e
     vars = 'rhoA rhouA rhoEA'
     slopes = '1.6 2.6 3.6'
-  [../]
-  [./p_material]
+  []
+  [p_material]
     type = LinearTestMaterial
     name = p
     vars = 'rhoA rhouA rhoEA'
     slopes = '1.8 2.8 3.8'
-  [../]
-  [./dir_material]
+  []
+  [dir_material]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [Kernels]
-  [./energy_flux]
+  [energy_flux]
     type = OneD3EqnEnergyFlux
     variable = rhoEA
     A = A
@@ -57,5 +57,5 @@
     vel = vel
     e = e
     p = p
-  [../]
+  []
 []

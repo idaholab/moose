@@ -6,12 +6,12 @@
 []
 
 [UserObjects]
-  [./flux]
+  [flux]
     type = BoundaryFlux3EqnFreeInflow
     rho_infinity = 1
     vel_infinity = 2
     p_infinity = 1.5
     fluid_properties = fluid_properties
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []

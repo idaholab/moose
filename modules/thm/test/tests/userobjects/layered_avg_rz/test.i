@@ -4,7 +4,7 @@ length = 4
 []
 
 [UserObjects]
-  [./average_temp_uo]
+  [average_temp_uo]
     type = LayeredAverageRZ
     execute_on = 'initial timestep_end'
     direction = z
@@ -14,48 +14,48 @@ length = 4
     axis_point = '0 0 0'
     axis_dir = '0 0 1'
     length = ${length}
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./average_temp]
+  [average_temp]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./layered_average]
+  [layered_average]
     type = SpatialUserObjectAux
     variable = average_temp
     execute_on = 'initial timestep_end'
     user_object = average_temp_uo
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./mat1]
+  [mat1]
     type = SolidMaterialProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
-  [../]
-  [./mat2]
+  []
+  [mat2]
     type = SolidMaterialProperties
     k = 0.6
     cp = 1.
     rho = 1.
-  [../]
-  [./mat3]
+  []
+  [mat3]
     type = SolidMaterialProperties
     k = 21.5
     cp = 350.
     rho = 6.55e3
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '0 0 1'
@@ -68,14 +68,14 @@ length = 4
     widths = '0.004 0.0001 0.0005'
     n_part_elems = '10 1 2'
     materials = 'mat1 mat2 mat3'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

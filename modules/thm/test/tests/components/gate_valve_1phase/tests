@@ -1,14 +1,14 @@
 [Tests]
-  [./1phase_heavy]
+  [1phase_heavy]
     type = Exodiff
     input = 'gate_valve_1phase.i'
     exodiff = 'gate_valve_1phase_out.e'
     rel_err = 1e-5
     abs_zero = 1e-8
     heavy = true
-  [../]
+  []
 
-  [./1phase_light]
+  [1phase_light]
     type = Exodiff
     input = 'gate_valve_1phase.i'
     cli_args = '
@@ -17,9 +17,9 @@
     exodiff = 'gate_valve_1phase_light.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-  [../]
+  []
 
-  [./1phase_light_flipped]
+  [1phase_light_flipped]
     type = Exodiff
     input = 'gate_valve_1phase.i'
     cli_args = "
@@ -32,26 +32,26 @@
     exodiff = 'gate_valve_1phase_light_flipped.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-  [../]
+  []
 
-  [./err:not_2_connections]
+  [err:not_2_connections]
     type = 'RunException'
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe2_valve/connections='pipe1:in pipe2A:out pipe2B:in'"
     expect_err = "The number of connections \(3\) must equal 2"
-  [../]
+  []
 
-  [./err:not_parallel]
+  [err:not_parallel]
     type = 'RunException'
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe3B/orientation='1 1 1'"
     expect_err = "The connected channels must be parallel at the junction"
-  [../]
+  []
 
-  [./warn:slope_reconstruction_used]
+  [warn:slope_reconstruction_used]
     type = 'RunException'
     input = 'gate_valve_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "GateValve1Phase cannot perform slope reconstruction"
-  [../]
+  []
 []

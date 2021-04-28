@@ -10,28 +10,28 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 
 [Functions]
-  [./p_fn]
+  [p_fn]
     type = PiecewiseConstant
     axis = x
     x = '0      0.5    1'
     y = '7.5e6  6.5e6  6.5e6'
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = eos
     # geometry
@@ -45,25 +45,25 @@
     f = 0.
 
     initial_p = p_fn
-  [../]
+  []
 
   # BCs
-  [./left]
+  [left]
     type = SolidWall1Phase
     input = 'pipe1:in'
-  [../]
+  []
 
-  [./right]
+  [right]
     type = SolidWall1Phase
     input = 'pipe1:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -86,7 +86,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

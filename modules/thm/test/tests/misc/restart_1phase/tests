@@ -1,5 +1,5 @@
 [Tests]
-  [./part1]
+  [part1]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'part1_out.e'
@@ -17,9 +17,9 @@
       Outputs/file_base=part1_out'
     recover = false
     abs_zero = 1e-7
-  [../]
+  []
 
-  [./part2]
+  [part2]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'part2_out.e'
@@ -30,9 +30,9 @@
     abs_zero = 1e-7
     prereq = 'part1'
     recover = false
-  [../]
+  []
 
-  [./part2_ics]
+  [part2_ics]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'part2_ics_out.e'
@@ -53,5 +53,5 @@
     prereq = 'part1'
     recover = false
     abs_zero = 1e-7
-  [../]
+  []
 []

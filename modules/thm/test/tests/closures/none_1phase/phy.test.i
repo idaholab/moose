@@ -13,34 +13,34 @@
 []
 
 [FluidProperties]
-  [./water]
+  [water]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./f_wall_mat]
+  [f_wall_mat]
     type = GenericConstantMaterial
     block = 'pipe'
     prop_names = 'f_D df_D/drhoA df_D/drhouA df_D/drhoEA'
     prop_values = '0.123 0 0 0'
-  [../]
+  []
 
-  [./htc_wall_mat]
+  [htc_wall_mat]
     type = GenericConstantMaterial
     block = 'pipe'
     prop_names = 'Hw'
     prop_values = '4.321'
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = water
     position = '0 0 0'
@@ -48,30 +48,30 @@
     A = 1e-4
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 
-  [./ht]
+  [ht]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     T_wall = 300
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -93,10 +93,10 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     output_material_properties = true
     show_material_properties = 'f_D Hw'
     show = 'f_D Hw'
-  [../]
+  []
 []

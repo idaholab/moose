@@ -6,12 +6,12 @@
 []
 
 [UserObjects]
-  [./numerical_flux]
+  [numerical_flux]
     type = NumericalFlux3EqnCentered
     fluid_properties = fluid_properties
     execute_on = 'linear nonlinear'
-  [../]
-  [./boundary_flux]
+  []
+  [boundary_flux]
     type = BoundaryFlux3EqnGhostStagnationPressureTemperature
     p0 = 1
     T0 = 2
@@ -19,5 +19,5 @@
     numerical_flux = numerical_flux
     normal = 1
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []

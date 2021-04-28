@@ -6,25 +6,25 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 300
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = HSHeatFluxBC
     variable = T
     boundary = 0
     function = 5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

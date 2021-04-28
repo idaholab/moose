@@ -13,18 +13,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
@@ -36,46 +36,46 @@
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./ht_pipe]
+  [ht_pipe]
     type = HeatTransferFromHeatFlux1Phase
     flow_channel = pipe
     q_wall = 1.0e5
     Hw = 1.0e4
     P_hf = 4.4925e-2
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E]
+  [E]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_change]
+  [E_change]
     type = ChangeOverTimePostprocessor
     postprocessor = E
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,12 +97,12 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'E_change'
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     show = 'E_change'
-  [../]
+  []
 []

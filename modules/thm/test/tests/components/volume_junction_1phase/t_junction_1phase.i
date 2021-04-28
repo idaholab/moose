@@ -30,44 +30,44 @@ A_small = 0.5
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     q = 0
     q_prime = 0
     p_inf = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
     A = ${A_big}
     # This pipe is pressurized higher than the others.
     initial_p = 1.05e5
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     position = '1 0 0'
     orientation = '1 0 0'
     A = ${A_big}
     initial_p = 1e5
-  [../]
+  []
 
-  [./pipe3]
+  [pipe3]
     type = FlowChannel1Phase
     position = '1 0 0'
     orientation = '0 1 0'
     # This pipe is smaller than the others.
     A = ${A_small}
     initial_p = 1e5
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in pipe3:in'
 
@@ -78,27 +78,27 @@ A_small = 0.5
     initial_vel_x = 0
     initial_vel_y = 0
     initial_vel_z = 0
-  [../]
+  []
 
-  [./pipe1_wall]
+  [pipe1_wall]
     type = SolidWall1Phase
     input = 'pipe1:in'
-  [../]
-  [./pipe2_wall]
+  []
+  [pipe2_wall]
     type = SolidWall1Phase
     input = 'pipe2:out'
-  [../]
-  [./pipe3_wall]
+  []
+  [pipe3_wall]
     type = SolidWall1Phase
     input = 'pipe3:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -119,67 +119,67 @@ A_small = 0.5
   l_tol = 1e-3
   l_max_its = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
   # mass conservation
-  [./mass_pipes]
+  [mass_pipes]
     type = ElementIntegralVariablePostprocessor
     variable = rhoA
     block = 'pipe1 pipe2 pipe3'
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_junction]
+  []
+  [mass_junction]
     type = ScalarVariable
     variable = junction:rhoV
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_tot]
+  []
+  [mass_tot]
     type = SumPostprocessor
     values = 'mass_pipes mass_junction'
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_tot_change]
+  []
+  [mass_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = mass_tot
     compute_relative_change = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
   # energy conservation
-  [./E_pipes]
+  [E_pipes]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     block = 'pipe1 pipe2 pipe3'
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_junction]
+  []
+  [E_junction]
     type = ScalarVariable
     variable = junction:rhoEV
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_tot]
+  []
+  [E_tot]
     type = SumPostprocessor
     values = 'E_pipes E_junction'
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_tot_change]
+  []
+  [E_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = E_tot
     compute_relative_change = true
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'mass_tot_change E_tot_change'
-  [../]
+  []
 []

@@ -36,18 +36,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -58,40 +58,40 @@
     # length and number of elements should be arbitrary for the test
     length = 10
     n_elems = 1
-  [../]
+  []
 
-  [./ht1]
+  [ht1]
     type = HeatTransferFromHeatFlux1Phase
     flow_channel = pipe
     q_wall = 10e6
     P_hf = 0.2
     Hw = 1
-  [../]
+  []
 
-  [./ht2]
+  [ht2]
     type = HeatTransferFromHeatFlux1Phase
     flow_channel = pipe
     q_wall = 20e6
     P_hf = 0.4
     Hw = 1
-  [../]
+  []
 
-  [./left]
+  [left]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right]
+  [right]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./preconditioner]
+  [preconditioner]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,17 +114,17 @@
 []
 
 [Postprocessors]
-  [./rhoEA_predicted]
+  [rhoEA_predicted]
     type = ElementAverageValue
     variable = rhoEA
     block = pipe
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'rhoEA_predicted'
     execute_on = 'final'
-  [../]
+  []
 []

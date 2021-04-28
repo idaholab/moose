@@ -1,19 +1,19 @@
 [HeatStructureMaterials]
-  [./mat]
+  [mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Components]
-  [./total_power]
+  [total_power]
     type = TotalPower
     power = 1234.
-  [../]
+  []
 
-  [./ch1:solid]
+  [ch1:solid]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '1 0 0'
@@ -24,22 +24,22 @@
     widths = '1'
     n_part_elems = '1'
     materials = 'mat'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./reactor_power]
+  [reactor_power]
     type = RealComponentParameterValuePostprocessor
     component = total_power
     parameter = power
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

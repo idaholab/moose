@@ -6,27 +6,27 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 300
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = HSHeatFluxRZBC
     variable = T
     boundary = 2
     function = 5
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

@@ -15,22 +15,22 @@
 []
 
 [Functions]
-  [./transition_fn]
+  [transition_fn]
     type = CosineTransitionFunction
     axis = t
     transition_center = 5
     transition_width = 4
     function1 = 0
     function2 = 100
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./transition]
+  [transition]
     type = FunctionValuePostprocessor
     function = transition_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

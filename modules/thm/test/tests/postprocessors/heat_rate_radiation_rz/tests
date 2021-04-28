@@ -1,8 +1,8 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'heat_rate_radiation_rz.i'
     csvdiff = 'heat_rate_radiation_rz.csv'
     recover = false
-  [../]
+  []
 []

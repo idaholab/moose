@@ -15,32 +15,32 @@
 []
 
 [ScalarKernels]
-  [./scalar_kernel]
+  [scalar_kernel]
     type = VolumeJunctionAdvectionScalarKernel
     variable = rhoV
     equation_index = 0
     volume_junction_uo = turbine_uo
-  [../]
+  []
 []
 
 [Materials]
-  [./direction_mat]
+  [direction_mat]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [UserObjects]
-  [./numerical_flux1]
+  [numerical_flux1]
     type = NumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./numerical_flux2]
+  []
+  [numerical_flux2]
     type = NumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./turbine_uo]
+  []
+  [turbine_uo]
     type = SimpleTurbine1PhaseUserObject
     volume = 0.3
     A_ref = 1.23
@@ -61,12 +61,12 @@
     normals = '1 -1'
     numerical_flux_names = 'numerical_flux1 numerical_flux2'
     execute_on = 'initial linear nonlinear'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
-  [../]
+  []
 []

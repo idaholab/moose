@@ -1,15 +1,15 @@
 [Tests]
   # Tests that TerminateControl can be used to exit gracefully (no error thrown)
-  [./no_error]
+  [no_error]
     type = 'RunApp'
     input = 'terminate.i'
     expect_out = 'Threshold exceeded'
 
     group = 'controls'
-  [../]
+  []
 
   # Tests that TerminateControl can be used to exit with an error thrown
-  [./throw_error]
+  [throw_error]
     type = 'RunException'
     input = 'terminate.i'
     cli_args = '
@@ -18,5 +18,5 @@
     expect_err = 'Custom error message'
 
     group = 'controls'
-  [../]
+  []
 []

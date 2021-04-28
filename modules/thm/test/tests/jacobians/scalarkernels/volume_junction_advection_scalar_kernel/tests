@@ -1,14 +1,14 @@
 [Tests]
   # 1-phase
-  [./rhoV]
+  [rhoV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
     ratio_tol = 1e-6
     difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhouV]
+  []
+  [rhouV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
     cli_args = '
@@ -18,8 +18,8 @@
     difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhovV]
+  []
+  [rhovV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
     cli_args = '
@@ -29,8 +29,8 @@
     difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhowV]
+  []
+  [rhowV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
     cli_args = '
@@ -40,8 +40,8 @@
     difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhoEV]
+  []
+  [rhoEV]
     type = 'PetscJacobianTester'
     input = '1phase.i'
     cli_args = '
@@ -51,5 +51,5 @@
     difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
-  [../]
+  []
 []

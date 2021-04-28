@@ -10,18 +10,18 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./f_wall_mat]
+  [f_wall_mat]
     type = WallFrictionChurchillMaterial
     f_D = f_D
     rhoA  = rhoA
@@ -32,14 +32,14 @@
     vel = vel
     D_h = D_h
     roughness = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = rhoA
     material_property = f_D
     args = 'rhoA rhouA rhoEA'
-  [../]
+  []
 []

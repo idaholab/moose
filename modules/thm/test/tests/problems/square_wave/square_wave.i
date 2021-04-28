@@ -9,25 +9,25 @@
 []
 
 [Functions]
-  [./T_ic_fn]
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.1 0.6 1.0'
     y = '2.8 1.4 2.8'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -45,17 +45,17 @@
     initial_vel = 1
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,8 +79,8 @@
 [Outputs]
   file_base = 'square_wave'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'p T vel'
-  [../]
+  []
 []

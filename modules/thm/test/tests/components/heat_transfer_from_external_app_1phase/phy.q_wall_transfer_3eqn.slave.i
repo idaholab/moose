@@ -9,13 +9,13 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = IdealGasFluidProperties
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -27,30 +27,30 @@
     f = 0.01
 
     fp = eos
-  [../]
+  []
 
-  [./hxconn]
+  [hxconn]
     type = HeatTransferFromExternalAppHeatFlux1Phase
     flow_channel = pipe1
     Hw = 1e3
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe1:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe1:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -72,10 +72,10 @@
   start_time = 0.0
   end_time = 5
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]
