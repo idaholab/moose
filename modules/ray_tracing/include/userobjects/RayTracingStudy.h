@@ -93,6 +93,7 @@ public:
    */
   virtual void
   segmentSubdomainSetup(const SubdomainID subdomain, const THREAD_ID tid, const RayID ray_id);
+
   /**
    * Reinitialize objects for a Ray segment for ray tracing
    * @param elem The elem the segment is in
@@ -110,6 +111,13 @@ public:
    * @param ray The ray
    */
   virtual void postOnSegment(const THREAD_ID tid, const std::shared_ptr<Ray> & ray);
+
+  /**
+   * Called at the beginning of a trace for a ray
+   * @param tid Thread id
+   * @param ray The ray
+   */
+  virtual void preTrace(const THREAD_ID /* tid */, const std::shared_ptr<Ray> & /* ray */) {}
 
   /**
    * Method for executing the study so that it can be called out of the standard UO execute()

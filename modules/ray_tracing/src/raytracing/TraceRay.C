@@ -1007,6 +1007,8 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
   _incoming_side = ray->currentIncomingSide();
   _should_continue = true;
 
+  _study.preTrace(_tid, ray);
+
   traceAssert(_current_elem, "Current element is not set");
   traceAssert(_current_elem->active(), "Current element is not active");
   traceAssert(!ray->invalidCurrentPoint(), "Current point is invalid");
@@ -1323,6 +1325,8 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       debugRay("  _intersection_distance = ", _intersection_distance);
       onSegment(ray);
 
+      _study.postOnSegment(_tid, ray);
+
       // RayKernel killed a Ray or we're at the end
       traceAssert(_should_continue == ray->shouldContinue(), "Should be the same");
       if (!_should_continue)
@@ -1360,13 +1364,18 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       else
         possiblyAddDebugRayMeshPoint(_incoming_point, _intersection_point);
     }
-    else if (!_should_continue)
+    else
     {
-      debugRay("Killing due to at end without RayKernels");
-      traceAssert(!ray->shouldContinue(), "Ray shouldn't continue");
+      _study.postOnSegment(_tid, ray);
 
-      onCompleteTrace(ray);
-      return;
+      if (!_should_continue)
+      {
+        debugRay("Killing due to at end without RayKernels");
+        traceAssert(!ray->shouldContinue(), "Ray shouldn't continue");
+
+        onCompleteTrace(ray);
+        return;
+      }
     }
 
     // If at a vertex/on an edge and not on the boundary, we may actually be on the boundary,
@@ -2028,8 +2037,6 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
     rk->onSegment();
     postRayTracingObject(ray, rk);
   }
-
-  _study.postOnSegment(_tid, ray);
 }
 
 void
