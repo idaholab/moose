@@ -38,7 +38,7 @@ TEST(ElemExtremaTest, Test)
 
     std::stringstream oss;
     oss << invalid;
-    EXPECT_EQ(oss.str(), "not at extrema (edge/vertex)");
+    EXPECT_EQ(oss.str(), "not at extrema");
   }
 
   {
@@ -99,5 +99,11 @@ TEST(ElemExtremaTest, Test)
     std::stringstream oss;
     oss << at_edge;
     EXPECT_EQ(oss.str(), should_be.str());
+  }
+
+  {
+    ElemExtrema at_edge(0, 1);
+    EXPECT_TRUE(at_edge.first == 0);
+    EXPECT_TRUE(at_edge.second == 1);
   }
 }

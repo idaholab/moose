@@ -42,8 +42,6 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
     _local_rays(
         declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("local_rays", this)),
     _claim_rays(*this,
-                *parallelStudy(),
-                _mesh,
                 _rays,
                 _local_rays,
                 /* do_exchange = */ !_define_rays_replicated),

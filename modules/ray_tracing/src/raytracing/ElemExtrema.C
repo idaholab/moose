@@ -39,7 +39,7 @@ ElemExtrema::print() const
   else if (atEdge())
     oss << "at edge with vertices " << first << " and " << second;
   else
-    oss << "not at extrema (edge/vertex)";
+    oss << "not at extrema";
   return oss.str();
 }
 

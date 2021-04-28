@@ -515,6 +515,11 @@ public:
   MeshBase & meshBase() const { return _mesh; }
 
   /**
+   * @returns A reference to the MooseMesh associated with this study.
+   */
+  MooseMesh & mesh() { return _mesh; }
+
+  /**
    * Get the outward normal for a given element side.
    */
   virtual const Point &
@@ -688,6 +693,11 @@ public:
    * Whether or not to produce a warning when interacting with a non-planar mesh.
    */
   bool warnNonPlanar() const { return _warn_non_planar; }
+
+  /**
+   * The underlying parallel study: used for the context for calling the packed range routines.
+   */
+  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
 
 protected:
   /**
@@ -864,11 +874,6 @@ protected:
    * in \p rays will be nullptr after this call.
    */
   void moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays);
-
-  /**
-   * The underlying parallel study: used for the context for calling the packed range routines.
-   */
-  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
 
   /// The Mesh
   MooseMesh & _mesh;

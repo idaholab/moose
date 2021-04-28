@@ -33,6 +33,11 @@ struct ElemExtrema : std::pair<unsigned short, unsigned short>
   {
   }
 
+  ElemExtrema(const unsigned short v1, const unsigned short v2)
+    : std::pair<unsigned short, unsigned short>(v1, v2)
+  {
+  }
+
   /**
    * @returns true if at the extrema (edge or vertex)
    */
