@@ -14,18 +14,18 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Kernels]
-  [./mom_flux]
+  [mom_flux]
     type = OneD3EqnMomentumFlux
     variable = rhouA
     A = A
@@ -36,5 +36,5 @@
     rho = rho
     vel = vel
     p = p
-  [../]
+  []
 []

@@ -9,18 +9,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     # geometry
     position = '0 0 0'
@@ -31,36 +31,36 @@
     D_h  = 1.1283791671e-02
     f = 0.
     fp = eos
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe1:in'
     rho = 996.561962436227759
     vel = 1
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
   show = 'rhoA rhouA rhoEA'
 
-  [./console]
+  [console]
     type = Console
     print_mesh_changed_info = true
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -80,10 +80,10 @@
   l_tol = 1e-3
   l_max_its = 100
 
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 0 # There seems to be a bug with non-zero initial adaptivity
     refine_fraction = 0.60
     coarsen_fraction = 0.30
     max_h_level = 4
-  [../]
+  []
 []

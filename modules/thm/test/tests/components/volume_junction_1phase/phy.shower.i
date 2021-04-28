@@ -24,7 +24,7 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -35,55 +35,55 @@
 []
 
 [Components]
-  [./inlet_hot]
+  [inlet_hot]
     type = InletDensityVelocity1Phase
     input = 'pipe_hot:in'
     # rho @ (p = 1e5, T = 310 K)
     rho = 1315.9279785683
     vel = 1
-  [../]
-  [./inlet_cold]
+  []
+  [inlet_cold]
     type = InletDensityVelocity1Phase
     input = 'pipe_cold:in'
     # rho @ (p = 1e5, T = 280 K)
     rho = 1456.9202619863
     vel = 1
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe_warm:out'
     p = 1e5
-  [../]
+  []
 
-  [./pipe_hot]
+  [pipe_hot]
     type = FlowChannel1Phase
     position = '0 1 0'
     A = 1
-  [../]
-  [./pipe_cold]
+  []
+  [pipe_cold]
     type = FlowChannel1Phase
     position = '0 0 0'
     A = 1
-  [../]
-  [./pipe_warm]
+  []
+  [pipe_warm]
     type = FlowChannel1Phase
     position = '1 0.5 0'
     A = 2
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe_cold:out pipe_hot:out pipe_warm:in'
     position = '1 0.5 0'
     volume = 1e-8
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -110,40 +110,40 @@
   # These post-processors are used to test that the energy flux on
   # the warm side of the junction is equal to the sum of the energy
   # fluxes of the hot and cold inlets to the junction.
-  [./energy_flux_hot]
+  [energy_flux_hot]
     type = EnergyFluxIntegral
     boundary = pipe_hot:out
     arhouA = rhouA
     H = H
-  [../]
-  [./energy_flux_cold]
+  []
+  [energy_flux_cold]
     type = EnergyFluxIntegral
     boundary = pipe_cold:out
     arhouA = rhouA
     H = H
-  [../]
-  [./energy_flux_warm]
+  []
+  [energy_flux_warm]
     type = EnergyFluxIntegral
     boundary = pipe_warm:in
     arhouA = rhouA
     H = H
-  [../]
-  [./energy_flux_inlet_sum]
+  []
+  [energy_flux_inlet_sum]
     type = SumPostprocessor
     values = 'energy_flux_hot energy_flux_cold'
-  [../]
-  [./test_rel_err]
+  []
+  [test_rel_err]
     type = RelativeDifferencePostprocessor
     value1 = energy_flux_warm
     value2 = energy_flux_inlet_sum
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = test_rel_err
     sync_only = true
     sync_times = '3 4 5'
-  [../]
+  []
 []

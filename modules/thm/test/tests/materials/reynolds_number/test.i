@@ -6,55 +6,55 @@
 []
 
 [Variables]
-  [./arhoA]
-  [../]
-  [./arhouA]
-  [../]
-  [./arhoEA]
-  [../]
+  [arhoA]
+  []
+  [arhouA]
+  []
+  [arhoEA]
+  []
 []
 
 [AuxVariables]
-  [./Re]
+  [Re]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Re_ak]
+  [Re_ak]
     type = MaterialRealAux
     variable = Re
     property = my_Re
-  [../]
+  []
 []
 
 [Materials]
-  [./rho_mat]
+  [rho_mat]
     type = ConstantMaterial
     property_name = rho
     derivative_vars = 'arhoA'
     value = 1000
-  [../]
-  [./vel_mat]
+  []
+  [vel_mat]
     type = ConstantMaterial
     property_name = vel
     derivative_vars = 'arhoA arhouA'
     value = 5
-  [../]
-  [./D_h_mat]
+  []
+  [D_h_mat]
     type = ConstantMaterial
     property_name = D_h
     value = 0.002
-  [../]
-  [./mu_mat]
+  []
+  [mu_mat]
     type = ConstantMaterial
     property_name = mu
     derivative_vars = 'arhoA arhouA arhoEA'
     value = 0.1
-  [../]
+  []
 
-  [./Re_material]
+  [Re_material]
     type = ReynoldsNumberMaterial
     arhoA = arhoA
     arhouA = arhouA
@@ -64,7 +64,7 @@
     vel = vel
     D_h = D_h
     mu = mu
-  [../]
+  []
 []
 
 [Problem]
@@ -76,11 +76,11 @@
 []
 
 [Postprocessors]
-  [./Re]
+  [Re]
     type = ElementalVariableValue
     elementid = 0
     variable = Re
-  [../]
+  []
 []
 
 [Outputs]

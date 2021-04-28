@@ -1,9 +1,9 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     csvdiff = test_out.csv
     input = 'test.i'
-  [../]
+  []
 
   [clg_test_torque]
     type = 'CSVDiff'

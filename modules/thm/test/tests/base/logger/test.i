@@ -1,18 +1,18 @@
 [HeatStructureMaterials]
-  [./a]
+  [a]
     type = SolidMaterialProperties
     rho = 1
     cp = 1
     k = 1
-  [../]
+  []
 []
 
 [Components]
-  [./warn]
+  [warn]
     type = LogWarningComponent
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '1 0 0'
@@ -23,7 +23,7 @@
     n_elems = 1
     n_part_elems = 1
     initial_T = 300
-  [../]
+  []
 []
 
 [Problem]

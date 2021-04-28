@@ -41,29 +41,29 @@
 []
 
 [FluidProperties]
-  [./fp_liquid]
+  [fp_liquid]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./hx:wall]
+  [hx:wall]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Components]
   # PRIMARY LOOP
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -72,12 +72,12 @@
     A = 1
     f = 1
     fp = fp_liquid
-  [../]
-  [./j1]
+  []
+  [j1]
     type = JunctionOneToOne1Phase
     connections = 'pipe1:out corechannel:in'
-  [../]
-  [./corechannel]
+  []
+  [corechannel]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -86,12 +86,12 @@
     A = 1
     f = 1
     fp = fp_liquid
-  [../]
-  [./j2]
+  []
+  [j2]
     type = JunctionOneToOne1Phase
     connections = 'corechannel:out pipe2:in'
-  [../]
-  [./pipe2]
+  []
+  [pipe2]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -100,12 +100,12 @@
     A = 1
     f = 1
     fp = fp_liquid
-  [../]
-  [./j3]
+  []
+  [j3]
     type = JunctionOneToOne1Phase
     connections = 'pipe2:out hx:primary:in'
-  [../]
-  [./hx:primary]
+  []
+  [hx:primary]
     type = FlowChannel1Phase
     position = '0 1 0'
     orientation = '1 0 0'
@@ -114,15 +114,15 @@
     A = 1
     f = 1
     fp = fp_liquid
-  [../]
-  [./j4]
+  []
+  [j4]
     type = JunctionOneToOne1Phase
     connections = 'hx:primary:out pipe1:in'
-  [../]
+  []
 
   # HEAT EXCHANGER
 
-  [./hs]
+  [hs]
     type = HeatStructurePlate
     position = '0 0 0'
     orientation = '1 0 0'
@@ -134,29 +134,29 @@
     widths = 1
     depth = 1
     initial_T = 300
-  [../]
-  [./ht_primary]
+  []
+  [ht_primary]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     flow_channel = hx:primary
     hs_side = outer
     Hw = 0
-  [../]
-  [./ht_secondary]
+  []
+  [ht_secondary]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     flow_channel = hx:secondary
     hs_side = inner
     Hw = 0
-  [../]
+  []
 
   # SECONDARY LOOP
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'hx:secondary:out'
-  [../]
-  [./hx:secondary]
+  []
+  [hx:secondary]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -165,11 +165,11 @@
     A = 1
     f = 1
     fp = fp_liquid
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = SolidWall1Phase
     input = 'hx:secondary:in'
-  [../]
+  []
 []
 
 [Problem]
@@ -182,9 +182,9 @@
 []
 
 [Outputs]
-  [./console]
+  [console]
     type = Console
     system_info = ''
     enable = false
-  [../]
+  []
 []

@@ -10,26 +10,26 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Materials]
-  [./const_mat_props]
+  [const_mat_props]
     type = GenericConstantMaterial
     prop_names = 'htc'
     prop_values = '1e4'
-  [../]
+  []
 []
 
 [Kernels]
-  [./mom_flux]
+  [mom_flux]
     type = OneDEnergyWallHeating
     variable = rhoEA
     rhoA = rhoA
@@ -39,5 +39,5 @@
     Hw = htc
     P_hf = phf
     T = T
-  [../]
+  []
 []

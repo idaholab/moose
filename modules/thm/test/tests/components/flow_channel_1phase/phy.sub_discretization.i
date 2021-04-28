@@ -12,18 +12,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -33,17 +33,17 @@
     A = 1
     f = 0
     fp = eos
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Problem]
@@ -56,8 +56,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     show = 'A'
-  [../]
+  []
 []

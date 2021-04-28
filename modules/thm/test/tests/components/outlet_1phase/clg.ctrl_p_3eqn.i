@@ -11,7 +11,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -20,11 +20,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -37,52 +37,52 @@
     f = 0.0
 
     fp = fp
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 1e5
     T0 = 300
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Functions]
-  [./outlet_p_fn]
+  [outlet_p_fn]
     type = PiecewiseLinear
     x = '0   1'
     y = '1e5 1.001e5'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./set_outlet_value]
+  [set_outlet_value]
     type = TimeFunctionComponentControl
     component = outlet
     parameter = p
     function = outlet_p_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./outlet_p]
+  [outlet_p]
     type = RealComponentParameterValuePostprocessor
     component = outlet
     parameter = p
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -104,10 +104,10 @@
   l_tol = 1e-3
   l_max_its = 100
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]

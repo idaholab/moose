@@ -1,31 +1,31 @@
 [AuxVariables]
-  [./power_density]
+  [power_density]
     family = MONOMIAL
     order = CONSTANT
     block = 'hs:fuel'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mock_power_aux]
+  [mock_power_aux]
     type = ConstantAux
     variable = power_density
     value = 1e9
     block = 'hs:fuel'
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 -0.024748 0'
     orientation = '0 0 1'
@@ -38,12 +38,12 @@
     materials = 'fuel-mat'
 
     initial_T = 559.15
-  [../]
+  []
 
-  [./hgen]
+  [hgen]
     type = HeatSourceFromPowerDensity
     power_density = power_density
-  [../]
+  []
 []
 
 [Executioner]

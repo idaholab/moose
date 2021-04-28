@@ -6,18 +6,18 @@
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDMassFreeBC
     variable = rhoA
     boundary = 0
     normal = -1
     arhouA = rhouA
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDMassFreeBC
     variable = rhoA
     boundary = 1
     normal = 1
     arhouA = rhouA
-  [../]
+  []
 []

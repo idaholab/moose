@@ -1,15 +1,15 @@
 [Components]
-  [./total_power]
+  [total_power]
     type = PrescribedReactorPower
     power = 1.
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

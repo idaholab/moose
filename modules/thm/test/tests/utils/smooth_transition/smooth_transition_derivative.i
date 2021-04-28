@@ -5,18 +5,18 @@
 []
 
 [Materials]
-  [./test_mat]
+  [test_mat]
     type = SmoothTransitionTestMaterial
     transition_type = cubic
     var = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = u
     material_property = mymatprop
     args = ''
-  [../]
+  []
 []

@@ -23,41 +23,41 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5        1.0'
     y = '3.52874226 0.571'
-  [../]
+  []
 
-  [./T_ic_fn]
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5              1.0'
     y = '11.1016610426966 1.5988'
-  [../]
+  []
 
-  [./vel_ic_fn]
+  [vel_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5   1.0'
     y = '0.692 0.0'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -75,17 +75,17 @@
     initial_vel = vel_ic_fn
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -109,8 +109,8 @@
 [Outputs]
   file_base = 'lax_shock_tube'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'rho p vel'
-  [../]
+  []
 []

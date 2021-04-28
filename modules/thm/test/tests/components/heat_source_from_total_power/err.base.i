@@ -1,19 +1,19 @@
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 2.5
     cp = 300.
     rho = 1.032e4
-  [../]
+  []
 []
 
 [Components]
-  [./reactor]
+  [reactor]
     type = TotalPower
     power = 10
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 -0.024748 0'
     orientation = '0 0 1'
@@ -26,12 +26,12 @@
     materials = 'fuel-mat'
 
     initial_T = 559.15
-  [../]
+  []
 
-  [./hgen]
+  [hgen]
     type = HeatSourceFromTotalPower
     power_fraction = 1
-  [../]
+  []
 []
 
 [Executioner]

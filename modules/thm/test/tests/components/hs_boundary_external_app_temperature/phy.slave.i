@@ -1,14 +1,14 @@
 [HeatStructureMaterials]
-  [./ss316]
+  [ss316]
     type = SolidMaterialProperties
     rho = 8.0272e3
     cp = 502.1
     k = 16.26
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     orientation = '1 0 0'
     position = '0 0 0'
@@ -22,13 +22,13 @@
     names = 'region'
 
     initial_T = 300
-  [../]
+  []
 
-  [./ext_temperature]
+  [ext_temperature]
     type = HSBoundaryExternalAppTemperature
     boundary = 'hs:outer'
     hs = hs
-  [../]
+  []
 []
 
 [Executioner]

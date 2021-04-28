@@ -11,15 +11,15 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = IdealGasFluidProperties
     gamma = 1.41
     molar_mass = 28.9662e-3
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = eos
     # geometry
@@ -32,27 +32,27 @@
 
     length = 1
     n_elems = 100
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationEnthalpyMomentum1Phase
     input = 'pipe:in'
     H    = 296748.357480000
     rhou = 41.0009888754850
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 101325
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

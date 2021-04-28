@@ -8,18 +8,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43
     cv = 1040.0
     q = 2.03e6
     p_inf = 0.0
     q_prime = -2.3e4
-  [../]
+  []
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDMomentumStaticPressureBC
     variable = rhouA
     boundary = 0
@@ -28,8 +28,8 @@
     rhoEA = rhoEA
     A = A
     p_in = 6e6
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDMomentumStaticPressureBC
     variable = rhouA
     boundary = 1
@@ -38,5 +38,5 @@
     rhoEA = rhoEA
     A = A
     p_in = 6e6
-  [../]
+  []
 []

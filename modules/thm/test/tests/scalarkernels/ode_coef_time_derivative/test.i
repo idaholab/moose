@@ -4,50 +4,50 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 
-  [./n]
+  [n]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
-  [./n_ic]
+  [n_ic]
     type = ScalarConstantIC
     variable = n
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./ctd]
+  [ctd]
     type = ODECoefTimeDerivative
     variable = n
     coef = 2.
-  [../]
-  [./ode1]
+  []
+  [ode1]
     type = ParsedODEKernel
     variable = n
     function = '-4'
-  [../]
+  []
 []
 
 [BCs]

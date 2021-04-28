@@ -1,14 +1,14 @@
 [Tests]
-  [./power_profile]
+  [power_profile]
     type = 'Exodiff'
     input = 'power_profile.i'
     exodiff = 'power_profile.e'
-  [../]
+  []
 
-  [./surrogate_power_profile]
+  [surrogate_power_profile]
     type = 'Exodiff'
     input = 'surrogate_power_profile.i'
     exodiff = 'surrogate_power_profile_out.e'
     prereq = 'power_profile'
-  [../]
+  []
 []

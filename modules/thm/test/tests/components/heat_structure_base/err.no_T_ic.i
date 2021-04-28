@@ -5,33 +5,33 @@
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 3.65
     cp = 288.734
     rho = 1.0412e2
-  [../]
-  [./gap-mat]
+  []
+  [gap-mat]
     type = SolidMaterialProperties
     k = 1.084498
     cp = 1.0
     rho = 1.0
-  [../]
-  [./clad-mat]
+  []
+  [clad-mat]
     type = SolidMaterialProperties
     k = 16.48672
     cp = 321.384
     rho = 6.6e1
-  [../]
+  []
 []
 
 [Components]
-  [./reactor]
+  [reactor]
     type = TotalPower
     power = 296153.84615384615385
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '1 0 0'
@@ -42,21 +42,21 @@
     widths = '0.0046955  0.0000955  0.000673'
     n_part_elems = '1 1 1'
     materials = 'fuel-mat gap-mat clad-mat'
-  [../]
+  []
 
-  [./temp_outside]
+  [temp_outside]
     type = HSBoundarySpecifiedTemperature
     hs = hs
     boundary = hs:outer
     T = 600
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

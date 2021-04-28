@@ -10,18 +10,18 @@
 []
 
 [FluidProperties]
-  [./water]
+  [water]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = water
     # geometry
@@ -32,14 +32,14 @@
     f = 0.01
     length = 1
     n_elems = 100
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -62,7 +62,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

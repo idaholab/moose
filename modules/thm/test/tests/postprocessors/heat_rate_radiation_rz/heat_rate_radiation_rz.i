@@ -14,16 +14,16 @@ sigma = 5.670367e-8
 emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
 
 [HeatStructureMaterials]
-  [./region1-mat]
+  [region1-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructureCylindrical
 
     position = '1 2 3'
@@ -38,11 +38,11 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
     n_part_elems = '5'
 
     initial_T = ${T}
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./Q_pp]
+  [Q_pp]
     type = HeatRateRadiationRZ
     boundary = heat_structure:outer
     axis_point = '1 2 3'
@@ -53,7 +53,7 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
     emissivity = ${emissivity}
     stefan_boltzmann_constant = ${sigma}
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]
@@ -67,9 +67,9 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
 
 [Outputs]
   file_base = 'heat_rate_radiation_rz'
-  [./csv]
+  [csv]
     type = CSV
     precision = 15
     execute_on = 'initial'
-  [../]
+  []
 []

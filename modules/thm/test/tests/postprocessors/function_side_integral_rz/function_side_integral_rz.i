@@ -11,23 +11,23 @@ Q = 5000
 q = ${fparse Q / S}
 
 [HeatStructureMaterials]
-  [./region1-mat]
+  [region1-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./q_fn]
+  [q_fn]
     type = ConstantFunction
     value = ${q}
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructureCylindrical
 
     position = '1 2 3'
@@ -42,11 +42,11 @@ q = ${fparse Q / S}
     n_part_elems = '5'
 
     initial_T = 300
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./Q_pp]
+  [Q_pp]
     type = FunctionSideIntegralRZ
     boundary = heat_structure:outer
     axis_point = '1 2 3'
@@ -54,7 +54,7 @@ q = ${fparse Q / S}
     offset = ${R_i}
     function = q_fn
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]
@@ -68,9 +68,9 @@ q = ${fparse Q / S}
 
 [Outputs]
   file_base = 'function_side_integral_rz'
-  [./csv]
+  [csv]
     type = CSV
     precision = 15
     execute_on = 'initial'
-  [../]
+  []
 []

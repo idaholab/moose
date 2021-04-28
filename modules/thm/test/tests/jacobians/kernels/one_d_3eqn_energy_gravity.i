@@ -15,25 +15,25 @@
 []
 
 [Materials]
-  [./rho_material]
+  [rho_material]
     type = LinearTestMaterial
     name = rho
     vars = 'rhoA'
     slopes = '2.5'
-  [../]
-  [./vel_material]
+  []
+  [vel_material]
     type = LinearTestMaterial
     name = vel
     vars = 'rhoA rhouA'
     slopes = '3.5 4.5'
-  [../]
-  [./dir_material]
+  []
+  [dir_material]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [Kernels]
-  [./test]
+  [test]
     type = OneD3EqnEnergyGravity
     variable = rhoEA
     A = A
@@ -43,5 +43,5 @@
     rho = rho
     vel = vel
     gravity_vector = '1 2 3'
-  [../]
+  []
 []

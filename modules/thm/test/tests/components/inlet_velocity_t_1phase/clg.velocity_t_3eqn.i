@@ -12,18 +12,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -33,57 +33,57 @@
     f = 0.0
     length = 1
     n_elems = 100
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletVelocityTemperature1Phase
     input = 'pipe:in'
     vel = 1.0
     T     = 444.447
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7e6
-  [../]
+  []
 []
 
 [Functions]
-  [./inlet_vel_fn]
+  [inlet_vel_fn]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 0.1 1'
-  [../]
+  []
 
-  [./inlet_T_fn]
+  [inlet_T_fn]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '300 400 440'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./inlet_vel_ctrl]
+  [inlet_vel_ctrl]
     type = TimeFunctionComponentControl
     component = inlet
     parameter = vel
     function = inlet_vel_fn
-  [../]
+  []
 
-  [./inlet_T_ctrl]
+  [inlet_T_ctrl]
     type = TimeFunctionComponentControl
     component = inlet
     parameter = T
     function = inlet_T_fn
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -108,20 +108,20 @@
 []
 
 [Postprocessors]
-  [./vel_inlet]
+  [vel_inlet]
     type = RealComponentParameterValuePostprocessor
     component = inlet
     parameter = vel
-  [../]
-  [./T_inlet]
+  []
+  [T_inlet]
     type = RealComponentParameterValuePostprocessor
     component = inlet
     parameter = T
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
-  [../]
+  []
 []

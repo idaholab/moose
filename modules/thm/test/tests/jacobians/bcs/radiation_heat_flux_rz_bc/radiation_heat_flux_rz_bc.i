@@ -6,13 +6,13 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 1000
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = RadiativeHeatFluxRZBC
     variable = T
     boundary = 2
@@ -21,14 +21,14 @@
     view_factor = 0.5
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

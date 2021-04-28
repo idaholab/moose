@@ -16,50 +16,50 @@
 []
 
 [AuxVariables]
-  [./p0]
+  [p0]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./p0_kernel]
+  [p0_kernel]
     type = StagnationPressureAux
     variable = p0
     fp = eos
     e = e
     v = v
     vel = vel
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     q = 0
     q_prime = 0
     p_inf = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./T0]
+  [T0]
     type = ParsedFunction
     value = 'if (x < 1, 300 + 50 * sin(2*pi*x + 1.5*pi), 250)'
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'inlet_pipe:in'
     rho = 1.37931034483
     vel = 1
-  [../]
+  []
 
-  [./inlet_pipe]
+  [inlet_pipe]
     type = FlowChannel1Phase
     fp = eos
 
@@ -75,16 +75,16 @@
     initial_vel = 1
 
     n_elems = 20
-  [../]
+  []
 
-  [./junction1]
+  [junction1]
     type = VolumeJunction1Phase
     connections = 'inlet_pipe:out deadend_pipe:in outlet_pipe:in'
     position = '1 0 0'
     volume = 1e-8
-  [../]
+  []
 
-  [./outlet_pipe]
+  [outlet_pipe]
     type = FlowChannel1Phase
     fp = eos
 
@@ -100,15 +100,15 @@
     initial_vel = 1
 
     n_elems = 20
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'outlet_pipe:out'
     p = 1e5
-  [../]
+  []
 
-  [./deadend_pipe]
+  [deadend_pipe]
     type = FlowChannel1Phase
     fp = eos
 
@@ -124,19 +124,19 @@
     initial_vel = 0
 
     n_elems = 20
-  [../]
+  []
 
-  [./deadend]
+  [deadend]
     type = SolidWall1Phase
     input = 'deadend_pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -162,28 +162,28 @@
 [Postprocessors]
   # These post-processors are used for testing that the stagnation pressure in
   # the dead-end pipe is equal to the inlet stagnation pressure.
-  [./p0_inlet]
+  [p0_inlet]
     type = SideAverageValue
     variable = p0
     boundary = inlet_pipe:in
-  [../]
-  [./p0_deadend]
+  []
+  [p0_deadend]
     type = SideAverageValue
     variable = p0
     boundary = deadend_pipe:out
-  [../]
-  [./test_rel_err]
+  []
+  [test_rel_err]
     type = RelativeDifferencePostprocessor
     value1 = p0_deadend
     value2 = p0_inlet
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = test_rel_err
     sync_only = true
     sync_times = '1 2 3 4 5'
-  [../]
+  []
 []

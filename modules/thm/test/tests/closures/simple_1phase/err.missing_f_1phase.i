@@ -9,18 +9,18 @@
 []
 
 [FluidProperties]
-  [./water]
+  [water]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = water
     position = '0 0 0'
@@ -28,27 +28,27 @@
     A = 1.
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 10
     T0 = 10
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 10
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -69,10 +69,10 @@
   start_time = 0.0
   num_steps = 10
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]

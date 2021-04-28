@@ -6,26 +6,26 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 300
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = ConvectionHeatTransferBC
     variable = T
     boundary = 0
     htc_ambient = 0.5
     T_ambient = 400
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

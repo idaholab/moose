@@ -15,7 +15,7 @@
 []
 
 [BCs]
-  [./bc1]
+  [bc1]
     type = VolumeJunction1PhaseBC
     variable = rhoA
     boundary = 1
@@ -32,8 +32,8 @@
     rhovV = rhovV
     rhowV = rhowV
     rhoEV = rhoEV
-  [../]
-  [./bc2]
+  []
+  [bc2]
     type = VolumeJunction1PhaseBC
     variable = rhoA
     boundary = 3
@@ -50,27 +50,27 @@
     rhovV = rhovV
     rhowV = rhowV
     rhoEV = rhoEV
-  [../]
+  []
 []
 
 [Materials]
-  [./direction_mat]
+  [direction_mat]
     type = DirectionMaterial
-  [../]
+  []
 []
 
 [UserObjects]
-  [./numerical_flux1]
+  [numerical_flux1]
     type = NumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./numerical_flux2]
+  []
+  [numerical_flux2]
     type = NumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./volume_junction_uo]
+  []
+  [volume_junction_uo]
     type = VolumeJunction1PhaseUserObject
     volume = 0.3
     A = A_elem
@@ -89,13 +89,13 @@
     execute_on = 'initial linear nonlinear'
     K = 0
     A_ref = 1.1
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 28.67055e-3
-  [../]
+  []
 []

@@ -7,19 +7,19 @@
 []
 
 [Materials]
-  [./test_material]
+  [test_material]
     type = ConstantMaterial
     property_name = test_property
     value = 5
     derivative_vars = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = test_property
     args = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []

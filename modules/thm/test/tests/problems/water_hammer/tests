@@ -1,7 +1,7 @@
 [Tests]
-  [./3eqn]
+  [3eqn]
     type = 'Exodiff'
     input = '3eqn.i'
     exodiff = '3eqn_out.e'
-  [../]
+  []
 []

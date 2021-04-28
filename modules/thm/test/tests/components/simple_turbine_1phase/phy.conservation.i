@@ -15,7 +15,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43
     cv = 1040.0
@@ -25,27 +25,27 @@
     k = 0.026
     mu = 134.4e-7
     M = 0.01801488
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletVelocityTemperature1Phase
     input = 'pipe1:in'
     vel = 1
     T = 517
-  [../]
+  []
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
     n_elems = 10
     A = 1
-  [../]
+  []
 
-  [./turbine]
+  [turbine]
     type = SimpleTurbine1Phase
     connections = 'pipe1:out pipe2:in'
     position = '1 0 0'
@@ -54,67 +54,67 @@
     K = 0
     on = true
     power = 1000
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     position = '1. 0 0'
     orientation = '1 0 0'
     length = 1
     n_elems = 10
     A = 1
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mass_in]
+  [mass_in]
     type = FlowBoundaryFlux1Phase
     equation = mass
     boundary = inlet
-  [../]
-  [./mass_out]
+  []
+  [mass_out]
     type = FlowBoundaryFlux1Phase
     equation = mass
     boundary = outlet
-  [../]
-  [./mass_diff]
+  []
+  [mass_diff]
     type = LinearCombinationPostprocessor
     pp_coefs = '1 -1'
     pp_names = 'mass_in mass_out'
-  [../]
+  []
 
-  [./energy_in]
+  [energy_in]
     type = FlowBoundaryFlux1Phase
     equation = energy
     boundary = inlet
-  [../]
-  [./energy_out]
+  []
+  [energy_out]
     type = FlowBoundaryFlux1Phase
     equation = energy
     boundary = outlet
-  [../]
-  [./W_dot]
+  []
+  [W_dot]
     type = ScalarVariable
     variable = turbine:W_dot
-  [../]
-  [./energy_diff]
+  []
+  [energy_diff]
     type = LinearCombinationPostprocessor
     pp_coefs = '1 -1 -1'
     pp_names = 'energy_in energy_out W_dot'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -138,9 +138,9 @@
 []
 
 [Outputs]
-  [./csv]
+  [csv]
     type = CSV
     show = 'mass_diff energy_diff'
     execute_on = 'final'
-  [../]
+  []
 []

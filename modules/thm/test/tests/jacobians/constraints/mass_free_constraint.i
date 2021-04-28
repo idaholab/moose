@@ -16,7 +16,7 @@
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Mesh]
@@ -25,11 +25,11 @@
 []
 
 [Constraints]
-  [./mass]
+  [mass]
     type = MassFreeConstraint
     variable = rhoA
     nodes = '1 2'
     normals = '1 -1'
     rhouA = rhouA
-  [../]
+  []
 []

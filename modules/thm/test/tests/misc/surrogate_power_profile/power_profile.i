@@ -15,56 +15,56 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./power_density_fn]
+  [power_density_fn]
     type = ParsedFunction
     value = 'sin(y/3.865*pi)*sin((x-0.020652)/4.096e-3*pi/2.)*10e7*t'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power_density]
+  [power_density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./pd_aux]
+  [pd_aux]
     type = FunctionAux
     variable = power_density
     function = power_density_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -76,8 +76,8 @@
 []
 
 [Outputs]
-  [./expdus]
+  [expdus]
     type = Exodus
     file_base = power_profile
-  [../]
+  []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunApp'
     input = 'test.i'
     expect_out = "Loop 1:
@@ -15,5 +15,5 @@
     requirement = 'The system shall allow nesting components into groups in input files'
     design = 'ComponentGroup.md'
     issues = '#94'
-  [../]
+  []
 []

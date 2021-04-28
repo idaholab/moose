@@ -1,21 +1,21 @@
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./total_power]
+  [total_power]
     type = TotalPower
     power = 1
-  [../]
+  []
 
-  [./fch1]
+  [fch1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
@@ -30,26 +30,26 @@
     initial_T = 300
     initial_p = 1e05
     initial_vel = 0
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatSourceVolumetric1Phase
     flow_channel = fch1
     q = 1
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = fch1:in
     m_dot = 1
     T = 300
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = fch1:out
     p = 1e-5
-  [../]
+  []
 []
 
 [Executioner]

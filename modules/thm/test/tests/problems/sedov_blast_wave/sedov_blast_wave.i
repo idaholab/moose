@@ -21,32 +21,32 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.0025                1'
     y = '1.591549333333333e+06 6.666666666666668e-09'
-  [../]
-  [./T_ic_fn]
+  []
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.0025                1'
     y = '2.228169066666667e+06 9.333333333333334e-09'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.66666666666666666667
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -64,17 +64,17 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,8 +98,8 @@
 [Outputs]
   file_base = 'sedov_blast_wave'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'p T vel'
-  [../]
+  []
 []

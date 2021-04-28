@@ -29,34 +29,34 @@ A = 0.1
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     q = 0
     q_prime = 0
     p_inf = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
     A = ${A}
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     position = '1 0 0'
     orientation = '1 0 0'
     A = ${A}
     initial_p = 1e5
-  [../]
+  []
 
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
 
@@ -67,48 +67,48 @@ A = 0.1
     initial_vel_x = 0
     initial_vel_y = 0
     initial_vel_z = 0
-  [../]
+  []
 
-  [./pipe1_in]
+  [pipe1_in]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     p0 = 1.0001e5
     T0 = 300
     reversible = false
-  [../]
+  []
 
-  [./pipe2_out]
+  [pipe2_out]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pJ_in]
+  [pJ_in]
     type = SideAverageValue
     variable = p
     boundary = pipe1:out
-  [../]
+  []
 
-  [./pJ_out]
+  [pJ_out]
     type = SideAverageValue
     variable = p
     boundary = pipe2:in
-  [../]
+  []
 
-  [./dpJ]
+  [dpJ]
     type = DifferencePostprocessor
     value1 = pJ_in
     value2 = pJ_out
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

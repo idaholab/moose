@@ -1,17 +1,17 @@
 [Tests]
   # physics
-  [./phy:3eqn]
+  [phy:3eqn]
     type = 'Exodiff'
     input = 'phy.3eqn.i'
     exodiff = 'phy.3eqn_out.e'
-  [../]
+  []
 
   # jacobian
-  [./jac:3eqn]
+  [jac:3eqn]
     type = 'PetscJacobianTester'
     input = 'jac.3eqn.i'
     ratio_tol = 2e-5
     difference_tol = 2100
     cli_args = 'Debug/check_jacobian=true'
-  [../]
+  []
 []

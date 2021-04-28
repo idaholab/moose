@@ -1,18 +1,18 @@
 [Tests]
-  [./single_block]
+  [single_block]
     type = 'Exodiff'
     input = 'single_block.i'
     exodiff = 'single_block_out.e-s005'
     abs_zero = 1e-9
     recover = false
-  [../]
+  []
 
-  [./multiple_blocks]
+  [multiple_blocks]
     type = 'Exodiff'
     input = 'multiple_blocks.i'
     exodiff = 'multiple_blocks_out.e-s005'
     recover = false
     method = 'opt'
     skip = '#709'
-  [../]
+  []
 []

@@ -27,33 +27,33 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.0 0.1'
-  [../]
+  []
 
-  [./T_ic_fn]
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.4 1.12'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -71,17 +71,17 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -105,8 +105,8 @@
 [Outputs]
   file_base = 'sod_shock_tube'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'rho p vel'
-  [../]
+  []
 []

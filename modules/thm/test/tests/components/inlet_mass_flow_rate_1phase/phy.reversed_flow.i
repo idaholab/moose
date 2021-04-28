@@ -11,18 +11,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -33,28 +33,28 @@
     f = 0.1
     length = 1
     n_elems = 100
-  [../]
+  []
 
-  [./in]
+  [in]
     type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = -0.18
     T     = 444.447
-  [../]
+  []
 
-  [./out]
+  [out]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:out'
     p0 = 7e6
     T0 = 444.447
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,9 +78,9 @@
 []
 
 [Outputs]
-  [./exodus]
+  [exodus]
     type = Exodus
     file_base = phy.reversed_flow
     show = 'rhouA T p'
-  [../]
+  []
 []

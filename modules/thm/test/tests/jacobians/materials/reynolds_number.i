@@ -5,30 +5,30 @@
 []
 
 [Materials]
-  [./rho_mat]
+  [rho_mat]
     type = LinearTestMaterial
     name = rho
     vars = 'beta arhoA'
     slopes = '1.5 0.8'
-  [../]
-  [./vel_mat]
+  []
+  [vel_mat]
     type = LinearTestMaterial
     name = vel
     vars = 'arhoA arhouA'
     slopes = '-0.6 -1.1'
-  [../]
-  [./mu_mat]
+  []
+  [mu_mat]
     type = LinearTestMaterial
     name = mu
     vars = 'beta arhoA arhouA arhoEA'
     slopes = '0.7 -2.2 0.4 -0.6'
-  [../]
-  [./D_h_mat]
+  []
+  [D_h_mat]
     type = ConstantMaterial
     property_name = D_h
     value = 0.2
-  [../]
-  [./Re_mat]
+  []
+  [Re_mat]
     type = ReynoldsNumberMaterial
     beta = beta
     arhoA = arhoA
@@ -39,14 +39,14 @@
     vel = vel
     D_h = D_h
     mu = mu
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = Re
     args = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []

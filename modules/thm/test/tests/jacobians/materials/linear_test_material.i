@@ -8,19 +8,19 @@
 []
 
 [Materials]
-  [./linear_test_material]
+  [linear_test_material]
     type = LinearTestMaterial
     vars = 'beta arhoA arhouA arhoEA'
     slopes = '2.5 3.5 4.5 5.5'
     name = test_property
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = test_property
     args = 'beta arhoA arhouA arhoEA'
-  [../]
+  []
 []

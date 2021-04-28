@@ -1,7 +1,7 @@
 [Tests]
-  [./err:missing_f_1phase]
+  [err:missing_f_1phase]
     type = 'RunException'
     input = 'err.missing_f_1phase.i'
     expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
-  [../]
+  []
 []

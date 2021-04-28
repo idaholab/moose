@@ -12,18 +12,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -33,27 +33,27 @@
     f = 0.0
     length = 1
     n_elems = 100
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletVelocityTemperature1Phase
     input = 'pipe:in'
     vel = 1.0
     T     = 444.447
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7e6
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,8 +79,8 @@
 
 [Outputs]
   file_base = 'phy.velocity_t_3eqn'
-  [./exodus]
+  [exodus]
     type = Exodus
     show = 'vel T p'
-  [../]
+  []
 []

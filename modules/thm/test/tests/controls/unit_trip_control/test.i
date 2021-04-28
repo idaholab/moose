@@ -5,68 +5,68 @@
 []
 
 [Functions]
-  [./fn]
+  [fn]
     type = ParsedFunction
     value = 'sin(pi*t)'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Components]
 []
 
 [Postprocessors]
-  [./a]
+  [a]
     type = FunctionValuePostprocessor
     function = fn
     execute_on = 'timestep_begin'
-  [../]
+  []
 
-  [./trip_state]
+  [trip_state]
     type = BoolControlDataValuePostprocessor
     control_data_name = trip_ctrl:state
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./trip_ctrl]
+  [trip_ctrl]
     type = UnitTripControl
     condition = 'a > 0.6'
     vars = 'a'
     vals = 'a'
-  [../]
+  []
 []
 
 [Executioner]

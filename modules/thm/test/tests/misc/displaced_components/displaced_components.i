@@ -12,18 +12,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = eos
     position = '0 0 0'
@@ -33,9 +33,9 @@
     f = 0
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     fp = eos
     position = '0 0 0'
@@ -45,9 +45,9 @@
     f = 0
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./pipe3]
+  [pipe3]
     type = FlowChannel1Phase
     fp = eos
     position = '0 0 0'
@@ -57,34 +57,34 @@
     f = 0
     length = 1
     n_elems = 10
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:in pipe2:in pipe3:in'
     position = '0 0 0'
     volume = 1e-5
-  [../]
+  []
 
-  [./in1]
+  [in1]
     type = SolidWall1Phase
     input = 'pipe1:out'
-  [../]
-  [./in2]
+  []
+  [in2]
     type = SolidWall1Phase
     input = 'pipe2:out'
-  [../]
-  [./in3]
+  []
+  [in3]
     type = SolidWall1Phase
     input = 'pipe3:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
