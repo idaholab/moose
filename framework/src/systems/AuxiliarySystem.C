@@ -36,9 +36,8 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<ExplicitSystem>(name)),
-    _current_solution(NULL),
+    _current_solution(_sys.current_local_solution.get()),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
-    _solution_previous_nl(NULL),
     _u_dot(NULL),
     _u_dotdot(NULL),
     _u_dot_old(NULL),
@@ -89,13 +88,6 @@ AuxiliarySystem::addDotVectors()
     _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
   if (_fe_problem.uDotDotOldRequested())
     _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
-}
-
-void
-AuxiliarySystem::addExtraVectors()
-{
-  if (_fe_problem.needsPreviousNewtonIteration())
-    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
 }
 
 void

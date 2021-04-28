@@ -31,7 +31,5 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  TagID _tag_id;
   const VariableValue & _v;
 };
-

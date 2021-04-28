@@ -11,24 +11,15 @@
 
 #include "Kernel.h"
 
-/**
- * CoupledForce using values from previous Newton iterate
- */
-class CoupledForceLagged : public Kernel
+class MatKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  CoupledForceLagged(const InputParameters & parameters);
+  MatKernel(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
-
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-  const unsigned int _v_var;
-  const VariableValue & _v;
+  virtual Real computeQpResidual();
+  const MaterialProperty<Real> & _mat_prop;
   const Real _coef;
 };

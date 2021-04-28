@@ -16,18 +16,24 @@ CoupledForceLagged::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
+  params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
+  params.addParam<TagName>(
+      "tag", Moose::PREVIOUS_NL_SOLUTION_TAG, "The solution vector to be coupled in");
   return params;
 }
 
 CoupledForceLagged::CoupledForceLagged(const InputParameters & parameters)
-  : Kernel(parameters), _v_var(coupled("v")), _v(coupledValuePreviousNL("v"))
+  : Kernel(parameters),
+    _v_var(coupled("v")),
+    _v(coupledVectorTagValue("v", "tag")),
+    _coef(getParam<Real>("coefficient"))
 {
 }
 
 Real
 CoupledForceLagged::computeQpResidual()
 {
-  return -_v[_qp] * _test[_i][_qp];
+  return -_coef * _v[_qp] * _test[_i][_qp];
 }
 
 Real

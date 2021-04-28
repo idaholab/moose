@@ -1254,11 +1254,6 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
-SystemBase::addExtraVectors()
-{
-}
-
-void
 SystemBase::update(const bool update_libmesh_system)
 {
   if (update_libmesh_system)
@@ -1355,6 +1350,24 @@ SystemBase::name() const
   return system().name();
 }
 
+NumericVector<Number> *
+SystemBase::solutionPreviousNewton()
+{
+  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    return &getVector(Moose::PREVIOUS_NL_SOLUTION_TAG);
+  else
+    return nullptr;
+}
+
+const NumericVector<Number> *
+SystemBase::solutionPreviousNewton() const
+{
+  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    return &getVector(Moose::PREVIOUS_NL_SOLUTION_TAG);
+  else
+    return nullptr;
+}
+
 void
 SystemBase::initSolutionState()
 {
@@ -1372,11 +1385,16 @@ SystemBase::initSolutionState()
   _solution_states_initialized = true;
 }
 
-std::string
+TagName
 SystemBase::oldSolutionStateVectorName(const unsigned int state) const
 {
   mooseAssert(state != 0, "Not an old state");
-  return "solution_state_" + std::to_string(state);
+  if (state == 1)
+    return Moose::OLD_SOLUTION_TAG;
+  else if (state == 2)
+    return Moose::OLDER_SOLUTION_TAG;
+  else
+    return "solution_state_" + std::to_string(state);
 }
 
 const NumericVector<Number> &
@@ -1425,7 +1443,11 @@ SystemBase::needSolutionState(const unsigned int state)
   // We will manually add all states past current
   for (unsigned int i = 1; i <= state; ++i)
     if (!_solution_states[i])
-      _solution_states[i] = &addVector(oldSolutionStateVectorName(i), true, GHOSTED);
+    {
+      auto tag =
+          _subproblem.addVectorTag(oldSolutionStateVectorName(i), Moose::VECTOR_TAG_SOLUTION);
+      _solution_states[i] = &addVector(tag, true, GHOSTED);
+    }
     else
       mooseAssert(_solution_states[i] == &getVector(oldSolutionStateVectorName(i)),
                   "Inconsistent solution state");

@@ -82,6 +82,11 @@ ComputeMaterialsObjectThread::subdomainChanged()
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _materials.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
+  std::set<TagID> needed_fe_var_vector_tags;
+  _materials.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
 }
 
 void

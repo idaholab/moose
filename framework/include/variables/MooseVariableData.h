@@ -467,16 +467,9 @@ public:
 
   /////////////////////////////// Tags ///////////////////////////////////////////////////
 
-  const FieldVariableValue & vectorTagValue(TagID tag) const
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
-  const FieldVariableValue & matrixTagValue(TagID tag) const
-  {
-    _need_matrix_tag_u[tag] = true;
-    return _matrix_tag_u[tag];
-  }
+  const FieldVariableValue & vectorTagValue(TagID tag) const;
+  const FieldVariableGradient & vectorTagGradient(TagID tag) const;
+  const FieldVariableValue & matrixTagValue(TagID tag) const;
 
   /**
    * The oldest solution state that is requested for this variable
@@ -541,6 +534,8 @@ private:
 
   std::vector<FieldVariableValue> _vector_tag_u;
   mutable std::vector<bool> _need_vector_tag_u;
+  std::vector<FieldVariableGradient> _vector_tag_grad;
+  mutable std::vector<bool> _need_vector_tag_grad;
   std::vector<FieldVariableValue> _matrix_tag_u;
   mutable std::vector<bool> _need_matrix_tag_u;
 
