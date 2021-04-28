@@ -135,8 +135,8 @@
   # fracture
   [fracture_bulk]
     type = GenericConstantMaterial
-    prop_names = 'Gc l c0'
-    prop_values = '2.7 0.02 2'
+    prop_names = ' Gc  l    c0           psic  xi'
+    prop_values = '2.7 0.02 ${fparse pi} 14.88 2'
   []
   [mobility]
     type = ParsedMaterial
@@ -156,16 +156,17 @@
     type = DerivativeParsedMaterial
     f_name = g
     args = 'c'
-    function = '(1-c)^2*(1-eta)+eta'
-    constant_names = 'eta'
-    constant_expressions = '1e-8'
+    material_property_names = 'L psic xi'
+    function = '(1-c)^p/((1-c)^p+(L/psic*xi)*c*(1+a2*c+a2*a3*c^2))*(1-eta)+eta'
+    constant_names = '      p a2   a3 eta'
+    constant_expressions = '2 -0.5 0  1e-8'
     derivative_order = 2
   []
   [crack_geometric_function]
     type = DerivativeParsedMaterial
     f_name = w
     args = 'c'
-    function = 'c^2'
+    function = '2*c-c^2'
     derivative_order = 2
   []
   [free_energy]

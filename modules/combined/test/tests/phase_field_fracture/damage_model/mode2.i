@@ -42,7 +42,6 @@
     inputs = 'top_stitch bottom_stitch'
     stitch_boundaries_pairs = 'top_stitch bottom_stitch'
   []
-  construct_side_list_from_node_list = true
 []
 
 [Modules]
@@ -51,8 +50,6 @@
       [mech]
         strain = FINITE
         incremental = true
-        additional_generate_output = 'stress_yy'
-        save_in = 'resid_x resid_y'
       []
     []
   []
@@ -68,10 +65,6 @@
 []
 
 [AuxVariables]
-  [resid_x]
-  []
-  [resid_y]
-  []
   [bounds_dummy]
   []
 []
@@ -150,15 +143,15 @@
   [mobility]
     type = ParsedMaterial
     f_name = L
-    material_property_names = 'Gc'
-    function = '1/Gc'
+    material_property_names = 'Gc c0 l'
+    function = 'Gc/c0/l'
     constant_on = SUBDOMAIN
   []
   [interface_coef]
     type = ParsedMaterial
     f_name = kappa
-    material_property_names = 'Gc l c0'
-    function = '2*Gc*l/c0'
+    material_property_names = 'l'
+    function = '2*l^2'
     constant_on = SUBDOMAIN
   []
   [degradation]
@@ -174,16 +167,15 @@
     type = DerivativeParsedMaterial
     f_name = w
     args = 'c'
-    material_property_names = 'Gc l c0'
-    function = 'c^2*Gc/c0/l'
+    function = 'c^2'
     derivative_order = 2
   []
   [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c'
-    material_property_names = 'w(c) E_el(c)'
-    function = 'w+E_el'
+    material_property_names = 'w(c) E_el(c) L'
+    function = 'w+E_el/L'
     derivative_order = 2
   []
 
@@ -206,14 +198,6 @@
   []
 []
 
-[Postprocessors]
-  [resid_x]
-    type = NodalSum
-    variable = resid_x
-    boundary = top_half_top
-  []
-[]
-
 [Preconditioning]
   [smp]
     type = SMP
@@ -225,8 +209,8 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -snes_type'
-  petsc_options_value = 'lu       superlu_dist                  vinewtonrsls'
+  petsc_options_iname = '-pc_type -snes_type'
+  petsc_options_value = 'lu       vinewtonrsls'
   automatic_scaling = true
 
   nl_rel_tol = 1e-8
@@ -235,10 +219,8 @@
   dt = 2e-5
   dtmin = 1e-9
   num_steps = 1
-  # end_time = 2e-2
 []
 
 [Outputs]
   exodus = true
-  print_linear_residuals = false
 []

@@ -1,0 +1,27 @@
+[Tests]
+  [brittle_mode1]
+    type = RunApp
+    input = 'brittle_mode1.i'
+    check_input = True
+  []
+  [brittle_mode2]
+    type = RunApp
+    input = 'brittle_mode2.i'
+    check_input = True
+  []
+  [cohesive_mode1]
+    type = RunApp
+    input = 'cohesive_mode1.i'
+    check_input = True
+  []
+  [cohesive_mode2]
+    type = RunApp
+    input = 'cohesive_mode2.i'
+    check_input = True
+  []
+  [cohesive_mode2_picard]
+    type = RunApp
+    input = 'cohesive_mode2_picard_damage.i'
+    check_input = True
+  []
+[]

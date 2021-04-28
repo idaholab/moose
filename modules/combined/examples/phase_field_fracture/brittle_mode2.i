@@ -171,15 +171,15 @@
   [mobility]
     type = ParsedMaterial
     f_name = L
-    material_property_names = 'Gc'
-    function = '1/Gc'
+    material_property_names = 'Gc c0 l'
+    function = 'Gc/c0/l'
     constant_on = SUBDOMAIN
   []
   [interface_coef]
     type = ParsedMaterial
     f_name = kappa
-    material_property_names = 'Gc l c0'
-    function = '2*Gc*l/c0'
+    material_property_names = 'l'
+    function = '2*l^2'
     constant_on = SUBDOMAIN
   []
   [degradation]
@@ -188,23 +188,22 @@
     args = 'c'
     function = '(1-c)^2*(1-eta)+eta'
     constant_names = 'eta'
-    constant_expressions = '1e-6'
+    constant_expressions = '1e-8'
     derivative_order = 2
   []
   [crack_geometric_function]
     type = DerivativeParsedMaterial
     f_name = w
     args = 'c'
-    material_property_names = 'Gc l c0'
-    function = 'c^2*Gc/c0/l'
+    function = 'c^2'
     derivative_order = 2
   []
   [free_energy]
     type = DerivativeParsedMaterial
     f_name = F
     args = 'c'
-    material_property_names = 'w(c) E_el(c)'
-    function = 'w+E_el'
+    material_property_names = 'w(c) E_el(c) L'
+    function = 'w+E_el/L'
     derivative_order = 2
   []
 
@@ -216,12 +215,11 @@
     constant_on = SUBDOMAIN
   []
   [damage]
-    type = PhaseFieldFractureStrainVolDevSplit
+    type = PhaseFieldFractureStrainSpectralSplit
     c = c
     degradation_function = g
     elastic_energy = E_el
     use_old_elastic_energy = true
-    hybrid = true
   []
   [stress]
     type = ComputeDamageStress
@@ -230,7 +228,7 @@
 []
 
 [Postprocessors]
-  [resid_x]
+  [Fx]
     type = NodalSum
     variable = resid_x
     boundary = top_half_top
@@ -256,7 +254,6 @@
   nl_abs_tol = 1e-10
 
   dt = 2e-5
-  dtmin = 1e-9
   end_time = 2e-2
 []
 
