@@ -10,63 +10,63 @@
 []
 
 [Functions]
-  [./left_bc_fn]
+  [left_bc_fn]
     type = PiecewiseLinear
     x = '0   1'
     y = '300 310'
-  [../]
+  []
 
-  [./K_prime_fn]
+  [K_prime_fn]
     type = ParsedFunction
     value = 't*(2-x)*x'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./K_prime]
-  [../]
+  [K_prime]
+  []
 []
 
 [AuxKernels]
-  [./K_prime_ak]
+  [K_prime_ak]
     type = FunctionAux
     variable = K_prime
     function = K_prime_fn
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [ICs]
-  [./T_ic]
+  [T_ic]
     type = ConstantIC
     variable = T
     value = 300
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = T
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = T
     boundary = left
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,22 +78,22 @@
 []
 
 [MultiApps]
-  [./slave]
+  [slave]
     type = TransientMultiApp
     app_type = THMApp
     input_files = phy.form_loss_1phase.slave.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./K_to_s]
+  [K_to_s]
     type = MultiAppNearestNodeTransfer
     multi_app = slave
     direction = to_multiapp
     source_variable = K_prime
     variable = K_prime
-  [../]
+  []
 []
 
 [Outputs]

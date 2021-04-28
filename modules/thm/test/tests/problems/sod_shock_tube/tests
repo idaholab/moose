@@ -1,5 +1,5 @@
 [Tests]
-  [./sod_shock_tube_erk2_heavy]
+  [sod_shock_tube_erk2_heavy]
     type = 'Exodiff'
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_erk2_heavy.e'
@@ -11,8 +11,8 @@
     heavy = true
     recover = false
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
-  [./sod_shock_tube_erk2_light]
+  []
+  [sod_shock_tube_erk2_light]
     type = 'Exodiff'
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_erk2_light.e'
@@ -22,8 +22,8 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
-  [./non_x_direction_1phase]
+  []
+  [non_x_direction_1phase]
     type = 'Exodiff'
     input = 'sod_shock_tube.i'
     exodiff = 'non_x_direction_1phase.e'
@@ -37,8 +37,8 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
-  [./sod_shock_tube_be]
+  []
+  [sod_shock_tube_be]
     type = 'Exodiff'
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_be.e'
@@ -52,5 +52,5 @@
     abs_zero = 1e-7
     rel_err = 1e-5
     group = '1phase rdg implicit pipe free_boundary'
-  [../]
+  []
 []

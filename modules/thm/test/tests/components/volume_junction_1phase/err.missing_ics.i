@@ -9,26 +9,26 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.4
     cv = 725
     p_inf = 0
     q = 0
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     # Stagnation property with p = 1e5 Pa, T = 250 K, vel = 1 m/s
     p0 = 100000.68965687
     T0 = 250.00049261084
-  [../]
+  []
 
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
 
     position = '0 0 0'
@@ -39,16 +39,16 @@
     initial_p = 1e5
     initial_T = 250
     initial_vel = 0
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
     position = '1.02 0 0'
     volume = 0.1
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
 
     position = '1.04 0 0'
@@ -59,13 +59,13 @@
     initial_p = 1e5
     initial_T = 250
     initial_vel = 0
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Executioner]

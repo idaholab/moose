@@ -1,5 +1,5 @@
 [Tests]
-  [./lax_shock_tube]
+  [lax_shock_tube]
     type = 'Exodiff'
     input = 'lax_shock_tube.i'
     exodiff = 'lax_shock_tube.e'
@@ -7,5 +7,5 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     group = '1phase rdg explicit pipe free_boundary'
-  [../]
+  []
 []

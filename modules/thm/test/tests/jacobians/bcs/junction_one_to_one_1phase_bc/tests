@@ -1,13 +1,13 @@
 [Tests]
-  [./rhoA]
+  [rhoA]
     type = 'PetscJacobianTester'
     input = 'junction_one_to_one_1phase_bc.i'
     ratio_tol = 1e-6
     difference_tol = 1e15
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhouA]
+  []
+  [rhouA]
     type = 'PetscJacobianTester'
     input = 'junction_one_to_one_1phase_bc.i'
     cli_args = 'BCs/bc1/variable=rhouA BCs/bc2/variable=rhouA'
@@ -15,8 +15,8 @@
     difference_tol = 1e15
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhoEA]
+  []
+  [rhoEA]
     type = 'PetscJacobianTester'
     input = 'junction_one_to_one_1phase_bc.i'
     cli_args = 'BCs/bc1/variable=rhoEA BCs/bc2/variable=rhoEA'
@@ -24,5 +24,5 @@
     difference_tol = 1e15
     max_threads = 1
     allow_test_objects = true
-  [../]
+  []
 []

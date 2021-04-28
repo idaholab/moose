@@ -33,7 +33,7 @@ p_out = 100e3
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -42,11 +42,11 @@ p_out = 100e3
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -56,30 +56,30 @@ p_out = 100e3
     n_elems = 5
 
     f = 0
-  [../]
-  [./form_loss]
+  []
+  [form_loss]
     type = FormLossFromFunction1Phase
     flow_channel = pipe
     K_prime = 0.25
-  [../]
-  [./inlet]
+  []
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
     rho = 996.5563397
     vel = 0.5
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = ${p_out}
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -100,37 +100,37 @@ p_out = 100e3
   start_time = 0.0
   num_steps = 100
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
   # this is not the right value, should be the value from the inlet ghost cell
-  [./p_in]
+  [p_in]
     type = SideAverageValue
     boundary = inlet
     variable = p
     execute_on = TIMESTEP_END
-  [../]
-  [./p_out]
+  []
+  [p_out]
     type = FunctionValuePostprocessor
     function = ${p_out}
     execute_on = TIMESTEP_END
-  [../]
-  [./dp]
+  []
+  [dp]
     type = DifferencePostprocessor
      value1 = p_in
      value2 = p_out
      execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'dp'
     execute_postprocessors_on = final
-  [../]
+  []
 []

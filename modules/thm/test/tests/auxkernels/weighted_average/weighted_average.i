@@ -20,82 +20,82 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./weighted_average]
+  [weighted_average]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./value1]
+  []
+  [value1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./value2]
+  []
+  [value2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./weight1]
+  []
+  [weight1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./weight2]
+  []
+  [weight2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./weighted_average_auxkernel]
+  [weighted_average_auxkernel]
     type = WeightedAverageAux
     variable = weighted_average
     values = 'value1 value2'
     weights = 'weight1 weight2'
-  [../]
-  [./value1_kernel]
+  []
+  [value1_kernel]
     type = ConstantAux
     variable = value1
     value = 4
-  [../]
-  [./value2_kernel]
+  []
+  [value2_kernel]
     type = ConstantAux
     variable = value2
     value = 9
-  [../]
-  [./weight1_kernel]
+  []
+  [weight1_kernel]
     type = ConstantAux
     variable = weight1
     value = 2
-  [../]
-  [./weight2_kernel]
+  []
+  [weight2_kernel]
     type = ConstantAux
     variable = weight2
     value = 3
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,11 +103,11 @@
 []
 
 [Postprocessors]
-  [./weighted_average_pp]
+  [weighted_average_pp]
     type = ElementalVariableValue
     elementid = 0
     variable = weighted_average
-  [../]
+  []
 []
 
 [Outputs]

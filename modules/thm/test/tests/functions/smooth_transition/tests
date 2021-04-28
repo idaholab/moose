@@ -1,16 +1,16 @@
 [Tests]
-  [./space_weighted]
+  [space_weighted]
     type = 'Exodiff'
     input = 'space.i'
     exodiff = 'space_weighted.e'
-  [../]
-  [./time_weighted]
+  []
+  [time_weighted]
     type = 'CSVDiff'
     input = 'time.i'
     csvdiff = 'time_weighted.csv'
-  [../]
+  []
 
-  [./space_cubic]
+  [space_cubic]
     type = 'Exodiff'
     input = 'space.i'
     cli_args = '
@@ -19,8 +19,8 @@
       Functions/transition_fn/function2_derivative_end_point=0
       Outputs/file_base=space_cubic'
     exodiff = 'space_cubic.e'
-  [../]
-  [./time_cubic]
+  []
+  [time_cubic]
     type = 'CSVDiff'
     input = 'time.i'
     cli_args = '
@@ -29,5 +29,5 @@
       Functions/transition_fn/function2_derivative_end_point=0
       Outputs/file_base=time_cubic'
     csvdiff = 'time_cubic.csv'
-  [../]
+  []
 []

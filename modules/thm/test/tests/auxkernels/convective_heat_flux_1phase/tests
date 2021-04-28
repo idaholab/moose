@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
@@ -7,5 +7,5 @@
     requirement = 'The system shall compute convective heat flux between fluid and wall temperature for 1-phase flow'
     design = 'ConvectiveHeatFlux1PhaseAux.md'
     issues = '#60'
-  [../]
+  []
 []

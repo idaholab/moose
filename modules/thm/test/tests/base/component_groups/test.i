@@ -7,42 +7,42 @@
 []
 
 [FluidProperties]
-  [./fp_liquid]
+  [fp_liquid]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./hx:wall]
+  [hx:wall]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Components]
-  [./pri_inlet]
+  [pri_inlet]
     type = SolidWall1Phase
     input = 'hx/primary:out'
-  [../]
+  []
 
-  [./pri_outlet]
+  [pri_outlet]
     type = SolidWall1Phase
     input = 'hx/primary:in'
-  [../]
+  []
 
   # heat exchanger
-  [./hx]
+  [hx]
     n_elems = 2
     length = 1
 
-    [./primary]
+    [primary]
       type = FlowChannel1Phase
       position = '0 1 0'
       orientation = '1 0 0'
@@ -51,9 +51,9 @@
       A = 1
       f = 1
       fp = fp_liquid
-    [../]
+    []
 
-    [./wall]
+    [wall]
       type = HeatStructurePlate
       position = '0 0 0'
       orientation = '1 0 0'
@@ -65,25 +65,25 @@
       widths = 1
       depth = 1
       initial_T = 300
-    [../]
+    []
 
-    [./ht_primary]
+    [ht_primary]
       type = HeatTransferFromHeatStructure1Phase
       hs = hx/wall
       flow_channel = hx/primary
       hs_side = outer
       Hw = 0
-    [../]
+    []
 
-    [./ht_secondary]
+    [ht_secondary]
       type = HeatTransferFromHeatStructure1Phase
       hs = hx/wall
       flow_channel = hx/secondary
       hs_side = inner
       Hw = 0
-    [../]
+    []
 
-    [./secondary]
+    [secondary]
       type = FlowChannel1Phase
       position = '0 0 0'
       orientation = '1 0 0'
@@ -92,17 +92,17 @@
       A = 1
       f = 1
       fp = fp_liquid
-    [../]
-  [../]
+    []
+  []
 
-  [./sec_inlet]
+  [sec_inlet]
     type = SolidWall1Phase
     input = 'hx/secondary:out'
-  [../]
-  [./sec_outlet]
+  []
+  [sec_outlet]
     type = SolidWall1Phase
     input = 'hx/secondary:in'
-  [../]
+  []
 []
 
 [Problem]
@@ -115,11 +115,11 @@
 []
 
 [Outputs]
-  [./console]
+  [console]
     type = Console
     system_info = ''
     enable = false
-  [../]
+  []
 []
 
 [Debug]

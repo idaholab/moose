@@ -10,7 +10,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -19,27 +19,27 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./mat1]
+  [mat1]
     type = SolidMaterialProperties
     k = 16
     cp = 356.
     rho = 6.551400E+03
-  [../]
+  []
 []
 
 [Functions]
-  [./Ts_init]
+  [Ts_init]
     type = ParsedFunction
     value = '2*sin(x*pi)+507'
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -50,9 +50,9 @@
     A = 1.907720E-04
     D_h = 1.698566E-02
     f = 0.1
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = VolumeJunction1Phase
     connections  = 'pipe1:out pipe2:in'
     volume = 1
@@ -67,9 +67,9 @@
     scaling_factor_rhovV = 1
     scaling_factor_rhowV = 1
     scaling_factor_rhoEV = 1e-4
-  [../]
+  []
 
-  [./pipe2]
+  [pipe2]
     type = FlowChannel1Phase
     fp = fp
     # geometry
@@ -80,9 +80,9 @@
     A = 1.907720E-04
     D_h = 1.698566E-02
     f = 0.1
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '1 0.01 0'
     orientation = '1 0 0'
@@ -93,33 +93,33 @@
     materials = 'mat1'
     widths = 0.1
     initial_T = Ts_init
-  [../]
+  []
 
-  [./temp_outside]
+  [temp_outside]
     type = HSBoundarySpecifiedTemperature
     hs = hs
     boundary = hs:outer
     T = Ts_init
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'pipe1:in'
     m_dot = 0.1
     T = 500
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 6e6
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

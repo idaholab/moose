@@ -7,18 +7,18 @@
 []
 
 [Functions]
-  [./test_fn]
+  [test_fn]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 []
 
 [Materials]
-  [./test_mat]
+  [test_mat]
     type = ADGenericFunctionMaterial
     prop_names = 'test_prop'
     prop_values = 'test_fn'
-  [../]
+  []
 []
 
 [Problem]
@@ -30,13 +30,13 @@
 []
 
 [VectorPostprocessors]
-  [./test_vpp]
+  [test_vpp]
     type = ADSampler1DReal
     block = 0
     property = test_prop
     sort_by = x
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Outputs]

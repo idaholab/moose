@@ -13,56 +13,56 @@ p_out = 1e5
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'channel:in'
     m_dot = 0.1
     T = ${T_in}
-  [../]
-  [./channel]
+  []
+  [channel]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
     orientation = '1 0 0'
     length = 1
     A = 3
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     p = ${p_out}
     input = 'channel:out'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./m_dot_in]
+  [m_dot_in]
     type = FlowBoundaryFlux1Phase
     boundary = 'inlet'
     equation = mass
-  [../]
-  [./m_dot_out]
+  []
+  [m_dot_out]
     type = FlowBoundaryFlux1Phase
     boundary = 'outlet'
     equation = mass
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,9 +81,9 @@ p_out = 1e5
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'm_dot_in m_dot_out'
     execute_on = 'final'
-  [../]
+  []
 []

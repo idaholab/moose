@@ -8,18 +8,18 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDMomentumHRhoUBC
     variable = rhouA
     boundary = 0
@@ -30,8 +30,8 @@
     arhouA = rhouA
     arhoEA = rhoEA
     p = p
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDMomentumHRhoUBC
     variable = rhouA
     boundary = 1
@@ -42,5 +42,5 @@
     arhouA = rhouA
     arhoEA = rhoEA
     p = p
-  [../]
+  []
 []

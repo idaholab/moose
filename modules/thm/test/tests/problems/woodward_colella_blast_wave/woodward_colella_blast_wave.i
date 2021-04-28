@@ -7,32 +7,32 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.1  0.9  1.0'
     y = '1000 0.01 100'
-  [../]
-  [./T_ic_fn]
+  []
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.1  0.9   1.0'
     y = '1400 0.014 140'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -50,17 +50,17 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_wall]
+  [right_wall]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -84,8 +84,8 @@
 [Outputs]
   file_base = 'woodward_colella_blast_wave'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'p T vel'
-  [../]
+  []
 []

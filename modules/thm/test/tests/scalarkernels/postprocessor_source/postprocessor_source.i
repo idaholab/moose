@@ -16,45 +16,45 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
-  [./ic_u]
+  [ic_u]
     type = ScalarConstantIC
     variable = u
     value = 0
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./sk_time]
+  [sk_time]
     type = ODETimeDerivative
     variable = u
-  [../]
-  [./sk_source]
+  []
+  [sk_source]
     type = PostprocessorSourceScalarKernel
     variable = u
     pp = pp_source
-  [../]
+  []
 []
 
 [Functions]
-  [./fn_source]
+  [fn_source]
     type = ParsedFunction
     value = 't'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp_source]
+  [pp_source]
     type = FunctionValuePostprocessor
     function = fn_source
     execute_on = 'LINEAR NONLINEAR'
-  [../]
+  []
 []
 
 [Executioner]

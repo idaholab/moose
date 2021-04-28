@@ -1,13 +1,13 @@
 [Tests]
-  [./rhoV]
+  [rhoV]
     type = 'PetscJacobianTester'
     input = 'simple_turbine_1phase.i'
     ratio_tol = 1e-8
     difference_tol = 2e-8
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhouV]
+  []
+  [rhouV]
     type = 'PetscJacobianTester'
     input = 'simple_turbine_1phase.i'
     cli_args = '
@@ -17,8 +17,8 @@
     difference_tol = 1e-4
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhovV]
+  []
+  [rhovV]
     type = 'PetscJacobianTester'
     input = 'simple_turbine_1phase.i'
     cli_args = '
@@ -28,8 +28,8 @@
     difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhowV]
+  []
+  [rhowV]
     type = 'PetscJacobianTester'
     input = 'simple_turbine_1phase.i'
     cli_args = '
@@ -39,8 +39,8 @@
     difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
-  [../]
-  [./rhoEV]
+  []
+  [rhoEV]
     type = 'PetscJacobianTester'
     input = 'simple_turbine_1phase.i'
     cli_args = '
@@ -51,5 +51,5 @@
     difference_tol = 3e-6
     max_threads = 1
     allow_test_objects = true
-  [../]
+  []
 []

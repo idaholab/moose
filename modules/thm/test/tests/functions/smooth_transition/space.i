@@ -14,30 +14,30 @@
 []
 
 [Functions]
-  [./transition_fn]
+  [transition_fn]
     type = CosineTransitionFunction
     axis = y
     transition_center = 0.3
     transition_width = 0.4
     function1 = 0
     function2 = 100
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./transition]
+  [transition]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./transition_kernel]
+  [transition_kernel]
     type = FunctionAux
     variable = transition
     function = transition_fn
     execute_on = initial
-  [../]
+  []
 []
 
 [Outputs]

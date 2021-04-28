@@ -13,25 +13,25 @@ T_ambient = 350
 htc = ${fparse Q / (S * (T_ambient - T))}
 
 [AuxVariables]
-  [./T_ext]
+  [T_ext]
     initial_condition = ${T_ambient}
-  [../]
-  [./htc_ext]
+  []
+  [htc_ext]
     initial_condition = ${htc}
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./region1-mat]
+  [region1-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructureCylindrical
 
     position = '1 2 3'
@@ -46,11 +46,11 @@ htc = ${fparse Q / (S * (T_ambient - T))}
     n_part_elems = '5'
 
     initial_T = ${T}
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./Q_pp]
+  [Q_pp]
     type = HeatRateExternalAppConvectionRZ
     boundary = heat_structure:outer
     axis_point = '1 2 3'
@@ -60,7 +60,7 @@ htc = ${fparse Q / (S * (T_ambient - T))}
     T = T_solid
     T_ext = T_ext
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]
@@ -74,9 +74,9 @@ htc = ${fparse Q / (S * (T_ambient - T))}
 
 [Outputs]
   file_base = 'heat_rate_external_app_convection_rz'
-  [./csv]
+  [csv]
     type = CSV
     precision = 15
     execute_on = 'initial'
-  [../]
+  []
 []

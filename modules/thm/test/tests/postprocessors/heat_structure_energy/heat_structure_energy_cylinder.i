@@ -27,29 +27,29 @@
 # Finally, n_units * 2 pi * rho2 * cp2 * int(T * y) = 7.930950653987433e+04
 
 [HeatStructureMaterials]
-  [./region1-mat]
+  [region1-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 1
     rho = 1
-  [../]
-  [./region2-mat]
+  []
+  [region2-mat]
     type = SolidMaterialProperties
     k = 1
     cp = 5
     rho = 3
-  [../]
+  []
 []
 
 [Functions]
-  [./T0_fn]
+  [T0_fn]
     type = ParsedFunction
     value = '0.2 * x + 0.4 * y + 0.5'
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructureCylindrical
     num_rods = 5
 
@@ -65,11 +65,11 @@
     n_part_elems = '5 50'
 
     initial_T = T0_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_tot]
+  [E_tot]
     type = HeatStructureEnergyRZ
     block = 'heat_structure:region2'
     n_units = 5
@@ -77,7 +77,7 @@
     axis_dir = '1 0 0'
     offset = 2.0
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]
@@ -91,9 +91,9 @@
 
 [Outputs]
   file_base = 'heat_structure_energy_cylinder'
-  [./csv]
+  [csv]
     type = CSV
     precision = 15
     execute_on = 'initial'
-  [../]
+  []
 []

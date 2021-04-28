@@ -6,22 +6,22 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 300
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./T_ext]
+  [T_ext]
     initial_condition = 400
-  [../]
-  [./htc_ext]
+  []
+  [htc_ext]
     initial_condition = 0.5
-  [../]
+  []
 []
 
 [BCs]
-  [./bc]
+  [bc]
     type = ExternalAppConvectionHeatTransferRZBC
     variable = T
     boundary = 2
@@ -29,14 +29,14 @@
     T_ext = T_ext
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]

@@ -11,38 +11,38 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.0 0.1'
-  [../]
+  []
 
-  [./T_ic_fn]
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.4 1.12'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'left_channel:in'
-  [../]
+  []
 
-  [./left_channel]
+  [left_channel]
     type = FlowChannel1Phase
 
     fp = fp
@@ -58,14 +58,14 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./junction]
+  [junction]
     type = JunctionOneToOne1Phase
     connections = 'left_channel:out right_channel:in'
-  [../]
+  []
 
-  [./right_channel]
+  [right_channel]
     type = FlowChannel1Phase
 
     fp = fp
@@ -81,19 +81,19 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'right_channel:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,37 +114,37 @@
 []
 
 [Postprocessors]
-  [./rhoA_left]
+  [rhoA_left]
     type = SideAverageValue
     variable = rhoA
     boundary = left_channel:out
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhouA_left]
+  []
+  [rhouA_left]
     type = SideAverageValue
     variable = rhouA
     boundary = left_channel:out
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhoEA_left]
+  []
+  [rhoEA_left]
     type = SideAverageValue
     variable = rhoEA
     boundary = left_channel:out
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhoA_right]
+  []
+  [rhoA_right]
     type = SideAverageValue
     variable = rhoA
     boundary = right_channel:in
     execute_on = 'initial timestep_end'
-  [../]
+  []
   # rhouA_right is added by tests file
-  [./rhoEA_right]
+  [rhoEA_right]
     type = SideAverageValue
     variable = rhoEA
     boundary = right_channel:in
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

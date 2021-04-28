@@ -10,38 +10,38 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = ConstantMaterial
     property_name = test_property
     value = 7
-  [../]
+  []
 []
 
 [Executioner]
@@ -54,19 +54,19 @@
 []
 
 [VectorPostprocessors]
-  [./test_property_vpp]
+  [test_property_vpp]
     type = Sampler1DReal
     block = 0
     property = test_property
     sort_by = x
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     file_base = out
     execute_vector_postprocessors_on = timestep_end
     show = 'test_property_vpp'
-  [../]
+  []
 []

@@ -15,30 +15,30 @@ D_h = 5
 []
 
 [Functions]
-  [./dh_fn]
+  [dh_fn]
     type = ConstantFunction
     value = ${D_h}
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
     input = pipe:in
-  [../]
+  []
 
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -51,19 +51,19 @@ D_h = 5
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./right_wall]
+  [right_wall]
     type = SolidWall1Phase
     input = pipe:out
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,11 +85,11 @@ D_h = 5
 []
 
 [Postprocessors]
-  [./D_h]
+  [D_h]
     type = ElementIntegralMaterialProperty
     mat_prop = D_h
     block = pipe
-  [../]
+  []
 []
 
 [Outputs]

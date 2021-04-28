@@ -6,26 +6,26 @@
 []
 
 [Functions]
-  [./p0_fn]
+  [p0_fn]
     type = PiecewiseLinear
     x = '0   0.2     0.4     0.6     0.8'
     y = '1e5 1.002e5 1.002e5 1.001e5 1.001e5'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -35,56 +35,56 @@
     A   = 0.01
     D_h = 0.1
     f = 0
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     p0 = 100.e3
     T0 = 300.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 100.0e3
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./p0_fn_ctrl]
+  [p0_fn_ctrl]
     type = TimeFunctionComponentControl
     component = inlet
     parameter = p0
     function = p0_fn
-  [../]
+  []
 
-  [./delay_ctrl]
+  [delay_ctrl]
     type = DelayControl
     input = p0_inlet
     tau = 0.3
     initial_value = 1e5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0_inlet_delayed]
+  [p0_inlet_delayed]
     type = RealControlDataValuePostprocessor
     control_data_name = delay_ctrl:value
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./p0_inlet]
+  [p0_inlet]
     type = FunctionValuePostprocessor
     function = p0_fn
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -5,18 +5,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./flow_channel]
+  [flow_channel]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -31,43 +31,43 @@
     initial_T = 310
     initial_p = 1e5
     initial_vel = 0
-  [../]
-  [./wall1]
+  []
+  [wall1]
     type = SolidWall1Phase
     input = flow_channel:in
-  [../]
-  [./wall2]
+  []
+  [wall2]
     type = SolidWall1Phase
     input = flow_channel:out
-  [../]
+  []
 
-  [./heat_source]
+  [heat_source]
     type = HeatSourceVolumetric1Phase
     flow_channel = flow_channel
     q = 1e3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_tot]
+  [E_tot]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_tot_change]
+  [E_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = E_tot
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

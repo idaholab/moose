@@ -11,34 +11,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./time_derivative]
+  [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -51,10 +51,10 @@
   type = Transient
   scheme = implicit-euler
 
-  [./TimeStepper]
+  [TimeStepper]
     type = ConstantDT
     dt = 0.01
-  [../]
+  []
 
   start_time = 0.0
   num_steps = 2

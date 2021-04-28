@@ -11,45 +11,45 @@
 []
 
 [Functions]
-  [./left_bc_fn]
+  [left_bc_fn]
     type = PiecewiseLinear
     x = '0   1'
     y = '300 310'
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [ICs]
-  [./T_ic]
+  [T_ic]
     type = ConstantIC
     variable = T
     value = 300
-  [../]
+  []
 []
 
 [Kernels]
-  [./td]
+  [td]
     type = TimeDerivative
     variable = T
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = T
     boundary = left
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,22 +61,22 @@
 []
 
 [MultiApps]
-  [./thm]
+  [thm]
     type = TransientMultiApp
     app_type = THMApp
     input_files = phy.T_wall_transfer_3eqn.slave.i
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Transfers]
-  [./T_to_slave]
+  [T_to_slave]
     type = MultiAppNearestNodeTransfer
     multi_app = thm
     direction = to_multiapp
     source_variable = T
     variable = T_wall
-  [../]
+  []
 []
 
 [Outputs]

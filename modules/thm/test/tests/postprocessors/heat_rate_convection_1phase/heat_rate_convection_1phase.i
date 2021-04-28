@@ -14,18 +14,18 @@ L = 2.0
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
-  [../]
+  []
 []
 
 [Components]
-  [./left_wall]
+  [left_wall]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
 
@@ -40,27 +40,27 @@ L = 2.0
     initial_p = 1e6
     initial_T = ${T}
     initial_vel = 0
-  [../]
+  []
 
-  [./right_wall]
+  [right_wall]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 
-  [./heat_flux]
+  [heat_flux]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     Hw = ${htc}
     T_wall = ${T_wall}
     P_hf = ${P_hf}
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,11 +83,11 @@ L = 2.0
 []
 
 [Postprocessors]
-  [./heat_rate]
+  [heat_rate]
     type = HeatRateConvection1Phase
     P_hf = P_hf
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Outputs]

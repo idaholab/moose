@@ -9,45 +9,45 @@
 []
 
 [FluidProperties]
-  [./fp_1phase]
+  [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Variables]
-  [./lm]
+  [lm]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./td_lm]
+  [td_lm]
     type = ODETimeDerivative
     variable = lm
-  [../]
+  []
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDEqualValueConstraintBC
     variable = rhouA
     boundary = 0
     lambda = lm
     component = 0
     vg = 1
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDEqualValueConstraintBC
     variable = rhouA
     boundary = 1
     lambda = lm
     component = 0
     vg = -1
-  [../]
+  []
 []

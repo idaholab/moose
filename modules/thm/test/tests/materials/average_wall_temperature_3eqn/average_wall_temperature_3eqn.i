@@ -24,120 +24,120 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Hw_avg]
+  [Hw_avg]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T_wall_avg]
+  []
+  [T_wall_avg]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T_wall1]
+  []
+  [T_wall1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T_wall2]
+  []
+  [T_wall2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./P_hf1]
+  []
+  [P_hf1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./P_hf2]
+  []
+  [P_hf2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./P_hf_total]
+  []
+  [P_hf_total]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T_fluid]
+  []
+  [T_fluid]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./T_wall_avg_auxkernel]
+  [T_wall_avg_auxkernel]
     type = MaterialRealAux
     variable = T_wall_avg
     property = T_wall
-  [../]
-  [./T_wall1_auxkernel]
+  []
+  [T_wall1_auxkernel]
     type = ConstantAux
     variable = T_wall1
     value = 2.6
-  [../]
-  [./T_wall2_auxkernel]
+  []
+  [T_wall2_auxkernel]
     type = ConstantAux
     variable = T_wall2
     value = 0.5
-  [../]
-  [./P_hf_total_auxkernel]
+  []
+  [P_hf_total_auxkernel]
     type = SumAux
     variable = P_hf_total
     values = 'P_hf1 P_hf2'
-  [../]
-  [./P_hf1_auxkernel]
+  []
+  [P_hf1_auxkernel]
     type = ConstantAux
     variable = P_hf1
     value = 1
-  [../]
-  [./P_hf2_auxkernel]
+  []
+  [P_hf2_auxkernel]
     type = ConstantAux
     variable = P_hf2
     value = 3
-  [../]
-  [./T_fluid_auxkernel]
+  []
+  [T_fluid_auxkernel]
     type = ConstantAux
     variable = T_fluid
     value = 0.25
-  [../]
+  []
 []
 
 [Materials]
-  [./const_materials]
+  [const_materials]
     type = GenericConstantMaterial
     prop_names = 'Hw1 Hw2'
     prop_values = '10 6'
-  [../]
+  []
 
-  [./Hw_avg_material]
+  [Hw_avg_material]
     type = WeightedAverageMaterial
     prop_name = Hw_avg
     values = 'Hw1 Hw2'
     weights = 'P_hf1 P_hf2'
-  [../]
+  []
 
-  [./T_wall_avg_material]
+  [T_wall_avg_material]
     type = AverageWallTemperature3EqnMaterial
     T_wall_sources = 'T_wall1 T_wall2'
     Hw_sources = 'Hw1 Hw2'
@@ -145,7 +145,7 @@
     T_fluid = T_fluid
     Hw_average = Hw_avg
     P_hf_total = P_hf_total
-  [../]
+  []
 []
 
 [Executioner]
@@ -153,11 +153,11 @@
 []
 
 [Postprocessors]
-  [./T_wall_avg_pp]
+  [T_wall_avg_pp]
     type = ElementalVariableValue
     elementid = 0
     variable = T_wall_avg
-  [../]
+  []
 []
 
 [Outputs]

@@ -15,25 +15,25 @@ f = 5
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./f_func]
+  [f_func]
     type = ConstantFunction
     value = ${f}
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     # geometry
     position = '0 0 0'
@@ -46,35 +46,35 @@ f = 5
     f = f_func
 
     fp = eos
-  [../]
+  []
 
-  [./ht_pipe]
+  [ht_pipe]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe
     T_wall = 559
     P_hf = 0.0489623493599167
     Hw = 50000
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletDensityVelocity1Phase
     input = 'pipe:in'
     rho = 741.707129779398883
     vel = 2
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 7.0e6
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,11 +96,11 @@ f = 5
 []
 
 [Postprocessors]
-  [./f]
+  [f]
     type = ElementIntegralMaterialProperty
     mat_prop = f_D
     block = pipe
-  [../]
+  []
 []
 
 [Outputs]

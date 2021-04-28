@@ -1,5 +1,5 @@
 [Tests]
-  [./no_latch]
+  [no_latch]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'no_latch.csv'
@@ -8,9 +8,9 @@
     requirement = 'The system shall provide a unit trip component that report true if the trip condition was met and false otherwise.'
     design = 'UnitTripControl.md'
     issues = '#619'
-  [../]
+  []
 
-  [./latch]
+  [latch]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'latch.csv'
@@ -19,9 +19,9 @@
     design = 'UnitTripControl.md'
     issues = '#619'
     group = 'controls'
-  [../]
+  []
 
-  [./err:not_boolean]
+  [err:not_boolean]
     type = 'RunException'
     input = 'test.i'
     cli_args = 'ControlLogic/trip_ctrl/condition=a'
@@ -30,5 +30,5 @@
     design = 'UnitTripControl.md'
     issues = '#619'
     group = 'controls'
-  [../]
+  []
 []

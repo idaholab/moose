@@ -9,28 +9,28 @@
 []
 
 [Materials]
-  [./f_D_mat]
+  [f_D_mat]
     type = LinearTestMaterial
     name = f_D
     vars = 'rhoA rhouA rhoEA'
     slopes = '2.5 3.5 4.5'
-  [../]
-  [./rho_mat]
+  []
+  [rho_mat]
     type = LinearTestMaterial
     name = rho
     vars = 'rhoA'
     slopes = '2.3'
-  [../]
-  [./vel_mat]
+  []
+  [vel_mat]
     type = LinearTestMaterial
     name = vel
     vars = 'rhoA rhouA'
     slopes = '2 3'
-  [../]
+  []
 []
 
 [Kernels]
-  [./test_kernel]
+  [test_kernel]
     type = OneD3EqnMomentumFriction
     variable = rhouA
     A = A
@@ -41,5 +41,5 @@
     rho = rho
     vel = vel
     f_D = f_D
-  [../]
+  []
 []

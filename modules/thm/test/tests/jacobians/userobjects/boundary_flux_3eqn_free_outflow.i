@@ -6,9 +6,9 @@
 []
 
 [UserObjects]
-  [./flux]
+  [flux]
     type = BoundaryFlux3EqnFreeOutflow
     fluid_properties = fluid_properties
     execute_on = 'linear nonlinear'
-  [../]
+  []
 []

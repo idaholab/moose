@@ -11,7 +11,7 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -20,11 +20,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -34,29 +34,29 @@
     n_elems = 10
 
     f = 0
-  [../]
-  [./form_loss]
+  []
+  [form_loss]
     type = FormLossFromExternalApp1Phase
     flow_channel = pipe
-  [../]
-  [./inlet]
+  []
+  [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'pipe:in'
     m_dot = 680
     T = 300
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -78,10 +78,10 @@
   start_time = 0.0
   end_time = 4.0
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]

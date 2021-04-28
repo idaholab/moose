@@ -1,17 +1,17 @@
 [Tests]
   # physics
-  [./phy:densityvelocity_3eqn]
+  [phy:densityvelocity_3eqn]
     type = 'Exodiff'
     input = 'phy.densityvelocity_3eqn.i'
     exodiff = 'phy.densityvelocity_3eqn_out.e'
     recover = false
-  [../]
+  []
 
   # control logic
-  [./clg:densityvelocity_3eqn]
+  [clg:densityvelocity_3eqn]
     type = 'CSVDiff'
     input = 'clg.densityvelocity_3eqn.i'
     csvdiff = 'clg.densityvelocity_3eqn_out.csv'
     rel_err = 1e-5
-  [../]
+  []
 []

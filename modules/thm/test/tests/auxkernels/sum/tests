@@ -1,7 +1,7 @@
 [Tests]
-  [./sum]
+  [sum]
     type = 'CSVDiff'
     input = 'sum.i'
     csvdiff = 'sum_out.csv'
-  [../]
+  []
 []

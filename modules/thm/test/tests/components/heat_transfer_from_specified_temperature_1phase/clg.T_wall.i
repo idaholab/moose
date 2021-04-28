@@ -7,18 +7,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = eos
     position = '0 0 0'
@@ -28,34 +28,34 @@
 
     A = 3.14e-2
     f = 0.1
-  [../]
+  []
 
-  [./ht_pipe1]
+  [ht_pipe1]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe1
     T_wall = 300
     Hw = 0
-  [../]
+  []
 
-  [./inlet1]
+  [inlet1]
     type = InletDensityVelocity1Phase
     input = 'pipe1:in'
     rho = 996.557482499661660
     vel = 1
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 0.1e6
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -82,26 +82,26 @@
 []
 
 [Functions]
-  [./T_wall_fn]
+  [T_wall_fn]
     type = PiecewiseLinear
     x = '0 1'
     y = '310 320'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./pipe_T_wall_ctrl]
+  [pipe_T_wall_ctrl]
     type = TimeFunctionComponentControl
     component = ht_pipe1
     parameter = T_wall
     function = T_wall_fn
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./T_wall]
+  [T_wall]
     type = RealComponentParameterValuePostprocessor
     component = ht_pipe1
     parameter = T_wall
-  [../]
+  []
 []

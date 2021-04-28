@@ -18,23 +18,23 @@ scale = 0.8
 E_change = ${fparse scale * heat_flux * A * t}
 
 [Functions]
-  [./q_fn]
+  [q_fn]
     type = ConstantFunction
     value = ${heat_flux}
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./hs_mat]
+  [hs_mat]
     type = SolidMaterialProperties
     rho = ${density}
     cp = ${specific_heat_capacity}
     k = ${conductivity}
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     orientation = '0 0 1'
     position = '0 0 0'
@@ -48,60 +48,60 @@ E_change = ${fparse scale * heat_flux * A * t}
     names = 'region'
 
     initial_T = ${T_hs}
-  [../]
+  []
 
-  [./heat_flux_boundary]
+  [heat_flux_boundary]
     type = HSBoundaryHeatFlux
     boundary = 'hs:outer'
     hs = hs
     q = q_fn
     scale_pp = bc_scale_pp
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./bc_scale_pp]
+  [bc_scale_pp]
     type = FunctionValuePostprocessor
     function = ${scale}
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
-  [./E_hs]
+  []
+  [E_hs]
     type = HeatStructureEnergyRZ
     block = 'hs:region'
     axis_dir = '0 0 1'
     axis_point = '0 0 0'
     offset = ${R_i}
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
-  [./E_hs_change]
+  []
+  [E_hs_change]
     type = ChangeOverTimePostprocessor
     postprocessor = E_hs
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
-  [./E_change_relerr]
+  []
+  [E_change_relerr]
     type = RelativeDifferencePostprocessor
     value1 = E_hs_change
     value2 = ${E_change}
     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
     solve_type = lumped
-  [../]
+  []
   dt = ${t}
   num_steps = 1
   abort_on_solve_fail = true
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'E_change_relerr'
     execute_on = 'FINAL'
-  [../]
+  []
 []

@@ -9,100 +9,100 @@
 []
 
 [Functions]
-  [./pps_fn]
+  [pps_fn]
     type = ConstantFunction
     value = 4
-  [../]
+  []
 
-  [./fn]
+  [fn]
     type = ConstantFunction
     value = 5
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sv]
+  [sv]
     family = SCALAR
     order = FIRST
     initial_condition = 0
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./sv_ak]
+  [sv_ak]
     type = ConstantScalarAux
     variable = sv
     value = 3
     execute_on = 'timestep_begin'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Components]
 []
 
 [Postprocessors]
-  [./pps]
+  [pps]
     type = FunctionValuePostprocessor
     function = pps_fn
     execute_on = 'timestep_begin'
-  [../]
+  []
 
-  [./result]
+  [result]
     type = RealControlDataValuePostprocessor
     control_data_name = eval_ctrl:value
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./ctrl]
+  [ctrl]
     type = GetFunctionValueControl
     function = 2
-  [../]
+  []
 
-  [./trip]
+  [trip]
     type = UnitTripControl
     condition = 't > 0'
-  [../]
+  []
 
-  [./eval_ctrl]
+  [eval_ctrl]
     type = ParsedFunctionControl
     function = 'a + b + c + d + f'
     vars = 'a b c d f'
     vals = 'fn pps sv ctrl:value trip:state'
-  [../]
+  []
 []
 
 [Executioner]

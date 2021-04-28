@@ -15,10 +15,10 @@
 []
 
 [Kernels]
-  [./test]
+  [test]
     type = OneD3EqnEnergyHeatSource
     variable = rhoEA
     A = A
     q = 1
-  [../]
+  []
 []

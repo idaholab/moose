@@ -7,20 +7,20 @@
 []
 
 [BCs]
-  [./bc_1]
+  [bc_1]
     type = OneDMassHRhoUBC
     variable = rhoA
     boundary = 0
     normal = -1
     rhou = 123
     A = A
-  [../]
-  [./bc_2]
+  []
+  [bc_2]
     type = OneDMassHRhoUBC
     variable = rhoA
     boundary = 1
     normal = 1
     rhou = 123
     A = A
-  [../]
+  []
 []

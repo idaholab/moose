@@ -15,18 +15,18 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -36,41 +36,41 @@
     A    = 0.01
     D_h  = 0.1
     f = 0.01
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     p0 = 100.e3
     T0 = 340.
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = Outlet1Phase
     input = 'pipe1:out'
     p = 100.0e3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./T_pt]
+  [T_pt]
     type = SideAverageValue
     boundary = pipe1:in
     variable = T
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./T_ctrl]
+  [T_ctrl]
     type = RealControlDataValuePostprocessor
     control_data_name = T_pt
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

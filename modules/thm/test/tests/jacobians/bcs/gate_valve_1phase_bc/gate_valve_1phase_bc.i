@@ -11,16 +11,16 @@
 []
 
 [Functions]
-  [./A_fn]
+  [A_fn]
     type = PiecewiseFunction
     axis = x
     axis_coordinates = '1.05'
     functions = '2.0 2.5'
-  [../]
+  []
 []
 
 [BCs]
-  [./bc1]
+  [bc1]
     type = GateValve1PhaseBC
     variable = rhoA
     boundary = 1
@@ -32,8 +32,8 @@
     rhoA = rhoA
     rhouA = rhouA
     rhoEA = rhoEA
-  [../]
-  [./bc2]
+  []
+  [bc2]
     type = GateValve1PhaseBC
     variable = rhoA
     boundary = 3
@@ -45,16 +45,16 @@
     rhoA = rhoA
     rhouA = rhouA
     rhoEA = rhoEA
-  [../]
+  []
 []
 
 [UserObjects]
-  [./numerical_flux]
+  [numerical_flux]
     type = NumericalFlux3EqnCentered
     fluid_properties = fluid_properties
     execute_on = 'initial linear nonlinear'
-  [../]
-  [./junction_uo]
+  []
+  [junction_uo]
     type = GateValve1PhaseUserObject
     open_area_fraction = 0.5
     A = A
@@ -66,5 +66,5 @@
     numerical_flux = numerical_flux
     component_name = valve
     execute_on = 'initial linear nonlinear'
-  [../]
+  []
 []

@@ -15,25 +15,25 @@
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'fch1:in'
     p0 = 100.e3
     T0 = 350.
-  [../]
+  []
 
-  [./fch1]
+  [fch1]
     type = FlowChannel1Phase
     fp = fp
     position = '0 0 0'
@@ -43,18 +43,18 @@
     A    = 0.01
     D_h  = 0.1
     f = 0.01
-  [../]
+  []
 
-  [./turbine]
+  [turbine]
     type = SimpleTurbine1Phase
     position = '1 0 0'
     connections = 'fch1:out fch2:in'
     volume = 1
     on = false
     power = 1
-  [../]
+  []
 
-  [./fch2]
+  [fch2]
     type = FlowChannel1Phase
     fp = fp
     position = '1 0 0'
@@ -64,53 +64,53 @@
     A    = 0.01
     D_h  = 0.1
     f = 0.01
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'fch2:out'
     p = 100.0e3
-  [../]
+  []
 []
 
 [Functions]
-  [./trip_fn]
+  [trip_fn]
     type = PiecewiseLinear
     xy_data = '
       0 1
       1 2'
-  [../]
+  []
 []
 
 [ControlLogic]
-  [./trip_ctrl]
+  [trip_ctrl]
     type = UnitTripControl
     condition = 'val > 1.5'
     vars = 'val'
     vals = 'trip_fn'
-  [../]
+  []
 
-  [./set_comp_value]
+  [set_comp_value]
     type = SetComponentBoolValueControl
     component = turbine
     parameter = on
     value = trip_ctrl:state
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./on_ctrl]
+  [on_ctrl]
     type = BoolComponentParameterValuePostprocessor
     component = turbine
     parameter = on
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -132,8 +132,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'on_ctrl'
-  [../]
+  []
 []

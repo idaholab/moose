@@ -11,18 +11,18 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = eos
     # geometry
@@ -34,16 +34,16 @@
 
     length = 1
     n_elems = 2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type -snes_test_err'
     petsc_options_value = 'test       1e-11'
-  [../]
+  []
 []
 
 [Executioner]

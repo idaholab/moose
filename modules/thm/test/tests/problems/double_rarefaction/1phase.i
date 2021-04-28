@@ -9,25 +9,25 @@
 []
 
 [Functions]
-  [./vel_ic_fn]
+  [vel_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = ' 0.0 0.1'
     y = '-1.0 1.0'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
 
     fp = fp
@@ -45,17 +45,17 @@
     initial_vel = vel_ic_fn
 
     f = 0
-  [../]
+  []
 
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,8 +79,8 @@
 [Outputs]
   file_base = '1phase'
   execute_on = 'initial timestep_end'
-  [./out]
+  [out]
     type = Exodus
     show = 'p T vel'
-  [../]
+  []
 []

@@ -7,31 +7,31 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = u
     function = u_ic_fn
-  [../]
+  []
 []
 
 [Functions]
-  [./u_ic_fn]
+  [u_ic_fn]
     type = ParsedFunction
     value = 'x'
-  [../]
+  []
 []
 
 [Materials]
-  [./test_mat]
+  [test_mat]
     type = SmoothTransitionTestMaterial
     transition_type = cubic
     var = u
-  [../]
+  []
 []
 
 [Problem]
@@ -43,13 +43,13 @@
 []
 
 [VectorPostprocessors]
-  [./test_vpp]
+  [test_vpp]
     type = Sampler1DReal
     block = 0
     property = mymatprop
     sort_by = x
     execute_on = 'INITIAL'
-  [../]
+  []
 []
 
 [Outputs]

@@ -14,38 +14,38 @@
 []
 
 [Functions]
-  [./p_ic_fn]
+  [p_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.0 0.1'
-  [../]
+  []
 
-  [./T_ic_fn]
+  [T_ic_fn]
     type = PiecewiseConstant
     axis = x
     direction = right
     x = '0.5 1.0'
     y = '1.4 1.12'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 11.64024372
-  [../]
+  []
 []
 
 [Components]
-  [./left_boundary]
+  [left_boundary]
     type = FreeBoundary1Phase
     input = 'channel:in'
-  [../]
+  []
 
-  [./channel]
+  [channel]
     type = FlowChannel1Phase
 
     fp = fp
@@ -61,19 +61,19 @@
     initial_vel = 0
 
     f = 0
-  [../]
+  []
 
-  [./right_boundary]
+  [right_boundary]
     type = FreeBoundary1Phase
     input = 'channel:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,42 +94,42 @@
 []
 
 [Postprocessors]
-  [./rhoA_left]
+  [rhoA_left]
     type = PointValue
     variable = rhoA
     point = '0.4999 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhouA_left]
+  []
+  [rhouA_left]
     type = PointValue
     variable = rhouA
     point = '0.4999 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhoEA_left]
+  []
+  [rhoEA_left]
     type = PointValue
     variable = rhoEA
     point = '0.4999 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhoA_right]
+  []
+  [rhoA_right]
     type = PointValue
     variable = rhoA
     point = '0.5001 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhouA_right]
+  []
+  [rhouA_right]
     type = PointValue
     variable = rhouA
     point = '0.5001 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./rhoEA_right]
+  []
+  [rhoEA_right]
     type = PointValue
     variable = rhoEA
     point = '0.5001 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

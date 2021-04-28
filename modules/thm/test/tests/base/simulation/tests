@@ -1,5 +1,5 @@
 [Tests]
-  [./loop_identification]
+  [loop_identification]
     type = 'RunApp'
     input = 'loop_identification.i'
     cli_args = 'Debug/print_component_loops=true'
@@ -17,7 +17,7 @@
 \s+hx:secondary
 \s+inlet
 \s+outlet"
-  [../]
+  []
 
   [err.no_smp]
     type = 'RunException'
