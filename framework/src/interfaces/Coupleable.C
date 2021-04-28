@@ -347,11 +347,10 @@ Coupleable::getDefaultVectorValue(const std::string & var_name) const
 const ArrayVariableValue *
 Coupleable::getDefaultArrayValue(const std::string & var_name) const
 {
-  std::map<std::string, ArrayVariableValue *>::iterator default_value_it =
-      _default_array_value.find(var_name);
+  auto default_value_it = _default_array_value.find(var_name);
   if (default_value_it == _default_array_value.end())
   {
-    ArrayVariableValue * value = new ArrayVariableValue(_coupleable_max_qps);
+    auto value = libmesh_make_unique<ArrayVariableValue>(_coupleable_max_qps);
     for (unsigned int qp = 0; qp < _coupleable_max_qps; ++qp)
     {
       auto n = _c_parameters.numberDefaultCoupledValues(var_name);
@@ -359,10 +358,11 @@ Coupleable::getDefaultArrayValue(const std::string & var_name) const
       for (unsigned int i = 0; i < n; ++i)
         (*value)[qp](i) = _c_parameters.defaultCoupledValue(var_name, i);
     }
-    default_value_it = _default_array_value.insert(std::make_pair(var_name, value)).first;
+    default_value_it =
+        _default_array_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
-  return default_value_it->second;
+  return default_value_it->second.get();
 }
 
 template <typename T>
