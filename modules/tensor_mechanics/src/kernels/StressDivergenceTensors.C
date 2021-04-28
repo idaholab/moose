@@ -41,7 +41,7 @@ StressDivergenceTensors::validParams()
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
-      "List of eigenstrains used in the strain calculation. Used for computing their derivaties "
+      "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
       "for off-diagonal Jacobian terms.");
   params.addCoupledVar("out_of_plane_strain",
                        "The name of the out_of_plane_strain variable used in the "
@@ -198,10 +198,6 @@ StressDivergenceTensors::computeJacobian()
 void
 StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
 {
-  // bail out if jvar is not coupled
-  if (getJvarMap()[jvar] < 0)
-    return;
-
   if (_volumetric_locking_correction)
   {
     computeAverageGradientPhi();
@@ -354,7 +350,11 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
                _component, _component, _out_of_plane_direction, _out_of_plane_direction) *
            _grad_test[_i][_qp](_component) * _phi[_j][_qp];
 
-  // off-diagonal Jacobian with respect to any other couple variable
+  // bail out if jvar is not coupled
+  if (getJvarMap()[jvar] < 0)
+    return 0.0;
+
+  // off-diagonal Jacobian with respect to any other coupled variable
   const unsigned int cvar = mapJvarToCvar(jvar);
   RankTwoTensor total_deigenstrain;
   for (const auto deigenstrain_darg : _deigenstrain_dargs[cvar])
