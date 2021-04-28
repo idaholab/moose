@@ -64,8 +64,10 @@ protected:
    * Adds a material for wall temperature from an aux variable
    *
    * @param[in] flow_channel   Flow channel component
+   * @param[in] i   index of the heat transfer
    */
-  void addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_channel) const;
+  void addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_channel,
+                                         unsigned int i = 0) const;
 
   /// Simulation
   THMProblem & _sim;

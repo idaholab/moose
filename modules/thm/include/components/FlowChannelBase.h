@@ -96,6 +96,11 @@ public:
   std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
 
   /**
+   * Gets wall heat flux names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHeatFluxNames() const { return _q_wall_names; }
+
+  /**
    * Adds the name of a heat transfer component to the flow channel's list.
    *
    * This function is called from a heat transfer component to add its name to
