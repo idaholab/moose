@@ -1,0 +1,20 @@
+[Tests]
+  [natural_convection]
+    requirement = 'The system shall be able to solve steady natural convection simulations using the finite volume method, a density-based compressible Navier-Stokes equation set, and central differencing of the advection terms for Rayleigh numbers of'
+    [ray_1pt7e4]
+      type = Exodiff
+      input = average-boussinesq.i
+      exodiff = average-boussinesq_out.e
+      mumps = true
+      detail = '1.7e4'
+    []
+    [ray_1pt4e5]
+      type = Exodiff
+      input = average-boussinesq.i
+      exodiff = ra-1e5.e
+      strumpack = true
+      cli_args = 'Mesh/gen/xmax=2e-2 Mesh/gen/ymax=2e-2 Outputs/file_base=ra-1e5 -pc_factor_mat_solver_type strumpack'
+      detail = '1.4e5'
+    []
+  []
+[]
