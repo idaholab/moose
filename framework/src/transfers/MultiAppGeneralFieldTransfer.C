@@ -164,7 +164,7 @@ namespace {
       void init_context (FEMContext &) {}
 
       Output eval_at_node (const FEMContext &,
-                           unsigned int i,
+                           unsigned int /*i*/,
                            unsigned int /*elem_dim*/,
                            const Node & n,
                            bool /*extra_hanging_dofs*/,
@@ -172,7 +172,7 @@ namespace {
       { return libmesh_map_find(_cache, n); }
 
       Output eval_at_point (const FEMContext &,
-                            unsigned int i,
+                            unsigned int /*i*/,
                             const Point & n,
                             const Real /*time*/,
                             bool /*skip_context_check*/)
@@ -695,6 +695,20 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 
     if (fe_type.order > CONSTANT && !is_nodal)
     {
+      CachedData<Number> f(interp_caches[problem_id]);
+      libMesh::VectorSetAction<Number> setter(*to_sys->solution);
+      const std::vector<unsigned int> varvec(1, var_num);
+
+      libMesh::GenericProjector<CachedData<Number>,
+                                CachedData<Gradient>, Number,
+                                libMesh::VectorSetAction<Number>>
+        set_solution(*to_sys, f, nullptr, setter, varvec);
+
+      ConstElemRange active_local_elem_range
+        (to_mesh.active_local_elements_begin(),
+         to_mesh.active_local_elements_end());
+
+      set_solution.project(active_local_elem_range);
     }
     else
     {
