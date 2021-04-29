@@ -6,6 +6,10 @@ vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
