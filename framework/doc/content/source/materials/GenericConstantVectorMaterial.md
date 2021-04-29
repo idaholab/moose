@@ -1,33 +1,17 @@
 # GenericConstantVectorMaterial
 
-!alert! construction title=Undocumented Class
-The GenericConstantVectorMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# GenericConstantVectorMaterial
-
 !syntax description /Materials/GenericConstantVectorMaterial
 
-## Overview
-
-!! Replace these lines with information regarding the GenericConstantVectorMaterial object.
+This can be used to quickly create simple constant anisotropic material properties, for testing,
+for initial survey of a problem or simply because the material properties do not vary much over the
+domain explored by the simulation.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the GenericConstantVectorMaterial object.
+In this example, we create a `GenericConstantVectorMaterial` for two anisotropic friction factors in a porous media flow simulation.
+Note the syntax for declaring two material properties and their values in the same material.
 
-!syntax parameters /Materials/GenericConstantVectorMaterial
-
-!syntax inputs /Materials/GenericConstantVectorMaterial
-
-!syntax children /Materials/GenericConstantVectorMaterial
-```
-!alert-end!
-
-!syntax description /Materials/GenericConstantVectorMaterial
+!listing moose/modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated-effective.i block=Materials/darcy
 
 !syntax parameters /Materials/GenericConstantVectorMaterial
 
