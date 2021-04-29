@@ -24,7 +24,8 @@ MeshInfo::validParams()
   MultiMooseEnum items(
       "num_dofs num_dofs_nonlinear num_dofs_auxiliary num_elements num_nodes num_local_dofs "
       "num_local_dofs_nonlinear num_local_dofs_auxiliary num_local_elements num_local_nodes "
-      "local_sidesets local_sideset_elems sidesets sideset_elems");
+      "local_sidesets local_sideset_elems sidesets sideset_elems"
+      "local_subdomains local_subdomain_elems subdomains subdomain_elems");
   params.addParam<MultiMooseEnum>(
       "items",
       items,
@@ -48,6 +49,7 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
         declareHelper<unsigned int>("num_dofs_local_auxiliary", REPORTER_MODE_DISTRIBUTED)),
     _num_local_elem(declareHelper<unsigned int>("num_local_elements", REPORTER_MODE_DISTRIBUTED)),
     _num_local_node(declareHelper<unsigned int>("num_local_nodes", REPORTER_MODE_DISTRIBUTED)),
+
     _local_sidesets(declareHelper<std::map<BoundaryID, SidesetInfo>>("local_sidesets",
                                                                      REPORTER_MODE_DISTRIBUTED)),
     _local_sideset_elems(declareHelper<std::map<BoundaryID, SidesetInfo>>(
@@ -56,6 +58,16 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
         declareHelper<std::map<BoundaryID, SidesetInfo>>("sidesets", REPORTER_MODE_REPLICATED)),
     _sideset_elems(
         declareHelper<std::map<BoundaryID, SidesetInfo>>("sideset_elems", REPORTER_MODE_ROOT)),
+
+    _local_subdomains(declareHelper<std::map<SubdomainID, SubdomainInfo>>(
+        "local_subdomains", REPORTER_MODE_DISTRIBUTED)),
+    _local_subdomain_elems(declareHelper<std::map<SubdomainID, SubdomainInfo>>(
+        "local_subdomain_elems", REPORTER_MODE_DISTRIBUTED)),
+    _subdomains(declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomains",
+                                                                    REPORTER_MODE_REPLICATED)),
+    _subdomain_elems(
+        declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomain_elems", REPORTER_MODE_ROOT)),
+
     _equation_systems(_fe_problem.es()),
     _nonlinear_system(_fe_problem.es().get_system("nl0")),
     _aux_system(_fe_problem.es().get_system("aux0")),
@@ -66,9 +78,6 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
 void
 MeshInfo::execute()
 {
-  // Whether or not to include all items (user didn't set "items")
-  const bool include_all = !_items.isValid();
-
   _num_dofs_nl = _nonlinear_system.n_dofs();
   _num_dofs_aux = _aux_system.n_dofs();
   _num_dofs = _equation_systems.n_dofs();
@@ -80,6 +89,13 @@ MeshInfo::execute()
   _num_local_node = _mesh.n_local_nodes();
   _num_local_elem = _mesh.n_local_elem();
 
+  possiblyAddSidesetInfo();
+  possiblyAddSubdomainInfo();
+}
+
+void
+MeshInfo::possiblyAddSidesetInfo()
+{
   // Helper for adding the sideset names to a given map of sidesets
   auto add_sideset_names = [&](std::map<BoundaryID, SidesetInfo> & sidesets) {
     for (auto & pair : sidesets)
@@ -91,6 +107,8 @@ MeshInfo::execute()
     for (auto & pair : sidesets)
       std::sort(pair.second.sides.begin(), pair.second.sides.end());
   };
+
+  const bool include_all = !_items.isValid();
 
   if (include_all || _items.contains("local_sidesets") || _items.contains("local_sideset_elems") ||
       _items.contains("sideset_elems"))
@@ -222,4 +240,143 @@ dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * con
   loadHelper(stream, sideset_info.id, context);
   loadHelper(stream, sideset_info.name, context);
   loadHelper(stream, sideset_info.sides, context);
+}
+
+void
+MeshInfo::possiblyAddSubdomainInfo()
+{
+  // Helper for adding the sideset names to a given map of sidesets
+  auto add_subdomain_names = [&](std::map<SubdomainID, SubdomainInfo> & subdomains) {
+    for (auto & pair : subdomains)
+      pair.second.name = _mesh.subdomain_name(pair.second.id);
+  };
+
+  // Helper for sorting all of the elems in each subdomain
+  auto sort_elems = [](std::map<SubdomainID, SubdomainInfo> & subdomains) {
+    for (auto & pair : subdomains)
+      std::sort(pair.second.elems.begin(), pair.second.elems.end());
+  };
+
+  const bool include_all = !_items.isValid();
+
+  if (include_all || _items.contains("local_subdomains") ||
+      _items.contains("local_subdomain_elems") || _items.contains("subdomain_elems"))
+  {
+    _local_subdomains.clear();
+    _local_subdomain_elems.clear();
+    _subdomain_elems.clear();
+
+    // Fill the local subdomain information; all cases need it
+    std::map<SubdomainID, SubdomainInfo> subdomains;
+    for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
+    {
+      auto & entry = subdomains[elem->subdomain_id()];
+      entry.id = elem->subdomain_id();
+      entry.elems.push_back(elem->id());
+    }
+
+    // For local subdomains: copy over the local info, remove the elems, and add the names
+    if (include_all || _items.contains("local_subdomains"))
+    {
+      _local_subdomains = subdomains;
+      for (auto & pair : _local_subdomains)
+        pair.second.elems.clear();
+      add_subdomain_names(_local_subdomains);
+    }
+
+    // For local subdomain elems: copy over the local info, and add the names
+    if (include_all || _items.contains("local_subdomain_elems"))
+    {
+      _local_subdomain_elems = subdomains;
+      sort_elems(_local_subdomain_elems);
+      add_subdomain_names(_local_subdomain_elems);
+    }
+
+    // For the global subdomain elems, we need to communicate all of the elems
+    if (include_all || _items.contains("subdomain_elems"))
+    {
+      // Set up a structure for sending each (id, elem id) to root
+      std::map<processor_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> send_info;
+      auto & root_info = send_info[0];
+      for (const auto & pair : subdomains)
+        for (const auto elem_id : pair.second.elems)
+          root_info.emplace_back(pair.second.id, elem_id);
+
+      // Take the received information and insert it into _subdomain_elems
+      auto accumulate_info =
+          [this](processor_id_type,
+                 const std::vector<std::pair<subdomain_id_type, dof_id_type>> & info) {
+            for (const auto & subdomain_elem_pair : info)
+            {
+              auto & entry = _subdomain_elems[subdomain_elem_pair.first];
+              entry.id = subdomain_elem_pair.first;
+              entry.elems.emplace_back(subdomain_elem_pair.second);
+            }
+          };
+
+      // Push the information and insert it into _subdomain_elems on root
+      Parallel::push_parallel_vector_data(comm(), send_info, accumulate_info);
+
+      if (processor_id() == 0)
+      {
+        sort_elems(_subdomain_elems);
+        add_subdomain_names(_subdomain_elems);
+      }
+    }
+  }
+
+  // For global subdomain information without elements, we can simplify communication.
+  // All we need are the subdomain IDs from libMesh and then add the names (global)
+  if (include_all || _items.contains("subdomains"))
+  {
+    _subdomains.clear();
+
+    std::set<subdomain_id_type> subdomain_ids;
+    _mesh.subdomain_ids(subdomain_ids);
+
+    if (processor_id() == 0)
+    {
+      for (const auto id : subdomain_ids)
+        _subdomains[id].id = id;
+      add_subdomain_names(_subdomains);
+    }
+  }
+}
+
+void
+to_json(nlohmann::json & json, const std::map<SubdomainID, MeshInfo::SubdomainInfo> & subdomains)
+{
+  for (const auto & pair : subdomains)
+  {
+    const MeshInfo::SubdomainInfo & subdomain_info = pair.second;
+
+    nlohmann::json subdomain_json;
+    subdomain_json["id"] = subdomain_info.id;
+    if (subdomain_info.name.size())
+      subdomain_json["name"] = subdomain_info.name;
+    if (subdomain_info.elems.size())
+    {
+      auto & sides_json = subdomain_json["elems"];
+      for (const auto & id : subdomain_info.elems)
+        sides_json.push_back(id);
+    }
+
+    json.push_back(subdomain_json);
+  }
+}
+
+void
+dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+{
+  storeHelper(stream, subdomain_info.id, context);
+  storeHelper(stream, subdomain_info.name, context);
+  storeHelper(stream, subdomain_info.elems, context);
+}
+
+void
+dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+{
+  loadHelper(stream, subdomain_info.id, context);
+  loadHelper(stream, subdomain_info.name, context);
+  loadHelper(stream, subdomain_info.elems, context);
 }
