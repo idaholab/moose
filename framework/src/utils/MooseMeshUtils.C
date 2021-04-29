@@ -133,13 +133,7 @@ getSubdomainIDs(const libMesh::MeshBase & mesh, const std::vector<SubdomainName>
       break;
     }
 
-    subdomain_id_type id = Moose::INVALID_BLOCK_ID;
-    std::istringstream ss(subdomain_name[i]);
-
-    if (!(ss >> id) || !ss.eof())
-      id = mesh.get_id_by_name(subdomain_name[i]);
-
-    ids[i] = id;
+    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], mesh);
   }
 
   return ids;
@@ -153,6 +147,21 @@ getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
 
   if (!(ss >> id))
     id = mesh.get_boundary_info().get_id_by_name(boundary_name);
+
+  return id;
+}
+
+SubdomainID
+getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
+{
+  if (subdomain_name == "ANY_BLOCK_ID")
+    mooseError("getSubdomainID() does not work with \"ANY_BLOCK_ID\"");
+
+  SubdomainID id = Moose::INVALID_BLOCK_ID;
+  std::istringstream ss(subdomain_name);
+
+  if (!(ss >> id) || !ss.eof())
+    id = mesh.get_id_by_name(subdomain_name);
 
   return id;
 }

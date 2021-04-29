@@ -1,0 +1,71 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "subdomain_elems",
+                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
+                            "value": null
+                        }
+                    ]
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "subdomain_elems",
+                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
+                            "value": [
+                                {
+                                    "elems": [
+                                        0,
+                                        1,
+                                        4,
+                                        5,
+                                        10,
+                                        11,
+                                        14,
+                                        15
+                                    ],
+                                    "id": 0,
+                                    "name": "block0_and_block3"
+                                },
+                                {
+                                    "elems": [
+                                        2,
+                                        3,
+                                        6,
+                                        7,
+                                        8,
+                                        9,
+                                        12,
+                                        13
+                                    ],
+                                    "id": 2,
+                                    "name": "block1"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
