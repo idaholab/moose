@@ -71,7 +71,7 @@ module:
 
 ```bash
 cd ~/projects/moose/modules/tensor_mechanics
-make -j12
+make -j16
 cd doc
 ./moosedocs.py generate TensorMechanicsApp
 ```
@@ -80,9 +80,9 @@ To generate pages for the framework, the moose test application can be used as f
 
 ```bash
 cd ~/projects/moose/test
-make -j12
+make -j16
 cd doc
-./moosedocs.py check --generate GENERATE
+./moosedocs.py genereate MooseApp
 ```
 
 This generate command needs to be run only when you add a new object (e.g., Kernel,
