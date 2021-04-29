@@ -55,9 +55,9 @@ private:
   /// A map from pid to a set of point info
   typedef std::unordered_map<processor_id_type, std::vector<PointInfo>> ProcessorToPointInfoVec;
 
-  /// A map from dof object to interpolation values
-  typedef std::unordered_map<std::pair<unsigned int, dof_id_type>,
-                             std::vector<std::pair<Real, processor_id_type>>>
+  /// A vector, indexed by to-problem id, of maps from dof object to interpolation values
+  typedef std::vector<std::unordered_map<dof_id_type,
+                                         std::pair<Real, processor_id_type>>>
       DofobjectToInterpValVec;
 
   /// A map for caching a single variable's values
@@ -159,7 +159,8 @@ private:
    * Set values to solution
    */
   void setSolutionVectorValues(const VariableName & var,
-                               DofobjectToInterpValVec & dofobject_to_valsvec);
+                               const DofobjectToInterpValVec & dofobject_to_valsvec,
+                               const InterpCaches & interp_caches);
 
   /*
    * Cache pointInfo

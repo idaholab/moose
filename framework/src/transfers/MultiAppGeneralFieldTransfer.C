@@ -317,7 +317,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
         evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
       };
 
-  DofobjectToInterpValVec dofobject_to_valsvec;
+  DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
   InterpCaches interp_caches(_to_problems.size());
 
   // Copy data out to incoming_vals_ids
@@ -340,10 +340,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   libMesh::Parallel::pull_parallel_vector_data(
       comm(), outgoing_points, gather_functor, action_functor, ex);
 
-
-
   // Set cached valeus into solution vector
-  setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec);
+  setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec, interp_caches);
 }
 
 void
@@ -631,28 +629,38 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       else
         dof_object_ptr = to_mesh->elem_ptr(dof_object_id);
 
-      // How many dofs for this dof object
-      auto n_dofs = dof_object_ptr->n_dofs(sys_num, var_num);
+      // We should only be supporting nodal and constant elemental
+      // variables in this code path; if we see multiple DoFs on one
+      // object we should have been using GenericProjector
+      mooseAssert(dof_object_ptr->n_dofs(sys_num, var_num) == 1,
+                  "Unexpectedly found " <<
+                  dof_object_ptr->n_dofs(sys_num, var_num) <<
+                  "dofs instead of 1");
+
+      auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
+
       // Check if we visited this dof object ealier
-      auto values_ptr = dofobject_to_valsvec.find(dofobject);
+      auto values_ptr = dofobject_to_val.find(dof_object_id);
       // We did not visit this
-      if (values_ptr == dofobject_to_valsvec.end())
+      if (values_ptr == dofobject_to_val.end())
       {
         // Values for this dof object
-        auto & val_vec = dofobject_to_valsvec[dofobject];
-        val_vec.resize(n_dofs);
-        // Interpolation Values
-        val_vec[0].first = incoming_vals[val_offset];
-        // Where these values come from
-        val_vec[0].second = pid;
+        auto & val = dofobject_to_val[dof_object_id];
+        // Interpolation value
+        val.first = incoming_vals[val_offset];
+        // Where this value came from
+        val.second = pid;
       }
       else
       {
-        auto & val_vec = dofobject_to_valsvec[dofobject];
+        auto & val = values_ptr->second;
         // We adopt values from the smallest rank which has a valid value
-        if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
+        if ((val.second > pid || val.first == OutOfMeshValue) &&
             incoming_vals[val_offset] != OutOfMeshValue)
-          val_vec[0].first = incoming_vals[val_offset];
+          {
+            val.first = incoming_vals[val_offset];
+            val.second = pid;
+          }
       }
     }
 
@@ -663,15 +671,17 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 
 void
 MultiAppGeneralFieldTransfer::setSolutionVectorValues(
-    const VariableName & var_name, DofobjectToInterpValVec & dofobject_to_valsvec)
+    const VariableName & var_name,
+    const DofobjectToInterpValVec & dofobject_to_valsvec,
+    const InterpCaches & interp_caches)
 {
-  for (auto & id_pair : dofobject_to_valsvec)
+  for (unsigned int problem_id = 0; problem_id < _to_problems.size(); ++problem_id)
   {
-    auto problem_id = id_pair.first.first;
-    auto dof_object_id = id_pair.first.second;
+    auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
     // libMesh EquationSystems
     auto & es = _to_problems[problem_id]->es();
+
     // libMesh system
     System * to_sys = find_sys(es, var_name);
 
@@ -683,37 +693,41 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
-    DofObject * dof_object = nullptr;
-    if (is_nodal)
-      dof_object = to_mesh->node_ptr(dof_object_id);
-    else
-      dof_object = to_mesh->elem_ptr(dof_object_id);
-
-    auto dof = dof_object->dof_number(sys_num, var_num, 0);
-    // If there are more than one dofs for this dof object,
-    // we need to add offset
-    auto val = id_pair.second[0].first;
-
-    // This will happen if meshes are mismatched
-    if (_error_on_miss && val == OutOfMeshValue)
+    if (fe_type.order > CONSTANT && !is_nodal)
     {
-      if (is_nodal)
-        mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
-      else
-        mooseError("Element ", dof_object_id, " for app ", problem_id, " could not be located ");
     }
+    else
+    {
+      for (auto & val_pair : dofobject_to_val)
+      {
+        auto dof_object_id = val_pair.first;
 
-    // We should not put garbage into solution vector
-    if (val == OutOfMeshValue)
-      continue;
+        DofObject * dof_object = nullptr;
+        if (is_nodal)
+          dof_object = to_mesh->node_ptr(dof_object_id);
+        else
+          dof_object = to_mesh->elem_ptr(dof_object_id);
 
-    to_sys->solution->set(dof, val);
-  }
+        auto dof = dof_object->dof_number(sys_num, var_num, 0);
 
-  // Update solution and sync solution
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
-  {
-    System * to_sys = find_sys(*_to_es[i_to], var_name);
+        auto val = val_pair.second.first;
+
+        // This will happen if meshes are mismatched
+        if (_error_on_miss && val == OutOfMeshValue)
+        {
+          if (is_nodal)
+            mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
+          else
+            mooseError("Element ", dof_object_id, " for app ", problem_id, " could not be located ");
+        }
+
+        // We should not put garbage into solution vector
+        if (val == OutOfMeshValue)
+          continue;
+
+        to_sys->solution->set(dof, val);
+      }
+    }
 
     to_sys->solution->close();
     // Sync local solutions
