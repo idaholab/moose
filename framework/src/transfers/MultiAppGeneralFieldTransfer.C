@@ -439,7 +439,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       RecordRequests<Number> f;
       RecordRequests<Gradient> g;
       NullAction<Number> nullsetter;
-      std::vector<unsigned int> varvec(1, var_num);
+      const std::vector<unsigned int> varvec(1, var_num);
 
       libMesh::GenericProjector<RecordRequests<Number>,
                                 RecordRequests<Gradient>,
