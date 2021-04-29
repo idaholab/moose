@@ -24,23 +24,23 @@ The following is a complete list for all the functional requirements for {{app}}
 ### Functional Requirements
 
 !template! field key=functional-requirements required=False
-!sqa requirements link=True collections=FUNCTIONAL category={{category}}
+!sqa requirements link=False collections=FUNCTIONAL category={{category}}
 !template-end!
 
 ### Usability Requirements
 
 !template! field key=usability-requirements required=False
-!sqa requirements link=True collections=USABILITY category={{category}}
+!sqa requirements link=False collections=USABILITY category={{category}}
 !template-end!
 
 ### Performance Requirements
 
 !template! field key=performance-requirements required=False
-!sqa requirements link=True collections=PERFORMANCE category={{category}}
+!sqa requirements link=False collections=PERFORMANCE category={{category}}
 !template-end!
 
 ### System Requirements
 
 !template! field key=system-requirements required=False
-!sqa requirements link=True collections=SYSTEM category={{category}}
+!sqa requirements link=False collections=SYSTEM category={{category}}
 !template-end!
