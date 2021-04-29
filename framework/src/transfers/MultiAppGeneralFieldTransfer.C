@@ -603,7 +603,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     System * to_sys = find_sys(es, var_name);
 
     // libMesh mesh
-    MeshBase * to_mesh = &_to_meshes[problem_id]->getMesh();
+    MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
     auto & fe_type = to_sys->variable_type(var_num);
@@ -624,10 +624,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       DofObject * dof_object_ptr = nullptr;
       // It is a node
       if (is_nodal)
-        dof_object_ptr = to_mesh->node_ptr(dof_object_id);
+        dof_object_ptr = to_mesh.node_ptr(dof_object_id);
       // It is an element
       else
-        dof_object_ptr = to_mesh->elem_ptr(dof_object_id);
+        dof_object_ptr = to_mesh.elem_ptr(dof_object_id);
 
       // We should only be supporting nodal and constant elemental
       // variables in this code path; if we see multiple DoFs on one
@@ -686,7 +686,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     System * to_sys = find_sys(es, var_name);
 
     // libMesh mesh
-    MeshBase * to_mesh = &_to_meshes[problem_id]->getMesh();
+    MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
 
@@ -704,9 +704,9 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 
         DofObject * dof_object = nullptr;
         if (is_nodal)
-          dof_object = to_mesh->node_ptr(dof_object_id);
+          dof_object = to_mesh.node_ptr(dof_object_id);
         else
-          dof_object = to_mesh->elem_ptr(dof_object_id);
+          dof_object = to_mesh.elem_ptr(dof_object_id);
 
         auto dof = dof_object->dof_number(sys_num, var_num, 0);
 
