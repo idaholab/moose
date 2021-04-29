@@ -14,6 +14,11 @@
 
 class INSFVVelocityVariable;
 
+/**
+ * A class for finite volume fully developed outflow boundary conditions for the mass equation
+ * It advects mass at the outflow, and may replace outlet pressure boundary conditions
+ * when selecting a mean-pressure approach.
+ */
 class INSFVMassAdvectionOutflowBC : public FVFluxBC, public INSFVFullyDevelopedFlowBC
 {
 public:

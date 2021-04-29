@@ -22,7 +22,6 @@ public:
   PINSFVMomentumAdvection(const InputParameters & params);
 
 protected:
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * interpolation overload for the velocity
    */
@@ -30,7 +29,7 @@ protected:
                    ADRealVectorValue & interp_v,
                    const ADRealVectorValue & elem_v,
                    const ADRealVectorValue & neighbor_v) override;
-#endif
+
   virtual ADReal computeQpResidual() override;
   VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
 

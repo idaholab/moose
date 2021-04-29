@@ -12,7 +12,7 @@ In this example, we create an `ADGenericConstantMaterial` for the diffusion coef
 We add the prefix `AD` as this simulation is making use of automatic differentiation to compute the Jacobian exactly.
 The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusion kernel.
 
-!listing moose/modules/navier_stokes/test/tests/fvkernels/mms/advection-diffusion.i block=Materials/diff
+!listing test/tests/fvkernels/mms/advection-diffusion.i block=Materials/diff
 
 !syntax parameters /Materials/GenericConstantMaterial
 

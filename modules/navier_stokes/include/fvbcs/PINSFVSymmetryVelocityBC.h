@@ -12,7 +12,8 @@
 #include "INSFVSymmetryVelocityBC.h"
 
 /**
- * A symmetry boundary condition for the superficial velocity
+ * A symmetry boundary condition for the superficial velocity. It should be
+ * used in conjunction with an INSFVSymmetryPressureBC.
  */
 class PINSFVSymmetryVelocityBC : public INSFVSymmetryVelocityBC
 {

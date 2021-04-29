@@ -13,6 +13,9 @@
 
 class Function;
 
+/**
+ * A class for no slip velocity boundary condtions
+ */
 class INSFVNoSlipWallBC : public FVFunctionDirichletBC
 {
 public:

@@ -11,7 +11,7 @@ domain explored by the simulation.
 In this example, we create a `GenericConstantVectorMaterial` for two anisotropic friction factors in a porous media flow simulation.
 Note the syntax for declaring two material properties and their values in the same material.
 
-!listing moose/modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated-effective.i block=Materials/darcy
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc-friction.i block=Materials/darcy
 
 !syntax parameters /Materials/GenericConstantVectorMaterial
 

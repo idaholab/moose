@@ -11,8 +11,6 @@
 
 #include "FVElementalKernel.h"
 
-class INSFVEnergyVariable;
-
 /**
  * An elemental kernel for transfering energy between the solid and fluid phases by convection
  */

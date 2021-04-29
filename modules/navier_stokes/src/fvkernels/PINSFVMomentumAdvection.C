@@ -348,10 +348,10 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem &, const ADReal &) const
 }
 
 void
-PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
-                                     ADRealVectorValue & v,
-                                     const ADRealVectorValue & elem_v,
-                                     const ADRealVectorValue & neighbor_v)
+PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod,
+                                     ADRealVectorValue &,
+                                     const ADRealVectorValue &,
+                                     const ADRealVectorValue &)
 {
   mooseError("PINSFVMomentumAdvection only works with global AD indexing");
 }
