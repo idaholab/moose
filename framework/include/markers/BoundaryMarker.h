@@ -12,7 +12,7 @@
 #include "Marker.h"
 
 /**
- * Marks all elements with sides on a given boundary for refinement/coarsening
+ * Marks all elements near a given boundary for refinement/coarsening
  */
 class BoundaryMarker : public Marker
 {
@@ -24,8 +24,15 @@ public:
 protected:
   virtual MarkerValue computeElementMarker() override;
 
+  /// distance from the boundary (centroid of boundary element to centroid of marked element)
   const Real _distance;
+
+  /// lists of boundary elements for all boundaries
   const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> & _bnd_elem_ids;
+
+  /// which way to mark elements near teh boundary
   MarkerValue _mark;
+
+  /// boundary near which to mark elements
   BoundaryID _boundary;
 };

@@ -33,6 +33,9 @@ BoundaryMarker::BoundaryMarker(const InputParameters & parameters)
     _mark(parameters.get<MooseEnum>("mark").getEnum<MarkerValue>()),
     _boundary(_mesh.getBoundaryID(getParam<BoundaryName>("next_to")))
 {
+  if (_mesh.isDistributedMesh() && _distance > 0)
+    mooseWarning("Elements with in `distance ` of a boundary segment on a different processor "
+                 "might not get marked when running with a distributed mesh.");
 }
 
 Marker::MarkerValue
@@ -52,12 +55,9 @@ BoundaryMarker::computeElementMarker()
       for (const auto id : it->second)
       {
         const auto elem = _mesh.elemPtr(id);
-        if (elem)
-        {
-          const auto r = _current_elem->centroid() - elem->centroid();
-          if (r.norm() < _distance)
-            return _mark;
-        }
+        const auto r = _current_elem->centroid() - elem->centroid();
+        if (r.norm() < _distance)
+          return _mark;
       }
 
     return DONT_MARK;
