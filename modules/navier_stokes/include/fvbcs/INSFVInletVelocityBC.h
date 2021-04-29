@@ -12,6 +12,9 @@
 #include "FVFunctionDirichletBC.h"
 #include "INSFVFlowBC.h"
 
+/**
+ * A class for velocity inlet boundary conditions
+ */
 class INSFVInletVelocityBC : public FVFunctionDirichletBC, public INSFVFlowBC
 {
 public:

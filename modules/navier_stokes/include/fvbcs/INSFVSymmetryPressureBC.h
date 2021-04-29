@@ -13,6 +13,9 @@
 
 class InputParameters;
 
+/**
+ * A symmetry boundary condition for the pressure variable
+ */
 class INSFVSymmetryPressureBC : public INSFVSymmetryBC
 {
 public:

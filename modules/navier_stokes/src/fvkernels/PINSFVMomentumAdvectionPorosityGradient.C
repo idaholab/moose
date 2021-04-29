@@ -31,7 +31,7 @@ PINSFVMomentumAdvectionPorosityGradient::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
+  params.addRequiredParam<bool>("smooth_porosity", "Whether the porosity has no discontinuities");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }

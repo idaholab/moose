@@ -15,7 +15,6 @@ The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusi
 
 !listing test/tests/materials/boundary_material/fv_material_quadrature.i block=Materials/k1
 
-
 !syntax parameters /Materials/GenericFunctionMaterial
 
 !syntax inputs /Materials/GenericFunctionMaterial

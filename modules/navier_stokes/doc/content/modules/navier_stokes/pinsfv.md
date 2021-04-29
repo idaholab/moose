@@ -93,6 +93,10 @@ for the first component of the superficial velocity:
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-u
 
 
+!alert note
+If the PINSFV version of a boundary condition does not exist, it may be because the INSFV version is valid to use,
+replacing velocity by superficial velocity.
+
 The pressure boundary condition is usually only set at the outlet:
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-p
 
@@ -112,7 +116,7 @@ on faces, this is not as exact.
 The solid temperature is by default constant in this input file, however by activating the relevant non-linear `Variable`,
 `FVKernels` and `FVBCs`, this input also allows solving for the solid phase temperature.
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc-heated.i
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated.i
 
 ## Example inputs : straight channel with a porosity change
 
@@ -127,7 +131,7 @@ discontinuity. To deal with this issue, the discontinuous case uses a flux-based
 To study cases with continuous porosity gradients, the `smooth_porosity` boolean parameter may be provided to the kernels,
 which will enable the full treatment of pressure and porosity gradients.
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc-epsjump.i
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/porosity_jump/2d-rc-epsjump.i
 
 ## Other inputs
 
