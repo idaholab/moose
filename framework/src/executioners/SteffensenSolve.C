@@ -28,35 +28,40 @@ SteffensenSolve::SteffensenSolve(Executioner * ex) : FixedPointSolve(ex)
   allocateStorage(true);
 
   // Steffensen method uses half-steps
-  _min_fixed_point_its *= 2;
+  if (!parameters().isParamSetByAddParam("fixed_point_min_its"))
+    _min_fixed_point_its *= 2;
   _max_fixed_point_its *= 2;
 }
 
 void
 SteffensenSolve::allocateStorage(const bool primary)
 {
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
-  const std::vector<std::string> * transformed_pps;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
+    xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
+    _xn_m1_tagid = xn_m1_tagid;
+    _fxn_m1_tagid = fxn_m1_tagid;
   }
   else
   {
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
+    xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
+    _secondary_xn_m1_tagid = xn_m1_tagid;
+    _secondary_fxn_m1_tagid = fxn_m1_tagid;
   }
 
   // Store a copy of the previous solution here
-  _problem.getNonlinearSystemBase().addVector(xn_m1_name, false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector(fxn_m1_name, false, PARALLEL);
+  _nl.addVector(xn_m1_tagid, false, PARALLEL);
+  _nl.addVector(fxn_m1_tagid, false, PARALLEL);
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());
@@ -68,25 +73,25 @@ void
 SteffensenSolve::saveVariableValues(const bool primary)
 {
   unsigned int iteration;
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
   if (primary)
   {
     iteration = _fixed_point_it;
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
+    fxn_m1_tagid = _fxn_m1_tagid;
+    xn_m1_tagid = _xn_m1_tagid;
   }
   else
   {
     iteration = _main_fixed_point_it;
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
+    fxn_m1_tagid = _secondary_fxn_m1_tagid;
+    xn_m1_tagid = _secondary_xn_m1_tagid;
   }
 
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
 
   // What 'solution' is with regards to the Steffensen solve depends on the step
   if (iteration % 2 == 1)
@@ -99,7 +104,7 @@ void
 SteffensenSolve::savePostprocessorValues(const bool primary)
 {
   unsigned int iteration;
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -139,7 +144,7 @@ void
 SteffensenSolve::transformPostprocessors(const bool primary)
 {
   Real relaxation_factor;
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -180,24 +185,24 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
                                     const bool primary)
 {
   Real relaxation_factor;
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
   if (primary)
   {
     relaxation_factor = _relax_factor;
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
+    fxn_m1_tagid = _fxn_m1_tagid;
+    xn_m1_tagid = _xn_m1_tagid;
   }
   else
   {
     relaxation_factor = _secondary_relaxation_factor;
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
+    fxn_m1_tagid = _secondary_fxn_m1_tagid;
+    xn_m1_tagid = _secondary_xn_m1_tagid;
   }
 
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
 
   for (const auto & dof : transformed_dofs)
   {
@@ -219,7 +224,7 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
 void
 SteffensenSolve::printFixedPointConvergenceHistory()
 {
-  _console << "\n 0 Steffensen method    |R| = "
+  _console << "\n 0 Steffensen initialization |R| = "
            << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
            << '\n';
 
@@ -228,10 +233,12 @@ SteffensenSolve::printFixedPointConvergenceHistory()
     Real max_norm =
         std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     std::stringstream steffensen_prefix;
-    if (i % 2 == 0)
-      steffensen_prefix << " Steffensen half-step |R| = ";
+    if (i == 0)
+      steffensen_prefix << " Steffensen initialization |R| = ";
+    else if (i % 2 == 0)
+      steffensen_prefix << " Steffensen half-step      |R| = ";
     else
-      steffensen_prefix << " Steffensen step      |R| = ";
+      steffensen_prefix << " Steffensen step           |R| = ";
 
     _console << std::setw(2) << i + 1 << steffensen_prefix.str()
              << Console::outputNorm(_fixed_point_initial_norm, max_norm) << '\n';

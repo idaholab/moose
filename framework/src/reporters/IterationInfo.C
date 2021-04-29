@@ -35,7 +35,7 @@ IterationInfo::IterationInfo(const InputParameters & parameters)
     _time_step_value(declareHelper<unsigned int>("timestep", _dummy_unsigned_int)),
     _num_linear(declareHelper<unsigned int>("num_linear_iterations", _dummy_unsigned_int)),
     _num_nonlinear(declareHelper<unsigned int>("num_nonlinear_iterations", _dummy_unsigned_int)),
-    _num_coupling(declareHelper<unsigned int>("num_fixed_point_iterations", _dummy_unsigned_int))
+    _num_fixed_point(declareHelper<unsigned int>("num_fixed_point_iterations", _dummy_unsigned_int))
 {
 }
 
@@ -46,5 +46,5 @@ IterationInfo::execute()
   _time_step_value = _t_step;
   _num_nonlinear = _subproblem.nNonlinearIterations();
   _num_linear = _subproblem.nLinearIterations();
-  _num_coupling = _app.getExecutioner()->fixedPointSolve()->numFixedPointIts();
+  _num_fixed_point = _app.getExecutioner()->fixedPointSolve()->numFixedPointIts();
 }

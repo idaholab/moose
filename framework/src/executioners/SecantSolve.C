@@ -15,8 +15,6 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
-defineLegacyParams(SecantSolve);
-
 InputParameters
 SecantSolve::validParams()
 {
@@ -30,38 +28,46 @@ SecantSolve::SecantSolve(Executioner * ex) : FixedPointSolve(ex) { allocateStora
 void
 SecantSolve::allocateStorage(const bool primary)
 {
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
-  std::string fxn_m2_name;
-  std::string xn_m2_name;
-  const std::vector<std::string> * transformed_pps;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
+  TagID fxn_m2_tagid;
+  TagID xn_m2_tagid;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
-    fxn_m2_name = "fxn_m2";
-    xn_m2_name = "xn_m2";
+    xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
+    xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
+    _xn_m1_tagid = xn_m1_tagid;
+    _fxn_m1_tagid = fxn_m1_tagid;
+    _xn_m2_tagid = xn_m2_tagid;
+    _fxn_m2_tagid = fxn_m2_tagid;
   }
   else
   {
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
-    fxn_m2_name = "secondary_fxn_m2";
-    xn_m2_name = "secondary_xn_m2";
+    xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
+    xn_m2_tagid = _problem.addVectorTag("secondary_xn_m2", Moose::VECTOR_TAG_SOLUTION);
+    fxn_m2_tagid = _problem.addVectorTag("secondary_fxn_m2", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
+    _secondary_xn_m1_tagid = xn_m1_tagid;
+    _secondary_fxn_m1_tagid = fxn_m1_tagid;
+    _secondary_xn_m2_tagid = xn_m2_tagid;
+    _secondary_fxn_m2_tagid = fxn_m2_tagid;
   }
 
   // TODO: We would only need to store the solution for the degrees of freedom that
   // will be transformed, not the entire solution.
   // Store solution vectors for the two previous points and their evaluation
-  _problem.getNonlinearSystemBase().addVector(xn_m1_name, false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector(fxn_m1_name, false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector(xn_m2_name, false, PARALLEL);
-  _problem.getNonlinearSystemBase().addVector(fxn_m2_name, false, PARALLEL);
+  _nl.addVector(xn_m1_tagid, false, PARALLEL);
+  _nl.addVector(fxn_m1_tagid, false, PARALLEL);
+  _nl.addVector(xn_m2_tagid, false, PARALLEL);
+  _nl.addVector(fxn_m2_tagid, false, PARALLEL);
 
   // Allocate storage for the previous values of the postprocessors to transform
   (*transformed_pps_values).resize((*transformed_pps).size());
@@ -72,31 +78,31 @@ SecantSolve::allocateStorage(const bool primary)
 void
 SecantSolve::saveVariableValues(const bool primary)
 {
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
-  std::string fxn_m2_name;
-  std::string xn_m2_name;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
+  TagID fxn_m2_tagid;
+  TagID xn_m2_tagid;
   if (primary)
   {
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
-    fxn_m2_name = "fxn_m2";
-    xn_m2_name = "xn_m2";
+    fxn_m1_tagid = _fxn_m1_tagid;
+    xn_m1_tagid = _xn_m1_tagid;
+    fxn_m2_tagid = _fxn_m2_tagid;
+    xn_m2_tagid = _xn_m2_tagid;
   }
   else
   {
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
-    fxn_m2_name = "secondary_fxn_m2";
-    xn_m2_name = "secondary_xn_m2";
+    fxn_m1_tagid = _secondary_fxn_m1_tagid;
+    xn_m1_tagid = _secondary_xn_m1_tagid;
+    fxn_m2_tagid = _secondary_fxn_m2_tagid;
+    xn_m2_tagid = _secondary_xn_m2_tagid;
   }
 
   // Save previous variable values
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
-  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_name);
-  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_name);
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_tagid);
 
   // Advance one step
   xn_m2 = xn_m1;
@@ -109,7 +115,7 @@ SecantSolve::saveVariableValues(const bool primary)
 void
 SecantSolve::savePostprocessorValues(const bool primary)
 {
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -129,8 +135,12 @@ SecantSolve::savePostprocessorValues(const bool primary)
     (*transformed_pps_values)[i][3] = (*transformed_pps_values)[i][1];
     (*transformed_pps_values)[i][2] = (*transformed_pps_values)[i][0];
 
-    // Secondary postprocessors are saved after a solve, but transfers from the main app have not
-    // been received yet
+    // Save current value
+    // Primary: this is done before the timestep's solves and before timestep_begin transfers,
+    // so the value is the result of the previous Secant update (xn_m1)
+    // Secondary: this is done after the secondary solve, but before timestep_end postprocessors
+    // are computed, or timestep_end transfers are received.
+    // This value is the same as before the solve (xn_m1)
     (*transformed_pps_values)[i][1] = getPostprocessorValueByName((*transformed_pps)[i]);
   }
 }
@@ -149,7 +159,7 @@ void
 SecantSolve::transformPostprocessors(const bool primary)
 {
   Real relaxation_factor;
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -168,19 +178,18 @@ SecantSolve::transformPostprocessors(const bool primary)
   for (size_t i = 0; i < (*transformed_pps).size(); i++)
   {
     // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName((*transformed_pps)[i]);
+    const Real fxn_m1 = getPostprocessorValueByName((*transformed_pps)[i]);
     const Real xn_m1 = (*transformed_pps_values)[i][1];
     const Real fxn_m2 = (*transformed_pps_values)[i][2];
     const Real xn_m2 = (*transformed_pps_values)[i][3];
 
     // Save fxn_m1, received or computed before the solve
-    (*transformed_pps_values)[i][0] = current_value;
+    (*transformed_pps_values)[i][0] = fxn_m1;
 
     // Compute and set relaxed value
-    Real new_value = current_value;
-    if (!MooseUtils::absoluteFuzzyEqual(current_value - xn_m1 - fxn_m2 + xn_m2, 0))
-      new_value = xn_m1 - (current_value - xn_m1) * (xn_m1 - xn_m2) /
-                              (current_value - xn_m1 - fxn_m2 + xn_m2);
+    Real new_value = fxn_m1;
+    if (!MooseUtils::absoluteFuzzyEqual(fxn_m1 - xn_m1 - fxn_m2 + xn_m2, 0))
+      new_value = xn_m1 - (fxn_m1 - xn_m1) * (xn_m1 - xn_m2) / (fxn_m1 - xn_m1 - fxn_m2 + xn_m2);
 
     // Relax update if desired
     new_value = relaxation_factor * new_value + (1 - relaxation_factor) * xn_m1;
@@ -193,34 +202,34 @@ void
 SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const bool primary)
 {
   Real relaxation_factor;
-  std::string fxn_m1_name;
-  std::string xn_m1_name;
-  std::string fxn_m2_name;
-  std::string xn_m2_name;
+  TagID fxn_m1_tagid;
+  TagID xn_m1_tagid;
+  TagID fxn_m2_tagid;
+  TagID xn_m2_tagid;
   if (primary)
   {
     relaxation_factor = _relax_factor;
-    fxn_m1_name = "fxn_m1";
-    xn_m1_name = "xn_m1";
-    fxn_m2_name = "fxn_m2";
-    xn_m2_name = "xn_m2";
+    fxn_m1_tagid = _fxn_m1_tagid;
+    xn_m1_tagid = _xn_m1_tagid;
+    fxn_m2_tagid = _fxn_m2_tagid;
+    xn_m2_tagid = _xn_m2_tagid;
   }
   else
   {
     relaxation_factor = _secondary_relaxation_factor;
-    fxn_m1_name = "secondary_fxn_m1";
-    xn_m1_name = "secondary_xn_m1";
-    fxn_m2_name = "secondary_fxn_m2";
-    xn_m2_name = "secondary_xn_m2";
+    fxn_m1_tagid = _secondary_fxn_m1_tagid;
+    xn_m1_tagid = _secondary_xn_m1_tagid;
+    fxn_m2_tagid = _secondary_fxn_m2_tagid;
+    xn_m2_tagid = _secondary_xn_m2_tagid;
   }
 
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_name);
-  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_name);
-  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_name);
+  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_tagid);
 
   // Save the most recent evaluation of the coupled problem
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_name);
+  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
   fxn_m1 = solution;
 
   for (const auto & dof : target_dofs)
@@ -252,7 +261,7 @@ SecantSolve::printFixedPointConvergenceHistory()
     Real max_norm =
         std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
     std::stringstream secant_prefix;
-    if (i < 1)
+    if (i < 2)
       secant_prefix << " Secant initialization |R| = ";
     else
       secant_prefix << " Secant step           |R| = ";

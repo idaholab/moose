@@ -87,7 +87,7 @@ public:
   }
 
   /// Set relaxation postprocessors for the current solve as a SubApp
-  virtual void setMultiAppTransformedPostprocessors(const std::vector<std::string> & pps)
+  virtual void setMultiAppTransformedPostprocessors(const std::vector<PostprocessorName> & pps)
   {
     _secondary_transformed_pps = pps;
   }
@@ -138,9 +138,9 @@ protected:
   /**
    * Perform one fixed point iteration or a full solve.
    *
-   * @param begin_norm     Residual norm after timestep_begin execution
-   * @param end_norm       Residual norm after timestep_end execution
-   * @param target_dofs    DoFs targetted by the fixed point algorithm
+   * @param begin_norm       Residual norm after timestep_begin execution
+   * @param end_norm         Residual norm after timestep_end execution
+   * @param transformed_dofs DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
    *
@@ -214,7 +214,7 @@ protected:
   /// The variables (transferred or not) that are going to be relaxed
   std::vector<std::string> _transformed_vars; // TODO: make const once relaxed_variables is removed
   /// The postprocessors (transferred or not) that are going to be relaxed
-  const std::vector<std::string> _transformed_pps;
+  const std::vector<PostprocessorName> _transformed_pps;
   /// Previous values of the relaxed postprocessors
   std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
 
@@ -223,7 +223,7 @@ protected:
   /// Variables to be relaxed outside of fixed point iteration (used as a subapp)
   std::vector<std::string> _secondary_transformed_variables;
   /// Postprocessors to be relaxed outside of fixed point iteration (used as a subapp)
-  std::vector<std::string> _secondary_transformed_pps;
+  std::vector<PostprocessorName> _secondary_transformed_pps;
   /// Previous values of the postprocessors relaxed outside of the fixed point iteration (used as a subapp)
   std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
 

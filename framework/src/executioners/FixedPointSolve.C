@@ -23,7 +23,7 @@ FixedPointSolve::validParams()
   InputParameters params = emptyInputParameters();
 
   params.addParam<unsigned int>(
-      "fixed_point_min_its", 0, "Specifies the minimum number of fixed point iterations.");
+      "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
   params.addParam<unsigned int>(
       "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
   params.addParam<bool>(
@@ -84,19 +84,19 @@ FixedPointSolve::validParams()
       "transformed_variables",
       std::vector<std::string>(),
       "List of main app variables to transform during fixed point iterations");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<PostprocessorName>>(
       "transformed_postprocessors",
-      std::vector<std::string>(),
+      std::vector<PostprocessorName>(),
       "List of main app postprocessors to transform during fixed point iterations");
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
       std::vector<std::string>(),
       "Relaxed variables is deprecated, use transformed_variables instead.",
-      "List of master app variables to relax during fixed point iterations");
+      "List of main app variables to relax during fixed point iterations");
 
   params.addParam<bool>("auto_advance",
                         "Whether to automatically advance sub-applications regardless of whether "
-                        "their solve converges.");
+                        "their solve converges, for transient executioners only.");
 
   params.addParamNamesToGroup(
       "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
@@ -133,7 +133,7 @@ FixedPointSolve::FixedPointSolve(Executioner * ex)
                                                      : nullptr),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
-    _transformed_pps(getParam<std::vector<std::string>>("transformed_postprocessors")),
+    _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
@@ -189,11 +189,10 @@ FixedPointSolve::solve()
 
   // Prepare to relax variables as a main app
   std::set<dof_id_type> transformed_dofs;
-  if (_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
+  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) && _transformed_vars.size() > 0)
   {
     // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl.system();
-    AllLocalDofIndicesThread aldit(libmesh_nl_system, _transformed_vars);
+    AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
     ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
@@ -204,13 +203,15 @@ FixedPointSolve::solve()
   std::set<dof_id_type> secondary_transformed_dofs;
   if (_secondary_relaxation_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
   {
-    // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl.system();
-    AllLocalDofIndicesThread aldit(libmesh_nl_system, _secondary_transformed_variables);
-    ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    if (_secondary_transformed_variables.size() > 0)
+    {
+      // Snag all of the local dof indices for all of these variables
+      AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
+      ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+      Threads::parallel_reduce(elem_range, aldit);
 
-    secondary_transformed_dofs = aldit.getDofIndices();
+      secondary_transformed_dofs = aldit.getDofIndices();
+    }
 
     // To detect a new time step
     if (_old_entering_time == _problem.time())
@@ -294,7 +295,8 @@ FixedPointSolve::solve()
   }
 
   // Save postprocessors after the solve and their potential timestep_end execution
-  // The postprocessors could be overwritten at timestep_begin, which is why they are saved now
+  // The postprocessors could be overwritten at timestep_begin, which is why they are saved
+  // after the solve. They could also be saved right after the transfers.
   if (_old_entering_time == _problem.time())
     savePostprocessorValues(false);
 
@@ -344,6 +346,11 @@ FixedPointSolve::solveStep(Real & begin_norm,
     return false;
   }
 
+  if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
+    _problem.updateMeshXFEM();
+
+  _problem.execute(EXEC_TIMESTEP_BEGIN);
+
   // Transform the fixed point postprocessors before solving, but after the timestep_begin transfers
   // have been received
   if (_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
@@ -351,11 +358,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
   if (_secondary_transformed_pps.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(false) &&
       _problem.time() == _old_entering_time)
     transformPostprocessors(false);
-
-  if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
-    _problem.updateMeshXFEM();
-
-  _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   if (_has_fixed_point_its && _has_fixed_point_norm)
     if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _fixed_point_force_norms)
@@ -451,7 +453,7 @@ FixedPointSolve::computeCustomConvergencePostprocessor()
 
   auto ppname = getParam<PostprocessorName>("custom_pp");
   _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new) << "\n";
+              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << "\n";
   _console << _pp_history.str();
 }
 

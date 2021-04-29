@@ -104,20 +104,22 @@ void
 PicardSolve::allocateStorage(const bool primary)
 {
   Real relaxation_factor;
-  std::string xn_m1_name;
-  const std::vector<std::string> * transformed_pps;
+  TagID old_tag_id;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
     relaxation_factor = _relax_factor;
-    xn_m1_name = "xn_m1";
+    old_tag_id = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _old_tag_id = old_tag_id;
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
   }
   else
   {
     relaxation_factor = _secondary_relaxation_factor;
-    xn_m1_name = "secondary_xn_m1";
+    old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _old_tag_id = old_tag_id;
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
   }
@@ -125,7 +127,7 @@ PicardSolve::allocateStorage(const bool primary)
   if (relaxation_factor != 1.)
   {
     // Store a copy of the previous solution
-    _problem.getNonlinearSystemBase().addVector(xn_m1_name, false, PARALLEL);
+    _nl.addVector(old_tag_id, false, PARALLEL);
 
     // Allocate storage for the previous postprocessor values
     (*transformed_pps_values).resize((*transformed_pps).size());
@@ -138,23 +140,23 @@ void
 PicardSolve::saveVariableValues(const bool primary)
 {
   Real relaxation_factor;
-  std::string old_name;
+  TagID old_tag_id;
   if (primary)
   {
     relaxation_factor = _relax_factor;
-    old_name = "xn_m1";
+    old_tag_id = _old_tag_id;
   }
   else
   {
     relaxation_factor = _secondary_relaxation_factor;
-    old_name = "secondary_xn_m1";
+    old_tag_id = _secondary_old_tag_id;
   }
 
   if (relaxation_factor != 1.)
   {
     // Save variable previous values
     NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & transformed_old = _nl.getVector(old_name);
+    NumericVector<Number> & transformed_old = _nl.getVector(old_tag_id);
     transformed_old = solution;
   }
 }
@@ -163,7 +165,7 @@ void
 PicardSolve::savePostprocessorValues(const bool primary)
 {
   Real relaxation_factor;
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -199,7 +201,7 @@ void
 PicardSolve::transformPostprocessors(const bool primary)
 {
   Real relaxation_factor;
-  const std::vector<std::string> * transformed_pps;
+  const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
@@ -232,20 +234,20 @@ void
 PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, const bool primary)
 {
   Real relaxation_factor;
-  std::string old_name;
+  TagID old_tag_id;
   if (primary)
   {
     relaxation_factor = _relax_factor;
-    old_name = "xn_m1";
+    old_tag_id = _old_tag_id;
   }
   else
   {
     relaxation_factor = _secondary_relaxation_factor;
-    old_name = "secondary_xn_m1";
+    old_tag_id = _secondary_old_tag_id;
   }
 
   NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & transformed_old = _nl.getVector(old_name);
+  NumericVector<Number> & transformed_old = _nl.getVector(old_tag_id);
 
   for (const auto & dof : transformed_dofs)
     solution.set(dof,

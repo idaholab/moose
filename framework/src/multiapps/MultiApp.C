@@ -171,10 +171,11 @@ MultiApp::validParams()
       "transformed_variables",
       std::vector<std::string>(),
       "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
-  params.addParam<std::vector<std::string>>("transformed_postprocessors",
-                                            std::vector<std::string>(),
-                                            "List of subapp postprocessors to use coupling "
-                                            "algorithm on during Multiapp coupling iterations");
+  params.addParam<std::vector<PostprocessorName>>(
+      "transformed_postprocessors",
+      std::vector<PostprocessorName>(),
+      "List of subapp postprocessors to use coupling "
+      "algorithm on during Multiapp coupling iterations");
 
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
@@ -798,7 +799,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
     fixed_point_solve->setMultiAppTransformedVariables(
         getParam<std::vector<std::string>>("relaxed_variables"));
   fixed_point_solve->setMultiAppTransformedPostprocessors(
-      getParam<std::vector<std::string>>("transformed_postprocessors"));
+      getParam<std::vector<PostprocessorName>>("transformed_postprocessors"));
   fixed_point_solve->allocateStorage(false);
 }
 

@@ -86,4 +86,11 @@ private:
 
   /// Print the convergence history of the coupling, at every coupling iteration
   virtual void printFixedPointConvergenceHistory() override final;
+
+  /// Vector tag id for the previous solution variable, as a main app
+  TagID _old_tag_id;
+
+  /// Vector tag id for the previous solution variable, as a sub app
+  TagID _secondary_old_tag_id;
+
 };
