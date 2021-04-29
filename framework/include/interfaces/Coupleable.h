@@ -1143,7 +1143,7 @@ protected:
       _default_vector_value;
 
   /// Will hold the default value for optional array coupled variables.
-  mutable std::map<std::string, ArrayVariableValue *> _default_array_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<ArrayVariableValue>> _default_array_value;
 
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
