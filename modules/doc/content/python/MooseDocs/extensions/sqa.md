@@ -54,6 +54,14 @@ then the "app_stp.md.template" file should be loaded in a file named "bull_frog_
   This will comprise the application Verification and Validation Report.
 - +app_far.md.template+\\
   This will comprise the application Failure Analysis Report.
+- +app_sll.md.template+\\
+  This will comprise the application Software Library List.
+- +app_cci.md.template+\\
+  This will comprise the application Communications and Contact Information.
+- +app_scs.md.template+\\
+  This will comprise the application Software Coding Standards.
+
+
 
 ### General Templates
 
@@ -75,6 +83,13 @@ framework documents on which all MOOSE-based applications depend.
   A template to build a Verification and Validation Report, [!ac](INL) does not supply a template.
 - +far.md.template+\\
   A template to build a Failure Analysis Report, [!ac](INL) does not supply a template.
+- +sll.md.template+\\
+  A template to build a Software Library List, [!ac](INL) does not supply a template.
+- +cci.md.template+\\
+  A template to build a Communication and Contact Information, [!ac](INL) does not supply a template.
+- +scs.md.template+\\
+  A template to build a Software Coding Standards, [!ac](INL) does not supply a template.
+
 
 ## Extension Configuration
 

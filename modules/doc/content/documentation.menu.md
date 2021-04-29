@@ -25,7 +25,7 @@
 
 ## [Framework Development [!icon!link]](framework_development/index.md)
 
-- [Contributing](framework_development/contributing.md)
+- [Contributing](framework/contributing.md)
 - [Code Standards](sqa/framework_scs.md)
 - [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
 - [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
@@ -36,7 +36,7 @@
 ## [MOOSEDocs [!icon!link]](MooseDocs/index.md)
 
 - [MooseDocs/specification.md]
-- [MooseDocs/generate.md]
+- [framework/documenting.md]
 - [Software Quality](sqa/index.md exact=True)
 
 ## Infrastructure

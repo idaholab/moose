@@ -2,7 +2,7 @@
 
 MOOSE and MOOSE-based applications generally focus on creating C++ objects (e.g., Kernels, BCs,
 etc.), so it is important that these objects are documented to allow other developers and users to
-understand the purpose of these objects. The [MooseDocs System](MooseDocs/index.md) aims to make
+understand the purpose of these objects. The [MooseDocs System](MooseDocs/index.md optional=True) aims to make
 documenting objects straightforward and natural. Moreover, accessing the object documentation is
 simple and allows for documentation to remain up-to-date as the code continues to advance.
 
@@ -49,8 +49,7 @@ code.
 
 Clear and consistent documentation is a necessary component of code development within MOOSE.  It is
 expected that developers submitting new MooseObjects (e.g., `Kernel` or `BoundaryCondition`) to the
-framework or modules will create a corresponding markdown file, using
-[MooseDocs/specification.md], to document the new classes.
+framework or modules will create a corresponding markdown file to document the new classes.
 
 The documentation for the classes within MOOSE and the modules are located within the "doc"
 directory where the class is registered: "framework/doc" contains all core MOOSE level objects,
@@ -82,7 +81,7 @@ To generate pages for the framework, the moose test application can be used as f
 cd ~/projects/moose/test
 make -j16
 cd doc
-./moosedocs.py genereate MooseApp
+./moosedocs.py generate MooseApp
 ```
 
 This generate command needs to be run only when you add a new object (e.g., Kernel,
@@ -105,7 +104,7 @@ cd ~/projects/moose/modules/doc
 Once the server is running, the markdown files within the repository may be modified. When
 changes are saved, the local server will automatically update the content.
 The content added or modified should follow the
-[Standards for Documentation Pages](MooseDocs/standards.md) guidelines.
+[Standards for Documentation Pages](MooseDocs/standards.md optional=True) guidelines.
 
 ## Media
 
