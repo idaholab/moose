@@ -26,7 +26,7 @@
 ## [Framework Development [!icon!link]](framework_development/index.md)
 
 - [Contributing](framework_development/contributing.md)
-- [Code Standards](code_standards.md)
+- [Code Standards](sqa/framework_scs.md)
 - [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
 - [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
 - [TIMPI Doxygen](https://mooseframework.org/docs/doxygen/timpi/classes.html)

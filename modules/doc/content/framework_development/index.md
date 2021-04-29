@@ -12,7 +12,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [How a patch becomes code](framework_development/patch_to_code.md)
 
-[Code Standards](code_standards.md) - How to format any code that goes into the framework
+[Code Standards](sqa/framework_scs.md) - How to format any code that goes into the framework
 
 ## Git Tips
 
@@ -56,7 +56,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Warehouses](/warehouses.md) - Objects that store all of the dynamically built MOOSE objects (`Kernels`, `BCs`, etc.)
 
-[Code Standards](code_standards.md)
+[Code Standards](sqa/framework_scs.md)
 
 [Tagging](tagging.md)
 
