@@ -1306,13 +1306,7 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
   if (subdomain_name == "ANY_BLOCK_ID")
     mooseError("Please use getSubdomainIDs() when passing \"ANY_BLOCK_ID\"");
 
-  SubdomainID id = Moose::INVALID_BLOCK_ID;
-  std::istringstream ss(subdomain_name);
-
-  if (!(ss >> id) || !ss.eof())
-    id = getMesh().get_id_by_name(subdomain_name);
-
-  return id;
+  return MooseMeshUtils::getSubdomainID(subdomain_name, getMesh());
 }
 
 std::vector<SubdomainID>
@@ -1331,13 +1325,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
       break;
     }
 
-    SubdomainID id = Moose::INVALID_BLOCK_ID;
-    std::istringstream ss(subdomain_name[i]);
-
-    if (!(ss >> id) || !ss.eof())
-      id = getMesh().get_id_by_name(subdomain_name[i]);
-
-    ids[i] = id;
+    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], getMesh());
   }
 
   return ids;
