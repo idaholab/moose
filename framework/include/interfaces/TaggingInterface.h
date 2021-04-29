@@ -131,7 +131,7 @@ public:
   void assignTaggedLocalMatrix();
 
 protected:
-  /// The vectors this Kernel will contribute to
+  /// The residual tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 
   /// The matrices this Kernel will contribute to

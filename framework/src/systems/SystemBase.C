@@ -223,25 +223,13 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 void
 SystemBase::addVariableToZeroOnResidual(std::string var_name)
 {
-  unsigned int ncomp = getVariable(0, var_name).count();
-  if (ncomp > 1)
-    // need to push libMesh variable names for all components
-    for (unsigned int i = 0; i < ncomp; ++i)
-      _vars_to_be_zeroed_on_residual.push_back(_subproblem.arrayVariableComponent(var_name, i));
-  else
-    _vars_to_be_zeroed_on_residual.push_back(var_name);
+  _vars_to_be_zeroed_on_residual.push_back(var_name);
 }
 
 void
 SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 {
-  unsigned int ncomp = getVariable(0, var_name).count();
-  if (ncomp > 1)
-    // need to push libMesh variable names for all components
-    for (unsigned int i = 0; i < ncomp; ++i)
-      _vars_to_be_zeroed_on_jacobian.push_back(_subproblem.arrayVariableComponent(var_name, i));
-  else
-    _vars_to_be_zeroed_on_jacobian.push_back(var_name);
+  _vars_to_be_zeroed_on_jacobian.push_back(var_name);
 }
 
 void
@@ -251,7 +239,11 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
   {
     NumericVector<Number> & solution = this->solution();
 
-    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed, true);
+    auto problem = dynamic_cast<FEProblemBase *>(&_subproblem);
+    if (!problem)
+      mooseError("System needs to be registered in FEProblemBase for using zeroVariables.");
+
+    AllLocalDofIndicesThread aldit(*problem, vars_to_be_zeroed, true);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
@@ -1262,11 +1254,6 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
-SystemBase::addExtraVectors()
-{
-}
-
-void
 SystemBase::update(const bool update_libmesh_system)
 {
   if (update_libmesh_system)
@@ -1363,6 +1350,24 @@ SystemBase::name() const
   return system().name();
 }
 
+NumericVector<Number> *
+SystemBase::solutionPreviousNewton()
+{
+  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    return &getVector(Moose::PREVIOUS_NL_SOLUTION_TAG);
+  else
+    return nullptr;
+}
+
+const NumericVector<Number> *
+SystemBase::solutionPreviousNewton() const
+{
+  if (hasVector(Moose::PREVIOUS_NL_SOLUTION_TAG))
+    return &getVector(Moose::PREVIOUS_NL_SOLUTION_TAG);
+  else
+    return nullptr;
+}
+
 void
 SystemBase::initSolutionState()
 {
@@ -1380,11 +1385,16 @@ SystemBase::initSolutionState()
   _solution_states_initialized = true;
 }
 
-std::string
+TagName
 SystemBase::oldSolutionStateVectorName(const unsigned int state) const
 {
   mooseAssert(state != 0, "Not an old state");
-  return "solution_state_" + std::to_string(state);
+  if (state == 1)
+    return Moose::OLD_SOLUTION_TAG;
+  else if (state == 2)
+    return Moose::OLDER_SOLUTION_TAG;
+  else
+    return "solution_state_" + std::to_string(state);
 }
 
 const NumericVector<Number> &
@@ -1433,7 +1443,11 @@ SystemBase::needSolutionState(const unsigned int state)
   // We will manually add all states past current
   for (unsigned int i = 1; i <= state; ++i)
     if (!_solution_states[i])
-      _solution_states[i] = &addVector(oldSolutionStateVectorName(i), true, GHOSTED);
+    {
+      auto tag =
+          _subproblem.addVectorTag(oldSolutionStateVectorName(i), Moose::VECTOR_TAG_SOLUTION);
+      _solution_states[i] = &addVector(tag, true, GHOSTED);
+    }
     else
       mooseAssert(_solution_states[i] == &getVector(oldSolutionStateVectorName(i)),
                   "Inconsistent solution state");

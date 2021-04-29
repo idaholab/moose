@@ -52,6 +52,7 @@ FixedPoint::solve()
     _console << "Fixed point iteration " << it << std::endl;
 
     Real residual_norm_previous = residual_norm;
+
     if (!_inner_solve->solve())
     {
       _console << COLOR_RED << " Fixed point iteration did NOT converge!" << COLOR_DEFAULT
@@ -61,6 +62,7 @@ FixedPoint::solve()
       return false;
     }
 
+    _fp_problem.copySolution();
     _fp_problem.computeFullResidual(*_nl.currentSolution(), _nl.RHS());
     residual_norm = _nl.RHS().l2_norm();
     _console << "Fixed point residual norm " << residual_norm << std::endl;

@@ -20,6 +20,7 @@
 #include "SwapBackSentinel.h"
 #include "TimeDerivative.h"
 #include "FVElementalKernel.h"
+#include "MaterialBase.h"
 
 #include "libmesh/threads.h"
 
@@ -152,6 +153,13 @@ ComputeJacobianThread::subdomainChanged()
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
+  // Update FE variable coupleable vector tags
+  std::set<TagID> needed_fe_var_vector_tags;
+  _kernels.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
+
   // Update material dependencies
   std::set<unsigned int> needed_mat_props;
   _kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
@@ -180,6 +188,7 @@ ComputeJacobianThread::subdomainChanged()
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 
   // If users pass a empty vector or a full size of vector,

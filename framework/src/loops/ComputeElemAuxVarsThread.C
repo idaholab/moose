@@ -14,6 +14,7 @@
 #include "AuxKernel.h"
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
+#include "MaterialBase.h"
 
 #include "libmesh/threads.h"
 
@@ -63,6 +64,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
   std::set<TagID> needed_fe_var_matrix_tags;
   std::set<TagID> needed_fe_var_vector_tags;
 
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<std::shared_ptr<AuxKernelType>> & kernels =

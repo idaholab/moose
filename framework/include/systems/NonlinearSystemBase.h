@@ -75,7 +75,6 @@ public:
    */
   virtual void turnOffJacobian();
 
-  virtual void addExtraVectors() override;
   virtual void solve() override = 0;
   virtual void restoreSolutions() override;
 
@@ -622,12 +621,6 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
-  const NumericVector<Number> * solutionPreviousNewton() const override
-  {
-    return _solution_previous_nl;
-  }
-
   virtual void setSolutionUDotOld(const NumericVector<Number> & u_dot_old);
 
   virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
@@ -759,9 +752,6 @@ protected:
 
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
-
-  /// Solution vector of the previous nonlinear iterate
-  NumericVector<Number> * _solution_previous_nl;
 
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;

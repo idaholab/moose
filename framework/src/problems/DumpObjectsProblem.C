@@ -39,6 +39,9 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
 
   // Create extra vectors and matrices if any
   createTagVectors();
+
+  // Create extra solution vectors if any
+  createTagSolutions();
 }
 
 std::string

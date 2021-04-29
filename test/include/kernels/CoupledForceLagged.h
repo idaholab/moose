@@ -28,6 +28,7 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  unsigned int _v_var;
+  const unsigned int _v_var;
   const VariableValue & _v;
+  const Real _coef;
 };

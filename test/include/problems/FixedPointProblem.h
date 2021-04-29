@@ -26,8 +26,13 @@ public:
   virtual void computeFullResidual(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual);
 
+  bool taggedVectorForResidual() const { return _tagged_vector_for_partial_residual; }
+
+  void copySolution();
+
 protected:
-  TagName _tag_previous;
-  TagID _tag_id;
-  NumericVector<Number> & _residual_previous;
+  const bool _tagged_vector_for_partial_residual;
+  const TagName _tag_previous;
+  const TagID _tag_id;
+  NumericVector<Number> & _tagged_vector;
 };

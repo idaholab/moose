@@ -167,12 +167,6 @@ public:
   virtual void initializeObjects(){};
 
   /**
-   * Method called during initialSetup to add extra system vector if they are required by
-   * the simulation
-   */
-  virtual void addExtraVectors();
-
-  /**
    * Update the system (doing libMesh magic)
    */
   virtual void update(bool update_libmesh_system = true);
@@ -198,8 +192,8 @@ public:
   const NumericVector<Number> & solutionOld() const { return solutionState(1); }
   const NumericVector<Number> & solutionOlder() const { return solutionState(2); }
 
-  virtual const NumericVector<Number> * solutionPreviousNewton() const = 0;
-  virtual NumericVector<Number> * solutionPreviousNewton() = 0;
+  virtual const NumericVector<Number> * solutionPreviousNewton() const;
+  virtual NumericVector<Number> * solutionPreviousNewton();
 
   /**
    * Initializes the solution state.
@@ -970,7 +964,7 @@ private:
   /**
    * Gets the vector name used for an old (not current) solution state.
    */
-  std::string oldSolutionStateVectorName(const unsigned int) const;
+  TagName oldSolutionStateVectorName(const unsigned int) const;
 
   /// The solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _solution_states;

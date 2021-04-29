@@ -11,6 +11,7 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
 #include "MaterialBase.h"
+#include "FEProblemBase.h"
 
 defineLegacyParams(MaterialPropertyInterface);
 
@@ -203,6 +204,19 @@ std::vector<BoundaryName>
 MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & name)
 {
   return _mi_feproblem.getMaterialPropertyBoundaryNames(name);
+}
+
+unsigned int
+MaterialPropertyInterface::getMaxQps() const
+{
+  return _mi_feproblem.getMaxQps();
+}
+
+void
+MaterialPropertyInterface::addConsumedPropertyName(const MooseObjectName & obj_name,
+                                                   const std::string & prop_name)
+{
+  return _mi_feproblem.addConsumedPropertyName(obj_name, prop_name);
 }
 
 void

@@ -934,3 +934,11 @@ DerivativeStringClass(ExtraElementIDName);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
+
+namespace Moose
+{
+extern const TagName SOLUTION_TAG;
+extern const TagName OLD_SOLUTION_TAG;
+extern const TagName OLDER_SOLUTION_TAG;
+extern const TagName PREVIOUS_NL_SOLUTION_TAG;
+}

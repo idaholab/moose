@@ -266,6 +266,10 @@ public:
   {
     return _element_data->vectorTagValue(tag);
   }
+  const FieldVariableGradient & vectorTagGradient(TagID tag) const
+  {
+    return _element_data->vectorTagGradient(tag);
+  }
   const DoFValue & vectorTagDofValue(TagID tag) const
   {
     return _element_data->vectorTagDofValue(tag);
