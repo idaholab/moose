@@ -23,6 +23,7 @@ Documents:
     requirements_traceablity_matrix: sqa/fluid_properties_rtm.md
     verification_validation_report: sqa/fluid_properties_vvr.md
     failure_analysis_report: sqa/fluid_properties_far.md
+    communication_and_contact_information: sqa/framework_cci.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
 

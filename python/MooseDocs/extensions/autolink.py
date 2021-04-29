@@ -179,7 +179,7 @@ class RenderLinkBase(components.RenderComponent):
         tok = tokens.Token(None)
         token.copyToToken(tok)
         if len(tok) == 0: # Use filename if no children exist
-            tokens.String(tok, content=page.local)
+            tokens.String(tok, content=token['page'])
         self.renderer.render(parent, tok, page)
 
 class RenderLocalLink(RenderLinkBase):
