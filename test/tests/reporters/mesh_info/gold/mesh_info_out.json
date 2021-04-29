@@ -11,6 +11,12 @@
                 "local_sidesets": {
                     "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
                 },
+                "local_subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
+                "local_subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
                 "num_dofs": {
                     "type": "unsigned int"
                 },
@@ -46,16 +52,23 @@
                 },
                 "sidesets": {
                     "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
+                },
+                "subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
+                "subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
                 }
             }
         }
     },
     "time_steps": [
         {
-<<<<<<< HEAD
             "mesh_info": {
                 "local_sideset_elems": null,
                 "local_sidesets": null,
+                "local_subdomain_elems": null,
+                "local_subdomains": null,
                 "num_dofs": 0,
                 "num_dofs_auxiliary": 0,
                 "num_dofs_local_auxiliary": 0,
@@ -67,108 +80,9 @@
                 "num_local_nodes": 0,
                 "num_nodes": 0,
                 "sideset_elems": null,
-                "sidesets": null
-=======
-            "reporters": {
-                "mesh_info": {
-                    "info": {
-                        "name": "mesh_info",
-                        "type": "MeshInfo"
-                    },
-                    "values": [
-                        {
-                            "name": "local_sideset_elems",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "local_sidesets",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "local_subdomain_elems",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "local_subdomains",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "num_dofs",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_dofs_auxiliary",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_dofs_local_auxiliary",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_dofs_local_nonlinear",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_dofs_nonlinear",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_elements",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_local_dofs",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_local_elements",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_local_nodes",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_nodes",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "sideset_elems",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "sidesets",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "subdomain_elems",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": null
-                        },
-                        {
-                            "name": "subdomains",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": null
-                        }
-                    ]
-                }
->>>>>>> aa717d2fff (Add subdomain information to MeshInfo)
+                "sidesets": null,
+                "subdomain_elems": null,
+                "subdomains": null
             },
             "time": 0.0,
             "time_step": 0
@@ -202,7 +116,6 @@
                             }
                         ]
                     },
-<<<<<<< HEAD
                     {
                         "id": 2,
                         "name": "top",
@@ -288,6 +201,68 @@
                     {
                         "id": 3,
                         "name": "left"
+                    }
+                ],
+                "local_subdomain_elems": [
+                    {
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25,
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31,
+                            32,
+                            33,
+                            34,
+                            35,
+                            36,
+                            37,
+                            38,
+                            39,
+                            40,
+                            41,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            49
+                        ],
+                        "id": 0
+                    }
+                ],
+                "local_subdomains": [
+                    {
+                        "id": 0
                     }
                 ],
                 "num_dofs": 221,
@@ -503,586 +478,119 @@
                         "id": 3,
                         "name": "left"
                     }
+                ],
+                "subdomain_elems": [
+                    {
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25,
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31,
+                            32,
+                            33,
+                            34,
+                            35,
+                            36,
+                            37,
+                            38,
+                            39,
+                            40,
+                            41,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            49,
+                            50,
+                            51,
+                            52,
+                            53,
+                            54,
+                            55,
+                            56,
+                            57,
+                            58,
+                            59,
+                            60,
+                            61,
+                            62,
+                            63,
+                            64,
+                            65,
+                            66,
+                            67,
+                            68,
+                            69,
+                            70,
+                            71,
+                            72,
+                            73,
+                            74,
+                            75,
+                            76,
+                            77,
+                            78,
+                            79,
+                            80,
+                            81,
+                            82,
+                            83,
+                            84,
+                            85,
+                            86,
+                            87,
+                            88,
+                            89,
+                            90,
+                            91,
+                            92,
+                            93,
+                            94,
+                            95,
+                            96,
+                            97,
+                            98,
+                            99
+                        ],
+                        "id": 0
+                    }
+                ],
+                "subdomains": [
+                    {
+                        "id": 0
+                    }
                 ]
-=======
-                    "values": [
-                        {
-                            "name": "local_sideset_elems",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0,
-                                    "name": "bottom",
-                                    "sides": [
-                                        {
-                                            "elem_id": 0,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 1,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 2,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 3,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 4,
-                                            "side": 0
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": 2,
-                                    "name": "top",
-                                    "sides": [
-                                        {
-                                            "elem_id": 45,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 46,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 47,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 48,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 49,
-                                            "side": 2
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": 3,
-                                    "name": "left",
-                                    "sides": [
-                                        {
-                                            "elem_id": 0,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 5,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 10,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 15,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 20,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 25,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 30,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 35,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 40,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 45,
-                                            "side": 3
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "name": "local_sidesets",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0,
-                                    "name": "bottom"
-                                },
-                                {
-                                    "id": 2,
-                                    "name": "top"
-                                },
-                                {
-                                    "id": 3,
-                                    "name": "left"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "local_subdomain_elems",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": [
-                                {
-                                    "elems": [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7,
-                                        8,
-                                        9,
-                                        10,
-                                        11,
-                                        12,
-                                        13,
-                                        14,
-                                        15,
-                                        16,
-                                        17,
-                                        18,
-                                        19,
-                                        20,
-                                        21,
-                                        22,
-                                        23,
-                                        24,
-                                        25,
-                                        26,
-                                        27,
-                                        28,
-                                        29,
-                                        30,
-                                        31,
-                                        32,
-                                        33,
-                                        34,
-                                        35,
-                                        36,
-                                        37,
-                                        38,
-                                        39,
-                                        40,
-                                        41,
-                                        42,
-                                        43,
-                                        44,
-                                        45,
-                                        46,
-                                        47,
-                                        48,
-                                        49
-                                    ],
-                                    "id": 0
-                                }
-                            ]
-                        },
-                        {
-                            "name": "local_subdomains",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0
-                                }
-                            ]
-                        },
-                        {
-                            "name": "num_dofs",
-                            "type": "unsigned int",
-                            "value": 221
-                        },
-                        {
-                            "name": "num_dofs_auxiliary",
-                            "type": "unsigned int",
-                            "value": 100
-                        },
-                        {
-                            "name": "num_dofs_local_auxiliary",
-                            "type": "unsigned int",
-                            "value": 50
-                        },
-                        {
-                            "name": "num_dofs_local_nonlinear",
-                            "type": "unsigned int",
-                            "value": 66
-                        },
-                        {
-                            "name": "num_dofs_nonlinear",
-                            "type": "unsigned int",
-                            "value": 121
-                        },
-                        {
-                            "name": "num_elements",
-                            "type": "unsigned int",
-                            "value": 100
-                        },
-                        {
-                            "name": "num_local_dofs",
-                            "type": "unsigned int",
-                            "value": 116
-                        },
-                        {
-                            "name": "num_local_elements",
-                            "type": "unsigned int",
-                            "value": 50
-                        },
-                        {
-                            "name": "num_local_nodes",
-                            "type": "unsigned int",
-                            "value": 66
-                        },
-                        {
-                            "name": "num_nodes",
-                            "type": "unsigned int",
-                            "value": 121
-                        },
-                        {
-                            "name": "sideset_elems",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0,
-                                    "name": "bottom",
-                                    "sides": [
-                                        {
-                                            "elem_id": 0,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 1,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 2,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 3,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 4,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 50,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 51,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 52,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 53,
-                                            "side": 0
-                                        },
-                                        {
-                                            "elem_id": 54,
-                                            "side": 0
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": 1,
-                                    "name": "right",
-                                    "sides": [
-                                        {
-                                            "elem_id": 54,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 59,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 64,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 69,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 74,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 79,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 84,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 89,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 94,
-                                            "side": 1
-                                        },
-                                        {
-                                            "elem_id": 99,
-                                            "side": 1
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": 2,
-                                    "name": "top",
-                                    "sides": [
-                                        {
-                                            "elem_id": 45,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 46,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 47,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 48,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 49,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 95,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 96,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 97,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 98,
-                                            "side": 2
-                                        },
-                                        {
-                                            "elem_id": 99,
-                                            "side": 2
-                                        }
-                                    ]
-                                },
-                                {
-                                    "id": 3,
-                                    "name": "left",
-                                    "sides": [
-                                        {
-                                            "elem_id": 0,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 5,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 10,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 15,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 20,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 25,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 30,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 35,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 40,
-                                            "side": 3
-                                        },
-                                        {
-                                            "elem_id": 45,
-                                            "side": 3
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "name": "sidesets",
-                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0,
-                                    "name": "bottom"
-                                },
-                                {
-                                    "id": 1,
-                                    "name": "right"
-                                },
-                                {
-                                    "id": 2,
-                                    "name": "top"
-                                },
-                                {
-                                    "id": 3,
-                                    "name": "left"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "subdomain_elems",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": [
-                                {
-                                    "elems": [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7,
-                                        8,
-                                        9,
-                                        10,
-                                        11,
-                                        12,
-                                        13,
-                                        14,
-                                        15,
-                                        16,
-                                        17,
-                                        18,
-                                        19,
-                                        20,
-                                        21,
-                                        22,
-                                        23,
-                                        24,
-                                        25,
-                                        26,
-                                        27,
-                                        28,
-                                        29,
-                                        30,
-                                        31,
-                                        32,
-                                        33,
-                                        34,
-                                        35,
-                                        36,
-                                        37,
-                                        38,
-                                        39,
-                                        40,
-                                        41,
-                                        42,
-                                        43,
-                                        44,
-                                        45,
-                                        46,
-                                        47,
-                                        48,
-                                        49,
-                                        50,
-                                        51,
-                                        52,
-                                        53,
-                                        54,
-                                        55,
-                                        56,
-                                        57,
-                                        58,
-                                        59,
-                                        60,
-                                        61,
-                                        62,
-                                        63,
-                                        64,
-                                        65,
-                                        66,
-                                        67,
-                                        68,
-                                        69,
-                                        70,
-                                        71,
-                                        72,
-                                        73,
-                                        74,
-                                        75,
-                                        76,
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99
-                                    ],
-                                    "id": 0
-                                }
-                            ]
-                        },
-                        {
-                            "name": "subdomains",
-                            "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >",
-                            "value": [
-                                {
-                                    "id": 0
-                                }
-                            ]
-                        }
-                    ]
-                }
->>>>>>> aa717d2fff (Add subdomain information to MeshInfo)
             },
             "time": 1.0,
             "time_step": 1

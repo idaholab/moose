@@ -24,8 +24,8 @@ MeshInfo::validParams()
   MultiMooseEnum items(
       "num_dofs num_dofs_nonlinear num_dofs_auxiliary num_elements num_nodes num_local_dofs "
       "num_local_dofs_nonlinear num_local_dofs_auxiliary num_local_elements num_local_nodes "
-      "local_sidesets local_sideset_elems sidesets sideset_elems"
-      "local_subdomains local_subdomain_elems subdomains subdomain_elems");
+      "local_sidesets local_sideset_elems sidesets sideset_elems local_subdomains "
+      "local_subdomain_elems subdomains subdomain_elems");
   params.addParam<MultiMooseEnum>(
       "items",
       items,
@@ -54,8 +54,7 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
                                                                      REPORTER_MODE_DISTRIBUTED)),
     _local_sideset_elems(declareHelper<std::map<BoundaryID, SidesetInfo>>(
         "local_sideset_elems", REPORTER_MODE_DISTRIBUTED)),
-    _sidesets(
-        declareHelper<std::map<BoundaryID, SidesetInfo>>("sidesets", REPORTER_MODE_REPLICATED)),
+    _sidesets(declareHelper<std::map<BoundaryID, SidesetInfo>>("sidesets", REPORTER_MODE_ROOT)),
     _sideset_elems(
         declareHelper<std::map<BoundaryID, SidesetInfo>>("sideset_elems", REPORTER_MODE_ROOT)),
 
@@ -63,8 +62,8 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
         "local_subdomains", REPORTER_MODE_DISTRIBUTED)),
     _local_subdomain_elems(declareHelper<std::map<SubdomainID, SubdomainInfo>>(
         "local_subdomain_elems", REPORTER_MODE_DISTRIBUTED)),
-    _subdomains(declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomains",
-                                                                    REPORTER_MODE_REPLICATED)),
+    _subdomains(
+        declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomains", REPORTER_MODE_ROOT)),
     _subdomain_elems(
         declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomain_elems", REPORTER_MODE_ROOT)),
 
