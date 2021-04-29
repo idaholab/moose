@@ -45,7 +45,7 @@ PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputPa
 #endif
 
   if (!_u_var)
-    paramError("u", "the u velocity must be an PINSFVSuperficialVelocityVariable.");
+    paramError("u", "the u velocity must be a PINSFVSuperficialVelocityVariable.");
 
   if (_dim >= 2 && !_v_var)
     paramError("v",

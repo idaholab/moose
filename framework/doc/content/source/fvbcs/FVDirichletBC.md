@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dirichlet boundary conditions imposes the boundary condition $u=g$, where $g$ is a constant. This boundary condition is imposed weakly, through the value of the
+Dirichlet boundary conditions impose the boundary condition $u=g$, where $g$ is a constant. This boundary condition is imposed weakly, through the value of the
 flux.
 
 Note that an upwinding scheme that may be used by flux kernels will affect how the Dirichlet value is applied to the interface. Upwinding schemes can result in the boundary solution being different than the specified Dirichlet value. In order to
