@@ -13,7 +13,7 @@ DOFs: degrees-of-freedom
 EA: Enterprise Architecture
 FE: finite element
 FEM: Finite Element Method
-GMRES: Gernalized Minimum Residual Method
+GMRES: Generalized Minimum Residual Method
 GUI: graphical user interface
 HIT: Hierarchical Input Text
 HPC: High Performance Computing
@@ -23,7 +23,7 @@ IT: Information Technology
 JFNK: Jacobian-Free Newton-Krylov
 JSON: JavaScript Object Notation
 LGPL: GNU Lesser General Public License
-LWP: Laboratory Wide Procuedure
+LWP: Laboratory Wide Procedure
 MMS: Method of Manufactured Solutions
 MWR: Method of Mean Weighted Residuals
 MPI: Message Passing Interface
@@ -35,7 +35,7 @@ POSIX: Portable Operating System Interface
 PBS: Portable Batch System
 PDE: partial differential equation
 PDEs: partial differential equations
-PJFNK: Preconditioned Jacobian Free Newtwon Krylov
+PJFNK: Preconditioned Jacobian Free Newton Krylov
 PMP: Project Management Plan
 RTM: Requirement Traceability Matrix
 SCS: Software Coding Standards
@@ -43,11 +43,11 @@ SDD: Software Design Description
 SRS: Software Requirement Specification
 SSD: Safety Software Determination
 STP: Software Test Plan
-SQAP: Software Quality  Assurance Plan
+SQAP: Software Quality Assurance Plan
 SQP: Software Quality Plan
 VVR: Verification and Validation Report
 VVP: Verification and Validation Plan
 FAR: Failure Analysis Report
 QLD: Quality Level Determination
 QP: quadrature point
-QPs: quadarature points
+QPs: quadrature points
