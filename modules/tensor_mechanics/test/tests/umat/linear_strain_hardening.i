@@ -67,11 +67,6 @@
     plugin = ../../../plugins/linear_strain_hardening
     num_state_vars = 3
   []
-  [elastic]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1000
-    poissons_ratio = 0.3
-  []
 []
 
 [Executioner]

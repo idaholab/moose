@@ -286,6 +286,30 @@ public:
   void fillSymmetricIsotropicEandNu(const T & E, const T & nu);
   ///@}
 
+  /**
+   * fillSymmetric9FromInputVector takes 9 inputs to fill in
+   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
+   * C_ijkl = C_ijlk, C_ijkl = C_jikl
+   * @param input is:
+   *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
+   *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
+   * Lame constant)
+   *                la+2mu la la la+2mu la la+2mu mu mu mu
+   */
+  template <typename T2>
+  void fillSymmetric9FromInputVector(const T2 & input);
+
+  /**
+   * fillSymmetric21FromInputVector takes either 21 inputs to fill in
+   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
+   * C_ijkl = C_ijlk, C_ijkl = C_jikl
+   * @param input is
+   *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
+   * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
+   */
+  template <typename T2>
+  void fillSymmetric21FromInputVector(const T2 & input);
+
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensorTempl<T> innerProductTranspose(const RankTwoTensorTempl<T> &) const;
 
@@ -311,30 +335,6 @@ protected:
   /// The values of the rank-four tensor stored by
   /// index=(((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l)
   T _vals[N4];
-
-  /**
-   * fillSymmetric9FromInputVector takes 9 inputs to fill in
-   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-   * C_ijkl = C_ijlk, C_ijkl = C_jikl
-   * @param input is:
-   *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
-   *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
-   * Lame constant)
-   *                la+2mu la la la+2mu la la+2mu mu mu mu
-   */
-  template <typename T2>
-  void fillSymmetric9FromInputVector(const T2 & input);
-
-  /**
-   * fillSymmetric21FromInputVector takes either 21 inputs to fill in
-   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-   * C_ijkl = C_ijlk, C_ijkl = C_jikl
-   * @param input is
-   *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
-   * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
-   */
-  template <typename T2>
-  void fillSymmetric21FromInputVector(const T2 & input);
 
   /**
    * fillAntisymmetricFromInputVector takes 6 inputs to fill the
@@ -501,4 +501,150 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
   for (unsigned int i = 0; i < N4; ++i)
     result._vals[i] = _vals[i] / b;
   return result;
+}
+
+template <typename T>
+template <typename T2>
+void
+RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const T2 & input)
+{
+  mooseAssert(input.size() == 9,
+              "To use fillSymmetric9FromInputVector, your input must have size 9.");
+  zero();
+
+  (*this)(0, 0, 0, 0) = input[0]; // C1111
+  (*this)(1, 1, 1, 1) = input[3]; // C2222
+  (*this)(2, 2, 2, 2) = input[5]; // C3333
+
+  (*this)(0, 0, 1, 1) = input[1]; // C1122
+  (*this)(1, 1, 0, 0) = input[1];
+
+  (*this)(0, 0, 2, 2) = input[2]; // C1133
+  (*this)(2, 2, 0, 0) = input[2];
+
+  (*this)(1, 1, 2, 2) = input[4]; // C2233
+  (*this)(2, 2, 1, 1) = input[4];
+
+  (*this)(1, 2, 1, 2) = input[6]; // C2323
+  (*this)(2, 1, 2, 1) = input[6];
+  (*this)(2, 1, 1, 2) = input[6];
+  (*this)(1, 2, 2, 1) = input[6];
+
+  (*this)(0, 2, 0, 2) = input[7]; // C1313
+  (*this)(2, 0, 2, 0) = input[7];
+  (*this)(2, 0, 0, 2) = input[7];
+  (*this)(0, 2, 2, 0) = input[7];
+
+  (*this)(0, 1, 0, 1) = input[8]; // C1212
+  (*this)(1, 0, 1, 0) = input[8];
+  (*this)(1, 0, 0, 1) = input[8];
+  (*this)(0, 1, 1, 0) = input[8];
+}
+template <typename T>
+template <typename T2>
+void
+RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
+{
+  mooseAssert(input.size() == 21,
+              "To use fillSymmetric21FromInputVector, your input must have size 21.");
+
+  (*this)(0, 0, 0, 0) = input[0];  // C1111
+  (*this)(1, 1, 1, 1) = input[6];  // C2222
+  (*this)(2, 2, 2, 2) = input[11]; // C3333
+
+  (*this)(0, 0, 1, 1) = input[1]; // C1122
+  (*this)(1, 1, 0, 0) = input[1];
+
+  (*this)(0, 0, 2, 2) = input[2]; // C1133
+  (*this)(2, 2, 0, 0) = input[2];
+
+  (*this)(1, 1, 2, 2) = input[7]; // C2233
+  (*this)(2, 2, 1, 1) = input[7];
+
+  (*this)(0, 0, 0, 2) = input[4]; // C1113
+  (*this)(0, 0, 2, 0) = input[4];
+  (*this)(0, 2, 0, 0) = input[4];
+  (*this)(2, 0, 0, 0) = input[4];
+
+  (*this)(0, 0, 0, 1) = input[5]; // C1112
+  (*this)(0, 0, 1, 0) = input[5];
+  (*this)(0, 1, 0, 0) = input[5];
+  (*this)(1, 0, 0, 0) = input[5];
+
+  (*this)(1, 1, 1, 2) = input[8]; // C2223
+  (*this)(1, 1, 2, 1) = input[8];
+  (*this)(1, 2, 1, 1) = input[8];
+  (*this)(2, 1, 1, 1) = input[8];
+
+  (*this)(1, 1, 1, 0) = input[10];
+  (*this)(1, 1, 0, 1) = input[10];
+  (*this)(1, 0, 1, 1) = input[10];
+  (*this)(0, 1, 1, 1) = input[10]; // C2212 //flipped for filling purposes
+
+  (*this)(2, 2, 2, 1) = input[12];
+  (*this)(2, 2, 1, 2) = input[12];
+  (*this)(2, 1, 2, 2) = input[12];
+  (*this)(1, 2, 2, 2) = input[12]; // C3323 //flipped for filling purposes
+
+  (*this)(2, 2, 2, 0) = input[13];
+  (*this)(2, 2, 0, 2) = input[13];
+  (*this)(2, 0, 2, 2) = input[13];
+  (*this)(0, 2, 2, 2) = input[13]; // C3313 //flipped for filling purposes
+
+  (*this)(0, 0, 1, 2) = input[3]; // C1123
+  (*this)(0, 0, 2, 1) = input[3];
+  (*this)(1, 2, 0, 0) = input[3];
+  (*this)(2, 1, 0, 0) = input[3];
+
+  (*this)(1, 1, 0, 2) = input[9];
+  (*this)(1, 1, 2, 0) = input[9];
+  (*this)(0, 2, 1, 1) = input[9]; // C2213  //flipped for filling purposes
+  (*this)(2, 0, 1, 1) = input[9];
+
+  (*this)(2, 2, 0, 1) = input[14];
+  (*this)(2, 2, 1, 0) = input[14];
+  (*this)(0, 1, 2, 2) = input[14]; // C3312 //flipped for filling purposes
+  (*this)(1, 0, 2, 2) = input[14];
+
+  (*this)(1, 2, 1, 2) = input[15]; // C2323
+  (*this)(2, 1, 2, 1) = input[15];
+  (*this)(2, 1, 1, 2) = input[15];
+  (*this)(1, 2, 2, 1) = input[15];
+
+  (*this)(0, 2, 0, 2) = input[18]; // C1313
+  (*this)(2, 0, 2, 0) = input[18];
+  (*this)(2, 0, 0, 2) = input[18];
+  (*this)(0, 2, 2, 0) = input[18];
+
+  (*this)(0, 1, 0, 1) = input[20]; // C1212
+  (*this)(1, 0, 1, 0) = input[20];
+  (*this)(1, 0, 0, 1) = input[20];
+  (*this)(0, 1, 1, 0) = input[20];
+
+  (*this)(1, 2, 0, 2) = input[16];
+  (*this)(0, 2, 1, 2) = input[16]; // C2313 //flipped for filling purposes
+  (*this)(2, 1, 0, 2) = input[16];
+  (*this)(1, 2, 2, 0) = input[16];
+  (*this)(2, 0, 1, 2) = input[16];
+  (*this)(0, 2, 2, 1) = input[16];
+  (*this)(2, 1, 2, 0) = input[16];
+  (*this)(2, 0, 2, 1) = input[16];
+
+  (*this)(1, 2, 0, 1) = input[17];
+  (*this)(0, 1, 1, 2) = input[17]; // C2312 //flipped for filling purposes
+  (*this)(2, 1, 0, 1) = input[17];
+  (*this)(1, 2, 1, 0) = input[17];
+  (*this)(1, 0, 1, 2) = input[17];
+  (*this)(0, 1, 2, 1) = input[17];
+  (*this)(2, 1, 1, 0) = input[17];
+  (*this)(1, 0, 2, 1) = input[17];
+
+  (*this)(0, 2, 0, 1) = input[19];
+  (*this)(0, 1, 0, 2) = input[19]; // C1312 //flipped for filling purposes
+  (*this)(2, 0, 0, 1) = input[19];
+  (*this)(0, 2, 1, 0) = input[19];
+  (*this)(1, 0, 0, 2) = input[19];
+  (*this)(0, 1, 2, 0) = input[19];
+  (*this)(2, 0, 1, 0) = input[19];
+  (*this)(1, 0, 2, 0) = input[19];
 }
