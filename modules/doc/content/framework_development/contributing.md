@@ -33,7 +33,8 @@ The first step in modifying MOOSE is to create your own [fork](https://help.gith
 
 - Clone your fork to your local machine (replace "username" with your GitHub username).
 
-+Note:+ We recommend that you use SSH URLs instead of HTTPS. Generally you will have fewer problems with
+!alert note title=SSH Recommended
+We recommend that you use SSH URLs instead of HTTPS. Generally, you will have fewer problems with
 firewalls and authentication this way. It does however require an additional step of setting up keys.
 Please follow the instructions provided by Github to setup your [SSH keys](https://help.github.com/articles/connecting-to-github-with-ssh/).
 
@@ -91,7 +92,14 @@ git fetch upstream
 git rebase upstream/devel
 ```
 
-### 4. Push Modifications Back to GitHub
+### 4. Add Documentation
+
+MOOSE follows stringent guidelines for software quality (see [sqa/index.md]). The testing system is designed
+in a manner to shield day-to-day development from any associated burdens. However, we do require
+that all new code is documented in a specific manner to meet the guidelines, please refer to
+[generate.md] for additional information.
+
+### 5. Push Modifications Back to GitHub
 
 Push your branch back into your fork on GitHub:
 
