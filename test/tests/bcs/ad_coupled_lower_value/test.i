@@ -8,7 +8,7 @@
   [lower_d]
     type = LowerDBlockFromSidesetGenerator
     input = square
-    new_block_name = 'lower'
+    new_block = 'lower'
     sidesets = 'top right'
   []
 []

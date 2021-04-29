@@ -15,29 +15,29 @@
     input = gen
     type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
-    new_block_id = 10
-    new_block_name = "secondary_x"
+    new_block = 10
+    new_block = "secondary_x"
   []
   [primary_x]
     input = secondary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
-    new_block_id = 12
-    new_block_name = "primary_x"
+    new_block = 12
+    new_block = "primary_x"
   []
   [secondary_y]
     input = primary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '0'
-    new_block_id = 11
-    new_block_name = "secondary_y"
+    new_block = 11
+    new_block = "secondary_y"
   []
   [primary_y]
     input = secondary_y
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
-    new_block_id = 13
-    new_block_name = "primary_y"
+    new_block = 13
+    new_block = "primary_y"
   []
 []
 

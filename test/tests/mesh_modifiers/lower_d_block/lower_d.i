@@ -8,7 +8,7 @@
   [lower]
     type = LowerDBlockFromSidesetGenerator
     input = gen
-    new_block_id = 10
+    new_block = 10
     sidesets = '0 0 1 2 3'
   []
 []

@@ -6,15 +6,15 @@
   [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
-    new_block_id = 11
-    new_block_name = "secondary"
+    new_block = 11
+    new_block = "secondary"
     sidesets = '101'
   []
   [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
-    new_block_id = 12
-    new_block_name = "primary"
+    new_block = 12
+    new_block = "primary"
     sidesets = '103'
   []
 []

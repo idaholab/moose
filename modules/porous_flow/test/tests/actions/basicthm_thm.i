@@ -32,8 +32,8 @@
   []
   [rename]
     type = RenameBlockGenerator
-    old_block_id = '0 1'
-    new_block_name = 'caprock aquifer'
+    old_block = '0 1'
+    new_block = 'caprock aquifer'
     input = 'outflow_area'
   []
 []

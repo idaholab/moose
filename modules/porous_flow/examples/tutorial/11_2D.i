@@ -27,8 +27,8 @@
   []
   [rename]
     type = RenameBlockGenerator
-    old_block_id = '0 1'
-    new_block_name = 'caps aquifer'
+    old_block = '0 1'
+    new_block = 'caps aquifer'
     input = 'injection_area'
   []
 []

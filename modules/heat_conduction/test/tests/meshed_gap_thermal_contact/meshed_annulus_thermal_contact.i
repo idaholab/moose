@@ -6,8 +6,8 @@
   [rename]
     type = RenameBlockGenerator
     input = fmesh
-    old_block_id = '1 2 3'
-    new_block_id = '1 4 3'
+    old_block = '1 2 3'
+    new_block = '1 4 3'
   []
 []
 

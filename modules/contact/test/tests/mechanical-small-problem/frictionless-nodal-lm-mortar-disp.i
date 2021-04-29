@@ -11,13 +11,13 @@
     type = LowerDBlockFromSidesetGenerator
     input = simple_mesh
     sidesets = '2'
-    new_block_id = '3'
+    new_block = '3'
   [../]
   [./secondary]
     type = LowerDBlockFromSidesetGenerator
     input = primary
     sidesets = '1'
-    new_block_id = '4'
+    new_block = '4'
   [../]
 []
 

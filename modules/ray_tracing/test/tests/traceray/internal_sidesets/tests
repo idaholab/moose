@@ -88,8 +88,8 @@
     input = 'internal_sidesets_2d.i'
     cli_args = 'Mesh/change_subdomain/type=RenameBlockGenerator
                 Mesh/change_subdomain/input=interior_top
-                Mesh/change_subdomain/old_block_id=5
-                Mesh/change_subdomain/new_block_id=1'
+                Mesh/change_subdomain/old_block=5
+                Mesh/change_subdomain/new_block=1'
     expect_err = 'RayBCs exist on internal sidesets that are not bounded by a different'
     allow_test_objects = true
 

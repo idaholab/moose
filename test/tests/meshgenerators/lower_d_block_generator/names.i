@@ -9,7 +9,7 @@
   [./lower_d_block]
     type = LowerDBlockFromSidesetGenerator
     input = gmg
-    new_block_id = 10
+    new_block = 10
     sidesets = 'bottom bottom right top left'
   []
 []

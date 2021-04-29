@@ -51,23 +51,23 @@ name = 'finite'
   [block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'plank block'
+    old_block = '1 2'
+    new_block = 'plank block'
   []
 
   [secondary]
     input = block_rename
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'block_left'
-    new_block_id = '30'
-    new_block_name = 'frictionless_secondary_subdomain'
+    new_block = '30'
+    new_block = 'frictionless_secondary_subdomain'
   []
   [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'plank_right'
-    new_block_id = '20'
-    new_block_name = 'frictionless_primary_subdomain'
+    new_block = '20'
+    new_block = 'frictionless_primary_subdomain'
   []
 []
 

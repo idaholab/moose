@@ -55,8 +55,8 @@
   [./block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'left_block right_block'
+    old_block = '1 2'
+    new_block = 'left_block right_block'
   [../]
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator
@@ -90,15 +90,15 @@
     input = right_bottom_sideset
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'lb_right'
-    new_block_id = '10001'
-    new_block_name = 'secondary_lower'
+    new_block = '10001'
+    new_block = 'secondary_lower'
   []
   [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'rb_left'
-    new_block_id = '10000'
-    new_block_name = 'primary_lower'
+    new_block = '10000'
+    new_block = 'primary_lower'
   []
 []
 

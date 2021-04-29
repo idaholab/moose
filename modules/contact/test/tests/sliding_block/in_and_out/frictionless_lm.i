@@ -8,13 +8,13 @@
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
-    new_block_id = '30'
+    new_block = '30'
   []
   [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
-    new_block_id = '20'
+    new_block = '20'
   []
 []
 
