@@ -24,7 +24,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Hypre/BoomerAMG Preconditioning](hypre.md) - In-depth discussion of using Hypre's algebraic multigrid preconditioner: BoomerAMG
 
-[Code Standards](code_standards.md) - How we expect code to be formatted
+[Code Standards](sqa/framework_scs.md) - How we expect code to be formatted
 
 [Debugging](/debugging.md) - Tips on how to debug MOOSE-based applications
 

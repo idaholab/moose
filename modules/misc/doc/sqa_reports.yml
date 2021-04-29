@@ -20,6 +20,7 @@ Documents:
     verification_validation_report: sqa/misc_vvr.md
     failure_analysis_report: sqa/misc_far.md
     communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
 
