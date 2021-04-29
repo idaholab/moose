@@ -542,7 +542,7 @@ MultiAppGeneralFieldTransfer::buildMeshFunctions(
     std::shared_ptr<MeshFunction> from_func;
     from_func.reset(new MeshFunction(
         from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num));
-    from_func->init(Trees::ELEMENTS);
+    from_func->init();
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
     local_meshfuns.push_back(from_func);
   }
