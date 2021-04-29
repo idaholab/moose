@@ -10,5 +10,5 @@ using the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions
 to +include the release* information with the inquiry.
 
 !template item key=contributing
-Please refer to the [framework_development/contributing.md] instructions for details regarding
+Please refer to the [framework/contributing.md] instructions for details regarding
 how to help improve [!ac](MOOSE).

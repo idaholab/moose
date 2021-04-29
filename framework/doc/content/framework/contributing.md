@@ -94,10 +94,10 @@ git rebase upstream/devel
 
 ### 4. Add Documentation
 
-MOOSE follows stringent guidelines for software quality (see [sqa/index.md]). The testing system is designed
+MOOSE follows stringent guidelines for software quality. The testing system is designed
 in a manner to shield day-to-day development from any associated burdens. However, we do require
 that all new code is documented in a specific manner to meet the guidelines, please refer to
-[generate.md] for additional information.
+[framework/documenting.md] for additional information.
 
 ### 5. Push Modifications Back to GitHub
 
@@ -125,7 +125,7 @@ MOOSE developers should expect to be assigned to their own PRs, as they should k
 
 ## What Now?
 
-The next phase is covered in [How a Patch Becomes Code](framework_development/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
+The next phase is covered in [How a Patch Becomes Code](framework/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
 
 ## Autotools
 

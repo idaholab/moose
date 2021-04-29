@@ -15,7 +15,7 @@ import tempfile
 import subprocess
 import mooseutils
 
-from mooseutils.gitutils import git_submodule_status
+#from mooseutils.gitutils import git_submodule_info
 
 class Test(unittest.TestCase):
     def testIsGitRepo(self):
@@ -53,15 +53,18 @@ class Test(unittest.TestCase):
         self.assertEqual(root, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
     @unittest.skipIf(not mooseutils.is_git_repo(), "Not a Git repository")
-    def testGitSubmoduleStatus(self):
+    def testGitSubmoduleInfo(self):
         root = mooseutils.git_root_dir()
-        status = mooseutils.git_submodule_status(root)
+        status = mooseutils.git_submodule_info(root)
         self.assertIn('large_media', status)
         self.assertIn('libmesh', status)
         self.assertIn('petsc', status)
+        self.assertEquql(len(status['large_media'], 2)
+        self.assertEquql(len(status['libmesh'], 2)
+        self.assertEquql(len(status['petsc'], 2)
 
     @mock.patch('subprocess.call')
-    @mock.patch('mooseutils.gitutils.git_submodule_status')
+    @mock.patch('mooseutils.gitutils.git_submodule_info')
     @unittest.skipIf(not mooseutils.is_git_repo(), "Not a Git repository")
     def testGitInitSubmodule(self, status_func, call_func):
         status_func.return_value = {'test':'-'}

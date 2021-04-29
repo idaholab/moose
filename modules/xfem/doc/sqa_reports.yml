@@ -20,6 +20,7 @@ Documents:
     requirements_traceablity_matrix: sqa/xfem_rtm.md
     verification_validation_report: sqa/xfem_vvr.md
     failure_analysis_report: sqa/xfem_far.md
+    software_library_list: sqa/xfem_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING

@@ -22,7 +22,7 @@ created so it is possible to develop syntax to meet the needs of any project.
 The following links provide additional details on the MOOSE documentation system:
 
 - [MooseDocs/specification.md]
-- [MooseDocs/generate.md]
+- [framework/documenting.md]
 - [MooseDocs/standards.md]
 
 If you are creating a website for your own application the following page may be of use:

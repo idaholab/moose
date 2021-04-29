@@ -58,7 +58,7 @@ class TestInit(unittest.TestCase):
         opt = self.getCommandLineArguments(app='MooseTestApp', category='moose_test')
         status = init.main(opt)
 
-        self.assertEqual(len(self._init_write.keys()), 9)
+        self.assertEqual(len(self._init_write.keys()), 12)
 
         self.assertIn('/test/doc/sqa_moose_test.yml', self._init_write.keys())
         self.assertIn('/test/doc/content/sqa/moose_test_sdd.md', self._init_write.keys())
@@ -68,6 +68,9 @@ class TestInit(unittest.TestCase):
         self.assertIn('/test/doc/content/sqa/moose_test_rtm.md', self._init_write.keys())
         self.assertIn('/test/doc/content/sqa/moose_test_vvr.md', self._init_write.keys())
         self.assertIn('/test/doc/content/sqa/moose_test_far.md', self._init_write.keys())
+        self.assertIn('/test/doc/content/sqa/moose_test_scs.md', self._init_write.keys())
+        self.assertIn('/test/doc/content/sqa/moose_test_cci.md', self._init_write.keys())
+        self.assertIn('/test/doc/content/sqa/moose_test_sll.md', self._init_write.keys())
         self.assertIn('/test/doc/sqa_reports.yml', self._init_write.keys())
 
         self.assertEqual(len(self._yaml_write.keys()), 1)

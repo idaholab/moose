@@ -1,8 +1,8 @@
-!template sqa/scs.md.template
+!template load file=sqa/scs.md.template
 
 [!ac](MOOSE) uses [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) for formatting all
 C++ code in the repository. The application of the format is enforced and checked when the a
-code is contributed, see [framework_development/contributing.md] for more details. The
+code is contributed, see [framework/contributing.md] for more details. The
 configuration file for the formatting is provided in the
 [.clang-format](https://github.com/idaholab/moose/blob/devel/.clang-format) file. If clang is
 installed, the following command will automatically format code changed between your current branch

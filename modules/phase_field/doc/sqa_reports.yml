@@ -22,6 +22,7 @@ Documents:
     requirements_traceablity_matrix: sqa/phase_field_rtm.md
     verification_validation_report: sqa/phase_field_vvr.md
     failure_analysis_report: sqa/phase_field_far.md
+    software_library_list: sqa/phase_field_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING

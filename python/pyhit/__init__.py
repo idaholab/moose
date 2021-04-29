@@ -13,10 +13,10 @@ except ImportError:
         raise
 
     moose_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
-    status = mooseutils.git_submodule_status(moose_dir)
+    status = mooseutils.git_submodule_info(moose_dir)
 
     # Use framework/contrib/hit because moosetools submodule is not available
-    if status['moosetools'] == '-':
+    if status['moosetools'][0] == '-':
         hit_dir = os.path.join(moose_dir, 'framework', 'contrib', 'hit')
         sys.path.append(hit_dir)
         try:

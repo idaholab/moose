@@ -1,16 +1,17 @@
 # How a Patch becomes Code
 
-**Note:** This is a follow on to [Contributing](framework_development/contributing.md).
+!alert note
+This is a follow on to [Contributing](framework/contributing.md).
 
 MOOSE uses an extensive set of automated processes and peer review to take in code from Contributors.
 
 ## 1. It begins with a Pull Request
 
-[Contributors](framework_development/contributing.md) submit code to MOOSE by pushing their modifications to their [Fork](https://help.github.com/articles/fork-a-repo) of the MOOSE repository.  Then, a Contributor will submit a Pull Request (PR) to pull their modifications from their Fork into the `next` branch in the main MOOSE repository.
+Contributors submit code to MOOSE by pushing their modifications to their [Fork](https://help.github.com/articles/fork-a-repo) of the MOOSE repository.  Then, a Contributor will submit a Pull Request (PR) to pull their modifications from their Fork into the `next` branch in the main MOOSE repository.
 
 ## 2. Testing At Every Turn
 
-Once a PR is opened on GitHub, it will automatically signal [CIVET](http://civet.inl.gov), which creates multiple "jobs" on [http://civet.inl.gov](http://civet.inl.gov). Client processes running on our build machines will pull down the code contribution, check it for basic formatting, make sure that it references an issue (see [Contributing](framework_development/contributing.md), and runs a few other pre-checks). If you fail this check, please click on the job to explore details about what went wrong. As a first time developer, you will likely run into a few minor problems. Make changes to your branch and continue to push it up to the server to try again. +Note:+ You do not need to close your PR if you fail to pass checks. Just make adjustments and push again.
+Once a PR is opened on GitHub, it will automatically signal [CIVET](http://civet.inl.gov), which creates multiple "jobs" on [http://civet.inl.gov](http://civet.inl.gov). Client processes running on our build machines will pull down the code contribution, check it for basic formatting, make sure that it references an issue (see [Contributing](framework/contributing.md), and runs a few other pre-checks). If you fail this check, please click on the job to explore details about what went wrong. As a first time developer, you will likely run into a few minor problems. Make changes to your branch and continue to push it up to the server to try again. +Note:+ You do not need to close your PR if you fail to pass checks. Just make adjustments and push again.
 
 Once you have passed the pre-check, you might find that CIVET is waiting to actually build your code. This happens if you are contributing to MOOSE for the first time and we are unfamiliar with you. This is to protect our systems from abuse or malice. Rest assured, a developer will take a look at your contribution soon and will activate the CIVET targets. CIVET will run your code on several platforms under a variety of configurations to make sure that new bugs have not been introduced as a result of your contribution. Check back later for results on the testing of your PR.
 
@@ -71,4 +72,4 @@ Pull Requests that remain inactive with unaddressed comments or failed tests for
 MOOSE follows stringent guidelines for software quality. The testing system is designed
 in a manner to shield day-to-day development from any associated burdens. However, we do require
 that all new code is documented in a specific manner to meet the guidelines, please refer to
-[generate.md] for additional information.
+[framework/documenting.md] for additional information.

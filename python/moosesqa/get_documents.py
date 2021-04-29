@@ -32,6 +32,7 @@ INL_DOCUMENTS = ['safety_software_determination',
                  'failure_analysis_report',
                  'communication_and_contact_information',
                  'software_coding_standards',
+                 'software_library_list',
                  'user_manual',
                  'theory_manual']
 
