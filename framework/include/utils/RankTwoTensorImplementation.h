@@ -980,7 +980,7 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
     }
 
   Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es;
-  es.computeDirect(self);
+  es.compute(self);
 
   auto lambda = es.eigenvalues();
   eigvals.resize(N);
