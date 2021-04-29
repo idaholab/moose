@@ -12,6 +12,7 @@ Documents:
     requirements_traceablity_matrix: sqa/ray_tracing_rtm.md
     verification_validation_plan: sqa/ray_tracing_vvr.md
     failure_analysis_report: sqa/ray_tracing_far.md
+    communication_and_contact_information: sqa/framework_cci.md
     log_default: WARNING
     show_warning: false
 

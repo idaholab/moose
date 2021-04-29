@@ -20,6 +20,7 @@ Documents:
     requirements_traceablity_matrix: sqa/heat_conduction_rtm.md
     verification_validation_report: sqa/heat_conduction_vvr.md
     failure_analysis_report: sqa/heat_conduction_far.md
+    communication_and_contact_information: sqa/framework_cci.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
 
