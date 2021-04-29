@@ -12,7 +12,7 @@
 #include "FVFluxKernel.h"
 
 /**
- * A flux kernel diffusion of momentum in porous media across cell faces
+ * A flux kernel for diffusion of momentum in porous media across cell faces
  */
 class PINSFVMomentumDiffusion : public FVFluxKernel
 {
