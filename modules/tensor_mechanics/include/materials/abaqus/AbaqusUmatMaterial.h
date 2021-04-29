@@ -103,11 +103,6 @@ protected:
   /// Jacobian multiplier (we approximate this using the elasticity tensor)
   MaterialProperty<RankFourTensor> & _jacobian_mult;
 
-  /// Name of the elasticity tensor material property
-  const std::string _elasticity_tensor_name;
-  /// Elasticity tensor material property
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
-
   const MaterialProperty<RankTwoTensor> & _Fbar;
   const MaterialProperty<RankTwoTensor> & _Fbar_old;
 

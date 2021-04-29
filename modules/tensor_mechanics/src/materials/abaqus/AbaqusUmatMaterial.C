@@ -42,12 +42,11 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
     _mechanical_constants(getParam<std::vector<Real>>("mechanical_constants")),
     _thermal_constants(getParam<std::vector<Real>>("thermal_constants")),
     _num_state_vars(getParam<unsigned int>("num_state_vars")),
+    _aqCELENT(1.0), // TODO: figure out what this really should be
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _Fbar(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _Fbar_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _state_var(declareProperty<std::vector<Real>>(_base_name + "state_var")),
@@ -62,11 +61,6 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
 
   // Size and create full (mechanical+thermal) material property array
   _num_props = _mechanical_constants.size() + _thermal_constants.size();
-  std::vector<Real> props_array(_num_props);
-  for (unsigned int i = 0; i < _mechanical_constants.size(); ++i)
-    props_array[i] = _mechanical_constants[i];
-  for (unsigned int i = _mechanical_constants.size(); i < _num_props; ++i)
-    props_array[i] = _thermal_constants[i];
 
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
   _aqNTENS = 6; // Size of the stress or strain component array (NDI+NSHR)
@@ -84,30 +78,11 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
   _aqDSTRAN.resize(_aqNTENS);
   _aqPROPS.resize(_num_props);
 
-  for (unsigned int i = 0; i < _num_state_vars; ++i)
-    _aqSTATEV[i] = 0.0;
-
-  for (int i = 0; i < _aqNTENS; ++i)
-  {
-    _aqDDSDDT[i] = 0.0;
-    _aqDRPLDE[i] = 0.0;
-    _aqSTRAN[i] = 0.0;
-    _aqSTRESS[i] = 0.0;
-    _aqDSTRAN[i] = 0.0;
-  }
-
-  for (unsigned int i = 0; i < 9; ++i)
-  {
-    _aqDFGRD0[i] = 0.0;
-    _aqDFGRD1[i] = 0.0;
-  }
-
-  for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
-    _aqDDSDDE[i] = 0.0;
-
   // Assign materials properties from vector form into an array
-  for (unsigned int i = 0; i < _num_props; ++i)
-    _aqPROPS[i] = props_array[i];
+  for (unsigned int i = 0; i < _mechanical_constants.size(); ++i)
+    _aqPROPS[i] = _mechanical_constants[i];
+  for (unsigned int i = _mechanical_constants.size(); i < _num_props; ++i)
+    _aqPROPS[i] = _thermal_constants[i];
 
   // Size UMAT state variable (NSTATV) and material constant (NPROPS) arrays
   _aqNSTATV = _num_state_vars;
@@ -162,25 +137,9 @@ AbaqusUmatMaterial::initQpStatefulProperties()
 void
 AbaqusUmatMaterial::computeQpStress()
 {
-  Real myDFGRD0[9] = {_Fbar_old[_qp](0, 0),
-                      _Fbar_old[_qp](1, 0),
-                      _Fbar_old[_qp](2, 0),
-                      _Fbar_old[_qp](0, 1),
-                      _Fbar_old[_qp](1, 1),
-                      _Fbar_old[_qp](2, 1),
-                      _Fbar_old[_qp](0, 2),
-                      _Fbar_old[_qp](1, 2),
-                      _Fbar_old[_qp](2, 2)};
-  Real myDFGRD1[9] = {_Fbar[_qp](0, 0),
-                      _Fbar[_qp](1, 0),
-                      _Fbar[_qp](2, 0),
-                      _Fbar[_qp](0, 1),
-                      _Fbar[_qp](1, 1),
-                      _Fbar[_qp](2, 1),
-                      _Fbar[_qp](0, 2),
-                      _Fbar[_qp](1, 2),
-                      _Fbar[_qp](2, 2)};
-
+  const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
+  const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
+  // copy because UMAT does not guarantee constness
   for (unsigned int i = 0; i < 9; ++i)
   {
     _aqDFGRD0[i] = myDFGRD0[i];
@@ -192,22 +151,35 @@ AbaqusUmatMaterial::computeQpStress()
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
   // Pass through updated stress, total strain, and strain increment arrays
+  static const std::array<Real, 6> strain_factor{1, 1, 1, 2, 2, 2};
   static const std::vector<std::pair<unsigned int, unsigned int>> component{
       {0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}};
-  for (int i = 0; i < _aqNTENS; ++i) // this works only for 3D
+  for (int i = 0; i < _aqNTENS; ++i)
   {
     _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
-    _aqSTRAN[i] = _total_strain[_qp](component[i].first, component[i].second);
-    _aqDSTRAN[i] = _strain_increment[_qp](component[i].first, component[i].second);
+    _aqSTRAN[i] = _total_strain[_qp](component[i].first, component[i].second) * strain_factor[i];
+    _aqDSTRAN[i] =
+        _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
   }
 
-  // Pass through step , time, and coordinate system information
-  _aqKSTEP = _t_step;    // Step number
-  _aqTIME[0] = _t;       // Value of step time at the beginning of the current increment - Check
-  _aqTIME[1] = _t - _dt; // Value of total time at the beginning of the current increment - Check
-  _aqDTIME = _dt;        // Time increment
-  for (unsigned int i = 0; i < 3; ++i) // Loop current coordinates in UMAT COORDS
+  // Step number
+  _aqKSTEP = _t_step;
+
+  // Value of step time at the beginning of the current increment - Check
+  _aqTIME[0] = _t;
+  // Value of total time at the beginning of the current increment - Check
+  _aqTIME[1] = _t - _dt;
+
+  // Time increment
+  _aqDTIME = _dt;
+
+  // current coordinates
+  for (unsigned int i = 0; i < 3; ++i)
     _aqCOORDS[i] = _q_point[_qp](i);
+
+  // zero out Jacobian contribution
+  for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
+    _aqDDSDDE[i] = 0.0;
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
@@ -261,7 +233,28 @@ AbaqusUmatMaterial::computeQpStress()
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[3], _aqSTRESS[4], _aqSTRESS[5]);
 
-  // update Jacobian multiplier
-  if (_fe_problem.currentlyComputingJacobian())
-    _jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  // use DDSDDE as Jacobian mult
+  _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{
+      _aqDDSDDE[0],  // C1111
+      _aqDDSDDE[1],  // C1122
+      _aqDDSDDE[2],  // C1133
+      _aqDDSDDE[3],  // C1123
+      _aqDDSDDE[4],  // C1113
+      _aqDDSDDE[5],  // C1112
+      _aqDDSDDE[7],  // C2222
+      _aqDDSDDE[8],  // C2233
+      _aqDDSDDE[9],  // C2223
+      _aqDDSDDE[10], // C2213
+      _aqDDSDDE[11], // C2212
+      _aqDDSDDE[14], // C3333
+      _aqDDSDDE[15], // C3323
+      _aqDDSDDE[16], // C3313
+      _aqDDSDDE[17], // C3312
+      _aqDDSDDE[21], // C2323
+      _aqDDSDDE[22], // C2313
+      _aqDDSDDE[23], // C2312
+      _aqDDSDDE[28], // C1313
+      _aqDDSDDE[29], // C1312
+      _aqDDSDDE[35]  // C1212
+  });
 }
