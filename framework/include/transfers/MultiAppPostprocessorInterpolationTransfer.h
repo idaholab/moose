@@ -39,4 +39,6 @@ protected:
   Real _power;
   MooseEnum _interp_type;
   Real _radius;
+
+  bool _nodal;
 };
