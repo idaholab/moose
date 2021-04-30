@@ -386,7 +386,6 @@ ConcentricCircleMeshGenerator::generate()
 
   while (index < limit)
   {
-    // ?
     Elem * elem = mesh->add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
     elem->set_node(1) = nodes[index + standard + 1];
@@ -659,7 +658,6 @@ ConcentricCircleMeshGenerator::generate()
       {
         while (index < limit)
         {
-          // remove -> crash
           Elem * elem = mesh->add_elem(new Quad4);
           elem->set_node(0) = nodes[index];
           elem->set_node(1) = nodes[index + 1];
