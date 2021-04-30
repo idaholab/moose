@@ -153,6 +153,7 @@ TensorMechanicsActionBase::validParams()
       "Specifies the family of FE shape functions to use for this variable.");
   params.addParamNamesToGroup("generate_output material_output_order material_output_family",
                               "Output");
+  params.addParam<bool>("verbose", false, "Display extra information.");
 
   return params;
 }

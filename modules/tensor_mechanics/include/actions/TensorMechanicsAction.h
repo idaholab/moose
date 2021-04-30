@@ -107,6 +107,7 @@ protected:
   bool _cylindrical_axis_point1_valid;
   bool _cylindrical_axis_point2_valid;
   bool _direction_valid;
+  bool _verbose;
 
   /// points used to determine axis of rotation for cyclindrical stress/strain quantities
   Point _cylindrical_axis_point1;

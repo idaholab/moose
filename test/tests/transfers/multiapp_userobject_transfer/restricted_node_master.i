@@ -79,7 +79,7 @@ num_layers = 2
 [MultiApps]
   [ch0]
     type = TransientMultiApp
-    input_files = 'restricted_node_slave.i'
+    input_files = 'restricted_node_sub.i'
     bounding_box_padding = '0 0.5 1'
     positions = '0 0.5 -0.1'
     output_in_position = true
@@ -87,7 +87,7 @@ num_layers = 2
   []
   [ch1]
     type = TransientMultiApp
-    input_files = 'restricted_node_slave.i'
+    input_files = 'restricted_node_sub.i'
     bounding_box_padding = '0 0.5 1'
     positions = '0 0.5  1.1'
     output_in_position = true
