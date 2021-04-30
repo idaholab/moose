@@ -70,15 +70,15 @@ class SubmoduleHashCommand(command.CommandComponent):
             raise exceptions.MooseDocsException("The '!git submodule-hash' command is an inline level command, use '[!git!submodule-hash](name)' instead.")
 
         name =  info['inline']
-        status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR)
-        ginfo = status.get(name, None)
-        if ginfo is None:
-            msg = "The submodule '{}' was not located, the available submodules are: {}"
-            raise exceptions.MooseDocsException(msg, name, ', '.join(status.keys()))
+        status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        for repo, ginfo in status.items():
+            if repo.endswith(name):
+                url = self.settings['url']
+                if url is None:
+                    core.Word(parent, content=ginfo[1])
+                else:
+                    core.Link(parent, url=urllib.parse.urljoin(url, ginfo[1]), string=ginfo[1])
+                return parent
 
-        url = self.settings['url']
-        if url is None:
-            core.Word(parent, content=ginfo[1])
-        else:
-            core.Link(parent, url=urllib.parse.urljoin(url, ginfo[1]), string=ginfo[1])
-        return parent
+        msg = "The submodule '{}' was not located, the available submodules are: {}"
+        raise exceptions.MooseDocsException(msg, name, ', '.join(status.keys()))

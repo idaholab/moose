@@ -60,7 +60,6 @@ class TemplateExtension(include.IncludeExtension):
         page['dependencies'] = set()
 
     def postTokenize(self, page, ast):
-
         items = set()
         fields = set()
 
@@ -72,8 +71,8 @@ class TemplateExtension(include.IncludeExtension):
 
         unknown_items = items.difference(fields)
         if unknown_items:
-            msg = "Unknown template item(s): {}\n{}".format(', '.join(unknown_items), page.source)
-            raise exceptions.MooseDocsException(msg)
+            msg = "Unknown template item(s): {}\n{}"
+            raise exceptions.MooseDocsException(msg, ', '.join(unknown_items), page.source)
 
 class TemplateLoadCommand(command.CommandComponent):
     """
