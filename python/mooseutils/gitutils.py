@@ -68,12 +68,12 @@ def git_root_dir(working_dir=os.getcwd()):
     except OSError:
         print("The supplied directory does not exist: {}".format(working_dir))
 
-def git_submodule_info(working_dir=os.getcwd()):
+def git_submodule_info(working_dir=os.getcwd(), *args):
     """
     Return the status of each of the git submodule(s).
     """
     out = dict()
-    result = check_output(['git', 'submodule', 'status'], cwd=working_dir)
+    result = check_output(['git', 'submodule', 'status', *args], cwd=working_dir)
     regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s')
     for match in regex.finditer(result):
         out[match.group('name')] = (match.group('status'), match.group('sha1'))

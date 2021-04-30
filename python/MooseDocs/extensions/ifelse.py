@@ -13,6 +13,8 @@ import importlib
 import collections
 import logging
 import moosetree
+import mooseutils
+import MooseDocs
 from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
@@ -33,6 +35,10 @@ def hasMooseApp(ext, app):
     """Module function for searching for the existence of a registered application name."""
     return ext.hasRegistredApp(app)
 
+def hasSubmodule(ext, name):
+    """Module function for testing if an application has a submodule ending with the given name."""
+    return ext.hasSubmodule(name)
+
 class IfElseExtension(command.CommandExtension):
     """
     Allows the if/elif/else statements to control content.
@@ -48,6 +54,7 @@ class IfElseExtension(command.CommandExtension):
 
         # List of registered apps, see preExecute
         self._registerd_apps = set()
+        self._current_app = None
 
         # Build list of modules for function searching and include this file by default
         self._modules = list()
@@ -80,6 +87,14 @@ class IfElseExtension(command.CommandExtension):
             LOG.warning(msg)
 
         return name in self._registerd_apps
+
+    def hasSubmodule(self, name):
+        """Helper for the 'hasSubmodule' function."""
+        status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        for repo, ginfo in status.items():
+            if repo.endswith(name):
+                return True
+        return False
 
     def extend(self, reader, renderer):
         self.requires(command)

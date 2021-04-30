@@ -22,9 +22,11 @@ class TestSQA(unittest.TestCase):
         cls.ROOT_DIR = mooseutils.git_root_dir(os.path.dirname(__file__))
         cls.TEMPLATE_DIR = os.path.join(cls.ROOT_DIR, 'framework', 'doc', 'content', 'templates', 'sqa')
         cls.TEMPLATE_NAMES =['far.md.template', 'rtm.md.template', 'sdd.md.template', 'srs.md.template',
-                             'stp.md.template', 'vvr.md.template', 'app_index.md.template',
+                             'stp.md.template', 'vvr.md.template', 'cci.md.template', 'scs.md.template',
+                             'sll.md.template', 'app_index.md.template',
                              'app_far.md.template', 'app_rtm.md.template', 'app_sdd.md.template',
-                             'app_srs.md.template', 'app_stp.md.template', 'app_vvr.md.template']
+                             'app_srs.md.template', 'app_stp.md.template', 'app_vvr.md.template',
+                             'app_cci.md.template', 'app_scs.md.template', 'app_sll.md.template']
         cls.DOC_FILE = os.path.join(cls.ROOT_DIR, 'modules', 'doc', 'content', 'python', 'MooseDocs', 'extensions', 'sqa.md')
         cls.COLLECTIONS = {'FUNCTIONAL', 'USABILITY', 'PERFORMANCE', 'SYSTEM', 'FAILURE_ANALYSIS'}
 

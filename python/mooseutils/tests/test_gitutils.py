@@ -59,9 +59,9 @@ class Test(unittest.TestCase):
         self.assertIn('large_media', status)
         self.assertIn('libmesh', status)
         self.assertIn('petsc', status)
-        self.assertEquql(len(status['large_media'], 2)
-        self.assertEquql(len(status['libmesh'], 2)
-        self.assertEquql(len(status['petsc'], 2)
+        self.assertEqual(len(status['large_media']), 2)
+        self.assertEqual(len(status['libmesh']), 2)
+        self.assertEqual(len(status['petsc']), 2)
 
     @mock.patch('subprocess.call')
     @mock.patch('mooseutils.gitutils.git_submodule_info')
