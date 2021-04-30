@@ -25,6 +25,8 @@ WindingOrder::WindingOrder(const InputParameters & parameters) : AuxKernel(param
 {
   if (isNodal())
     mooseError(" WindingOrder must be for an elemental variable");
+  if (_mesh.dimension() != 2)
+    mooseError(" WindingOrder is only defined for 2D elements");
 }
 
 Real
