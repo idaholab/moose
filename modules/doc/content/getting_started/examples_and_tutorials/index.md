@@ -88,7 +88,7 @@ Learn how to develop a MOOSE-based application to solve coupled systems of diffe
 
 !col! small=11 medium=11 large=11
 [tutorial02_multiapps/index.md]\\
-Learn how to used the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems to couple many multiphysics applications together across differing time or length scales.
+Learn how to use the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems to couple many multiphysics applications together across differing time or length scales.
 !col-end!
 
 !col! small=1 medium=1 large=1

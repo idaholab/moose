@@ -1,14 +1,7 @@
-# Tutorial 2: Multiapp Demonstration id=tutorial-multiapp
+# Tutorial 2: MultiApp Demonstration id=tutorial-multiapp
 
-In this tutorial the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems will be demonstrated...
+In this tutorial the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems are
+used to couple multiphysics applications together across differing time or length scales. This
+tutorial is currently a stand-alone slide set as linked below.
 
-
-## Tutorial Contents id=contents
-
-!content outline location=getting_started/examples_and_tutorials/tutorial02_multiapps
-                 max_level=6
-                 hide=tutorial-multiapp contents
-                 no_prefix=2
-                 no_count=problem-statement
-
-!content pagination next=tutorial02_multiapps/problem_statement.md
+[Tutorial 2: MOOSE MultiApps](https://mooseframework.org/getting_started/examples_and_tutorials/tutorial02_multiapps/slides)
