@@ -35,7 +35,7 @@ recognized. Please upgrade your client, if possible. Otherwise, replace
 the ProxyJump directive with the following line:
 
 ```bash
-ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p`
+ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
 ```
 !alert-end!
 
