@@ -30,9 +30,9 @@ protected:
   /// lists of boundary elements for all boundaries
   const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> & _bnd_elem_ids;
 
-  /// which way to mark elements near teh boundary
-  MarkerValue _mark;
+  /// which way to mark elements near the boundary
+  const MarkerValue _mark;
 
   /// boundary near which to mark elements
-  BoundaryID _boundary;
+  const BoundaryID _boundary;
 };
