@@ -46,6 +46,8 @@ protected:
   const ADMaterialProperty<Real> & _e_neighbor;
   const MooseEnum _eqn;
   const unsigned int _index;
+  const MooseArray<ADReal> & _scalar_elem;
+  const MooseArray<ADReal> & _scalar_neighbor;
 
   RealVectorValue _Sf;
   ADReal _vSf_elem;

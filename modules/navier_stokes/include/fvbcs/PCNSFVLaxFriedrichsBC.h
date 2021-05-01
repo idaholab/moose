@@ -48,4 +48,8 @@ protected:
   const Function * const _pressure_function;
   const Function * const _T_fluid_function;
   const bool _implicit_state_var;
+  const MooseArray<ADReal> & _scalar_elem;
+  const MooseArray<ADReal> & _scalar_neighbor;
+  const bool _scalar_function_provided;
+  const Function * const _scalar_function;
 };
