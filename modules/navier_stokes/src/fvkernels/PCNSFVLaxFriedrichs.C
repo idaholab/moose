@@ -19,12 +19,16 @@ PCNSFVLaxFriedrichs::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
-  MooseEnum eqn("mass momentum energy");
+  MooseEnum eqn("mass momentum energy scalar");
   params.addRequiredParam<MooseEnum>("eqn", eqn, "The equation you're solving.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
+  params.addParam<MaterialPropertyName>(
+      "scalar_prop_name",
+      "An optional material property name that can be used to specify an advected material "
+      "property. If this is not supplied the variable variable will be used.");
   return params;
 }
 
@@ -49,7 +53,13 @@ PCNSFVLaxFriedrichs::PCNSFVLaxFriedrichs(const InputParameters & params)
     _e_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
     _e_neighbor(getNeighborADMaterialProperty<Real>(NS::specific_internal_energy)),
     _eqn(getParam<MooseEnum>("eqn")),
-    _index(getParam<MooseEnum>("momentum_component"))
+    _index(getParam<MooseEnum>("momentum_component")),
+    _scalar_elem(isParamValid("scalar_prop_name")
+                     ? getADMaterialProperty<Real>("scalar_prop_name").get()
+                     : _u_elem),
+    _scalar_neighbor(isParamValid("scalar_prop_name")
+                         ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
+                         : _u_neighbor)
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -169,6 +179,9 @@ PCNSFVLaxFriedrichs::computeQpResidual()
            // if instead of using pressure, one uses porosity*pressure then the solution is totally
            // wrong
            _omega * (_pressure_elem[_qp] - _pressure_neighbor[_qp]);
+  else if (_eqn == "scalar")
+    return _adjusted_vSf_elem * _rho_elem[_qp] * _scalar_elem[_qp] +
+           _adjusted_vSf_neighbor * _rho_neighbor[_qp] * _scalar_neighbor[_qp];
   else
     mooseError("Unrecognized enum type ", _eqn);
 }

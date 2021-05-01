@@ -20,7 +20,7 @@ PCNSFVLaxFriedrichsBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
-  MooseEnum eqn("mass momentum energy");
+  MooseEnum eqn("mass momentum energy scalar");
   params.addRequiredParam<MooseEnum>("eqn", eqn, "The equation you're solving.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addParam<MooseEnum>("momentum_component",
@@ -47,6 +47,14 @@ PCNSFVLaxFriedrichsBC::validParams()
       "variables *must* be implicit (for subsonic flows)) and the equation of state. I will note "
       "that treating the state variable implicitly doesn't even appear to allow a converged "
       "solution in initial testing, so I'll probably remove this option soon.");
+  params.addParam<MaterialPropertyName>(
+      "scalar_prop_name",
+      "An optional material property name that can be used to specify an advected material "
+      "property. If this is not supplied the variable variable will be used.");
+  params.addParam<FunctionName>(
+      "scalar",
+      "A function describing the value of the scalar at the boundary. If this function is not "
+      "provided, then the interior value will be used.");
   return params;
 }
 
@@ -72,7 +80,15 @@ PCNSFVLaxFriedrichsBC::PCNSFVLaxFriedrichsBC(const InputParameters & params)
     _svel_function(_svel_provided ? &getFunction(NS::superficial_velocity) : nullptr),
     _pressure_function(_pressure_provided ? &getFunction(NS::pressure) : nullptr),
     _T_fluid_function(_T_fluid_provided ? &getFunction(NS::T_fluid) : nullptr),
-    _implicit_state_var(getParam<bool>("implicit_state_var"))
+    _implicit_state_var(getParam<bool>("implicit_state_var")),
+    _scalar_elem(isParamValid("scalar_prop_name")
+                     ? getADMaterialProperty<Real>("scalar_prop_name").get()
+                     : _u),
+    _scalar_neighbor(isParamValid("scalar_prop_name")
+                         ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
+                         : _u_neighbor),
+    _scalar_function_provided(isParamValid("scalar")),
+    _scalar_function(_scalar_function_provided ? &getFunction("scalar") : nullptr)
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -224,6 +240,15 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
            // if instead of using pressure, one uses porosity*pressure then the solution is totally
            // wrong
            omega * (pressure_interior - pressure_boundary);
+  }
+  else if (_eqn == "scalar")
+  {
+    const auto & scalar_interior = out_of_elem ? _scalar_elem[_qp] : _scalar_neighbor[_qp];
+    const auto scalar_boundary =
+        _scalar_function_provided ? ADReal(_scalar_function->value(_t, _face_info->faceCentroid()))
+                                  : scalar_interior;
+    return adjusted_vSf_interior * rho_interior * scalar_interior +
+           adjusted_vSf_boundary * rho_boundary * scalar_boundary;
   }
   else
     mooseError("Unrecognized enum type ", _eqn);
