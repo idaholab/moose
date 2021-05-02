@@ -9,8 +9,9 @@
   [./gpd]
     type = MeshGeneratorPD
     input = fmg
-    retain_fe_mesh = false
-    convert_block_ids = '1 2'
+    retain_fe_mesh = true
+    blocks_to_pd = 2
+    #blocks_as_fe = 1
   [../]
 []
 

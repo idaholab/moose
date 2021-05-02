@@ -4,12 +4,12 @@
 
   [./fmg]
     type = FileMeshGenerator
-    file = circle.e
+    file = cylinder_circle.e
   [../]
   [./mgpd]
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = false
-    construct_peridynamics_sideset = true
+    construct_pd_sidesets = true
   [../]
 []
