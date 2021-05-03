@@ -10,7 +10,7 @@
 > of the library is to provide support for adaptive mesh refinement (AMR) computations in parallel
 > while allowing a research scientist to focus on the physics they are modeling.
 
-Current Version of libMesh: [!git!submodule-hash url=https://github.com/libmesh/libmesh/commit](libmesh)]
+Current Version of libMesh: [!git!submodule-hash url=https://github.com/libmesh/libmesh/commit](libmesh)
 
 ## [!ac](PETSc)
 
@@ -22,4 +22,4 @@ Current Version of libMesh: [!git!submodule-hash url=https://github.com/libmesh/
 > supports MPI, and GPUs through CUDA or OpenCL, as well as hybrid MPI-GPU parallelism. PETSc
 > (sometimes called PETSc/Tao) also contains the Tao optimization software library.
 
-Current Version of [!ac](PETSc): [!git!submodule-hash url=https://github.com/petsc/petsc/commit](petsc)]
+Current Version of [!ac](PETSc): [!git!submodule-hash url=https://github.com/petsc/petsc/commit](petsc)

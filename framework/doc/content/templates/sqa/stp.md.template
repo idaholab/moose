@@ -85,7 +85,7 @@ sufficient, but for a large-scale effort more iterations will be required.
 
 !template-end!
 
-## Test Automation (Scripting)
+## Test Automation (Scripting) id=test-automation
 
 !template field key=test-automation
 If testing tools can be used, then in this section it needs to be clearly defined how and to
