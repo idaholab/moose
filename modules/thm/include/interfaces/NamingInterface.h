@@ -42,6 +42,16 @@ public:
   }
 
   /**
+   * Build a name from 2 strings and a number
+   */
+  std::string genName(const std::string & prefix, const std::string & name, unsigned int i) const
+  {
+    std::stringstream ss;
+    ss << prefix << ":" << name << ":" << i;
+    return ss.str();
+  }
+
+  /**
    * Build a name from strings
    */
   std::string genName(const std::string & prefix,
