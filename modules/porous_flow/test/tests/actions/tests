@@ -161,4 +161,22 @@
     issues = "#10093"
     design = "PorousFlowAddMaterialJoiner.md PorousFlowAddMaterialAction.md"
   [../]
+  [./basicthm_bh]
+    type = CSVDiff
+    input = 'basicthm_borehole.i'
+    csvdiff = 'basicthm_borehole_out.csv'
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action to allow boreholes to be used"
+    issues = "#17025"
+    design = "PorousFlowBasicTHM.md"
+  [../]
+  [./fullsat_bh]
+    type = CSVDiff
+    input = 'fullsat_borehole.i'
+    csvdiff = 'fullsat_borehole_out.csv'
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowFullySaturated Action to allow boreholes to be used"
+    issues = "#17025"
+    design = "PorousFlowFullySaturated.md"
+  [../]
 []

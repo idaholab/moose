@@ -146,9 +146,13 @@ PorousFlowBasicTHM::addMaterials()
       _mechanical)
     addVolumetricStrainMaterial(_coupled_displacements, false);
 
+  // Relative permeability might be needed by Darcy-velocity Aux, so add a material
+  // setting kr=1
   if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
-    addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
+    addRelativePermeabilityConst(false, 0, 1.0);
 
+  // Some obects not added by this action might have a use_mobility = true param,
+  // which needs a nodal relative permeability
   if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
-    addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
+    addRelativePermeabilityConst(true, 0, 1.0);
 }

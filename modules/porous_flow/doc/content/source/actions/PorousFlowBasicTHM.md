@@ -27,6 +27,9 @@ For isothermal simulations, the fluid properties may still depend on temperature
 
 [Upwinding](/porous_flow/upwinding.md) and [mass lumping](/porous_flow/mass_lumping.md) are not used by these Kernels.  These numerical schemes are typically unnecessary in fully-saturated, single-phase simulations, but the lack of stabilization means the results from `PorousFlowBasicTHM` will typically be slightly different to the remainder of PorousFlow.
 
+!alert note
+Even though there is only one fluid phase in this fully saturated action, some objects may require a relative permeability material to work. Examples include [PorousFlowDarcyVelocityComponent](PorousFlowDarcyVelocityComponent.md) `AuxKernels` which requires relative permeability, or [PorousFlowPeacemanBorehole](PorousFlowPeacemanBorehole.md) wells. By default, this action adds a constant relative permeability of one, so that the fluid is perfectly mobile. 
+
 ## Heat flow
 
 For anisothermal simulations, the energy equation reads
