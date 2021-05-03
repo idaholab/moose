@@ -9,6 +9,10 @@ mu = ${fparse rho * bulk_u * D / Re}
 advected_interp_method='upwind'
 velocity_interp_method='rc'
 
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
