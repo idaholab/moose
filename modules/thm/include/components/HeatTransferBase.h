@@ -30,9 +30,9 @@ public:
   /**
    * Returns wall heat flux name
    *
-   * @return The name of wall heat flux variable
+   * @return The name of wall heat flux material property
    */
-  const VariableName & getWallHeatFluxName() const;
+  const MaterialPropertyName & getWallHeatFluxName() const;
 
   /**
    * Returns whether this heat transfer is specified by temperature, rather than heat flux
@@ -84,7 +84,7 @@ protected:
   /// wall temperature name
   VariableName _T_wall_name;
   /// wall heat flux name
-  VariableName _q_wall_name;
+  MaterialPropertyName _q_wall_name;
 
   /// Subdomains corresponding to the connected flow channel
   std::vector<SubdomainName> _flow_channel_subdomains;

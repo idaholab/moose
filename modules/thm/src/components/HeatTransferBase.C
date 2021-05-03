@@ -147,7 +147,7 @@ HeatTransferBase::getWallTemperatureName() const
   return _T_wall_name;
 }
 
-const VariableName &
+const MaterialPropertyName &
 HeatTransferBase::getWallHeatFluxName() const
 {
   return _q_wall_name;
