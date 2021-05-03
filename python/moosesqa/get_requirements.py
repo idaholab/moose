@@ -15,7 +15,7 @@ import moosetree
 import moosesqa
 from .Requirement import TestSpecification, Requirement, Detail
 
-def get_requirements_from_tests(directories, specs):
+def get_requirements_from_tests(directories, specs, include_non_testable=False):
     """
     Build requirements dictionary from the provided directories.
 
@@ -29,7 +29,8 @@ def get_requirements_from_tests(directories, specs):
             if os.path.isfile(filename) and (os.path.basename(filename) in specs):
                 local = os.path.relpath(filename, location)
                 group = local.split('/')[0]
-                out[group] += get_requirements_from_file(filename, os.path.dirname(local))
+                out[group] += get_requirements_from_file(filename, os.path.dirname(local),
+                                                         include_non_testable)
     return out
 
 def number_requirements(requirement_dict, category):
@@ -51,7 +52,7 @@ def number_requirements(requirement_dict, category):
         for j, req in enumerate(requirements):
             req.label = "{}.{}.{}".format(category, i+1, j+1)
 
-def get_requirements_from_file(filename, prefix=None):
+def get_requirements_from_file(filename, prefix=None, include_non_testable=False):
     """
     Opens hit file and extracts requirement items.
 
@@ -86,7 +87,6 @@ def get_requirements_from_file(filename, prefix=None):
                                   collections, collections_line,
                                   deprecated, deprecated_line)
         req.prefix = prefix
-        requirements.append(req)
 
         # Get "detail" parameter from nested tests
         for grandchild in child.children:
@@ -96,6 +96,9 @@ def get_requirements_from_file(filename, prefix=None):
 
         if not req.details:
             req.specification = _create_specification(child, child.name, filename)
+
+        if req.testable or include_non_testable:
+            requirements.append(req)
 
     return requirements
 
