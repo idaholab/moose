@@ -21,7 +21,7 @@ enhancement requests.
 
 !template field key=problem-reporting-intro required=False
 This section details how to communicate with the {{project}} development team to report a potential
-problem with a specific +release* of the application.
+problem with a specific +release+ of the application.
 
 !template field key=problem-reporting required=True
 This section should discuss how to contact the {{project}} developer to report a potential problem with
