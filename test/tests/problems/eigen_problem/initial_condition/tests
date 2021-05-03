@@ -17,6 +17,7 @@
     csvdiff = 'ne_ic_no_free_out_eigenvalues_0001.csv'
     issues = '#17026'
     requirement = "The system shall support eigenvalue execution without free power iterations."
+    slepc = true
   [../]
 
   [./inverse_eigenvalue_postprocessor]
