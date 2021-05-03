@@ -1,0 +1,21 @@
+[Tests] # NOTE: This file is used for testing by the python/moosesqa package
+  group = 'Boundary Marker'
+  design = "/Markers/index.md /BoundaryMarker.md"
+  issues = '#1275'
+
+  [./adjacent]
+    type = 'Exodiff'
+    input = 'adjacent.i'
+    exodiff = 'adjacent_out.e'
+    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+                  "elements for refinement adjacent to a boundary."
+  [../]
+  [./distance]
+    type = 'Exodiff'
+    input = 'distance.i'
+    exodiff = 'distance_out.e'
+    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+                  "elements for refinement within a given distance of a boundary."
+    mesh_mode = REPLICATED
+  [../]
+[]

@@ -88,4 +88,26 @@
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
   []
+  [triangles]
+    requirement = 'The system shall be able to run incompressible Navier-Stokes channel-flow simulations with'
+    issues = '#16822'
+    design = 'MooseVariableFV.md'
+    [tris]
+      type = 'Exodiff'
+      input = 2d-rc-no-slip.i
+      exodiff = 2d-rc-no-slip-tris.e
+      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris'
+      ad_indexing_type = 'global'
+      detail = 'two-dimensional triangular elements'
+    []
+    [tets]
+      type = 'Exodiff'
+      input = 3d-rc-no-slip.i
+      exodiff = 3d-rc-no-slip_out.e
+      ad_indexing_type = 'global'
+      detail = 'three-dimensional tetrahedral elements'
+      mumps = true
+      heavy = true
+    []
+  []
 []
