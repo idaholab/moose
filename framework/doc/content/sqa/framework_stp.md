@@ -26,9 +26,16 @@ single objective: that when executed with the prescribed input the software shal
 expected output. The type of test indicates the type of output that shall be considered, which
 can range from numerical verification to error testing. The overall object is to provide the
 necessary confidence that the software will perform as expected for each for the defined test
-cases. By the nature of the software as a library it is not possible to guarantee the functionality
+cases to ensure that the software properly handles abnormal conditions and events as well as credible
+failures, does not perform adverse unintended functions, and does not degrade the system either by
+itself, or in combination with other functions.
+
+By the nature of the software as a library it is not possible to guarantee the functionality
 of the software from an end-user perspective, since the input provided by the user cannot be
 controlled.
+
+The test cases
+
 !template-end!
 
 !template! item key=assumptions
