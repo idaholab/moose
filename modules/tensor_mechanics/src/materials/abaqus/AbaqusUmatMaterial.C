@@ -53,7 +53,8 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
     _state_var_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
     _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
-    _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation"))
+    _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
+    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit"))
 {
 #if defined(METHOD)
   _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
@@ -152,8 +153,8 @@ AbaqusUmatMaterial::computeQpStress()
 
   // Pass through updated stress, total strain, and strain increment arrays
   static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
-  static const std::vector<std::pair<unsigned int, unsigned int>> component{
-      {0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}};
+  static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
+      {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}}};
   for (int i = 0; i < _aqNTENS; ++i)
   {
     _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
@@ -161,9 +162,6 @@ AbaqusUmatMaterial::computeQpStress()
     _aqDSTRAN[i] =
         _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
   }
-
-  // Step number
-  _aqKSTEP = _t_step;
 
   // Value of step time at the beginning of the current increment - Check
   _aqTIME[0] = _t;
@@ -181,13 +179,19 @@ AbaqusUmatMaterial::computeQpStress()
   for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
     _aqDDSDDE[i] = 0.0;
 
+  // set PNEWDT to a large value
+  _aqPNEWDT = std::numeric_limits<Real>::max();
+
+  // current element "number"
+  _aqNOEL = _current_elem->id();
+
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
         _aqSTATEV.data(),
         _aqDDSDDE.data(),
-        &_aqSSE,
-        &_aqSPD,
-        &_aqSCD,
+        &_elastic_strain_energy[_qp],
+        &_plastic_dissipation[_qp],
+        &_creep_dissipation[_qp],
         &_aqRPL,
         _aqDDSDDT.data(),
         _aqDRPLDE.data(),
@@ -214,20 +218,18 @@ AbaqusUmatMaterial::computeQpStress()
         _aqDFGRD0.data(),
         _aqDFGRD1.data(),
         &_aqNOEL,
-        &_aqNPT,
+        &_qp,
         &_aqLAYER,
         &_aqKSPT,
-        &_aqKSTEP,
+        &_t_step,
         &_aqKINC);
-
-  // Energy outputs
-  _elastic_strain_energy[_qp] = _aqSSE;
-  _plastic_dissipation[_qp] = _aqSPD;
-  _creep_dissipation[_qp] = _aqSCD;
 
   // Update state variables
   for (unsigned int i = 0; i < _num_state_vars; ++i)
     _state_var[_qp][i] = _aqSTATEV[i];
+
+  // determine the material timestep
+  _material_timestep[_qp] = _aqPNEWDT < 1.0 ? _aqPNEWDT * _dt : std::numeric_limits<Real>::max();
 
   // Get new stress tensor - UMAT should update stress
   _stress[_qp] = RankTwoTensor(

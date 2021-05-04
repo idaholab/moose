@@ -37,11 +37,10 @@ typedef void (*creep_t)(Real DECRA[],
                         int * KSTEP,
                         int * KINC);
 
-// Forward Declaration
-
-// class define a property
-// class AbaqusCreepMaterial : public VolumetricModel
-class AbaqusCreepMaterial : public ComputeStressBase
+/**
+ * Coupling material to use Abaqus UMAT models in MOOSE
+ */
+class AbaqusCreepMaterial : public ComputeStressBase // previously inherited from SM VolumetricModel
 {
 public:
   static InputParameters validParams();
@@ -53,7 +52,8 @@ public:
 protected:
   FileName _plugin;
   Real _youngs_modulus, _poissons_ratio;
-  unsigned int _num_state_vars, _integration_flag, _solve_definition, _routine_flag;
+  unsigned int _num_state_vars, _integration_flag, _solve_definition;
+  int _routine_flag;
 
   // The plugin library handle
   void * _handle;

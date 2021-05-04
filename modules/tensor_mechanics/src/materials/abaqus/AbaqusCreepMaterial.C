@@ -31,18 +31,20 @@ AbaqusCreepMaterial::validParams()
                                     "plugin you want to use (without -opt.plugin or "
                                     "-dbg.plugin)");
   params.addRequiredParam<Real>("youngs_modulus", "Young's Modulus");
-  params.addRequiredParam<Real>("poissons_ratio", "Poissons Ratio");
+  params.addRequiredRangeCheckedParam<Real>("poissons_ratio", "poissons_ratio < 0.5", "Poissons Ratio");
   params.addRequiredParam<Real>("num_state_vars",
                                 "The number of state variables this CREEP routine will use");
   params.addRequiredParam<unsigned int>(
       "integration_flag", "The creep integration method: Explicit = 0 and Implicit = 1");
   params.addRequiredParam<unsigned int>(
       "solve_definition", "Creep/Swell Explicit/Implicit Integration Definition to use: 1 - 5");
-  params.addParam<unsigned int>("routine_flag",
-                                0,
-                                "The flag determining when the routine is "
-                                "called: Start of increment = 0 and End of "
-                                "Increment = 1");
+
+  MooseEnum routine_flag_enum("INCREMENT_START=0 INCREMENT_END=1", "INCREMENT_START");
+  params.addParam<MooseEnum>("routine_flag",
+                              routine_flag_enum,
+                              "The flag determining when the routine is "
+                              "called: Start of increment = 0 and End of "
+                              "Increment = 1");
   return params;
 }
 
@@ -54,7 +56,7 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters)
     _num_state_vars(getParam<Real>("num_state_vars")),
     _integration_flag(getParam<unsigned int>("integration_flag")),
     _solve_definition(getParam<unsigned int>("solve_definition")),
-    _routine_flag(getParam<unsigned int>("routine_flag")),
+    _routine_flag(getParam<MooseEnum>("routine_flag")),
     _state_var(declareProperty<std::vector<Real>>("state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real>>("state_var")),
     _trial_stress(declareProperty<SymmTensor>("trial_stress")),
