@@ -93,6 +93,7 @@ public:
    */
   virtual void
   segmentSubdomainSetup(const SubdomainID subdomain, const THREAD_ID tid, const RayID ray_id);
+
   /**
    * Reinitialize objects for a Ray segment for ray tracing
    * @param elem The elem the segment is in
@@ -110,6 +111,13 @@ public:
    * @param ray The ray
    */
   virtual void postOnSegment(const THREAD_ID tid, const std::shared_ptr<Ray> & ray);
+
+  /**
+   * Called at the beginning of a trace for a ray
+   * @param tid Thread id
+   * @param ray The ray
+   */
+  virtual void preTrace(const THREAD_ID /* tid */, const std::shared_ptr<Ray> & /* ray */) {}
 
   /**
    * Method for executing the study so that it can be called out of the standard UO execute()
@@ -507,6 +515,11 @@ public:
   MeshBase & meshBase() const { return _mesh; }
 
   /**
+   * @returns A reference to the MooseMesh associated with this study.
+   */
+  MooseMesh & mesh() { return _mesh; }
+
+  /**
    * Get the outward normal for a given element side.
    */
   virtual const Point &
@@ -680,6 +693,11 @@ public:
    * Whether or not to produce a warning when interacting with a non-planar mesh.
    */
   bool warnNonPlanar() const { return _warn_non_planar; }
+
+  /**
+   * The underlying parallel study: used for the context for calling the packed range routines.
+   */
+  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
 
 protected:
   /**
@@ -856,11 +874,6 @@ protected:
    * in \p rays will be nullptr after this call.
    */
   void moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays);
-
-  /**
-   * The underlying parallel study: used for the context for calling the packed range routines.
-   */
-  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
 
   /// The Mesh
   MooseMesh & _mesh;

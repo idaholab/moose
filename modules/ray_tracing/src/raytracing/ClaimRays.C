@@ -20,18 +20,16 @@
 #include "libmesh/mesh_tools.h"
 
 ClaimRays::ClaimRays(RayTracingStudy & study,
-                     ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
-                     MooseMesh & mesh,
                      const std::vector<std::shared_ptr<Ray>> & rays,
                      std::vector<std::shared_ptr<Ray>> & local_rays,
                      const bool do_exchange)
   : ParallelObject(study.comm()),
     MeshChangedInterface(study.parameters()),
-    _mesh(mesh),
+    _mesh(study.mesh()),
     _pid(comm().rank()),
     _do_exchange(do_exchange),
     _study(study),
-    _parallel_study(parallel_study),
+    _parallel_study(*_study.parallelStudy()),
     _rays(rays),
     _local_rays(local_rays),
     _needs_init(true)

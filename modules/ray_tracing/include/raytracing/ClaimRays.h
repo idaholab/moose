@@ -45,8 +45,6 @@ public:
    * filled by objects on other processors
    */
   ClaimRays(RayTracingStudy & study,
-            ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
-            MooseMesh & mesh,
             const std::vector<std::shared_ptr<Ray>> & rays,
             std::vector<std::shared_ptr<Ray>> & local_rays,
             const bool do_exchange);
