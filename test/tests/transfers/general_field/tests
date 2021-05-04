@@ -8,4 +8,11 @@
     exodiff = 'tosub_out.e tosub_out_sub0.e tosub_out_sub1.e tosub_out_sub2.e'
     requirement = "The system shall support general field transfer"
   [../]
+
+  [./tosub_projection]
+    type = 'Exodiff'
+    input = 'tosub_projections.i'
+    exodiff = 'tosub_projections_out.e tosub_projections_out_sub0.e tosub_projections_out_sub1.e tosub_projections_out_sub2.e'
+    requirement = "The system shall support general field transfer with arbitrary variable types"
+  [../]
 []
