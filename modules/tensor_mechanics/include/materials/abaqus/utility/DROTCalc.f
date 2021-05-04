@@ -102,26 +102,6 @@ C-------
       CALL INVERS(DM,N,N,DET)
       CALL PRDMAT(N,DM,DP,DROT)
 C----------------------------------------------------------------------+
-C----------------------------------------------------------------------+
-C-------  Comment Check Code
-C
-C      IF(M.GE.4) THEN
-C         WRITE(MPI,*)'WINGET DSTRAN'
-C         DO I=1,NTENS
-C            WRITE(MPI,101)DSTRAN(I)
-C         END DO
-C         CALL TRANSPOSE(3,DROT,TDR)
-C         CALL PRDMAT(N,DROT,TDR,TI)
-C         WRITE(MPI,*)'WINGET DROT'
-C         DO I=1,N
-C            WRITE(MPI,101)(DROT(I,J),J=1,N)
-C         END DO
-C         WRITE(MPI,*)'WINGET TI'
-C         DO I=1,N
-C            WRITE(MPI,101)(TI(I,J),J=1,N)
-C         END DO
-C     END IF
-C----------------------------------------------------------------------+
 C======================================================================+
 C----------------------------------------------------------------------+
 C---------   FORMATS  -------------------------------------------------+

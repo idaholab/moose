@@ -43,7 +43,7 @@ typedef void (*umat_t)(Real STRESS[],
                        Real DFGRD0[],
                        Real DFGRD1[],
                        int * NOEL,
-                       int * NPT,
+                       unsigned int * NPT,
                        int * LAYER,
                        int * KSPT,
                        int * KSTEP,
@@ -73,25 +73,115 @@ protected:
   // Function pointer to the dynamically loaded function
   umat_t _umat;
 
-  // UMAT real scalar values
-  Real _aqSSE, _aqSPD, _aqSCD, _aqDRPLDT, _aqRPL, _aqPNEWDT, _aqDTIME, _aqTEMP, _aqDTEMP, _aqCELENT;
+  /// specific elastic strain energy
+  Real _aqSSE;
+  /// plastic dissipation
+  Real _aqSPD;
+  /// creep dissipation
+  Real _aqSCD;
 
-  // model name buffer
+  ///  Variation of RPL with respect to the temperature.
+  Real _aqDRPLDT;
+
+  /**
+   * Volumetric heat generation per unit time at the end of the increment caused by mechanical
+   * working of the material.
+   */
+  Real _aqRPL;
+
+  /// Ratio of suggested new time increment to the time increment being used (out)
+  Real _aqPNEWDT;
+
+  /// Time increment
+  Real _aqDTIME;
+
+  /// Temperature at the start of the increment.
+  Real _aqTEMP;
+
+  /// Increment of temperature
+  Real _aqDTEMP;
+
+  /// Characteristic element length, which is a typical length of a line across an element for a first-order element (unused, set to 1)
+  Real _aqCELENT;
+
+  /// model name buffer
   char _aqCMNAME[80];
 
-  // UMAT integer values
-  int _aqNDI, _aqNSHR, _aqNTENS, _aqNSTATV, _aqNPROPS, _aqNOEL, _aqNPT, _aqLAYER, _aqKSPT, _aqKSTEP,
-      _aqKINC;
+  /// Number of direct stress components at this point
+  int _aqNDI;
 
-  // UMAT arrays
-  std::vector<Real> _aqSTATEV, _aqDDSDDT, _aqDRPLDE, _aqSTRAN, _aqDFGRD0, _aqDFGRD1, _aqSTRESS,
-      _aqDDSDDE, _aqDSTRAN, _aqPROPS;
+  /// Number of engineering shear stress components at this point
+  int _aqNSHR;
+
+  /// Size of the stress or strain component array (NDI + NSHR).
+  int _aqNTENS;
+
+  /// Number of solution-dependent state variables that are associated with this material type
+  int _aqNSTATV;
+
+  /// User-defined number of material constants associated with this user material.
+  int _aqNPROPS;
+
+  /// Element number
+  int _aqNOEL;
+
+  /// Layer number (for composite shells and layered solids). (unused)
+  int _aqLAYER;
+
+  /// Section point number within the current layer. (unused)
+  int _aqKSPT;
+
+  /// Increment number (unused)
+  int _aqKINC;
+
+  // An array containing the solution-dependent state variables
+  std::vector<Real> _aqSTATEV;
+
+  /// Variation of the stress increments with respect to the temperature
+  std::vector<Real> _aqDDSDDT;
+
+  /// Variation of RPL with respect to the strain increments
+  std::vector<Real> _aqDRPLDE;
+
+  /// An array containing the total strains at the beginning of the increment
+  std::vector<Real> _aqSTRAN;
+
+  /// Array containing the deformation gradient at the beginning of the increment
+  std::vector<Real> _aqDFGRD0;
+
+  /// Array containing the deformation gradient at the end of the increment
+  std::vector<Real> _aqDFGRD1;
+
+  /// Stress tensor (in: old stress, out: updated stress)
+  std::vector<Real> _aqSTRESS;
+
+  /// Jacobian matrix of the model (out)
+  std::vector<Real> _aqDDSDDE;
+
+  /**
+   * Array of strain increments. If thermal expansion is included in the same material definition,
+   * these are the mechanical strain increments (the total strain increments minus the thermal
+   * strain increments).
+   */
+  std::vector<Real> _aqDSTRAN;
+
+  /// User-specified array of material constants associated with this user material
+  std::vector<Real> _aqPROPS;
+
+  /// Value of step time at the beginning of the current increment, total time at the beginning of the current increment
   std::array<Real, 2> _aqTIME;
+
+  /// An array containing the coordinates of this point
   std::array<Real, 3> _aqCOORDS;
+
+  /// Rotation increment matrix
   std::array<Real, 3 * 3> _aqDROT;
 
-  // single element "arrays"
-  Real _aqPREDEF, _aqDPRED;
+  /// Array of interpolated values of predefined field variables at this point at the start of the increment, based on the values read in at the nodes.
+  Real _aqPREDEF;
+
+  /// Array of increments of predefined field variables
+  Real _aqDPRED;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpStress();
@@ -112,4 +202,7 @@ protected:
   MaterialProperty<Real> & _elastic_strain_energy;
   MaterialProperty<Real> & _plastic_dissipation;
   MaterialProperty<Real> & _creep_dissipation;
+
+  /// recommended maximum timestep for this model under the current conditions
+  MaterialProperty<Real> & _material_timestep;
 };

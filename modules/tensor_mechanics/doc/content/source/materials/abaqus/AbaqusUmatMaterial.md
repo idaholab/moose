@@ -45,7 +45,7 @@ A description of the input and output parameters of the UMAT user subroutines
 can be found in the [Abaqus user manual](https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/sub/default.htm?startat=ch01s01asb31.html)
 
 !alert note
-Temperature coupling is not yet implemented
+Temperature coupling and `PREDEF` support are not yet implemented.
 
 ## Example Input File
 
