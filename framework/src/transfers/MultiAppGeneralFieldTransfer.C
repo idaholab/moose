@@ -241,12 +241,16 @@ MultiAppGeneralFieldTransfer::validParams()
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
-    _bbox_tol(getParam<Real>("bbox_tol"))
+    _bbox_tol(getParam<Real>("bbox_tol")),
+    _has_to_blocks(false)
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
   else
     paramError("variable", "The number of variables to transfer to and from should be equal");
+
+  auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
+  _has_to_blocks = !blocks.empty();
 }
 
 void
@@ -396,11 +400,10 @@ void
 MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_name,
                                                     ProcessorToPointVec & outgoing_points)
 {
-  // Clean up to blocks that were cached
-  _to_blocks.clear();
   // Clean up the map from processor to pointInfo vector
   // This map shuld be consistent with outgoing_points
   _processor_to_pointInfoVec.clear();
+
   // Loop over all problems
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
@@ -420,6 +423,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     // Moose mesh
     MooseMesh * to_moose_mesh = &_to_problems[i_to]->mesh();
 
+    std::set<SubdomainID> _to_blocks;
+
     // Take users' input block names
     // Change them to ids
     // Store then in a member variables
@@ -428,7 +433,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       // User input block names
       auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
       // Subdomain ids
-      std::vector<SubdomainID> ids = to_moose_mesh->getSubdomainIDs(blocks);
+     std::vector<SubdomainID> ids = to_moose_mesh->getSubdomainIDs(blocks);
       // Store these ids
       _to_blocks.insert(ids.begin(), ids.end());
     }
@@ -447,11 +452,17 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
         request_gather(*to_sys, f, &g, nullsetter, varvec);
 
 
-      ConstElemRange active_local_elem_range
-        (to_mesh.active_local_elements_begin(),
-         to_mesh.active_local_elements_end());
+      const MeshBase::element_iterator to_begin = _to_blocks.empty() ?
+        to_mesh.active_local_elements_begin() :
+        to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
 
-      request_gather.project(active_local_elem_range);
+      const MeshBase::element_iterator to_end = _to_blocks.empty() ?
+        to_mesh.active_local_elements_end() :
+        to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
+
+      ConstElemRange to_elem_range (to_begin, to_end);
+
+      request_gather.project(to_elem_range);
 
       for (Point p : f.points_requested())
         {
@@ -752,7 +763,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 bool
 MultiAppGeneralFieldTransfer::blockRestrictedTarget() const
 {
-  return !_to_blocks.empty();
+  return _has_to_blocks;
 }
 
 bool

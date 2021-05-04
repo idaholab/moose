@@ -75,8 +75,8 @@ private:
   /// How much we should relax bounding boxes
   Real _bbox_tol;
 
-  /// Target mesh blocks this transfer is restricted to
-  std::set<SubdomainID> _to_blocks;
+  /// This transfer is restricted to subdomains on the target emsh?
+  bool _has_to_blocks;
 
   /// Source mesh blocks this transfer is restricted to
   std::set<SubdomainID> _from_blocks;
