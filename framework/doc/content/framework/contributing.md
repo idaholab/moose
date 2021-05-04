@@ -15,7 +15,7 @@ engaging in the community will certainly be beneficial.
 
 ## Code Standards
 
-When modifying or adding to MOOSE you need to follow the strict [MOOSE Code Standard](framework_development/code_standards.md).  These guidelines ensure a common look and feel to all of the code in MOOSE allowing developers to seamlessly move between sections of code and giving users a consistent interface.
+When modifying or adding to MOOSE you need to follow the strict [MOOSE Code Standard](sqa/framework_scs.md).  These guidelines ensure a common look and feel to all of the code in MOOSE allowing developers to seamlessly move between sections of code and giving users a consistent interface.
 
 ## Referencing Issues
 
@@ -33,7 +33,8 @@ The first step in modifying MOOSE is to create your own [fork](https://help.gith
 
 - Clone your fork to your local machine (replace "username" with your GitHub username).
 
-+Note:+ We recommend that you use SSH URLs instead of HTTPS. Generally you will have fewer problems with
+!alert note title=SSH Recommended
+We recommend that you use SSH URLs instead of HTTPS. Generally, you will have fewer problems with
 firewalls and authentication this way. It does however require an additional step of setting up keys.
 Please follow the instructions provided by Github to setup your [SSH keys](https://help.github.com/articles/connecting-to-github-with-ssh/).
 
@@ -91,7 +92,14 @@ git fetch upstream
 git rebase upstream/devel
 ```
 
-### 4. Push Modifications Back to GitHub
+### 4. Add Documentation
+
+MOOSE follows stringent guidelines for software quality. The testing system is designed
+in a manner to shield day-to-day development from any associated burdens. However, we do require
+that all new code is documented in a specific manner to meet the guidelines, please refer to
+[framework/documenting.md] for additional information.
+
+### 5. Push Modifications Back to GitHub
 
 Push your branch back into your fork on GitHub:
 
@@ -117,7 +125,7 @@ MOOSE developers should expect to be assigned to their own PRs, as they should k
 
 ## What Now?
 
-The next phase is covered in [How a Patch Becomes Code](framework_development/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
+The next phase is covered in [How a Patch Becomes Code](framework/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...
 
 ## Autotools
 

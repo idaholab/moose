@@ -1,0 +1,1 @@
+!include cci.md.template replace={{project}},{{app}}

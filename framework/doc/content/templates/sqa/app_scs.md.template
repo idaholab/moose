@@ -1,0 +1,6 @@
+# {{app}} Software Coding Standard
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](SCS) provides detailed information about the software code practics for {{app}}.

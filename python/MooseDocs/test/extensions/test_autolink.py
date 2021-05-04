@@ -211,17 +211,17 @@ class TestAutoLinkRender(MooseDocsTestCase):
         link = autolink.AutoLink(None, page='not_a_file.md', optional=True)
 
         res = self.render(link, renderer=base.HTMLRenderer())
-        self.assertHTMLTag(res, 'body', string='_text_')
+        self.assertHTMLTag(res, 'body', string='not_a_file.md')
 
         res = self.render(link, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', string='_text_')
+        self.assertHTMLTag(res, 'div', string='not_a_file.md')
 
         res = self.render(link, renderer=base.RevealRenderer())
-        self.assertHTMLTag(res, 'div', string='_text_')
+        self.assertHTMLTag(res, 'div', string='not_a_file.md')
 
         res = self.render(link, renderer=base.LatexRenderer())
         self.assertSize(res, 1)
-        self.assertLatexString(res(0), '_text_')
+        self.assertLatexString(res(0), 'not_a_file.md')
 
     def testBookmark(self):
         link = autolink.AutoLink(None, page='core.md', bookmark='unordered-nested-lists')

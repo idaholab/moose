@@ -80,6 +80,7 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
                                         ", 'dependencies', 'repo', 'reports'.")
+        config['include_non_testable_requirements'] = (False, "Control display of skipped requirements.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
         config['reports'] = (None, "Build SQA reports for dashboard creation.")
         config['default_collection'] = ('FUNCTIONAL', "The default requirement collection.")
@@ -143,9 +144,9 @@ class SQAExtension(command.CommandExtension):
                     continue
                 directories.append(path)
 
-
             # Create requirement database from tests
-            self.__requirements[category] = moosesqa.get_requirements_from_tests(directories, specs)
+            self.__requirements[category] = moosesqa.get_requirements_from_tests(directories, specs,
+                                                                                 self.get('include_non_testable_requirements'))
 
             # Create dependency database
             self.__dependencies[category] = info.get('dependencies', [])

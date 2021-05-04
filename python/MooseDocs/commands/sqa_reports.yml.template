@@ -15,6 +15,7 @@ Documents:
     requirements_traceablity_matrix: sqa/{{category}}_rtm.md
     verification_validation_report: sqa/{{category}}_vvr.md
     failure_analysis_report: sqa/{{category}}_far.md
+    software_library_list: sqa/{{category}}_sll.md
     log_default: WARNING
     show_warning: false
 
