@@ -45,12 +45,17 @@ FVPropValPerSubdomainMaterial::computeQpProperties()
     return;
   }
 
-  mooseAssert(_face_info,
-              "We must have set a face info object in order for the FVPropValPerSubdomainMaterial "
-              "class to work on faces");
-
   if (_current_elem)
   {
+    _face_info = _mesh.faceInfo(_current_elem, _current_side);
+    if (!_face_info)
+    {
+      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
+      mooseAssert(neighbor, "Should be non-null");
+      const auto neighbor_side = neighbor->which_neighbor_am_i(_current_elem);
+      _face_info = _mesh.faceInfo(neighbor, neighbor_side);
+      mooseAssert(_face_info, "We need to have retrieved something.");
+    }
     mooseAssert(_current_elem->build_side_ptr(_current_side)->centroid() ==
                     _face_info->faceCentroid(),
                 "Making sure we're in the right place");
@@ -70,6 +75,10 @@ FVPropValPerSubdomainMaterial::computeQpProperties()
     _prop[_qp] = it->second;
     return;
   }
+
+  mooseAssert(_face_info,
+              "We must have set a face info object in order for the FVPropValPerSubdomainMaterial "
+              "class to work on faces");
 
   // We must be off the domain
   auto it = _sub_id_to_prop.find(_face_info->elem().subdomain_id());
