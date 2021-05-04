@@ -26,6 +26,10 @@ PCNSFVLaxFriedrichsBC::validParams()
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
+  params.addParam<bool>("velocity_function_includes_rho",
+                        false,
+                        "Whether the provided superficial velocity function actually includes "
+                        "multiplication by rho (e.g. the function is representative of momentum.");
   params.addParam<FunctionName>(
       NS::superficial_velocity,
       "An optional name of a vector function for the velocity. If not provided then the "
@@ -88,7 +92,8 @@ PCNSFVLaxFriedrichsBC::PCNSFVLaxFriedrichsBC(const InputParameters & params)
                          ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
                          : _u_neighbor),
     _scalar_function_provided(isParamValid("scalar")),
-    _scalar_function(_scalar_function_provided ? &getFunction("scalar") : nullptr)
+    _scalar_function(_scalar_function_provided ? &getFunction("scalar") : nullptr),
+    _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho"))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -156,10 +161,6 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
   const auto e_interior = _fluid.e_from_p_rho(pressure_interior, rho_interior);
   const auto specific_volume_interior = 1. / rho_interior;
 
-  const auto superficial_vel_boundary =
-      _svel_provided
-          ? ADRealVectorValue(_svel_function->vectorValue(_t, _face_info->faceCentroid()))
-          : superficial_vel_interior;
   const auto pressure_boundary =
       _pressure_provided ? ADReal(_pressure_function->value(_t, _face_info->faceCentroid()))
                          : pressure_interior;
@@ -168,6 +169,11 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
                         : T_fluid_interior;
   const auto rho_boundary =
       _implicit_state_var ? rho_interior : _fluid.rho_from_p_T(pressure_boundary, T_fluid_boundary);
+  const auto superficial_vel_boundary =
+      _svel_provided
+          ? ADRealVectorValue(_svel_function->vectorValue(_t, _face_info->faceCentroid())) /
+                (_velocity_function_includes_rho ? rho_boundary : ADReal(1.))
+          : static_cast<const TypeVector<ADReal> &>(superficial_vel_interior);
   const auto eps_boundary = eps_interior;
   const auto u_boundary = superficial_vel_boundary / eps_boundary;
   const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
