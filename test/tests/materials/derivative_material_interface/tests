@@ -44,7 +44,8 @@
       input = 'ad_construction_order.i'
       exodiff = 'ad_construction_order_out.e'
 
-      detail = 'so that construction order does not influence the outcome of the tests when using automatic differentiation, and'
+      detail = 'so that construction order does not influence the outcome of the tests when using '
+               'automatic differentiation, and'
     []
 
     [execution]
@@ -117,6 +118,37 @@
       cli_args = 'Materials/F/evalerror_behavior=exception'
       recover = false
       detail = 'throwing an exception.'
+    []
+  []
+
+  [postprocessor_coupling]
+    requirement = 'The system shall be capable of couplimng postprocessor values in'
+    [parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      detail = 'ParsedMaterial'
+    []
+    [derivative_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=DerivativeParsedMaterial'
+      detail = 'DerivativeParsedMaterialParsedMaterial'
+    []
+    [ad_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=ADParsedMaterial'
+      detail = 'ADParsedMaterial'
+    []
+    [ad_derivative_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=ADDerivativeParsedMaterial'
+      detail = 'ADDerivativeParsedMaterial'
     []
   []
 
