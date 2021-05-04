@@ -11,12 +11,12 @@
 
 #include "ArrayLowerDIntegratedBC.h"
 
-class HFEMDirichletBC : public ArrayLowerDIntegratedBC
+class ArrayHFEMDirichletBC : public ArrayLowerDIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  HFEMDirichletBC(const InputParameters & parameters);
+  ArrayHFEMDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual void computeQpResidual(RealEigenVector & residual) override;

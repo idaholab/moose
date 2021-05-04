@@ -21,6 +21,12 @@
     block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
     components = 2
   []
+  [lambdab]
+    order = CONSTANT
+    family = MONOMIAL
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    components = 2
+  []
 []
 
 [AuxVariables]
@@ -50,7 +56,7 @@
 
 [DGKernels]
   [surface]
-    type = HFEMDiffusion
+    type = ArrayHFEMDiffusion
     variable = u
     lowerd_variable = lambda
   []
@@ -58,9 +64,10 @@
 
 [BCs]
   [all]
-    type = ArrayVacuumBC
+    type = ArrayHFEMDirichletBC
     boundary = 'left right top bottom'
     variable = u
+    lowerd_variable = lambdab
   []
 []
 

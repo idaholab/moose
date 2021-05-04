@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HFEMDirichletBC.h"
+#include "ArrayHFEMDirichletBC.h"
 
-registerMooseObject("MooseApp", HFEMDirichletBC);
+registerMooseObject("MooseApp", ArrayHFEMDirichletBC);
 
 InputParameters
-HFEMDirichletBC::validParams()
+ArrayHFEMDirichletBC::validParams()
 {
   InputParameters params = ArrayLowerDIntegratedBC::validParams();
   params.addParam<RealEigenVector>("value", "Value of the BC");
@@ -21,7 +21,7 @@ HFEMDirichletBC::validParams()
   return params;
 }
 
-HFEMDirichletBC::HFEMDirichletBC(const InputParameters & parameters)
+ArrayHFEMDirichletBC::ArrayHFEMDirichletBC(const InputParameters & parameters)
   : ArrayLowerDIntegratedBC(parameters),
     _value(isParamValid("value") ? getParam<RealEigenVector>("value")
                                  : RealEigenVector::Zero(_count)),
@@ -50,13 +50,13 @@ HFEMDirichletBC::HFEMDirichletBC(const InputParameters & parameters)
 }
 
 void
-HFEMDirichletBC::computeQpResidual(RealEigenVector & residual)
+ArrayHFEMDirichletBC::computeQpResidual(RealEigenVector & residual)
 {
   residual += _lambda[_qp] * _test[_i][_qp];
 }
 
 void
-HFEMDirichletBC::computeLowerDQpResidual(RealEigenVector & r)
+ArrayHFEMDirichletBC::computeLowerDQpResidual(RealEigenVector & r)
 {
   if (_uhat)
     r += (_u[_qp] - (*_uhat)[_qp]) * _test_lambda[_i][_qp];
@@ -65,13 +65,13 @@ HFEMDirichletBC::computeLowerDQpResidual(RealEigenVector & r)
 }
 
 RealEigenVector
-HFEMDirichletBC::computeQpJacobian()
+ArrayHFEMDirichletBC::computeQpJacobian()
 {
   return RealEigenVector::Zero(_count);
 }
 
 RealEigenVector
-HFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
+ArrayHFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
   RealEigenVector r = RealEigenVector::Zero(_count);
   switch (type)
@@ -92,8 +92,8 @@ HFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 }
 
 RealEigenMatrix
-HFEMDirichletBC::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                const MooseVariableFEBase & jvar)
+ArrayHFEMDirichletBC::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                     const MooseVariableFEBase & jvar)
 {
   if (_uhat_var && jvar.number() == _uhat_var->number() && type == Moose::LowerLower)
   {

@@ -2,33 +2,33 @@
   issues = '#17447'
   design = '/DGKernels/index.md'
 
-  [dirichlet]
+  [array_dirichlet]
     type = 'Exodiff'
-    input = 'dirichlet.i'
-    exodiff = 'dirichlet_out.e'
-    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions.'
+    input = 'array_dirichlet.i'
+    exodiff = 'array_dirichlet_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions using array variables.'
     mesh_mode = replicated
     mumps = true
   []
-  [neumann]
+  [array_neumann]
     type = 'Exodiff'
-    input = 'neumann.i'
-    exodiff = 'neumann_out.e'
-    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions.'
+    input = 'array_neumann.i'
+    exodiff = 'array_neumann_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using array variables..'
     mesh_mode = replicated
     mumps = true
   []
-  [robin]
+  [array_robin]
     type = 'Exodiff'
-    input = 'robin.i'
-    exodiff = 'robin_out.e'
-    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions.'
+    input = 'array_robin.i'
+    exodiff = 'array_robin_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using array variables..'
     mesh_mode = replicated
     mumps = true
   []
   [high_order]
     type = 'Exodiff'
-    input = 'robin.i'
+    input = 'array_robin.i'
     cli_args = 'Variables/u/order=FOURTH Variables/lambda/order=FIRST Outputs/file_base=high_order_out'
     exodiff = 'high_order_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with high order shape functions.'

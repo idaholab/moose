@@ -7,24 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HFEMDiffusion.h"
+#include "ArrayHFEMDiffusion.h"
 
-registerMooseObject("MooseApp", HFEMDiffusion);
+registerMooseObject("MooseApp", ArrayHFEMDiffusion);
 
 InputParameters
-HFEMDiffusion::validParams()
+ArrayHFEMDiffusion::validParams()
 {
   InputParameters params = ArrayDGLowerDKernel::validParams();
   params.addClassDescription("Imposes the constraints on internal sides with HFEM.");
   return params;
 }
 
-HFEMDiffusion::HFEMDiffusion(const InputParameters & parameters) : ArrayDGLowerDKernel(parameters)
+ArrayHFEMDiffusion::ArrayHFEMDiffusion(const InputParameters & parameters)
+  : ArrayDGLowerDKernel(parameters)
 {
 }
 
 void
-HFEMDiffusion::computeQpResidual(Moose::DGResidualType type, RealEigenVector & r)
+ArrayHFEMDiffusion::computeQpResidual(Moose::DGResidualType type, RealEigenVector & r)
 {
   switch (type)
   {
@@ -39,18 +40,18 @@ HFEMDiffusion::computeQpResidual(Moose::DGResidualType type, RealEigenVector & r
 }
 
 void
-HFEMDiffusion::computeLowerDQpResidual(RealEigenVector & r)
+ArrayHFEMDiffusion::computeLowerDQpResidual(RealEigenVector & r)
 {
   r += (_u_neighbor[_qp] - _u[_qp]) * _test_lambda[_i][_qp];
 }
 
-RealEigenVector HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType)
+RealEigenVector ArrayHFEMDiffusion::computeQpJacobian(Moose::DGJacobianType)
 {
   return RealEigenVector::Zero(_count);
 }
 
 RealEigenVector
-HFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
+ArrayHFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
   RealEigenVector r = RealEigenVector::Zero(_count);
   switch (type)
