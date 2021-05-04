@@ -151,7 +151,7 @@ AbaqusUmatMaterial::computeQpStress()
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
   // Pass through updated stress, total strain, and strain increment arrays
-  static const std::array<Real, 6> strain_factor{1, 1, 1, 2, 2, 2};
+  static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
   static const std::vector<std::pair<unsigned int, unsigned int>> component{
       {0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}};
   for (int i = 0; i < _aqNTENS; ++i)
@@ -234,7 +234,7 @@ AbaqusUmatMaterial::computeQpStress()
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[3], _aqSTRESS[4], _aqSTRESS[5]);
 
   // use DDSDDE as Jacobian mult
-  _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{
+  _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{{
       _aqDDSDDE[0],  // C1111
       _aqDDSDDE[1],  // C1122
       _aqDDSDDE[2],  // C1133
@@ -256,5 +256,5 @@ AbaqusUmatMaterial::computeQpStress()
       _aqDDSDDE[28], // C1313
       _aqDDSDDE[29], // C1312
       _aqDDSDDE[35]  // C1212
-  });
+  }});
 }
