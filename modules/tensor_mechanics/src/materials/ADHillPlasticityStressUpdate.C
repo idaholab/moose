@@ -343,12 +343,3 @@ ADHillPlasticityStressUpdate::computeStressFinalize(
   ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 }
-
-Real
-ADHillPlasticityStressUpdate::computeStrainEnergyRateDensity(
-    const ADMaterialProperty<RankTwoTensor> & /*stress*/,
-    const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
-{
-  mooseError("computeStrainEnergyRateDensity not implemented for anisotropic creep.");
-  return 0.0;
-}

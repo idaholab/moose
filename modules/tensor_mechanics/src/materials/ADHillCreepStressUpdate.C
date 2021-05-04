@@ -267,12 +267,3 @@ ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & creepStra
   else
     _max_integration_error_time_step = std::numeric_limits<Real>::max();
 }
-
-Real
-ADHillCreepStressUpdate::computeStrainEnergyRateDensity(
-    const ADMaterialProperty<RankTwoTensor> & /*stress*/,
-    const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
-{
-  mooseError("computeStrainEnergyRateDensity not implemented for anisotropic creep.");
-  return 0.0;
-}
