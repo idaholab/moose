@@ -8,11 +8,11 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Overview on contributing
 
-[Contributing](framework_development/contributing.md)
+[Contributing](framework/contributing.md)
 
-[How a patch becomes code](framework_development/patch_to_code.md)
+[How a patch becomes code](framework/patch_to_code.md)
 
-[Code Standards](code_standards.md) - How to format any code that goes into the framework
+[Code Standards](sqa/framework_scs.md) - How to format any code that goes into the framework
 
 ## Git Tips
 
@@ -56,7 +56,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Warehouses](/warehouses.md) - Objects that store all of the dynamically built MOOSE objects (`Kernels`, `BCs`, etc.)
 
-[Code Standards](code_standards.md)
+[Code Standards](sqa/framework_scs.md)
 
 [Tagging](tagging.md)
 

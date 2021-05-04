@@ -15,11 +15,6 @@ engineers and is supported by various funding agencies including the
 [United States Department of Energy](http://energy.gov/). Development is ongoing at INL and by
 collaborators throughout the world.
 
-The following link(s) may also be of interest when creating documentation related to software
-quality.
-
-- [what_is_a_requirement.md]
-
 !sqa records
 
 ## Test Results and Releases

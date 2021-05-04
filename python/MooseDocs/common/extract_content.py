@@ -42,9 +42,9 @@ def extractContentSettings():
     settings['end'] = (None, "A portion of text that unique identifies the ending location "
                        "for including text, if not provided the end of the file is "
                        "used. By default this line is not included in the display.")
-    settings['include-start'] = (True, "When False the texted captured by the 'start' setting "
+    settings['include-start'] = (True, "When False the text captured by the 'start' setting "
                                  "is excluded in the displayed text.")
-    settings['include-end'] = (False, "When True the texted captured by the 'end' setting is "
+    settings['include-end'] = (False, "When True the text captured by the 'end' setting is "
                                "included in the displayed text.")
     settings['replace'] = (None, "List of replacement string pairs: ['foo','bar', 'boom','baam'] " \
                                  "replaces 'foo' with 'bar' and 'boom' with 'baam'.")

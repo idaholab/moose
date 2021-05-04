@@ -42,5 +42,25 @@ class TestGitUtilsCommit(MooseDocsTestCase):
         self.assertToken(ast(0), "ErrorToken")
         self.assertIn("The current working directory is not a git repository.", ast(0)['message'])
 
+class TestGitUtilsCommit(MooseDocsTestCase):
+    EXTENSIONS = [core, command, gitutils]
+
+    def testInline(self):
+        ast = self.tokenize('[!git!submodule-hash](petsc)')
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'Word')
+        self.assertEqual(len(ast(0,0)['content']), 40)
+
+    def testInlineUrl(self):
+        ast = self.tokenize('[!git!submodule-hash url=https://foo.com](petsc)')
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'Link')
+        self.assertEqual(len(ast(0,0,0)['content']), 40)
+
+    def testContentException(self):
+        ast = self.tokenize('[!git!submodule-hash](wrong)')
+        self.assertToken(ast(0,0), "ErrorToken")
+        self.assertIn("The submodule 'wrong' was not located", ast(0,0)['message'])
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
