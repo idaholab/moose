@@ -219,6 +219,12 @@ protected:
   virtual void postExecuteChunk(const work_iterator /* begin */, const work_iterator /* end */) {}
 
   /**
+   * Insertion point called just after trying to receive work and just before beginning
+   * work on the work buffer
+   */
+  virtual void preReceiveAndExecute() {}
+
+  /**
    * Pure virtual for acting on parallel data that has JUST been received and
    * filled into the buffer.
    *
@@ -440,7 +446,7 @@ ParallelStudy<WorkType, ParallelDataType>::validParams()
       "The number of objects to process at one time during execution");
   params.addRangeCheckedParam<unsigned int>("clicks_per_communication",
                                             10,
-                                            "clicks_per_communication > 0",
+                                            "clicks_per_communication >= 0",
                                             "Iterations to wait before communicating");
   params.addRangeCheckedParam<unsigned int>("clicks_per_root_communication",
                                             10,
@@ -647,6 +653,8 @@ ParallelStudy<WorkType, ParallelDataType>::receiveAndExecute()
     _receive_buffer->receive();
 
   postReceiveParallelDataInternal();
+
+  preReceiveAndExecute();
 
   while (!_work_buffer->empty())
   {
