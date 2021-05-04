@@ -11,12 +11,12 @@
 
 #include "ArrayDGLowerDKernel.h"
 
-class HFEMDiffusion : public ArrayDGLowerDKernel
+class ArrayHFEMDiffusion : public ArrayDGLowerDKernel
 {
 public:
   static InputParameters validParams();
 
-  HFEMDiffusion(const InputParameters & parameters);
+  ArrayHFEMDiffusion(const InputParameters & parameters);
 
 protected:
   virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;

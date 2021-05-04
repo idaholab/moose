@@ -76,7 +76,7 @@
 
 [DGKernels]
   [surface]
-    type = HFEMDiffusion
+    type = ArrayHFEMDiffusion
     variable = u
     lowerd_variable = lambda
   []
@@ -84,7 +84,7 @@
 
 [BCs]
   [all]
-    type = HFEMDirichletBC
+    type = ArrayHFEMDirichletBC
     boundary = 'left right top bottom'
     variable = u
     lowerd_variable = lambdab

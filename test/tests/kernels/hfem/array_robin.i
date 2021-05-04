@@ -39,12 +39,6 @@
     block = 0
     diffusion_coefficient = dc
   []
-  [reaction]
-    type = ArrayReaction
-    variable = u
-    block = 0
-    reaction_coefficient = rc
-  []
   [source]
     type = ArrayCoupledForce
     variable = u
@@ -56,7 +50,7 @@
 
 [DGKernels]
   [surface]
-    type = HFEMDiffusion
+    type = ArrayHFEMDiffusion
     variable = u
     lowerd_variable = lambda
   []
@@ -64,7 +58,7 @@
 
 [BCs]
   [all]
-    type = ArrayNeumannBC
+    type = ArrayVacuumBC
     boundary = 'left right top bottom'
     variable = u
   []
@@ -74,11 +68,6 @@
   [dc]
     type = GenericConstantArray
     prop_name = dc
-    prop_value = '1 1'
-  []
-  [rc]
-    type = GenericConstantArray
-    prop_name = rc
     prop_value = '1 1'
   []
 []
