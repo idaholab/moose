@@ -29,7 +29,8 @@ Closures1PhaseSimple::check(const FlowChannelBase & flow_channel) const
 }
 
 void
-Closures1PhaseSimple::check(const HeatTransferBase & heat_transfer) const
+Closures1PhaseSimple::check(const HeatTransferBase & heat_transfer,
+                            const FlowChannelBase & /*flow_channel*/) const
 {
   if (!heat_transfer.isParamValid("Hw"))
     logComponentError(heat_transfer.cname(),
@@ -72,7 +73,8 @@ Closures1PhaseSimple::addMooseObjects(const FlowChannelBase & flow_channel)
 }
 
 void
-Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer)
+Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer,
+                                      const FlowChannelBase & flow_channel)
 {
   const HeatTransfer1PhaseBase & heat_transfer_1phase =
       dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
@@ -81,12 +83,12 @@ Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer)
   {
     const std::string class_name = "GenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") =
-        heat_transfer_1phase.getFlowChannelSubdomains();
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {
         heat_transfer_1phase.getWallHeatTransferCoefficient1PhaseName()};
     params.set<std::vector<FunctionName>>("prop_values") = {Hw_fn_name};
-    _sim.addMaterial(class_name, genName(heat_transfer.name(), "Hw_material"), params);
+    _sim.addMaterial(
+        class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
   }
 
   heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");

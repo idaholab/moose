@@ -58,7 +58,7 @@
     materials = 'mat'
   []
   [rmax]
-    type =HSBoundaryAmbientConvection
+    type = HSBoundaryAmbientConvection
     boundary = blk:rmax
     hs = blk
     htc_ambient = 1e5
@@ -66,7 +66,7 @@
   []
   [ht]
     type = HeatTransferFromHeatStructure3D1Phase
-    flow_channel = fch
+    flow_channels = 'fch'
     hs = blk
     boundary = blk:rmin
     Hw = 10000

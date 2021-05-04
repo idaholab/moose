@@ -16,7 +16,7 @@ public:
   virtual RealVectorValue getDirection() const { return _dir; }
   virtual Real getRotation() const { return _rotation; }
 
-  virtual Real getNumElems() const { return _n_elem; }
+  virtual unsigned int getNumElems() const { return _n_elem; }
   virtual Real getLength() const { return _length; }
 
   /**
