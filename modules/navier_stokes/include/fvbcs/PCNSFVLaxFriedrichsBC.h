@@ -52,4 +52,5 @@ protected:
   const MooseArray<ADReal> & _scalar_neighbor;
   const bool _scalar_function_provided;
   const Function * const _scalar_function;
+  const bool _velocity_function_includes_rho;
 };
