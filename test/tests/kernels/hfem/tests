@@ -1,7 +1,14 @@
 [Tests]
   issues = '#17447'
   design = '/DGKernels/index.md'
-
+  [dirichlet]
+    type = 'Exodiff'
+    input = 'dirichlet.i'
+    exodiff = 'dirichlet_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions using standard variables.'
+    mesh_mode = replicated
+    mumps = true
+  []
   [array_dirichlet]
     type = 'Exodiff'
     input = 'array_dirichlet.i'
@@ -10,11 +17,27 @@
     mesh_mode = replicated
     mumps = true
   []
+  [neumann]
+    type = 'Exodiff'
+    input = 'neumann.i'
+    exodiff = 'neumann_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using standard variables.'
+    mesh_mode = replicated
+    mumps = true
+  []
   [array_neumann]
     type = 'Exodiff'
     input = 'array_neumann.i'
     exodiff = 'array_neumann_out.e'
-    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using array variables..'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using array variables.'
+    mesh_mode = replicated
+    mumps = true
+  []
+  [robin]
+    type = 'Exodiff'
+    input = 'robin.i'
+    exodiff = 'robin_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using standard variables.'
     mesh_mode = replicated
     mumps = true
   []
@@ -22,7 +45,7 @@
     type = 'Exodiff'
     input = 'array_robin.i'
     exodiff = 'array_robin_out.e'
-    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using array variables..'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using array variables.'
     mesh_mode = replicated
     mumps = true
   []
