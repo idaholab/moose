@@ -61,6 +61,5 @@ ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_cha
   params.set<MaterialPropertyName>("prop_name") = {flow_channel.getWallTemperatureNames()[i]};
   params.set<std::vector<VariableName>>("coupled_variable") = {
       flow_channel.getWallTemperatureNames()[i]};
-  _sim.addMaterial(
-      class_name, genName(flow_channel.name(), "coupled_var_mat", std::to_string(i)), params);
+  _sim.addMaterial(class_name, genName(flow_channel.name(), "coupled_var_mat", i), params);
 }
