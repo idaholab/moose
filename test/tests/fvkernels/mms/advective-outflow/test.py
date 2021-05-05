@@ -35,3 +35,45 @@ class TestExtrapolation(unittest.TestCase):
                 self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
             else:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+
+class UpwindLimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 7, "FVKernels/advection_u/limiter='upwind'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('upwind-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+
+class CentralDifferenceLimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 7, "FVKernels/advection_u/limiter='central_difference'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('cd-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+
+class VanLeerLimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 9, "FVKernels/advection_u/limiter='vanLeer'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('vanLeer-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
