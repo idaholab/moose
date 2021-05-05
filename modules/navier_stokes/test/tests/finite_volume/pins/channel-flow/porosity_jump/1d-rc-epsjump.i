@@ -13,6 +13,10 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
+
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable
@@ -61,7 +65,7 @@ velocity_interp_method='rc'
 []
 
 [FVKernels]
-  inactive = 'u_porosity_gradient'
+  inactive = 'u_advection_porosity_gradient'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -95,13 +99,13 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [u_pressure]
-    type = PINSFVMomentumPressureFlux
+    type = PINSFVMomentumPressure
     variable = u
     p = pressure
     porosity = porosity
     momentum_component = 'x'
   []
-  [u_porosity_gradient]
+  [u_advection_porosity_gradient]
     type = PINSFVMomentumAdvectionPorosityGradient
     variable = u
     u = u

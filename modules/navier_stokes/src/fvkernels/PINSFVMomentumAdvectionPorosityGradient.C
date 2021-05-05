@@ -16,7 +16,9 @@ InputParameters
 PINSFVMomentumAdvectionPorosityGradient::validParams()
 {
   auto params = FVElementalKernel::validParams();
-  params.addClassDescription("Porosity gradient term for the momentum equation.");
+  params.addClassDescription(
+      "Porosity gradient spun from the advection term for the porous media Navier Stokes "
+      "momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   params.addRequiredCoupledVar("u", "The superficial velocity in the x direction.");

@@ -364,24 +364,14 @@ PINSFVMomentumAdvection::computeQpResidual()
   ADReal adv_quant_interface;
   Real one_over_eps_interface = 1;
 
-  // Velocity interpolation
+  // Superficial velocity interpolation
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
 
-  // Interpolation of 1/eps term
-  // TODO: Consider advecting interstitial momentum, then this function may be inherited
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         one_over_eps_interface,
-                         1 / _eps[_qp],
-                         1 / _eps_neighbor[_qp],
-                         v,
-                         *_face_info,
-                         true);
-
-  // Interpolation of advected quantity
+  // Interpolation of the interstitial momentum
   Moose::FV::interpolate(_advected_interp_method,
                          adv_quant_interface,
-                         _adv_quant_elem[_qp],
-                         _adv_quant_neighbor[_qp],
+                         _adv_quant_elem[_qp] / _eps[_qp],
+                         _adv_quant_neighbor[_qp] / _eps_neighbor[_qp],
                          v,
                          *_face_info,
                          true);
