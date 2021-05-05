@@ -97,4 +97,26 @@
       detail = 'in parallel.'
     []
   []
+
+  [clone_type]
+    requirement = 'If processors do not contain a sub-application and reporter clone transfer is requested, the system shall '
+    [type_specified]
+      type = JSONDiff
+      input = clone_type.i
+      jsondiff = 'clone_type_out.json clone_type_out.json.1 clone_type_out.json.2 clone_type_out.json.3 clone_type_out.json.4 clone_type_out.json.5'
+      skip_keys = 'part number_of_parts'
+      min_parallel = 6
+      max_parallel = 6
+      detail = 'be able to transfer if reporter types are specified and'
+    []
+    [error]
+      type = RunException
+      input = clone.i
+      cli_args = 'MultiApps/multi_reporter/max_procs_per_app=1'
+      match_literal = True
+      expect_err = "For a direct reporter clone, all processors must be associated with a sub-application. If you know the type of reporter being transferred, please consider using the 'reporter_type' parameter for an indirect clone."
+      min_parallel = 5
+      detail = 'error if types are not specified.'
+    []
+  []
 []
