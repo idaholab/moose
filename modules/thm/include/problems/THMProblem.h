@@ -12,6 +12,7 @@ public:
   THMProblem(const InputParameters & parameters);
 
   virtual void advanceState() override;
+  virtual void copySolutionsBackwards() override;
 
   /**
    * Check if a postprocessor with a given name exists in the simulation
