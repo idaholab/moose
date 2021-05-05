@@ -1,4 +1,4 @@
-# Test for `FluidStructureInterface` interface kernel. The domain is 1D with 20m
+# Test for `StructureAcousticInterface` interface kernel. The domain is 1D with 20m
 # length. The fluid domain is on the right and the structural domain is on the left.
 # Fluid end is subjected to a 250Hz sine wave with a single peak of amplitude unity.
 # Structural domain is 4 times as dense as the fluid domain with all other material
@@ -121,7 +121,7 @@
 
 [InterfaceKernels]
   [./interface1]
-    type =  FluidStructureInterface
+    type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_x
     boundary = 'interface1'
