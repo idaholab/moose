@@ -187,7 +187,7 @@ C
 ********************************************************
 **    TESTING ROTSIG                                  **
 ********************************************************
-      CALL DROTCalc(DSTRAN, DROT, DFGRD0, DFGRD1, DTIME, NTENS)
+      CALL DROTCALC(DROT, DFGRD0, DFGRD1, DTIME, NTENS)
       CALL ROTSIG(STRESS, DROT, STRESSROT, 1, NDI, NSHR)
 C
       DO K =1,6

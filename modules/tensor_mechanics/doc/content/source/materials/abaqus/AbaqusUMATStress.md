@@ -1,21 +1,21 @@
-# Abaqus UMAT Material
+# Abaqus UMAT Stress
 
-!syntax description /Materials/AbaqusUmatMaterial
+!syntax description /Materials/AbaqusUMATStress
 
 ## Description
 
-`AbaqusUmatMaterial` provides an interface for using _Abaqus UMAT_
+`AbaqusUMATStress` provides an interface for using _Abaqus UMAT_
 functions as constitutive models in MOOSE.
 
 ## UMAT User subroutine interface
 
 UMAT functions are commonly coded in Fortran, are located in the
-`moose/modules/tensor_mechanics/plugins`, and are automatically
+`moose/modules/tensor_mechanics/plugins` directory, and are automatically
 compiled by the MOOSE build system.
 
-A UMAT file `my_umat.f` can be loaded by the `AbaqusUmatMaterial` by providing the
-the full path and filename without an extension via the [!param](/Materials/AbaqusUmatMaterial/plugin)
-parameter.
+A UMAT file `my_umat.f` can be loaded by the `AbaqusUMATStress` by providing the
+the full path and filename without an extension via the
+[!param](/Materials/AbaqusUMATStress/plugin) parameter in the MOOSE input file.
 
 A valid UMAT subroutine has the following call signature
 
@@ -42,7 +42,7 @@ C
 ```
 
 A description of the input and output parameters of the UMAT user subroutines
-can be found in the [Abaqus user manual](https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/sub/default.htm?startat=ch01s01asb31.html)
+can be found in the Abaqus user manual [!cite](AbaqusManual69).
 
 !alert note
 Temperature coupling and `PREDEF` support are not yet implemented.
@@ -51,10 +51,10 @@ Temperature coupling and `PREDEF` support are not yet implemented.
 
 !listing modules/tensor_mechanics/test/tests/umat/linear_strain_hardening.i block=Materials/constant
 
-!syntax parameters /Materials/AbaqusUmatMaterial
+!syntax parameters /Materials/AbaqusUMATStress
 
-!syntax inputs /Materials/AbaqusUmatMaterial
+!syntax inputs /Materials/AbaqusUMATStress
 
-!syntax children /Materials/AbaqusUmatMaterial
+!syntax children /Materials/AbaqusUMATStress
 
 !bibtex bibliography

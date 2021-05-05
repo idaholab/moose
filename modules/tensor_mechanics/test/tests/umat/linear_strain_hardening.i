@@ -1,5 +1,4 @@
-# Testing the UMAT Interface - creep linear strain hardening model using the small strain formulation - visco-plastic material.
-# Note that this isn't a thermal or irradiation creep model.
+# Testing the UMAT Interface - creep linear strain hardening model using the finite strain formulation - visco-plastic material.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -61,7 +60,7 @@
 
 [Materials]
   [constant]
-    type = AbaqusUmatMaterial
+    type = AbaqusUMATStress
     #                      Young's modulus,  Poisson's Ratio, Yield, Hardening
     mechanical_constants = '1000 0.3 10 100'
     plugin = ../../../plugins/linear_strain_hardening

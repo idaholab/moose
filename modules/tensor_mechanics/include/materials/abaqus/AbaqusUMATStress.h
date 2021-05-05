@@ -52,13 +52,16 @@ typedef void (*umat_t)(Real STRESS[],
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUmatMaterial : public ComputeStressBase
+class AbaqusUMATStress : public ComputeStressBase
 {
 public:
   static InputParameters validParams();
 
-  AbaqusUmatMaterial(const InputParameters & parameters);
-  virtual ~AbaqusUmatMaterial();
+  AbaqusUMATStress(const InputParameters & parameters);
+  virtual ~AbaqusUMATStress();
+
+  /// perform per-element computation/initialization
+  void computeProperties() override;
 
 protected:
   FileName _plugin;
@@ -80,14 +83,14 @@ protected:
   /// creep dissipation
   Real _aqSCD;
 
-  ///  Variation of RPL with respect to the temperature.
-  Real _aqDRPLDT;
-
   /**
    * Volumetric heat generation per unit time at the end of the increment caused by mechanical
    * working of the material.
    */
   Real _aqRPL;
+
+  ///  Variation of the volumetric heat generation (RPL) with respect to the temperature.
+  Real _aqDRPLDT;
 
   /// Ratio of suggested new time increment to the time increment being used (out)
   Real _aqPNEWDT;
@@ -183,14 +186,14 @@ protected:
   /// Array of increments of predefined field variables
   Real _aqDPRED;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpStress();
+  void initQpStatefulProperties() override;
+  void computeQpStress() override;
 
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _total_strain;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 
-  /// Jacobian multiplier (we approximate this using the elasticity tensor)
+  /// Jacobian multiplier
   MaterialProperty<RankFourTensor> & _jacobian_mult;
 
   const MaterialProperty<RankTwoTensor> & _Fbar;
