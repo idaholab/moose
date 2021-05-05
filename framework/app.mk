@@ -48,7 +48,7 @@ endif
 # source files
 TEST_SRC_DIRS    := $(APPLICATION_DIR)/test/src
 SRC_DIRS    := $(APPLICATION_DIR)/src
-PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
+PLUGIN_DIR  := $(APPLICATION_DIR)/plugins $(APPLICATION_DIR)/test/plugins
 
 
 excluded_srcfiles += main.C

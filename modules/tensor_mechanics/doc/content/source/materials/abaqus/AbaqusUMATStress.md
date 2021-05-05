@@ -10,8 +10,8 @@ functions as constitutive models in MOOSE.
 ## UMAT User subroutine interface
 
 UMAT functions are commonly coded in Fortran, are located in the
-`moose/modules/tensor_mechanics/plugins` directory, and are automatically
-compiled by the MOOSE build system.
+`$(APPLICATION_DIR)/plugins` and `$(APPLICATION_DIR)/test/plugins` directories,
+and are automatically compiled by the MOOSE build system.
 
 A UMAT file `my_umat.f` can be loaded by the `AbaqusUMATStress` by providing the
 the full path and filename without an extension via the
@@ -42,7 +42,7 @@ C
 ```
 
 A description of the input and output parameters of the UMAT user subroutines
-can be found in the Abaqus user manual [!cite](AbaqusManual69).
+can be found in the Abaqus user manual [!cite](AbaqusManual).
 
 !alert note
 Temperature coupling and `PREDEF` support are not yet implemented.

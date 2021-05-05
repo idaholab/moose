@@ -127,7 +127,8 @@ AbaqusUMATStress::computeProperties()
   _aqNOEL = _current_elem->id();
 
   // characteristic element length
-  _aqCELENT = _current_elem->hmax();
+  // TODO: check what Abaqus actually passes in here (likely ~ element_volume^(1/element_dim))
+  _aqCELENT = std::numeric_limits<Real>::signaling_NaN();
 
   // Value of step time at the beginning of the current increment - Check
   _aqTIME[0] = _t;
