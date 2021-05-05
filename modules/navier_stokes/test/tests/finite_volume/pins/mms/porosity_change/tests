@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#16756'
+  design = 'navier_stokes/fv.md'
+  [1D_continuous_porosity]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestRC
+    requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 1D channel with a continuously varying porosity and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 8
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [2D_continuous_porosity]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestRC_2D
+    requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 2D channel with a continuously varying porosity and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 16
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]

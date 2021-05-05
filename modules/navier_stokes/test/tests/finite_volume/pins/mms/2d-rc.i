@@ -1,5 +1,5 @@
 mu=1.1
-rho=1
+rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
@@ -8,34 +8,29 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 5
-    ymin = 0
+    xmax = 2
+    ymin = -1
     ymax = 1
-    nx = 40
-    ny = 20
+    nx = 8
+    ny = 8
   []
 []
 
-[GlobalParams]
-  two_term_boundary_expansion = true
+[Problem]
+  fv_bcs_integrity_check = true
 []
 
 [Variables]
-  inactive = 'lambda'
   [u]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = 1
   []
   [v]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1e-6
+    initial_condition = 1
   []
   [pressure]
     type = INSFVPressureVariable
-  []
-  [lambda]
-    family = SCALAR
-    order = FIRST
   []
 []
 
@@ -44,12 +39,16 @@ velocity_interp_method='rc'
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    initial_condition = 0.5
+    initial_condition = 0.8
   []
 []
 
+[GlobalParams]
+  porosity = porosity
+  two_term_boundary_expansion = true
+[]
+
 [FVKernels]
-  inactive = 'mean-pressure'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -61,7 +60,11 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    porosity = porosity
+  []
+  [mass_forcing]
+    type = FVBodyForce
+    variable = pressure
+    function = forcing_p
   []
 
   [u_advection]
@@ -76,7 +79,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    porosity = porosity
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
@@ -89,16 +91,11 @@ velocity_interp_method='rc'
     variable = u
     momentum_component = 'x'
     p = pressure
-    porosity = porosity
   []
-  [u_friction]
-    type = PINSFVMomentumFriction
+  [u_forcing]
+    type = FVBodyForce
     variable = u
-    momentum_component = 'x'
-    porosity = porosity
-    Darcy_name = 'Darcy_coefficient'
-    Forchheimer_name = 'Forchheimer_coefficient'
-    rho = ${rho}
+    function = forcing_u
   []
 
   [v_advection]
@@ -113,7 +110,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    porosity = porosity
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
@@ -126,23 +122,11 @@ velocity_interp_method='rc'
     variable = v
     momentum_component = 'y'
     p = pressure
-    porosity = porosity
   []
-  [v_friction]
-    type = PINSFVMomentumFriction
+  [v_forcing]
+    type = FVBodyForce
     variable = v
-    momentum_component = 'y'
-    porosity = porosity
-    Darcy_name = 'Darcy_coefficient'
-    Forchheimer_name = 'Forchheimer_coefficient'
-    rho = ${rho}
-  []
-
-  [mean-pressure]
-    type = FVScalarLagrangeMultiplier
-    variable = pressure
-    lambda = lambda
-    phi0 = 0.01
+    function = forcing_v
   []
 []
 
@@ -151,64 +135,31 @@ velocity_interp_method='rc'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = '1'
+    function = 'exact_u'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = v
-    function = 0
+    function = 'exact_v'
   []
-  [inlet-p]
-    type = INSFVOutletPressureBC
-    boundary = 'left'
-    variable = pressure
-    function = 1
-  []
-
-  [no-slip-u]
+  [walls-u]
     type = INSFVNoSlipWallBC
-    boundary = 'top'
+    boundary = 'top bottom'
     variable = u
-    function = 0
+    function = 'exact_u'
   []
-  [no-slip-v]
+  [walls-v]
     type = INSFVNoSlipWallBC
-    boundary = 'top'
+    boundary = 'top bottom'
     variable = v
-    function = 0
+    function = 'exact_v'
   []
-  [symmetry-u]
-    type = PINSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = u
-    u = u
-    v = v
-    mu = ${mu}
-    momentum_component = 'x'
-    porosity = porosity
-  []
-  [symmetry-v]
-    type = PINSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = v
-    u = u
-    v = v
-    mu = ${mu}
-    momentum_component = 'y'
-    porosity = porosity
-  []
-  [symmetry-p]
-    type = INSFVSymmetryPressureBC
-    boundary = 'bottom'
-    variable = pressure
-  []
-
-  [outlet-p]
+  [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0
+    function = 'exact_p'
   []
 []
 
@@ -220,10 +171,38 @@ velocity_interp_method='rc'
     pressure = 'pressure'
     rho = ${rho}
   []
-  [darcy]
-    type = ADGenericConstantVectorMaterial
-    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
-    prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
+[]
+
+[Functions]
+  [exact_u]
+    type = ParsedFunction
+    value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+  []
+  [forcing_u]
+    type = ParsedFunction
+    value = '0.625*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + 0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - 1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [exact_v]
+    type = ParsedFunction
+    value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+  []
+  [forcing_v]
+    type = ParsedFunction
+    value = '0.390625*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - 1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + 0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + 1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
+  []
+  [forcing_p]
+    type = ParsedFunction
+    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+    vars = 'rho'
+    vals = '${rho}'
   []
 []
 
@@ -231,26 +210,41 @@ velocity_interp_method='rc'
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
+  petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-11
-  nl_abs_tol = 1e-14
-[]
-
-# Some basic Postprocessors to visually examine the solution
-[Postprocessors]
-  [inlet-p]
-    type = SideAverageValue
-    variable = pressure
-    boundary = 'left'
-  []
-  [outlet-u]
-    type = SideIntegralVariablePostprocessor
-    variable = u
-    boundary = 'right'
-  []
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
   exodus = true
+  csv = true
+[]
+
+[Postprocessors]
+  [h]
+    type = AverageElementSize
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
+  [L2u]
+    type = ElementL2Error
+    variable = u
+    function = exact_u
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
+  [L2v]
+    type = ElementL2Error
+    variable = v
+    function = exact_v
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
+  [L2p]
+    type = ElementL2Error
+    variable = pressure
+    function = exact_p
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
 []

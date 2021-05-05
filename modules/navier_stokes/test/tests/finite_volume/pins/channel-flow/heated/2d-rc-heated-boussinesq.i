@@ -20,6 +20,10 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
+
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable

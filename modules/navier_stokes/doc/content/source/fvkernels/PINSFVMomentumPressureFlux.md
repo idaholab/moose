@@ -1,12 +1,12 @@
 # PINSFVMomentumPressureFlux
 
 
-This object adds the $\epsilon \nabla p$ pressure gradient term of the
+This object adds the $\nabla (\epsilon p)$ pressure gradient term of the
 incompressible porous media Navier Stokes momentum equation as a surface term using the divergence
 theorem.
 This formulation better handles discontinuities in porosity as it does not attempt to
-compute the pressure gradient near the discontinuity. It is otherwise strictly equivalent
-to its volumetric equivalent [PINSFVMomentumPressure.md].
+compute the pressure gradient near the discontinuity. Note that the porosity gradient that originates
+from the integration by part is added by `PINSFVMomentumPressurePorosityGradient`.
 
 The pressure is a Lagrange Multiplier that ensures the incompressibility constraint.
 
