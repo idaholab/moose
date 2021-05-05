@@ -1,6 +1,6 @@
-# Fluid-structure interface
+# Structure-acoustic interface
 
-!syntax description /InterfaceKernels/FluidStructureInterface
+!syntax description /InterfaceKernels/StructureAcousticInterface
 
 ## Description
 
@@ -14,8 +14,8 @@ In this interface kernel, element is always the structure and neighbor is always
   be the structure and `paired_block` should be the fluid. If sideset is defined
   using Paraview, use the `with respect to` option.
 
-!syntax parameters /InterfaceKernels/FluidStructureInterface
+!syntax parameters /InterfaceKernels/StructureAcousticInterface
 
-!syntax inputs /InterfaceKernels/FluidStructureInterface
+!syntax inputs /InterfaceKernels/StructureAcousticInterface
 
-!syntax children /InterfaceKernels/FluidStructureInterface
+!syntax children /InterfaceKernels/StructureAcousticInterface
