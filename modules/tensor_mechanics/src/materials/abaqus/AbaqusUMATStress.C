@@ -28,9 +28,8 @@ AbaqusUMATStress::validParams()
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
-  params.addRequiredParam<std::vector<Real>>("mechanical_constants",
-                                             "Mechanical Material Properties");
-  params.addParam<std::vector<Real>>("thermal_constants", "Thermal Material Properties");
+  params.addRequiredParam<std::vector<Real>>(
+      "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
   return params;
@@ -39,9 +38,10 @@ AbaqusUMATStress::validParams()
 AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
-    _mechanical_constants(getParam<std::vector<Real>>("mechanical_constants")),
-    _thermal_constants(getParam<std::vector<Real>>("thermal_constants")),
-    _num_state_vars(getParam<unsigned int>("num_state_vars")),
+    _aqNSTATV(getParam<unsigned int>("num_state_vars")),
+    _aqSTATEV(_aqNSTATV),
+    _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
+    _aqNPROPS(_aqPROPS.size()),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
@@ -60,15 +60,11 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 #endif
   _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
 
-  // Size and create full (mechanical+thermal) material property array
-  _num_props = _mechanical_constants.size() + _thermal_constants.size();
-
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
   _aqNTENS = 6; // Size of the stress or strain component array (NDI+NSHR)
   _aqNSHR = 3;  // Number of engineering shear stress components
   _aqNDI = 3;   // Number of direct stress components (always 3)
 
-  _aqSTATEV.resize(_num_state_vars);
   _aqDDSDDT.resize(_aqNTENS);
   _aqDRPLDE.resize(_aqNTENS);
   _aqSTRAN.resize(_aqNTENS);
@@ -77,17 +73,6 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
-  _aqPROPS.resize(_num_props);
-
-  // Assign materials properties from vector form into an array
-  for (unsigned int i = 0; i < _mechanical_constants.size(); ++i)
-    _aqPROPS[i] = _mechanical_constants[i];
-  for (unsigned int i = _mechanical_constants.size(); i < _num_props; ++i)
-    _aqPROPS[i] = _thermal_constants[i];
-
-  // Size UMAT state variable (NSTATV) and material constant (NPROPS) arrays
-  _aqNSTATV = _num_state_vars;
-  _aqNPROPS = _num_props;
 
   // Open the library
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -130,8 +115,8 @@ void
 AbaqusUMATStress::initQpStatefulProperties()
 {
   // Initialize state variable vector
-  _state_var[_qp].resize(_num_state_vars);
-  for (unsigned int i = 0; i < _num_state_vars; ++i)
+  _state_var[_qp].resize(_aqNSTATV);
+  for (int i = 0; i < _aqNSTATV; ++i)
     _state_var[_qp][i] = 0.0;
 }
 
@@ -168,7 +153,7 @@ AbaqusUMATStress::computeQpStress()
   }
 
   // Recover "old" state variables
-  for (unsigned int i = 0; i < _num_state_vars; ++i)
+  for (int i = 0; i < _aqNSTATV; ++i)
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
   // Pass through updated stress, total strain, and strain increment arrays
@@ -184,7 +169,7 @@ AbaqusUMATStress::computeQpStress()
   }
 
   // current coordinates
-  for (unsigned int i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     _aqCOORDS[i] = _q_point[_qp](i);
 
   // zero out Jacobian contribution
@@ -234,7 +219,7 @@ AbaqusUMATStress::computeQpStress()
         &_aqKINC);
 
   // Update state variables
-  for (unsigned int i = 0; i < _num_state_vars; ++i)
+  for (int i = 0; i < _aqNSTATV; ++i)
     _state_var[_qp][i] = _aqSTATEV[i];
 
   // determine the material timestep
