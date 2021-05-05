@@ -172,12 +172,15 @@ TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & par
     MultiMooseEnum generate_output = getParam<MultiMooseEnum>("generate_output");
     MultiMooseEnum additional_generate_output =
         getParam<MultiMooseEnum>("additional_generate_output");
+
     MultiMooseEnum material_output_order = getParam<MultiMooseEnum>("material_output_order");
     MultiMooseEnum additional_material_output_order =
         getParam<MultiMooseEnum>("additional_material_output_order");
+
     MultiMooseEnum material_output_family = getParam<MultiMooseEnum>("material_output_family");
     MultiMooseEnum additional_material_output_family =
         getParam<MultiMooseEnum>("additional_material_output_family");
+
     for (auto & output : additional_generate_output)
       generate_output.push_back(output);
     for (auto & order : additional_material_output_order)
@@ -186,6 +189,8 @@ TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & par
       material_output_family.push_back(family);
 
     _pars.set<MultiMooseEnum>("generate_output") = generate_output;
+    _pars.set<MultiMooseEnum>("material_output_order") = material_output_order;
+    _pars.set<MultiMooseEnum>("material_output_family") = material_output_family;
   }
 }
 
@@ -200,9 +205,7 @@ TensorMechanicsActionBase::materialOutputOrders()
 MultiMooseEnum
 TensorMechanicsActionBase::materialOutputFamilies()
 {
-  auto families = AddAuxVariableAction::getAuxVariableFamilies().getRawNames();
-
-  return MultiMooseEnum(families);
+  return MultiMooseEnum("MONOMIAL LAGRANGE");
 }
 
 MultiMooseEnum

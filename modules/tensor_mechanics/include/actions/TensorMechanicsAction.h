@@ -100,8 +100,8 @@ protected:
 
   /// output materials to generate scalar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
-  std::vector<std::string> _material_output_order;
-  std::vector<std::string> _material_output_family;
+  MultiMooseEnum _material_output_order;
+  MultiMooseEnum _material_output_family;
 
   /// booleans used to determine if cylindrical axis points are passed
   bool _cylindrical_axis_point1_valid;
