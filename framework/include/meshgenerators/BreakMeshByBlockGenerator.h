@@ -55,6 +55,8 @@ protected:
   const bool _split_transition_interface;
   /// the name of the transition interface
   const BoundaryName _interface_transition_name;
+  /// whether to add two sides interface boundaries
+  const bool _add_two_sides_interface;
 
 private:
   /// generate the new boundary interface

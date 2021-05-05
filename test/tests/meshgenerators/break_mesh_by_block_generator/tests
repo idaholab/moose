@@ -79,7 +79,18 @@
   [block_restricted]
     requirement = 'The system shall be able to break the mesh between listed blocks:'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895'
+    issues = '#15895 #17749'
+
+    [2d]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted_2d.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_block_restricted_2d_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'with splitting the interface and without splitting the transition interface in 2D;'
+    []
 
     [split_transition_only]
       type = 'Exodiff'

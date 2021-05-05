@@ -38,6 +38,8 @@ BreakMeshByBlockGenerator::validParams()
                         "interface_transition is generate between listed blocks and other blocks.");
   params.addParam<bool>(
       "split_transition_interface", false, "Whether to split the transition interface by blocks.");
+  params.addParam<bool>(
+      "add_two_sides_interface", false, "Whether to add two sides interface boundaries.");
   params.addParam<BoundaryName>(
       "interface_transition_name",
       "interface_transition",
@@ -54,7 +56,8 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _block_restricted(parameters.isParamSetByUser("block")),
     _add_transition_interface(getParam<bool>("add_transition_interface")),
     _split_transition_interface(getParam<bool>("split_transition_interface")),
-    _interface_transition_name(getParam<BoundaryName>("interface_transition_name"))
+    _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
+    _add_two_sides_interface(getParam<bool>("add_two_sides_interface"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
@@ -96,7 +99,14 @@ BreakMeshByBlockGenerator::generate()
       for (auto elem_id = node_it->second.begin(); elem_id != node_it->second.end(); elem_id++)
       {
         const Elem * current_elem = mesh->elem_ptr(*elem_id);
-        connected_blocks.insert(blockRestrictedElementSubdomainID(current_elem));
+        subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
+        if (!_add_transition_interface)
+        {
+          if (block_id != Elem::invalid_subdomain_id)
+            connected_blocks.insert(block_id);
+        }
+        else
+          connected_blocks.insert(block_id);
       }
 
       unsigned int node_multiplicity = connected_blocks.size();
@@ -114,6 +124,7 @@ BreakMeshByBlockGenerator::generate()
             connected_blocks.find(Elem::invalid_subdomain_id) != connected_blocks.end()
                 ? Elem::invalid_subdomain_id
                 : *subdomain_it;
+        // subdomain_id_type reference_subdomain_id = *subdomain_it;
         // multiplicity counter to keep track of how many nodes we added
         unsigned int multiplicity_counter = node_multiplicity;
         for (auto elem_id : connected_elems)
@@ -123,7 +134,12 @@ BreakMeshByBlockGenerator::generate()
             break;
 
           Elem * current_elem = mesh->elem_ptr(elem_id);
-          if (blockRestrictedElementSubdomainID(current_elem) != reference_subdomain_id)
+          subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
+
+          if ((_add_transition_interface && block_id != reference_subdomain_id) ||
+              (!_add_transition_interface && block_id != reference_subdomain_id &&
+               reference_subdomain_id != Elem::invalid_subdomain_id &&
+               block_id != Elem::invalid_subdomain_id))
           {
             // assign the newly added node to current_elem
             Node * new_node = nullptr;
@@ -191,7 +207,10 @@ BreakMeshByBlockGenerator::generate()
               {
 
                 dof_id_type elem_id = current_elem->id();
+                dof_id_type connected_elem_id = connected_elem->id();
                 unsigned int side = current_elem->which_neighbor_am_i(connected_elem);
+                unsigned int connected_elem_side =
+                    connected_elem->which_neighbor_am_i(current_elem);
 
                 // in this case we need to play a game to reorder the sides
                 if (_block_restricted)
@@ -204,13 +223,38 @@ BreakMeshByBlockGenerator::generate()
 
                     elem_id = connected_elem->id();
                     side = connected_elem->which_neighbor_am_i(current_elem);
+
+                    connected_elem_id = current_elem->id();
+                    connected_elem_side = current_elem->which_neighbor_am_i(connected_elem);
                   }
                 }
 
                 std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
                     std::make_pair(curr_elem_subid, connected_elem_subid);
 
-                _new_boundary_sides_map[blocks_pair].insert(std::make_pair(elem_id, side));
+                std::pair<subdomain_id_type, subdomain_id_type> blocks_pair2 =
+                    std::make_pair(connected_elem_subid, curr_elem_subid);
+
+                if (!_add_transition_interface)
+                {
+                  if (blockRestrictedElementSubdomainID(current_elem) !=
+                          Elem::invalid_subdomain_id &&
+                      blockRestrictedElementSubdomainID(connected_elem) !=
+                          Elem::invalid_subdomain_id)
+                  {
+                    _new_boundary_sides_map[blocks_pair].insert(std::make_pair(elem_id, side));
+                    if (_add_two_sides_interface)
+                      _new_boundary_sides_map[blocks_pair2].insert(
+                          std::make_pair(connected_elem_id, connected_elem_side));
+                  }
+                }
+                else
+                {
+                  _new_boundary_sides_map[blocks_pair].insert(std::make_pair(elem_id, side));
+                  if (_add_two_sides_interface)
+                    _new_boundary_sides_map[blocks_pair2].insert(
+                        std::make_pair(connected_elem_id, connected_elem_side));
+                }
               }
             }
           }

@@ -12,7 +12,7 @@ As an option, the interface can be split into $Q$ different sidesets, where $Q$ 
 
 The split can be restricted to the blocks listed in the `block` input parameter. When blocks are provided the additional boundary `interface_transition` is added. The `interface_transition` boundary identifies the interface between the provided blocks and the rest of the mesh. The creation of `interface_transition` boundary can be inhibited by setting `add_transition_interface=false` and transition boundaries are added to the `interface` sidesets.
 The `interface_transition_name` parameter allows to change the name of the resulting interface transition boundary.  
-If present, the `interface_transition` boundary can be split by setting `split_transition_interface=true`.
+If present, the `interface_transition` boundary can be split by setting `split_transition_interface=true`. The `add_two_sides_interface` parameter allows to generate two sides interface boundaries which can be used to enforce thermal and mechanical contact at the interface.
 
 ## Example Input File Syntax
 
