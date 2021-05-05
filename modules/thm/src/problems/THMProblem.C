@@ -62,6 +62,13 @@ THMProblem::advanceState()
   Simulation::advanceState();
 }
 
+void
+THMProblem::copySolutionsBackwards()
+{
+  FEProblem::copySolutionsBackwards();
+  Simulation::advanceState();
+}
+
 bool
 THMProblem::hasPostprocessor(const std::string & name) const
 {
