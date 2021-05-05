@@ -144,4 +144,4 @@ In addition, there is continuity of pressure at the boundary as expressed by the
     [\mathbf{S}_s]_{\Gamma_{sf}}=-p~\mathbf{I}
 \end{equation}
 
-where $\mathbf{I}$ is an identity matrix. The [FluidStructureInterface](/FluidStructureInterface.md) interface kernel enforces the normal displacements and stress-pressure continuity across the fluid and structure domains through [eqn:Int_4] and [eqn:Int_2], respectively.
+where $\mathbf{I}$ is an identity matrix. The [StructureAcousticInterface](/StructureAcousticInterface.md) interface kernel enforces the normal displacements and stress-pressure continuity across the fluid and structure domains through [eqn:Int_4] and [eqn:Int_2], respectively.
