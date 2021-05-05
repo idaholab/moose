@@ -63,7 +63,7 @@
     type = AbaqusUMATStress
     #                      Young's modulus,  Poisson's Ratio, Yield, Hardening
     constant_properties = '1000 0.3 10 100'
-    plugin = ../../../plugins/linear_strain_hardening
+    plugin = ../../plugins/linear_strain_hardening
     num_state_vars = 3
   []
 []

@@ -66,7 +66,7 @@
   [umat]
     type = AbaqusUMATStress
     constant_properties = '1000 0.3'
-    plugin = '../../../plugins/elastic'
+    plugin = '../../plugins/elastic'
     num_state_vars = 0
   []
 
