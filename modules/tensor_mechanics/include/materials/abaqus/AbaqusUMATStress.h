@@ -64,11 +64,8 @@ public:
   void computeProperties() override;
 
 protected:
+  // The plugin file name
   FileName _plugin;
-  std::vector<Real> _mechanical_constants;
-  std::vector<Real> _thermal_constants;
-  unsigned int _num_state_vars;
-  unsigned int _num_props;
 
   // The plugin library handle
   void * _handle;
@@ -121,9 +118,6 @@ protected:
 
   /// Number of solution-dependent state variables that are associated with this material type
   int _aqNSTATV;
-
-  /// User-defined number of material constants associated with this user material.
-  int _aqNPROPS;
 
   /// Element number
   int _aqNOEL;
@@ -179,6 +173,9 @@ protected:
 
   /// Rotation increment matrix
   std::array<Real, 3 * 3> _aqDROT;
+
+  /// User-defined number of material constants associated with this user material.
+  int _aqNPROPS;
 
   /// Array of interpolated values of predefined field variables at this point at the start of the increment, based on the values read in at the nodes.
   Real _aqPREDEF;

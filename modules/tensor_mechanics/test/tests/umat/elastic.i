@@ -65,7 +65,7 @@
   # 1. active for umat calculation
   [umat]
     type = AbaqusUMATStress
-    mechanical_constants = '1000 0.3'
+    constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic'
     num_state_vars = 0
   []
