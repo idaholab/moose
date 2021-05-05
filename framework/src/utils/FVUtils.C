@@ -44,6 +44,25 @@ gradUDotNormal(const T &
 #endif
 }
 
+ADReal
+interpolate(const Limiter & limiter,
+            const ADReal & phiC,
+            const ADReal & phiD,
+            const VectorValue<ADReal> & gradC,
+            const FaceInfo & fi,
+            const bool C_is_elem)
+{
+  // Using beta, w_f, g nomenclature from Greenshields
+  const auto r_f = rF(phiC, phiD, gradC, C_is_elem ? fi.dCF() : RealVectorValue(-fi.dCF()));
+  const auto beta = limiter(r_f);
+
+  const auto w_f = C_is_elem ? fi.gC() : (1. - fi.gC());
+
+  const auto g = beta * (1. - w_f);
+
+  return (1. - g) * phiC + g * phiD;
+}
+
 template ADReal
 gradUDotNormal(const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &);
 template ADReal

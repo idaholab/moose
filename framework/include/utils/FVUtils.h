@@ -15,6 +15,8 @@
 #include "Assembly.h"
 #include "FaceInfo.h"
 #include "MooseVariableFV.h"
+#include "Limiter.h"
+#include "MathUtils.h"
 #include "libmesh/elem.h"
 #include "libmesh/compare_types.h"
 
@@ -27,6 +29,8 @@ namespace Moose
 {
 namespace FV
 {
+class Limiter;
+
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
 /// properties, etc.) at the face (centroid).  These methods are used in the
@@ -348,5 +352,46 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
 
   return std::make_tuple(elem_one, elem_two, one_is_elem);
 }
+
+/**
+ * From Moukalled 12.30
+ *
+ * r_f = (phiC - phiU) / (phiD - phiC)
+ *
+ * However, this formula is only clear on grids where upwind locations can be readily determined,
+ * which is not the case for unstructured meshes. So we leverage a virtual upwind location and
+ * Moukalled 12.65
+ *
+ * phiD - phiU = 2 * grad(phi)_C * dCD ->
+ * phiU = phiD - 2 * grad(phi)_C * dCD
+ *
+ * Combining the two equations and performing some algebraic manipulation yields this equation for
+ * r_f:
+ *
+ * r_f = 2 * grad(phi)_C * dCD / (phiD - phiC) - 1
+ *
+ * This equation is clearly asymmetric considering the face between C and D because of the
+ * subscript on grad(phi). Hence this method can be thought of as constructing an r associated with
+ * the C side of the face
+ */
+inline ADReal
+rF(const ADReal & phiC,
+   const ADReal & phiD,
+   const ADRealVectorValue & gradC,
+   const RealVectorValue & dCD)
+{
+  // We need to make sure we protect ourselves against things like division by zero
+  return 2. * gradC * dCD / (std::numeric_limits<Real>::epsilon() + (phiD - phiC)) - 1.;
+}
+
+/**
+ * Interpolates with a limiter
+ */
+ADReal interpolate(const Limiter & limiter,
+                   const ADReal & phiC,
+                   const ADReal & phiD,
+                   const VectorValue<ADReal> & gradC,
+                   const FaceInfo & fi,
+                   const bool C_is_elem);
 }
 }

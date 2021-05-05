@@ -24,4 +24,25 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
+  [UpwindLimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = UpwindLimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [CentralDifferenceLimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = CentralDifferenceLimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [VanLeerLimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = VanLeerLimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
 []
