@@ -1,0 +1,30 @@
+[Tests]
+  # Note that these tests illustrate that Kurganov-Tadmor (KT) shows
+  # non-constant momentum whereas central differencing shows constant
+  # momentum. The non-const-ness of the KT scheme goes away with mesh
+  # refinement, so this is indeed discretization error
+  [heated_channel]
+    requirement = 'The system shall be able to solve the steady Euler equations in a heated channel using'
+    [average]
+      type = Exodiff
+      input = steady-porous-average.i
+      exodiff = steady-porous-average_out.e
+      ad_indexing_type = global
+      detail = 'central differencing for the convection terms and a conserved variable set'
+    []
+    [kt-conserved]
+      type = Exodiff
+      input = steady-porous-kt.i
+      exodiff = steady-porous-kt_out.e
+      ad_indexing_type = global
+      detail = 'Kurganov-Tadmor for the convection terms and a conserved variable set'
+    []
+    [kt-primitive]
+      type = Exodiff
+      input = steady-porous-kt-primitive.i
+      exodiff = steady-porous-kt-primitive_out.e
+      ad_indexing_type = global
+      detail = 'Kurganov-Tadmor for the convection terms and a primitive variable set'
+    []
+  []
+[]
