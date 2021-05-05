@@ -11,12 +11,12 @@
 
 #include "InterfaceKernel.h"
 
-class FluidStructureInterface : public InterfaceKernel
+class StructureAcousticInterface : public InterfaceKernel
 {
 public:
   static InputParameters validParams();
 
-  FluidStructureInterface(const InputParameters & parameters);
+  StructureAcousticInterface(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;

@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FluidStructureInterface.h"
+#include "StructureAcousticInterface.h"
 #include "MooseVariableFE.h"
 
-registerMooseObject("FsiApp", FluidStructureInterface);
+registerMooseObject("FsiApp", StructureAcousticInterface);
 
 InputParameters
-FluidStructureInterface::validParams()
+StructureAcousticInterface::validParams()
 {
   InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription("Enforces displacement and stress/pressure continuity "
@@ -26,7 +26,7 @@ FluidStructureInterface::validParams()
   return params;
 }
 
-FluidStructureInterface::FluidStructureInterface(const InputParameters & parameters)
+StructureAcousticInterface::StructureAcousticInterface(const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _D(getMaterialProperty<Real>("D")),
     _neighbor_dotdot(_neighbor_var.uDotDotNeighbor()),
@@ -36,7 +36,7 @@ FluidStructureInterface::FluidStructureInterface(const InputParameters & paramet
 }
 
 Real
-FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
+StructureAcousticInterface::computeQpResidual(Moose::DGResidualType type)
 {
   switch (type)
   {
@@ -50,7 +50,7 @@ FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
+StructureAcousticInterface::computeQpJacobian(Moose::DGJacobianType type)
 {
   switch (type)
   {

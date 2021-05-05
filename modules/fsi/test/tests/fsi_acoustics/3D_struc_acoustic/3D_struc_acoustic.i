@@ -1,4 +1,4 @@
-# Test for `FluidStructureInterface_3D` interface kernel. The domain is 3D with lengths
+# Test for `StructureAcousticInterface` interface kernel. The domain is 3D with lengths
 # 10 X 0.1 X 0.1 meters. The fluid domain is on the right and the structural domain
 # is on the left. Fluid end is subjected to a 250Hz sine wave with a single peak.
 # Structural domain has the same material properties as the fluid. Interface between
@@ -252,7 +252,7 @@
 
 [InterfaceKernels]
   [./interface1]
-    type =  FluidStructureInterface
+    type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_x
     boundary = 'interface1'
@@ -260,7 +260,7 @@
     component = 0
   [../]
   [./interface2]
-    type =  FluidStructureInterface
+    type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_y
     boundary = 'interface1'
@@ -268,7 +268,7 @@
     component = 1
   [../]
   [./interface3]
-    type =  FluidStructureInterface
+    type =  StructureAcousticInterface
     variable = p
     neighbor_var = disp_z
     boundary = 'interface1'
@@ -307,7 +307,7 @@
 [Functions]
   [./accel_bottom]
     type = PiecewiseLinear
-    data_file = ../1D_fluid_struc/Input_1Peak_highF.csv
+    data_file = ../1D_struc_acoustic/Input_1Peak_highF.csv
     scale_factor = 1e-2
     format = 'columns'
   [../]
