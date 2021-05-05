@@ -93,14 +93,9 @@ C
          C(K)=(S(4)*S(5))-((S(2)-S(K))*S(6))
       END DO
 
-C      PRINT *, A
-C      PRINT *, B
-C      PRINT *, C
-
       DO K=1, 3
          V(K)=1/SQRT(A(K)**2+B(K)**2+C(K)**2)
       END DO
-C      PRINT *, V
 C
 C     Calculate Direction Cosines
 C
@@ -110,9 +105,6 @@ C
          N(K)=C(K)*V(K)
       END DO
 
-C      PRINT *, L
-C      PRINT *, M
-C      PRINT *, N
 C
 C     Assign Direction Cosines to array locations
 C
@@ -125,7 +117,6 @@ C
       AN(3,1)=L(2)
       AN(3,2)=M(2)
       AN(3,3)=N(2)
-C      PRINT *, AN
 
       RETURN
       END

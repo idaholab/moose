@@ -1,4 +1,4 @@
-      SUBROUTINE DROTCALC(DSTRAN,DROT ,DFGRD0,DFGRD1,DTIME,NTENS)
+      SUBROUTINE DROTCALC(DROT ,DFGRD0,DFGRD1,DTIME,NTENS)
 C======================================================================+
 C----------------------------------------------------------------------+
 C----------------  CALCULATION OF ROTATION INCREMENT  -----------------+
@@ -19,7 +19,6 @@ C-----------
 C  OUTPUT :
 C-----------
 C  DROT		: ROTATION INCEMENT MATRIX
-C  DSTRAN	: STRAIN INCREMENT TENSOR
 C----------------------------------------------------------------------+
 C=======================================================================
 C----------------------------------------------------------------------+
@@ -28,7 +27,6 @@ C.1-----  Precision
 C.2-----  Parameter
       PARAMETER (N=3)
 C.3-----  Dimension
-      DIMENSION DSTRAN(NTENS)
       DIMENSION DFGRD0(3,3),DFGRD1(3,3),DROT(3,3),DF(3,3),F0I(3,3)
       DIMENSION DQDQ(3,3),DFM(3,3),DFP(3,3)
       DIMENSION VL(3,3),DW(3,3),DM(3,3),DP(3,3)
@@ -69,17 +67,6 @@ C-------
             VL(I,J) = TWODT*VL(I,J)
          END DO
       END DO
-C----------------------------------------------------------------------+
-C-------  Strain Increment Tensor Dstran and Plastic Spin DW
-C
-C      DSTRAN(1) = VL(1,1)
-C      DSTRAN(2) = VL(2,2)
-C      DSTRAN(3) = VL(3,3)
-C      DSTRAN(4) = VL(1,2)+VL(2,1)
-C      IF(NTENS.GT.4) THEN
-C         DSTRAN(5) = VL(1,3)+VL(3,1)
-C         DSTRAN(6) = VL(2,3)+VL(3,2)
-C      END IF
 C-------
       DO I=1,N
          DO J=1,N
@@ -226,17 +213,6 @@ C-------  Switch columns J and J1
 C
 C---------------------------------------------------------------------+
 1000  CONTINUE
-C---------------------------------------------------------------------+
-C-------  Comment Check Code
-C
-C      IF(M.GE.4) THEN
-C         WRITE(MPI,*)'INVERS  A'
-C         DO I=1,NP
-C            WRITE(MPI,101)(A(I,J),J=1,NP)
-C         END DO
-C         WRITE(MPI,102)'INVERS  DET=',DET
-C      END IF
-C---------------------------------------------------------------------+
 C---------------------------------------------------------------------+
 C---------------------------------------------------------------------+
  101  FORMAT(1X,6(D12.5,2X))

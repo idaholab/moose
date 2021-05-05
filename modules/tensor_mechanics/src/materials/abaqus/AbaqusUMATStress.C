@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AbaqusUmatMaterial.h"
+#include "AbaqusUMATStress.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
@@ -19,10 +19,10 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-registerMooseObject("TensorMechanicsApp", AbaqusUmatMaterial);
+registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
 
 InputParameters
-AbaqusUmatMaterial::validParams()
+AbaqusUMATStress::validParams()
 {
   InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
@@ -36,13 +36,12 @@ AbaqusUmatMaterial::validParams()
   return params;
 }
 
-AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
+AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
     _mechanical_constants(getParam<std::vector<Real>>("mechanical_constants")),
     _thermal_constants(getParam<std::vector<Real>>("thermal_constants")),
     _num_state_vars(getParam<unsigned int>("num_state_vars")),
-    _aqCELENT(1.0), // TODO: figure out what this really should be
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
@@ -56,9 +55,10 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit"))
 {
-#if defined(METHOD)
-  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
+#ifndef METHOD
+#error "The METHOD preprocessor symbol must be supplied by the build system."
 #endif
+  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
 
   // Size and create full (mechanical+thermal) material property array
   _num_props = _mechanical_constants.size() + _thermal_constants.size();
@@ -94,7 +94,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
   _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
 
   if (!_handle)
-    mooseError("Cannot open library: ", dlerror());
+    paramError("plugin", "Cannot open library: ", dlerror());
 
   // Reset errors
   dlerror();
@@ -110,16 +110,16 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
   if (dlsym_error)
   {
     dlclose(_handle);
-    std::ostringstream error;
-    error << "Cannot load symbol 'umat_': " << dlsym_error << '\n';
-    mooseError(error.str());
+    paramError("plugin", "Cannot load symbol 'umat_': ", dlsym_error);
   }
 #else
-  mooseError("AbaqusUmatMaterial is not supported on Windows.");
+  paramError("plugin",
+             "AbaqusUMATStress requires an operating system with support for the POSIX function "
+             "'dlopen' to dynamically load UMAT plugins.");
 #endif
 }
 
-AbaqusUmatMaterial::~AbaqusUmatMaterial()
+AbaqusUMATStress::~AbaqusUMATStress()
 {
 #ifdef LIBMESH_HAVE_DLOPEN
   dlclose(_handle);
@@ -127,7 +127,7 @@ AbaqusUmatMaterial::~AbaqusUmatMaterial()
 }
 
 void
-AbaqusUmatMaterial::initQpStatefulProperties()
+AbaqusUMATStress::initQpStatefulProperties()
 {
   // Initialize state variable vector
   _state_var[_qp].resize(_num_state_vars);
@@ -136,7 +136,27 @@ AbaqusUmatMaterial::initQpStatefulProperties()
 }
 
 void
-AbaqusUmatMaterial::computeQpStress()
+AbaqusUMATStress::computeProperties()
+{
+  // current element "number"
+  _aqNOEL = _current_elem->id();
+
+  // characteristic element length
+  _aqCELENT = _current_elem->hmax();
+
+  // Value of step time at the beginning of the current increment - Check
+  _aqTIME[0] = _t;
+  // Value of total time at the beginning of the current increment - Check
+  _aqTIME[1] = _t - _dt;
+
+  // Time increment
+  _aqDTIME = _dt;
+
+  ComputeStressBase::computeProperties();
+}
+
+void
+AbaqusUMATStress::computeQpStress()
 {
   const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
   const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
@@ -163,14 +183,6 @@ AbaqusUmatMaterial::computeQpStress()
         _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
   }
 
-  // Value of step time at the beginning of the current increment - Check
-  _aqTIME[0] = _t;
-  // Value of total time at the beginning of the current increment - Check
-  _aqTIME[1] = _t - _dt;
-
-  // Time increment
-  _aqDTIME = _dt;
-
   // current coordinates
   for (unsigned int i = 0; i < 3; ++i)
     _aqCOORDS[i] = _q_point[_qp](i);
@@ -181,9 +193,6 @@ AbaqusUmatMaterial::computeQpStress()
 
   // set PNEWDT to a large value
   _aqPNEWDT = std::numeric_limits<Real>::max();
-
-  // current element "number"
-  _aqNOEL = _current_elem->id();
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
