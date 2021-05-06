@@ -1,0 +1,33 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+
+  [linear_strain_hardening]
+    type = 'Exodiff'
+    input = 'linear_strain_hardening.i'
+    exodiff = 'linear_strain_hardening_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for stateful properties'
+  []
+
+  [elastic]
+    type = 'Exodiff'
+    input = 'elastic.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'elastic_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for finite strain elastic material models'
+  []
+  [elastic_reference]
+    type = 'Exodiff'
+    input = 'elastic.i'
+    cli_args = "Materials/active='elastic stress'"
+    exodiff = 'elastic_out.e'
+    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+                  'material models for finite strain elasticity'
+  []
+[]

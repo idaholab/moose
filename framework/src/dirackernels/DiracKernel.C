@@ -23,6 +23,7 @@ DiracKernel::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += MaterialPropertyInterface::validParams();
+  params += BlockRestrictable::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -36,6 +37,14 @@ DiracKernel::validParams()
       "By default points added to a DiracKernel are dropped if a point at the same location"
       "has been added before. If this option is set to false duplicate points are retained"
       "and contribute to residual and Jacobian.");
+
+  MooseEnum point_not_found_behavior("ERROR WARNING IGNORE", "IGNORE");
+  params.addParam<MooseEnum>(
+      "point_not_found_behavior",
+      point_not_found_behavior,
+      "By default (IGNORE), it is ignored if an added point cannot be located in the "
+      "specified subdomains. If this option is set to ERROR, this situation will result in an "
+      "error. If this option is set to WARNING, then a warning will be issued.");
 
   params.addParamNamesToGroup("use_displaced_mesh drop_duplicate_points", "Advanced");
 
@@ -54,6 +63,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     GeometricSearchInterface(this),
+    BlockRestrictable(this),
     _var(mooseVariableField()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
@@ -68,7 +78,9 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _grad_test(_var.gradPhi()),
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
-    _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points"))
+    _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points")),
+    _point_not_found_behavior(
+        parameters.get<MooseEnum>("point_not_found_behavior").getEnum<PointNotFoundBehavior>())
 {
   addMooseVariableDependency(&mooseVariableField());
 
@@ -178,7 +190,27 @@ DiracKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 void
 DiracKernel::addPoint(const Elem * elem, Point p, unsigned /*id*/)
 {
-  if (!elem || (elem->processor_id() != processor_id()))
+  if (!elem || !hasBlocks(elem->subdomain_id()))
+  {
+    std::stringstream msg;
+    msg << "Point " << p << " not found in block(s) " << Moose::stringify(blockIDs(), ", ") << ".";
+    switch (_point_not_found_behavior)
+    {
+      case PointNotFoundBehavior::ERROR:
+        mooseError(msg.str());
+        break;
+      case PointNotFoundBehavior::WARNING:
+        mooseDoOnce(mooseWarning(msg.str()));
+        break;
+      case PointNotFoundBehavior::IGNORE:
+        break;
+      default:
+        mooseError("Internal enum error.");
+    }
+    return;
+  }
+
+  if (elem->processor_id() != processor_id())
     return;
 
   _dirac_kernel_info.addPoint(elem, p);
@@ -199,7 +231,7 @@ DiracKernel::addPoint(Point p, unsigned id)
   // If id == libMesh::invalid_uint (the default), the user is not
   // enabling caching when they add Dirac points.  So all we can do is
   // the PointLocator lookup, and call the other addPoint() method.
-  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
   addPoint(elem, p, id);
   return elem;
 }
@@ -228,7 +260,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   // safe, because all processors have the same value of we_found_it.
   if (!we_found_it)
   {
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
 
     // Only add the point to the cache on this processor if the Elem is local
     if (elem && (elem->processor_id() == processor_id()))
@@ -374,7 +406,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   if (we_need_find_point)
   {
     // findPoint() is a parallel-only function
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
 
     updateCaches(cached_elem, elem, p, id);
     addPoint(elem, p, id);

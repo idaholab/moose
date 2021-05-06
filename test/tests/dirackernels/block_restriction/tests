@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#17561'
+  design = 'syntax/DiracKernels/index.md'
+  [skip]
+    type = 'Exodiff'
+    input = 'skip.i'
+    exodiff = 'skip_out.e'
+    cli_args = 'DiracKernels/point_source/point_not_found_behavior=IGNORE'
+    requirement = "The system shall support block restricted dirac kernels."
+  []
+  [point_not_found]
+    requirement = "The system shall behave accordingly if the added point is not found, when point_not_found_behavior is set to "
+    [error]
+      type = 'RunException'
+      input = 'skip.i'
+      expect_err = 'not found in block'
+      cli_args = 'DiracKernels/point_source/point_not_found_behavior=ERROR'
+      detail = "ERROR or"
+    []
+    [warning]
+      type = 'RunApp'
+      input = 'skip.i'
+      expect_out = 'not found in block'
+      cli_args = 'DiracKernels/point_source/point_not_found_behavior=WARNING'
+      allow_warnings = true
+      detail = "WARNING."
+    []
+  []
+[]
