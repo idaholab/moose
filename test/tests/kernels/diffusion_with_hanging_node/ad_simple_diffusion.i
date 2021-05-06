@@ -15,6 +15,11 @@
     type = ADDiffusion
     variable = u
   [../]
+  [force]
+    type = ADBodyForce
+    variable = u
+    function = '0'
+  []
 []
 
 [BCs]
