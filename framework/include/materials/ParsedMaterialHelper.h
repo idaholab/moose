@@ -62,7 +62,7 @@ public:
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
                      const std::vector<std::string> & mat_prop_names,
-                     const std::vector<std::string> & postprocessor_names,
+                     const std::vector<PostprocessorName> & postprocessor_names,
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
 

@@ -35,7 +35,7 @@ left of `E`.
 If a material property `M` is listed in
 [!param](/Materials/DerivativeParsedMaterial/material_property_names) a special syntax
 (`M(c1,c2)` where `c1` and `c2` are variables) can be used to declare variable
-dependences  as well as selecting derivatives of material properties (for
+dependencies  as well as selecting derivatives of material properties (for
 example, `d2M:=D[M(c1,c2),c2,c2]` would make the second derivative of `M` with
 respect to `c2` available as `d2M` in the parsed function expression). If
 variable dependencies are declared, the necessary derivatives of the coupled

@@ -32,7 +32,7 @@ ParsedMaterialTempl<is_ad>::ParsedMaterialTempl(const InputParameters & paramete
                 _constant_names,
                 _constant_expressions,
                 this->template getParam<std::vector<std::string>>("material_property_names"),
-                this->template getParam<std::vector<std::string>>("postprocessor_names"),
+                this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"),
                 _tol_names,
                 _tol_values);
 }

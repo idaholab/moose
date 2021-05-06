@@ -41,10 +41,10 @@ ParsedMaterialBase::validParams()
       std::vector<std::string>(),
       "Vector of material properties used in the parsed function");
 
-  // Material properties
-  params.addParam<std::vector<std::string>>(
+  // Postprocessors
+  params.addParam<std::vector<PostprocessorName>>(
       "postprocessor_names",
-      std::vector<std::string>(),
+      std::vector<PostprocessorName>(),
       "Vector of postprocessor names used in the parsed function");
 
   // Function expression
