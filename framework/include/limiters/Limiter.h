@@ -22,7 +22,10 @@ enum class LimiterType : int
 {
   VanLeer = 0,
   Upwind,
-  CentralDifference
+  CentralDifference,
+  MinMod,
+  SOU,
+  QUICK
 };
 extern const MooseEnum moose_limiter_type;
 
