@@ -47,7 +47,7 @@
     type = PetscJacobianTester
     input = 'ad_simple_diffusion.i'
     run_sim = True
-    requirement = 'The system shall compute a perfect Jacobian via automatic differentiation for a hanging-node problem.'
+    requirement = 'The system shall compute a perfect Jacobian via automatic differentiation for a hanging-node problem and simultaneously handle automatic differentiation objects that do not actually have nonlinear variable dependence.'
     issues = 'libmesh#1985 #15732'
   []
 []
