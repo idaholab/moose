@@ -9,35 +9,22 @@
 
 #pragma once
 
-#include "ADReal.h"
-#include <memory>
-
-class MooseEnum;
+#include "Limiter.h"
 
 namespace Moose
 {
 namespace FV
 {
-enum class LimiterType : int
-{
-  VanLeer = 0,
-  Upwind,
-  CentralDifference,
-  MinMod,
-  SOU,
-  QUICK
-};
-extern const MooseEnum moose_limiter_type;
-
-class Limiter
+class MinModLimiter : public Limiter
 {
 public:
-  virtual ADReal operator()(const ADReal & r_f) const = 0;
+  ADReal operator()(const ADReal & r_f) const override final
+  {
+    // Dummy addition to avoid new nonzeros
+    return 0 * r_f + std::max(0, std::min(1, r_f));
+  }
 
-  Limiter() = default;
-
-  static std::unique_ptr<Limiter> build(LimiterType limiter);
+  MinModLimiter() = default;
 };
-
 }
 }

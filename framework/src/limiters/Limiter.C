@@ -11,6 +11,9 @@
 #include "VanLeerLimiter.h"
 #include "UpwindLimiter.h"
 #include "CentralDifferenceLimiter.h"
+#include "MinModLimiter.h"
+#include "SOULimiter.h"
+#include "QUICKLimiter.h"
 #include "MooseError.h"
 
 #include "libmesh/auto_ptr.h"
@@ -19,7 +22,8 @@ namespace Moose
 {
 namespace FV
 {
-const MooseEnum moose_limiter_type("vanLeer=0 upwind=1 central_difference=2", "upwind");
+const MooseEnum
+    moose_limiter_type("vanLeer=0 upwind=1 central_difference=2 min_mod=3 sou=4 quick=5", "upwind");
 
 std::unique_ptr<Limiter>
 Limiter::build(const LimiterType limiter)
@@ -34,6 +38,15 @@ Limiter::build(const LimiterType limiter)
 
     case LimiterType::CentralDifference:
       return libmesh_make_unique<CentralDifferenceLimiter>();
+
+    case LimiterType::MinMod:
+      return libmesh_make_unique<MinModLimiter>();
+
+    case LimiterType::SOU:
+      return libmesh_make_unique<SOULimiter>();
+
+    case LimiterType::QUICK:
+      return libmesh_make_unique<QUICKLimiter>();
 
     default:
       mooseError("Unrecognized limiter type ", unsigned(limiter));
