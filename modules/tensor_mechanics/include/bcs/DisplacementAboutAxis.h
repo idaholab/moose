@@ -56,7 +56,7 @@ protected:
   /// number of displacement components
   const unsigned int _ndisp;
 
-  /// the old displacemnt value
+  /// the old displacement value
   std::vector<const VariableValue *> _disp_old;
 
   /// flag for incremental formulation
