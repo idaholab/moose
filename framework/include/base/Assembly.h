@@ -2771,10 +2771,18 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
     auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
                                                   resid_it->derivatives().nude_indices().end());
     mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same");
+                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
+                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
+                "same for every residual passed to this method otherwise constrain_element_matrix "
+                "will not work.");
   }
 #endif
   auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
+  // indices to constrain_element_matrix then we will potentially get errors out of BLAS
+  if (!column_indices.size())
+    return;
 
   DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
   for (const auto i : index_range(row_indices))
