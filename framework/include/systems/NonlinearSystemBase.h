@@ -40,7 +40,7 @@ class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernel;
 class DiracKernel;
-class NodalKernel;
+class NodalKernelBase;
 class Split;
 class KernelBase;
 class BoundaryCondition;
@@ -827,7 +827,7 @@ protected:
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
   /// NodalKernels for each thread
-  MooseObjectTagWarehouse<NodalKernel> _nodal_kernels;
+  MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods
