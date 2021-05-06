@@ -37,7 +37,7 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expression)
 {
-  static const std::vector<std::string> empty_string_vector;
+  const std::vector<std::string> empty_string_vector;
   functionParse(function_expression, empty_string_vector, empty_string_vector);
 }
 
@@ -47,8 +47,8 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
                                            const std::vector<std::string> & constant_names,
                                            const std::vector<std::string> & constant_expressions)
 {
-  static const std::vector<std::string> empty_string_vector;
-  static const std::vector<Real> empty_real_vector;
+  const std::vector<std::string> empty_string_vector;
+  const std::vector<Real> empty_real_vector;
   functionParse(function_expression,
                 constant_names,
                 constant_expressions,
@@ -66,25 +66,26 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
                                            const std::vector<std::string> & tol_names,
                                            const std::vector<Real> & tol_values)
 {
-  static const std::vector<std::string> empty_string_vector;
+  const std::vector<PostprocessorName> empty_pp_name_vector;
   functionParse(function_expression,
                 constant_names,
                 constant_expressions,
                 mat_prop_expressions,
-                empty_string_vector,
+                empty_pp_name_vector,
                 tol_names,
                 tol_values);
 }
 
 template <bool is_ad>
 void
-ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expression,
-                                           const std::vector<std::string> & constant_names,
-                                           const std::vector<std::string> & constant_expressions,
-                                           const std::vector<std::string> & mat_prop_expressions,
-                                           const std::vector<std::string> & postprocessor_names,
-                                           const std::vector<std::string> & tol_names,
-                                           const std::vector<Real> & tol_values)
+ParsedMaterialHelper<is_ad>::functionParse(
+    const std::string & function_expression,
+    const std::vector<std::string> & constant_names,
+    const std::vector<std::string> & constant_expressions,
+    const std::vector<std::string> & mat_prop_expressions,
+    const std::vector<PostprocessorName> & postprocessor_names,
+    const std::vector<std::string> & tol_names,
+    const std::vector<Real> & tol_values)
 {
   // build base function object
   _func_F = std::make_shared<SymFunction>();
