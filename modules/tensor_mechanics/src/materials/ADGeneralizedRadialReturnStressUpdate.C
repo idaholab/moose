@@ -38,6 +38,8 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "inelastic_strain_rate_name",
       "Name of the material property that stores the inelastic strain rate");
+  params.addParam<RealVectorValue>("rotation_angles",
+                                   "Provide the rotation angle for transformation matrix");
   return params;
 }
 
@@ -55,7 +57,11 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
         _base_name + getParam<std::string>("inelastic_strain_rate_name"))),
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _max_integration_error(getParam<Real>("max_integration_error")),
-    _max_integration_error_time_step(std::numeric_limits<Real>::max())
+    _max_integration_error_time_step(std::numeric_limits<Real>::max()),
+    _angle(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
+                                           : RealVectorValue(0.0, 0.0, 0.0)),
+
+    _transformation_tensor(6, 6)
 {
 }
 
@@ -177,4 +183,98 @@ ADGeneralizedRadialReturnStressUpdate::outputIterationSummary(std::stringstream 
                  << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
   }
   ADGeneralizedReturnMappingSolution::outputIterationSummary(iter_output, total_it);
+}
+
+void
+ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(ADDenseMatrix & hill_tensor)
+{
+  _transformation_tensor.zero();
+
+  const Real s = std::sin(_angle(2) * libMesh::pi / 180.0);
+  const Real c = std::cos(_angle(2) * libMesh::pi / 180.0);
+
+  _transformation_tensor(0, 0) = c * c;
+  _transformation_tensor(0, 1) = s * s;
+  _transformation_tensor(0, 5) = 2 * c * s;
+
+  _transformation_tensor(1, 0) = s * s;
+  _transformation_tensor(1, 1) = c * c;
+  _transformation_tensor(1, 5) = -2 * c * s;
+
+  _transformation_tensor(2, 2) = 1.0;
+
+  _transformation_tensor(3, 3) = c;
+  _transformation_tensor(3, 4) = s;
+
+  _transformation_tensor(4, 3) = s;
+  _transformation_tensor(4, 4) = c;
+
+  _transformation_tensor(5, 0) = -c * s;
+  _transformation_tensor(5, 1) = c * s;
+  _transformation_tensor(5, 5) = c * c - s * s;
+
+  // rotation about y-axis
+  if (_angle(1) != 0)
+  {
+    const Real s2 = std::sin(_angle(1) * libMesh::pi / 180.0);
+    const Real c2 = std::cos(_angle(1) * libMesh::pi / 180.0);
+
+    ADDenseMatrix transformation_tensor_y;
+
+    transformation_tensor_y(0, 0) = c2 * c2;
+    transformation_tensor_y(0, 2) = s2 * s2;
+    transformation_tensor_y(0, 4) = 2 * c2 * s2;
+
+    transformation_tensor_y(1, 1) = 1.0;
+
+    transformation_tensor_y(2, 0) = s2 * s2;
+    transformation_tensor_y(2, 2) = c2 * c2;
+    transformation_tensor_y(2, 4) = -2 * c2 * s2;
+
+    transformation_tensor_y(3, 3) = c2;
+    transformation_tensor_y(3, 5) = -s2;
+
+    transformation_tensor_y(4, 0) = -c2 * s2;
+    transformation_tensor_y(4, 2) = c2 * s2;
+    transformation_tensor_y(4, 4) = c2 * c2 - s2 * s2;
+
+    transformation_tensor_y(5, 3) = -s2;
+    transformation_tensor_y(5, 5) = c2;
+
+    _transformation_tensor.left_multiply(transformation_tensor_y);
+  }
+
+  // rotation about x-axis
+  if (_angle(0) != 0.0)
+  {
+    const Real s1 = std::sin(_angle(0) * libMesh::pi / 180.0);
+    const Real c1 = std::cos(_angle(0) * libMesh::pi / 180.0);
+
+    ADDenseMatrix transformation_tensor_x;
+
+    transformation_tensor_x(0, 0) = 1.0;
+
+    transformation_tensor_x(1, 1) = c1 * c1;
+    transformation_tensor_x(1, 2) = s1 * s1;
+    transformation_tensor_x(1, 3) = 2 * c1 * s1;
+
+    transformation_tensor_x(2, 1) = s1 * s1;
+    transformation_tensor_x(2, 2) = c1 * c1;
+    transformation_tensor_x(2, 3) = -2 * c1 * s1;
+
+    transformation_tensor_x(3, 1) = -c1 * s1;
+    transformation_tensor_x(3, 2) = c1 * s1;
+    transformation_tensor_x(3, 3) = c1 * c1 - s1 * s1;
+
+    transformation_tensor_x(4, 4) = c1;
+    transformation_tensor_x(4, 5) = -s1;
+
+    transformation_tensor_x(5, 4) = -s1;
+    transformation_tensor_x(5, 5) = c1;
+
+    _transformation_tensor.left_multiply(transformation_tensor_x);
+  }
+
+  hill_tensor.right_multiply_transpose(_transformation_tensor);
+  hill_tensor.left_multiply(_transformation_tensor);
 }

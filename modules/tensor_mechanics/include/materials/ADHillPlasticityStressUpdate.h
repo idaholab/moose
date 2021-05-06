@@ -85,7 +85,8 @@ protected:
                                ADReal & sy_gamma);
 
   /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants;
+  std::vector<Real> _hill_constants_input;
+  ADDenseVector _hill_constants;
 
   /// Square of the q function for orthotropy
   ADReal _qsigma;
