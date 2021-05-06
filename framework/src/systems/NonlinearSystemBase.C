@@ -56,9 +56,8 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
-#include "NodalKernel.h"
+#include "NodalKernelBase.h"
 #include "DiracKernel.h"
-#include "NodalKernel.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
 #include "Assembly.h"
@@ -432,8 +431,8 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // Create the kernel object via the factory and add to the warehouse
-    std::shared_ptr<NodalKernel> kernel =
-        _factory.create<NodalKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<NodalKernelBase> kernel =
+        _factory.create<NodalKernelBase>(kernel_name, name, parameters, tid);
     _nodal_kernels.addObject(kernel, tid);
     postAddResidualObject(*kernel);
   }

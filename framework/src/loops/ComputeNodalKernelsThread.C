@@ -14,13 +14,13 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
-#include "NodalKernel.h"
+#include "NodalKernelBase.h"
 
 #include "libmesh/threads.h"
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(
     FEProblemBase & fe_problem,
-    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+    MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _fe_problem(fe_problem),
@@ -61,7 +61,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
 
-  std::set<const NodalKernel *> nks_executed;
+  std::set<const NodalKernelBase *> nks_executed;
 
   // prepare variables
   for (auto * var : _aux_sys._nodal_vars[_tid])

@@ -13,13 +13,13 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseVariableFE.h"
-#include "NodalKernel.h"
+#include "NodalKernelBase.h"
 
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(
     FEProblemBase & fe_problem,
-    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+    MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _fe_problem(fe_problem),
