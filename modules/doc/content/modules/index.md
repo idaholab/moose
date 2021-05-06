@@ -6,6 +6,7 @@ application.
 - [Chemical reactions](modules/chemical_reactions/index.md)
 - [Contact](modules/contact/index.md)
 - [Fluid Properties](modules/fluid_properties/index.md)
+- [Fluid-Structure Interaction](modules/fsi/index.md)
 - [Functional Expansion Tools](modules/functional_expansion_tools/index.md)
 - [Geochemistry](modules/geochemistry/index.md)
 - [Heat Conduction](modules/heat_conduction/index.md)

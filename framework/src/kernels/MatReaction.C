@@ -9,7 +9,7 @@
 
 #include "MatReaction.h"
 
-registerMooseObject("PhaseFieldApp", MatReaction);
+registerMooseObject("MooseApp", MatReaction);
 
 InputParameters
 MatReaction::validParams()
