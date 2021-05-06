@@ -166,6 +166,7 @@
     internal_solve_full_iteration_history = true
     max_inelastic_increment = 2.0e-6
     internal_solve_output_on = on_error
+    rotation_angles =  '0 0 90'
   []
 []
 
