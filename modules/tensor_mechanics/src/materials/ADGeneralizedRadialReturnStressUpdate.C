@@ -38,8 +38,12 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "inelastic_strain_rate_name",
       "Name of the material property that stores the inelastic strain rate");
-  params.addParam<RealVectorValue>("rotation_angles",
-                                   "Provide the rotation angle for transformation matrix");
+  params.addRangeCheckedParam<RealVectorValue>(
+      "rotation_angles",
+      "rotation_angles_size = 3",
+      "Provide the rotation angles for the transformation matrix. "
+      "This should be a vector that provides "
+      "the rotation angles about z-, y-, and x-axis, respectively.");
   return params;
 }
 
@@ -190,9 +194,10 @@ ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(ADDenseMatrix & hill_ten
 {
   _transformation_tensor.zero();
 
-  const Real s = std::sin(_angle(2) * libMesh::pi / 180.0);
-  const Real c = std::cos(_angle(2) * libMesh::pi / 180.0);
+  const Real s = std::sin(_angle(0) * libMesh::pi / 180.0);
+  const Real c = std::cos(_angle(0) * libMesh::pi / 180.0);
 
+  // rotation about z-axis to provide the default transformation matrix
   _transformation_tensor(0, 0) = c * c;
   _transformation_tensor(0, 1) = s * s;
   _transformation_tensor(0, 5) = 2 * c * s;
@@ -219,7 +224,7 @@ ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(ADDenseMatrix & hill_ten
     const Real s2 = std::sin(_angle(1) * libMesh::pi / 180.0);
     const Real c2 = std::cos(_angle(1) * libMesh::pi / 180.0);
 
-    ADDenseMatrix transformation_tensor_y;
+    ADDenseMatrix transformation_tensor_y(6, 6);
 
     transformation_tensor_y(0, 0) = c2 * c2;
     transformation_tensor_y(0, 2) = s2 * s2;
@@ -245,12 +250,12 @@ ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(ADDenseMatrix & hill_ten
   }
 
   // rotation about x-axis
-  if (_angle(0) != 0.0)
+  if (_angle(2) != 0.0)
   {
-    const Real s1 = std::sin(_angle(0) * libMesh::pi / 180.0);
-    const Real c1 = std::cos(_angle(0) * libMesh::pi / 180.0);
+    const Real s1 = std::sin(_angle(2) * libMesh::pi / 180.0);
+    const Real c1 = std::cos(_angle(2) * libMesh::pi / 180.0);
 
-    ADDenseMatrix transformation_tensor_x;
+    ADDenseMatrix transformation_tensor_x(6, 6);
 
     transformation_tensor_x(0, 0) = 1.0;
 
