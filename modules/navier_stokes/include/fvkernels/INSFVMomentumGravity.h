@@ -12,25 +12,20 @@
 #include "FVElementalKernel.h"
 
 /**
- * Imposes a Boussinesq force on the momentum equation. Useful for modeling natural convection
- * within an incompressible Navier-Stokes approximation
+ * Imposes a gravitational force on the momentum equation
  */
-class INSFVBoussinesqBodyForce : public FVElementalKernel
+class INSFVMomentumGravity : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  INSFVBoussinesqBodyForce(const InputParameters & params);
+  INSFVMomentumGravity(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  const ADVariableValue & _temperature;
   const RealVectorValue _gravity;
-  /// The thermal expansion coefficient
-  const ADMaterialProperty<Real> & _alpha;
-  /// Reference temperature at which the value of _rho was measured
-  const Real _ref_temperature;
-  /// the density
+
+  /// The density
   const Real & _rho;
   /// index x|y|z
   const unsigned int _index;

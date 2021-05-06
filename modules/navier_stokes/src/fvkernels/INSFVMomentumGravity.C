@@ -7,22 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVBoussinesqBodyForce.h"
+#include "INSFVMomentumGravity.h"
 
-registerMooseObject("NavierStokesApp", INSFVBoussinesqBodyForce);
+registerMooseObject("NavierStokesApp", INSFVMomentumGravity);
 
 InputParameters
-INSFVBoussinesqBodyForce::validParams()
+INSFVMomentumGravity::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Computes a body force for natural convection buoyancy.");
-  params.addRequiredCoupledVar("temperature", "temperature variable");
+  params.addClassDescription("Computes a body force due to gravity.");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addParam<MaterialPropertyName>("alpha_name",
-                                        "alpha",
-                                        "The name of the thermal expansion coefficient"
-                                        "this is of the form rho = rho*(1-alpha (T-T_ref))");
-  params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -33,12 +27,9 @@ INSFVBoussinesqBodyForce::validParams()
   return params;
 }
 
-INSFVBoussinesqBodyForce::INSFVBoussinesqBodyForce(const InputParameters & params)
+INSFVMomentumGravity::INSFVMomentumGravity(const InputParameters & params)
   : FVElementalKernel(params),
-    _temperature(adCoupledValue("temperature")),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _alpha(getADMaterialProperty<Real>("alpha_name")),
-    _ref_temperature(getParam<Real>("ref_temperature")),
     _rho(getParam<Real>("rho")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
@@ -50,7 +41,7 @@ INSFVBoussinesqBodyForce::INSFVBoussinesqBodyForce(const InputParameters & param
 }
 
 ADReal
-INSFVBoussinesqBodyForce::computeQpResidual()
+INSFVMomentumGravity::computeQpResidual()
 {
-  return _alpha[_qp] * _gravity(_index) * _rho * (_temperature[_qp] - _ref_temperature);
+  return -_rho * _gravity(_index);
 }

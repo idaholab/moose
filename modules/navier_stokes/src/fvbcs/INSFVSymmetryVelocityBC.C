@@ -59,7 +59,7 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   const auto & v_C = use_elem ? _v_elem : _v_neighbor;
   const auto & w_C = use_elem ? _w_elem : _w_neighbor;
 
-  // FIXME: interpolate mu to the boundary
+  // FIXME: interpolate mu to the boundary, see #16809
   const auto & mu_b = use_elem ? _mu_elem : _mu_neighbor;
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);

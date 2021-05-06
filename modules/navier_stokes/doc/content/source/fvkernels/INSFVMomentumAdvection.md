@@ -1,6 +1,6 @@
 # INSFVMomentumAdvection
 
-This object implements the $\rho\left(\vec u \cdot\nabla\right)\vec u$ component
+This object implements the $\nabla \cdot \left(\rho\vec u \otimes \vec u\right)$ component
 terms of the
 incompressible Navier Stokes momentum equation. An average or Rhie-Chow
 interpolation can be used for the advecting velocity interpolation. An average

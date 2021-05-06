@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16755'
-  design = 'INSFVBoussinesqBodyForce.md'
+  design = 'INSFVMomentumBoussinesq.md'
   [1e3]
     type = Exodiff
     input = boussinesq.i

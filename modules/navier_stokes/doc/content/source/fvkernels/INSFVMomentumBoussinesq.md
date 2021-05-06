@@ -1,4 +1,4 @@
-# INSFVBoussinesqBodyForce
+# INSFVMomentumBoussinesq
 
 This object adds a $\rho\alpha\vec{g}(T - T_{ref})$ term to the incompressible
 Navier Stokes (INS) equations where $\rho$ is the density, $\alpha$ is the thermal
@@ -7,8 +7,8 @@ and $T_{ref}$ is a reference temperature. The term above introduces the
 Boussinesq approximation into the INS equations, which allows for modeling
 natural convection.
 
-!syntax parameters /FVKernels/INSFVBoussinesqBodyForce
+!syntax parameters /FVKernels/INSFVMomentumBoussinesq
 
-!syntax inputs /FVKernels/INSFVBoussinesqBodyForce
+!syntax inputs /FVKernels/INSFVMomentumBoussinesq
 
-!syntax children /FVKernels/INSFVBoussinesqBodyForce
+!syntax children /FVKernels/INSFVMomentumBoussinesq

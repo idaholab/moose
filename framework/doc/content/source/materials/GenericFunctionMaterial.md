@@ -1,33 +1,19 @@
 # GenericFunctionMaterial
 
-!alert! construction title=Undocumented Class
-The GenericFunctionMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# GenericFunctionMaterial
-
 !syntax description /Materials/GenericFunctionMaterial
 
-## Overview
-
-!! Replace these lines with information regarding the GenericFunctionMaterial object.
+This can be used to quickly create simple functionalized material properties, for testing,
+for initial survey of a problem or simply because the material properties do not vary much
+from the defined function over the domain explored by the simulation.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the GenericFunctionMaterial object.
+In this example, `ADGenericFunctionMaterial` is used to define a linearly varying in space
+diffusion coefficient for this finite volume diffusion calculation.
+We add the prefix `AD` as this simulation is making use of automatic differentiation to compute the Jacobian exactly.
+The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusion kernel.
 
-!syntax parameters /Materials/GenericFunctionMaterial
-
-!syntax inputs /Materials/GenericFunctionMaterial
-
-!syntax children /Materials/GenericFunctionMaterial
-```
-!alert-end!
-
-!syntax description /Materials/GenericFunctionMaterial
+!listing test/tests/materials/boundary_material/fv_material_quadrature.i block=Materials/k1
 
 !syntax parameters /Materials/GenericFunctionMaterial
 

@@ -14,6 +14,11 @@
 
 class INSFVVelocityVariable;
 
+/**
+ * A class for finite volume fully developed outflow boundary conditions for the momentum equation
+ * It advects momentum at the outflow, and may replace outlet pressure boundary conditions
+ * when selecting a mean-pressure approach.
+ */
 class INSFVMomentumAdvectionOutflowBC : public FVMatAdvectionOutflowBC,
                                         public INSFVFullyDevelopedFlowBC
 {

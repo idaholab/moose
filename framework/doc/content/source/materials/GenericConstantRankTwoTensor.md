@@ -5,7 +5,11 @@
 ## Overview
 
 `GenericConstantRankTwoTensor` creates a `RankTwoTensor` material property that use
-constant values to fill the tensor
+constant values to fill the tensor.
+
+This can be used to quickly create simple constant tensor material properties, for testing,
+for initial survey of a problem or simply because the material properties do not vary much over the
+domain explored by the simulation.
 
 ## Example Input File Syntax
 

@@ -11,6 +11,9 @@
 
 #include "INSFVSlipWallBC.h"
 
+/**
+ * A class for free slip boundary conditions for the velocity.
+ */
 class INSFVNaturalFreeSlipBC : public INSFVSlipWallBC
 {
 public:
