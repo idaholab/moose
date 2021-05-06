@@ -9,18 +9,21 @@
 
 #pragma once
 
-#include "Reaction.h"
+#include "IntegratedBC.h"
 
-class CoefReaction : public Reaction
+class FluidFreeSurfaceBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  CoefReaction(const InputParameters & parameters);
+  FluidFreeSurfaceBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  Real _coef;
+  /// Ratio of u to du/dn. alpha is the inverse of acceleration due to gravity
+  const Real _alpha;
+  const VariableValue & _u_dotdot;
+  const VariableValue & _du_dotdot_du;
 };

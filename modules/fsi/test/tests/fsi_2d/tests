@@ -1,0 +1,14 @@
+[Tests]
+  design = 'modules/fsi/index.md'
+
+  [./fsi]
+    type = 'Exodiff'
+    input = 'fsi_flat_channel.i'
+    exodiff = 'fsi_flat_channel_out.e'
+    requirement = 'We shall be able to combine navier-stokes and tensor-mechanics simulation capabilities to do some basic fluid-structure interaction simulations'
+    issues = '#12462'
+    # vel_x_solid is not accurate
+    # We mmay improve that in the future
+    rel_err = 1e-4
+  [../]
+[]
