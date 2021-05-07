@@ -35,28 +35,64 @@ PorousPrimitiveVarMaterial::validParams()
 PorousPrimitiveVarMaterial::PorousPrimitiveVarMaterial(const InputParameters & params)
   : Material(params),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    // primitive variables
     _var_pressure(adCoupledValue(NS::pressure)),
-    _var_ud(adCoupledValue(NS::superficial_velocity_x)),
-    _var_vd(isCoupled(NS::superficial_velocity_y) ? adCoupledValue(NS::superficial_velocity_y)
-                                                  : _ad_zero),
-    _var_wd(isCoupled(NS::superficial_velocity_z) ? adCoupledValue(NS::superficial_velocity_z)
-                                                  : _ad_zero),
+    _grad_var_pressure(adCoupledGradient(NS::pressure)),
     _var_T_fluid(adCoupledValue(NS::T_fluid)),
+    _grad_var_T_fluid(adCoupledGradient(NS::T_fluid)),
+    _var_sup_vel_x(adCoupledValue(NS::superficial_velocity_x)),
+    _grad_var_sup_vel_x(adCoupledGradient(NS::superficial_velocity_x)),
+    _var_sup_vel_y(isCoupled(NS::superficial_velocity_y)
+                       ? adCoupledValue(NS::superficial_velocity_y)
+                       : _ad_zero),
+    _grad_var_sup_vel_y(isCoupled(NS::superficial_velocity_y)
+                            ? adCoupledGradient(NS::superficial_velocity_y)
+                            : _ad_grad_zero),
+    _var_sup_vel_z(isCoupled(NS::superficial_velocity_z)
+                       ? adCoupledValue(NS::superficial_velocity_z)
+                       : _ad_zero),
+    _grad_var_sup_vel_z(isCoupled(NS::superficial_velocity_z)
+                            ? adCoupledGradient(NS::superficial_velocity_z)
+                            : _ad_grad_zero),
+    _pressure_dot(adCoupledDot(NS::pressure)),
+    _T_fluid_dot(adCoupledDot(NS::T_fluid)),
+    _sup_vel_x_dot(adCoupledDot(NS::superficial_velocity_x)),
+    _sup_vel_y_dot(isCoupled(NS::superficial_velocity_y) ? adCoupledDot(NS::superficial_velocity_y)
+                                                         : _ad_zero),
+    _sup_vel_z_dot(isCoupled(NS::superficial_velocity_z) ? adCoupledDot(NS::superficial_velocity_z)
+                                                         : _ad_zero),
+    // porosity
     _epsilon(getMaterialProperty<Real>(NS::porosity)),
+    // properties: primitives
+    _pressure(declareADProperty<Real>(NS::pressure)),
+    _grad_pressure(declareADProperty<RealVectorValue>(NS::grad(NS::pressure))),
+    _T_fluid(declareADProperty<Real>(NS::T_fluid)),
+    _grad_T_fluid(declareADProperty<RealVectorValue>(NS::grad(NS::T_fluid))),
+    _sup_vel_x(declareADProperty<Real>(NS::superficial_velocity_x)),
+    _grad_sup_vel_x(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_x))),
+    _sup_vel_y(declareADProperty<Real>(NS::superficial_velocity_y)),
+    _grad_sup_vel_y(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_y))),
+    _sup_vel_z(declareADProperty<Real>(NS::superficial_velocity_z)),
+    _grad_sup_vel_z(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_z))),
+    // properties: for viz
     _rho(declareADProperty<Real>(NS::density)),
-    _momentum(declareADProperty<RealVectorValue>(NS::momentum)),
-    _superficial_velocity(declareADProperty<RealVectorValue>(NS::superficial_velocity)),
+    _sup_rho_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_density))),
     _vel_x(declareADProperty<Real>(NS::velocity_x)),
     _vel_y(declareADProperty<Real>(NS::velocity_y)),
     _vel_z(declareADProperty<Real>(NS::velocity_z)),
-    _mom_x(declareADProperty<Real>(NS::momentum_x)),
-    _mom_y(declareADProperty<Real>(NS::momentum_y)),
-    _mom_z(declareADProperty<Real>(NS::momentum_z)),
-    _specific_internal_energy(declareADProperty<Real>(NS::specific_internal_energy)),
-    _pressure(declareADProperty<Real>(NS::pressure)),
-    _rho_ht(declareADProperty<Real>(NS::total_enthalpy_density)),
-    _T_fluid(declareADProperty<Real>(NS::T_fluid))
+    _sup_mom_x(declareADProperty<Real>(NS::superficial_momentum_x)),
+    _sup_mom_y(declareADProperty<Real>(NS::superficial_momentum_y)),
+    _sup_mom_z(declareADProperty<Real>(NS::superficial_momentum_z)),
+    _sup_mom_x_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_x))),
+    _sup_mom_y_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_y))),
+    _sup_mom_z_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_z))),
+    _sup_rho_et_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_total_energy_density)))
 {
+  if (_mesh.dimension() >= 2 && !isCoupled(NS::superficial_velocity_y))
+    mooseError("You must couple in a superficial y-velocity when solving 2D or 3D problems.");
+
+  if (_mesh.dimension() >= 3 && !isCoupled(NS::superficial_velocity_z))
+    mooseError("You must couple in a superficial z-velocity when solving 3D problems.");
 }
 
 void
@@ -64,24 +100,47 @@ PorousPrimitiveVarMaterial::computeQpProperties()
 {
   // Our primitive variable set
   _pressure[_qp] = _var_pressure[_qp];
+  _grad_pressure[_qp] = _grad_var_pressure[_qp];
   _T_fluid[_qp] = _var_T_fluid[_qp];
-  _superficial_velocity[_qp] = {_var_ud[_qp], _var_vd[_qp], _var_wd[_qp]};
+  _grad_T_fluid[_qp] = _grad_var_T_fluid[_qp];
+  const VectorValue<ADReal> superficial_velocity = {
+      _var_sup_vel_x[_qp], _var_sup_vel_y[_qp], _var_sup_vel_z[_qp]};
+  _sup_vel_x[_qp] = superficial_velocity(0);
+  _sup_vel_y[_qp] = superficial_velocity(1);
+  _sup_vel_z[_qp] = superficial_velocity(2);
+  _grad_sup_vel_x[_qp] = _grad_var_sup_vel_x[_qp];
+  _grad_sup_vel_y[_qp] = _grad_var_sup_vel_y[_qp];
+  _grad_sup_vel_z[_qp] = _grad_var_sup_vel_z[_qp];
 
-  // Our fourth independent variable (computed using our equation of state)
-  _rho[_qp] = _fluid.rho_from_p_T(_pressure[_qp], _T_fluid[_qp]);
+  Real drho_dp, drho_dT;
+  _fluid.rho_from_p_T(
+      _pressure[_qp].value(), _T_fluid[_qp].value(), _rho[_qp].value(), drho_dp, drho_dT);
+  _rho[_qp].derivatives() =
+      drho_dp * _pressure[_qp].derivatives() + drho_dT * _T_fluid[_qp].derivatives();
+  const auto rho_dot = drho_dp * _pressure_dot[_qp] + drho_dT * _T_fluid_dot[_qp];
+  _sup_rho_dot[_qp] = _epsilon[_qp] * rho_dot;
 
-  // Perhaps only useful for visualization (e.g. ADMaterialRealAux)
-  const auto velocity = _superficial_velocity[_qp] / _epsilon[_qp];
+  const auto velocity = superficial_velocity / _epsilon[_qp];
   _vel_x[_qp] = velocity(0);
   _vel_y[_qp] = velocity(1);
   _vel_z[_qp] = velocity(2);
+  const auto superficial_momentum = superficial_velocity * _rho[_qp];
+  _sup_mom_x[_qp] = superficial_momentum(0);
+  _sup_mom_y[_qp] = superficial_momentum(1);
+  _sup_mom_z[_qp] = superficial_momentum(2);
+  _sup_mom_x_dot[_qp] = _rho[_qp] * _sup_vel_x_dot[_qp] + rho_dot * _sup_vel_x[_qp];
+  _sup_mom_y_dot[_qp] = _rho[_qp] * _sup_vel_y_dot[_qp] + rho_dot * _sup_vel_y[_qp];
+  _sup_mom_z_dot[_qp] = _rho[_qp] * _sup_vel_z_dot[_qp] + rho_dot * _sup_vel_z[_qp];
 
-  // Potentially consumed by objects like PCNSFVLaxFriedrichs
-  _momentum[_qp] = velocity * _rho[_qp];
-  _mom_x[_qp] = _momentum[_qp](0);
-  _mom_y[_qp] = _momentum[_qp](1);
-  _mom_z[_qp] = _momentum[_qp](2);
-  _specific_internal_energy[_qp] = _fluid.e_from_p_rho(_pressure[_qp], _rho[_qp]);
-  const auto et = _specific_internal_energy[_qp] + 0.5 * velocity * velocity;
-  _rho_ht[_qp] = _rho[_qp] * et + _pressure[_qp];
+  ADReal e;
+  Real de_dp, de_drho;
+  _fluid.e_from_p_rho(_pressure[_qp].value(), _rho[_qp].value(), e.value(), de_dp, de_drho);
+  e.derivatives() = _pressure[_qp].derivatives() * de_dp + _rho[_qp].derivatives() * de_drho;
+  const auto e_dot = de_dp * _pressure_dot[_qp] + de_drho * rho_dot;
+  const auto et = e + velocity * velocity / 2.;
+  const auto velocity_dot =
+      VectorValue<ADReal>(_sup_vel_x_dot[_qp], _sup_vel_y_dot[_qp], _sup_vel_z_dot[_qp]) /
+      _epsilon[_qp];
+  const auto et_dot = e_dot + velocity * velocity_dot;
+  _sup_rho_et_dot[_qp] = _epsilon[_qp] * (rho_dot * et + et_dot * _rho[_qp]);
 }
