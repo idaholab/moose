@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#3036'
+  design = 'cgfe.md INSMomentumLaplaceForm.md'
+  requirement = 'The system shall be able to model the effect of gravity on incompressible flow using a finite element discretization.'
   [./gravity]
     type = 'Exodiff'
     input = 'gravity.i'

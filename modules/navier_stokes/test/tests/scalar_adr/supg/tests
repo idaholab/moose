@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#9643'
+  design = 'cgfe.md '
+  requirement = 'The system shall be able to solve for an incompressible fluid flowing through a 1D channel with Streamline Upwind Petrov Galerkin stabilization.'
   [./tauOpt]
     type = 'Exodiff'
     input = 'tauOpt.i'

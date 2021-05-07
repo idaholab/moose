@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#7904'
+  design = 'cgfe.md'
+  requirement = 'The system shall be able to solve Jeffery-Hamel flow in a 2D wedge and compare to the analytical solution.'
   [./wedge_dirichlet]
     type = 'Exodiff'
     input = 'wedge_dirichlet.i'

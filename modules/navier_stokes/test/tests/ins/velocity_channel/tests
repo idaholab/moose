@@ -1,14 +1,19 @@
 [Tests]
+  issues = '#3036'
+  design = 'cgfe.md'
+  requirement = 'The system shall be able to solve for incompressible fluid flowing through a 2D channel with only inlet velocity boundary conditions'
   [./velocity_inletBC_no_parts]
     type = 'Exodiff'
     input = 'velocity_inletBC_no_parts.i'
     exodiff = 'velocity_inletBC_no_parts_out.e'
     custom_cmp = velocity_inletBC_no_parts_out.cmp
+    details = 'with the regular volumetric integration of the momentum pressure term'
   [../]
   [./velocity_inletBC_by_parts]
     type = 'Exodiff'
     input = 'velocity_inletBC_by_parts.i'
     exodiff = 'velocity_inletBC_by_parts_out.e'
     custom_cmp = velocity_inletBC_by_parts_out.cmp
+    details = 'and with the momentum pressure term integrated by parts.'
   [../]
 []
