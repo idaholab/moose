@@ -10,7 +10,7 @@ even advanced mechanics models:
 - Tensor implementation matches mathematical theory
 - Straight-forward procedure for adding new physics
 
-The tensor mechanics system can be used to simulation both linear and finite strain mechanics, including
+The tensor mechanics system can be used to simulate both linear and finite strain mechanics, including
 Elasticity and Cosserat elasticity, Plasticity and micromechanics plasticity, Creep, and
 Damage due to cracking and property degradation
 

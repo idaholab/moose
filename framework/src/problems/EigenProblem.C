@@ -394,9 +394,9 @@ EigenProblem::preScaleEigenVector()
   computeResidualTag(
       *_nl_eigen->currentSolution(), _nl_eigen->residualVectorBX(), _nl_eigen->eigenVectorTag());
 
-  // If we do not have eigenvaue yet, we scale 1/|Bx| to unity
+  // If we do not have eigenvalue yet, we scale 1/|Bx| to unity
   std::pair<Real, Real> eig(1, 0);
-  // If there is an eigenvaue, we scale 1/|Bx| to eigenvaue
+  // If there is an eigenvalue, we scale 1/|Bx| to eigenvalue
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
 
@@ -420,7 +420,7 @@ EigenProblem::postScaleEigenVector()
       if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
         mooseError("Number of converged eigenvalues ",
                    _nl_eigen->getNumConvergedEigenvalues(),
-                   " but you required eigenvaue ",
+                   " but you required eigenvalue ",
                    _active_eigen_index);
 
       // when normal factor is not provided, we use the inverse of the norm of

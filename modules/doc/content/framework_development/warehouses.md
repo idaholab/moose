@@ -32,6 +32,6 @@ In addition, there is a bit of functionality there for holding sets of Kernels t
 `MooseVariable` to make retrieving them quick for Jacobian calculations.
 
 There is some trickiness in `addObject()`.  To support `getActiveVariableBlockObjects()` we want
-to have a `Warehouse` for each variable Kernel's are acting on.  To do that, we have nested
+to have a `Warehouse` for each variable Kernels are acting on.  To do that, we have nested
 `MooseObjectWarehouse`s which we add to in `addObject()`.  However, we need the recursion to stop
 after one level so we can pass `recurse = false` to keep it from recursing to death.

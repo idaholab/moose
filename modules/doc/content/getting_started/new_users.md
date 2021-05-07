@@ -16,7 +16,7 @@ cd ~/projects
 
 Running this script will create a folder named "your_app_name" in the projects directory, this
 application will automatically link against MOOSE. Obviously, the "YourAppName" should be the desired
-name or your application; consider the use of an acronym. Animal names are prefered for
+name of your application; consider the use of an acronym. Animal names are preferred for
 applications, but you are free to choose whatever name suits your needs.
 
 !alert warning title=Execute stork from outside of the MOOSE directory
