@@ -27,6 +27,9 @@ DistributedPower::validParams()
   params.addCoupledVar("rho_v", "y-component of the momentum vector");
   params.addCoupledVar("rho_w", "z-component of the momentum vector");
 
+  params.addClassDescription(
+      "Implements the power term of a specified force in the Navier Stokes energy equation.");
+
   return params;
 }
 

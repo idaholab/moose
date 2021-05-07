@@ -21,7 +21,8 @@ MomentumFreeBC::validParams()
   params.addCoupledVar("vel_z", "z-component of velocity");
   params.addRequiredParam<unsigned int>("component", "Component of the momentum equation");
   params.addRequiredCoupledVar("pressure", "The value of pressure");
-
+  params.addClassDescription(
+      "Implements free flow boundary conditions for one of the momentum equations.");
   return params;
 }
 

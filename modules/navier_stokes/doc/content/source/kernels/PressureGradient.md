@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=PressureGradient syntax=/Kernels/PressureGradient
+# PressureGradient
+
+!syntax description /Kernels/PressureGradient
+
+!syntax parameters /Kernels/PressureGradient
+
+!syntax inputs /Kernels/PressureGradient
+
+!syntax children /Kernels/PressureGradient

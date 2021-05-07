@@ -19,7 +19,8 @@ EnergyFreeBC::validParams()
   params.addCoupledVar("rho_v", "y-component of momentum");
   params.addCoupledVar("rho_w", "z-component of momentum");
   params.addRequiredCoupledVar("enthalpy", "Enthalpy");
-
+  params.addClassDescription(
+      "Implements free advective flow boundary conditions for the energy equation.");
   return params;
 }
 
