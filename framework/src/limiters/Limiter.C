@@ -19,7 +19,7 @@ namespace Moose
 {
 namespace FV
 {
-const MooseEnum moose_limiter_type("vanLeer=0 upwind=1 central_difference=2");
+const MooseEnum moose_limiter_type("vanLeer=0 upwind=1 central_difference=2", "upwind");
 
 std::unique_ptr<Limiter>
 Limiter::build(const LimiterType limiter)

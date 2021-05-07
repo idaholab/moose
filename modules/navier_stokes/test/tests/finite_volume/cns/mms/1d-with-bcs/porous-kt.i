@@ -56,7 +56,7 @@
 
 [FVKernels]
   [mass_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho
     eqn = "mass"
   []
@@ -67,7 +67,7 @@
   []
 
   [momentum_x_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho_ud
     momentum_component = x
     eqn = "momentum"
@@ -89,7 +89,7 @@
   []
 
   [fluid_energy_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho_et
     eqn = "energy"
   []
@@ -103,7 +103,7 @@
 [FVBCs]
   [mass_left]
     variable = rho
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = left
     T_fluid = 'exact_T'
     superficial_velocity = 'exact_superficial_velocity'
@@ -111,7 +111,7 @@
   []
   [momentum_left]
     variable = rho_ud
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = left
     T_fluid = 'exact_T'
     superficial_velocity = 'exact_superficial_velocity'
@@ -120,7 +120,7 @@
   []
   [energy_left]
     variable = rho_et
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = left
     T_fluid = 'exact_T'
     superficial_velocity = 'exact_superficial_velocity'
@@ -128,14 +128,14 @@
   []
   [mass_right]
     variable = rho
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
     pressure = 'exact_p'
     eqn = 'mass'
   []
   [momentum_right]
     variable = rho_ud
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
     pressure = 'exact_p'
     eqn = 'momentum'
@@ -143,7 +143,7 @@
   []
   [energy_right]
     variable = rho_et
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
     pressure = 'exact_p'
     eqn = 'energy'
