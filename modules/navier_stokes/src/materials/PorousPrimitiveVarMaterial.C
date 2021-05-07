@@ -54,13 +54,15 @@ PorousPrimitiveVarMaterial::PorousPrimitiveVarMaterial(const InputParameters & p
     _grad_var_sup_vel_z(isCoupled(NS::superficial_velocity_z)
                             ? adCoupledGradient(NS::superficial_velocity_z)
                             : _ad_grad_zero),
-    _pressure_dot(adCoupledDot(NS::pressure)),
-    _T_fluid_dot(adCoupledDot(NS::T_fluid)),
-    _sup_vel_x_dot(adCoupledDot(NS::superficial_velocity_x)),
-    _sup_vel_y_dot(isCoupled(NS::superficial_velocity_y) ? adCoupledDot(NS::superficial_velocity_y)
-                                                         : _ad_zero),
-    _sup_vel_z_dot(isCoupled(NS::superficial_velocity_z) ? adCoupledDot(NS::superficial_velocity_z)
-                                                         : _ad_zero),
+    _pressure_dot(_is_transient ? adCoupledDot(NS::pressure) : _ad_zero),
+    _T_fluid_dot(_is_transient ? adCoupledDot(NS::T_fluid) : _ad_zero),
+    _sup_vel_x_dot(_is_transient ? adCoupledDot(NS::superficial_velocity_x) : _ad_zero),
+    _sup_vel_y_dot((isCoupled(NS::superficial_velocity_y) && _is_transient)
+                       ? adCoupledDot(NS::superficial_velocity_y)
+                       : _ad_zero),
+    _sup_vel_z_dot((isCoupled(NS::superficial_velocity_z) && _is_transient)
+                       ? adCoupledDot(NS::superficial_velocity_z)
+                       : _ad_zero),
     // porosity
     _epsilon(getMaterialProperty<Real>(NS::porosity)),
     // properties: primitives
@@ -86,7 +88,10 @@ PorousPrimitiveVarMaterial::PorousPrimitiveVarMaterial(const InputParameters & p
     _sup_mom_x_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_x))),
     _sup_mom_y_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_y))),
     _sup_mom_z_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_z))),
-    _sup_rho_et_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_total_energy_density)))
+    _sup_rho_et_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_total_energy_density))),
+    _mom_x(declareADProperty<Real>(NS::momentum_x)),
+    _mom_y(declareADProperty<Real>(NS::momentum_y)),
+    _mom_z(declareADProperty<Real>(NS::momentum_z))
 {
   if (_mesh.dimension() >= 2 && !isCoupled(NS::superficial_velocity_y))
     mooseError("You must couple in a superficial y-velocity when solving 2D or 3D problems.");
@@ -143,4 +148,8 @@ PorousPrimitiveVarMaterial::computeQpProperties()
       _epsilon[_qp];
   const auto et_dot = e_dot + velocity * velocity_dot;
   _sup_rho_et_dot[_qp] = _epsilon[_qp] * (rho_dot * et + et_dot * _rho[_qp]);
+
+  _mom_x[_qp] = _sup_mom_x[_qp] / _epsilon[_qp];
+  _mom_y[_qp] = _sup_mom_y[_qp] / _epsilon[_qp];
+  _mom_z[_qp] = _sup_mom_z[_qp] / _epsilon[_qp];
 }

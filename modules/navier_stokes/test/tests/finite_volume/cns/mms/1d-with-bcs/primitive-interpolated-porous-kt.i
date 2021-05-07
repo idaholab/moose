@@ -1,7 +1,7 @@
 [GlobalParams]
   fp = fp
-  limiter = 'vanLeer'
-  two_term_boundary_expansion = false
+  limiter = 'central_difference'
+  two_term_boundary_expansion = true
 []
 
 [Mesh]

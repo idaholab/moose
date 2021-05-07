@@ -69,4 +69,7 @@ protected:
   ADMaterialProperty<Real> & _sup_mom_y_dot;
   ADMaterialProperty<Real> & _sup_mom_z_dot;
   ADMaterialProperty<Real> & _sup_rho_et_dot;
+  ADMaterialProperty<Real> & _mom_x;
+  ADMaterialProperty<Real> & _mom_y;
+  ADMaterialProperty<Real> & _mom_z;
 };

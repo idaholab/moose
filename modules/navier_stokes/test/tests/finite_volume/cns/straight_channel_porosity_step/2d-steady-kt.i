@@ -203,13 +203,13 @@ mass_flux_in=${fparse u_in * rho_in}
 
 [FVKernels]
   [mass_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho
     eqn = "mass"
   []
 
   [momentum_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho_u
     eqn = "momentum"
     momentum_component = 'x'
@@ -226,7 +226,7 @@ mass_flux_in=${fparse u_in * rho_in}
   []
 
   [momentum_advection_y]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho_v
     eqn = "momentum"
     momentum_component = 'y'
@@ -243,7 +243,7 @@ mass_flux_in=${fparse u_in * rho_in}
   []
 
   [energy_advection]
-    type = PCNSFVLaxFriedrichs
+    type = PCNSFVInterpolatedLaxFriedrichs
     variable = rho_et
     eqn = "energy"
   []
@@ -251,7 +251,7 @@ mass_flux_in=${fparse u_in * rho_in}
 
 [FVBCs]
   [rho_left]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'left'
     variable = rho
     superficial_velocity = 'ud_in'
@@ -259,7 +259,7 @@ mass_flux_in=${fparse u_in * rho_in}
     eqn = 'mass'
   []
   [rhou_left]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'left'
     variable = rho_u
     superficial_velocity = 'ud_in'
@@ -268,7 +268,7 @@ mass_flux_in=${fparse u_in * rho_in}
     momentum_component = 'x'
   []
   [rhov_left]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'left'
     variable = rho_v
     superficial_velocity = 'ud_in'
@@ -277,7 +277,7 @@ mass_flux_in=${fparse u_in * rho_in}
     momentum_component = 'y'
   []
   [rho_et_left]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'left'
     variable = rho_et
     superficial_velocity = 'ud_in'
@@ -285,14 +285,14 @@ mass_flux_in=${fparse u_in * rho_in}
     eqn = 'energy'
   []
   [rho_right]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = rho
     pressure = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = rho_u
     pressure = ${p_initial}
@@ -300,7 +300,7 @@ mass_flux_in=${fparse u_in * rho_in}
     momentum_component = 'x'
   []
   [rhov_right]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = rho_v
     pressure = ${p_initial}
@@ -308,7 +308,7 @@ mass_flux_in=${fparse u_in * rho_in}
     momentum_component = 'y'
   []
   [rho_et_right]
-    type = PCNSFVLaxFriedrichsBC
+    type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = rho_et
     pressure = ${p_initial}
