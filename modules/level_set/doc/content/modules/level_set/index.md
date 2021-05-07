@@ -8,7 +8,7 @@ links provided detailed information on the theory and use of the level set modul
 !include modules/level_set/level_set_examples.md
 
 For reference the following tables list the objects contained within the level set module and a brief
-description of there purpose, each object may be selected to navigate to a detailed page.
+description of their purpose; each object may be selected to navigate to a detailed page.
 
 ## Level Set Module Tasks
 

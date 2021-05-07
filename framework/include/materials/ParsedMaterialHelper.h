@@ -27,6 +27,7 @@
   using ParsedMaterialHelper<T>::_variable_names;                                                  \
   using ParsedMaterialHelper<T>::_mat_prop_descriptors;                                            \
   using ParsedMaterialHelper<T>::_tol;                                                             \
+  using ParsedMaterialHelper<T>::_postprocessor_values;                                            \
   using ParsedMaterialHelper<T>::_map_mode
 
 /**
@@ -57,6 +58,13 @@ public:
                      const std::vector<std::string> & mat_prop_names,
                      const std::vector<std::string> & tol_names,
                      const std::vector<Real> & tol_values);
+  void functionParse(const std::string & function_expression,
+                     const std::vector<std::string> & constant_names,
+                     const std::vector<std::string> & constant_expressions,
+                     const std::vector<std::string> & mat_prop_names,
+                     const std::vector<PostprocessorName> & postprocessor_names,
+                     const std::vector<std::string> & tol_names,
+                     const std::vector<Real> & tol_values);
 
 protected:
   usingFunctionMaterialBaseMembers(is_ad);
@@ -85,6 +93,9 @@ protected:
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
+
+  /// List of coupled Postprocessors
+  std::vector<const PostprocessorValue *> _postprocessor_values;
 
   /**
    * Flag to indicate if MOOSE nonlinear variable names should be used as FParser variable names.

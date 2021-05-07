@@ -1,7 +1,7 @@
 # Conda MOOSE Environment
 
 Our preferred method for obtaining dependencies necessary for MOOSE-based
-application development, is via Conda's myriad array of libraries. Follow these
+application development is via Conda's myriad array of libraries. Follow these
 instructions to create an environment on your machine using Conda. At this time,
 an option to install MOOSE directly on a Windows system is not yet supported.
 On-going efforts are being made to add a conda installation option for Windows,

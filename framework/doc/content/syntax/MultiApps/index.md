@@ -24,7 +24,7 @@ other MOOSE applications, or might represent external applications. A sub-app ca
 
 ## Input File Syntax
 
-`MultiApp` objects are declared in the `[MultiApps]` block and require a "type" just like may other blocks.
+`MultiApp` objects are declared in the `[MultiApps]` block and require a "type" just like any other block.
 
 The [!param](/MultiApps/TransientMultiApp/app_type) is the name of the `MooseApp` derived app that is going
 to be executed. Generally, this is the name of the application being

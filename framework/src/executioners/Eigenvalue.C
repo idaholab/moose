@@ -26,7 +26,7 @@ Eigenvalue::validParams()
   InputParameters params = Steady::validParams();
 
   params.addClassDescription(
-      "Eigenvalue solves a standard/generalized linear or nonlinear eigenvaue problem");
+      "Eigenvalue solves a standard/generalized linear or nonlinear eigenvalue problem");
 
   // matrix_free will be an invalid for griffin once the integration is done.
   // In this PR, we can not change it. It will still be a valid option when users
@@ -138,7 +138,7 @@ Eigenvalue::init()
 {
   if (_app.isRecovering())
   {
-    _console << "\nCannot recover eigenvaue solves!\nExiting...\n" << std::endl;
+    _console << "\nCannot recover eigenvalue solves!\nExiting...\n" << std::endl;
     return;
   }
 
@@ -196,9 +196,9 @@ Eigenvalue::prepareSolverOptions()
 void
 Eigenvalue::checkIntegrity()
 {
-  // check to make sure that we don't have any time kernels in eigenvaue simulation
+  // check to make sure that we don't have any time kernels in eigenvalue simulation
   if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
-    mooseError("You have specified time kernels in your eigenvaue simulation");
+    mooseError("You have specified time kernels in your eigenvalue simulation");
 }
 
 #endif
@@ -287,7 +287,7 @@ Eigenvalue::execute()
   postExecute();
 
 #else
-  mooseError("SLEPc is required for eigenvaue executioner, please use --download-slepc when "
+  mooseError("SLEPc is required for eigenvalue executioner, please use --download-slepc when "
              "configuring PETSc ");
 #endif
 }
