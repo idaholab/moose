@@ -79,7 +79,7 @@ public:
 
   /**
    * Eigenvector need to be scaled back if it was scaled in an ealier stage
-   * Scaling eigen vector does not affect solution (eigenvaue, eigenvector),
+   * Scaling eigen vector does not affect solution (eigenvalue, eigenvector),
    * but it does affect the convergence rate. To have a optimal converge rate,
    * We pre scale eigen vector using the same factor as that computed in
    * "postScaleEigenVector"
@@ -98,7 +98,7 @@ public:
   void scaleEigenvector(const Real scaling_factor);
 
   /**
-   * Set eigen problem type. Don't need to use this if we use Newton eigenvaue solver.
+   * Set eigen problem type. Don't need to use this if we use Newton eigenvalue solver.
    */
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
@@ -210,7 +210,7 @@ protected:
   /// often used to compute initial guess for Newton eigen solver. It is automatically
   /// triggered by Eigenvalue Executioner
   bool _do_free_power_iteration;
-  /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvaue.
+  /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvalue.
   bool _output_inverse_eigenvalue;
   /// Timers
   PerfID _compute_jacobian_tag_timer;

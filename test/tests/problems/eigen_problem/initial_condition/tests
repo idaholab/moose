@@ -62,6 +62,6 @@
     absent_out = '(eps_power_)'
     # Make sure '-eps_view' actually work
     expect_out = 'SNES Object:'
-    requirement = "The system shall support extra power iterations and check eigenvaue."
+    requirement = "The system shall support extra power iterations and check eigenvalue."
   [../]
 []

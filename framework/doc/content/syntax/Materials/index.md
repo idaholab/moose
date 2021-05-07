@@ -84,7 +84,7 @@ Objects that require material properties consume them using one of two functions
 1. `getADMaterialProperty<TYPE>` retrieves a property with a name "property_name" to be
    consumed by the object that will include automatic differentiation.
 
-For on object to consume a property the same basic procedure is followed. First in the consuming
+For an object to consume a property the same basic procedure is followed. First in the consuming
 objects header file a `MaterialProperty` with the correct type (e.g., `Real` for the diffusivity
 example) is declared (in the C++ sense) as follows. Notice, that the member variable is a +const+
 reference. The const is important. Consuming objects cannot modify a property, it only uses the

@@ -23,7 +23,7 @@ InputParameters
 EigenExecutionerBase::validParams()
 {
   InputParameters params = Executioner::validParams();
-  params.addClassDescription("Executioner for Eigen value problems.");
+  params.addClassDescription("Executioner for eigenvalue problems.");
 
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");
   params.addParam<PostprocessorName>("normalization", "To evaluate |x| for normalization");
