@@ -1,0 +1,102 @@
+[Tests]
+  issues = '#16756'
+  design = 'navier_stokes/pinsfv.md'
+  [free-slip]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a porous media channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc'"
+  []
+  [free-slip-rz]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-rz.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a porous media cylindrical channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-rz'"
+  []
+  [no-slip]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+  [no-slip-pressure-driven]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-delta-pressure.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/active='inlet-p outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-delta-pressure'"
+  []
+  [no-slip-pressure-average]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-mean-pressure.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a set mean pressure; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Variables/inactive='' FVKernels/inactive='' FVBCs/active='inlet-u inlet-v outlet-p-novalue outlet-u outlet-v no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-mean-pressure'"
+  []
+  [no-slip-average]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-average-velocity.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel using an average interpolation for velocity; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+  [no-slip-match]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-match-insfv.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a porosity of 1; specifically, it should match a regular INSFV simulation results.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "AuxVariables/porosity/initial_condition=1 FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-match-insfv' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+  [symmetry]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-symmetry.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-symmetry'"
+  []
+  [symmetry-rz]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-rz-symmetry.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a cylindrical porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-rz-symmetry' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+  [friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = rc-friction.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-friction' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
+[]

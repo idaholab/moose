@@ -13,6 +13,9 @@
 
 class InputParameters;
 
+/**
+ * A parent class for INSFV fully developed flow boundary conditions
+ */
 class INSFVFullyDevelopedFlowBC : public INSFVFlowBC
 {
 public:

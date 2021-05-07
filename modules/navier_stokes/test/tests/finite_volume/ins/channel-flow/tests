@@ -1,6 +1,14 @@
 [Tests]
   issues = '#15640'
   design = 'navier_stokes/fv.md'
+  [1d-rc]
+    type = 'Exodiff'
+    input = 1d-rc.i
+    exodiff = 1d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a 1D channel; specifically the tangential velocity shall have a uniform value of unity and the pressure shall not change.'
+    ad_indexing_type = 'global'
+  []
   [free-slip]
     type = 'Exodiff'
     input = 2d-rc.i
@@ -109,5 +117,13 @@
       mumps = true
       heavy = true
     []
+  []
+  [3d-rc]
+    type = 'Exodiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a 3D square channel; specifically the tangential velocity shall have a uniform value of unity and the pressure shall not change.'
+    ad_indexing_type = 'global'
   []
 []

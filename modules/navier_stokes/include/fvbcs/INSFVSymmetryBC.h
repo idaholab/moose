@@ -13,6 +13,9 @@
 
 class InputParameters;
 
+/**
+ * A parent class for symmetry boundary conditions
+ */
 class INSFVSymmetryBC : public FVFluxBC
 {
 public:

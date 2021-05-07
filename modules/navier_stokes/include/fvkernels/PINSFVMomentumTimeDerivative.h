@@ -9,24 +9,14 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "INSFVMomentumTimeDerivative.h"
 
-/**
- * Imposes a gravitational force on the momentum equation
+/*
+ * An elemental kernel to compute the time derivative term in the momentum equation.
  */
-class INSFVGravityForce : public FVElementalKernel
+class PINSFVMomentumTimeDerivative : public INSFVMomentumTimeDerivative
 {
 public:
   static InputParameters validParams();
-  INSFVGravityForce(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  const RealVectorValue _gravity;
-
-  /// The density
-  const Real & _rho;
-  /// index x|y|z
-  const unsigned int _index;
+  PINSFVMomentumTimeDerivative(const InputParameters & params);
 };

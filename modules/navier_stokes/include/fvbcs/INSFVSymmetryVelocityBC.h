@@ -11,6 +11,10 @@
 
 #include "INSFVSymmetryBC.h"
 
+/**
+ * A class for setting a symmetry boundary condition on the velocity. It should be
+ * used in conjunction with an INSFVSymmetryPressureBC.
+ */
 class INSFVSymmetryVelocityBC : public INSFVSymmetryBC
 {
 public:

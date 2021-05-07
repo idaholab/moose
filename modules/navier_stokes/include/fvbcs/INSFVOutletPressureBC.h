@@ -12,6 +12,10 @@
 #include "FVFunctionDirichletBC.h"
 #include "INSFVFullyDevelopedFlowBC.h"
 
+/**
+ * A class for setting the value of the pressure at an outlet of the system.
+ * It may not be used with a mean-pressure approach
+ */
 class INSFVOutletPressureBC : public FVFunctionDirichletBC, public INSFVFullyDevelopedFlowBC
 {
 public:

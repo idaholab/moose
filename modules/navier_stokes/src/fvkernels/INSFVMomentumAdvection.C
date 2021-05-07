@@ -547,6 +547,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod,
                                     const ADRealVectorValue &,
                                     const ADRealVectorValue &)
 {
+  mooseError("INSFVMomentumAdvection only works with global AD indexing");
 }
 #endif
 
