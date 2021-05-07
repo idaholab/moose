@@ -75,7 +75,7 @@ We notice immediately that $\frac{|Bx|}{k}$ remains constant during the iteratio
 
 Also in this simplified algorithm, the solution is automatically normalized making $|Bx|=k$. We can do postprocessing to normalize the solution so that $|x|=c$, where $|.|$ can be any norm and $c$ is a scalar constant.
 
-If the minimum eigenvalue and the second smallest eigenvalue are close, i.e. the dominant ratio is about to one, the inverse power iteration converges very slowly. In such a case, we can apply accelerations, such as Chebyshev acceleration, based on the on-the-fly estimation of the dominant ratio.
+If the minimum eigenvalue and the second smallest eigenvalue are close, i.e. the dominance ratio is about equal to one, the inverse power iteration converges very slowly. In such a case, we can apply accelerations, such as Chebyshev acceleration, based on the on-the-fly estimation of the dominance ratio.
 
 The inverse power method is appealing because we can apply matrix-free schemes on evaluating $Ax - \frac{1}{k}Bx$. We can use PJFNK for inverting $A$ and we do not have to exactly assemble matrix $A$ for the preconditioning purpose.
 

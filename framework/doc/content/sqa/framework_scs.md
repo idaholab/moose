@@ -80,7 +80,7 @@ natural code one would like to write yields a warning with our default compiler 
 !alert note
 This warning stems from the fact that numeric literals in C++ are treated as "signed ints". There are
 suffixes that can be applied to literals to force the "correct" type, but are you sure you really
-know the correct type? If you are thinking "unsigned int" you are in the majority and unfortunantly
+know the correct type? If you are thinking "unsigned int" you are in the majority and unfortunately
 also wrong. The right type for a container is `::size_type (aka 'unsigned long')`. See the error
 message once more above.
 
@@ -185,5 +185,5 @@ class MyClass:
 - Every destructor must be virtual.
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
-- Thou shall not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless prove is provided that it can't fail.
-- Thou shall use range-based loops or `MooseIndex()` based loops for iteration.
+- Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless prove is provided that it can't fail.
+- Thou shalt use range-based loops or `MooseIndex()` based loops for iteration.

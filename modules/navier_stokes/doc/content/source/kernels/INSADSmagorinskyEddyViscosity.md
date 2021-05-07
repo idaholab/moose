@@ -12,7 +12,7 @@ adds this term to the momentum equation:
 Where the subgrid-scale eddy viscosity is calculated as:
 
 \begin{equation}
-\nu_{sgs} (C_s \bar{\Delta})^2 ||\bar{\bar{S}}||
+\nu_{sgs} = (C_s \bar{\Delta})^2 ||\bar{\bar{S}}||
 \end{equation}
 
 Where the symmetric strain rate tensor magnitude is calculated by:
