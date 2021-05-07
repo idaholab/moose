@@ -1,4 +1,7 @@
 [Tests]
+  issues = '#3036 #7651'
+  design = 'cgfe.md'
+  requirement = 'The system shall be able to solve for incompressible fluid evolving in a corner cavity with Dirichlet boundary conditions on velocity.'
   [./2D]
     type = 'Exodiff'
     input = 'stagnation.i'
