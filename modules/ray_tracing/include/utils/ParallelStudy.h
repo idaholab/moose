@@ -542,8 +542,8 @@ ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t ch
     if (threaded_work_size)
     {
       // We don't ever want to decrease the capacity, so only set it if we need more entries
-      if (_work_buffer->capacity() < _work_buffer->capacity() + threaded_work_size)
-        _work_buffer->setCapacity(_work_buffer->capacity() + threaded_work_size);
+      if (_work_buffer->capacity() < _work_buffer->size() + threaded_work_size)
+        _work_buffer->setCapacity(_work_buffer->size() + threaded_work_size);
 
       // Move the work into the buffer
       for (auto & threaded_work_vector : _temp_threaded_work)
