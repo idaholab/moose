@@ -16,7 +16,9 @@ Extensions:
             - framework/include
             - modules/electromagnetics/include
     MooseDocs.extensions.common:
-        shortcuts: !include framework/doc/globals.yml
+        shortcuts:
+            framework: !include framework/doc/globals.yml
+            electromagnetics: !include modules/electromagnetics/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.sqa: disable

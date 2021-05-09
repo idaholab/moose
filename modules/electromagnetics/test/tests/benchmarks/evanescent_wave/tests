@@ -1,0 +1,11 @@
+[Tests]
+  [./time_harmonic]
+    type = Exodiff
+    input = 'evanescent_wave.i'
+    exodiff = 'evanescent_wave_out.e'
+    requirement = 'The system shall calculate the evanescent wave decay for a waveguide structure below the cutoff frequency.'
+    design = 'benchmarks/DipoleAntenna.md'
+    validation = 'benchmarks/EvanescentWave.md'
+    issues = '#13744'
+  [../]
+[]
