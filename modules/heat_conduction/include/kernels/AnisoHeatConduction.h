@@ -26,6 +26,6 @@ protected:
 private:
   const unsigned _dim;
 
-  const MaterialProperty<Real> * _k_i[3];
-  const MaterialProperty<Real> * _k_i_dT[3];
+  const MaterialProperty<RankTwoTensor> * _k;
+  const MaterialProperty<RankTwoTensor> * _k_dT;
 };
