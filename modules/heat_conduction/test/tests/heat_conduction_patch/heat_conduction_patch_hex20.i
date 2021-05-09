@@ -104,7 +104,6 @@
   [./heat]
     type = HeatConductionMaterial
     block = 1
-
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]

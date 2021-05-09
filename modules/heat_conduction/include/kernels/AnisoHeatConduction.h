@@ -8,10 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
+#include "DerivativeMaterialInterface.h"
 #include "Kernel.h"
 
-class AnisoHeatConduction : public Kernel
+/**
+ * This kernel implements the Laplacian operator
+ * multiplied by a 2nd order tensor giving
+ * anisotropic (direction specific) HeatConduction:
+ * $\overline K \cdot \nabla u \cdot \nabla \phi_i$
+ */
+class AnisoHeatConduction : public DerivativeMaterialInterface<Kernel>
 {
 public:
   static InputParameters validParams();
@@ -19,13 +25,10 @@ public:
   AnisoHeatConduction(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-private:
-  const unsigned _dim;
-
-  const MaterialProperty<Real> * _k_i[3];
-  const MaterialProperty<Real> * _k_i_dT[3];
+  const MaterialProperty<RankTwoTensor> & _k;
+  const MaterialProperty<RankTwoTensor> & _dk_dT;
 };
