@@ -207,10 +207,10 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   const Real positive_flow = 1.0;
   // used to defined global direction of the cross_flow_map coefficients for each subchannel and gap
   const Real negative_flow = -1.0;
-
+  // the indicator used while setting _gap_to_chan_map array
+  std::vector<std::pair<unsigned int, unsigned int>> gap_fill;
   rodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
   _nrods = _rod_position.size();
-
   // assign the rods to the corresponding rings
   unsigned int k = 0; // initializat the fuel rod counter index
   _rods_in_rings.resize(_nrings);
@@ -218,7 +218,6 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   for (unsigned int i = 1; i < _nrings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
       _rods_in_rings[i].push_back(k++);
-
   //  Given the number of rods and number of fuel rod rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
@@ -230,6 +229,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   _subch_type.resize(_n_channels);
   _n_gaps = _n_channels + _nrods - 1; /// initial assignment
   _gap_to_chan_map.resize(_n_gaps);
+  gap_fill.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
   _gij_map.resize(_n_gaps);
   _sign_id_crossflow_map.resize(_n_channels);
@@ -494,13 +494,15 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         if ((j == _chan_to_gap_map[i][0]) || (j == _chan_to_gap_map[i][1]) ||
             (j == _chan_to_gap_map[i][2]))
         {
-          if (_gap_to_chan_map[j].first == 0)
+          if (_gap_to_chan_map[j].first == 0 && gap_fill[j].first == 0)
           {
             _gap_to_chan_map[j].first = i;
+            gap_fill[j].first = 1;
           }
-          else if (_gap_to_chan_map[j].second == 0)
+          else if (_gap_to_chan_map[j].second == 0 && gap_fill[j].second == 0)
           {
             _gap_to_chan_map[j].second = i;
+            gap_fill[j].second = 1;
           }
           else
           {
@@ -511,13 +513,15 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       {
         if ((j == _chan_to_gap_map[i][0]) || (j == _chan_to_gap_map[i][1]))
         {
-          if (_gap_to_chan_map[j].first == 0)
+          if (_gap_to_chan_map[j].first == 0 && gap_fill[j].first == 0)
           {
             _gap_to_chan_map[j].first = i;
+            gap_fill[j].first = 1;
           }
-          else if (_gap_to_chan_map[j].second == 0)
+          else if (_gap_to_chan_map[j].second == 0 && gap_fill[j].second == 0)
           {
             _gap_to_chan_map[j].second = i;
+            gap_fill[j].second = 1;
           }
           else
           {
