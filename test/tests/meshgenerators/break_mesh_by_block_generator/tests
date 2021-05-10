@@ -76,21 +76,10 @@
     []
   []
 
-  [block_restricted]
+  [surrounding_block_restricted]
     requirement = 'The system shall be able to break the mesh between listed blocks:'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895 #17749'
-
-    [2d]
-      type = 'Exodiff'
-      input = 'break_mesh_block_restricted_2d.i'
-      cli_args = '--mesh-only'
-      exodiff = 'break_mesh_block_restricted_2d_in.e'
-      exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
-      recover = false
-      detail = 'with splitting the interface and without splitting the transition interface in 2D;'
-    []
+    issues = '#15895'
 
     [split_transition_only]
       type = 'Exodiff'
@@ -159,6 +148,68 @@
       detail = 'without a split interface, splitting the transition interface, or a transition '
                'interface;'
     []
+  []
+
+  [block_pairs_restricted]
+    type = 'Exodiff'
+    input = 'break_mesh_block_pairs_restricted.i'
+    cli_args = '--mesh-only'
+    exodiff = 'break_mesh_block_pairs_restricted_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to break the mesh between listed block pairs.'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#17749'
+  []
+
+  [block_pairs_restricted_3blocks]
+    requirement = 'MOOSE shall be able to break the mesh between listed block pairs'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#17749'
+    [one_new_node]
+      type = 'Exodiff'
+      input = 'break_mesh_block_pairs_restricted_3blocks.i'
+      cli_args = "Mesh/split/block_pairs='0 2' --mesh-only block_pairs_restricted_3blocks_one_new_node_in.e"
+      exodiff = 'block_pairs_restricted_3blocks_one_new_node_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'by creating one new node.'
+    []
+    [two_new_nodes]
+      type = 'Exodiff'
+      input = 'break_mesh_block_pairs_restricted_3blocks.i'
+      cli_args = "Mesh/split/block_pairs='0 1' --mesh-only block_pairs_restricted_3blocks_two_new_nodes_in.e"
+      exodiff = 'block_pairs_restricted_3blocks_two_new_nodes_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'by creating two new nodes.'
+    []
+    [three_new_nodes]
+      type = 'Exodiff'
+      input = 'break_mesh_block_pairs_restricted_3blocks.i'
+      cli_args = "Mesh/split/block_pairs='0 2;0 1' --mesh-only block_pairs_restricted_3blocks_three_new_nodes_in.e"
+      exodiff = 'block_pairs_restricted_3blocks_three_new_nodes_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'by creating three new nodes.'
+    []
+  []
+
+  [block_pairs_restricted_two_interfaces]
+    type = 'Exodiff'
+    input = 'break_mesh_block_pairs_restricted.i'
+    cli_args = 'Mesh/split/add_interface_on_two_sides=true --mesh-only break_mesh_block_pairs_restricted_two_sides_interfaces_in.e'
+    exodiff = 'break_mesh_block_pairs_restricted_two_sides_interfaces_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to create two sides interface when interfaces are created between listed block pairs.'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#17749'
   []
 
   [hanging_nodes]

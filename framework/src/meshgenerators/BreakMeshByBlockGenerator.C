@@ -29,17 +29,19 @@ BreakMeshByBlockGenerator::validParams()
                              "boundary name plus \"_to_\" plus the subdomain name. At the moment"
                              "this only works on REPLICATED mesh");
   params.addParam<std::vector<SubdomainID>>(
-      "block",
-      "The list of subdomain names where the mesh should be split, "
-      "default all blocks.");
+      "surrounding_blocks",
+      "The list of subdomain names surrounding which interfaces will be generated.");
+  params.addParam<std::vector<std::vector<SubdomainID>>>(
+      "block_pairs", "The list of subdomain pairs between which interfaces will be generated.");
   params.addParam<bool>("add_transition_interface",
-                        true,
-                        "If true (default) and block is not empty, a special boundary named "
+                        false,
+                        "If true and block is not empty, a special boundary named "
                         "interface_transition is generate between listed blocks and other blocks.");
   params.addParam<bool>(
       "split_transition_interface", false, "Whether to split the transition interface by blocks.");
-  params.addParam<bool>(
-      "add_two_sides_interface", false, "Whether to add two sides interface boundaries.");
+  params.addParam<bool>("add_interface_on_two_sides",
+                        false,
+                        "Whether to add an additional interface boundary at the other side.");
   params.addParam<BoundaryName>(
       "interface_transition_name",
       "interface_transition",
@@ -50,15 +52,37 @@ BreakMeshByBlockGenerator::validParams()
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
   : BreakMeshByBlockGeneratorBase(parameters),
     _input(getMesh("input")),
-    _block(parameters.isParamSetByUser("block") ? getParam<std::vector<SubdomainID>>("block")
-                                                : std::vector<SubdomainID>()),
-    _block_set(_block.begin(), _block.end()),
-    _block_restricted(parameters.isParamSetByUser("block")),
+    _block_pairs_restricted(parameters.isParamSetByUser("block_pairs")),
+    _surrounding_blocks_restricted(parameters.isParamSetByUser("surrounding_blocks")),
     _add_transition_interface(getParam<bool>("add_transition_interface")),
     _split_transition_interface(getParam<bool>("split_transition_interface")),
     _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
-    _add_two_sides_interface(getParam<bool>("add_two_sides_interface"))
+    _add_interface_on_two_sides(getParam<bool>("add_interface_on_two_sides"))
 {
+  if (_block_pairs_restricted && _surrounding_blocks_restricted)
+    paramError("block_pairs_restricted",
+               "BreakMeshByBlockGenerator: 'surrounding_blocks' and 'block_pairs' can not be used "
+               "at the same time.");
+
+  if (_block_pairs_restricted)
+  {
+    for (auto block_pair : getParam<std::vector<std::vector<SubdomainID>>>("block_pairs"))
+    {
+      if (block_pair.size() != 2)
+        paramError("block_pair",
+                   "Each row of 'block_pairs' must have a size of two (block names).");
+      std::pair<SubdomainID, SubdomainID> pair = std::make_pair(
+          std::min(block_pair[0], block_pair[1]), std::max(block_pair[0], block_pair[1]));
+
+      _block_pairs.insert(pair);
+      std::copy(block_pair.begin(), block_pair.end(), std::inserter(_block_set, _block_set.end()));
+    }
+  }
+  else if (_surrounding_blocks_restricted)
+    std::copy(getParam<std::vector<SubdomainID>>("surrounding_blocks").begin(),
+              getParam<std::vector<SubdomainID>>("surrounding_blocks").end(),
+              std::inserter(_block_set, _block_set.end()));
+
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 
@@ -66,6 +90,11 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     paramError("split_transition_interface",
                "BreakMeshByBlockGenerator cannot split the transition interface because "
                "add_transition_interface is false");
+
+  if (_add_transition_interface && _block_pairs_restricted)
+    paramError("add_transition_interface",
+               "BreakMeshByBlockGenerator cannot split the transition interface when 'block_pairs' "
+               "are specified.");
 }
 
 std::unique_ptr<MeshBase>
@@ -75,7 +104,7 @@ BreakMeshByBlockGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // check that a boundary named _interface_transition_name does not already exist in the mesh
-  if (_block_restricted && _add_transition_interface &&
+  if ((_block_pairs_restricted || _surrounding_blocks_restricted) && _add_transition_interface &&
       boundary_info.get_id_by_name(_interface_transition_name) != Moose::INVALID_BOUNDARY_ID)
     paramError("interface_transition_name",
                "BreakMeshByBlockGenerator the specified  interface transition boundary name "
@@ -100,13 +129,13 @@ BreakMeshByBlockGenerator::generate()
       {
         const Elem * current_elem = mesh->elem_ptr(*elem_id);
         subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
-        if (!_add_transition_interface)
+        if (!_block_pairs_restricted)
+          connected_blocks.insert(block_id);
+        else
         {
           if (block_id != Elem::invalid_subdomain_id)
             connected_blocks.insert(block_id);
         }
-        else
-          connected_blocks.insert(block_id);
       }
 
       unsigned int node_multiplicity = connected_blocks.size();
@@ -124,7 +153,26 @@ BreakMeshByBlockGenerator::generate()
             connected_blocks.find(Elem::invalid_subdomain_id) != connected_blocks.end()
                 ? Elem::invalid_subdomain_id
                 : *subdomain_it;
-        // subdomain_id_type reference_subdomain_id = *subdomain_it;
+
+        // For the block_pairs option, the node that is only shared by specific block pairs will be
+        // newly created.
+        bool should_create_new_node = true;
+        if (_block_pairs_restricted)
+        {
+          auto elems = node_to_elem_map[current_node->id()];
+          should_create_new_node = false;
+          std::set<subdomain_id_type> sets_blocks_for_this_node;
+          for (auto elem_id = elems.begin(); elem_id != elems.end(); elem_id++)
+            sets_blocks_for_this_node.insert(
+                blockRestrictedElementSubdomainID(mesh->elem_ptr(*elem_id)));
+          if (sets_blocks_for_this_node.size() == 2)
+          {
+            auto setIt = sets_blocks_for_this_node.begin();
+            if (findBlockPairs(*setIt, *std::next(setIt, 1)))
+              should_create_new_node = true;
+          }
+        }
+
         // multiplicity counter to keep track of how many nodes we added
         unsigned int multiplicity_counter = node_multiplicity;
         for (auto elem_id : connected_elems)
@@ -136,10 +184,8 @@ BreakMeshByBlockGenerator::generate()
           Elem * current_elem = mesh->elem_ptr(elem_id);
           subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
 
-          if ((_add_transition_interface && block_id != reference_subdomain_id) ||
-              (!_add_transition_interface && block_id != reference_subdomain_id &&
-               reference_subdomain_id != Elem::invalid_subdomain_id &&
-               block_id != Elem::invalid_subdomain_id))
+          if ((blockRestrictedElementSubdomainID(current_elem) != reference_subdomain_id) ||
+              (_block_pairs_restricted & findBlockPairs(reference_subdomain_id, block_id)))
           {
             // assign the newly added node to current_elem
             Node * new_node = nullptr;
@@ -150,41 +196,47 @@ BreakMeshByBlockGenerator::generate()
               if (current_elem->node_id(node_id) ==
                   current_node->id()) // if current node == node on element
               {
-                // add new node
-                new_node = Node::build(*current_node, mesh->n_nodes()).release();
+                if (should_create_new_node)
+                {
+                  // add new node
+                  new_node = Node::build(*current_node, mesh->n_nodes()).release();
 
-                // We're duplicating nodes so that each subdomain elem has its own copy, so it
-                // seems natural to assign this new node the same proc id as corresponding
-                // subdomain elem
-                new_node->processor_id() = current_elem->processor_id();
-                mesh->add_node(new_node);
-
-                // Add boundary info to the new node
-                boundary_info.boundary_ids(current_node, node_boundary_ids);
-                boundary_info.add_node(new_node, node_boundary_ids);
+                  // We're duplicating nodes so that each subdomain elem has its own copy, so it
+                  // seems natural to assign this new node the same proc id as corresponding
+                  // subdomain elem
+                  new_node->processor_id() = current_elem->processor_id();
+                  mesh->add_node(new_node);
+                  current_elem->set_node(node_id) = new_node;
+                  // Add boundary info to the new node
+                  boundary_info.boundary_ids(current_node, node_boundary_ids);
+                  boundary_info.add_node(new_node, node_boundary_ids);
+                }
 
                 multiplicity_counter--; // node created, update multiplicity counter
 
-                current_elem->set_node(node_id) = new_node;
                 break; // ones the proper node has been fixed in one element we can break the
                        // loop
               }
 
-            for (auto connected_elem_id : connected_elems)
+            if (should_create_new_node)
             {
-              Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
-
-              // Assign the newly added node to other connected elements with the same block_id
-              if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
-                  connected_elem != current_elem)
+              for (auto connected_elem_id : connected_elems)
               {
-                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
-                  if (connected_elem->node_id(node_id) ==
-                      current_node->id()) // if current node == node on element
-                  {
-                    connected_elem->set_node(node_id) = new_node;
-                    break;
-                  }
+                Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
+
+                // Assign the newly added node to other connected elements with the same
+                // block_id
+                if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
+                    connected_elem != current_elem)
+                {
+                  for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
+                    if (connected_elem->node_id(node_id) ==
+                        current_node->id()) // if current node == node on element
+                    {
+                      connected_elem->set_node(node_id) = new_node;
+                      break;
+                    }
+                }
               }
             }
           }
@@ -205,7 +257,6 @@ BreakMeshByBlockGenerator::generate()
             {
               if (current_elem->has_neighbor(connected_elem))
               {
-
                 dof_id_type elem_id = current_elem->id();
                 dof_id_type connected_elem_id = connected_elem->id();
                 unsigned int side = current_elem->which_neighbor_am_i(connected_elem);
@@ -213,7 +264,7 @@ BreakMeshByBlockGenerator::generate()
                     connected_elem->which_neighbor_am_i(current_elem);
 
                 // in this case we need to play a game to reorder the sides
-                if (_block_restricted)
+                if (_block_pairs_restricted || _surrounding_blocks_restricted)
                 {
                   connected_elem_subid = connected_elem->subdomain_id();
                   if (curr_elem_subid > connected_elem_subid) // we need to switch the ids
@@ -235,15 +286,13 @@ BreakMeshByBlockGenerator::generate()
                 std::pair<subdomain_id_type, subdomain_id_type> blocks_pair2 =
                     std::make_pair(connected_elem_subid, curr_elem_subid);
 
-                if (!_add_transition_interface)
+                if (_block_pairs_restricted)
                 {
-                  if (blockRestrictedElementSubdomainID(current_elem) !=
-                          Elem::invalid_subdomain_id &&
-                      blockRestrictedElementSubdomainID(connected_elem) !=
-                          Elem::invalid_subdomain_id)
+                  if (findBlockPairs(blockRestrictedElementSubdomainID(current_elem),
+                                     blockRestrictedElementSubdomainID(connected_elem)))
                   {
                     _new_boundary_sides_map[blocks_pair].insert(std::make_pair(elem_id, side));
-                    if (_add_two_sides_interface)
+                    if (_add_interface_on_two_sides)
                       _new_boundary_sides_map[blocks_pair2].insert(
                           std::make_pair(connected_elem_id, connected_elem_side));
                   }
@@ -251,7 +300,7 @@ BreakMeshByBlockGenerator::generate()
                 else
                 {
                   _new_boundary_sides_map[blocks_pair].insert(std::make_pair(elem_id, side));
-                  if (_add_two_sides_interface)
+                  if (_add_interface_on_two_sides)
                     _new_boundary_sides_map[blocks_pair2].insert(
                         std::make_pair(connected_elem_id, connected_elem_side));
                 }
@@ -283,7 +332,8 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
   // loop over boundary sides
   for (auto & boundary_side_map : _new_boundary_sides_map)
   {
-    if (!_block_restricted || (_block_restricted && !_add_transition_interface))
+    if (!(_block_pairs_restricted || _surrounding_blocks_restricted) ||
+        ((_block_pairs_restricted || _surrounding_blocks_restricted) && !_add_transition_interface))
     {
       // find the appropriate boundary name and id
       // given primary and secondary block ID
@@ -351,8 +401,19 @@ subdomain_id_type
 BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem)
 {
   subdomain_id_type elem_subdomain_id = elem->subdomain_id();
-  if (_block_restricted && (_block_set.find(elem_subdomain_id) == _block_set.end()))
+  if ((_block_pairs_restricted || _surrounding_blocks_restricted) &&
+      (_block_set.find(elem_subdomain_id) == _block_set.end()))
     elem_subdomain_id = Elem::invalid_subdomain_id;
 
   return elem_subdomain_id;
+}
+
+bool
+BreakMeshByBlockGenerator::findBlockPairs(subdomain_id_type block_one, subdomain_id_type block_two)
+{
+  for (auto block_pair : _block_pairs)
+    if ((block_pair.first == block_one && block_pair.second == block_two) ||
+        (block_pair.first == block_two && block_pair.second == block_one))
+      return true;
+  return false;
 }

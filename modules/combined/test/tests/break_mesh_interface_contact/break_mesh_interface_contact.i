@@ -29,10 +29,9 @@
   [breakmesh]
     input = block2
     type = BreakMeshByBlockGenerator
-    block = '1 2'
+    block_pairs = '1 2'
     split_interface = true
-    add_transition_interface = false
-    add_two_sides_interface = true
+    add_interface_on_two_sides = true
   []
 []
 
