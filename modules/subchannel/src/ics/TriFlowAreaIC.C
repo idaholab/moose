@@ -17,7 +17,7 @@ TriFlowAreaIC::value(const Point & p)
 {
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
-  auto wire_diameter = pitch - rod_diameter;
+  auto wire_diameter = _mesh.getWireDiameter();
   auto gap = _mesh.getDuctToRodGap();
 
   auto i = _mesh.getSubchannelIndexFromPoint(p);

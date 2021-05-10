@@ -39,6 +39,16 @@ public:
     return _subchannel_to_rod_map[channel_idx][neighbor_idx];
   }
 
+  /**
+   * Return wire diameter
+   */
+  virtual const Real & getWireDiameter() const { return _dwire; }
+
+  /**
+   * Return the wire lead length
+   */
+  virtual const Real & getWireLeadLength() const { return _hwire; }
+
   virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const override
   {
     return _nodes[i_chan][iz];
@@ -76,6 +86,10 @@ protected:
   unsigned int _n_channels;
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;
+  /// wire diameter
+  Real _dwire;
+  /// wire lead length
+  Real _hwire;
   /// the gap thickness between the duct and peripheral fuel rods
   Real _duct_to_rod_gap;
   /// nodes

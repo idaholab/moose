@@ -17,7 +17,7 @@ TriWettedPerimIC::value(const Point & p)
   // Define geometry parameters.
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
-  auto wire_diameter = pitch - rod_diameter;
+  auto wire_diameter = _mesh.getWireDiameter();
   auto rod_circumference = libMesh::pi * rod_diameter;
   auto wire_circumference = libMesh::pi * wire_diameter;
   auto gap = _mesh.getDuctToRodGap();
