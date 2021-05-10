@@ -63,7 +63,7 @@
   []
   [ht]
     type = HeatTransferFromHeatStructure3D1Phase
-    flow_channel = fch
+    flow_channels = 'fch'
     hs = blk
     boundary = blk:rmin
     Hw = 10000

@@ -10,7 +10,7 @@ InputParameters
 OneD3EqnEnergyHeatFluxFromHeatStructure3D::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addRequiredParam<UserObjectName>("T_wall_avg_uo",
+  params.addRequiredParam<UserObjectName>("user_object",
                                           "Layered average wall temperature user object");
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Convective heat transfer coefficient");
@@ -24,7 +24,7 @@ OneD3EqnEnergyHeatFluxFromHeatStructure3D::validParams()
 OneD3EqnEnergyHeatFluxFromHeatStructure3D::OneD3EqnEnergyHeatFluxFromHeatStructure3D(
     const InputParameters & parameters)
   : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
-    _T_wall_avg_uo(getUserObject<LayeredSideAverage>("T_wall_avg_uo")),
+    _user_object(getUserObjectBase("user_object")),
     _Hw(getMaterialProperty<Real>("Hw")),
     _T(getMaterialProperty<Real>("T")),
     _dT_drhoA(getMaterialPropertyDerivativeTHM<Real>("T", "rhoA")),
@@ -40,9 +40,7 @@ OneD3EqnEnergyHeatFluxFromHeatStructure3D::OneD3EqnEnergyHeatFluxFromHeatStructu
 Real
 OneD3EqnEnergyHeatFluxFromHeatStructure3D::computeQpResidual()
 {
-  Point center = _current_elem->centroid();
-  unsigned int i = _T_wall_avg_uo.getLayer(center);
-  const Real T_wall = _T_wall_avg_uo.getLayerValue(i);
+  const Real T_wall = _user_object.spatialValue(_current_elem->centroid());
   return _Hw[_qp] * (_T[_qp] - T_wall) * _P_hf[_qp] * _test[_i][_qp];
 }
 

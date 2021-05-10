@@ -1,6 +1,5 @@
 [GlobalParams]
   scaling_factor_1phase = '1 1 1e-3'
-  gravity_vector = '0 0 0'
 []
 
 [HeatStructureMaterials]
@@ -31,29 +30,60 @@
 []
 
 [Components]
-  [fch]
+  [fch1]
     type = FlowChannel1Phase
     position = '0 0 0'
-    orientation = '0 0 1'
+    # orientation = '0 0 1'
     fp = fp
     n_elems = 6
     length = 1
     initial_T = 300
     initial_p = 1.01e5
-    initial_vel = 0
+    initial_vel = 1
     closures = simple
     A   = 0.00314159
     D_h  = 0.2
     f = 0.01
   []
-  [in]
-    type = SolidWall1Phase
-    input = 'fch:in'
+  [in1]
+    type = InletVelocityTemperature1Phase
+    input = 'fch1:in'
+    vel = 1
+    T = 300
   []
-  [out]
-    type = SolidWall1Phase
-    input = 'fch:out'
+  [out1]
+    type = Outlet1Phase
+    input = 'fch1:out'
+    p = 1.01e5
   []
+
+  [fch2]
+    type = FlowChannel1Phase
+    position = '0.2 0.2 0'
+    # orientation = '0 0 1'
+    fp = fp
+    n_elems = 6
+    length = 1
+    initial_T = 300
+    initial_p = 1.01e5
+    initial_vel = 1
+    closures = simple
+    A   = 0.00314159
+    D_h  = 0.2
+    f = 0.01
+  []
+  [in2]
+    type = InletVelocityTemperature1Phase
+    input = 'fch2:in'
+    vel = 1
+    T = 300
+  []
+  [out2]
+    type = Outlet1Phase
+    input = 'fch2:out'
+    p = 1.01e5
+  []
+
   [blk]
     type = HeatStructureFromFile3D
     file = mesh.e
@@ -63,11 +93,11 @@
   []
   [ht]
     type = HeatTransferFromHeatStructure3D1Phase
-    flow_channels = 'fch'
+    flow_channels = 'fch1 fch2'
     hs = blk
     boundary = blk:rmin
     Hw = 10000
-    P_hf = 0.1564344650402309
+    P_hf = 0.156434465
   []
 []
 
@@ -79,7 +109,7 @@
   []
   [energy_fch]
     type = ElementIntegralVariablePostprocessor
-    block = fch
+    block = 'fch1 fch2'
     variable = rhoEA
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -92,7 +122,7 @@
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = total_energy
-    compute_relative_change = true
+   compute_relative_change = false
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
@@ -106,21 +136,15 @@
 
 [Executioner]
   type = Transient
-  scheme = bdf2
-  dt = 0.1
-  num_steps = 10
-
+  dt = 1
   solve_type = PJFNK
   line_search = basic
-  abort_on_solve_fail = true
+  num_steps = 1000
+  steady_state_detection = true
+  steady_state_tolerance = 1e-08
   nl_abs_tol = 1e-8
 []
 
 [Outputs]
-  file_base = 'phy.conservation'
-  [csv]
-    type = CSV
-    show = 'energy_change'
-    execute_on = 'FINAL'
-  []
+  exodus = true
 []

@@ -13,9 +13,11 @@ public:
   Closures1PhaseNone(const InputParameters & params);
 
   virtual void check(const FlowChannelBase & flow_channel) const override;
-  virtual void check(const HeatTransferBase & heat_transfer) const override;
+  virtual void check(const HeatTransferBase & heat_transfer,
+                     const FlowChannelBase & flow_channel) const override;
   virtual void addMooseObjects(const FlowChannelBase & flow_channel) override;
-  virtual void addMooseObjects(const HeatTransferBase & heat_transfer) override;
+  virtual void addMooseObjects(const HeatTransferBase & heat_transfer,
+                               const FlowChannelBase & flow_channel) override;
 
 public:
   static InputParameters validParams();
