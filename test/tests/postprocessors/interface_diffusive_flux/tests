@@ -8,13 +8,13 @@
       input = 'interface_diffusive_flux.i'
       exodiff = 'InterfaceDiffusiveFluxIntegral_fe.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
-      details = 'with finite element variables, '
+      detail = 'with finite element variables, '
     []
     [fv]
       type = 'Exodiff'
       input = 'interface_diffusive_flux_fv.i'
       exodiff = 'InterfaceDiffusiveFluxIntegral_fv.e'
-      details = 'and with finite volume variables.'
+      detail = 'and with finite volume variables.'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
     []
   []
@@ -25,14 +25,14 @@
       input = 'interface_diffusive_flux.i'
       exodiff = 'InterfaceDiffusiveFluxAverage_fe.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxAverage'
-      details = 'with finite element variables, '
+      detail = 'with finite element variables, '
     []
     [fv]
       type = 'Exodiff'
       input = 'interface_diffusive_flux_fv.i'
       exodiff = 'InterfaceDiffusiveFluxAverage_fv.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxAverage'
-      details = 'and with finite volume variables.'
+      detail = 'and with finite volume variables.'
     []
   []
 []

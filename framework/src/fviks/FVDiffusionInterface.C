@@ -42,8 +42,7 @@ FVDiffusionInterface::computeQpResidual()
   const auto & coef_neighbor = elemIsOne() ? _coeff2_neighbor : _coeff1_neighbor;
 
   // Form a finite difference gradient across the interface
-  Point one_over_gradient_support =
-      _face_info->elemCentroid() - _face_info->neighborCentroid();
+  Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
   one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
   const auto gradient = elemIsOne() ? (var1().getElemValue(&_face_info->elem()) -
                                        var2().getElemValue(_face_info->neighborPtr())) *

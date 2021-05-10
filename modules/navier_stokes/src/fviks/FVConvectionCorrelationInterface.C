@@ -27,9 +27,6 @@ FVConvectionCorrelationInterface::validParams()
   params.addParam<bool>("wall_cell_is_bulk",
                         false,
                         "Use the wall cell centroid temperature for the fluid bulk temperature");
-
-  params.set<unsigned short>("ghost_layers") = 2;
-  // TODO Make it dependent on mesh size and bulk distance OR a parameter?
   return params;
 }
 
@@ -74,8 +71,7 @@ FVConvectionCorrelationInterface::computeQpResidual()
 
   mooseAssert(bulk_elem,
               "The element at bulk_distance from the wall was not found in the mesh. "
-              "Increase the number of ghost_layers in FVTwoVarConvectionCorrelationInterface and "
-              "re-compile.");
+              "Increase the number of ghost layers with the 'ghost_layers' parameter.");
   mooseAssert(var1().hasBlocks(bulk_elem->subdomain_id()),
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
