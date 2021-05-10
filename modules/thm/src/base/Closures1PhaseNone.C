@@ -22,7 +22,8 @@ Closures1PhaseNone::check(const FlowChannelBase & /*flow_channel*/) const
 }
 
 void
-Closures1PhaseNone::check(const HeatTransferBase & /*heat_transfer*/) const
+Closures1PhaseNone::check(const HeatTransferBase & /*heat_transfer*/,
+                          const FlowChannelBase & /*flow_channel*/) const
 {
 }
 
@@ -43,6 +44,7 @@ Closures1PhaseNone::addMooseObjects(const FlowChannelBase & flow_channel)
 }
 
 void
-Closures1PhaseNone::addMooseObjects(const HeatTransferBase & /*heat_transfer*/)
+Closures1PhaseNone::addMooseObjects(const HeatTransferBase & /*heat_transfer*/,
+                                    const FlowChannelBase & /*flow_channel*/)
 {
 }

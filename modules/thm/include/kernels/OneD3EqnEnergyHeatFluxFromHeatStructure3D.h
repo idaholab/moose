@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Kernel.h"
-#include "LayeredSideAverage.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
 /**
@@ -23,8 +22,8 @@ protected:
    */
   std::map<unsigned int, unsigned int> getVariableIndexMapping() const;
 
-  /// User object to compute the average wall temperature
-  const LayeredSideAverage & _T_wall_avg_uo;
+  /// User object to be queried for the average wall temperature
+  const UserObject & _user_object;
   /// Heat transfer coefficient
   const MaterialProperty<Real> & _Hw;
   /// Fluid temperature
