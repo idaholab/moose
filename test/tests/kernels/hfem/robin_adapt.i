@@ -50,7 +50,7 @@
 
 [DGKernels]
   [surface]
-    type = HFEMDiffusion
+    type = ArrayHFEMDiffusion
     variable = u
     lowerd_variable = lambda
   []

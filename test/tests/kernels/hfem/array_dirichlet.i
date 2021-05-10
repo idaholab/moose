@@ -15,12 +15,6 @@
     block = 0
     components = 2
   []
-  [uhat]
-    order = CONSTANT
-    family = MONOMIAL
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
-    components = 2
-  []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
@@ -58,20 +52,6 @@
     coef = '1 2'
     block = 0
   []
-  [uhat_reaction]
-    type = ArrayReaction
-    variable = uhat
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
-    reaction_coefficient = rc
-  []
-  [uhat_coupled]
-    type = ArrayCoupledForce
-    variable = uhat
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
-    v = lambdab
-    is_v_array = true
-    coef = '1 1'
-  []
 []
 
 [DGKernels]
@@ -88,7 +68,6 @@
     boundary = 'left right top bottom'
     variable = u
     lowerd_variable = lambdab
-    uhat = uhat
   []
 []
 
@@ -97,12 +76,6 @@
     type = GenericConstantArray
     prop_name = dc
     prop_value = '1 1'
-  []
-  [rc]
-    type = GenericConstantArray
-    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
-    prop_name = rc
-    prop_value = '0.5 0.5'
   []
 []
 

@@ -13,37 +13,25 @@
     order = THIRD
     family = MONOMIAL
     block = 0
-    components = 2
   []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
     block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
-    components = 2
-  []
-[]
-
-[AuxVariables]
-  [v]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-    initial_condition = '1'
   []
 []
 
 [Kernels]
   [diff]
-    type = ArrayDiffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = '1'
     block = 0
-    diffusion_coefficient = dc
   []
   [source]
-    type = ArrayCoupledForce
+    type = BodyForce
     variable = u
-    v = v
-    coef = '1 2'
+    value = '1'
     block = 0
   []
 []
@@ -58,28 +46,20 @@
 
 [BCs]
   [all]
-    type = ArrayVacuumBC
+    type = VacuumBC
     boundary = 'left right top bottom'
     variable = u
   []
 []
 
-[Materials]
-  [dc]
-    type = GenericConstantArray
-    prop_name = dc
-    prop_value = '1 1'
-  []
-[]
-
 [Postprocessors]
   [intu]
-    type = ElementIntegralArrayVariablePostprocessor
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = 0
   []
   [lambdanorm]
-    type = ElementArrayL2Norm
+    type = ElementL2Norm
     variable = lambda
     block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
   []

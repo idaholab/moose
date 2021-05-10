@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ArrayLowerDIntegratedBC.h"
+#include "LowerDIntegratedBC.h"
 
-class HFEMDirichletBC : public ArrayLowerDIntegratedBC
+class HFEMDirichletBC : public LowerDIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -19,17 +19,17 @@ public:
   HFEMDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpResidual(RealEigenVector & residual) override;
-  virtual void computeLowerDQpResidual(RealEigenVector & residual) override;
-  virtual RealEigenVector computeQpJacobian() override;
-  virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType,
-                                                         const MooseVariableFEBase & jvar) override;
+  virtual Real computeQpResidual() override;
+  virtual Real computeLowerDQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
+  virtual Real computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType,
+                                              const MooseVariableFEBase & jvar) override;
 
   /// Boundary values
-  const RealEigenVector _value;
+  const Real _value;
   /// Variable coupled in
-  const ArrayMooseVariable * const _uhat_var;
+  const MooseVariable * const _uhat_var;
   /// Holds the coupled solution at the current quadrature point on the face.
-  const ArrayVariableValue * const _uhat;
+  const VariableValue * const _uhat;
 };

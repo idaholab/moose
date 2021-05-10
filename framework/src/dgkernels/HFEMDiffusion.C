@@ -14,66 +14,62 @@ registerMooseObject("MooseApp", HFEMDiffusion);
 InputParameters
 HFEMDiffusion::validParams()
 {
-  InputParameters params = ArrayDGLowerDKernel::validParams();
+  InputParameters params = DGLowerDKernel::validParams();
   params.addClassDescription("Imposes the constraints on internal sides with HFEM.");
   return params;
 }
 
-HFEMDiffusion::HFEMDiffusion(const InputParameters & parameters) : ArrayDGLowerDKernel(parameters)
-{
-}
+HFEMDiffusion::HFEMDiffusion(const InputParameters & parameters) : DGLowerDKernel(parameters) {}
 
-void
-HFEMDiffusion::computeQpResidual(Moose::DGResidualType type, RealEigenVector & r)
+Real
+HFEMDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
   switch (type)
   {
     case Moose::Element:
-      r -= _lambda[_qp] * _test[_i][_qp];
+      return -_lambda[_qp] * _test[_i][_qp];
       break;
 
     case Moose::Neighbor:
-      r += _lambda[_qp] * _test_neighbor[_i][_qp];
+      return _lambda[_qp] * _test_neighbor[_i][_qp];
       break;
   }
+  return 0;
 }
 
-void
-HFEMDiffusion::computeLowerDQpResidual(RealEigenVector & r)
+Real
+HFEMDiffusion::computeLowerDQpResidual()
 {
-  r += (_u_neighbor[_qp] - _u[_qp]) * _test_lambda[_i][_qp];
+  return (_u_neighbor[_qp] - _u[_qp]) * _test_lambda[_i][_qp];
 }
 
-RealEigenVector HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType)
-{
-  return RealEigenVector::Zero(_count);
-}
+Real HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType) { return 0; }
 
-RealEigenVector
+Real
 HFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
-  RealEigenVector r = RealEigenVector::Zero(_count);
+
   switch (type)
   {
     case Moose::LowerPrimary:
-      return RealEigenVector::Constant(_count, -_test_lambda[_i][_qp] * _phi[_j][_qp]);
+      return -_test_lambda[_i][_qp] * _phi[_j][_qp];
       break;
 
     case Moose::LowerSecondary:
-      return RealEigenVector::Constant(_count, _test_lambda[_i][_qp] * _phi_neighbor[_j][_qp]);
+      return _test_lambda[_i][_qp] * _phi_neighbor[_j][_qp];
       break;
 
     case Moose::PrimaryLower:
-      return RealEigenVector::Constant(_count, -_phi_lambda[_j][_qp] * _test[_i][_qp]);
+      return -_phi_lambda[_j][_qp] * _test[_i][_qp];
       break;
 
     case Moose::SecondaryLower:
-      return RealEigenVector::Constant(_count, _phi_lambda[_j][_qp] * _test_neighbor[_i][_qp]);
+      return _phi_lambda[_j][_qp] * _test_neighbor[_i][_qp];
       break;
 
     default:
       break;
   }
 
-  return r;
+  return 0;
 }

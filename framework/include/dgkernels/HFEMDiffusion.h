@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ArrayDGLowerDKernel.h"
+#include "DGLowerDKernel.h"
 
-class HFEMDiffusion : public ArrayDGLowerDKernel
+class HFEMDiffusion : public DGLowerDKernel
 {
 public:
   static InputParameters validParams();
@@ -19,8 +19,8 @@ public:
   HFEMDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;
-  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) override;
-  virtual void computeLowerDQpResidual(RealEigenVector & residual) override;
-  virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
+  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+  virtual Real computeLowerDQpResidual() override;
+  virtual Real computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
 };
