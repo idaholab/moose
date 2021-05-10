@@ -15,6 +15,8 @@ TriSubChannelMesh::validParams()
   params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
+  params.addRequiredParam<Real>("dwire", "Wire diameter [m]");
+  params.addRequiredParam<Real>("hwire", "Wire lead length [m]");
   params.addParam<bool>(
       "generate_duct", true, "true to generate a hexagonal duct mesh around the subchannels");
   return params;
@@ -173,6 +175,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   : SubChannelMeshBase(params),
     _nrings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
+    _dwire(getParam<Real>("dwire")),
+    _hwire(getParam<Real>("hwire")),
     _duct_to_rod_gap(0.5 *
                      (_flat_to_flat - (_nrings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter))
 {
