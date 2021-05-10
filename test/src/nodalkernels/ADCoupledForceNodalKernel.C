@@ -17,7 +17,7 @@ ADCoupledForceNodalKernel::validParams()
   InputParameters params = ADNodalKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addParam<Real>(
-      "coef", 1.0, "Coefficent ($\\sigma$) multiplier for the coupled force term.");
+      "coef", 1.0, "Coefficient ($\\sigma$) multiplier for the coupled force term.");
   return params;
 }
 
@@ -27,10 +27,6 @@ ADCoupledForceNodalKernel::ADCoupledForceNodalKernel(const InputParameters & par
     _v(adCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with "
-               "ADCoupledForceNodalKernel, "
-               "consider using Reaction or somethig similar");
 }
 
 ADReal

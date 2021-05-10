@@ -45,7 +45,7 @@ public:
    * This method simply routes to computeJacobian whenever jvar == _var.number() since global AD
    * computes all the derivatives for all variables at once
    */
-  void computeOffDiagJacobian(unsigned int jvar) override;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
 
 protected:
   /**

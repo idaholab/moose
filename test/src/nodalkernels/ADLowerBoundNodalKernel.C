@@ -17,11 +17,11 @@ ADLowerBoundNodalKernel::validParams()
   InputParameters params = ADNodalKernel::validParams();
   params.addRequiredCoupledVar(
       "v", "The coupled variable we require to be greater than the lower bound");
-  params.addParam<Real>("lower_bound", 0, "The lower bound on the coupled variable");
+  params.addParam<Real>("lower_bound", "The lower bound on the coupled variable");
   params.addParam<std::vector<BoundaryName>>(
       "exclude_boundaries",
       "Boundaries on which not to execute the NodalKernel. This can be useful for avoiding "
-      "singuarility in the matrix in case a constraint is active in the same place that a "
+      "singularity in the matrix in case a constraint is active in the same place that a "
       "DirichletBC is set");
   return params;
 }
