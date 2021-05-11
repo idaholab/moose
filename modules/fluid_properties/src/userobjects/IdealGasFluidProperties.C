@@ -398,9 +398,24 @@ IdealGasFluidProperties::e_from_p_rho(Real p, Real rho) const
   return p / (_gamma - 1.0) / rho;
 }
 
+ADReal
+IdealGasFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
+{
+  return p / (_gamma - 1.0) / rho;
+}
+
 void
 IdealGasFluidProperties::e_from_p_rho(
     Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  e = e_from_p_rho(p, rho);
+  de_dp = 1.0 / (_gamma - 1.0) / rho;
+  de_drho = -p / (_gamma - 1.0) / rho / rho;
+}
+
+void
+IdealGasFluidProperties::e_from_p_rho(
+    const ADReal & p, const ADReal & rho, ADReal & e, ADReal & de_dp, ADReal & de_drho) const
 {
   e = e_from_p_rho(p, rho);
   de_dp = 1.0 / (_gamma - 1.0) / rho;
