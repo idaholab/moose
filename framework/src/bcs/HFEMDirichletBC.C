@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", HFEMDirichletBC);
 InputParameters
 HFEMDirichletBC::validParams()
 {
-  InputParameters params = ArrayLowerDIntegratedBC::validParams();
+  InputParameters params = LowerDIntegratedBC::validParams();
   params.addParam<RealEigenVector>("value", "Value of the BC");
   params.addCoupledVar("uhat", "The coupled variable");
   params.addClassDescription("Imposes the Dirichlet BC with HFEM.");
@@ -22,16 +22,11 @@ HFEMDirichletBC::validParams()
 }
 
 HFEMDirichletBC::HFEMDirichletBC(const InputParameters & parameters)
-  : ArrayLowerDIntegratedBC(parameters),
-    _value(isParamValid("value") ? getParam<RealEigenVector>("value")
-                                 : RealEigenVector::Zero(_count)),
-    _uhat_var(isParamValid("uhat") ? getArrayVar("uhat", 0) : nullptr),
+  : LowerDIntegratedBC(parameters),
+    _value(isParamValid("value") ? getParam<Real>("value") : 0),
+    _uhat_var(isParamValid("uhat") ? getVar("uhat", 0) : nullptr),
     _uhat(_uhat_var ? (_is_implicit ? &_uhat_var->slnLower() : &_uhat_var->slnLowerOld()) : nullptr)
 {
-  if (_value.size() != _count)
-    paramError(
-        "value", "Number of values must equal number of variable components (", _count, ").");
-
   if (_uhat_var)
   {
     if (!_uhat_var->activeSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
@@ -39,69 +34,58 @@ HFEMDirichletBC::HFEMDirichletBC(const InputParameters & parameters)
                  "Must be defined on BOUNDARY_SIDE_LOWERD_SUBDOMAIN subdomain that is added by "
                  "Mesh/build_all_side_lowerd_mesh=true");
 
-    if (_uhat_var->count() != _count)
-      paramError("uhat",
-                 "The number of components must be equal to the number of "
-                 "components of 'variable'");
-
     if (isParamValid("value"))
       paramError("uhat", "'uhat' and 'value' can not be both provided");
   }
 }
 
-void
-HFEMDirichletBC::computeQpResidual(RealEigenVector & residual)
+Real
+HFEMDirichletBC::computeQpResidual()
 {
-  residual += _lambda[_qp] * _test[_i][_qp];
+  return _lambda[_qp] * _test[_i][_qp];
 }
 
-void
-HFEMDirichletBC::computeLowerDQpResidual(RealEigenVector & r)
+Real
+HFEMDirichletBC::computeLowerDQpResidual()
 {
   if (_uhat)
-    r += (_u[_qp] - (*_uhat)[_qp]) * _test_lambda[_i][_qp];
+    return (_u[_qp] - (*_uhat)[_qp]) * _test_lambda[_i][_qp];
   else
-    r += (_u[_qp] - _value) * _test_lambda[_i][_qp];
+    return (_u[_qp] - _value) * _test_lambda[_i][_qp];
 }
 
-RealEigenVector
+Real
 HFEMDirichletBC::computeQpJacobian()
 {
-  return RealEigenVector::Zero(_count);
+  return 0;
 }
 
-RealEigenVector
+Real
 HFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
-  RealEigenVector r = RealEigenVector::Zero(_count);
   switch (type)
   {
     case Moose::LowerPrimary:
-      return RealEigenVector::Constant(_count, _test_lambda[_i][_qp] * _phi[_j][_qp]);
+      return _test_lambda[_i][_qp] * _phi[_j][_qp];
       break;
 
     case Moose::PrimaryLower:
-      return RealEigenVector::Constant(_count, _phi_lambda[_j][_qp] * _test[_i][_qp]);
+      return _phi_lambda[_j][_qp] * _test[_i][_qp];
       break;
 
     default:
       break;
   }
 
-  return r;
+  return 0;
 }
 
-RealEigenMatrix
+Real
 HFEMDirichletBC::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
                                                 const MooseVariableFEBase & jvar)
 {
   if (_uhat_var && jvar.number() == _uhat_var->number() && type == Moose::LowerLower)
-  {
-    RealEigenVector v = RealEigenVector::Constant(_count, -_test_lambda[_i][_qp] * _phi[_j][_qp]);
-    RealEigenMatrix t = RealEigenMatrix::Zero(_var.count(), _var.count());
-    t.diagonal() = v;
-    return t;
-  }
+    return -_test_lambda[_i][_qp] * _phi[_j][_qp];
   else
-    return RealEigenMatrix::Zero(_count, jvar.count());
+    return 0;
 }

@@ -13,19 +13,21 @@
     order = THIRD
     family = MONOMIAL
     block = 0
-    components = 2
+  []
+  [uhat]
+    order = CONSTANT
+    family = MONOMIAL
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
   []
   [lambda]
     order = CONSTANT
     family = MONOMIAL
     block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
-    components = 2
   []
   [lambdab]
     order = CONSTANT
     family = MONOMIAL
     block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
-    components = 2
   []
 []
 
@@ -40,17 +42,30 @@
 
 [Kernels]
   [diff]
-    type = ArrayDiffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = '1'
     block = 0
-    diffusion_coefficient = dc
   []
   [source]
-    type = ArrayCoupledForce
+    type = CoupledForce
     variable = u
     v = v
-    coef = '1 2'
+    coef = '1'
     block = 0
+  []
+  [reaction]
+    type = Reaction
+    variable = uhat
+    rate = '1'
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+  []
+  [uhat_coupled]
+    type = CoupledForce
+    variable = uhat
+    block = BOUNDARY_SIDE_LOWERD_SUBDOMAIN
+    v = lambdab
+    coef = '1'
   []
 []
 
@@ -68,25 +83,18 @@
     boundary = 'left right top bottom'
     variable = u
     lowerd_variable = lambdab
-  []
-[]
-
-[Materials]
-  [dc]
-    type = GenericConstantArray
-    prop_name = dc
-    prop_value = '1 1'
+    uhat = uhat
   []
 []
 
 [Postprocessors]
   [intu]
-    type = ElementIntegralArrayVariablePostprocessor
+    type = ElementIntegralVariablePostprocessor
     variable = u
     block = 0
   []
   [lambdanorm]
-    type = ElementArrayL2Norm
+    type = ElementL2Norm
     variable = lambda
     block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
   []
