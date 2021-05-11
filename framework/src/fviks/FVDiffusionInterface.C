@@ -22,7 +22,6 @@ FVDiffusionInterface::validParams()
                                                 "The diffusion coefficient on the 1st subdomain");
   params.addRequiredParam<MaterialPropertyName>("coeff2",
                                                 "The diffusion coefficient on the 2nd subdomain");
-  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 

@@ -35,7 +35,6 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::validParams()
                                         "primary side material property name is used for the "
                                         "secondary side. Only needed for finite volume");
   params.addClassDescription("Computes the diffusive flux on the interface.");
-  params.set<unsigned short>("ghost_layers") = 2;
 
   return params;
 }

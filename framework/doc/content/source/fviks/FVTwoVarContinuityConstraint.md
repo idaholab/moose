@@ -10,7 +10,7 @@ numerical convergence for some linear solvers. For the `lu` (sub-)preconditioner
 `NONZERO` `(sub_)pc_factor_shift_type`.
 
 !alert note
-`kernel_coverage_check`, a parameter in the `[Problem]` block should be set to false, as
+`kernel_coverage_check`, a parameter in the `[Problem]` block, should be set to false, as
 the Lagrange multiplier variable is a variable that is not found on any block, only on
 the interface.
 

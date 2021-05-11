@@ -48,7 +48,6 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
                   (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
               "These seem like the reasonable combinations of face types.");
 #endif
-  mooseAssert(_local_re.size() == 1, "We should only have a single dof");
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
@@ -60,6 +59,7 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
 
   // Primal residual
   prepareVectorTag(_assembly, var_elem_num);
+  mooseAssert(_local_re.size() == 1, "We should only have a single dof");
   _local_re(0) = r;
   accumulateTaggedLocalResidual();
   prepareVectorTagNeighbor(_assembly, var_neigh_num);

@@ -49,6 +49,24 @@ FVInterfaceKernel::validParams()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
 
+  params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
+  params.addParam<bool>("use_point_neighbors",
+                        false,
+                        "Whether to use point neighbors, which introduces additional ghosting to "
+                        "that used for simple face neighbors.");
+
+  // FV Interface Kernels always need one layer of ghosting because the elements
+  // on each side of the interface may be on different MPI ranks, but we still
+  // need to access them as a pair to compute the numerical face flux.
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
+        rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+      });
+
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");
