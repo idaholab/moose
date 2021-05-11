@@ -743,7 +743,7 @@ MooseObjectWarehouseBase<T>::sortHelper(std::vector<std::shared_ptr<T>> & object
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort<std::shared_ptr<T>>(objects);
+    DependencyResolverInterface::sortDFS<std::shared_ptr<T>>(objects);
   }
   catch (CyclicDependencyException<std::shared_ptr<T>> & e)
   {
