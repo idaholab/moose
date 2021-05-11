@@ -178,26 +178,28 @@ PCNSFVKT::computeQpResidual()
   c_neighbor.derivatives() = dc_neighbor_dv * specific_volume_neighbor.derivatives() +
                              dc_neighbor_de * e_neighbor.derivatives();
 
-  const auto v_elem = sup_vel_elem * _face_info->normal();
-  const auto v_neighbor = sup_vel_neighbor * _face_info->normal();
+  const auto sup_vel_elem_normal = sup_vel_elem * _face_info->normal();
+  const auto sup_vel_neighbor_normal = sup_vel_neighbor * _face_info->normal();
+  const auto u_elem_normal = u_elem * _face_info->normal();
+  const auto u_neighbor_normal = u_neighbor * _face_info->normal();
 
-  const auto a_elem = std::max(std::abs(v_elem + c_elem), std::abs(v_elem - c_elem));
+  const auto a_elem = std::max(std::abs(u_elem_normal + c_elem), std::abs(u_elem_normal - c_elem));
   const auto a_neighbor =
-      std::max(std::abs(v_neighbor + c_neighbor), std::abs(v_neighbor - c_neighbor));
+      std::max(std::abs(u_neighbor_normal + c_neighbor), std::abs(u_neighbor_normal - c_neighbor));
   // Second term is to avoid new nonzero mallocs
   const auto a = std::max(a_elem, a_neighbor) + 0 * a_elem + 0 * a_neighbor;
 
   if (_eqn == "mass")
-    return 0.5 * (v_elem * rho_elem + v_neighbor * rho_neighbor -
-                  a * (pressure_neighbor - pressure_elem));
+    return 0.5 * (sup_vel_elem_normal * rho_elem + sup_vel_neighbor_normal * rho_neighbor -
+                  a * (rho_neighbor - rho_elem));
   else if (_eqn == "momentum")
   {
     const auto rhou_elem = u_elem(_index) * rho_elem;
     const auto rhou_neighbor = u_neighbor(_index) * rho_neighbor;
-    return 0.5 * (v_elem * rhou_elem + v_neighbor * rhou_neighbor +
+    return 0.5 * (sup_vel_elem_normal * rhou_elem + sup_vel_neighbor_normal * rhou_neighbor +
                   (_eps_elem[_qp] * pressure_elem + _eps_neighbor[_qp] * pressure_neighbor) *
                       _face_info->normal()(_index) -
-                  a * (sup_vel_neighbor(_index) - sup_vel_elem(_index)));
+                  a * (rhou_neighbor - rhou_elem));
   }
   else if (_eqn == "energy")
   {
@@ -206,12 +208,12 @@ PCNSFVKT::computeQpResidual()
         e_neighbor + 0.5 * u_neighbor * u_neighbor + pressure_neighbor / rho_neighbor;
     const auto rho_ht_elem = rho_elem * ht_elem;
     const auto rho_ht_neighbor = rho_neighbor * ht_neighbor;
-    return 0.5 * (v_elem * rho_ht_elem + v_neighbor * rho_ht_neighbor -
-                  a * (T_fluid_neighbor - T_fluid_elem));
+    return 0.5 * (sup_vel_elem_normal * rho_ht_elem + sup_vel_neighbor_normal * rho_ht_neighbor -
+                  a * (rho_ht_neighbor - rho_ht_elem));
   }
   else if (_eqn == "scalar")
-    return v_elem * rho_elem * _scalar_elem[_qp] +
-           v_neighbor * rho_neighbor * _scalar_neighbor[_qp];
+    return sup_vel_elem_normal * rho_elem * _scalar_elem[_qp] +
+           sup_vel_neighbor_normal * rho_neighbor * _scalar_neighbor[_qp];
   else
     mooseError("Unrecognized enum type ", _eqn);
 }
