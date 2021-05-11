@@ -49,6 +49,7 @@
   [./coeffField_real]
     type = CoeffField
     func = ASquaredMinusBSquared
+    coeff = -1
     variable = u_real
   [../]
   [./coupledField_real]
@@ -66,6 +67,7 @@
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_imag
+    coeff = -1
   [../]
   [./coupledField_imag]
     type = CoupledCoeffField

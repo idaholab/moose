@@ -17,7 +17,7 @@ registerMooseObject("ElectromagneticsApp", RobinBC);
 InputParameters
 RobinBC::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription(
       "First order Robin-style Absorbing/Port BC for scalar variables, assuming plane waves.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");
@@ -41,10 +41,10 @@ RobinBC::validParams()
 }
 
 RobinBC::RobinBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
+  : ADIntegratedBC(parameters),
 
-    _field_real(coupledValue("field_real")),
-    _field_imag(coupledValue("field_imaginary")),
+    _field_real(adCoupledValue("field_real")),
+    _field_imag(adCoupledValue("field_imaginary")),
     _component(getParam<MooseEnum>("component")),
     _func_real(getFunction("func_real")),
     _func_imag(getFunction("func_imag")),
@@ -68,11 +68,9 @@ RobinBC::RobinBC(const InputParameters & parameters)
   }
 }
 
-Real
+ADReal
 RobinBC::computeQpResidual()
 {
-
-  std::complex<double> field(_field_real[_qp], _field_imag[_qp]);
   std::complex<double> func(_func_real.value(_t, _q_point[_qp]),
                             _func_imag.value(_t, _q_point[_qp]));
   std::complex<double> profile_func(_profile_func_real.value(_t, _q_point[_qp]),
@@ -81,7 +79,8 @@ RobinBC::computeQpResidual()
   std::complex<double> jay(0, 1);
 
   std::complex<double> common = jay * coeff * func;
-  std::complex<double> lhs = common * field;
+  ADReal lhs_real = common.real() * _field_real[_qp] - common.imag() * _field_imag[_qp];
+  ADReal lhs_imag = common.real() * _field_imag[_qp] + common.imag() * _field_real[_qp];
 
   std::complex<double> rhs = 0.0;
   switch (_mode)
@@ -93,15 +92,17 @@ RobinBC::computeQpResidual()
       break;
   }
 
-  std::complex<double> diff = rhs - lhs;
-  Real res = 0.0;
+  ADReal diff_real = rhs.real() - lhs_real;
+  ADReal diff_imag = rhs.imag() - lhs_imag;
+
+  ADReal res = 0.0;
   switch (_component)
   {
     case electromagnetics::REAL:
-      res = _sign * _test[_i][_qp] * diff.real();
+      res = _sign * _test[_i][_qp] * diff_real;
       break;
     case electromagnetics::IMAGINARY:
-      res = _sign * _test[_i][_qp] * diff.imag();
+      res = _sign * _test[_i][_qp] * diff_imag;
       break;
   }
   return res;

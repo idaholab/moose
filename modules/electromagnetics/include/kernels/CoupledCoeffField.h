@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Kernel.h"
+#include "ADKernel.h"
 
-class CoupledCoeffField : public Kernel
+class CoupledCoeffField : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -10,15 +10,14 @@ public:
   CoupledCoeffField(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
   Real _coefficient;
 
   const Function & _func;
 
-  const VariableValue & _coupled_val;
+  const ADVariableValue & _coupled_val;
 
   Real _sign;
 };
