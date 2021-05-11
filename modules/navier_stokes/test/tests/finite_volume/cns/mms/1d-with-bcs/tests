@@ -48,6 +48,16 @@
       detail = 'when using a primitive variable set (and not containing a drag term)'
     []
   []
+  [basic_kurganov_tadmor]
+    requirement = 'The system shall be able to compute intercell fluxes using a Kurganov-Tadmor scheme'
+    [central_difference]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DPorousKTPrimitiveCD
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using central differencing to interpolate cell center values to faces'
+    []
+  []
   [sources_give_hllc_problems_irregular]
     requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
     [hllc_with_volume_source]

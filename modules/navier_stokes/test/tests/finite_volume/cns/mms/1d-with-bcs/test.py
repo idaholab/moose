@@ -84,6 +84,21 @@ class Test1DPorousKTPrimitive(unittest.TestCase):
         # for key,value in fig.label_to_intercept.items():
         #     print("%s intercept, %f" % (key, value))
 
+class TestBasic1DPorousKTPrimitiveCD(unittest.TestCase):
+# class TestBasic1DPorousKTPrimitiveCD():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('basic-primitive-pcnsfv-kt.i', 7, "GlobalParams/limiter='central_difference'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('basic-primitive-pcnsfv-kt-cd.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
@@ -93,3 +108,4 @@ if __name__ == '__main__':
     # Test1DPorousHLLC().test()
     # Test1DPorousKTConservative().test()
     # Test1DPorousKTPrimitive().test()
+    # TestBasic1DPorousKTPrimitiveCD().test()
