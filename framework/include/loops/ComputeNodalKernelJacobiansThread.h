@@ -17,7 +17,7 @@
 // Forward declarations
 class FEProblemBase;
 class AuxiliarySystem;
-class NodalKernel;
+class NodalKernelBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -31,7 +31,7 @@ class ComputeNodalKernelJacobiansThread
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
-                                    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+                                    MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
                                     const std::set<TagID> & tags);
 
   // Splitting Constructor
@@ -50,11 +50,10 @@ protected:
 
   const std::set<TagID> & _tags;
 
-  MooseObjectTagWarehouse<NodalKernel> & _nodal_kernels;
+  MooseObjectTagWarehouse<NodalKernelBase> & _nodal_kernels;
 
-  MooseObjectWarehouse<NodalKernel> * _nkernel_warehouse;
+  MooseObjectWarehouse<NodalKernelBase> * _nkernel_warehouse;
 
   /// Number of contributions cached up
   unsigned int _num_cached;
 };
-
