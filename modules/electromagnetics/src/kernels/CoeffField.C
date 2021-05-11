@@ -15,7 +15,7 @@ registerMooseObject("ElectromagneticsApp", CoeffField);
 InputParameters
 CoeffField::validParams()
 {
-  InputParameters params = Reaction::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription(
       "Kernel representing the contribution of the PDE term $cfu$, where $c$ and $f$ are constant "
       "and function coefficients, respectively, and $u$ is a scalar variable.");
@@ -25,7 +25,7 @@ CoeffField::validParams()
 }
 
 CoeffField::CoeffField(const InputParameters & parameters)
-  : Reaction(parameters),
+  : ADKernel(parameters),
 
     _coefficient(getParam<Real>("coeff")),
 
@@ -34,14 +34,8 @@ CoeffField::CoeffField(const InputParameters & parameters)
 {
 }
 
-Real
+ADReal
 CoeffField::computeQpResidual()
 {
-  return -_coefficient * _func.value(_t, _q_point[_qp]) * Reaction::computeQpResidual();
-}
-
-Real
-CoeffField::computeQpJacobian()
-{
-  return -_coefficient * _func.value(_t, _q_point[_qp]) * Reaction::computeQpJacobian();
+  return _coefficient * _func.value(_t, _q_point[_qp]) * _test[_i][_qp] * _u[_qp];
 }

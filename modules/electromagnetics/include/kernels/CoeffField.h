@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Reaction.h"
+#include "ADKernel.h"
 
-class CoeffField : public Reaction
+class CoeffField : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -10,8 +10,7 @@ public:
   CoeffField(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
   Real _coefficient;

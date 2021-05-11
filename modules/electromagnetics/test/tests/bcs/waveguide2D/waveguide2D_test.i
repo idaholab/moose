@@ -42,6 +42,7 @@
   [./coeffField_real]
     type = CoeffField
     func = kSquared
+    coeff = -1
     variable = E_real
   [../]
   [./diffusion_imaginary]
@@ -51,6 +52,7 @@
   [./coeffField_imaginary]
     type = CoeffField
     func = kSquared
+    coeff = -1
     variable = E_imag
   [../]
 []

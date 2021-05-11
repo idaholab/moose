@@ -1,8 +1,8 @@
 #pragma once
 
-#include "IntegratedBC.h"
+#include "ADIntegratedBC.h"
 
-class RobinBC : public IntegratedBC
+class RobinBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -10,12 +10,12 @@ public:
   RobinBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
-  const VariableValue & _field_real;
+  const ADVariableValue & _field_real;
 
-  const VariableValue & _field_imag;
+  const ADVariableValue & _field_imag;
 
   const MooseEnum _component;
 
