@@ -11,6 +11,9 @@
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
+#include "Limiter.h"
+
+using namespace Moose::FV;
 
 registerMooseObject("MooseApp", PCNSFVPrimitiveBC);
 
@@ -50,6 +53,8 @@ PCNSFVPrimitiveBC::validParams()
                        "The superficial velocity in the y direction");
   params.addCoupledVar(NS::superficial_velocity_z + "_var",
                        "The superficial velocity in the z direction");
+  params.addParam<MooseEnum>(
+      "limiter", moose_limiter_type, "The limiter to apply during interpolation.");
   return params;
 }
 
@@ -61,10 +66,11 @@ PCNSFVPrimitiveBC::PCNSFVPrimitiveBC(const InputParameters & params)
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),
-    _svel_provided(isParamValid(NS::superficial_velocity)),
+    _sup_vel_provided(isParamValid(NS::superficial_velocity)),
     _pressure_provided(isParamValid(NS::pressure)),
     _T_fluid_provided(isParamValid(NS::T_fluid)),
-    _svel_function(_svel_provided ? &getFunction(NS::superficial_velocity + "_function") : nullptr),
+    _sup_vel_function(_sup_vel_provided ? &getFunction(NS::superficial_velocity + "_function")
+                                        : nullptr),
     _pressure_function(_pressure_provided ? &getFunction(NS::pressure + "_function") : nullptr),
     _T_fluid_function(_T_fluid_provided ? &getFunction(NS::T_fluid + "_function") : nullptr),
     _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho")),
@@ -79,7 +85,8 @@ PCNSFVPrimitiveBC::PCNSFVPrimitiveBC(const InputParameters & params)
     _sup_vel_z_var(isCoupled(NS::superficial_velocity_z + "_var")
                        ? dynamic_cast<const MooseVariableFVReal *>(
                              getFieldVar(NS::superficial_velocity_z + "_var", 0))
-                       : nullptr)
+                       : nullptr),
+    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter")))))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -115,36 +122,201 @@ ADReal
 PCNSFVPrimitiveBC::computeQpResidual()
 {
   mooseAssert(_eps_elem[_qp] == _eps_neighbor[_qp], "the porosities need to be the same");
-  const auto eps_boundary = _eps_elem[_qp];
+  const auto eps_interior = _eps_elem[_qp];
+  const auto eps_boundary = eps_interior;
+
   const auto ft = _face_info->faceType(_var.name());
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
+  const auto & pressure_interior_center =
+      out_of_elem ? _pressure_var->getElemValue(&_face_info->elem())
+                  : _pressure_var->getElemValue(_face_info->neighborPtr());
+  const auto & T_fluid_interior_center =
+      out_of_elem ? _T_fluid_var->getElemValue(&_face_info->elem())
+                  : _T_fluid_var->getElemValue(_face_info->neighborPtr());
+  const auto & sup_vel_x_interior_center =
+      out_of_elem ? _sup_vel_x_var->getElemValue(&_face_info->elem())
+                  : _sup_vel_x_var->getElemValue(_face_info->neighborPtr());
+  const auto & sup_vel_y_interior_center =
+      _sup_vel_y_var ? (out_of_elem ? _sup_vel_y_var->getElemValue(&_face_info->elem())
+                                    : _sup_vel_y_var->getElemValue(_face_info->neighborPtr()))
+                     : ADReal(0);
+  const auto & sup_vel_z_interior_center =
+      _sup_vel_z_var ? (out_of_elem ? _sup_vel_z_var->getElemValue(&_face_info->elem())
+                                    : _sup_vel_z_var->getElemValue(_face_info->neighborPtr()))
+                     : ADReal(0);
+  const auto & grad_pressure_interior_center =
+      out_of_elem ? _pressure_var->adGradSln(&_face_info->elem())
+                  : _pressure_var->adGradSln(_face_info->neighborPtr());
+  const auto & grad_T_fluid_interior_center =
+      out_of_elem ? _T_fluid_var->adGradSln(&_face_info->elem())
+                  : _T_fluid_var->adGradSln(_face_info->neighborPtr());
+  const auto & grad_sup_vel_x_interior_center =
+      out_of_elem ? _sup_vel_x_var->adGradSln(&_face_info->elem())
+                  : _sup_vel_x_var->adGradSln(_face_info->neighborPtr());
+  const auto & grad_sup_vel_y_interior_center =
+      _sup_vel_y_var ? (out_of_elem ? _sup_vel_y_var->adGradSln(&_face_info->elem())
+                                    : _sup_vel_y_var->adGradSln(_face_info->neighborPtr()))
+                     : ADRealVectorValue(0);
+  const auto & grad_sup_vel_z_interior_center =
+      _sup_vel_z_var ? (out_of_elem ? _sup_vel_z_var->adGradSln(&_face_info->elem())
+                                    : _sup_vel_z_var->adGradSln(_face_info->neighborPtr()))
+                     : ADRealVectorValue(0);
+  const auto & interior_centroid =
+      out_of_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
+  const auto dCf = _face_info->faceCentroid() - interior_centroid;
 
-  const auto pressure_boundary = _pressure_var->getBoundaryFaceValue(*_face_info);
-  const auto T_fluid_boundary = _T_fluid_var->getBoundaryFaceValue(*_face_info);
+  ADReal pressure_boundary, pressure_interior;
+  if (_pressure_provided)
+  {
+    pressure_boundary = _pressure_function->value(_t, _face_info->faceCentroid());
+    pressure_interior = interpolate(*_limiter,
+                                    pressure_interior_center,
+                                    pressure_boundary,
+                                    grad_pressure_interior_center,
+                                    *_face_info,
+                                    out_of_elem);
+  }
+  else
+    pressure_boundary = pressure_interior =
+        pressure_interior_center + grad_pressure_interior_center * dCf;
+
+  ADReal T_fluid_boundary, T_fluid_interior;
+  if (_T_fluid_provided)
+  {
+    T_fluid_boundary = _T_fluid_function->value(_t, _face_info->faceCentroid());
+    T_fluid_interior = interpolate(*_limiter,
+                                   T_fluid_interior_center,
+                                   T_fluid_boundary,
+                                   grad_T_fluid_interior_center,
+                                   *_face_info,
+                                   out_of_elem);
+  }
+  else
+    T_fluid_boundary = T_fluid_interior =
+        T_fluid_interior_center + grad_T_fluid_interior_center * dCf;
+
+  // Need rho_boundary potentially for sup_vel calculations
   const auto rho_boundary = _fluid.rho_from_p_T(pressure_boundary, T_fluid_boundary);
-  const auto sup_vel_x_boundary = _sup_vel_x_var->getBoundaryFaceValue(*_face_info);
-  const auto sup_vel_y_boundary =
-      _dim >= 2 ? _sup_vel_y_var->getBoundaryFaceValue(*_face_info) : ADReal(0);
-  const auto sup_vel_z_boundary =
-      _dim >= 3 ? _sup_vel_z_var->getBoundaryFaceValue(*_face_info) : ADReal(0);
 
+  ADReal sup_vel_x_boundary, sup_vel_x_interior;
+  if (_sup_vel_provided)
+  {
+    sup_vel_x_boundary = _sup_vel_function->vectorValue(_t, _face_info->faceCentroid())(0);
+    if (_velocity_function_includes_rho)
+      sup_vel_x_boundary /= rho_boundary;
+    sup_vel_x_interior = interpolate(*_limiter,
+                                     sup_vel_x_interior_center,
+                                     sup_vel_x_boundary,
+                                     grad_sup_vel_x_interior_center,
+                                     *_face_info,
+                                     out_of_elem);
+  }
+  else
+    sup_vel_x_boundary = sup_vel_x_interior =
+        sup_vel_x_interior_center + grad_sup_vel_x_interior_center * dCf;
+
+  ADReal sup_vel_y_boundary = 0, sup_vel_y_interior = 0;
+  if (_sup_vel_y_var)
+  {
+    if (_sup_vel_provided)
+    {
+      sup_vel_y_boundary = _sup_vel_function->vectorValue(_t, _face_info->faceCentroid())(1);
+      if (_velocity_function_includes_rho)
+        sup_vel_y_boundary /= rho_boundary;
+      sup_vel_y_interior = interpolate(*_limiter,
+                                       sup_vel_y_interior_center,
+                                       sup_vel_y_boundary,
+                                       grad_sup_vel_y_interior_center,
+                                       *_face_info,
+                                       out_of_elem);
+    }
+    else
+      sup_vel_y_boundary = sup_vel_y_interior =
+          sup_vel_y_interior_center + grad_sup_vel_y_interior_center * dCf;
+  }
+
+  ADReal sup_vel_z_boundary = 0, sup_vel_z_interior = 0;
+  if (_sup_vel_z_var)
+  {
+    if (_sup_vel_provided)
+    {
+      sup_vel_z_boundary = _sup_vel_function->vectorValue(_t, _face_info->faceCentroid())(2);
+      if (_velocity_function_includes_rho)
+        sup_vel_z_boundary /= rho_boundary;
+      sup_vel_z_interior = interpolate(*_limiter,
+                                       sup_vel_z_interior_center,
+                                       sup_vel_z_boundary,
+                                       grad_sup_vel_z_interior_center,
+                                       *_face_info,
+                                       out_of_elem);
+    }
+    else
+      sup_vel_z_boundary = sup_vel_z_interior =
+          sup_vel_z_interior_center + grad_sup_vel_z_interior_center * dCf;
+  }
+
+  const auto sup_vel_interior =
+      VectorValue<ADReal>(sup_vel_x_interior, sup_vel_y_interior, sup_vel_z_interior);
+  const auto u_interior = sup_vel_interior / eps_interior;
+  const auto rho_interior = _fluid.rho_from_p_T(pressure_interior, T_fluid_interior);
+  const auto e_interior = _fluid.e_from_p_rho(pressure_interior, rho_interior);
+  const auto specific_volume_interior = 1. / rho_interior;
   const auto sup_vel_boundary =
       VectorValue<ADReal>(sup_vel_x_boundary, sup_vel_y_boundary, sup_vel_z_boundary);
   const auto u_boundary = sup_vel_boundary / eps_boundary;
-  const auto normal_sup_vel_boundary = sup_vel_boundary * normal;
+  const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
+  const auto specific_volume_boundary = 1. / rho_boundary;
+
+  ADReal c_interior, c_boundary;
+  Real dc_interior_dv, dc_interior_de, dc_boundary_dv, dc_boundary_de;
+  _fluid.c_from_v_e(specific_volume_interior.value(),
+                    e_interior.value(),
+                    c_interior.value(),
+                    dc_interior_dv,
+                    dc_interior_de);
+  _fluid.c_from_v_e(specific_volume_boundary.value(),
+                    e_boundary.value(),
+                    c_boundary.value(),
+                    dc_boundary_dv,
+                    dc_boundary_de);
+  c_interior.derivatives() = dc_interior_dv * specific_volume_interior.derivatives() +
+                             dc_interior_de * e_interior.derivatives();
+  c_boundary.derivatives() = dc_boundary_dv * specific_volume_boundary.derivatives() +
+                             dc_boundary_de * e_boundary.derivatives();
+
+  const auto v_interior = sup_vel_interior * normal;
+  const auto v_boundary = sup_vel_boundary * normal;
+
+  const auto a_interior =
+      std::max(std::abs(v_interior + c_interior), std::abs(v_interior - c_interior));
+  const auto a_boundary =
+      std::max(std::abs(v_interior + c_interior), std::abs(v_interior - c_interior));
+  // Second term is to avoid new nonzero mallocs
+  const auto a = std::max(a_interior, a_boundary) + 0 * a_interior + 0 * a_boundary;
 
   if (_eqn == "mass")
-    return normal_sup_vel_boundary * rho_boundary;
+    return 0.5 * (v_interior * rho_interior + v_boundary * rho_boundary -
+                  a * (rho_boundary - rho_interior));
   else if (_eqn == "momentum")
-    return normal_sup_vel_boundary * rho_boundary * u_boundary(_index) +
-           eps_boundary * pressure_boundary * normal(_index);
+  {
+    const auto rhou_interior = u_interior(_index) * rho_interior;
+    const auto rhou_boundary = u_boundary(_index) * rho_boundary;
+    return 0.5 *
+           (v_interior * rhou_interior + v_boundary * rhou_boundary +
+            (eps_interior * pressure_interior + eps_boundary * pressure_boundary) * normal(_index) -
+            a * (rhou_boundary - rhou_interior));
+  }
   else if (_eqn == "energy")
   {
-    const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
-    const auto rho_ht_boundary =
-        rho_boundary * (e_boundary + 0.5 * u_boundary * u_boundary) + pressure_boundary;
-    return normal_sup_vel_boundary * rho_ht_boundary;
+    const auto ht_interior =
+        e_interior + 0.5 * u_interior * u_interior + pressure_interior / rho_interior;
+    const auto ht_boundary =
+        e_boundary + 0.5 * u_boundary * u_boundary + pressure_boundary / rho_boundary;
+    const auto rho_ht_interior = rho_interior * ht_interior;
+    const auto rho_ht_boundary = rho_boundary * ht_boundary;
+    return 0.5 * (v_interior * rho_ht_interior + v_boundary * rho_ht_boundary -
+                  a * (rho_ht_boundary - rho_ht_interior));
   }
   else
     mooseError("Unrecognized enum type ", _eqn);

@@ -12,6 +12,15 @@
 #include "FVFluxBC.h"
 #include "MooseVariableFV.h"
 
+#include <memory>
+
+namespace Moose
+{
+namespace FV
+{
+class Limiter;
+}
+}
 class SinglePhaseFluidProperties;
 
 class PCNSFVPrimitiveBC : public FVFluxBC
@@ -31,10 +40,10 @@ protected:
   const MooseEnum _eqn;
   const unsigned int _index;
 
-  const bool _svel_provided;
+  const bool _sup_vel_provided;
   const bool _pressure_provided;
   const bool _T_fluid_provided;
-  const Function * const _svel_function;
+  const Function * const _sup_vel_function;
   const Function * const _pressure_function;
   const Function * const _T_fluid_function;
   const bool _velocity_function_includes_rho;
@@ -43,4 +52,6 @@ protected:
   const MooseVariableFVReal * const _sup_vel_x_var;
   const MooseVariableFVReal * const _sup_vel_y_var;
   const MooseVariableFVReal * const _sup_vel_z_var;
+
+  std::unique_ptr<Moose::FV::Limiter> _limiter;
 };
