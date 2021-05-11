@@ -17,6 +17,8 @@ ElectromagneticsApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
+  params.set<bool>("use_legacy_material_output") = false;
+
   return params;
 }
 
