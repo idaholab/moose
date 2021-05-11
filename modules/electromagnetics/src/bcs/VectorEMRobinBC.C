@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorRobinBC.h"
+#include "VectorEMRobinBC.h"
 #include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", VectorRobinBC);
+registerMooseObject("ElectromagneticsApp", VectorEMRobinBC);
 
 InputParameters
-VectorRobinBC::validParams()
+VectorEMRobinBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription(
@@ -32,12 +32,12 @@ VectorRobinBC::validParams()
   params.addParam<MooseEnum>(
       "mode",
       mode,
-      "Mode of operation for VectorRobinBC. Can be set to 'absorbing' or 'port' "
+      "Mode of operation for VectorEMRobinBC. Can be set to 'absorbing' or 'port' "
       "(default: 'port').");
   return params;
 }
 
-VectorRobinBC::VectorRobinBC(const InputParameters & parameters)
+VectorEMRobinBC::VectorEMRobinBC(const InputParameters & parameters)
   : VectorIntegratedBC(parameters),
 
     _beta(getFunction("beta")),
@@ -69,7 +69,7 @@ VectorRobinBC::VectorRobinBC(const InputParameters & parameters)
 }
 
 Real
-VectorRobinBC::computeQpResidual()
+VectorEMRobinBC::computeQpResidual()
 {
 
   // Initialize E components
@@ -152,13 +152,13 @@ VectorRobinBC::computeQpResidual()
 }
 
 Real
-VectorRobinBC::computeQpJacobian()
+VectorEMRobinBC::computeQpJacobian()
 {
   return 0.0;
 }
 
 Real
-VectorRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
+VectorEMRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);

@@ -81,7 +81,7 @@
 
 [BCs]
   [./absorbing_left_real]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_real
     component = real
     beta = beta
@@ -90,7 +90,7 @@
     boundary = 'port'
   [../]
   [./absorbing_right_real]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_real
     component = real
     beta = beta
@@ -99,7 +99,7 @@
     boundary = 'exit'
   [../]
   [./absorbing_left_imag]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_imag
     component = imaginary
     beta = beta
@@ -108,7 +108,7 @@
     boundary = 'port'
   [../]
   [./absorbing_right_imag]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_imag
     component = imaginary
     beta = beta

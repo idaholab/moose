@@ -1,11 +1,11 @@
-# RobinBC
+# EMRobinBC
 
-!syntax description /BCs/RobinBC
+!syntax description /BCs/EMRobinBC
 
 ## Overview
 
 !style halign=left
-The RobinBC object is an implementation of the first-order Robin-style boundary
+The EMRobinBC object is an implementation of the first-order Robin-style boundary
 condition outlined in [!citep](jin-fem) Equation 9.60 and [!citep](jin-computation)
 Equation 9.3.51 for scalar variables.
 
@@ -31,10 +31,10 @@ where
 - $\eta_r$ is a radiation condition parameter ($\eta_r = 1$ if the condition is applied in free space), and
 - $\hat{\mathbf{n}}$ is the boundary normal vector.
 
-#### Scalar field form (for RobinBC)
+#### Scalar field form (for EMRobinBC)
 
 !style halign=left
-In RobinBC, this condition is simplified for use with scalar field variables, such
+In EMRobinBC, this condition is simplified for use with scalar field variables, such
 as those solved for in plane-wave problems where only a component of the vector
 field is being solved for. In such a problem, it is assumed that $E \sim e^{jkx}$.
 The choice of $x$ as the spatial variable here is arbitrary; the directionality
@@ -51,7 +51,7 @@ where
 - $k$ is the wavenumber, and
 - $F(x)$ is a function representing the amplitude profile of the incoming wave.
 
-Note that in RobinBC, $k$ could be set via the `coeff_real` and `coeff_imag`
+Note that in EMRobinBC, $k$ could be set via the `coeff_real` and `coeff_imag`
 parameters for a constant wavenumber, or `func_real` and `func_imag` for a
 property that varies in space or time. The incoming profile is set via
 `profile_func_real` and `profile_func_imag`.
@@ -65,7 +65,7 @@ and zero incoming wave but a port also has an absorbing component), care must be
 taken in setting the shape of the truncation boundary as well as the distance
 from the scattering object. Boundaries as close as $0.3 \lambda$ away from the
 object was shown in [!citep](jin-fem), and several wavelengths were used in the
-[DipoleAntenna.md] for VectorRobinBC. Also, this boundary condition is best
+[DipoleAntenna.md] for [VectorEMRobinBC.md]. This boundary condition is also best
 applied on spherical boundaries (as a result of its origin from the Sommerfeld
 condition, which was derived for spherical boundaries). Of course, it is also
 valid on any non-spherical smooth surface with a trade-off in accuracy.
@@ -80,8 +80,8 @@ valid on any non-spherical smooth surface with a trade-off in accuracy.
 
 !listing waveguide2D_test.i block=BCs/exit_real
 
-!syntax parameters /BCs/RobinBC
+!syntax parameters /BCs/EMRobinBC
 
-!syntax inputs /BCs/RobinBC
+!syntax inputs /BCs/EMRobinBC
 
-!syntax children /BCs/RobinBC
+!syntax children /BCs/EMRobinBC

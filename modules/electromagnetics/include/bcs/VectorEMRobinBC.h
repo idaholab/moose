@@ -3,12 +3,12 @@
 #include "VectorIntegratedBC.h"
 #include <complex>
 
-class VectorRobinBC : public VectorIntegratedBC
+class VectorEMRobinBC : public VectorIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  VectorRobinBC(const InputParameters & parameters);
+  VectorEMRobinBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

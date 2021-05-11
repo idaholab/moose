@@ -1,11 +1,11 @@
-# VectorRobinBC
+# VectorEMRobinBC
 
-!syntax description /BCs/VectorRobinBC
+!syntax description /BCs/VectorEMRobinBC
 
 ## Overview
 
 !style halign=left
-The VectorRobinBC object is an implementation of the first-order Robin-style boundary
+The VectorEMRobinBC object is an implementation of the first-order Robin-style boundary
 condition outlined in [!citep](jin-fem) Equation 9.60 and [!citep](jin-computation)
 Equation 9.3.51 for scalar variables.
 
@@ -34,7 +34,7 @@ where
 #### Implemented form
 
 !style halign=left
-In VectorRobinBC, this condition is slightly generalized. The ratio of $k_0 / \eta_r$
+In VectorEMRobinBC, this condition is slightly generalized. The ratio of $k_0 / \eta_r$
 is generalized to a coefficient function $\beta$, and so the implemented form is
 
 \begin{equation}
@@ -57,7 +57,7 @@ and zero incoming wave but a port also has an absorbing component), care must be
 taken in setting the shape of the truncation boundary as well as the distance
 from the scattering object. Boundaries as close as $0.3 \lambda$ away from the
 object was shown in [!citep](jin-fem), and several wavelengths were used in the
-[DipoleAntenna.md] for VectorRobinBC. Also, this boundary condition is best
+[DipoleAntenna.md] for VectorEMRobinBC. Also, this boundary condition is best
 applied on spherical boundaries (as a result of its origin from the Sommerfeld
 condition, which was derived for spherical boundaries). Of course, it is also
 valid on any non-spherical smooth surface with a trade-off in accuracy.
@@ -72,8 +72,8 @@ valid on any non-spherical smooth surface with a trade-off in accuracy.
 
 !listing dipole.i block=BCs/radiation_condition_real
 
-!syntax parameters /BCs/VectorRobinBC
+!syntax parameters /BCs/VectorEMRobinBC
 
-!syntax inputs /BCs/VectorRobinBC
+!syntax inputs /BCs/VectorEMRobinBC
 
-!syntax children /BCs/VectorRobinBC
+!syntax children /BCs/VectorEMRobinBC
