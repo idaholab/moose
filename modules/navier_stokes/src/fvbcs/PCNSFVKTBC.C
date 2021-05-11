@@ -236,42 +236,28 @@ PCNSFVKTBC::computeQpResidual()
   const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
   const auto specific_volume_boundary = 1. / rho_boundary;
 
-  ADReal c_interior, c_boundary;
-  Real dc_interior_dv, dc_interior_de, dc_boundary_dv, dc_boundary_de;
-  _fluid.c_from_v_e(specific_volume_interior.value(),
-                    e_interior.value(),
-                    c_interior.value(),
-                    dc_interior_dv,
-                    dc_interior_de);
-  _fluid.c_from_v_e(specific_volume_boundary.value(),
-                    e_boundary.value(),
-                    c_boundary.value(),
-                    dc_boundary_dv,
-                    dc_boundary_de);
-  c_interior.derivatives() = dc_interior_dv * specific_volume_interior.derivatives() +
-                             dc_interior_de * e_interior.derivatives();
-  c_boundary.derivatives() = dc_boundary_dv * specific_volume_boundary.derivatives() +
-                             dc_boundary_de * e_boundary.derivatives();
+  const auto c_interior = _fluid.c_from_v_e(specific_volume_interior, e_interior);
+  const auto c_boundary = _fluid.c_from_v_e(specific_volume_boundary, e_boundary);
 
-  const auto v_interior = sup_vel_interior * normal;
-  const auto v_boundary = sup_vel_boundary * normal;
+  const auto sup_vel_interior_normal = sup_vel_interior * normal;
+  const auto sup_vel_boundary_normal = sup_vel_boundary * normal;
 
-  const auto a_interior =
-      std::max(std::abs(v_interior + c_interior), std::abs(v_interior - c_interior));
-  const auto a_boundary =
-      std::max(std::abs(v_interior + c_interior), std::abs(v_interior - c_interior));
+  const auto a_interior = std::max(std::abs(sup_vel_interior_normal + c_interior),
+                                   std::abs(sup_vel_interior_normal - c_interior));
+  const auto a_boundary = std::max(std::abs(sup_vel_boundary_normal + c_boundary),
+                                   std::abs(sup_vel_boundary_normal - c_boundary));
   // Second term is to avoid new nonzero mallocs
   const auto a = std::max(a_interior, a_boundary) + 0 * a_interior + 0 * a_boundary;
 
   if (_eqn == "mass")
-    return 0.5 * (v_interior * rho_interior + v_boundary * rho_boundary -
+    return 0.5 * (sup_vel_interior_normal * rho_interior + sup_vel_boundary_normal * rho_boundary -
                   a * (rho_boundary - rho_interior));
   else if (_eqn == "momentum")
   {
     const auto rhou_interior = u_interior(_index) * rho_interior;
     const auto rhou_boundary = u_boundary(_index) * rho_boundary;
     return 0.5 *
-           (v_interior * rhou_interior + v_boundary * rhou_boundary +
+           (sup_vel_interior_normal * rhou_interior + sup_vel_boundary_normal * rhou_boundary +
             (eps_interior * pressure_interior + eps_boundary * pressure_boundary) * normal(_index) -
             a * (rhou_boundary - rhou_interior));
   }
@@ -283,8 +269,9 @@ PCNSFVKTBC::computeQpResidual()
         e_boundary + 0.5 * u_boundary * u_boundary + pressure_boundary / rho_boundary;
     const auto rho_ht_interior = rho_interior * ht_interior;
     const auto rho_ht_boundary = rho_boundary * ht_boundary;
-    return 0.5 * (v_interior * rho_ht_interior + v_boundary * rho_ht_boundary -
-                  a * (rho_ht_boundary - rho_ht_interior));
+    return 0.5 *
+           (sup_vel_interior_normal * rho_ht_interior + sup_vel_boundary_normal * rho_ht_boundary -
+            a * (rho_ht_boundary - rho_ht_interior));
   }
   else
     mooseError("Unrecognized enum type ", _eqn);
