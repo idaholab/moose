@@ -99,6 +99,36 @@ class TestBasic1DPorousKTPrimitiveCD(unittest.TestCase):
         # for key,value in fig.label_to_intercept.items():
         #     print("%s intercept, %f" % (key, value))
 
+class TestBasic1DPorousKTPrimitiveUpwind(unittest.TestCase):
+# class TestBasic1DPorousKTPrimitiveUpwind():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('basic-primitive-pcnsfv-kt.i', 9, "GlobalParams/limiter='upwind'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('basic-primitive-pcnsfv-kt-upwind.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
+class TestBasic1DPorousKTPrimitiveVanLeer(unittest.TestCase):
+# class TestBasic1DPorousKTPrimitiveVanLeer():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('basic-primitive-pcnsfv-kt.i', 4, "GlobalParams/limiter='vanLeer'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('basic-primitive-pcnsfv-kt-vanLeer.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertGreaterEqual(value, 2.)
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
@@ -109,3 +139,5 @@ if __name__ == '__main__':
     # Test1DPorousKTConservative().test()
     # Test1DPorousKTPrimitive().test()
     # TestBasic1DPorousKTPrimitiveCD().test()
+    # TestBasic1DPorousKTPrimitiveUpwind().test()
+    # TestBasic1DPorousKTPrimitiveVanLeer().test()

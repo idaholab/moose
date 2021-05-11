@@ -55,7 +55,21 @@
       input = test.py
       test_case = TestBasic1DPorousKTPrimitiveCD
       required_python_packages = 'pandas matplotlib'
-      detail = 'when using central differencing to interpolate cell center values to faces'
+      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+    []
+    [upwind]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DPorousKTPrimitiveUpwind
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+    []
+    [vanLeer]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DPorousKTPrimitiveVanLeer
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
     []
   []
   [sources_give_hllc_problems_irregular]

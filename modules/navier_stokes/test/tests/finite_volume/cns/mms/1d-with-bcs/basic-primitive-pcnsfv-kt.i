@@ -100,7 +100,6 @@
     boundary = left
     T_fluid_function = 'exact_T'
     superficial_velocity_function = 'exact_superficial_velocity'
-    pressure_function = 'exact_p'
     eqn = 'mass'
     pressure_var = pressure
     T_fluid_var = T_fluid
@@ -112,7 +111,6 @@
     boundary = left
     T_fluid_function = 'exact_T'
     superficial_velocity_function = 'exact_superficial_velocity'
-    pressure_function = 'exact_p'
     eqn = 'momentum'
     momentum_component = 'x'
     pressure_var = pressure
@@ -125,7 +123,6 @@
     boundary = left
     T_fluid_function = 'exact_T'
     superficial_velocity_function = 'exact_superficial_velocity'
-    pressure_function = 'exact_p'
     eqn = 'energy'
     pressure_var = pressure
     T_fluid_var = T_fluid
@@ -136,6 +133,7 @@
     type = PCNSFVPrimitiveBC
     boundary = right
     eqn = 'mass'
+    pressure_function = 'exact_p'
     pressure_var = pressure
     T_fluid_var = T_fluid
     superficial_vel_x_var = sup_vel_x
@@ -146,6 +144,7 @@
     boundary = right
     eqn = 'momentum'
     momentum_component = 'x'
+    pressure_function = 'exact_p'
     pressure_var = pressure
     T_fluid_var = T_fluid
     superficial_vel_x_var = sup_vel_x
@@ -155,17 +154,18 @@
     type = PCNSFVPrimitiveBC
     boundary = right
     eqn = 'energy'
+    pressure_function = 'exact_p'
     pressure_var = pressure
     T_fluid_var = T_fluid
     superficial_vel_x_var = sup_vel_x
   []
 
   # help gradient reconstruction
-  [pressure_left]
+  [pressure_right]
     type = FVFunctionDirichletBC
     variable = pressure
     function = exact_p
-    boundary = 'left'
+    boundary = 'right'
   []
   [sup_vel_x_left]
     type = FVFunctionDirichletBC
