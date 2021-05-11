@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=EnergyFreeBC syntax=/BCs/EnergyFreeBC
+# EnergyFreeBC
+
+!syntax description /BCs/EnergyFreeBC
+
+!syntax parameters /BCs/EnergyFreeBC
+
+!syntax inputs /BCs/EnergyFreeBC
+
+!syntax children /BCs/EnergyFreeBC

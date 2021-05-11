@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#3036 #7350'
+  design = 'cgfe.md'
   [./bump]
     type = 'Exodiff'
     input = 'bump.i'
@@ -9,5 +11,6 @@
     # absolute comparisons.
     custom_cmp = 'bump_out.cmp'
     threading = '!pthreads'
+    requirement = 'The system shall be able to solve the Euler equations for subsonic flow with a bump in the channel.'
   [../]
 []

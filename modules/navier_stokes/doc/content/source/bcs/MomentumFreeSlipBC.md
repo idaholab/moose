@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=MomentumFreeSlipBC syntax=/BCs/MomentumFreeSlipBC
+# MomentumFreeSlipBC
+
+!syntax description /BCs/MomentumFreeSlipBC
+
+!syntax parameters /BCs/MomentumFreeSlipBC
+
+!syntax inputs /BCs/MomentumFreeSlipBC
+
+!syntax children /BCs/MomentumFreeSlipBC
