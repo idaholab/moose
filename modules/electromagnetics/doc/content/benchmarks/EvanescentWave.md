@@ -55,7 +55,7 @@ where
 - $J_{i,I}$ is the imaginary current density component in the $i$ direction, and
 - $\hat{\mathbf{i}}$ and $\hat{\mathbf{j}}$ are Cartesian unit vectors in the $x$ and $y$ directions, respectively.
 
-At the entry and exit ports, this model uses the [VectorRobinBC.md] object. This is given by
+At the entry and exit ports, this model uses the [VectorEMRobinBC.md] object. This is given by
 
 !equation
 \hat{\mathbf{n}} \times \left( \frac{1}{\mu_0} \nabla \times \vec{E} \right) + j\beta(\mathbf{r}) \hat{\mathbf{n}} \times \left( \hat{\mathbf{n}} \times \vec{E} \right) = \hat{\mathbf{n}} \times (\nabla \times \vec{E}_{inc}) + j\beta(\mathbf{r}) \hat{\mathbf{n}} \times \left( \hat{\mathbf{n}} \times \vec{E}_{inc} \right)

@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RobinBC.h"
+#include "EMRobinBC.h"
 #include "ElectromagneticEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", RobinBC);
+registerMooseObject("ElectromagneticsApp", EMRobinBC);
 
 InputParameters
-RobinBC::validParams()
+EMRobinBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription(
@@ -35,12 +35,12 @@ RobinBC::validParams()
   MooseEnum mode("absorbing port", "port");
   params.addParam<MooseEnum>("mode",
                              mode,
-                             "Mode of operation for RobinBC. Can be set to 'absorbing' or 'port' "
+                             "Mode of operation for EMRobinBC. Can be set to 'absorbing' or 'port' "
                              "(default: 'port').");
   return params;
 }
 
-RobinBC::RobinBC(const InputParameters & parameters)
+EMRobinBC::EMRobinBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
 
     _field_real(adCoupledValue("field_real")),
@@ -69,7 +69,7 @@ RobinBC::RobinBC(const InputParameters & parameters)
 }
 
 ADReal
-RobinBC::computeQpResidual()
+EMRobinBC::computeQpResidual()
 {
   std::complex<double> func(_func_real.value(_t, _q_point[_qp]),
                             _func_imag.value(_t, _q_point[_qp]));

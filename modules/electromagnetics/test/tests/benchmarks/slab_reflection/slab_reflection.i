@@ -108,7 +108,7 @@ E0 = 1 # magnitude of the incident field (in V/m)
     boundary = metal
   [../]
   [./vacuum_real]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = ${k}
     func_real = cosTheta
     profile_func_real = ${E0}
@@ -120,7 +120,7 @@ E0 = 1 # magnitude of the incident field (in V/m)
     sign = -1
   [../]
   [./vacuum_imag]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = ${k}
     func_real = cosTheta
     profile_func_real = ${E0}

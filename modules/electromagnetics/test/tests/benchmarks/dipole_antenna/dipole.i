@@ -55,7 +55,7 @@
     variable = E_imag
   [../]
   [./radiation_condition_real]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_real
     coupled_field = E_imag
     boundary = boundary
@@ -64,7 +64,7 @@
     beta = 20.9439510239  # wave number at 1 GHz
   [../]
   [./radiation_condition_imag]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = E_imag
     coupled_field = E_real
     boundary = boundary

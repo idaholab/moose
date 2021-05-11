@@ -2,12 +2,12 @@
 
 #include "ADIntegratedBC.h"
 
-class RobinBC : public ADIntegratedBC
+class EMRobinBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  RobinBC(const InputParameters & parameters);
+  EMRobinBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;

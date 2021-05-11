@@ -71,7 +71,7 @@
     boundary = bottom
   [../]
   [./port_real]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = -0.27706242940220277  # -sqrt(k^2 - (pi/10)^2)
     sign = 1.0
     profile_func_real = inc_y
@@ -84,7 +84,7 @@
     boundary = port
   [../]
   [./exit_real]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
     field_real = E_real
@@ -107,7 +107,7 @@
     boundary = bottom
   [../]
   [./port_imaginary]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = -0.27706242940220277
     sign = 1.0
     profile_func_real = inc_y
@@ -120,7 +120,7 @@
     boundary = port
   [../]
   [./exit_imaginary]
-    type = RobinBC
+    type = EMRobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
     field_real = E_real

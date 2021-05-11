@@ -68,7 +68,7 @@
 
 [BCs]
   [./sides_real]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = u_real
     component = real
     coupled_field = u_imaginary
@@ -77,7 +77,7 @@
     boundary = 'left right top bottom'
   [../]
   [./sides_imaginary]
-    type = VectorRobinBC
+    type = VectorEMRobinBC
     variable = u_imaginary
     component = imaginary
     coupled_field = u_real
