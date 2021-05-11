@@ -1,3 +1,8 @@
+# Evanescent wave decay benchmark
+# frequency = 20 GHz
+# eps_R = 1.0
+# mu_R = 1.0
+
 [Mesh]
   type = FileMesh
   file = waveguide_discontinuous.msh

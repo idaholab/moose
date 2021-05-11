@@ -13,9 +13,9 @@ complex-valued solution wave at the domain boundary has the form
   F_{boundary} = F_{incoming} + R F_{reflected}
 \end{equation}
 
-where $R$ is the reflection coefficient. As the wave is a complex-valued plane
-wave in the benchmark case, the incoming and reflected plane waves have the
-general forms
+where $R$ is the reflection coefficient of the wave. As the wave is a
+complex-valued plane wave in the benchmark case, the incoming and reflected plane
+waves have the general forms
 
 \begin{equation}
   F_{incoming} = C e^{jkL\cos(\theta \pi / 180^{\circ})} \\
@@ -30,14 +30,15 @@ where
 - $L$ is the length of the slab domain, and
 - $\theta$ is the incident angle of the incoming wave.
 
+To calculate the percentage of reflected power, as required in the benchmark,
+the squared magnitude of $R$ above is taken as the object output
+
+!equation
+R_{power} = |R|^2
+
 ## Example Input File Syntax
 
-!alert warning title=This is not currently tested
-The ReflectionCoefficient object is not currently used in any tested input files. This
-section of the documentation will be updated when this occurs. See a selection of
-untested input files where this is used at the bottom of this page.
-
-!! TODO: add a test to fix this up!
+!listing slab_reflection.i block=Postprocessors/reflection_coefficient
 
 !syntax parameters /UserObjects/ReflectionCoefficient
 

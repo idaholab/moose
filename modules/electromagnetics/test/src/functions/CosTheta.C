@@ -9,14 +9,14 @@
 
 #include "CosTheta.h"
 
-registerMooseObject("ElectromagneticsApp", CosTheta);
+registerMooseObject("ElectromagneticsTestApp", CosTheta);
 
 InputParameters
 CosTheta::validParams()
 {
   InputParameters params = Function::validParams();
-  params.addClassDescription(
-      "Function for cosine(theta) (where theta is in degrees) for use in reflection problems.");
+  params.addClassDescription("Function for cosine(theta) (where theta is in degrees) for use in "
+                             "the slab reflection benchmark.");
   params.addRequiredParam<Real>("theta", "Angle (in degrees).");
   return params;
 }

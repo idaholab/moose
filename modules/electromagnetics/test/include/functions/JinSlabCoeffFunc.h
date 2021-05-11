@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Function.h"
-#include "FunctionInterface.h"
 
 /**
- *    Function for coefficient in JinSlab1D case.
+ *    Function for field coefficient in slab reflection benchmark case.
  */
-class JinSlabCoeffFunc : public Function, public FunctionInterface
+class JinSlabCoeffFunc : public Function
 {
 public:
   static InputParameters validParams();
@@ -20,6 +19,8 @@ protected:
   Real _k;
 
   Real _theta;
+
+  Real _length;
 
   MooseEnum _component;
 };
