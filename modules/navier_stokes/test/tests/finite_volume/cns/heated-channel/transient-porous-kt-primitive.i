@@ -115,69 +115,51 @@ superficial_vel_in=${fparse u_in * eps}
 
 [FVBCs]
   [rho_left]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'left'
     variable = pressure
     superficial_velocity_function = 'superficial_vel_in'
     T_fluid_function = ${T}
     eqn = 'mass'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
   [rhou_left]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'left'
     variable = superficial_vel_x
     superficial_velocity_function = 'superficial_vel_in'
     T_fluid_function = ${T}
     eqn = 'momentum'
     momentum_component = 'x'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
   [rho_et_left]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'left'
     variable = temperature
     superficial_velocity_function = 'superficial_vel_in'
     T_fluid_function = ${T}
     eqn = 'energy'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
   [rho_right]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'right'
     variable = pressure
     pressure_function = ${p_initial}
     eqn = 'mass'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
   [rhou_right]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'right'
     variable = superficial_vel_x
     pressure_function = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
   [rho_et_right]
-    type = PCNSFVPrimitiveBC
+    type = PCNSFVKTBC
     boundary = 'right'
     variable = temperature
     pressure_function = ${p_initial}
     eqn = 'energy'
-    pressure_var = pressure
-    T_fluid_var = temperature
-    superficial_vel_x_var = superficial_vel_x
   []
 
   # Use these to help create more accurate cell centered gradients for cells adjacent to boundaries

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PCNSFVPrimitiveBC.h"
+#include "PCNSFVKTBC.h"
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
@@ -15,10 +15,10 @@
 
 using namespace Moose::FV;
 
-registerMooseObject("MooseApp", PCNSFVPrimitiveBC);
+registerMooseObject("MooseApp", PCNSFVKTBC);
 
 InputParameters
-PCNSFVPrimitiveBC::validParams()
+PCNSFVKTBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
@@ -45,23 +45,41 @@ PCNSFVPrimitiveBC::validParams()
       NS::T_fluid + "_function",
       "An optional name of a function for the fluid temperature. If not provided then the fluid "
       "temperature will be treated implicitly (e.g. we will use the interior value");
-  params.addRequiredCoupledVar(NS::pressure + "_var", "The pressure variable");
-  params.addRequiredCoupledVar(NS::T_fluid + "_var", "The fluid energy");
-  params.addRequiredCoupledVar(NS::superficial_velocity_x + "_var",
-                               "The superficial velocity in the x direction");
-  params.addCoupledVar(NS::superficial_velocity_y + "_var",
-                       "The superficial velocity in the y direction");
-  params.addCoupledVar(NS::superficial_velocity_z + "_var",
-                       "The superficial velocity in the z direction");
   params.addParam<MooseEnum>(
       "limiter", moose_limiter_type, "The limiter to apply during interpolation.");
   return params;
 }
 
-PCNSFVPrimitiveBC::PCNSFVPrimitiveBC(const InputParameters & params)
+PCNSFVKTBC::PCNSFVKTBC(const InputParameters & params)
   : FVFluxBC(params),
     _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _dim(_mesh.dimension()),
+    _sup_vel_x_elem(getADMaterialProperty<Real>(NS::superficial_velocity_x)),
+    _sup_vel_x_neighbor(getNeighborADMaterialProperty<Real>(NS::superficial_velocity_x)),
+    _grad_sup_vel_x_elem(
+        getADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_x))),
+    _grad_sup_vel_x_neighbor(
+        getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_x))),
+    _sup_vel_y_elem(getADMaterialProperty<Real>(NS::superficial_velocity_y)),
+    _sup_vel_y_neighbor(getNeighborADMaterialProperty<Real>(NS::superficial_velocity_y)),
+    _grad_sup_vel_y_elem(
+        getADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_y))),
+    _grad_sup_vel_y_neighbor(
+        getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_y))),
+    _sup_vel_z_elem(getADMaterialProperty<Real>(NS::superficial_velocity_z)),
+    _sup_vel_z_neighbor(getNeighborADMaterialProperty<Real>(NS::superficial_velocity_z)),
+    _grad_sup_vel_z_elem(
+        getADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_z))),
+    _grad_sup_vel_z_neighbor(
+        getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_z))),
+    _T_fluid_elem(getADMaterialProperty<Real>(NS::T_fluid)),
+    _T_fluid_neighbor(getNeighborADMaterialProperty<Real>(NS::T_fluid)),
+    _grad_T_fluid_elem(getADMaterialProperty<RealVectorValue>(NS::grad(NS::T_fluid))),
+    _grad_T_fluid_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::T_fluid))),
+    _pressure_elem(getADMaterialProperty<Real>(NS::pressure)),
+    _pressure_neighbor(getNeighborADMaterialProperty<Real>(NS::pressure)),
+    _grad_pressure_elem(getADMaterialProperty<RealVectorValue>(NS::grad(NS::pressure))),
+    _grad_pressure_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::pressure))),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
@@ -74,52 +92,16 @@ PCNSFVPrimitiveBC::PCNSFVPrimitiveBC(const InputParameters & params)
     _pressure_function(_pressure_provided ? &getFunction(NS::pressure + "_function") : nullptr),
     _T_fluid_function(_T_fluid_provided ? &getFunction(NS::T_fluid + "_function") : nullptr),
     _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho")),
-    _pressure_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure + "_var", 0))),
-    _T_fluid_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::T_fluid + "_var", 0))),
-    _sup_vel_x_var(dynamic_cast<const MooseVariableFVReal *>(
-        getFieldVar(NS::superficial_velocity_x + "_var", 0))),
-    _sup_vel_y_var(isCoupled(NS::superficial_velocity_y + "_var")
-                       ? dynamic_cast<const MooseVariableFVReal *>(
-                             getFieldVar(NS::superficial_velocity_y + "_var", 0))
-                       : nullptr),
-    _sup_vel_z_var(isCoupled(NS::superficial_velocity_z + "_var")
-                       ? dynamic_cast<const MooseVariableFVReal *>(
-                             getFieldVar(NS::superficial_velocity_z + "_var", 0))
-                       : nullptr),
     _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter")))))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
                "If 'momentum' is specified for 'eqn', then you must provide a parameter "
                "value for 'momentum_component'");
-
-  if (!_sup_vel_x_var)
-    paramError(NS::superficial_velocity_x + "_var",
-               NS::superficial_velocity_x + "_var",
-               " must be a finite volume variable.");
-  if (isCoupled(NS::superficial_velocity_y + "_var") && !_sup_vel_y_var)
-    paramError(NS::superficial_velocity_y + "_var",
-               NS::superficial_velocity_y + "_var",
-               " must be a finite volume variable.");
-  if (isCoupled(NS::superficial_velocity_z + "_var") && !_sup_vel_z_var)
-    paramError(NS::superficial_velocity_z + "_var",
-               NS::superficial_velocity_z + "_var",
-               " must be a finite volume variable.");
-
-  if (_dim >= 2 && !isCoupled(NS::superficial_velocity_y + "_var"))
-    mooseError("For a mesh dimension of 2 or greater, the superficial velocity in the y direction "
-               "must be provided via the '",
-               NS::superficial_velocity_y + "_var",
-               "' parameter");
-  if (_dim >= 3 && !isCoupled(NS::superficial_velocity_z + "_var"))
-    mooseError("For a mesh dimension of 2 or greater, the superficial velocity in the z direction "
-               "must be provided via the '",
-               NS::superficial_velocity_z + "_var",
-               "' parameter");
 }
 
 ADReal
-PCNSFVPrimitiveBC::computeQpResidual()
+PCNSFVKTBC::computeQpResidual()
 {
   mooseAssert(_eps_elem[_qp] == _eps_neighbor[_qp], "the porosities need to be the same");
   const auto eps_interior = _eps_elem[_qp];
@@ -128,40 +110,26 @@ PCNSFVPrimitiveBC::computeQpResidual()
   const auto ft = _face_info->faceType(_var.name());
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
-  const auto & pressure_interior_center =
-      out_of_elem ? _pressure_var->getElemValue(&_face_info->elem())
-                  : _pressure_var->getElemValue(_face_info->neighborPtr());
-  const auto & T_fluid_interior_center =
-      out_of_elem ? _T_fluid_var->getElemValue(&_face_info->elem())
-                  : _T_fluid_var->getElemValue(_face_info->neighborPtr());
   const auto & sup_vel_x_interior_center =
-      out_of_elem ? _sup_vel_x_var->getElemValue(&_face_info->elem())
-                  : _sup_vel_x_var->getElemValue(_face_info->neighborPtr());
+      out_of_elem ? _sup_vel_x_elem[_qp] : _sup_vel_x_neighbor[_qp];
   const auto & sup_vel_y_interior_center =
-      _sup_vel_y_var ? (out_of_elem ? _sup_vel_y_var->getElemValue(&_face_info->elem())
-                                    : _sup_vel_y_var->getElemValue(_face_info->neighborPtr()))
-                     : ADReal(0);
+      out_of_elem ? _sup_vel_y_elem[_qp] : _sup_vel_y_neighbor[_qp];
   const auto & sup_vel_z_interior_center =
-      _sup_vel_z_var ? (out_of_elem ? _sup_vel_z_var->getElemValue(&_face_info->elem())
-                                    : _sup_vel_z_var->getElemValue(_face_info->neighborPtr()))
-                     : ADReal(0);
-  const auto & grad_pressure_interior_center =
-      out_of_elem ? _pressure_var->adGradSln(&_face_info->elem())
-                  : _pressure_var->adGradSln(_face_info->neighborPtr());
-  const auto & grad_T_fluid_interior_center =
-      out_of_elem ? _T_fluid_var->adGradSln(&_face_info->elem())
-                  : _T_fluid_var->adGradSln(_face_info->neighborPtr());
+      out_of_elem ? _sup_vel_z_elem[_qp] : _sup_vel_z_neighbor[_qp];
+  const auto & pressure_interior_center =
+      out_of_elem ? _pressure_elem[_qp] : _pressure_neighbor[_qp];
+  const auto & T_fluid_interior_center = out_of_elem ? _T_fluid_elem[_qp] : _T_fluid_neighbor[_qp];
+
   const auto & grad_sup_vel_x_interior_center =
-      out_of_elem ? _sup_vel_x_var->adGradSln(&_face_info->elem())
-                  : _sup_vel_x_var->adGradSln(_face_info->neighborPtr());
+      out_of_elem ? _grad_sup_vel_x_elem[_qp] : _grad_sup_vel_x_neighbor[_qp];
   const auto & grad_sup_vel_y_interior_center =
-      _sup_vel_y_var ? (out_of_elem ? _sup_vel_y_var->adGradSln(&_face_info->elem())
-                                    : _sup_vel_y_var->adGradSln(_face_info->neighborPtr()))
-                     : ADRealVectorValue(0);
+      out_of_elem ? _grad_sup_vel_y_elem[_qp] : _grad_sup_vel_y_neighbor[_qp];
   const auto & grad_sup_vel_z_interior_center =
-      _sup_vel_z_var ? (out_of_elem ? _sup_vel_z_var->adGradSln(&_face_info->elem())
-                                    : _sup_vel_z_var->adGradSln(_face_info->neighborPtr()))
-                     : ADRealVectorValue(0);
+      out_of_elem ? _grad_sup_vel_z_elem[_qp] : _grad_sup_vel_z_neighbor[_qp];
+  const auto & grad_pressure_interior_center =
+      out_of_elem ? _grad_pressure_elem[_qp] : _grad_pressure_neighbor[_qp];
+  const auto & grad_T_fluid_interior_center =
+      out_of_elem ? _grad_T_fluid_elem[_qp] : _grad_T_fluid_neighbor[_qp];
   const auto & interior_centroid =
       out_of_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
   const auto dCf = _face_info->faceCentroid() - interior_centroid;
@@ -217,7 +185,7 @@ PCNSFVPrimitiveBC::computeQpResidual()
         sup_vel_x_interior_center + grad_sup_vel_x_interior_center * dCf;
 
   ADReal sup_vel_y_boundary = 0, sup_vel_y_interior = 0;
-  if (_sup_vel_y_var)
+  if (_dim >= 2)
   {
     if (_sup_vel_provided)
     {
@@ -237,7 +205,7 @@ PCNSFVPrimitiveBC::computeQpResidual()
   }
 
   ADReal sup_vel_z_boundary = 0, sup_vel_z_interior = 0;
-  if (_sup_vel_z_var)
+  if (_dim >= 3)
   {
     if (_sup_vel_provided)
     {
