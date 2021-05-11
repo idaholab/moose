@@ -11,7 +11,7 @@ eps = 'cos(1.3*x)'
 # is always below the speed of sound, e.g. subsonic everywhere
 rho = '3.487882614709243*cos(x)'
 rho_ud = '3.487882614709243*eps*cos(1.1*x)'
-rho_et = '26.74394130735463*cos(1.2*x)'
+rho_et = '26.74394130735463*cos(1.5*x)'
 ud = 'rho_ud / rho'
 u = 'ud / eps'
 vel = 'u * e_i'
@@ -36,6 +36,8 @@ f_rho_et, e_rho_et = mms.evaluate('div(mass_flux * ht)', rho_et, variable='rho_e
 _, e_T = mms.evaluate('T', T, variable='T', eps=eps, rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, T=T)
 _, e_eps_p = mms.evaluate('eps_p', eps_p, variable='eps_p', eps=eps, rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, p=p)
 _, e_p = mms.evaluate('p', p, variable='p', eps=eps, rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, p=p)
+_, e_ud = mms.evaluate('ud', ud, variable='ud', eps=eps, rho=rho, rho_ud=rho_ud)
+_, e_eps = mms.evaluate('eps', eps, variable='eps')
 
 mms.print_hit(e_rho, 'exact_rho')
 mms.print_hit(f_rho, 'forcing_rho')
@@ -49,3 +51,5 @@ mms.print_hit(f_rho_et, 'forcing_rho_et')
 mms.print_hit(e_T, 'exact_T')
 mms.print_hit(e_eps_p, 'exact_eps_p')
 mms.print_hit(e_p, 'exact_p')
+mms.print_hit(e_ud, 'exact_sup_vel_x')
+mms.print_hit(e_eps, 'eps')
