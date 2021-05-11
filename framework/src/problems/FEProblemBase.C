@@ -4983,6 +4983,7 @@ FEProblemBase::init()
   }
 
   _nl->update();
+  _aux->update();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->init(_cm.get());
