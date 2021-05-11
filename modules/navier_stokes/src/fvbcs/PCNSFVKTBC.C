@@ -241,11 +241,13 @@ PCNSFVKTBC::computeQpResidual()
 
   const auto sup_vel_interior_normal = sup_vel_interior * normal;
   const auto sup_vel_boundary_normal = sup_vel_boundary * normal;
+  const auto u_interior_normal = u_interior * normal;
+  const auto u_boundary_normal = u_boundary * normal;
 
-  const auto a_interior = std::max(std::abs(sup_vel_interior_normal + c_interior),
-                                   std::abs(sup_vel_interior_normal - c_interior));
-  const auto a_boundary = std::max(std::abs(sup_vel_boundary_normal + c_boundary),
-                                   std::abs(sup_vel_boundary_normal - c_boundary));
+  const auto a_interior =
+      std::max(std::abs(u_interior_normal + c_interior), std::abs(u_interior_normal - c_interior));
+  const auto a_boundary =
+      std::max(std::abs(u_boundary_normal + c_boundary), std::abs(u_boundary_normal - c_boundary));
   // Second term is to avoid new nonzero mallocs
   const auto a = std::max(a_interior, a_boundary) + 0 * a_interior + 0 * a_boundary;
 
