@@ -237,10 +237,11 @@
 []
 
 [Executioner]
-  solve_type = PJFNK
+  solve_type = NEWTON
   type = Transient
   num_steps = 1
   dtmin = 1
+  petsc_options = '-snes_linesearch_monitor'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   nl_max_its = 50

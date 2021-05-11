@@ -117,11 +117,8 @@ PorousPrimitiveVarMaterial::computeQpProperties()
   _grad_sup_vel_y[_qp] = _grad_var_sup_vel_y[_qp];
   _grad_sup_vel_z[_qp] = _grad_var_sup_vel_z[_qp];
 
-  Real drho_dp, drho_dT;
-  _fluid.rho_from_p_T(
-      _pressure[_qp].value(), _T_fluid[_qp].value(), _rho[_qp].value(), drho_dp, drho_dT);
-  _rho[_qp].derivatives() =
-      drho_dp * _pressure[_qp].derivatives() + drho_dT * _T_fluid[_qp].derivatives();
+  ADReal drho_dp, drho_dT;
+  _fluid.rho_from_p_T(_pressure[_qp], _T_fluid[_qp], _rho[_qp], drho_dp, drho_dT);
   const auto rho_dot = drho_dp * _pressure_dot[_qp] + drho_dT * _T_fluid_dot[_qp];
   _sup_rho_dot[_qp] = _epsilon[_qp] * rho_dot;
 
@@ -137,10 +134,8 @@ PorousPrimitiveVarMaterial::computeQpProperties()
   _sup_mom_y_dot[_qp] = _rho[_qp] * _sup_vel_y_dot[_qp] + rho_dot * _sup_vel_y[_qp];
   _sup_mom_z_dot[_qp] = _rho[_qp] * _sup_vel_z_dot[_qp] + rho_dot * _sup_vel_z[_qp];
 
-  ADReal e;
-  Real de_dp, de_drho;
-  _fluid.e_from_p_rho(_pressure[_qp].value(), _rho[_qp].value(), e.value(), de_dp, de_drho);
-  e.derivatives() = _pressure[_qp].derivatives() * de_dp + _rho[_qp].derivatives() * de_drho;
+  ADReal e, de_dp, de_drho;
+  _fluid.e_from_p_rho(_pressure[_qp], _rho[_qp], e, de_dp, de_drho);
   const auto e_dot = de_dp * _pressure_dot[_qp] + de_drho * rho_dot;
   const auto et = e + velocity * velocity / 2.;
   const auto velocity_dot =

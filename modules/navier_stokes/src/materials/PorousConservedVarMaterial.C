@@ -142,17 +142,15 @@ PorousConservedVarMaterial::computeQpProperties()
       _total_energy_density[_qp] / (_rho[_qp] * _rho[_qp]) * _var_grad_rho[_qp] -
       (_vel_x[_qp] * grad_vel_x + _vel_y[_qp] * grad_vel_y + _vel_z[_qp] * grad_vel_z);
 
-  Real dp_dv, dp_de, dummy_p;
-  _pressure[_qp] = _fluid.p_from_v_e(_v[_qp], _specific_internal_energy[_qp]);
-  _fluid.p_from_v_e(_v[_qp].value(), _specific_internal_energy[_qp].value(), dummy_p, dp_dv, dp_de);
+  ADReal dp_dv, dp_de;
+  _fluid.p_from_v_e(_v[_qp], _specific_internal_energy[_qp], _pressure[_qp], dp_dv, dp_de);
   _grad_pressure[_qp] = dp_dv * grad_v + dp_de * grad_e;
 
   _specific_total_enthalpy[_qp] = (_total_energy_density[_qp] + _pressure[_qp]) / _rho[_qp];
   _rho_ht[_qp] = _specific_total_enthalpy[_qp] * _rho[_qp];
   _superficial_rho_ht[_qp] = _rho_ht[_qp] * _epsilon[_qp];
 
-  Real dT_dv, dT_de, dummy_T;
-  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _specific_internal_energy[_qp]);
-  _fluid.T_from_v_e(_v[_qp].value(), _specific_internal_energy[_qp].value(), dummy_T, dT_dv, dT_de);
+  ADReal dT_dv, dT_de;
+  _fluid.T_from_v_e(_v[_qp], _specific_internal_energy[_qp], _T_fluid[_qp], dT_dv, dT_de);
   _grad_T_fluid[_qp] = dT_dv * grad_v + dT_de * grad_e;
 }
