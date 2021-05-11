@@ -3,7 +3,8 @@
 #include "Function.h"
 
 /**
- *  Function for cosine(theta) (where theta is in degrees) for use in reflection problems.
+ *  Function for cosine(theta) (where theta is in degrees) for use in slab
+ *  reflection benchmark.
  */
 class CosTheta : public Function
 {

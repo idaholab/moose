@@ -19,11 +19,10 @@ public:
 protected:
   virtual Real computeReflection();
 
-  const VariableValue & _u;
-
   unsigned int _qp;
 
-private:
+  const VariableValue & _coupled_real;
+
   const VariableValue & _coupled_imag;
 
   Real _theta;
@@ -32,7 +31,7 @@ private:
 
   Real _k;
 
-  Real _coeff;
+  Real _incoming_mag;
 
   Real _reflection_coefficient;
 };

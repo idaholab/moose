@@ -197,18 +197,18 @@ field magnitude.
 
 Rounding the corner is a common way to try to avoid this issue (as mentioned in
 [!citep](jin-fem) and others), and the impact of a round corner with radius of
-10 $\mu \text{m}$ here is shown in [rounded-corner]. Because the rounded corner is
-not perfectly round, but made up of tiny line segments, there will still be some
-opportunities for field singularities to occur. Indeed, the peak electric field
-local to the singularity location is higher than in [field-results-20]; however,
-the impact of the singularity on the surrounding field calculation is reduced.
-Regardless of the geometry adjustment, this suggests the impact of numerical
-singularities on the calculated global electric field magnitude are extremely
-local (made even more so due to the level of local refinement used here) due to
-the nature of the finite element method (minimizing global error while possibly
-allowing local ones). Away from this singularity, this property allows us to
-successfully use this model to examine evanescent wave decay in the smaller
-waveguide region on the right, away from the singularity point.
+10 $\mu \text{m}$ (seen in [rounded-geometry]) is shown in [rounded-corner].
+Because the rounded corner is not perfectly round, but made up of tiny line
+segments, there will still be some opportunities for field singularities to occur.
+Indeed, the peak electric field local to the singularity location is higher than
+in [field-results-20]; however, the impact of the singularity on the surrounding
+field calculation is reduced. Regardless of the geometry adjustment, this suggests
+the impact of numerical singularities on the calculated global electric field
+magnitude are extremely local (made even more so due to the level of local
+refinement used here) due to the nature of the finite element method (minimizing
+global error while possibly allowing local ones). Away from this singularity,
+this property allows us to successfully use this model to examine evanescent wave
+decay in the smaller waveguide region on the right, away from the singularity point.
 
 !media media/evanescent_field_results_20.png
        style=width:100%;margin:auto;
@@ -224,3 +224,8 @@ waveguide region on the right, away from the singularity point.
        style=width:100%;margin:auto;
        id=rounded-corner
        caption=Field results of the evanescent wave decay benchmark study at 20GHz, using a rounded corner instead of a sharp one.
+
+!media media/rounded_mesh.png
+       style=width:50%;margin:auto;
+       id=rounded-geometry
+       caption=Rounded corner in waveguide geometry.

@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReflectionCoefficient.h"
-#include "Function.h"
 #include <complex>
-#include "libmesh/quadrature.h"
 
 registerMooseObject("ElectromagneticsApp", ReflectionCoefficient);
 
@@ -18,39 +16,42 @@ InputParameters
 ReflectionCoefficient::validParams()
 {
   InputParameters params = SidePostprocessor::validParams();
-  params.addClassDescription("CURRENTLY ONLY FOR 1D SOLVES. Calculate power reflection coefficient "
-                             "for impinging wave on a "
-                             "surface. Assumes that wave of form F = F_incoming + R*F_reflected");
+  params.addClassDescription(
+      "CURRENTLY ONLY FOR 1D PLANE WAVE SOLVES. Calculate power reflection coefficient "
+      "for impinging wave on a "
+      "surface. Assumes that wave of form F = F_incoming + R*F_reflected");
   params.addRequiredCoupledVar(
-      "variable", "The name of the real field variable this postprocessor operates on.");
+      "field_real", "The name of the real field variable this postprocessor operates on.");
   params.addRequiredCoupledVar("field_imag", "Coupled imaginary field variable.");
-  params.addRequiredParam<Real>("theta", "Wave incidence angle.");
+  params.addRequiredParam<Real>("theta", "Wave incidence angle");
   params.addRequiredParam<Real>("length", "Domain length");
   params.addRequiredParam<Real>("k", "Wave number");
-  params.addParam<Real>("coeff", 1.0, "Coefficient");
+  params.addParam<Real>("incoming_field_magnitude", 1.0, "Incoming field magnitude");
   return params;
 }
 
 ReflectionCoefficient::ReflectionCoefficient(const InputParameters & parameters)
   : SidePostprocessor(parameters),
-
-    MooseVariableInterface<Real>(this, false),
-    _u(coupledValue("variable")),
-
+    MooseVariableInterface<Real>(this, false, "field_real"),
     _qp(0),
-
+    _coupled_real(coupledValue("field_real")),
     _coupled_imag(coupledValue("field_imag")),
     _theta(getParam<Real>("theta")),
     _length(getParam<Real>("length")),
     _k(getParam<Real>("k")),
-    _coeff(getParam<Real>("coeff"))
+    _incoming_mag(getParam<Real>("incoming_field_magnitude"))
 {
-  addMooseVariableDependency(mooseVariable());
 }
 
 void
 ReflectionCoefficient::initialize()
 {
+  if (_current_elem->dim() > 1)
+  {
+    mooseError("The ReflectionCoefficient object is not currently configured to work with 2D or 3D "
+               "meshes. Please disable this object or setup a 1D mesh!");
+  }
+
   _reflection_coefficient = 0;
 }
 
@@ -76,20 +77,15 @@ ReflectionCoefficient::threadJoin(const UserObject & y)
 Real
 ReflectionCoefficient::computeReflection()
 {
-  Real ref = 0;
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
+  std::complex<double> jay(0, 1);
+  std::complex<double> field(_coupled_real[_qp], _coupled_imag[_qp]);
 
-    std::complex<double> jay(0, 1);
-    std::complex<double> field(_u[_qp], _coupled_imag[_qp]);
+  std::complex<double> incoming_wave =
+      _incoming_mag * std::exp(jay * _k * _length * std::cos(_theta * libMesh::pi / 180.));
+  std::complex<double> reversed_wave =
+      _incoming_mag * std::exp(-jay * _k * _length * std::cos(_theta * libMesh::pi / 180.));
 
-    std::complex<double> reflection_coefficient_complex =
-        (field - _coeff * std::exp(jay * _k * _length * std::cos(_theta * libMesh::pi / 180.))) /
-        (_coeff * std::exp(-jay * _k * _length * std::cos(_theta * libMesh::pi / 180.)));
+  std::complex<double> reflection_coefficient_complex = (field - incoming_wave) / reversed_wave;
 
-    // TODO: does this need to be a +=?
-    // TODO: Make sure this needs to be squared alongside abs (is this meant to be a 2-norm?)
-    ref = std::pow(std::abs(reflection_coefficient_complex), 2);
-  }
-  return ref;
+  return std::pow(std::abs(reflection_coefficient_complex), 2);
 }

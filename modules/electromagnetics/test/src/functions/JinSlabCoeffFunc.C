@@ -11,16 +11,18 @@
 #include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", JinSlabCoeffFunc);
+registerMooseObject("ElectromagneticsTestApp", JinSlabCoeffFunc);
 
 InputParameters
 JinSlabCoeffFunc::validParams()
 {
   InputParameters params = Function::validParams();
-  params.addClassDescription("Function describing a wave incident on a surface at a given angle "
-                             "and wave number, for use in reflection and transmission problems.");
-  params.addRequiredParam<Real>("k", "Wave Number");
+  params.addClassDescription(
+      "Function describing a wave incident on a surface at a given angle, wavenumber, and domain "
+      "length, for use in the slab reflection benchmark.");
+  params.addRequiredParam<Real>("k", "Wavenumber");
   params.addRequiredParam<Real>("theta", "Wave Incidence angle, in degrees");
+  params.addRequiredParam<Real>("length", "Length of slab domain");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component");
   return params;
@@ -28,10 +30,10 @@ JinSlabCoeffFunc::validParams()
 
 JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
   : Function(parameters),
-    FunctionInterface(this),
 
     _k(getParam<Real>("k")),
     _theta(getParam<Real>("theta")),
+    _length(getParam<Real>("length")),
     _component(getParam<MooseEnum>("component"))
 {
 }
@@ -39,13 +41,12 @@ JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
 Real
 JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
 {
-
   std::complex<double> jay(0, 1);
-  std::complex<double> eps_r = 4.0 + (2.0 - jay * 0.1) * std::pow((1 - p(0) * _k / 5), 2);
+  std::complex<double> eps_r = 4.0 + (2.0 - jay * 0.1) * std::pow((1 - p(0) / _length), 2);
   std::complex<double> mu_r(2, -0.1);
 
   std::complex<double> val =
-      _k * std::sqrt(eps_r * mu_r - std::pow(std::sin(_theta * libMesh::pi / 180.), 2));
+      mu_r * std::pow(_k, 2) * (eps_r - (1 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
 
   if (_component == electromagnetics::REAL)
   {
