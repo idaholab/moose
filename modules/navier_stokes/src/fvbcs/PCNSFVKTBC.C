@@ -82,8 +82,6 @@ PCNSFVKTBC::PCNSFVKTBC(const InputParameters & params)
     _grad_pressure_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::pressure))),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
-    _grad_eps_elem(getMaterialProperty<RealVectorValue>(NS::grad(NS::porosity))),
-    _grad_eps_neighbor(getNeighborMaterialProperty<RealVectorValue>(NS::grad(NS::porosity))),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),
     _sup_vel_provided(isParamValid(NS::superficial_velocity)),
@@ -105,6 +103,10 @@ PCNSFVKTBC::PCNSFVKTBC(const InputParameters & params)
 ADReal
 PCNSFVKTBC::computeQpResidual()
 {
+  mooseAssert(_eps_elem[_qp] == _eps_neighbor[_qp], "the porosities need to be the same");
+  const auto eps_interior = _eps_elem[_qp];
+  const auto eps_boundary = eps_interior;
+
   const auto ft = _face_info->faceType(_var.name());
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
@@ -117,7 +119,6 @@ PCNSFVKTBC::computeQpResidual()
   const auto & pressure_interior_center =
       out_of_elem ? _pressure_elem[_qp] : _pressure_neighbor[_qp];
   const auto & T_fluid_interior_center = out_of_elem ? _T_fluid_elem[_qp] : _T_fluid_neighbor[_qp];
-  const auto eps_interior_center = out_of_elem ? _eps_elem[_qp] : _eps_neighbor[_qp];
 
   const auto & grad_sup_vel_x_interior_center =
       out_of_elem ? _grad_sup_vel_x_elem[_qp] : _grad_sup_vel_x_neighbor[_qp];
@@ -129,14 +130,9 @@ PCNSFVKTBC::computeQpResidual()
       out_of_elem ? _grad_pressure_elem[_qp] : _grad_pressure_neighbor[_qp];
   const auto & grad_T_fluid_interior_center =
       out_of_elem ? _grad_T_fluid_elem[_qp] : _grad_T_fluid_neighbor[_qp];
-  const auto & grad_eps_interior_center =
-      out_of_elem ? _grad_eps_elem[_qp] : _grad_eps_neighbor[_qp];
   const auto & interior_centroid =
       out_of_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
   const auto dCf = _face_info->faceCentroid() - interior_centroid;
-
-  // We assume that the user has setup their problem such that the ghost value is exact
-  const auto eps_boundary = out_of_elem ? _eps_neighbor[_qp] : _eps_elem[_qp];
 
   ADReal pressure_boundary, pressure_interior;
   if (_pressure_provided)
@@ -227,12 +223,6 @@ PCNSFVKTBC::computeQpResidual()
       sup_vel_z_boundary = sup_vel_z_interior =
           sup_vel_z_interior_center + grad_sup_vel_z_interior_center * dCf;
   }
-  const auto eps_interior = interpolate(*_limiter,
-                                        eps_interior_center,
-                                        eps_boundary,
-                                        grad_eps_interior_center,
-                                        *_face_info,
-                                        out_of_elem);
 
   const auto sup_vel_interior =
       VectorValue<ADReal>(sup_vel_x_interior, sup_vel_y_interior, sup_vel_z_interior);
