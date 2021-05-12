@@ -28,13 +28,19 @@
 []
 
 [Variables]
-  [rho]
+  [pressure]
     type = MooseVariableFVReal
   []
-  [rho_ud]
+  [sup_vel_x]
     type = MooseVariableFVReal
   []
-  [rho_et]
+  [T_fluid]
+    type = MooseVariableFVReal
+  []
+[]
+
+[AuxVariables]
+  [eps]
     type = MooseVariableFVReal
   []
 []
@@ -42,60 +48,71 @@
 [ICs]
   [pressure]
     type = FunctionIC
-    variable = rho
-    function = 'exact_rho'
+    variable = pressure
+    function = 'exact_p'
   []
   [sup_vel_x]
     type = FunctionIC
-    variable = rho_ud
-    function = 'exact_rho_ud'
+    variable = sup_vel_x
+    function = 'exact_sup_vel_x'
   []
   [T_fluid]
     type = FunctionIC
-    variable = rho_et
-    function = 'exact_rho_et'
+    variable = T_fluid
+    function = 'exact_T'
+  []
+  [eps]
+    type = FunctionIC
+    variable = eps
+    function = 'eps'
   []
 []
 
 [FVKernels]
   [mass_advection]
     type = PCNSFVKT
-    variable = rho
+    variable = pressure
     eqn = "mass"
   []
   [mass_fn]
     type = FVBodyForce
-    variable = rho
+    variable = pressure
     function = 'forcing_rho'
   []
 
   [momentum_x_advection]
     type = PCNSFVKT
-    variable = rho_ud
+    variable = sup_vel_x
     momentum_component = x
     eqn = "momentum"
   []
+  [eps_grad]
+    type = PNSFVPGradEpsilon
+    variable = sup_vel_x
+    momentum_component = 'x'
+    epsilon_var = 'eps'
+  []
   [momentum_fn]
     type = FVBodyForce
-    variable = rho_ud
+    variable = sup_vel_x
     function = 'forcing_rho_ud'
   []
 
   [fluid_energy_advection]
     type = PCNSFVKT
-    variable = rho_et
+    variable = T_fluid
     eqn = "energy"
   []
   [energy_fn]
     type = FVBodyForce
-    variable = rho_et
+    variable = T_fluid
     function = 'forcing_rho_et'
   []
 []
 
 [FVBCs]
   [mass_left]
-    variable = rho
+    variable = pressure
     type = PCNSFVKTBC
     boundary = left
     T_fluid_function = 'exact_T'
@@ -103,7 +120,7 @@
     eqn = 'mass'
   []
   [momentum_left]
-    variable = rho_ud
+    variable = sup_vel_x
     type = PCNSFVKTBC
     boundary = left
     T_fluid_function = 'exact_T'
@@ -112,7 +129,7 @@
     momentum_component = 'x'
   []
   [energy_left]
-    variable = rho_et
+    variable = T_fluid
     type = PCNSFVKTBC
     boundary = left
     T_fluid_function = 'exact_T'
@@ -120,14 +137,14 @@
     eqn = 'energy'
   []
   [mass_right]
-    variable = rho
+    variable = pressure
     type = PCNSFVKTBC
     boundary = right
     eqn = 'mass'
     pressure_function = 'exact_p'
   []
   [momentum_right]
-    variable = rho_ud
+    variable = sup_vel_x
     type = PCNSFVKTBC
     boundary = right
     eqn = 'momentum'
@@ -135,7 +152,7 @@
     pressure_function = 'exact_p'
   []
   [energy_right]
-    variable = rho_et
+    variable = T_fluid
     type = PCNSFVKTBC
     boundary = right
     eqn = 'energy'
@@ -143,34 +160,44 @@
   []
 
   # help gradient reconstruction
-  [rho_right]
+  [pressure_right]
     type = FVFunctionDirichletBC
-    variable = rho
-    function = exact_rho
+    variable = pressure
+    function = exact_p
     boundary = 'right'
   []
-  [rho_ud_left]
+  [sup_vel_x_left]
     type = FVFunctionDirichletBC
-    variable = rho_ud
-    function = exact_rho_ud
+    variable = sup_vel_x
+    function = exact_sup_vel_x
     boundary = 'left'
   []
-  [rho_et_left]
+  [T_fluid_left]
     type = FVFunctionDirichletBC
-    variable = rho_et
-    function = exact_rho_et
+    variable = T_fluid
+    function = exact_T
     boundary = 'left'
+  []
+  [eps]
+    type = FVFunctionDirichletBC
+    variable = eps
+    function = eps
+    boundary = 'left right'
   []
 []
 
 [Materials]
   [var_mat]
-    type = PorousConservedVarMaterial
-    rho = rho
-    superficial_rhou = rho_ud
-    rho_et = rho_et
+    type = PorousPrimitiveVarMaterial
+    pressure = pressure
+    superficial_vel_x = sup_vel_x
+    T_fluid = T_fluid
     porosity = porosity
   []
+  # [porosity]
+  #   type = PorosityVarMaterial
+  #   porosity_var = 'eps'
+  # []
   [porosity]
     type = PorosityVarMaterial
     porosity_function = 'eps'
@@ -184,55 +211,48 @@
 []
 [forcing_rho]
   type = ParsedFunction
-  value = '-3.45300378856215*sin(1.1*x)'
+  value = '-3.83667087618017*sin(1.1*x)*cos(1.3*x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)'
 []
 [exact_rho_ud]
   type = ParsedFunction
-  value = '3.13909435323832*cos(1.1*x)'
+  value = '3.48788261470924*cos(1.1*x)*cos(1.3*x)'
 []
 [forcing_rho_ud]
   type = ParsedFunction
-  value = '-0.9*(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + 0.9*(10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) + 3.13909435323832*sin(x)*cos(1.1*x)^2/cos(x)^2 - 6.9060075771243*sin(1.1*x)*cos(1.1*x)/cos(x)'
+  value = '(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x))*cos(1.3*x) + 3.48788261470924*sin(x)*cos(1.1*x)^2*cos(1.3*x)/cos(x)^2 - 7.67334175236034*sin(1.1*x)*cos(1.1*x)*cos(1.3*x)/cos(x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)^2/cos(x)'
 []
 [exact_rho_et]
   type = ParsedFunction
-  value = '26.7439413073546*cos(1.2*x)'
+  value = '26.7439413073546*cos(1.5*x)'
 []
 [forcing_rho_et]
   type = ParsedFunction
-  value = '0.9*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(x)*cos(1.1*x)/cos(x)^2 - 0.99*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(1.1*x)/cos(x) + 0.9*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) - 32.0927295688256*sin(1.2*x))*cos(1.1*x)/cos(x)'
+  value = '1.0*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(x)*cos(1.1*x)*cos(1.3*x)/cos(x)^2 - 1.1*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.1*x)*cos(1.3*x)/cos(x) - 1.3*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.3*x)*cos(1.1*x)/cos(x) + 1.0*(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x) - 40.1159119610319*sin(1.5*x))*cos(1.1*x)*cos(1.3*x)/cos(x)'
 []
 [exact_T]
   type = ParsedFunction
-  value = '0.0106975765229418*cos(1.2*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
+  value = '0.0106975765229418*cos(1.5*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
 []
 [exact_eps_p]
   type = ParsedFunction
-  value = '3.13909435323832*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
+  value = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)*cos(1.3*x)'
 []
 [exact_p]
   type = ParsedFunction
-  value = '3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
+  value = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
 []
 [exact_sup_vel_x]
   type = ParsedFunction
-  value = '0.9*cos(1.1*x)/cos(x)'
-[]
-[exact_superficial_velocity]
-  type = ParsedVectorFunction
-  value_x = '0.9*cos(1.1*x)/cos(x)'
+  value = '1.0*cos(1.1*x)*cos(1.3*x)/cos(x)'
 []
 [eps]
   type = ParsedFunction
-  value = '0.9'
+  value = 'cos(1.3*x)'
 []
+[exact_superficial_velocity]
+  type = ParsedVectorFunction
+  value_x = '1.0*cos(1.1*x)*cos(1.3*x)/cos(x)'
 []
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
 []
 
 [Executioner]
@@ -240,11 +260,12 @@
   type = Transient
   num_steps = 1
   dtmin = 1
-  petsc_options = '-snes_linesearch_monitor'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   nl_max_its = 50
   line_search = bt
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]
@@ -262,23 +283,23 @@
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [L2rho]
+  [L2pressure]
     type = ElementL2Error
-    variable = rho
-    function = exact_rho
+    variable = pressure
+    function = exact_p
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [L2rho_ud]
-    variable = rho_ud
-    function = exact_rho_ud
+  [L2sup_vel_x]
+    variable = sup_vel_x
+    function = exact_sup_vel_x
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [L2rho_et]
-    variable = rho_et
-    function = exact_rho_et
+  [L2T_fluid]
+    variable = T_fluid
+    function = exact_T
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'

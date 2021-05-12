@@ -219,6 +219,51 @@ class TestBasic1DVaryingPorousKTPrimitiveVanLeer(unittest.TestCase):
         # for key,value in fig.label_to_intercept.items():
         #     print("%s intercept, %f" % (key, value))
 
+class TestBasic1DVaryingVarPorousKTPrimitiveCD(unittest.TestCase):
+# class TestBasic1DVaryingVarPorousKTPrimitiveCD():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('varying-eps-var-basic-kt-primitive.i', 7, "GlobalParams/limiter='central_difference'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-var-basic-kt-primitive-cd.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
+class TestBasic1DVaryingVarPorousKTPrimitiveUpwind(unittest.TestCase):
+# class TestBasic1DVaryingVarPorousKTPrimitiveUpwind():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('varying-eps-var-basic-kt-primitive.i', 9, "GlobalParams/limiter='upwind'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-var-basic-kt-primitive-upwind.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
+class TestBasic1DVaryingVarPorousKTPrimitiveVanLeer(unittest.TestCase):
+# class TestBasic1DVaryingVarPorousKTPrimitiveVanLeer():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
+        df1 = mms.run_spatial('varying-eps-var-basic-kt-primitive.i', 8, "GlobalParams/limiter='vanLeer'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-var-basic-kt-primitive-vanLeer.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertGreaterEqual(value, 1.95)
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
@@ -237,3 +282,6 @@ if __name__ == '__main__':
     # TestBasic1DVaryingPorousKTPrimitiveCD().test()
     # TestBasic1DVaryingPorousKTPrimitiveUpwind().test()
     # TestBasic1DVaryingPorousKTPrimitiveVanLeer().test()
+    # TestBasic1DVaryingVarPorousKTPrimitiveCD().test()
+    # TestBasic1DVaryingVarPorousKTPrimitiveUpwind().test()
+    # TestBasic1DVaryingVarPorousKTPrimitiveVanLeer().test()

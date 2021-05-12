@@ -96,8 +96,8 @@
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
     []
   []
-  [primitive_basic_kurganov_tadmor_varying_porosity]
-    requirement = 'The system shall be able to solve a problem with continuously varying porosity, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
+  [primitive_basic_kurganov_tadmor_varying_porosity_function]
+    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -116,6 +116,30 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestBasic1DVaryingPorousKTPrimitiveVanLeer
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
+    []
+  []
+  [primitive_basic_kurganov_tadmor_varying_porosity_var]
+    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a variable object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    [central_difference]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingVarPorousKTPrimitiveCD
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+    []
+    [upwind]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingVarPorousKTPrimitiveUpwind
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+    []
+    [vanLeer]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingVarPorousKTPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
     []
