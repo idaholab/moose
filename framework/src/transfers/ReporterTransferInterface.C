@@ -97,6 +97,29 @@ ReporterTransferInterface::declareClone(const ReporterName & from_reporter,
 }
 
 void
+ReporterTransferInterface::declareClone(const ReporterName & rname,
+                                        FEProblemBase & problem,
+                                        const std::string & type,
+                                        const ReporterMode & mode)
+{
+  ReporterData & rdata = problem.getReporterData(ReporterData::WriteKey());
+  if (type == "bool")
+    rdata.declareReporterValue<bool, ReporterGeneralContext<bool>>(rname, mode, _rti_transfer);
+  else if (type == "integer")
+    rdata.declareReporterValue<int, ReporterGeneralContext<int>>(rname, mode, _rti_transfer);
+  else if (type == "real")
+    rdata.declareReporterValue<Real, ReporterGeneralContext<Real>>(rname, mode, _rti_transfer);
+  else if (type == "string")
+    rdata.declareReporterValue<std::string, ReporterGeneralContext<std::string>>(
+        rname, mode, _rti_transfer);
+  else
+    _rti_transfer.mooseError("Unknown reporter type, ", type, ".");
+
+  // Hide variables (if requested in parameters) if name is associated with a reporter object
+  hideVariableHelper(rname, problem);
+}
+
+void
 ReporterTransferInterface::declareVectorClone(const ReporterName & from_reporter,
                                               const ReporterName & to_reporter,
                                               const FEProblemBase & from_problem,
@@ -111,6 +134,32 @@ ReporterTransferInterface::declareVectorClone(const ReporterName & from_reporter
 
   // Hide variables (if requested in parameters) if name is associated with a reporter object
   hideVariableHelper(to_reporter, to_problem);
+}
+
+void
+ReporterTransferInterface::declareVectorClone(const ReporterName & rname,
+                                              FEProblemBase & problem,
+                                              const std::string & type,
+                                              const ReporterMode & mode)
+{
+  ReporterData & rdata = problem.getReporterData(ReporterData::WriteKey());
+  if (type == "bool")
+    rdata.declareReporterValue<std::vector<bool>, ReporterVectorContext<bool>>(
+        rname, mode, _rti_transfer);
+  else if (type == "integer")
+    rdata.declareReporterValue<std::vector<int>, ReporterVectorContext<int>>(
+        rname, mode, _rti_transfer);
+  else if (type == "real")
+    rdata.declareReporterValue<std::vector<Real>, ReporterVectorContext<Real>>(
+        rname, mode, _rti_transfer);
+  else if (type == "string")
+    rdata.declareReporterValue<std::vector<std::string>, ReporterVectorContext<std::string>>(
+        rname, mode, _rti_transfer);
+  else
+    _rti_transfer.mooseError("Unknown reporter type, ", type, ".");
+
+  // Hide variables (if requested in parameters) if name is associated with a reporter object
+  hideVariableHelper(rname, problem);
 }
 
 void

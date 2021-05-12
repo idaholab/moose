@@ -31,6 +31,11 @@ public:
   ReporterTransferInterface(const Transfer * transfer);
 
 protected:
+  static MultiMooseEnum standardTransferTypes()
+  {
+    return MultiMooseEnum("bool=0 integer=1 real=2 string=3");
+  }
+
   /*
    * This function allows derived objects how the "from" reporters should be transferred.
    * I.e. whether we are transferring the entire data or part of it. Without calling this
@@ -95,6 +100,19 @@ protected:
                     const ReporterMode & mode);
 
   /*
+   * Helper for declaring a new reporter value in a FEProblem that has specified type.
+   *
+   * @param reporter_name reporter name of the clone
+   * @param fe_problem The FEProblem that references the reporter data to declare clone
+   * @param type The type of reporter to declare
+   * @param mode ReporterMode to declare value as
+   */
+  void declareClone(const ReporterName & rname,
+                    FEProblemBase & problem,
+                    const std::string & type,
+                    const ReporterMode & mode);
+
+  /*
    * Helper for declaring a new vector reporter value in a FEProblem that contains
    * the same type as the reporter value in another FEProblem.
    *
@@ -108,6 +126,19 @@ protected:
                           const ReporterName & to_reporter,
                           const FEProblemBase & from_problem,
                           FEProblemBase & to_problem,
+                          const ReporterMode & mode);
+
+  /*
+   * Helper for declaring a new reporter value in a FEProblem that has specified type.
+   *
+   * @param reporter_name reporter name of the vector clone
+   * @param fe_problem The FEProblem that references the reporter data to declare vector clone
+   * @param type The type of reporter to declare the vector
+   * @param mode ReporterMode to declare value as
+   */
+  void declareVectorClone(const ReporterName & rname,
+                          FEProblemBase & problem,
+                          const std::string & type,
                           const ReporterMode & mode);
 
   /*
