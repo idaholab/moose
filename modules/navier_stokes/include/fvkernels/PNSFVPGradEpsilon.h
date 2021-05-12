@@ -11,6 +11,8 @@
 
 #include "FVElementalKernel.h"
 
+class Function;
+
 class PNSFVPGradEpsilon : public FVElementalKernel
 {
 public:
@@ -22,7 +24,8 @@ protected:
 
   /// The gradient of the pressure
   const ADMaterialProperty<Real> & _pressure;
-  const Function & _eps;
+  const Function * const _eps_function;
+  const ADVariableGradient * const _eps_var_grad;
 
   /// index x|y|z
   const unsigned int _index;

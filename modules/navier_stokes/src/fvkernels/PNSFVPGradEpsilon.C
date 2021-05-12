@@ -23,20 +23,30 @@ PNSFVPGradEpsilon::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addRequiredParam<FunctionName>("epsilon_function", "A function describing epsilon");
+  params.addParam<FunctionName>("epsilon_function", "A function describing epsilon");
+  params.addCoupledVar("epsilon_var", "An auxiliary variable holding the porosity");
   return params;
 }
 
 PNSFVPGradEpsilon::PNSFVPGradEpsilon(const InputParameters & params)
   : FVElementalKernel(params),
     _pressure(getADMaterialProperty<Real>(NS::pressure)),
-    _eps(getFunction("epsilon_function")),
+    _eps_function(isParamValid("epsilon_function") ? &getFunction("epsilon_function") : nullptr),
+    _eps_var_grad(isCoupled("epsilon_var") ? &adCoupledGradient("epsilon_var") : nullptr),
     _index(getParam<MooseEnum>("momentum_component"))
 {
+  if (!_eps_function && !_eps_var_grad)
+    mooseError("Either 'epsilon_function' or 'epsilon_var' must be provided for ", name());
+  if (_eps_function && _eps_var_grad)
+    mooseError("Either 'epsilon_function' or 'epsilon_var', but not both, must be provided for ",
+               name());
 }
 
 ADReal
 PNSFVPGradEpsilon::computeQpResidual()
 {
-  return -_pressure[_qp] * _eps.gradient(_t, _q_point[_qp])(_index);
+  if (_eps_function)
+    return -_pressure[_qp] * _eps_function->gradient(_t, _q_point[_qp])(_index);
+  else
+    return -_pressure[_qp] * (*_eps_var_grad)[_qp](_index);
 }
