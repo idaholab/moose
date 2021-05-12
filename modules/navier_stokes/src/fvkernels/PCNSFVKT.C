@@ -71,6 +71,8 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _grad_pressure_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::grad(NS::pressure))),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
+    _grad_eps_elem(getMaterialProperty<RealVectorValue>(NS::grad(NS::porosity))),
+    _grad_eps_neighbor(getNeighborMaterialProperty<RealVectorValue>(NS::grad(NS::porosity))),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),
     _scalar_elem(isParamValid("scalar_prop_name")
@@ -151,15 +153,27 @@ PCNSFVKT::computeQpResidual()
                                               _grad_sup_vel_z_neighbor[_qp],
                                               *_face_info,
                                               /*elem_is_up=*/false);
+  const auto eps_elem = interpolate(*_limiter,
+                                    _eps_elem[_qp],
+                                    _eps_neighbor[_qp],
+                                    _grad_eps_elem[_qp],
+                                    *_face_info,
+                                    /*elem_is_up=*/true);
+  const auto eps_neighbor = interpolate(*_limiter,
+                                        _eps_neighbor[_qp],
+                                        _eps_elem[_qp],
+                                        _grad_eps_neighbor[_qp],
+                                        *_face_info,
+                                        /*elem_is_up=*/false);
 
   const auto sup_vel_elem = VectorValue<ADReal>(sup_vel_x_elem, sup_vel_y_elem, sup_vel_z_elem);
-  const auto u_elem = sup_vel_elem / _eps_elem[_qp];
+  const auto u_elem = sup_vel_elem / eps_elem;
   const auto rho_elem = _fluid.rho_from_p_T(pressure_elem, T_fluid_elem);
   const auto e_elem = _fluid.e_from_p_rho(pressure_elem, rho_elem);
   const auto specific_volume_elem = 1. / rho_elem;
   const auto sup_vel_neighbor =
       VectorValue<ADReal>(sup_vel_x_neighbor, sup_vel_y_neighbor, sup_vel_z_neighbor);
-  const auto u_neighbor = sup_vel_neighbor / _eps_neighbor[_qp];
+  const auto u_neighbor = sup_vel_neighbor / eps_neighbor;
   const auto rho_neighbor = _fluid.rho_from_p_T(pressure_neighbor, T_fluid_neighbor);
   const auto e_neighbor = _fluid.e_from_p_rho(pressure_neighbor, rho_neighbor);
   const auto specific_volume_neighbor = 1. / rho_neighbor;
@@ -186,7 +200,7 @@ PCNSFVKT::computeQpResidual()
     const auto rhou_elem = u_elem(_index) * rho_elem;
     const auto rhou_neighbor = u_neighbor(_index) * rho_neighbor;
     return 0.5 * (sup_vel_elem_normal * rhou_elem + sup_vel_neighbor_normal * rhou_neighbor +
-                  (_eps_elem[_qp] * pressure_elem + _eps_neighbor[_qp] * pressure_neighbor) *
+                  (eps_elem * pressure_elem + eps_neighbor * pressure_neighbor) *
                       _face_info->normal()(_index) -
                   a * (rhou_neighbor - rhou_elem));
   }
