@@ -374,11 +374,9 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
  * subscript on grad(phi). Hence this method can be thought of as constructing an r associated with
  * the C side of the face
  */
-inline ADReal
-rF(const ADReal & phiC,
-   const ADReal & phiD,
-   const ADRealVectorValue & gradC,
-   const RealVectorValue & dCD)
+template <typename Scalar, typename Vector>
+ADReal
+rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
   // We need to make sure we protect ourselves against things like division by zero
   return 2. * gradC * dCD / (std::numeric_limits<Real>::epsilon() + (phiD - phiC)) - 1.;
@@ -387,11 +385,25 @@ rF(const ADReal & phiC,
 /**
  * Interpolates with a limiter
  */
-ADReal interpolate(const Limiter & limiter,
-                   const ADReal & phiC,
-                   const ADReal & phiD,
-                   const VectorValue<ADReal> & gradC,
-                   const FaceInfo & fi,
-                   const bool C_is_elem);
+template <typename Scalar, typename Vector>
+ADReal
+interpolate(const Limiter & limiter,
+            const Scalar & phiC,
+            const Scalar & phiD,
+            const Vector & gradC,
+            const FaceInfo & fi,
+            const bool C_is_elem)
+{
+  // Using beta, w_f, g nomenclature from Greenshields
+  const auto r_f = rF(phiC, phiD, gradC, C_is_elem ? fi.dCF() : RealVectorValue(-fi.dCF()));
+  const auto beta = limiter(r_f);
+
+  const auto w_f = C_is_elem ? fi.gC() : (1. - fi.gC());
+
+  const auto g = beta * (1. - w_f);
+
+  return (1. - g) * phiC + g * phiD;
+}
+
 }
 }
