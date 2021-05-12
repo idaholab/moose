@@ -63,4 +63,12 @@
     requirement = 'The system shall be able to solve a series of stages of continuous porosity changes using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind interpolation to the faces.'
     ad_indexing_type = 'global'
   []
+  [min_mod_limited_frictional_porosity_jumps]
+    type = Exodiff
+    input = implicit-euler-basic-kt-primitive-jumps.i
+    exodiff = implicit-euler-basic-kt-primitive-jumps_out.e
+    requirement = 'The system shall be able to solve a problem with frictional drag and a series of porosity jumps using the Kurganov-Tadmor scheme for computing intercell convective fluxes with linear interpolation to the faces and min-mod limiting.'
+    ad_indexing_type = 'global'
+    heavy = true
+  []
 []
