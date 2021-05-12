@@ -9,7 +9,7 @@
 
 #include "WedgeFunction.h"
 
-registerMooseObject("NavierStokesApp", WedgeFunction);
+registerMooseObject("NavierStokesTestApp", WedgeFunction);
 
 InputParameters
 WedgeFunction::validParams()

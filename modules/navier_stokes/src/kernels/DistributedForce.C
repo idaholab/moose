@@ -25,6 +25,7 @@ DistributedForce::validParams()
 
   // The body force acts on the mass of the volume
   params.addRequiredCoupledVar("rho", "density"); // Density integrated over a volume yields mass
+  params.addClassDescription("Implements a force term in the Navier Stokes momentum equation.");
 
   return params;
 }
