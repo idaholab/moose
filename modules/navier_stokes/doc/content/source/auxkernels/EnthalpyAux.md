@@ -2,12 +2,12 @@
 
 !syntax description /AuxKernels/EnthalpyAux
 
-This AuxKernel computes the specific enthalpy $h$ of the fluid from the total energy $\rho e$
-and the pressure $P$.
-
 \begin{equation}
 h = \dfrac{\rho e + P}{\rho}
 \end{equation}
+
+with $h$ the specific enthalpy, $\rho$ the density, $\rho e$ the total energy and
+P$ the pressure.
 
 !syntax parameters /AuxKernels/EnthalpyAux
 
