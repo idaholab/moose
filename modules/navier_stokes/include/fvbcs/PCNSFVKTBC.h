@@ -57,8 +57,6 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _grad_pressure_neighbor;
   const MaterialProperty<Real> & _eps_elem;
   const MaterialProperty<Real> & _eps_neighbor;
-  const MaterialProperty<RealVectorValue> & _grad_eps_elem;
-  const MaterialProperty<RealVectorValue> & _grad_eps_neighbor;
   const MooseEnum _eqn;
   const unsigned int _index;
 
