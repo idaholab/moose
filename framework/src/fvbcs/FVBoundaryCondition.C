@@ -12,6 +12,18 @@
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 
+namespace
+{
+SystemBase &
+changeSystem(const InputParameters & params_in, MooseVariableFV<Real> & fv_var)
+{
+  SystemBase & var_sys = fv_var.sys();
+  auto & params = const_cast<InputParameters &>(params_in);
+  params.set<SystemBase *>("_sys") = &var_sys;
+  return var_sys;
+}
+}
+
 InputParameters
 FVBoundaryCondition::validParams()
 {
@@ -53,12 +65,12 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     MooseVariableInterface<Real>(this,
                                  false,
                                  "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _sys(changeSystem(parameters, _var)),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
