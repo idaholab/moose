@@ -7,7 +7,7 @@
 - Started in May of 2008
 - A framework enabling rapid development of new simulation tools
 - NQA-1 Compliant
--  Application development focuses on implementing physics (PDEs) rather than numerical implementation issues
+- Application development focuses on implementing physics (PDEs) rather than numerical implementation issues
 - Seamlessly couples native (MOOSE) applications using MOOSE MultiApps and Transfers
 - Efficiently couples non-native codes using MOOSE-Wrapped Apps
 - Open Sourced February 12, 2014

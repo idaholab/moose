@@ -5,7 +5,7 @@
 
 ## Input File Syntax
 
-`MultiApp` objects are declared in the `[MultiApps]` block and require a `type` just like may other blocks.
+`MultiApp` objects are declared in the `[MultiApps]` block and require a `type` just like many other blocks.
 
 The `app_type` is required and is the name of the `MooseApp`
 derived app that is going to be executed. Generally, this is the name of the application being
@@ -139,7 +139,7 @@ Let's modify the sub-app to have a smaller timestep and see what happens
 
 Forcing all apps to take the same timestep size is very limiting.
 
-Often better to allow the sub-app to take smaller timesteps.  For instance: if the sub-app is a CFD calculation, the timestep size may be limited by material properties (CFL, etc.).
+Often better to allow the sub-app to take smaller timesteps.  For instance: if the sub-app is a CFD calculation, the timestep size may be limited by numerical criteria or material properties (CFL conditions, etc.).
 
 To allow this: set `sub_cycling=true` in the `MultiApp` block:
 
@@ -152,7 +152,7 @@ To allow this: set `sub_cycling=true` in the `MultiApp` block:
 ## Run 03_master_subcycle.i
 
 - Note the timestep size used by each solve
-- The sub-app will take however many timesteps is needed to reach the Master app's time
+- The sub-app will take however many timesteps are needed to reach the Master app's time
 - What happens if the timesteps aren't even?
 
 By default the intermediate steps are NOT output - only the final solution once the sub-app reaches the Master's time.  To enable outputting all steps solved by the sub-app turn on `output_subcycles` in the MultiApp block.
