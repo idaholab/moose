@@ -144,6 +144,30 @@
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
     []
   []
+  [frictional_primitive_basic_kurganov_tadmor_varying_porosity_var]
+    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a variable object, using a primitive variable set, including drag, and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    [central_difference]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveCD
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+    []
+    [upwind]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveUpwind
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+    []
+    [sou]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveSOU
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using linear interpolation of cell center values to faces with sou limiting and display at least second order convergence'
+    []
+  []
   [sources_give_hllc_problems_irregular]
     requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
     [hllc_with_volume_source]
