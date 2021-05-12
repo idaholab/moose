@@ -31,6 +31,13 @@ MultiAppCloneReporterTransfer::validParams()
                                "Use the supplied string as the prefix for reporter "
                                "name rather than the transfer name.");
 
+  params.addParam<MultiMooseEnum>(
+      "reporter_type",
+      standardTransferTypes(),
+      "The type of the reporter on the sub-application. This parameter is not typically required, "
+      "but if some processors do not have a sub-app, for instance if the max_procs_per_app "
+      "parameter is used in the MultiApp, then this is required.");
+
   params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
@@ -52,8 +59,12 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
 void
 MultiAppCloneReporterTransfer::initialSetup()
 {
+  if (!_multi_app->hasApp() && !isParamValid("reporter_type"))
+    mooseError("For a direct reporter clone, all processors must be associated with a "
+               "sub-application. If you know the type of reporter being transferred, please "
+               "consider using the 'reporter_type' parameter for an indirect clone.");
+
   const UserObject & uo = _fe_problem.getUserObjectBase(_to_obj_name);
-  // auto & uo = _fe_problem.getUserObject<UserObject>(_to_obj_name);
   if (!dynamic_cast<const Reporter *>(&uo))
     paramError("to_reporter", "This object must be a Reporter object.");
 
@@ -65,24 +76,42 @@ MultiAppCloneReporterTransfer::initialSetup()
         addReporterTransferMode(
             _from_reporter_names[r], REPORTER_MODE_ROOT, _multi_app->appProblemBase(i));
 
-  for (unsigned int r = 0; r < _from_reporter_names.size(); ++r)
-    for (MooseIndex(n) i = 0; i < n; i++)
-      if (_multi_app->hasLocalApp(i))
-      {
-        if (n > 1)
-          declareVectorClone(_from_reporter_names[r],
-                             _to_reporter_names[r],
-                             _multi_app->appProblemBase(i),
-                             _multi_app->problemBase(),
-                             REPORTER_MODE_DISTRIBUTED);
-        else
-          declareClone(_from_reporter_names[r],
-                       _to_reporter_names[r],
-                       _multi_app->appProblemBase(i),
-                       _multi_app->problemBase(),
-                       REPORTER_MODE_ROOT);
-        break;
-      }
+  if (_multi_app->hasApp())
+  {
+    for (unsigned int r = 0; r < _from_reporter_names.size(); ++r)
+      for (MooseIndex(n) i = 0; i < n; i++)
+        if (_multi_app->hasLocalApp(i))
+        {
+          if (n > 1)
+            declareVectorClone(_from_reporter_names[r],
+                               _to_reporter_names[r],
+                               _multi_app->appProblemBase(i),
+                               _multi_app->problemBase(),
+                               REPORTER_MODE_DISTRIBUTED);
+          else
+            declareClone(_from_reporter_names[r],
+                         _to_reporter_names[r],
+                         _multi_app->appProblemBase(i),
+                         _multi_app->problemBase(),
+                         REPORTER_MODE_ROOT);
+          break;
+        }
+  }
+  else
+  {
+    const auto & types = getParam<MultiMooseEnum>("reporter_type");
+    if (types.size() != _from_reporter_names.size())
+      paramError("reporter_type", "This parameter must be the same length as 'from_reporters'");
+    for (unsigned int r = 0; r < _from_reporter_names.size(); ++r)
+    {
+      if (n > 1)
+        declareVectorClone(
+            _to_reporter_names[r], _multi_app->problemBase(), types[r], REPORTER_MODE_DISTRIBUTED);
+      else
+        declareClone(
+            _to_reporter_names[r], _multi_app->problemBase(), types[r], REPORTER_MODE_ROOT);
+    }
+  }
 
   if (n > 1 && _multi_app->isRootProcessor())
     for (const auto & rn : _to_reporter_names)
