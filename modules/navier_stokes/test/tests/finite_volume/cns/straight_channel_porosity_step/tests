@@ -71,4 +71,13 @@
     ad_indexing_type = 'global'
     heavy = true
   []
+  [twod_min_mod_limited_frictional_porosity_jumps]
+    type = Exodiff
+    input = 2d-bkt.i
+    exodiff = 2d-bkt_out.e
+    requirement = 'The system shall be able to solve a two-dimensional problem with frictional drag and a series of porosity jumps using the Kurganov-Tadmor scheme for computing intercell convective fluxes with linear interpolation to the faces and min-mod limiting.'
+    ad_indexing_type = 'global'
+    heavy = true
+    mumps = true
+  []
 []
