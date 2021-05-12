@@ -89,6 +89,7 @@ PorousPrimitiveVarMaterial::PorousPrimitiveVarMaterial(const InputParameters & p
     _sup_mom_y_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_y))),
     _sup_mom_z_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_momentum_z))),
     _sup_rho_et_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_total_energy_density))),
+    _mom(declareADProperty<RealVectorValue>(NS::momentum)),
     _mom_x(declareADProperty<Real>(NS::momentum_x)),
     _mom_y(declareADProperty<Real>(NS::momentum_y)),
     _mom_z(declareADProperty<Real>(NS::momentum_z))
@@ -147,4 +148,5 @@ PorousPrimitiveVarMaterial::computeQpProperties()
   _mom_x[_qp] = _sup_mom_x[_qp] / _epsilon[_qp];
   _mom_y[_qp] = _sup_mom_y[_qp] / _epsilon[_qp];
   _mom_z[_qp] = _sup_mom_z[_qp] / _epsilon[_qp];
+  _mom[_qp] = {_mom_x[_qp], _mom_y[_qp], _mom_z[_qp]};
 }
