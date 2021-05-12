@@ -157,9 +157,10 @@ namespace {
       typedef DofValueType ValuePushType;
       typedef Output FunctorValue;
 
-      CachedData(const Cache & cache) : _cache(cache) {}
+      CachedData(const Cache & cache,
+                 const FunctionBase<Output> & backup) : _cache(cache), _backup(backup.clone()) {}
 
-      CachedData(const CachedData & primary) : _cache(primary._cache) {}
+      CachedData(const CachedData & primary) : _cache(primary._cache), _backup(primary._backup->clone()) {}
 
       void init_context (FEMContext &) {}
 
@@ -169,14 +170,26 @@ namespace {
                            const Node & n,
                            bool /*extra_hanging_dofs*/,
                            const Real /*time*/)
-      { return libmesh_map_find(_cache, n); }
+      {
+        auto it = _cache.find(n);
+        if (it == _cache.end())
+          return (*_backup)(n);
+        else
+          return it->second;
+      }
 
       Output eval_at_point (const FEMContext &,
                             unsigned int /*i*/,
                             const Point & n,
                             const Real /*time*/,
                             bool /*skip_context_check*/)
-      { return libmesh_map_find(_cache, n); }
+      {
+        auto it = _cache.find(n);
+        if (it == _cache.end())
+          return (*_backup)(n);
+        else
+          return it->second;
+      }
 
     bool is_grid_projection() { return false; }
 
@@ -203,7 +216,11 @@ namespace {
     { libmesh_error(); }
 
     private:
+      // Data to return for cached points
       const Cache & _cache;
+
+      // Function to evaluate for uncached points
+      std::unique_ptr<FunctionBase<Output>> _backup;
   };
 
 
@@ -706,7 +723,14 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      CachedData<Number> f(interp_caches[problem_id]);
+      // We may need to use existing data values in places where the
+      // from app domain doesn't overlap
+      MeshFunction to_func (es, *to_sys->current_local_solution,
+                            to_sys->get_dof_map(), var_num);
+      to_func.init();
+
+      CachedData<Number> f(interp_caches[problem_id],
+                           to_func);
       libMesh::VectorSetAction<Number> setter(*to_sys->solution);
       const std::vector<unsigned int> varvec(1, var_num);
 
