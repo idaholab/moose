@@ -81,4 +81,12 @@
     mumps = true
     abs_zero = 1e-9
   []
+  [twod_y_channel_upwind_frictional_porosity_function]
+    type = Exodiff
+    input = rotated-2d-bkt-function-porosity.i
+    exodiff = rotated-2d-bkt-function-porosity_out.e
+    requirement = 'The system shall be able to solve a two-dimensional y-channel problem with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
+    ad_indexing_type = 'global'
+    mumps = true
+  []
 []
