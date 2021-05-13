@@ -67,7 +67,7 @@
     input = 'gray_lambert_cavity.i'
     cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.5 0.5 ; 1 1 1 1; 1 1 1 1"'
     expect_err = 'view_factors must be provided as square array. Row 1 has 2 entries.'
-    requirement = 'The system shall check consistency of the view_factors entry.'
+    requirement = 'The system shall check consistency of the view_factors entry shape.'
     design = 'ConstantViewFactorSurfaceRadiation.md'
   [../]
 
@@ -77,7 +77,7 @@
     cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
     expect_err = 'view_factors row 1 sums to 0.95.'
     compiler = '!GCC'
-    requirement = 'The system shall check consistency of the view_factors entry.'
+    requirement = 'The system shall check consistency of the view_factors entry norm.'
     design = 'ConstantViewFactorSurfaceRadiation.md'
   [../]
 
@@ -120,7 +120,7 @@
     type = CSVDiff
     input = 'gray_lambert_cavity_automatic_vf_3D.i'
     csvdiff = 'gray_lambert_cavity_automatic_vf_3D_out.csv'
-    requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject.'
+    requirement = 'The system shall compute radiative transfer between gray Lambert surfaces in 3D when the view factors are provided by a userobject.'
     design = 'ViewFactorObjectSurfaceRadiation.md'
     mesh_mode = REPLICATED
   [../]
