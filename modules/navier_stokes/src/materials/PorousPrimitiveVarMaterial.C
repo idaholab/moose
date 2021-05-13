@@ -92,7 +92,9 @@ PorousPrimitiveVarMaterial::PorousPrimitiveVarMaterial(const InputParameters & p
     _mom(declareADProperty<RealVectorValue>(NS::momentum)),
     _mom_x(declareADProperty<Real>(NS::momentum_x)),
     _mom_y(declareADProperty<Real>(NS::momentum_y)),
-    _mom_z(declareADProperty<Real>(NS::momentum_z))
+    _mom_z(declareADProperty<Real>(NS::momentum_z)),
+    _speed(declareADProperty<Real>(NS::speed)),
+    _rho_et(declareADProperty<Real>(NS::total_energy_density))
 {
   if (_mesh.dimension() >= 2 && !isCoupled(NS::superficial_velocity_y))
     mooseError("You must couple in a superficial y-velocity when solving 2D or 3D problems.");
@@ -135,9 +137,11 @@ PorousPrimitiveVarMaterial::computeQpProperties()
   _sup_mom_y_dot[_qp] = _rho[_qp] * _sup_vel_y_dot[_qp] + rho_dot * _sup_vel_y[_qp];
   _sup_mom_z_dot[_qp] = _rho[_qp] * _sup_vel_z_dot[_qp] + rho_dot * _sup_vel_z[_qp];
 
-  ADReal e, de_dp, de_drho;
-  _fluid.e_from_p_rho(_pressure[_qp], _rho[_qp], e, de_dp, de_drho);
-  const auto e_dot = de_dp * _pressure_dot[_qp] + de_drho * rho_dot;
+  const auto v = 1. / _rho[_qp];
+  const auto v_dot = -rho_dot / (_rho[_qp] * _rho[_qp]);
+  ADReal e, de_dT, de_dv;
+  _fluid.e_from_T_v(_T_fluid[_qp], v, e, de_dT, de_dv);
+  const auto e_dot = de_dT * _T_fluid_dot[_qp] + de_dv * v_dot;
   const auto et = e + velocity * velocity / 2.;
   const auto velocity_dot =
       VectorValue<ADReal>(_sup_vel_x_dot[_qp], _sup_vel_y_dot[_qp], _sup_vel_z_dot[_qp]) /
@@ -149,4 +153,16 @@ PorousPrimitiveVarMaterial::computeQpProperties()
   _mom_y[_qp] = _sup_mom_y[_qp] / _epsilon[_qp];
   _mom_z[_qp] = _sup_mom_z[_qp] / _epsilon[_qp];
   _mom[_qp] = {_mom_x[_qp], _mom_y[_qp], _mom_z[_qp]};
+
+  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
+  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
+  // So add a bit of noise to avoid this failure mode.
+  if ((MooseUtils::absoluteFuzzyEqual(velocity(0), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(velocity(1), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(velocity(2), 0)))
+    _speed[_qp] = 1e-42;
+  else
+    _speed[_qp] = velocity.norm();
+
+  _rho_et[_qp] = _rho[_qp] * et;
 }
