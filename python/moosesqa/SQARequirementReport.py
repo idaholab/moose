@@ -24,6 +24,7 @@ from .LogHelper import LogHelper
 @mooseutils.addProperty('specs', ptype=str)
 @mooseutils.addProperty('test_names', ptype=set)
 @mooseutils.addProperty('global_report', ptype=bool, default=False)
+@mooseutils.addProperty('include_non_testable', ptype=bool, default=False)
 class SQARequirementReport(SQAReport):
     """
     Data wrapper for SQA requirement/design/issue information.
@@ -55,7 +56,7 @@ class SQARequirementReport(SQAReport):
                 raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
 
         # Build Requirement objects and remove directory based dict
-        req_dict = get_requirements_from_tests(directories, specs.split())
+        req_dict = get_requirements_from_tests(directories, specs.split(), self.include_non_testable)
         requirements = []
         for values in req_dict.values():
             requirements += values
