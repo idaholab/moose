@@ -32,7 +32,7 @@ ACBarrierFunction::ACBarrierFunction(const InputParameters & parameters)
     _d2mudvar2(getMaterialPropertyDerivative<Real>("mu", _uname, _uname)),
     _vname(getParam<std::vector<VariableName>>("v")),
     _d2mudvardeta(_n_eta),
-    _eta_map(getParameterJvarMap("v"))
+    _vmap(getParameterJvarMap("v"))
 {
   for (unsigned int i = 0; i < _n_eta; ++i)
     _d2mudvardeta[i] = &getMaterialPropertyDerivative<Real>("mu", _uname, _vname[i]);
@@ -75,15 +75,15 @@ ACBarrierFunction::computeQpOffDiagJacobian(unsigned int jvar)
     if (i != j)
       sum_etai2 += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
-  auto etavar = mapJvarToCvar(jvar, _eta_map);
+  auto etavar = mapJvarToCvar(jvar, _vmap);
   if (etavar >= 0)
   {
-  df0deta_base = (*_vals[etavar])[_qp] * (*_vals[etavar])[_qp] - 1.0 +
-                 2.0 * _gamma[_qp] * (_u[_qp] * _u[_qp] + sum_etai2);
-  df0deta = (*_vals[etavar])[_qp] * df0deta_base;
+    df0deta_base = (*_vals[etavar])[_qp] * (*_vals[etavar])[_qp] - 1.0 +
+                   2.0 * _gamma[_qp] * (_u[_qp] * _u[_qp] + sum_etai2);
+    df0deta = (*_vals[etavar])[_qp] * df0deta_base;
 
-  return ((*_d2mudvardeta[etavar])[_qp] * calculateF0() + _dmudvar[_qp] * df0deta) * _phi[_j][_qp] *
-         _test[_i][_qp] * _L[_qp];
+    return ((*_d2mudvardeta[etavar])[_qp] * calculateF0() + _dmudvar[_qp] * df0deta) *
+           _phi[_j][_qp] * _test[_i][_qp] * _L[_qp];
   }
   return 0.0;
 }

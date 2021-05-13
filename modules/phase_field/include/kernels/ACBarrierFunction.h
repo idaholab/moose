@@ -33,10 +33,10 @@ protected:
   const MaterialProperty<Real> & _gamma;
   const MaterialProperty<Real> & _dmudvar;
   const MaterialProperty<Real> & _d2mudvar2;
-  const JvarMap & _eta_map;
 
   const std::vector<VariableName> _vname;
   std::vector<const MaterialProperty<Real> *> _d2mudvardeta;
+  const JvarMap & _vmap;
 
 private:
   Real calculateF0(); /// calculates the free energy function
