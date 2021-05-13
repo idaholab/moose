@@ -127,6 +127,21 @@ HeliumFluidProperties::e_from_T_v(
   de_dv = 0;
 }
 
+ADReal
+HeliumFluidProperties::e_from_T_v(const ADReal & T, const ADReal & /*v*/) const
+{
+  return _cv * T;
+}
+
+void
+HeliumFluidProperties::e_from_T_v(
+    const ADReal & T, const ADReal & v, ADReal & e, ADReal & de_dT, ADReal & de_dv) const
+{
+  e = e_from_T_v(T, v);
+  de_dT = _cv;
+  de_dv = 0;
+}
+
 Real
 HeliumFluidProperties::T_from_v_e(Real /*v*/, Real e) const
 {

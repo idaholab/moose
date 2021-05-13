@@ -324,6 +324,12 @@ public:
   using SinglePhaseFluidProperties::e_from_T_v;
   Real e_from_T_v(Real T, Real /*v*/) const override;
   void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  ADReal e_from_T_v(const ADReal & T, const ADReal & v) const override;
+  void e_from_T_v(const ADReal & T,
+                  const ADReal & v,
+                  ADReal & e,
+                  ADReal & de_dT,
+                  ADReal & de_dv) const override;
 
   using SinglePhaseFluidProperties::p_from_T_v;
   Real p_from_T_v(Real T, Real v) const override;
