@@ -62,5 +62,19 @@ class TestGitUtilsCommit(MooseDocsTestCase):
         self.assertToken(ast(0,0), "ErrorToken")
         self.assertIn("The submodule 'wrong' was not located", ast(0,0)['message'])
 
+    def testJoin(self):
+        ast = self.tokenize('[!git!submodule-hash url=https://github.com/petsc/petsc/commit/](petsc)')
+        link = ast(0,0)
+        self.assertIn('/commit/', link['url'])
+
+        ast = self.tokenize('[!git!submodule-hash url=https://github.com/petsc/petsc/commit](petsc)')
+        link = ast(0,0)
+        self.assertIn('/commit/', link['url'])
+
+        ast = self.tokenize('[!git!submodule-hash url=https://github.com/petsc/petsc/commit///](petsc)')
+        link = ast(0,0)
+        self.assertIn('/commit/', link['url'])
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
