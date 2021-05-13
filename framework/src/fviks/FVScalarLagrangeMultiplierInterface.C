@@ -35,11 +35,11 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _elem_is_one = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
+  _elem_is_one = sub1().find(fi.elem().subdomain_id()) != sub1().end();
 
 #ifndef NDEBUG
-  const auto ft1 = fi.faceType(_var1.name());
-  const auto ft2 = fi.faceType(_var2.name());
+  const auto ft1 = fi.faceType(var1().name());
+  const auto ft2 = fi.faceType(var2().name());
   constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
   constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
   constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
@@ -52,8 +52,8 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
               "The lambda variable should be first order");
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
 
-  const auto var_elem_num = _elem_is_one ? _var1.number() : _var2.number();
-  const auto var_neigh_num = _elem_is_one ? _var2.number() : _var1.number();
+  const auto var_elem_num = _elem_is_one ? var1().number() : var2().number();
+  const auto var_neigh_num = _elem_is_one ? var2().number() : var1().number();
 
   const auto r = MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord();
 
@@ -77,11 +77,11 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _elem_is_one = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
+  _elem_is_one = sub1().find(fi.elem().subdomain_id()) != sub1().end();
 
 #ifndef NDEBUG
-  const auto ft1 = fi.faceType(_var1.name());
-  const auto ft2 = fi.faceType(_var2.name());
+  const auto ft1 = fi.faceType(var1().name());
+  const auto ft2 = fi.faceType(var2().name());
   constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
   constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
   constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
@@ -93,9 +93,9 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
 
-  const auto & elem_dof_indices = _elem_is_one ? _var1.dofIndices() : _var2.dofIndices();
+  const auto & elem_dof_indices = _elem_is_one ? var1().dofIndices() : var2().dofIndices();
   const auto & neigh_dof_indices =
-      _elem_is_one ? _var2.dofIndicesNeighbor() : _var1.dofIndicesNeighbor();
+      _elem_is_one ? var2().dofIndicesNeighbor() : var1().dofIndicesNeighbor();
   mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
               "We're currently built to use CONSTANT MONOMIALS");
 

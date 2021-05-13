@@ -146,6 +146,12 @@ protected:
   /// Thread id
   const THREAD_ID _tid;
 
+  /// Whether the current element is associated with variable/subdomain 1 or 2
+  bool _elem_is_one;
+
+  /// The Assembly object, which keeps track of stuff related to assembling
+  Assembly & _assembly;
+
 private:
   SystemBase & _sys;
   SubProblem & _subproblem;
@@ -156,11 +162,5 @@ private:
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
 
-  Assembly & _assembly;
-
-  bool _elem_is_one;
-
   const MooseMesh & _mesh;
-
-  friend class FVScalarLagrangeMultiplierInterface;
 };
