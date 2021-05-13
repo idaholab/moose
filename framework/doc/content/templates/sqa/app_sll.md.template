@@ -37,5 +37,5 @@ summarized in the follwoing abstract [!cite](permann2020moose).
 > events, compressible and incompressible fluid flow, microstructure evolution, and advanced
 > manufacturing processes.
 
-Current Version of [!ac](MOOSE): [!git!submodule-hash url=https://github.com/idaholab/moose/commit](moose)]
+Current Version of [!ac](MOOSE): [!git!submodule-hash url=https://github.com/idaholab/moose/commit](moose)
 !if-end!
