@@ -15,9 +15,9 @@ InputParameters
 BarrierFunctionMaterial::validParams()
 {
   InputParameters params = OrderParameterFunctionMaterial::validParams();
-  params.addClassDescription("Helper material to provide g(eta) and its derivative in a "
-                             "polynomial.\nSIMPLE: eta^2*(1-eta)^2\nLOW: eta*(1-eta)"
-                             "\nHIGH: eta^2*(1-eta^2)^2");
+  params.addClassDescription("Helper material to provide $g(\\eta)$ and its derivative in a "
+                             "polynomial.\nSIMPLE: $\\eta^2(1-\\eta)^2$\nLOW: $\\eta(1-\\eta)$"
+                             "\nHIGH: $\\eta^2(1-\\eta^2)^2$");
   MooseEnum g_order("SIMPLE=0 LOW HIGH", "SIMPLE");
   params.addParam<MooseEnum>("g_order", g_order, "Polynomial order of the barrier function g(eta)");
   params.addParam<bool>("well_only",
