@@ -436,6 +436,21 @@ IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/, Real & e, Real & de_dT, 
   de_dv = 0.0;
 }
 
+ADReal
+IdealGasFluidProperties::e_from_T_v(const ADReal & T, const ADReal & /*v*/) const
+{
+  return _cv * T;
+}
+
+void
+IdealGasFluidProperties::e_from_T_v(
+    const ADReal & T, const ADReal & /*v*/, ADReal & e, ADReal & de_dT, ADReal & de_dv) const
+{
+  e = _cv * T;
+  de_dT = _cv;
+  de_dv = 0.0;
+}
+
 Real
 IdealGasFluidProperties::p_from_T_v(Real T, Real v) const
 {

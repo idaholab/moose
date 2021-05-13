@@ -84,6 +84,12 @@ public:
                             ADReal & de_drho) const override;
   virtual Real e_from_T_v(Real T, Real v) const override;
   virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  virtual ADReal e_from_T_v(const ADReal & T, const ADReal & v) const override;
+  virtual void e_from_T_v(const ADReal & T,
+                          const ADReal & v,
+                          ADReal & e,
+                          ADReal & de_dT,
+                          ADReal & de_dv) const override;
   virtual Real p_from_T_v(Real T, Real v) const override;
   virtual void p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const override;
   virtual Real h_from_T_v(Real T, Real v) const override;
