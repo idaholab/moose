@@ -10,7 +10,6 @@ import os
 import datetime
 import mooseutils
 import MooseDocs
-import urllib.parse
 from ..base import components
 from ..common import exceptions
 from ..tree import tokens, html
@@ -77,7 +76,7 @@ class SubmoduleHashCommand(command.CommandComponent):
                 if url is None:
                     core.Word(parent, content=ginfo[1])
                 else:
-                    core.Link(parent, url=urllib.parse.urljoin(url, ginfo[1]), string=ginfo[1])
+                    core.Link(parent, url=f"{url.rstrip('/')}/{ginfo[1]}", string=ginfo[1])
                 return parent
 
         msg = "The submodule '{}' was not located, the available submodules are: {}"
