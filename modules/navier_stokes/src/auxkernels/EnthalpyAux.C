@@ -19,7 +19,7 @@ EnthalpyAux::validParams()
   params.addRequiredCoupledVar("rho_et", "Total energy");
   params.addCoupledVar("pressure", "Coupled value pressure");
   params.addClassDescription("This AuxKernel computes the specific enthalpy of the fluid"
-      "from the total energy and the pressure.");
+                             "from the total energy and the pressure.");
 
   return params;
 }

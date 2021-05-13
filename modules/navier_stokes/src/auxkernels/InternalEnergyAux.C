@@ -20,7 +20,7 @@ InternalEnergyAux::validParams()
   params.addRequiredCoupledVar("pressure", "Pressure");
   params.addRequiredParam<UserObjectName>("fp", "The name of the equation of state user object");
   params.addClassDescription("This AuxKernel computes the internal energy based on the equation "
-      "of state / fluid properties and the local pressure and density.");
+                             "of state / fluid properties and the local pressure and density.");
 
   return params;
 }

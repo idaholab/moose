@@ -24,8 +24,7 @@ MomentumFreeSlipBC::validParams()
   params.addCoupledVar("rho_v", "y-component of velocity");
   params.addCoupledVar("rho_w", "z-component of velocity");
   params.addClassDescription("Implements free slip boundary conditions for the Navier Stokes"
-      "momentum equation.")
-
+                             "momentum equation.");
   return params;
 }
 
