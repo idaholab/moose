@@ -47,7 +47,7 @@ ComputeDamageStress::computeQpStress()
   ComputeFiniteStrainElasticStress::computeQpStress();
 
   _damage_model->setQp(_qp);
-  _damage_model->updateDamage();
+  _damage_model->updateDamage(&_stress[_qp]);
   _damage_model->updateStressForDamage(_stress[_qp]);
   _damage_model->finiteStrainRotation(_rotation_increment[_qp]);
   _damage_model->updateJacobianMultForDamage(_Jacobian_mult[_qp]);

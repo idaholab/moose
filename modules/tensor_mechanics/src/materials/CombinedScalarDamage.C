@@ -54,7 +54,7 @@ CombinedScalarDamage::initialSetup()
 }
 
 void
-CombinedScalarDamage::updateQpDamageIndex()
+CombinedScalarDamage::updateQpDamageIndex(const RankTwoTensor * /*stress = nullptr*/)
 {
   switch (_combination_type)
   {

@@ -30,7 +30,7 @@ ScalarMaterialDamage::ScalarMaterialDamage(const InputParameters & parameters)
 }
 
 void
-ScalarMaterialDamage::updateQpDamageIndex()
+ScalarMaterialDamage::updateQpDamageIndex(const RankTwoTensor * /*stress*/)
 {
   _damage_index[_qp] = _damage_property[_qp];
 

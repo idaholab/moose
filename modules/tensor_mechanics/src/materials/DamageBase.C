@@ -41,7 +41,7 @@ DamageBase::setQp(unsigned int qp)
 }
 
 void
-DamageBase::updateDamage()
+DamageBase::updateDamage(const RankTwoTensor * /*stress = nullptr*/)
 {
 }
 

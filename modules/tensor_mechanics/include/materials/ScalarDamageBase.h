@@ -25,7 +25,7 @@ public:
 
   virtual void initQpStatefulProperties() override;
 
-  virtual void updateDamage() override;
+  virtual void updateDamage(const RankTwoTensor * stress = nullptr) override;
 
   virtual void updateStressForDamage(RankTwoTensor & stress_new) override;
 
@@ -44,7 +44,7 @@ protected:
   const MaterialPropertyName _damage_index_name;
 
   /// Update the damage index at the current qpoint
-  virtual void updateQpDamageIndex() = 0;
+  virtual void updateQpDamageIndex(const RankTwoTensor * stress = nullptr) = 0;
 
   ///@{ Material property that provides the damage index
   MaterialProperty<Real> & _damage_index;

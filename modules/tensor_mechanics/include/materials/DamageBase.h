@@ -31,7 +31,7 @@ public:
   /**
    * Update the internal variable(s) that evolve the damage
    */
-  virtual void updateDamage();
+  virtual void updateDamage(const RankTwoTensor * stress = nullptr);
 
   /**
    * Update the current stress tensor for effects of damage.

@@ -64,7 +64,7 @@ ScalarDamageBase::getQpDamageIndex(unsigned int qp)
 }
 
 void
-ScalarDamageBase::updateDamage()
+ScalarDamageBase::updateDamage(const RankTwoTensor * /*stress*/)
 {
   updateQpDamageIndex();
 }

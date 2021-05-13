@@ -24,7 +24,7 @@ public:
   ScalarMaterialDamage(const InputParameters & parameters);
 
 protected:
-  virtual void updateQpDamageIndex() override;
+  virtual void updateQpDamageIndex(const RankTwoTensor * stress = nullptr) override;
 
   ///@{ Material property that provides the damage index
   const MaterialProperty<Real> & _damage_property;

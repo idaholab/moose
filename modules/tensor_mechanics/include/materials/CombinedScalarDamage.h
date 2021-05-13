@@ -24,7 +24,7 @@ public:
   void initialSetup() override;
 
 protected:
-  virtual void updateQpDamageIndex() override;
+  virtual void updateQpDamageIndex(const RankTwoTensor * stress) override;
 
   enum class CombinationType
   {
