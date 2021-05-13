@@ -228,13 +228,13 @@ PCNSFVKTBC::computeQpResidual()
       VectorValue<ADReal>(sup_vel_x_interior, sup_vel_y_interior, sup_vel_z_interior);
   const auto u_interior = sup_vel_interior / eps_interior;
   const auto rho_interior = _fluid.rho_from_p_T(pressure_interior, T_fluid_interior);
-  const auto e_interior = _fluid.e_from_p_rho(pressure_interior, rho_interior);
   const auto specific_volume_interior = 1. / rho_interior;
+  const auto e_interior = _fluid.e_from_T_v(T_fluid_interior, specific_volume_interior);
   const auto sup_vel_boundary =
       VectorValue<ADReal>(sup_vel_x_boundary, sup_vel_y_boundary, sup_vel_z_boundary);
   const auto u_boundary = sup_vel_boundary / eps_boundary;
-  const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
   const auto specific_volume_boundary = 1. / rho_boundary;
+  const auto e_boundary = _fluid.e_from_T_v(T_fluid_boundary, specific_volume_boundary);
 
   const auto c_interior = _fluid.c_from_v_e(specific_volume_interior, e_interior);
   const auto c_boundary = _fluid.c_from_v_e(specific_volume_boundary, e_boundary);

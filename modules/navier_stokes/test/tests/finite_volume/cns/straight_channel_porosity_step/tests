@@ -79,5 +79,6 @@
     ad_indexing_type = 'global'
     heavy = true
     mumps = true
+    abs_zero = 1e-9
   []
 []

@@ -155,14 +155,14 @@ PCNSFVKT::computeQpResidual()
   const auto sup_vel_elem = VectorValue<ADReal>(sup_vel_x_elem, sup_vel_y_elem, sup_vel_z_elem);
   const auto u_elem = sup_vel_elem / _eps_elem[_qp];
   const auto rho_elem = _fluid.rho_from_p_T(pressure_elem, T_fluid_elem);
-  const auto e_elem = _fluid.e_from_p_rho(pressure_elem, rho_elem);
   const auto specific_volume_elem = 1. / rho_elem;
+  const auto e_elem = _fluid.e_from_T_v(T_fluid_elem, specific_volume_elem);
   const auto sup_vel_neighbor =
       VectorValue<ADReal>(sup_vel_x_neighbor, sup_vel_y_neighbor, sup_vel_z_neighbor);
   const auto u_neighbor = sup_vel_neighbor / _eps_neighbor[_qp];
   const auto rho_neighbor = _fluid.rho_from_p_T(pressure_neighbor, T_fluid_neighbor);
-  const auto e_neighbor = _fluid.e_from_p_rho(pressure_neighbor, rho_neighbor);
   const auto specific_volume_neighbor = 1. / rho_neighbor;
+  const auto e_neighbor = _fluid.e_from_T_v(T_fluid_neighbor, specific_volume_neighbor);
 
   const auto c_elem = _fluid.c_from_v_e(specific_volume_elem, e_elem);
   const auto c_neighbor = _fluid.c_from_v_e(specific_volume_neighbor, e_neighbor);
