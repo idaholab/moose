@@ -193,7 +193,9 @@ of field enhancement might be - it is a well known issue to separate out the two
 effects). The surface normal is ill-defined at the corner node, and thus the
 boundary condition suggests that the current must change direction instantaneously
 with the modeled conducting surface. This results in a possibly infinite electric
-field magnitude.
+field magnitude. Note that all color bars in the presented results are scaled
+for clarity due to the presence of the singularity. Maximum field magnitude at
+the singularity is noted on each figure.
 
 Rounding the corner is a common way to try to avoid this issue (as mentioned in
 [!citep](jin-fem) and others), and the impact of a round corner with radius of
@@ -208,7 +210,7 @@ magnitude are extremely local (made even more so due to the level of local
 refinement used here) due to the nature of the finite element method (minimizing
 global error while possibly allowing local ones). Away from this singularity,
 this property allows us to successfully use this model to examine evanescent wave
-decay in the smaller waveguide region on the right, away from the singularity point.
+decay in the smaller waveguide region on the right.
 
 !media media/evanescent_field_results_20.png
        style=width:100%;margin:auto;
