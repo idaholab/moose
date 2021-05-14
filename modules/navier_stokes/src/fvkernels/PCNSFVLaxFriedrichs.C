@@ -29,6 +29,9 @@ PCNSFVLaxFriedrichs::validParams()
       "scalar_prop_name",
       "An optional material property name that can be used to specify an advected material "
       "property. If this is not supplied the variable variable will be used.");
+  // this is going to require evaluation of materials on either side of the face that will compute
+  // gradients so we need two ghost layers
+  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
