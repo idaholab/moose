@@ -121,7 +121,7 @@ template <
     typename std::enable_if<std::is_same<typename W<T>::index_type, unsigned int>::value &&
                                 std::is_same<typename W2<T2>::index_type, unsigned int>::value,
                             int>::type = 0>
-typename CompareTypes<T, T2>::supertype
+typename libMesh::CompareTypes<T, T2>::supertype
 dotProduct(const W<T> & a, const W2<T2> & b)
 {
   return a * b;
@@ -138,7 +138,7 @@ template <typename T,
                                       std::is_same<typename W2<T2>::index_type,
                                                    std::tuple<unsigned int, unsigned int>>::value,
                                   int>::type = 0>
-typename CompareTypes<T, T2>::supertype
+typename libMesh::CompareTypes<T, T2>::supertype
 dotProduct(const W<T> & a, const W2<T2> & b)
 {
   return a.contract(b);
@@ -159,7 +159,7 @@ dotProduct(const W<T> & a, const W2<T2> & b)
  */
 template <typename C,
           typename T,
-          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+          typename R = typename libMesh::CompareTypes<typename C::value_type, T>::supertype>
 R
 poly(const C & c, const T x, const bool derivative = false)
 {
@@ -194,7 +194,7 @@ poly(const C & c, const T x, const bool derivative = false)
  */
 template <typename C,
           typename T,
-          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+          typename R = typename libMesh::CompareTypes<typename C::value_type, T>::supertype>
 R
 polynomial(const C & c, const T x)
 {
@@ -215,7 +215,7 @@ polynomial(const C & c, const T x)
  */
 template <typename C,
           typename T,
-          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+          typename R = typename libMesh::CompareTypes<typename C::value_type, T>::supertype>
 R
 polynomialDerivative(const C & c, const T x)
 {
