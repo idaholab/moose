@@ -92,14 +92,14 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
         this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _tid(getParam<THREAD_ID>("_tid")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _assembly(_subproblem.assembly(_tid)),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
     _var2(_sys.getFVVariable<Real>(_tid,
                                    isParamValid("variable2")
                                        ? getParam<NonlinearVariableName>("variable2")
                                        : getParam<NonlinearVariableName>("variable1"))),
-    _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

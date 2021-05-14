@@ -149,12 +149,14 @@ protected:
   /// Whether the current element is associated with variable/subdomain 1 or 2
   bool _elem_is_one;
 
-  /// The Assembly object, which keeps track of stuff related to assembling
+  /// The SubProblem
+  SubProblem & _subproblem;
+
+  /// The Assembly object
   Assembly & _assembly;
 
 private:
   SystemBase & _sys;
-  SubProblem & _subproblem;
 
   MooseVariableFV<Real> & _var1;
   MooseVariableFV<Real> & _var2;
