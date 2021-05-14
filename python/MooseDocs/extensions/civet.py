@@ -12,6 +12,7 @@ import time
 import mooseutils
 import collections
 import uuid
+import MooseDocs
 from ..base import components, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from ..common import exceptions
@@ -83,17 +84,18 @@ class CivetExtension(command.CommandExtension):
             start = time.time()
             LOG.info("Collecting CIVET results...")
 
-            sites = list()
-            hashes = mooseutils.git_merge_commits()
-            for category in self.get('remotes').values():
-                sites.append((category['url'], category['repo']))
-
-            self.__database = mooseutils.get_civet_results(hashes=hashes,
-                                                           sites=sites,
-                                                           cache=self.get('test_results_cache'),
-                                                           possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
-                                                           logger=LOG)
-
+            self.__database = dict()
+            for name, category in self.get('remotes').items():
+                sites = [(category['url'], category['repo'])]
+                working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
+                hashes = mooseutils.git_merge_commits(working_dir)
+                LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
+                local_db = mooseutils.get_civet_results(hashes=hashes,
+                                                        sites=sites,
+                                                        cache=self.get('test_results_cache'),
+                                                        possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
+                                                        logger=LOG)
+                self.__database.update(local_db)
             LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
