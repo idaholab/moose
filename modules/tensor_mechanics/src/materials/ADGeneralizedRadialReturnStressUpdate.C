@@ -38,12 +38,10 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "inelastic_strain_rate_name",
       "Name of the material property that stores the inelastic strain rate");
-  params.addRangeCheckedParam<RealVectorValue>(
-      "rotation_angles",
-      "rotation_angles_size = 3",
-      "Provide the rotation angles for the transformation matrix. "
-      "This should be a vector that provides "
-      "the rotation angles about z-, y-, and x-axis, respectively.");
+  params.addParam<RealVectorValue>("rotation_angles",
+                                   "Provide the rotation angles for the transformation matrix. "
+                                   "This should be a vector that provides "
+                                   "the rotation angles about z-, y-, and x-axis, respectively.");
   return params;
 }
 
@@ -64,9 +62,12 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
     _max_integration_error_time_step(std::numeric_limits<Real>::max()),
     _angle(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
                                            : RealVectorValue(0.0, 0.0, 0.0)),
+    _transformation_tensor(6),
+    _hill_constants(6)
 
-    _transformation_tensor(6, 6)
 {
+  for (unsigned int i = 0; i < _transformation_tensor.size(); ++i)
+    _transformation_tensor[i].resize(6);
 }
 
 void
@@ -190,96 +191,153 @@ ADGeneralizedRadialReturnStressUpdate::outputIterationSummary(std::stringstream 
 }
 
 void
-ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(ADDenseMatrix & hill_tensor)
+ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(std::vector<Real> & hill_constants_input)
 {
-  _transformation_tensor.zero();
+  const Real sz = std::sin(_angle(0) * libMesh::pi / 180.0);
+  const Real cz = std::cos(_angle(0) * libMesh::pi / 180.0);
 
-  const Real s = std::sin(_angle(0) * libMesh::pi / 180.0);
-  const Real c = std::cos(_angle(0) * libMesh::pi / 180.0);
+  const Real sy = std::sin(_angle(1) * libMesh::pi / 180.0);
+  const Real cy = std::cos(_angle(1) * libMesh::pi / 180.0);
 
-  // rotation about z-axis to provide the default transformation matrix
-  _transformation_tensor(0, 0) = c * c;
-  _transformation_tensor(0, 1) = s * s;
-  _transformation_tensor(0, 5) = 2 * c * s;
+  const Real sx = std::sin(_angle(2) * libMesh::pi / 180.0);
+  const Real cx = std::cos(_angle(2) * libMesh::pi / 180.0);
 
-  _transformation_tensor(1, 0) = s * s;
-  _transformation_tensor(1, 1) = c * c;
-  _transformation_tensor(1, 5) = -2 * c * s;
+  // transformation matrix is formed by performing the ZYX rotation
+  _transformation_tensor[0][0] = cy * cy * cz * cz;
+  _transformation_tensor[0][1] = sz * sz * cy * cy;
+  _transformation_tensor[0][2] = sy * sy;
+  _transformation_tensor[0][3] = -2.0 * sy * sz * cy;
+  _transformation_tensor[0][4] = 2.0 * sy * cy * cz;
+  _transformation_tensor[0][5] = 2.0 * sz * cy * cy * cz;
 
-  _transformation_tensor(2, 2) = 1.0;
+  _transformation_tensor[1][0] =
+      sx * sx * sy * sy * cz * cz + 2.0 * sx * sy * sz * cx * cz + sz * sz * cx * cx;
+  _transformation_tensor[1][1] =
+      sx * sx * sz * sz * sy * sy - 2.0 * sx * sy * sz * cx * cz + cx * cx * cz * cz;
+  _transformation_tensor[1][2] = sx * sx * cy * cy;
+  _transformation_tensor[1][3] = 2.0 * sx * sx * sz * sy * cy + 2.0 * sx * cx * cy * cz;
+  _transformation_tensor[1][4] = -2.0 * sx * sx * sy * cy * cz + 2.0 * sx * sz * cx * cz;
+  _transformation_tensor[1][5] = -2.0 * (-sz * sz + cz * cz) * sx * sy * cx +
+                                 2.0 * sx * sx * sy * sy * sz * cz - 2.0 * sz * cx * cx * cz;
 
-  _transformation_tensor(3, 3) = c;
-  _transformation_tensor(3, 4) = s;
+  _transformation_tensor[2][0] =
+      sx * sx * sz * sz - 2.0 * sx * sy * sz * cx * cz + sy * sy * cx * cx * cz * cz;
+  _transformation_tensor[2][1] =
+      sx * sx * cz * cz + 2.0 * sx * sy * sz * cx * cz + sy * sy * sz * sz * cx * cx;
+  _transformation_tensor[2][2] = cx * cx * cy * cy;
+  _transformation_tensor[2][3] = -2.0 * sx * cx * cy * cz + 2.0 * sy * sz * cx * cx * cy;
+  _transformation_tensor[2][4] = -2.0 * sx * sz * cx * cy - 2.0 * sy * cx * cx * cy * cz;
+  _transformation_tensor[2][5] = 2.0 * (-sz * sz + cz * cz) * sx * sy * cx -
+                                 2.0 * sx * sx * sz * cz + 2.0 * sy * sy * sz * cx * cx * cz;
 
-  _transformation_tensor(4, 3) = s;
-  _transformation_tensor(4, 4) = c;
+  _transformation_tensor[3][0] =
+      (-sx * sx + cx * cx) * sy * sz * cz + sx * sy * sy * cx * cz * cz - sx * sz * sz * cx;
+  _transformation_tensor[3][1] =
+      -(-sx * sx + cx * cx) * sy * sz * cz + sx * sy * sy * sz * sz * cx - sx * cx * cz * cz;
+  _transformation_tensor[3][2] = sx * cx * cy * cy;
+  _transformation_tensor[3][3] = (-sx * sx + cx * cx) * cy * cz + 2.0 * sx * sy * sz * cx * cy;
+  _transformation_tensor[3][4] = (-sx * sx + cx * cx) * sz * cy - 2.0 * sx * sy * cx * cy * cz;
+  _transformation_tensor[3][5] = -(-sx * sx + cx * cx) * (-sz * sz + cz * cz) * sy +
+                                 2.0 * sx * sy * sy * sz * cx * cz + 2.0 * sx * sz * cx * cz;
 
-  _transformation_tensor(5, 0) = -c * s;
-  _transformation_tensor(5, 1) = c * s;
-  _transformation_tensor(5, 5) = c * c - s * s;
+  _transformation_tensor[4][0] = sx * sz * cy * cz - sy * cx * cy * cz * cz;
+  _transformation_tensor[4][1] = -sx * sz * cy * cz - sy * sz * sz * cx * cy;
+  _transformation_tensor[4][2] = sy * cx * cy;
+  _transformation_tensor[4][3] = -(-sy * sy + cy * cy) * sz * cx - sx * sy * cz;
+  _transformation_tensor[4][4] = (-sy * sy + cy * cy) * cx * cz - sx * sy * sz;
+  _transformation_tensor[4][5] = -(-sz * sz + cz * cz) * sx * cy - 2.0 * sy * sz * cx * cy * cz;
 
-  // rotation about y-axis
-  if (_angle(1) != 0)
-  {
-    const Real s2 = std::sin(_angle(1) * libMesh::pi / 180.0);
-    const Real c2 = std::cos(_angle(1) * libMesh::pi / 180.0);
+  _transformation_tensor[5][0] = -sx * sy * cy * cz * cz - sz * cx * cy * cz;
+  _transformation_tensor[5][1] = -sx * sy * sz * sz * cy + sz * cx * cy * cz;
+  _transformation_tensor[5][2] = sx * sy * cy;
+  _transformation_tensor[5][3] = -(-sy * sy + cy * cy) * sx * sz + sy * cx * cz;
+  _transformation_tensor[5][4] = (-sy * sy + cy * cy) * sx * cz + sy * sz * cx;
+  _transformation_tensor[5][5] = (-sz * sz + cz * cz) * cx * cy - 2.0 * sx * sy * sz * cy * cz;
 
-    ADDenseMatrix transformation_tensor_y(6, 6);
+  // store hill constants
+  const Real & F = hill_constants_input[0];
+  const Real & G = hill_constants_input[1];
+  const Real & H = hill_constants_input[2];
+  const Real & L = hill_constants_input[3];
+  const Real & M = hill_constants_input[4];
+  const Real & N = hill_constants_input[5];
 
-    transformation_tensor_y(0, 0) = c2 * c2;
-    transformation_tensor_y(0, 2) = s2 * s2;
-    transformation_tensor_y(0, 4) = 2 * c2 * s2;
+  // rotated hill constants are calculated from rotated hill tensor, Hill_rot = Tm*Hill*Tm^T
+  _hill_constants[0] = -_transformation_tensor[1][0] *
+                           (-G * _transformation_tensor[2][2] - H * _transformation_tensor[2][1] +
+                            _transformation_tensor[2][0] * (G + H)) -
+                       _transformation_tensor[1][1] *
+                           (-F * _transformation_tensor[2][2] - H * _transformation_tensor[2][0] +
+                            _transformation_tensor[2][1] * (F + H)) -
+                       _transformation_tensor[1][2] *
+                           (-F * _transformation_tensor[2][1] - G * _transformation_tensor[2][0] +
+                            _transformation_tensor[2][2] * (F + G)) -
+                       2.0 * L * _transformation_tensor[1][4] * _transformation_tensor[2][4] -
+                       2.0 * M * _transformation_tensor[1][5] * _transformation_tensor[2][5] -
+                       2.0 * N * _transformation_tensor[1][3] * _transformation_tensor[2][3];
 
-    transformation_tensor_y(1, 1) = 1.0;
+  _hill_constants[1] = -_transformation_tensor[0][0] *
+                           (-G * _transformation_tensor[2][2] - H * _transformation_tensor[2][1] +
+                            _transformation_tensor[2][0] * (G + H)) -
+                       _transformation_tensor[0][1] *
+                           (-F * _transformation_tensor[2][2] - H * _transformation_tensor[2][0] +
+                            _transformation_tensor[2][1] * (F + H)) -
+                       _transformation_tensor[0][2] *
+                           (-F * _transformation_tensor[2][1] - G * _transformation_tensor[2][0] +
+                            _transformation_tensor[2][2] * (F + G)) -
+                       2.0 * L * _transformation_tensor[0][4] * _transformation_tensor[2][4] -
+                       2.0 * M * _transformation_tensor[0][5] * _transformation_tensor[2][5] -
+                       2.0 * N * _transformation_tensor[0][3] * _transformation_tensor[2][3];
 
-    transformation_tensor_y(2, 0) = s2 * s2;
-    transformation_tensor_y(2, 2) = c2 * c2;
-    transformation_tensor_y(2, 4) = -2 * c2 * s2;
+  _hill_constants[2] = -_transformation_tensor[0][0] *
+                           (-G * _transformation_tensor[1][2] - H * _transformation_tensor[1][1] +
+                            _transformation_tensor[1][0] * (G + H)) -
+                       _transformation_tensor[0][1] *
+                           (-F * _transformation_tensor[1][2] - H * _transformation_tensor[1][0] +
+                            _transformation_tensor[1][1] * (F + H)) -
+                       _transformation_tensor[0][2] *
+                           (-F * _transformation_tensor[1][1] - G * _transformation_tensor[1][0] +
+                            _transformation_tensor[1][2] * (F + G)) -
+                       2.0 * L * _transformation_tensor[0][4] * _transformation_tensor[1][4] -
+                       2.0 * M * _transformation_tensor[0][5] * _transformation_tensor[1][5] -
+                       2.0 * N * _transformation_tensor[0][3] * _transformation_tensor[1][3];
 
-    transformation_tensor_y(3, 3) = c2;
-    transformation_tensor_y(3, 5) = -s2;
+  _hill_constants[3] = 0.5 * _transformation_tensor[4][0] *
+                           (-G * _transformation_tensor[4][2] - H * _transformation_tensor[4][1] +
+                            _transformation_tensor[4][0] * (G + H)) +
+                       0.5 * _transformation_tensor[4][1] *
+                           (-F * _transformation_tensor[4][2] - H * _transformation_tensor[4][0] +
+                            _transformation_tensor[4][1] * (F + H)) +
+                       0.5 * _transformation_tensor[4][2] *
+                           (-F * _transformation_tensor[4][1] - G * _transformation_tensor[4][0] +
+                            _transformation_tensor[4][2] * (F + G)) +
+                       L * _transformation_tensor[4][4] * _transformation_tensor[4][4] +
+                       M * _transformation_tensor[4][5] * _transformation_tensor[4][5] +
+                       N * _transformation_tensor[4][3] * _transformation_tensor[4][3];
 
-    transformation_tensor_y(4, 0) = -c2 * s2;
-    transformation_tensor_y(4, 2) = c2 * s2;
-    transformation_tensor_y(4, 4) = c2 * c2 - s2 * s2;
+  _hill_constants[4] = 0.5 * _transformation_tensor[5][0] *
+                           (-G * _transformation_tensor[5][2] - H * _transformation_tensor[5][1] +
+                            _transformation_tensor[5][0] * (G + H)) +
+                       0.5 * _transformation_tensor[5][1] *
+                           (-F * _transformation_tensor[5][2] - H * _transformation_tensor[5][0] +
+                            _transformation_tensor[5][1] * (F + H)) +
+                       0.5 * _transformation_tensor[5][2] *
+                           (-F * _transformation_tensor[5][1] - G * _transformation_tensor[5][0] +
+                            _transformation_tensor[5][2] * (F + G)) +
+                       L * _transformation_tensor[5][4] * _transformation_tensor[5][4] +
+                       M * _transformation_tensor[5][5] * _transformation_tensor[5][5] +
+                       N * _transformation_tensor[5][3] * _transformation_tensor[5][3];
 
-    transformation_tensor_y(5, 3) = -s2;
-    transformation_tensor_y(5, 5) = c2;
-
-    _transformation_tensor.left_multiply(transformation_tensor_y);
-  }
-
-  // rotation about x-axis
-  if (_angle(2) != 0.0)
-  {
-    const Real s1 = std::sin(_angle(2) * libMesh::pi / 180.0);
-    const Real c1 = std::cos(_angle(2) * libMesh::pi / 180.0);
-
-    ADDenseMatrix transformation_tensor_x(6, 6);
-
-    transformation_tensor_x(0, 0) = 1.0;
-
-    transformation_tensor_x(1, 1) = c1 * c1;
-    transformation_tensor_x(1, 2) = s1 * s1;
-    transformation_tensor_x(1, 3) = 2 * c1 * s1;
-
-    transformation_tensor_x(2, 1) = s1 * s1;
-    transformation_tensor_x(2, 2) = c1 * c1;
-    transformation_tensor_x(2, 3) = -2 * c1 * s1;
-
-    transformation_tensor_x(3, 1) = -c1 * s1;
-    transformation_tensor_x(3, 2) = c1 * s1;
-    transformation_tensor_x(3, 3) = c1 * c1 - s1 * s1;
-
-    transformation_tensor_x(4, 4) = c1;
-    transformation_tensor_x(4, 5) = -s1;
-
-    transformation_tensor_x(5, 4) = -s1;
-    transformation_tensor_x(5, 5) = c1;
-
-    _transformation_tensor.left_multiply(transformation_tensor_x);
-  }
-
-  hill_tensor.right_multiply_transpose(_transformation_tensor);
-  hill_tensor.left_multiply(_transformation_tensor);
+  _hill_constants[5] = 0.5 * _transformation_tensor[3][0] *
+                           (-G * _transformation_tensor[3][2] - H * _transformation_tensor[3][1] +
+                            _transformation_tensor[3][0] * (G + H)) +
+                       0.5 * _transformation_tensor[3][1] *
+                           (-F * _transformation_tensor[3][2] - H * _transformation_tensor[3][0] +
+                            _transformation_tensor[3][1] * (F + H)) +
+                       0.5 * _transformation_tensor[3][2] *
+                           (-F * _transformation_tensor[3][1] - G * _transformation_tensor[3][0] +
+                            _transformation_tensor[3][2] * (F + G)) +
+                       L * _transformation_tensor[3][4] * _transformation_tensor[3][4] +
+                       M * _transformation_tensor[3][5] * _transformation_tensor[3][5] +
+                       N * _transformation_tensor[3][3] * _transformation_tensor[3][3];
 }

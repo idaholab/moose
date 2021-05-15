@@ -36,7 +36,7 @@ ADHillElastoPlasticityStressUpdate::validParams()
 ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
     const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
-    _hill_constants(6),
+    _hill_constants_input(6),
     _qsigma(0.0),
     _eigenvalues_hill(6),
     _eigenvectors_hill(6, 6),
@@ -61,7 +61,8 @@ ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
     _yield_stress(getParam<Real>("yield_stress")),
     _hill_tensor(6, 6)
 {
-  _hill_constants = getParam<std::vector<Real>>("hill_constants");
+  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+  ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(_hill_constants_input);
 
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -83,8 +84,6 @@ ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
   _hill_tensor(3, 3) = 2.0 * N;
   _hill_tensor(4, 4) = 2.0 * L;
   _hill_tensor(5, 5) = 2.0 * M;
-
-  ADGeneralizedRadialReturnStressUpdate::rotateHillTensor(_hill_tensor);
 }
 
 void
@@ -387,12 +386,12 @@ ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
       inelasticStrainIncrement_vector(5) / 2.0;
 
   // Calculate appropriate equivalent plastic strain
-  const ADReal & F = -_hill_tensor(1, 2);
-  const ADReal & G = -_hill_tensor(0, 2);
-  const ADReal & H = -_hill_tensor(0, 1);
-  const ADReal & L = _hill_tensor(4, 4) / 2;
-  const ADReal & M = _hill_tensor(5, 5) / 2;
-  const ADReal & N = _hill_tensor(3, 3) / 2;
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   ADReal eq_plastic_strain_inc = (F * Utility::pow<2>(inelasticStrainIncrement(0, 0)) +
                                   G * Utility::pow<2>(inelasticStrainIncrement(1, 1)) +

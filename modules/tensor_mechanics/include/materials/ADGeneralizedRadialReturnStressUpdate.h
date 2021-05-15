@@ -162,7 +162,7 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
-  virtual void rotateHillTensor(ADDenseMatrix & hill_tensor);
+  virtual void rotateHillConstants(std::vector<Real> & hill_constants_input);
 
   /// Equivalent creep/plastic strain
   ADMaterialProperty<Real> & _effective_inelastic_strain;
@@ -185,5 +185,8 @@ protected:
   RealVectorValue _angle;
 
   /// Transformation matrix
-  ADDenseMatrix _transformation_tensor;
+  std::vector<std::vector<Real>> _transformation_tensor;
+
+  /// Hill constants for orthotropic creep
+  std::vector<Real> _hill_constants;
 };

@@ -125,7 +125,7 @@ protected:
   Real _exp_time;
 
   /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants;
+  std::vector<Real> _hill_constants_input;
   ADDenseMatrix _hill_tensor;
 
   /// Square of the q function for orthotropy
