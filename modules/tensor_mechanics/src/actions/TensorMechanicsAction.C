@@ -105,6 +105,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _out_of_plane_direction(
         getParam<MooseEnum>("out_of_plane_direction").getEnum<OutOfPlaneDirection>()),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _material_output_order(getParam<MultiMooseEnum>("material_output_order")),
+    _material_output_family(getParam<MultiMooseEnum>("material_output_family")),
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
     _direction_valid(params.isParamSetByUser("direction")),
@@ -478,17 +480,19 @@ TensorMechanicsAction::actOutputGeneration()
     unsigned int index = 0;
     for (auto out : _generate_output)
     {
-      std::string type;
-      if (_material_output_order[index] == "CONSTANT")
-        type = "MooseVariableConstMonomial";
-      else
-        type = "MooseVariable";
+      const auto & order = _material_output_order[index];
+      const auto & family = _material_output_family[index];
+
+      std::string type = (order == "CONSTANT" && family == "MONOMIAL")
+                             ? "MooseVariableConstMonomial"
+                             : "MooseVariable";
+
       // Create output helper aux variables
       auto params = _factory.getValidParams(type);
-      params.set<MooseEnum>("order") = _material_output_order[index];
-      params.set<MooseEnum>("family") = _material_output_family[index];
+      params.set<MooseEnum>("order") = order;
+      params.set<MooseEnum>("family") = family;
 
-      if (_material_output_family[index] == "MONOMIAL")
+      if (family == "MONOMIAL")
         _problem->addAuxVariable(type, _base_name + out, params);
       else
         _problem->addVariable(type, _base_name + out, params);
@@ -666,56 +670,50 @@ void
 TensorMechanicsAction::verifyOrderAndFamilyOutputs()
 {
   // Ensure material output order and family vectors are same size as generate output
-  auto order_check = getParam<MultiMooseEnum>("material_output_order");
-  auto family_check = getParam<MultiMooseEnum>("material_output_family");
 
-  // Magnitude check
-  if (order_check.size() > 1 && order_check.size() < _generate_output.size())
-    mooseError("The number of orders assigned to material outputs must be: 0 to be assigned "
+  // check number of supplied orders and families
+  if (_material_output_order.size() > 1 && _material_output_order.size() < _generate_output.size())
+    paramError("material_output_order",
+               "The number of orders assigned to material outputs must be: 0 to be assigned "
                "CONSTANT; 1 to assign all outputs the same value, or the same size as the number "
                "of generate outputs listed.");
-  if (family_check.size() > 1 && family_check.size() < _generate_output.size())
-    mooseError("The number of families assigned to material outputs must be: 0 to be assigned "
+
+  if (_material_output_family.size() > 1 &&
+      _material_output_family.size() < _generate_output.size())
+    paramError("material_output_family",
+               "The number of families assigned to material outputs must be: 0 to be assigned "
                "MONOMIAL; 1 to assign all outputs the same value, or the same size as the number "
                "of generate outputs listed.");
 
-  if (order_check.size() == _generate_output.size())
-  {
-    for (const auto & out : order_check)
-      _material_output_order.push_back(out);
-  }
-  else
-  {
-    if (order_check.size() == 0)
-      // Make sure all outputs are standard constant value
-      _material_output_order.assign(_generate_output.size(), "CONSTANT");
-    // For only one order, make all orders the same magnitude
-    if (order_check.size() == 1)
-      _material_output_order.assign(_generate_output.size(), _material_output_order[0]);
-    if (_verbose)
-      Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
-                 << "\n"
-                 << _name << ": " << Moose::stringify(_material_output_order) << "\n"
-                 << COLOR_DEFAULT;
-  }
+  // if no value was provided, chose the default CONSTANT
+  if (_material_output_order.size() == 0)
+    _material_output_order.push_back("CONSTANT");
 
-  if (family_check.size() == _generate_output.size())
-  {
-    for (const auto & out : family_check)
-      _material_output_family.push_back(out);
-  }
-  else
-  {
-    if (family_check.size() == 0)
-      _material_output_family.assign(_generate_output.size(), "MONOMIAL");
-    if (family_check.size() == 1)
-      _material_output_family.assign(_generate_output.size(), _material_output_family[0]);
-    if (_verbose)
-      Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
-                 << "\n"
-                 << _name << ": " << Moose::stringify(_material_output_family) << "\n"
-                 << COLOR_DEFAULT;
-  }
+  // For only one order, make all orders the same magnitude
+  if (_material_output_order.size() == 1)
+    _material_output_order =
+        std::vector<std::string>(_generate_output.size(), _material_output_order[0]);
+
+  if (_verbose)
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
+               << "\n"
+               << _name << ": " << Moose::stringify(_material_output_order) << "\n"
+               << COLOR_DEFAULT;
+
+  // if no value was provided, chose the default MONOMIAL
+  if (_material_output_family.size() == 0)
+    _material_output_family.push_back("MONOMIAL");
+
+  // For only one family, make all families that value
+  if (_material_output_family.size() == 1)
+    _material_output_family =
+        std::vector<std::string>(_generate_output.size(), _material_output_family[0]);
+
+  if (_verbose)
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
+               << "\n"
+               << _name << ": " << Moose::stringify(_material_output_family) << "\n"
+               << COLOR_DEFAULT;
 }
 
 void

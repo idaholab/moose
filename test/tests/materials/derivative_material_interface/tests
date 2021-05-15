@@ -192,6 +192,13 @@
     []
   []
 
+  [ad_zero_derivatives]
+    type = Exodiff
+    input = 'ad_derivative_parsed_material_zero.i'
+    exodiff = 'ad_derivative_parsed_material_zero_out.e'
+    requirement = 'The system shall create AD material properties even if the derivatives are zero'
+  []
+
   [ad_ordering]
     requirement = 'The system shall support late binding of derivative material properties:'
     [execution]

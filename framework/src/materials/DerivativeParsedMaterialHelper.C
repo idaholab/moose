@@ -121,7 +121,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseDerivative(unsigned int var,
     current._F->Optimize();
 
   // proceed only if the derivative is not zero
-  if (!current._F->isZero())
+  if (!current._F->isZero() || is_ad)
   {
     // compile
     if (_enable_jit && !current._F->JITCompile())
