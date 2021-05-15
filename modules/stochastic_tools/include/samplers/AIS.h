@@ -11,6 +11,7 @@
 
 #include "Sampler.h"
 #include "ReporterInterface.h"
+#include "AdaptiveMonteCarloUtils.h"
 
 /**
  * A class used to perform Adaptive Importance Sampling using a Markov Chain Monte Carlo algorithm

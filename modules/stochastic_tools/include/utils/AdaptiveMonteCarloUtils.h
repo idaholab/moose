@@ -6,49 +6,28 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-<<<<<<< HEAD
-#pragma once
-#ifndef ADAPTIVEMONTECARLOUTILS_H
-#define ADAPTIVEMONTECARLOUTILS_H
-=======
-
-// #pragma once
-// #ifndef ADAPTIVEMONTECARLOUTILS_H
-// #define ADAPTIVEMONTECARLOUTILS_H
-//
-// // Forward Declarations
-// namespace AdaptiveMonteCarloUtils
-// {
-//   /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
-//   Carlo set of algorithms.*/
-//
-//  Real computeSTD(const std::vector<Real> & data, const unsigned int start_index);
-//
-//  Real computeMEAN(const std::vector<Real> & data, const unsigned int start_index);
-//
-// } // namespace
-// #endif
->>>>>>> Create docs #17664
 
 #pragma once
+
+#include "libmesh/utility.h"
+#include "DataIO.h"
 
 namespace StochasticTools
 {
   /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
-  Carlo set of algorithms.*/
+   Carlo set of algorithms.*/
 
-  class SobolCalculator : public libMesh::ParallelObject
+  class AdaptiveMonteCarloUtils
   {
   public:
-    computeSTD(const std::vector<Real> & data, const unsigned int start_index);
-    computeMEAN(const std::vector<Real> & data, const unsigned int start_index);
+    AdaptiveMonteCarloUtils(){};
 
-  private:
+    ~AdaptiveMonteCarloUtils() = default;
 
-<<<<<<< HEAD
-} // namespace
-#endif
-=======
+    static Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
+    static Real computeMEAN(const std::vector<Real> & data, const unsigned int & start_index);
+
+  // private:
+
   };
 } // namespace
->>>>>>> Create docs #17664

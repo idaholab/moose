@@ -11,7 +11,6 @@
 #include "Distribution.h"
 #include "Normal.h"
 #include "Uniform.h"
-#include "AdaptiveMonteCarloUtils.h"
 
 registerMooseObjectAliased("StochasticToolsApp", AIS, "AIS");
 registerMooseObjectReplaced("StochasticToolsApp",
@@ -148,8 +147,8 @@ AIS::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
     {
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
       {
-        _mean_sto[i] = AdaptiveMonteCarloUtils::computeMEAN(_inputs_sto[i], 2);
-        _std_sto[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 2);
+        _mean_sto[i] = StochasticTools::AdaptiveMonteCarloUtils::computeMEAN(_inputs_sto[i], 2);
+        _std_sto[i] = StochasticTools::AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 2);
         _prev_value[i] = (Normal::quantile(getRand(_step), _mean_sto[i], _std_factor * _std_sto[i]));
       }
     }
