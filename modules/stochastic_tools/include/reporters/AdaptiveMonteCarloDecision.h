@@ -12,7 +12,8 @@
 #include "GeneralReporter.h"
 
 /**
- * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo schemes.
+ * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo
+ * schemes.
  */
 class AdaptiveMonteCarloDecision : public GeneralReporter
 {
@@ -24,7 +25,6 @@ public:
   virtual void execute() override;
 
 protected:
-
   /// This will add another type of reporter to the params
   template <typename T>
   static InputParameters addReporterTypeParams(const std::string & prefix, bool add_vector = true);
@@ -56,7 +56,6 @@ private:
 
   /// Storage for previously accepted output value.
   Real _prev_val_out;
-
 };
 
 template <typename T>

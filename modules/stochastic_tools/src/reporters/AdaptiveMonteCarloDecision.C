@@ -34,10 +34,13 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
   _sampler = &getSamplerByName(getParam<SamplerName>("sampler"));
 
   // Initialize the required variables depending upon the type of adaptive Monte Carlo algorithm
-  if(_sampler->parameters().get<std::string>("_type") == "AIS")
+  if (_sampler->parameters().get<std::string>("_type") == "AIS")
   {
-    _prev_val.resize(_sampler->parameters().get<std::vector<DistributionName>>("distributions").size());
-    for (unsigned int i = 0; i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size(); ++i)
+    _prev_val.resize(
+        _sampler->parameters().get<std::vector<DistributionName>>("distributions").size());
+    for (unsigned int i = 0;
+         i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size();
+         ++i)
       _prev_val[i] = _sampler->parameters().get<std::vector<Real>>("initial_values")[i];
     _prev_val_out = 1.0;
   }
@@ -57,14 +60,23 @@ AdaptiveMonteCarloDecision::execute()
         /* This is the training phase of the Adaptive Importance Sampling algorithm.
            Here, it is decided whether or not to accept a proposed sample by the AIS.C sampler
            depending upon the model output.*/
-        if ( ((_sampler->parameters().get<bool>("use_absolute_value")) ? std::abs(*_output[0]) : (*_output[0])) < (_sampler->parameters().get<Real>("output_limit")))
+        if (((_sampler->parameters().get<bool>("use_absolute_value"))
+                 ? std::abs(*_output[0])
+                 : (*_output[0])) < (_sampler->parameters().get<Real>("output_limit")))
         {
-          for (dof_id_type i = 0; i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size(); ++i)
+          for (dof_id_type i = 0;
+               i <
+               _sampler->parameters().get<std::vector<DistributionName>>("distributions").size();
+               ++i)
             (*_inputs[i]) = _prev_val[i];
           (*_output[0]) = 0.0;
-        } else
+        }
+        else
         {
-          for (dof_id_type i = 0; i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size(); ++i)
+          for (dof_id_type i = 0;
+               i <
+               _sampler->parameters().get<std::vector<DistributionName>>("distributions").size();
+               ++i)
           {
             (*_inputs[i]) = _sampler->getNextLocalRow()[i];
             _prev_val[i] = (*_inputs[i]);
@@ -72,18 +84,23 @@ AdaptiveMonteCarloDecision::execute()
           (*_output[0]) = 1.0;
           _prev_val_out = (*_output[0]);
         }
-      } else
+      }
+      else
       {
         /* This is the sampling phase of the Adaptive Importance Sampling algorithm.
            Here, all proposed samples by the AIS.C sampler are accepted since the importance
            distribution traning phase is finished.*/
-        for (dof_id_type i = 0; i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size(); ++i)
+        for (dof_id_type i = 0;
+             i < _sampler->parameters().get<std::vector<DistributionName>>("distributions").size();
+             ++i)
           (*_inputs[i]) = _sampler->getNextLocalRow()[i];
-        _prev_val_out = (_sampler->parameters().get<bool>("use_absolute_value")) ? std::abs(*_output[0]) : (*_output[0]);
+        _prev_val_out = (_sampler->parameters().get<bool>("use_absolute_value"))
+                            ? std::abs(*_output[0])
+                            : (*_output[0]);
         if (_prev_val_out >= (_sampler->parameters().get<Real>("output_limit")))
           (*_output[0]) = 1.0;
         else
-          (*_output[0]) =  0.0;
+          (*_output[0]) = 0.0;
       }
     }
     _check_step = _step;
