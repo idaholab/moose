@@ -14,20 +14,19 @@
 
 namespace StochasticTools
 {
-  /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
-   Carlo set of algorithms.*/
+/* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
+ Carlo set of algorithms.*/
 
-  class AdaptiveMonteCarloUtils
-  {
-  public:
-    AdaptiveMonteCarloUtils(){};
+class AdaptiveMonteCarloUtils
+{
+public:
+  AdaptiveMonteCarloUtils(){};
 
-    ~AdaptiveMonteCarloUtils() = default;
+  ~AdaptiveMonteCarloUtils() = default;
 
-    static Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
-    static Real computeMEAN(const std::vector<Real> & data, const unsigned int & start_index);
+  static Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
+  static Real computeMEAN(const std::vector<Real> & data, const unsigned int & start_index);
 
   // private:
-
-  };
+};
 } // namespace

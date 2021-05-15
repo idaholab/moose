@@ -60,7 +60,6 @@ protected:
   const unsigned int & _num_random_seeds;
 
 private:
-
   /// Acceptance ratio variable for the MCMC sampler.
   Real _acceptance_ratio;
 
