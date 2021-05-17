@@ -80,22 +80,26 @@ class CivetExtension(command.CommandExtension):
         """(override) Generate test reports."""
 
         # Test result database
-        if self.get('download_test_results', True):
-            start = time.time()
-            LOG.info("Collecting CIVET results...")
+        start = time.time()
+        LOG.info("Collecting CIVET results...")
 
-            self.__database = dict()
-            for name, category in self.get('remotes').items():
-                sites = [(category['url'], category['repo'])]
+        self.__database = dict()
+        local = mooseutils.eval_path(self.get('test_results_cache'))
+        for name, category in self.get('remotes').items():
+            hashes = None
+            if self.get('download_test_results', True):
                 working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
                 hashes = mooseutils.git_merge_commits(working_dir)
                 LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
-                local_db = mooseutils.get_civet_results(hashes=hashes,
-                                                        sites=sites,
-                                                        cache=self.get('test_results_cache'),
-                                                        possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
-                                                        logger=LOG)
-                self.__database.update(local_db)
+
+            site = (category['url'], category['repo'])
+            local_db = mooseutils.get_civet_results(local=local,
+                                                    hashes=hashes,
+                                                    site=site,
+                                                    cache=self.get('test_results_cache'),
+                                                    possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
+                                                    logger=LOG)
+            self.__database.update(local_db)
             LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
