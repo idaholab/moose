@@ -189,9 +189,3 @@ def get_civet_results(local=DEFAULT_JOBS_CACHE,
         for job in jobs:
             _update_database_from_job(job, database, possible)
     return database
-
-if __name__ == '__main__':
-    #database = get_civet_results(hashes=['681ba2f4274dc8465bb2a54e1353cfa24765a5c1',
-    #                                    'febe3476040fe6af1df1d67e8cc8c04c4760afb6'])
-    database = get_civet_results(site=('https://civet.inl.gov', 'idaholab/moose'),
-                                 local='/Users/slauae/projects/moose/release/results')

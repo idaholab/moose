@@ -84,14 +84,14 @@ class CivetExtension(command.CommandExtension):
         LOG.info("Collecting CIVET results...")
 
         self.__database = dict()
-        local = mooseutils.eval_path(self.get('test_results_cache'))
         for name, category in self.get('remotes').items():
             hashes = None
-            if self.get('download_test_results', True):
+            if category.get('download_test_results', self.get('download_test_results', True)):
                 working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
                 hashes = mooseutils.git_merge_commits(working_dir)
                 LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
 
+            local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
             site = (category['url'], category['repo'])
             local_db = mooseutils.get_civet_results(local=local,
                                                     hashes=hashes,
