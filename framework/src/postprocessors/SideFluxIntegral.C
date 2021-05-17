@@ -31,7 +31,7 @@ SideFluxIntegralTempl<is_ad>::validParams()
 template <bool is_ad>
 SideFluxIntegralTempl<is_ad>::SideFluxIntegralTempl(const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
-    _diffusivity(parameters.get<MaterialPropertyName>("diffusivity")),
+    _diffusivity(getParam<MaterialPropertyName>("diffusivity")),
     _diffusion_coef(getGenericMaterialProperty<Real, is_ad>(_diffusivity))
 {
 }
@@ -40,7 +40,6 @@ template <bool is_ad>
 Real
 SideFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
     // Get the face info
@@ -54,7 +53,6 @@ SideFluxIntegralTempl<is_ad>::computeQpIntegral()
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * grad_u * _normals[_qp];
   }
   else
-#endif
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * _grad_u[_qp] * _normals[_qp];
 }
 
