@@ -27,7 +27,7 @@ where
 - $\vec{E}_{inc}$ is the incoming electric field vector,
 - $\mu_r$ is the relative magnetic permeability,
 - $j = \sqrt{-1}$,
-- $k_0$ is the wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength), and
+- $k_0$ is the wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength),
 - $\eta_r$ is a radiation condition parameter ($\eta_r = 1$ if the condition is applied in free space), and
 - $\hat{\mathbf{n}}$ is the boundary normal vector.
 
@@ -60,8 +60,8 @@ property that varies in space or time. The incoming profile is set via
 #### Usage notes
 
 !style halign=left
-It is important to note that when used as an absorber (strict is `mode = absorbing`
-and zero incoming wave but a port also has an absorbing component), care must be
+It is important to note that when used as an absorber (strictly absorbing means that `mode = absorbing`
+with zero incoming wave but a port also has an absorbing component for any reflections), care must be
 taken in setting the shape of the truncation boundary as well as the distance
 from the scattering object. Boundaries as close as $0.3 \lambda$ away from the
 object was shown in [!citep](jin-fem), and several wavelengths were used in the
