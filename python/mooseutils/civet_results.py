@@ -33,6 +33,7 @@ TEST_RE = re.compile(r'^(?:\[(?P<time>.+?)s\])?'       # Optional test time
                      flags=re.MULTILINE)
 
 JOB_RE = re.compile(r'id=\"job_(?P<job>\d+)\"')
+JOB_NUMBER_RE = re.compile(r"results_(?P<number>[0-9]+).tar\.gz")
 RECIPE_RE = re.compile(r'results_(?P<number>\d+)_(?P<job>.*)/(?P<recipe>.*)')
 RUN_TESTS_START_RE = re.compile(r'^.+?run_tests.+?$', flags=re.MULTILINE)
 RUN_TESTS_END_RE = re.compile(r'^-{5,}$', flags=re.MULTILINE)
@@ -57,16 +58,16 @@ else:
         FAIL = 3
 
 
-def _get_local_civet_jobs(location, logger=None):
+def _get_local_civet_jobs(location, url=None, logger=None):
     """
     Get a list of Job objects for the supplied directory; this searches for tar.gz files with the
     name as: results_<JOB>_*.tar.gz.
     """
     jobs = set()
     for filename in glob.glob(os.path.join(location, 'results_*.tar.gz')):
-        match = RESULT_FILENAME_RE.search(filename)
+        match = JOB_NUMBER_RE.search(filename)
         if match:
-            jobs.add(Job(int(match.group('number')), filename, JobFileStatus.LOCAL, None))
+            jobs.add(Job(int(match.group('number')), filename, JobFileStatus.LOCAL, url))
     return sorted(jobs, key=lambda j: j.number)
 
 def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=None):
@@ -171,26 +172,20 @@ def _process_results(database, job, recipe, content, possible):
             url = job.url if job.url is not None else job.filename
             database[tname][job.number].append(Test(recipe, status, caveats, reason, time, url))
 
-def get_civet_results(local=list(),
-                      hashes=list(),
-                      sites=[(DEFAULT_CIVET_SITE, DEFAULT_CIVET_REPO)],
+def get_civet_results(local=DEFAULT_JOBS_CACHE,
+                      hashes=None,
+                      site=(DEFAULT_CIVET_SITE, DEFAULT_CIVET_REPO),
                       possible=None,
                       cache=DEFAULT_JOBS_CACHE, logger=None):
 
     database = collections.defaultdict(lambda: collections.defaultdict(list))
-    for loc in local:
-        jobs = _get_local_civet_jobs(loc, logger=logger)
+    if local is not None:
+        jobs = _get_local_civet_jobs(local, site[0], logger=logger)
         for job in jobs:
             _update_database_from_job(job, database, possible)
 
-    for site, repo in sites:
-        jobs = _get_remote_civet_jobs(hashes, site, repo, cache=cache, logger=logger)
+    if hashes is not None:
+        jobs = _get_remote_civet_jobs(hashes, site[0], site[1], cache=cache, logger=logger)
         for job in jobs:
             _update_database_from_job(job, database, possible)
     return database
-
-if __name__ == '__main__':
-    #database = get_civet_results(hashes=['681ba2f4274dc8465bb2a54e1353cfa24765a5c1',
-    #                                    'febe3476040fe6af1df1d67e8cc8c04c4760afb6'])
-    database = get_civet_results(sites=[],
-                                 local=['/Users/slauae/projects/moose/python/MooseDocs/test/content/civet'])

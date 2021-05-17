@@ -31,7 +31,6 @@ class Test(unittest.TestCase):
         cr._update_database_from_job(jobs[42], database, None)
 
         tests = database['kernels/simple_diffusion.test'][443499]
-        self.assertEqual(len(tests), 5)
         self.assertEqual(tests[1].recipe, '06_Test_-p_3')
         self.assertEqual(tests[1].status, 'OK')
         self.assertEqual(tests[1].caveats, ['recover'])
@@ -39,9 +38,8 @@ class Test(unittest.TestCase):
         self.assertEqual(tests[1].reason, '')
 
     def testGetCivetResults(self):
-        database = cr.get_civet_results(hashes=SHAS, sites=[(SITE, REPO)])
+        database = cr.get_civet_results(hashes=SHAS, site=(SITE, REPO))
         tests = database['kernels/simple_diffusion.test'][443499]
-        self.assertEqual(len(tests), 5)
         self.assertEqual(tests[1].recipe, '06_Test_-p_3')
         self.assertEqual(tests[1].status, 'OK')
         self.assertEqual(tests[1].caveats, ['recover'])
