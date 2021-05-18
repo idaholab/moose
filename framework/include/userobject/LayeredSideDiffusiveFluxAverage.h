@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "LayeredSideAverage.h"
 
-// Forward Declarations
-class LayeredSideDiffusiveFluxAverage;
-
-template <>
-InputParameters validParams<LayeredSideDiffusiveFluxAverage>();
-
 /**
  * This UserObject computes side averages of a flux storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
