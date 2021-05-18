@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 10
+    nx = 20
     xmax = 2
   []
   [subdomain1]
@@ -114,4 +114,5 @@
 
 [Outputs]
   exodus = true
+  hide = 'lambda'
 []

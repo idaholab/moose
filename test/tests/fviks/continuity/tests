@@ -7,5 +7,6 @@
     input = test.i
     exodiff = 'test_out.e'
     ad_indexing_type = 'global'
+    max_parallel = 20
   []
 []

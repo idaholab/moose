@@ -16,7 +16,7 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
     bottom_left = '0 0 0'
     top_right = '2 1 0'
     block_id = 1
-    []
+  []
   [interface]
     input = subdomain_id
     type = SideSetsBetweenSubdomainsGenerator
