@@ -24,8 +24,8 @@ RankTwoCylindricalComponentTempl<is_ad>::validParams()
       "Compute components of a rank-2 tensor in a cylindrical coordinate system");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
-  params.addRequiredParam<std::string>("property_name",
-                                       "Name of the material property computed by this model");
+  params.addRequiredParam<MaterialPropertyName>(
+      "property_name", "Name of the material property computed by this model");
   MooseEnum cylindricalTypes("AxialStress HoopStress RadialStress");
   params.addParam<MooseEnum>(
       "cylindrical_component", cylindricalTypes, "Type of cylindrical scalar output");
@@ -43,11 +43,9 @@ RankTwoCylindricalComponentTempl<is_ad>::RankTwoCylindricalComponentTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
-    _property(declareGenericProperty<Real, is_ad>(_property_name)),
+    _property(declareGenericProperty<Real, is_ad>("property_name")),
     _cylindrical_component(getParam<MooseEnum>("cylindrical_component")
-                               .template getEnum<RankTwoScalarTools::CYLINDRICAL_COMPONENT>()),
+                               .template getEnum<RankTwoScalarTools::CylindricalComponent>()),
     _cylindrical_axis_point1(isParamValid("cylindrical_axis_point1")
                                  ? getParam<Point>("cylindrical_axis_point1")
                                  : Point(0, 0, 0)),

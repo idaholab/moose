@@ -743,7 +743,7 @@ TensorMechanicsAction::actOutputMatProp()
               params.set<unsigned int>("index_j") = b;
 
               params.applyParameters(parameters());
-              params.set<std::string>("property_name") = _base_name + out;
+              params.set<MaterialPropertyName>("property_name") = _base_name + out;
             }
 
       // RankTwoDirectionalComponent
@@ -759,7 +759,7 @@ TensorMechanicsAction::actOutputMatProp()
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
               params.set<MooseEnum>("invariant") = r2sdq.second.first;
               params.applyParameters(parameters());
-              params.set<std::string>("property_name") = _base_name + out;
+              params.set<MaterialPropertyName>("property_name") = _base_name + out;
             }
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
@@ -780,7 +780,7 @@ TensorMechanicsAction::actOutputMatProp()
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
               params.set<MooseEnum>("invariant") = r2i.second.first;
               params.applyParameters(parameters());
-              params.set<std::string>("property_name") = _base_name + out;
+              params.set<MaterialPropertyName>("property_name") = _base_name + out;
             }
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
@@ -803,7 +803,7 @@ TensorMechanicsAction::actOutputMatProp()
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
               params.set<MooseEnum>("cylindrical_component") = r2sdq.second.first;
               params.applyParameters(parameters());
-              params.set<std::string>("property_name") = _base_name + out;
+              params.set<MaterialPropertyName>("property_name") = _base_name + out;
             }
             else
               mooseError("Internal error. The permitted tensor shortcuts in "

@@ -66,7 +66,7 @@ RankTwoBasedFailureCriteriaNOSPD::computeFailureCriterionValue()
       val = 2.0 * RankTwoScalarTools::maxShear(avg_tensor);
       break;
     case 4:
-      val = RankTwoScalarTools::effectiveStrain(avg_tensor);
+      val = RankTwoScalarTools::effectiveStrainIncrement(avg_tensor);
       break;
     case 5:
       val = RankTwoScalarTools::vonMisesStress(avg_tensor);

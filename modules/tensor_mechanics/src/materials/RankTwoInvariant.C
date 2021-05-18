@@ -23,8 +23,8 @@ RankTwoInvariantTempl<is_ad>::validParams()
   params.addClassDescription("Compute a invariant property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
-  params.addRequiredParam<std::string>("property_name",
-                                       "Name of the material property computed by this model");
+  params.addRequiredParam<MaterialPropertyName>(
+      "property_name", "Name of the material property computed by this model");
   MooseEnum mixedInvariants(
       "VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain FirstInvariant "
       "SecondInvariant ThirdInvariant TriaxialityStress MaxShear StressIntensity MaxPrincipal "
@@ -38,12 +38,13 @@ RankTwoInvariantTempl<is_ad>::validParams()
 template <bool is_ad>
 RankTwoInvariantTempl<is_ad>::RankTwoInvariantTempl(const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
-    _property(declareGenericProperty<Real, is_ad>(_property_name)),
     _invariant(
-        getParam<MooseEnum>("invariant").template getEnum<RankTwoScalarTools::INVARIANT_TYPE>())
+        getParam<MooseEnum>("invariant").template getEnum<RankTwoScalarTools::InvariantType>()),
+    _stateful(_invariant == RankTwoScalarTools::InvariantType::EffectiveStrain),
+    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+    _tensor_old(_stateful ? &getMaterialPropertyOld<RankTwoTensor>("rank_two_tensor") : nullptr),
+    _property(declareGenericProperty<Real, is_ad>("property_name")),
+    _property_old(_stateful ? &getMaterialPropertyOld<Real>("property_name") : nullptr)
 {
 }
 
@@ -60,31 +61,43 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
 {
   switch (_invariant)
   {
-    case RankTwoScalarTools::INVARIANT_TYPE::MaxPrincipal:
-    case RankTwoScalarTools::INVARIANT_TYPE::MidPrincipal:
-    case RankTwoScalarTools::INVARIANT_TYPE::MinPrincipal:
+    case RankTwoScalarTools::InvariantType::MaxPrincipal:
+    case RankTwoScalarTools::InvariantType::MidPrincipal:
+    case RankTwoScalarTools::InvariantType::MinPrincipal:
     {
       Point dummy_direction;
       _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
           MetaPhysicL::raw_value(_tensor[_qp]), _invariant, dummy_direction);
       break;
     }
-    case RankTwoScalarTools::INVARIANT_TYPE::VonMisesStress:
-    case RankTwoScalarTools::INVARIANT_TYPE::EffectiveStrain:
-    case RankTwoScalarTools::INVARIANT_TYPE::Hydrostatic:
-    case RankTwoScalarTools::INVARIANT_TYPE::L2norm:
-    case RankTwoScalarTools::INVARIANT_TYPE::VolumetricStrain:
-    case RankTwoScalarTools::INVARIANT_TYPE::FirstInvariant:
-    case RankTwoScalarTools::INVARIANT_TYPE::SecondInvariant:
-    case RankTwoScalarTools::INVARIANT_TYPE::ThirdInvariant:
-    case RankTwoScalarTools::INVARIANT_TYPE::TriaxialityStress:
-    case RankTwoScalarTools::INVARIANT_TYPE::MaxShear:
-    case RankTwoScalarTools::INVARIANT_TYPE::StressIntensity:
+
+    case RankTwoScalarTools::InvariantType::VonMisesStress:
+    case RankTwoScalarTools::InvariantType::Hydrostatic:
+    case RankTwoScalarTools::InvariantType::L2norm:
+    case RankTwoScalarTools::InvariantType::VolumetricStrain:
+    case RankTwoScalarTools::InvariantType::FirstInvariant:
+    case RankTwoScalarTools::InvariantType::SecondInvariant:
+    case RankTwoScalarTools::InvariantType::ThirdInvariant:
+    case RankTwoScalarTools::InvariantType::TriaxialityStress:
+    case RankTwoScalarTools::InvariantType::MaxShear:
+    case RankTwoScalarTools::InvariantType::StressIntensity:
     {
       _property[_qp] =
           RankTwoScalarTools::getInvariant(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
       break;
     }
+
+    case RankTwoScalarTools::InvariantType::EffectiveStrain:
+    {
+      mooseAssert(_tensor_old, "The selected invariant requires the input material to be stateful");
+      mooseAssert(_property_old,
+                  "The selected invariant requires the output material to be stateful");
+      _property[_qp] = (*_property_old)[_qp] + RankTwoScalarTools::effectiveStrainIncrement(
+                                                   MetaPhysicL::raw_value(_tensor[_qp]) -
+                                                   MetaPhysicL::raw_value((*_tensor_old)[_qp]));
+      break;
+    }
+
     default:
       mooseError("Not a recognized invariant for RankTwoInvariant");
   }
