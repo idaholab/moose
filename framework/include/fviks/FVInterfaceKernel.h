@@ -72,12 +72,17 @@ public:
   /**
    * Compute the residual on the supplied face
    */
-  void computeResidual(const FaceInfo & fi);
+  virtual void computeResidual(const FaceInfo & fi);
 
   /**
    * Compute the jacobian on the supplied face
    */
-  void computeJacobian(const FaceInfo & fi);
+  virtual void computeJacobian(const FaceInfo & fi);
+
+  /**
+   * Compute the off-diagonal contributions to the jacobian on the interface
+   */
+  virtual void computeOffDiagJacobian(const FaceInfo &){};
 
 protected:
   /**
@@ -106,7 +111,7 @@ protected:
   /**
    * @return Whether the \p FaceInfo element is on the 1st side of the interface
    */
-  bool elemIsOne() const { return _elem_is_one; }
+  virtual bool elemIsOne() const { return _elem_is_one; }
 
   /**
    * @return Variable 1
@@ -141,19 +146,23 @@ protected:
   /// Thread id
   const THREAD_ID _tid;
 
+  /// Whether the current element is associated with variable/subdomain 1 or 2
+  bool _elem_is_one;
+
+  /// The SubProblem
+  SubProblem & _subproblem;
+
+  /// The Assembly object
+  Assembly & _assembly;
+
 private:
   SystemBase & _sys;
-  SubProblem & _subproblem;
 
   MooseVariableFV<Real> & _var1;
   MooseVariableFV<Real> & _var2;
 
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
-
-  Assembly & _assembly;
-
-  bool _elem_is_one;
 
   const MooseMesh & _mesh;
 };
