@@ -53,14 +53,6 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  if (ft == FaceInfo::VarFaceNeighbors::BOTH)
-    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
-               fi.faceCentroid());
-  else if (ft == FaceInfo::VarFaceNeighbors::NEITHER)
-    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
-               "with the relevant finite volume variable. Its centroid: ",
-               fi.faceCentroid());
-
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   // This could be an "internal" boundary - one created by variable block
@@ -71,6 +63,13 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
     prepareVectorTag(_assembly, _var.number());
   else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     prepareVectorTagNeighbor(_assembly, _var.number());
+  else if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+               fi.faceCentroid());
+  else
+    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+               "with the relevant finite volume variable. Its centroid: ",
+               fi.faceCentroid());
 
   _local_re(0) = r;
   accumulateTaggedLocalResidual();
