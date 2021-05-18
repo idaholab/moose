@@ -43,17 +43,12 @@ template <bool is_ad>
 InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
     const InputParameters & parameters)
   : InterfaceIntegralPostprocessor(parameters),
-    MooseVariableInterface<Real>(this,
-                                 false,
-                                 "variable",
-                                 Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     _grad_u(coupledGradient("variable")),
-    _neighbor_fv_variable(
-        parameters.isParamSetByUser("neighbor_variable")
-            ? dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("neighbor_variable", 0))
-            : dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("variable", 0))),
-    _fv(_fv_variable),
+    _fv_variable(coupledValue("variable")),
+    _neighbor_fv_variable(parameters.isParamSetByUser("neighbor_variable")
+                              ? coupledNeighborValue("neighbor_variable")
+                              : coupledNeighborValue("variable")),
+    _fv(getFieldVar("variable", 0)->isFV()),
     _diffusion_coef(
         getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("diffusivity"))),
     _diffusion_coef_neighbor(parameters.isParamSetByUser("neighbor_diffusivity")
@@ -62,7 +57,6 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
                                  : getGenericNeighborMaterialProperty<Real, is_ad>(
                                        getParam<MaterialPropertyName>("diffusivity")))
 {
-  addMooseVariableDependency(&mooseVariableField());
 
   // Primary and secondary variable should both be of a similar variable type
   if (parameters.isParamSetByUser("neighbor_variable"))
@@ -72,7 +66,7 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
                  "neighbor_variable should be of a similar variable type.");
 
   // Warn that we are not using the same gradient to compute the diffusive flux here
-  if (_fv && (_fv_variable == _neighbor_fv_variable))
+  if (_fv && !isParamValid("neighbor_variable"))
     mooseWarning("Only one finite volume variable was specified. InterfaceDiffusiveFluxIntegral is "
                  "only accurate at a "
                  "FVDiffusionInterface, not with a regular diffusion kernel.");
@@ -89,11 +83,10 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     const auto normal = fi->normal();
 
     // Form a finite difference gradient across the interface
-    Point du = _current_elem->centroid() - _neighbor_elem->centroid();
-    du /= (du * du);
-    const auto gradient = (_fv_variable->getElemValue(_current_elem) -
-                           _neighbor_fv_variable->getElemValue(_neighbor_elem)) *
-                          du;
+    Point one_over_gradient_support = fi->elemCentroid() - fi->neighborCentroid();
+    one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
+    const auto gradient =
+        (_fv_variable[_qp] - _neighbor_fv_variable[_qp]) * one_over_gradient_support;
 
     Real diffusivity;
     interpolate(Moose::FV::InterpMethod::Average,
