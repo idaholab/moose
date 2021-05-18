@@ -37,6 +37,7 @@ SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParame
 Real
 SideIntegralVariableUserObject::computeQpIntegral()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
     // We should be at the edge of the domain for this variable
@@ -46,5 +47,6 @@ SideIntegralVariableUserObject::computeQpIntegral()
     return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
   }
   else
+#endif
     return _u[_qp];
 }

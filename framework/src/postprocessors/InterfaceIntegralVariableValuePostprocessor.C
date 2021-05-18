@@ -22,7 +22,7 @@ InterfaceIntegralVariableValuePostprocessor::validParams()
   params.addCoupledVar(
       "neighbor_variable",
       "The name of the variable on the secondary side of the interface. By default "
-      "the primary side variable name is used for the secondary side as well");
+      "the same variable name is used for the secondary side");
   params.addClassDescription("Add access to variables and their gradient on an interface.");
   params.addParam<MooseEnum>("interface_value_type",
                              InterfaceValueTools::InterfaceAverageOptions(),
@@ -66,6 +66,7 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
 Real
 InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
     // Get FaceInfo from the mesh
@@ -92,5 +93,6 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
     return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
   }
   else
+#endif
     return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
 }

@@ -49,24 +49,6 @@ FVInterfaceKernel::validParams()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
 
-  params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
-  params.addParam<bool>("use_point_neighbors",
-                        false,
-                        "Whether to use point neighbors, which introduces additional ghosting to "
-                        "that used for simple face neighbors.");
-
-  // FV Interface Kernels always need one layer of ghosting because the elements
-  // on each side of the interface may be on different MPI ranks, but we still
-  // need to access them as a pair to compute the numerical face flux.
-  params.addRelationshipManager(
-      "ElementSideNeighborLayers",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-          Moose::RelationshipManagerType::COUPLING,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
-        rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
-      });
-
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");
@@ -92,14 +74,14 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
         this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _tid(getParam<THREAD_ID>("_tid")),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _assembly(_subproblem.assembly(_tid)),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
     _var2(_sys.getFVVariable<Real>(_tid,
                                    isParamValid("variable2")
                                        ? getParam<NonlinearVariableName>("variable2")
                                        : getParam<NonlinearVariableName>("variable1"))),
+    _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -153,7 +135,7 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
   mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
                   (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
                   (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "Face type was not recognized. Check that the specified boundaries are interfaces.");
+              "These seem like the reasonable combinations of face types.");
 #endif
 
   const auto var_elem_num = _elem_is_one ? _var1.number() : _var2.number();
