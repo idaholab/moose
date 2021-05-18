@@ -79,7 +79,7 @@ knowledge of any sub-app application dependencies.
 !col! width=50%
 To get started, let's consider a simple system with two apps as shown on the right.
 
-For now: no Transfers, no Coupling
+For now: no `Transfers` so no coupling
 
 Each application will march forward in time together, solve, and output
 !col-end!
@@ -116,7 +116,7 @@ Note how the `sub-app` input file doesn't even "know" it's being run within a Mu
 
 ## Sub-App Constraining dt
 
-By default the MultiApp system will "negotiate" a dt that makes sense for the entire hierarchy: it will choose the smallest dt that any app is currently requesting
+By default the MultiApp system will "negotiate" a timestep dt that makes sense for the entire hierarchy: it will choose the smallest dt that any app is currently requesting
 
 Let's modify the sub-app to have a smaller timestep and see what happens
 
