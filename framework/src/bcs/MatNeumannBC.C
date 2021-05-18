@@ -11,17 +11,16 @@
 
 registerMooseObject("MooseApp", MatNeumannBC);
 
-defineLegacyParams(MatNeumannBC);
-
 InputParameters
 MatNeumannBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
-  params.addParam<Real>("value", 0.0, "The value to be enforced on the boundary.");
+  params.addParam<Real>("value", 1.0, "The value to be enforced on the boundary.");
   params.declareControllable("value");
   params.addClassDescription("Imposes the integrated boundary condition "
-                             "$\\frac{D \\partial u}{\\partial n}=M*h$, "
-                             "where $h$ is a constant and $M$ is a material property.");
+                             "$\\frac{C \\partial u}{\\partial n}=M*h$, "
+                             "where $h$ is a constant, $M$ is a material property, and $C$ is a "
+                             "coefficient defined by the kernel for $u$.");
   params.addRequiredParam<MaterialPropertyName>(
       "boundary_material",
       "Material property multiplying the constant that will be enforced by the BC");

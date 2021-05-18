@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class MatNeumannBC;
-
-template <>
-InputParameters validParams<MatNeumannBC>();
-
 /**
  * Implements a Neumann BC where D grad(u) = value * M on the boundary, where
  * value is a constant and M is a material property.
@@ -24,10 +19,6 @@ InputParameters validParams<MatNeumannBC>();
 class MatNeumannBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   static InputParameters validParams();
 
   MatNeumannBC(const InputParameters & parameters);

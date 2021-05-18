@@ -11,9 +11,9 @@ of a constant and a MOOSE Material [`Material`](/Materials/index.md).  That is, 
 PDE of the form
 \begin{equation}
 \begin{aligned}
-  -D \nabla^2 u &= f && \quad \in \Omega \\
+  -\nabla \cdot C (\nabla u) &= f && \quad \in \Omega \\
   u &= g(t,\vec{x}) && \quad \in \partial \Omega_D \\
-  D \frac{\partial u}{\partial n} &= hM(t,\vec{x}) && \quad \in \partial \Omega_N,
+  C \frac{\partial u}{\partial n} &= hM(t,\vec{x}) && \quad \in \partial \Omega_N,
 \end{aligned}
 \end{equation}
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
