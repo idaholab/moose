@@ -112,7 +112,8 @@ Extensions:
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.civet:
-        test_results_cache: '/tmp/civet/jobs'
+        test_results_cache: ${ROOT_DIR}/release
+        download_test_results: false
         remotes:
             moose:
                 url: https://civet.inl.gov
