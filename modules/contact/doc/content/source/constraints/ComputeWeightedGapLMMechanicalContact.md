@@ -34,10 +34,8 @@ where $\gamma_c^{(1)}$ denotes the secondary contact interface, $\Phi_j$ is the
 j'th lagrange multiplier test function, and $g_{n,h}$ is the discretized version
 of the gap function.
 
-The `ComputeWeightedGapLMMechanicalContact` object computes the weighted gap. It
-**does not apply** the KKT conditions. That is done with the
-[ApplyPenetrationConstraintLMMechanicalContact.md] object. Consequently, the two
-objects must always be used in conjunction.
+The `ComputeWeightedGapLMMechanicalContact` object computes the weighted gap and
+applies the KKT conditions.
 
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 

@@ -10,7 +10,7 @@
       heavy = true
       detail = 'low conductivity in the gap and first order variables'
       cli_args = 'name=first_low_k'
-      ad_mode = 'sparse'
+      ad_indexing_type = 'global'
     []
     [first_high_k]
       type = CSVDiff
@@ -19,7 +19,7 @@
       heavy = true
       detail = 'high conductivity in the gap and first order variables'
       cli_args = 'name=first_high_k Constraints/thermal_contact/k=100'
-      ad_mode = 'sparse'
+      ad_indexing_type = 'global'
     []
     [second_low_k]
       type = CSVDiff
@@ -28,9 +28,9 @@
       heavy = true
       detail = 'low conductivity in the gap and second order variables'
       cli_args = 'name=second_low_k Mesh/second_order=true order=SECOND Variables/frictionless_normal_lm/use_dual=false'
-      min_ad_size = '75'
+      min_ad_size = '73'
       ad_mode = 'sparse'
-      max_time = 450
+      ad_indexing_type = 'global'
     []
     [second_high_k]
       type = CSVDiff
@@ -39,9 +39,9 @@
       heavy = true
       detail = 'high conductivity in the gap and second order variables'
       cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND Variables/frictionless_normal_lm/use_dual=false Constraints/thermal_contact/k=100'
-      min_ad_size = '75'
+      min_ad_size = '73'
       ad_mode = 'sparse'
-      max_time = 450
+      ad_indexing_type = 'global'
     []
   []
 []

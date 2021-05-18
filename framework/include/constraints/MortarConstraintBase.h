@@ -103,6 +103,8 @@ public:
    */
   bool interpolateNormals() const { return _interpolate_normals; }
 
+  virtual void post() {}
+
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;

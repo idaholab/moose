@@ -138,13 +138,6 @@ name = 'finite'
     disp_y = disp_y
     use_displaced_mesh = true
   []
-  [ncp_lm]
-    type = ApplyPenetrationConstraintLMMechanicalContact
-    secondary = block_left
-    primary = plank_right
-    variable = frictionless_normal_lm
-    primary_variable = disp_x
-  []
   [normal_x]
     type = NormalMortarMechanicalContact
     primary_boundary = plank_right
