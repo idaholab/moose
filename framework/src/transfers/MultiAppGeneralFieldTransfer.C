@@ -28,8 +28,19 @@
 #include "timpi/parallel_sync.h"
 
 
-// Anonymous namespace for functors to use with GenericProjector.
+// Anonymous namespace for data, functors to use with GenericProjector.
 namespace {
+
+  // Transfer::OutOfMeshValue is an actual number.  Why?  Why!
+  static_assert(std::numeric_limits<Real>::has_infinity,
+                "What are you trying to use for Real?  It lacks infinity!");
+  Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+
+  inline bool isBetterOutOfMeshValue (Number val)
+  {
+    // Might need to be changed for e.g. NaN
+    return val == BetterOutOfMeshValue;
+  }
 
   // We need two functors that record point (value and gradient,
   // respectively) requests, so we know what queries we need to make
@@ -333,7 +344,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
       [this, &local_bboxes, &local_meshfuns](processor_id_type /*pid*/,
                                              const std::vector<Point> & incoming_points,
                                              std::vector<Real> & outgoing_vals) {
-        outgoing_vals.resize(incoming_points.size(), OutOfMeshValue);
+        outgoing_vals.resize(incoming_points.size(), BetterOutOfMeshValue);
         // Evaluate interpolation values for these incoming points
         evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
       };
@@ -569,7 +580,7 @@ MultiAppGeneralFieldTransfer::buildMeshFunctions(
     from_func.reset(new MeshFunction(
         from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num));
     from_func->init();
-    from_func->enable_out_of_mesh_mode(OutOfMeshValue);
+    from_func->enable_out_of_mesh_mode(BetterOutOfMeshValue);
     local_meshfuns.push_back(from_func);
   }
 }
@@ -587,7 +598,7 @@ MultiAppGeneralFieldTransfer::evaluateInterpValues(
     // Loop until we've found the lowest-ranked app that actually contains
     // the quadrature point.
     for (MooseIndex(_from_problems.size()) i_from = 0;
-         i_from < _from_problems.size() && outgoing_vals[i_pt] == OutOfMeshValue;
+         i_from < _from_problems.size() && outgoing_vals[i_pt] == BetterOutOfMeshValue;
          ++i_from)
     {
       if (local_bboxes[i_from].contains_point(pt))
@@ -683,8 +694,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       {
         auto & val = values_ptr->second;
         // We adopt values from the smallest rank which has a valid value
-        if ((val.second > pid || val.first == OutOfMeshValue) &&
-            incoming_vals[val_offset] != OutOfMeshValue)
+        if ((val.second > pid || isBetterOutOfMeshValue(val.first)) &&
+            !isBetterOutOfMeshValue(incoming_vals[val_offset]))
           {
             val.first = incoming_vals[val_offset];
             val.second = pid;
@@ -762,7 +773,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         auto val = val_pair.second.first;
 
         // This will happen if meshes are mismatched
-        if (_error_on_miss && val == OutOfMeshValue)
+        if (_error_on_miss && isBetterOutOfMeshValue(val))
         {
           if (is_nodal)
             mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
@@ -771,7 +782,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         }
 
         // We should not put garbage into solution vector
-        if (val == OutOfMeshValue)
+        if (isBetterOutOfMeshValue(val))
           continue;
 
         to_sys->solution->set(dof, val);
