@@ -9,6 +9,7 @@
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
 #include "DisplacedProblem.h"
+#include "Assembly.h"
 
 registerMooseObject("ContactApp", ComputeWeightedGapLMMechanicalContact);
 
@@ -40,6 +41,9 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   params.suppressParameter<VariableName>("primary_variable");
   params.addRequiredCoupledVar("disp_x", "The x displacement variable");
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
+  params.addParam<Real>(
+      "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -50,42 +54,115 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _primary_disp_x(adCoupledNeighborValue("disp_x")),
     _secondary_disp_y(adCoupledValue("disp_y")),
     _primary_disp_y(adCoupledNeighborValue("disp_y")),
-    _displaced(dynamic_cast<DisplacedProblem *>(&_subproblem)),
-    _normal_index(_interpolate_normals ? _qp : _i)
+    _normal_index(_interpolate_normals ? _qp : _i),
+    _c(getParam<Real>("c"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
+             "in order to make its implementation feasible");
+#endif
+
+  if (!getParam<bool>("use_displaced_mesh"))
+    paramError(
+        "use_displaced_mesh",
+        "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
 }
 
-ADReal
-ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type)
+ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
-  switch (mortar_type)
+  mooseError("We should never call computeQpResidual for ComputeWeightedGapLMMechanicalContact");
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::computeQpProperties()
+{
+  if (_has_primary)
   {
-    case Moose::MortarType::Lower:
-    {
-      if (_has_primary)
-      {
-        DualRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
+    ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
 
-        if (_displaced)
-        {
-          gap_vec(0).derivatives() =
-              _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
-          gap_vec(1).derivatives() =
-              _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
-        }
+    gap_vec(0).derivatives() =
+        _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
+    gap_vec(1).derivatives() =
+        _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
 
-        mooseAssert(_normals.size() == (_interpolate_normals ? _test[_i].size()
-                                                             : _lower_secondary_elem->n_nodes()),
-                    "Making sure that _normals is the expected size");
-        auto gap = gap_vec * _normals[_normal_index];
-
-        return _test[_i][_qp] * gap;
-      }
-      else
-        return std::numeric_limits<Real>::quiet_NaN();
-    }
-
-    default:
-      return 0;
+    _qp_gap = gap_vec * (_normals[_normal_index] * _JxW_msm[_qp] * _coord[_qp]);
   }
+  else
+    _qp_gap = std::numeric_limits<Real>::quiet_NaN();
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
+{
+  mooseAssert(_normals.size() ==
+                  (_interpolate_normals ? _test[_i].size() : _lower_secondary_elem->n_nodes()),
+              "Making sure that _normals is the expected size");
+
+  const auto * const node = _lower_secondary_elem->node_ptr(_i);
+  _node_to_weighted_gap[node] += _test[_i][_qp] * _qp_gap;
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::residualSetup()
+{
+  _node_to_weighted_gap.clear();
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::jacobianSetup()
+{
+  residualSetup();
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType mortar_type)
+{
+  if (mortar_type != Moose::MortarType::Lower)
+    return;
+
+  mooseAssert(_var, "LM variable is null");
+
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+  {
+    computeQpProperties();
+    for (_i = 0; _i < _test.size(); ++_i)
+      computeQpIProperties();
+  }
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::computeJacobian(const Moose::MortarType mortar_type)
+{
+  // During "computeResidual" and "computeJacobian" we are actually just computing properties on the
+  // mortar segment element mesh. We are *not* actually assembling into the residual/Jacobian. For
+  // the zero-penetration constraint, the property of interest is the map from node to weighted gap.
+  // Computation of the properties proceeds identically for residual and Jacobian evaluation hence
+  // why we simply call computeResidual here. We will assemble into the residual/Jacobian later from
+  // the post() method
+  computeResidual(mortar_type);
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::post()
+{
+  for (const auto & pr : _node_to_weighted_gap)
+  {
+    _weighted_gap_ptr = &pr.second;
+    enforceConstraintOnNode(pr.first);
+  }
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::enforceConstraintOnNode(const Node * const node)
+{
+  const auto dof_index = node->dof_number(_sys.number(), _var->number(), 0);
+  ADReal lm_value = _var->getNodalValue(*node);
+  Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
+  const auto & weighted_gap = *_weighted_gap_ptr;
+  const ADReal nodal_residual =
+      std::isnan(weighted_gap) ? lm_value : std::min(lm_value, weighted_gap * _c);
+  if (_subproblem.currentlyComputingJacobian())
+    _assembly.processDerivatives(nodal_residual, dof_index, _matrix_tags);
+  else
+    _assembly.cacheResidual(dof_index, nodal_residual.value(), _vector_tags);
 }

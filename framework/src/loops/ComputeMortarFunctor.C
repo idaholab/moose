@@ -207,7 +207,7 @@ ComputeMortarFunctor::operator()()
     num_cached++;
     if (!_fe_problem.currentlyComputingJacobian())
     {
-      for (auto && mc : _mortar_constraints)
+      for (auto * const mc : _mortar_constraints)
       {
         mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeResidual(_has_primary);
@@ -222,7 +222,7 @@ ComputeMortarFunctor::operator()()
     }
     else
     {
-      for (auto && mc : _mortar_constraints)
+      for (auto * const mc : _mortar_constraints)
       {
         mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeJacobian(_has_primary);
@@ -234,6 +234,10 @@ ComputeMortarFunctor::operator()()
         _assembly.addCachedJacobian();
     }
   } // end for loop over elements
+
+  // Call any post operations for our mortar constraints
+  for (auto * const mc : _mortar_constraints)
+    mc->post();
 
   // Make sure any remaining cached residuals/Jacobians get added
   if (!_fe_problem.currentlyComputingJacobian())
