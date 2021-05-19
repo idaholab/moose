@@ -159,12 +159,6 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [inlet-p]
-    type = INSFVOutletPressureBC
-    boundary = 'left'
-    variable = pressure
-    function = 1
-  []
 
   [no-slip-u]
     type = INSFVNoSlipWallBC
