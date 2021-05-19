@@ -32,9 +32,9 @@ MfrPostprocessor::computeQpIntegral()
 }
 
 void
-MfrPostprocessor::setMfr(const FaceInfo * const fi, const Real mfr)
+MfrPostprocessor::setMfr(const FaceInfo * const fi, const Real mfr, const bool includes_area)
 {
-  _fi_to_mfr[fi] = mfr;
+  _fi_to_mfr[fi] = mfr * (includes_area ? Real(1) : (fi->faceArea() * fi->faceCoord()));
 }
 
 Real

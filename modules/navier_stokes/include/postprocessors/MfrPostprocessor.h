@@ -23,7 +23,7 @@ public:
   static InputParameters validParams();
 
   MfrPostprocessor(const InputParameters & parameters);
-  void setMfr(const FaceInfo * fi, Real mfr);
+  void setMfr(const FaceInfo * fi, Real mfr, bool includes_area = true);
 
 protected:
   virtual Real computeQpIntegral() override;
