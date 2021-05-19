@@ -9,20 +9,18 @@
 
 #pragma once
 
-#include "ADMortarConstraint.h"
-
-#include <unordered_map>
+#include "ComputeWeightedGapLMMechanicalContact.h"
 
 /**
  * Computes the weighted gap that will later be used to enforce the
  * zero-penetration mechanical contact conditions
  */
-class ComputeWeightedGapLMMechanicalContact : public ADMortarConstraint
+class ComputeFrictionalForceLMMechanicalContact : public ComputeWeightedGapLMMechanicalContact
 {
 public:
   static InputParameters validParams();
 
-  ComputeWeightedGapLMMechanicalContact(const InputParameters & parameters);
+  ComputeFrictionalForceLMMechanicalContact(const InputParameters & parameters);
   using ADMortarConstraint::computeResidual;
   void computeResidual(Moose::MortarType mortar_type) override;
   using ADMortarConstraint::computeJacobian;
@@ -32,18 +30,16 @@ public:
   void post() override;
 
 protected:
-  ADReal computeQpResidual(Moose::MortarType mortar_type) final;
-
   /**
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
    * indepedent of shape functions
    */
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /**
    * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
    */
-  virtual void computeQpIProperties();
+  virtual void computeQpIProperties() override;
 
   /**
    * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
@@ -51,31 +47,38 @@ protected:
    * using an NCP function. This is also where we actually feed the node-based constraint
    * information into the system residual and Jacobian
    */
-  virtual void enforceConstraintOnNode(const Node * node);
-
-  /// x-displacement on the secondary face
-  const ADVariableValue & _secondary_disp_x;
-  /// x-displacement on the primary face
-  const ADVariableValue & _primary_disp_x;
-  /// y-displacement on the secondary face
-  const ADVariableValue & _secondary_disp_y;
-  /// y-displacement on the primary face
-  const ADVariableValue & _primary_disp_y;
-
-  /// The normal index. This is _qp if we are interpolating the nodal normals, else it is _i
-  const unsigned int & _normal_index;
-
-  /// This factor multiplies the weighted gap. This member, provided through a user parameter,
-  /// should be of a value such that its product with the gap is on the same scale as the lagrange
-  /// multiplier
-  const Real _c;
-
-  /// The value of the gap at the current quadrature point
-  ADReal _qp_gap;
+  virtual void enforceConstraintOnNode(const Node * node) override;
 
   /// A map from node to weighted gap
-  std::unordered_map<const Node *, ADReal> _node_to_weighted_gap;
+  std::unordered_map<const Node *, ADReal> _node_to_weighted_tangential_velocity;
 
   /// A pointer member that can be used to help avoid copying ADReals
-  const ADReal * _weighted_gap_ptr = nullptr;
+  const ADReal * _tangential_vel_ptr = nullptr;
+
+  /// The value of the tangential velocity at the current quadrature point
+  ADReal _qp_tangential_velocity;
+
+  /// This is a numerical factor used in the tangential constraints for convergence purposes.
+  const Real _c_t;
+
+  /// Frictional Lagrange's multiplier variable pointer
+  MooseVariable * _friction_var;
+
+  /// x-velocity on the secondary face
+  const ADVariableValue & _secondary_x_dot;
+
+  /// x-velocity on the primary face
+  const ADVariableValue & _primary_x_dot;
+
+  /// y-velocity on the secondary face
+  const ADVariableValue & _secondary_y_dot;
+
+  /// y-velocity on the primary face
+  const ADVariableValue & _primary_y_dot;
+
+  /// Small contact pressure value to trigger computation of frictional forces
+  const Real _epsilon;
+
+  /// Friction coefficient
+  const Real _mu;
 };
