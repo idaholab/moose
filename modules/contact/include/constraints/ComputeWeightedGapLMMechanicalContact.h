@@ -33,23 +33,49 @@ public:
 
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
+
+  /**
+   * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
+   * indepedent of shape functions
+   */
   void computeQpProperties();
+
+  /**
+   * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
+   */
   void computeQpIProperties();
-  void onNode(const Node * node);
 
+  /**
+   * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
+   * ComputeWeightedGapLMMechanicalContact we enforce the zero-penetration constraint in this method
+   * using an NCP function. This is also where we actually feed the node-based constraint
+   * information into the system residual and Jacobian
+   */
+  void enforceConstraintOnNode(const Node * node);
+
+  /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
+  /// x-displacement on the primary face
   const ADVariableValue & _primary_disp_x;
+  /// y-displacement on the secondary face
   const ADVariableValue & _secondary_disp_y;
+  /// y-displacement on the primary face
   const ADVariableValue & _primary_disp_y;
-
-  /// Whether this object is operating on the displaced mesh
-  const bool _displaced;
 
   /// The normal index. This is _qp if we are interpolating the nodal normals, else it is _i
   const unsigned int & _normal_index;
 
+  /// This factor multiplies the weighted gap. This member, provided through a user parameter,
+  /// should be of a value such that its product with the gap is on the same scale as the lagrange
+  /// multiplier
   const Real _c;
+
+  /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
+
+  /// A map from node to weighted gap
   std::unordered_map<const Node *, ADReal> _node_to_weighted_gap;
+
+  /// A pointer member that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;
 };
