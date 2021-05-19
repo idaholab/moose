@@ -153,20 +153,24 @@
     absolute_tolerance = 1e-16
   []
 
+  [hill_tensor]
+    type = ADHillTensor
+    # F G H L M N
+    hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
+    base_name = trial_plasticity
+    rotation_angles =  '90 90 90'
+  []
+
   [trial_plasticity]
     type = ADHillPlasticityStressUpdate
     hardening_constant = 2000.0
     yield_stress = 0.001 # was 200 for verification
-
-    # F G H L M N
-    hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
     absolute_tolerance = 1e-14
     relative_tolerance = 1e-12
     base_name = trial_plasticity
     internal_solve_full_iteration_history = true
     max_inelastic_increment = 2.0e-6
     internal_solve_output_on = on_error
-    rotation_angles =  '90 90 90'
   []
 []
 
