@@ -31,7 +31,6 @@ ADHillPlasticityStressUpdate::validParams()
 
 ADHillPlasticityStressUpdate::ADHillPlasticityStressUpdate(const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
-    _hill_constants_input(6),
     _qsigma(0.0),
     _eigenvalues_hill(6),
     _eigenvectors_hill(6, 6),
@@ -43,7 +42,6 @@ ADHillPlasticityStressUpdate::ADHillPlasticityStressUpdate(const InputParameters
     _hardening_slope(0.0),
     _yield_condition(1.0),
     _yield_stress(getParam<Real>("yield_stress")),
-    _hill_tensor(6, 6),
     _hill_tensor(getADMaterialProperty<ADDenseMatrix>(_base_name + "hill_tensor")),
     _stress_np1(6)
 {
@@ -103,6 +101,7 @@ ADHillPlasticityStressUpdate::computeDeltaDerivatives(const ADReal & delta_gamma
 {
   omega_gamma = 0.0;
   sy_gamma = 0.0;
+  computeHillTensorEigenDecomposition(_hill_tensor[_qp]);
 
   ADDenseVector K_deltaGamma(6);
   omega = computeOmega(delta_gamma, stress_trial);
@@ -143,6 +142,7 @@ ADHillPlasticityStressUpdate::computeResidual(const ADDenseVector & stress_dev,
   // If in elastic regime, just return
   if (_yield_condition <= 0.0)
     return 0.0;
+  computeHillTensorEigenDecomposition(_hill_tensor[_qp]);
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -187,7 +187,7 @@ ADHillPlasticityStressUpdate::computeDerivative(const ADDenseVector & /*stress_d
 }
 
 void
-ADHillPlasticityStressUpdate::computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor)
+ADHillPlasticityStressUpdate::computeHillTensorEigenDecomposition(const ADDenseMatrix & hill_tensor)
 {
   const unsigned int dimension = hill_tensor.n();
 

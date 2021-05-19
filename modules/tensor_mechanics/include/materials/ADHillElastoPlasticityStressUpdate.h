@@ -94,9 +94,6 @@ protected:
                                ADReal & omega_gamma,
                                ADReal & sy_gamma);
 
-  /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants_input;
-
   /// Square of the q function for orthotropy
   ADReal _qsigma;
 
@@ -127,5 +124,7 @@ protected:
   ADReal _hardening_slope;
   ADReal _yield_condition;
   ADReal _yield_stress;
-  ADDenseMatrix _hill_tensor;
+
+  /// Hill tensor material
+  const ADMaterialProperty<ADDenseMatrix> & _hill_tensor;
 };

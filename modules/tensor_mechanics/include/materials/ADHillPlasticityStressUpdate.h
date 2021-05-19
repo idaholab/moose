@@ -53,7 +53,7 @@ protected:
    * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
    * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
    */
-  void computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor);
+  void computeHillTensorEigenDecomposition(const ADDenseMatrix & hill_tensor);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -98,7 +98,7 @@ protected:
   ADReal _hardening_slope;
   ADReal _yield_condition;
   ADReal _yield_stress;
-
+  /// Hill tensor material
   const ADMaterialProperty<ADDenseMatrix> & _hill_tensor;
 
   ADDenseVector _stress_np1;

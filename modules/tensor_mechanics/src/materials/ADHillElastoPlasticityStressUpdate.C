@@ -25,18 +25,12 @@ ADHillElastoPlasticityStressUpdate::validParams()
   params.addRequiredParam<Real>("yield_stress",
                                 "Yield stress (constant value) for anisotropic plasticity");
 
-  params.addRequiredRangeCheckedParam<std::vector<Real>>("hill_constants",
-                                                         "hill_constants_size = 6",
-                                                         "Hill material constants in order: F, "
-                                                         "G, H, L, M, N");
-
   return params;
 }
 
 ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
     const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
-    _hill_constants_input(6),
     _qsigma(0.0),
     _eigenvalues_hill(6),
     _eigenvectors_hill(6, 6),
@@ -59,31 +53,8 @@ ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
     _hardening_slope(0.0),
     _yield_condition(1.0),
     _yield_stress(getParam<Real>("yield_stress")),
-    _hill_tensor(6, 6)
+    _hill_tensor(getADMaterialProperty<ADDenseMatrix>(_base_name + "hill_tensor"))
 {
-  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
-  ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(_hill_constants_input);
-
-  // Hill constants, some constraints apply
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
-
-  _hill_tensor.zero();
-
-  _hill_tensor(0, 0) = G + H;
-  _hill_tensor(1, 1) = F + H;
-  _hill_tensor(2, 2) = F + G;
-  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
-  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
-  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
-
-  _hill_tensor(3, 3) = 2.0 * N;
-  _hill_tensor(4, 4) = 2.0 * L;
-  _hill_tensor(5, 5) = 2.0 * M;
 }
 
 void
@@ -195,7 +166,7 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
   ADDenseMatrix eigenvectors_elasticity_transpose(6, 6);
   _elasticity_eigenvectors[_qp].get_transpose(eigenvectors_elasticity_transpose);
 
-  ADDenseMatrix b_matrix(_hill_tensor);
+  ADDenseMatrix b_matrix(_hill_tensor[_qp]);
 
   // Right multiply by matrix of eigenvectors transpose
   b_matrix.right_multiply(_elasticity_eigenvectors[_qp]);
@@ -371,7 +342,7 @@ ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
   stress_vector(4) = stress(1, 2);
   stress_vector(5) = stress(0, 2);
 
-  _hill_tensor.vector_mult(hill_stress, stress_vector);
+  _hill_tensor[_qp].vector_mult(hill_stress, stress_vector);
   hill_stress.scale(delta_gamma);
   inelasticStrainIncrement_vector = hill_stress;
 
@@ -386,12 +357,12 @@ ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
       inelasticStrainIncrement_vector(5) / 2.0;
 
   // Calculate appropriate equivalent plastic strain
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
+  const ADReal & F = -_hill_tensor[_qp](1, 2);
+  const ADReal & G = -_hill_tensor[_qp](0, 2);
+  const ADReal & H = -_hill_tensor[_qp](0, 1);
+  const ADReal & L = _hill_tensor[_qp](4, 4) / 2;
+  const ADReal & M = _hill_tensor[_qp](5, 5) / 2;
+  const ADReal & N = _hill_tensor[_qp](3, 3) / 2;
 
   ADReal eq_plastic_strain_inc = (F * Utility::pow<2>(inelasticStrainIncrement(0, 0)) +
                                   G * Utility::pow<2>(inelasticStrainIncrement(1, 1)) +
