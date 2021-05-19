@@ -203,7 +203,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
       // Look up elem in the mortar_interface_coupling data structure.
-      auto bounds = _amg->mortar_interface_coupling.equal_range(elem->id());
+      auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem->id());
 
       for (const auto & pr : as_range(bounds))
       {

@@ -46,7 +46,6 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     bool periodic)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
-    h_max(0.),
     _debug(false),
     _on_displaced(on_displaced),
     _periodic(periodic),
@@ -115,6 +114,55 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
       vec.push_back(primary_elem);
     }
   }
+}
+
+std::vector<Point>
+AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
+{
+  std::vector<Point> nodal_normals(secondary_elem.n_nodes());
+  for (const auto n : make_range(secondary_elem.n_nodes()))
+    nodal_normals[n] = secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
+
+  return nodal_normals;
+}
+
+std::vector<Point>
+AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
+                                      const std::vector<Real> & oned_xi1_pts) const
+{
+  std::vector<Point> xi1_pts(oned_xi1_pts.size());
+  for (const auto qp : index_range(oned_xi1_pts))
+    xi1_pts[qp] = oned_xi1_pts[qp];
+
+  return getNormals(secondary_elem, xi1_pts);
+}
+
+std::vector<Point>
+AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
+                                      const std::vector<Point> & xi1_pts) const
+{
+  const auto num_qps = xi1_pts.size();
+  const auto nodal_normals = getNodalNormals(secondary_elem);
+  std::vector<Point> normals(num_qps);
+  for (const auto n : make_range(secondary_elem.n_nodes()))
+    for (const auto qp : make_range(num_qps))
+    {
+#ifndef NDEBUG
+      for (const auto d : make_range(1, LIBMESH_DIM))
+        mooseAssert(xi1_pts[qp](d) == 0,
+                    "We should only have non-zero entries in the first entry of the point because "
+                    "our mortar mesh currently only ever has 1D elements");
+#endif
+      const auto phi =
+          Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0));
+      normals[qp] += phi * nodal_normals[n];
+    }
+
+  if (_periodic)
+    for (auto & normal : normals)
+      normal *= -1;
+
+  return normals;
 }
 
 void
@@ -293,17 +341,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the primary elems relative to the
     // new mortar segments.
-    std::vector<Point> nodal_normals(secondary_elem->n_nodes());
-    for (const auto n : make_range(secondary_elem->n_nodes()))
-      nodal_normals[n] = secondary_node_to_nodal_normal.at(secondary_elem->node_ptr(n));
-    Point normal(0);
-    for (const auto n : make_range(secondary_elem->n_nodes()))
-    {
-      const auto phi = Moose::fe_lagrange_1D_shape(order, n, xi1);
-      normal += phi * nodal_normals[n];
-    }
-    if (_periodic)
-      normal *= -1;
+    const Point normal = getNormals(*secondary_elem, std::vector<Real>({xi1}))[0];
 
     // Get the set of primary_node neighbors.
     if (this->nodes_to_primary_elem_map.find(primary_node->id()) ==
