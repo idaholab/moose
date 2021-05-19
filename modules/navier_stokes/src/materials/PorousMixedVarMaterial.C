@@ -70,6 +70,7 @@ PorousMixedVarMaterial::PorousMixedVarMaterial(const InputParameters & params)
     _grad_pressure(declareADProperty<RealVectorValue>(NS::grad(NS::pressure))),
     _T_fluid(declareADProperty<Real>(NS::T_fluid)),
     _grad_T_fluid(declareADProperty<RealVectorValue>(NS::grad(NS::T_fluid))),
+    _sup_vel(declareADProperty<RealVectorValue>(NS::superficial_velocity)),
     _sup_vel_x(declareADProperty<Real>(NS::superficial_velocity_x)),
     _grad_sup_vel_x(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_x))),
     _sup_vel_y(declareADProperty<Real>(NS::superficial_velocity_y)),
@@ -126,10 +127,10 @@ PorousMixedVarMaterial::computeQpProperties()
   const auto grad_rho = drho_dp * _grad_pressure[_qp] + drho_dT * _grad_T_fluid[_qp];
   _sup_rho_dot[_qp] = _epsilon[_qp] * rho_dot;
 
-  const auto superficial_velocity = superficial_momentum / _rho[_qp];
-  _sup_vel_x[_qp] = superficial_velocity(0);
-  _sup_vel_y[_qp] = superficial_velocity(1);
-  _sup_vel_z[_qp] = superficial_velocity(2);
+  _sup_vel[_qp] = superficial_momentum / _rho[_qp];
+  _sup_vel_x[_qp] = _sup_vel[_qp](0);
+  _sup_vel_y[_qp] = _sup_vel[_qp](1);
+  _sup_vel_z[_qp] = _sup_vel[_qp](2);
   _grad_sup_vel_x[_qp] = _grad_var_sup_mom_x[_qp] / _rho[_qp] -
                          superficial_momentum(0) / (_rho[_qp] * _rho[_qp]) * grad_rho;
   _grad_sup_vel_y[_qp] = _grad_var_sup_mom_y[_qp] / _rho[_qp] -
@@ -143,7 +144,7 @@ PorousMixedVarMaterial::computeQpProperties()
   const auto sup_vel_z_dot = _var_sup_mom_z_dot[_qp] / _rho[_qp] -
                              superficial_momentum(2) / (_rho[_qp] * _rho[_qp]) * rho_dot;
 
-  const auto velocity = superficial_velocity / _epsilon[_qp];
+  const auto velocity = _sup_vel[_qp] / _epsilon[_qp];
   _vel_x[_qp] = velocity(0);
   _vel_y[_qp] = velocity(1);
   _vel_z[_qp] = velocity(2);

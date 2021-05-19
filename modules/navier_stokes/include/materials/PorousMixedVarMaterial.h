@@ -51,6 +51,7 @@ protected:
   ADMaterialProperty<RealVectorValue> & _grad_pressure;
   ADMaterialProperty<Real> & _T_fluid;
   ADMaterialProperty<RealVectorValue> & _grad_T_fluid;
+  ADMaterialProperty<RealVectorValue> & _sup_vel;
   ADMaterialProperty<Real> & _sup_vel_x;
   ADMaterialProperty<RealVectorValue> & _grad_sup_vel_x;
   ADMaterialProperty<Real> & _sup_vel_y;
