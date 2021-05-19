@@ -11,6 +11,7 @@
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
+#include "MfrPostprocessor.h"
 
 registerMooseObject("MooseApp", PCNSFVLaxFriedrichsBC);
 
@@ -59,6 +60,9 @@ PCNSFVLaxFriedrichsBC::validParams()
       "scalar",
       "A function describing the value of the scalar at the boundary. If this function is not "
       "provided, then the interior value will be used.");
+  params.addParam<UserObjectName>("mfr_postprocessor",
+                                  "A postprocessor used for outputting mass flow rates on the same "
+                                  "boundary this object acts on");
   return params;
 }
 
@@ -93,7 +97,11 @@ PCNSFVLaxFriedrichsBC::PCNSFVLaxFriedrichsBC(const InputParameters & params)
                          : _u_neighbor),
     _scalar_function_provided(isParamValid("scalar")),
     _scalar_function(_scalar_function_provided ? &getFunction("scalar") : nullptr),
-    _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho"))
+    _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho")),
+    _mfr_pp(
+        isParamValid("mfr_postprocessor")
+            ? &const_cast<MfrPostprocessor &>(getUserObject<MfrPostprocessor>("mfr_postprocessor"))
+            : nullptr)
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -223,7 +231,12 @@ PCNSFVLaxFriedrichsBC::computeQpResidual()
   adjusted_vSf_max += 0 * (adjusted_vSf_interior + adjusted_vSf_boundary);
 
   if (_eqn == "mass")
-    return adjusted_vSf_interior * rho_interior + adjusted_vSf_boundary * rho_boundary;
+  {
+    const ADReal mfr = adjusted_vSf_interior * rho_interior + adjusted_vSf_boundary * rho_boundary;
+    if (_mfr_pp)
+      _mfr_pp->setMfr(_face_info, mfr.value());
+    return mfr;
+  }
   else if (_eqn == "momentum")
   {
     const auto rhou_interior = u_interior(_index) * rho_interior;

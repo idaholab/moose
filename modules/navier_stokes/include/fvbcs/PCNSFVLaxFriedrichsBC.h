@@ -12,6 +12,7 @@
 #include "FVFluxBC.h"
 
 class SinglePhaseFluidProperties;
+class MfrPostprocessor;
 
 class PCNSFVLaxFriedrichsBC : public FVFluxBC
 {
@@ -53,4 +54,6 @@ protected:
   const bool _scalar_function_provided;
   const Function * const _scalar_function;
   const bool _velocity_function_includes_rho;
+
+  MfrPostprocessor * const _mfr_pp;
 };
