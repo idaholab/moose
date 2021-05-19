@@ -9,7 +9,7 @@
 
 #include "AdaptiveMonteCarloUtils.h"
 
-/* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
+/* AdaptiveMonteCarloUtils contains functions used across the Adaptive Monte
  Carlo set of algorithms.*/
 
 namespace StochasticTools
