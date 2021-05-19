@@ -654,7 +654,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       Point p = point_requests[val_offset];
       // We should only have one value for each variable at any given point.
       libmesh_assert(cache.count(p) == 0);
-      cache[p] = incoming_vals[val_offset];
+      const Number val = incoming_vals[val_offset];
+      if (!isBetterOutOfMeshValue(val))
+        cache[p] = val;
     }
     else
     {
