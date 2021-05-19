@@ -9,20 +9,20 @@
 
 #pragma once
 
-#include "SideFluxIntegral.h"
+#include "SideDiffusiveFluxIntegral.h"
 
 template <bool>
-class SideFluxAverageTempl;
-typedef SideFluxAverageTempl<false> SideFluxAverage;
-typedef SideFluxAverageTempl<true> ADSideFluxAverage;
+class SideDiffusiveFluxAverageTempl;
+typedef SideDiffusiveFluxAverageTempl<false> SideDiffusiveFluxAverage;
+typedef SideDiffusiveFluxAverageTempl<true> ADSideDiffusiveFluxAverage;
 
 template <bool is_ad>
-class SideFluxAverageTempl : public SideFluxIntegralTempl<is_ad>
+class SideDiffusiveFluxAverageTempl : public SideDiffusiveFluxIntegralTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  SideFluxAverageTempl(const InputParameters & parameters);
+  SideDiffusiveFluxAverageTempl(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

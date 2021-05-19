@@ -186,14 +186,14 @@
   [../]
 
   [./flux_left]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
   [../]
 
   [./flux_right]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity

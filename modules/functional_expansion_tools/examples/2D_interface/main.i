@@ -99,7 +99,7 @@
     boundary = right
   [../]
   [./total_flux]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = m
     boundary = right
     diffusivity = thermal_conductivity

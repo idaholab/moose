@@ -13,7 +13,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 #include "MooseMesh.h"
 #include "Output.h"
 #include "TimeStepper.h"

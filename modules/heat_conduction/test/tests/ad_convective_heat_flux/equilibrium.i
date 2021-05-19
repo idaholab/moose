@@ -45,7 +45,7 @@
     boundary = right
   [../]
   [./right_flux]
-    type = SideFluxAverage
+    type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right
     diffusivity = 1

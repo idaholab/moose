@@ -42,7 +42,7 @@
 [Postprocessors]
   [avg_flux_right]
     # Computes -\int(exp(y)+1) from 0 to 1 which is -2.718281828
-    type = SideFluxAverage
+    type = SideDiffusiveFluxAverage
     variable = u
     boundary = right
     diffusivity = diffusivity

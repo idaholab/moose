@@ -12,22 +12,16 @@
 // MOOSE includes
 #include "LayeredSideAverage.h"
 
-// Forward Declarations
-class LayeredSideFluxAverage;
-
-template <>
-InputParameters validParams<LayeredSideFluxAverage>();
-
 /**
  * This UserObject computes side averages of a flux storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
  */
-class LayeredSideFluxAverage : public LayeredSideAverage
+class LayeredSideDiffusiveFluxAverage : public LayeredSideAverage
 {
 public:
   static InputParameters validParams();
 
-  LayeredSideFluxAverage(const InputParameters & parameters);
+  LayeredSideDiffusiveFluxAverage(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
@@ -35,4 +29,3 @@ protected:
   std::string _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;
 };
-
