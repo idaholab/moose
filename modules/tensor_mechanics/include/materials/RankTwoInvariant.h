@@ -35,7 +35,7 @@ protected:
   /// Tensor to extract the invariant from
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
-  /// Old state of the tensor (required for sffective strain calculation)
+  /// Old state of the tensor (required for effective strain calculation)
   const MaterialProperty<RankTwoTensor> * _tensor_old;
 
   /// Stress/strain value returned from calculation

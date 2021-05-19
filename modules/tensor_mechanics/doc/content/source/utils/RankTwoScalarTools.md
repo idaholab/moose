@@ -38,7 +38,7 @@ s = D_i T_{ij} D_j
 where $D$ is the direction vector specified in the input file.
 
 
-## Effective Strain
+## Effective Strain Increment
 
 Effective plastic strain or effective creep strain, which are computed as
 integrals over the history of the inelastic strain as
@@ -46,7 +46,8 @@ integrals over the history of the inelastic strain as
 s = \int_t\sqrt{\frac{2}{3} \dot{\epsilon}^p_{ij} \dot{\epsilon}^p_{ij}} \mathrm{d}t
 \end{equation}
 can be computed with the help of the `effectiveStrainIncrement` method.
-See [RankTwoInvariant.md].
+The integration of the effective increment is performed in [RankTwoInvariant.md],
+yielding the effective strain.
 
 ##Hoop Stress
 
