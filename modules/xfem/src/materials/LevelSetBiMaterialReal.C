@@ -12,11 +12,11 @@
 registerMooseObjectReplaced("XFEMApp",
                             LevelSetBiMaterialReal,
                             "01/01/2022 00:00",
-                            GeometricCutSwitchingMaterialReal);
+                            XFEMCutSwitchingMaterialReal);
 registerMooseObjectReplaced("XFEMApp",
                             ADLevelSetBiMaterialReal,
                             "01/01/2022 00:00",
-                            ADGeometricCutSwitchingMaterialReal);
+                            ADXFEMCutSwitchingMaterialReal);
 
 template <bool is_ad>
 InputParameters

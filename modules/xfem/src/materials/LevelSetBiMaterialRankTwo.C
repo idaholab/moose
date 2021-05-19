@@ -12,11 +12,11 @@
 registerMooseObjectReplaced("XFEMApp",
                             LevelSetBiMaterialRankTwo,
                             "01/01/2022 00:00",
-                            GeometricCutSwitchingMaterialRankTwoTensor);
+                            XFEMCutSwitchingMaterialRankTwoTensor);
 registerMooseObjectReplaced("XFEMApp",
                             ADLevelSetBiMaterialRankTwo,
                             "01/01/2022 00:00",
-                            ADGeometricCutSwitchingMaterialRankTwoTensor);
+                            ADXFEMCutSwitchingMaterialRankTwoTensor);
 
 template <bool is_ad>
 InputParameters
