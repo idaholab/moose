@@ -12,7 +12,6 @@
   [to_sub_vpp]
     type = ConstantVectorPostprocessor
     vector_names = 'a b'
-    value = '11 11 11 ; 21 21 21'
   []
   [from_sub_vpp]
     type = ConstantVectorPostprocessor

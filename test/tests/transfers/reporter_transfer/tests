@@ -1,6 +1,6 @@
 [Tests]
   design = 'MultiAppReporterTransfer.md MultiAppCloneReporterTransfer.md'
-  issues = '#16055'
+  issues = '#16055 #17885'
 
   [vpp]
     requirement = "The system shall support the ability to transfer vectorpostprocessor data "

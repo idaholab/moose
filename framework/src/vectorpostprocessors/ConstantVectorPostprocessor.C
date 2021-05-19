@@ -21,7 +21,7 @@ ConstantVectorPostprocessor::validParams()
       "Populate constant VectorPostprocessorValue directly from input file.");
   params.addParam<std::vector<std::string>>("vector_names",
                                             "Names of the column vectors in this object");
-  params.addRequiredParam<std::vector<std::vector<Real>>>(
+  params.addParam<std::vector<std::vector<Real>>>(
       "value",
       "Vector values this object will have. Leading dimension must be equal to leading dimension "
       "of vector_names parameter.");
@@ -43,10 +43,19 @@ ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters &
   for (unsigned int j = 0; j < nvec; ++j)
     _value[j] = &declareVector(names[j]);
 
-  std::vector<std::vector<Real>> v = getParam<std::vector<std::vector<Real>>>("value");
-  if (v.size() != nvec)
-    paramError("value",
-               "Leading dimension must be equal to leading dimension of vector_names parameter.");
+  std::vector<std::vector<Real>> v;
+  if (isParamValid("value"))
+  {
+    v = getParam<std::vector<std::vector<Real>>>("value");
+    if (v.size() != nvec)
+      paramError("value",
+                 "Leading dimension must be equal to leading dimension of vector_names parameter.");
+  }
+  else
+  {
+    for (unsigned int i = 0; i < nvec; ++i)
+      v.push_back({std::numeric_limits<Real>::max()});
+  }
 
   if (processor_id() == 0)
   {
