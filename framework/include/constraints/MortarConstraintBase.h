@@ -103,6 +103,11 @@ public:
    */
   bool interpolateNormals() const { return _interpolate_normals; }
 
+  /**
+   * This method will be called after the loop over the mortar segment mesh
+   */
+  virtual void post() {}
+
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;

@@ -34,10 +34,15 @@ where $\gamma_c^{(1)}$ denotes the secondary contact interface, $\Phi_j$ is the
 j'th lagrange multiplier test function, and $g_{n,h}$ is the discretized version
 of the gap function.
 
-The `ComputeWeightedGapLMMechanicalContact` object computes the weighted gap. It
-**does not apply** the KKT conditions. That is done with the
-[ApplyPenetrationConstraintLMMechanicalContact.md] object. Consequently, the two
-objects must always be used in conjunction.
+The `ComputeWeightedGapLMMechanicalContact` object computes the weighted gap and
+applies the KKT conditions. The KKT conditions
+are enforced using a nonlinear complimentarity problem (NCP) function, in this case the most
+simple such function, $min(c(\tilde{g}_n)_j, (\lambda_n)_j)$, where $c$ (implemented with the input
+parameter `c`) is used to balance the size of the gap
+and the normal contact pressure. If the contact pressure is of order 10000, and the
+gap is of order .01, then `c` should be set to 1e6 in order to bring
+components of the NCP function onto the same level and achieve optimal
+convergence in the non-linear solve.
 
 !syntax description /Constraints/ComputeWeightedGapLMMechanicalContact
 
