@@ -128,6 +128,8 @@ bool
 TensorMechanicsAction::setupOutput(std::string out, T table, T2 setup)
 {
   for (const auto & t1 : table)
+  {
+    // find the officially supported properties
     for (const auto & t2 : t1.second.second)
       if (t1.first + '_' + t2 == out)
       {
@@ -141,5 +143,15 @@ TensorMechanicsAction::setupOutput(std::string out, T table, T2 setup)
           mooseError("Internal error. The permitted tensor shortcuts must be keys in the "
                      "'_rank_two_cartesian_component_table'.");
       }
+
+    // check for custom properties
+    auto prefix = t1.first + '_';
+    if (out.substr(0, prefix.length()) == prefix)
+    {
+      setup(out.substr(prefix.length()), t1.second.first);
+      return true;
+    }
+  }
+
   return false;
 }
