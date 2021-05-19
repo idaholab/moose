@@ -723,102 +723,80 @@ TensorMechanicsAction::actOutputMatProp()
 
   if (_current_task == "add_material")
   {
-
     // Add output Materials
     for (auto out : _generate_output)
     {
-      std::string type;
       InputParameters params = emptyInputParameters();
 
       // RankTwoCartesianComponent
-      for (const auto & r2q : _rank_two_cartesian_component_table)
-        for (unsigned int a = 0; a < 3; ++a)
-          for (unsigned int b = 0; b < 3; ++b)
-            if (r2q.first + '_' + _component_table[a] + _component_table[b] == out)
-            {
-              type = ad_prepend + "RankTwoCartesianComponent";
-              params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q.second;
-              params.set<unsigned int>("index_i") = a;
-              params.set<unsigned int>("index_j") = b;
+      if ([&]() {
+            for (const auto & r2q : _rank_two_cartesian_component_table)
+              for (unsigned int a = 0; a < 3; ++a)
+                for (unsigned int b = 0; b < 3; ++b)
+                  if (r2q.first + '_' + _component_table[a] + _component_table[b] == out)
+                  {
+                    auto type = ad_prepend + "RankTwoCartesianComponent";
+                    params = _factory.getValidParams(type);
+                    params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q.second;
+                    params.set<unsigned int>("index_i") = a;
+                    params.set<unsigned int>("index_j") = b;
 
-              params.applyParameters(parameters());
-              params.set<MaterialPropertyName>("property_name") = _base_name + out;
-            }
+                    params.applyParameters(parameters());
+                    params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                    _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+                    return true;
+                  }
+            return false;
+          }())
+        continue;
 
       // RankTwoDirectionalComponent
-      for (const auto & r2sdq : _rank_two_directional_component_table)
-        for (const auto & t : r2sdq.second.second)
-          if (r2sdq.first + '_' + t == out)
-          {
-            const auto r2q = _rank_two_cartesian_component_table.find(t);
-            if (r2q != _rank_two_cartesian_component_table.end())
-            {
-              type = ad_prepend + "RankTwoDirectionalComponent";
-              params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
-              params.set<MooseEnum>("invariant") = r2sdq.second.first;
-              params.applyParameters(parameters());
-              params.set<MaterialPropertyName>("property_name") = _base_name + out;
-            }
-            else
-              mooseError("Internal error. The permitted tensor shortcuts in "
-                         "'_rank_two_directional_component_table' must be keys in the "
-                         "'_rank_two_cartesian_component_table'.");
-          }
+      if (setupOutput(out,
+                      _rank_two_directional_component_table,
+                      [&](std::string prop_name, std::string invariant) {
+                        auto type = ad_prepend + "RankTwoDirectionalComponent";
+                        params = _factory.getValidParams(type);
+                        params.set<MaterialPropertyName>("rank_two_tensor") =
+                            _base_name + prop_name;
+                        params.set<MooseEnum>("invariant") = invariant;
+                        params.applyParameters(parameters());
+                        params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                        _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+                      }))
+        continue;
 
       // RankTwoInvariant
-      for (const auto & r2i : _rank_two_invariant_table)
-        for (const auto & t : r2i.second.second)
-          if (r2i.first + '_' + t == out)
-          {
-            const auto r2q = _rank_two_cartesian_component_table.find(t);
-            if (r2q != _rank_two_cartesian_component_table.end())
-            {
-              type = ad_prepend + "RankTwoInvariant";
-              params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
-              params.set<MooseEnum>("invariant") = r2i.second.first;
-              params.applyParameters(parameters());
-              params.set<MaterialPropertyName>("property_name") = _base_name + out;
-            }
-            else
-              mooseError("Internal error. The permitted tensor shortcuts in "
-                         "'_rank_two_invariant_table' must be keys in the "
-                         "'_rank_two_cartesian_component_table'.");
-          }
+      if (setupOutput(
+              out, _rank_two_invariant_table, [&](std::string prop_name, std::string invariant) {
+                auto type = ad_prepend + "RankTwoInvariant";
+                params = _factory.getValidParams(type);
+                params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + prop_name;
+                params.set<MooseEnum>("invariant") = invariant;
+                params.applyParameters(parameters());
+                params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+              }))
+        continue;
 
       // RankTwoCylindricalComponent
-      for (const auto & r2sdq : _rank_two_cylindrical_component_table)
-        for (const auto & t : r2sdq.second.second)
-          if (r2sdq.first + '_' + t == out)
-          {
-            const auto r2q = _rank_two_cartesian_component_table.find(t);
-            if (r2q != _rank_two_cartesian_component_table.end() &&
-                _coord_system != Moose::COORD_RSPHERICAL)
-            {
+      if (setupOutput(
+              out,
+              _rank_two_cylindrical_component_table,
+              [&](std::string prop_name, std::string component) {
+                if (_coord_system == Moose::COORD_RSPHERICAL)
+                  mooseError(
+                      "Cannot use cylindrical component output in a spherical coordinate system.");
+                auto type = ad_prepend + "RankTwoCylindricalComponent";
+                params = _factory.getValidParams(type);
+                params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + prop_name;
+                params.set<MooseEnum>("cylindrical_component") = component;
+                params.applyParameters(parameters());
+                params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+              }))
+        continue;
 
-              type = ad_prepend + "RankTwoCylindricalComponent";
-              params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
-              params.set<MooseEnum>("cylindrical_component") = r2sdq.second.first;
-              params.applyParameters(parameters());
-              params.set<MaterialPropertyName>("property_name") = _base_name + out;
-            }
-            else
-              mooseError("Internal error. The permitted tensor shortcuts in "
-                         "'_rank_two_cylindrical_component_table' must be keys in the "
-                         "'_rank_two_cartesian_component_table'.");
-          }
-
-      // This material property is already created by creep or plasticity models
-      if (type != "" && (out != "effective_creep_strain" && out != "effective_plastic_strain"))
-      {
-        _problem->addMaterial(type, _base_name + out + '_' + name(), params);
-      }
-
-      if (type == "")
-        mooseError("Unable to add output Material");
+      mooseError("Unable to add output Material");
     }
   }
 }
