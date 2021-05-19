@@ -53,7 +53,7 @@
 
 [Postprocessors]
   [flux]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = u
     diffusivity = 1
     boundary = 'left'

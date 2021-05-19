@@ -93,7 +93,7 @@
 
 [Postprocessors]
   [./right]
-    type = SideFluxAverage
+    type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right
     diffusivity = thermal_conductivity
