@@ -378,8 +378,10 @@ template <typename Scalar, typename Vector>
 ADReal
 rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
-  // We need to make sure we protect ourselves against things like division by zero
-  return 2. * gradC * dCD / (std::numeric_limits<Real>::epsilon() + (phiD - phiC)) - 1.;
+  if ((phiD - phiC) == 0)
+    return 1e6 * MathUtils::sign(gradC * dCD) + 0 * (gradC * dCD + phiD + phiC);
+
+  return 2. * gradC * dCD / (phiD - phiC) - 1.;
 }
 
 /**
