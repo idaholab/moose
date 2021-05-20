@@ -44,9 +44,6 @@ NavierStokesMaterial::validParams()
   params.addRequiredCoupledVar(nms::total_energy_density, "energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
-  // UPDATE:
-  params.addRequiredCoupledVar(nms::porosity, "porosity");
-
   return params;
 }
 

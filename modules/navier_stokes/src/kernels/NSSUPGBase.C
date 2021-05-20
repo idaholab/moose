@@ -65,6 +65,6 @@ NSSUPGBase::NSSUPGBase(const InputParameters & parameters)
 
     // Coupled aux variables
     _temperature(coupledValue(NS::temperature)),
-    _specific_total_enthalpy(coupledValue("specific_total_enthalpy"))
+    _specific_total_enthalpy(coupledValue(NS::specific_total_enthalpy))
 {
 }

@@ -76,6 +76,7 @@
 [Outputs]
   exodus = true
   file_base = lid_driven_stabilized_out
+  hide = 'pressure'
 []
 
 [Postprocessors]
@@ -92,5 +93,19 @@
   [nl_tot]
     type = CumulativeValuePostprocessor
     postprocessor = 'nl'
+  []
+[]
+
+[AuxVariables]
+  [p][]
+[]
+
+[AuxKernels]
+  [p]
+    type = ParsedAux
+    variable = p
+    function = 'pressure'
+    args = 'pressure'
+    execute_on = 'initial timestep_end'
   []
 []

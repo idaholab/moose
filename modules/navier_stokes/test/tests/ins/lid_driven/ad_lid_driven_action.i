@@ -84,7 +84,21 @@
   file_base = lid_driven_out
   [exodus]
     type = Exodus
-    hide = 'velocity'
+    hide = 'velocity pressure'
   []
   perf_graph = true
+[]
+
+[AuxVariables]
+  [p][]
+[]
+
+[AuxKernels]
+  [p]
+    type = ParsedAux
+    variable = p
+    function = 'pressure'
+    args = 'pressure'
+    execute_on = 'initial timestep_end'
+  []
 []

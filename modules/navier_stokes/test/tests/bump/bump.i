@@ -34,8 +34,6 @@
   # file = SmoothBump_quad_ref5_Q2.msh # 12804 elems, 49665 nodes
 []
 
-
-
 [Modules]
   [FluidProperties]
     [ideal_gas]
@@ -64,14 +62,12 @@
     # variable types, scalings and initial conditions
     family = LAGRANGE
     order = FIRST
-    total_energy_scaling = 9.869232667160121e-6
+    total_energy_density_scaling = 9.869232667160121e-6
     initial_pressure = 101325.
     initial_temperature = 300.
     initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
   []
 []
-
-
 
 [Materials]
   [fluid]
@@ -80,11 +76,11 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoE = rhoE
+    rho_et = rho_et
     vel_x = vel_x
     vel_y = vel_y
     temperature = temperature
-    enthalpy = enthalpy
+    ht = ht
     # This value is not used in the Euler equations, but it *is* used
     # by the stabilization parameter computation, which it decreases
     # the amount of artificial viscosity added, so it's best to use a
@@ -94,8 +90,6 @@
   []
 []
 
-
-
 [Postprocessors]
   [entropy_error]
     type = NSEntropyError
@@ -104,12 +98,10 @@
     rho_infty = 1.1768292682926829
     p_infty = 101325
     rho = rho
-    pressure = p
+    pressure = pressure
     fluid_properties = ideal_gas
   []
 []
-
-
 
 [Preconditioning]
   [SMP_PJFNK]
@@ -117,8 +109,6 @@
     full = true
   []
 []
-
-
 
 [Executioner]
   type = Transient
@@ -139,9 +129,37 @@
   []
 []
 
-
-
 [Outputs]
   interval = 1
   exodus = true
+[]
+
+[AuxVariables]
+  [rhoe][]
+  [p][]
+  [enthalpy][]
+[]
+
+[AuxKernels]
+  [rhoe]
+    variable = rhoe
+    type = ParsedAux
+    function = 'rho_et'
+    args = 'rho_et'
+    execute_on = 'initial timestep_end'
+  []
+  [p]
+    variable = p
+    type = ParsedAux
+    function = 'pressure'
+    args = 'pressure'
+    execute_on = 'initial timestep_end'
+  []
+  [enthalpy]
+    variable = enthalpy
+    type = ParsedAux
+    function = 'ht'
+    args = 'ht'
+    execute_on = 'initial timestep_end'
+  []
 []
