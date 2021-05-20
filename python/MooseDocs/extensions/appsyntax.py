@@ -583,10 +583,13 @@ class SyntaxCompleteCommand(SyntaxListCommand):
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj):
-        self._addList(parent, info, page, obj, self.settings['level'])
+        # Always search entire syntax tree for group members when listing root systems by setting
+        # `recursive=True`. This is so that top level headers are always rendered even if a system
+        # only has actions and/or subsystems available for the group and no child objects.
+        self._addList(parent, info, page, obj, self.settings['level'], recursive=True)
         return parent
 
-    def _addList(self, parent, info, page, obj, level):
+    def _addList(self, parent, info, page, obj, level, recursive=False):
 
         gs = self.settings['groups']
         groups = set(gs.split()) if gs else None
@@ -595,12 +598,16 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             if child.removed or child.test:
                 continue
 
-            if (groups is None) or (child.groups(actions=True, syntax=True, objects=True).intersection(groups)):
+            # get a list of groups this object is a member of to cross-reference w/ those specified
+            cgs = child.groups(actions=True, syntax=True, objects=True, recursive=recursive)
+
+            if (groups is None) or (cgs.intersection(groups)):
                 url = os.path.join('syntax', child.markdown)
                 h = core.Heading(parent, level=level, id_=self.settings['id'])
                 autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')))
 
             SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child)
+
             self._addList(parent, info, page, child, level + 1)
 
 
