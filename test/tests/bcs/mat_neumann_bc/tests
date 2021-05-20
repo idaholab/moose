@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#17791'
+  design = 'MatNeumannBC.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'mat_neumann.i'
+    exodiff = 'mat_neumann_out.e'
+    requirement = 'The system shall support applying a material property as a Neumann boundary condition.'
+  [../]
+[]
