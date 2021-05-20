@@ -3685,6 +3685,8 @@ void
 FEProblemBase::setCurrentExecuteOnFlag(const ExecFlagType & flag)
 {
   _current_execute_on_flag = flag;
+  if (flag != EXEC_NONE)
+    _app.appendExecution(flag);
 }
 
 void
@@ -5430,7 +5432,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   unsigned int n_threads = libMesh::n_threads();
 
-  _current_execute_on_flag = EXEC_LINEAR;
+  setCurrentExecuteOnFlag(EXEC_LINEAR);
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
@@ -5508,7 +5510,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   executeControls(EXEC_LINEAR);
 
-  _current_execute_on_flag = EXEC_NONE;
+  setCurrentExecuteOnFlag(EXEC_NONE);
 
   _app.getOutputWarehouse().residualSetup();
 
@@ -5602,7 +5604,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     for (const auto & it : _random_data_objects)
       it.second->updateSeeds(EXEC_NONLINEAR);
 
-    _current_execute_on_flag = EXEC_NONLINEAR;
+    setCurrentExecuteOnFlag(EXEC_NONLINEAR);
     _currently_computing_jacobian = true;
     if (_displaced_problem)
       _displaced_problem->setCurrentlyComputingJacobian(true);
@@ -5648,7 +5650,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _nl->computeJacobianTags(tags);
 
-    _current_execute_on_flag = EXEC_NONE;
+    setCurrentExecuteOnFlag(EXEC_NONE);
 
     // For explicit Euler calculations for example we often compute the Jacobian one time and then
     // re-use it over and over. If we're performing automatic scaling, we don't want to use that
