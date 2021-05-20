@@ -87,3 +87,19 @@ MooseObject::typeAndName() const
 {
   return type() + std::string(" \"") + name() + std::string("\"");
 }
+
+bool
+MooseObject::mooseDoOnceOnFlagInternal(const ExecFlagType & exec_type, const unsigned int line)
+{
+  auto & entry =
+      _did_once_map
+          .emplace(std::make_pair(exec_type.id(), line), std::numeric_limits<unsigned int>::max())
+          .first->second;
+  const auto execution_count = _app.executionCount(exec_type);
+  if (Moose::show_multiple || execution_count != entry)
+  {
+    entry = execution_count;
+    return true;
+  }
+  return false;
+}

@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#17896'
+
+  [test]
+    type = CSVDiff
+    input = 'do_once_on_flag.i'
+    csvdiff = 'do_once_on_flag_out.csv'
+    recover = false
+    allow_test_objects = true
+
+    requirement = 'The system shall support the ability to execute an action only once per execution phase.'
+  []
+[]

@@ -226,7 +226,11 @@ protected:
   /// Reference to the "enable" InputParaemters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
 
+  bool mooseDoOnceOnFlagInternal(const ExecFlagType & flag, const unsigned int line);
+
 private:
+  std::map<std::pair<int, unsigned int>, unsigned int> _did_once_map;
+
   template <typename... Args>
   std::string paramErrorMsg(const std::string & param, Args... args) const
   {
@@ -300,3 +304,10 @@ MooseObject::getCheckedPointerParam(const std::string & name,
 {
   return parameters().getCheckedPointerParam<T>(name, error_string);
 }
+
+#define mooseDoOnceOnFlag(do_this, exec_flag)                                                      \
+  do                                                                                               \
+  {                                                                                                \
+    if (mooseDoOnceOnFlagInternal(exec_flag, __LINE__))                                            \
+      do_this;                                                                                     \
+  } while (0)
