@@ -182,10 +182,10 @@ protected:
   Real _max_integration_error_time_step;
 
   /// Angles for transformation of hill tensor
-  RealVectorValue _angle;
+  RealVectorValue _zyx_angles;
 
   /// Transformation matrix
-  std::vector<std::vector<Real>> _transformation_tensor;
+  DenseMatrix<Real> _transformation_tensor;
 
   /// Hill constants for orthotropic creep
   std::vector<Real> _hill_constants;
