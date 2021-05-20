@@ -83,19 +83,20 @@ class SyntaxNode(NodeBase):
         if self.markdown is None:
             self.markdown = os.path.join(self.fullpath().lstrip('/'), 'index.md')
 
-    def groups(self, syntax=True, actions=True, objects=False):
+    def groups(self, syntax=True, actions=True, objects=False, **kwargs):
         """
-        Return groups associated with this Actions (i.e., where the syntax is defined).
+        Return groups associated with this node (i.e., where the syntax is defined). The **kwargs
+        may be used to pass the named arguments to __nodeFinder, e.g., recursive=True.
         """
         out = set([self.group]) if self.group is not None else set()
         if syntax:
-            for node in self.syntax():
+            for node in self.syntax(**kwargs):
                 out.update(node.groups())
         if actions:
-            for node in self.actions():
+            for node in self.actions(**kwargs):
                 out.update(node.groups())
         if objects:
-            for node in self.objects():
+            for node in self.objects(**kwargs):
                 out.update(node.groups())
         return out
 
