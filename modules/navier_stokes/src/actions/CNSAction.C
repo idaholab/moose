@@ -84,8 +84,8 @@ CNSAction::validParams()
       "stagnation_boundary stagnation_pressure stagnation_temperature "
       "stagnation_flow_direction no_penetration_boundary static_pressure_boundary static_pressure",
       "BoundaryCondition");
-  params.addParamNamesToGroup("family order density_scaling momentum_scaling total_energy_density_scaling",
-                              "Variable");
+  params.addParamNamesToGroup(
+      "family order density_scaling momentum_scaling total_energy_density_scaling", "Variable");
   return params;
 }
 

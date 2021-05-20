@@ -37,7 +37,8 @@ HLLCUserObject::HLLCUserObject(const InputParameters & parameters)
     _rho_elem(getADMaterialProperty<Real>(nms::density)),
     _rho_neighbor(getNeighborADMaterialProperty<Real>(nms::density)),
     _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
-    _specific_internal_energy_neighbor(getNeighborADMaterialProperty<Real>(nms::specific_internal_energy))
+    _specific_internal_energy_neighbor(
+        getNeighborADMaterialProperty<Real>(nms::specific_internal_energy))
 {
 }
 

@@ -25,10 +25,10 @@ defineADValidParams(SoundspeedMat,
 
 SoundspeedMat::SoundspeedMat(const InputParameters & parameters)
   : ADMaterial(parameters),
-  _sound_speed(declareADProperty<Real>(nms::sound_speed)),
-  _pressure(getADMaterialProperty<Real>(nms::pressure)),
-  _temperature(getADMaterialProperty<Real>(nms::T_fluid)),
-  _fluid(getUserObject<SinglePhaseFluidProperties>(nms::fluid))
+    _sound_speed(declareADProperty<Real>(nms::sound_speed)),
+    _pressure(getADMaterialProperty<Real>(nms::pressure)),
+    _temperature(getADMaterialProperty<Real>(nms::T_fluid)),
+    _fluid(getUserObject<SinglePhaseFluidProperties>(nms::fluid))
 {
 }
 

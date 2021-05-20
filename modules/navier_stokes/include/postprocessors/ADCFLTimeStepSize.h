@@ -9,7 +9,7 @@
 
 #pragma once
 
-// MOOSE includes 
+// MOOSE includes
 #include "ElementPostprocessor.h"
 
 /**

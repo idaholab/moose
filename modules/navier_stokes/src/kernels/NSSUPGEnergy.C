@@ -116,7 +116,7 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
     // Art. Diffusion matrix for taum-proportional term = (diag(H) + (1-gam)*S) * A_{ell}
     //
     RealTensorValue mom_mat;
-    mom_mat(0, 0) = mom_mat(1, 1) = mom_mat(2, 2) = _specific_total_enthalpy[_qp];    // (diag(H)
+    mom_mat(0, 0) = mom_mat(1, 1) = mom_mat(2, 2) = _specific_total_enthalpy[_qp]; // (diag(H)
     mom_mat += (1. - gam) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
     mom_mat = mom_mat * _calA[_qp][mapped_var_number];                 // * A_{ell}
     Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j);

@@ -40,7 +40,11 @@ computeAxialDistanceBelow(const Point & p, int axis, Real bed_top)
 }
 
 Real
-computeMinRadialDistance(const Point & point, const Point & center, const int & axis, const Real & inner_radius, const Real & outer_radius)
+computeMinRadialDistance(const Point & point,
+                         const Point & center,
+                         const int & axis,
+                         const Real & inner_radius,
+                         const Real & outer_radius)
 {
   Real r = computeRadialCoordinate(point, center, axis);
 
@@ -48,8 +52,8 @@ computeMinRadialDistance(const Point & point, const Point & center, const int & 
   Real tol = NS_DEFAULT_VALUES::epsilon;
   if (r < inner_radius - tol || r > outer_radius + tol)
     mooseError("Radial coordinate " + std::to_string(r) + " does not lie between inner radius: " +
-      std::to_string(inner_radius) + " and outer radius: " + std::to_string(outer_radius) +
-      " in 'computeMinRadialDistance' function!");
+               std::to_string(inner_radius) + " and outer radius: " + std::to_string(outer_radius) +
+               " in 'computeMinRadialDistance' function!");
 
   // sometimes, the distance is still computed as a very tiny 1e-16 number despite the
   // above check, so to be safe we take the absolute value
@@ -71,9 +75,9 @@ computeMinAxialDistance(const Point & p, int axis, const Real & bed_bottom, cons
 
   Real tol = NS_DEFAULT_VALUES::epsilon;
   if ((z < bed_bottom - tol) || (z > bed_top + tol))
-    mooseError("Axial coordinate " + std::to_string(z) + " does not lie between bed bottom: "
-      + std::to_string(bed_bottom) + " and bed top: " + std::to_string(bed_top) +
-      " in 'computeMinAxialDistance' function!");
+    mooseError("Axial coordinate " + std::to_string(z) + " does not lie between bed bottom: " +
+               std::to_string(bed_bottom) + " and bed top: " + std::to_string(bed_top) +
+               " in 'computeMinAxialDistance' function!");
 
   return std::min(z - bed_bottom, bed_top - z);
 }

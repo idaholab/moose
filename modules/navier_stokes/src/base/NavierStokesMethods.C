@@ -22,7 +22,7 @@ delta(unsigned int i, unsigned int j)
 int
 computeSign(const Real & a)
 {
-  return a > 0 ? 1 : (a < 0 ? - 1 : 0);
+  return a > 0 ? 1 : (a < 0 ? -1 : 0);
 }
 
 unsigned int
@@ -39,13 +39,19 @@ getIndex(const Real & p, const std::vector<Real> & bounds)
 }
 
 Real
-reynoldsPropertyDerivative(const Real & Re, const Real & rho, const Real & mu, const Real & drho, const Real & dmu)
+reynoldsPropertyDerivative(
+    const Real & Re, const Real & rho, const Real & mu, const Real & drho, const Real & dmu)
 {
   return Re * (drho / std::max(rho, 1e-6) - dmu / std::max(mu, 1e-8));
 }
 
 Real
-prandtlPropertyDerivative(const Real & mu, const Real & cp, const Real & k, const Real & dmu, const Real & dcp, const Real & dk)
+prandtlPropertyDerivative(const Real & mu,
+                          const Real & cp,
+                          const Real & k,
+                          const Real & dmu,
+                          const Real & dcp,
+                          const Real & dk)
 {
   return (k * (mu * dcp + cp * dmu) - mu * cp * dk) / std::max(k * k, 1e-8);
 }

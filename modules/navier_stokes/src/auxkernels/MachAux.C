@@ -25,12 +25,13 @@ MachAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>(nms::fluid, "fluid userobject");
-  params.addClassDescription("Mach number from fluid properties user object and material properties");
+  params.addClassDescription(
+      "Mach number from fluid properties user object and material properties");
   return params;
 }
 
-MachAux::MachAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+MachAux::MachAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _speed(getADMaterialProperty<Real>(nms::speed)),
     _pressure(getADMaterialProperty<Real>(nms::pressure)),
     _temperature(getADMaterialProperty<Real>(nms::T_fluid)),

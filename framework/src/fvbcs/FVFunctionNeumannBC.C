@@ -17,13 +17,16 @@ FVFunctionNeumannBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Neumann boundary condition for finite volume method.");
-  params.addParam<Real>("factor", 1., "A factor for multiplying the function. This could be useful for flipping the sign of the function for example based off the normal");
+  params.addParam<Real>("factor",
+                        1.,
+                        "A factor for multiplying the function. This could be useful for flipping "
+                        "the sign of the function for example based off the normal");
   params.addRequiredParam<FunctionName>("function", "The value of the flux crossing the boundary.");
   return params;
 }
 
 FVFunctionNeumannBC::FVFunctionNeumannBC(const InputParameters & parameters)
-    : FVFluxBC(parameters), _function(getFunction("function")), _factor(getParam<Real>("factor"))
+  : FVFluxBC(parameters), _function(getFunction("function")), _factor(getParam<Real>("factor"))
 {
 }
 

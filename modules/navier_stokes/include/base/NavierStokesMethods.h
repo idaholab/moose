@@ -18,16 +18,14 @@
  * @param[in] j   integer number
  * @return delta function
  */
-int
-delta(unsigned int i, unsigned int j);
+int delta(unsigned int i, unsigned int j);
 
 /**
  * Sign function, returns $+1$ if $a$ is positive and $-1$ if $a$ is negative
  * @param[in] a   number
  * @return the sign of the input
  */
-int
-computeSign(const Real & a);
+int computeSign(const Real & a);
 
 /**
  * Determines the index $i$ in a sorted array such that the input point is within
@@ -36,8 +34,7 @@ computeSign(const Real & a);
  * @param[in] bounds sorted array
  * @return index of point
  */
-unsigned int
-getIndex(const Real & p, const std::vector<Real> & bounds);
+unsigned int getIndex(const Real & p, const std::vector<Real> & bounds);
 
 /**
  * Computes the derivative of the Reynolds number, $Re\equiv \frac{\rho Vd}{\mu}$,
@@ -48,23 +45,27 @@ getIndex(const Real & p, const std::vector<Real> & bounds);
  * number such that the partial derivative of $Re$ with respect to an aritrary
  * parameter $\zeta$ is
  *
- * $\frac{\partial Re}{\partial\zeta}=Re\left(\frac{1}{\rho}\frac{\partial\rho}{\partial x}-\frac{1}{\mu}\frac{\partial\mu}{\partial x}$
+ * $\frac{\partial Re}{\partial\zeta}=Re\left(\frac{1}{\rho}\frac{\partial\rho}{\partial
+ * x}-\frac{1}{\mu}\frac{\partial\mu}{\partial x}$
  *
  * @param[in] Re   Reynolds number
  * @param[in] rho  density
  * @param[in] mu   dynamic viscosity
  * @param[in] drho partial derivative of density with respect to arbitrary variable $\zeta$
- * @param[in] dmu  partial derivative of dynamic viscosity with respect to arbitrary variable $\zeta$
+ * @param[in] dmu  partial derivative of dynamic viscosity with respect to arbitrary variable
+ * $\zeta$
  * @return derivative of Reynolds number with respect to $\zeta$
  */
-Real
-reynoldsPropertyDerivative(const Real & Re, const Real & rho, const Real & mu, const Real & drho, const Real & dmu);
+Real reynoldsPropertyDerivative(
+    const Real & Re, const Real & rho, const Real & mu, const Real & drho, const Real & dmu);
 
 /**
  * Computes the derivative of the Prandtl number, $Pr\equiv\frac{\mu C_p}{k}$, with respect
  * to an arbitrary variale $\zeta$. This derivative is
  *
- * $\frac{\partial Pr}{\partial \zeta}=\frac{k\left(\mu\frac{\partial C_p}{\partial\zeta}+C_p\frac{\partial mu}{\partial\zeta}\right)-\mu C_p\frac{\partial k}{\partial\zeta}}{k^2}$
+ * $\frac{\partial Pr}{\partial \zeta}=\frac{k\left(\mu\frac{\partial
+ * C_p}{\partial\zeta}+C_p\frac{\partial mu}{\partial\zeta}\right)-\mu C_p\frac{\partial
+ * k}{\partial\zeta}}{k^2}$
  *
  * @param[in] mu  dynamic viscosity
  * @param[in] cp  isobaric specific heat
@@ -74,5 +75,9 @@ reynoldsPropertyDerivative(const Real & Re, const Real & rho, const Real & mu, c
  * @param[in] dk  derivative of thermal conductivity with respect to $\zeta$
  * @return derivative of Prandtl number with respect to $\zeta$
  */
-Real
-prandtlPropertyDerivative(const Real & mu, const Real & cp, const Real & k, const Real & dmu, const Real & dcp, const Real & dk);
+Real prandtlPropertyDerivative(const Real & mu,
+                               const Real & cp,
+                               const Real & k,
+                               const Real & dmu,
+                               const Real & dcp,
+                               const Real & dk);

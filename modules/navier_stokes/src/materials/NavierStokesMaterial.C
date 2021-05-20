@@ -27,8 +27,9 @@ NavierStokesMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addClassDescription("This is the base class of all materials should use if you are trying to "
-                             "use the Navier-Stokes Kernels.");
+  params.addClassDescription(
+      "This is the base class of all materials should use if you are trying to "
+      "use the Navier-Stokes Kernels.");
   params.addRequiredCoupledVar(nms::velocity_x, "x-velocity");
   params.addCoupledVar(nms::velocity_y, "y-velocity"); // only required in >= 2D
   params.addCoupledVar(nms::velocity_z, "z-velocity"); // only required in 3D
@@ -462,7 +463,7 @@ NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
-      _calE[qp][k][m](k, m_local) = _specific_total_enthalpy[qp];                 // H * D_{km}
+      _calE[qp][k][m](k, m_local) = _specific_total_enthalpy[qp];  // H * D_{km}
       _calE[qp][k][m] += (1. - _fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 

@@ -26,11 +26,11 @@ defineADValidParams(
 
     params.addRequiredCoupledVar(nms::porosity, "porosity");
     params.addRangeCheckedParam<Real>(nms::pebble_diameter,
-                                              nms::pebble_diameter + " > 0.0 ",
-                                              "Pebble diameter");
+                                      nms::pebble_diameter + " > 0.0 ",
+                                      "Pebble diameter");
     params.addRangeCheckedParam<Real>("characteristic_length",
-                                              "characteristic_length > 0.0 ",
-                                              "characteristic length for Reynolds number calculation"););
+                                      "characteristic_length > 0.0 ",
+                                      "characteristic length for Reynolds number calculation"););
 
 GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
   : DerivativeMaterialInterface<ADMaterial>(parameters),
@@ -74,15 +74,18 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
   if (parameters.isParamSetByUser("characteristic_length"))
   {
     _d = getParam<Real>("characteristic_length");
-    checkUnusedInputParameter(parameters, nms::pebble_diameter, "When specifying a characteristic length");
+    checkUnusedInputParameter(
+        parameters, nms::pebble_diameter, "When specifying a characteristic length");
   }
   else
   {
     if (parameters.isParamSetByUser(nms::pebble_diameter))
       _d = getParam<Real>(nms::pebble_diameter);
     else
-      errorMessage(parameters, "A 'characteristic_length' must be specified for computing "
-        "the Reynolds number. For pebble bed systems, you can specify '" + nms::pebble_diameter + "'.");
+      errorMessage(parameters,
+                   "A 'characteristic_length' must be specified for computing "
+                   "the Reynolds number. For pebble bed systems, you can specify '" +
+                       nms::pebble_diameter + "'.");
   }
 }
 

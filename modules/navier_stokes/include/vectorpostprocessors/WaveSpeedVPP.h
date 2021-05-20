@@ -32,5 +32,5 @@ protected:
   const HLLCUserObject & _hllc;
   const unsigned int _side_id;
   const Elem * _elem;
-  VectorPostprocessorValue & _wave_speeds;  
+  VectorPostprocessorValue & _wave_speeds;
 };

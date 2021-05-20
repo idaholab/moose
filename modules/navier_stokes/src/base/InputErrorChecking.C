@@ -11,18 +11,21 @@
 #include "libmesh/elem.h"
 
 void
-checkUnusedInputParameter(const InputParameters & p, const std::string & name, const std::string & explanation)
+checkUnusedInputParameter(const InputParameters & p,
+                          const std::string & name,
+                          const std::string & explanation)
 {
   if (p.isParamSetByUser(name))
-    mooseDoOnce(mooseWarning(p.blockLocation() + " " + p.blockFullpath() + "\n" +
-      " " + explanation + " the '" + name + "' parameter is un-used."));
+    mooseDoOnce(mooseWarning(p.blockLocation() + " " + p.blockFullpath() + "\n" + " " +
+                             explanation + " the '" + name + "' parameter is un-used."));
 }
 
 void
 checkTestOnlyParameter(const InputParameters & p)
 {
   mooseDoOnce(mooseWarning(p.blockLocation() + " " + p.blockFullpath() + "\n" +
-    + "This object is for testing purposes only, please check the user manual for further details."));
+                           +"This object is for testing purposes only, please check the user "
+                            "manual for further details."));
 }
 
 void

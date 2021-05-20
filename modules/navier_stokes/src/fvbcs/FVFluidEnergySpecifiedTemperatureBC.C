@@ -26,7 +26,8 @@ CNSFVFluidEnergySpecifiedTemperatureBC::validParams()
   return params;
 }
 
-CNSFVFluidEnergySpecifiedTemperatureBC::CNSFVFluidEnergySpecifiedTemperatureBC(const InputParameters & parameters)
+CNSFVFluidEnergySpecifiedTemperatureBC::CNSFVFluidEnergySpecifiedTemperatureBC(
+    const InputParameters & parameters)
   : FVFluxBC(parameters),
     _eps(getParam<Real>(nms::porosity)),
     _temperature(this->getPostprocessorValue("specified_temperature")),
@@ -41,6 +42,7 @@ CNSFVFluidEnergySpecifiedTemperatureBC::computeQpResidual()
 {
   ADReal T = _temperature;
   ADReal rho = _fluid.rho_from_p_T(_pressure[_qp], T);
-  ADReal H = _fluid.e_from_p_T(_pressure[_qp], T) + 0.5 * _velocity[_qp] * _velocity[_qp] + _pressure[_qp] / rho;
+  ADReal H = _fluid.e_from_p_T(_pressure[_qp], T) + 0.5 * _velocity[_qp] * _velocity[_qp] +
+             _pressure[_qp] / rho;
   return _normal * _velocity[_qp] * H * rho;
 }

@@ -15,8 +15,7 @@
  * @param center center coordinate of the bed
  * @param axis   vertical axis of the bed
  */
-Real
-computeRadialCoordinate(const Point & p, const Point & center, const int & axis);
+Real computeRadialCoordinate(const Point & p, const Point & center, const int & axis);
 
 /**
  * Get the coordinate along a particular axis
@@ -24,8 +23,7 @@ computeRadialCoordinate(const Point & p, const Point & center, const int & axis)
  * @param  axis axis
  * @return point along axis
  */
-Real
-getCoordinate(const Point & p, const int & axis);
+Real getCoordinate(const Point & p, const int & axis);
 
 /**
  * Compute displacement above a point along a particular axis
@@ -34,8 +32,7 @@ getCoordinate(const Point & p, const int & axis);
  * @param bed_bottom point from which to compute distance
  * @return displacement from point along axis relative to bed_bottom
  */
-Real
-computeAxialDistanceAbove(const Point & p, int axis, Real bed_bottom);
+Real computeAxialDistanceAbove(const Point & p, int axis, Real bed_bottom);
 
 /**
  * Compute displacement below a point along a particular axis
@@ -44,12 +41,13 @@ computeAxialDistanceAbove(const Point & p, int axis, Real bed_bottom);
  * @param bed_top    point from which to compute distance
  * @return displacement from point along axis relative to bed_top
  */
-Real
-computeAxialDistanceBelow(const Point & p, int axis, Real bed_top);
+Real computeAxialDistanceBelow(const Point & p, int axis, Real bed_top);
 
-Real
-computeMinRadialDistance(const Point & point, const Point & center,
-  const int & axis, const Real & inner_radius, const Real & outer_radius);
+Real computeMinRadialDistance(const Point & point,
+                              const Point & center,
+                              const int & axis,
+                              const Real & inner_radius,
+                              const Real & outer_radius);
 
 /**
  * Compute minimum distance to an axial boundary
@@ -62,5 +60,4 @@ computeMinRadialDistance(const Point & point, const Point & center,
 Real
 computeMinAxialDistance(const Point & p, int axis, const Real & bed_bottom, const Real & bed_top);
 
-Real
-elementSize(const Elem * e);
+Real elementSize(const Elem * e);

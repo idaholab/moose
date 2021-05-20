@@ -19,8 +19,9 @@ CNSFVStagnationInletBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addRequiredParam<PostprocessorName>("stagnation_temperature",
-                                     "Specified inlet stagnation temperature.");
-  params.addRequiredParam<PostprocessorName>("stagnation_pressure", "Specified inlet stagnation pressure.");
+                                             "Specified inlet stagnation temperature.");
+  params.addRequiredParam<PostprocessorName>("stagnation_pressure",
+                                             "Specified inlet stagnation pressure.");
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   params.addParam<Real>(NS::porosity, 1, "porosity");
   return params;
@@ -43,14 +44,15 @@ CNSFVStagnationInletBC::CNSFVStagnationInletBC(const InputParameters & parameter
 
 void
 CNSFVStagnationInletBC::inletConditionHelper(ADReal & p_inlet,
-                                              ADReal & T_inlet,
-                                              ADReal & rho_inlet,
-                                              ADReal & H_inlet) const
+                                             ADReal & T_inlet,
+                                             ADReal & rho_inlet,
+                                             ADReal & H_inlet) const
 {
   if (!_fluid_ideal_gas)
     paramError(
         nms::fluid,
-        "Navier-Stokes module supports stagnation inlet BCs only for IdealGasFluidProperties. Non-ideal "
+        "Navier-Stokes module supports stagnation inlet BCs only for IdealGasFluidProperties. "
+        "Non-ideal "
         "fluid "
         "properties do not implement the necessary interfaces to support isentropic processes.");
 

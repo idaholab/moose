@@ -20,7 +20,8 @@ CNSFVFluidEnergyStagnationInletBC::validParams()
   return params;
 }
 
-CNSFVFluidEnergyStagnationInletBC::CNSFVFluidEnergyStagnationInletBC(const InputParameters & parameters)
+CNSFVFluidEnergyStagnationInletBC::CNSFVFluidEnergyStagnationInletBC(
+    const InputParameters & parameters)
   : CNSFVStagnationInletBC(parameters)
 {
 }

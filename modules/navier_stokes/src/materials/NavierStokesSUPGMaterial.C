@@ -35,9 +35,7 @@ registerADMooseObject("NavierStokesApp", NavierStokesSUPGMaterial);
 namespace nms = NS;
 
 defineADValidParams(
-    NavierStokesSUPGMaterial,
-    ADMaterial,
-    params.addRequiredCoupledVar(nms::porosity, "porosity");
+    NavierStokesSUPGMaterial, ADMaterial, params.addRequiredCoupledVar(nms::porosity, "porosity");
     params.addCoupledVar(nms::T_solid, "T_solid");
 
     params.addParam<RealVectorValue>(nms::acceleration,
@@ -112,21 +110,20 @@ NavierStokesSUPGMaterial::NavierStokesSUPGMaterial(const InputParameters & param
     _v(getADMaterialProperty<Real>(nms::v)),
     _speed(getADMaterialProperty<Real>(nms::speed)),
 
-    _fluid(_fluid_energy_eqn ?
-               &getUserObject<SinglePhaseFluidProperties>(nms::fluid) : nullptr),
+    _fluid(_fluid_energy_eqn ? &getUserObject<SinglePhaseFluidProperties>(nms::fluid) : nullptr),
     _fluid_ideal_gas(nullptr),
 
     _acceleration(getParam<RealVectorValue>(nms::acceleration)),
     _kappa(_fluid_energy_eqn ? &getADMaterialProperty<Real>(nms::kappa) : nullptr),
-    _dkappa_dp(_fluid_energy_eqn
-                   ? &getMaterialPropertyDerivative<Real>(nms::kappa, nms::pressure) : nullptr),
-    _dkappa_dT(_fluid_energy_eqn
-                   ? &getMaterialPropertyDerivative<Real>(nms::kappa, nms::T_fluid) : nullptr),
+    _dkappa_dp(_fluid_energy_eqn ? &getMaterialPropertyDerivative<Real>(nms::kappa, nms::pressure)
+                                 : nullptr),
+    _dkappa_dT(_fluid_energy_eqn ? &getMaterialPropertyDerivative<Real>(nms::kappa, nms::T_fluid)
+                                 : nullptr),
     _mu_eff(_viscous_stress ? &getADMaterialProperty<Real>(nms::mu_eff) : nullptr),
-    _dmu_eff_dp(_viscous_stress
-                   ? &getMaterialPropertyDerivative<Real>(nms::mu_eff, nms::pressure) : nullptr),
-    _dmu_eff_dT(_viscous_stress
-                   ? &getMaterialPropertyDerivative<Real>(nms::mu_eff, nms::T_fluid) : nullptr),
+    _dmu_eff_dp(_viscous_stress ? &getMaterialPropertyDerivative<Real>(nms::mu_eff, nms::pressure)
+                                : nullptr),
+    _dmu_eff_dT(_viscous_stress ? &getMaterialPropertyDerivative<Real>(nms::mu_eff, nms::T_fluid)
+                                : nullptr),
 
     _convective_heat_transfer(_fluid_energy_eqn && isCoupled(nms::T_solid)),
     _alpha(_convective_heat_transfer ? &getADMaterialProperty<Real>(nms::alpha) : nullptr),
@@ -166,8 +163,8 @@ NavierStokesSUPGMaterial::NavierStokesSUPGMaterial(const InputParameters & param
   // need to specify at least one equation
   if (!_mass_eqn && !_momentum_eqn && !_fluid_energy_eqn)
     errorMessage(parameters,
-               "At least one of the mass, momentum, and fluid energy "
-               "equations must be included!");
+                 "At least one of the mass, momentum, and fluid energy "
+                 "equations must be included!");
 }
 
 void
@@ -329,7 +326,8 @@ NavierStokesSUPGMaterial::computeF()
     _F[_qp][i](_N - 1) = _rho[_qp] * _velocity[_qp](i) * _specific_total_enthalpy[_qp];
 
     for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
-      _F[_qp][i](k) = _rho[_qp] * _velocity[_qp](i) * _velocity[_qp](k - 1) + delta(k - 1, i) * _p[_qp];
+      _F[_qp][i](k) =
+          _rho[_qp] * _velocity[_qp](i) * _velocity[_qp](k - 1) + delta(k - 1, i) * _p[_qp];
   }
 }
 
@@ -352,8 +350,8 @@ NavierStokesSUPGMaterial::computeG()
     if (_viscous_stress)
       for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
       {
-        auto grad_velocity = k == 1 ? _grad_vel_x[_qp] :
-          (k == 2 ? _grad_vel_y[_qp] : _grad_vel_z[_qp]);
+        auto grad_velocity =
+            k == 1 ? _grad_vel_x[_qp] : (k == 2 ? _grad_vel_y[_qp] : _grad_vel_z[_qp]);
 
         _G[_qp][i](k) = (*_mu_eff)[_qp] * grad_velocity(i);
       }
@@ -386,7 +384,7 @@ NavierStokesSUPGMaterial::computeS()
   // - heat source in fluid
   if (_fluid_energy_eqn)
     _S[_qp](_N - 1) = -_eps[_qp] * _acceleration * _rho[_qp] * _velocity[_qp] -
-                            _scaling_factor * _heat_source[_qp];
+                      _scaling_factor * _heat_source[_qp];
 
   if (_convective_heat_transfer)
     _S[_qp](_N - 1) += (*_alpha)[_qp] * (_T_fluid[_qp] - _T_solid[_qp]);
@@ -427,8 +425,7 @@ NavierStokesSUPGMaterial::computedUdx()
 
     if (_momentum_eqn)
     {
-      ADRealVectorValue grad_mom(
-          _grad_rho_u[_qp](i), _grad_rho_v[_qp](i), _grad_rho_w[_qp](i));
+      ADRealVectorValue grad_mom(_grad_rho_u[_qp](i), _grad_rho_v[_qp](i), _grad_rho_w[_qp](i));
 
       for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
         _dU_dx[i](k) = grad_mom(k - 1);
@@ -474,9 +471,8 @@ NavierStokesSUPGMaterial::computeR()
     ADRealVectorValue grad_k =
         (*_dkappa_dp)[_qp] * _grad_pressure[_qp] + (*_dkappa_dT)[_qp] * _grad_T_fluid[_qp];
 
-    _R[_qp](_N - 1) -=
-        _eps[_qp] * (*_kappa)[_qp] * _hess_T_fluid[_qp].tr() +
-        (_eps[_qp] * grad_k + (*_kappa)[_qp] * _grad_eps[_qp]) * _grad_T_fluid[_qp];
+    _R[_qp](_N - 1) -= _eps[_qp] * (*_kappa)[_qp] * _hess_T_fluid[_qp].tr() +
+                       (_eps[_qp] * grad_k + (*_kappa)[_qp] * _grad_eps[_qp]) * _grad_T_fluid[_qp];
   }
 
   if (_viscous_stress)
@@ -484,17 +480,18 @@ NavierStokesSUPGMaterial::computeR()
     // Add the viscous stress quasi-linear residual teerms to the momentum
     // components of _R - currently we do not actually use viscous flux jacobians here.
     ADRealVectorValue grad_mu_eff =
-      (*_dmu_eff_dp)[_qp] * _grad_pressure[_qp] + (*_dmu_eff_dT)[_qp] * _grad_T_fluid[_qp];
+        (*_dmu_eff_dp)[_qp] * _grad_pressure[_qp] + (*_dmu_eff_dT)[_qp] * _grad_T_fluid[_qp];
 
     for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
     {
-      auto grad_velocity = k == 1 ? _grad_vel_x[_qp] :
-        (k == 2 ? _grad_vel_y[_qp] : _grad_vel_z[_qp]);
-      auto grad_grad_velocity = k == 1 ? _grad_grad_vel_x[_qp].tr() :
-        (k == 2 ? _grad_grad_vel_y[_qp].tr() : _grad_grad_vel_z[_qp].tr());
+      auto grad_velocity =
+          k == 1 ? _grad_vel_x[_qp] : (k == 2 ? _grad_vel_y[_qp] : _grad_vel_z[_qp]);
+      auto grad_grad_velocity =
+          k == 1 ? _grad_grad_vel_x[_qp].tr()
+                 : (k == 2 ? _grad_grad_vel_y[_qp].tr() : _grad_grad_vel_z[_qp].tr());
 
       _R[_qp](k) -= _eps[_qp] * (*_mu_eff)[_qp] * grad_grad_velocity +
-        (_eps[_qp] * grad_mu_eff + (*_mu_eff)[_qp] * _grad_eps[_qp]) * grad_velocity;
+                    (_eps[_qp] * grad_mu_eff + (*_mu_eff)[_qp] * _grad_eps[_qp]) * grad_velocity;
     }
   }
 
