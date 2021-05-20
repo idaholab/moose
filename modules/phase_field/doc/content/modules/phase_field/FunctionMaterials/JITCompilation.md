@@ -56,3 +56,20 @@ recompilation. The compiled function respects the current FParser `Epsilon` sett
 
 Almost all FParser opcodes are supported, _except_ `PCall` and `FCall`, which are function calls to
 other FParser objects and calls to custom functions.
+
+## Required header files
+
+JIT compilation for non-AD parsed functions only requires the `cmath` standard
+library header file. Compilation of AD functions with dual numbers  required the
+`ADReal.h` header and all headers recursively included by it. For binary-only
+application distribution these headers may not be readily available.
+
+The make command `make ADRealMonolithic.h` can be used to build a
+redistributable header file sufficient for parsed function JIT compilation. This
+file can be distributed along with the application binary. The application will
+use this header to compile AD parsed material functions when the
+`MOOSE_ADFPARSER_JIT_INCLUDE` environment variable is set. E.g.:
+
+```
+export MOOSE_ADFPARSER_JIT_INCLUDE=/usr/local/include/ADRealMonolithic.h
+```
