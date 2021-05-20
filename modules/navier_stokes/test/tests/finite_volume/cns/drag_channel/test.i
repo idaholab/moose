@@ -61,7 +61,7 @@ interp_method = 'upwind'
   []
 
   [x_momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = superficial_rho_u
     momentum_component = 'x'
     boundaries_to_force = 'top bottom'
@@ -75,7 +75,7 @@ interp_method = 'upwind'
   []
 
   [y_momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = superficial_rho_v
     momentum_component = 'y'
     boundaries_to_force = 'top bottom'

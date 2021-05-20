@@ -96,7 +96,7 @@ global_interp_method='average'
     advected_quantity = 'vel_x'
   []
   [x_momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = superficial_rho_u
     momentum_component = 'x'
     boundaries_to_force = 'top bottom'
@@ -119,7 +119,7 @@ global_interp_method='average'
     advected_quantity = 'vel_y'
   []
   [y_momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = superficial_rho_v
     momentum_component = 'y'
     boundaries_to_force = 'top bottom'

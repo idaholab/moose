@@ -230,7 +230,7 @@ mass_flux_in=${fparse u_in * rho_in}
     advected_quantity = 'vel_x'
   []
   [momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = rho_u
     momentum_component = 'x'
   []

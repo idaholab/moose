@@ -21,11 +21,16 @@ PNSFVMomentumGravity::validParams()
   InputParameters params = NSFVMomentumGravity::validParams();
   params.addClassDescription(
       "Computes a body force, $eps * \rho * g$ due to gravity on fluid in porous media.");
+  params.addCoupledVar("porosity",
+                       "Porosity auxiliary variable. If this is not supplied then we will attempt "
+                       "to use a porosity material property");
   return params;
 }
 
 PNSFVMomentumGravity::PNSFVMomentumGravity(const InputParameters & params)
-  : NSFVMomentumGravity(params), _eps(getMaterialProperty<Real>(NS::porosity))
+  : NSFVMomentumGravity(params),
+    _eps(isCoupled("porosity") ? coupledValue("porosity")
+                               : getMaterialProperty<Real>(NS::porosity).get())
 {
 }
 

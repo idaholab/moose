@@ -11,11 +11,11 @@
 
 #include "FVElementalKernel.h"
 
-class PNSFVMomentumPressureRZ : public FVElementalKernel
+class PCNSFVMomentumPressureRZ : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  PNSFVMomentumPressureRZ(const InputParameters & params);
+  PCNSFVMomentumPressureRZ(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

@@ -9,25 +9,20 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVElementalKernel.h"
 
-class PNSFVMomentumPressure : public FVFluxKernel
+class INSFVMomentumPressure : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  PNSFVMomentumPressure(const InputParameters & params);
+  INSFVMomentumPressure(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// The porosity on the element
-  const MaterialProperty<Real> & _eps_elem;
-  /// The porosity on the neighbor
-  const MaterialProperty<Real> & _eps_neighbor;
-  /// The pressure on the element
-  const ADMaterialProperty<Real> & _p_elem;
-  /// The pressure on the neighbor
-  const ADMaterialProperty<Real> & _p_neighbor;
+  /// The pressure variable
+  const MooseVariableFVReal * const _p_var;
+
   /// index x|y|z
   const unsigned int _index;
 };

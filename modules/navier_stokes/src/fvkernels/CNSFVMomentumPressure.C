@@ -7,21 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMomentumPressure.h"
+#include "CNSFVMomentumPressure.h"
 #include "NS.h"
 
 registerMooseObjectRenamed("NavierStokesApp",
-                           INSFVMomentumPressure,
-                           "07/01/2021 00:00",
-                           NSFVMomentumPressure);
-registerMooseObjectRenamed("NavierStokesApp",
                            CNSFVMomPressure,
                            "07/01/2021 00:00",
-                           NSFVMomentumPressure);
-registerMooseObject("NavierStokesApp", NSFVMomentumPressure);
+                           CNSFVMomentumPressure);
+registerMooseObject("NavierStokesApp", CNSFVMomentumPressure);
 
 InputParameters
-NSFVMomentumPressure::validParams()
+CNSFVMomentumPressure::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
@@ -41,7 +37,7 @@ NSFVMomentumPressure::validParams()
   return params;
 }
 
-NSFVMomentumPressure::NSFVMomentumPressure(const InputParameters & params)
+CNSFVMomentumPressure::CNSFVMomentumPressure(const InputParameters & params)
   : FVElementalKernel(params),
     _grad_pressure(isCoupled("p")
                        ? adCoupledGradient("p")
@@ -51,7 +47,7 @@ NSFVMomentumPressure::NSFVMomentumPressure(const InputParameters & params)
 }
 
 ADReal
-NSFVMomentumPressure::computeQpResidual()
+CNSFVMomentumPressure::computeQpResidual()
 {
   return _grad_pressure[_qp](_index);
 }

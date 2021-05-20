@@ -316,13 +316,13 @@ mass_flux_in=${fparse u_in * rho_in}
   []
 
   [rhou_pressure_walls]
-    type = PNSFVMomentumPressureBC
+    type = PCNSFVImplicitMomentumPressureBC
     variable = rho_u
     momentum_component = 'x'
     boundary = 'top bottom'
   []
   [rhov_pressure_walls]
-    type = PNSFVMomentumPressureBC
+    type = PCNSFVImplicitMomentumPressureBC
     variable = rho_v
     momentum_component = 'y'
     boundary = 'top bottom'

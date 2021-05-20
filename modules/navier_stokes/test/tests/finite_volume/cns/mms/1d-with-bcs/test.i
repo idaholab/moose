@@ -175,7 +175,7 @@ interp_method='upwind'
     advected_interp_method = ${interp_method}
   []
   [momentum_pressure_x]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = rho_ud
     momentum_component = 'x'
   []

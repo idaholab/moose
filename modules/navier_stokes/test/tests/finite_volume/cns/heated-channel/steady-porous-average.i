@@ -121,7 +121,7 @@ rho_et_initial=${fparse rho_initial * et_initial}
     advected_quantity = 'vel_x'
   []
   [momentum_pressure]
-    type = PNSFVMomentumPressure
+    type = PCNSFVMomentumPressureFlux
     variable = rho_u
     momentum_component = 'x'
   []

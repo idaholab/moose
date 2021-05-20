@@ -24,5 +24,5 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the porosity
-  const MaterialProperty<Real> & _eps;
+  const MooseArray<Real> & _eps;
 };

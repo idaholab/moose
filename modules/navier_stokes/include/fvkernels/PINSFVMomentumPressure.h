@@ -9,20 +9,20 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "INSFVMomentumPressure.h"
 
-class NSFVMomentumPressure : public FVElementalKernel
+/**
+ * Introduces the coupled pressure term into the Navier-Stokes porous media momentum equation.
+ */
+class PINSFVMomentumPressure : public INSFVMomentumPressure
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumPressure(const InputParameters & params);
+  PINSFVMomentumPressure(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// The gradient of the pressure
-  const MooseArray<ADRealVectorValue> & _grad_pressure;
-
-  /// index x|y|z
-  const unsigned int _index;
+  /// the porosity
+  const VariableValue & _eps;
 };
