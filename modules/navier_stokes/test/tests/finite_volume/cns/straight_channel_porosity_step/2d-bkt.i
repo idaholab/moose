@@ -163,8 +163,8 @@ user_limiter='min_mod'
     type = PNSFVMomentumFriction
     variable = sup_vel_x
     momentum_component = 'x'
-    linear_coef_name = 100
-    momentum_name = momentum
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhou
   []
 
   [momentum_time_y]
@@ -188,8 +188,8 @@ user_limiter='min_mod'
     type = PNSFVMomentumFriction
     variable = sup_vel_y
     momentum_component = 'y'
-    linear_coef_name = 100
-    momentum_name = momentum
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhov
   []
 
   [energy_time]
@@ -375,6 +375,11 @@ user_limiter='min_mod'
     prop_names = 'porosity'
     prop_values = '1'
     block = 4
+  []
+  [ad_generic]
+    type = ADGenericConstantVectorMaterial
+    prop_names = 'cl'
+    prop_values = '100 100 100'
   []
 []
 

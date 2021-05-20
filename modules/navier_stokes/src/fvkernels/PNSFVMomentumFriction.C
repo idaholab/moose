@@ -30,7 +30,7 @@ PNSFVMomentumFriction::validParams()
                                         "Name of the Darcy coefficients material property.");
   params.addParam<MaterialPropertyName>("Forchheimer_name",
                                         "Name of the Forchheimer coefficients material property.");
-  params.addRequiredCoupledVar("porosity", "Porosity variable.");
+  params.addCoupledVar("porosity", "Porosity variable.");
 
   params.addParam<MaterialPropertyName>("momentum_name",
                                         "Name of the superficial momentum material property for "
@@ -50,7 +50,8 @@ PNSFVMomentumFriction::PNSFVMomentumFriction(const InputParameters & params)
             : nullptr),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
-    _eps(coupledValue("porosity")),
+    _eps(isCoupled("porosity") ? coupledValue("porosity")
+                               : getMaterialProperty<Real>(NS::porosity).get()),
     _momentum(isParamValid("momentum_name") ? &getADMaterialProperty<Real>("momentum_name")
                                             : nullptr),
     _rho(isParamValid("rho") ? getParam<Real>("rho") : 0)

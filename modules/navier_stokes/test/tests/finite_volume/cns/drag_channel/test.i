@@ -70,7 +70,8 @@ interp_method = 'upwind'
     type = PNSFVMomentumFriction
     variable = superficial_rho_u
     momentum_component = 'x'
-    linear_coef_name = 'cl'
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhou
   []
 
   [y_momentum_pressure]
@@ -83,7 +84,8 @@ interp_method = 'upwind'
     type = PNSFVMomentumFriction
     variable = superficial_rho_v
     momentum_component = 'y'
-    linear_coef_name = 'cl'
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhov
   []
 
   [fluid_energy_advection]
@@ -117,9 +119,9 @@ interp_method = 'upwind'
     prop_values = '${eps}'
   []
   [ad_generic]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantVectorMaterial
     prop_names = 'cl'
-    prop_values = '${cl}'
+    prop_values = '${cl} ${cl} ${cl}'
   []
 []
 

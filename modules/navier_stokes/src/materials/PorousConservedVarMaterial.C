@@ -66,6 +66,9 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
     _grad_sup_vel_x(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_x))),
     _grad_sup_vel_y(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_y))),
     _grad_sup_vel_z(declareADProperty<RealVectorValue>(NS::grad(NS::superficial_velocity_z))),
+    _sup_mom_x(declareADProperty<Real>(NS::superficial_momentum_x)),
+    _sup_mom_y(declareADProperty<Real>(NS::superficial_momentum_y)),
+    _sup_mom_z(declareADProperty<Real>(NS::superficial_momentum_z)),
     _vel_x(declareADProperty<Real>(NS::velocity_x)),
     _vel_y(declareADProperty<Real>(NS::velocity_y)),
     _vel_z(declareADProperty<Real>(NS::velocity_z)),
@@ -105,6 +108,9 @@ PorousConservedVarMaterial::computeQpProperties()
   _rho[_qp] = _var_rho[_qp];
   _superficial_rho[_qp] = _rho[_qp] * _epsilon[_qp];
   _mass_flux[_qp] = {_var_rho_ud[_qp], _var_rho_vd[_qp], _var_rho_wd[_qp]};
+  _sup_mom_x[_qp] = _mass_flux[_qp](0);
+  _sup_mom_y[_qp] = _mass_flux[_qp](1);
+  _sup_mom_z[_qp] = _mass_flux[_qp](2);
   _momentum[_qp] = _mass_flux[_qp] / _epsilon[_qp];
   _total_energy_density[_qp] = _var_total_energy_density[_qp];
   _superficial_rho_et[_qp] = _epsilon[_qp] * _total_energy_density[_qp];

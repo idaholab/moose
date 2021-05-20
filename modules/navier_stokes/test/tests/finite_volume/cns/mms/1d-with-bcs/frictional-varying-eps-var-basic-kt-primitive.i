@@ -96,8 +96,8 @@
     type = PNSFVMomentumFriction
     variable = sup_vel_x
     momentum_component = 'x'
-    linear_coef_name = 1
-    momentum_name = momentum
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhou
   []
   [momentum_fn]
     type = FVBodyForce
@@ -201,13 +201,14 @@
     T_fluid = T_fluid
     porosity = porosity
   []
-  # [porosity]
-  #   type = PorosityVarMaterial
-  #   porosity_var = 'eps'
-  # []
   [porosity]
     type = PorosityVarMaterial
     porosity_function = 'eps'
+  []
+  [ad_generic]
+    type = ADGenericConstantVectorMaterial
+    prop_names = 'cl'
+    prop_values = '1 1 1'
   []
 []
 

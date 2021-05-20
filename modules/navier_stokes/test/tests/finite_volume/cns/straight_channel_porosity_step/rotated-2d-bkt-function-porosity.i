@@ -134,8 +134,8 @@ friction_coeff=10
     type = PNSFVMomentumFriction
     variable = sup_vel_x
     momentum_component = 'x'
-    linear_coef_name = ${friction_coeff}
-    momentum_name = momentum
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhou
   []
 
   [momentum_time_y]
@@ -159,8 +159,8 @@ friction_coeff=10
     type = PNSFVMomentumFriction
     variable = sup_vel_y
     momentum_component = 'y'
-    linear_coef_name = ${friction_coeff}
-    momentum_name = momentum
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhov
   []
 
   [energy_time]
@@ -321,6 +321,11 @@ friction_coeff=10
     type = GenericFunctionMaterial
     prop_names = 'porosity'
     prop_values = 'eps'
+  []
+  [ad_generic]
+    type = ADGenericConstantVectorMaterial
+    prop_names = 'cl'
+    prop_values = '${friction_coeff} ${friction_coeff} ${friction_coeff}'
   []
 []
 

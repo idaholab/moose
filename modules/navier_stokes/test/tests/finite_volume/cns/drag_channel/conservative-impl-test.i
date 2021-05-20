@@ -105,7 +105,8 @@ global_interp_method='average'
     type = PNSFVMomentumFriction
     variable = superficial_rho_u
     momentum_component = 'x'
-    linear_coef_name = 'cl'
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhou
   []
 
   [y_momentum_time]
@@ -127,7 +128,8 @@ global_interp_method='average'
     type = PNSFVMomentumFriction
     variable = superficial_rho_v
     momentum_component = 'y'
-    linear_coef_name = 'cl'
+    Darcy_name = 'cl'
+    momentum_name = superficial_rhov
   []
 
   [fluid_energy_time]
@@ -164,9 +166,9 @@ global_interp_method='average'
     prop_values = '${eps}'
   []
   [ad_generic]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantVectorMaterial
     prop_names = 'cl'
-    prop_values = '${cl}'
+    prop_values = '${cl} ${cl} ${cl}'
   []
 []
 

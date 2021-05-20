@@ -51,6 +51,9 @@ protected:
   ADMaterialProperty<RealVectorValue> & _grad_sup_vel_x;
   ADMaterialProperty<RealVectorValue> & _grad_sup_vel_y;
   ADMaterialProperty<RealVectorValue> & _grad_sup_vel_z;
+  ADMaterialProperty<Real> & _sup_mom_x;
+  ADMaterialProperty<Real> & _sup_mom_y;
+  ADMaterialProperty<Real> & _sup_mom_z;
   ADMaterialProperty<Real> & _vel_x;
   ADMaterialProperty<Real> & _vel_y;
   ADMaterialProperty<Real> & _vel_z;
