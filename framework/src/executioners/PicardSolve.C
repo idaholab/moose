@@ -250,7 +250,7 @@ PicardSolve::solve()
 
       auto ppname = getParam<PostprocessorName>("picard_custom_pp");
       pp_history << std::setw(2) << _picard_it + 1 << " Picard " << ppname << " = "
-                 << Console::outputNorm(std::numeric_limits<Real>::max(), pp_new) << "\n";
+                 << Console::outputNorm(std::numeric_limits<Real>::max(), pp_new, 8) << "\n";
       _console << pp_history.str();
     }
 
