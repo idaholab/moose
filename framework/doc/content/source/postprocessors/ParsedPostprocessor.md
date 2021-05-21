@@ -5,6 +5,10 @@
 The `function` to parse may only include other postprocessors, the time variable and
 constants from the input file.
 
+!alert note
+Derivatives and integrals are not natively supported by the parsing operation, unless the
+postprocessors in the parsed expression are already the derivatives / integrals of interest.
+
 ## Example Input File Syntax
 
 In this test input file, we compute various quantities using ParsedPostprocessors. First,
