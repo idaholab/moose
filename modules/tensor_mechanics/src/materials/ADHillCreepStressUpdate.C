@@ -50,7 +50,8 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
     _start_time(getParam<Real>("start_time")),
     _exponential(1.0),
     _exp_time(1.0),
-    _hill_constants(6),
+    _hill_constants_input(6),
+    _hill_tensor(6, 6),
     _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
@@ -58,7 +59,8 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
                "Start time must be equal to or greater than the Executioner start_time if a "
                "non-integer m_exponent is used");
 
-  _hill_constants = getParam<std::vector<Real>>("hill_constants");
+  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+  ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(_hill_constants_input);
 
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -69,17 +71,18 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
   const Real & N = _hill_constants[5];
 
   // Build Hill tensor or anisotropy matrix
-  ADDenseMatrix hill_tensor(6, 6);
-  hill_tensor(0, 0) = G + H;
-  hill_tensor(1, 1) = F + H;
-  hill_tensor(2, 2) = F + G;
-  hill_tensor(0, 1) = hill_tensor(1, 0) = -H;
-  hill_tensor(0, 2) = hill_tensor(2, 0) = -G;
-  hill_tensor(1, 2) = hill_tensor(2, 1) = -F;
+  _hill_tensor.zero();
 
-  hill_tensor(3, 3) = 2.0 * N;
-  hill_tensor(4, 4) = 2.0 * L;
-  hill_tensor(5, 5) = 2.0 * M;
+  _hill_tensor(0, 0) = G + H;
+  _hill_tensor(1, 1) = F + H;
+  _hill_tensor(2, 2) = F + G;
+  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
+  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
+  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
+
+  _hill_tensor(3, 3) = 2.0 * N;
+  _hill_tensor(4, 4) = 2.0 * L;
+  _hill_tensor(5, 5) = 2.0 * M;
 }
 
 void

@@ -162,6 +162,8 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
+  virtual void rotateHillConstants(std::vector<Real> & hill_constants_input);
+
   /// Equivalent creep/plastic strain
   ADMaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
@@ -178,4 +180,13 @@ protected:
 
   /// Maximum integration error time step
   Real _max_integration_error_time_step;
+
+  /// Angles for transformation of hill tensor
+  RealVectorValue _zyx_angles;
+
+  /// Transformation matrix
+  DenseMatrix<Real> _transformation_tensor;
+
+  /// Hill constants for orthotropic creep
+  std::vector<Real> _hill_constants;
 };

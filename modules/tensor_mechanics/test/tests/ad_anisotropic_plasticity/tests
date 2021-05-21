@@ -29,6 +29,17 @@
                   'verification problem along x axis'
   []
 
+  [ad_aniso_plasticity_x_rotate]
+    type = 'CSVDiff'
+    abs_zero = 1.0e-9
+    rel_err = 1.0e-5
+    heavy = true
+    input = 'ad_aniso_plasticity_x_rotate.i'
+    csvdiff = 'ad_aniso_plasticity_x_rotate_out.csv'
+    requirement = 'Anisotropic plasticity with hill tensor rotation must produce simplified '
+                  'verification problem along x axis'
+  []
+
   [ad_aniso_plasticity_y]
     type = 'CSVDiff'
     abs_zero = 1.0e-9

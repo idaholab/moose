@@ -30,13 +30,12 @@ ADHillPlasticityStressUpdate::validParams()
                                                          "hill_constants_size = 6",
                                                          "Hill material constants in order: F, "
                                                          "G, H, L, M, N");
-
   return params;
 }
 
 ADHillPlasticityStressUpdate::ADHillPlasticityStressUpdate(const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
-    _hill_constants(6),
+    _hill_constants_input(6),
     _qsigma(0.0),
     _eigenvalues_hill(6),
     _eigenvectors_hill(6, 6),
@@ -50,9 +49,9 @@ ADHillPlasticityStressUpdate::ADHillPlasticityStressUpdate(const InputParameters
     _yield_stress(getParam<Real>("yield_stress")),
     _hill_tensor(6, 6),
     _stress_np1(6)
-
 {
-  _hill_constants = getParam<std::vector<Real>>("hill_constants");
+  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+  ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(_hill_constants_input);
 
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
