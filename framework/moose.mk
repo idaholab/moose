@@ -485,6 +485,10 @@ clobberall: clobber
           echo $$item >> .clang_complete;  \
         done
 
+ADRealMonolithic.h:
+	@echo "Building monolithic ADReal header for JIT compilation"
+	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $(MOOSE_DIR)/framework/include/utils/ADReal.h > ADRealMonolithic.h
+
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands.json:
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
