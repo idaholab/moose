@@ -7,53 +7,52 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParsedAux.h"
+#include "ParsedPostprocessor.h"
 
-registerMooseObject("MooseApp", ParsedAux);
+registerMooseObject("MooseApp", ParsedPostprocessor);
 
 InputParameters
-ParsedAux::validParams()
+ParsedPostprocessor::validParams()
 {
-  InputParameters params = AuxKernel::validParams();
+  InputParameters params = GeneralPostprocessor::validParams();
   params += FunctionParserUtils<false>::validParams();
-  params.addClassDescription("Parsed function AuxKernel.");
 
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "function expression");
-  params.addCoupledVar("args", "coupled variables");
-  params.addParam<bool>(
-      "use_xyzt",
-      false,
-      "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
+  params.addRequiredParam<std::vector<PostprocessorName>>("pp_names", "Post-processors arguments");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<bool>(
+      "use_t",
+      false,
+      "Make time (t) variables available in the function expression.");
 
+  params.addClassDescription(
+      "Computes a parsed expression with post-processors");
   return params;
 }
 
-ParsedAux::ParsedAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
+    _n_pp(coupledPostprocessors("pp_names")),
+    _pp_names(getParam<std::vector<PostprocessorName>>("pp_names")),
     _function(getParam<std::string>("function")),
-    _nargs(coupledComponents("args")),
-    _args(coupledValues("args")),
-    _use_xyzt(getParam<bool>("use_xyzt"))
+    _use_t(getParam<bool>("use_t"))
 {
-  // build variables argument
-  std::string variables;
+  // build postprocessors argument
+  std::string postprocessors;
 
-  // coupled field variables
-  for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+  // coupled  postprocessors
+  for (std::size_t i = 0; i < _n_pp; ++i)
+    postprocessors += (i == 0 ? "" : ",") + _pp_names[i];
 
-  // "system" variables
-  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
-  if (_use_xyzt)
-    for (auto & v : xyzt)
-      variables += (variables.empty() ? "" : ",") + v;
+  // add time if required
+  if (_use_t)
+    postprocessors += (postprocessors.empty() ? "" : ",") + std::string("t");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -67,7 +66,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
                       getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
-  if (_func_F->Parse(_function, variables) >= 0)
+  if (_func_F->Parse(_function, postprocessors) >= 0)
     mooseError(
         "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
 
@@ -80,21 +79,30 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _func_F->JITCompile();
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_n_pp + _use_t);
+  _pp_values.resize(_n_pp);
+  for (unsigned int i = 0; i < _n_pp; i++)
+    _pp_values[i] = &getPostprocessorValue("pp_names", i);
 }
 
-Real
-ParsedAux::computeValue()
+void
+ParsedPostprocessor::initialize()
 {
-  for (std::size_t j = 0; j < _nargs; ++j)
-    _func_params[j] = (*_args[j])[_qp];
+}
 
-  if (_use_xyzt)
-  {
-    for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
-      _func_params[_nargs + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
-    _func_params[_nargs + 3] = _t;
-  }
+void
+ParsedPostprocessor::execute()
+{
+}
+
+PostprocessorValue
+ParsedPostprocessor::getValue()
+{
+  for (unsigned int i = 0; i < _n_pp; i++)
+    _func_params[i] = *_pp_values[i];
+
+  if (_use_t)
+    _func_params[_n_pp] = _t;
 
   return evaluate(_func_F);
 }
