@@ -532,7 +532,7 @@ Console::writeVariableNorms()
 
 // Quick helper to output the norm in color
 std::string
-Console::outputNorm(const Real & old_norm, const Real & norm)
+Console::outputNorm(const Real & old_norm, const Real & norm, const unsigned int precision)
 {
   std::string color = COLOR_GREEN;
 
@@ -544,7 +544,7 @@ Console::outputNorm(const Real & old_norm, const Real & norm)
     color = COLOR_YELLOW;
 
   std::stringstream oss;
-  oss << std::scientific << color << norm << COLOR_DEFAULT;
+  oss << std::scientific << std::setprecision(precision) << color << norm << COLOR_DEFAULT;
 
   return oss.str();
 }
