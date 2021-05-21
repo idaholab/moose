@@ -55,7 +55,7 @@ PINSFVEnergyEffectiveDiffusion::computeQpResidual()
   // Compute the temperature gradient times the conductivity tensor
   ADRealVectorValue kappa_grad_T;
   const auto grad_T = _var.adGradSln(*_face_info);
-  for (size_t i=0; i<LIBMESH_DIM; i++)
+  for (size_t i = 0; i < LIBMESH_DIM; i++)
     kappa_grad_T(i) = k_eps_face(i) * grad_T(i);
 
   return -kappa_grad_T * _normal;

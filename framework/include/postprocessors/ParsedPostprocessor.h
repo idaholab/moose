@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "GeneralPostprocessor.h"
 #include "FunctionParserUtils.h"
 
 /**
