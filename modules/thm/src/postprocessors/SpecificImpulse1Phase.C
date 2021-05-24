@@ -98,8 +98,7 @@ SpecificImpulse1Phase::execute()
     _mass_flow_rate += std::abs(flux[0]);
 
     // get entropy at inlet (= entropy at outlet because process is isentropic)
-    Real entropy_in, d1, d2;
-    _fp.s_from_v_e(_v[qp], _e[qp], entropy_in, d1, d2);
+    Real entropy_in = _fp.s_from_v_e(_v[qp], _e[qp]);
 
     // compute outlet enthalpy from entropy at inlet (isentropic flow)
     // and pressure at outlet, need to do bisection because h_from_s_p does not
@@ -109,22 +108,19 @@ SpecificImpulse1Phase::execute()
     Real T_up = _T[qp];
 
     // compute entropy associated with T_up
-    Real entropy_up;
-    _fp.s_from_p_T(_p_exit, T_up, entropy_up, d1, d2);
+    Real entropy_up = _fp.s_from_p_T(_p_exit, T_up);
 
     // lower bound for temperature is 0.1 K
     Real T_low = 0.1;
 
     // compute entropy associated with T_low
-    Real entropy_low;
-    _fp.s_from_p_T(_p_exit, T_low, entropy_low, d1, d2);
+    Real entropy_low = _fp.s_from_p_T(_p_exit, T_low);
 
     // compute the midpoint temperature
     Real T_mid = 0.5 * (T_up + T_low);
 
     // the current guess for entropy
-    Real entropy_mid;
-    _fp.s_from_p_T(_p_exit, T_mid, entropy_mid, d1, d2);
+    Real entropy_mid = _fp.s_from_p_T(_p_exit, T_mid);
 
     // main bisection loop
     unsigned int nit = 0;
@@ -146,7 +142,7 @@ SpecificImpulse1Phase::execute()
       T_mid = 0.5 * (T_up + T_low);
 
       // update the guess for entropy
-      _fp.s_from_p_T(_p_exit, T_mid, entropy_mid, d1, d2);
+      entropy_mid = _fp.s_from_p_T(_p_exit, T_mid);
 
       ++nit;
 
@@ -158,8 +154,7 @@ SpecificImpulse1Phase::execute()
     }
 
     // the enthalpy evaluated at _p_exit and T_mid
-    Real h_exit;
-    _fp.h_from_p_T(_p_exit, T_mid, h_exit, d1, d2);
+    Real h_exit = _fp.h_from_p_T(_p_exit, T_mid);
 
     // compute outlet speed
     Real vel_exit = std::sqrt(2.0 * (_H[qp] - h_exit));
