@@ -189,6 +189,13 @@ public:
     logComponentWarning(cname(), std::forward<Args>(args)...);
   }
 
+  /**
+   * Adds a component name to the list of dependencies
+   *
+   * @param[in] dependency   name of component to add to list of dependencies
+   */
+  void addDependency(const std::string & dependency);
+
 protected:
   /**
    * Initializes the component
@@ -218,13 +225,6 @@ protected:
    * Performs mesh setup such as creating mesh or naming mesh sets
    */
   virtual void setupMesh() {}
-
-  /**
-   * Adds a component name to the list of dependencies
-   *
-   * @param[in] dependency   name of component to add to list of dependencies
-   */
-  void addDependency(const std::string & dependency);
 
   /**
    * Gets an enum parameter

@@ -14,7 +14,7 @@ HSBoundaryInterface::validParams()
   return params;
 }
 
-HSBoundaryInterface::HSBoundaryInterface(const Component * const component)
+HSBoundaryInterface::HSBoundaryInterface(Component * component)
   : _hs_name(component->getParam<std::string>("hs")),
     _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
     _hs_side(THM::stringToEnum<HeatStructureSideType>(_hs_side_enum))
@@ -24,6 +24,8 @@ HSBoundaryInterface::HSBoundaryInterface(const Component * const component)
     _hs_side_valid = true;
   else
     _hs_side_valid = false;
+
+  component->addDependency(_hs_name);
 }
 
 void
