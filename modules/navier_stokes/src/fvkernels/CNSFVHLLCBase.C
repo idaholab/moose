@@ -110,7 +110,7 @@ CNSFVHLLCBase::waveSpeed(const THREAD_ID tid,
   ADReal SM = (rho2 * q2 * (SR - q2) - rho1 * q1 * (SL - q1) + p1 - p2) /
               (rho2 * (SR - q2) - rho1 * (SL - q1));
 
-  std::array<ADReal, 3> wave_speeds = {std::move(SL), std::move(SM), std::move(SR)};
+  std::array<ADReal, 3> wave_speeds = {{std::move(SL), std::move(SM), std::move(SR)}};
 
   // store these results in _wave_speed
   auto pr = _fi_to_wave_speeds[tid].emplace(&fi, std::move(wave_speeds));

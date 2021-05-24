@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CNSFVHLLCFluidEnergyStagnationInletBC.h"
-
-namespace nms = NS;
+#include "NS.h"
 
 // Full specialization of the validParams function for this object
 registerADMooseObject("NavierStokesApp", CNSFVHLLCFluidEnergyStagnationInletBC);
@@ -24,7 +23,7 @@ CNSFVHLLCFluidEnergyStagnationInletBC::validParams()
 CNSFVHLLCFluidEnergyStagnationInletBC::CNSFVHLLCFluidEnergyStagnationInletBC(
     const InputParameters & parameters)
   : CNSFVHLLCStagnationInletBC(parameters),
-    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
+    _ht_elem(getADMaterialProperty<Real>(NS::specific_total_enthalpy))
 {
 }
 

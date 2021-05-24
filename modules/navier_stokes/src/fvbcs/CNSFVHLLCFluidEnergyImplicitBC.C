@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CNSFVHLLCFluidEnergyImplicitBC.h"
-
-namespace nms = NS;
+#include "NS.h"
 
 // Full specialization of the validParams function for this object
 registerADMooseObject("NavierStokesApp", CNSFVHLLCFluidEnergyImplicitBC);
@@ -23,7 +22,7 @@ CNSFVHLLCFluidEnergyImplicitBC::validParams()
 
 CNSFVHLLCFluidEnergyImplicitBC::CNSFVHLLCFluidEnergyImplicitBC(const InputParameters & parameters)
   : CNSFVHLLCImplicitBC(parameters),
-    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
+    _ht_elem(getADMaterialProperty<Real>(NS::specific_total_enthalpy))
 {
 }
 
