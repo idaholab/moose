@@ -36,16 +36,15 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
     _n_pp(coupledPostprocessors("pp_names")),
-    _pp_names(getParam<std::vector<PostprocessorName>>("pp_names")),
-    _function(getParam<std::string>("function")),
     _use_t(getParam<bool>("use_t"))
 {
   // build postprocessors argument
   std::string postprocessors;
 
   // coupled  postprocessors
+  std::vector<PostprocessorName> pp_names = getParam<std::vector<PostprocessorName>>("pp_names");
   for (std::size_t i = 0; i < _n_pp; ++i)
-    postprocessors += (i == 0 ? "" : ",") + _pp_names[i];
+    postprocessors += (i == 0 ? "" : ",") + pp_names[i];
 
   // add time if required
   if (_use_t)
@@ -63,9 +62,9 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
                       getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
-  if (_func_F->Parse(_function, postprocessors) >= 0)
-    mooseError(
-        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
+  std::string function = getParam<std::string>("function");
+  if (_func_F->Parse(function, postprocessors) >= 0)
+    mooseError("Invalid parsed function\n", function, "\n", _func_F->ErrorMsg());
 
   // optimize
   if (!_disable_fpoptimizer)

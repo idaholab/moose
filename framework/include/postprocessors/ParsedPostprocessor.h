@@ -22,22 +22,16 @@ public:
 
   ParsedPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  void initialize() override final;
+  void execute() override final;
+  PostprocessorValue getValue() override final;
 
-protected:
+private:
   /// number of postprocessors in parsed expression
   const unsigned int _n_pp;
 
-  /// postprocessors part of the parsed expression
-  std::vector<PostprocessorName> _pp_names;
-
   /// values of the postprocessors part of the parsed expression
   std::vector<const PostprocessorValue *> _pp_values;
-
-  /// function expression
-  std::string _function;
 
   /// whether time is part of the parsed expression
   const bool _use_t;
