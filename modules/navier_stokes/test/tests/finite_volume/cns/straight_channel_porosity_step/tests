@@ -62,6 +62,7 @@
     exodiff = implicit-euler-basic-kt-primitive_out.e
     requirement = 'The system shall be able to solve a series of stages of continuous porosity changes using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind interpolation to the faces.'
     ad_indexing_type = 'global'
+    recover = false # See https://github.com/idaholab/moose/issues/17906
   []
   [min_mod_limited_frictional_porosity_jumps]
     type = Exodiff
@@ -88,6 +89,7 @@
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
     ad_indexing_type = 'global'
     mumps = true
+    recover = false # See https://github.com/idaholab/moose/issues/17906
   []
   [twod_y_channel_upwind_frictional_porosity_function_mixed]
     type = Exodiff
@@ -96,5 +98,6 @@
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem using a mixed variable set with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
     ad_indexing_type = 'global'
     mumps = true
+    recover = false # See https://github.com/idaholab/moose/issues/17906
   []
 []
