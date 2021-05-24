@@ -1,20 +1,28 @@
 [Tests]
   [natural_convection]
     requirement = 'The system shall be able to solve steady natural convection simulations using the finite volume method, a density-based compressible Navier-Stokes equation set, and central differencing of the advection terms for Rayleigh numbers of'
+
+    # Central differencing is unstable and consequently will produce slightly
+    # different results with different numbers of processors and on different
+    # architectures. So instead of doing an exodiff we will just make sure it
+    # runs. Additionally our best limiter, the min_mod limiter, produces slow
+    # convergence for Steady calculations and also is seemingly too diffusive in
+    # conjunction with Kurganov-Tadmor for these natural convection problems.
+    # E.g. it takes an unreasonable amount of mesh refinement before the flow
+    # detaches from the walls (e.g. before you see the boundary layers form
+    # which are an essential feature of these natural convection benchmarks)
     [ray_1pt7e4]
-      type = Exodiff
+      type = RunApp
       input = average-boussinesq.i
-      exodiff = average-boussinesq_out.e
-      mumps = true
       detail = '1.7e4'
+      strumpack = true
     []
     [ray_1pt4e5]
-      type = Exodiff
+      type = RunApp
       input = average-boussinesq.i
-      exodiff = ra-1e5.e
-      strumpack = true
-      cli_args = 'Mesh/gen/xmax=2e-2 Mesh/gen/ymax=2e-2 Outputs/file_base=ra-1e5 -pc_factor_mat_solver_type strumpack'
+      cli_args = 'Mesh/gen/xmax=2e-2 Mesh/gen/ymax=2e-2 Outputs/file_base=ra-1e5'
       detail = '1.4e5'
+      strumpack = true
     []
   []
 []
