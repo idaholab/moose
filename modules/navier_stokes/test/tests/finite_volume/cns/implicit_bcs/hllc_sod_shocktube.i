@@ -177,14 +177,11 @@ middle = 0.5
 
 [Executioner]
   type = Transient
-  scheme = explicit-tvd-rk-2
-  solve_type = LINEAR
-
-  l_tol = 1e-4
-
-  nl_rel_tol = 1e-20
-  nl_abs_tol = 1e-8
-  nl_max_its = 60
+  [TimeIntegrator]
+    type = ExplicitSSPRungeKutta
+    order = 2
+  []
+  l_tol = 1e-8
 
   # run to t = 0.15
   start_time = 0.0

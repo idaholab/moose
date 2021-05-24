@@ -242,7 +242,6 @@ x_sep = 35
     full = true
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-    petsc_options = '-snes_converged_reason'
   [../]
 []
 
@@ -271,19 +270,16 @@ x_sep = 35
 [Executioner]
   type = Transient
   end_time = 100
-  scheme = explicit-tvd-rk-2
-  solve_type = LINEAR
+  [TimeIntegrator]
+    type = ExplicitSSPRungeKutta
+    order = 2
+  []
+  l_tol = 1e-8
 
   [./TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl_dt
   [../]
-  l_tol = 1e-4
-
-  #l_max_its = 60
-  #nl_max_its = 40
-  #nl_rel_tol = 1e-6
-  #nl_abs_tol = 1e-6
 []
 
 [Outputs]
