@@ -95,19 +95,4 @@
 
 [Outputs]
   exodus = true
-  hide = 'pressure'
-[]
-
-[AuxVariables]
-  [p][]
-[]
-
-[AuxKernels]
-  [p]
-    type = ParsedAux
-    variable = p
-    function = 'pressure'
-    args = 'pressure'
-    execute_on = 'initial timestep_end'
-  []
 []

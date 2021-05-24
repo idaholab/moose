@@ -429,9 +429,9 @@ CNSAction::addSpecificTotalEnthalpyAux()
   params.set<AuxVariableName>("variable") = NS::specific_total_enthalpy;
 
   // coupled variables
-  params.set<CoupledName>("rho") = {NS::density};
-  params.set<CoupledName>("rho_et") = {NS::total_energy_density};
-  params.set<CoupledName>("pressure") = {NS::pressure};
+  params.set<CoupledName>(NS::density) = {NS::density};
+  params.set<CoupledName>(NS::total_energy_density) = {NS::total_energy_density};
+  params.set<CoupledName>(NS::pressure) = {NS::pressure};
 
   _problem->addAuxKernel(kernel_type, "specific_total_enthalpy_auxkernel", params);
 }

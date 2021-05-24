@@ -125,14 +125,14 @@ ud_in=${fparse u_in * eps}
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = pressure
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = vel_x
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -140,7 +140,7 @@ ud_in=${fparse u_in * eps}
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = 'right'
     variable = temperature
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'energy'
   []
 []
@@ -155,7 +155,7 @@ ud_in=${fparse u_in * eps}
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    pressure = pressure
+    p = pressure
     T_fluid = temperature
     superficial_vel_x = vel_x
     fp = fp

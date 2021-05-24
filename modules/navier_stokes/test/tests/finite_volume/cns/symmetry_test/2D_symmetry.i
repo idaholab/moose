@@ -199,7 +199,7 @@ angle = 45
   [p_aux]
     type = ADMaterialRealAux
     variable = p
-    property = pressure
+    property = p
   []
 []
 

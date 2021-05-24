@@ -80,7 +80,7 @@ mu=18.23e-6
   [pressure]
     type = ADMaterialRealAux
     variable = pressure
-    property = pressure
+    property = p
     execute_on = 'timestep_end'
   []
   [vel_x]

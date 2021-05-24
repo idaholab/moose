@@ -234,7 +234,7 @@ outlet_pressure = 0.9e5
   [p_aux]
     type = ADMaterialRealAux
     variable = p
-    property = pressure
+    property = p
   []
 
   [Ma_layered_aux]

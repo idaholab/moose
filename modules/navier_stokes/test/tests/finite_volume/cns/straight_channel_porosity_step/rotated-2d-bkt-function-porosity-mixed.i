@@ -211,14 +211,14 @@ friction_coeff=10
     type = PCNSFVKTBC
     boundary = 'top'
     variable = pressure
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'mass'
   []
   [rhou_top]
     type = PCNSFVKTBC
     boundary = 'top'
     variable = sup_mom_x
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -226,7 +226,7 @@ friction_coeff=10
     type = PCNSFVKTBC
     boundary = 'top'
     variable = sup_mom_y
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'y'
   []
@@ -234,7 +234,7 @@ friction_coeff=10
     type = PCNSFVKTBC
     boundary = 'top'
     variable = T_fluid
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'energy'
   []
 
@@ -307,7 +307,7 @@ friction_coeff=10
 [Materials]
   [var_mat]
     type = PorousMixedVarMaterial
-    pressure = pressure
+    p = pressure
     T_fluid = T_fluid
     superficial_rhou = sup_mom_x
     superficial_rhov = sup_mom_y

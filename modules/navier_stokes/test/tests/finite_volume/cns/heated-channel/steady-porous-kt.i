@@ -82,7 +82,7 @@ rho_et_initial=${fparse rho_initial * et_initial}
   [pressure]
     type = ADMaterialRealAux
     variable = pressure
-    property = pressure
+    property = p
     execute_on = 'timestep_end'
   []
   [temperature]
@@ -163,14 +163,14 @@ rho_et_initial=${fparse rho_initial * et_initial}
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho_u
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -178,7 +178,7 @@ rho_et_initial=${fparse rho_initial * et_initial}
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho_et
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'energy'
   []
 []

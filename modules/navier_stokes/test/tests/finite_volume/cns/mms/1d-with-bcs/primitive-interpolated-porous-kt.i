@@ -129,14 +129,14 @@
     variable = pressure
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'mass'
   []
   [momentum_right]
     variable = sup_vel_x
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -144,7 +144,7 @@
     variable = T_fluid
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'energy'
   []
 
@@ -172,7 +172,7 @@
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    pressure = pressure
+    p = pressure
     superficial_vel_x = sup_vel_x
     T_fluid = T_fluid
     porosity = porosity

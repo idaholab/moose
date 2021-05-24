@@ -285,14 +285,14 @@ u_in=1
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho_u
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -300,7 +300,7 @@ u_in=1
     type = PCNSFVLaxFriedrichsBC
     boundary = 'right'
     variable = rho_et
-    pressure = ${p_initial}
+    p = ${p_initial}
     eqn = 'energy'
   []
 []

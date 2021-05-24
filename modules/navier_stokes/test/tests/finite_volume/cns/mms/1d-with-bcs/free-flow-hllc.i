@@ -118,20 +118,20 @@
     variable = rho
     type = CNSFVHLLCSpecifiedPressureMassBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
   []
   [momentum_out]
     variable = rho_u
     type = CNSFVHLLCSpecifiedPressureMomentumBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     momentum_component = 'x'
   []
   [energy_out]
     variable = rho_et
     type = CNSFVHLLCSpecifiedPressureFluidEnergyBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
   []
 []
 

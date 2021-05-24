@@ -85,19 +85,4 @@
   file_base = lid_driven_out
   exodus = true
   perf_graph = true
-  hide = 'pressure'
-[]
-
-[AuxVariables]
-  [p][]
-[]
-
-[AuxKernels]
-  [p]
-    type = ParsedAux
-    variable = p
-    function = 'pressure'
-    args = 'pressure'
-    execute_on = 'initial timestep_end'
-  []
 []

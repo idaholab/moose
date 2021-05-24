@@ -41,7 +41,7 @@ global_interp_method='average'
   [pressure]
     type = ADMaterialRealAux
     variable = pressure
-    property = pressure
+    property = p
     execute_on = 'timestep_end'
   []
   [temperature]
@@ -203,7 +203,7 @@ global_interp_method='average'
     type = PNSFVMomentumSpecifiedPressureBC
     boundary = 'right'
     variable = superficial_rho_u
-    pressure = ${p_out}
+    p = ${p_out}
     momentum_component = 'x'
   []
 
@@ -223,7 +223,7 @@ global_interp_method='average'
     type = PNSFVMomentumSpecifiedPressureBC
     boundary = 'right'
     variable = superficial_rho_v
-    pressure = ${p_out}
+    p = ${p_out}
     momentum_component = 'y'
   []
 

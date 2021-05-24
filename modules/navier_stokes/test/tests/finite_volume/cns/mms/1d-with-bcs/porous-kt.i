@@ -130,14 +130,14 @@
     variable = rho
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'mass'
   []
   [momentum_right]
     variable = rho_ud
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -145,7 +145,7 @@
     variable = rho_et
     type = PCNSFVInterpolatedLaxFriedrichsBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     eqn = 'energy'
   []
 []

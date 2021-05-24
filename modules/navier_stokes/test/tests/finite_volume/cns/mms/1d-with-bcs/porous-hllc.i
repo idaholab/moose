@@ -120,20 +120,20 @@ eps=0.9
     variable = rho
     type = PCNSFVHLLCSpecifiedPressureMassBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
   []
   [momentum_out]
     variable = rho_ud
     type = PCNSFVHLLCSpecifiedPressureMomentumBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
     momentum_component = 'x'
   []
   [energy_out]
     variable = rho_et
     type = PCNSFVHLLCSpecifiedPressureFluidEnergyBC
     boundary = right
-    pressure = 'exact_p'
+    p = 'exact_p'
   []
 []
 

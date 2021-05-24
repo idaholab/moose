@@ -30,7 +30,9 @@ NSMachAux::validParams()
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // Only required in 3D...
   params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
-  params.addRequiredCoupledVar(NS::specific_internal_energy, "internal energy");
+  params.addCoupledVar(NS::specific_internal_energy, "internal energy");
+  params.addDeprecatedCoupledVar(
+      NS::internal_energy, NS::specific_internal_energy, "January 1, 2022");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
 

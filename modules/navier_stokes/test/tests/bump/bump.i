@@ -98,7 +98,7 @@
     rho_infty = 1.1768292682926829
     p_infty = 101325
     rho = rho
-    pressure = pressure
+    pressure = p
     fluid_properties = ideal_gas
   []
 []
@@ -136,7 +136,6 @@
 
 [AuxVariables]
   [rhoe][]
-  [p][]
   [enthalpy][]
 []
 
@@ -146,13 +145,6 @@
     type = ParsedAux
     function = 'rho_et'
     args = 'rho_et'
-    execute_on = 'initial timestep_end'
-  []
-  [p]
-    variable = p
-    type = ParsedAux
-    function = 'pressure'
-    args = 'pressure'
     execute_on = 'initial timestep_end'
   []
   [enthalpy]

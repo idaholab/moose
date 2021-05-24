@@ -229,14 +229,14 @@ user_limiter='upwind'
     type = PCNSFVKTBC
     boundary = 'right'
     variable = pressure
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVKTBC
     boundary = 'right'
     variable = sup_vel_x
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -244,7 +244,7 @@ user_limiter='upwind'
     type = PCNSFVKTBC
     boundary = 'right'
     variable = T_fluid
-    pressure_function = ${p_initial}
+    p_function = ${p_initial}
     eqn = 'energy'
   []
 
@@ -291,7 +291,7 @@ user_limiter='upwind'
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    pressure = pressure
+    p = pressure
     T_fluid = T_fluid
     superficial_vel_x = sup_vel_x
     fp = fp

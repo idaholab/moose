@@ -121,7 +121,7 @@ interp_method='upwind'
   [pressure]
     type = ADMaterialRealAux
     variable = pressure
-    property = pressure
+    property = p
     execute_on = 'timestep_end'
   []
   [mach]

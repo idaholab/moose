@@ -35,7 +35,6 @@
   [out]
     type = Exodus
     execute_on = 'final'
-    hide = 'pressure'
   []
 []
 
@@ -95,19 +94,5 @@
     type = GenericConstantMaterial
     prop_names =  'temp_ref'
     prop_values = '900'
-  []
-[]
-
-[AuxVariables]
-  [p][]
-[]
-
-[AuxKernels]
-  [p]
-    type = ParsedAux
-    variable = p
-    function = 'pressure'
-    args = 'pressure'
-    execute_on = 'initial timestep_end'
   []
 []

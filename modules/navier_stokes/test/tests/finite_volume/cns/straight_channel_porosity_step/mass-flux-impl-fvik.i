@@ -313,7 +313,7 @@ mass_flux_in=${fparse u_in * rho_in}
     boundary = 'right'
     variable = rho_u
     momentum_component = 'x'
-    pressure = ${p_initial}
+    p = ${p_initial}
   []
   [rho_et_left]
     type = PNSFVFluidEnergySpecifiedTemperatureBC
