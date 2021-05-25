@@ -63,7 +63,7 @@ DynamicStressDivergenceTensors::computeQpResidual()
   Real residual = 0.0;
   if (_static_initialization && _t == _dt)
   {
-    // If static inialization is true, then in the first step residual is only Ku which is
+    // If static initialization is true, then in the first step residual is only Ku which is
     // stress.grad(test).
     residual += _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
@@ -121,8 +121,6 @@ DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     else
       return 0.0;
   }
-  if (_temp_coupled && jvar == _temp_var)
-    return 0.0;
 
   return 0;
 }

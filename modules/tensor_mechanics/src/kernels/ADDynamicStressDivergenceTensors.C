@@ -49,7 +49,7 @@ ADDynamicStressDivergenceTensors::computeQpResidual()
 {
   /**
    *This kernel needs to be used only if either Rayleigh damping or numerical damping through HHT
-   *time integration scheme needs to be added to the problem thorugh the stiffness dependent damping
+   *time integration scheme needs to be added to the problem through the stiffness dependent damping
    * parameter _zeta or HHT parameter _alpha, respectively.
    *
    * The residual of _zeta*K*[(1+_alpha)vel-_alpha vel_old]+ alpha K [ u - uold] + K u is required
@@ -64,7 +64,7 @@ ADDynamicStressDivergenceTensors::computeQpResidual()
   ADReal residual;
   if (_static_initialization && _t == _dt)
   {
-    // If static inialization is true, then in the first step residual is only Ku which is
+    // If static initialization is true, then in the first step residual is only Ku which is
     // stress.grad(test).
     residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 

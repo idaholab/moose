@@ -86,7 +86,7 @@ FEProblemSolve::validParams()
       "n_max_nonlinear_pingpong",
       100,
       "The maximum number of times the non linear residual can ping pong "
-      "before requesting halting the current evalution and requesting timestep cut");
+      "before requesting halting the current evaluation and requesting timestep cut");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -115,7 +115,7 @@ FEProblemSolve::validParams()
       "0 indicates pure Jacobian-based scaling");
   params.addParam<std::vector<std::vector<std::string>>>(
       "scaling_group_variables",
-      "Name of variables that are grouped together to for determing scale factors. (Multiple "
+      "Name of variables that are grouped together for determining scale factors. (Multiple "
       "groups can be provided, separated by semicolon)");
   params.addRangeCheckedParam<unsigned int>(
       "num_grids",
