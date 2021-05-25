@@ -63,6 +63,7 @@ FVKernel::FVKernel(const InputParameters & params)
     UserObjectInterface(this),
     PostprocessorInterface(this),
     SetupInterface(this),
+    Restartable(this, "FVKernels"),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(params.get<THREAD_ID>("_tid")),
