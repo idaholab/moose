@@ -100,4 +100,12 @@
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906
   []
+  [deferred_correction]
+    type = Exodiff
+    input = dc.i
+    exodiff = dc_out.e
+    ad_indexing_type = 'global'
+    requirement = 'The system shall support the deferred correction algorithm for transitioning from low-order to high-order representations of the convective flux during a transient simulation.'
+    abs_zero = 1e-8
+  []
 []
