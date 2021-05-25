@@ -69,7 +69,7 @@ namespace {
             Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             _primary->_points_requested.insert
               (_primary->_points_requested.end(),
-	       _points_requested.begin(), _points_requested.end());
+               _points_requested.begin(), _points_requested.end());
           }
       }
 
