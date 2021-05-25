@@ -19,6 +19,7 @@ public:
 protected:
   virtual const FEType & getFEType() override;
 
+  virtual void preSetupMesh() override;
   virtual void setupMesh() override;
   virtual void check() const override;
 

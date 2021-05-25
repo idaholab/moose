@@ -13,6 +13,15 @@ HeatStructureCylindricalBase::HeatStructureCylindricalBase(const InputParameters
 }
 
 void
+HeatStructureCylindricalBase::setupMesh()
+{
+  if (!_connected_to_flow_channel)
+    _axial_offset = _inner_radius;
+
+  HeatStructureBase::setupMesh();
+}
+
+void
 HeatStructureCylindricalBase::addMooseObjects()
 {
   HeatStructureBase::addMooseObjects();
