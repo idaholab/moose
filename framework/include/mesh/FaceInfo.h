@@ -168,11 +168,14 @@ public:
 
   const std::vector<const Node *> & vertices() const { return _vertices; }
 
+  const std::pair<dof_id_type, unsigned int> & id() const { return _id; }
+
 private:
   Real _face_coord = 0;
   Point _normal;
 
   const processor_id_type _processor_id;
+  const std::pair<dof_id_type, unsigned int> _id;
 
   /// the elem and neighbor elems
   const Elem * const _elem;

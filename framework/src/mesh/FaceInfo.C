@@ -18,6 +18,7 @@
 
 FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   : _processor_id(elem->processor_id()),
+    _id(std::make_pair(elem->id(), side)),
     _elem(elem),
     _neighbor(neighbor),
     _elem_subdomain_id(elem->subdomain_id()),
