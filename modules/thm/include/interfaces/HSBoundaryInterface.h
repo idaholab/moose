@@ -12,7 +12,7 @@ class Component;
 class HSBoundaryInterface
 {
 public:
-  HSBoundaryInterface(const Component * const component);
+  HSBoundaryInterface(Component * component);
 
   void check(const Component * const component) const;
 
