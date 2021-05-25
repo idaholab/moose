@@ -457,7 +457,7 @@ BetterSubChannel1PhaseProblemBase::computeP(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeH(int iz)
+BetterSubChannel1PhaseProblemBase::computeh(int iz)
 {
   if (iz == 0)
   {
@@ -557,112 +557,9 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iz)
   }
 }
 
-double
-BetterSubChannel1PhaseProblemBase::computeMassFlowForDPDZ(double dpdz, int i_ch)
-{
-  auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-  // initialize massflow
-  auto massflow = (*mdot_soln)(node);
-  auto rho = (*rho_soln)(node);
-  auto T = (*T_soln)(node);
-  auto mu = _fp->mu_from_rho_T(rho, T);
-  auto Si = (*S_flow_soln)(node);
-  auto w_perim = (*w_perim_soln)(node);
-  auto Dhi = 4.0 * Si / w_perim;
-  auto max_iter = 10;
-  auto TOL = 1e-6;
-  // Iterate until we find massflow that matches the given dp/dz.
-  auto iter = 0;
-  auto Error = 1.0;
-  while (Error > TOL)
-  {
-    iter += 1;
-    if (iter > max_iter)
-    {
-      mooseError(name(), ": exceeded maximum number of iterations");
-    }
-    auto massflow_old = massflow;
-    auto Rei = ((massflow / Si) * Dhi / mu);
-    auto fi = computeFrictionFactor(Rei);
-    massflow = sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
-    Error = std::abs((massflow - massflow_old) / massflow_old);
-  }
-  return massflow;
-}
-
-void
-BetterSubChannel1PhaseProblemBase::enforceUniformDPDZAtInlet()
-{
-  _console
-      << "Edit mass flow boundary condition in order to have uniform Pressure drop at the inlet\n";
-  auto total_mass_flow = 0.0;
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-  {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    total_mass_flow += (*mdot_soln)(node_in);
-  }
-  _console << "Total mass flow :" << total_mass_flow << " [kg/sec] \n";
-  // Define vectors of pressure drop and massflow
-  Eigen::VectorXd DPDZi(_subchannel_mesh.getNumOfChannels());
-  Eigen::VectorXd MassFlowi(_subchannel_mesh.getNumOfChannels());
-  // Calculate Pressure drop derivative for current mass flow BC
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-  {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    auto rho_in = (*rho_soln)(node_in);
-    auto T_in = (*T_soln)(node_in);
-    auto Si = (*S_flow_soln)(node_in);
-    auto w_perim = (*w_perim_soln)(node_in);
-    auto Dhi = 4.0 * Si / w_perim;
-    auto mu = _fp->mu_from_rho_T(rho_in, T_in);
-    auto Rei = (((*mdot_soln)(node_in) / Si) * Dhi / mu);
-    auto fi = computeFrictionFactor(Rei);
-    DPDZi(i_ch) =
-        (fi / Dhi) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
-  }
-
-  // Initialize an average pressure drop for uniform pressure inlet condition
-  auto DPDZ = DPDZi.mean();
-  auto Error = 1.0;
-  auto tol = 1e-6;
-  auto iter = 0;
-  auto max_iter = 10;
-  while (Error > tol)
-  {
-    iter += 1;
-    if (iter > max_iter)
-    {
-      mooseError(name(), ": exceeded maximum number of iterations");
-    }
-    auto DPDZ_old = DPDZ;
-    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-    {
-      // update inlet mass flow to achieve DPDZ
-      MassFlowi(i_ch) = computeMassFlowForDPDZ(DPDZ, i_ch);
-    }
-    // Calculate total massflow at the inlet
-    auto mass_flow_sum = MassFlowi.sum();
-    // Update the DP/DZ to correct the mass flow rate.
-    DPDZ *= std::pow(total_mass_flow / mass_flow_sum, 2.0);
-    Error = std::abs((DPDZ - DPDZ_old) / DPDZ_old);
-  }
-
-  // Populate solution vector with corrected boundary conditions
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-  {
-    auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-    mdot_soln->set(node, MassFlowi(i_ch));
-  }
-  _console << "Done Applying mass flow boundary condition\n";
-}
-
 void
 BetterSubChannel1PhaseProblemBase::externalSolve()
 {
-  if (_enforce_uniform_pressure)
-  {
-    enforceUniformDPDZAtInlet();
-  }
   _console << "Executing subchannel solver\n";
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   Eigen::MatrixXd PCYCLES(nz, 2);
@@ -717,7 +614,7 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
           // Calculate turbulent crossflow
           computeWijPrime(iz);
           // Calculate enthalpy (Rho and H need to be updated at the inlet to (TODO))
-          computeH(iz);
+          computeh(iz);
           // Update Temperature
           computeT(iz);
           // Update Density
