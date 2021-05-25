@@ -31,8 +31,6 @@ protected:
   virtual void computeSumWij(int iz);
   /// Computes mass flow per channel for level iz
   virtual void computeMdot(int iz);
-  /// Returns mass flow for a given pressure drop
-  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
   /// Computes turbulent crossflow per gap for level iz
   virtual void computeWijPrime(int iz);
   /// Computes Pressure Drop per channel for level iz
@@ -40,13 +38,11 @@ protected:
   /// Computes Pressure per channel for level iz
   virtual void computeP(int iz);
   /// Computes Enthalpy per channel for level iz
-  virtual void computeH(int iz);
+  virtual void computeh(int iz);
   /// Computes Temperature per channel for level iz
   virtual void computeT(int iz);
   /// Computes Density per channel for level iz
   virtual void computeRho(int iz);
-  /// Computes and populates solution vector with Boundary mass flow
-  virtual void enforceUniformDPDZAtInlet();
 
   Eigen::MatrixXd Wij;
   Eigen::MatrixXd Wij_old;
