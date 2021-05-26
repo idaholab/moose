@@ -278,4 +278,9 @@ protected:
   void setupTimeIntegrator();
 
   PerfID _final_timer;
+
+  /// Whether to include dt in the computation of the solution difference norm. If taking 'small'
+  /// time steps this member should probably be true. If taking very 'large' timesteps in an attempt
+  /// to reach a steady-state, this member should probably be be false.
+  const bool _dt_in_solution_diff_norm;
 };
