@@ -6,10 +6,10 @@
 /**
  *
  */
-class OneDHeatForcingFunction : public Kernel
+class HeatStructureHeatSource : public Kernel
 {
 public:
-  OneDHeatForcingFunction(const InputParameters & parameters);
+  HeatStructureHeatSource(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
