@@ -107,37 +107,8 @@ ComputeFrictionalForceLMMechanicalContact::jacobianSetup()
 }
 
 void
-ComputeFrictionalForceLMMechanicalContact::computeResidual(const Moose::MortarType mortar_type)
-{
-  if (mortar_type != Moose::MortarType::Lower)
-    return;
-
-  // Fill node to weighted tangential velocity map.
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-  {
-    computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
-      computeQpIProperties();
-  }
-}
-
-void
-ComputeFrictionalForceLMMechanicalContact::computeJacobian(const Moose::MortarType mortar_type)
-{
-  // During "computeResidual" and "computeJacobian" we are actually just computing properties on the
-  // mortar segment element mesh. We are *not* actually assembling into the residual/Jacobian. The
-  // property of interest is the map from node to weighted tangential velocity. Computation of the
-  // properties proceeds identically for residual and Jacobian evaluation hence why we simply call
-  // computeResidual here. We will assemble into the residual/Jacobian later from the post() method
-  computeResidual(mortar_type);
-}
-
-void
 ComputeFrictionalForceLMMechanicalContact::post()
 {
-  // Enforce weighted gap constraint (calls enforceConstraintOnNode)
-  ComputeWeightedGapLMMechanicalContact::post();
-
   // Enforce frictional complementarity constraints
   for (const auto & pr : _node_to_weighted_tangential_velocity)
   {
@@ -150,6 +121,8 @@ ComputeFrictionalForceLMMechanicalContact::post()
 void
 ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnNode(const Node * const node)
 {
+  ComputeWeightedGapLMMechanicalContact::enforceConstraintOnNode(node);
+
   // Get friction LM index
   const auto dof_index = node->dof_number(_sys.number(), _friction_var->number(), 0);
   ADReal friction_lm_value = _friction_var->getNodalValue(*node);

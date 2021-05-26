@@ -20,10 +20,6 @@ public:
   static InputParameters validParams();
 
   ComputeFrictionalForceLMMechanicalContact(const InputParameters & parameters);
-  using ADMortarConstraint::computeResidual;
-  void computeResidual(Moose::MortarType mortar_type) override;
-  using ADMortarConstraint::computeJacobian;
-  void computeJacobian(Moose::MortarType mortar_type) override;
   void residualSetup() override;
   void jacobianSetup() override;
   void post() override;

@@ -32,9 +32,8 @@
               'frictional_bouncing_block_checkfile_friction_0029.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
-    min_parallel = 2
-    heavy = true
     min_ad_size = '50'
+    heavy = true
     ad_indexing_type = 'global'
     requirement = 'Contact module shall solve frictional contact between a bouncing block and '
                   'flexible base material.'

@@ -21,7 +21,7 @@ of the tangential velocity function.
 
 This object automatically enforces normal contact constraints by making calls to its parent class `ComputeWeightedGapLMMechanicalContact`, see [`ComputeWeightedGapLMMechanicalContact`](/ComputeWeightedGapLMMechanicalContact.md) for input parameters and details.
 
-It is preliminary recommended to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running $new$ models, but they can be held constant once good convergence behavior has been attained.  
+The preliminary recommendation is to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running *new* models, but they can be held constant once good convergence behavior has been attained.  
 
 !syntax description /Constraints/ComputeFrictionalForceLMMechanicalContact
 

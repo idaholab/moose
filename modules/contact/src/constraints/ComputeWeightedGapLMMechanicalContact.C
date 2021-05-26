@@ -112,7 +112,7 @@ ComputeWeightedGapLMMechanicalContact::residualSetup()
 void
 ComputeWeightedGapLMMechanicalContact::jacobianSetup()
 {
-  ComputeWeightedGapLMMechanicalContact::residualSetup();
+  residualSetup();
 }
 
 void
@@ -125,9 +125,9 @@ ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType m
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
-    ComputeWeightedGapLMMechanicalContact::computeQpProperties();
+    computeQpProperties();
     for (_i = 0; _i < _test.size(); ++_i)
-      ComputeWeightedGapLMMechanicalContact::computeQpIProperties();
+      computeQpIProperties();
   }
 }
 
@@ -149,7 +149,7 @@ ComputeWeightedGapLMMechanicalContact::post()
   for (const auto & pr : _node_to_weighted_gap)
   {
     _weighted_gap_ptr = &pr.second;
-    ComputeWeightedGapLMMechanicalContact::enforceConstraintOnNode(pr.first);
+    enforceConstraintOnNode(pr.first);
   }
 }
 

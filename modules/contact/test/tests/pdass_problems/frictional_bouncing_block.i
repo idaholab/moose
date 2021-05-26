@@ -188,14 +188,14 @@ offset = 1e-2
     type = NodalValueSampler
     variable = normal_lm
     boundary = '10'
-    sort_by = id
+    sort_by = x
     execute_on = FINAL
   []
   [friction]
     type = NodalValueSampler
     variable = tangential_lm
     boundary = '10'
-    sort_by = id
+    sort_by = x
     execute_on = FINAL
   []
 []
