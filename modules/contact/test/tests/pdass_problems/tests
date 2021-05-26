@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Constraints/ComputeFrictionalForceLMMechanicalContact.md'
+  design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md'
   issues = '#17495'
   [cylinder_friction]
     type = 'CSVDiff'

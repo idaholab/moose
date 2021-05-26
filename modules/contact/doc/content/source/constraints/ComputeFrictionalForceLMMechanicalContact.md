@@ -1,6 +1,6 @@
 # ComputeFrictionalForceLMMechanicalContact
 
-This class represents a preliminary implementation of frictional mortar contact constraints intended to be used with Lagrange's multiplier interpolation with dual bases. The nonlinear complementarity constraints employed here are based on a primal-dual active set strategy (PDASS), see [!citep](gitterle2010finite). It   
+This class represents a preliminary implementation of frictional mortar contact constraints intended to be used with Lagrange's multiplier interpolation with dual bases. The nonlinear complementarity constraints employed here are based on a primal-dual active set strategy (PDASS), see [!citep](gitterle2010finite). These constraints capture nodes in sticking and slipping states on different solution branches, and can be written as:   
 
 \begin{equation}
 C_{tj}(\lambda_{j},\boldsymbol{u}, \boldsymbol{\dot{u}}) = \max({\mu({pressure} + c_{n}\tilde{g}_{nj}),  abs({\lambda_{j} + c_t \tilde{u}_{tj}}))  \lambda_{j} - \mu \max({0,({pressure} + c_{n}\tilde{g}_{nj})}) (\lambda_{j} + c_t \tilde{u}_{tj})
