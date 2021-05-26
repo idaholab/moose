@@ -97,4 +97,25 @@
     requirement = 'The system shall issue an error for not fully supported distributed mesh with hybrid finite element method (HFEM) calculations.'
     mumps = true
   []
+
+  [accurate_lower_d_volumes]
+    requirement = 'The system shall be able to compute lower dimensional element volumes using element Jacobian information computed earlier during finite element object reinitialization and when the highest dimension of the mesh is'
+    issues = '#17938'
+    [2d]
+      type = 'Exodiff'
+      input = 'lower-d-volumes.i'
+      exodiff = 'lower-d-volumes_out.e'
+      detail = 'two'
+      mumps = true
+      mesh_mode = replicated
+    []
+    [3d]
+      type = 'Exodiff'
+      input = '3d-lower-d-volumes.i'
+      exodiff = '3d-lower-d-volumes_out.e'
+      detail = 'three'
+      mumps = true
+      mesh_mode = replicated
+    []
+  []
 []
