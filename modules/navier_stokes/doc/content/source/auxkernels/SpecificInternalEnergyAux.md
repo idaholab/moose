@@ -2,12 +2,12 @@
 
 !syntax description /AuxKernels/SpecificInternalEnergyAux
 
-This AuxKernel computes the specific internal energy $u$ based from the total energy $e$
-and the kinetic energy, computed using the fluid momentum $\rho \vec{u}$.
-
 \begin{equation}
 u = e - \dfrac{||\rho \vec{u}||_{L^2}}{2 \rho}
 \end{equation}
+
+with $u$ the specific internal energy, $e$ the specific total energy, and $\rho \vec{u}$ the
+fluid momentum.
 
 !syntax parameters /AuxKernels/SpecificInternalEnergyAux
 

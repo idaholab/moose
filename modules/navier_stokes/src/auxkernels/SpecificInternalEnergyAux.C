@@ -20,6 +20,9 @@ SpecificInternalEnergyAux::validParams()
   params.addCoupledVar("rho_v", 0, "Momentum y-component");
   params.addCoupledVar("rho_w", 0, "Momentum z-component");
   params.addRequiredCoupledVar("rho_et", "Total energy");
+  params.addClassDescription("This AuxKernel computes the specific internal energy based "
+                             "from the total and the kinetic energy.");
+
   return params;
 }
 

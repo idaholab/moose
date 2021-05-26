@@ -116,7 +116,7 @@
     prereq = 'petsc_as_master'
 
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling."
+    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling and different time steps."
   []
 
   [petsc_as_master_small_dt]
