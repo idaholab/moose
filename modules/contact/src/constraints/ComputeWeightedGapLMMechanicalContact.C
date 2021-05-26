@@ -99,10 +99,8 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   const auto * const node = _lower_secondary_elem->node_ptr(_i);
-  //  Moose::out << "Weighte gap node _i: " << _i << "\n";
 
   _node_to_weighted_gap[node] += _test[_i][_qp] * _qp_gap;
-  //  Moose::out << "_qp_gap: " << MetaPhysicL::raw_value(_qp_gap) << "\n";
 }
 
 void

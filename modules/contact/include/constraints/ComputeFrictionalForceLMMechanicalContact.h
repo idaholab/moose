@@ -12,8 +12,7 @@
 #include "ComputeWeightedGapLMMechanicalContact.h"
 
 /**
- * Computes the weighted gap that will later be used to enforce the
- * zero-penetration mechanical contact conditions
+ * Computes frictional constraints (and normal contact constraints by calling its parent object)
  */
 class ComputeFrictionalForceLMMechanicalContact : public ComputeWeightedGapLMMechanicalContact
 {
@@ -43,9 +42,9 @@ protected:
 
   /**
    * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
-   * ComputeWeightedGapLMMechanicalContact we enforce the zero-penetration constraint in this method
-   * using an NCP function. This is also where we actually feed the node-based constraint
-   * information into the system residual and Jacobian
+   * ComputeFrictionalForceLMMechanicalContact we enforce PDASS frictional constraints. This is also
+   * where we actually feed the node-based constraint information into the system residual and
+   * Jacobian
    */
   virtual void enforceConstraintOnNode(const Node * node) override;
 
@@ -58,7 +57,7 @@ protected:
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;
 
-  /// This is a numerical factor used in the tangential constraints for convergence purposes.
+  /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 
   /// Frictional Lagrange's multiplier variable pointer
