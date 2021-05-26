@@ -57,7 +57,7 @@ void
 BetterSubChannel1PhaseProblemBase::initialSetup()
 {
   ExternalProblem::initialSetup();
-  // Read in Wij_global for null transient only at the first run of externalSolve
+  // Read in Wij for null transient only at the first run of externalSolve
   if (isTransient())
   {
     std::ifstream file("Wij_SS");
@@ -260,19 +260,22 @@ BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
 
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    double SumWij = 0.0;
-    // Calculate sum of crossflow into channel i from channels j around i
-    unsigned int counter = 0;
-    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
-      SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz);
-      counter++;
+      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      double SumWij = 0.0;
+      // Calculate sum of crossflow into channel i from channels j around i
+      unsigned int counter = 0;
+      for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+      {
+        SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz);
+        counter++;
+      }
+      // The net crossflow coming out of cell i [kg/sec]
+      SumWij_soln->set(node_out, SumWij);
     }
-    // The net crossflow coming out of cell i [kg/sec]
-    SumWij_soln->set(node_out, SumWij);
   }
 }
 
