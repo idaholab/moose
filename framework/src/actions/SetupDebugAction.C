@@ -31,6 +31,7 @@ SetupDebugAction::validParams()
       "show_var_residual_norms",
       false,
       "Print the residual norms of the individual solution variables at each nonlinear iteration");
+  params.addParam<bool>("show_action_dependencies", false, "Print out the action dependencies");
   params.addParam<bool>("show_actions", false, "Print out the actions being executed");
   params.addParam<bool>(
       "show_parser", false, "Shows parser block extraction and debugging information");
@@ -54,6 +55,7 @@ SetupDebugAction::validParams()
 
 SetupDebugAction::SetupDebugAction(InputParameters parameters) : Action(parameters)
 {
+  _awh.showActionDependencies(getParam<bool>("show_action_dependencies"));
   _awh.showActions(getParam<bool>("show_actions"));
   _awh.showParser(getParam<bool>("show_parser"));
 }
