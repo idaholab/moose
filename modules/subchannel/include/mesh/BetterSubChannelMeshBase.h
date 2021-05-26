@@ -7,11 +7,11 @@
 /**
  * Base class for subchannel meshes
  */
-class SubChannelMeshBase : public MooseMesh
+class BetterSubChannelMeshBase : public MooseMesh
 {
 public:
-  SubChannelMeshBase(const InputParameters & parameters);
-  SubChannelMeshBase(const SubChannelMeshBase & other_mesh);
+  BetterSubChannelMeshBase(const InputParameters & parameters);
+  BetterSubChannelMeshBase(const BetterSubChannelMeshBase & other_mesh);
 
   /**
    * Get axial location of layers
@@ -19,9 +19,14 @@ public:
   virtual const std::vector<Real> & getZGrid() const { return _z_grid; }
 
   /**
-   * Return the number of axial nodes
+   * Return the number of axial cells
    */
-  virtual const unsigned int & getNumOfAxialNodes() const { return _nz; }
+  virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
+
+  /**
+   * Return the number of axial blocks
+   */
+  virtual const unsigned int & getNumOfAxialBlocks() const { return _n_blocks; }
 
   /**
    * Get the mesh node for a given channel index and elevation index
@@ -90,8 +95,6 @@ public:
   virtual Real getGapWidth(unsigned int gap_index) const = 0;
 
 protected:
-  /// number of axial nodes
-  unsigned int _nz;
   /// heated length of the fuel rod
   Real _heated_length;
   /// axial location of nodes
@@ -100,12 +103,14 @@ protected:
   const std::vector<Real> & _spacer_z;
   /// form loss coefficient of the spacers
   const std::vector<Real> & _spacer_k;
-  /// max allowed axial node size
-  Real _max_dz;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter
   Real _rod_diameter;
+  /// number of axial cells
+  unsigned int _n_cells;
+  /// number of axial blocks
+  unsigned int _n_blocks;
 
 public:
   static InputParameters validParams();
