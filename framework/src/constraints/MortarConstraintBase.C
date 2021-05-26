@@ -119,8 +119,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _phys_points_primary(_assembly.qPointsFaceNeighbor()),
     _lower_secondary_elem(_assembly.lowerDElem()),
     _lower_primary_elem(_assembly.neighborLowerDElem()),
-    _lower_secondary_volume(_assembly.lowerDElemVolume()),
-    _lower_primary_volume(_assembly.neighborLowerDElemVolume()),
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {

@@ -197,12 +197,6 @@ protected:
   /// interface. It is these split elements that are the mortar segment mesh elements
   Elem const * const & _lower_primary_elem;
 
-  /// The secondary face lower dimensional element (not the mortar element!) volume
-  const Real & _lower_secondary_volume;
-
-  /// The primary face lower dimensional element volume (not the mortar element!)
-  const Real & _lower_primary_volume;
-
   /// Whether this object operates on the displaced mesh
   const bool _displaced;
 
