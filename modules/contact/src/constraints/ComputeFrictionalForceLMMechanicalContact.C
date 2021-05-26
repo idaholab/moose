@@ -142,11 +142,11 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnNode(const Node * 
     nodal_residual = friction_lm_value;
   else
   {
-    auto term_1 = std::max(_mu * (contact_pressure + _c * weighted_gap),
-                           std::abs(friction_lm_value + _c_t * tangential_vel * _dt)) *
-                  friction_lm_value;
-    auto term_2 = _mu * std::max(0.0, contact_pressure + _c * weighted_gap) *
-                  (friction_lm_value + _c_t * tangential_vel * _dt);
+    const auto term_1 = std::max(_mu * (contact_pressure + _c * weighted_gap),
+                                 std::abs(friction_lm_value + _c_t * tangential_vel * _dt)) *
+                        friction_lm_value;
+    const auto term_2 = _mu * std::max(0.0, contact_pressure + _c * weighted_gap) *
+                        (friction_lm_value + _c_t * tangential_vel * _dt);
 
     nodal_residual = term_1 - term_2;
   }
