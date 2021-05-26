@@ -9,8 +9,6 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <cmath>
-#include "SinglePhaseFluidProperties.h"
-#include "SolutionHandle.h"
 #include "AuxiliarySystem.h"
 
 InputParameters
@@ -22,6 +20,8 @@ BetterSubChannel1PhaseProblemBase::validParams()
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addRequiredParam<bool>("enforce_uniform_pressure",
                                 "Flag that enables uniform inlet pressure");
+  params.addRequiredParam<bool>("Density", "Flag that enables the calculation of density");
+  params.addRequiredParam<bool>("Viscosity", "Flag that enables the calculation of viscosity");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
@@ -31,19 +31,23 @@ BetterSubChannel1PhaseProblemBase::BetterSubChannel1PhaseProblemBase(const Input
     _g_grav(9.87),
     _one(1.0),
     _TR(isTransient() ? 1. : 0.),
+    _Density(getParam<bool>("Density")),
+    _Viscosity(getParam<bool>("Viscosity")),
     _dt(isTransient() ? dt() : _one),
-    _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
-    _beta(getParam<Real>("abeta")),
+    _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
+    _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
     _enforce_uniform_pressure(getParam<bool>("enforce_uniform_pressure")),
     _fp(nullptr)
 {
-  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
-  unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
+  n_cells = _subchannel_mesh.getNumOfAxialCells();
+  n_blocks = _subchannel_mesh.getNumOfAxialBlocks();
+  n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
+  block_size = n_cells / n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
-  Wij.resize(n_gaps, nz + 1);
-  Wij_old.resize(n_gaps, nz + 1);
-  WijPrime.resize(n_gaps, nz + 1);
+  Wij.resize(n_gaps, n_cells + 1);
+  Wij_old.resize(n_gaps, n_cells + 1);
+  WijPrime.resize(n_gaps, n_cells + 1);
   Wij.setZero();
   Wij_old.setZero();
   WijPrime.setZero();
@@ -90,6 +94,7 @@ BetterSubChannel1PhaseProblemBase::initialSetup()
   h_soln = new SolutionHandle(getVariable(0, "h"));
   T_soln = new SolutionHandle(getVariable(0, "T"));
   rho_soln = new SolutionHandle(getVariable(0, "rho"));
+  Mu_soln = new SolutionHandle(getVariable(0, "Mu"));
   S_flow_soln = new SolutionHandle(getVariable(0, "S"));
   w_perim_soln = new SolutionHandle(getVariable(0, "w_perim"));
   q_prime_soln = new SolutionHandle(getVariable(0, "q_prime"));
@@ -104,6 +109,7 @@ BetterSubChannel1PhaseProblemBase::~BetterSubChannel1PhaseProblemBase()
   delete h_soln;
   delete T_soln;
   delete rho_soln;
+  delete Mu_soln;
   delete S_flow_soln;
   delete w_perim_soln;
   delete q_prime_soln;
@@ -142,14 +148,11 @@ BetterSubChannel1PhaseProblemBase::computeFrictionFactor(double Re)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeWij(int iz)
+BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute crossflow quantities at the inlet of the assembly. Boundary "
-               "conditions are applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   const Real & pitch = _subchannel_mesh.getPitch();
@@ -252,15 +255,11 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeSumWij(int iz)
+BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(
-        name(),
-        ": Cannot compute sum of crossflow quantities at the inlet of the assembly. Boundary "
-        "conditions are applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -278,14 +277,11 @@ BetterSubChannel1PhaseProblemBase::computeSumWij(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeMdot(int iz)
+BetterSubChannel1PhaseProblemBase::computeMdot(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute massflow at the inlet of the assembly. Boundary conditions are "
-               "applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // go through the channels of the level.
@@ -317,15 +313,13 @@ BetterSubChannel1PhaseProblemBase::computeMdot(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeWijPrime(int iz)
+BetterSubChannel1PhaseProblemBase::computeWijPrime(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute crossflow quantities at the inlet of the assembly. Boundary "
-               "conditions are applied here");
-  }
-  auto z_grid = _subchannel_mesh.getZGrid();
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
+  int last_node = (iblock + 1) * block_size int first_node = iblock * block_size + 1 auto z_grid =
+                                                                 _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
@@ -356,14 +350,11 @@ BetterSubChannel1PhaseProblemBase::computeWijPrime(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeDP(int iz)
+BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute pressure drop at the inlet of the assembly. Boundary conditions "
-               "are applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // Sweep through the channels of level
@@ -438,14 +429,11 @@ BetterSubChannel1PhaseProblemBase::computeDP(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeP(int iz)
+BetterSubChannel1PhaseProblemBase::computeP(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute pressure at the outlet of the assembly. Boundary conditions are "
-               "applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   // Calculate pressure in the inlet of the cell assuming known outlet
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -457,8 +445,11 @@ BetterSubChannel1PhaseProblemBase::computeP(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeh(int iz)
+BetterSubChannel1PhaseProblemBase::computeh(int iblock)
 {
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   if (iz == 0)
   {
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
@@ -529,14 +520,11 @@ BetterSubChannel1PhaseProblemBase::computeh(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeT(int iz)
+BetterSubChannel1PhaseProblemBase::computeT(int iblock)
 {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute temperature at the inlet of the assembly. Boundary conditions are "
-               "applied here");
-  }
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -546,8 +534,11 @@ BetterSubChannel1PhaseProblemBase::computeT(int iz)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeRho(int iz)
+BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
 {
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     // Find the node
@@ -558,96 +549,94 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iz)
 }
 
 void
+BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
+{
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+}
+
+void
+BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock)
+{
+  int last_node = (iblock + 1) * block_size;
+  int first_node = iblock * block_size + 1;
+}
+
+void
 BetterSubChannel1PhaseProblemBase::externalSolve()
 {
   _console << "Executing subchannel solver\n";
-  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
-  Eigen::MatrixXd PCYCLES(nz, 2);
-  // Initialize
-  PCYCLES.setZero();
-  auto Ptol = 1E-10, Mtol = 1E-10;
-  // nz level calculations
-  for (unsigned int axial_level = 1; axial_level < nz + 1; axial_level++)
+
+  auto P_error = 1.0;
+  auto P_tol = 1e-6;
+  unsigned int P_it = 0;
+  unsigned int P_it_max = 2 * n_blocks;
+  auto Ptol = 1E-6;
+  if (n_blocks == 1)
+    P_it_max = 1;
+
+  while (P_error > P_tol && P_it < P_it_max)
   {
-    _console << "AXIAL LEVEL: " << axial_level << std::endl;
-    double PError = 1.0;
-    unsigned int stencilSize = 5;
-    int max_axial_cycles = 200;
-    int axial_cycles = 0;
-    int max_level_cycles = 200;
-    int bottom_limiter;
-    while (PError > Ptol && axial_cycles <= max_axial_cycles)
+    P_it += 1 _console << "Solving Outer Iteration : " << P_it << std::endl;
+    auto mdot_L2norm_old_axial = mdot_soln->L2norm();
+    auto P_L2norm_old_axial = P_soln->L2norm();
+    auto DP_L2norm_old_axial = DP_soln->L2norm();
+    auto T_L2norm_old_axial = T_soln->L2norm();
+
+    for (unsigned int iblock = 0; iblock < n_blocks; iblock++)
     {
-      if (axial_level < stencilSize)
-        bottom_limiter = 1;
-      else
-        bottom_limiter = axial_level - stencilSize + 1;
-      axial_cycles++;
-      PCYCLES(axial_level - 1, 0) = axial_cycles;
-      if (axial_cycles == max_axial_cycles)
+      int last_node = (iblock + 1) * block_size;
+      int first_node = iblock * block_size + 1;
+      auto T_block_error = 1.0;
+      auto T_tol = 1e-6;
+      auto T_it_max = 5;
+      auto T_it = 0;
+      _console << "Solving Block :" << iblock << " From first node :" << first_node
+               << " to last node :" << last_node << std::endl;
+      while (T_block_error > T_tol && T_it < T_it_max)
       {
-        mooseError(name(), " Pressure loop didn't converge, axial_cycles: ", axial_cycles);
-      }
-      // L2 norm of old pressure solution vector
-      auto P_L2norm_old = P_soln->L2norm();
-      // Sweep upwards through the channels.
-      for (unsigned int iz = bottom_limiter; iz < axial_level + 1; iz++)
-      {
-        double MError = 1.0;
-        int level_cycles = 0;
-        // Lateral Loop... crossflow calculation
-        while (MError > Mtol && (level_cycles <= max_level_cycles))
+        T_it += 1;
+        auto T_L2norm_old_block = T_soln->L2norm();
+
+        // Compute Crossflow
+        computeWij(iblock);
+
+        if (Power != 0.0)
         {
-          level_cycles++;
-          if (level_cycles == max_level_cycles)
-          {
-            mooseError(name(), " Level loop didn't converge, level_cycles: ", level_cycles);
-          }
-          // L2 norm of old mass flow solution vector
-          auto mdot_L2norm_old = mdot_soln->L2norm();
-          // Calculate crossflow between channel i-j using crossflow momentum equation
-          computeWij(iz);
-          // calculate Sum of crossflow per channel
-          computeSumWij(iz);
-          // Calculate mass flow
-          computeMdot(iz);
-          // Calculate turbulent crossflow
-          computeWijPrime(iz);
-          // Calculate enthalpy (Rho and H need to be updated at the inlet to (TODO))
-          computeh(iz);
-          // Update Temperature
-          computeT(iz);
-          // Update Density
-          computeRho(iz);
-          // Calculate Error per level
-          auto mdot_L2norm_new = mdot_soln->L2norm();
-          MError = std::abs((mdot_L2norm_new - mdot_L2norm_old) / (mdot_L2norm_old + 1E-14));
+          // Energy conservation equation
+          computeh(iblock);
+
+          // calculate temperature (equation of state)
+          computeT(iblock);
         }
-        // Populate Pressure Drop vector
-        computeDP(iz);
+
+        if (Density_flag)
+          computeRho(iblock);
+
+        if (Viscocity_flag)
+          computeMu(iblock);
+
+        auto T_L2norm_new = T_soln->L2norm();
+        T_block_error =
+            std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));
+        _console << "T_block_error : " << T_block_error << std::endl;
       }
-      // At this point we reach the top of the oscillating stencil and now backsolve
-      if (axial_level == nz)
-        bottom_limiter = 1;
-      // Calculate pressure everywhere (in the stencil) using the axial momentum equation
-      // Sweep downwards through the channels level by level
-      for (int iz = axial_level; iz > bottom_limiter - 1; iz--) // nz calculations
-      {
-        for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          // update Pressure solution
-          P_soln->set(node_in, (*P_soln)(node_out) + (*DP_soln)(node_out));
-        }
-      }
-      //      // Calculate pressure Error
-      auto P_L2norm_new = P_soln->L2norm();
-      PError = std::abs((P_L2norm_new - P_L2norm_old) / (P_L2norm_old + 1E-14));
-      _console << "- PError: " << PError << std::endl;
-      PCYCLES(axial_level - 1, 1) = PError;
     }
+    auto T_L2norm_new_axial = T_soln->L2norm();
+    auto P_L2norm_new_axial = P_soln->L2norm();
+    auto DP_L2norm_new_axial = DP_soln->L2norm();
+    auto mdot_L2norm_new_axial = mdot_soln->L2norm();
+
+    T_error = std::abs((T_L2norm_new_axial - T_L2norm_old_axial) / (T_L2norm_old_axial + 1E-14));
+    P_error = std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + 1E-14));
+    DP_error =
+        std::abs((DP_L2norm_new_axial - DP_L2norm_old_axial) / (DP_L2norm_old_axial + 1E-14));
+    mdot_error =
+        std::abs((mdot_L2norm_new_axial - mdot_L2norm_old_axial) / (mdot_L2norm_old_axial + 1E-14));
+
+    _console << "P_error" << P_error << std::endl;
   }
+
   // update old crossflow matrix
   Wij_old = Wij;
   // Save Wij_global
