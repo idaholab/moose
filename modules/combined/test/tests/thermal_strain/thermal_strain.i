@@ -44,6 +44,7 @@
   strain = SMALL
   incremental = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+  temperature = temp
 
   [./block1]
     eigenstrain_names = eigenstrain1

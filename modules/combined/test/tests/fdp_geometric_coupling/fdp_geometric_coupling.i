@@ -42,6 +42,7 @@
     strain = FINITE
     eigenstrain_names = 'thermal_expansion1'
     decomposition_method = EigenSolution
+    temperature = temp
   [../]
   [./block2]
     block = 2
@@ -50,6 +51,7 @@
     strain = FINITE
     eigenstrain_names = 'thermal_expansion2'
     decomposition_method = EigenSolution
+    temperature = temp
   [../]
 []
 

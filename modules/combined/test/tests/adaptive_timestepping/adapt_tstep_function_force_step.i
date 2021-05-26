@@ -48,6 +48,7 @@
     eigenstrain_names = thermal_expansion
     add_variables  = true
     generate_output = 'vonmises_stress'
+    temperature = temp
   [../]
 []
 
