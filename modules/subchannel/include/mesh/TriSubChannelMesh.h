@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "SubChannelMeshBase.h"
+#include "Enums.h"
 
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies

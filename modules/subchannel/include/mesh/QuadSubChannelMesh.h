@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SubChannelMeshBase.h"
+#include "Enums.h"
 
 class QuadSubChannelMesh : public SubChannelMeshBase
 {
