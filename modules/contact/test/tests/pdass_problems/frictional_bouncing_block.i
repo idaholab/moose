@@ -3,12 +3,11 @@ offset = 1e-2
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  # scaling = 1.0
 []
 
 [Mesh]
   file = long-bottom-block-1elem-blocks.e
-  uniform_refine = 0
+  uniform_refine = 0 # 1,2
   patch_update_strategy = always
 []
 
@@ -23,14 +22,6 @@ offset = 1e-2
     block = 3
     use_dual = true
   []
-  # [gap_variable]
-  #   block = 3
-  #   use_dual = false
-  # []
-  # [vel_variable]s
-  #   block = 3
-  #   use_dual = false
-  # []
   [tangential_lm]
     block = 3
     use_dual = true
@@ -72,9 +63,7 @@ offset = 1e-2
     block = '1 2'
   []
 []
-# [Problem]
-#   error_on_jacobian_nonzero_reallocation = true
-# []
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeFrictionalForceLMMechanicalContact
@@ -88,7 +77,7 @@ offset = 1e-2
     use_displaced_mesh = true
     friction_lm = tangential_lm
     mu = 0.4
-    c_t = 1.0e1 # TODO compaare
+    c_t = 1.0e1
     c = 1.0e3
   []
   [normal_x]
@@ -173,29 +162,52 @@ offset = 1e-2
 
 [Executioner]
   type = Transient
-  end_time = 70
-  dt = 0.1 # was 0.5 # TODO
-  dtmin = .1
+  end_time = 7 # 70
+  dt = 0.25 # 0.1 for finer meshes (uniform_refine)
+  dtmin = .01
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
                   '-snes_linesearch_monitor '
-  # -snes_test_jacobian -snes_test_jacobian_view
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
-  nl_max_its = 20
+  nl_max_its = 40
   line_search = 'none'
   snesmf_reuse_base = false
   nl_abs_tol = 1e-9
-  nl_rel_tol = 1e-9 # was both 9
+  nl_rel_tol = 1e-9
+  l_tol = 1e-07 # Tightening l_tol can help with friction
 []
 
 [Debug]
   show_var_residual_norms = true
 []
 
+[VectorPostprocessors]
+  [cont_press]
+    type = NodalValueSampler
+    variable = normal_lm
+    boundary = '10'
+    sort_by = id
+    execute_on = FINAL
+  []
+  [friction]
+    type = NodalValueSampler
+    variable = tangential_lm
+    boundary = '10'
+    sort_by = id
+    execute_on = FINAL
+  []
+[]
+
 [Outputs]
-  exodus = true
+  exodus = false
+  [checkfile]
+    type = CSV
+    show = 'cont_press friction'
+    start_time = 0.0
+    execute_vector_postprocessors_on = FINAL
+  []
 []
 
 [Preconditioning]
