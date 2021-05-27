@@ -119,7 +119,7 @@ PicardSolve::allocateStorage(const bool primary)
   {
     relaxation_factor = _secondary_relaxation_factor;
     old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    _old_tag_id = old_tag_id;
+    _secondary_old_tag_id = old_tag_id;
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
   }

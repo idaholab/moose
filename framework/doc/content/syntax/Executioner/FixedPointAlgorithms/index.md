@@ -17,6 +17,11 @@ within the main coupling iterations and within the secondary coupling iterations
 Relaxation, or acceleration (cf secant/Steffensen's method), is performed on variables or postprocessors. These two objects encompass
 most of the data transfers that are performed when coupling several applications.
 
+!alert note
+The fixed point iteration algorithms work to converge within a time step. They do not attempt to use a previous time step solution,
+or lag part or all of the solution vector. Lagging can still be achieved using postprocessors, auxiliary variables, or other constructs, and
+transferring them at the beginning / end of a time step.
+
 ## Picard fixed point iterations
 
 Picard iterations are the default fixed point iteration algorithm. They may be relaxed, with a relaxation factor specified for the
