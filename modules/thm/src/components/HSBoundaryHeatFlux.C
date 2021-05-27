@@ -57,7 +57,7 @@ HSBoundaryHeatFlux::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     if (isParamValid("scale_pp"))
       pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
@@ -74,7 +74,7 @@ HSBoundaryHeatFlux::addMooseObjects()
     pars.set<FunctionName>("function") = _q_fn_name;
     pars.set<Point>("axis_point") = hs.getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-    pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+    pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     _sim.addPostprocessor(class_name, genName(name(), "integral"), pars);
   }

@@ -87,7 +87,7 @@ HeatSourceFromTotalPower::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
     // TODO: This seems to produce incorrect output files, even though this is the line
@@ -100,7 +100,7 @@ HeatSourceFromTotalPower::addMooseObjects()
 
   {
     const std::string class_name =
-        is_cylindrical ? "OneDHeatForcingFunctionRZ" : "OneDHeatForcingFunction";
+        is_cylindrical ? "HeatStructureHeatSourceRZ" : "HeatStructureHeatSource";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
@@ -113,7 +113,7 @@ HeatSourceFromTotalPower::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     else
     {

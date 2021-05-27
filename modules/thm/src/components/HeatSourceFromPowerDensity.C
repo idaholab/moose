@@ -45,7 +45,7 @@ HeatSourceFromPowerDensity::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs.getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     std::string mon = genName(name(), "heat_src");
     _sim.addKernel(class_name, mon, pars);

@@ -1,9 +1,9 @@
-#include "OneDHeatForcingFunction.h"
+#include "HeatStructureHeatSource.h"
 
-registerMooseObject("THMApp", OneDHeatForcingFunction);
+registerMooseObject("THMApp", HeatStructureHeatSource);
 
 InputParameters
-OneDHeatForcingFunction::validParams()
+HeatStructureHeatSource::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
@@ -18,7 +18,7 @@ OneDHeatForcingFunction::validParams()
   return params;
 }
 
-OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & parameters)
+HeatStructureHeatSource::HeatStructureHeatSource(const InputParameters & parameters)
   : Kernel(parameters),
     _power_fraction(getParam<Real>("power_fraction")),
     _total_power(coupledScalarValue("total_power")),
@@ -30,7 +30,7 @@ OneDHeatForcingFunction::OneDHeatForcingFunction(const InputParameters & paramet
 }
 
 Real
-OneDHeatForcingFunction::computeQpResidual()
+HeatStructureHeatSource::computeQpResidual()
 {
   const Real power = _power_fraction * _total_power[0];
   const Real power_density =

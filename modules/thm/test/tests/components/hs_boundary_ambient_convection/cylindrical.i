@@ -84,7 +84,6 @@ E_change = ${fparse scale * heat_flux_integral * t}
     block = 'hs:region'
     axis_dir = '0 0 1'
     axis_point = '0 0 0'
-    offset = ${R_i}
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [E_hs_change]

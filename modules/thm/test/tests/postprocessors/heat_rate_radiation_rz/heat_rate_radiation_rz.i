@@ -47,7 +47,6 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
     boundary = heat_structure:outer
     axis_point = '1 2 3'
     axis_dir = '1 1 1'
-    offset = ${R_i}
     T = T_solid
     T_ambient = ${T_ambient}
     emissivity = ${emissivity}
