@@ -7,10 +7,10 @@
 
 [UserObjects]
   [other_uo]
-    type = UserObjectInterfaceErrorTest
+    type = UserObjectInterfaceTest
   []
-  [error_test]
-    type = UserObjectInterfaceErrorTest
+  [test]
+    type = UserObjectInterfaceTest
     uo = other_uo
   []
 []

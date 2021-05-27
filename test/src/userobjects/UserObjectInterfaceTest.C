@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "UserObjectInterfaceErrorTest.h"
+#include "UserObjectInterfaceTest.h"
 
 #include "ThreadedGeneralUserObject.h"
 
-registerMooseObject("MooseTestApp", UserObjectInterfaceErrorTest);
+registerMooseObject("MooseTestApp", UserObjectInterfaceTest);
 
 InputParameters
-UserObjectInterfaceErrorTest::validParams()
+UserObjectInterfaceTest::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
 
@@ -36,11 +36,15 @@ UserObjectInterfaceErrorTest::validParams()
       "bad_cast", false, "True to test the error for a UO that fails the cast via parameter");
   params.addParam<bool>(
       "bad_cast_by_name", false, "True to test the error for a UO that fails the cast via name");
+  params.addParam<bool>("has", false, "True to test hasUserObject");
+  params.addParam<bool>("has_T", false, "True to test hasUserObject<T>");
+  params.addParam<bool>("has_by_name", false, "True to test hasUserObjectByName");
+  params.addParam<bool>("has_T_by_name", false, "True to test hasUserObjectByName<T>");
 
   return params;
 }
 
-UserObjectInterfaceErrorTest::UserObjectInterfaceErrorTest(const InputParameters & params)
+UserObjectInterfaceTest::UserObjectInterfaceTest(const InputParameters & params)
   : GeneralUserObject(params)
 {
   if (getParam<bool>("missing_parameter"))
@@ -55,4 +59,20 @@ UserObjectInterfaceErrorTest::UserObjectInterfaceErrorTest(const InputParameters
     getUserObject<ThreadedGeneralUserObject>("uo");
   if (getParam<bool>("bad_cast_by_name"))
     getUserObjectByName<ThreadedGeneralUserObject>("other_uo");
+  if (getParam<bool>("has") && !hasUserObject("uo"))
+    mooseError("hasUserObject failed");
+  if (getParam<bool>("has_T") && !hasUserObject<UserObjectInterfaceTest>("uo"))
+    mooseError("hasUserObject<T> failed");
+  if (getParam<bool>("has") && hasUserObject("uo"))
+    _console << "hasUserObject success" << std::endl;
+  if (getParam<bool>("has_T") && hasUserObject<UserObjectInterfaceTest>("uo") &&
+      !hasUserObject<ThreadedGeneralUserObject>("uo"))
+    _console << "hasUserObject<T> success" << std::endl;
+  if (getParam<bool>("has_by_name") && hasUserObjectByName(getParam<UserObjectName>("uo")) &&
+      !hasUserObjectByName("dummy"))
+    _console << "hasUserObjectByName success" << std::endl;
+  if (getParam<bool>("has_T_by_name") &&
+      hasUserObjectByName<UserObjectInterfaceTest>(getParam<UserObjectName>("uo")) &&
+      !hasUserObjectByName<ThreadedGeneralUserObject>(getParam<UserObjectName>("uo")))
+    _console << "hasUserObjectByName<T> success" << std::endl;
 }
