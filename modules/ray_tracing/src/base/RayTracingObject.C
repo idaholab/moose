@@ -45,17 +45,18 @@ RayTracingObject::RayTracingObject(const InputParameters & params)
     TransientInterface(this),
     UserObjectInterface(this),
     DependencyResolverInterface(),
+    _tid(params.get<THREAD_ID>("_tid")),
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _study(*params.getCheckedPointerParam<RayTracingStudy *>("_ray_tracing_study")),
+    _trace_ray(const_cast<const RayTracingStudy &>(_study).traceRay(_tid)),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_fe_problem.mesh()),
-    _tid(params.get<THREAD_ID>("_tid")),
-    _current_elem(_study.traceRay(_tid).currentElem()),
-    _current_subdomain_id(_study.traceRay(_tid).currentSubdomainID()),
-    _current_intersected_side(_study.traceRay(_tid).currentIntersectedSide()),
-    _current_intersected_extrema(_study.traceRay(_tid).currentIntersectedExtrema()),
-    _current_ray(_study.traceRay(_tid).currentRay())
+    _current_elem(_trace_ray.currentElem()),
+    _current_subdomain_id(_trace_ray.currentSubdomainID()),
+    _current_intersected_side(_trace_ray.currentIntersectedSide()),
+    _current_intersected_extrema(_trace_ray.currentIntersectedExtrema()),
+    _current_ray(_trace_ray.currentRay())
 {
   // Supplies only itself
   _supplied_names.insert(name());

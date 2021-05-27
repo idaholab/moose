@@ -157,6 +157,51 @@ public:
    */
   const SubdomainID & currentSubdomainID() const { return _current_subdomain_id; }
 
+  /**
+   * Gets the neighbors at a vertex.
+   * @param elem An elem that contains the vertex
+   * @param vertex The Node that is the vertex
+   */
+  const std::vector<NeighborInfo> & getVertexNeighbors(const Elem * elem, const Node * vertex);
+  /**
+   * Gets the neighbors at a vertex.
+   * @param elem An elem that contains the vertex
+   * @param vertex The local ID of the vertex on elem
+   */
+  const std::vector<NeighborInfo> & getVertexNeighbors(const Elem * elem,
+                                                       const unsigned short vertex);
+  /**
+   * Get the neighbors at an edge.
+   * @param elem An elem that contains the edge
+   * @param vertices A pair of Nodes that are the vertices that contain the edge fully
+   * @param point The point on the edge where neighbors are desired
+   */
+  const std::vector<NeighborInfo> &
+  getEdgeNeighbors(const Elem * elem,
+                   const std::pair<const Node *, const Node *> & vertices,
+                   const Point & point);
+  /**
+   * Get the neighbors at an edge.
+   * @param elem An elem that contains the edge
+   * @param vertices A pair of local vertex IDs of the vertices that contain the edge fully
+   * @param point The point on the edge where neighbors are desired
+   */
+  const std::vector<NeighborInfo> &
+  getEdgeNeighbors(const Elem * elem,
+                   const std::pair<unsigned short, unsigned short> & vertices,
+                   const Point & point);
+  /**
+   * Get the point neighbors
+   * @param elem The elem
+   * @param point The point
+   */
+  const std::vector<NeighborInfo> & getPointNeighbors(const Elem * elem, const Point & point);
+  /**
+   * Get the point/vertex/edge neighbors depending on extrema
+   */
+  const std::vector<NeighborInfo> &
+  getNeighbors(const Elem * elem, const ElemExtrema & extrema, const Point & point);
+
 private:
   /**
    * Called on a single segment traced by a Ray.
@@ -352,51 +397,6 @@ private:
    * @param point The point on elem at which ray continues
    */
   void continueTraceOffProcessor(const std::shared_ptr<Ray> & ray);
-
-  /**
-   * Gets the neighbors at a vertex.
-   * @param elem An elem that contains the vertex
-   * @param vertex The Node that is the vertex
-   */
-  const std::vector<NeighborInfo> & getVertexNeighbors(const Elem * elem, const Node * vertex);
-  /**
-   * Gets the neighbors at a vertex.
-   * @param elem An elem that contains the vertex
-   * @param vertex The local ID of the vertex on elem
-   */
-  const std::vector<NeighborInfo> & getVertexNeighbors(const Elem * elem,
-                                                       const unsigned short vertex);
-  /**
-   * Get the neighbors at an edge.
-   * @param elem An elem that contains the edge
-   * @param vertices A pair of Nodes that are the vertices that contain the edge fully
-   * @param point The point on the edge where neighbors are desired
-   */
-  const std::vector<NeighborInfo> &
-  getEdgeNeighbors(const Elem * elem,
-                   const std::pair<const Node *, const Node *> & vertices,
-                   const Point & point);
-  /**
-   * Get the neighbors at an edge.
-   * @param elem An elem that contains the edge
-   * @param vertices A pair of local vertex IDs of the vertices that contain the edge fully
-   * @param point The point on the edge where neighbors are desired
-   */
-  const std::vector<NeighborInfo> &
-  getEdgeNeighbors(const Elem * elem,
-                   const std::pair<unsigned short, unsigned short> & vertices,
-                   const Point & point);
-  /**
-   * Get the point neighbors
-   * @param elem The elem
-   * @param point The point
-   */
-  const std::vector<NeighborInfo> & getPointNeighbors(const Elem * elem, const Point & point);
-  /**
-   * Get the point/vertex/edge neighbors depending on extrema
-   */
-  const std::vector<NeighborInfo> &
-  getNeighbors(const Elem * elem, const ElemExtrema & extrema, const Point & point);
 
   /**
    * Finds (if any) an element side that is on the boundary and is outgoing

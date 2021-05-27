@@ -999,8 +999,9 @@ TraceRay::findExternalBoundarySide(unsigned short & boundary_side,
 void
 TraceRay::trace(const std::shared_ptr<Ray> & ray)
 {
-  _current_ray = &ray;
+  mooseAssert(_study.currentlyPropagating(), "Should only use while propagating rays");
 
+  _current_ray = &ray;
   _current_elem = ray->currentElem();
   _last_elem = nullptr;
   _incoming_point = ray->currentPoint();

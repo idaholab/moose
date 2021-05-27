@@ -722,14 +722,9 @@ protected:
   Real computeTotalVolume();
 
   /**
-   * Gets the threaded TraceRay objects.
-   *
-   * Allows for other studies to change options in the TraceRay objects.
+   * Gets the threaded TraceRay object for thread \p tid.
    */
-  const std::vector<std::shared_ptr<TraceRay>> & threadedTraceRay() const
-  {
-    return _threaded_trace_ray;
-  }
+  TraceRay & traceRay(const THREAD_ID tid) { return *_threaded_trace_ray[tid]; }
 
   /**
    * Gets the writeable current RayKernels for a thread

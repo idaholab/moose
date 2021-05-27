@@ -25,8 +25,8 @@ BackfaceCullingStudyTest::BackfaceCullingStudyTest(const InputParameters & param
   : LotsOfRaysRayStudy(parameters)
 {
   // Use backface culling
-  for (auto & trace_ray : threadedTraceRay())
-    trace_ray->setBackfaceCulling(true);
+  for (const auto tid : make_range(libMesh::n_threads()))
+    traceRay(tid).setBackfaceCulling(true);
 }
 
 void

@@ -28,6 +28,7 @@
 // Forward declarations
 class AuxiliarySystem;
 class NonlinearSystemBase;
+class TraceRay;
 
 /**
  * Base class for a MooseObject used in ray tracing.
@@ -79,11 +80,16 @@ protected:
    */
   void dependsOn(const std::string name) { _depend_names.insert(name); }
 
+  /// The thread id
+  const THREAD_ID _tid;
+
   /// The FEProblemBase
   FEProblemBase & _fe_problem;
 
   /// The RayTracingStudy associated with this object
   RayTracingStudy & _study;
+  /// The TraceRay object associated with this thread
+  const TraceRay & _trace_ray;
 
   /// The nonlinear system
   NonlinearSystemBase & _nl;
@@ -92,9 +98,6 @@ protected:
 
   /// The MooseMesh
   MooseMesh & _mesh;
-
-  /// The thread id
-  const THREAD_ID _tid;
 
   /// The current Elem that _current_ray is tracing through
   const Elem * const & _current_elem;
