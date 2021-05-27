@@ -132,7 +132,7 @@ FEProblemSolve::validParams()
   return params;
 }
 
-FEProblemSolve::FEProblemSolve(Executioner * ex)
+FEProblemSolve::FEProblemSolve(Executioner & ex)
   : SolveObject(ex), _splitting(getParam<std::vector<std::string>>("splitting"))
 {
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=

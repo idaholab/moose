@@ -23,7 +23,7 @@ SecantSolve::validParams()
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner * ex) : FixedPointSolve(ex) { allocateStorage(true); }
+SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
 
 void
 SecantSolve::allocateStorage(const bool primary)

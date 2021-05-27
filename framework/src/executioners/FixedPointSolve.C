@@ -34,18 +34,20 @@ FixedPointSolve::validParams()
                         false,
                         "Disable the residual norm evaluation thus the three parameters "
                         "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
-  params.addParam<Real>("fixed_point_rel_tol",
-                        1e-8,
-                        "The relative nonlinear residual drop to shoot for "
-                        "during fixed point iterations. This check is "
-                        "performed based on the main app's nonlinear "
-                        "residual.");
-  params.addParam<Real>("fixed_point_abs_tol",
-                        1e-50,
-                        "The absolute nonlinear residual to shoot for "
-                        "during fixed point iterations. This check is "
-                        "performed based on the main app's nonlinear "
-                        "residual.");
+  params.addRangeCheckedParam<Real>("fixed_point_rel_tol",
+                                    1e-8,
+                                    "fixed_point_rel_tol>0",
+                                    "The relative nonlinear residual drop to shoot for "
+                                    "during fixed point iterations. This check is "
+                                    "performed based on the main app's nonlinear "
+                                    "residual.");
+  params.addRangeCheckedParam<Real>("fixed_point_abs_tol",
+                                    1e-50,
+                                    "fixed_point_abs_tol>0",
+                                    "The absolute nonlinear residual to shoot for "
+                                    "during fixed point iterations. This check is "
+                                    "performed based on the main app's nonlinear "
+                                    "residual.");
   params.addParam<bool>(
       "fixed_point_force_norms",
       false,
@@ -55,18 +57,20 @@ FixedPointSolve::validParams()
   // Parameters for using a custom postprocessor for convergence checks
   params.addParam<PostprocessorName>("custom_pp",
                                      "Postprocessor for custom fixed point convergence check.");
-  params.addParam<Real>("custom_rel_tol",
-                        1e-8,
-                        "The relative nonlinear residual drop to shoot for "
-                        "during fixed point iterations. This check is "
-                        "performed based on the postprocessor defined by "
-                        "custom_pp residual.");
-  params.addParam<Real>("custom_abs_tol",
-                        1e-50,
-                        "The absolute nonlinear residual to shoot for "
-                        "during fixed point iterations. This check is "
-                        "performed based on postprocessor defined by "
-                        "the custom_pp residual.");
+  params.addRangeCheckedParam<Real>("custom_rel_tol",
+                                    1e-8,
+                                    "custom_rel_tol>0",
+                                    "The relative nonlinear residual drop to shoot for "
+                                    "during fixed point iterations. This check is "
+                                    "performed based on the postprocessor defined by "
+                                    "custom_pp residual.");
+  params.addRangeCheckedParam<Real>("custom_abs_tol",
+                                    1e-50,
+                                    "custom_abs_tol>0",
+                                    "The absolute nonlinear residual to shoot for "
+                                    "during fixed point iterations. This check is "
+                                    "performed based on postprocessor defined by "
+                                    "the custom_pp residual.");
   params.addParam<bool>("direct_pp_value",
                         false,
                         "True to use direct postprocessor value "
@@ -119,7 +123,7 @@ FixedPointSolve::validParams()
   return params;
 }
 
-FixedPointSolve::FixedPointSolve(Executioner * ex)
+FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
     _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
     _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),

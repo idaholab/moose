@@ -23,7 +23,7 @@ InputParameters validParams<PicardSolve>();
 class PicardSolve : public FixedPointSolve
 {
 public:
-  PicardSolve(Executioner * ex);
+  PicardSolve(Executioner & ex);
 
   static InputParameters validParams();
 
@@ -92,5 +92,4 @@ private:
 
   /// Vector tag id for the previous solution variable, as a sub app
   TagID _secondary_old_tag_id;
-
 };

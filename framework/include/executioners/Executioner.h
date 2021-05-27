@@ -121,13 +121,12 @@ public:
   {
     mooseDeprecated("picardSolve() is deprecated. Use FixedPointSolve() instead.");
     if (_iteration_method == "picard")
-      return *(std::dynamic_pointer_cast<PicardSolve>(_fixed_point_solve));
+      return *(dynamic_cast<PicardSolve *>(_fixed_point_solve.get()));
     else
       mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
   }
 
-  /// Return a pointer to the underlying fixed point solve object.
-  std::shared_ptr<FixedPointSolve> fixedPointSolve() { return _fixed_point_solve; }
+  FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
 
   /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const
@@ -166,7 +165,7 @@ protected:
   FEProblemSolve _feproblem_solve;
 
   MooseEnum _iteration_method;
-  std::shared_ptr<FixedPointSolve> _fixed_point_solve;
+  std::unique_ptr<FixedPointSolve> _fixed_point_solve;
 
   // Restart
   std::string _restart_file_base;

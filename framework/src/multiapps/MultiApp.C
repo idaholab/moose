@@ -790,7 +790,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->runInputFile();
 
   // Transfer coupling relaxation information to the subapps
-  auto fixed_point_solve = _apps[i]->getExecutioner()->fixedPointSolve();
+  auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
   fixed_point_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
   fixed_point_solve->setMultiAppTransformedVariables(
       getParam<std::vector<std::string>>("transformed_variables"));

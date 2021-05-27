@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ChangeOverFixedPointPostprocessor;
-
-template <>
-InputParameters validParams<ChangeOverFixedPointPostprocessor>();
-
 /**
  * Computes the change in a post-processor value, or the magnitude of its
  * relative change, over a time step or over the entire transient.
@@ -31,7 +26,7 @@ public:
   virtual void execute() override;
   virtual Real getValue() override;
 
-protected:
+private:
   /// option to compute change with respect to initial value instead of previous time value
   const bool _change_with_respect_to_initial;
 

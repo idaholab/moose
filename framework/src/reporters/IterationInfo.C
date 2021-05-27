@@ -46,5 +46,5 @@ IterationInfo::execute()
   _time_step_value = _t_step;
   _num_nonlinear = _subproblem.nNonlinearIterations();
   _num_linear = _subproblem.nLinearIterations();
-  _num_fixed_point = _app.getExecutioner()->fixedPointSolve()->numFixedPointIts();
+  _num_fixed_point = _app.getExecutioner()->fixedPointSolve().numFixedPointIts();
 }

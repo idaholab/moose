@@ -26,7 +26,7 @@ FixedPoint::validParams()
   return params;
 }
 
-FixedPoint::FixedPoint(Executioner * ex)
+FixedPoint::FixedPoint(Executioner & ex)
   : SolveObject(ex),
     _fp_problem(dynamic_cast<FixedPointProblem &>(_problem)),
     _fp_max_its(getParam<unsigned int>("fp_max_its")),

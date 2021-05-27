@@ -70,7 +70,7 @@ PicardSolve::validParams()
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner * ex) : FixedPointSolve(ex)
+PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex)
 {
   // Handle deprecated parameters
   if (!parameters().isParamSetByAddParam("picard_max_its"))

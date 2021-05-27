@@ -60,7 +60,7 @@ Executioner::Executioner(const InputParameters & parameters)
     PerfGraphInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _feproblem_solve(this),
+    _feproblem_solve(*this),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose")),
@@ -99,11 +99,11 @@ Executioner::Executioner(const InputParameters & parameters)
 
   // Instantiate the SolveObject for the fixed point iteration algorithm
   if (_iteration_method == "picard")
-    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<PicardSolve>(this));
+    _fixed_point_solve = libmesh_make_unique<PicardSolve>(*this);
   else if (_iteration_method == "secant")
-    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<SecantSolve>(this));
+    _fixed_point_solve = libmesh_make_unique<SecantSolve>(*this);
   else if (_iteration_method == "steffensen")
-    _fixed_point_solve = std::shared_ptr<FixedPointSolve>(std::make_shared<SteffensenSolve>(this));
+    _fixed_point_solve = libmesh_make_unique<SteffensenSolve>(*this);
 }
 
 Problem &

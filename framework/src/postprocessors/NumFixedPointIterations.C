@@ -35,5 +35,5 @@ NumFixedPointIterations::NumFixedPointIterations(const InputParameters & paramet
 Real
 NumFixedPointIterations::getValue()
 {
-  return _app.getExecutioner()->fixedPointSolve()->numFixedPointIts();
+  return _app.getExecutioner()->fixedPointSolve().numFixedPointIts();
 }

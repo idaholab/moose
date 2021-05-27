@@ -14,15 +14,10 @@
 // System includes
 #include <string>
 
-class FixedPointSolve;
-
-template <>
-InputParameters validParams<FixedPointSolve>();
-
 class FixedPointSolve : public SolveObject
 {
 public:
-  FixedPointSolve(Executioner * ex);
+  FixedPointSolve(Executioner & ex);
 
   virtual ~FixedPointSolve() = default;
 
