@@ -38,8 +38,8 @@ RayBoundaryConditionBase::RayBoundaryConditionBase(const InputParameters & param
   : RayTracingObject(params),
     Restartable(this, "RayBoundaryConditions"),
     BoundaryRestrictableRequired(this, false), // false for sidesets
-    _current_intersection_point(_study.traceRay(_tid).currentIntersectionPoint()),
-    _current_bnd_id(_study.traceRay(_tid).currentBoundaryID())
+    _current_intersection_point(_trace_ray.currentIntersectionPoint()),
+    _current_bnd_id(_trace_ray.currentBoundaryID())
 {
   // Add dependencies
   if (params.isParamSetByUser("depends_on"))

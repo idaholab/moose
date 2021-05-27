@@ -42,10 +42,10 @@ RayKernelBase::RayKernelBase(const InputParameters & params)
     RandomInterface(params, _fe_problem, _tid, false),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     Restartable(this, "RayKernels"),
-    _current_segment_start(_study.traceRay(_tid).currentIncomingPoint()),
-    _current_segment_end(_study.traceRay(_tid).currentIntersectionPoint()),
-    _current_segment_length(_study.traceRay(_tid).currentIntersectionDistance()),
-    _current_incoming_side(_study.traceRay(_tid).currentIncomingSide()),
+    _current_segment_start(_trace_ray.currentIncomingPoint()),
+    _current_segment_end(_trace_ray.currentIntersectionPoint()),
+    _current_segment_length(_trace_ray.currentIntersectionDistance()),
+    _current_incoming_side(_trace_ray.currentIncomingSide()),
     _need_segment_reinit(getParam<bool>("_need_segment_reinit"))
 {
   // Add dependencies
@@ -76,7 +76,6 @@ RayKernelBase::changeRayStartDirection(const Point & start, const Point & direct
       mooseError("Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
                  ray->getInfo());
   }
-
 
   if (ray->trajectoryChanged())
     mooseError("Cannot change a Ray's trajectory when its trajectory has already been changed\n\n",
