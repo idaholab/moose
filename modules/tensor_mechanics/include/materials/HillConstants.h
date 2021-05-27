@@ -15,12 +15,12 @@
  * This class defines a Hill tensor material object with a given base name.
  */
 
-class ADHillTensor : public ADMaterial
+class HillConstants : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  ADHillTensor(const InputParameters & parameters);
+  HillConstants(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -33,10 +33,9 @@ protected:
   /// Hill constants for orthotropic inelasticity
   std::vector<Real> _hill_constants_input;
   std::vector<Real> _hill_constants;
-  ADDenseMatrix _hill_tensor;
 
-  /// material property for storing hill tensor
-  ADMaterialProperty<ADDenseMatrix> & _hill_tensor_material;
+  /// material property for storing hill constants
+  MaterialProperty<std::vector<Real>> & _hill_constant_material;
 
   /// Angles for transformation of hill tensor
   RealVectorValue _zyx_angles;

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADHillTensor.h"
+#include "HillConstants.h"
 
-registerMooseObject("TensorMechanicsApp", ADHillTensor);
+registerMooseObject("TensorMechanicsApp", HillConstants);
 
 InputParameters
-ADHillTensor::validParams()
+HillConstants::validParams()
 {
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Build and rotate the Hill Tensor. It can be used with other Hill "
@@ -33,50 +33,28 @@ ADHillTensor::validParams()
   return params;
 }
 
-ADHillTensor::ADHillTensor(const InputParameters & parameters)
+HillConstants::HillConstants(const InputParameters & parameters)
   : ADMaterial(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _hill_constants_input(6),
     _hill_constants(6),
-    _hill_tensor(6, 6),
-    _hill_tensor_material(declareADProperty<ADDenseMatrix>(_base_name + "hill_tensor")),
+    _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
     _zyx_angles(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
                                                 : RealVectorValue(0.0, 0.0, 0.0)),
     _transformation_tensor(6, 6)
 {
   _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
   rotateHillConstants(_hill_constants_input);
-
-  // Hill constants
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
-
-  _hill_tensor.zero();
-
-  _hill_tensor(0, 0) = G + H;
-  _hill_tensor(1, 1) = F + H;
-  _hill_tensor(2, 2) = F + G;
-  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
-  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
-  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
-
-  _hill_tensor(3, 3) = 2.0 * N;
-  _hill_tensor(4, 4) = 2.0 * L;
-  _hill_tensor(5, 5) = 2.0 * M;
 }
 
 void
-ADHillTensor::computeQpProperties()
+HillConstants::computeQpProperties()
 {
-  _hill_tensor_material[_qp] = _hill_tensor;
+  _hill_constant_material[_qp] = _hill_constants;
 }
 
 void
-ADHillTensor::rotateHillConstants(std::vector<Real> & hill_constants_input)
+HillConstants::rotateHillConstants(std::vector<Real> & hill_constants_input)
 {
   const Real sz = std::sin(_zyx_angles(0) * libMesh::pi / 180.0);
   const Real cz = std::cos(_zyx_angles(0) * libMesh::pi / 180.0);

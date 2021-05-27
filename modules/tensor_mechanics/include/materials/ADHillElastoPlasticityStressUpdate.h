@@ -125,6 +125,7 @@ protected:
   ADReal _yield_condition;
   ADReal _yield_stress;
 
-  /// Hill tensor material
-  const ADMaterialProperty<ADDenseMatrix> & _hill_tensor;
+  /// Hill constant material
+  const MaterialProperty<std::vector<Real>> & _hill_constants;
+  ADDenseMatrix _hill_tensor;
 };

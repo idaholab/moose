@@ -1,11 +1,10 @@
-# Hill Tensor
+# Hill Constants
 
-!syntax description /Materials/ADHillTensor
+!syntax description /Materials/HillConstants
 
 ## Description
 
-The material `ADHillTensor` builds the Hill tensor based on
-the Hill constant inputs specified by the user. `ADHillTensor` also rotates the hill constants during the initial time step only. This class does not rotate the hill tensor during the simulation.  The initial rotation is performed based of the user defined rotation angle parameters. The rotated Hill tensor is obtained as:
+`HillConstants` material transforms the user specified hill constants from global co-ordinates to the material co-ordinates and stores them as a material property. It rotates the hill constants during the initial time step only. This class does not rotate the hill tensor during the simulation.  The initial rotation is performed based of the user defined rotation angle parameters. The rotated Hill tensor is obtained as [!cite](stewart2011anisotropic):
 
 \begin{equation}
 \label{eq:rotate_hill_tensor}
@@ -13,7 +12,7 @@ the Hill constant inputs specified by the user. `ADHillTensor` also rotates the 
 \end{equation}
  Here, $H_{rot}$ is the rotated hill tensor, $H$ is the initial Hill tensor and $T_m$ is the transformation matrix.
 
-The transformation matrix is formed assuming anti-clockwise rotation about z-, y-, and x-, axis in sequence such that
+The transformation matrix is formed assuming anti-clockwise rotation about z-, y-, and x-, axis in sequence [!cite](bower2009applied) such that
 \begin{equation}
 \label{eq:transformation_matrix}
  T_m = T_x T_y T_z
@@ -48,17 +47,17 @@ Here, T_x, T_y, T_z are the transformation matrices about x-, y- and z-axis, res
              \end{bmatrix}}
 \end{aligned}
 \end{equation}
-where, $\alpha$, $\beta$ and $\theta$ are the rotation angles. Note that, for reducing the computational cost, only the components required for the updated hill constants are computed from the rotated Hill tesnor.
+where, $\alpha$, $\beta$ and $\theta$ are the rotation angles. Note that, to reduce the computational cost, only the components required for the updated hill constants are computed from the rotated Hill tensor.
 
 ### Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/ad_anisotropic_plasticity/ad_aniso_plasticity_x.i
          block=Materials/hill_tensor
 
-!syntax parameters /Materials/ADHillTensor
+!syntax parameters /Materials/HillConstants
 
-!syntax inputs /Materials/ADHillTensor
+!syntax inputs /Materials/HillConstants
 
-!syntax children /Materials/ADHillTensor
+!syntax children /Materials/HillConstants
 
 !bibtex bibliography

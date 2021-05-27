@@ -124,8 +124,8 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 
-  /// Hill tensor material
-  const ADMaterialProperty<ADDenseMatrix> & _hill_tensor;
+  /// Hill constant material
+  const MaterialProperty<std::vector<Real>> & _hill_constants;
 
   /// Square of the q function for orthotropy
   ADReal _qsigma;
