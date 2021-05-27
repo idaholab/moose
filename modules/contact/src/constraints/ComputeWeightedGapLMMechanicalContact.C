@@ -99,6 +99,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   const auto * const node = _lower_secondary_elem->node_ptr(_i);
+
   _node_to_weighted_gap[node] += _test[_i][_qp] * _qp_gap;
 }
 
@@ -159,6 +160,7 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnNode(const Node * cons
   ADReal lm_value = _var->getNodalValue(*node);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
   const auto & weighted_gap = *_weighted_gap_ptr;
+
   const ADReal nodal_residual =
       std::isnan(weighted_gap) ? lm_value : std::min(lm_value, weighted_gap * _c);
   if (_subproblem.currentlyComputingJacobian())
