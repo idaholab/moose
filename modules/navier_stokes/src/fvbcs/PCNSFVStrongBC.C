@@ -43,10 +43,6 @@ PCNSFVStrongBC::validParams()
       NS::T_fluid,
       "An optional name of a function for the fluid temperature. If not provided then the fluid "
       "temperature will be treated implicitly (e.g. we will use the interior value");
-  params.addParam<MaterialPropertyName>(
-      "scalar_prop_name",
-      "An optional material property name that can be used to specify an advected material "
-      "property. If this is not supplied the variable variable will be used.");
   params.addParam<FunctionName>(
       "scalar",
       "A function describing the value of the scalar at the boundary. If this function is not "
@@ -97,12 +93,10 @@ PCNSFVStrongBC::PCNSFVStrongBC(const InputParameters & params)
     _sup_vel_function(_sup_vel_provided ? &getFunction(NS::superficial_velocity) : nullptr),
     _pressure_function(_pressure_provided ? &getFunction(NS::pressure) : nullptr),
     _T_fluid_function(_T_fluid_provided ? &getFunction(NS::T_fluid) : nullptr),
-    _scalar_elem(isParamValid("scalar_prop_name")
-                     ? getADMaterialProperty<Real>("scalar_prop_name").get()
-                     : _u),
-    _scalar_neighbor(isParamValid("scalar_prop_name")
-                         ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
-                         : _u_neighbor),
+    _scalar_elem(_u),
+    _scalar_neighbor(_u_neighbor),
+    _grad_scalar_elem((_eqn == "scalar") ? &_var.adGradSln() : nullptr),
+    _grad_scalar_neighbor((_eqn == "scalar") ? &_var.adGradSlnNeighbor() : nullptr),
     _scalar_function_provided(isParamValid("scalar")),
     _scalar_function(_scalar_function_provided ? &getFunction("scalar") : nullptr),
     _velocity_function_includes_rho(getParam<bool>("velocity_function_includes_rho")),
@@ -219,9 +213,11 @@ PCNSFVStrongBC::computeQpResidual()
   else if (_eqn == "scalar")
   {
     const auto & scalar_interior = out_of_elem ? _scalar_elem[_qp] : _scalar_neighbor[_qp];
+    const auto & grad_scalar_interior =
+        out_of_elem ? (*_grad_scalar_elem)[_qp] : (*_grad_scalar_neighbor)[_qp];
     const auto scalar_boundary =
         _scalar_function_provided ? ADReal(_scalar_function->value(_t, _face_info->faceCentroid()))
-                                  : scalar_interior;
+                                  : scalar_interior + grad_scalar_interior * dCf;
     return rho_boundary * scalar_boundary * sup_vel_boundary * normal;
   }
   else

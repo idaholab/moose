@@ -60,8 +60,10 @@ protected:
   const MaterialProperty<Real> & _eps_neighbor;
   const MooseEnum _eqn;
   const unsigned int _index;
-  const MooseArray<ADReal> & _scalar_elem;
-  const MooseArray<ADReal> & _scalar_neighbor;
+  const ADVariableValue & _scalar_elem;
+  const ADVariableValue & _scalar_neighbor;
+  const ADVariableGradient * const _grad_scalar_elem;
+  const ADVariableGradient * const _grad_scalar_neighbor;
 
   std::unique_ptr<Moose::FV::Limiter> _limiter;
   const bool _knp_for_omega;

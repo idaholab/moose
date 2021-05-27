@@ -28,10 +28,6 @@ PCNSFVKT::validParams()
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
-  params.addParam<MaterialPropertyName>(
-      "scalar_prop_name",
-      "An optional material property name that can be used to specify an advected material "
-      "property. If this is not supplied the variable variable will be used.");
   params.addParam<MooseEnum>(
       "limiter", moose_limiter_type, "The limiter to apply during interpolation.");
   params.set<unsigned short>("ghost_layers") = 2;
@@ -78,12 +74,10 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),
-    _scalar_elem(isParamValid("scalar_prop_name")
-                     ? getADMaterialProperty<Real>("scalar_prop_name").get()
-                     : _u_elem),
-    _scalar_neighbor(isParamValid("scalar_prop_name")
-                         ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
-                         : _u_neighbor),
+    _scalar_elem(_u_elem),
+    _scalar_neighbor(_u_neighbor),
+    _grad_scalar_elem((_eqn == "scalar") ? &_var.adGradSln() : nullptr),
+    _grad_scalar_neighbor((_eqn == "scalar") ? &_var.adGradSlnNeighbor() : nullptr),
     _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
     _knp_for_omega(getParam<bool>("knp_for_omega"))
 {
@@ -225,8 +219,20 @@ PCNSFVKT::computeQpResidual()
   }
   else if (_eqn == "scalar")
   {
-    const auto rhos_elem = rho_elem * _scalar_elem[_qp];
-    const auto rhos_neighbor = rho_neighbor * _scalar_neighbor[_qp];
+    const auto scalar_elem = interpolate(*_limiter,
+                                         _scalar_elem[_qp],
+                                         _scalar_neighbor[_qp],
+                                         (*_grad_scalar_elem)[_qp],
+                                         *_face_info,
+                                         true);
+    const auto scalar_neighbor = interpolate(*_limiter,
+                                             _scalar_neighbor[_qp],
+                                             _scalar_elem[_qp],
+                                             (*_grad_scalar_neighbor)[_qp],
+                                             *_face_info,
+                                             false);
+    const auto rhos_elem = rho_elem * scalar_elem;
+    const auto rhos_neighbor = rho_neighbor * scalar_neighbor;
     return 0.5 * (sup_vel_elem_normal * rhos_elem + sup_vel_neighbor_normal * rhos_neighbor) -
            omega * (rhos_neighbor - rhos_elem);
   }

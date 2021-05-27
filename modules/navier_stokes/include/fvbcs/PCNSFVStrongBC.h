@@ -56,8 +56,10 @@ protected:
   const Function * const _sup_vel_function;
   const Function * const _pressure_function;
   const Function * const _T_fluid_function;
-  const MooseArray<ADReal> & _scalar_elem;
-  const MooseArray<ADReal> & _scalar_neighbor;
+  const ADVariableValue & _scalar_elem;
+  const ADVariableValue & _scalar_neighbor;
+  const ADVariableGradient * const _grad_scalar_elem;
+  const ADVariableGradient * const _grad_scalar_neighbor;
   const bool _scalar_function_provided;
   const Function * const _scalar_function;
   const bool _velocity_function_includes_rho;
