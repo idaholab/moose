@@ -1,28 +1,13 @@
 [Tests]
   issues = '#16758'
   design = 'navier_stokes/fv.md'
-  [1d-upwind]
-    type = PythonUnitTest
-    input = test.py
-    test_case = Test1DUpwind
-    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with two physical boundary conditions on the subsonic inlet and one physical boundary condition on the outlet and display first order convergence for all variables when using a first-order upwind scheme for the convection terms.'
-    ad_indexing_type = 'global'
-    required_python_packages = 'pandas matplotlib'
-  []
-  [1d-average]
-    type = PythonUnitTest
-    input = test.py
-    test_case = Test1DAverage
-    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with two physical boundary conditions on the subsonic inlet and one physical boundary condition on the outlet and display first order convergence for all variables when using a second-order central differencing scheme for the convection terms.'
-    ad_indexing_type = 'global'
-    required_python_packages = 'pandas matplotlib'
-  []
   [1d-free-flow-hllc]
     type = PythonUnitTest
     input = test.py
     test_case = Test1DFreeFlowHLLC
     requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
+    method = "!dbg"
   []
   [1d-porous-hllc]
     type = PythonUnitTest
@@ -30,23 +15,7 @@
     test_case = Test1DPorousHLLC
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
-  []
-  [kurganov_tadmor]
-    requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a Kurganov-Tadmor discretization scheme for the advection flux, with specified temperature and momentum at one boundary and specified pressure at another boundary, and including continuously varying porosity'
-    [1d-porous-kt-conservative]
-      type = PythonUnitTest
-      input = test.py
-      test_case = Test1DPorousKTConservative
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when containing a linear drag term and using a conservative variable set'
-    []
-    [1d-porous-kt-primitive]
-      type = PythonUnitTest
-      input = test.py
-      test_case = Test1DPorousKTPrimitive
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using a primitive variable set (and not containing a drag term)'
-    []
+    method = "!dbg"
   []
   [primitive_basic_kurganov_tadmor]
     requirement = 'The system shall be able to use a primitive variable set and compute intercell fluxes using a Kurganov-Tadmor scheme'
@@ -56,6 +25,8 @@
       test_case = TestBasic1DPorousKTPrimitiveCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [upwind]
       type = PythonUnitTest
@@ -63,6 +34,8 @@
       test_case = TestBasic1DPorousKTPrimitiveUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [vanLeer]
       type = PythonUnitTest
@@ -70,6 +43,8 @@
       test_case = TestBasic1DPorousKTPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
   []
   [conserved_basic_kurganov_tadmor]
@@ -80,6 +55,8 @@
       test_case = TestBasic1DPorousKTConservedCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [upwind]
       type = PythonUnitTest
@@ -87,6 +64,8 @@
       test_case = TestBasic1DPorousKTConservedUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [vanLeer]
       type = PythonUnitTest
@@ -94,16 +73,20 @@
       test_case = TestBasic1DPorousKTConservedVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
   []
   [primitive_basic_kurganov_tadmor_varying_porosity_function]
-    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor (KT) scheme with the KT Method for computing omega'
     [central_difference]
       type = PythonUnitTest
       input = test.py
       test_case = TestBasic1DVaryingPorousKTPrimitiveCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [upwind]
       type = PythonUnitTest
@@ -111,6 +94,8 @@
       test_case = TestBasic1DVaryingPorousKTPrimitiveUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [vanLeer]
       type = PythonUnitTest
@@ -118,6 +103,38 @@
       test_case = TestBasic1DVaryingPorousKTPrimitiveVanLeer
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
+    []
+  []
+  [primitive_basic_knp_varying_porosity_function]
+    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme with the Kurganov-Noelle-Petrova method for computing omega'
+    [central_difference]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingPorousKNPPrimitiveCD
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
+    []
+    [upwind]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingPorousKNPPrimitiveUpwind
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
+    []
+    [vanLeer]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestBasic1DVaryingPorousKNPPrimitiveVanLeer
+      required_python_packages = 'pandas matplotlib'
+      detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
   []
   [mixed_basic_kurganov_tadmor_varying_porosity_function]
@@ -128,6 +145,8 @@
       test_case = TestBasic1DVaryingPorousKTMixedCD
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
     [upwind]
       type = PythonUnitTest
@@ -135,71 +154,8 @@
       test_case = TestBasic1DVaryingPorousKTMixedUpwind
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-    []
-  []
-  [mixed_basic_kurganov_tadmor_varying_porosity_function_strong_bcs]
-    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a mixed variable set, computing internal fluxes using a Kurganov-Tadmor scheme, and not using Kurganov-Tadmor at the boundaries'
-    [central_difference]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DVaryingPorousKTMixedStrongBCsCD
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-    []
-    [upwind]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DVaryingPorousKTMixedStrongBCsUpwind
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-    []
-  []
-  [primitive_basic_kurganov_tadmor_varying_porosity_var]
-    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a variable object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
-    [central_difference]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DVaryingVarPorousKTPrimitiveCD
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-    []
-    [upwind]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DVaryingVarPorousKTPrimitiveUpwind
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-    []
-    [vanLeer]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DVaryingVarPorousKTPrimitiveVanLeer
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
-    []
-  []
-  [frictional_primitive_basic_kurganov_tadmor_varying_porosity_var]
-    requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a variable object, using a primitive variable set, including drag, and compute intercell fluxes using a Kurganov-Tadmor scheme'
-    [central_difference]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveCD
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
-    []
-    [upwind]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveUpwind
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
-    []
-    [sou]
-      type = PythonUnitTest
-      input = test.py
-      test_case = TestBasic1DFrictionalVaryingVarPorousKTPrimitiveSOU
-      required_python_packages = 'pandas matplotlib'
-      detail = 'when using linear interpolation of cell center values to faces with sou limiting and display at least second order convergence'
+      ad_indexing_type = 'global'
+      method = "!dbg"
     []
   []
   [sources_give_hllc_problems_irregular]
@@ -209,18 +165,7 @@
       input = 'straight-channel-hllc.i'
       exodiff = straight-channel-hllc_out.e
       detail = 'when the source has a cell-centered volumetric discretization'
-    []
-    [hllcs]
-      type = Exodiff
-      input = 'straight-channel-hllcs.i'
-      exodiff = straight-channel-hllcs_out.e
-      detail = 'when the source has a wave-speed based discretization (can thinking of upwinding here)'
-    []
-    [centered]
-      type = Exodiff
-      input = 'straight-channel-centered.i'
-      exodiff = 'straight-channel-centered_out.e'
-      detail = 'However, a centered (average) discretization, not based on Godunov/Riemann shows what the correct solution should be.'
+      method = "!dbg"
     []
   []
   [sources_give_hllc_problems_regular]
@@ -231,6 +176,7 @@
       exodiff = 'regular-straight-channel_out.e'
       detail = 'conservation of mass when no sources are present'
       cli_args = "FVKernels/inactive='drag'"
+      method = "!dbg"
     []
     [non_conserved]
       input = 'regular-straight-channel.i'
@@ -238,6 +184,7 @@
       detail = 'violation of conservation of mass when sources are present'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources_out'
+      method = "!dbg"
     []
     [non_conserved_finer]
       input = 'regular-straight-channel.i'
@@ -245,6 +192,7 @@
       detail = 'lesser violation of conservation of mass when sources are present and the mesh is refined'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources-nx-150_out Mesh/gen_mesh/nx=150'
+      method = "!dbg"
     []
   []
 []

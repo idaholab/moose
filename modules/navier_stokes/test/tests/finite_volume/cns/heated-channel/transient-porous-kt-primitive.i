@@ -115,50 +115,50 @@ superficial_vel_in=${fparse u_in * eps}
 
 [FVBCs]
   [rho_left]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'left'
     variable = pressure
-    superficial_velocity_function = 'superficial_vel_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'superficial_vel_in'
+    T_fluid = ${T}
     eqn = 'mass'
   []
   [rhou_left]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'left'
     variable = superficial_vel_x
-    superficial_velocity_function = 'superficial_vel_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'superficial_vel_in'
+    T_fluid = ${T}
     eqn = 'momentum'
     momentum_component = 'x'
   []
   [rho_et_left]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'left'
     variable = temperature
-    superficial_velocity_function = 'superficial_vel_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'superficial_vel_in'
+    T_fluid = ${T}
     eqn = 'energy'
   []
   [rho_right]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'right'
     variable = pressure
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'right'
     variable = superficial_vel_x
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
   [rho_et_right]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'right'
     variable = temperature
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'energy'
   []
 

@@ -7,10 +7,10 @@
  * Auxiliary kernel to compute the mach number from specific
  * pressure & temperature (as matprops) and fluid props object
  */
-class MachAux : public AuxKernel
+class MaterialMachAux : public AuxKernel
 {
 public:
-  MachAux(const InputParameters & parameters);
+  MaterialMachAux(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:

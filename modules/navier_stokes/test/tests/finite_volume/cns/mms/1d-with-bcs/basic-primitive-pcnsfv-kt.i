@@ -96,50 +96,50 @@
 [FVBCs]
   [mass_left]
     variable = pressure
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = left
-    T_fluid_function = 'exact_T'
-    superficial_velocity_function = 'exact_superficial_velocity'
+    T_fluid = 'exact_T'
+    superficial_velocity = 'exact_superficial_velocity'
     eqn = 'mass'
   []
   [momentum_left]
     variable = sup_vel_x
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = left
-    T_fluid_function = 'exact_T'
-    superficial_velocity_function = 'exact_superficial_velocity'
+    T_fluid = 'exact_T'
+    superficial_velocity = 'exact_superficial_velocity'
     eqn = 'momentum'
     momentum_component = 'x'
   []
   [energy_left]
     variable = T_fluid
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = left
-    T_fluid_function = 'exact_T'
-    superficial_velocity_function = 'exact_superficial_velocity'
+    T_fluid = 'exact_T'
+    superficial_velocity = 'exact_superficial_velocity'
     eqn = 'energy'
   []
   [mass_right]
     variable = pressure
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = right
     eqn = 'mass'
-    p_function = 'exact_p'
+    p = 'exact_p'
   []
   [momentum_right]
     variable = sup_vel_x
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = right
     eqn = 'momentum'
     momentum_component = 'x'
-    p_function = 'exact_p'
+    p = 'exact_p'
   []
   [energy_right]
     variable = T_fluid
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = right
     eqn = 'energy'
-    p_function = 'exact_p'
+    p = 'exact_p'
   []
 
   # help gradient reconstruction

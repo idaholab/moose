@@ -177,67 +177,67 @@ friction_coeff=10
 
 [FVBCs]
   [rho_bottom]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'bottom'
     variable = pressure
-    superficial_velocity_function = 'ud_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
     eqn = 'mass'
   []
   [rhou_bottom]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'bottom'
     variable = sup_vel_x
-    superficial_velocity_function = 'ud_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
     eqn = 'momentum'
     momentum_component = 'x'
   []
   [rhov_bottom]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'bottom'
     variable = sup_vel_y
-    superficial_velocity_function = 'ud_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
     eqn = 'momentum'
     momentum_component = 'y'
   []
   [rho_et_bottom]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'bottom'
     variable = T_fluid
-    superficial_velocity_function = 'ud_in'
-    T_fluid_function = ${T}
+    superficial_velocity = 'ud_in'
+    T_fluid = ${T}
     eqn = 'energy'
   []
   [rho_top]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'top'
     variable = pressure
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'mass'
   []
   [rhou_top]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'top'
     variable = sup_vel_x
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
   [rhov_top]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'top'
     variable = sup_vel_y
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'y'
   []
   [rho_et_top]
-    type = PCNSFVKTBC
+    type = PCNSFVStrongBC
     boundary = 'top'
     variable = T_fluid
-    p_function = ${p_initial}
+    p = ${p_initial}
     eqn = 'energy'
   []
 

@@ -226,7 +226,7 @@ outlet_pressure = 0.9e5
 
 [AuxKernels]
   [Ma_aux]
-    type = MachAux
+    type = MaterialMachAux
     variable = Ma
     fp = fp
   []

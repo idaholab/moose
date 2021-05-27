@@ -221,7 +221,7 @@ stagnation_temperature = 1
 
 [AuxKernels]
   [Ma_aux]
-    type = MachAux
+    type = MaterialMachAux
     variable = Ma
     fp = fp
   []

@@ -102,7 +102,7 @@ x_sep = 35
 
 [AuxKernels]
   [./Ma_aux]
-    type = MachAux
+    type = MaterialMachAux
     variable = Ma
     fp = fp
   [../]

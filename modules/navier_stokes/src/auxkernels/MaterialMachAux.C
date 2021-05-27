@@ -8,39 +8,37 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Navier-Stokes includes
-#include "MachAux.h"
+#include "MaterialMachAux.h"
 #include "NS.h"
 
 // FluidProperties includes
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("NavierStokesApp", MachAux);
-
-namespace nms = NS;
+registerMooseObject("NavierStokesApp", MaterialMachAux);
 
 using MetaPhysicL::raw_value;
 
 InputParameters
-MachAux::validParams()
+MaterialMachAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addRequiredParam<UserObjectName>(nms::fluid, "fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
   params.addClassDescription(
       "Mach number from fluid properties user object and material properties");
   return params;
 }
 
-MachAux::MachAux(const InputParameters & parameters)
+MaterialMachAux::MaterialMachAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _speed(getADMaterialProperty<Real>(nms::speed)),
-    _pressure(getADMaterialProperty<Real>(nms::pressure)),
-    _temperature(getADMaterialProperty<Real>(nms::T_fluid)),
-    _fluid(getUserObject<SinglePhaseFluidProperties>(nms::fluid))
+    _speed(getADMaterialProperty<Real>(NS::speed)),
+    _pressure(getADMaterialProperty<Real>(NS::pressure)),
+    _temperature(getADMaterialProperty<Real>(NS::T_fluid)),
+    _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid))
 {
 }
 
 Real
-MachAux::computeValue()
+MaterialMachAux::computeValue()
 {
   return raw_value(_speed[_qp] / _fluid.c_from_p_T(_pressure[_qp], _temperature[_qp]));
 }

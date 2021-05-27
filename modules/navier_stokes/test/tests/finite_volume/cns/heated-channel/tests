@@ -1,35 +1,11 @@
 [Tests]
-  [heated_channel]
-    requirement = 'The system shall be able to solve the steady Euler equations in a heated channel using'
-    [average]
-      type = Exodiff
-      input = steady-porous-average.i
-      exodiff = steady-porous-average_out.e
-      ad_indexing_type = global
-      detail = 'central differencing for the convection terms and a conserved variable set and show a flat momentum profile'
-    []
-    [kt-conserved]
-      type = Exodiff
-      input = steady-porous-kt.i
-      exodiff = steady-porous-kt_out.e
-      ad_indexing_type = global
-      detail = 'Kurganov-Tadmor with piecewise constant data for the convection terms and a conserved variable set and show a non-flat momentum profile due to first-order discretization error'
-    []
-    [kt-primitive]
-      type = Exodiff
-      input = steady-porous-kt-primitive.i
-      exodiff = steady-porous-kt-primitive_out.e
-      ad_indexing_type = global
-      detail = 'Kurganov-Tadmor with piecewise constant data for the convection terms and a primitive variable set and show a non-flat momentum profile due to first-order discretization error'
-    []
-    [kt-van-leer-primitive]
-      type = Exodiff
-      input = transient-porous-kt-primitive.i
-      exodiff = transient-porous-kt-primitive_exo.e
-      ad_indexing_type = global
-      detail = 'Kurganov-Tadmor with linearly reconstructed data with Van-Leer limiting for the convection term and a primitive variable set and show a flat momentum profile'
-      mumps = true
-      recover = false # See https://github.com/idaholab/moose/issues/17906
-    []
+  [kt-van-leer-primitive]
+    type = Exodiff
+    input = transient-porous-kt-primitive.i
+    exodiff = transient-porous-kt-primitive_exo.e
+    ad_indexing_type = global
+    requirement = 'The system shall be able to solve the steady Euler equations in a heated channel using Kurganov-Tadmor with linearly reconstructed data with Van-Leer limiting for the convection term and a primitive variable set and show a flat momentum profile'
+    mumps = true
+    recover = false # See https://github.com/idaholab/moose/issues/17906
   []
 []

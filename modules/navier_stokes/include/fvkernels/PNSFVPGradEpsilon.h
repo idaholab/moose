@@ -24,8 +24,7 @@ protected:
 
   /// The gradient of the pressure
   const ADMaterialProperty<Real> & _pressure;
-  const Function * const _eps_function;
-  const ADVariableGradient * const _eps_var_grad;
+  const Function & _eps_function;
 
   /// index x|y|z
   const unsigned int _index;
