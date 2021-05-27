@@ -35,6 +35,11 @@ PCNSFVKT::validParams()
   params.addParam<MooseEnum>(
       "limiter", moose_limiter_type, "The limiter to apply during interpolation.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>(
+      "knp_for_omega",
+      true,
+      "Whether to use the Kurgano, Noelle, and Petrova method to compute the omega parameter for "
+      "stabilization. If false, then the Kurganov-Tadmor method will be used.");
   return params;
 }
 
@@ -79,12 +84,34 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _scalar_neighbor(isParamValid("scalar_prop_name")
                          ? getNeighborADMaterialProperty<Real>("scalar_prop_name").get()
                          : _u_neighbor),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter")))))
+    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _knp_for_omega(getParam<bool>("knp_for_omega"))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
                "If 'momentum' is specified for 'eqn', then you must provide a parameter "
                "value for 'momentum_component'");
+}
+
+ADReal
+PCNSFVKT::computeOmega(const ADReal & u_elem_normal,
+                       const ADReal & u_neighbor_normal,
+                       const ADReal & c_elem,
+                       const ADReal & c_neighbor) const
+{
+  // Equations from Greenshields sans multiplication by area (which well be done in
+  // computeResidual/Jacobian
+  const auto psi_elem =
+      std::max({c_elem + u_elem_normal, c_neighbor + u_neighbor_normal, ADReal(0)});
+  const auto psi_neighbor =
+      std::max({c_elem - u_elem_normal, c_neighbor - u_neighbor_normal, ADReal(0)});
+  const auto alpha = _knp_for_omega ? psi_elem / (psi_elem + psi_neighbor) : ADReal(0.5);
+  auto omega = _knp_for_omega ? alpha * (1 - alpha) * (psi_elem + psi_neighbor)
+                              : alpha * std::max(psi_elem, psi_neighbor);
+
+  // Do this to avoid new nonzero mallocs
+  omega += 0 * (c_elem + u_elem_normal + c_neighbor + u_neighbor_normal);
+  return omega;
 }
 
 ADReal
@@ -172,23 +199,19 @@ PCNSFVKT::computeQpResidual()
   const auto u_elem_normal = u_elem * _face_info->normal();
   const auto u_neighbor_normal = u_neighbor * _face_info->normal();
 
-  const auto a_elem = std::max(std::abs(u_elem_normal + c_elem), std::abs(u_elem_normal - c_elem));
-  const auto a_neighbor =
-      std::max(std::abs(u_neighbor_normal + c_neighbor), std::abs(u_neighbor_normal - c_neighbor));
-  // Second term is to avoid new nonzero mallocs
-  const auto a = std::max(a_elem, a_neighbor) + 0 * a_elem + 0 * a_neighbor;
+  const auto omega = computeOmega(u_elem_normal, u_neighbor_normal, c_elem, c_neighbor);
 
   if (_eqn == "mass")
-    return 0.5 * (sup_vel_elem_normal * rho_elem + sup_vel_neighbor_normal * rho_neighbor -
-                  a * (rho_neighbor - rho_elem));
+    return 0.5 * (sup_vel_elem_normal * rho_elem + sup_vel_neighbor_normal * rho_neighbor) -
+           omega * (rho_neighbor - rho_elem);
   else if (_eqn == "momentum")
   {
     const auto rhou_elem = u_elem(_index) * rho_elem;
     const auto rhou_neighbor = u_neighbor(_index) * rho_neighbor;
     return 0.5 * (sup_vel_elem_normal * rhou_elem + sup_vel_neighbor_normal * rhou_neighbor +
                   (_eps_elem[_qp] * pressure_elem + _eps_neighbor[_qp] * pressure_neighbor) *
-                      _face_info->normal()(_index) -
-                  a * (rhou_neighbor - rhou_elem));
+                      _face_info->normal()(_index)) -
+           omega * (rhou_neighbor - rhou_elem);
   }
   else if (_eqn == "energy")
   {
@@ -197,12 +220,16 @@ PCNSFVKT::computeQpResidual()
         e_neighbor + 0.5 * u_neighbor * u_neighbor + pressure_neighbor / rho_neighbor;
     const auto rho_ht_elem = rho_elem * ht_elem;
     const auto rho_ht_neighbor = rho_neighbor * ht_neighbor;
-    return 0.5 * (sup_vel_elem_normal * rho_ht_elem + sup_vel_neighbor_normal * rho_ht_neighbor -
-                  a * (rho_ht_neighbor - rho_ht_elem));
+    return 0.5 * (sup_vel_elem_normal * rho_ht_elem + sup_vel_neighbor_normal * rho_ht_neighbor) -
+           omega * (rho_ht_neighbor - rho_ht_elem);
   }
   else if (_eqn == "scalar")
-    return sup_vel_elem_normal * rho_elem * _scalar_elem[_qp] +
-           sup_vel_neighbor_normal * rho_neighbor * _scalar_neighbor[_qp];
+  {
+    const auto rhos_elem = rho_elem * _scalar_elem[_qp];
+    const auto rhos_neighbor = rho_neighbor * _scalar_neighbor[_qp];
+    return 0.5 * (sup_vel_elem_normal * rhos_elem + sup_vel_neighbor_normal * rhos_neighbor) -
+           omega * (rhos_neighbor - rhos_elem);
+  }
   else
     mooseError("Unrecognized enum type ", _eqn);
 }

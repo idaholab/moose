@@ -29,6 +29,10 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
+  ADReal computeOmega(const ADReal & u_elem_normal,
+                      const ADReal & u_neighbor_normal,
+                      const ADReal & c_elem,
+                      const ADReal & c_neighbor) const;
 
   const SinglePhaseFluidProperties & _fluid;
   const ADMaterialProperty<Real> & _sup_vel_x_elem;
@@ -60,4 +64,5 @@ protected:
   const MooseArray<ADReal> & _scalar_neighbor;
 
   std::unique_ptr<Moose::FV::Limiter> _limiter;
+  const bool _knp_for_omega;
 };
