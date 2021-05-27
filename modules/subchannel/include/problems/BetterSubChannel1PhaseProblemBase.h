@@ -45,7 +45,7 @@ protected:
   /// Computes Viscosity per channel for block iblock
   virtual void computeMu(int iblock);
   /// Computes Residual per gap for block iblock
-  virtual void computeResidualFunction(int iblock);
+  virtual Eigen::VectorXd computeResidualFunction(int iblock, Eigen::VectorXd solution);
 
   Eigen::MatrixXd Wij;
   Eigen::MatrixXd Wij_old;
@@ -62,6 +62,8 @@ protected:
   const bool _Density;
   /// Flag that activates or deactivates the calculation of viscosity
   const bool _Viscosity;
+  /// Flag that informs where we solve the Enthalpy/Temperature equations or not
+  const bool _Power;
   /// Time step
   const Real & _dt;
   BetterSubChannelMeshBase & _subchannel_mesh;

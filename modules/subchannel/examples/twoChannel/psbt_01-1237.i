@@ -1,7 +1,7 @@
-T_in = 562.35
+T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 10.94 / 3600.}
-P_out = 14739394.95 # Pa
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -21,13 +21,9 @@ P_out = 14739394.95 # Pa
   []
   [SumWij]
   []
-  [SumWijh]
-  []
-  [SumWijPrimeDhij]
-  []
-  [SumWijPrimeDUij]
-  []
   [P]
+  []
+  [DP]
   []
   [h]
   []
@@ -56,6 +52,9 @@ P_out = 14739394.95 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  abeta = 0.08
+  CT = 1.0
+  enforce_uniform_pressure = false
 []
 
 [ICs]
@@ -72,7 +71,7 @@ P_out = 14739394.95 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 1.50e6 # W
+    power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
@@ -86,6 +85,12 @@ P_out = 14739394.95 # Pa
     type = ConstantIC
     variable = P
     value = ${P_out}
+  []
+
+  [DP_ic]
+    type = ConstantIC
+    variable = DP
+    value = 0.0
   []
 
   [rho_ic]
@@ -105,10 +110,9 @@ P_out = 14739394.95 # Pa
   []
 
   [mdot_ic]
-    type = MassFlowRateIC
+    type = ConstantIC
     variable = mdot
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = 0.0
   []
 []
 
@@ -166,4 +170,75 @@ P_out = 14739394.95 # Pa
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
+[]
+
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [prettyMesh]
+    type = FullSolveMultiApp
+    input_files = "prettyMesh.i"
+    execute_on = "timestep_end"
+  []
+[]
+
+[Transfers]
+  [xfer_mdot]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = mdot
+    variable = mdot
+  []
+  [xfer_SumWij]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = SumWij
+    variable = SumWij
+  []
+  [xfer_P]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = P
+    variable = P
+  []
+  [xfer_DP]
+  type = MultiAppNearestNodeTransfer
+  multi_app = prettyMesh
+  direction = to_multiapp
+  source_variable = DP
+  variable = DP
+  []
+  [xfer_h]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = h
+    variable = h
+  []
+  [xfer_T]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = T
+    variable = T
+  []
+  [xfer_rho]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = rho
+    variable = rho
+  []
+  [xfer_q_prime]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = q_prime
+    variable = q_prime
+  []
 []
