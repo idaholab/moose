@@ -22,6 +22,8 @@ BetterSubChannel1PhaseProblemBase::validParams()
                                 "Flag that enables uniform inlet pressure");
   params.addRequiredParam<bool>("Density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("Viscosity", "Flag that enables the calculation of viscosity");
+  params.addRequiredParam<bool>(
+      "Power", "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
@@ -33,6 +35,7 @@ BetterSubChannel1PhaseProblemBase::BetterSubChannel1PhaseProblemBase(const Input
     _TR(isTransient() ? 1. : 0.),
     _Density(getParam<bool>("Density")),
     _Viscosity(getParam<bool>("Viscosity")),
+    _Power(getParam<bool>("Power")),
     _dt(isTransient() ? dt() : _one),
     _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
     _beta(getParam<Real>("beta")),
@@ -152,105 +155,19 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
+  Eigen::VectorXd solution_seed = Wij.block(0, first_node, n_gaps, block_size);
 
-  auto z_grid = _subchannel_mesh.getZGrid();
-  unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-  const Real & pitch = _subchannel_mesh.getPitch();
-  auto dz = z_grid[iz] - z_grid[iz - 1];
-  for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined
+  root = PETSC_SNES_SOLVER();
+  /// Update crossflow using root (root is a PETSc vector i need to turn into eigen Vector and then put into an eigen Matrix)
+  // Assign the solution to the cross-flow matrix
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-    unsigned int i_ch = chans.first;
-    unsigned int j_ch = chans.second;
-    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-    auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-    auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-    auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-    auto rho_i = (*rho_soln)(node_in_i);
-    auto rho_j = (*rho_soln)(node_in_j);
-    // area of channel i
-    auto Si = (*S_flow_soln)(node_in_i);
-    // area of channel j
-    auto Sj = (*S_flow_soln)(node_in_j);
-    // crossflow area between channels i,j dz*gap_width
-    auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-    // hydraulic diameter in the ij direction
-    auto Lij = pitch;
-    // total local form loss in the ij direction
-    auto Kij = 481.759; // this will change
-    //        2.0 *
-    //        std::pow((1.0 - std::pow(Lij, 2.0) / std::pow(Lij -
-    //        _subchannel_mesh._rod_diameter, 2.0)),
-    //                 2.0);
-    // apply lateral pressure difference damping
-    auto asp = 1.0; // means no damping
-    auto DPi = (*DP_soln)(node_out_i);
-    auto DPj = (*DP_soln)(node_out_j);
-    auto DPij_out = (*P_soln)(node_out_i) - (*P_soln)(node_out_j);
-    auto DPij_in = (*P_soln)(node_in_i) - (*P_soln)(node_in_j);
-    auto DPij = (1 - asp) * (DPij_out + DPi - DPj) + asp * DPij_in;
-
-    // Figure out donor cell density
-    auto rho_star = 0.0;
-    if (Wij(i_gap, iz) > 0.0)
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
-      rho_star = rho_i;
+      int i = n_gaps * iz + i_gap; // column wise transfer
+      Wij(i_gap, iz) = root(i);
     }
-    else if (Wij(i_gap, iz) < 0.0)
-    {
-      rho_star = rho_j;
-    }
-    else
-    {
-      rho_star = (rho_i + rho_j) / 2.0;
-    }
-
-    auto Mass_Term_out =
-        (*mdot_soln)(node_out_i) / Si / rho_i + (*mdot_soln)(node_out_j) / Sj / rho_j;
-    auto Mass_Term_in = (*mdot_soln)(node_in_i) / Si / rho_i + (*mdot_soln)(node_in_j) / Sj / rho_j;
-    auto Term_out = Sij * rho_star * (Lij / dz) * Mass_Term_out;
-    auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * Wij(i_gap, iz - 1);
-    auto Pressure_Term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
-
-    // Set inertia terms to zero (need to go away in the future)
-    Term_out = 0.0;
-    Term_in = 0.0;
-
-    // INITIAL GUESS (eventually the continue statement will be removed)
-    auto Wijguess = 0.0;
-    if (Wij(i_gap, iz) == 0.0)
-    {
-      if (isTransient())
-        Wijguess = Wij(i_gap, iz);
-      else
-        Wijguess = Wij(i_gap, iz - 1);
-    }
-    else
-      continue;
-
-    auto newton_error = 1.0;
-    auto newton_tolerance = 1e-10;
-    int newton_cycles = 0;
-    int max_newton_cycles = 100;
-    while (newton_error > newton_tolerance && newton_cycles <= max_newton_cycles)
-    {
-      newton_cycles++;
-      if (newton_cycles == max_newton_cycles)
-      {
-        mooseError(
-            name(), " CrossFlow Calculation didn't converge, newton_cycles: ", newton_cycles);
-      }
-      auto time_term = _TR * 2.0 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
-      auto Residual = time_term + Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess -
-                      Term_in - Pressure_Term;
-      auto derivative =
-          _TR * 2.0 * Lij * Sij * rho_star / _dt + 2.0 * Kij * std::abs(Wijguess) + Term_out;
-      Wijguess = Wijguess - Residual / (derivative + 1e-10);
-      newton_error = std::abs(Residual);
-    }
-    // Wij has a global sign at this point (Positive is from the lower index subchannel to the
-    // higher index)
-    Wij(i_gap, iz) = Wijguess;
   }
 }
 
@@ -554,8 +471,7 @@ BetterSubChannel1PhaseProblemBase::computeT(int iblock)
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto T = _fp->T_from_p_h((*P_soln)(node), (*h_soln)(node));
-      T_soln->set(node, T); // Kelvin
+      T_soln->set(node, _fp->T_from_p_h((*P_soln)(node), (*h_soln)(node)));
     }
   }
 }
@@ -612,11 +528,119 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
   }
 }
 
-void
-BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock)
+Eigen::VectorXd
+BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock, Eigen::VectorXd solution)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
+
+  Eigen::MatrixXd Wij_residual_matrix(n_gaps, block_size);
+  Wij_residual_matrix.setZero();
+  Eigen::VectorXd Wij_residual_vector(n_gaps * block_size);
+  Wij_residual_vector.setZero();
+
+  // Assign the solution to the cross-flow matrix
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
+      int i = n_gaps * iz + i_gap; // column wise transfer
+      Wij(i_gap, iz) = solution(i);
+    }
+  }
+
+  // Calculating Sum Crossflows
+  computeSumWij(iblock);
+
+  // Solving axial flux
+  computeMdot(iblock);
+
+  // Calculation of Turbulent Crossflow
+  computeWijPrime(iblock);
+
+  // Solving for Pressure Drop
+  computeDP(iblock);
+
+  // Solving for pressure
+  computeP(iblock);
+
+  // Cross flow residual
+  auto z_grid = _subchannel_mesh.getZGrid();
+  const Real & pitch = _subchannel_mesh.getPitch();
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    auto dz = z_grid[iz] - z_grid[iz - 1];
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int i_ch = chans.first;
+      unsigned int j_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+      auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+      auto rho_i = (*rho_soln)(node_in_i);
+      auto rho_j = (*rho_soln)(node_in_j);
+      // area of channel i
+      auto Si = (*S_flow_soln)(node_in_i);
+      // area of channel j
+      auto Sj = (*S_flow_soln)(node_in_j);
+      // crossflow area between channels i,j dz*gap_width
+      auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+      // hydraulic diameter in the ij direction
+      auto Lij = pitch;
+      // total local form loss in the ij direction
+      auto Kij = 0.5;
+
+      // apply lateral pressure difference damping
+      auto asp = 1.0; // means no damping
+      auto DPi = (*DP_soln)(node_out_i);
+      auto DPj = (*DP_soln)(node_out_j);
+      auto DPij_out = (*P_soln)(node_out_i) - (*P_soln)(node_out_j);
+      auto DPij_in = (*P_soln)(node_in_i) - (*P_soln)(node_in_j);
+      auto DPij = (1 - asp) * (DPij_out + DPi - DPj) + asp * DPij_in;
+
+      // Figure out donor cell density
+      auto rho_star = 0.0;
+      if (Wij(i_gap, iz) > 0.0)
+      {
+        rho_star = rho_i;
+      }
+      else if (Wij(i_gap, iz) < 0.0)
+      {
+        rho_star = rho_j;
+      }
+      else
+      {
+        rho_star = (rho_i + rho_j) / 2.0;
+      }
+
+      auto Mass_Term_out =
+          (*mdot_soln)(node_out_i) / Si / rho_i + (*mdot_soln)(node_out_j) / Sj / rho_j;
+      auto Mass_Term_in =
+          (*mdot_soln)(node_in_i) / Si / rho_i + (*mdot_soln)(node_in_j) / Sj / rho_j;
+      auto Term_out = Sij * rho_star * (Lij / dz) * Mass_Term_out;
+      auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * Wij(i_gap, iz - 1);
+      auto Pressure_Term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
+      auto time_term =
+          _TR * 2.0 * (Wij(i_gap, iz) - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
+
+      Wij_residual_matrix(i_gap, iz - 1 - iblock * block_size) =
+          time_term + Kij * Wij(i_gap, iz) * std::abs(Wij(i_gap, iz)) + Term_out * Wij(i_gap, iz) -
+          Term_in - Pressure_Term;
+    }
+  }
+
+  // Make the residual matrix into a residual vector
+  for (unsigned int iz = 0; iz < block_size; iz++)
+  {
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
+      int i = n_gaps * iz + i_gap; // column wise transfer
+      Wij_residual_vector(i) = Wij_residual_matrix(i_gap, iz);
+    }
+  }
+  return Wij_residual_vector;
 }
 
 void
@@ -628,7 +652,6 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
   auto P_tol = 1e-6;
   unsigned int P_it = 0;
   unsigned int P_it_max = 2 * n_blocks;
-  auto Ptol = 1E-6;
   if (n_blocks == 1)
     P_it_max = 1;
   while (P_error > P_tol && P_it < P_it_max)
@@ -658,7 +681,7 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
         // Compute Crossflow
         computeWij(iblock);
 
-        if (Power != 0.0)
+        if (_Power)
         {
           // Energy conservation equation
           computeh(iblock);

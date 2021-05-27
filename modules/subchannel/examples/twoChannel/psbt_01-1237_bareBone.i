@@ -1,7 +1,8 @@
-T_in = 387.05
+T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 1.95 / 3600.}
-P_out = 14709975.0 # Pa
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
+mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -21,13 +22,9 @@ P_out = 14709975.0 # Pa
   []
   [SumWij]
   []
-  [SumWijh]
-  []
-  [SumWijPrimeDhij]
-  []
-  [SumWijPrimeDUij]
-  []
   [P]
+  []
+  [DP]
   []
   [h]
   []
@@ -36,8 +33,6 @@ P_out = 14709975.0 # Pa
   [rho]
   []
   [S]
-  []
-  [Sij]
   []
   [w_perim]
   []
@@ -72,7 +67,7 @@ P_out = 14709975.0 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 0.41e6 # W
+    power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
@@ -86,6 +81,12 @@ P_out = 14709975.0 # Pa
     type = ConstantIC
     variable = P
     value = ${P_out}
+  []
+
+  [DP_ic]
+  type = ConstantIC
+  variable = DP
+  value = 0.0
   []
 
   [rho_ic]
@@ -105,10 +106,9 @@ P_out = 14709975.0 # Pa
   []
 
   [mdot_ic]
-    type = MassFlowRateIC
+    type = ConstantIC
     variable = mdot
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = 0.0
   []
 []
 
@@ -128,17 +128,17 @@ P_out = 14709975.0 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = ConstantAux
     variable = mdot
     boundary = inlet
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = ${fparse mass_flow_in / 36.0}
     execute_on = 'timestep_begin'
   []
 []
 
 [Outputs]
   exodus = true
+
   [Temp_Out_MATRIX]
     type = NormalSliceValues
     variable = T
