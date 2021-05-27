@@ -340,6 +340,36 @@ class TestBasic1DVaryingPorousKTMixedUpwind(unittest.TestCase):
         # for key,value in fig.label_to_intercept.items():
         #     print("%s intercept, %f" % (key, value))
 
+class TestBasic1DVaryingPorousKTMixedStrongBCsCD(unittest.TestCase):
+# class TestBasic1DVaryingPorousKTMixedStrongBCsCD():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_mom_x', 'L2T_fluid']
+        df1 = mms.run_spatial('varying-eps-basic-kt-mixed-strong-bcs.i', 5, "GlobalParams/limiter='central_difference'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-basic-kt-mixed-strong-bcs-cd.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
+class TestBasic1DVaryingPorousKTMixedStrongBCsUpwind(unittest.TestCase):
+# class TestBasic1DVaryingPorousKTMixedStrongBCsUpwind():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_mom_x', 'L2T_fluid']
+        df1 = mms.run_spatial('varying-eps-basic-kt-mixed-strong-bcs.i', list(range(1,9)), "GlobalParams/limiter='upwind'", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-basic-kt-mixed-strong-bcs-upwind.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+        # for key,value in fig.label_to_intercept.items():
+        #     print("%s intercept, %f" % (key, value))
+
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
     # Test1DUpwind().test()
@@ -365,3 +395,5 @@ if __name__ == '__main__':
     # TestBasic1DFrictionalVaryingVarPorousKTPrimitiveSOU().test()
     # TestBasic1DVaryingPorousKTMixedCD().test()
     # TestBasic1DVaryingPorousKTMixedUpwind().test()
+    # TestBasic1DVaryingPorousKTMixedStrongBCsCD().test()
+    # TestBasic1DVaryingPorousKTMixedStrongBCsUpwind().test()
