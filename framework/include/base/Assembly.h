@@ -415,12 +415,12 @@ public:
   /*
    * @return The current lower-dimensional element volume
    */
-  const Real & lowerDElemVolume() const { return _current_lower_d_elem_volume; }
+  const Real & lowerDElemVolume() const;
 
   /*
    * @return The current neighbor lower-dimensional element volume
    */
-  const Real & neighborLowerDElemVolume() const { return _current_neighbor_lower_d_elem_volume; }
+  const Real & neighborLowerDElemVolume() const;
 
   /**
    * Return the current subdomain ID
@@ -2257,6 +2257,8 @@ private:
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
   /// Vector FE objects for lower dimensional elements
   mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_lower;
+  /// helper object for transforming coordinates for lower dimensional element quadrature points
+  std::map<unsigned int, FEBase **> _holder_fe_lower_helper;
 
   /// quadrature rule used on neighbors. Note that this const version is required because our getter
   /// APIs return a const QBase * const &. Without the const QBase * member we would be casting the
@@ -2340,8 +2342,12 @@ protected:
   const Elem * _current_lower_d_elem;
   /// The current neighboring lower dimensional element
   const Elem * _current_neighbor_lower_d_elem;
+  /// Whether we need to compute the lower dimensional element volume
+  mutable bool _need_lower_d_elem_volume;
   /// The current lower dimensional element volume
   Real _current_lower_d_elem_volume;
+  /// Whether we need to compute the neighboring lower dimensional element volume
+  mutable bool _need_neighbor_lower_d_elem_volume;
   /// The current neighboring lower dimensional element volume
   Real _current_neighbor_lower_d_elem_volume;
 
@@ -2805,4 +2811,18 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif
+}
+
+inline const Real &
+Assembly::lowerDElemVolume() const
+{
+  _need_lower_d_elem_volume = true;
+  return _current_lower_d_elem_volume;
+}
+
+inline const Real &
+Assembly::neighborLowerDElemVolume() const
+{
+  _need_neighbor_lower_d_elem_volume = true;
+  return _current_neighbor_lower_d_elem_volume;
 }
