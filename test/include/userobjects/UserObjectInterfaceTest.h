@@ -12,14 +12,14 @@
 #include "GeneralUserObject.h"
 
 /**
- * A UserObject that tests errors produced by the UserObjectInterface.
+ * A UserObject that tests the UserObjectInterface.
  */
-class UserObjectInterfaceErrorTest : public GeneralUserObject
+class UserObjectInterfaceTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  UserObjectInterfaceErrorTest(const InputParameters & params);
+  UserObjectInterfaceTest(const InputParameters & params);
 
   virtual void initialize(){};
   virtual void execute(){};

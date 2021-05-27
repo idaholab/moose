@@ -158,7 +158,7 @@ template <class T>
 bool
 UserObjectInterface::hasUserObject(const std::string & param_name) const
 {
-  return hasUserObjectByName(getUserObjectName(param_name));
+  return hasUserObjectByName<T>(getUserObjectName(param_name));
 }
 
 template <class T>
