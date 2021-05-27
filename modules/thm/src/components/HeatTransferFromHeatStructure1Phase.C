@@ -31,6 +31,16 @@ HeatTransferFromHeatStructure1Phase::getFEType()
 }
 
 void
+HeatTransferFromHeatStructure1Phase::preSetupMesh()
+{
+  if (hasComponentByName<HeatStructureBase>(_hs_name))
+  {
+    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
+    hs.setConnectedToFlowChannel();
+  }
+}
+
+void
 HeatTransferFromHeatStructure1Phase::setupMesh()
 {
   if (hasComponentByName<HeatStructureBase>(_hs_name) && _hs_side_valid &&

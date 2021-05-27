@@ -18,6 +18,8 @@ any of the corresponding blocks in their input files.
 The following methods are available to implement for a component, in the order
 in which they are called:
 
+- `preSetupMesh()`: This performs any setup that needs to occur before setting
+  up the mesh that is not safe to perform in the constructor.
 - `setupMesh()`: This performs any mesh setup such as creating meshes or naming mesh sets.
 - `init()`: This performs any initialization steps that are not safe to perform
   in the constructor. This typically used when other component(s) need to have

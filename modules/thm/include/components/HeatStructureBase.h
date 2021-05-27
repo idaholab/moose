@@ -78,6 +78,16 @@ public:
   const std::vector<std::tuple<dof_id_type, unsigned short int>> &
   getBoundaryInfo(const HeatStructureSideType & side) const;
 
+  /**
+   * Sets the flag specifying that the heat structure is connected to a flow channel to 'true'
+   */
+  void setConnectedToFlowChannel() const { _connected_to_flow_channel = true; }
+
+  /**
+   * Gets the axial offset for the mesh
+   */
+  Real getAxialOffset() const { return _axial_offset; }
+
 protected:
   virtual std::shared_ptr<HeatConductionModel> buildModel();
   virtual void init() override;
@@ -169,6 +179,11 @@ protected:
   std::vector<std::tuple<dof_id_type, unsigned short int>> _start_bnd_info;
   /// Boundary info for the end side of the heat structure
   std::vector<std::tuple<dof_id_type, unsigned short int>> _end_bnd_info;
+
+  /// True if this heat structure is connected to at least one flow channel
+  mutable bool _connected_to_flow_channel;
+  /// Distance by which to offset the mesh from the heat structure axis
+  mutable Real _axial_offset;
 
 public:
   /// map of heat structure side string to enum

@@ -15,7 +15,7 @@
 #
 # Next, the following radial boundary is tested:
 #  (x,r) in (x0,x1) X r0
-#  x0 = 0, x1 = x5, r0 = 1.5
+#  x0 = 0, x1 = 5, r0 = 1.5
 # with n = -e_r (negative r-direction).
 # In this case, the integral of [-k grad(T) * n] is
 #   Q = pi * r0 * k (x1^2 - x0^2)
@@ -26,7 +26,7 @@ R_i = 1.0
 [Functions]
   [T_fn]
     type = ParsedFunction
-    value = 'x * (y + ${R_i})'
+    value = 'x * y'
   []
 []
 
@@ -67,7 +67,6 @@ R_i = 1.0
     diffusivity = thermal_conductivity
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-    offset = ${R_i}
     execute_on = 'INITIAL'
   []
   [Q_radial]
@@ -77,7 +76,6 @@ R_i = 1.0
     diffusivity = thermal_conductivity
     axis_point = '0 0 0'
     axis_dir = '1 0 0'
-    offset = ${R_i}
     execute_on = 'INITIAL'
   []
 []

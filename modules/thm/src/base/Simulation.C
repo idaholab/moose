@@ -70,6 +70,10 @@ Simulation::buildMesh()
   if (_components.size() == 0)
     return;
 
+  // perform any pre-mesh-setup initialization
+  for (auto && comp : _components)
+    comp->executePreSetupMesh();
+
   // build mesh
   for (auto && comp : _components)
     comp->executeSetupMesh();

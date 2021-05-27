@@ -10,6 +10,7 @@ class HeatStructureCylindricalBase : public HeatStructureBase
 public:
   HeatStructureCylindricalBase(const InputParameters & params);
 
+  virtual void setupMesh() override;
   virtual void addMooseObjects() override;
   virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
 

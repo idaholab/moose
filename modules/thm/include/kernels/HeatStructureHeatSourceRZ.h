@@ -1,15 +1,15 @@
 #pragma once
 
-#include "OneDHeatForcingFunction.h"
+#include "HeatStructureHeatSource.h"
 #include "RZSymmetry.h"
 
 /**
  * Forcing function used in the heat conduction equation in arbitrary RZ symmetry
  */
-class OneDHeatForcingFunctionRZ : public OneDHeatForcingFunction, public RZSymmetry
+class HeatStructureHeatSourceRZ : public HeatStructureHeatSource, public RZSymmetry
 {
 public:
-  OneDHeatForcingFunctionRZ(const InputParameters & parameters);
+  HeatStructureHeatSourceRZ(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

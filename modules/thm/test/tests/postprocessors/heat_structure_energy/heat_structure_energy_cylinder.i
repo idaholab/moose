@@ -44,7 +44,7 @@
 [Functions]
   [T0_fn]
     type = ParsedFunction
-    value = '0.2 * x + 0.4 * y + 0.5'
+    value = '0.2 * x + 0.4 * (y - 2) + 0.5'
   []
 []
 
@@ -75,7 +75,6 @@
     n_units = 5
     axis_point = '0 2 0'
     axis_dir = '1 0 0'
-    offset = 2.0
     execute_on = 'initial'
   []
 []

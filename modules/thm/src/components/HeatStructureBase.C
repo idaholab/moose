@@ -33,7 +33,11 @@ HeatStructureBase::validParams()
 }
 
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
-  : GeometricalComponent(params), _number_of_hs(0), _total_elem_number(0)
+  : GeometricalComponent(params),
+    _number_of_hs(0),
+    _total_elem_number(0),
+    _connected_to_flow_channel(false),
+    _axial_offset(0.0)
 {
 }
 
@@ -102,7 +106,7 @@ HeatStructureBase::build2DMesh()
   // loop over layers
   for (unsigned int i = 0; i < n_layers; i++)
   {
-    Point p(_node_locations[i], 0, 0);
+    Point p(_node_locations[i], _axial_offset, 0);
 
     Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
@@ -230,7 +234,7 @@ HeatStructureBase::build2DMesh2ndOrder()
   // loop over layers
   for (unsigned int i = 0; i < n_layers; i++)
   {
-    Point p(_node_locations[i], 0, 0);
+    Point p(_node_locations[i], _axial_offset, 0);
 
     const Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
