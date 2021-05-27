@@ -91,10 +91,7 @@ class IfElseExtension(command.CommandExtension):
     def hasSubmodule(self, name):
         """Helper for the 'hasSubmodule' function."""
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
-        for repo, ginfo in status.items():
-            if repo.endswith(name):
-                return True
-        return False
+        return any([repo.endswith(name) for repo in status.keys()])
 
     def extend(self, reader, renderer):
         self.requires(command)

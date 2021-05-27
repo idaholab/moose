@@ -72,18 +72,28 @@ def git_submodule_info(working_dir=os.getcwd(), *args):
     """
     Return the status of each of the git submodule(s).
     """
+    command = ['git', 'submodule', 'status', *args]
+    try:
+        result = check_output(command, cwd=working_dir, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError:
+        # If the status command failed, it's possible that some submodules are broken, e.g., cannot
+        # be recursed because it is empty, so run a non-initializing update and try again.
+        subprocess.call(['git', 'submodule', 'update', '--recursive'], cwd=working_dir)
+        result = check_output(command, cwd=working_dir)
+
     out = dict()
-    result = check_output(['git', 'submodule', 'status', *args], cwd=working_dir)
-    regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s')
+    regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s(?P<refs>(\(.*\))?)')
     for match in regex.finditer(result):
-        out[match.group('name')] = (match.group('status'), match.group('sha1'))
+        out[match.group('name')] = (match.group('status'), match.group('sha1'), match.group('refs'))
     return out
 
 def git_init_submodule(path, working_dir=os.getcwd()):
-    """Check submodule for given in path"""
+    """
+    Check if given path is a submodule and initialize it (unless it already has been) if so.
+    """
     status = git_submodule_info(working_dir)
     for submodule, status in status.items():
-        if (submodule == path) and (status[0] == '-'):
+        if (submodule == path) and ((status[0] == '-') or ('(null)' in status[2])):
             subprocess.call(['git', 'submodule', 'update', '--init', path], cwd=working_dir)
             break
 

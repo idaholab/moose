@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+# import logging
 import datetime
 import mooseutils
 import MooseDocs
@@ -68,8 +69,11 @@ class SubmoduleHashCommand(command.CommandComponent):
         if not inline:
             raise exceptions.MooseDocsException("The '!git submodule-hash' command is an inline level command, use '[!git!submodule-hash](name)' instead.")
 
-        name =  info['inline']
+        name = info['inline']
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        # if (name == 'moose') and any([repo.endswith('moose') for repo in status.keys()]) and (status['moose'][0] == '-'):
+        #     logging.getLogger(__name__).warning("The 'moose' submodule exists but has not been initialized.")
+
         for repo, ginfo in status.items():
             if repo.endswith(name):
                 url = self.settings['url']
