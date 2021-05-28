@@ -1,5 +1,7 @@
 #include "LiquidMetalSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
+#include "TriSubChannelMesh.h"
+
 registerMooseObject("SubChannelApp", LiquidMetalSubChannel1PhaseProblem);
 
 InputParameters
@@ -11,7 +13,8 @@ LiquidMetalSubChannel1PhaseProblem::validParams()
 
 LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
     const InputParameters & params)
-  : SubChannel1PhaseProblemBase(params)
+  : SubChannel1PhaseProblemBase(params),
+    _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
 {
 }
 

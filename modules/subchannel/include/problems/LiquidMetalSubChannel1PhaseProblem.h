@@ -3,7 +3,7 @@
 #include "SubChannel1PhaseProblemBase.h"
 
 class LiquidMetalSubChannel1PhaseProblem;
-
+class TriSubChannelMesh;
 /**
  * Steady state subchannel solver for 1-phase liquid metal coolants
  */
@@ -31,6 +31,7 @@ protected:
   virtual void externalSolve() override;
   /// average relative error in pressure drop of channels
   Real _dpz_error;
+  TriSubChannelMesh & _tri_sch_mesh;
 
 public:
   static InputParameters validParams();
