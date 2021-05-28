@@ -37,15 +37,24 @@ WaveSpeedVPP::WaveSpeedVPP(const InputParameters & parameters)
 void
 WaveSpeedVPP::initialize()
 {
-  _elem = _fe_problem.mesh().elemPtr(getParam<unsigned int>("elem_id"));
+  _elem = _fe_problem.mesh().queryElemPtr(getParam<unsigned int>("elem_id"));
   _wave_speeds.clear();
-  _wave_speeds.resize(3);
 }
 
 void
 WaveSpeedVPP::execute()
 {
+  if (!_elem || !_hllc.hasData(_elem, _side_id))
+    return;
+
   const auto & ws = _hllc.waveSpeed(_elem, _side_id);
-  for (unsigned int j = 0; j < ws.size(); ++j)
+  _wave_speeds.resize(ws.size());
+  for (const auto j : index_range(ws))
     _wave_speeds[j] = MetaPhysicL::raw_value(ws[j]);
+}
+
+void
+WaveSpeedVPP::finalize()
+{
+  _communicator.allgather(_wave_speeds);
 }

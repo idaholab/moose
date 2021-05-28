@@ -7,6 +7,7 @@ E_right = 1.7919094397e+05
 u_right = 90
 
 [Mesh]
+  allow_renumbering = false
   [./cartesian]
     type = GeneratedMeshGenerator
     dim = 1

@@ -27,6 +27,7 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void finalize() override;
 
 protected:
   const HLLCUserObject & _hllc;

@@ -102,6 +102,13 @@ HLLCUserObject::execute()
   _wave_speed[elem_side] = {SL, SM, SR};
 }
 
+bool
+HLLCUserObject::hasData(const Elem * const elem, const unsigned int side) const
+{
+  side_type elem_side(elem, side);
+  return (_wave_speed.find(elem_side) != _wave_speed.end());
+}
+
 void
 HLLCUserObject::threadJoin(const UserObject & y)
 {

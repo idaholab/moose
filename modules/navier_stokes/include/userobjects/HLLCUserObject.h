@@ -34,6 +34,9 @@ public:
   /// accessor for the void speed
   std::vector<ADReal> waveSpeed(const Elem * elem, unsigned int side) const;
 
+  /// Query whether this processor has data for the provided element and side
+  bool hasData(const Elem * elem, unsigned int side) const;
+
 protected:
   /// helper function for returning the FaceInfo object for an elem/side pair
   const FaceInfo & faceInfoHelper(const Elem * elem, unsigned int side) const;
