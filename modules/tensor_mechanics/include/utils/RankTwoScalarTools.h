@@ -102,7 +102,7 @@ vonMisesStress(const RankTwoTensorTempl<T> & stress)
  */
 template <typename T>
 T
-effectiveStrainIncrement(const RankTwoTensorTempl<T> & strain)
+effectiveStrain(const RankTwoTensorTempl<T> & strain)
 {
   return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
 }
@@ -458,7 +458,7 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
       return vonMisesStress(tensor);
     case 1:
       mooseError("To compute an effective inelastic strain use "
-                 "RankTwoScalarTools::effectiveStrainincrement()");
+                 "RankTwoScalarTools::effectiveStrain()");
     case 2:
       return hydrostatic(tensor);
     case 3:
@@ -554,7 +554,7 @@ getInvariant(const RankTwoTensorTempl<T> & tensor, const InvariantType & scalar_
       return vonMisesStress(tensor);
     case InvariantType::EffectiveStrain:
       mooseError("To compute an effective inelastic strain use "
-                 "RankTwoScalarTools::effectiveStrainincrement()");
+                 "RankTwoScalarTools::effectiveStrain()");
     case InvariantType::Hydrostatic:
       return hydrostatic(tensor);
     case InvariantType::L2norm:

@@ -45,7 +45,7 @@ integrals over the history of the inelastic strain as
 \begin{equation}
 s = \int_t\sqrt{\frac{2}{3} \dot{\epsilon}^p_{ij} \dot{\epsilon}^p_{ij}} \mathrm{d}t
 \end{equation}
-can be computed with the help of the `effectiveStrainIncrement` method.
+can be computed with the help of the `effectiveStrain` method.
 The integration of the effective increment is performed in [RankTwoInvariant.md],
 yielding the effective strain.
 

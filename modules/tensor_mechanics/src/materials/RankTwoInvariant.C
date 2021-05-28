@@ -92,7 +92,7 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
       mooseAssert(_tensor_old, "The selected invariant requires the input material to be stateful");
       mooseAssert(_property_old,
                   "The selected invariant requires the output material to be stateful");
-      _property[_qp] = (*_property_old)[_qp] + RankTwoScalarTools::effectiveStrainIncrement(
+      _property[_qp] = (*_property_old)[_qp] + RankTwoScalarTools::effectiveStrain(
                                                    MetaPhysicL::raw_value(_tensor[_qp]) -
                                                    MetaPhysicL::raw_value((*_tensor_old)[_qp]));
       break;
