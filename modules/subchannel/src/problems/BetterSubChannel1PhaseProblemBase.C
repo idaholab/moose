@@ -24,6 +24,7 @@ BetterSubChannel1PhaseProblemBase::validParams()
   params.addRequiredParam<bool>("Viscosity", "Flag that enables the calculation of viscosity");
   params.addRequiredParam<bool>(
       "Power", "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
+  params.addRequiredParam<Real>("P_out", "Outlet Pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
@@ -37,6 +38,7 @@ BetterSubChannel1PhaseProblemBase::BetterSubChannel1PhaseProblemBase(const Input
     _Viscosity(getParam<bool>("Viscosity")),
     _Power(getParam<bool>("Power")),
     _dt(isTransient() ? dt() : _one),
+    _P_out(getParam<Real>("P_out")),
     _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
     _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
@@ -390,7 +392,7 @@ BetterSubChannel1PhaseProblemBase::computeh(int iblock)
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      h_soln->set(node, _fp->h_from_p_T((*P_soln)(node), (*T_soln)(node)));
+      h_soln->set(node, _fp->h_from_p_T((*P_soln)(node) + _P_out, (*T_soln)(node)));
     }
   }
 
@@ -471,7 +473,7 @@ BetterSubChannel1PhaseProblemBase::computeT(int iblock)
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      T_soln->set(node, _fp->T_from_p_h((*P_soln)(node), (*h_soln)(node)));
+      T_soln->set(node, _fp->T_from_p_h((*P_soln)(node) + _P_out, (*h_soln)(node)));
     }
   }
 }
@@ -487,7 +489,7 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      rho_soln->set(node, _fp->rho_from_p_T((*P_soln)(node), (*T_soln)(node)));
+      rho_soln->set(node, _fp->rho_from_p_T((*P_soln)(node) + _P_out, (*T_soln)(node)));
     }
   }
 
@@ -497,7 +499,7 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
     {
       // Find the node
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      rho_soln->set(node, _fp->rho_from_p_T((*P_soln)(node), (*T_soln)(node)));
+      rho_soln->set(node, _fp->rho_from_p_T((*P_soln)(node) + _P_out, (*T_soln)(node)));
     }
   }
 }
@@ -513,7 +515,7 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      Mu_soln->set(node, _fp->mu_from_rho_T((*rho_soln)(node), (*T_soln)(node)));
+      Mu_soln->set(node, _fp->mu_from_p_T((*P_soln)(node) + _P_out, (*T_soln)(node)));
     }
   }
 
@@ -523,7 +525,7 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
     {
       // Find the node
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      Mu_soln->set(node, _fp->mu_from_rho_T((*rho_soln)(node), (*T_soln)(node)));
+      Mu_soln->set(node, _fp->mu_from_p_T((*P_soln)(node) + _P_out, (*T_soln)(node)));
     }
   }
 }
@@ -647,7 +649,6 @@ void
 BetterSubChannel1PhaseProblemBase::externalSolve()
 {
   _console << "Executing subchannel solver\n";
-
   auto P_error = 1.0;
   auto P_tol = 1e-6;
   unsigned int P_it = 0;
@@ -709,7 +710,8 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
 
     auto T_error =
         std::abs((T_L2norm_new_axial - T_L2norm_old_axial) / (T_L2norm_old_axial + 1E-14));
-    P_error = std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + 1E-14));
+    P_error =
+        std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
     auto DP_error =
         std::abs((DP_L2norm_new_axial - DP_L2norm_old_axial) / (DP_L2norm_old_axial + 1E-14));
     auto mdot_error =
