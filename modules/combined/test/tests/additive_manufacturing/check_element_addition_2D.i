@@ -5,33 +5,30 @@
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    dim = 3
+    dim = 2
     xmin = 0
-    xmax = 10
     ymin = 0
-    ymax = 10
-    zmin = 0
-    zmax = 0.5
+    xmax = 1
+    ymax = 0.5
     nx = 20
-    ny = 20
-    nz = 1
+    ny = 10
   []
-  [left_domain]
+  [bottom_domain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
-    top_right = '5 10 0.5'
+    top_right = ' 1 0.1 0'
     block_id = 1
   []
-  [right_domain]
-    input = left_domain
+  [top_domain]
+    input = bottom_domain
     type = SubdomainBoundingBoxGenerator
-    bottom_left = '5 0 0'
-    top_right = '10 10 0.5'
+    bottom_left = '0 0.1 0'
+    top_right = '1 0.5 00'
     block_id = 2
   []
   [sidesets]
-    input = right_domain
+    input = top_domain
     type = SideSetsAroundSubdomainGenerator
     normal = '1 0 0'
     block = 1
@@ -46,17 +43,13 @@
 []
 
 [Functions]
-  [fx]
-    type = ParsedFunction
-    value = '5.25'
-  []
   [fy]
     type = ParsedFunction
-    value = '2.5*t'
+    value = '0.2'
   []
-  [fz]
+  [fx]
     type = ParsedFunction
-    value = '0.25'
+    value = 't'
   []
 []
 
@@ -71,9 +64,7 @@
   type = Transient
 
   automatic_scaling = true
-
   solve_type = 'NEWTON'
-
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
@@ -84,7 +75,7 @@
   nl_rel_tol = 1e-4
 
   start_time = 0.0
-  end_time = 1.0
+  end_time = 1
   dt = 1e-1
   dtmin = 1e-4
 []
@@ -93,9 +84,9 @@
   [activated_elem_uo]
     type = ActivateElementsByPath
     execute_on = timestep_begin
+    activate_distance = 0.2
     function_x = fx
     function_y = fy
-    function_z = fz
     active_subdomain_id = 1
     expand_boundary_name = 'moving_interface'
   []

@@ -4,34 +4,34 @@
 []
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 3
-    xmin =0
-    xmax =10
-    ymin =0
-    ymax =10
-    zmin =0
-    zmax =0.5
-    nx=20
-    ny=20
-    nz=1
-  [../]
-  [./left_domain]
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 10
+    zmin = 0
+    zmax = 0.5
+    nx = 20
+    ny = 20
+    nz = 1
+  []
+  [left_domain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '5 10 0.5'
     block_id = 1
-  [../]
-  [./right_domain]
+  []
+  [right_domain]
     input = left_domain
     type = SubdomainBoundingBoxGenerator
     bottom_left = '5 0 0'
     top_right = '10 10 0.5'
     block_id = 2
-  [../]
-  [./sidesets]
+  []
+  [sidesets]
     input = right_domain
     type = SideSetsAroundSubdomainGenerator
     normal = '1 0 0'
@@ -41,54 +41,54 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 300
     block = '1'
-  [../]
+  []
 []
 
 # Output aux variables to check if stateful properties
 # are initialized properly for newly added elements
 [AuxVariables]
-  [./density_aux]
+  [density_aux]
     order = CONSTANT
     family = MONOMIAL
     block = '1'
-  [../]
-  [./specific_heat_aux]
+  []
+  [specific_heat_aux]
     order = CONSTANT
     family = MONOMIAL
     block = '1'
-  [../]
-  [./thermal_conductivity_aux]
+  []
+  [thermal_conductivity_aux]
     order = CONSTANT
     family = MONOMIAL
     block = '1'
-  [../]
+  []
 []
 
 [Kernels]
-  [./null]
+  [null]
     type = NullKernel
     variable = temp
     jacobian_fill = 1e-5
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./density]
+  [density]
     type = ADMaterialRealAux
     property = density
     variable = density_aux
     block = 1
   []
-  [./specific_heat]
+  [specific_heat]
     type = ADMaterialRealAux
     property = specific_heat
     variable = specific_heat_aux
     block = 1
   []
-  [./thermal_conductivity]
+  [thermal_conductivity]
     type = ADMaterialRealAux
     property = thermal_conductivity
     variable = thermal_conductivity_aux
@@ -97,47 +97,46 @@
 []
 
 [Functions]
-  [./fx]
+  [fx]
     type = ParsedFunction
-    value= '5.25'
-  [../]
-  [./fy]
+    value = '5.25'
+  []
+  [fy]
     type = ParsedFunction
-    value= '2.5*t'
-  [../]
-  [./fz]
+    value = '2.5*t'
+  []
+  [fz]
     type = ParsedFunction
-    value= '0.25'
-  [../]
+    value = '0.25'
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = ADDensity
     density = 4.43e-6
     block = '1'
-  [../]
-  [./heat]
+  []
+  [heat]
     type = ADHeatConductionMaterial
     specific_heat = 600
     thermal_conductivity = 10e-3
     block = '1'
-  [../]
-  [./volumetric_heat]
+  []
+  [volumetric_heat]
     type = ADGenericConstantMaterial
     prop_names = 'volumetric_heat'
     prop_values = 100
     block = '1'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient
@@ -162,15 +161,15 @@
 []
 
 [UserObjects]
-  [./activated_elem_uo]
+  [activated_elem_uo]
     type = ActivateElementsByPath
     execute_on = timestep_begin
-    function_x= fx
-    function_y= fy
-    function_z= fz
+    function_x = fx
+    function_y = fy
+    function_z = fz
     active_subdomain_id = 1
     expand_boundary_name = 'moving_interface'
-  [../]
+  []
 []
 
 [Outputs]
