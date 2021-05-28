@@ -66,6 +66,8 @@ protected:
   const bool _Power;
   /// Time step
   const Real & _dt;
+  /// Outlet Pressure
+  const Real & _P_out;
   BetterSubChannelMeshBase & _subchannel_mesh;
   /// Thermal diffusion coefficient used in turbulent crossflow
   const Real & _beta;

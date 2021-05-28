@@ -31,9 +31,9 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [S]
+  [Mu]
   []
-  [Sij]
+  [S]
   []
   [w_perim]
   []
@@ -52,9 +52,13 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  abeta = 0.08
+  abeta = 0.006
   CT = 1.0
   enforce_uniform_pressure = false
+  Density = true
+  Viscosity = true
+  Power = true
+  P_out = ${P_out}
 []
 
 [ICs]
@@ -84,7 +88,7 @@ P_out = 4.923e6 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -93,10 +97,18 @@ P_out = 4.923e6 # Pa
     value = 0.0
   []
 
+  [Viscosity_ic]
+    type = ViscosityIC
+    variable = Mu
+    p = ${P_out}
+    T = T
+    fp = water
+  []
+
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -104,7 +116,7 @@ P_out = 4.923e6 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -117,13 +129,6 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -233,6 +238,13 @@ P_out = 4.923e6 # Pa
     direction = to_multiapp
     source_variable = rho
     variable = rho
+  []
+  [xfer_Mu]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = Mu
+    variable = Mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer
