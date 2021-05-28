@@ -44,6 +44,7 @@
 []
 
 [Debug]
+  show_action_dependencies = true
   show_actions = true
   show_top_residuals = 5
 []
