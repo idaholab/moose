@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FixedPointSolve.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 // System includes
 #include <string>

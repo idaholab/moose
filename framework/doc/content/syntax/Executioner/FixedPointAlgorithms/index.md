@@ -18,9 +18,9 @@ Relaxation, or acceleration (cf secant/Steffensen's method), is performed on var
 most of the data transfers that are performed when coupling several applications.
 
 !alert note
-The fixed point iteration algorithms work to converge within a time step. They do not attempt to use a previous time step solution,
-or lag part or all of the solution vector. Lagging can still be achieved using postprocessors, auxiliary variables, or other constructs, and
-transferring them at the beginning / end of a time step.
+The fixed point iteration algorithms work to converge within a time step. The previous time step solution is not modified,
+The Picard, secant and Steffensen algorithm do not lag part or all of the solution vector. Lagging can still be achieved
+using postprocessors, auxiliary variables, or other constructs, and transferring them at the beginning / end of a time step.
 
 ## Picard fixed point iterations
 

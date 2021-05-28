@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FixedPointSolve.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 class SecantSolve : public FixedPointSolve
 {
