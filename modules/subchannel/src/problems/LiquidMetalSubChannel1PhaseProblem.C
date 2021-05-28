@@ -117,7 +117,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   // inlet pressure convergence cycles
   auto dpz_cycles = 0;
   // max relative error convergence criterion for the inlet pressure distribution
-  dpz_error0 = 1.0E-4;
+  dpz_error0 = 5.0E-3;
   // initial guess for the relative error
   _dpz_error = 1.0e-2;
 
