@@ -20,6 +20,8 @@ CNSFVHLLCMomentumImplicitBC::validParams()
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
+  params.addClassDescription("Implements an implicit advective boundary flux for the momentum "
+                             "equation for an HLLC discretization");
   return params;
 }
 

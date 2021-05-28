@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#16758'
+  design = 'PCNSFVKT.md'
   [kt-van-leer-primitive]
     type = Exodiff
     input = transient-porous-kt-primitive.i

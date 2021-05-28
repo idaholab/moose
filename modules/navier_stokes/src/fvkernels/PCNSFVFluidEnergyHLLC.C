@@ -16,6 +16,8 @@ InputParameters
 PCNSFVFluidEnergyHLLC::validParams()
 {
   InputParameters params = PCNSFVHLLC::validParams();
+  params.addClassDescription(
+      "Implements the fluid energy flux portion of the porous HLLC discretization.");
   return params;
 }
 

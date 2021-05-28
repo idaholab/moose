@@ -9,21 +9,19 @@
 
 #pragma once
 
-// MOOSE includes
-#include "ADMaterial.h"
+#include "Material.h"
 
-class SoundspeedMat;
 class SinglePhaseFluidProperties;
-
-declareADValidParams(SoundspeedMat);
 
 /**
  * Computes the speed of sound from other Navier-Stokes materials
  */
-class SoundspeedMat : public ADMaterial
+class SoundspeedMat : public Material
 {
 public:
   SoundspeedMat(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;

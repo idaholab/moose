@@ -41,3 +41,6 @@ typedef PCNSFVHLLCFluidEnergyBC<PCNSFVHLLCSpecifiedMassFluxAndTemperatureBC>
     PCNSFVHLLCSpecifiedMassFluxAndTemperatureFluidEnergyBC;
 typedef PCNSFVHLLCFluidEnergyBC<PCNSFVHLLCSpecifiedPressureBC>
     PCNSFVHLLCSpecifiedPressureFluidEnergyBC;
+
+template <>
+InputParameters PCNSFVHLLCFluidEnergyBC<PCNSFVHLLCSpecifiedPressureBC>::validParams();

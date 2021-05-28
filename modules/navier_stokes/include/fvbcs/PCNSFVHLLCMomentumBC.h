@@ -17,6 +17,7 @@ class PCNSFVHLLCMomentumBC : public T
 {
 public:
   static InputParameters validParams();
+  static void addCommonParams(InputParameters & params);
   PCNSFVHLLCMomentumBC(const InputParameters & params);
 
 protected:
@@ -42,3 +43,6 @@ protected:
 typedef PCNSFVHLLCMomentumBC<PCNSFVHLLCSpecifiedMassFluxAndTemperatureBC>
     PCNSFVHLLCSpecifiedMassFluxAndTemperatureMomentumBC;
 typedef PCNSFVHLLCMomentumBC<PCNSFVHLLCSpecifiedPressureBC> PCNSFVHLLCSpecifiedPressureMomentumBC;
+
+template <>
+InputParameters PCNSFVHLLCMomentumBC<PCNSFVHLLCSpecifiedPressureBC>::validParams();

@@ -11,12 +11,12 @@
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Limiter.h"
-#include "MooseApp.h"
+#include "NavierStokesApp.h"
 #include "Executioner.h"
 
 using namespace Moose::FV;
 
-registerMooseObject("MooseApp", PCNSFVKTDC);
+registerMooseObject("NavierStokesApp", PCNSFVKTDC);
 
 InputParameters
 PCNSFVKTDC::validParams()

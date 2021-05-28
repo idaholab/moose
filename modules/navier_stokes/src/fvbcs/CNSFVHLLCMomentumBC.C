@@ -13,15 +13,35 @@ registerMooseObject("NavierStokesApp", CNSFVHLLCSpecifiedMassFluxAndTemperatureM
 registerMooseObject("NavierStokesApp", CNSFVHLLCSpecifiedPressureMomentumBC);
 
 template <typename T>
-InputParameters
-CNSFVHLLCMomentumBC<T>::validParams()
+void
+CNSFVHLLCMomentumBC<T>::addCommonParams(InputParameters & params)
 {
-  InputParameters params = T::validParams();
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+}
+
+template <typename T>
+InputParameters
+CNSFVHLLCMomentumBC<T>::validParams()
+{
+  InputParameters params = T::validParams();
+  addCommonParams(params);
+  params.addClassDescription("Implements the momentum boundary flux portion of the free-flow HLLC "
+                             "discretization given specified mass fluxes and fluid temperature");
+  return params;
+}
+
+template <>
+InputParameters
+CNSFVHLLCMomentumBC<CNSFVHLLCSpecifiedPressureBC>::validParams()
+{
+  InputParameters params = CNSFVHLLCSpecifiedPressureBC::validParams();
+  addCommonParams(params);
+  params.addClassDescription("Implements the momentum boundary flux portion of the free-flow HLLC "
+                             "discretization given specified pressure");
   return params;
 }
 

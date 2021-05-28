@@ -17,6 +17,8 @@ InputParameters
 CNSFVHLLCFluidEnergyImplicitBC::validParams()
 {
   InputParameters params = CNSFVHLLCImplicitBC::validParams();
+  params.addClassDescription("Implements an implicit advective boundary flux for the fluid energy "
+                             "equation for an HLLC discretization");
   return params;
 }
 

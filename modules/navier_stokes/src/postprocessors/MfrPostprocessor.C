@@ -17,6 +17,8 @@ InputParameters
 MfrPostprocessor::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
+  params.addClassDescription("Object for outputting boundary mass fluxes in conjunction with "
+                             "FVFluxBC derived objects that support it");
   return params;
 }
 

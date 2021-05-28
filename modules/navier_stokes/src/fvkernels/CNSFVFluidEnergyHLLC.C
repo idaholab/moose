@@ -19,6 +19,8 @@ InputParameters
 CNSFVFluidEnergyHLLC::validParams()
 {
   InputParameters params = CNSFVHLLC::validParams();
+  params.addClassDescription(
+      "Implements the fluid energy flux portion of the free-flow HLLC discretization.");
   return params;
 }
 

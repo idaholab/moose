@@ -1,4 +1,6 @@
 [Tests]
+  design = 'PCNSFVKT.md'
+  issues = '#16758'
   [scalar_advection]
     type = Exodiff
     input = mass-frac-advection.i

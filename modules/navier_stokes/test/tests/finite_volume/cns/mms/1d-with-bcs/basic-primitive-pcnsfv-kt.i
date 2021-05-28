@@ -172,8 +172,9 @@
     porosity = porosity
   []
   [porosity]
-    type = PorosityVarMaterial
-    porosity_function = 'eps'
+    type = GenericFunctionMaterial
+    prop_names = 'porosity'
+    prop_values = 'eps'
   []
 []
 

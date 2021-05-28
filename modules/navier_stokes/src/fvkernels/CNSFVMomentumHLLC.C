@@ -21,6 +21,8 @@ CNSFVMomentumHLLC::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+  params.addClassDescription(
+      "Implements the momentum flux portion of the free-flow HLLC discretization.");
   return params;
 }
 

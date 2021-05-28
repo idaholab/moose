@@ -17,6 +17,18 @@ InputParameters
 CNSFVHLLCMassBC<T>::validParams()
 {
   InputParameters params = T::validParams();
+  params.addClassDescription("Implements the mass boundary flux portion of the free-flow HLLC "
+                             "discretization given specified mass fluxes and fluid temperature");
+  return params;
+}
+
+template <>
+InputParameters
+CNSFVHLLCMassBC<CNSFVHLLCSpecifiedPressureBC>::validParams()
+{
+  InputParameters params = CNSFVHLLCSpecifiedPressureBC::validParams();
+  params.addClassDescription("Implements the mass boundary flux portion of the free-flow HLLC "
+                             "discretization given specified pressure");
   return params;
 }
 

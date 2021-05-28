@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#16758'
+  design = 'HLLCUserObject.md WaveSpeedVPP.md'
   [./HLLC_wave_speeds_1D]
     type = CSVDiff
     input = 'hllc_uo_1D.i'

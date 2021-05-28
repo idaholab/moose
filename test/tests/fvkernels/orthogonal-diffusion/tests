@@ -1,4 +1,6 @@
 [Tests]
+  design = 'FVOrthogonalDiffusion.md FVOrthogonalBoundaryDiffusion.md'
+  issues = '#16758'
   [orthogonal-diffusion]
     type = Exodiff
     input = orthogonal-diffusion.i

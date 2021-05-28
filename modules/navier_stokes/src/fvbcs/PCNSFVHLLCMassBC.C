@@ -17,6 +17,18 @@ InputParameters
 PCNSFVHLLCMassBC<T>::validParams()
 {
   InputParameters params = T::validParams();
+  params.addClassDescription("Implements the mass boundary flux portion of the porous HLLC "
+                             "discretization given specified mass fluxes and fluid temperature");
+  return params;
+}
+
+template <>
+InputParameters
+PCNSFVHLLCMassBC<PCNSFVHLLCSpecifiedPressureBC>::validParams()
+{
+  InputParameters params = PCNSFVHLLCSpecifiedPressureBC::validParams();
+  params.addClassDescription("Implements the mass boundary flux portion of the porous HLLC "
+                             "discretization given specified pressure");
   return params;
 }
 

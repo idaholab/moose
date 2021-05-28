@@ -13,7 +13,7 @@
 #include "Function.h"
 #include "MfrPostprocessor.h"
 
-registerMooseObject("MooseApp", PCNSFVStrongBC);
+registerMooseObject("NavierStokesApp", PCNSFVStrongBC);
 
 InputParameters
 PCNSFVStrongBC::validParams()

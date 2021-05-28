@@ -21,6 +21,8 @@ HLLCUserObject::validParams()
 {
   InputParameters params = InternalSideUserObject::validParams();
   params.addRequiredParam<UserObjectName>(nms::fluid, "Fluid userobject");
+  params.addClassDescription(
+      "Computes free-flow wave speeds on internal sides, useful in HLLC contexts");
   return params;
 }
 

@@ -16,6 +16,8 @@ InputParameters
 CNSFVHLLCMassImplicitBC::validParams()
 {
   InputParameters params = CNSFVHLLCImplicitBC::validParams();
+  params.addClassDescription("Implements an implicit advective boundary flux for the mass "
+                             "equation for an HLLC discretization");
   return params;
 }
 

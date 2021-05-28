@@ -16,6 +16,8 @@ InputParameters
 CNSFVMassHLLC::validParams()
 {
   InputParameters params = CNSFVHLLC::validParams();
+  params.addClassDescription(
+      "Implements the mass flux portion of the free-flow HLLC discretization.");
   return params;
 }
 

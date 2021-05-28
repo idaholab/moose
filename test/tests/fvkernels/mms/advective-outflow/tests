@@ -30,6 +30,7 @@
     test_case = UpwindLimiter
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display first order convergence with an upwind limiter.'
   []
   [CentralDifferenceLimiter]
     type = PythonUnitTest
@@ -37,6 +38,7 @@
     test_case = CentralDifferenceLimiter
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display second order convergence with a central-differencing limiter.'
   []
   [VanLeerLimiter]
     type = PythonUnitTest
@@ -44,6 +46,7 @@
     test_case = VanLeerLimiter
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
   []
   [kt]
     requirement = 'The system shall provide a Kurganov-Tadmor scheme for evaluating convective intercell fluxes'

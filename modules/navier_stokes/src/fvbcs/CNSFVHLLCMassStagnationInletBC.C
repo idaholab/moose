@@ -16,6 +16,8 @@ InputParameters
 CNSFVHLLCMassStagnationInletBC::validParams()
 {
   InputParameters params = CNSFVHLLCStagnationInletBC::validParams();
+  params.addClassDescription(
+      "Adds the boundary mass flux for HLLC when provided stagnation temperature and pressure");
   return params;
 }
 

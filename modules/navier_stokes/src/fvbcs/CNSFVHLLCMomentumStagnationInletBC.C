@@ -20,6 +20,8 @@ CNSFVHLLCMomentumStagnationInletBC::validParams()
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
+  params.addClassDescription(
+      "Adds the boundary momentum flux for HLLC when provided stagnation temperature and pressure");
   return params;
 }
 

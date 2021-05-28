@@ -40,3 +40,6 @@ protected:
 typedef PCNSFVHLLCMassBC<PCNSFVHLLCSpecifiedMassFluxAndTemperatureBC>
     PCNSFVHLLCSpecifiedMassFluxAndTemperatureMassBC;
 typedef PCNSFVHLLCMassBC<PCNSFVHLLCSpecifiedPressureBC> PCNSFVHLLCSpecifiedPressureMassBC;
+
+template <>
+InputParameters PCNSFVHLLCMassBC<PCNSFVHLLCSpecifiedPressureBC>::validParams();

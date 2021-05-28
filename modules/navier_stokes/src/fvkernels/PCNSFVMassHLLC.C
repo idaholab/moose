@@ -15,6 +15,7 @@ InputParameters
 PCNSFVMassHLLC::validParams()
 {
   InputParameters params = PCNSFVHLLC::validParams();
+  params.addClassDescription("Implements the mass flux portion of the porous HLLC discretization.");
   return params;
 }
 
