@@ -69,7 +69,7 @@ PorousFlowAddMaterialAction::act()
         // 2) The parameter at_nodes has not been set by the user. In this case, this action
         // will check to see if the material is required at the qps, at the nodes, or possibly both
 
-        // Only chech the second possibility
+        // Only check the second possibility
         if (!pars.isParamSetByUser("at_nodes"))
         {
           bool qp_material_required = false;

@@ -212,7 +212,18 @@ protected:
                         const MooseEnum & temperature_unit);
 
   /**
+   * Adds a relative-permeability Material of the constant variety (primarily to
+   * add kr = 1 in actions that add a default relatively permeability for objects
+   * that require kr even when the flow is fully saturated with a single phase)
+   * @param at_nodes whether the material is nodal
+   * @param phase the phase number of the fluid
+   * @param kr the relative permeability
+   */
+  void addRelativePermeabilityConst(bool at_nodes, unsigned phase, Real kr);
+
+  /**
    * Adds a relative-permeability Material of the Corey variety
+   * @param at_nodes whether the material is nodal
    * @param phase the phase number of the fluid
    * @param n The Corey exponent
    * @param s_res The residual saturation for this phase
@@ -223,6 +234,7 @@ protected:
 
   /**
    * Adds a relative-permeability Material of the FLAC variety
+   * @param at_nodes whether the material is nodal
    * @param phase the phase number of the fluid
    * @param m The FLAC exponent
    * @param s_res The residual saturation for this phase
