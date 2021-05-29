@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ParsedPostprocessor.md'
+  issues = '#3447 #5954 #17901'
+  [test]
+    type = 'CSVDiff'
+    input = 'parsed_pp.i'
+    csvdiff = 'parsed_pp_out.csv'
+    requirement = 'The system shall be able to compute a postprocessor based on a parsed expression of other postprocessors.'
+  []
+[]

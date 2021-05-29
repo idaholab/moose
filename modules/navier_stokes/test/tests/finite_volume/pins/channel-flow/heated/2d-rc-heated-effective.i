@@ -149,7 +149,7 @@ velocity_interp_method='rc'
   []
   [energy_diffusion]
     type = PINSFVEnergyEffectiveDiffusion
-    kappa = ${k}
+    kappa = 'kappa'
     variable = temperature
   []
   [energy_convection]
@@ -255,6 +255,11 @@ velocity_interp_method='rc'
     type = ADGenericConstantMaterial
     prop_names = 'cp h_cv'
     prop_values = '${cp} 1'
+  []
+  [kappa]
+    type = ADGenericConstantVectorMaterial
+    prop_names = 'kappa'
+    prop_values = '1e-3 1e-2 1e-1'
   []
   [ins_fv]
     type = INSFVMaterial
