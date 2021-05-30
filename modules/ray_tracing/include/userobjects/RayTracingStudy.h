@@ -1106,7 +1106,7 @@ private:
   const std::unique_ptr<ParallelRayStudy> _parallel_ray_study;
 
   /// Quadrature rule for laying points across a 1D ray segment
-  UniquePtr<QBase> _segment_qrule;
+  std::unique_ptr<QBase> _segment_qrule;
 
   /// Total number of processor crossings for Rays that finished on this processor
   unsigned long long int _ending_processor_crossings;
