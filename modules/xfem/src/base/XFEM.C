@@ -1362,7 +1362,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       n_edges = parent_elem2->n_edges();
       for (unsigned int edge = 0; edge < n_edges; ++edge)
       {
-        _displaced_mesh->get_boundary_info().edge_boundary_ids(parent_elem2, edge, parent_boundary_ids);
+        _displaced_mesh->get_boundary_info().edge_boundary_ids(
+            parent_elem2, edge, parent_boundary_ids);
         _displaced_mesh->get_boundary_info().add_edge(libmesh_elem2, edge, parent_boundary_ids);
       }
     }
