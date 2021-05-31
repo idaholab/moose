@@ -930,11 +930,6 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
-   * No longer used. To be removed after application patching
-   */
-  void initPostprocessorData(const std::string &) {}
-
-  /**
    * Whether or not a Postprocessor value exists by a given name.
    * @param name The name of the Postprocessor
    * @return True if a Postprocessor value exists
