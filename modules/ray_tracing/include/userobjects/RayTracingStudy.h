@@ -668,7 +668,10 @@ public:
   /**
    * Gets the threaded TraceRay object for \p tid.
    */
+  ///@{
+  TraceRay & traceRay(const THREAD_ID tid) { return *_threaded_trace_ray[tid]; }
   const TraceRay & traceRay(const THREAD_ID tid) const { return *_threaded_trace_ray[tid]; }
+  ///@}
 
   /**
    * Whether or not to verify if Rays have valid information before being traced
@@ -720,11 +723,6 @@ protected:
    * Helper function for computing the total domain volume
    */
   Real computeTotalVolume();
-
-  /**
-   * Gets the threaded TraceRay object for thread \p tid.
-   */
-  TraceRay & traceRay(const THREAD_ID tid) { return *_threaded_trace_ray[tid]; }
 
   /**
    * Gets the writeable current RayKernels for a thread
