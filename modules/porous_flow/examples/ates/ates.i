@@ -403,19 +403,19 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
     function = insitu_temperature
     boundary = 'bottom right top'
   []
-  [inject_heat1]
+  [inject_heat]
     type = FunctionDirichletBC
     variable = temperature
     function = ${inject_temp}
     boundary = 'injection_area'
   []
-  [inject_fluid1]
+  [inject_fluid]
     type = PorousFlowSink
     variable = porepressure
     boundary = injection_area
     flux_function = injection_rate_value
   []
-  [produce_heat1]
+  [produce_heat]
     type = PorousFlowSink
     variable = temperature
     boundary = injection_area
@@ -424,7 +424,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
     use_enthalpy = true
     save_in = heat_flux_out
   []
-  [produce_fluid1]
+  [produce_fluid]
     type = PorousFlowSink
     variable = porepressure
     boundary = injection_area
@@ -435,14 +435,14 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 [Controls]
   [inject_on]
     type = ConditionalFunctionEnableControl
-    enable_objects = 'BCs::inject_heat1 BCs::inject_fluid1'
+    enable_objects = 'BCs::inject_heat BCs::inject_fluid'
     conditional_function = inject
     implicit = false
     execute_on = 'initial timestep_begin'
   []
   [produce_on]
     type = ConditionalFunctionEnableControl
-    enable_objects = 'BCs::produce_heat1 BCs::produce_fluid1'
+    enable_objects = 'BCs::produce_heat BCs::produce_fluid'
     conditional_function = produce
     implicit = false
     execute_on = 'initial timestep_begin'
@@ -691,7 +691,10 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 
 [Outputs]
   sync_times = ${synctimes}
-  exodus = true
+  [ex]
+    type = Exodus
+    interval = 20
+  []
   [csv]
     type = CSV
     execute_postprocessors_on = 'initial timestep_end'
