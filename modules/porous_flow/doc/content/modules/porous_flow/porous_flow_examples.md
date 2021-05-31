@@ -8,4 +8,5 @@
 - [modules/porous_flow/restart.md]
 - [modules/porous_flow/heterogeneous_models.md]
 - [modules/porous_flow/groundwater_models.md]
+- [modules/porous_flow/ates.md]
 - [modules/porous_flow/tests.md]
