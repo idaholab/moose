@@ -1,11 +1,21 @@
 [Tests]
   [continuous_eps]
-    type = Exodiff
-    input = implicit-euler-basic-kt-primitive.i
-    exodiff = implicit-euler-basic-kt-primitive_out.e
-    requirement = 'The system shall be able to solve a series of stages of continuous porosity changes using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind interpolation to the faces.'
-    ad_indexing_type = 'global'
-    recover = false # See https://github.com/idaholab/moose/issues/17906
+  requirement = 'The system shall be able to solve a series of stages of continuous porosity changes with different schemes for computing the convective fluxes assuming piecewise constant data including'
+    [continuous_eps_kt]
+      type = Exodiff
+      input = implicit-euler-basic-kt-primitive.i
+      exodiff = implicit-euler-basic-kt-primitive_out.e
+      detail = 'the Kurganov-Tadmor scheme'
+      ad_indexing_type = 'global'
+      recover = false # See https://github.com/idaholab/moose/issues/17906
+    []
+    [continuous_eps_hllc]
+      type = Exodiff
+      input = hllc.i
+      exodiff = hllc_out.e
+      detail = 'the HLLC scheme'
+      ad_indexing_type = 'global'
+    []
   []
   [twod_y_channel_upwind_frictional_porosity_function]
     type = Exodiff
@@ -16,6 +26,7 @@
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
+    valgrind = 'none'
   []
   [twod_y_channel_upwind_frictional_porosity_function_mixed]
     type = Exodiff
@@ -26,6 +37,7 @@
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
+    valgrind = 'none'
   []
   [deferred_correction]
     type = Exodiff
