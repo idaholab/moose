@@ -2,6 +2,7 @@
   design = 'Constraints/index.md'
   issues = '#13080'
   [./soft]
+    no_error_deprecated = true
     requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem on a second order 2D mesh using tensor mechanics and mortar contact'
     [./finite_noaction]
       detail = 'using the finite strain formulation without the contact action.'
@@ -46,6 +47,7 @@
     [../]
   [../]
   [./stiff]
+    no_error_deprecated = true
     requirement = 'The system shall be able to compute a block bouncing on a plank problem on a second order 2D mesh using tensor mechanics and mortar contact and finite strain'
     [./stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'

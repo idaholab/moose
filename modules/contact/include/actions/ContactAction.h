@@ -94,7 +94,14 @@ protected:
   /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
   /// Mortar approach (weighted --variationally consistent-- or legacy)
-  const MooseEnum _mortar_approach;
+  enum class MortarApproach
+  {
+    Weighted,
+    Legacy
+  };
+  const MortarApproach _mortar_approach;
+  /// Whether to use the dual Mortar approach
+  const bool _use_dual;
 
 private:
   /**

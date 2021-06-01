@@ -119,6 +119,11 @@ ContactAction::validParams()
                              "Whether to choose a variationally consistent mortar approach "
                              "'weighted' or a mixed approach 'legacy' ");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
+  params.addParam<bool>("use_dual",
+                        true,
+                        "Whether to use the dual mortar approach. It is defaulted to true for "
+                        "weighted quantity approach, and to false for the legacy approach. This "
+                        "input is only intended for advanced users.");
 
   return params;
 }
@@ -131,7 +136,9 @@ ContactAction::ContactAction(const InputParameters & params)
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
-    _mortar_approach(getParam<MooseEnum>("mortar_approach"))
+    _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
+    _use_dual(getParam<bool>("use_dual"))
+
 {
 
   if (_formulation == "tangential_penalty")
@@ -154,10 +161,17 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("mesh", "The 'mortar' formulation requires 'mesh' to be supplied");
     if (_model == "glued")
       paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
+
+    if (_mortar_approach == MortarApproach::Legacy)
+      mooseDeprecated(
+          "Use of legacy mortar contact approach is deprecated and will be removed by December "
+          "2021. Instead, select the default option based on weighted quantities and dual bases");
   }
   else if (params.isParamSetByUser("mortar_approach"))
     paramError("mortar_approach",
                "The 'mortar_approach' option can only be used with the 'mortar' formulation");
+  else if (!_use_dual)
+    paramError("use_dual", "The 'use_dual' option can only be used with the 'mortar' formulation");
 
   if (_formulation != "ranfs")
     if (getParam<bool>("ping_pong_protection"))
@@ -348,13 +362,16 @@ ContactAction::addMortarContact()
                                                           const Real scaling_factor) //
     {
       InputParameters params = _factory.getValidParams("MooseVariableBase");
-      params.set<bool>("use_dual") = (_mortar_approach == "weighted");
+
+      // Allow the user to select "weighted" constraints and standard bases (use_dual = false)
+      // Unless it's for testing purposes, this combination isn't recommended
+      params.set<bool>("use_dual") = (_mortar_approach == MortarApproach::Weighted && _use_dual);
 
       mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
                   "Displacement variable is missing");
       const auto primal_type =
           _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
-      const int codimension = frictional && !(_mortar_approach == "weighted");
+      const int codimension = frictional && !(_mortar_approach == MortarApproach::Weighted);
       // Order of LM is independent of whether it enforces normal contact or frictional contact.
       const int lm_order = std::max(primal_type.order.get_order() - codimension, min_lm_order);
 
@@ -378,28 +395,28 @@ ContactAction::addMortarContact()
       _problem->addVariable(var_type, variable_name, params);
     };
 
-    // **To avoid instabilities in the solution and obtain the full benefits of a variational
-    // enforcement, use of dual mortar is strongly recommended**
+    // To avoid instabilities in the solution and obtain the full benefits of a variational
+    // enforcement, use of dual mortar is strongly recommended.
 
     // Normal contact:
     //   Lagrange family with order one less than primal, but by necessity with a min
     //   order of 1 (we don't have zeroth order Lagrange). We must use a Lagrange basis because we
     //   need dofs at nodes in order to enforce the zero-penetration constraint
     //
-    if (_mortar_approach == "weighted")
+    if (_mortar_approach == MortarApproach::Weighted)
       addLagrangeMultiplier(
           normal_lagrange_multiplier_name, 1, false, getParam<Real>("normal_lm_scaling"));
-    else if (_mortar_approach == "legacy")
+    else if (_mortar_approach == MortarApproach::Legacy)
       addLagrangeMultiplier(
           normal_lagrange_multiplier_name, 1, false, getParam<Real>("normal_lm_scaling"));
 
     // Tangential contact:
     //    For standard Mortar: one order lower than primal, Lagrange family unless zeroth order,
     //    than MONOMIAL. For dual Mortar: same family, equal order as primal, Lagrange family.
-    if (_model == "coulomb" && _mortar_approach == "weighted")
+    if (_model == "coulomb" && _mortar_approach == MortarApproach::Weighted)
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 1, true, getParam<Real>("tangential_lm_scaling"));
-    else if (_model == "coulomb" && _mortar_approach == "legacy")
+    else if (_model == "coulomb" && _mortar_approach == MortarApproach::Legacy)
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 0, true, getParam<Real>("tangential_lm_scaling"));
   }
@@ -411,7 +428,7 @@ ContactAction::addMortarContact()
     // If no friction, only weighted gap class
     if (_model != "coulomb")
     {
-      if (_mortar_approach == "weighted")
+      if (_mortar_approach == MortarApproach::Weighted)
       {
         InputParameters params = _factory.getValidParams("ComputeWeightedGapLMMechanicalContact");
 
@@ -434,7 +451,7 @@ ContactAction::addMortarContact()
                                 params);
         _problem->haveADObjects(true);
       }
-      else if (_mortar_approach == "legacy")
+      else if (_mortar_approach == MortarApproach::Legacy)
       {
         InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
@@ -460,7 +477,7 @@ ContactAction::addMortarContact()
     // Add the tangential and normal Lagrange's multiplier constraints on the secondary boundary.
     else if (_model == "coulomb")
     {
-      if (_mortar_approach == "weighted")
+      if (_mortar_approach == MortarApproach::Weighted)
       {
         InputParameters params =
             _factory.getValidParams("ComputeFrictionalForceLMMechanicalContact");
@@ -488,7 +505,7 @@ ContactAction::addMortarContact()
             "ComputeFrictionalForceLMMechanicalContact", action_name + "_tangential_lm", params);
         _problem->haveADObjects(true);
       }
-      else if (_mortar_approach == "legacy")
+      else if (_mortar_approach == MortarApproach::Legacy)
       {
         InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
