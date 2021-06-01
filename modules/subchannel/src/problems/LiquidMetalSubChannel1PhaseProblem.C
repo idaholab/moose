@@ -31,7 +31,6 @@ double
 LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
     double Re, int i_ch, Real S, Real w_perim, Real Dh_i)
 {
-  // define and initialize variables used in the correlation
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
@@ -40,10 +39,10 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto gap = _tri_sch_mesh.getDuctToRodGap();
   auto w_to_d = (rod_diameter + gap) / rod_diameter;
-  auto Reb_l = pow(10, (p_to_d - 1)) * 320.0;
-  auto Reb_t = pow(10, 0.7 * (p_to_d - 1)) * 1.0E+4;
-  const Real lamda = 7.0;
-  auto fib = log(Re / Reb_l) / log(Reb_t / Reb_l);
+  auto Reb_l = std::pow(10, (p_to_d - 1)) * 320.0;
+  auto Reb_t = std::pow(10, 0.7 * (p_to_d - 1)) * 1.0E+4;
+  const Real lambda = 7.0;
+  auto fib = std::log(Re / Reb_l) / std::log(Reb_t / Reb_l);
   Real a_l = 0.0;
   Real b1_l = 0.0;
   Real b2_l = 0.0;
@@ -52,13 +51,14 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
   Real b2_t = 0.0;
   Real cfl_p = 0.0;
   Real cft_p = 0.0;
-  auto teta = acos(wire_lead_length / sqrt(pow(wire_lead_length, 2) +
-                                           pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+  auto theta = std::acos(wire_lead_length /
+                         std::sqrt(std::pow(wire_lead_length, 2) +
+                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
   auto wd_t = (19.56 + 98.71 * (wire_diameter / rod_diameter) +
-               303.47 * pow((wire_diameter / rod_diameter), 2)) *
-              pow((wire_lead_length / rod_diameter), -0.541);
+               303.47 * std::pow((wire_diameter / rod_diameter), 2)) *
+              std::pow((wire_lead_length / rod_diameter), -0.541);
   auto wd_l = 1.4 * wd_t;
-  auto ws_t = -11.0 * log(wire_lead_length / rod_diameter) / log(10.0) + 19.0;
+  auto ws_t = -11.0 * std::log(wire_lead_length / rod_diameter) / std::log(10.0) + 19.0;
   auto ws_l = ws_t;
   Real pw_p = 0.0;
   Real ar = 0.0;
@@ -89,9 +89,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
       b2_t = -0.03333;
     }
     // laminar flow friction factor for bare rod bundle - Center subchannel
-    cfl_p = a_l + b1_l * (p_to_d - 1) + b2_l * pow((p_to_d - 1), 2);
+    cfl_p = a_l + b1_l * (p_to_d - 1) + b2_l * std::pow((p_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Center subchannel
-    cft_p = a_t + b1_t * (p_to_d - 1) + b2_t * pow((p_to_d - 1), 2);
+    cft_p = a_t + b1_t * (p_to_d - 1) + b2_t * std::pow((p_to_d - 1), 2);
   }
   else if (subch_type == EChannelType::EDGE)
   {
@@ -114,9 +114,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
       b2_t = -0.04428;
     }
     // laminar flow friction factor for bare rod bundle - Edge subchannel
-    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * pow((w_to_d - 1), 2);
+    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Edge subchannel
-    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * pow((w_to_d - 1), 2);
+    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
   }
   else
   {
@@ -139,9 +139,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
       b2_t = -0.0009567;
     }
     // laminar flow friction factor for bare rod bundle - Corner subchannel
-    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * pow((w_to_d - 1), 2);
+    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Corner subchannel
-    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * pow((w_to_d - 1), 2);
+    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
   }
 
   if (subch_type == EChannelType::CENTER)
@@ -151,10 +151,11 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
     // wire projected area - center subchannel wire-wrapped bundle
     ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
     // bare rod bundle center subchannel flow area
-    a_p = sqrt(3.0) / 4.0 * pow(pitch, 2.0) - libMesh::pi * pow(rod_diameter, 2) / 8.0;
+    a_p =
+        std::sqrt(3.0) / 4.0 * std::pow(pitch, 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
     // turbulent friction factor equation constant - Center subchannel
-    cf_t = cft_p * (pw_p / w_perim) +
-           wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) * pow((Dh_i / wire_diameter), 0.18);
+    cf_t = cft_p * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
+                                          std::pow((Dh_i / wire_diameter), 0.18);
     // laminar friction factor equation constant - Center subchannel
     cf_l = cfl_p * (pw_p / w_perim) +
            wd_l * (3 * ar / a_p) * (Dh_i / wire_lead_length) * (Dh_i / wire_diameter);
@@ -164,40 +165,43 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
     // wire projected area - edge subchannel wire-wrapped bundle
     ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
     // bare rod bundle edge subchannel flow area
-    a_p = S + 0.5 * libMesh::pi * pow(wire_diameter, 2) / 4.0 / cos(teta);
+    a_p = S + 0.5 * libMesh::pi * std::pow(wire_diameter, 2) / 4.0 / std::cos(theta);
     // turbulent friction factor equation constant - Edge subchannel
-    cf_t = cft_p * pow((1 + ws_t * (ar / a_p) * pow(tan(teta), 2.0)), 1.41);
+    cf_t = cft_p * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
     // laminar friction factor equation constant - Edge subchannel
-    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * pow(tan(teta), 2.0));
+    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
   }
   else
   {
     // wire projected area - corner subchannel wire-wrapped bundle
     ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
     // bare rod bundle corner subchannel flow area
-    a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * pow(wire_diameter, 2) / cos(teta);
+    a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * std::pow(wire_diameter, 2) / std::cos(theta);
     // turbulent friction factor equation constant - Corner subchannel
-    cf_t = cft_p * pow((1 + ws_t * (ar / a_p) * pow(tan(teta), 2.0)), 1.41);
+    cf_t = cft_p * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
     // laminar friction factor equation constant - Corner subchannel
-    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * pow(tan(teta), 2.0));
+    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
   }
   // laminar friction factor
   auto f_l = cf_l / Re;
   // turbulent friction factor
-  auto f_t = cf_t / pow(Re, 0.18);
+  auto f_t = cf_t / std::pow(Re, 0.18);
 
   if (Re < Reb_l)
   {
-    return f_l; // laminar flow
+    // laminar flow
+    return f_l;
   }
   else if (Re > Reb_t)
   {
-    return f_t; // turbulent flow
+    // turbulent flow
+    return f_t;
   }
   else
   {
-    return f_l * pow((1 - fib), 1.0 / 3.0) * (1 - pow(fib, lamda)) +
-           f_t * pow(fib, 1.0 / 3.0); // transition flow
+    // transition flow
+    return f_l * std::pow((1 - fib), 1.0 / 3.0) * (1 - std::pow(fib, lambda)) +
+           f_t * std::pow(fib, 1.0 / 3.0);
   }
 }
 
@@ -229,12 +233,12 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iz)
         _TR * ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / _dt -
         dz * 2.0 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / _dt;
 
-    auto Mass_Term1 =
+    auto mass_term1 =
         std::pow((*mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
-    auto Mass_Term2 = -2.0 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
+    auto mass_term2 = -2.0 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
 
-    auto CrossFlow_Term = 0.0;
-    auto Turbulent_Term = 0.0;
+    auto crossflow_term = 0.0;
+    auto turbulent_term = 0.0;
 
     unsigned int counter = 0;
     for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -261,24 +265,24 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iz)
         U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
       }
 
-      CrossFlow_Term += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz) * U_star;
+      crossflow_term += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz) * U_star;
 
-      Turbulent_Term += WijPrime(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
+      turbulent_term += WijPrime(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
                                                (*mdot_soln)(node_out_j) / Sj / rho_j -
                                                (*mdot_soln)(node_out_i) / Si / rho_i);
       counter++;
     }
-    Turbulent_Term *= _CT;
+    turbulent_term *= _CT;
 
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Re = (((*mdot_soln)(node_in) / S) * Dh_i / mu);
     auto fi = computeFrictionFactor(Re, i_ch, S, w_perim, Dh_i);
     // auto fi = computeFrictionFactor(Re);
-    auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
+    auto friction_term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
                          (S * (*rho_soln)(node_out));
-    auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
-    auto DP = std::pow(S, -1.0) * (time_term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
-                                   Turbulent_Term + Friction_Term + Gravity_Term); // Pa
+    auto gravity_term = _g_grav * (*rho_soln)(node_out)*dz * S;
+    auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
+                                   turbulent_term + friction_term + gravity_term); // Pa
     // update solution
     DP_soln->set(node_out, DP);
   }
@@ -300,19 +304,18 @@ LiquidMetalSubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch
   auto TOL = 1e-6;
   // Iterate until we find massflow that matches the given dp/dz.
   auto iter = 0;
-  auto Error = 1.0;
-  while (Error > TOL)
+  auto error = 1.0;
+  while (error > TOL)
   {
     iter += 1;
     if (iter > max_iter)
-    {
       mooseError(name(), ": exceeded maximum number of iterations");
-    }
+
     auto massflow_old = massflow;
     auto Rei = ((massflow / Si) * Dhi / mu);
     auto fi = computeFrictionFactor(Rei, i_ch, Si, w_perim, Dhi);
-    massflow = sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
-    Error = std::abs((massflow - massflow_old) / massflow_old);
+    massflow = std::sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
+    error = std::abs((massflow - massflow_old) / massflow_old);
   }
   return massflow;
 }
@@ -330,8 +333,8 @@ LiquidMetalSubChannel1PhaseProblem::enforceUniformDPDZAtInlet()
   }
   _console << "Total mass flow :" << total_mass_flow << " [kg/sec] \n";
   // Define vectors of pressure drop and massflow
-  Eigen::VectorXd DPDZi(_subchannel_mesh.getNumOfChannels());
-  Eigen::VectorXd MassFlowi(_subchannel_mesh.getNumOfChannels());
+  Eigen::VectorXd dPdZ_i(_subchannel_mesh.getNumOfChannels());
+  Eigen::VectorXd mass_flow_i(_subchannel_mesh.getNumOfChannels());
   // Calculate Pressure drop derivative for current mass flow BC
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -344,43 +347,41 @@ LiquidMetalSubChannel1PhaseProblem::enforceUniformDPDZAtInlet()
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Rei = (((*mdot_soln)(node_in) / Si) * Dhi / mu);
     auto fi = computeFrictionFactor(Rei, i_ch, Si, w_perim, Dhi);
-    DPDZi(i_ch) =
+    dPdZ_i(i_ch) =
         (fi / Dhi) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
   }
 
   // Initialize an average pressure drop for uniform pressure inlet condition
-  auto DPDZ = DPDZi.mean();
-  auto Error = 1.0;
+  auto dPdZ = dPdZ_i.mean();
+  auto error = 1.0;
   auto tol = 1e-6;
   auto iter = 0;
   auto max_iter = 10;
-  while (Error > tol)
+  while (error > tol)
   {
     iter += 1;
     if (iter > max_iter)
-    {
       mooseError(name(), ": exceeded maximum number of iterations");
-    }
-    auto DPDZ_old = DPDZ;
+    auto dPdZ_old = dPdZ;
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
     {
       // update inlet mass flow to achieve DPDZ
-      MassFlowi(i_ch) = computeMassFlowForDPDZ(DPDZ, i_ch);
+      mass_flow_i(i_ch) = computeMassFlowForDPDZ(dPdZ, i_ch);
     }
     // Calculate total massflow at the inlet
-    auto mass_flow_sum = MassFlowi.sum();
+    auto mass_flow_sum = mass_flow_i.sum();
     // Update the DP/DZ to correct the mass flow rate.
-    DPDZ *= std::pow(total_mass_flow / mass_flow_sum, 2.0);
-    Error = std::abs((DPDZ - DPDZ_old) / DPDZ_old);
+    dPdZ *= std::pow(total_mass_flow / mass_flow_sum, 2.0);
+    error = std::abs((dPdZ - dPdZ_old) / dPdZ_old);
   }
 
   // Populate solution vector with corrected boundary conditions
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-    mdot_soln->set(node, MassFlowi(i_ch));
+    mdot_soln->set(node, mass_flow_i(i_ch));
   }
-  _console << "Done Applying mass flow boundary condition\n";
+  _console << "Done applying mass flow boundary condition\n";
 }
 
 void
@@ -434,11 +435,11 @@ LiquidMetalSubChannel1PhaseProblem::computeInletMassFlowDist()
   _dpz_error = 0.0;
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
-    g_new(i_ch) = pow(dpz_ave / dpz(i_ch), 0.3) * mass_flux_i(i_ch);
+    g_new(i_ch) = std::pow(dpz_ave / dpz(i_ch), 0.3) * mass_flux_i(i_ch);
     mass_flow_new_tot = mass_flow_new_tot + g_new(i_ch) * Si(i_ch);
-    _dpz_error = _dpz_error + pow((dpz(i_ch) - dpz_ave), 2.0);
+    _dpz_error = _dpz_error + std::pow((dpz(i_ch) - dpz_ave), 2.0);
   }
-  _dpz_error = pow(_dpz_error, 0.5) / dpz_ave / tot_chan;
+  _dpz_error = std::pow(_dpz_error, 0.5) / dpz_ave / tot_chan;
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);

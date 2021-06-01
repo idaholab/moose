@@ -14,7 +14,7 @@ public:
 
 protected:
   /**
-   * Ccomputes the axial friction factor for the sodium coolant and
+   * Computes the axial friction factor for the sodium coolant and
    * for each subchannel.
    * Upgraded Cheng-Todreas Correlation (2018).
    */
