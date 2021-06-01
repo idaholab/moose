@@ -22,8 +22,9 @@ TriWettedPerimIC::value(const Point & p)
   auto rod_circumference = libMesh::pi * rod_diameter;
   auto wire_circumference = libMesh::pi * wire_diameter;
   auto gap = _mesh.getDuctToRodGap();
-  auto teta = acos(wire_lead_length / sqrt(pow(wire_lead_length, 2) +
-                                           pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+  auto theta = std::acos(wire_lead_length /
+                         std::sqrt(std::pow(wire_lead_length, 2) +
+                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
   // given the channel number, i, it computes the wetted perimeter of
   // the subchannel based on the subchannel type: CENTER, EDGE or CORNER.
   auto i = _mesh.getSubchannelIndexFromPoint(p);
@@ -31,15 +32,15 @@ TriWettedPerimIC::value(const Point & p)
 
   if (subch_type == EChannelType::CENTER)
   {
-    return 0.5 * rod_circumference + 0.5 * wire_circumference / cos(teta);
+    return 0.5 * rod_circumference + 0.5 * wire_circumference / std::cos(theta);
   }
   else if (subch_type == EChannelType::EDGE)
   {
-    return 0.5 * rod_circumference + 0.5 * wire_circumference / cos(teta) + pitch;
+    return 0.5 * rod_circumference + 0.5 * wire_circumference / std::cos(theta) + pitch;
   }
   else
   {
-    return (rod_circumference + wire_circumference / cos(teta)) / 6.0 +
+    return (rod_circumference + wire_circumference / std::cos(theta)) / 6.0 +
            2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap);
   }
 }
