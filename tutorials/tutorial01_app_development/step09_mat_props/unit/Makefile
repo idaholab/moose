@@ -29,6 +29,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 CHEMICAL_REACTIONS        := no
 CONTACT                   := no
 FLUID_PROPERTIES          := no
+FSI                       := no
 HEAT_CONDUCTION           := no
 MISC                      := no
 NAVIER_STOKES             := no

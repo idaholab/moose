@@ -30,6 +30,7 @@ CHEMICAL_REACTIONS          := no
 CONTACT                     := no
 EXTERNAL_PETSC_SOLVER       := no
 FLUID_PROPERTIES            := no
+FSI                         := no
 FUNCTIONAL_EXPANSION_TOOLS  := no
 GEOCHEMISTRY                := no
 HEAT_CONDUCTION             := no
