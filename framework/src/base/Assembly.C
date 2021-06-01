@@ -103,6 +103,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
 
     _current_lower_d_elem(nullptr),
     _current_neighbor_lower_d_elem(nullptr),
+    _need_lower_d_elem_volume(false),
+    _need_neighbor_lower_d_elem_volume(false),
 
     _residual_vector_tags(_subproblem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL)),
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
@@ -122,6 +124,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   buildFaceFE(FEType(helper_order, LAGRANGE));
   buildNeighborFE(FEType(helper_order, LAGRANGE));
   buildFaceNeighborFE(FEType(helper_order, LAGRANGE));
+  buildLowerDFE(FEType(helper_order, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current
   // mesh
@@ -148,6 +151,15 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _holder_fe_neighbor_helper[dim] = &_fe_neighbor[dim][FEType(helper_order, LAGRANGE)];
     (*_holder_fe_neighbor_helper[dim])->get_xyz();
     (*_holder_fe_neighbor_helper[dim])->get_JxW();
+  }
+
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  {
+    _holder_fe_lower_helper[dim] = &_fe_lower[dim][FEType(helper_order, LAGRANGE)];
+    // We need these computations in order to compute correct lower-d element volumes in curvilinear
+    // coordinates
+    (*_holder_fe_lower_helper[dim])->get_xyz();
+    (*_holder_fe_lower_helper[dim])->get_JxW();
   }
 
   _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
@@ -2271,12 +2283,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights)
 {
-  mooseAssert(elem->dim() == _mesh_dimension - 1,
-              "You should be calling reinitLowerDElemRef on a lower dimensional element");
-
   _current_lower_d_elem = elem;
 
-  unsigned int elem_dim = elem->dim();
+  const unsigned int elem_dim = elem->dim();
   mooseAssert(elem_dim < _mesh_dimension,
               "The lower dimensional element should truly be a lower dimensional element");
 
@@ -2326,26 +2335,57 @@ Assembly::reinitLowerDElem(const Elem * elem,
     }
   }
 
-  mooseAssert(elem_dim == 1,
-              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
-              "anything with the coordinate transformation. We currently only support 2D mortar, "
-              "so if you hit this assertion there is a problem");
-  _current_lower_d_elem_volume = _current_lower_d_elem->volume();
+  if (!_need_lower_d_elem_volume)
+    return;
+
+  if (pts && !weights)
+  {
+    // We only have dummy weights so the JxWs computed during our FE reinits are meaningless and we
+    // cannot use them
+
+    if (_subproblem.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
+      // We are in a Cartesian coordinate system and we can just use the element volume method which
+      // has fast computation for certain element types
+      _current_lower_d_elem_volume = elem->volume();
+    else
+      // We manually compute the volume taking the curvilinear coordinate transformations into
+      // account
+      _current_lower_d_elem_volume = elementVolume(elem);
+  }
+  else
+  {
+    // During that last loop the helper objects will have been reinitialized as well
+    auto * helper_fe = *_holder_fe_lower_helper[elem_dim];
+    const auto & physical_q_points = helper_fe->get_xyz();
+    const auto & JxW = helper_fe->get_JxW();
+    MooseArray<Real> coord;
+    setCoordinateTransformation(
+        _current_qrule_lower, physical_q_points, coord, elem->subdomain_id());
+    _current_lower_d_elem_volume = 0;
+    for (const auto qp : make_range(_current_qrule_lower->n_points()))
+      _current_lower_d_elem_volume += JxW[qp] * coord[qp];
+  }
 }
 
 void
 Assembly::reinitNeighborLowerDElem(const Elem * elem)
 {
-  mooseAssert(elem->dim() == _mesh_dimension - 1,
+  mooseAssert(elem->dim() < _mesh_dimension,
               "You should be calling reinitNeighborLowerDElem on a lower dimensional element");
 
   _current_neighbor_lower_d_elem = elem;
 
-  mooseAssert(elem->dim() == 1,
-              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
-              "anything with the coordinate transformation. We currently only support 2D mortar, "
-              "so if you hit this assertion there is a problem");
-  _current_neighbor_lower_d_elem_volume = _current_neighbor_lower_d_elem->volume();
+  if (!_need_neighbor_lower_d_elem_volume)
+    return;
+
+  if (_subproblem.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
+    // We are in a Cartesian coordinate system and we can just use the element volume method which
+    // has fast computation for certain element types
+    _current_neighbor_lower_d_elem_volume = elem->volume();
+  else
+    // We manually compute the volume taking the curvilinear coordinate transformations into
+    // account
+    _current_neighbor_lower_d_elem_volume = elementVolume(elem);
 }
 
 void

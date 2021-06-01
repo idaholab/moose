@@ -475,11 +475,6 @@
     density = 2750.0
     specific_heat_capacity = 900.0
   []
-  [relperm] # this is necessary because of the use_mobility = true used in the PorousFlowPeacemanBorehole objects
-    type = PorousFlowRelativePermeabilityConst
-    at_nodes = true
-    phase = 0
-  []
 []
 
 [Preconditioning]

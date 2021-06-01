@@ -25,7 +25,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the effective thermal conductivity
-  const ADMaterialProperty<Real> & _kappa_elem;
+  const ADMaterialProperty<RealVectorValue> & _kappa_elem;
   /// the neighbor effective element thermal conductivity
-  const ADMaterialProperty<Real> & _kappa_neighbor;
+  const ADMaterialProperty<RealVectorValue> & _kappa_neighbor;
 };

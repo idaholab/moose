@@ -29,6 +29,7 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _syntax(syntax),
     _action_factory(factory),
     _generator_valid(false),
+    _show_action_dependencies(false),
     _show_actions(false),
     _show_parser(false),
     _mesh(nullptr),
@@ -321,7 +322,7 @@ ActionWarehouse::printActionDependencySets() const
     }
   }
 
-  if (_show_actions)
+  if (_show_action_dependencies)
     _console << oss.str() << std::endl;
 }
 
@@ -330,7 +331,7 @@ ActionWarehouse::executeAllActions()
 {
   _completed_tasks.clear();
 
-  if (_show_actions)
+  if (_show_action_dependencies)
   {
     _console << "[DBG][ACT] Action Dependency Sets:\n";
     printActionDependencySets();
@@ -352,7 +353,7 @@ ActionWarehouse::executeAllActions()
     MemoryUtils::getMemoryStats(stats);
     auto usage =
         MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
-    _console << "[DBG][ACT] Finished executing all actions with memory usage " << usage << "MB"
+    _console << "[DBG][ACT] Finished executing all actions with memory usage " << usage << "MB\n"
              << std::endl;
   }
 }

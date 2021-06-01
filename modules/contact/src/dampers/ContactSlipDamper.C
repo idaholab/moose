@@ -20,9 +20,9 @@ InputParameters
 ContactSlipDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
-  params.addParam<std::vector<int>>(
+  params.addParam<std::vector<BoundaryName>>(
       "primary", "IDs of the primary surfaces for which slip reversals should be damped");
-  params.addParam<std::vector<int>>(
+  params.addParam<std::vector<BoundaryName>>(
       "secondary", "IDs of the secondary surfaces for which slip reversals should be damped");
   params.addParam<Real>(
       "max_iterative_slip", std::numeric_limits<Real>::max(), "Maximum iterative slip");
@@ -60,8 +60,8 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
   if (!_displaced_problem)
     mooseError("Must have displaced problem to use ContactSlipDamper");
 
-  std::vector<int> primary = getParam<std::vector<int>>("primary");
-  std::vector<int> secondary = getParam<std::vector<int>>("secondary");
+  std::vector<BoundaryName> primary = getParam<std::vector<BoundaryName>>("primary");
+  std::vector<BoundaryName> secondary = getParam<std::vector<BoundaryName>>("secondary");
 
   unsigned int num_interactions = primary.size();
   if (num_interactions != secondary.size())
@@ -72,7 +72,8 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < primary.size(); ++i)
   {
-    std::pair<int, int> ms_pair(primary[i], secondary[i]);
+    std::pair<int, int> ms_pair(_subproblem.mesh().getBoundaryID(primary[i]),
+                                _subproblem.mesh().getBoundaryID(secondary[i]));
     _interactions.insert(ms_pair);
   }
 }

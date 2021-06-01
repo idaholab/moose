@@ -3,34 +3,34 @@
 []
 
 [Mesh]
-  [./gen]
+  [gen]
     type = GeneratedMeshGenerator
     dim = 3
-    xmin =0
-    xmax =10
-    ymin =0
-    ymax =10
-    zmin =0
-    zmax =0.5
-    nx=20
-    ny=20
-    nz=1
-  [../]
-  [./left_domain]
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 10
+    zmin = 0
+    zmax = 0.5
+    nx = 20
+    ny = 20
+    nz = 1
+  []
+  [left_domain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '5 10 0.5'
     block_id = 1
-  [../]
-  [./right_domain]
+  []
+  [right_domain]
     input = left_domain
     type = SubdomainBoundingBoxGenerator
     bottom_left = '5 0 0'
     top_right = '10 10 0.5'
     block_id = 2
-  [../]
-  [./sidesets]
+  []
+  [sidesets]
     input = right_domain
     type = SideSetsAroundSubdomainGenerator
     normal = '1 0 0'
@@ -40,33 +40,32 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     block = '1'
-  [../]
+  []
 []
 
 [Functions]
-  [./fx]
+  [fx]
     type = ParsedFunction
-    value= '5.25'
-  [../]
-  [./fy]
+    value = '5.25'
+  []
+  [fy]
     type = ParsedFunction
-    value= '2.5*t'
-  [../]
-  [./fz]
+    value = '2.5*t'
+  []
+  [fz]
     type = ParsedFunction
-    value= '0.25'
-  [../]
+    value = '0.25'
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient
@@ -91,15 +90,15 @@
 []
 
 [UserObjects]
-  [./activated_elem_uo]
+  [activated_elem_uo]
     type = ActivateElementsByPath
     execute_on = timestep_begin
-    function_x= fx
-    function_y= fy
-    function_z= fz
+    function_x = fx
+    function_y = fy
+    function_z = fz
     active_subdomain_id = 1
     expand_boundary_name = 'moving_interface'
-  [../]
+  []
 []
 
 [Outputs]

@@ -38,12 +38,12 @@ protected:
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
    * indepedent of shape functions
    */
-  void computeQpProperties();
+  virtual void computeQpProperties();
 
   /**
    * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
    */
-  void computeQpIProperties();
+  virtual void computeQpIProperties();
 
   /**
    * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
@@ -51,7 +51,7 @@ protected:
    * using an NCP function. This is also where we actually feed the node-based constraint
    * information into the system residual and Jacobian
    */
-  void enforceConstraintOnNode(const Node * node);
+  virtual void enforceConstraintOnNode(const Node * node);
 
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;

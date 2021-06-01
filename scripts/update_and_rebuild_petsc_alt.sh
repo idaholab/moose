@@ -16,6 +16,8 @@ echo "use only. Please use scripts/update_and_rebuild_petsc.sh instead."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SCRIPT_DIR
 
+cd $SCRIPT_DIR/..
+
 # Initialize petsc submodule
 git_dir=`git rev-parse --show-cdup 2>/dev/null`
 if [[ $? == 0 && "x$git_dir" == "x" ]]; then

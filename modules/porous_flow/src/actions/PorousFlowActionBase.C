@@ -16,6 +16,7 @@
 #include "AddKernelAction.h"
 #include "AddPostprocessorAction.h"
 #include "AddBCAction.h"
+#include "AddDiracKernelAction.h"
 
 InputParameters
 PorousFlowActionBase::validParams()
@@ -182,6 +183,11 @@ PorousFlowActionBase::addMaterialDependencies()
   auto bcs = _awh.getActions<AddBCAction>();
   for (auto & bc : bcs)
     _included_objects.push_back(bc->getMooseObjectType());
+
+  // Unique list of Dirac kernels added in input file
+  auto diracs = _awh.getActions<AddDiracKernelAction>();
+  for (auto & dirac : diracs)
+    _included_objects.push_back(dirac->getMooseObjectType());
 }
 
 void
@@ -519,9 +525,28 @@ PorousFlowActionBase::addBrineMaterial(VariableName nacl_brine,
 }
 
 void
+PorousFlowActionBase::addRelativePermeabilityConst(bool at_nodes, unsigned phase, Real kr)
+{
+  if (_current_task == "add_material")
+  {
+    std::string material_type = "PorousFlowRelativePermeabilityConst";
+    InputParameters params = _factory.getValidParams(material_type);
+
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<unsigned int>("phase") = phase;
+    params.set<Real>("kr") = kr;
+    std::string material_name = "PorousFlowActionBase_RelativePermeability_qp";
+    if (at_nodes)
+      material_name = "PorousFlowActionBase_RelativePermeability_nodal";
+
+    params.set<bool>("at_nodes") = at_nodes;
+    _problem->addMaterial(material_type, material_name, params);
+  }
+}
+
+void
 PorousFlowActionBase::addRelativePermeabilityCorey(
     bool at_nodes, unsigned phase, Real n, Real s_res, Real sum_s_res)
-
 {
   if (_current_task == "add_material")
   {

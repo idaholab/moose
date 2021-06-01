@@ -85,22 +85,23 @@ class CivetExtension(command.CommandExtension):
 
         self.__database = dict()
         for name, category in self.get('remotes').items():
+            working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
+            LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
             hashes = None
             if category.get('download_test_results', self.get('download_test_results', True)):
-                working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
                 hashes = mooseutils.git_merge_commits(working_dir)
-                LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
+                LOG.info("Downloading CIVET results for '%s' category in %s", name, working_dir)
 
             local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
             site = (category['url'], category['repo'])
             local_db = mooseutils.get_civet_results(local=local,
                                                     hashes=hashes,
                                                     site=site,
-                                                    cache=self.get('test_results_cache'),
+                                                    cache=local,
                                                     possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
                                                     logger=LOG)
             self.__database.update(local_db)
-            LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
+        LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
             LOG.warning("'generate_test_reports' is being disabled, it requires results to exist but none were located.")
