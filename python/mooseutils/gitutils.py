@@ -71,17 +71,12 @@ def git_root_dir(working_dir=os.getcwd()):
 def git_submodule_info(working_dir=os.getcwd(), *args):
     """
     Return the status of each of the git submodule(s).
-    """
-    command = ['git', 'submodule', 'status', *args]
-    try:
-        result = check_output(command, cwd=working_dir, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError:
-        # If the status command failed, it's possible that some submodules are broken, e.g., cannot
-        # be recursed because it is empty, so run a non-initializing update and try again.
-        subprocess.call(['git', 'submodule', 'update', '--recursive'], cwd=working_dir)
-        result = check_output(command, cwd=working_dir)
 
+    NOTE: It is possible that the 'git submodule status' command fails if one of the additional args
+          is '--recursive' and there are broken or empty (null) submodules.
+    """
     out = dict()
+    result = check_output(['git', 'submodule', 'status', *args], cwd=working_dir)
     regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s(?P<refs>(\(.*\))?)')
     for match in regex.finditer(result):
         out[match.group('name')] = (match.group('status'), match.group('sha1'), match.group('refs'))
