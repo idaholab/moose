@@ -86,6 +86,8 @@ name = 'small'
     primary = plank_right
     secondary = block_left
     formulation = mortar
+    mortar_approach = weighted
+    c_normal = 1e0
   [../]
 []
 

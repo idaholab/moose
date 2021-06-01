@@ -50,8 +50,8 @@ offset = 1e-2
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.1
-    mortar_approach = legacy
-    c_normal = 1e0
+    c_normal = 1.0e-2
+    c_tangential = 1.0e-1
   []
 []
 
@@ -140,10 +140,10 @@ offset = 1e-2
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
   [../]
-  [contact]
-    type = ContactDOFSetSize
-    variable = frictional_normal_lm
-    subdomain = frictional_secondary_subdomain
-    execute_on = 'nonlinear timestep_end'
-  []
+ [contact]
+   type = ContactDOFSetSize
+   variable = frictional_normal_lm
+   subdomain = frictional_secondary_subdomain
+   execute_on = 'nonlinear timestep_end'
+ []
 []

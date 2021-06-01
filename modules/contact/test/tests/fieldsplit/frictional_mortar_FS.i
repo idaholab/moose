@@ -94,11 +94,11 @@ refine = 1
     mesh = original_file_mesh
     secondary = 10
     primary = 20
-
     model = coulomb
     formulation = mortar
-
     friction_coefficient = 0.2
+    mortar_approach = legacy
+    c_normal = 1e0
   [../]
 []
 

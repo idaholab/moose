@@ -55,7 +55,7 @@ offset = 1e-2
     model = frictionless
     formulation = mortar
     c_normal = 1e-2
-    mortar_approach = legacy
+    mortar_approach = weighted
   []
 []
 

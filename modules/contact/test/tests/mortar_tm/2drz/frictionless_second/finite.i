@@ -97,6 +97,7 @@ name = 'finite'
     primary = plank_right
     secondary = block_left
     formulation = mortar
+    mortar_approach = legacy
   [../]
 []
 
