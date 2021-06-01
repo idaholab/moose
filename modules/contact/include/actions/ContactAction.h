@@ -55,6 +55,11 @@ public:
    */
   static MooseEnum getModelEnum();
   /**
+   * Get mortar approach
+   * @return enum
+   */
+  static MooseEnum getMortarApproach();
+  /**
    * Get contact formulation
    * @return enum
    */
@@ -88,8 +93,8 @@ protected:
   const MooseEnum _system;
   /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
-  /// Whether to use the dual Mortar approach
-  const bool _use_dual;
+  /// Mortar approach (weighted --variationally consistent-- or legacy)
+  const MooseEnum _mortar_approach;
 
 private:
   /**
