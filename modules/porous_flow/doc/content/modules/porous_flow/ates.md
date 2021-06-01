@@ -1,6 +1,6 @@
 # Aquifer thermal energy storage
 
-The material in the page is based upon the paper [!citet](sheldon2021).
+The material in this page is based on [!citet](sheldon2021).
 
 ## Introduction
 
@@ -22,13 +22,15 @@ R = \frac{\overline{h}_{\mathrm{p}} - h_{\mathrm{amb}}}{h_{\mathrm{i}} - h_{\mat
 
 where $h$ denotes enthalpy and $T$ temperature.  The subscript "p" indicates "produced" (retrieved from the aquifer), "amb" indicates "ambient", and "i" indicates "injected".  For instance, if the ambient aquifer temperature is $T_{\mathrm{amb}} = 20^{\circ}$C, the injection temperature is $T_{i} = 150^{\circ}$C and $R=0.9$, then the average produced temperature is $\overline{T}_{\mathrm{p}} \approx 137^{\circ}$C.
 
-$R$ has been measured at ATES sites, and estimated using numerical modelling.  Numerical models can provide accurate estimates of $R$ as a function of operational parameters, such as the injection temperature and rate, and aquifer parameters such as the permeability, depth.  Such estimates are useful for rapid screening of potential ATES sites, indicating which sites might or might not be viable.
+$R$ has been measured at ATES sites, and estimated using numerical modelling.  Numerical models can provide accurate estimates of $R$ as a function of operational parameters, such as the injection temperature and rate, and aquifer parameters such as the permeability, thickness and depth.  Such estimates are useful for rapid screening of potential ATES sites, indicating which sites might or might not be viable.
 
 The purpose of this page is to describe a MOOSE model of an ATES system, with the goal of predicting $R$, and present a few results.  For significantly more background discussion, discussion of the modelling approach and results, the reader is referred to [!citet](sheldon2021).
 
 ## Model setup
 
-A single-well ATES system with radial symmetry is explored here, in which hot water is injected and produced from the same well.  Hence, this may be simulated using "RZ" coordinates:
+The model simulates an ATES system comprising a single injection-production well penetrating a horizontal aquifer 20 m thick. Five injection-production cycles are simulated, with each cycle comprising 91 days each of injection, storage, production and rest. The injection temperature is 90$^{\circ}\mathrm{C}$, and the injected fluid mass is 10$^8\,$kg. 
+
+The single-well system has radial symmetry, hence it may be simulated using "RZ" coordinates:
 
 !listing modules/porous_flow/examples/ates/ates.i block=Problem
 
@@ -40,7 +42,7 @@ The geometry is shown in [ates_geometry_fig].
 
 !media porous_flow/ATES_geometry.png caption=Geometry on a radial slice of the ATES model.  id=ates_geometry_fig
 
-In this example, the mesh is created by using a combination of MOOSE MeshGenerators, however, for accurate prediction of $R$, readers are encouraged to use a more sophisticated approach, such as the one outlined in [!citet](sheldon2021).
+In this example, the mesh is created by using a combination of MOOSE MeshGenerators, however, for accurate prediction of $R$, readers are encouraged to use a more sophisticated approach involving greater refinement of the mesh close to the well screen, such as the one outlined in [!citet](sheldon2021).
 
 !listing modules/porous_flow/examples/ates/ates.i block=Mesh
 
@@ -76,9 +78,11 @@ This may be multiplied by the time-step size to find the total heat withdrawn (w
 
 !listing modules/porous_flow/examples/ates/ates.i start=[heat_out_in_timestep] end=[produced_T_time_integrated]
 
+which in turn can be used to calculate $R$ for each cycle.
+
 ## Results
 
-[ates_evolution] shows the evolution of temperature for the first cycle in this example.  Notice the buoyancy-driven convection, where hot water rises to the top of the aquifer: it is the prime reason why not all the heat energy can be extracted.  In subsequent cycles, the aquifer temperature starts slightly hotter than ambient, so recovery efficiency gradually increases with cycle, as shown in [tab:re].
+[ates_evolution] shows the evolution of temperature for the first cycle in this example.  Notice the buoyancy-driven convection, which causes hot water to rise to the top of the aquifer: this is the prime reason why not all the heat energy can be extracted.  In subsequent cycles, the aquifer temperature starts slightly hotter than ambient, so recovery efficiency gradually increases with cycle, as shown in [tab:re].
 
 !media porous_flow/ates_evolution.mp4 caption=Evolution of the temperature during injection of 90$^{\circ}$C water into an aquifer of thickness 20m (indicated by the white horizontal lines) for a annual cycle length id=ates_evolution
 
