@@ -157,10 +157,11 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
+  /// Initial guess, port crossflow in block to a vector
   Eigen::VectorXd solution_seed = Wij.block(0, first_node, n_gaps, block_size);
 
-  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined
-  root = PETSC_SNES_SOLVER();
+  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined returns a vector
+  Eigen::VectorXd root = PETScSnesSolver(iblock, solution_seed);
   /// Update crossflow using root (root is a PETSc vector i need to turn into eigen Vector and then put into an eigen Matrix)
   // Assign the solution to the cross-flow matrix
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -530,8 +531,8 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
   }
 }
 
-Eigen::VectorXd
-BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock, Eigen::VectorXd solution)
+virtual Eigen::VectorXd
+BetterSubChannel1PhaseProblemBase::ResidualFunction(int iblock, Eigen::VectorXd solution)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
@@ -541,7 +542,7 @@ BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock, Eigen::Ve
   Eigen::VectorXd Wij_residual_vector(n_gaps * block_size);
   Wij_residual_vector.setZero();
 
-  // Assign the solution to the cross-flow matrix
+  // Assign the solution to the cross-flow matrix (This may not be needed)
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
@@ -643,6 +644,189 @@ BetterSubChannel1PhaseProblemBase::computeResidualFunction(int iblock, Eigen::Ve
     }
   }
   return Wij_residual_vector;
+}
+
+virtual Eigen::VectorXd
+BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd solution)
+{
+  SNES snes; /* nonlinear solver context */
+  KSP ksp;   /* linear solver context */
+  PC pc;     /* preconditioner context */
+  Vec x, r;  /* solution, residual vectors */
+  Mat J;     /* Jacobian matrix */
+  PetscErrorCode ierr;
+  PetscMPIInt size;
+  PetscScalar pfive = .5, *xx;
+  PetscBool flg;
+
+  ierr = PetscInitialize(&argc, &argv, (char *)0, help);
+  if (ierr)
+    return ierr;
+  ierr = MPI_Comm_size(PETSC_COMM_WORLD, &size);
+  CHKERRMPI(ierr);
+  if (size > 1)
+    SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Create nonlinear solver context
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  ierr = SNESCreate(PETSC_COMM_WORLD, &snes);
+  CHKERRQ(ierr);
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Create matrix and vector data structures; set corresponding routines
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  /*
+     Create vectors for solution and nonlinear function
+  */
+  ierr = VecCreate(PETSC_COMM_WORLD, &x);
+  CHKERRQ(ierr);
+  ierr = VecSetSizes(x, PETSC_DECIDE, 2);
+  CHKERRQ(ierr);
+  ierr = VecSetFromOptions(x);
+  CHKERRQ(ierr);
+  ierr = VecDuplicate(x, &r);
+  CHKERRQ(ierr);
+
+  /*
+     Create Jacobian matrix data structure
+  */
+  ierr = MatCreate(PETSC_COMM_WORLD, &J);
+  CHKERRQ(ierr);
+  ierr = MatSetSizes(J, PETSC_DECIDE, PETSC_DECIDE, 2, 2);
+  CHKERRQ(ierr);
+  ierr = MatSetFromOptions(J);
+  CHKERRQ(ierr);
+  ierr = MatSetUp(J);
+  CHKERRQ(ierr);
+
+  ierr = PetscOptionsHasName(NULL, NULL, "-hard", &flg);
+  CHKERRQ(ierr);
+  if (!flg)
+  {
+    ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
+    CHKERRQ(ierr);
+    ierr = SNESSetFunction(snes, r, FormFunction1, NULL);
+    CHKERRQ(ierr);
+    //    ierr = SNESSetJacobian(snes,J,J,FormJacobian1,NULL);CHKERRQ(ierr);
+  }
+  else
+  {
+    ierr = SNESSetFunction(snes, r, FormFunction2, NULL);
+    CHKERRQ(ierr);
+    ierr = SNESSetJacobian(snes, J, J, FormJacobian2, NULL);
+    CHKERRQ(ierr);
+  }
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Customize nonlinear solver; set runtime options
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  /*
+     Set linear solver defaults for this problem. By extracting the
+     KSP and PC contexts from the SNES context, we can then
+     directly call any KSP and PC routines to set various options.
+  */
+  ierr = SNESGetKSP(snes, &ksp);
+  CHKERRQ(ierr);
+  ierr = KSPGetPC(ksp, &pc);
+  CHKERRQ(ierr);
+  ierr = PCSetType(pc, PCNONE);
+  CHKERRQ(ierr);
+  ierr = KSPSetTolerances(ksp, 1.e-4, PETSC_DEFAULT, PETSC_DEFAULT, 20);
+  CHKERRQ(ierr);
+
+  /*
+     Set SNES/KSP/KSP/PC runtime options, e.g.,
+         -snes_view -snes_monitor -ksp_type <ksp> -pc_type <pc>
+     These options will override those specified above as long as
+     SNESSetFromOptions() is called _after_ any other customization
+     routines.
+  */
+  ierr = SNESSetFromOptions(snes);
+  CHKERRQ(ierr);
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Evaluate initial guess; then solve nonlinear system
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  if (!flg)
+  {
+    ierr = VecSet(x, pfive);
+    CHKERRQ(ierr);
+  }
+  else
+  {
+    ierr = VecGetArray(x, &xx);
+    CHKERRQ(ierr);
+    xx[0] = 2.0;
+    xx[1] = 3.0;
+    ierr = VecRestoreArray(x, &xx);
+    CHKERRQ(ierr);
+  }
+  /*
+     Note: The user should initialize the vector, x, with the initial guess
+     for the nonlinear solver prior to calling SNESSolve().  In particular,
+     to employ an initial guess of zero, the user should explicitly set
+     this vector to zero by calling VecSet().
+  */
+
+  ierr = SNESSolve(snes, NULL, x);
+  CHKERRQ(ierr);
+  //  if (flg) {
+  Vec f;
+  //    std::cout << "Hello World!";
+  ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+  CHKERRQ(ierr);
+  ierr = SNESGetFunction(snes, &f, 0, 0);
+  CHKERRQ(ierr);
+  ierr = VecView(r, PETSC_VIEWER_STDOUT_WORLD);
+  CHKERRQ(ierr);
+  //  }
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Free work space.  All PETSc objects should be destroyed when they
+     are no longer needed.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+  ierr = VecDestroy(&x);
+  CHKERRQ(ierr);
+  ierr = VecDestroy(&r);
+  CHKERRQ(ierr);
+  ierr = MatDestroy(&J);
+  CHKERRQ(ierr);
+  ierr = SNESDestroy(&snes);
+  CHKERRQ(ierr);
+  ierr = PetscFinalize();
+  return ierr;
+}
+/// example of a residual function in SNES context
+extern "C" virtual PetscErrorCode
+BetterSubChannel1PhaseProblemBase::FormResidualFunction(SNES snes, Vec x, Vec f, void * ctx)
+{
+  PetscErrorCode ierr;
+  const PetscScalar * xx;
+  PetscScalar * ff;
+
+  /*
+   Get pointers to vector data.
+      - For default PETSc vectors, VecGetArray() returns a pointer to
+        the data array.  Otherwise, the routine is implementation dependent.
+      - You MUST call VecRestoreArray() when you no longer need access to
+        the array.
+   */
+  ierr = VecGetArrayRead(x, &xx);
+  CHKERRQ(ierr);
+  ierr = VecGetArray(f, &ff);
+  CHKERRQ(ierr);
+
+  /* Compute function */
+  ff[0] = xx[0] * xx[0] + xx[0] * xx[1] - 8.0;
+  ff[1] = xx[0] * xx[1] + xx[1] * xx[1] - 8.0;
+
+  /* Restore vectors */
+  ierr = VecRestoreArrayRead(x, &xx);
+  CHKERRQ(ierr);
+  ierr = VecRestoreArray(f, &ff);
+  CHKERRQ(ierr);
+  return 0;
 }
 
 void
