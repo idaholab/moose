@@ -580,7 +580,7 @@ ContactAction::addMortarContact()
       _problem->haveADObjects(true);
     };
 
-    // Add residual contribution from mortar mechanical contact on primal variables
+    // Add mortar mechanical contact constraint objects for primal variables
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
                                     "NormalMortarMechanicalContact");
