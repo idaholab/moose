@@ -69,7 +69,7 @@ The `DarcyPressure` object shall be modified to allow users to define the consta
 
 ### Source Code id=source-demo
 
-A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu$. Assuming that both are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
+A required parameter `"permeability"` shall be used to set the value of $K$ and an optional parameter `"viscosity"` whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu$. Assuming that both are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
 
 In `DarcyPressure.h`, declare `_permeability` and `_viscosity` as reference variables so that their input value may be accessed without having to create additional copies of them:
 

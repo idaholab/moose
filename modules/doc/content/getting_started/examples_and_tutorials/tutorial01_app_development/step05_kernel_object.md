@@ -8,7 +8,7 @@ In this step, the basic components of [#kernels] will be presented. To demonstra
 
 ## Kernel Objects id=kernels
 
-The [syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function, $\nabla \psi$, or to check those which represent an integral over the whole domain, $\Omega$.
+The [syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function $\nabla \psi$, or to check those which represent an integral over the whole domain $\Omega$.
 
 In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one that *inherits* from the `ADKernelGrad` base class, which, in turn, inherits from the `ADKernel` base class. This means that `ADDiffusion` is a unique object that builds upon what the MOOSE Kernels system is designed to do.
 
@@ -71,7 +71,7 @@ cd ~/projects/babbler
 mkdir include/kernels src/kernels
 ```
 
-In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
+In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file `ADKernelGrad.h` was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/include/kernels/DarcyPressure.h
          link=False
@@ -119,7 +119,7 @@ cd ~/projects/babbler/problems
        id=results
        caption=Rendering of the [!ac](FEM) solution of Darcy's pressure equation subject to the given [!ac](BVP).
 
-One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu_{f}$, is constant and since the foregoing [!ac](BVP) is a simple one that involves only essential boundary conditions,
+One should be convinced that, because this is a steady-state problem, where the coefficient $K / \mu_{f}$ is constant and since the foregoing [!ac](BVP) is a simple one that involves only essential boundary conditions,
 the solution produced by the new `DarcyPressure` object, shown in [results],
 is identical to the [previous one](tutorial01_app_development/step02_input_file.md#results) produced by the `ADDiffusion` object.
 
