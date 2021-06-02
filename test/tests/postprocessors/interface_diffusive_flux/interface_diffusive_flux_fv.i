@@ -69,7 +69,6 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
   []
 []
 
-# Not a diffusion interface but can test the postprocessor anyway
 [FVInterfaceKernels]
   [reaction]
     type = FVDiffusionInterface

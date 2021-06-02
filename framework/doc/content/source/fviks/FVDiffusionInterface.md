@@ -1,6 +1,6 @@
 # FVDiffusionInterface
 
-!syntax description /FVInterfaceKernels/FVDiffusionInterface
+!syntax description /fviks/FVDiffusionInterface
 
 The diffusive flux is obtained from a two point gradient, and the diffusivity is
 interpolated to the interface.
@@ -13,8 +13,8 @@ of the volumetric diffusivities as the interface diffusion coefficient.
 
 !listing test/tests/fviks/diffusion/test.i block=FVInterfaceKernels/interface
 
-!syntax parameters /FVInterfaceKernels/FVDiffusionInterface
+!syntax parameters /fviks/FVDiffusionInterface
 
-!syntax inputs /FVInterfaceKernels/FVDiffusionInterface
+!syntax inputs /fviks/FVDiffusionInterface
 
-!syntax children /FVInterfaceKernels/FVDiffusionInterface
+!syntax children /fviks/FVDiffusionInterface

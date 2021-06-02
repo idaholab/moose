@@ -23,10 +23,8 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::validParams()
 
   params.addRequiredCoupledVar("variable",
                                "The name of the variable on the primary side of the interface");
-  params.addCoupledVar(
-      "neighbor_variable",
-      "The name of the variable on the secondary side of the interface. By default, "
-      "the primary side variable name is used for the secondary side");
+  params.addCoupledVar("neighbor_variable",
+                       "The name of the variable on the secondary side of the interface.");
   params.addRequiredParam<MaterialPropertyName>(
       "diffusivity", "The name of the diffusivity property on the primary side of the interface");
   params.addParam<MaterialPropertyName>("neighbor_diffusivity",
@@ -64,11 +62,6 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
         (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
       mooseError("For the InterfaceDiffusiveFluxIntegral, variable and "
                  "neighbor_variable should be of a similar variable type.");
-
-  // Warn that we are not using the same gradient to compute the diffusive flux here
-  if (_fv && !isParamValid("neighbor_variable"))
-    mooseWarning("Only one finite volume variable was specified. InterfaceDiffusiveFluxIntegral is "
-                 "only accurate at a FVDiffusionInterface, not with a regular diffusion kernel.");
 }
 
 template <bool is_ad>
@@ -77,8 +70,11 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
   if (_fv)
   {
+    const auto faceinfos = _mesh.faceInfo();
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    mooseAssert(fi, "We should have a face info");
+    // FaceInfo is not local, another process owns the element
+    if (!fi)
+      return 0;
     const auto normal = fi->normal();
 
     // Form a finite difference gradient across the interface

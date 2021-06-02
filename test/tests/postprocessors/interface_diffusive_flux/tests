@@ -18,7 +18,6 @@
       detail = 'and with finite volume variables.'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
       ad_indexing_type = 'global'
-      mesh_mode = 'REPLICATED'
     []
   []
   [average]
@@ -38,7 +37,6 @@
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxAverage'
       detail = 'and with finite volume variables.'
       ad_indexing_type = 'global'
-      mesh_mode = 'REPLICATED'
     []
   []
 []

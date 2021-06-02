@@ -55,7 +55,8 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
   const auto var_elem_num = _elem_is_one ? var1().number() : var2().number();
   const auto var_neigh_num = _elem_is_one ? var2().number() : var1().number();
 
-  const auto r = MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord();
+  const auto r =
+      MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
 
   // Primal residual
   prepareVectorTag(_assembly, var_elem_num);
@@ -100,7 +101,7 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
               "We're currently built to use CONSTANT MONOMIALS");
 
   // Primal
-  const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord();
+  const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
   _assembly.processDerivatives(primal_r, elem_dof_indices[0], _matrix_tags);
   _assembly.processDerivatives(-primal_r, neigh_dof_indices[0], _matrix_tags);
 

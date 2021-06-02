@@ -70,7 +70,10 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
   {
     // Get FaceInfo from the mesh
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    mooseAssert(fi, "We should have a face info");
+
+    // FaceInfo is not local, another process owns the element
+    if (!fi)
+      return 0;
     const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
 
     // If both variables are different, assume this is a boundary for both variables

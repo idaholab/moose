@@ -1,6 +1,6 @@
 # FVOneVarDiffusionInterface
 
-!syntax description /FVInterfaceKernels/FVOneVarDiffusionInterface
+!syntax description /fviks/FVOneVarDiffusionInterface
 
 This class is only meant to be used with a single variable, e.g. the `variable1`
 parameter should be provided but not `variable2`. `coeff1` should correspond to
@@ -16,8 +16,8 @@ values. This discretization scheme is O(h) accurate.
 
 !listing test/tests/fviks/one-var-diffusion/test.i block=FVInterfaceKernels/interface
 
-!syntax parameters /FVInterfaceKernels/FVOneVarDiffusionInterface
+!syntax parameters /fviks/FVOneVarDiffusionInterface
 
-!syntax inputs /FVInterfaceKernels/FVOneVarDiffusionInterface
+!syntax inputs /fviks/FVOneVarDiffusionInterface
 
-!syntax children /FVInterfaceKernels/FVOneVarDiffusionInterface
+!syntax children /fviks/FVOneVarDiffusionInterface

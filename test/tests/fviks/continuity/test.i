@@ -114,5 +114,4 @@
 
 [Outputs]
   exodus = true
-  hide = 'lambda'
 []
