@@ -101,7 +101,7 @@ protected:
   };
   const MortarApproach _mortar_approach;
   /// Whether to use the dual Mortar approach
-  const bool _use_dual;
+  bool _use_dual;
 
 private:
   /**

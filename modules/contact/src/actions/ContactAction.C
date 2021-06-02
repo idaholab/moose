@@ -125,11 +125,14 @@ ContactAction::validParams()
                              "Whether to choose a variationally consistent mortar approach "
                              "'weighted' or a mixed approach 'legacy' ");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
-  params.addParam<bool>("use_dual",
-                        true,
-                        "Whether to use the dual mortar approach. It is defaulted to true for "
-                        "weighted quantity approach, and to false for the legacy approach. This "
-                        "input is only intended for advanced users.");
+  params.addParam<bool>(
+      "use_dual",
+      true,
+      "Whether to use the dual mortar approach. It is defaulted to true for "
+      "weighted quantity approach, and to false for the legacy approach. To avoid instabilities "
+      "in the solution and obtain the full benefits of a variational enforcement,"
+      "use of dual mortar with weighted constraints is strongly recommended. This "
+      "input is only intended for advanced users.");
 
   return params;
 }
@@ -169,14 +172,21 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
 
     if (_mortar_approach == MortarApproach::Legacy)
+    {
       mooseDeprecated(
           "Use of legacy mortar contact approach is deprecated and will be removed by December "
           "2021. Instead, select the default option based on weighted quantities and dual bases");
+
+      // If user does not specify whether to use dual bases, standard bases will be used with the
+      // `legacy` option.
+      if (!params.isParamSetByUser("use_dual"))
+        _use_dual = false;
+    }
   }
   else if (params.isParamSetByUser("mortar_approach"))
     paramError("mortar_approach",
                "The 'mortar_approach' option can only be used with the 'mortar' formulation");
-  else if (!_use_dual)
+  else if (params.isParamSetByUser("use_dual"))
     paramError("use_dual", "The 'use_dual' option can only be used with the 'mortar' formulation");
 
   if (_formulation != "ranfs")
@@ -369,9 +379,10 @@ ContactAction::addMortarContact()
     {
       InputParameters params = _factory.getValidParams("MooseVariableBase");
 
-      // Allow the user to select "weighted" constraints and standard bases (use_dual = false)
-      // Unless it's for testing purposes, this combination isn't recommended
-      params.set<bool>("use_dual") = (_mortar_approach == MortarApproach::Weighted && _use_dual);
+      // Allow the user to select "weighted" constraints and standard bases (use_dual = false) or
+      // "legacy" constraints and dual bases (use_dual = true). Unless it's for testing purposes,
+      // this combination isn't recommended
+      params.set<bool>("use_dual") = _use_dual;
 
       mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
                   "Displacement variable is missing");
@@ -400,9 +411,6 @@ ContactAction::addMortarContact()
       auto var_type = AddVariableAction::determineType(fe_type, 1);
       _problem->addVariable(var_type, variable_name, params);
     };
-
-    // To avoid instabilities in the solution and obtain the full benefits of a variational
-    // enforcement, use of dual mortar is strongly recommended.
 
     // Normal contact:
     //   Lagrange family with order one less than primal, but by necessity with a min
