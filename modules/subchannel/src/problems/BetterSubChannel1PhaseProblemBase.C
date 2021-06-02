@@ -159,21 +159,21 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
   /// Initial guess, port crossflow in block (iblock) into a vector that will act as my initial guess
-  Eigen::VectorXd solution_seed_matrix = Wij.block(0, first_node, n_gaps, block_size);
+  Eigen::MatrixXd solution_seed_matrix = Wij.block(0, first_node, n_gaps, block_size);
 
+  Eigen::VectorXd solution_seed;
   for (unsigned int iz = 0; iz < block_size; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       int i = n_gaps * iz + i_gap; // column wise transfer
-      solution_seed(i) = solution_seed_matrix(i_gap, iz)
+      solution_seed(i) = solution_seed_matrix(i_gap, iz);
     }
   }
 
-  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined returns a vector
+  /// Solving the combined lateral momentum equation for Wij using a PETSc solver and returns a vector root
   Eigen::VectorXd root = PETScSnesSolver(iblock, solution_seed);
 
-  /// Update crossflow using root \
   // Assign the solution to the cross-flow matrix
   int i = 0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -181,7 +181,7 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       Wij(i_gap, iz) = root(i);
-      i += 1;
+      i ++;
     }
   }
 }
@@ -561,7 +561,7 @@ BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd 
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       Wij(i_gap, iz) = solution(i);
-      i += 1;
+      i ++;
     }
   }
 
@@ -773,7 +773,6 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
      Free work space.  All PETSc objects should be destroyed when they
      are no longer needed.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
   ierr = VecDestroy(&x);
   CHKERRQ(ierr);
   ierr = VecDestroy(&r);
@@ -790,7 +789,7 @@ BetterSubChannel1PhaseProblemBase::formFunction(SNES snes, Vec x, Vec f, void * 
   PetscErrorCode ierr;
   const PetscScalar * xx;
   PetscScalar * ff;
-  BetterSubchanel1PhaseBase * schp = static_cast<BetterSubchanel1PhaseBase *>(ctx);
+  BetterSubchanel1PhaseProblemBase * schp = static_cast<BetterSubchanel1PhaseProblemBase *>(ctx);
   /*
    Get pointers to vector data.
       - For default PETSc vectors, VecGetArray() returns a pointer to
@@ -817,8 +816,6 @@ BetterSubChannel1PhaseProblemBase::formFunction(SNES snes, Vec x, Vec f, void * 
   {
     ff[i] = Wij_residual_vector(i);
   }
-  ff[0] = xx[0] * xx[0] + xx[0] * xx[1] - 8.0;
-  ff[1] = xx[0] * xx[1] + xx[1] * xx[1] - 8.0;
 
   /* Restore vectors */
   ierr = VecRestoreArrayRead(x, &xx);
