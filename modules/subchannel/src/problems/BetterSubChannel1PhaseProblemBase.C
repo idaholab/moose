@@ -6,6 +6,7 @@
 #include <petscksp.h>
 #include <petscsys.h>
 #include <petscvec.h>
+#include <petscsnes.h>
 #include <iostream>
 #include <Eigen/Dense>
 #include <cmath>
@@ -531,8 +532,8 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
   }
 }
 
-virtual Eigen::VectorXd
-BetterSubChannel1PhaseProblemBase::ResidualFunction(int iblock, Eigen::VectorXd solution)
+Eigen::VectorXd
+BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd solution)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
@@ -646,22 +647,17 @@ BetterSubChannel1PhaseProblemBase::ResidualFunction(int iblock, Eigen::VectorXd 
   return Wij_residual_vector;
 }
 
-virtual Eigen::VectorXd
+Eigen::VectorXd
 BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd solution)
 {
   SNES snes; /* nonlinear solver context */
   KSP ksp;   /* linear solver context */
   PC pc;     /* preconditioner context */
   Vec x, r;  /* solution, residual vectors */
-  Mat J;     /* Jacobian matrix */
   PetscErrorCode ierr;
   PetscMPIInt size;
-  PetscScalar pfive = .5, *xx;
-  PetscBool flg;
+  PetscScalar * xx;
 
-  ierr = PetscInitialize(&argc, &argv, (char *)0, help);
-  if (ierr)
-    return ierr;
   ierr = MPI_Comm_size(PETSC_COMM_WORLD, &size);
   CHKERRMPI(ierr);
   if (size > 1)
@@ -681,42 +677,18 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   */
   ierr = VecCreate(PETSC_COMM_WORLD, &x);
   CHKERRQ(ierr);
-  ierr = VecSetSizes(x, PETSC_DECIDE, 2);
+  ierr = VecSetSizes(x, PETSC_DECIDE, block_size * n_gaps);
   CHKERRQ(ierr);
   ierr = VecSetFromOptions(x);
   CHKERRQ(ierr);
   ierr = VecDuplicate(x, &r);
   CHKERRQ(ierr);
 
-  /*
-     Create Jacobian matrix data structure
-  */
-  ierr = MatCreate(PETSC_COMM_WORLD, &J);
+  ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
   CHKERRQ(ierr);
-  ierr = MatSetSizes(J, PETSC_DECIDE, PETSC_DECIDE, 2, 2);
-  CHKERRQ(ierr);
-  ierr = MatSetFromOptions(J);
-  CHKERRQ(ierr);
-  ierr = MatSetUp(J);
+  ierr = SNESSetFunction(snes, r, formFunction, this);
   CHKERRQ(ierr);
 
-  ierr = PetscOptionsHasName(NULL, NULL, "-hard", &flg);
-  CHKERRQ(ierr);
-  if (!flg)
-  {
-    ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
-    CHKERRQ(ierr);
-    ierr = SNESSetFunction(snes, r, FormFunction1, NULL);
-    CHKERRQ(ierr);
-    //    ierr = SNESSetJacobian(snes,J,J,FormJacobian1,NULL);CHKERRQ(ierr);
-  }
-  else
-  {
-    ierr = SNESSetFunction(snes, r, FormFunction2, NULL);
-    CHKERRQ(ierr);
-    ierr = SNESSetJacobian(snes, J, J, FormJacobian2, NULL);
-    CHKERRQ(ierr);
-  }
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Customize nonlinear solver; set runtime options
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -747,20 +719,15 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Evaluate initial guess; then solve nonlinear system
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  if (!flg)
+  ierr = VecGetArray(x, &xx);
+  CHKERRQ(ierr);
+  for (unsigned int i = 0; i < block_size * n_gaps; i++)
   {
-    ierr = VecSet(x, pfive);
-    CHKERRQ(ierr);
+    xx[i] = solution(i)
   }
-  else
-  {
-    ierr = VecGetArray(x, &xx);
-    CHKERRQ(ierr);
-    xx[0] = 2.0;
-    xx[1] = 3.0;
-    ierr = VecRestoreArray(x, &xx);
-    CHKERRQ(ierr);
-  }
+  ierr = VecRestoreArray(x, &xx);
+  CHKERRQ(ierr);
+
   /*
      Note: The user should initialize the vector, x, with the initial guess
      for the nonlinear solver prior to calling SNESSolve().  In particular,
@@ -770,16 +737,25 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
 
   ierr = SNESSolve(snes, NULL, x);
   CHKERRQ(ierr);
-  //  if (flg) {
   Vec f;
-  //    std::cout << "Hello World!";
   ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
   CHKERRQ(ierr);
   ierr = SNESGetFunction(snes, &f, 0, 0);
   CHKERRQ(ierr);
   ierr = VecView(r, PETSC_VIEWER_STDOUT_WORLD);
   CHKERRQ(ierr);
-  //  }
+
+  /// put x into eigen vector root and return that vector
+  Eigen::VectorXd root;
+  ierr = VecGetArrayRead(x, &xx);
+  CHKERRQ(ierr);
+  for (unsigned int i = 0; i < block_size * n_gaps; i++)
+  {
+    root(i) = xx[i];
+  }
+  /* Restore vectors */
+  ierr = VecRestoreArrayRead(x, &xx);
+  CHKERRQ(ierr);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Free work space.  All PETSc objects should be destroyed when they
@@ -790,21 +766,19 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   CHKERRQ(ierr);
   ierr = VecDestroy(&r);
   CHKERRQ(ierr);
-  ierr = MatDestroy(&J);
-  CHKERRQ(ierr);
   ierr = SNESDestroy(&snes);
   CHKERRQ(ierr);
-  ierr = PetscFinalize();
-  return ierr;
+
+  return root;
 }
-/// example of a residual function in SNES context
-extern "C" virtual PetscErrorCode
-BetterSubChannel1PhaseProblemBase::FormResidualFunction(SNES snes, Vec x, Vec f, void * ctx)
+
+virtual PetscErrorCode
+BetterSubChannel1PhaseProblemBase::formFunction(SNES snes, Vec x, Vec f, void * ctx)
 {
   PetscErrorCode ierr;
   const PetscScalar * xx;
   PetscScalar * ff;
-
+  BetterSubchanel1PhaseBase * schp = static_cast<BetterSubchanel1PhaseBase *>(ctx);
   /*
    Get pointers to vector data.
       - For default PETSc vectors, VecGetArray() returns a pointer to
@@ -812,12 +786,25 @@ BetterSubChannel1PhaseProblemBase::FormResidualFunction(SNES snes, Vec x, Vec f,
       - You MUST call VecRestoreArray() when you no longer need access to
         the array.
    */
+
+  /// Put x into eigen vector solution_seed
+  Eigen::VectorXd solution_seed;
   ierr = VecGetArrayRead(x, &xx);
   CHKERRQ(ierr);
+  for (unsigned int i = 0; i < block_size * n_gaps; i++)
+  {
+    solution_seed(i) = xx[i];
+  }
+  Eigen::VectorXd Wij_residual_vector = schp->ResidualFunction(iblock, solution_seed);
+
   ierr = VecGetArray(f, &ff);
   CHKERRQ(ierr);
 
   /* Compute function */
+  for (unsigned int i = 0; i < block_size * n_gaps; i++)
+  {
+    ff[i] = Wij_residual_vector(i);
+  }
   ff[0] = xx[0] * xx[0] + xx[0] * xx[1] - 8.0;
   ff[1] = xx[0] * xx[1] + xx[1] * xx[1] - 8.0;
 
