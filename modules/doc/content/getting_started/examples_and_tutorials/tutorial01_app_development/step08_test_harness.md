@@ -57,7 +57,7 @@ This demonstration will show how to create the [three test setup items](#setup) 
 !equation
 (\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-If $\mu = 0$, the residual would yield a [`NaN`](https://en.wikipedia.org/wiki/NaN) value and the application would crash. Thus, the source code shall be modified to prevent this condition and a second test will be created with the input, `viscosity = 0`, to verify that a proper, unambiguous error occurs.
+If $\mu = 0$, the residual would yield a [`NaN`](https://en.wikipedia.org/wiki/NaN) value and the application would crash. Thus, the source code shall be modified to prevent this condition and a second test will be created with the input `viscosity = 0` to verify that a proper, unambiguous error occurs.
 
 ### Source Code id=source-demo
 

@@ -33,7 +33,7 @@ cd ~/projects/babbler
 It is possible to use both [!ac](MPI) and threading. This is accomplished by combining the two
 methods described above.
 
-!alert tip title=Optimum numbers are hardware and problem dependent
+!alert tip title=Optimum numbers are hardware and problem dependent.
 The number of processors and threads available for execution is hardware dependent. A modern laptop
 typically has 4 processors, with 2 threads each. In general, it is recommended to begin with
 using just [!ac](MPI). Thus, it is typical to use between 4 and 8 processors for the `mpiexec`
@@ -41,7 +41,7 @@ command. If threading is added, then using 4 processors for [!ac](MPI) and 2 for
 typical. The optimum arrangement for parallel execution will be hardware and problem dependent. It
 may be worth while exploring differing arrangements before running a full-scale problem.
 
-!alert note title=Parallel can be enabled in Peacock
+!alert note title=Parallelism can be enabled in Peacock.
 In the "Execute" tab of Peacock, the `mpiexec` and `--n-threads` options can be used by selecting the "Use MPI" and "Use Threads" checkboxes and specifying the command syntax. These options can be set and enabled by default in +Peacock > Preferences+.
 
 *For more information about command-line options, please visit the [application_usage/command_line_usage.md] page.*
@@ -68,7 +68,7 @@ MOOSE includes a tool for evaluating performance: [PerfGraphOutput.md]. This ena
 
 There is an entire field of science about [!ac](HPC) and massively parallel processing. Although it is a valuable one, a formal discussion cannot be made here. One concept worth mentioning is [scalable parallelism](https://en.wikipedia.org/wiki/Scalable_parallelism), which refers to software that performs at the same level for larger problems that use more processes as it does for smaller problems that use fewer processes. In MOOSE, selecting a number of processes based on the number of [!ac](DOFs) in the system is a simple way to try and achieve scalability.
 
-!alert tip title=Try to target 20,000 [!ac](DOFs)-per-process
+!alert tip title=Try to target 20,000 [!ac](DOFs)-per-process.
 MOOSE developers tend to agree that 20,000 is the ideal number of [!ac](DOFs) that a single process may be responsible for. This value is reported as "`Num Local DOFs`" in the terminal printout at the beginning of every execution. There are, of course, some exceptions; if a problem exhibits speedup with less than 20,000 [!ac](DOFs)/process, then just use that.
 
 *For more information about application performance, please visit the [application_development/performance_benchmarking.md] page.*
@@ -85,7 +85,7 @@ cd ~/projects/babbler/problems
 ./babbler-opt -i pressure_diffusion.i -r 4 --timing
 ```
 
-!alert warning title=Use less refinement for older hardware
+!alert warning title=Use less refinement for older hardware.
 Running this problem with 4 levels of refinement may be too much for older systems. It is still
 possible to follow along with this example using less levels of refinement.
 

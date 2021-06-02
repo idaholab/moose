@@ -11,7 +11,7 @@ Consider a system containing two pressure vessels at differing temperatures as i
        id=problem-schematic
        caption=Schematic of the pressure vessel system for which a custom MOOSE-based application will be designed to solve [!cite](pamuk2012friction).
 
-For this tutorial, the outlined portion of the pipe of length $L$, shown in [problem-schematic], is of particular interest. This region shall serve as the problem domain, $\Omega$.
+For this tutorial, the outlined portion of the pipe of length $L$, shown in [problem-schematic], is of particular interest. This region shall serve as the problem domain $\Omega$.
 
 ## Governing Equations id=equations
 
@@ -68,14 +68,14 @@ C \equiv \epsilon \rho_{f} c_{p,f} + (1 - \epsilon) \rho_{s} c_{p,s}
 !equation id=thermal-cond
 k \equiv \epsilon k_{f} + (1 - \epsilon) k_{s}
 
-Here, $c_{p}$ denotes specific heat and the subscripts, $f$ and $s$ refer to the fluid material (water) and solid material (steel), respectively.
+Here, $c_{p}$ denotes specific heat and the subscripts $f$ and $s$ refer to the fluid material (water) and solid material (steel), respectively.
 
 ## Material Properties id=mats
 
-The material properties of the fluid, $f$, and the solid, $s$, are given in [mats]. The permeability of the packed steel sphere medium that is present throughout the pipe is assumed to be isotropic. [!cite](pamuk2012friction) provides the following relationship:
+The material properties of the fluid ($f$) and the solid ($s$) are given in [mats]. The permeability of the packed steel sphere medium that is present throughout the pipe is assumed to be isotropic. [!cite](pamuk2012friction) provides the following relationship:
 
 !equation id=permeability
-K(d) = \frac{1}{2} \begin{bmatrix} -d + 3 & d - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \, \, \, \forall \, d \in [1, 3]
+K(d) = \frac{1}{2} \begin{bmatrix} -d + 3 & d - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \enspace \forall \, d \in [1, 3]
 
 where $d$ is the diameter ($\textrm{mm}$) of the spheres and $K$ denotes the scalar permeability ($\textrm{m}^{2}$), which is a linear function of $d$.
 
