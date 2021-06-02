@@ -95,7 +95,12 @@ ContactAction::validParams()
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<Real>(
-      "c_normal", 1e6, "Parameter for balancing the size of the gap and contact pressure");
+      "c_normal",
+      1e6,
+      "Parameter for balancing the size of the gap and contact pressure. This purely numerical "
+      "parameter affects convergence behavior and, in general, should be larger for stiffer "
+      "materials. It is recommended that the user tries out various orders of magnitude for this "
+      "parameter if the default value generates poor contact convergence.");
   params.addParam<Real>(
       "c_tangential", 1, "Numerical parameter for nonlinear frictional constraints");
   params.addParam<bool>("ping_pong_protection",
@@ -113,7 +118,8 @@ ContactAction::validParams()
       true,
       "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
-      "used, and then the _normals member should be indexed with _i instead of _qp");
+      "used, and then the _normals member should be indexed with _i instead of _qp. This input "
+      "parameter is intended for developers.");
   params.addParam<MooseEnum>("mortar_approach",
                              ContactAction::getMortarApproach(),
                              "Whether to choose a variationally consistent mortar approach "
@@ -403,12 +409,8 @@ ContactAction::addMortarContact()
     //   order of 1 (we don't have zeroth order Lagrange). We must use a Lagrange basis because we
     //   need dofs at nodes in order to enforce the zero-penetration constraint
     //
-    if (_mortar_approach == MortarApproach::Weighted)
-      addLagrangeMultiplier(
-          normal_lagrange_multiplier_name, 1, false, getParam<Real>("normal_lm_scaling"));
-    else if (_mortar_approach == MortarApproach::Legacy)
-      addLagrangeMultiplier(
-          normal_lagrange_multiplier_name, 1, false, getParam<Real>("normal_lm_scaling"));
+    addLagrangeMultiplier(
+        normal_lagrange_multiplier_name, 1, false, getParam<Real>("normal_lm_scaling"));
 
     // Tangential contact:
     //    For standard Mortar: one order lower than primal, Lagrange family unless zeroth order,

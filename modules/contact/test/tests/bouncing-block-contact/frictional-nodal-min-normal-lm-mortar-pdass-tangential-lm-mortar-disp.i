@@ -163,11 +163,6 @@ offset = 1e-2
   nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = false
-
-  # [./Predictor]
-  #   type = SimplePredictor
-  #   scale = 1.0
-  # [../]
 []
 
 [Debug]
@@ -176,11 +171,6 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  # checkpoint = true
-  # [./dofmap]
-  #   type = DOFMap
-  #   execute_on = 'initial'
-  # [../]
 []
 
 [Preconditioning]
@@ -191,17 +181,4 @@ offset = 1e-2
 []
 
 [Postprocessors]
-#  [num_nl]
-#    type = NumNonlinearIterations
-#  []
-#  [cumulative]
-#    type = CumulativeValuePostprocessor
-#    postprocessor = num_nl
-#  []
-#  [contact]
-#    type = ContactDOFSetSize
-#    variable = frictional_normal_lm
-#    subdomain = '3'
-#    execute_on = 'nonlinear timestep_end'
-#  []
 []
