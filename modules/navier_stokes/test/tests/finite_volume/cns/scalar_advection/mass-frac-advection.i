@@ -292,7 +292,6 @@ v_in=1
 [Executioner]
   solve_type = NEWTON
   type = Transient
-  nl_max_its = 10
   [TimeIntegrator]
     type = ActuallyExplicitEuler
   []

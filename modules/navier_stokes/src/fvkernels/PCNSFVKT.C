@@ -14,7 +14,7 @@
 
 using namespace Moose::FV;
 
-registerMooseObject("MooseApp", PCNSFVKT);
+registerMooseObject("NavierStokesApp", PCNSFVKT);
 
 InputParameters
 PCNSFVKT::validParams()
@@ -93,11 +93,11 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
 #endif
 }
 
-ADReal
-PCNSFVKT::computeOmega(const ADReal & u_elem_normal,
-                       const ADReal & u_neighbor_normal,
-                       const ADReal & c_elem,
-                       const ADReal & c_neighbor) const
+std::pair<ADReal, ADReal>
+PCNSFVKT::computeAlphaAndOmega(const ADReal & u_elem_normal,
+                               const ADReal & u_neighbor_normal,
+                               const ADReal & c_elem,
+                               const ADReal & c_neighbor) const
 {
   // Equations from Greenshields sans multiplication by area (which well be done in
   // computeResidual/Jacobian
@@ -105,13 +105,29 @@ PCNSFVKT::computeOmega(const ADReal & u_elem_normal,
       std::max({c_elem + u_elem_normal, c_neighbor + u_neighbor_normal, ADReal(0)});
   const auto psi_neighbor =
       std::max({c_elem - u_elem_normal, c_neighbor - u_neighbor_normal, ADReal(0)});
-  const auto alpha = _knp_for_omega ? psi_elem / (psi_elem + psi_neighbor) : ADReal(0.5);
+  auto alpha = _knp_for_omega ? psi_elem / (psi_elem + psi_neighbor) : ADReal(0.5);
   auto omega = _knp_for_omega ? alpha * (1 - alpha) * (psi_elem + psi_neighbor)
                               : alpha * std::max(psi_elem, psi_neighbor);
 
   // Do this to avoid new nonzero mallocs
-  omega += 0 * (c_elem + u_elem_normal + c_neighbor + u_neighbor_normal);
-  return omega;
+  const auto dummy_quant = 0 * (c_elem + u_elem_normal + c_neighbor + u_neighbor_normal);
+
+  alpha += dummy_quant;
+  omega += dummy_quant;
+  return std::make_pair(std::move(alpha), std::move(omega));
+}
+
+ADReal
+PCNSFVKT::computeFaceFlux(const ADReal & alpha,
+                          const ADReal & omega,
+                          const ADReal & sup_vel_elem_normal,
+                          const ADReal & sup_vel_neighbor_normal,
+                          const ADReal & adv_quant_elem,
+                          const ADReal & adv_quant_neighbor)
+{
+  return alpha * (sup_vel_elem_normal * adv_quant_elem) +
+         (1 - alpha) * sup_vel_neighbor_normal * adv_quant_neighbor -
+         omega * (adv_quant_neighbor - adv_quant_elem);
 }
 
 ADReal
@@ -199,19 +215,25 @@ PCNSFVKT::computeQpResidual()
   const auto u_elem_normal = u_elem * _face_info->normal();
   const auto u_neighbor_normal = u_neighbor * _face_info->normal();
 
-  const auto omega = computeOmega(u_elem_normal, u_neighbor_normal, c_elem, c_neighbor);
+  const auto pr = computeAlphaAndOmega(u_elem_normal, u_neighbor_normal, c_elem, c_neighbor);
+  const auto & alpha = pr.first;
+  const auto & omega = pr.second;
 
   if (_eqn == "mass")
-    return 0.5 * (sup_vel_elem_normal * rho_elem + sup_vel_neighbor_normal * rho_neighbor) -
-           omega * (rho_neighbor - rho_elem);
+    return computeFaceFlux(
+        alpha, omega, sup_vel_elem_normal, sup_vel_neighbor_normal, rho_elem, rho_neighbor);
   else if (_eqn == "momentum")
   {
     const auto rhou_elem = u_elem(_index) * rho_elem;
     const auto rhou_neighbor = u_neighbor(_index) * rho_neighbor;
-    return 0.5 * (sup_vel_elem_normal * rhou_elem + sup_vel_neighbor_normal * rhou_neighbor +
-                  (_eps_elem[_qp] * pressure_elem + _eps_neighbor[_qp] * pressure_neighbor) *
-                      _face_info->normal()(_index)) -
-           omega * (rhou_neighbor - rhou_elem);
+    return computeFaceFlux(alpha,
+                           omega,
+                           sup_vel_elem_normal,
+                           sup_vel_neighbor_normal,
+                           rhou_elem,
+                           rhou_neighbor) +
+           _face_info->normal()(_index) * (alpha * _eps_elem[_qp] * pressure_elem +
+                                           (1 - alpha) * _eps_neighbor[_qp] * pressure_neighbor);
   }
   else if (_eqn == "energy")
   {
@@ -220,8 +242,8 @@ PCNSFVKT::computeQpResidual()
         e_neighbor + 0.5 * u_neighbor * u_neighbor + pressure_neighbor / rho_neighbor;
     const auto rho_ht_elem = rho_elem * ht_elem;
     const auto rho_ht_neighbor = rho_neighbor * ht_neighbor;
-    return 0.5 * (sup_vel_elem_normal * rho_ht_elem + sup_vel_neighbor_normal * rho_ht_neighbor) -
-           omega * (rho_ht_neighbor - rho_ht_elem);
+    return computeFaceFlux(
+        alpha, omega, sup_vel_elem_normal, sup_vel_neighbor_normal, rho_ht_elem, rho_ht_neighbor);
   }
   else if (_eqn == "scalar")
   {
@@ -239,8 +261,8 @@ PCNSFVKT::computeQpResidual()
                                              false);
     const auto rhos_elem = rho_elem * scalar_elem;
     const auto rhos_neighbor = rho_neighbor * scalar_neighbor;
-    return 0.5 * (sup_vel_elem_normal * rhos_elem + sup_vel_neighbor_normal * rhos_neighbor) -
-           omega * (rhos_neighbor - rhos_elem);
+    return computeFaceFlux(
+        alpha, omega, sup_vel_elem_normal, sup_vel_neighbor_normal, rhos_elem, rhos_neighbor);
   }
   else
     mooseError("Unrecognized enum type ", _eqn);

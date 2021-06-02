@@ -47,7 +47,7 @@ class TestBasic1DPorousKTPrimitiveUpwind(unittest.TestCase):
 # class TestBasic1DPorousKTPrimitiveUpwind():
     def test(self):
         labels = ['L2pressure', 'L2sup_vel_x', 'L2T_fluid']
-        df1 = mms.run_spatial('basic-primitive-pcnsfv-kt.i', 9, "GlobalParams/limiter='upwind'", "--error", y_pp=labels)
+        df1 = mms.run_spatial('basic-primitive-pcnsfv-kt.i', list(range(8,11)), "GlobalParams/limiter='upwind'", "--error", y_pp=labels)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -99,7 +99,7 @@ class TestBasic1DPorousKTConservedUpwind(unittest.TestCase):
         fig.save('basic-conserved-pcnsfv-kt-upwind.png')
         for key,value in fig.label_to_slope.items():
             print("%s slope, %f" % (key, value))
-            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .1))
         # for key,value in fig.label_to_intercept.items():
         #     print("%s intercept, %f" % (key, value))
 

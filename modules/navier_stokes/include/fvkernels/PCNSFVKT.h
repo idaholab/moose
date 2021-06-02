@@ -11,6 +11,7 @@
 
 #include "FVFluxKernel.h"
 #include <memory>
+#include <utility>
 
 namespace Moose
 {
@@ -29,10 +30,16 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  ADReal computeOmega(const ADReal & u_elem_normal,
-                      const ADReal & u_neighbor_normal,
-                      const ADReal & c_elem,
-                      const ADReal & c_neighbor) const;
+  std::pair<ADReal, ADReal> computeAlphaAndOmega(const ADReal & u_elem_normal,
+                                                 const ADReal & u_neighbor_normal,
+                                                 const ADReal & c_elem,
+                                                 const ADReal & c_neighbor) const;
+  static ADReal computeFaceFlux(const ADReal & alpha,
+                                const ADReal & omega,
+                                const ADReal & sup_vel_elem_normal,
+                                const ADReal & sup_vel_neighbor_normal,
+                                const ADReal & adv_quant_elem,
+                                const ADReal & adv_quant_neighbor);
 
   const SinglePhaseFluidProperties & _fluid;
   const ADMaterialProperty<Real> & _sup_vel_x_elem;
