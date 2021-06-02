@@ -52,7 +52,7 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  abeta = 0.006
+  beta = 0.006
   CT = 1.0
   enforce_uniform_pressure = false
   Density = true
