@@ -12,6 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "DelimitedFileReader.h"
 
 class CrystalPlasticityStressUpdateBase : public Material
 {
@@ -38,7 +39,11 @@ public:
    */
   virtual void initQpStatefulProperties() override;
 
-  /// Read in the crystal specific glide slip systems from a file
+  /**
+   * A helper method to read in plane normal and direction vectors from a file
+   * and to normalize the vectors. This method is abstracted to allow for reuse
+   * in inheriting classes with multiple plane normal and direction vector pairs.
+   */
   virtual void getSlipSystems();
 
   /**
@@ -72,21 +77,10 @@ public:
    * tensor from the Elasticity tensor class.
    */
   void calculateSchmidTensor(const unsigned int & number_dislocation_systems,
-                             const DenseVector<Real> & plane_normal_vector,
-                             const DenseVector<Real> & direction_vector,
+                             const std::vector<DenseVector<Real>> & plane_normal_vector,
+                             const std::vector<DenseVector<Real>> & direction_vector,
                              std::vector<RankTwoTensor> & schmid_tensor,
                              const RankTwoTensor & crysrot);
-
-  /**
-   * A helper method to read in plane normal and direction vectors from a file
-   * and to normalize the vectors. This method is abstracted to allow for reuse
-   * in inheriting classes with multiple plane normal and direction vector pairs.
-   */
-  void getPlaneNormalAndDirectionVectors(const FileName & vector_file_name,
-                                         const unsigned int & number_dislocation_systems,
-                                         DenseVector<Real> & plane_normal_vector,
-                                         DenseVector<Real> & direction_vector,
-                                         bool & orthonormal_error);
 
   /**
    * A helper method to sort the slip systems of a crystal into cross slip families based
@@ -183,6 +177,10 @@ protected:
   /// multi-material systems
   const std::string _base_name;
 
+  const enum class UnitCellType { BCC, FCC, HCP } _unit_cell_type;
+
+  const std::vector<Real> _unit_cell_dimension;
+
   ///Maximum number of active slip systems for the crystalline material being modeled
   const unsigned int _number_slip_systems;
 
@@ -212,8 +210,8 @@ protected:
   MaterialProperty<std::vector<Real>> & _slip_increment;
 
   ///@{Slip system direction and normal and associated Schmid tensors
-  DenseVector<Real> _slip_direction;
-  DenseVector<Real> _slip_plane_normal;
+  std::vector<DenseVector<Real>> _slip_direction;
+  std::vector<DenseVector<Real>> _slip_plane_normal;
   MaterialProperty<std::vector<RankTwoTensor>> & _flow_direction;
   ///@}
 
