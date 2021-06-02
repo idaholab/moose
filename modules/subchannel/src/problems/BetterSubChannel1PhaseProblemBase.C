@@ -181,7 +181,7 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       Wij(i_gap, iz) = root(i);
-      i ++;
+      i++;
     }
   }
 }
@@ -561,7 +561,7 @@ BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd 
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       Wij(i_gap, iz) = solution(i);
-      i ++;
+      i++;
     }
   }
 
