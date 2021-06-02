@@ -72,6 +72,8 @@
     primary = 2
     secondary = 1
     formulation = mortar
+    mortar_approach = legacy
+    c_normal = 1e0
   []
 []
 
@@ -105,4 +107,3 @@
     execute_on = 'nonlinear timestep_end'
   []
 []
-

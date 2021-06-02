@@ -17,6 +17,7 @@
       input = 'small.i'
       csvdiff = 'small.csv'
       heavy = true
+      ad_indexing_type = 'global'
     [../]
     [./finite]
       detail = 'using the finite strain formulation.'

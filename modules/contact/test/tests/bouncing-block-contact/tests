@@ -256,6 +256,7 @@
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
       ad_indexing_type = 'global'
+      abs_zero = 5e-9
     []
     [action]
       type = 'Exodiff'
@@ -265,6 +266,7 @@
       cli_args = "Postprocessors/active=''"
       ad_indexing_type = 'global'
       min_ad_size = '73'
+      abs_zero = 5e-9
     []
   []
 []
