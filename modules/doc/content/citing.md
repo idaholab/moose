@@ -178,7 +178,7 @@ journal = {International Journal for Numerical Methods in Engineering},
 
 ### Porous Flow
 
-The [following paper](https://doi.org/10.21105/joss.02176) provides an overview of the MOOSE Porous Flow module.
+The following papers present the governing equations of the MOOSE Porous Flow module, along with discussions of its capabilities and implementation details:
 
 ```
 @article{Wilkins2020,
@@ -192,6 +192,17 @@ The [following paper](https://doi.org/10.21105/joss.02176) provides an overview 
   author = {Andy Wilkins and Christopher P. Green and Jonathan Ennis-King},
   title = {PorousFlow: a multiphysics simulation code for coupled problems in porous media},
   journal = {Journal of Open Source Software}
+}
+
+@article{Wilkins2021,
+  title = {An open-source multiphysics simulation code for coupled problems in porous media},
+  journal = {Computers \& Geosciences},
+  volume = {154},
+  pages = {104820},
+  year = {2021},
+  issn = {0098-3004},
+  doi = {10.1016/j.cageo.2021.104820},
+  author = {Andy Wilkins and Christopher P. Green and Jonathan Ennis-King}
 }
 ```
 
