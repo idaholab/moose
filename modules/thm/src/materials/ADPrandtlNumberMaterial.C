@@ -1,4 +1,4 @@
-#include "ADPrandtlNumberMaterial.h" 
+#include "ADPrandtlNumberMaterial.h"
 #include "Numerics.h"
 
 registerMooseObject("THMApp", ADPrandtlNumberMaterial);
