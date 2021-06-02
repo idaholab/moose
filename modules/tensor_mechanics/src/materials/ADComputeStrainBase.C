@@ -55,7 +55,7 @@ ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
   for (unsigned i = _ndisp; i < 3; ++i)
   {
     _disp.push_back(&_ad_zero);
-    _grad_disp.push_back(&_ad_grad_zero);
+    _grad_disp.push_back(&_ad_vector_of_zeroes);
   }
 
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)

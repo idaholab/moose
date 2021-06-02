@@ -1654,7 +1654,7 @@ public:
   std::vector<VariablePhiValue> _phi_zero;
   std::vector<MooseArray<ADReal>> _ad_zero;
   std::vector<VariableGradient> _grad_zero;
-  std::vector<MooseArray<ADRealVectorValue>> _ad_grad_zero;
+  std::vector<MooseArray<ADRealVectorValue>> _ad_vector_of_zeroes;
   std::vector<VariablePhiGradient> _grad_phi_zero;
   std::vector<VariableSecond> _second_zero;
   std::vector<MooseArray<ADRealTensorValue>> _ad_second_zero;

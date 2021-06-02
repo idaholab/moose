@@ -1058,7 +1058,7 @@ protected:
   const ADVariableValue & adZeroValue() const;
 
   /**
-   *  method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
+   *  method that returns _grad_zero to RESIDUAL computing objects and _ad_vector_of_zeroes to
    * JACOBIAN computing objects
    */
   const ADVariableGradient & adZeroGradient() const;
@@ -1177,7 +1177,9 @@ protected:
 
   /// Zero gradient of a variable
   const VariableGradient & _grad_zero;
-  const MooseArray<ADRealVectorValue> & _ad_grad_zero;
+
+  /// Zero gradient of an AD variable or zero value of an AD vector variable
+  const MooseArray<ADRealVectorValue> & _ad_vector_of_zeroes;
 
   /// Zero gradient of trial function
   const VariablePhiGradient & _grad_phi_zero;

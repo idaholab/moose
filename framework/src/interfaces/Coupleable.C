@@ -31,7 +31,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _phi_zero(_c_fe_problem._phi_zero[_c_tid]),
     _ad_zero(_c_fe_problem._ad_zero[_c_tid]),
     _grad_zero(_c_fe_problem._grad_zero[_c_tid]),
-    _ad_grad_zero(_c_fe_problem._ad_grad_zero[_c_tid]),
+    _ad_vector_of_zeroes(_c_fe_problem._ad_vector_of_zeroes[_c_tid]),
     _grad_phi_zero(_c_fe_problem._grad_phi_zero[_c_tid]),
     _second_zero(_c_fe_problem._second_zero[_c_tid]),
     _ad_second_zero(_c_fe_problem._ad_second_zero[_c_tid]),
@@ -1888,8 +1888,8 @@ Coupleable::adZeroValue() const
 const ADVariableGradient &
 Coupleable::adZeroGradient() const
 {
-  mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_grad_zero' instead.");
-  return _ad_grad_zero;
+  mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_vector_of_zeroes' instead.");
+  return _ad_vector_of_zeroes;
 }
 
 const ADVariableSecond &
@@ -1924,7 +1924,7 @@ template <>
 const GenericVariableGradient<true> &
 Coupleable::genericZeroGradient<true>()
 {
-  return _ad_grad_zero;
+  return _ad_vector_of_zeroes;
 }
 
 template <>

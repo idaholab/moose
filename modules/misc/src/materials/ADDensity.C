@@ -45,7 +45,7 @@ ADDensity::ADDensity(const InputParameters & parameters)
         "The system uses a displaced problem but 'displacements' are not provided in ADDensity.");
 
   // fill remaining components with zero
-  _grad_disp.resize(3, &_ad_grad_zero);
+  _grad_disp.resize(3, &_ad_vector_of_zeroes);
 }
 
 void

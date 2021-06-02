@@ -381,7 +381,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _phi_zero.resize(n_threads);
   _ad_zero.resize(n_threads);
   _grad_zero.resize(n_threads);
-  _ad_grad_zero.resize(n_threads);
+  _ad_vector_of_zeroes.resize(n_threads);
   _grad_phi_zero.resize(n_threads);
   _second_zero.resize(n_threads);
   _ad_second_zero.resize(n_threads);
@@ -550,7 +550,7 @@ FEProblemBase::~FEProblemBase()
     _vector_zero[i].release();
     _vector_curl_zero[i].release();
     _ad_zero[i].release();
-    _ad_grad_zero[i].release();
+    _ad_vector_of_zeroes[i].release();
     _ad_second_zero[i].release();
   }
 
@@ -4730,7 +4730,7 @@ FEProblemBase::updateMaxQps()
     _zero[tid].resize(max_qpts, 0);
     _ad_zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
-    _ad_grad_zero[tid].resize(max_qpts, ADRealGradient(0));
+    _ad_vector_of_zeroes[tid].resize(max_qpts, ADRealVectorValue(0));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
     _ad_second_zero[tid].resize(max_qpts, ADRealTensorValue(0));
     _vector_zero[tid].resize(max_qpts, RealGradient(0.));
