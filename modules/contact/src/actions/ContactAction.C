@@ -381,7 +381,7 @@ ContactAction::addMortarContact()
       // Order of LM is independent of whether it enforces normal contact or frictional contact.
       const int lm_order = std::max(primal_type.order.get_order() - codimension, min_lm_order);
 
-      if ((primal_type.family == LAGRANGE) && (lm_order < 1))
+      if (primal_type.family == LAGRANGE && lm_order < 1)
       {
         params.set<MooseEnum>("family") = "MONOMIAL";
         params.set<MooseEnum>("order") = "CONSTANT";
