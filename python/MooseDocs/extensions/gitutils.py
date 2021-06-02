@@ -68,7 +68,7 @@ class SubmoduleHashCommand(command.CommandComponent):
         if not inline:
             raise exceptions.MooseDocsException("The '!git submodule-hash' command is an inline level command, use '[!git!submodule-hash](name)' instead.")
 
-        name =  info['inline']
+        name = info['inline']
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
         for repo, ginfo in status.items():
             if repo.endswith(name):
