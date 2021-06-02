@@ -158,19 +158,30 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 {
   int last_node = (iblock + 1) * block_size;
   int first_node = iblock * block_size + 1;
-  /// Initial guess, port crossflow in block to a vector
-  Eigen::VectorXd solution_seed = Wij.block(0, first_node, n_gaps, block_size);
+  /// Initial guess, port crossflow in block (iblock) into a vector that will act as my initial guess
+  Eigen::VectorXd solution_seed_matrix = Wij.block(0, first_node, n_gaps, block_size);
 
-  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined returns a vector
-  Eigen::VectorXd root = PETScSnesSolver(iblock, solution_seed);
-  /// Update crossflow using root (root is a PETSc vector i need to turn into eigen Vector and then put into an eigen Matrix)
-  // Assign the solution to the cross-flow matrix
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  for (unsigned int iz = 0; iz < block_size; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
       int i = n_gaps * iz + i_gap; // column wise transfer
+      solution_seed(i) = solution_seed_matrix(i_gap, iz)
+    }
+  }
+
+  /// Solving the combined lateral momentum equation for Wij using a PETSc solver yet to be defined returns a vector
+  Eigen::VectorXd root = PETScSnesSolver(iblock, solution_seed);
+
+  /// Update crossflow using root \
+  // Assign the solution to the cross-flow matrix
+  int i = 0;
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
       Wij(i_gap, iz) = root(i);
+      i += 1;
     }
   }
 }
@@ -544,12 +555,13 @@ BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd 
   Wij_residual_vector.setZero();
 
   // Assign the solution to the cross-flow matrix (This may not be needed)
+  int i = 0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
-      int i = n_gaps * iz + i_gap; // column wise transfer
       Wij(i_gap, iz) = solution(i);
+      i += 1;
     }
   }
 
