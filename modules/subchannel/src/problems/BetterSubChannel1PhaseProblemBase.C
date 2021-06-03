@@ -12,6 +12,59 @@
 #include <cmath>
 #include "AuxiliarySystem.h"
 
+struct Ctx
+{
+  int iblock;
+  BetterSubChannel1PhaseProblemBase * schp;
+};
+
+PetscErrorCode
+formFunction(SNES snes, Vec x, Vec f, void * ctx)
+{
+  PetscErrorCode ierr;
+  const PetscScalar * xx;
+  PetscScalar * ff;
+  PetscInt size;
+  Ctx * cc = static_cast<Ctx *>(ctx);
+  ierr = VecGetSize(x, &size);
+  CHKERRQ(ierr);
+
+  /*
+   Get pointers to vector data.
+      - For default PETSc vectors, VecGetArray() returns a pointer to
+        the data array.  Otherwise, the routine is implementation dependent.
+      - You MUST call VecRestoreArray() when you no longer need access to
+        the array.
+   */
+
+  /// Put x into eigen vector solution_seed
+  Eigen::VectorXd solution_seed;
+  ierr = VecGetArrayRead(x, &xx);
+  CHKERRQ(ierr);
+  for (unsigned int i = 0; i < size; i++)
+  {
+    solution_seed(i) = xx[i];
+  }
+
+  Eigen::VectorXd Wij_residual_vector = cc->schp->residualFunction(cc->iblock, solution_seed);
+
+  ierr = VecGetArray(f, &ff);
+  CHKERRQ(ierr);
+
+  /* Compute function */
+  for (unsigned int i = 0; i < size; i++)
+  {
+    ff[i] = Wij_residual_vector(i);
+  }
+
+  /* Restore vectors */
+  ierr = VecRestoreArrayRead(x, &xx);
+  CHKERRQ(ierr);
+  ierr = VecRestoreArray(f, &ff);
+  CHKERRQ(ierr);
+  return 0;
+}
+
 InputParameters
 BetterSubChannel1PhaseProblemBase::validParams()
 {
@@ -172,7 +225,8 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
   }
 
   /// Solving the combined lateral momentum equation for Wij using a PETSc solver and returns a vector root
-  Eigen::VectorXd root = PETScSnesSolver(iblock, solution_seed);
+  Eigen::VectorXd root;
+  PETScSnesSolver(iblock, solution_seed, root);
 
   // Assign the solution to the cross-flow matrix
   int i = 0;
@@ -659,8 +713,10 @@ BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd 
   return Wij_residual_vector;
 }
 
-Eigen::VectorXd
-BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd solution)
+PetscErrorCode
+BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock,
+                                                   const Eigen::VectorXd & solution,
+                                                   Eigen::VectorXd & root)
 {
   SNES snes; /* nonlinear solver context */
   KSP ksp;   /* linear solver context */
@@ -698,7 +754,10 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
 
   ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
   CHKERRQ(ierr);
-  ierr = SNESSetFunction(snes, r, formFunction, this);
+  Ctx ctx;
+  ctx.iblock = iblock;
+  ctx.schp = this;
+  ierr = SNESSetFunction(snes, r, formFunction, &ctx);
   CHKERRQ(ierr);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -735,7 +794,7 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < block_size * n_gaps; i++)
   {
-    xx[i] = solution(i)
+    xx[i] = solution(i);
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
@@ -758,15 +817,14 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   CHKERRQ(ierr);
 
   /// put x into eigen vector root and return that vector
-  Eigen::VectorXd root;
-  ierr = VecGetArrayRead(x, &xx);
+  ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < block_size * n_gaps; i++)
   {
     root(i) = xx[i];
   }
   /* Restore vectors */
-  ierr = VecRestoreArrayRead(x, &xx);
+  ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -780,49 +838,7 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock, Eigen::VectorXd s
   ierr = SNESDestroy(&snes);
   CHKERRQ(ierr);
 
-  return root;
-}
-
-virtual PetscErrorCode
-BetterSubChannel1PhaseProblemBase::formFunction(SNES snes, Vec x, Vec f, void * ctx)
-{
-  PetscErrorCode ierr;
-  const PetscScalar * xx;
-  PetscScalar * ff;
-  BetterSubchanel1PhaseProblemBase * schp = static_cast<BetterSubchanel1PhaseProblemBase *>(ctx);
-  /*
-   Get pointers to vector data.
-      - For default PETSc vectors, VecGetArray() returns a pointer to
-        the data array.  Otherwise, the routine is implementation dependent.
-      - You MUST call VecRestoreArray() when you no longer need access to
-        the array.
-   */
-
-  /// Put x into eigen vector solution_seed
-  Eigen::VectorXd solution_seed;
-  ierr = VecGetArrayRead(x, &xx);
-  CHKERRQ(ierr);
-  for (unsigned int i = 0; i < block_size * n_gaps; i++)
-  {
-    solution_seed(i) = xx[i];
-  }
-  Eigen::VectorXd Wij_residual_vector = schp->ResidualFunction(iblock, solution_seed);
-
-  ierr = VecGetArray(f, &ff);
-  CHKERRQ(ierr);
-
-  /* Compute function */
-  for (unsigned int i = 0; i < block_size * n_gaps; i++)
-  {
-    ff[i] = Wij_residual_vector(i);
-  }
-
-  /* Restore vectors */
-  ierr = VecRestoreArrayRead(x, &xx);
-  CHKERRQ(ierr);
-  ierr = VecRestoreArray(f, &ff);
-  CHKERRQ(ierr);
-  return 0;
+  return ierr;
 }
 
 void

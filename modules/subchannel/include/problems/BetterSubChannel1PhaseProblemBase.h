@@ -47,9 +47,9 @@ protected:
   /// Computes Residual per gap for block iblock
   virtual Eigen::VectorXd residualFunction(int iblock, Eigen::VectorXd solution);
   /// Computes solution of nonlinear equation using snes
-  virtual Eigen::VectorXd PETScSnesSolver(int iblock, Eigen::VectorXd solution);
-  /// Computes residual function in snes context
-  virtual PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
+  virtual PetscErrorCode
+  PETScSnesSolver(int iblock, const Eigen::VectorXd & solution, Eigen::VectorXd & root);
+  friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
   Eigen::MatrixXd Wij;
   Eigen::MatrixXd Wij_old;
