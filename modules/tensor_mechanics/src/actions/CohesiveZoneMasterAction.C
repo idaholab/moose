@@ -39,14 +39,14 @@ CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & param
   if (_kinematic == Kinematic::SmallStrain)
   {
     _czm_kernel_name = "CZMInterfaceKernelSmallStrain";
-    _disp_jump_provider_name = "CZMDisplacementJumpProviderSmallStrain";
-    _equilibrium_traction_calculator_name = "CZMEquilibriumTractionCalculatorSmallStrain";
+    _disp_jump_provider_name = "CZMComputeDisplacementJumpSmallStrain";
+    _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionSmallStrain";
   }
   else if (_kinematic == Kinematic::TotalLagrangian)
   {
     _czm_kernel_name = "CZMInterfaceKernelTotalLagrangian";
-    _disp_jump_provider_name = "CZMDisplacementJumpProviderIncrementalTotalLagrangian";
-    _equilibrium_traction_calculator_name = "CZMEquilibriumTractionCalculatorTotalLagrangian";
+    _disp_jump_provider_name = "CZMComputeDisplacementJumpTotalLagrangian";
+    _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionTotalLagrangian";
   }
   else
     mooseError("Internal error");

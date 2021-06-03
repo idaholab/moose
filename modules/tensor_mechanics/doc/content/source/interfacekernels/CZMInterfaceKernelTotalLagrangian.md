@@ -5,7 +5,7 @@
 ## Description
 
 This class assembles the integrated first Piola-Kirchoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
-The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Equilibrium Traction Calculator Total Lagrangian](CZMEquilibriumTractionCalculatorTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
+The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Equilibrium Traction Calculator Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
 This kernel accounts for both interface area changes and rotations.
 
 ### Residual
@@ -36,7 +36,7 @@ Therefore the residual for the primary and secondary surfaces, for a specific te
 \end{equation}
 
 These are the residual equations implemented in the `CZMInterfaceKernelTotalLagrangian`.
-The traction vector $T$ by the [CZM Equilibrium Traction Calculator Total Lagrangian](CZMEquilibriumTractionCalculatorTotalLagrangian.md)
+The traction vector $T$ by the [CZM Equilibrium Traction Calculator Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)
 
 ### Jacobian
 
@@ -63,7 +63,7 @@ Assuming the traction is only a function of the the midplane deformation gradien
 \end{equation}
 Substituting the last two equations in the Jacobian definition one obtains the equation implemented in this kernel.
 
-The [CZM Equilibrium Traction Calculator Total Lagrangian](CZMEquilibriumTractionCalculatorTotalLagrangian.md) provides $\partial  T_{i}/\partial \hat{F}_{pq}$ and $\partial  T_{i} / \partial \llbracket u \rrbracket_{p}$ . This kernel is responsible for computing $\partial  \llbracket u \rrbracket_{p} / \partial  u^{\pm,k}_{s}$ and $\partial \hat{F}_{pq} / \partial u^{\pm,k}_{s}$.
+The [CZM Equilibrium Traction Calculator Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md) provides $\partial  T_{i}/\partial \hat{F}_{pq}$ and $\partial  T_{i} / \partial \llbracket u \rrbracket_{p}$ . This kernel is responsible for computing $\partial  \llbracket u \rrbracket_{p} / \partial  u^{\pm,k}_{s}$ and $\partial \hat{F}_{pq} / \partial u^{\pm,k}_{s}$.
 
 #### Displacement Jump and deformation gradient derivatives
 

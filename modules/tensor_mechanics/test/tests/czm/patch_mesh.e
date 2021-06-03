@@ -1,1 +1,0 @@
-../finite_strain_tensor_mechanics_tests/patch_mesh.e

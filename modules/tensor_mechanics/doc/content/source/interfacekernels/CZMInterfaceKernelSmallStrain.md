@@ -5,7 +5,7 @@
 ## Description
 
 This class assembles the integrated traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelSmallStrain` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
-The `CZMInterfaceKernelSmallStrain` uses the traction and its derivatives provided by the [CZM Equilibrium Traction Calculator Small Strain](CZMEquilibriumTractionCalculatorSmallStrain.md) to compute the appropriate residual and Jacobian.
+The `CZMInterfaceKernelSmallStrain` uses the traction and its derivatives provided by the [CZM Equilibrium Traction Calculator Small Strain](CZMComputeGlobalTractionSmallStrain.md) to compute the appropriate residual and Jacobian.
 This kernel does not account for interface area chagnes and rotations.
 ### Residual
 
@@ -60,7 +60,7 @@ Assuming the traction is only a function of the the midplane deformation gradien
 
 Substituting the last two equations in the Jacobian definition one obtains the equation implemented in this kernel.
 
-The [CZM Equilibrium Traction Calculator Small Strain Lagrangian](CZMEquilibriumTractionCalculatorSmallStrain.md) provides $\partial  T_{i} / \partial \llbracket u \rrbracket_{p}$ . This kernel is responsible for computing $\partial  \llbracket u \rrbracket_{p} / \partial  u^{\pm,k}_{s}$.
+The [CZM Equilibrium Traction Calculator Small Strain Lagrangian](CZMComputeGlobalTractionSmallStrain.md) provides $\partial  T_{i} / \partial \llbracket u \rrbracket_{p}$ . This kernel is responsible for computing $\partial  \llbracket u \rrbracket_{p} / \partial  u^{\pm,k}_{s}$.
 
 #### Displacement Jump derivatives
 

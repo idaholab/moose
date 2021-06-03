@@ -29,14 +29,14 @@ Each type of formulations requires adding a different  `DisplacementJumpProvider
 
 The `Small Strain` formulations requires adding:
 
-1. [CZMDisplacementJumpProviderSmallStrain](CZMDisplacementJumpProviderSmallStrain.md)
-2. [EquilibriumTractionCalcualtorSmallStrain](CZMEquilibriumTractionCalculatorSmallStrain.md)
+1. [CZMComputeDisplacementJumpSmallStrain](CZMComputeDisplacementJumpSmallStrain.md)
+2. [EquilibriumTractionCalcualtorSmallStrain](CZMComputeGlobalTractionSmallStrain.md)
 3. [CZMInterfaceKernelCalcualtorSmallStrain](CZMInterfaceKernelSmallStrain.md)
 
 The `Total Lagrangian` formulations requires adding:
 
-1. [DisplacementJumpProviderIncrementalTotalLagrangian](CZMDisplacementJumpProviderIncrementalTotalLagrangian.md)
-2. [EquilibriumTractionCalcualtorTotalLagrangian](CZMEquilibriumTractionCalculatorTotalLagrangian.md)
+1. [DisplacementJumpProviderIncrementalTotalLagrangian](CZMComputeDisplacementJumpTotalLagrangian.md)
+2. [EquilibriumTractionCalcualtorTotalLagrangian](CZMComputeGlobalTractionTotalLagrangian.md)
 3. [CZMInterfaceKernelCalcualtorTotalLagrangian](CZMInterfaceKernelTotalLagrangian.md)
 
 The `CohesiveZoneMaster` automatically adds the proper `DisplacementJumpProvider`, `EquilibriumTractionCalcualtor`, `CZMInterfaceKernelSmallStrain` based on the `kinematic_type` parameter value (see inputs).
@@ -52,7 +52,7 @@ Path dependent models assumes the traction increment is a function of the interf
 In both cases the traction separation law should always be written in terms of the local interface response assuming small strains. All the kinematics is already embedded in the `DisplacementJumpProvider` and `EquilibriumTractionCalcualtor`.
 Both types of `CohesiveZoneConstituiveModel` allow using  the `Small Strain` and the `Total Lagrangian` kinematics.
 
-!listing modules/tensor_mechanics/test/tests/czm/czm_large_deformation.i block=Modules/TensorMechanics/CohesiveZoneMaster/czm_ik
+!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_large_deformation.i block=Modules/TensorMechanics/CohesiveZoneMaster/czm_ik
 
 !syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
 !syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
