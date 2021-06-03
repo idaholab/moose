@@ -2,10 +2,9 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
-mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
-  type = QuadSubChannelMesh
+  type = BetterSu
   nx = 6
   ny = 6
   max_dz = 0.02
@@ -32,6 +31,8 @@ mass_flow_in = 11.522 #kg/sec
   []
   [rho]
   []
+  [Mu]
+  []
   [S]
   []
   [w_perim]
@@ -51,6 +52,13 @@ mass_flow_in = 11.522 #kg/sec
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  beta = 0.006
+  CT = 1.0
+  enforce_uniform_pressure = false
+  Density = true
+  Viscosity = true
+  Power = true
+  P_out = ${P_out}
 []
 
 [ICs]
@@ -68,7 +76,7 @@ mass_flow_in = 11.522 #kg/sec
     type = QuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
-    filename = "power_profile.txt" #type in name of file that describes power profile
+        filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
   [T_ic]
@@ -80,19 +88,27 @@ mass_flow_in = 11.522 #kg/sec
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
-  type = ConstantIC
-  variable = DP
-  value = 0.0
+    type = ConstantIC
+    variable = DP
+    value = 0.0
+  []
+
+  [Viscosity_ic]
+    type = ViscosityIC
+    variable = Mu
+    p = ${P_out}
+    T = T
+    fp = water
   []
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -100,7 +116,7 @@ mass_flow_in = 11.522 #kg/sec
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -113,13 +129,6 @@ mass_flow_in = 11.522 #kg/sec
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -128,17 +137,17 @@ mass_flow_in = 11.522 #kg/sec
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = ConstantAux
+    type = MassFlowRateAux
     variable = mdot
     boundary = inlet
-    value = ${fparse mass_flow_in / 36.0}
+    area = S
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
 
 [Outputs]
   exodus = true
-
   [Temp_Out_MATRIX]
     type = NormalSliceValues
     variable = T
