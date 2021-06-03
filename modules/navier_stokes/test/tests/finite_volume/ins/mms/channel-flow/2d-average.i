@@ -2,7 +2,6 @@ mu=1.1
 rho=1.1
 advected_interp_method='average'
 velocity_interp_method='average'
-force_boundary_execution=true
 
 [Mesh]
   [gen]
