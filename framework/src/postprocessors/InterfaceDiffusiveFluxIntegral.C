@@ -9,7 +9,9 @@
 
 #include "InterfaceDiffusiveFluxIntegral.h"
 #include "FVUtils.h"
+#include "FaceInfo.h"
 
+#include "libmesh/remote_elem.h"
 #include "metaphysicl/raw_type.h"
 
 registerMooseObject("MooseApp", InterfaceDiffusiveFluxIntegral);
@@ -53,7 +55,8 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
                                  ? getGenericNeighborMaterialProperty<Real, is_ad>(
                                        getParam<MaterialPropertyName>("neighbor_diffusivity"))
                                  : getGenericNeighborMaterialProperty<Real, is_ad>(
-                                       getParam<MaterialPropertyName>("diffusivity")))
+                                       getParam<MaterialPropertyName>("diffusivity"))),
+    _fi(nullptr)
 {
 
   // Primary and secondary variable should both be of a similar variable type
@@ -65,20 +68,61 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
 }
 
 template <bool is_ad>
+void
+InterfaceDiffusiveFluxIntegralTempl<is_ad>::initialize()
+{
+  if (_fv)
+    _face_infos_processed.clear();
+
+  InterfaceIntegralPostprocessor::initialize();
+}
+
+template <bool is_ad>
+void
+InterfaceDiffusiveFluxIntegralTempl<is_ad>::execute()
+{
+  if (_fv)
+  {
+    _fi = _mesh.faceInfo(_current_elem, _current_side);
+    if (!_fi)
+    {
+      // Let's check the other side
+      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
+      mooseAssert(neighbor != remote_elem,
+                  "I'm pretty confident that if we got here then our neighbor should be "
+                  "local/ghosted/null");
+      if (neighbor)
+      {
+        const auto neigh_side = neighbor->which_neighbor_am_i(_current_elem);
+        _fi = _mesh.faceInfo(neighbor, neigh_side);
+      }
+
+      if (!_fi)
+        // We still don't have a face info. It must be owned by another process
+        return;
+    }
+
+    auto pr = _face_infos_processed.insert(_fi);
+    if (!pr.second)
+      // Insertion didn't happen so we must have already processed this FaceInfo
+      return;
+  }
+
+  InterfaceIntegralPostprocessor::execute();
+}
+
+template <bool is_ad>
 Real
 InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
   if (_fv)
   {
-    const auto faceinfos = _mesh.faceInfo();
-    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    // FaceInfo is not local, another process owns the element
-    if (!fi)
-      return 0;
-    const auto normal = fi->normal();
+    mooseAssert(_fi, "This should never be null. If it is then something went wrong in execute()");
+
+    const auto normal = _fi->normal();
 
     // Form a finite difference gradient across the interface
-    Point one_over_gradient_support = fi->elemCentroid() - fi->neighborCentroid();
+    Point one_over_gradient_support = _fi->elemCentroid() - _fi->neighborCentroid();
     one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
     const auto gradient = (_u[_qp] - _u_neighbor[_qp]) * one_over_gradient_support;
 
@@ -87,7 +131,7 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
                 diffusivity,
                 MetaPhysicL::raw_value(_diffusion_coef[_qp]),
                 MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
-                *fi,
+                *_fi,
                 true);
 
     return -diffusivity * MetaPhysicL::raw_value(gradient * normal);

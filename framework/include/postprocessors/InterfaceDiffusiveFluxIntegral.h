@@ -13,11 +13,14 @@
 #include "InterfaceIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
+#include <set>
+
 // Forward Declarations
 template <bool>
 class InterfaceDiffusiveFluxIntegralTempl;
 typedef InterfaceDiffusiveFluxIntegralTempl<false> InterfaceDiffusiveFluxIntegral;
 typedef InterfaceDiffusiveFluxIntegralTempl<true> ADInterfaceDiffusiveFluxIntegral;
+class FaceInfo;
 
 /**
  * This postprocessor computes an integral of the diffusive flux over an interface.
@@ -29,6 +32,8 @@ public:
   static InputParameters validParams();
 
   InterfaceDiffusiveFluxIntegralTempl(const InputParameters & parameters);
+  void initialize() override;
+  void execute() override;
 
 protected:
   virtual Real computeQpIntegral() override;
@@ -45,4 +50,9 @@ protected:
   /// Material properties for the diffusion coefficient
   const GenericMaterialProperty<Real, is_ad> & _diffusion_coef;
   const GenericMaterialProperty<Real, is_ad> & _diffusion_coef_neighbor;
+
+  /// A pointer to a face info, useful when working with FV
+  const FaceInfo * _fi;
+
+  std::unordered_set<const FaceInfo *> _face_infos_processed;
 };
