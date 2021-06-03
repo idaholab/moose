@@ -124,9 +124,8 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 
-  /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants_input;
-  ADDenseMatrix _hill_tensor;
+  /// Hill constant material
+  const MaterialProperty<std::vector<Real>> & _hill_constants;
 
   /// Square of the q function for orthotropy
   ADReal _qsigma;

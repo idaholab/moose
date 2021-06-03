@@ -30,10 +30,6 @@ ADHillCreepStressUpdate::validParams()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
-  params.addRequiredRangeCheckedParam<std::vector<Real>>("hill_constants",
-                                                         "hill_constants_size = 6",
-                                                         "Hill material constants in order: F, "
-                                                         "G, H, L, M, N");
 
   return params;
 }
@@ -50,39 +46,13 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
     _start_time(getParam<Real>("start_time")),
     _exponential(1.0),
     _exp_time(1.0),
-    _hill_constants_input(6),
-    _hill_tensor(6, 6),
+    _hill_constants(getMaterialPropertyByName<std::vector<Real>>(_base_name + "hill_constants")),
     _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
                "Start time must be equal to or greater than the Executioner start_time if a "
                "non-integer m_exponent is used");
-
-  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
-  ADGeneralizedRadialReturnStressUpdate::rotateHillConstants(_hill_constants_input);
-
-  // Hill constants, some constraints apply
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
-
-  // Build Hill tensor or anisotropy matrix
-  _hill_tensor.zero();
-
-  _hill_tensor(0, 0) = G + H;
-  _hill_tensor(1, 1) = F + H;
-  _hill_tensor(2, 2) = F + G;
-  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
-  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
-  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
-
-  _hill_tensor(3, 3) = 2.0 * N;
-  _hill_tensor(4, 4) = 2.0 * L;
-  _hill_tensor(5, 5) = 2.0 * M;
 }
 
 void
@@ -110,12 +80,12 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
                                          const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
+  const Real & F = _hill_constants[_qp][0];
+  const Real & G = _hill_constants[_qp][1];
+  const Real & H = _hill_constants[_qp][2];
+  const Real & L = _hill_constants[_qp][3];
+  const Real & M = _hill_constants[_qp][4];
+  const Real & N = _hill_constants[_qp][5];
 
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
   qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
@@ -152,12 +122,12 @@ ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_tri
                                            const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
+  const Real & F = _hill_constants[_qp][0];
+  const Real & G = _hill_constants[_qp][1];
+  const Real & H = _hill_constants[_qp][2];
+  const Real & L = _hill_constants[_qp][3];
+  const Real & M = _hill_constants[_qp][4];
+  const Real & N = _hill_constants[_qp][5];
 
   // Equivalent deviatoric stress function.
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
@@ -185,12 +155,12 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
                                                const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
-  const Real & F = _hill_constants[0];
-  const Real & G = _hill_constants[1];
-  const Real & H = _hill_constants[2];
-  const Real & L = _hill_constants[3];
-  const Real & M = _hill_constants[4];
-  const Real & N = _hill_constants[5];
+  const Real & F = _hill_constants[_qp][0];
+  const Real & G = _hill_constants[_qp][1];
+  const Real & H = _hill_constants[_qp][2];
+  const Real & L = _hill_constants[_qp][3];
+  const Real & M = _hill_constants[_qp][4];
+  const Real & N = _hill_constants[_qp][5];
 
   // Equivalent deviatoric stress function.
   ADReal qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));
