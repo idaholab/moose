@@ -54,8 +54,8 @@ offset = 1e-2
     primary = 20
     model = frictionless
     formulation = mortar
-    c_normal = 1e-2
-    mortar_approach = legacy
+    c_normal = 1e-1
+    mortar_approach = weighted
   []
 []
 
@@ -98,6 +98,8 @@ offset = 1e-2
   petsc_options_value = 'lu       1e-5          NONZERO'
   l_max_its = 30
   nl_max_its = 20
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-10
   line_search = 'none'
 []
 

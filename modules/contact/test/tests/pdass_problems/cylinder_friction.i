@@ -228,7 +228,7 @@
 
   start_time = 0.0
   end_time = 0.2 # 3.5
-  l_tol = 1e-3
+  l_tol = 1e-4
   dt = 0.1
   dtmin = 0.001
 []
@@ -297,7 +297,7 @@
     friction_lm = tangential_lm
     mu = 0.4
     c_t = 1.0e5
-    c = 1.0e8
+    c = 1.0e6
   []
   [x]
     type = NormalMortarMechanicalContact

@@ -6,9 +6,17 @@ offset = 1e-2
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks.e
+  [file]
+    type = FileMeshGenerator
+    file = long-bottom-block-1elem-blocks.e
+  []
   uniform_refine = 0 # 1,2
   patch_update_strategy = always
+[]
+
+[Problem]
+  kernel_coverage_check = false
+  material_coverage_check = false
 []
 
 [Variables]
@@ -17,14 +25,6 @@ offset = 1e-2
   []
   [disp_y]
     block = '1 2'
-  []
-  [frictional_normal_lm]
-    block = 3
-    use_dual = true
-  []
-  [frictional_tangential_lm]
-    block = 3
-    use_dual = true
   []
 []
 
@@ -64,69 +64,16 @@ offset = 1e-2
   []
 []
 
-[Constraints]
-  [weighted_gap_lm]
-    type = ComputeFrictionalForceLMMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = frictional_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
-    friction_lm = frictional_tangential_lm
-    mu = 0.4
-    c = 1.0e3
-    c_t = 5.0e1
-  []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = frictional_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = frictional_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [tangential_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = frictional_tangential_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [tangential_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = frictional_tangential_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
+[Contact]
+  [frictional]
+    mesh = file
+    primary = 20
+    secondary = 10
+    formulation = mortar
+    model = coulomb
+    friction_coefficient = 0.4
+    c_normal = 1.0e3
+    c_tangential = 5.0e1
   []
 []
 
@@ -201,7 +148,7 @@ offset = 1e-2
 []
 
 [Outputs]
-  exodus = false
+  exodus = true
   [checkfile]
     type = CSV
     show = 'cont_press friction'
@@ -236,7 +183,7 @@ offset = 1e-2
   [contact]
     type = ContactDOFSetSize
     variable = frictional_normal_lm
-    subdomain = '3'
+    subdomain = 'frictional_secondary_subdomain'
     execute_on = 'nonlinear timestep_end'
   []
 []

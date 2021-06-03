@@ -12,34 +12,34 @@ offset = 1e-2
 []
 
 [Mesh]
-  [./original_file_mesh]
+  [original_file_mesh]
     type = FileMeshGenerator
     file = long-bottom-block-1elem-blocks-coarse.e
-  [../]
+  []
   # These sidesets need to be deleted because the contact action adds them automatically. For this
   # particular mesh, the new IDs will be identical to the deleted ones and will conflict if we don't
   # remove the original ones.
-  [./delete_3]
+  [delete_3]
     type = BlockDeletionGenerator
     input = original_file_mesh
     block = 3
-  [../]
-  [./revised_file_mesh]
+  []
+  [revised_file_mesh]
     type = BlockDeletionGenerator
     input = delete_3
     block = 4
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
     # order = SECOND
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
     # order = SECOND
-  [../]
+  []
 []
 
 [Contact]
@@ -50,56 +50,56 @@ offset = 1e-2
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.1
-    mortar_approach = legacy
-    c_normal = 1e0
+    c_normal = 1.0e-2
+    c_tangential = 1.0e-1
   []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 2
     variable = disp_y
-    value = ${fparse starting_point + offset}
+    value = '${fparse starting_point + offset}'
     type = ConstantIC
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
+  []
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
     function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
-  [../]
-  [./leftx]
+  []
+  [leftx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
     function = '1e-2 * t'
-  [../]
+  []
 []
 
 [Executioner]
@@ -108,7 +108,8 @@ offset = 1e-2
   dt = 5
   dtmin = .1
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor -snes_ksp_ew'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
+                  '-snes_linesearch_monitor -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
@@ -126,20 +127,20 @@ offset = 1e-2
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
   [contact]
     type = ContactDOFSetSize
     variable = frictional_normal_lm

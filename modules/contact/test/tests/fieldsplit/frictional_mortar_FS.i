@@ -11,82 +11,82 @@ refine = 1
 []
 
 [Mesh]
-  [./original_file_mesh]
+  [original_file_mesh]
     type = FileMeshGenerator
     file = long_short_blocks.e
-  [../]
-  uniform_refine =  ${refine}
+  []
+  uniform_refine = ${refine}
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./horizontal_movement]
+  [horizontal_movement]
     type = ParsedFunction
     value = 'if(t<0.5,${vx}*t-${offset},${vx}-${offset})'
-  [../]
-  [./vertical_movement]
+  []
+  [vertical_movement]
     type = ParsedFunction
     value = 'if(t<0.5,${offset},${vy}*(t-0.5)+${offset})'
-  [../]
+  []
 []
 
 [BCs]
-  [./push_left_x]
+  [push_left_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 30
     function = horizontal_movement
-  [../]
-  [./fix_right_x]
+  []
+  [fix_right_x]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./fix_right_y]
+  []
+  [fix_right_y]
     type = DirichletBC
     variable = disp_y
     boundary = '40'
     value = 0.0
-  [../]
-  [./push_left_y]
+  []
+  [push_left_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '30'
     function = vertical_movement
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_left]
+  [elasticity_tensor_left]
     type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_left]
+  []
+  [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 
-  [./elasticity_tensor_right]
+  [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_right]
+  []
+  [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = 2
-  [../]
+  []
 []
 
 [Contact]
@@ -94,66 +94,64 @@ refine = 1
     mesh = original_file_mesh
     secondary = 10
     primary = 20
-
     model = coulomb
     formulation = mortar
-
     friction_coefficient = 0.2
-  [../]
+    mortar_approach = legacy
+    c_normal = 1e0
+  []
 []
 
 [ICs]
-  [./disp_y]
+  [disp_y]
     block = 1
     variable = disp_y
     value = ${offset}
     type = ConstantIC
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     block = 1
     variable = disp_x
     value = -${offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./FSP]
+  [FSP]
     type = FSP
     # It is the starting point of splitting
     topsplit = 'contact_interior' # 'contact_interior' should match the following block name
-    [./contact_interior]
-      splitting          = 'contact interior'
-      splitting_type     = multiplicative
-    [../]
-    [./interior]
+    [contact_interior]
+      splitting = 'contact interior'
+      splitting_type = multiplicative
+    []
+    [interior]
       type = ContactSplit
       vars = 'disp_x disp_y'
-      uncontact_primary   = '20'
-      uncontact_secondary    = '10'
+      uncontact_primary = '20'
+      uncontact_secondary = '10'
       uncontact_displaced = '30'
-      blocks              = '1 2'
+      blocks = '1 2'
       include_all_contact_nodes = 1
 
       petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type '
       petsc_options_value = '  preonly hypre  boomeramg'
-    [../]
-    [./contact]
+    []
+    [contact]
       type = ContactSplit
       vars = 'disp_x disp_y leftright_normal_lm leftright_tangential_lm'
-      contact_primary   = '20'
-      contact_secondary    = '10'
+      contact_primary = '20'
+      contact_secondary = '10'
       contact_displaced = '30'
       include_all_contact_nodes = 1
       blocks = '4'
 
-
       petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type  -pc_factor_shift_amount'
       petsc_options_value = '  preonly lu NONZERO 1e-15'
-    [../]
-  [../]
+    []
+  []
 []
-
 
 [Executioner]
   type = Transient
@@ -173,11 +171,11 @@ refine = 1
 
 [Outputs]
   file_base = frictional_mortar_FS_out
-  [./exodus]
+  [exodus]
     type = Exodus
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     max_rows = 5
-  [../]
+  []
 []
