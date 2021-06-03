@@ -17,8 +17,6 @@
 #include "FEProblemSolve.h"
 #include "FixedPointSolve.h"
 #include "PicardSolve.h"
-#include "SecantSolve.h"
-#include "SteffensenSolve.h"
 #include "Reporter.h"
 #include "ReporterInterface.h"
 

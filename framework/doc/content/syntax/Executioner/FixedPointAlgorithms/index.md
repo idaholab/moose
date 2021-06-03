@@ -25,12 +25,13 @@ using postprocessors, auxiliary variables, or other constructs, and transferring
 ## Picard fixed point iterations
 
 Picard iterations are the default fixed point iteration algorithm. They may be relaxed, with a relaxation factor specified for the
-,ain application in the `Executioner` block, and a relaxation factor specified for each `MultiApp` in their respective block.
+main application in the `Executioner` block, and a relaxation factor specified for each `MultiApp` in their respective block.
 
 Relaxed Picard fixed point iterations may be described by:
-\begin{equation}
+
+!equation
 x_{n+1} = \alpha f(x_n) + (1 - \alpha) x_n
-\end{equation}
+
 with $x_n$ the specified variable/postprocessor, $f$ a function representing the coupled problem and $\alpha$ the relaxation factor.
 
 Convergence of Picard iterations is expected to be linear when it converges. The Picard-Lindelhof theorem provides a set of conditions under
@@ -38,27 +39,30 @@ which convergence is guaranteed.
 
 ## Secant method
 
-The secant method is a root finding technique which follows secant lines to find the roots of f. It is adapted here for fixed point iterations.
+The secant method is a root finding technique which follows secant lines to find the roots of a function $f$. It is adapted here for fixed point iterations.
 The secant method may be described by:
-\begin{eqnarray}
+
+!equation
 x_{n+1} = x_n - \dfrac{(f(x_n) - x_n) * (x_n - x_{n-1})}{f(x_n) - x_n - f(x_{n-1}) + x_{n-1}}
-\end{eqnarray}
+
 with the same conventions as above. The relaxation factor, if used, is not shown here. The secant method is easily understood for 1D problems,
 where $(x_n, f(x_n) - x_n)$ are the coordinates of the points used to draw the secant, of slope $\dfrac{x_n - x_{n-1}}{(f(x_n) - x_n) - (f(x_{n-1}) - x_{n-1})}$.
 
-Convergence of the secant method is expected to be super-linear when it converges, with an order of $\dfrac{1 + \sqrt{5}}{2}. Some conditions
+Convergence of the secant method is expected to be super-linear when it converges, with an order of $\dfrac{1 + \sqrt{5}}{2}$. Some conditions
 for this convergence rate is that the equations are twice differentiable in their inputs, with a fixed point multiplicity of one. Oscillatory
 functions and poor initial guesses can prevent convergence.
 
 ## Steffensen's method
 
-Steffensen's method is a root finding technique based on perturbating a solution at a given point to approximate the local derivative. The update is
-then similar to Newton's method which uses the exact derivative.
+Steffensen's method is a root finding technique based on perturbating a solution at a given point to approximate the local derivative, such that:
 
-\begin{eqnarray}
+!equation
 g(x_{n}) = \dfrac{f(x_{n} + f(x_{n}))}{f(x_{n})}
+
+!equation
 x_{n+1} = x_n - \dfrac{f(x_n)}{g(x_{n})}
-\end{eqnarray}
+
+The update is then similar to Newton's method which uses the exact derivative.
 
 Convergence of Steffensen's method is expected to be quadratic when it converges. However because it requires two evaluations of the coupled
 problem before computing the next term, this method is expected to be slower than the secant method. A poor initial guesses can also prevent convergence.

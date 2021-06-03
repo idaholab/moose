@@ -15,6 +15,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "SlepcSupport.h"
+#include "SecantSolve.h"
+#include "SteffensenSolve.h"
 
 // C++ includes
 #include <vector>
