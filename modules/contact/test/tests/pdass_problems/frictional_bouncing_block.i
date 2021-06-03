@@ -18,11 +18,11 @@ offset = 1e-2
   [disp_y]
     block = '1 2'
   []
-  [normal_lm]
+  [frictional_normal_lm]
     block = 3
     use_dual = true
   []
-  [tangential_lm]
+  [frictional_tangential_lm]
     block = 3
     use_dual = true
   []
@@ -71,14 +71,14 @@ offset = 1e-2
     secondary_boundary = 10
     primary_subdomain = 4
     secondary_subdomain = 3
-    variable = normal_lm
+    variable = frictional_normal_lm
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
-    friction_lm = tangential_lm
+    friction_lm = frictional_tangential_lm
     mu = 0.4
-    c_t = 1.0e1
     c = 1.0e3
+    c_t = 5.0e1
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -86,7 +86,7 @@ offset = 1e-2
     secondary_boundary = 10
     primary_subdomain = 4
     secondary_subdomain = 3
-    variable = normal_lm
+    variable = frictional_normal_lm
     secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -98,7 +98,7 @@ offset = 1e-2
     secondary_boundary = 10
     primary_subdomain = 4
     secondary_subdomain = 3
-    variable = normal_lm
+    variable = frictional_normal_lm
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
@@ -110,7 +110,7 @@ offset = 1e-2
     secondary_boundary = 10
     primary_subdomain = 4
     secondary_subdomain = 3
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -122,7 +122,7 @@ offset = 1e-2
     secondary_boundary = 10
     primary_subdomain = 4
     secondary_subdomain = 3
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
@@ -186,14 +186,14 @@ offset = 1e-2
 [VectorPostprocessors]
   [cont_press]
     type = NodalValueSampler
-    variable = normal_lm
+    variable = frictional_normal_lm
     boundary = '10'
     sort_by = x
     execute_on = FINAL
   []
   [friction]
     type = NodalValueSampler
-    variable = tangential_lm
+    variable = frictional_tangential_lm
     boundary = '10'
     sort_by = x
     execute_on = FINAL
@@ -235,7 +235,7 @@ offset = 1e-2
   []
   [contact]
     type = ContactDOFSetSize
-    variable = normal_lm
+    variable = frictional_normal_lm
     subdomain = '3'
     execute_on = 'nonlinear timestep_end'
   []

@@ -50,6 +50,8 @@ offset = 1e-2
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.1
+    mortar_approach = legacy
+    c_normal = 1e0
   []
 []
 

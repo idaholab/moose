@@ -234,8 +234,8 @@
   petsc_options_value = 'lu     superlu_dist'
   line_search = 'none'
 
-  nl_abs_tol = 1e-6
-  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-7
   l_tol = 1e-6
 
   l_max_its = 50
