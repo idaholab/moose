@@ -54,7 +54,7 @@ MeshOnlyAction::act()
 
   if (should_generate)
   {
-    mesh_file = _app.parser().getFileName();
+    mesh_file = _app.parser().getPrimaryFileName();
     size_t pos = mesh_file.find_last_of('.');
 
     // Default to writing out an ExodusII mesh base on the input filename.
