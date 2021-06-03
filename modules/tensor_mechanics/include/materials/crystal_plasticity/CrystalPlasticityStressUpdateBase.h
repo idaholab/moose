@@ -50,7 +50,9 @@ public:
   /**
    * Computes the shear stess for each slip system
    */
-  void calculateShearStress(RankTwoTensor & pk2);
+  void calculateShearStress(const RankTwoTensor & pk2,
+                            const RankTwoTensor & inverse_eigenstrain_deformation_grad,
+                            const unsigned int & num_eigenstrains);
 
   /**
    * Calculates the total value of $\frac{d\mathbf{F}^P^{-1}}{d\mathbf{PK2}}$ and
@@ -59,7 +61,10 @@ public:
    * $\sum_i \frac{d\mathbf{F}^P^{-1}}{d\mathbf{PK2}_i}$
    */
   virtual void calculateTotalPlasticDeformationGradientDerivative(
-      RankFourTensor & dfpinvdpk2, const RankTwoTensor & inverse_plastic_deformation_grad_old);
+      RankFourTensor & dfpinvdpk2,
+      const RankTwoTensor & inverse_plastic_deformation_grad_old,
+      const RankTwoTensor & inverse_eigenstrain_deformation_grad_old,
+      const unsigned int & num_eigenstrains);
 
   /**
    * A helper method to rotate the a direction and plane normal system set into

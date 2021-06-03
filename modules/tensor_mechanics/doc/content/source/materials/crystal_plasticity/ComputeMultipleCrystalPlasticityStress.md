@@ -52,19 +52,24 @@ plasticity constitutive model base class is given below.
 
 ### Constitutive Equations
 
-Following what is typical in crystal plasticity computations (e.g., [!cite](Asaro:1983kf)),
-the total deformation gradient $\boldsymbol{F}$ is multiplicatively decomposed into
-elastic ($\boldsymbol{F}^e$) and plastic ($\boldsymbol{F}^{p}$) components:
+For finite strain inelastic mechanics of crystal plasticity the deformation gradient $\boldsymbol{F}$ is assumed to be multiplicatively decomposed in its elastic and plastic parts as (see e.g., [!cite](Asaro:1983kf)):
+\begin{equation}
+\boldsymbol{F} = \boldsymbol{F}^e \boldsymbol{F}^p,
+\end{equation}
+such that $\text{det}\left( \boldsymbol{F}^e \right) > 0$ and $\text{det}\left( \boldsymbol{F}^p \right) = 1$ are the elastic and plastic deformation gradients, respectively.
+ The elastic and plastic deformation gradients define two deformed configurations: one intermediate configuration described by $\boldsymbol{F}^{p}$, and a final deformed configuration $\boldsymbol{F}^e \boldsymbol{F}^p$. Here, the change in the crystal shape due to dislocation motion is accounted for in
+ the plastic deformation gradient tensor, $\boldsymbol{F}^p$, the elastic
+ deformation gradient tensor, $\boldsymbol{F}^e$, accounts for recoverable elastic
+ stretch and rotations of the crystal lattice,
 
+ For a thermo-mechanical problem, a third configuration is introduced accounting for thermal deformations (see e.g., [!cite](li2019development,ozturk2016crystal,meissonnier2001finite)). The resulting decomposition reads
 \begin{equation}
   \label{eqn:deformationGradDecomposition}
-  \boldsymbol{F} = \boldsymbol{F}^e \boldsymbol{F}^p,
+  \boldsymbol{F} = \boldsymbol{F}^e \boldsymbol{F}^p \boldsymbol{F}^{\theta},
 \end{equation}
-such that $\text{det}\left( \boldsymbol{F}^e \right) > 0$ and $\text{det}\left( \boldsymbol{F}^p \right) = 1$.
-The change in the crystal shape due to dislocation motion is accounted for in
-the plastic deformation gradient tensor, $\boldsymbol{F}^p$, while the elastic
-deformation gradient tensor, $\boldsymbol{F}^e$, accounts for recoverable elastic
-stretch and rotations of the crystal lattice.
+where $\boldsymbol{F}^{\theta}$ is the thermal deformation gradient, such that  $\text{det}\left( \boldsymbol{F}^{\theta} \right) > 0$.
+The thermal deformation gradient $\boldsymbol{F}^{\theta}$ accounts for the deformation of the crystal lattice due to thermal expansion.
+The constitutive equation and calculation details associated with the thermal deformation gradient $\boldsymbol{F} ^{\theta}$ are included in [ComputeCrystalPlasticityThermalEigenstrain](/ComputeCrystalPlasticityThermalEigenstrain.md).
 
 The total plastic velocity gradient can be expressed in terms of the plasticity deformation gradient as
 \begin{equation}
@@ -119,11 +124,14 @@ The evolution of the plastic slip $\gamma^\alpha_i$ must be specified for every 
 \label{eqn:gamma_dot}
     \dot{\gamma}^\alpha_{i} = \hat{\dot{\gamma}}^\alpha_i \left( \tau^\alpha_i, s^\alpha_i \right),
 \end{equation}
-which can take different forms among constitutive models used in crystal plasticity. Here, the $s^\alpha_i$ denotes the slip resistance and $\tau^\alpha_i$ denotes the resolved shear stress that is associated with slip system $\alpha$ and model $i$, respectively. The resolved shear stress is defined as
+which can take different forms among constitutive models used in crystal plasticity. Here, the $s^\alpha_i$ denotes the slip resistance and $\tau^\alpha_i$ denotes the resolved shear stress that is associated with slip system $\alpha$ and model $i$, respectively.
+
+The resolved shear stress is defined as
 \begin{equation}
   \label{eqn:appliedShearStress}
-  \tau^{\alpha}_i = \boldsymbol{S} : \boldsymbol{s}^{\alpha}_{i,o} \otimes \boldsymbol{m}^{\alpha}_{i,o}.
+  \tau^\alpha = \text{det}(\boldsymbol{F}^\theta) \left(  {\boldsymbol{F}^{\theta}}^{\intercal} \boldsymbol{S} {\boldsymbol{F}^{\theta}}^{-\intercal} \right) : \boldsymbol{s}^{\alpha}_{i,o} \otimes \boldsymbol{m}^{\alpha}_{i,o}.
 \end{equation}
+Here, we report the shear stress in a form that considers the thermal effect. For readers who are particularly interested in the thermal eigenstrain calculations, please refer to the  [ComputeCrystalPlasticityThermalEigenstrain](/ComputeCrystalPlasticityThermalEigenstrain.md) documentation page.
 
 To facilitate the understanding of the above constitutive equations, some fundamental continuum mechanics concepts are included in the following subsections.
 

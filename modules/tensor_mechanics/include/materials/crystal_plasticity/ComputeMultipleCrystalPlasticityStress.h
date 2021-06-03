@@ -12,6 +12,7 @@
 #include "ComputeFiniteStrainElasticStress.h"
 
 #include "CrystalPlasticityStressUpdateBase.h"
+#include "ComputeCrystalPlasticityEigenstrainBase.h"
 
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
@@ -111,11 +112,22 @@ protected:
   /// performs the line search update
   bool lineSearchUpdate(const Real & rnorm_prev, const RankTwoTensor & dpk2);
 
+  /**
+   * Calculates the deformation gradient due to eigenstrain
+   */
+  void calculateEigenstrainDeformationGrad();
+
   /// number of plastic models
   const unsigned _num_models;
 
   /// The user supplied cyrstal plasticity consititutive models
   std::vector<CrystalPlasticityStressUpdateBase *> _models;
+
+  /// number of eigenstrains
+  const unsigned _num_eigenstrains;
+
+  /// The user supplied cyrstal plasticity eigenstrains
+  std::vector<ComputeCrystalPlasticityEigenstrainBase *> _eigenstrains;
 
   /// optional parameter to define several mechanical systems on the same block, e.g. multiple phases
   const std::string _base_name;
@@ -144,6 +156,9 @@ protected:
   /// Maximum number of substep iterations
   unsigned int _max_substep_iter;
 
+  /// time step size during substepping
+  Real _substep_dt;
+
   /// Flag to activate line serach
   bool _use_line_search;
 
@@ -162,6 +177,11 @@ protected:
   ///@{Plastic deformation gradient RankTwoTensor for the crystal
   MaterialProperty<RankTwoTensor> & _plastic_deformation_gradient;
   const MaterialProperty<RankTwoTensor> & _plastic_deformation_gradient_old;
+  ///@}
+
+  ///@{ Generalized eigenstrain deformation gradient RankTwoTensor for the crystal
+  MaterialProperty<RankTwoTensor> * _eigenstrain_deformation_gradient;
+  const MaterialProperty<RankTwoTensor> * _eigenstrain_deformation_gradient_old;
   ///@}
 
   ///@{Total deformation gradient RankTwoTensor for the crystal
@@ -194,6 +214,7 @@ protected:
   RankTwoTensor _elastic_deformation_gradient;
   RankTwoTensor _inverse_plastic_deformation_grad;
   RankTwoTensor _inverse_plastic_deformation_grad_old;
+  RankTwoTensor _inverse_eigenstrain_deformation_grad;
   ///@}
 
   /// Flag to check whether convergence is achieved or if substepping is needed
