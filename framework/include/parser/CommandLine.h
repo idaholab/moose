@@ -11,6 +11,7 @@
 
 // Moose Includes
 #include "MooseError.h"
+#include "Conversion.h"
 
 #include "libmesh/parallel.h"
 
@@ -203,26 +204,29 @@ CommandLine::search(const std::string & option_name, std::vector<T> & argument)
   {
     for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
     {
-      for (size_t j = 0; j < _args.size(); j++)
+      for (size_t j = 0; j < _argv.size(); j++)
       {
-        auto arg = _args[j];
+        auto arg = _argv[j];
 
         if (arg == pos->second.cli_switch[i])
         {
           // "Flag" CLI options added vector of Boolean types may apprear multiple times on the
-          // command line (like a repeated verbosity flag to increase verbosoty), when we see them
+          // command line (like a repeated verbosity flag to increase verbosity), when we see them
           // we append a true value to the vector.
           if (pos->second.argument_type == NONE)
             argument.push_back(T());
-          else if (j + 1 < _args.size())
-          {
-            std::stringstream ss;
-            ss << _args[j + 1];
+          else
+            while (j + 1 < _argv.size() && _argv[j + 1][0] != '-' &&
+                   _argv[j + 1].find("=") == std::string::npos)
+            {
+              std::stringstream ss;
+              ss << _argv[j + 1];
 
-            T item;
-            setArgument(ss, item);
-            argument.push_back(item);
-          }
+              T item;
+              setArgument(ss, item);
+              argument.push_back(item);
+              ++j;
+            }
         }
       }
     }
