@@ -4,10 +4,11 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
 [Mesh]
-  type = QuadSubChannelMesh
+  type = BetterQuadSubChannelMesh
   nx = 6
   ny = 6
-  max_dz = 0.02
+  n_cells = 100
+  n_blocks = 1
   pitch = 0.0126
   rod_diameter = 0.00950
   gap = 0.00095 # the half gap between sub-channel assemblies
@@ -31,9 +32,9 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [S]
+  [Mu]
   []
-  [Sij]
+  [S]
   []
   [w_perim]
   []
@@ -50,26 +51,30 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = BetterSubChannel1PhaseProblemBase
   fp = water
-  abeta = 0.08
+  beta = 0.006
   CT = 1.0
   enforce_uniform_pressure = false
+  Density = true
+  Viscosity = true
+  Power = true
+  P_out = ${P_out}
 []
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = BetterQuadFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = QuadWettedPerimIC
+    type = BetterQuadWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = QuadPowerIC
+    type = BetterQuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
@@ -84,7 +89,7 @@ P_out = 4.923e6 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -93,10 +98,18 @@ P_out = 4.923e6 # Pa
     value = 0.0
   []
 
+  [Viscosity_ic]
+    type = ViscosityIC
+    variable = Mu
+    p = ${P_out}
+    T = T
+    fp = water
+  []
+
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -104,7 +117,7 @@ P_out = 4.923e6 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -117,13 +130,6 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -144,21 +150,21 @@ P_out = 4.923e6 # Pa
 [Outputs]
   exodus = true
   [Temp_Out_MATRIX]
-    type = NormalSliceValues
+    type = BetterNormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
     height = 3.658
   []
   [mdot_Out_MATRIX]
-    type = NormalSliceValues
+    type = BetterNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_Out.txt"
     height = 3.658
   []
   [mdot_In_MATRIX]
-    type = NormalSliceValues
+    type = BetterNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_In.txt"
@@ -233,6 +239,13 @@ P_out = 4.923e6 # Pa
     direction = to_multiapp
     source_variable = rho
     variable = rho
+  []
+  [xfer_Mu]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = Mu
+    variable = Mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer
