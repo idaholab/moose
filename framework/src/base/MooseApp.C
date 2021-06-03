@@ -43,7 +43,7 @@
 #include "ProxyRelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
-#include "PerfGraphInterface.h" // For TIME_SECTIOn
+#include "PerfGraphInterface.h" // For TIME_SECTION
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
@@ -358,7 +358,7 @@ MooseApp::MooseApp(InputParameters parameters)
     bool has_heap_profiling = false;
     static std::string profile_file;
 
-    // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
+    // For CPU profiling, users need to have environment 'MOOSE_PROFILE_BASE'
     if (std::getenv("MOOSE_PROFILE_BASE"))
     {
       has_cpu_profiling = true;
@@ -934,7 +934,7 @@ MooseApp::setupOptions()
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
-        //       have it in betwen the input file name and the object name for Output/*
+        //       have it in between the input file name and the object name for Output/*
         //       syntax.
       }
       // default file base for multiapps is set by MultiApp

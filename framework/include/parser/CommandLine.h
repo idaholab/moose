@@ -88,6 +88,9 @@ public:
   template <typename T>
   bool search(const std::string & option_name, T & argument);
 
+  template <typename T>
+  bool search(const std::string & option_name, std::vector<T> & argument);
+
   /**
    * Print the usage info for this command line
    */
@@ -159,7 +162,6 @@ CommandLine::search(const std::string & option_name, T & argument)
   {
     for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
     {
-
       for (size_t j = 0; j < _args.size(); j++)
       {
         auto arg = _args[j];
@@ -183,6 +185,49 @@ CommandLine::search(const std::string & option_name, T & argument)
     }
 
     if (pos->second.required)
+    {
+      Moose::err << "Required parameter: " << option_name << " missing\n";
+      printUsage();
+    }
+    return false;
+  }
+  mooseError("Unrecognized option name");
+}
+
+template <typename T>
+bool
+CommandLine::search(const std::string & option_name, std::vector<T> & argument)
+{
+  std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
+  if (pos != _cli_options.end())
+  {
+    for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
+    {
+      for (size_t j = 0; j < _args.size(); j++)
+      {
+        auto arg = _args[j];
+
+        if (arg == pos->second.cli_switch[i])
+        {
+          // "Flag" CLI options added vector of Boolean types may apprear multiple times on the
+          // command line (like a repeated verbosity flag to increase verbosoty), when we see them
+          // we append a true value to the vector.
+          if (pos->second.argument_type == NONE)
+            argument.push_back(T());
+          else if (j + 1 < _args.size())
+          {
+            std::stringstream ss;
+            ss << _args[j + 1];
+
+            T item;
+            setArgument(ss, item);
+            argument.push_back(item);
+          }
+        }
+      }
+    }
+
+    if (pos->second.required && argument.empty())
     {
       Moose::err << "Required parameter: " << option_name << " missing\n";
       printUsage();

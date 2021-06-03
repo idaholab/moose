@@ -842,6 +842,22 @@ private:
   void setParameters() {}
 
   /**
+   * Helper that uses overloading to distinguish adding commandline parameters of
+   * a scalar and a vector kind. Vector parameters are options that may appear multiple
+   * times on the command line (like -i).
+   */
+  template <typename T>
+  void addCommandLineParamHelper(const std::string & name,
+                                 const std::string & syntax,
+                                 const std::string & doc_string,
+                                 T *);
+  template <typename T>
+  void addCommandLineParamHelper(const std::string & name,
+                                 const std::string & syntax,
+                                 const std::string & doc_string,
+                                 std::vector<T> *);
+
+  /**
    * Private method for setting deprecated coupled variable documentation strings
    */
   void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
