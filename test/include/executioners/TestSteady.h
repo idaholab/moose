@@ -23,6 +23,11 @@ public:
   virtual ~TestSteady();
 
   /**
+   * This is called at the beginning of FEProblemBase::init.
+   */
+  virtual void preProblemInit() override;
+
+  /**
    * This will call solve() on the NonlinearSystem.
    */
   virtual void preExecute() override;

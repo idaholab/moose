@@ -97,6 +97,7 @@
 #include "FVInterfaceKernel.h"
 #include "Reporter.h"
 #include "ADUtils.h"
+#include "Executioner.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -4896,6 +4897,9 @@ FEProblemBase::init()
     return;
 
   TIME_SECTION(_init_timer);
+
+  // call executioner's preProblemInit so that it can do some setups before problem init
+  _app.getExecutioner()->preProblemInit();
 
   // If we have AD and we are doing global AD indexing, then we should by default set the matrix
   // coupling to full. If the user has told us to trust their coupling matrix, then this call will
