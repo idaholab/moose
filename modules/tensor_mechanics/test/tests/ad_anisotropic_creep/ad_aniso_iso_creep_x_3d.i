@@ -151,14 +151,18 @@
     max_iterations = 50
   []
 
+  [hill_tensor]
+    type = HillConstants
+    # F G H L M N
+    hill_constants = "0.5 0.5 0.5 1.5 1.5 1.5"
+  []
+
   [trial_creep_aniso_iso]
     type = ADHillCreepStressUpdate
     coefficient = 1e-16
     n_exponent = 9
     m_exponent = 0
     activation_energy = 0
-    # F G H L M N
-    hill_constants = "0.5 0.5 0.5 1.5 1.5 1.5"
     max_inelastic_increment = 0.00003
     relative_tolerance = 1e-20
     absolute_tolerance = 1e-20

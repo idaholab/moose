@@ -102,6 +102,12 @@
     max_iterations = 500
     absolute_tolerance = 1e-05
   []
+  [hill_tensor]
+    type = HillConstants
+    # F G H L M N
+    hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
+    base_name = trial_plasticity
+  []
 
   [trial_plasticity]
     type = ADHillPlasticityStressUpdate
@@ -109,7 +115,6 @@
     # F G H L M N
     hardening_constant = 5000
     yield_stress = 20000000000000
-    hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
     base_name = trial_plasticity
   []
 []

@@ -53,7 +53,7 @@ protected:
    * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
    * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
    */
-  void computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor);
+  void computeHillTensorEigenDecomposition(const ADDenseMatrix & hill_tensor);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -84,9 +84,6 @@ protected:
                                ADReal & omega_gamma,
                                ADReal & sy_gamma);
 
-  /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants_input;
-
   /// Square of the q function for orthotropy
   ADReal _qsigma;
 
@@ -101,7 +98,10 @@ protected:
   ADReal _hardening_slope;
   ADReal _yield_condition;
   ADReal _yield_stress;
+  /// Hill constant material
+  const MaterialProperty<std::vector<Real>> & _hill_constants;
   ADDenseMatrix _hill_tensor;
+
   ADDenseVector _stress_np1;
   /// 2 * shear modulus
   ADReal _two_shear_modulus;

@@ -102,18 +102,30 @@
     absolute_tolerance = 1e-05
   []
 
+  [hill_tensor]
+    type = HillConstants
+    # F G H L M N
+    hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
+    base_name = trial_creep
+  []
+
   [trial_creep]
     type = ADHillCreepStressUpdate
     coefficient = 3e-18
     n_exponent = 5
     m_exponent = 0
     activation_energy = 0
-    # F G H L M N
-    hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5
     base_name = trial_creep
     # Force it to not use integration error
     max_integration_error = 1.0
+  []
+
+  [hill_tensor_two]
+    type = HillConstants
+    # F G H L M N
+    hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
+    base_name = trial_creep_two
   []
 
   [trial_creep_two]
@@ -122,8 +134,6 @@
     n_exponent = 5
     m_exponent = 0
     activation_energy = 0
-    # F G H L M N
-    hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5
     base_name = trial_creep_two
     # Force it to not use integration error

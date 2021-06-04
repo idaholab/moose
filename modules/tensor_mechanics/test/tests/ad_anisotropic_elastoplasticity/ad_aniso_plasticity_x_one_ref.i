@@ -108,13 +108,16 @@
     absolute_tolerance = 1e-16
   []
 
+  [hill_tensor]
+    type = HillConstants
+    # F G H L M N
+    hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
+  []
+
   [trial_plasticity]
     type = ADHillPlasticityStressUpdate
     hardening_constant = 2000.0
     yield_stress = 0.001 # was 200 for verification
-
-    # F G H L M N
-    hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
     absolute_tolerance = 1e-15
     relative_tolerance = 1e-13
     # internal_solve_full_iteration_history = true
