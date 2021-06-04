@@ -96,4 +96,9 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 An elastic spherical indenter penetrates into a base material modeled with tensor-mechanics crystal plasticity.
 [contact/index.md].
 !card-end!
+
+!card! contact/ironing_gallery.mp4 title=Frictional Ironing Problem with Mortar Contact
+A deformable semi-circular tool pushes into highly deformable material generating tangential deformation.
+[contact/index.md].
+!card-end!
 !gallery-end!
