@@ -22,8 +22,8 @@ CZMComputeDisplacementJumpTotalLagrangian::validParams()
   return params;
 }
 
-CZMComputeDisplacementJumpTotalLagrangian::
-    CZMComputeDisplacementJumpTotalLagrangian(const InputParameters & parameters)
+CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagrangian(
+    const InputParameters & parameters)
   : CZMComputeDisplacementJumpSmallStrain(parameters),
     _displacement_jump_global_old(
         getMaterialPropertyOld<RealVectorValue>("displacement_jump_global")),

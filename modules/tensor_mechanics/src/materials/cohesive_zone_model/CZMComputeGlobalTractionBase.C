@@ -20,8 +20,7 @@ CZMComputeGlobalTractionBase::validParams()
   return params;
 }
 
-CZMComputeGlobalTractionBase::CZMComputeGlobalTractionBase(
-    const InputParameters & parameters)
+CZMComputeGlobalTractionBase::CZMComputeGlobalTractionBase(const InputParameters & parameters)
   : InterfaceMaterial(parameters),
     _traction_global(declareProperty<RealVectorValue>("traction_global")),
     _interface_traction(getMaterialProperty<RealVectorValue>("interface_traction")),
