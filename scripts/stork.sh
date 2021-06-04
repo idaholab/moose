@@ -105,6 +105,7 @@ rm -f $dir/Makefile.*
 rm -f $dir/unit/Makefile.*
 rm -f $dir/run_tests.*
 rm -f $dir/src/base/StorkApp.C.*
+rm -f $dir/test/src/base/StorkTestApp.C.*
 rm -f $dir/doc/config.yml.*
 rm -f $dir/doc/moosedocs.py.*
 
