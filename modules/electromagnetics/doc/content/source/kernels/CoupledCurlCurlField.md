@@ -8,12 +8,12 @@
 The CoupledCurlCurlField object computes the residual contribution for the term
 
 \begin{equation}
-  s \nabla \times \nabla \times \vec{E}_{coupled}
+  s \nabla \times \nabla \times \vec{v}
 \end{equation}
 
 where
 
-- $\vec{E}_{coupled}$ is a coupled electric field vector variable, and
+- $\vec{v}$ is a coupled field vector variable, and
 - $s$ is a constant coefficient corresponding to the sign of the term in the weak form (default = 1.0)
 
 ## Example Input File Syntax
