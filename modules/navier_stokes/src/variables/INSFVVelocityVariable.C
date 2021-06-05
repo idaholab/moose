@@ -44,13 +44,19 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem) const
 {
-  auto pr = _elem_to_grad.emplace(elem, 0);
+  VectorValue<ADReal> * grad_pointer = &_temp_face_gradients[_tid];
+  if (_cache_face_gradients)
+  {
+    auto pr = _elem_to_grad.emplace(elem, 0);
 
-  if (!pr.second)
-    // Insertion didn't happen...we already have a gradient ready to go
-    return pr.first->second;
+    if (!pr.second)
+      // Insertion didn't happen...we already have a gradient ready to go
+      return pr.first->second;
 
-  VectorValue<ADReal> & grad = pr.first->second;
+    grad_pointer = &pr.first->second;
+  }
+
+  VectorValue<ADReal> & grad = *grad_pointer;
 
   bool volume_set = false;
   Real volume = 0;
@@ -292,25 +298,29 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
       grad(lm_dim_index) = x(lm_dim_index);
 
     // Cache the face value information
-    for (const auto ebf_index : make_range(num_ebfs))
-      _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
+    if (_cache_face_values)
+      for (const auto ebf_index : make_range(num_ebfs))
+        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
-    // Cache the extrapolated face gradient information
-    auto it = ebf_faces.begin();
-    for (const auto fdf_index : make_range(num_fdf_faces))
+    if (_cache_face_gradients)
     {
-      it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
-        return in.second;
-      });
-      mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
-      const auto starting_index = static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
-      auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
-      mooseAssert(pr.second, "We should have inserted a new face gradient");
-      for (const auto lm_index : make_range(lm_dim))
-        pr.first->second(lm_index) = x(starting_index + lm_index);
+      // Cache the extrapolated face gradient information
+      auto it = ebf_faces.begin();
+      for (const auto fdf_index : make_range(num_fdf_faces))
+      {
+        it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
+          return in.second;
+        });
+        mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
+        const auto starting_index = static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+        auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
+        mooseAssert(pr.second, "We should have inserted a new face gradient");
+        for (const auto lm_index : make_range(lm_dim))
+          pr.first->second(lm_index) = x(starting_index + lm_index);
 
-      // increment the iterator so we don't find the same element again
-      ++it;
+        // increment the iterator so we don't find the same element again
+        ++it;
+      }
     }
   }
 
