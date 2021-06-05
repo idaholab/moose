@@ -1,0 +1,45 @@
+[Tests]
+  issues = '#18009'
+  design = 'MooseVariableFV.md'
+  [3d-no-face-caching]
+    type = 'CSVDiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for flow in a 3D channel while not caching face variable values.'
+    ad_indexing_type = 'global'
+    cli_args = 'pressure_face_gradient_caching = false
+                velocity_face_gradient_caching = false
+                pressure_face_value_caching = false
+                velocity_face_value_caching = false'
+  []
+  [3d-no-gradient-caching]
+    type = 'CSVDiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for flow in a 3D channel while not caching face variable gradients.'
+    ad_indexing_type = 'global'
+    cli_args = 'pressure_face_gradient_caching = false
+                velocity_face_gradient_caching = false'
+  []
+  [3d-pressure-gradient-caching]
+    type = 'CSVDiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for flow in a 3D channel while only caching face pressure gradients.'
+    ad_indexing_type = 'global'
+    cli_args = 'velocity_face_gradient_caching = false
+                pressure_face_value_caching = false
+                velocity_face_value_caching = false'
+  []
+  [3d-all-caching]
+    type = 'CSVDiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for flow in a 3D channel while caching all variable face values and gradients.'
+    ad_indexing_type = 'global'
+  []
+[]
