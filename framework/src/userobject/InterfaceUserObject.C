@@ -48,12 +48,58 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
     _neighbor_elem(_assembly.neighbor()),
-    _current_neighbor_volume(_assembly.neighborVolume())
+    _current_neighbor_volume(_assembly.neighborVolume()),
+    _fi(nullptr)
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
+
+  // Check for finite volume variables
+  _fv = false;
+  for (const auto & var : coupled_vars)
+    if (var->isFV())
+      _fv = true;
+}
+
+void
+InterfaceUserObject::execute()
+{
+  if (_fv)
+  {
+    // Retrieve the face info from the mesh
+    _fi = _mesh.faceInfo(_current_elem, _current_side);
+    if (!_fi)
+    {
+      // Let's check the other side
+      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
+      mooseAssert(neighbor != remote_elem,
+                  "I'm pretty confident that if we got here then our neighbor should be "
+                  "local/ghosted/null");
+      if (neighbor)
+      {
+        const auto neigh_side = neighbor->which_neighbor_am_i(_current_elem);
+        _fi = _mesh.faceInfo(neighbor, neigh_side);
+      }
+
+      if (!_fi)
+        // We still don't have a face info. It must be owned by another process
+        return;
+    }
+
+    auto pr = _face_infos_processed.insert(_fi);
+    if (!pr.second)
+      // Insertion didn't happen so we must have already processed this FaceInfo
+      return;
+  }
+}
+
+void
+InterfaceUserObject::initialize()
+{
+  if (_fv)
+    _face_infos_processed.clear();
 }
 
 const Real &

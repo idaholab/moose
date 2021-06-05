@@ -48,15 +48,13 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
     _u_neighbor(parameters.isParamSetByUser("neighbor_variable")
                     ? coupledNeighborValue("neighbor_variable")
                     : coupledNeighborValue("variable")),
-    _fv(getFieldVar("variable", 0)->isFV()),
     _diffusion_coef(
         getGenericMaterialProperty<Real, is_ad>(getParam<MaterialPropertyName>("diffusivity"))),
     _diffusion_coef_neighbor(parameters.isParamSetByUser("neighbor_diffusivity")
                                  ? getGenericNeighborMaterialProperty<Real, is_ad>(
                                        getParam<MaterialPropertyName>("neighbor_diffusivity"))
                                  : getGenericNeighborMaterialProperty<Real, is_ad>(
-                                       getParam<MaterialPropertyName>("diffusivity"))),
-    _fi(nullptr)
+                                       getParam<MaterialPropertyName>("diffusivity")))
 {
 
   // Primary and secondary variable should both be of a similar variable type
@@ -65,50 +63,6 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
         (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
       mooseError("For the InterfaceDiffusiveFluxIntegral, variable and "
                  "neighbor_variable should be of a similar variable type.");
-}
-
-template <bool is_ad>
-void
-InterfaceDiffusiveFluxIntegralTempl<is_ad>::initialize()
-{
-  if (_fv)
-    _face_infos_processed.clear();
-
-  InterfaceIntegralPostprocessor::initialize();
-}
-
-template <bool is_ad>
-void
-InterfaceDiffusiveFluxIntegralTempl<is_ad>::execute()
-{
-  if (_fv)
-  {
-    _fi = _mesh.faceInfo(_current_elem, _current_side);
-    if (!_fi)
-    {
-      // Let's check the other side
-      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
-      mooseAssert(neighbor != remote_elem,
-                  "I'm pretty confident that if we got here then our neighbor should be "
-                  "local/ghosted/null");
-      if (neighbor)
-      {
-        const auto neigh_side = neighbor->which_neighbor_am_i(_current_elem);
-        _fi = _mesh.faceInfo(neighbor, neigh_side);
-      }
-
-      if (!_fi)
-        // We still don't have a face info. It must be owned by another process
-        return;
-    }
-
-    auto pr = _face_infos_processed.insert(_fi);
-    if (!pr.second)
-      // Insertion didn't happen so we must have already processed this FaceInfo
-      return;
-  }
-
-  InterfaceIntegralPostprocessor::execute();
 }
 
 template <bool is_ad>

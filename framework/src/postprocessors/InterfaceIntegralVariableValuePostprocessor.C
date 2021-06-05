@@ -50,8 +50,7 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
     _neighbor_fv_variable(
         parameters.isParamSetByUser("neighbor_variable")
             ? dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("neighbor_variable", 0))
-            : dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("variable", 0))),
-    _fv(_fv_variable)
+            : dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("variable", 0)))
 {
   addMooseVariableDependency(&mooseVariableField());
 
@@ -68,28 +67,24 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 {
   if (_fv)
   {
-    // Get FaceInfo from the mesh
-    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(_fi, "This should never be null. If it is then something went wrong in execute()");
 
-    // FaceInfo is not local, another process owns the element
-    if (!fi)
-      return 0;
     const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
 
     // If both variables are different, assume this is a boundary for both variables
     Real u, u_neighbor;
     if (_fv_variable != _neighbor_fv_variable)
     {
-      u = MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
-      u_neighbor = MetaPhysicL::raw_value(_neighbor_fv_variable->getBoundaryFaceValue(*fi));
+      u = MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*_fi));
+      u_neighbor = MetaPhysicL::raw_value(_neighbor_fv_variable->getBoundaryFaceValue(*_fi));
     }
     // If only one variable is specified, assume this is an internal interface
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     else
     {
-      u = MetaPhysicL::raw_value(_fv_variable->getInternalFaceValue(neighbor, *fi, _u[_qp]));
+      u = MetaPhysicL::raw_value(_fv_variable->getInternalFaceValue(neighbor, *_fi, _u[_qp]));
       u_neighbor = MetaPhysicL::raw_value(
-          _neighbor_fv_variable->getInternalFaceValue(neighbor, *fi, _u_neighbor[_qp]));
+          _neighbor_fv_variable->getInternalFaceValue(neighbor, *_fi, _u_neighbor[_qp]));
     }
 
     return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
