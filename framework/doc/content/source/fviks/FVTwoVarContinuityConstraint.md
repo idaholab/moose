@@ -1,6 +1,6 @@
 # FVTwoVarContinuityConstraint
 
-!syntax description /fviks/FVTwoVarContinuityConstraint
+!syntax description /FVInterfaceKernels/FVTwoVarContinuityConstraint
 
 The constraint is enforced using a Lagrange multiplier variable.
 
@@ -22,8 +22,8 @@ spanning the entire domain.
 
 !listing test/tests/fviks/continuity/test.i block=FVInterfaceKernels/interface
 
-!syntax parameters /fviks/FVTwoVarContinuityConstraint
+!syntax parameters /FVInterfaceKernels/FVTwoVarContinuityConstraint
 
-!syntax inputs /fviks/FVTwoVarContinuityConstraint
+!syntax inputs /FVInterfaceKernels/FVTwoVarContinuityConstraint
 
-!syntax children /fviks/FVTwoVarContinuityConstraint
+!syntax children /FVInterfaceKernels/FVTwoVarContinuityConstraint
