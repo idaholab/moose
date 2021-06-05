@@ -45,11 +45,19 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem) const
 {
-  const auto it = _elem_to_grad.find(elem);
+  VectorValue<ADReal> * grad_pointer = &_temp_face_gradients[_tid];
+  if (_cache_elem_gradients)
+  {
+    auto pr = _elem_to_grad.emplace(elem, 0);
 
-  if (it != _elem_to_grad.end())
-    // we already have a gradient ready to go
-    return it->second;
+    if (!pr.second)
+      // Insertion didn't happen...we already have a gradient ready to go
+      return pr.first->second;
+
+    grad_pointer = &pr.first->second;
+  }
+
+  VectorValue<ADReal> & grad = *grad_pointer;
 
   ADReal elem_value = getElemValue(elem);
 
@@ -297,10 +305,20 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
       for (const auto lm_dim_index : make_range(lm_dim))
         grad(lm_dim_index) = x(lm_dim_index);
 
+<<<<<<< HEAD
       // Cache the face value information
       for (const auto ebf_index : make_range(num_ebfs))
         _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
+=======
+    // Cache the face value information
+    if (_cache_face_values)
+      for (const auto ebf_index : make_range(num_ebfs))
+        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
+
+    if (_cache_face_gradients)
+    {
+>>>>>>> Cache pressure gradient by default for INSFV, refs #18009
       // Cache the extrapolated face gradient information
       auto it = ebf_faces.begin();
       for (const auto fdf_index : make_range(num_fdf_faces))
@@ -309,8 +327,12 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
           return in.second;
         });
         mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
+<<<<<<< HEAD
         const auto starting_index =
             static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+=======
+        const auto starting_index = static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+>>>>>>> Cache pressure gradient by default for INSFV, refs #18009
         auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
         mooseAssert(pr.second, "We should have inserted a new face gradient");
         for (const auto lm_index : make_range(lm_dim))
