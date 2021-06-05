@@ -5,7 +5,7 @@
     csvdiff = slab_reflection_out.csv
     requirement = 'The system shall calculate the reflection of a 1D electric field plane wave in a metal backed dielectric slab.'
     design = 'benchmarks/OneDReflection.md'
-    validation = 'benchmarks/OneDReflection.md'
+    verification = 'benchmarks/OneDReflection.md'
     issues = '#13744'
     allow_test_objects = true
   [../]
