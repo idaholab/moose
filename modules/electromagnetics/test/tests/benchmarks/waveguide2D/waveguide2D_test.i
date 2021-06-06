@@ -1,4 +1,4 @@
-# Test for AbsorbingBC and PortBC with simple electric plane wave
+# Test for EMRobinBC in port and absorbing modes with simple electric plane wave
 # 2D, vacuum-filled waveguide with conducting walls
 # u^2 + k^2*u = 0, 0 < x < 80, 0 < y < 10, u: R -> C
 # k = 2*pi*freq/c, freq = 20e6 Hz, c = 3e8 m/s
@@ -20,13 +20,9 @@
 []
 
 [Functions]
-  [./k]
-    type = ConstantFunction
-    value = 0.4188790204786391
-  [../]
   [./kSquared]
-    type = CompositeFunction
-    functions = 'k k'
+    type = ParsedFunction
+    value = '0.4188790204786391^2'
   [../]
   [./inc_y]
     type = ParsedFunction
