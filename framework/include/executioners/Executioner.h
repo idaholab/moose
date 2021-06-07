@@ -53,6 +53,11 @@ public:
   static InputParameters validParams();
 
   /**
+   * Perform initializations during executing actions right before init_problem task
+   */
+  virtual void preProblemInit() {}
+
+  /**
    * Initialize the executioner
    */
   virtual void init() {}
