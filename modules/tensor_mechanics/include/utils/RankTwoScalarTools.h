@@ -492,7 +492,7 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
     case 17:
       return stressIntensity(tensor);
     default:
-      mooseError("RankTwoScalarAux Error: invalid scalar type");
+      mooseError("RankTwoScalarTools Error: invalid scalar type");
   }
 }
 

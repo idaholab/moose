@@ -32,6 +32,11 @@ protected:
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
+  /**
+   * Helper function to decode `generate_outputs` options using a "table" of
+   * scalar output quantities and a "setup" lambda that performs the input parameter
+   * setup for the output material object.
+   */
   template <typename T, typename T2>
   bool setupOutput(std::string out, T table, T2 setup);
 
