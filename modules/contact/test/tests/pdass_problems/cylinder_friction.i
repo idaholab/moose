@@ -228,7 +228,7 @@
 
   start_time = 0.0
   end_time = 0.3 # 3.5
-  l_tol = 1e-7
+  l_tol = 1e-4
   dt = 0.1
   dtmin = 0.001
 []
