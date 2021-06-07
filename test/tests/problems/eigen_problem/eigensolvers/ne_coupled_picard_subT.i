@@ -51,8 +51,8 @@
   solve_type = PJFNK
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-6
-  picard_max_its = 20
-  picard_rel_tol = 1e-6
+  fixed_point_max_its = 20
+  fixed_point_rel_tol = 1e-6
 []
 
 [MultiApps]

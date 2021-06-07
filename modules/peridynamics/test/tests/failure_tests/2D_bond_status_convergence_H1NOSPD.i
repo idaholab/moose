@@ -135,9 +135,9 @@
   dt = 0.5
   end_time = 1
 
-  picard_max_its = 5
-  accept_on_max_picard_iteration = true
-  picard_custom_pp = bond_status_updated_times
+  fixed_point_max_its = 5
+  accept_on_max_fixed_point_iteration = true
+  custom_pp = bond_status_updated_times
   custom_abs_tol = 2
   disable_picard_residual_norm_check = true
 

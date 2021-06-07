@@ -9,6 +9,11 @@
                     },
                     "values": [
                         {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 0
+                        },
+                        {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",
                             "value": 0
@@ -42,6 +47,11 @@
                         "type": "IterationInfo"
                     },
                     "values": [
+                        {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
                         {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",

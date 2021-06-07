@@ -70,6 +70,7 @@ AllLocalDofIndicesThread::operator()(const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
+  mooseAssert(_sys, "We should have a system, did you forget to specify any variable in vars?");
   auto & dof_map = _sys->get_dof_map();
 
   for (const auto & elem : range)

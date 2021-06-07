@@ -62,7 +62,7 @@
   num_steps = 2
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 1
+  fixed_point_max_its = 1
   auto_advance = false
 []
 

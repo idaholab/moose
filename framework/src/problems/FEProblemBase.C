@@ -3754,7 +3754,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 
   query.condition<AttribThread>(0).queryInto(objs);
 
-  // finalize objects and retrieve/store any postproessor values
+  // finalize objects and retrieve/store any postprocessor values
   for (auto obj : objs)
   {
     if (isgen && dynamic_cast<ThreadedGeneralUserObject *>(obj))

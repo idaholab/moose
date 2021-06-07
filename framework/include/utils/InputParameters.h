@@ -1365,7 +1365,7 @@ template <typename T>
 void
 InputParameters::checkConsistentType(const std::string & name) const
 {
-  // Do we have a paremeter with the same name but a different type?
+  // Do we have a parameter with the same name but a different type?
   InputParameters::const_iterator it = _values.find(name);
   if (it != _values.end() && dynamic_cast<const Parameter<T> *>(it->second) == NULL)
     mooseError("Attempting to set parameter \"",

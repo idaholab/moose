@@ -25,7 +25,6 @@ public:
   virtual void execute() override;
 
 protected:
-  Transient * _transient_executioner = nullptr;
   const MultiMooseEnum & _items;
 
   // Reporter values to return (all are computed as "replicated" values)
@@ -33,7 +32,7 @@ protected:
   unsigned int & _time_step_value;
   unsigned int & _num_linear;
   unsigned int & _num_nonlinear;
-  unsigned int & _num_picard;
+  unsigned int & _num_fixed_point;
 
   // Used to allow for optional declare
   Real _dummy_real = 0;

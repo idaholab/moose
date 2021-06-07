@@ -67,7 +67,7 @@
   solve_type = 'PJFNK'
 
   nl_abs_tol = 1e-10
-  picard_max_its = 2
+  fixed_point_max_its = 2
   start_time = 0
   num_steps = 3
   [./TimeStepper]

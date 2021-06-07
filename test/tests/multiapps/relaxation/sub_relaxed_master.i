@@ -62,8 +62,8 @@
 []
 
 [Postprocessors]
-  [./picard_its]
-    type = NumPicardIterations
+  [picard_its]
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -75,7 +75,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 30
+  fixed_point_max_its = 30
   nl_abs_tol = 1e-14
 []
 
@@ -91,7 +91,7 @@
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = sub_relaxed_sub.i
-    relaxed_variables = v
+    transformed_variables = v
     relaxation_factor = 0.94
   [../]
 []
@@ -112,4 +112,3 @@
     variable = u
   [../]
 []
-

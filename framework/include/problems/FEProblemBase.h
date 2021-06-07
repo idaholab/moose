@@ -193,14 +193,14 @@ public:
   nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
-   * Check for converence of the nonlinear solution
+   * Check for convergence of the nonlinear solution
    * @param msg            Error message that gets sent back to the solver
    * @param it             Iteration counter
    * @param xnorm          Norm of the solution vector
    * @param snorm          Norm of the change in the solution vector
    * @param fnorm          Norm of the residual vector
    * @param rtol           Relative residual convergence tolerance
-   * @param divtol           Relative residual divergence tolerance
+   * @param divtol         Relative residual divergence tolerance
    * @param stol           Solution change convergence tolerance
    * @param abstol         Absolute residual convergence tolerance
    * @param nfuncs         Number of function evaluations
@@ -306,7 +306,7 @@ public:
                             SubdomainID block = Moose::ANY_BLOCK_ID);
 
   /**
-   * Increases the elemennt/volume quadrature order for the specified mesh
+   * Increases the element/volume quadrature order for the specified mesh
    * block if and only if the current volume quadrature order is lower.  This
    * can only cause the quadrature level to increase.  If volume_order is
    * lower than or equal to the current volume/elem quadrature rule order,
@@ -796,7 +796,7 @@ public:
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
 
   /**
-   * Method for creating an adding an object to the warehouse.
+   * Method for creating and adding an object to the warehouse.
    *
    * @tparam T The base object type (registered in the Factory)
    * @param type String type of the object (registered in the Factory)
@@ -926,7 +926,7 @@ public:
   /**
    * Set the value of a PostprocessorValue.
    * @param name The name of the post-processor
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    * @return The reference to the value at the given time index
    *
    * Note: This method is only for setting values that already exist, the Postprocessor and
@@ -966,7 +966,7 @@ public:
    * @param object_name The name of the VPP object
    * @param vector_name The name of the declared vector
    * @param value The data to apply to the vector
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    */
   void setVectorPostprocessorValueByName(const std::string & object_name,
                                          const std::string & vector_name,
@@ -1040,7 +1040,7 @@ public:
   getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const;
 
   /**
-   * Execute MultiAppTransfers associate with execution flag and direction.
+   * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
    */

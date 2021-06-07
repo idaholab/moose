@@ -84,9 +84,9 @@
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-12
 
-  picard_rel_tol = 1E-7
-  picard_abs_tol = 1.0e-07
-  picard_max_its = 12
+  fixed_point_rel_tol = 1E-7
+  fixed_point_abs_tol = 1.0e-07
+  fixed_point_max_its = 12
 []
 
 [MultiApps]
