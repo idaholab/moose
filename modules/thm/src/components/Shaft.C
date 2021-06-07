@@ -9,7 +9,7 @@ Shaft::validParams()
 {
   InputParameters params = Component::validParams();
   params.addParam<Real>("scaling_factor_omega", 1.0, "Scaling factor for omega [-]");
-  params.addParam<Real>("initial_speed", 0, "Initial shaft speed");
+  params.addParam<Real>("initial_speed", "Initial shaft speed");
   params.addRequiredParam<std::vector<std::string>>("connected_components",
                                                     "Names of the connected components");
   params.addClassDescription("Component that connects torque of turbomachinery components");
@@ -19,7 +19,6 @@ Shaft::validParams()
 Shaft::Shaft(const InputParameters & parameters)
   : Component(parameters),
     _scaling_factor_omega(getParam<Real>("scaling_factor_omega")),
-    _initial_speed(getParam<Real>("initial_speed")),
     _omega_var_name(genName(name(), "omega")),
     _connected_components(getParam<std::vector<std::string>>("connected_components"))
 {
@@ -48,6 +47,10 @@ Shaft::check() const
 {
   if (_connected_components.size() == 0)
     logError("No components are connected to the shaft.");
+
+  bool ics_set = _sim.hasInitialConditionsFromFile() || isParamValid("initial_speed");
+  if (!ics_set && !_app.isRestarting())
+    logError("The `initial_speed` parameter is missing.");
 }
 
 void
@@ -70,7 +73,9 @@ Shaft::addVariables()
         true, _omega_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_omega);
   else
     _sim.addSimVariable(true, _omega_var_name, FEType(FIRST, SCALAR), _scaling_factor_omega);
-  _sim.addConstantScalarIC(_omega_var_name, _initial_speed);
+
+  if (isParamValid("initial_speed"))
+    _sim.addConstantScalarIC(_omega_var_name, getParam<Real>("initial_speed"));
 }
 
 void

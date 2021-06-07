@@ -1,8 +1,33 @@
 [Tests]
-  [test]
-    type = 'CSVDiff'
-    csvdiff = test_out.csv
+  [err:no_initial_speed]
+    type = 'RunException'
     input = 'test.i'
+    cli_args = 'Components/hs/initial_T=300'
+    expect_err = "shaft: The `initial_speed` parameter is missing."
+  []
+  [part1]
+    type = 'CSVDiff'
+    csvdiff = part1_out.csv
+    input = 'test.i'
+    cli_args = '
+      Components/hs/initial_T=300
+      Components/shaft/initial_speed=0
+      Outputs/checkpoint=true
+      Outputs/file_base=part1_out'
+    recover = false
+  []
+
+  [part2]
+    type = 'CSVDiff'
+    csvdiff = part2_out.csv
+    input = 'test.i'
+    cli_args = '
+      Outputs/file_base=part2_out
+      Problem/restart_file_base=part1_out_cp/LATEST
+      Executioner/num_steps=2
+      Outputs/file_base=part2_out'
+    prereq = 'part1'
+    recover = false
   []
 
   [clg_test_torque]
