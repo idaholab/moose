@@ -9,6 +9,7 @@
     input = 'cylinder_friction.i'
     rel_err = 1.0e-4
     min_parallel = 4
+    max_parallel = 4
     heavy = true
     min_ad_size = '50'
     ad_indexing_type = 'global'
