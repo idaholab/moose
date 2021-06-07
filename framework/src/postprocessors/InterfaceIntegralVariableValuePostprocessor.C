@@ -56,8 +56,8 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
 
   // Primary and secondary variable should both be of a similar variable type
   if (parameters.isParamSetByUser("neighbor_variable"))
-    if ((_fv && !getFieldVar("neighbor_variable", 0)->isFV()) ||
-        (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
+    if ((_has_fv_vars && !getFieldVar("neighbor_variable", 0)->isFV()) ||
+        (!_has_fv_vars && getFieldVar("neighbor_variable", 0)->isFV()))
       mooseError("For the InterfaceIntegralVariableValuePostprocessor, variable and "
                  "neighbor_variable should be of a similar variable type.");
 }
@@ -65,7 +65,7 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
 Real
 InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 {
-  if (_fv)
+  if (_has_fv_vars)
   {
     mooseAssert(_fi, "This should never be null. If it is then something went wrong in execute()");
 

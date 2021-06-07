@@ -57,16 +57,16 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
     addMooseVariableDependency(var);
 
   // Check for finite volume variables
-  _fv = false;
+  _has_fv_vars = false;
   for (const auto & var : coupled_vars)
     if (var->isFV())
-      _fv = true;
+      _has_fv_vars = true;
 }
 
 void
 InterfaceUserObject::execute()
 {
-  if (_fv)
+  if (_has_fv_vars)
   {
     // Retrieve the face info from the mesh
     _fi = _mesh.faceInfo(_current_elem, _current_side);
@@ -98,7 +98,7 @@ InterfaceUserObject::execute()
 void
 InterfaceUserObject::initialize()
 {
-  if (_fv)
+  if (_has_fv_vars)
     _face_infos_processed.clear();
 }
 

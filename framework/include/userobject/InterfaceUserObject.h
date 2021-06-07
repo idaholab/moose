@@ -75,7 +75,7 @@ protected:
   const Real & getNeighborElemVolume();
 
   /// Whether finite volume variables are involved in the user object
-  bool _fv;
+  bool _has_fv_vars;
 
   /// A pointer to a face info, useful when working with FV
   const FaceInfo * _fi;
