@@ -6,7 +6,7 @@
 [Mesh]
   [input_file]
     type = FileMeshGenerator
-    file = cylinder.e
+    file = hertz_cyl_coarser.e
   []
   [secondary]
     type = LowerDBlockFromSidesetGenerator
@@ -224,10 +224,10 @@
   nl_abs_tol = 1e-5
   nl_rel_tol = 1e-5
   l_max_its = 100
-  nl_max_its = 20
+  nl_max_its = 30
 
   start_time = 0.0
-  end_time = 0.2 # 3.5
+  end_time = 0.3 # 3.5
   l_tol = 1e-4
   dt = 0.1
   dtmin = 0.001
