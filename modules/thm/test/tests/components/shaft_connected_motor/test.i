@@ -17,7 +17,6 @@
   [shaft]
     type = Shaft
     connected_components = 'motor'
-    initial_speed = 0
   []
 
   [hs]
@@ -31,8 +30,6 @@
     n_part_elems = 1
     widths = '1'
     materials = 'mat'
-
-    initial_T = 300
   []
 []
 

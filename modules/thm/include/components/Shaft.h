@@ -20,8 +20,6 @@ protected:
 
   /// scaling factor for scalar variable omega
   const Real & _scaling_factor_omega;
-  /// Initial shaft speed
-  const Real & _initial_speed;
   /// Name of the omega variable
   const VariableName _omega_var_name;
   /// Components connected to this shaft
