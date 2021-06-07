@@ -105,7 +105,8 @@ r_{\pm} = 2 \frac{\bm{d}_{\pm}\cdot\left(\nabla
 
 where $\left(\nabla \bm{\Psi}\right)_{\pm}$ corresponds to the $+$ or $-$ cell
 centroid gradient and $\left(\nabla_d \bm{\Psi}\right)_{f\pm} =
-\bm{\Psi}_{\mp} - \bm{\Psi}_{\pm}$.
+\bm{\Psi}_{\mp} - \bm{\Psi}_{\pm}$. A list and summary of the limiters available
+in MOOSE can be found [here](Limiters/index.md).
 
 !syntax parameters /FVKernels/PCNSFVKT
 

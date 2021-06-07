@@ -11,6 +11,10 @@
 
 #include "FVFluxKernel.h"
 
+/**
+ * This class computes the intercell diffusion flux by taking the difference between neighboring
+ * cell centroid values. This only captures the orthogonal component of the diffusive flux
+ */
 class FVOrthogonalDiffusion : public FVFluxKernel
 {
 public:

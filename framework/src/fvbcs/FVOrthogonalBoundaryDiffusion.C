@@ -21,9 +21,9 @@ FVOrthogonalBoundaryDiffusion::validParams()
   params.addRequiredParam<FunctionName>("function",
                                         "The value of the quantity of interest on the boundary.");
   params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
-  params.addParam<MaterialPropertyName>("diffusing_quantity",
-                                        "The quantity that is diffusing. If this is not valid, "
-                                        "then the solution value will be used.");
+  params.addParam<MaterialPropertyName>(
+      "diffusing_quantity",
+      "The quantity that is diffusing. By default, the 'variable' solution value will be used.");
   return params;
 }
 

@@ -15,6 +15,10 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * Implements a limiter which reproduces the second-order-upwind scheme, defined by
+ * $\beta(r_f) = r_f$
+ */
 class SOULimiter : public Limiter
 {
 public:

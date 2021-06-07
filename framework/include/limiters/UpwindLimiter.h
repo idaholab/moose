@@ -15,6 +15,10 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * Implements a limiter which reproduces the upwind scheme, defined by
+ * $\beta(r_f) = 0$
+ */
 class UpwindLimiter : public Limiter
 {
 public:

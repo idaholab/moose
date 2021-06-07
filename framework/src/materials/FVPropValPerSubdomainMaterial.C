@@ -10,27 +10,34 @@
 #include "FVPropValPerSubdomainMaterial.h"
 
 registerMooseObject("MooseApp", FVPropValPerSubdomainMaterial);
+registerMooseObject("MooseApp", FVADPropValPerSubdomainMaterial);
 
+template <bool is_ad>
 InputParameters
-FVPropValPerSubdomainMaterial::validParams()
+FVPropValPerSubdomainMaterialTempl<is_ad>::validParams()
 {
   auto params = Material::validParams();
   params.addClassDescription("Computes a property value on a per-subdomain basis");
-  params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the property to declare");
-  params.addRequiredParam<std::map<std::string, Real>>("subdomain_to_prop_value",
-                                                       "Map from subdomain to property value");
+  // Somehow min gcc doesn't know the type of params here
+  params.template addRequiredParam<MaterialPropertyName>("prop_name",
+                                                         "The name of the property to declare");
+  params.template addRequiredParam<std::map<std::string, Real>>(
+      "subdomain_to_prop_value", "Map from subdomain to property value");
   return params;
 }
 
-FVPropValPerSubdomainMaterial::FVPropValPerSubdomainMaterial(const InputParameters & params)
-  : Material(params), _prop(declareProperty<Real>("prop_name"))
+template <bool is_ad>
+FVPropValPerSubdomainMaterialTempl<is_ad>::FVPropValPerSubdomainMaterialTempl(
+    const InputParameters & params)
+  : Material(params), _prop(declareGenericProperty<Real, is_ad>("prop_name"))
 {
   for (const auto & map_pr : getParam<std::map<std::string, Real>>("subdomain_to_prop_value"))
     _sub_id_to_prop.emplace(std::make_pair(_mesh.getSubdomainID(map_pr.first), map_pr.second));
 }
 
+template <bool is_ad>
 void
-FVPropValPerSubdomainMaterial::computeQpProperties()
+FVPropValPerSubdomainMaterialTempl<is_ad>::computeQpProperties()
 {
   if (!_bnd)
   {
@@ -87,3 +94,6 @@ FVPropValPerSubdomainMaterial::computeQpProperties()
               "subdomain_to_prop_value parameter");
   _prop[_qp] = it->second;
 }
+
+template class FVPropValPerSubdomainMaterialTempl<false>;
+template class FVPropValPerSubdomainMaterialTempl<true>;

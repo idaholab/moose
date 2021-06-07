@@ -48,6 +48,31 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
   []
+  [MinModLimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = MinModLimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display second order convergence with a min-mod limiter.'
+  []
+  [SOULimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = SOULimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
+  []
+  [QUICKLimiter]
+    type = PythonUnitTest
+    input = test.py
+    test_case = QUICKLimiter
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    requirement = 'The system shall display second order convergence with a QUICK limiter.'
+    heavy = true
+  []
   [kt]
     requirement = 'The system shall provide a Kurganov-Tadmor scheme for evaluating convective intercell fluxes'
     [KTLimitedCD]

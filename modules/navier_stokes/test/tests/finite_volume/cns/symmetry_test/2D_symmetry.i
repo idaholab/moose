@@ -191,9 +191,10 @@ angle = 45
 
 [AuxKernels]
   [Ma_aux]
-    type = MaterialMachAux
+    type = NSMachAux
     variable = Ma
-    fp = fp
+    fluid_properties = fp
+    use_material_properties = true
   []
 
   [p_aux]

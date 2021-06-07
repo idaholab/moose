@@ -15,6 +15,10 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * Implements the Min-Mod limiter, defined by
+ * $\beta(r_f) = \text{max}(0, \text{min}(1, r_f))$
+ */
 class MinModLimiter : public Limiter
 {
 public:

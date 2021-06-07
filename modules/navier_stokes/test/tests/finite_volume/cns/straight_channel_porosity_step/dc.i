@@ -351,7 +351,7 @@ friction_coeff=10
   verbose = true
   steady_state_detection = true
   steady_state_tolerance = 1e-8
-  dt_in_solution_diff_norm = false
+  normalize_solution_diff_norm_by_dt = false
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'

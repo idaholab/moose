@@ -187,7 +187,6 @@ PCNSFVStrongBC::computeQpResidual()
       sup_vel_x_boundary, sup_vel_y_boundary, sup_vel_z_boundary);
   const auto eps_boundary = eps_interior;
   const auto u_boundary = sup_vel_boundary / eps_boundary;
-  // const auto e_boundary = _fluid.e_from_p_rho(pressure_boundary, rho_boundary);
   const auto e_boundary = _fluid.e_from_p_T(pressure_boundary, T_fluid_boundary);
 
   if (_eqn == "mass")

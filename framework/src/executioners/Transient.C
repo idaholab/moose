@@ -99,9 +99,9 @@ Transient::validParams()
       0.0,
       "Minimum amount of time to run before checking for steady state conditions.");
   params.addParam<bool>(
-      "dt_in_solution_diff_norm",
+      "normalize_solution_diff_norm_by_dt",
       true,
-      "Whether to include dt in the computation of the solution difference norm. If taking 'small' "
+      "Whether to divide the solution difference norm by dt. If taking 'small' "
       "time steps you probably want this to be true. If taking very 'large' timesteps in an "
       "attempt to *reach* a steady-state, you probably want this parameter to be false.");
 
@@ -173,7 +173,7 @@ Transient::Transient(const InputParameters & parameters)
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _final_timer(registerTimedSection("final", 1)),
-    _dt_in_solution_diff_norm(getParam<bool>("dt_in_solution_diff_norm"))
+    _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -459,7 +459,7 @@ Transient::takeStep(Real input_dt)
   _time_stepper->postSolve();
 
   _solution_change_norm =
-      relativeSolutionDifferenceNorm() / (_dt_in_solution_diff_norm ? _dt : Real(1));
+      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 
   return;
 }

@@ -15,6 +15,10 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * Implements the Van Leer limiter, defined by
+ * $\beta(r_f) = \frac{r_f + \text{abs}(r_f)}{1 + \text{abs}(r_f)}$
+ */
 class VanLeerLimiter : public Limiter
 {
 public:

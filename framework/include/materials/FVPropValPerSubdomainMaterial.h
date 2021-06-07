@@ -13,16 +13,20 @@
 
 #include <unordered_map>
 
-class FVPropValPerSubdomainMaterial : public Material
+template <bool is_ad>
+class FVPropValPerSubdomainMaterialTempl : public Material
 {
 public:
-  FVPropValPerSubdomainMaterial(const InputParameters & parameters);
+  FVPropValPerSubdomainMaterialTempl(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
 
 private:
-  MaterialProperty<Real> & _prop;
+  GenericMaterialProperty<Real, is_ad> & _prop;
   std::unordered_map<SubdomainID, Real> _sub_id_to_prop;
 };
+
+typedef FVPropValPerSubdomainMaterialTempl<false> FVPropValPerSubdomainMaterial;
+typedef FVPropValPerSubdomainMaterialTempl<true> FVADPropValPerSubdomainMaterial;

@@ -37,17 +37,14 @@ HeliumFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
   ADReal e = p / (_cp / _cv - 1.) / rho;
   const ADReal v = 1. / rho;
 
-  Real real_p_from_props, dp_dv, dp_de;
+  ADReal p_from_props, dp_dv, dp_de;
   const unsigned int max_its = 10;
   unsigned int it = 0;
 
   do
   {
-    p_from_v_e(v.value(), e.value(), real_p_from_props, dp_dv, dp_de);
-    ADReal p_from_props = real_p_from_props;
-    const Real jacobian = dp_de;
-    p_from_props.derivatives() = dp_de * e.derivatives() + dp_dv * v.derivatives();
-
+    p_from_v_e(v, e, p_from_props, dp_dv, dp_de);
+    const ADReal & jacobian = dp_de;
     const ADReal residual = p_from_props - p;
 
     if (std::abs(residual.value()) / p.value() < 1e-12)
@@ -66,6 +63,13 @@ Real
 HeliumFluidProperties::p_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
+  return T / (48.14 * v - 0.4446 / std::pow(T, 0.2)) * 1.0e5;
+}
+
+ADReal
+HeliumFluidProperties::p_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  const ADReal T = T_from_v_e(v, e);
   return T / (48.14 * v - 0.4446 / std::pow(T, 0.2)) * 1.0e5;
 }
 
@@ -88,7 +92,7 @@ void
 HeliumFluidProperties::p_from_v_e(
     const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
 {
-  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  p = p_from_v_e(v, e);
 
   DualReal T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
@@ -103,18 +107,21 @@ HeliumFluidProperties::p_from_v_e(
 Real
 HeliumFluidProperties::p_from_T_v(const Real T, const Real v) const
 {
+  // Formula taken from p_from_v_e method
   return T / (48.14 * v - 0.4446 / std::pow(T, 0.2)) * 1.0e5;
 }
 
 ADReal
 HeliumFluidProperties::p_from_T_v(const ADReal & T, const ADReal & v) const
 {
+  // Formula taken from p_from_v_e method
   return T / (48.14 * v - 0.4446 / std::pow(T, 0.2)) * 1.0e5;
 }
 
 Real
 HeliumFluidProperties::e_from_T_v(const Real T, const Real /*v*/) const
 {
+  // Formula taken from e_from_p_T method
   return _cv * T;
 }
 
@@ -130,6 +137,7 @@ HeliumFluidProperties::e_from_T_v(
 ADReal
 HeliumFluidProperties::e_from_T_v(const ADReal & T, const ADReal & /*v*/) const
 {
+  // Formula taken from e_from_p_T method
   return _cv * T;
 }
 
@@ -144,6 +152,12 @@ HeliumFluidProperties::e_from_T_v(
 
 Real
 HeliumFluidProperties::T_from_v_e(Real /*v*/, Real e) const
+{
+  return e / _cv;
+}
+
+ADReal
+HeliumFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & e) const
 {
   return e / _cv;
 }

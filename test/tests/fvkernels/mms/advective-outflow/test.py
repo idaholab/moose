@@ -78,6 +78,48 @@ class VanLeerLimiter(unittest.TestCase):
         for label,value in fig.label_to_slope.items():
             self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
 
+class MinModLimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 9, "FVKernels/advection_u/limiter='min_mod'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('min-mod-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+
+class SOULimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 9, "FVKernels/advection_u/limiter='sou'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('sou-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+
+class QUICKLimiter(unittest.TestCase):
+    def test(self):
+        df1 = mms.run_spatial('limited-advection.i', 15, "FVKernels/advection_u/limiter='quick'", y_pp=['L2u'])
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label=['L2u'],
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=3,
+                 slope_precision=1)
+        fig.save('quick-limiter.png')
+        for label,value in fig.label_to_slope.items():
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+
 class KTLimitedCD(unittest.TestCase):
 # class KTLimitedCD():
     def test(self):

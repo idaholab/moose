@@ -40,6 +40,15 @@ public:
   virtual Real p_from_v_e(Real v, Real e) const override;
 
   /**
+   * Pressure from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return pressure (Pa)
+   */
+  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
+
+  /**
    * Pressure and its derivatives from specific volume and specific internal energy
    *
    * @param[in] v        specific volume (m$^3$/kg)
@@ -64,6 +73,15 @@ public:
    * @return temperature (K)
    */
   virtual Real T_from_v_e(Real v, Real e) const override;
+
+  /**
+   * Temperature from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return temperature (K)
+   */
+  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
 
   /**
    * Temperature and its derivatives from specific volume and specific internal energy

@@ -23,6 +23,6 @@ static const Real epsilon = 1e-8;
 
 namespace Constants
 {
-static const Real sigma = 5.67e-8;
+static const Real sigma = 5.670374419e-8;
 }
 }

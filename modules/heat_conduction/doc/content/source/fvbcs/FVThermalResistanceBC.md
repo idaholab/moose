@@ -8,16 +8,16 @@ Heat flux boundary condition for the fluid or solid energy conservation equation
 with the fluid energy equation, this boundary condition specifies
 
 \begin{equation}
--\int_\Gamma\kappa_f\cdot\nabla T_f\cdot\hat{n}d\Gamma\ ,
+-\int_\Gamma\kappa_f \nabla T_f\cdot\hat{n}d\Gamma\ ,
 \end{equation}
 
 where
 
 \begin{equation}
--\kappa_f\cdot\nabla T_f\cdot\hat{n}=\tilde{q}\ ,
+-\kappa_f\nabla T_f\cdot\hat{n}=\tilde{q}\ ,
 \end{equation}
 
-where $\tilde{q}$ is the imposed heat flux, to be discussed shortyl.
+where $\tilde{q}$ is the imposed heat flux, to be discussed shortly.
 When used with the solid energy equation, this boundary condition specifies
 
 \begin{equation}
@@ -43,7 +43,7 @@ where $\Delta x_i$ is the thickness of each layer and $k_i$ is the thermal condu
 each layer. For cylindrical annuli, the conduction thermal resistance is computed as
 
 \begin{equation}
-R_c=\sum_{i=1}^N\frac{\ln{\left(\frac{\Delta x_i+r_i}{r_i}\right)}}{k_i}\ ,
+R_c=\sum_{i=1}^N\frac{\ln{\left(\frac{\Delta x_i+r_i}{r_i}\right)}}{2 \pi k_i}\ ,
 \end{equation}
 
 where $r_i$ is the inner radius corresponding to each layer. The inner radius of the very

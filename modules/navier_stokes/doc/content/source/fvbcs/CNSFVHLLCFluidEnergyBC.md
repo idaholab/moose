@@ -3,7 +3,7 @@
 The `CNSFVHLLCFluidEnergyBC` template class implements the fluid energy flux boundary condition for
 Harten-Lax-Van Leer-Contact (HLLC) given either specified boundary fluid energy and
 temperature functions or a
-boundary pressure function. Note that these are function corresponding to
+boundary pressure function. Note that these are functions corresponding to
 static boundary quantities as opposed to stagnation quantities. More details
 about the different template instantiations are given below.
 

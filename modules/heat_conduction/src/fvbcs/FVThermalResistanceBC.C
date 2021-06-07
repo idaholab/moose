@@ -34,7 +34,7 @@ FVThermalResistanceBC::validParams()
   params.addParam<MooseEnum>("geometry", geometry, "type of geometry");
   params.addRangeCheckedParam<Real>("inner_radius",
                                     "inner_radius > 0.0",
-                                    "coordiante corresponding to the first resistance layer");
+                                    "coordinate corresponding to the first resistance layer");
 
   params.addRangeCheckedParam<Real>(
       "step_size", 0.1, "step_size > 0.0", "underrelaxation step size");
@@ -83,7 +83,7 @@ FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
 void
 FVThermalResistanceBC::computeConductionResistance()
 {
-  ADReal r = _inner_radius;
+  Real r = _inner_radius;
 
   for (std::size_t i = 0; i < _k.size(); ++i)
   {
@@ -128,7 +128,7 @@ FVThermalResistanceBC::computeQpResidual()
   // iterate to find the approximate surface temperature needed for evaluating the
   // radiation resistance. We only do this iteration if we have radiation transfer.
   if (_emissivity > HeatConduction::DefaultValues::epsilon)
-    while (norm > _tolerance)
+    while (norm > (_tolerance * _alpha))
     {
       T_surface_previous = _T_surface;
 

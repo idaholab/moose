@@ -15,6 +15,11 @@ namespace Moose
 {
 namespace FV
 {
+
+/**
+ * Implements a limiter which reproduces a central-differencing scheme, defined by
+ * $\beta(r_f) = 1$
+ */
 class CentralDifferenceLimiter : public Limiter
 {
 public:

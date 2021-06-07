@@ -5,7 +5,7 @@
 ## Overview
 
 This object is equivalent to [FVNeumannBC.md] with the exception that the
-constant `value` parameter is is replaced by the `function` parameter.
+constant `value` parameter is replaced by the `function` parameter.
 
 !syntax parameters /FVBCs/FVFunctionNeumannBC
 

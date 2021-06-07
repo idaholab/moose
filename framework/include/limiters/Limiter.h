@@ -29,9 +29,17 @@ enum class LimiterType : int
 };
 extern const MooseEnum moose_limiter_type;
 
+/**
+ * Base class for defining slope limiters for finite volume or potentially reconstructed
+ * Discontinuous-Galerkin applications
+ */
 class Limiter
 {
 public:
+  /**
+   * Defines the slope limiter function $\beta(r_f)$ where $r_f$ represents the ratio of upstream to
+   * downstream gradients
+   */
   virtual ADReal operator()(const ADReal & r_f) const = 0;
 
   Limiter() = default;

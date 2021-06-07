@@ -15,10 +15,14 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * Implements a limiter which reproduces the QUICK scheme, defined by
+ * $\beta(r_f) = \frac{3+r_f}{4}$
+ */
 class QUICKLimiter : public Limiter
 {
 public:
-  ADReal operator()(const ADReal & r_f) const override final { return r_f; }
+  ADReal operator()(const ADReal & r_f) const override final { return (3. + r_f) / 4.; }
 
   QUICKLimiter() = default;
 };

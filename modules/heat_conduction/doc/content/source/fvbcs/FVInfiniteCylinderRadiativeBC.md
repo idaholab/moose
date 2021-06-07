@@ -19,7 +19,7 @@ $T_{\infty}$ is the temperature at infinity and the coefficient $c$ is given by
 
 where $\epsilon_b$ is the emissivity of the boundary we are on (e.g. the
 `boundary` parameter), $\epsilon_c$ is the emissivity of the theoretical
-cylinder surrounding the theoretical cylinder boundeded by our `boundary`, $r_c$
+cylinder surrounding the theoretical cylinder bounded by our `boundary`, $r_c$
 is the radius of the surrounding cylinder, and $r_b$ is the radius corresponding
 to the location of our `boundary`.
 
