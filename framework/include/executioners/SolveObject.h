@@ -24,7 +24,7 @@ class AuxiliarySystem;
 class SolveObject : public MooseObject, public PerfGraphInterface, public PostprocessorInterface
 {
 public:
-  SolveObject(Executioner * ex);
+  SolveObject(Executioner & ex);
 
   /**
    * Solve routine provided by this object.

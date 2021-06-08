@@ -948,7 +948,7 @@ SystemBase::getVector(TagID tag)
                  tag,
                  " in system '",
                  name(),
-                 "'\nbecause a vector has not been assocaited with that tag.");
+                 "'\nbecause a vector has not been associated with that tag.");
   }
 
   return *_tagged_vectors[tag];
@@ -966,7 +966,7 @@ SystemBase::getVector(TagID tag) const
                  tag,
                  " in system '",
                  name(),
-                 "'\nbecause a vector has not been assocaited with that tag.");
+                 "'\nbecause a vector has not been associated with that tag.");
   }
 
   return *_tagged_vectors[tag];
@@ -1027,7 +1027,7 @@ SystemBase::getMatrix(TagID tag)
                  tag,
                  " in system '",
                  name(),
-                 "'\nbecause a matrix has not been assocaited with that tag.");
+                 "'\nbecause a matrix has not been associated with that tag.");
   }
 
   return *_tagged_matrices[tag];
@@ -1045,7 +1045,7 @@ SystemBase::getMatrix(TagID tag) const
                  tag,
                  " in system '",
                  name(),
-                 "'\nbecause a matrix has not been assocaited with that tag.");
+                 "'\nbecause a matrix has not been associated with that tag.");
   }
 
   return *_tagged_matrices[tag];

@@ -9,17 +9,17 @@
                     },
                     "values": [
                         {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 0
+                        },
+                        {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",
                             "value": 0
                         },
                         {
                             "name": "num_nonlinear_iterations",
-                            "type": "unsigned int",
-                            "value": 0
-                        },
-                        {
-                            "name": "num_picard_iterations",
                             "type": "unsigned int",
                             "value": 0
                         },
@@ -48,17 +48,17 @@
                     },
                     "values": [
                         {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
+                        {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },
                         {
                             "name": "num_nonlinear_iterations",
-                            "type": "unsigned int",
-                            "value": 1
-                        },
-                        {
-                            "name": "num_picard_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },
@@ -87,17 +87,17 @@
                     },
                     "values": [
                         {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
+                        {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },
                         {
                             "name": "num_nonlinear_iterations",
-                            "type": "unsigned int",
-                            "value": 1
-                        },
-                        {
-                            "name": "num_picard_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },
@@ -126,17 +126,17 @@
                     },
                     "values": [
                         {
+                            "name": "num_fixed_point_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
+                        {
                             "name": "num_linear_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },
                         {
                             "name": "num_nonlinear_iterations",
-                            "type": "unsigned int",
-                            "value": 1
-                        },
-                        {
-                            "name": "num_picard_iterations",
                             "type": "unsigned int",
                             "value": 1
                         },

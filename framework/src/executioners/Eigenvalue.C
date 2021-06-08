@@ -104,7 +104,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
                "Cannot set scaling factor without defining normalization postprocessor.");
 
   // _feproblem_solve calls FEProblemBase
-  _picard_solve.setInnerSolve(_feproblem_solve);
+  _fixed_point_solve->setInnerSolve(_feproblem_solve);
   _time = _system_time;
 
   if (isParamValid("normalization"))
@@ -241,7 +241,7 @@ Eigenvalue::execute()
     // This loop is for nonlinear multigrids (developed by Alex)
     for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
     {
-      _last_solve_converged = _picard_solve.solve();
+      _last_solve_converged = _fixed_point_solve->solve();
 
       if (!lastSolveConverged())
       {

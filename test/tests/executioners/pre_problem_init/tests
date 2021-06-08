@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'RunApp'
+    input = 'pre_problem_init.i'
+    expect_out = 'TestSteady::preProblemInit\(\) is called while executing init_problem task'
+    requirement = 'The system shall allow executioners to do setups before initializing the problem.'
+    design = 'Executioner/index.md'
+    issues = '#18004'
+  []
+[]

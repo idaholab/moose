@@ -15,6 +15,7 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 #include "FEProblemSolve.h"
+#include "FixedPointSolve.h"
 #include "PicardSolve.h"
 #include "Reporter.h"
 #include "ReporterInterface.h"
@@ -50,6 +51,11 @@ public:
   virtual ~Executioner() {}
 
   static InputParameters validParams();
+
+  /**
+   * Perform initializations during executing actions right before init_problem task
+   */
+  virtual void preProblemInit() {}
 
   /**
    * Initialize the executioner
@@ -113,11 +119,28 @@ public:
   /// Return the underlining FEProblemSolve object.
   FEProblemSolve & feProblemSolve() { return _feproblem_solve; }
 
-  /// Return underlining PicardSolve object.
-  PicardSolve & picardSolve() { return _picard_solve; }
+  /// Return underlying PicardSolve object.
+  PicardSolve & picardSolve()
+  {
+    mooseDeprecated("picardSolve() is deprecated. Use FixedPointSolve() instead.");
+    if (_iteration_method == "picard")
+      return *(dynamic_cast<PicardSolve *>(_fixed_point_solve.get()));
+    else
+      mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
+  }
 
-  /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedPicardConvergenceCheck() const { return false; }
+  FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
+
+  /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
+  virtual bool augmentedPicardConvergenceCheck() const
+  {
+    mooseDeprecated(
+        "augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
+    return false;
+  }
+
+  /// Augmented fixed point iteration convergence check that to be called by PicardSolve and can be overridden by derived executioners
+  virtual bool augmentedFixedPointConvergenceCheck() const { return false; }
 
   /**
    * Get the verbose output flag
@@ -143,7 +166,9 @@ protected:
   FEProblemBase & _fe_problem;
 
   FEProblemSolve _feproblem_solve;
-  PicardSolve _picard_solve;
+
+  MooseEnum _iteration_method;
+  std::unique_ptr<FixedPointSolve> _fixed_point_solve;
 
   // Restart
   std::string _restart_file_base;

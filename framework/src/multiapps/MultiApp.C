@@ -162,19 +162,30 @@ MultiApp::validParams()
                                     "relaxation_factor>0 & relaxation_factor<2",
                                     "Fraction of newly computed value to keep."
                                     "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("relaxed_variables",
-                                            std::vector<std::string>(),
-                                            "List of variables to relax during Picard Iteration");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "relaxed_variables",
+      std::vector<std::string>(),
+      "Use transformed_variables.",
+      "List of subapp variables to relax during Multiapp coupling iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_variables",
+      std::vector<std::string>(),
+      "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
+  params.addParam<std::vector<PostprocessorName>>(
+      "transformed_postprocessors",
+      std::vector<PostprocessorName>(),
+      "List of subapp postprocessors to use coupling "
+      "algorithm on during Multiapp coupling iterations");
 
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
 
   params.addParam<bool>("keep_solution_during_restore",
                         false,
-                        "This is useful when doing Picard.  It takes the "
-                        "final solution from the previous Picard iteration"
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final solution from the previous coupling iteration"
                         "and re-uses it as the initial guess "
-                        "for the next picard iteration");
+                        "for the next coupling iteration");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -778,16 +789,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
   preRunInputFile();
   app->runInputFile();
 
-  auto & picard_solve = _apps[i]->getExecutioner()->picardSolve();
-  picard_solve.setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  picard_solve.setMultiAppRelaxationVariables(
-      getParam<std::vector<std::string>>("relaxed_variables"));
-  if (getParam<Real>("relaxation_factor") != 1.0)
-  {
-    // Store a copy of the previous solution here
-    FEProblemBase & fe_problem_base = _apps[i]->getExecutioner()->feProblem();
-    fe_problem_base.getNonlinearSystemBase().addVector("self_relax_previous", false, PARALLEL);
-  }
+  // Transfer coupling relaxation information to the subapps
+  auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
+  fixed_point_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
+  fixed_point_solve->setMultiAppTransformedVariables(
+      getParam<std::vector<std::string>>("transformed_variables"));
+  // Handle deprecated parameter
+  if (!parameters().isParamSetByAddParam("relaxed_variables"))
+    fixed_point_solve->setMultiAppTransformedVariables(
+        getParam<std::vector<std::string>>("relaxed_variables"));
+  fixed_point_solve->setMultiAppTransformedPostprocessors(
+      getParam<std::vector<PostprocessorName>>("transformed_postprocessors"));
+  fixed_point_solve->allocateStorage(false);
 }
 
 std::string

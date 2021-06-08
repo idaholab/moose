@@ -20,8 +20,8 @@ FixedPointSteady::validParams()
 }
 
 FixedPointSteady::FixedPointSteady(const InputParameters & parameters)
-  : Steady(parameters), _fixed_point(this)
+  : Steady(parameters), _fixed_point(*this)
 {
   _fixed_point.setInnerSolve(_feproblem_solve);
-  _picard_solve.setInnerSolve(_fixed_point);
+  _fixed_point_solve->setInnerSolve(_fixed_point);
 }

@@ -97,6 +97,7 @@
 #include "FVInterfaceKernel.h"
 #include "Reporter.h"
 #include "ADUtils.h"
+#include "Executioner.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -3754,7 +3755,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 
   query.condition<AttribThread>(0).queryInto(objs);
 
-  // finalize objects and retrieve/store any postproessor values
+  // finalize objects and retrieve/store any postprocessor values
   for (auto obj : objs)
   {
     if (isgen && dynamic_cast<ThreadedGeneralUserObject *>(obj))
@@ -4896,6 +4897,9 @@ FEProblemBase::init()
     return;
 
   TIME_SECTION(_init_timer);
+
+  // call executioner's preProblemInit so that it can do some setups before problem init
+  _app.getExecutioner()->preProblemInit();
 
   // If we have AD and we are doing global AD indexing, then we should by default set the matrix
   // coupling to full. If the user has told us to trust their coupling matrix, then this call will
