@@ -9,6 +9,7 @@
 | $\alpha_{\beta,L}$ | m | Longitudional dispersivity of phase $\beta$ |
 | $\alpha_{\beta,T}$ | m | Transverse dispersivity of phase $\beta$ |
 | $\alpha_{B}$ | dimensionless | Biot coefficient |
+| $\alpha_{B}'$ | dimensionless | Biot coefficient that multiplies the porepressure term in the porosity.  Usually equal to $\alpha_{B}$, but may be $\neq\alpha_{B}$ for fracture-flow |
 | $\alpha_{f}$ | K$^{-1}$ | Volumetric coefficient of thermal expansion of the fluid  |
 | $\alpha_{T}$ | K$^{-1}$ | Volumetric coefficient of thermal expansion of the drained porous skeleton (ie, the porous rock without fluid, or which a fluid that is free to move in and out of the rock) |
 | ${\mathbf b}$ | m.s$^{-2}$ | External force density acting on the porous solid.  This could be gravitational acceleration, or a load-density from a platten |
