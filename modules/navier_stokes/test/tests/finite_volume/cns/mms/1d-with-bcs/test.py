@@ -36,6 +36,19 @@ class Test1DPorousHLLC(unittest.TestCase):
             print("%s, %f" % (key, value))
             self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
 
+class Test1DVaryingEpsPorousHLLC(unittest.TestCase):
+# class Test1DVaryingEpsPorousHLLC():
+    def test(self):
+        labels = ['L2pressure', 'L2sup_mom_x', 'L2T_fluid']
+        df1 = run_spatial('varying-eps-hllc.i', 9, "--error", y_pp=labels)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('varying-eps-hllc.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
+
 class TestBasic1DPorousKTPrimitiveCD(unittest.TestCase):
 # class TestBasic1DPorousKTPrimitiveCD():
     def test(self):

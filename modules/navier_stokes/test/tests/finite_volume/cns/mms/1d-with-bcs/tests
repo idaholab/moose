@@ -10,12 +10,23 @@
     method = "!dbg"
   []
   [1d-porous-hllc]
-    type = PythonUnitTest
-    input = test.py
-    test_case = Test1DPorousHLLC
-    requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
-    required_python_packages = 'pandas matplotlib'
-    method = "!dbg"
+    requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum/velocity at one boundary and specified pressure at another boundary with'
+    [constant]
+      type = PythonUnitTest
+      input = test.py
+      test_case = Test1DPorousHLLC
+      required_python_packages = 'pandas matplotlib'
+      method = "!dbg"
+      detail = 'constant porosity'
+    []
+    [varying]
+      type = PythonUnitTest
+      input = test.py
+      test_case = Test1DVaryingEpsPorousHLLC
+      required_python_packages = 'pandas matplotlib'
+      method = "!dbg"
+      detail = 'varying porosity'
+    []
   []
   [primitive_basic_kurganov_tadmor]
     requirement = 'The system shall be able to use a primitive variable set and compute intercell fluxes using a Kurganov-Tadmor scheme'

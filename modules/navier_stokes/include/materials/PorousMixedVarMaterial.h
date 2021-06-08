@@ -61,6 +61,7 @@ protected:
 
   ADMaterialProperty<Real> & _rho;
   ADMaterialProperty<Real> & _sup_rho_dot;
+  ADMaterialProperty<RealVectorValue> & _velocity;
   ADMaterialProperty<Real> & _vel_x;
   ADMaterialProperty<Real> & _vel_y;
   ADMaterialProperty<Real> & _vel_z;
@@ -77,4 +78,6 @@ protected:
   ADMaterialProperty<Real> & _mom_z;
   ADMaterialProperty<Real> & _speed;
   ADMaterialProperty<Real> & _rho_et;
+  ADMaterialProperty<Real> & _e;
+  ADMaterialProperty<Real> & _ht;
 };

@@ -80,6 +80,7 @@ PorousMixedVarMaterial::PorousMixedVarMaterial(const InputParameters & params)
     // properties: for viz
     _rho(declareADProperty<Real>(NS::density)),
     _sup_rho_dot(declareADProperty<Real>(NS::time_deriv(NS::superficial_density))),
+    _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
     _vel_x(declareADProperty<Real>(NS::velocity_x)),
     _vel_y(declareADProperty<Real>(NS::velocity_y)),
     _vel_z(declareADProperty<Real>(NS::velocity_z)),
@@ -95,7 +96,9 @@ PorousMixedVarMaterial::PorousMixedVarMaterial(const InputParameters & params)
     _mom_y(declareADProperty<Real>(NS::momentum_y)),
     _mom_z(declareADProperty<Real>(NS::momentum_z)),
     _speed(declareADProperty<Real>(NS::speed)),
-    _rho_et(declareADProperty<Real>(NS::total_energy_density))
+    _rho_et(declareADProperty<Real>(NS::total_energy_density)),
+    _e(declareADProperty<Real>(NS::specific_internal_energy)),
+    _ht(declareADProperty<Real>(NS::specific_total_enthalpy))
 {
   if (_mesh.dimension() >= 2 && !isCoupled(NS::superficial_momentum_y))
     mooseError("You must couple in a superficial y-momentum when solving 2D or 3D problems.");
@@ -144,20 +147,20 @@ PorousMixedVarMaterial::computeQpProperties()
   const auto sup_vel_z_dot = _var_sup_mom_z_dot[_qp] / _rho[_qp] -
                              superficial_momentum(2) / (_rho[_qp] * _rho[_qp]) * rho_dot;
 
-  const auto velocity = _sup_vel[_qp] / _epsilon[_qp];
-  _vel_x[_qp] = velocity(0);
-  _vel_y[_qp] = velocity(1);
-  _vel_z[_qp] = velocity(2);
+  _velocity[_qp] = _sup_vel[_qp] / _epsilon[_qp];
+  _vel_x[_qp] = _velocity[_qp](0);
+  _vel_y[_qp] = _velocity[_qp](1);
+  _vel_z[_qp] = _velocity[_qp](2);
 
   const auto v = 1. / _rho[_qp];
   const auto v_dot = -rho_dot / (_rho[_qp] * _rho[_qp]);
-  ADReal e, de_dT, de_dv;
-  _fluid.e_from_T_v(_T_fluid[_qp], v, e, de_dT, de_dv);
+  ADReal de_dT, de_dv;
+  _fluid.e_from_T_v(_T_fluid[_qp], v, _e[_qp], de_dT, de_dv);
   const auto e_dot = de_dT * _T_fluid_dot[_qp] + de_dv * v_dot;
-  const auto et = e + velocity * velocity / 2.;
+  const auto et = _e[_qp] + _velocity[_qp] * _velocity[_qp] / 2.;
   const auto velocity_dot =
       VectorValue<ADReal>(sup_vel_x_dot, sup_vel_y_dot, sup_vel_z_dot) / _epsilon[_qp];
-  const auto et_dot = e_dot + velocity * velocity_dot;
+  const auto et_dot = e_dot + _velocity[_qp] * velocity_dot;
   _sup_rho_et_dot[_qp] = _epsilon[_qp] * (rho_dot * et + et_dot * _rho[_qp]);
 
   _mom_x[_qp] = _sup_mom_x[_qp] / _epsilon[_qp];
@@ -168,12 +171,13 @@ PorousMixedVarMaterial::computeQpProperties()
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
   // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
   // So add a bit of noise to avoid this failure mode.
-  if ((MooseUtils::absoluteFuzzyEqual(velocity(0), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(velocity(1), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(velocity(2), 0)))
+  if ((MooseUtils::absoluteFuzzyEqual(_velocity[_qp](0), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](1), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](2), 0)))
     _speed[_qp] = 1e-42;
   else
-    _speed[_qp] = velocity.norm();
+    _speed[_qp] = _velocity[_qp].norm();
 
   _rho_et[_qp] = _rho[_qp] * et;
+  _ht[_qp] = et + _pressure[_qp] / _rho[_qp];
 }
