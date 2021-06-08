@@ -16,19 +16,17 @@ The general approach to solving a [!ac](FE) simulation in parallel is to partiti
 
 The `mpiexec` command is used to execute a MOOSE-based application using [!ac](MPI). For example, the tutorial application can be executed with the following syntax, where the `-n 4` is an argument supplied to the `mpiexec` command that indicates to use 4 processors for execution:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 mpiexec -n 4 ./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i
-```
 
 In most cases, using [!ac](MPI) alone is the best coarse of action. If desired, threading may
 be enabled using the `--n-threads` option, which is supplied directly to the application executable.
 For example, the following runs the application with 4 threads:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 ./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i --n-threads=4
-```
 
 It is possible to use both [!ac](MPI) and threading. This is accomplished by combining the two
 methods described above.
@@ -80,10 +78,9 @@ ran, but with two particular command-line options: First, the performance inform
 included using the `--timing` option and second, the mesh will be uniformly refined using the `-r`
 option to make the problem large enough for analysis.
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ./babbler-opt -i pressure_diffusion.i -r 4 --timing
-```
 
 !alert warning title=Use less refinement for older hardware.
 Running this problem with 4 levels of refinement may be too much for older systems. It is still
@@ -108,7 +105,7 @@ the root processor and is roughly equivalent to the number on the other processo
 
 The performance information is presented at the end of the simulation, as demonstrated below.
 
-```bash
+```
 Performance Graph:
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 |                  Section                 | Calls |   Self(s)  |   Avg(s)   |    %   | Children(s) |   Avg(s)   |    %   |  Total(s)  |   Avg(s)   |    %   |
@@ -132,10 +129,9 @@ To test the parallel scaling of this [!ac](FE) model it can be executed with an 
 of processors. For example, the following executes the same problem with two processors. If the
 problem is scalable, then the expectation is that the +solve time+ should be twice as fast.
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 mpiexec -n 2 ./babbler-opt -i pressure_diffusion.i -r 4 --timing
-```
 
 The data presented in [scale] shows decreasing solve time as the number of processors increases.
 This problem was executed on a 2019 Mac Pro with a 2.5 GHz 28-Core Intel Xeon W. For perfect

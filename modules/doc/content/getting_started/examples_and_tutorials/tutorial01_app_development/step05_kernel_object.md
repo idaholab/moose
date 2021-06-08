@@ -66,10 +66,8 @@ where $K$ is a scalar and was substituted under the assertion that the permeabil
 
 To evaluate [darcy-weak-kernel], a new `ADKernelGrad` object can be created and it shall be called `DarcyPressure`. Start by making the directories to store files for objects that are part of the Kernels System:
 
-```bash
-cd ~/projects/babbler
-mkdir include/kernels src/kernels
-```
+!include commands/mkdir.md
+         replace=['<d>', 'include/kernels src/kernels']
 
 In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file `ADKernelGrad.h` was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
@@ -100,19 +98,18 @@ Instead of the `ADDiffusion` class, the problem model should now use `DarcyPress
 
 Now, execute the input file:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
-```
 
 ### Results id=result-demo
 
 Visualize the solution with PEACOCK and confirm that it resembles that which is shown in [results]:
 
-```bash
-cd ~/projects/babbler/problems
-~/projects/moose/python/peacock/peacock -r pressure_diffusion_out.e
-```
+!include commands/peacock_r.md
+         replace=['<d>', 'problems',
+                  'peacock', '~/projects/moose/python/peacock/peacock',
+                  '<e>', 'pressure_diffusion_out']
 
 !media tutorial01_app_development/step05_result.png
        style=width:100%;margin-left:auto;margin-right:auto;
@@ -127,17 +124,14 @@ is identical to the [previous one](tutorial01_app_development/step02_input_file.
 
 Add the two new files, `DarcyPressure.h` and `DarcyPressure.C`, to the git tracker and update the `pressure_diffusion.i` file:
 
-```bash
-cd ~/projects/babbler
-git add include/kernels/ src/kernels/ problems/pressure_diffusion.i
-```
+!include commands/git_add.md
+         replace=['*', 'include/kernels src/kernels problems/pressure_diffusion.i']
 
 Now, commit and push the changes to the remote repository:
 
-```bash
+!listing language=bash
 git commit -m "developed kernel to solve Darcy pressure and updated the problem input file"
 git push
-```
 
 !content pagination previous=tutorial01_app_development/step04_weak_form.md
                     next=tutorial01_app_development/step06_input_params.md
