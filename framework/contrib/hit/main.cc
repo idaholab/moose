@@ -1,13 +1,13 @@
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <fstream>
+#include <iostream>
 #include <map>
-#include <set>
 #include <memory>
+#include <set>
+#include <sstream>
+#include <string>
 
-#include "parse.h"
 #include "braceexpr.h"
+#include "parse.h"
 
 class Flags;
 std::vector<std::string> parseOpts(int argc, char ** argv, Flags & flags);
@@ -15,6 +15,7 @@ std::vector<std::string> parseOpts(int argc, char ** argv, Flags & flags);
 int findParam(int argc, char ** argv);
 int validate(int argc, char ** argv);
 int format(int argc, char ** argv);
+int merge(int argc, char ** argv);
 
 int
 main(int argc, char ** argv)
@@ -33,13 +34,15 @@ main(int argc, char ** argv)
     return validate(argc - 2, argv + 2);
   else if (subcmd == "format")
     return format(argc - 2, argv + 2);
+  else if (subcmd == "merge")
+    return merge(argc - 2, argv + 2);
   else if (subcmd == "braceexpr")
   {
     std::stringstream ss;
     for (std::string line; std::getline(std::cin, line);)
       ss << line << std::endl;
 
-    hit::BraceExpander expander("STDIN");
+    hit::BraceExpander expander;
     hit::EnvEvaler env;
     hit::RawEvaler raw;
     expander.registerEvaler("env", env);
@@ -131,7 +134,7 @@ parseOpts(int argc, char ** argv, Flags & flags)
 class DupParamWalker : public hit::Walker
 {
 public:
-  DupParamWalker(std::string fname) : _fname(fname) {}
+  DupParamWalker() {}
   void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
   {
     std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
@@ -142,11 +145,10 @@ public:
       if (_duplicates.count(fullpath) == 0)
       {
         errors.push_back(
-            hit::errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
+            hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
         _duplicates.insert(fullpath);
       }
-      errors.push_back(
-          hit::errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
     }
     _have[n->fullpath()] = n;
   }
@@ -154,7 +156,6 @@ public:
   std::vector<std::string> errors;
 
 private:
-  std::string _fname;
   std::set<std::string> _duplicates;
   std::map<std::string, hit::Node *> _have;
 };
@@ -199,9 +200,9 @@ findParam(int argc, char ** argv)
     if (n)
     {
       if (flags.have("f"))
-        std::cout << fname << "\n";
+        std::cout << n->filename() << "\n";
       else
-        std::cout << fname << ":" << n->line() << "\n";
+        std::cout << n->filename() << ":" << n->line() << "\n";
     }
   }
 
@@ -303,6 +304,50 @@ format(int argc, char ** argv)
 }
 
 int
+merge(int argc, char ** argv)
+{
+  Flags flags("hit merge [flags] -output outfile <file>...\n  Specify '-' as a file name to accept "
+              "input from stdin.");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
+  flags.add("output", "Output file", "");
+
+  auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help"))
+  {
+    std::cout << flags.usage();
+    return 0;
+  }
+
+  if (positional.size() < 1 || !flags.have("output"))
+  {
+    std::cout << flags.usage();
+    return 1;
+  }
+
+  std::string fname(flags.val("output"));
+  std::ofstream output(fname);
+
+  hit::Node * root = nullptr;
+  for (int i = 0; i < positional.size(); i++)
+  {
+    std::string fname(positional[i]);
+    std::istream && f =
+        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
+    std::string input(std::istreambuf_iterator<char>(f), {});
+    if (root)
+      hit::merge(hit::parse(fname, input), root);
+    else
+      root = hit::parse(fname, input);
+  }
+
+  output << root->render();
+
+  return 0;
+}
+
+int
 validate(int argc, char ** argv)
 {
   if (argc < 1)
@@ -331,7 +376,7 @@ validate(int argc, char ** argv)
       continue;
     }
 
-    DupParamWalker w(fname);
+    DupParamWalker w;
     root->walk(&w, hit::NodeType::Field);
     for (auto & msg : w.errors)
       std::cout << msg << "\n";

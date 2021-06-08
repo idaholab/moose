@@ -1,13 +1,13 @@
 #ifndef HIT_PARSE
 #define HIT_PARSE
 
-#include <string>
-#include <vector>
-#include <map>
 #include <algorithm>
-#include <typeinfo>
 #include <cstdint>
 #include <iostream>
+#include <map>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 #include "lex.h"
 
@@ -147,6 +147,9 @@ public:
   /// line returns the line number of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
   int line();
+  /// name returns the file name of the original parsed input (file) that contained the start of
+  /// the content that this node was built from.
+  const std::string & filename();
 
   /// the following functions return the stored value of the node (if any exists) of the type
   /// indicated in the function name. If the node holds a value of a different type or doesn't hold
@@ -266,6 +269,9 @@ template <>
 inline unsigned int
 Node::paramInner(Node * n)
 {
+  if (n->intVal() < 0)
+    throw Error("negative value read from file '" + n->filename() + "' on line " +
+                std::to_string(n->line()));
   return n->intVal();
 }
 template <>
@@ -299,7 +305,12 @@ Node::paramInner(Node * n)
   auto tmp = n->vecIntVal();
   std::vector<unsigned int> vec;
   for (auto val : tmp)
+  {
+    if (val < 0)
+      throw Error("negative value read from file '" + n->filename() + "' on line " +
+                  std::to_string(n->line()));
     vec.push_back(val);
+  }
   return vec;
 }
 template <>

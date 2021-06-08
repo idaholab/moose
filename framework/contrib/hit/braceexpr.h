@@ -32,6 +32,24 @@ errormsg(std::string fname, Node * n, T arg, Args... args)
   return ss.str();
 }
 
+inline std::string
+errormsg(Node * /*n*/)
+{
+  return "";
+}
+
+template <typename T, typename... Args>
+std::string
+errormsg(Node * n, T arg, Args... args)
+{
+  std::stringstream ss;
+  if (n)
+    ss << n->filename() << ":" << n->line() << ": ";
+  ss << arg;
+  ss << errormsg(nullptr, args...);
+  return ss.str();
+}
+
 class BraceNode
 {
 public:
@@ -83,14 +101,13 @@ public:
 class BraceExpander : public Walker
 {
 public:
-  BraceExpander(const std::string & fname = "") : fname(fname) {}
+  BraceExpander() {}
   void registerEvaler(const std::string & name, Evaler & ev);
   virtual void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n);
   std::string expand(Field * n, const std::string & input);
 
   std::vector<std::string> used;
   std::vector<std::string> errors;
-  std::string fname;
 
 private:
   std::string expand(Field * n, BraceNode & expr);

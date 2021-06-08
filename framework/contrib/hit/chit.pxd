@@ -21,6 +21,7 @@ cdef extern from "parse.h" namespace "hit":
         string path()
         string fullpath()
         int line()
+        const string & filename()
         string render(int indent, const string & indent_text, int maxlen)
 
         string strVal() except +
@@ -116,10 +117,11 @@ cdef extern from "lex.h" namespace "hit::TokType":
 
 cdef extern from "lex.h" namespace "hit":
     cdef cppclass Token:
-        Token(TokType t, const string & val, size_t offset, line)
+        Token(TokType t, const string & val, const string & name, size_t offset, line)
         string str()
         TokType type
         string val
+        string name
         size_t offset
         int line
 
