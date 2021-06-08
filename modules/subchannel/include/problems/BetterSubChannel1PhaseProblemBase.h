@@ -48,26 +48,27 @@ protected:
   virtual Eigen::VectorXd residualFunction(int iblock, Eigen::VectorXd solution);
   /// Computes solution of nonlinear equation using snes
   virtual PetscErrorCode
-  PETScSnesSolver(int iblock, const Eigen::VectorXd & solution, Eigen::VectorXd & root);
+  petscSnesSolver(int iblock, const Eigen::VectorXd & solution, Eigen::VectorXd & root);
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
-  Eigen::MatrixXd Wij;
-  Eigen::MatrixXd Wij_old;
-  Eigen::MatrixXd WijPrime;
+  Eigen::MatrixXd _Wij;
+  Eigen::MatrixXd _Wij_old;
+  Eigen::MatrixXd _WijPrime;
   const Real _g_grav;
-  unsigned int n_cells;
-  unsigned int n_blocks;
-  unsigned int n_gaps;
-  unsigned int block_size;
+  unsigned int _n_cells;
+  unsigned int _n_blocks;
+  unsigned int _n_gaps;
+  unsigned int _n_channels;
+  unsigned int _block_size;
   Real _one;
-  /// Flag that activates or deactivates the transient parts of the equations solved
+  /// Flag that activates or deactivates the transient parts of the equations solved by multiplication
   Real _TR;
   /// Flag that activates or deactivates the calculation of density
-  const bool _Density;
+  const bool _density;
   /// Flag that activates or deactivates the calculation of viscosity
-  const bool _Viscosity;
+  const bool _viscosity;
   /// Flag that informs where we solve the Enthalpy/Temperature equations or not
-  const bool _Power;
+  const bool _power;
   /// Time step
   const Real & _dt;
   /// Outlet Pressure
@@ -80,17 +81,17 @@ protected:
   /// Flag that indicates if uniform pressure should be applied at the subchannel inlet
   const bool & _enforce_uniform_pressure;
   const SinglePhaseFluidProperties * _fp;
-  SolutionHandle * mdot_soln;
-  SolutionHandle * SumWij_soln;
-  SolutionHandle * P_soln;
-  SolutionHandle * DP_soln;
-  SolutionHandle * h_soln;
-  SolutionHandle * T_soln;
-  SolutionHandle * rho_soln;
-  SolutionHandle * Mu_soln;
-  SolutionHandle * S_flow_soln;
-  SolutionHandle * w_perim_soln;
-  SolutionHandle * q_prime_soln;
+  SolutionHandle * _mdot_soln;
+  SolutionHandle * _SumWij_soln;
+  SolutionHandle * _P_soln;
+  SolutionHandle * _DP_soln;
+  SolutionHandle * _h_soln;
+  SolutionHandle * _T_soln;
+  SolutionHandle * _rho_soln;
+  SolutionHandle * _Mu_soln;
+  SolutionHandle * _S_flow_soln;
+  SolutionHandle * _w_perim_soln;
+  SolutionHandle * _q_prime_soln;
 
 public:
   static InputParameters validParams();
