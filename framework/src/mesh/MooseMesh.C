@@ -3230,7 +3230,7 @@ MooseMesh::buildFaceInfo() const
 
       // We want to create a face object in all of the following cases:
       //
-      //  * at all mesh boundaries (i.e. where there is no neighbor
+      //  * at all mesh boundaries (i.e. where there is no neighbor)
       //
       //  * when the following three conditions are met:
       //

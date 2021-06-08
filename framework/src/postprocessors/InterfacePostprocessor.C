@@ -28,12 +28,14 @@ InterfacePostprocessor::InterfacePostprocessor(const InputParameters & parameter
 void
 InterfacePostprocessor::initialize()
 {
+  InterfaceUserObject::initialize();
   _interface_primary_area = 0;
 }
 
 void
 InterfacePostprocessor::execute()
 {
+  InterfaceUserObject::execute();
   _interface_primary_area += _current_side_volume;
 }
 

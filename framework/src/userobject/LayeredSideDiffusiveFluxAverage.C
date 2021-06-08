@@ -37,7 +37,6 @@ LayeredSideDiffusiveFluxAverage::LayeredSideDiffusiveFluxAverage(const InputPara
 Real
 LayeredSideDiffusiveFluxAverage::computeQpIntegral()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
     // Get the face info
@@ -51,6 +50,5 @@ LayeredSideDiffusiveFluxAverage::computeQpIntegral()
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp] * grad_u * _normals[_qp]);
   }
   else
-#endif
     return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
 }

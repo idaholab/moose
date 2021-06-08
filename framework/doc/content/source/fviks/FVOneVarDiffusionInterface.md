@@ -12,6 +12,10 @@ non-orthogonal correction. The diffusion/conductivity coefficient at the
 interface is computed using linear interpolation of the `coeff1` and `coeff2`
 values. This discretization scheme is O(h) accurate.
 
+## Example input file syntax
+
+!listing test/tests/fviks/one-var-diffusion/test.i block=FVInterfaceKernels/interface
+
 !syntax parameters /FVInterfaceKernels/FVOneVarDiffusionInterface
 
 !syntax inputs /FVInterfaceKernels/FVOneVarDiffusionInterface

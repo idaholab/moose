@@ -146,10 +146,8 @@ public:
   virtual void computeElemValuesFace() override final;
   virtual void computeNeighborValuesFace() override final;
 
-  virtual void computeNeighborValues() override final
-  {
-    // mooseError("computeNeighborValues not supported by MooseVariableFVBase");
-  }
+  virtual void computeNeighborValues() override final;
+
   virtual void computeLowerDValues() override final
   {
     // mooseError("computeLowerDValues not supported by MooseVariableFVBase");

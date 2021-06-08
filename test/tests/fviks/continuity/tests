@@ -1,0 +1,12 @@
+[Tests]
+  [continuity]
+    type = Exodiff
+    issues = '#17638'
+    design = 'FVTwoVarContinuityConstraint.md'
+    requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and force the two variables living on each side of the domain to match on the interface.'
+    input = test.i
+    exodiff = 'test_out.e'
+    ad_indexing_type = 'global'
+    max_parallel = 20
+  []
+[]
