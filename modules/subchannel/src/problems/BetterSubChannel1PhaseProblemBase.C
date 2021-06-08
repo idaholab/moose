@@ -11,6 +11,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include "AuxiliarySystem.h"
+registerMooseObject("SubChannelApp", BetterSubChannel1PhaseProblemBase);
 
 struct Ctx
 {
@@ -38,7 +39,7 @@ formFunction(SNES snes, Vec x, Vec f, void * ctx)
    */
 
   /// Put x into eigen vector solution_seed
-  Eigen::VectorXd solution_seed;
+  Eigen::VectorXd solution_seed(size);
   ierr = VecGetArrayRead(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < size; i++)
@@ -209,12 +210,12 @@ BetterSubChannel1PhaseProblemBase::computeFrictionFactor(double Re)
 void
 BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
   /// Initial guess, port crossflow in block (iblock) into a vector that will act as my initial guess
   Eigen::MatrixXd solution_seed_matrix = Wij.block(0, first_node, n_gaps, block_size);
 
-  Eigen::VectorXd solution_seed;
+  Eigen::VectorXd solution_seed(n_gaps * block_size);
   for (unsigned int iz = 0; iz < block_size; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
@@ -225,7 +226,7 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
   }
 
   /// Solving the combined lateral momentum equation for Wij using a PETSc solver and returns a vector root
-  Eigen::VectorXd root;
+  Eigen::VectorXd root(n_gaps * block_size);
   PETScSnesSolver(iblock, solution_seed, root);
 
   // Assign the solution to the cross-flow matrix
@@ -243,8 +244,8 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -268,8 +269,8 @@ BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeMdot(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -307,8 +308,8 @@ BetterSubChannel1PhaseProblemBase::computeMdot(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeWijPrime(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -350,8 +351,8 @@ BetterSubChannel1PhaseProblemBase::computeWijPrime(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -432,8 +433,8 @@ BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeP(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   for (unsigned int iz = last_node; iz > first_node - 1; iz--)
   {
@@ -451,8 +452,8 @@ BetterSubChannel1PhaseProblemBase::computeP(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeh(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   if (iblock == 0)
   {
@@ -532,8 +533,8 @@ BetterSubChannel1PhaseProblemBase::computeh(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeT(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -548,8 +549,8 @@ BetterSubChannel1PhaseProblemBase::computeT(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   if (iblock == 0)
   {
@@ -574,8 +575,8 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
 void
 BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   if (iblock == 0)
   {
@@ -600,8 +601,8 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
 Eigen::VectorXd
 BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd solution)
 {
-  int last_node = (iblock + 1) * block_size;
-  int first_node = iblock * block_size + 1;
+  unsigned int last_node = (iblock + 1) * block_size;
+  unsigned int first_node = iblock * block_size + 1;
 
   Eigen::MatrixXd Wij_residual_matrix(n_gaps, block_size);
   Wij_residual_matrix.setZero();
@@ -808,13 +809,13 @@ BetterSubChannel1PhaseProblemBase::PETScSnesSolver(int iblock,
 
   ierr = SNESSolve(snes, NULL, x);
   CHKERRQ(ierr);
-  Vec f;
-  ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
-  CHKERRQ(ierr);
-  ierr = SNESGetFunction(snes, &f, 0, 0);
-  CHKERRQ(ierr);
-  ierr = VecView(r, PETSC_VIEWER_STDOUT_WORLD);
-  CHKERRQ(ierr);
+  //  Vec f;
+  //  ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+  //  CHKERRQ(ierr);
+  //  ierr = SNESGetFunction(snes, &f, 0, 0);
+  //  CHKERRQ(ierr);
+  //  ierr = VecView(r, PETSC_VIEWER_STDOUT_WORLD);
+  //  CHKERRQ(ierr);
 
   /// put x into eigen vector root and return that vector
   ierr = VecGetArray(x, &xx);
