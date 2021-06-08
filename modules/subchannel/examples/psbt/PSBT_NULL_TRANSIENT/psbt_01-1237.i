@@ -17,6 +17,15 @@ P_out = 4.923e6 # Pa
   spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
 []
 
+[UserObjects]
+  [steady_sln]
+    type = SolutionUserObject
+    mesh = psbt_01-1237_out_SS.e
+    timestep = LATEST
+    system_variables = 'mdot SumWij P DP h T rho Mu S w_perim q_prime'
+  []
+[]
+
 [AuxVariables]
   [mdot]
   []
@@ -62,6 +71,51 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
 []
 
+[Functions]
+  [mdot_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = mdot
+  []
+
+  [P_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = P
+  []
+
+  [DP_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = DP
+  []
+
+  [h_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = h
+  []
+
+  [T_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = T
+  []
+
+  [rho_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = rho
+  []
+
+  [Mu_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = Mu
+  []
+[]
+
+
 [ICs]
   [S_IC]
     type = BetterQuadFlowAreaIC
@@ -81,51 +135,45 @@ P_out = 4.923e6 # Pa
   []
 
   [T_ic]
-    type = ConstantIC
-    variable = T
-    value = ${T_in}
+  type = FunctionIC
+  variable = T
+  function = T_ic_fn
   []
 
   [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
+  type = FunctionIC
+  variable = P
+  function = P_ic_fn
   []
 
   [DP_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = DP
-    value = 0.0
+    function = DP_ic_fn
   []
 
   [Viscosity_ic]
-    type = ViscosityIC
+    type = FunctionIC
     variable = Mu
-    p = ${P_out}
-    T = T
-    fp = water
+    function = Mu_ic_fn
   []
 
   [rho_ic]
-    type = RhoFromPressureTemperatureIC
+    type = FunctionIC
     variable = rho
-    p = ${P_out}
-    T = T
-    fp = water
+    function = rho_ic_fn
   []
 
   [h_ic]
-    type = SpecificEnthalpyFromPressureTemperatureIC
+    type = FunctionIC
     variable = h
-    p = ${P_out}
-    T = T
-    fp = water
+    function = h_ic_fn
   []
 
   [mdot_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = mdot
-    value = 0.0
+    function = mdot_ic_fn
   []
 []
 
@@ -152,30 +200,33 @@ P_out = 4.923e6 # Pa
   [Temp_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = T
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "Temp_Out.txt"
     height = 3.658
   []
   [mdot_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_Out.txt"
     height = 3.658
   []
   [mdot_In_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_In.txt"
     height = 0.0
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   nl_rel_tol = 0.9
   l_tol = 0.9
+  start_time = 0.0
+  end_time = 0.2
+  dt = 0.1
 []
 
 ################################################################################
