@@ -11,31 +11,25 @@
 
 #include "FVTimeKernel.h"
 
-/**
- * Kernel providing the time derivative term in the solid energy equation,
- * with strong form $(1-\epsilon)C_{p,s}\frac{\partial T_s}{\partial t}$.
- */
-class PNSFVSolidEnergyTime : public FVTimeKernel
+class PNSFVEnergyTimeDerivative : public FVTimeKernel
 {
 public:
-  PNSFVSolidEnergyTime(const InputParameters & parameters);
   static InputParameters validParams();
+  PNSFVEnergyTimeDerivative(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// Porosity
-  const MaterialProperty<Real> & _eps;
-
+  /// the density
+  const ADMaterialProperty<Real> & _rho;
+  /// the heat conductivity
+  const ADMaterialProperty<Real> & _cp;
+  /// the porosity
+  const VariableValue & _eps;
+  /// whether this kernel is being used for a solid or a fluid temperature
+  const bool _is_solid;
   /// scales the value of the kernel, used for faster steady state during pseudo transient
-  const Real & _scaling;
-
+  const Real _scaling;
   /// whether a zero scaling factor has been specifed
   const bool _zero_scaling;
-
-  /// Solid density
-  const ADMaterialProperty<Real> * const _rho_s;
-
-  /// Solid isobaric specific heat
-  const ADMaterialProperty<Real> * const _cp_s;
 };

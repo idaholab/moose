@@ -26,7 +26,6 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// porosity
-  // const VariableValue & _eps;
   const MaterialProperty<Real> * const _eps;
 
   /// The pressure on the elem

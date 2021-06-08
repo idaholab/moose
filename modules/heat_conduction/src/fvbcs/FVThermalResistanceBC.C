@@ -127,7 +127,7 @@ FVThermalResistanceBC::computeQpResidual()
 
   // iterate to find the approximate surface temperature needed for evaluating the
   // radiation resistance. We only do this iteration if we have radiation transfer.
-  if (_emissivity > HeatConduction::DefaultValues::epsilon)
+  if (_emissivity > 1e-8)
     while (norm > (_tolerance * _alpha))
     {
       T_surface_previous = _T_surface;

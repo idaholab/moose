@@ -12,6 +12,10 @@
 #include "PCNSFVHLLCSpecifiedMassFluxAndTemperatureBC.h"
 #include "PCNSFVHLLCSpecifiedPressureBC.h"
 
+/**
+ * Template class for implementing the advective flux in the porous conservation of fluid energy
+ * equation at boundaries when using a HLLC discretization
+ */
 template <typename T>
 class PCNSFVHLLCFluidEnergyBC : public T
 {

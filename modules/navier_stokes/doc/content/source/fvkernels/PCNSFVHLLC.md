@@ -29,7 +29,6 @@ part of a source vector $\bm{S}$). Then we define our conserved variable set
 
 and our flux vector
 
-
 \begin{equation}
 \bm{F} =
 \begin{bmatrix}

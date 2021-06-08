@@ -66,6 +66,7 @@ static const std::string specific_volume = "specific_volume";
 static const std::string momentum = "momentum";
 static const std::string v = "v";
 static const std::string acceleration = "acceleration";
+
 static const std::string fluid = "fp";
 
 // for Navier-Stokes material props representing gradients of nonlin+aux vars
@@ -139,8 +140,6 @@ static const std::string mass_flux = "mass_flux";
 
 namespace NS_DEFAULT_VALUES
 {
-using namespace HeatConduction::DefaultValues;
-
 static const Real infinite_porosity = 0.4;
 static const int bed_axis = 2;
 static const Real wall_porosity = 1.0;
@@ -151,7 +150,7 @@ static const Real vel_epsilon = 1e-8;
 static const RealVectorValue center(0.0, 0.0, 0.0);
 static const RealVectorValue acceleration(0.0, 0.0, 0.0);
 
-// assumed that the bed is not annular unless otherwise specified
+// assumed that the RZ geometry is not annular unless otherwise specified
 static const Real inner_radius = 0.0;
 }
 

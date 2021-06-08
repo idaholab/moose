@@ -14,7 +14,7 @@
 class Function;
 
 /**
- * HLLC implicit boundary conditions
+ * HLLC pressure boundary conditions for the momentum conservation equation
  */
 class CNSFVHLLCMomentumSpecifiedPressureBC : public CNSFVHLLCMomentumImplicitBC
 {

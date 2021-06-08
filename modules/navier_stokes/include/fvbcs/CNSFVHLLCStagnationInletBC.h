@@ -12,7 +12,7 @@
 #include "CNSFVHLLCBC.h"
 
 /**
- * HLLC stagnation boundary conditions
+ * Base class for the HLLC stagnation inlet boundary conditions
  */
 class CNSFVHLLCStagnationInletBC : public CNSFVHLLCBC
 {

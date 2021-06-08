@@ -14,7 +14,7 @@
 // Forward Declarations
 
 /**
- * Computes h_min / |u|
+ * Computes |u| dt / h_min
  */
 class Courant : public AuxKernel
 {

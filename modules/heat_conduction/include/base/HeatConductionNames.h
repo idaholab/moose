@@ -16,11 +16,6 @@ namespace HeatConduction
 static const std::string emissivity = "emissivity";
 static const std::string T_ambient = "T_ambient";
 
-namespace DefaultValues
-{
-static const Real epsilon = 1e-8;
-}
-
 namespace Constants
 {
 static const Real sigma = 5.670374419e-8;

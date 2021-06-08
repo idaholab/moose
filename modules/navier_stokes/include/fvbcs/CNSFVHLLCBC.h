@@ -17,7 +17,7 @@ class SinglePhaseFluidProperties;
 /**
  * Base clase for HLLC boundary condition for Euler equation
  */
-class CNSFVHLLCBC : public CNSFVHLLCBCBase // Kernel
+class CNSFVHLLCBC : public CNSFVHLLCBCBase
 {
 public:
   CNSFVHLLCBC(const InputParameters & parameters);

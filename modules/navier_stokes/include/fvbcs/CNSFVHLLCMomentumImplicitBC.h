@@ -12,7 +12,7 @@
 #include "CNSFVHLLCImplicitBC.h"
 
 /**
- * HLLC implicit boundary conditions
+ * HLLC implicit boundary conditions for the momentum conservation equation
  */
 class CNSFVHLLCMomentumImplicitBC : public CNSFVHLLCImplicitBC
 {

@@ -3,7 +3,7 @@
 The `PCNSFVHLLCMassBC` template class implements the mass flux boundary condition for
 porous Harten-Lax-Van Leer-Contact (HLLC) given either specified boundary momentum and
 temperature functions or a
-boundary pressure function. Note that these are function corresponding to
+boundary pressure function. Note that these are functions corresponding to
 static boundary quantities as opposed to stagnation quantities. More details
 about the different template instantiations are given below.
 

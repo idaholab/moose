@@ -60,53 +60,7 @@ $\alpha$ and $\omega$. $\omega$ is given by
 \end{cases}
 \end{equation}
 
-We will now discuss computation of $\bm{\Psi}_{f\pm}$ ($\phi_{f\pm}$ is computed
-in an identical way). To be clear about notation: the equations that follow will
-have a lot of $\pm$ and $\mp$. When computing the "top" quantity (e.g. $+$ for
-$\pm$) we select the "top" quantities throughout the equation, e.g. we select $+$
-for $\pm$ and $-$ for $\mp$. Similarly, when computing "bottom" quantities we select the
-"bottom" quantities throughout the equation. We will also have a series of "ors"
-in the text. In general left of "or" will be for "top" quantities and right of
-"or" will be for "bottom" quantities.
-
-Interpolation of advected quantities proceeds as follows:
-
-\begin{equation}
-\bm{\Psi}_{f\pm} = \left(1 - g_{f\pm}\right)\bm{\Psi}_{\pm} +
-g_{f\pm}\bm{\Psi}_{\mp}
-\end{equation}
-
-where $\bm{\Psi}_{\pm}$ denotes the $+$ or $-$ cell centroid value of the
-interpolated quantity and
-
-\begin{equation}
-g_{f\pm} = \beta\left(r_{\pm}\right)\left(1 - w_{f\pm}\right)
-\end{equation}
-
-where $\beta\left(r_{\pm}\right)$ represents a flux limiter function and
-
-\begin{equation}
-w_{f\pm} = \vert \bm{d}_{f\mp}\vert/\vert \bm{d}_{\pm}\vert
-\end{equation}
-
-where $\bm{d}_{f-}$ is the norm of the distance from the face to the $-$ or $+$
-cell centroid and $\bm{d}_{\pm}$ is the norm of the distance from the $+$ to $-$
-or $-$ to $+$
-cell centroids.
-
-The flux limiter function takes different forms. For example the min-mod limiter
-is expressed as $\beta_{\text{min-mod}}\left(r\right) = \text{max}\left(0,\
-\text{min}\left(1,\ r\right)\right)$. $r_{\pm}$ is computed as follows
-
-\begin{equation}
-r_{\pm} = 2 \frac{\bm{d}_{\pm}\cdot\left(\nabla
-\bm{\Psi}\right)_{\pm}}{\left(\nabla_d \bm{\Psi}\right)_{f\pm}} - 1
-\end{equation}
-
-where $\left(\nabla \bm{\Psi}\right)_{\pm}$ corresponds to the $+$ or $-$ cell
-centroid gradient and $\left(\nabla_d \bm{\Psi}\right)_{f\pm} =
-\bm{\Psi}_{\mp} - \bm{\Psi}_{\pm}$. A list and summary of the limiters available
-in MOOSE can be found [here](Limiters/index.md).
+Interpolation of $\bm{\Psi}_{f\pm}$ is described in [Limiters/index.md].
 
 !syntax parameters /FVKernels/PCNSFVKT
 

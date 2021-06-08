@@ -30,7 +30,7 @@ convective flux:
 \end{bmatrix}
 \end{equation}
 
-where $a_n = \bm{a}\hat{n}$ where $\bm{a} = \lbrace u, v, w\rbrace$ and
+where $a_n = \bm{a}\cdot\hat{n}$ where $\bm{a} = \lbrace u, v, w\rbrace$ and
 $\hat{n}$ is the normal vector at the face. $n_x$, $n_y$, and $n_z$ represent
 the $x$, $y$, and $z$ components of the normal vector respectively, while $u$,
 $v$, and $w$ represent the $x$, $y$, and $z$ components of the velocity $\bm{a}$

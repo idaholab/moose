@@ -12,6 +12,10 @@
 #include "CNSFVHLLCSpecifiedMassFluxAndTemperatureBC.h"
 #include "CNSFVHLLCSpecifiedPressureBC.h"
 
+/**
+ * Template class for implementing the advective flux plus pressure terms in the conservation of
+ * momentum equation at boundaries when using a HLLC discretization
+ */
 template <typename T>
 class CNSFVHLLCMomentumBC : public T
 {

@@ -12,7 +12,7 @@
 #include "CNSFVHLLCStagnationInletBC.h"
 
 /**
- * HLLC stagnation inlet boundary conditions
+ * HLLC stagnation inlet boundary conditions for the momentum conservation equation
  */
 class CNSFVHLLCMomentumStagnationInletBC : public CNSFVHLLCStagnationInletBC
 {

@@ -13,6 +13,11 @@
 
 class Function;
 
+/**
+ * Base class for specifying boundary advective fluxes for conservation of mass, momentum, and fluid
+ * energy equations when using an HLLC discretization and when mass fluxes and temperature are
+ * specified
+ */
 class CNSFVHLLCSpecifiedMassFluxAndTemperatureBC : public CNSFVHLLCBC
 {
 public:

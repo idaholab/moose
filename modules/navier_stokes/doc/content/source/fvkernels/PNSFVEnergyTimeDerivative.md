@@ -1,11 +1,11 @@
-# PINSFVEnergyTimeDerivative
+# PNSFVEnergyTimeDerivative
 
 ## Description
 
 This kernel implements a time derivative for the domain $\Omega$ given by
 
 \begin{equation}
-\underbrace{\epsilon \rho c_{pf} \frac{\partial T_f}{\partial t}}_{\textrm{PINSFVEnergyTimeDerivative}}
+\underbrace{\epsilon \rho c_{pf} \frac{\partial T_f}{\partial t}}_{\textrm{PNSFVEnergyTimeDerivative}}
 \end{equation}
 for the fluid phase and
 \begin{equation}
@@ -15,8 +15,8 @@ for the solid phase, where $\epsilon$ is the porosity, $\rho_{f/s}$ the fluid/so
 
 The variation of the kinetic energy is not considered in this kernel.
 
-!syntax parameters /FVKernels/PINSFVEnergyTimeDerivative
+!syntax parameters /FVKernels/PNSFVEnergyTimeDerivative
 
-!syntax inputs /FVKernels/PINSFVEnergyTimeDerivative
+!syntax inputs /FVKernels/PNSFVEnergyTimeDerivative
 
-!syntax children /FVKernels/PINSFVEnergyTimeDerivative
+!syntax children /FVKernels/PNSFVEnergyTimeDerivative

@@ -9,21 +9,18 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
 class SinglePhaseFluidProperties;
 
-class GeneralFluidProps;
-
-declareADValidParams(GeneralFluidProps);
-
 /**
  * Computes fluid properties in (P, T) formulation.
  */
-class GeneralFluidProps : public DerivativeMaterialInterface<ADMaterial>
+class GeneralFluidProps : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
   GeneralFluidProps(const InputParameters & parameters);
 
 protected:
@@ -117,5 +114,5 @@ protected:
   ADMaterialProperty<Real> & _Re_i;
 
   using UserObjectInterface::getUserObject;
-  using DerivativeMaterialInterface<ADMaterial>::declarePropertyDerivative;
+  using DerivativeMaterialInterface<Material>::declarePropertyDerivative;
 };

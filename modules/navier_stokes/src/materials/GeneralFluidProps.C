@@ -12,80 +12,81 @@
 #include "DimensionlessFlowNumbers.h"
 #include "NavierStokesMethods.h"
 #include "SinglePhaseFluidProperties.h"
-#include "InputErrorChecking.h"
 
-namespace nms = NS;
+registerMooseObject("NavierStokesApp", GeneralFluidProps);
 
-registerADMooseObject("NavierStokesApp", GeneralFluidProps);
+InputParameters
+GeneralFluidProps::validParams()
+{
+  auto params = Material::validParams();
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
+  params.addClassDescription("Computes fluid properties using (P, T) formulation");
 
-defineADValidParams(
-    GeneralFluidProps,
-    ADMaterial,
-    params.addRequiredParam<UserObjectName>(nms::fluid, "Fluid userobject");
-    params.addClassDescription("Computes fluid properties using (P, T) formulation");
-
-    params.addRequiredCoupledVar(nms::porosity, "porosity");
-    params.addRangeCheckedParam<Real>(nms::pebble_diameter,
-                                      nms::pebble_diameter + " > 0.0 ",
-                                      "Pebble diameter");
-    params.addRangeCheckedParam<Real>("characteristic_length",
-                                      "characteristic_length > 0.0 ",
-                                      "characteristic length for Reynolds number calculation"););
+  params.addRequiredCoupledVar(NS::porosity, "porosity");
+  params.addRangeCheckedParam<Real>(
+      NS::pebble_diameter, NS::pebble_diameter + " > 0.0 ", "Pebble diameter");
+  params.addRangeCheckedParam<Real>("characteristic_length",
+                                    "characteristic_length > 0.0 ",
+                                    "characteristic length for Reynolds number calculation");
+  return params;
+}
 
 GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ADMaterial>(parameters),
-    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
-    _eps(coupledValue(nms::porosity)),
+  : DerivativeMaterialInterface<Material>(parameters),
+    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _eps(coupledValue(NS::porosity)),
 
-    _pressure(getADMaterialProperty<Real>(nms::pressure)),
-    _rhoE(getADMaterialProperty<Real>(nms::total_energy_density)),
-    _T_fluid(getADMaterialProperty<Real>(nms::T_fluid)),
-    _rho(getADMaterialProperty<Real>(nms::density)),
-    _speed(getADMaterialProperty<Real>(nms::speed)),
+    _pressure(getADMaterialProperty<Real>(NS::pressure)),
+    _rhoE(getADMaterialProperty<Real>(NS::total_energy_density)),
+    _T_fluid(getADMaterialProperty<Real>(NS::T_fluid)),
+    _rho(getADMaterialProperty<Real>(NS::density)),
+    _speed(getADMaterialProperty<Real>(NS::speed)),
 
-    _drho_dp(declarePropertyDerivative<Real>(nms::density, nms::pressure)),
-    _drho_dT(declarePropertyDerivative<Real>(nms::density, nms::T_fluid)),
+    _drho_dp(declarePropertyDerivative<Real>(NS::density, NS::pressure)),
+    _drho_dT(declarePropertyDerivative<Real>(NS::density, NS::T_fluid)),
 
-    _cp(declareADProperty<Real>(nms::cp)),
-    _dcp_dp(declarePropertyDerivative<Real>(nms::cp, nms::pressure)),
-    _dcp_dT(declarePropertyDerivative<Real>(nms::cp, nms::T_fluid)),
+    _cp(declareADProperty<Real>(NS::cp)),
+    _dcp_dp(declarePropertyDerivative<Real>(NS::cp, NS::pressure)),
+    _dcp_dT(declarePropertyDerivative<Real>(NS::cp, NS::T_fluid)),
 
-    _cv(declareADProperty<Real>(nms::cv)),
+    _cv(declareADProperty<Real>(NS::cv)),
 
-    _mu(declareADProperty<Real>(nms::mu)),
-    _dmu_dp(declarePropertyDerivative<Real>(nms::mu, nms::pressure)),
-    _dmu_dT(declarePropertyDerivative<Real>(nms::mu, nms::T_fluid)),
+    _mu(declareADProperty<Real>(NS::mu)),
+    _dmu_dp(declarePropertyDerivative<Real>(NS::mu, NS::pressure)),
+    _dmu_dT(declarePropertyDerivative<Real>(NS::mu, NS::T_fluid)),
 
-    _k(declareADProperty<Real>(nms::k)),
-    _dk_dp(declarePropertyDerivative<Real>(nms::k, nms::pressure)),
-    _dk_dT(declarePropertyDerivative<Real>(nms::k, nms::T_fluid)),
+    _k(declareADProperty<Real>(NS::k)),
+    _dk_dp(declarePropertyDerivative<Real>(NS::k, NS::pressure)),
+    _dk_dT(declarePropertyDerivative<Real>(NS::k, NS::T_fluid)),
 
-    _Pr(declareADProperty<Real>(nms::Prandtl)),
-    _dPr_dp(declarePropertyDerivative<Real>(nms::Prandtl, nms::pressure)),
-    _dPr_dT(declarePropertyDerivative<Real>(nms::Prandtl, nms::T_fluid)),
+    _Pr(declareADProperty<Real>(NS::Prandtl)),
+    _dPr_dp(declarePropertyDerivative<Real>(NS::Prandtl, NS::pressure)),
+    _dPr_dT(declarePropertyDerivative<Real>(NS::Prandtl, NS::T_fluid)),
 
-    _Re(declareADProperty<Real>(nms::Reynolds)),
-    _dRe_dp(declarePropertyDerivative<Real>(nms::Reynolds, nms::pressure)),
-    _dRe_dT(declarePropertyDerivative<Real>(nms::Reynolds, nms::T_fluid)),
+    _Re(declareADProperty<Real>(NS::Reynolds)),
+    _dRe_dp(declarePropertyDerivative<Real>(NS::Reynolds, NS::pressure)),
+    _dRe_dT(declarePropertyDerivative<Real>(NS::Reynolds, NS::T_fluid)),
 
-    _Re_h(declareADProperty<Real>(nms::Reynolds_hydraulic)),
-    _Re_i(declareADProperty<Real>(nms::Reynolds_interstitial))
+    _Re_h(declareADProperty<Real>(NS::Reynolds_hydraulic)),
+    _Re_i(declareADProperty<Real>(NS::Reynolds_interstitial))
 {
   if (parameters.isParamSetByUser("characteristic_length"))
   {
     _d = getParam<Real>("characteristic_length");
-    checkUnusedInputParameter(
-        parameters, nms::pebble_diameter, "When specifying a characteristic length");
+    if (parameters.isParamSetByUser(NS::pebble_diameter))
+      paramWarning(NS::pebble_diameter,
+                   "'",
+                   NS::pebble_diameter,
+                   "' is unused when the 'characteristic_length' parameter is also specified.");
   }
   else
   {
-    if (parameters.isParamSetByUser(nms::pebble_diameter))
-      _d = getParam<Real>(nms::pebble_diameter);
+    if (parameters.isParamSetByUser(NS::pebble_diameter))
+      _d = getParam<Real>(NS::pebble_diameter);
     else
-      errorMessage(parameters,
-                   "A 'characteristic_length' must be specified for computing "
-                   "the Reynolds number. For pebble bed systems, you can specify '" +
-                       nms::pebble_diameter + "'.");
+      mooseError("Either the 'characteristic_length' or '",
+                 NS::pebble_diameter,
+                 "' parameter must be specified");
   }
 }
 
@@ -108,7 +109,9 @@ GeneralFluidProps::computeQpProperties()
   _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, _dmu_dp[_qp], _dmu_dT[_qp]);
   _fluid.k_from_p_T(raw_pressure, raw_T_fluid, dummy, _dk_dp[_qp], _dk_dT[_qp]);
 
-  _Pr[_qp] = fp::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], NS_DEFAULT_VALUES::epsilon));
+  static constexpr Real small_number = 1e-8;
+
+  _Pr[_qp] = fp::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], small_number));
   _dPr_dp[_qp] = prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
                                            MetaPhysicL::raw_value(_cp[_qp]),
                                            MetaPhysicL::raw_value(_k[_qp]),
@@ -126,9 +129,7 @@ GeneralFluidProps::computeQpProperties()
   // pebble diameter. Only call Reynolds() one time to compute all three so that
   // we don't redundantly check that viscosity is not too close to zero.
   _Re[_qp] = std::max(
-      fp::reynolds(
-          _rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], NS_DEFAULT_VALUES::epsilon)),
-      1.0);
+      fp::reynolds(_rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)), 1.0);
   _dRe_dp[_qp] = reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
                                             MetaPhysicL::raw_value(_rho[_qp]),
                                             MetaPhysicL::raw_value(_mu[_qp]),
@@ -141,7 +142,7 @@ GeneralFluidProps::computeQpProperties()
                                             _dmu_dT[_qp]);
 
   // (hydraulic) Reynolds number
-  _Re_h[_qp] = _Re[_qp] / std::max(1 - _eps[_qp], NS_DEFAULT_VALUES::epsilon);
+  _Re_h[_qp] = _Re[_qp] / std::max(1 - _eps[_qp], small_number);
 
   // (interstitial) Reynolds number
   _Re_i[_qp] = _Re[_qp] / _eps[_qp];
