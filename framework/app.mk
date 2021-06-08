@@ -460,7 +460,7 @@ $(binlink): all install_$(APPLICATION_NAME)_tests
 install_$(APPLICATION_NAME)_docs:
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
-	@cd $(docs_dir) && ./moosedocs.py build --destination $(docs_install_dir)
+	@if [ -f "$(docs_dir)/moosedocs.py" ]; then cd $(docs_dir) && ./moosedocs.py build --destination $(docs_install_dir); fi
 
 $(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing $<"
