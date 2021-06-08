@@ -14,9 +14,8 @@ Every `MooseObject` includes a set of custom parameters within a single [`InputP
 
 When coding a `validParams()` function, it is customary to declare a `params` variable and initialize it with the `validParams()` output from the base class, e.g.,
 
-```C++
+!listing language=C++
 InputParameters params = ADKernelGrad::validParams();
-```
 
 This initialization means that the parameters for the given `MooseObject` always includes those which are defined for the base class. These parameters provide standard usability for inherited classes, e.g., `"variable"`, `"block"`, or `"boundary"`.
 
@@ -30,15 +29,13 @@ The first item appended to `params` should be an `addClassDescription()` object,
 
 There are many more methods available to `InputParameters` objects. All of which provide different strategies to lend, or limit, user-control over an object's construction. One of the most basic is `addRequiredParam()`. This can be used to define parameters that *must* be set by a user:
 
-```C++
+!listing language=C++
 params.addRequiredParam<T>("name", "description");
-```
 
 where `T` is the required data type of the input, e.g., `Real`, `std::vector<Real>`, or `std::string`. Another basic method is `addParam()`, which can be used to define optional parameters:
 
-```C++
+!listing language=C++
 params.addParam<T>("name", value, "description");
-```
 
 where `value` is the default value set for the parameter if one is not specified in the input file.
 
@@ -107,37 +104,32 @@ The properties in [darcy-weak] can now be specified in the input file. However, 
 
 Now, execute the input file:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
-```
 
 ### Results id=result-demo
 
 Run the following commands to visualize the solution with PEACOCK:
 
-```bash
-cd ~/projects/babbler/problems
-peacock -r pressure_diffusion_out.e
-```
+!include commands/peacock_r.md
+         replace=['<d>', 'problems',
+                  '<e>', 'pressure_diffusion_out']
 
 Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [application_usage/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
 
 ### Commit id=commit-demo
 
-Add the changes made for `DarcyPressure.C` and `pressure_diffusion.i`:
+Add the changes made to the `DarcyPressure` object files and `pressure_diffusion.i`:
 
-```bash
-cd ~/projects/babbler
-git add src/kernels/DarcyPressure.C problems/pressure_diffusion.i
-```
+!include commands/git_add.md
+         replace=['*', 'include/kernels/DarcyPressure.h src/kernels/DarcyPressure.C problems/pressure_diffusion.i']
 
 Now, commit and push the changes to the remote repository:
 
-```bash
+!listing language=bash
 git commit -m 'defined "permeability" and "viscosity" input parameters'
 git push
-```
 
 !content pagination previous=tutorial01_app_development/step05_kernel_object.md
                     next=tutorial01_app_development/step07_parallel.md

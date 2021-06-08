@@ -54,10 +54,8 @@ Since the pressure vessel model uses $d = d_{s} = 1 \, \text{mm}$, `pressure_dif
 
 To produce the material property term in [darcy-weak], a new `ADMaterial` object can be created and it shall be called `PackedColumn`: a name intended to depict a coarse filter medium in a slender tube. Start by making the directories to store files for objects that are part of the Materials System:
 
-```bash
-cd ~/projects/babbler
-mkdir include/materials src/materials
-```
+!include commands/mkdir.md
+         replace=['<d>', 'include/materials src/materials']
 
 In `include/materials`, create a file name `PackedColumn.h` and add the code given in [pc-header]. Here, the header file for the base class was included so that it can be inherited. In addition, [`LinearInterpolation.h`](framework/include/utils/LinearInterpolation.h) was included so that an object of the `LinearInterpolation` class---a member of the [framework_development/utils/index.md] System in MOOSE---can be made to evaluate [permeability]. The `validParams()` and constructor methods were the first members declared, as is typical, and the `computeQpProperties()` method from the base class was overridden. Two variables, `_diameter` and `_input_viscosity`, were declared to store the values input for $d$ and $\mu$, respectively. The former of these two variables will need to be passed to a `LinearInterpolation` object, in order to obtain $K$, so `_permeability_interpolation` was declared for this purpose. Finally, two `ADMaterialProperty` variables were declared and will, ultimately, become available to other MOOSE objects that need them.
 
@@ -100,9 +98,8 @@ Be sure to recompile the application before proceeding:
 
 An input file specialized to test the `PackedColumn` class is in order. Start by creating a directory to store the test files:
 
-!listing language=bash
-cd ~/projects/babbler
-mkdir test/tests/materials/packed_column
+!include commands/mkdir.md
+         replace=['<d>', 'test/tests/materials/packed_column']
 
 In this folder, create a file named `packed_column_test.i` and add the inputs given in [pc-test]. In the `[filter]` block, a `PackedColumn` object is created with a `"viscosity"` input that is trivial for testing purposes as its value goes directly to the property reference. However, for the `"diameter"` input, the median value of the domain ($d = 2$) was selected because this obviously corresponds to the median value of the range ($K = 4.907 \times 10^{-9}$) and, therefore, can be verified in such terms. Outputs were requested for both properties by means which were discussed in the [#out-props] section, where the format will be an ExodusII file so that an `Exodiff` tester may reference it.
 
@@ -138,9 +135,9 @@ Perhaps we could make a new alert brand: !alert exercise, !alert task, e.g., but
 
 Use PEACOCK to query the `"permeability"` and `"viscosity"` outputs from `packed_column_test.i` on each element:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/materials/packed_column
-peacock -r packed_column_test_out.e
+!include commands/peacock_r.md
+         replace=['<d>', 'test/tests/materials/packed_column',
+                  '<e>', 'packed_column_test_out']
 
 In the ExodusViewer tab, the property values can be resolved by referring to the color bar (enabling the "View Mesh" checkbox might help with interpreting the image). Verify that the values match the expected ones and note that, since neither property was made spatially dependent, the `PackedColumn` object assigned the same number to all [!ac](QPs) and the contours render as a solid color. These results are illustrated in [results].
 
@@ -153,10 +150,9 @@ In the ExodusViewer tab, the property values can be resolved by referring to the
 
 Since the results of the `packed_column_test.i` input file have been deemed good, the ExodusII output can now become a certified gold file:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/materials/packed_column
-mkdir gold
-mv packed_colum_test_out.e gold
+!include commands/new_gold.md
+         replace=['<d>', 'materials/packed_column',
+                  '<e>', 'packed_colum_test_out']
 
 Next, create a file named `tests` in `test/tests/materials/packed_column` and add the inputs given in [pc-test-spec].
 
@@ -190,9 +186,7 @@ Ran 3 tests in 0.4 seconds. Average test time 0.1 seconds, maximum test time 0.1
 
 There are many changes to add to the git tracker here, but a wildcard can help simplify the command:
 
-!listing language=bash
-cd ~/projects/babbler
-git add *
+!include commands/git_add.md
 
 Disregard the warning about `.gitignore` files. Now, commit and push the changes to the remote repository:
 

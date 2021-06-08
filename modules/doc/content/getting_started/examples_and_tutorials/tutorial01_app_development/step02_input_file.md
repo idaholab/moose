@@ -44,17 +44,15 @@ There are a several ways to execute an input file---a couple of which shall be e
 
 The most basic way to execute an input file is from a terminal. To do this, a user may navigate to the directory where their input file is stored and then pass it to the executable with the `-i` argument. For example, the input file for the application's default test may be executed as follows:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/test/tests/kernels/simple_diffusion
 ../../../../babbler-opt -i simple_diffusion.i
-```
 
 The input file could also be executed relative to the application's root directory:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 ./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i
-```
 
 The application will run the [!ac](FE) simulation and populate the directory with all of the requested outputs, e.g., ExodusII or comma delimited files. Here, a file called `simple_diffusion_out.e` should have been created. As mentioned in [Helpful Software](getting_started/new_users.md#helpful-software), this file can be opened to visualize results of the solution with [ParaView](https://www.paraview.org) or Peacock (the MOOSE in-house [!ac](GUI)).
 
@@ -62,10 +60,9 @@ The application will run the [!ac](FE) simulation and populate the directory wit
 
 Peacock provides a second way to execute an input file. To demonstrate this, run the following commands:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/test/tests/kernels/simple_diffusion
 ~/projects/moose/python/peacock/peacock -i simple_diffusion.i
-```
 
 This will open the Peacock window and display the mesh used for the [simple diffusion test](tutorial01_app_development/step01_moose_app.md#test). To execute the input file, click on the "Execute" tab and then click "Run". Once the solve completes, click on the "ExodusViewer" tab to view the results.
 
@@ -88,10 +85,8 @@ satisfies the following [!ac](BVP): $u = 4000 \, \textrm{Pa}$ at the inlet (left
 
 In this section, the setup of an input file to model the steady-state diffusion of pressure over the length of the pipe will be detailed. To begin, create a directory named "problems:"
 
-```bash
-cd ~/projects/babbler
-mkdir problems
-```
+!include commands/mkdir.md
+         replace=['<d>', 'problems']
 
 Next, use a [text editor](getting_started/new_users.md#helpful-software) to create a file named `pressure_diffusion.i` in the `problems` directory. This file is where the block-structured ([!ac](HIT)) format will be used to setup the inputs needed to solve the given [!ac](BVP).
 
@@ -155,17 +150,16 @@ There are a lot of ways to control the solution when using the `Steady` class (o
 In [#execute],
 some ways in which to execute and visualize the results of an input file were discussed. These methods should be reviewed to find a preferred means of interacting with the application. As a reminder, the [`pressure_diffusion.i`](#input-demo) file can be exectued from the terminal by entering the following:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
-```
 
 If the input file was ran from the terminal, and the `pressure_diffusion_out.e` file exists, the results can be rendered in Peacock by running the following commands:
 
-```bash
-cd ~/projects/babbler/problems
-~/projects/moose/python/peacock/peacock -r pressure_diffusion_out.e
-```
+!include commands/peacock_r.md
+         replace=['<d>', 'problems',
+                  'peacock', '~/projects/moose/python/peacock/peacock',
+                  '<e>', 'pressure_diffusion_out']
 
 After running the above commands, the Peacock window opens to the "ExodusViewer" tab and a result which resembles that shown in [results] will be displayed.
 
@@ -180,41 +174,39 @@ Notice that the [!ac](FEM) solution depicted in [results] satisfies the boundary
 
 A GitHub repository to store the new MOOSE-based application was created as part of the [previous step](tutorial01_app_development/step01_moose_app.md#repo) of this tutorial. The repository should also contain the first commit to the `origin` remote (the online copy). Now that a new file exists in the local repository, i.e., `problems/pressure_diffusion.i`, and since this input file has been verified to produce good results, it should be committed and pushed to the remote. Before proceeding, inspect the status of the local repository as it compares to the `HEAD`, which denotes the version that existed following the most recent commit:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 git status
-```
 
 The terminal output should read something like the following:
 
-```git
+!listing! language=git
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
 
 	problems/
 
 nothing added to commit but untracked files present (use "git add" to track)
-```
+!listing-end!
 
 This indicates that a new directory `problems` has not been staged, and that there may or may not be more unstaged files in that directory. Of course, in this case, there are. Proceed with the instructions provided in the output for adding the new files and then reinspect the status of the local repository:
 
-```bash
+!listing language=bash
 git add problems
 git status
-```
 
 Now, the terminal output should be the following:
 
-```git
+!listing! language=git
 Changes to be committed:
   (use "git reset HEAD <file>..." to unstage)
 
 	new file:   problems/pressure_diffusion.i
-```
+!listing-end!
 
 To commit these changes, simply enter `git commit`. A user will then be prompted to enter a message describing the changes. For this change, the message added might be "created an input file to solve diffusion problem," as shown in the example below.
 
-```git
+!listing! language=git
 created an input file to solve diffusion problem
 # Please enter the commit message for your changes. Lines starting
 # with '#' will be ignored, and an empty message aborts the commit.
@@ -225,7 +217,7 @@ created an input file to solve diffusion problem
 # Changes to be committed:
 #       new file:   problems/pressure_diffusion.i
 #
-```
+!listing-end!
 
 After exiting the `git commit` prompt, simply enter `git push` to update the `origin` remote. The remote repository on `github.com/YourGitHubUserName/babbler` can be inspected to confirm that the changes have been published.
 

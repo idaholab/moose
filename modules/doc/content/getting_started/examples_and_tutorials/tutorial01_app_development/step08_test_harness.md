@@ -87,9 +87,8 @@ The simple diffusion test is a great example of a regression test that is simple
 
 Start by creating a directory to store test files related to the `DarcyPressure` class:
 
-!listing language=bash
-cd ~/projects/babbler
-mkdir test/tests/kernels/darcy_pressure
+!include commands/mkdir.md
+         replace=['<d>', 'test/tests/kernels/darcy_pressure']
 
 In this folder, create a file named `darcy_pressure_test.i` and add the inputs given in [darcy-kernel-test]. Here, the value input for the permeability is that for the 1 mm steel sphere medium and the viscosity is left as the default value $\mu_{f}$. The `"exodus"` parameter was set to `true` in the `[Outputs]` block so that an `Exodiff` object can reference the output file.
 
@@ -121,9 +120,9 @@ cd ~/projects/babbler/test/tests/kernels/darcy_pressure
 
 Visualize the results of the `darcy_pressure_test.i` input file with PEACOCK:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/kernels/darcy_pressure
-peacock -r darcy_pressure_test_out.e
+!include commands/peacock_r.md
+         replace=['<d>', 'test/tests/kernels/darcy_pressure',
+                  '<e>', 'darcy_pressure_test_out']
 
 Confirm that the solution resembles that which is shown in [results]. Notice that the solution satisfies the BVP: $p(0, y) = 0$ and $p(1, y) = 1$, $\forall \, y \in [0, 1]$. Also, notice that the solution directly maps to the spatial coordinates along the $x$-direction as expected. This result is clearly indicated by the contour colors displayed by [results]. Thus, one may declare that the solution is good and, therefore, that the `DarcyPressure` class is functioning properly.
 
@@ -136,10 +135,9 @@ Confirm that the solution resembles that which is shown in [results]. Notice tha
 
 Since the results of the `darcy_pressure_test.i` input file have been deemed good, the ExodusII output can now become a certified gold file:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/kernels/darcy_pressure
-mkdir gold
-mv darcy_pressure_test_out.e gold
+!include commands/new_gold.md
+         replace=['<d>', 'kernels/darcy_pressure',
+                  '<e>', 'darcy_pressure_test_out']
 
 Next, create a file named `tests` in `test/tests/kernels/darcy_pressure` and add the inputs given in [darcy-test-spec]. The first test is defined in the `[test]` block, which creates an `Exodiff` object that will attempt to match the output from `darcy_pressure_test.i` to the gold file just created. The second test is defined in the `[zero_viscosity_error]` block, which creates a `RunException` object that attempts to match the error message incurred by `zero_viscosity_error.i` to the string specified for the `expect_err` parameter.
 
@@ -168,9 +166,8 @@ Ran 3 tests in 0.4 seconds. Average test time 0.1 seconds, maximum test time 0.1
 
 Update the `DarcyPressure.C` file and add all of the new test files to the git tracker:
 
-!listing language=bash
-cd ~/projects/babbler
-git add src/kernels/DarcyPressure.C test/tests/kernels/darcy_pressure/
+!include commands/git_add.md
+         replace=['*', 'src/kernels/DarcyPressure.C test/tests/kernels/darcy_pressure']
 
 Now, commit and push the changes to the remote repository:
 
