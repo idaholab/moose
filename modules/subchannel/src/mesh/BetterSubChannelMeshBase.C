@@ -29,7 +29,7 @@ BetterSubChannelMeshBase::BetterSubChannelMeshBase(const InputParameters & param
 {
   _z_grid.push_back(0.0);
   Real _dz = _heated_length / _n_cells;
-  for (int i = 0; i < _n_cells; i++)
+  for (unsigned int i = 0; i < _n_cells; i++)
     _z_grid.push_back(_z_grid.back() + _dz);
 }
 
