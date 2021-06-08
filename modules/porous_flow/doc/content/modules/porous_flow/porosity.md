@@ -44,10 +44,21 @@ M = \sum_{\mathrm{minerals}}w_{\mathrm{mineral}} C_{\mathrm{mineral}} \ ,
 where $w$ is the user-defined weight for each mineral and $C$ is the concentration (m$^{3}$/m$^{3}$)
 of precipitated mineral.
 
+It is sometimes convenient to extend [eq:phi_dog] to include a new Biot coefficient, $\alpha_{B}'$:
+\begin{equation}
+\label{eq:phi_dog_prime}
+\frac{\partial}{\partial t}(\phi + M) = (\alpha_{B} -
+(\phi + M))\frac{\partial}{\partial t}
+\left(\epsilon^{\mathrm{total}}_{ii} - \alpha_{T} T +
+\frac{1-\alpha_{B}'}{K}
+P_{\mathrm{f}} \right) \ .
+\end{equation}
+This form is useful when modelling flow through fractures, where the porosity *increases* with porepressure, which can be simulated with $\alpha_{B}'>1$.
+
 The equation for porosity has solution
 \begin{equation}
 \label{eq:poro_evolve}
-\phi + M = \alpha_{B} + (\phi_{0} + M_{\mathrm{ref}} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
+\phi + M = \alpha_{B} + (\phi_{0} + M_{\mathrm{ref}} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}'
   - 1}{K}(P_{f} - P_{f}^{\mathrm{ref}}) - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ ,
 \end{equation}
 where $\phi_{0}$ is the porosity at reference porepressure, zero elastic strain, reference

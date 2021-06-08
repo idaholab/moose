@@ -1,13 +1,14 @@
 # Test that porosity is correctly calculated.
-# Porosity = biot + (phi0 - biot) * exp(-vol_strain + (biot - 1) / solid_bulk * (porepressure - ref_pressure))
+# Porosity = biot + (phi0 - biot) * exp(-vol_strain + (biot_prime - 1) / solid_bulk * (porepressure - ref_pressure))
 # The parameters used are:
 # biot = 0.7
+# biot_prime = 0.75
 # phi0 = 0.5
 # vol_strain = 0.5
 # solid_bulk = 0.3
 # porepressure = 2
 # ref_pressure = 3
-# which yield porosity = 0.370255745860
+# which yield porosity = 0.420877515
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -125,6 +126,7 @@
     porosity_zero = 0.5
     solid_bulk = 0.3
     reference_porepressure = 3
+    biot_coefficient_prime = 0.75
   []
 []
 

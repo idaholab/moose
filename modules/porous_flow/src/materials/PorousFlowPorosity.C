@@ -32,6 +32,10 @@ PorousFlowPorosity::validParams()
                         "skeleton (only used if thermal=true)");
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
+  params.addParam<Real>("biot_coefficient_prime",
+                        "Biot coefficient that appears in the term (biot_coefficient_prime - 1) * "
+                        "(P - reference_porepressure) / solid_bulk.  If not provided, this "
+                        "defaults to the standard biot_coefficient");
   params.addRangeCheckedParam<Real>(
       "solid_bulk",
       "solid_bulk>0",
@@ -69,7 +73,9 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
                                                        : 0.0),
     _solid_bulk(isParamValid("solid_bulk") ? getParam<Real>("solid_bulk")
                                            : std::numeric_limits<Real>::max()),
-    _coeff((_biot - 1.0) / _solid_bulk),
+    _coeff(isParamValid("biot_coefficient_prime")
+               ? (getParam<Real>("biot_coefficient_prime") - 1.0) / _solid_bulk
+               : (_biot - 1.0) / _solid_bulk),
 
     _t_reference(_nodal_material ? coupledDofValues("reference_temperature")
                                  : coupledValue("reference_temperature")),
