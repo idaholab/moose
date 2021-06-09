@@ -1,5 +1,7 @@
 #include "CFLTimeStepSize.h"
 
+#ifndef NS_HAS_CFL_TIME_STEP_SIZE
+
 #include <algorithm>
 #include <limits>
 
@@ -85,3 +87,5 @@ CFLTimeStepSize::execute()
     }
   }
 }
+
+#endif
