@@ -20,7 +20,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Documentation
 
-[Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html)
+[Doxygen](http://www.mooseframework.org/docs/doxygen/moose/classes.html)
 
 [Source Code Documentation](source/index.md exact=True)
 
@@ -32,7 +32,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Build Status (internal)](https://moosebuild.hpc.inl.gov)
 
-[Code Coverage](http://mooseframework.com/docs/coverage/moose/)
+[Code Coverage](http://mooseframework.org/docs/coverage/moose/)
 
 [Test Timing](http://mooseframework.org/docs/timing/)
 
