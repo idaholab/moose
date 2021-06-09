@@ -19,6 +19,9 @@ class FaceInfo;
 class HLLCUserObject;
 class SinglePhaseFluidProperties;
 
+/**
+ * Helper structure for holding data necessary for computing HLLC fluxes
+ */
 struct HLLCData
 {
   /// fluid properties
@@ -40,6 +43,10 @@ struct HLLCData
   ///@}
 };
 
+/**
+ * Base class for both HLLC inter-cell flux kernels and boundary conditions. This class holds the
+ * method that computes the wave speeds necessary for HLLC flux determination
+ */
 class CNSFVHLLCBase : public FVFluxKernel
 {
 public:

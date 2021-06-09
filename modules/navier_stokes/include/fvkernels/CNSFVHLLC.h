@@ -11,6 +11,11 @@
 
 #include "CNSFVHLLCBase.h"
 
+/**
+ * Base class for HLLC inter-cell flux kernels. This class defines the interfaces necessary to
+ * complete the definition of the HLLC fluxes in derived mass, momentum, and fluid energy classes.
+ * It also selects the HLLC flux computation branch based on the wave speeds
+ */
 class CNSFVHLLC : public CNSFVHLLCBase
 {
 public:

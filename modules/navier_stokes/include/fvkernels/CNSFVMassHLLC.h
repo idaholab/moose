@@ -11,6 +11,9 @@
 
 #include "CNSFVHLLC.h"
 
+/**
+ * Implements the advective flux in the conservation of mass equation using a HLLC discretization
+ */
 class CNSFVMassHLLC : public CNSFVHLLC
 {
 public:

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Navier-Stokes includes
-#include "ADCFLTimeStepSize.h"
+#include "NSCFLTimeStepSize.h"
 
 // MOOSE includes
 #include "libmesh/quadrature.h"
@@ -17,10 +17,12 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("NavierStokesApp", CFLTimeStepSize);
 registerMooseObject("NavierStokesApp", ADCFLTimeStepSize);
 
+template <bool is_ad>
 InputParameters
-ADCFLTimeStepSize::validParams()
+CFLTimeStepSizeTempl<is_ad>::validParams()
 {
   InputParameters params = ElementPostprocessor::validParams();
 
@@ -40,7 +42,8 @@ ADCFLTimeStepSize::validParams()
   return params;
 }
 
-ADCFLTimeStepSize::ADCFLTimeStepSize(const InputParameters & parameters)
+template <bool is_ad>
+CFLTimeStepSizeTempl<is_ad>::CFLTimeStepSizeTempl(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
     _CFL(getParam<Real>("CFL")),
     _vel_names(getParam<std::vector<MaterialPropertyName>>("vel_names")),
@@ -53,35 +56,39 @@ ADCFLTimeStepSize::ADCFLTimeStepSize(const InputParameters & parameters)
 
   for (unsigned int k = 0; k < _n_phases; ++k)
   {
-    _vel.push_back(&getADMaterialPropertyByName<Real>(_vel_names[k]));
-    _c.push_back(&getADMaterialPropertyByName<Real>(_c_names[k]));
+    _vel.push_back(&getGenericMaterialPropertyByName<Real, is_ad>(_vel_names[k]));
+    _c.push_back(&getGenericMaterialPropertyByName<Real, is_ad>(_c_names[k]));
   }
 }
 
+template <bool is_ad>
 void
-ADCFLTimeStepSize::initialize()
+CFLTimeStepSizeTempl<is_ad>::initialize()
 {
   // start with the max
   _dt = std::numeric_limits<Real>::max();
 }
 
+template <bool is_ad>
 Real
-ADCFLTimeStepSize::getValue()
+CFLTimeStepSizeTempl<is_ad>::getValue()
 {
   gatherMin(_dt);
   return _dt;
 }
 
+template <bool is_ad>
 void
-ADCFLTimeStepSize::threadJoin(const UserObject & y)
+CFLTimeStepSizeTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  const ADCFLTimeStepSize & pps = static_cast<const ADCFLTimeStepSize &>(y);
+  const CFLTimeStepSizeTempl<is_ad> & pps = static_cast<const CFLTimeStepSizeTempl<is_ad> &>(y);
 
   _dt = std::min(_dt, pps._dt);
 }
 
+template <bool is_ad>
 void
-ADCFLTimeStepSize::execute()
+CFLTimeStepSizeTempl<is_ad>::execute()
 {
   // get minimum element diameter for element
   const Real h_min_element = _current_elem->hmin();

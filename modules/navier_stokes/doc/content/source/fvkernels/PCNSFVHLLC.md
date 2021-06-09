@@ -139,15 +139,15 @@ below.
 ## Porous HLLC Fluxes
 
 For discontinuous wave solutions over a wave-speed $S_i$ associated with the
-$\lambda_i$ characteric, the Rankine-Hugoniot conditions state that the flux
-changes acoording to
+$\lambda_i$ characteristic, the Rankine-Hugoniot conditions state that the flux
+changes according to
 
 \begin{equation}
 \Delta \bm{F} = S_i\Delta \bm{U}
 \end{equation}
 
 We can apply the Rankine-Hugoniot conditions to help us establish a
-discretization for the porous HLLC fluxes. Applying Rankine-Hunoniot conditions
+discretization for the porous HLLC fluxes. Applying Rankine-Hugoniot conditions
 over the left wave results in
 
 \begin{equation}

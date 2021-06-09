@@ -11,6 +11,10 @@
 
 #include "PCNSFVHLLC.h"
 
+/**
+ * Implements the advective flux and the pressure terms in the porous conservation of momentum
+ * equation using a HLLC discretization
+ */
 class PCNSFVMomentumHLLC : public PCNSFVHLLC
 {
 public:

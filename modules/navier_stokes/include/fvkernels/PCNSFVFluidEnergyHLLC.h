@@ -11,6 +11,10 @@
 
 #include "PCNSFVHLLC.h"
 
+/**
+ * Implements the advective flux in the porous conservation of fluid energy equation using a HLLC
+ * discretization
+ */
 class PCNSFVFluidEnergyHLLC : public PCNSFVHLLC
 {
 public:

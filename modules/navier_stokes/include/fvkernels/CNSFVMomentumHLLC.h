@@ -11,6 +11,10 @@
 
 #include "CNSFVHLLC.h"
 
+/**
+ * Implements the advective flux and the pressure terms in the conservation of momentum equation
+ * using a HLLC discretization
+ */
 class CNSFVMomentumHLLC : public CNSFVHLLC
 {
 public:

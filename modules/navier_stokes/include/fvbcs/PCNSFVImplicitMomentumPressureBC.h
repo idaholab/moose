@@ -11,6 +11,12 @@
 
 #include "FVFluxBC.h"
 
+/**
+ * Computes an implicit boundary flux for the term \f$n_i \epsilon p\f$ where \f$i\f$ denotes the
+ * conservation of momentum component equation that this object is acting on (represented by \p
+ * _index). This object is useful for wall boundaries where the momentum advective flux is zero and
+ * consequently the pressure term is not included in other \p FVFluxBCs
+ */
 class PCNSFVImplicitMomentumPressureBC : public FVFluxBC
 {
 public:

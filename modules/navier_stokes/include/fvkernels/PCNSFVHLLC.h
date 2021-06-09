@@ -14,6 +14,12 @@
 class HLLCUserObject;
 class SinglePhaseFluidProperties;
 
+/**
+ * Base class for porous HLLC inter-cell flux kernels. This class defines the interfaces necessary
+ * to complete the definition of the porous HLLC fluxes in derived mass, momentum, and fluid energy
+ * classes. It also selects the HLLC flux computation branch based on the wave speeds, whose
+ * computation is defined in this class
+ */
 class PCNSFVHLLC : public FVFluxKernel
 {
 public:

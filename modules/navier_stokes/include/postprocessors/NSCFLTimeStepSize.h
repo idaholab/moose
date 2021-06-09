@@ -15,10 +15,11 @@
 /**
  * Computes a time step size based on user-specified CFL number
  */
-class ADCFLTimeStepSize : public ElementPostprocessor
+template <bool is_ad>
+class CFLTimeStepSizeTempl : public ElementPostprocessor
 {
 public:
-  ADCFLTimeStepSize(const InputParameters & parameters);
+  CFLTimeStepSizeTempl(const InputParameters & parameters);
 
   virtual void execute() override;
 
@@ -39,9 +40,9 @@ protected:
   const unsigned int _n_phases;
 
   /// Velocity material properties
-  std::vector<const ADMaterialProperty<Real> *> _vel;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _vel;
   /// Sound speed material properties
-  std::vector<const ADMaterialProperty<Real> *> _c;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _c;
 
   /// Time step size
   Real _dt;
@@ -49,3 +50,6 @@ protected:
 public:
   static InputParameters validParams();
 };
+
+typedef CFLTimeStepSizeTempl<false> CFLTimeStepSize;
+typedef CFLTimeStepSizeTempl<true> ADCFLTimeStepSize;

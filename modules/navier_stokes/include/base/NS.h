@@ -158,3 +158,5 @@ namespace NS_CONSTANTS
 {
 using namespace HeatConduction::Constants;
 }
+
+#define NS_HAS_CFL_TIME_STEP_SIZE 1

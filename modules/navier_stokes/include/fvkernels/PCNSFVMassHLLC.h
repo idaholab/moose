@@ -11,6 +11,10 @@
 
 #include "PCNSFVHLLC.h"
 
+/**
+ * Implements the advective flux in the porous conservation of mass equation using a HLLC
+ * discretization
+ */
 class PCNSFVMassHLLC : public PCNSFVHLLC
 {
 public:

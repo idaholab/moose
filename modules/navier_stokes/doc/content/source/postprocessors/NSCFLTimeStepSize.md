@@ -1,6 +1,6 @@
-# ADCFLTimeStepSize
+# CFLTimeStepSize
 
-!syntax description /Postprocessors/ADCFLTimeStepSize
+!syntax description /Postprocessors/CFLTimeStepSize
 
 ## Overview
 
@@ -17,8 +17,8 @@ where $h_{min}$ is the minimum element side length, $a_k$ is the fluid speed for
 the $k\text{-th}$ phase and $c_k$ is the speed of sound in the $k\text{-th}$
 phase.
 
-!syntax parameters /Postprocessors/ADCFLTimeStepSize
+!syntax parameters /Postprocessors/CFLTimeStepSize
 
-!syntax inputs /Postprocessors/ADCFLTimeStepSize
+!syntax inputs /Postprocessors/CFLTimeStepSize
 
-!syntax children /Postprocessors/ADCFLTimeStepSize
+!syntax children /Postprocessors/CFLTimeStepSize

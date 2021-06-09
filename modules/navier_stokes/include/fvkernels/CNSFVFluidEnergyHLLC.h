@@ -11,6 +11,10 @@
 
 #include "CNSFVHLLC.h"
 
+/**
+ * Implements the advective flux in the conservation of fluid energy equation using a HLLC
+ * discretization
+ */
 class CNSFVFluidEnergyHLLC : public CNSFVHLLC
 {
 public:
