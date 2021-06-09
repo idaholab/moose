@@ -28,6 +28,9 @@
 #ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
 #include "FunctionalExpansionToolsApp.h"
 #endif
+#ifdef GEOCHEMISTRY_ENABLED
+#include "GeochemistryApp.h"
+#endif
 #ifdef HEAT_CONDUCTION_ENABLED
 #include "HeatConductionApp.h"
 #endif
@@ -344,6 +347,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef FSI_ENABLED
   FsiApp::registerAll(f, af, s);
+#endif
+
+#ifdef GEOCHEMISTRY_ENABLED
+  GeochemistryApp::registerAll(f, af, s);
 #endif
 
 #ifdef HEAT_CONDUCTION_ENABLED
