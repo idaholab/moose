@@ -5,16 +5,16 @@
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
 
-class BetterSubChannel1PhaseProblemBase;
+class BetterSubChannel1PhaseProblem;
 
 /**
  * Base class for the 1-phase steady state sub channel solver.
  */
-class BetterSubChannel1PhaseProblemBase : public ExternalProblem
+class BetterSubChannel1PhaseProblem : public ExternalProblem
 {
 public:
-  BetterSubChannel1PhaseProblemBase(const InputParameters & params);
-  virtual ~BetterSubChannel1PhaseProblemBase();
+  BetterSubChannel1PhaseProblem(const InputParameters & params);
+  virtual ~BetterSubChannel1PhaseProblem();
 
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction direction) override;
@@ -64,11 +64,11 @@ protected:
   /// Flag that activates or deactivates the transient parts of the equations solved by multiplication
   Real _TR;
   /// Flag that activates or deactivates the calculation of density
-  const bool _density;
+  const bool _compute_density;
   /// Flag that activates or deactivates the calculation of viscosity
-  const bool _viscosity;
+  const bool _compute_viscosity;
   /// Flag that informs where we solve the Enthalpy/Temperature equations or not
-  const bool _power;
+  const bool _compute_power;
   /// Time step
   const Real & _dt;
   /// Outlet Pressure
@@ -88,7 +88,7 @@ protected:
   SolutionHandle * _h_soln;
   SolutionHandle * _T_soln;
   SolutionHandle * _rho_soln;
-  SolutionHandle * _Mu_soln;
+  SolutionHandle * _mu_soln;
   SolutionHandle * _S_flow_soln;
   SolutionHandle * _w_perim_soln;
   SolutionHandle * _q_prime_soln;

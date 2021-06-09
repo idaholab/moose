@@ -32,7 +32,7 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [Mu]
+  [mu]
   []
   [S]
   []
@@ -51,14 +51,14 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = BetterSubChannel1PhaseProblemBase
+  type = BetterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 1.8
   enforce_uniform_pressure = false
-  Density = true
-  Viscosity = true
-  Power = true
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
   P_out = ${P_out}
 []
 
@@ -100,7 +100,7 @@ P_out = 4.923e6 # Pa
 
   [Viscosity_ic]
     type = ViscosityIC
-    variable = Mu
+    variable = mu
     p = ${P_out}
     T = T
     fp = water

@@ -115,12 +115,11 @@ BetterQuadPowerIC::value(const Point & p)
 {
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
-  // Determine which subchannel this point is in.
   auto idx = _mesh.getSubchannelIndexFromPoint(p);
   unsigned int i = idx % nx;
   unsigned int j = idx / nx;
   // Compute and return the estimated channel axial heat rate per channel
-  // Corners contact 1/4 of a  one pin
+  // Corners contact 1/4 of one pin
   if (i == 0 && j == 0)
     return 0.25 * _ref_qprime(j, i) * _pin_power_correction(j, i) * _axial_heat_rate.value(_t, p);
   else if (i == 0 && j == ny - 1)
