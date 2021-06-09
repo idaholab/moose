@@ -65,9 +65,9 @@ P_out = 4.923e6 # Pa
   beta = 0.006
   CT = 1.8
   enforce_uniform_pressure = false
-  Density = true
-  Viscosity = true
-  Power = true
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
   P_out = ${P_out}
 []
 
@@ -135,15 +135,15 @@ P_out = 4.923e6 # Pa
   []
 
   [T_ic]
-  type = FunctionIC
-  variable = T
-  function = T_ic_fn
+    type = FunctionIC
+    variable = T
+    function = T_ic_fn
   []
 
   [P_ic]
-  type = FunctionIC
-  variable = P
-  function = P_ic_fn
+    type = FunctionIC
+    variable = P
+    function = P_ic_fn
   []
 
   [DP_ic]
@@ -264,11 +264,11 @@ P_out = 4.923e6 # Pa
     variable = P
   []
   [xfer_DP]
-  type = MultiAppNearestNodeTransfer
-  multi_app = prettyMesh
-  direction = to_multiapp
-  source_variable = DP
-  variable = DP
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = DP
+    variable = DP
   []
   [xfer_h]
     type = MultiAppNearestNodeTransfer

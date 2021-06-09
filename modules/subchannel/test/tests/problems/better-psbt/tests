@@ -1,5 +1,5 @@
 [Tests]
-  [Better-PSBT]
+  [better-psbt]
     type = Exodiff
     input = psbt.i
     exodiff = psbt_out.e

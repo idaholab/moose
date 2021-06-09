@@ -20,13 +20,13 @@ protected:
   std::string _filename;
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
-  /// average linear heat rate over the whole pin in W/m
+  /// Average linear heat rate over the whole pin [W/m]
   Eigen::MatrixXd _ref_qprime;
-  /// actual pin power in W
+  /// Actual pin power [W]
   Eigen::MatrixXd _ref_power;
-  /// its the correction that will be applied to the estimated calculation [unitless]
+  /// The correction that will be applied to the estimated calculation [unitless]
   Eigen::MatrixXd _pin_power_correction;
-  /// its a matrix which will hold the total estimated power of each pin [W]
+  /// Matrix which will hold the total estimated power of each pin [W]
   Eigen::MatrixXd _estimate_power;
 
 public:

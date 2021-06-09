@@ -28,9 +28,9 @@ BetterSubChannelMeshBase::BetterSubChannelMeshBase(const InputParameters & param
     _n_blocks(getParam<unsigned int>("n_blocks"))
 {
   _z_grid.push_back(0.0);
-  Real _dz = _heated_length / _n_cells;
+  Real dz = _heated_length / _n_cells;
   for (unsigned int i = 0; i < _n_cells; i++)
-    _z_grid.push_back(_z_grid.back() + _dz);
+    _z_grid.push_back(_z_grid.back() + dz);
 }
 
 BetterSubChannelMeshBase::BetterSubChannelMeshBase(const BetterSubChannelMeshBase & other_mesh)

@@ -1,4 +1,4 @@
-#include "BetterSubChannel1PhaseProblemBase.h"
+#include "BetterSubChannel1PhaseProblem.h"
 #include "SystemBase.h"
 #include "libmesh/petsc_vector.h"
 #include <petscdm.h>
@@ -11,12 +11,12 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include "AuxiliarySystem.h"
-registerMooseObject("SubChannelApp", BetterSubChannel1PhaseProblemBase);
+registerMooseObject("SubChannelApp", BetterSubChannel1PhaseProblem);
 
 struct Ctx
 {
   int iblock;
-  BetterSubChannel1PhaseProblemBase * schp;
+  BetterSubChannel1PhaseProblem * schp;
 };
 
 PetscErrorCode
@@ -67,7 +67,7 @@ formFunction(SNES snes, Vec x, Vec f, void * ctx)
 }
 
 InputParameters
-BetterSubChannel1PhaseProblemBase::validParams()
+BetterSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<Real>("beta",
@@ -75,23 +75,25 @@ BetterSubChannel1PhaseProblemBase::validParams()
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addRequiredParam<bool>("enforce_uniform_pressure",
                                 "Flag that enables uniform inlet pressure");
-  params.addRequiredParam<bool>("Density", "Flag that enables the calculation of density");
-  params.addRequiredParam<bool>("Viscosity", "Flag that enables the calculation of viscosity");
+  params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
+  params.addRequiredParam<bool>("compute_viscosity",
+                                "Flag that enables the calculation of viscosity");
   params.addRequiredParam<bool>(
-      "Power", "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
+      "compute_power",
+      "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
   params.addRequiredParam<Real>("P_out", "Outlet Pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
 
-BetterSubChannel1PhaseProblemBase::BetterSubChannel1PhaseProblemBase(const InputParameters & params)
+BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     _g_grav(9.87),
     _one(1.0),
     _TR(isTransient() ? 1. : 0.),
-    _density(getParam<bool>("Density")),
-    _viscosity(getParam<bool>("Viscosity")),
-    _power(getParam<bool>("Power")),
+    _compute_density(getParam<bool>("compute_density")),
+    _compute_viscosity(getParam<bool>("compute_viscosity")),
+    _compute_power(getParam<bool>("compute_power")),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
     _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
@@ -115,7 +117,7 @@ BetterSubChannel1PhaseProblemBase::BetterSubChannel1PhaseProblemBase(const Input
 }
 
 void
-BetterSubChannel1PhaseProblemBase::initialSetup()
+BetterSubChannel1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
   // Read in Wij for null transient only at the first run of externalSolve
@@ -155,13 +157,13 @@ BetterSubChannel1PhaseProblemBase::initialSetup()
   _h_soln = new SolutionHandle(getVariable(0, "h"));
   _T_soln = new SolutionHandle(getVariable(0, "T"));
   _rho_soln = new SolutionHandle(getVariable(0, "rho"));
-  _Mu_soln = new SolutionHandle(getVariable(0, "Mu"));
+  _mu_soln = new SolutionHandle(getVariable(0, "mu"));
   _S_flow_soln = new SolutionHandle(getVariable(0, "S"));
   _w_perim_soln = new SolutionHandle(getVariable(0, "w_perim"));
   _q_prime_soln = new SolutionHandle(getVariable(0, "q_prime"));
 }
 
-BetterSubChannel1PhaseProblemBase::~BetterSubChannel1PhaseProblemBase()
+BetterSubChannel1PhaseProblem::~BetterSubChannel1PhaseProblem()
 {
   delete _mdot_soln;
   delete _SumWij_soln;
@@ -170,20 +172,20 @@ BetterSubChannel1PhaseProblemBase::~BetterSubChannel1PhaseProblemBase()
   delete _h_soln;
   delete _T_soln;
   delete _rho_soln;
-  delete _Mu_soln;
+  delete _mu_soln;
   delete _S_flow_soln;
   delete _w_perim_soln;
   delete _q_prime_soln;
 }
 
 bool
-BetterSubChannel1PhaseProblemBase::converged()
+BetterSubChannel1PhaseProblem::converged()
 {
   return true;
 }
 
 double
-BetterSubChannel1PhaseProblemBase::computeFrictionFactor(double Re)
+BetterSubChannel1PhaseProblem::computeFrictionFactor(double Re)
 {
   double a, b;
   if (Re < 1)
@@ -209,7 +211,7 @@ BetterSubChannel1PhaseProblemBase::computeFrictionFactor(double Re)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
+BetterSubChannel1PhaseProblem::computeWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -243,7 +245,7 @@ BetterSubChannel1PhaseProblemBase::computeWij(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
+BetterSubChannel1PhaseProblem::computeSumWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -268,7 +270,7 @@ BetterSubChannel1PhaseProblemBase::computeSumWij(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeMdot(int iblock)
+BetterSubChannel1PhaseProblem::computeMdot(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -307,7 +309,7 @@ BetterSubChannel1PhaseProblemBase::computeMdot(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeWijPrime(int iblock)
+BetterSubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -346,7 +348,7 @@ BetterSubChannel1PhaseProblemBase::computeWijPrime(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
+BetterSubChannel1PhaseProblem::computeDP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -363,7 +365,7 @@ BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto rho_in = (*_rho_soln)(node_in);
       auto rho_out = (*_rho_soln)(node_out);
-      auto Mu_in = (*_Mu_soln)(node_in);
+      auto mu_in = (*_mu_soln)(node_in);
       auto S = (*_S_flow_soln)(node_in);
       auto w_perim = (*_w_perim_soln)(node_in);
       // hydraulic diameter in the i direction
@@ -414,7 +416,7 @@ BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
       }
       Turbulent_Term *= _CT;
 
-      auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / Mu_in);
+      auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
       auto fi = computeFrictionFactor(Re);
       auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
                            (S * (*_rho_soln)(node_out));
@@ -428,7 +430,7 @@ BetterSubChannel1PhaseProblemBase::computeDP(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeP(int iblock)
+BetterSubChannel1PhaseProblem::computeP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -447,7 +449,7 @@ BetterSubChannel1PhaseProblemBase::computeP(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeh(int iblock)
+BetterSubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -528,7 +530,7 @@ BetterSubChannel1PhaseProblemBase::computeh(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeT(int iblock)
+BetterSubChannel1PhaseProblem::computeT(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -544,7 +546,7 @@ BetterSubChannel1PhaseProblemBase::computeT(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
+BetterSubChannel1PhaseProblem::computeRho(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -570,7 +572,7 @@ BetterSubChannel1PhaseProblemBase::computeRho(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
+BetterSubChannel1PhaseProblem::computeMu(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -580,7 +582,7 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      _Mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
+      _mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
     }
   }
 
@@ -590,13 +592,13 @@ BetterSubChannel1PhaseProblemBase::computeMu(int iblock)
     {
       // Find the node
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      _Mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
+      _mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
     }
   }
 }
 
 Eigen::VectorXd
-BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd solution)
+BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solution)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -712,9 +714,9 @@ BetterSubChannel1PhaseProblemBase::residualFunction(int iblock, Eigen::VectorXd 
 }
 
 PetscErrorCode
-BetterSubChannel1PhaseProblemBase::petscSnesSolver(int iblock,
-                                                   const Eigen::VectorXd & solution,
-                                                   Eigen::VectorXd & root)
+BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
+                                               const Eigen::VectorXd & solution,
+                                               Eigen::VectorXd & root)
 {
   SNES snes; /* nonlinear solver context */
   KSP ksp;   /* linear solver context */
@@ -840,7 +842,7 @@ BetterSubChannel1PhaseProblemBase::petscSnesSolver(int iblock,
 }
 
 void
-BetterSubChannel1PhaseProblemBase::externalSolve()
+BetterSubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
   auto P_error = 1.0;
@@ -876,7 +878,7 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
         // Compute Crossflow
         computeWij(iblock);
 
-        if (_power)
+        if (_compute_power)
         {
           // Energy conservation equation
           computeh(iblock);
@@ -885,10 +887,10 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
           computeT(iblock);
         }
 
-        if (_density)
+        if (_compute_density)
           computeRho(iblock);
 
-        if (_viscosity)
+        if (_compute_viscosity)
           computeMu(iblock);
 
         auto T_L2norm_new = _T_soln->L2norm();
@@ -925,4 +927,4 @@ BetterSubChannel1PhaseProblemBase::externalSolve()
   _aux->solution().close();
 }
 
-void BetterSubChannel1PhaseProblemBase::syncSolutions(Direction /*direction*/) {}
+void BetterSubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

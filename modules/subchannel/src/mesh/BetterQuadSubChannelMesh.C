@@ -69,14 +69,9 @@ BetterQuadSubChannelMesh::BetterQuadSubChannelMesh(const InputParameters & param
 
       // make a gap size map
       if (iy == 0 || iy == _ny - 1)
-      {
         _gij_map[i_gap] = (_pitch - _rod_diameter) / 2 + _gap;
-      }
       else
-      {
         _gij_map[i_gap] = (_pitch - _rod_diameter);
-      }
-
       ++i_gap;
     }
   }
