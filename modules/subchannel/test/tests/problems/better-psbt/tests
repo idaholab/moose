@@ -1,0 +1,9 @@
+[Tests]
+  [Better-PSBT]
+    type = Exodiff
+    input = psbt.i
+    exodiff = psbt_out.e
+    method = '!DBG'
+    valgrind = NONE
+  []
+[]
