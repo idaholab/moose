@@ -221,6 +221,22 @@ class Node(moosetree.Node):
 
         return default
 
+    def filename(self, name=None, default=None):
+        """
+        Return the file name for node itself or for the supplied *name*.
+        When the *name* is not included the file name for the beginning of the block is returned;
+        and when it is included the file name is returned.
+        When *name* is used and the parameter is not located, the *default* is returned.
+        """
+        if name is None:
+            return self.__hitnode.filename()
+
+        for child in self.__hitnode.children(hit.NodeType.Field):
+            if child.path() == name:
+                return child.filename()
+
+        return default
+
     def __getitem__(self, name):
         """
         Provides operator [] access to the parameters of this node.
