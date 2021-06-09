@@ -17,5 +17,6 @@
     design = 'SideIntegralVariablePostprocessor.md'
     requirement = 'The system shall support computing the integral of a finite volume variable'
         'quantity over a side on the mesh.'
+    ad_indexing_type = 'global'
   []
 []

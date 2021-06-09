@@ -41,8 +41,6 @@ protected:
   const MooseEnum _interface_value_type;
   /// the fv variable for the neighbor variable
   const MooseVariableFV<Real> * const _neighbor_fv_variable;
-  /// whether finite volume variables are used
-  const bool _fv;
 
   /// the contribution of a qp to the integral
   virtual Real computeQpIntegral() override;
