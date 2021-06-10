@@ -13,7 +13,7 @@
   spacer_z = '0'
 []
 
-[Variables] 
+[Variables]
   [w_perim]
   []
 []
