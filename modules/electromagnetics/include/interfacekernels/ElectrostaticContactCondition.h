@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ADInterfaceKernel.h"
+#include "Function.h"
 
 /**
  *  This ADInterfaceKernel object calculates the electrostatic potential value
@@ -28,7 +29,7 @@ protected:
   const ADMaterialProperty<Real> & _mean_hardness;
 
   /// Mechanical pressure uniformly applied at the contact surface area (user-supplied for now)
-  const Real & _mechanical_pressure;
+  const Function & _mechanical_pressure;
 
   /// User-provided electrical contact conductance constant value
   const Real & _user_contact_conductance;

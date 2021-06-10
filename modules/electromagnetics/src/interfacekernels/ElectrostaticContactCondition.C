@@ -25,9 +25,10 @@ ElectrostaticContactCondition::validParams()
       "Geometric mean of the hardness of each contacting material.");
   params.addParam<Real>("user_electrical_contact_conductance",
                         "User-supplied electrical contact conductance coefficient.");
-  params.addParam<Real>("mechanical_pressure",
-                        "Mechanical pressure uniformly applied at the contact surface area "
-                        "(Pressure = Force / Surface Area).");
+  params.addParam<FunctionName>("mechanical_pressure",
+                                0.0,
+                                "Mechanical pressure uniformly applied at the contact surface area "
+                                "(Pressure = Force / Surface Area).");
   params.addClassDescription(
       "Interface condition that describes the current continuity and contact conductance across a "
       "boundary formed between two dissimilar materials (resulting in a potential discontinuity). "
@@ -42,8 +43,7 @@ ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParamete
     _mean_hardness(isParamValid("user_electrical_contact_conductance")
                        ? getGenericZeroMaterialProperty<Real, true>("mean_hardness")
                        : getADMaterialProperty<Real>("mean_hardness")),
-    _mechanical_pressure(isParamValid("mechanical_pressure") ? getParam<Real>("mechanical_pressure")
-                                                             : _real_zero),
+    _mechanical_pressure(getFunction("mechanical_pressure")),
     _user_contact_conductance(isParamValid("user_electrical_contact_conductance")
                                   ? getParam<Real>("user_electrical_contact_conductance")
                                   : _real_zero),
@@ -69,8 +69,10 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
   }
   else if (_mean_hardness_was_set && !_conductance_was_set)
   {
-    contact_conductance = _alpha_electric * mean_conductivity *
-                          std::pow((_mechanical_pressure / _mean_hardness[_qp]), _beta_electric);
+    contact_conductance =
+        _alpha_electric * mean_conductivity *
+        std::pow((_mechanical_pressure.value(_t, _q_point[_qp]) / _mean_hardness[_qp]),
+                 _beta_electric);
   }
   else
   {
