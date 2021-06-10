@@ -1,5 +1,9 @@
 #pragma once
 
+#include "NS.h"
+
+#ifndef NS_HAS_CFL_TIME_STEP_SIZE
+
 #include "ElementPostprocessor.h"
 
 /**
@@ -39,3 +43,5 @@ protected:
 public:
   static InputParameters validParams();
 };
+
+#endif
