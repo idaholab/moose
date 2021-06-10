@@ -2407,9 +2407,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
-    // We would like to compute ScalarKernels and block NodalKernels up front because we want
-    // these included whether we are computing an ordinary Jacobian or a Jacobian for
-    // determining variable scaling factors
+    // We would like to compute ScalarKernels, block NodalKernels, FVFluxKernels, and mortar objects
+    // up front because we want these included whether we are computing an ordinary Jacobian or a
+    // Jacobian for determining variable scaling factors
     computeScalarKernelsJacobians(tags);
 
     // Block restricted Nodal Kernels
@@ -2434,6 +2434,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
       Threads::parallel_reduce(faces, fvj);
     }
+
+    mortarConstraints();
 
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -2525,8 +2527,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
   }
   PARALLEL_CATCH;
-
-  mortarConstraints();
 
   closeTaggedMatrices(tags);
 
