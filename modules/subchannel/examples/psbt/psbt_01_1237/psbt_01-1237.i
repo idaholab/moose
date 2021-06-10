@@ -31,8 +31,6 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [Mu]
-  []
   [S]
   []
   [w_perim]
@@ -52,13 +50,9 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  beta = 0.006
+  abeta = 0.006
   CT = 1.0
   enforce_uniform_pressure = false
-  Density = true
-  Viscosity = true
-  Power = true
-  P_out = ${P_out}
 []
 
 [ICs]
@@ -95,14 +89,6 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = DP
     value = 0.0
-  []
-
-  [Viscosity_ic]
-    type = ViscosityIC
-    variable = Mu
-    p = ${P_out}
-    T = T
-    fp = water
   []
 
   [rho_ic]
@@ -238,13 +224,6 @@ P_out = 4.923e6 # Pa
     direction = to_multiapp
     source_variable = rho
     variable = rho
-  []
-  [xfer_Mu]
-    type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
-    direction = to_multiapp
-    source_variable = Mu
-    variable = Mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer

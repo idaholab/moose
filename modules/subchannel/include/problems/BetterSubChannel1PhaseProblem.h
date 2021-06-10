@@ -8,7 +8,7 @@
 class BetterSubChannel1PhaseProblem;
 
 /**
- * Base class for the 1-phase steady state sub channel solver.
+ * Base class for the 1-phase steady-state/transient sub channel solver.
  */
 class BetterSubChannel1PhaseProblem : public ExternalProblem
 {
@@ -61,13 +61,13 @@ protected:
   unsigned int _n_channels;
   unsigned int _block_size;
   Real _one;
-  /// Flag that activates or deactivates the transient parts of the equations solved by multiplication
+  /// Flag that activates or deactivates the transient parts of the equations we solve by multiplication
   Real _TR;
   /// Flag that activates or deactivates the calculation of density
   const bool _compute_density;
   /// Flag that activates or deactivates the calculation of viscosity
   const bool _compute_viscosity;
-  /// Flag that informs where we solve the Enthalpy/Temperature equations or not
+  /// Flag that informs if we need to solve the Enthalpy/Temperature equations or not
   const bool _compute_power;
   /// Time step
   const Real & _dt;

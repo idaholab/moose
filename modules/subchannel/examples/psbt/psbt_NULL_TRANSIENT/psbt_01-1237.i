@@ -22,7 +22,7 @@ P_out = 4.923e6 # Pa
     type = SolutionUserObject
     mesh = psbt_01-1237_out_SS.e
     timestep = LATEST
-    system_variables = 'mdot SumWij P DP h T rho Mu S w_perim q_prime'
+    system_variables = 'mdot SumWij P DP h T rho mu S w_perim q_prime'
   []
 []
 
@@ -41,7 +41,7 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [Mu]
+  [mu]
   []
   [S]
   []
@@ -60,7 +60,7 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = BetterSubChannel1PhaseProblemBase
+  type = BetterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 1.8
@@ -111,7 +111,7 @@ P_out = 4.923e6 # Pa
   [Mu_ic_fn]
     type = SolutionFunction
     solution = steady_sln
-    from_variable = Mu
+    from_variable = mu
   []
 []
 
@@ -154,7 +154,7 @@ P_out = 4.923e6 # Pa
 
   [Viscosity_ic]
     type = FunctionIC
-    variable = Mu
+    variable = mu
     function = Mu_ic_fn
   []
 
@@ -295,8 +295,8 @@ P_out = 4.923e6 # Pa
     type = MultiAppNearestNodeTransfer
     multi_app = prettyMesh
     direction = to_multiapp
-    source_variable = Mu
-    variable = Mu
+    source_variable = mu
+    variable = mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer

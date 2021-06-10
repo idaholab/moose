@@ -3,7 +3,7 @@
 #include "AuxKernel.h"
 
 /**
- * Computes mass float rate from specifiec mass flux and cross-sectional area
+ * Computes mass float rate from specified uniform mass flux and cross-sectional area
  */
 class MassFlowRateAux : public AuxKernel
 {
