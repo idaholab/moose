@@ -13,6 +13,7 @@ import unittest
 import mock
 import tempfile
 import subprocess
+import platform
 import mooseutils
 
 #from mooseutils.gitutils import git_submodule_info
@@ -148,6 +149,18 @@ class Test(unittest.TestCase):
         with self.assertRaises(OSError) as e:
             mooseutils.git_repo(os.path.dirname(__file__), remotes=['wrong'])
         self.assertEqual(str(e.exception), "Unable to locate a remote with the name(s): wrong")
+
+    @unittest.skipIf(platform.python_version() < '3.7.0', "Python 3.7 or greater required.")
+    def testGitCivetHashes(self):
+
+        # Release 2021-05-18
+        gold = ('90123e7b6bd52f1bc36e68aac5d1fa95e76aeb91', 'd72a8d0d69e21b4945eedf2e78a7de80b1bd3e6f')
+        hashes = mooseutils.git_civet_hashes('2021-05-18')
+        self.assertEqual(hashes, gold)
+
+        gold = ('df827bfaf6ea29394ce609bdf032bd40a9818cfc', 'c4ec8d4669166086da10470cc99c4b40813eeee9')
+        hashes = mooseutils.git_civet_hashes('df827bfaf6ea29394ce609bdf032bd40a9818cfc')
+        self.assertEqual(hashes, gold)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)
