@@ -1,5 +1,5 @@
 [Tests]
-  [test]
+  [test1]
     type = Exodiff
     input = test.i
     exodiff = test_out.e
