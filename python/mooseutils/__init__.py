@@ -14,6 +14,7 @@ from .mooseutils import generate_filebase, recursive_update, fuzzyEqual, fuzzyAb
 from .gitutils import is_git_repo, git_commit, git_commit_message, git_merge_commits, git_ls_files
 from .gitutils import git_root_dir, git_init_submodule, git_submodule_info, git_version
 from .gitutils import git_authors, git_lines, git_committers, git_localpath, git_repo
+from .gitutils import git_civet_hashes
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path

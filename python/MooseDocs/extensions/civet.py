@@ -34,6 +34,8 @@ class CivetExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['remotes'] = (dict(), "Remote CIVET repositories to pull result; each item in the dict should have another dict with a 'url' and 'repo' key.")
+        config['branch'] = ('master', "The main stable branch for extracting test results.")
+        config['author'] = ('moosetest', "The 'author' of the merge commit into the stable main branch.")
 
         config['download_test_results'] = (True, "Automatically download and aggregate test results for the current merge commits.")
         config['generate_test_reports'] = (True, "Generate test report pages, if results exist from download or local file(s).")
@@ -89,7 +91,7 @@ class CivetExtension(command.CommandExtension):
             LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
             hashes = None
             if category.get('download_test_results', self.get('download_test_results', True)):
-                hashes = mooseutils.git_merge_commits(working_dir)
+                hashes = mooseutils.git_civet_hashes(start=self.get('branch'), author=self.get('author'), working_dir=working_dir)
                 LOG.info("Downloading CIVET results for '%s' category in %s", name, working_dir)
 
             local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
@@ -191,7 +193,8 @@ class CivetMergeResultsCommand(CivetCommandBase):
         site, repo = self.getCivetInfo()
 
         rows = []
-        for sha in mooseutils.git_merge_commits():
+        for sha in mooseutils.git_civet_hashes(start=self.extension.get('branch'),
+                                               author=self.extension.get('author')):
             url = '{}/sha_events/{}/{}'.format(site, repo, sha)
             link = core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
