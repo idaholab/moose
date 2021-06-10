@@ -21,7 +21,7 @@ BetterNormalSliceValuesCSV::BetterNormalSliceValuesCSV(const InputParameters & p
     _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
-  _exitValue.resize(_mesh.getNy(), _mesh.getNx());
+  _exit_value.resize(_mesh.getNy(), _mesh.getNx());
 }
 
 void
@@ -40,7 +40,7 @@ BetterNormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
       auto * node = _mesh.getChannelNode(i_ch, nz);
       unsigned int i = (i_ch / _mesh.getNx());   // row
       unsigned int j = i_ch - i * _mesh.getNx(); // column
-      _exitValue(i, j) = val_soln(node);
+      _exit_value(i, j) = val_soln(node);
     }
   }
   else
@@ -56,7 +56,7 @@ BetterNormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
           auto * node = _mesh.getChannelNode(i_ch, iz);
           unsigned int i = (i_ch / _mesh.getNx());   // row
           unsigned int j = i_ch - i * _mesh.getNx(); // column
-          _exitValue(i, j) = val_soln(node);
+          _exit_value(i, j) = val_soln(node);
         }
         break;
       }
@@ -68,21 +68,21 @@ BetterNormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
           auto * node_in = _mesh.getChannelNode(i_ch, iz - 1);
           unsigned int i = (i_ch / _mesh.getNx());   // row
           unsigned int j = i_ch - i * _mesh.getNx(); // column
-          _exitValue(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *
-                                                     (_height - z_grid[iz - 1]) /
-                                                     (z_grid[iz] - z_grid[iz - 1]);
+          _exit_value(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *
+                                                      (_height - z_grid[iz - 1]) /
+                                                      (z_grid[iz] - z_grid[iz - 1]);
         }
         break;
       }
     }
   }
 
-  _exitValue.resize(1, _mesh.getNy() * _mesh.getNx());
+  _exit_value.resize(1, _mesh.getNy() * _mesh.getNx());
 
   const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
 
   std::ofstream myfile1;
   myfile1.open(_file_base, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exitValue.format(CSVFormat) << "\n";
+  myfile1 << std::setprecision(3) << std::fixed << _exit_value.format(CSVFormat) << "\n";
   myfile1.close();
 }

@@ -30,35 +30,19 @@ formFunction(SNES snes, Vec x, Vec f, void * ctx)
   ierr = VecGetSize(x, &size);
   CHKERRQ(ierr);
 
-  /*
-   Get pointers to vector data.
-      - For default PETSc vectors, VecGetArray() returns a pointer to
-        the data array.  Otherwise, the routine is implementation dependent.
-      - You MUST call VecRestoreArray() when you no longer need access to
-        the array.
-   */
-
-  /// Put x into eigen vector solution_seed
   Eigen::VectorXd solution_seed(size);
   ierr = VecGetArrayRead(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < size; i++)
-  {
     solution_seed(i) = xx[i];
-  }
 
   Eigen::VectorXd Wij_residual_vector = cc->schp->residualFunction(cc->iblock, solution_seed);
 
   ierr = VecGetArray(f, &ff);
   CHKERRQ(ierr);
-
-  /* Compute function */
   for (unsigned int i = 0; i < size; i++)
-  {
     ff[i] = Wij_residual_vector(i);
-  }
 
-  /* Restore vectors */
   ierr = VecRestoreArrayRead(x, &xx);
   CHKERRQ(ierr);
   ierr = VecRestoreArray(f, &ff);
@@ -132,12 +116,9 @@ BetterSubChannel1PhaseProblem::initialSetup()
       int column_index = 0;
       std::stringstream str_strm(line_str);
       std::string tmp;
-      char delim = ' '; // Define the delimiter to split by
+      char delim = ' ';
       while (std::getline(str_strm, tmp, delim))
       {
-        // Provide proper checks here for tmp like if empty
-        // Also strip down symbols like !, ., ?, etc.
-        // Finally push it.
         if (tmp.size() != 0)
         {
           _Wij(row_index, column_index) = std::stof(tmp);
@@ -215,7 +196,7 @@ BetterSubChannel1PhaseProblem::computeWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-  /// Initial guess, port crossflow in block (iblock) into a vector that will act as my initial guess
+  // Initial guess, port crossflow of block (iblock) into a vector that will act as my initial guess
   Eigen::MatrixXd solution_seed_matrix = _Wij.block(0, first_node, _n_gaps, _block_size);
 
   Eigen::VectorXd solution_seed(_n_gaps * _block_size);
@@ -228,7 +209,8 @@ BetterSubChannel1PhaseProblem::computeWij(int iblock)
     }
   }
 
-  /// Solving the combined lateral momentum equation for Wij using a PETSc solver and returns a vector root
+  // Solving the combined lateral momentum equation for Wij using a PETSc solver and update vector
+  // root
   Eigen::VectorXd root(_n_gaps * _block_size);
   petscSnesSolver(iblock, solution_seed, root);
 
@@ -279,15 +261,12 @@ BetterSubChannel1PhaseProblem::computeMdot(int iblock)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
     auto dz = z_grid[iz] - z_grid[iz - 1];
-    // go through the channels of the level.
+
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      // Start with applying mass-conservation equation & energy - conservation equation
-      // Find the nodes for the top and bottom of this element.
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto volume = dz * (*_S_flow_soln)(node_in);
-      // mass damping
       double am = 1.0; // means no damping
       auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
       // Wij positive out of i into j;
@@ -302,7 +281,6 @@ BetterSubChannel1PhaseProblem::computeMdot(int iblock)
                    " Axial Level= : ",
                    iz);
       }
-      // Update solution vector
       _mdot_soln->set(node_out, mdot_out); // kg/sec
     }
   }
@@ -327,15 +305,11 @@ BetterSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
       auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-      // area of channel i
       auto Si_in = (*_S_flow_soln)(node_in_i);
-      // area of channel j
       auto Sj_in = (*_S_flow_soln)(node_in_j);
-      // area of channel i
       auto Si_out = (*_S_flow_soln)(node_out_i);
-      // area of channel j
       auto Sj_out = (*_S_flow_soln)(node_out_j);
-      // crossflow area between channels i,j dz*gap_width
+      // crossflow area between channels i,j (dz*gap_width)
       auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
       // Calculation of Turbulent Crossflow
       _WijPrime(i_gap, iz) =
@@ -357,10 +331,8 @@ BetterSubChannel1PhaseProblem::computeDP(int iblock)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
     auto dz = z_grid[iz] - z_grid[iz - 1];
-    // Sweep through the channels of level
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      // Find the nodes for the top and bottom of this element.
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto rho_in = (*_rho_soln)(node_in);
@@ -398,13 +370,9 @@ BetterSubChannel1PhaseProblem::computeDP(int iblock)
         auto U_star = 0.0;
         // figure out donor axial velocity
         if (_Wij(i_gap, iz) > 0.0)
-        {
           U_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-        }
         else
-        {
           U_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
-        }
 
         CrossFlow_Term +=
             _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * U_star;
@@ -423,7 +391,6 @@ BetterSubChannel1PhaseProblem::computeDP(int iblock)
       auto Gravity_Term = _g_grav * (*_rho_soln)(node_out)*dz * S;
       auto DP = std::pow(S, -1.0) * (time_term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
                                      Turbulent_Term + Friction_Term + Gravity_Term); // Pa
-      // update solution
       _DP_soln->set(node_out, DP);
     }
   }
@@ -467,14 +434,10 @@ BetterSubChannel1PhaseProblem::computeh(int iblock)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
     auto dz = z_grid[iz] - z_grid[iz - 1];
-    // go through the channels of the level.
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      // Start with applying mass-conservation equation & energy - conservation equation
-      // Find the nodes for the top and bottom of this element.
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      // Copy the variables at the inlet (bottom) of this element.
       auto mdot_in = (*_mdot_soln)(node_in);
       auto h_in = (*_h_soln)(node_in); // J/kg
       auto volume = dz * (*_S_flow_soln)(node_in);
@@ -495,13 +458,9 @@ BetterSubChannel1PhaseProblem::computeh(int iblock)
         // Define donor enthalpy
         auto h_star = 0.0;
         if (_Wij(i_gap, iz) > 0.0)
-        {
           h_star = (*_h_soln)(node_in_i);
-        }
         else if (_Wij(i_gap, iz) < 0.0)
-        {
           h_star = (*_h_soln)(node_in_j);
-        }
         // take care of the sign by applying the map, use donor cell
         sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
         sumWijPrimeDhij += _WijPrime(i_gap, iz) * (2 * (*_h_soln)(node_in) - (*_h_soln)(node_in_j) -
@@ -523,7 +482,6 @@ BetterSubChannel1PhaseProblem::computeh(int iblock)
                    " Axial Level= : ",
                    iz);
       }
-      // Update the solution vectors at the outlet of the cell
       _h_soln->set(node_out, h_out); // J/kg
     }
   }
@@ -564,7 +522,6 @@ BetterSubChannel1PhaseProblem::computeRho(int iblock)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      // Find the node
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
       _rho_soln->set(node, _fp->rho_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
     }
@@ -590,7 +547,6 @@ BetterSubChannel1PhaseProblem::computeMu(int iblock)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      // Find the node
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
       _mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
     }
@@ -608,7 +564,7 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
   Eigen::VectorXd Wij_residual_vector(_n_gaps * _block_size);
   Wij_residual_vector.setZero();
 
-  // Assign the solution to the cross-flow matrix (This may not be needed)
+  // Assign the solution to the cross-flow matrix
   int i = 0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -619,13 +575,13 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
     }
   }
 
-  // Calculating Sum Crossflows
+  // Calculating sum of crossflows
   computeSumWij(iblock);
 
   // Solving axial flux
   computeMdot(iblock);
 
-  // Calculation of Turbulent Crossflow
+  // Calculation of turbulent Crossflow
   computeWijPrime(iblock);
 
   // Solving for Pressure Drop
@@ -651,13 +607,9 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
       auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
       auto rho_i = (*_rho_soln)(node_in_i);
       auto rho_j = (*_rho_soln)(node_in_j);
-      // area of channel i
       auto Si = (*_S_flow_soln)(node_in_i);
-      // area of channel j
       auto Sj = (*_S_flow_soln)(node_in_j);
-      // crossflow area between channels i,j dz*gap_width
       auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-      // hydraulic diameter in the ij direction
       auto Lij = pitch;
       // total local form loss in the ij direction
       auto Kij = 0.5;
@@ -673,17 +625,11 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
       // Figure out donor cell density
       auto rho_star = 0.0;
       if (_Wij(i_gap, iz) > 0.0)
-      {
         rho_star = rho_i;
-      }
       else if (_Wij(i_gap, iz) < 0.0)
-      {
         rho_star = rho_j;
-      }
       else
-      {
         rho_star = (rho_i + rho_j) / 2.0;
-      }
 
       auto Mass_Term_out =
           (*_mdot_soln)(node_out_i) / Si / rho_i + (*_mdot_soln)(node_out_j) / Sj / rho_j;
@@ -701,7 +647,7 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
     }
   }
 
-  // Make the residual matrix into a residual vector
+  // Turn the residual matrix into a residual vector
   for (unsigned int iz = 0; iz < _block_size; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
@@ -718,10 +664,10 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
                                                const Eigen::VectorXd & solution,
                                                Eigen::VectorXd & root)
 {
-  SNES snes; /* nonlinear solver context */
-  KSP ksp;   /* linear solver context */
-  PC pc;     /* preconditioner context */
-  Vec x, r;  /* solution, residual vectors */
+  SNES snes;
+  KSP ksp;
+  PC pc;
+  Vec x, r;
   PetscErrorCode ierr;
   PetscMPIInt size;
   PetscScalar * xx;
@@ -731,18 +677,9 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
   if (size > 1)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Create nonlinear solver context
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = SNESCreate(PETSC_COMM_WORLD, &snes);
   CHKERRQ(ierr);
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Create matrix and vector data structures; set corresponding routines
-     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  /*
-     Create vectors for solution and nonlinear function
-  */
   ierr = VecCreate(PETSC_COMM_WORLD, &x);
   CHKERRQ(ierr);
   ierr = VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps);
@@ -760,14 +697,6 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
   ierr = SNESSetFunction(snes, r, formFunction, &ctx);
   CHKERRQ(ierr);
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Customize nonlinear solver; set runtime options
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  /*
-     Set linear solver defaults for this problem. By extracting the
-     KSP and PC contexts from the SNES context, we can then
-     directly call any KSP and PC routines to set various options.
-  */
   ierr = SNESGetKSP(snes, &ksp);
   CHKERRQ(ierr);
   ierr = KSPGetPC(ksp, &pc);
@@ -777,19 +706,9 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
   ierr = KSPSetTolerances(ksp, 1.e-4, PETSC_DEFAULT, PETSC_DEFAULT, 20);
   CHKERRQ(ierr);
 
-  /*
-     Set SNES/KSP/KSP/PC runtime options, e.g.,
-         -snes_view -snes_monitor -ksp_type <ksp> -pc_type <pc>
-     These options will override those specified above as long as
-     SNESSetFromOptions() is called _after_ any other customization
-     routines.
-  */
   ierr = SNESSetFromOptions(snes);
   CHKERRQ(ierr);
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Evaluate initial guess; then solve nonlinear system
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -799,38 +718,17 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
 
-  /*
-     Note: The user should initialize the vector, x, with the initial guess
-     for the nonlinear solver prior to calling SNESSolve().  In particular,
-     to employ an initial guess of zero, the user should explicitly set
-     this vector to zero by calling VecSet().
-  */
-
   ierr = SNESSolve(snes, NULL, x);
   CHKERRQ(ierr);
-  //  Vec f;
-  //  ierr = VecView(x, PETSC_VIEWER_STDOUT_WORLD);
-  //  CHKERRQ(ierr);
-  //  ierr = SNESGetFunction(snes, &f, 0, 0);
-  //  CHKERRQ(ierr);
-  //  ierr = VecView(r, PETSC_VIEWER_STDOUT_WORLD);
-  //  CHKERRQ(ierr);
 
-  /// put x into eigen vector root and return that vector
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
-  {
     root(i) = xx[i];
-  }
-  /* Restore vectors */
+
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Free work space.  All PETSc objects should be destroyed when they
-     are no longer needed.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = VecDestroy(&x);
   CHKERRQ(ierr);
   ierr = VecDestroy(&r);
@@ -875,15 +773,12 @@ BetterSubChannel1PhaseProblem::externalSolve()
         T_it += 1;
         auto T_L2norm_old_block = _T_soln->L2norm();
 
-        // Compute Crossflow
         computeWij(iblock);
 
         if (_compute_power)
         {
-          // Energy conservation equation
           computeh(iblock);
 
-          // calculate temperature (equation of state)
           computeT(iblock);
         }
 

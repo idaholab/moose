@@ -50,7 +50,7 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = BetterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 1.0
