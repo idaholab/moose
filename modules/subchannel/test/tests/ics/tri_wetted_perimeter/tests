@@ -2,6 +2,6 @@
   [test]
     type = Exodiff
     input = 'test.i'
-    exodiff = 'test_out.e' 
+    exodiff = 'test_out.e'
   []
 []

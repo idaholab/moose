@@ -9,7 +9,7 @@
   dwire = 0.03
   hwire = 0.3
   max_dz = 0.5
-  spacer_k = '0.5' 
+  spacer_k = '0.5'
   spacer_z = '0'
 []
 
