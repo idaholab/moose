@@ -45,19 +45,35 @@ public:
    * Solve the N*N nonlinear equation system
    */
   template <typename V, typename T>
-  void nonlinear(V & guess, T compute) const;
+  void nonlinear(V & guess, T compute);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
-  static Real absoluteToleranceDefault() { return 1e-8; }
-  static unsigned int maxIterationsDefault() { return 20; }
+  static Real absoluteToleranceDefault() { return 1e-13; }
+  static unsigned int minIterationsDefault() { return 10; }
+  static unsigned int maxIterationsDefault() { return 1000; }
   ///@}
+
+  void setRelativeTolerance(Real rel) { _relative_tolerance_square = rel * rel; }
+  void setAbsoluteTolerance(Real abs) { _absolute_tolerance_square = abs * abs; }
 
   Real _relative_tolerance_square;
   Real _absolute_tolerance_square;
+  unsigned int _min_iterations;
   unsigned int _max_iterations;
 
+  enum class State
+  {
+    NONE,
+    CONVERGED_ABS,
+    CONVERGED_REL,
+    EXACT_GUESS
+  };
+
 protected:
+  /// current solver state
+  State _state;
+
   ///@{ Deduce the Jacobian type from the solution type
   template <typename T>
   struct CorrespondingJacobianTempl;
@@ -130,22 +146,51 @@ protected:
 
 template <typename V, typename T>
 void
-NestedSolve::nonlinear(V & guess, T compute) const
+NestedSolve::nonlinear(V & guess, T compute)
 {
   V delta;
   V residual;
   CorrespondingJacobian<V> jacobian;
   sizeItems(guess, residual, jacobian);
 
+  _state = State::NONE;
+
   std::size_t n_iterations = 0;
+  compute(guess, residual, jacobian);
+
+  // compute first residual norm for relative convergence checks
+  auto r0_square = normSquare(residual);
+  if (r0_square == 0)
+  {
+    _state = State::EXACT_GUESS;
+    return;
+  }
+
+  auto r_square = r0_square;
   while (n_iterations < _max_iterations)
   {
-    compute(guess, residual, jacobian);
-    if (normSquare(residual) < 1e-30)
-      return;
+    // check convergence
+    if (n_iterations >= _min_iterations)
+    {
+      if (r_square < _absolute_tolerance_square)
+      {
+        _state = State::CONVERGED_ABS;
+        return;
+      }
+      if (r_square / r0_square < _relative_tolerance_square)
+      {
+        _state = State::CONVERGED_REL;
+        return;
+      }
+    }
 
+    // solve and apply next increment
     linear(jacobian, delta, residual);
     guess -= delta;
     n_iterations++;
+
+    // compute residual and jacobian for the next iteration
+    compute(guess, residual, jacobian);
+    r_square = normSquare(residual);
   }
 }

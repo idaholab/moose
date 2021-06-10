@@ -23,6 +23,10 @@ InputParameters
   params.addParam<Real>("absolute_tolerance",
                         NestedSolve::absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
+  params.addParam<unsigned int>(
+      "min_iterations",
+      NestedSolve::minIterationsDefault(),
+      "Minimum number of non linear iterations to execute befor accpting concergence");
   params.addParam<unsigned int>("max_iterations",
                                 NestedSolve::maxIterationsDefault(),
                                 "Maximum number of non linear iterations");
@@ -32,13 +36,17 @@ InputParameters
 NestedSolve::NestedSolve()
   : _relative_tolerance_square(Utility::pow<2>(relativeToleranceDefault())),
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
-    _max_iterations(maxIterationsDefault())
+    _min_iterations(minIterationsDefault()),
+    _max_iterations(maxIterationsDefault()),
+    _state(State::NONE)
 {
 }
 
 NestedSolve::NestedSolve(const InputParameters & params)
   : _relative_tolerance_square(Utility::pow<2>(params.get<Real>("relative_tolerance"))),
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
-    _max_iterations(params.get<unsigned int>("max_iterations"))
+    _min_iterations(params.get<unsigned int>("min_iterations")),
+    _max_iterations(params.get<unsigned int>("max_iterations")),
+    _state(State::NONE)
 {
 }

@@ -27,6 +27,7 @@ TEST(FixedSize, test)
 
   NestedSolve solver;
   NestedSolve::Value<2> solution{1.98, 1.02};
+  solver.setRelativeTolerance(1e-10);
   solver.nonlinear(solution, compute);
 
   EXPECT_NEAR(solution(0), 2, 1e-6);
@@ -50,6 +51,7 @@ TEST(DynamicSize, test)
   NestedSolve solver;
   NestedSolve::Value<> solution(2);
   solution << 1.98, 1.02;
+  solver.setRelativeTolerance(1e-10);
   solver.nonlinear(solution, compute);
 
   EXPECT_NEAR(solution(0), 2, 1e-6);
