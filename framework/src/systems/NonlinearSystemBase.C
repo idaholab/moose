@@ -75,6 +75,7 @@
 #include "FVScalarLagrangeMultiplier.h"
 #include "FVFluxKernel.h"
 #include "UserObject.h"
+#include "OffDiagonalScalingMatrix.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -92,6 +93,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/default_coupling.h"
+#include "libmesh/diagonal_matrix.h"
 
 #include <ios>
 
@@ -170,7 +172,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _computed_scaling(false),
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0),
-    _scaling_matrix(_communicator),
+    _off_diagonals_in_auto_scaling(false),
 #ifndef MOOSE_SPARSE_AD
     _required_derivative_size(0),
 #endif
@@ -337,6 +339,14 @@ NonlinearSystemBase::initialSetup()
                                                               _fe_problem,
                                                               /*displaced=*/true));
     }
+  }
+
+  if (_automatic_scaling)
+  {
+    if (_off_diagonals_in_auto_scaling)
+      _scaling_matrix = libmesh_make_unique<OffDiagonalScalingMatrix<Number>>(_communicator);
+    else
+      _scaling_matrix = libmesh_make_unique<DiagonalMatrix<Number>>(_communicator);
   }
 }
 
@@ -3461,8 +3471,8 @@ NonlinearSystemBase::computeScaling()
       auto init_vector = NumericVector<Number>::build(this->comm());
       init_vector->init(system().n_dofs(), system().n_local_dofs(), /*fast=*/false, PARALLEL);
 
-      _scaling_matrix.clear();
-      _scaling_matrix.init(*init_vector);
+      _scaling_matrix->clear();
+      _scaling_matrix->init(*init_vector);
     }
 
     _fe_problem.computingScalingJacobian(true);
@@ -3494,7 +3504,7 @@ NonlinearSystemBase::computeScaling()
           if (jac_scaling)
           {
             // For now we will use the diagonal for determining scaling
-            auto mat_value = _scaling_matrix(dof_index, dof_index);
+            auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
             auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
             factor = std::max(factor, std::abs(mat_value));
           }
@@ -3520,7 +3530,7 @@ NonlinearSystemBase::computeScaling()
         if (jac_scaling)
         {
           // For now we will use the diagonal for determining scaling
-          auto mat_value = _scaling_matrix(dof_index, dof_index);
+          auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
           jac_inverse_scaling_factors[offset + i] =
               std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
         }
