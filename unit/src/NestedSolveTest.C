@@ -13,9 +13,9 @@
 
 TEST(FixedSize, test)
 {
-  auto compute = [&](const Moose::NestedSolve::Value<2> & guess,
-                     Moose::NestedSolve::Value<2> & residual,
-                     Moose::NestedSolve::Jacobian<2> & jacobian) {
+  auto compute = [&](const NestedSolve::Value<2> & guess,
+                     NestedSolve::Value<2> & residual,
+                     NestedSolve::Jacobian<2> & jacobian) {
     residual(0) = guess(0) + guess(0) * guess(1) - 4;
     residual(1) = guess(0) + guess(1) - 3;
 
@@ -25,8 +25,9 @@ TEST(FixedSize, test)
     jacobian(1, 1) = 1;
   };
 
-  Moose::NestedSolve::Value<2> solution{1.98, 1.02};
-  Moose::NestedSolve::nonlinear(solution, compute);
+  NestedSolve solver;
+  NestedSolve::Value<2> solution{1.98, 1.02};
+  solver.nonlinear(solution, compute);
 
   EXPECT_NEAR(solution(0), 2, 1e-6);
   EXPECT_NEAR(solution(1), 1, 1e-6);
@@ -34,9 +35,9 @@ TEST(FixedSize, test)
 
 TEST(DynamicSize, test)
 {
-  auto compute = [&](const Moose::NestedSolve::Value<> & guess,
-                     Moose::NestedSolve::Value<> & residual,
-                     Moose::NestedSolve::Jacobian<> & jacobian) {
+  auto compute = [&](const NestedSolve::Value<> & guess,
+                     NestedSolve::Value<> & residual,
+                     NestedSolve::Jacobian<> & jacobian) {
     residual(0) = guess(0) + guess(0) * guess(1) - 4;
     residual(1) = guess(0) + guess(1) - 3;
 
@@ -46,9 +47,10 @@ TEST(DynamicSize, test)
     jacobian(1, 1) = 1;
   };
 
-  Moose::NestedSolve::Value<> solution(2);
+  NestedSolve solver;
+  NestedSolve::Value<> solution(2);
   solution << 1.98, 1.02;
-  Moose::NestedSolve::nonlinear(solution, compute);
+  solver.nonlinear(solution, compute);
 
   EXPECT_NEAR(solution(0), 2, 1e-6);
   EXPECT_NEAR(solution(1), 1, 1e-6);
@@ -61,8 +63,9 @@ TEST(Scalar, test)
     jacobian = 3 * guess * guess;
   };
 
+  NestedSolve solver;
   Real solution = 1.0;
-  Moose::NestedSolve::nonlinear(solution, compute);
+  solver.nonlinear(solution, compute);
 
   EXPECT_NEAR(solution, 2, 1e-6);
 }
