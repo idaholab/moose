@@ -1,0 +1,246 @@
+.libs
+*.la
+*.lo
+*.d
+*.o
+*.a
+*-opt
+*-dbg
+*-oprof
+*-prof
+*-devel
+*.e
+*.nav
+*.log
+*.aux
+*.toc
+*.snm
+*.csv
+*.csv.*
+*.dylib
+*.so
+*.so.*
+*.vrb
+*.jou
+*.pyc
+*.mod
+*.e.*
+*.e-s*
+*.cfg
+*.lbd.*
+*.nem
+*.spd
+*.pex
+*.pdf
+*.plist*
+*.bbl
+*.blg
+*.spl
+*.idx
+traceout*.txt
+temp_print_trace.*
+*.xda
+*.xda.*
+*.xdr
+*.xdr.*
+*.mps
+*.msmp
+*.msmp-*
+*.muds
+# Latex garbage
+*.lot
+*.lof
+*.poly
+*.mpx
+*.btr
+*.xml
+*.xml.*
+*.gmv
+*.plt
+*.slh
+*.eps
+*.dat
+*.gp
+*.plugin
+*.outp
+*.patch
+*.txt
+*.bib.bak
+*.out
+*.vtk
+*.vtu
+*.pvtu
+.depend
+*.png
+*.svg
+*.gif
+*.tif
+*.jpg
+*.tiff
+*.ps
+*.bmp
+*.mp4
+*.webm
+*.ico
+*.html
+*.xyz
+*Revision.h
+*.json
+*.json.*
+*.bak
+*.processor.*
+.clang_complete
+.failed_tests
+failed-unittest
+compile_commands.json
+build
+
+# Allow certain files in gold directories
+!**/gold/*.e
+!**/gold/*.e-s*
+!**/gold/*.csv
+!**/gold/*.csv.*
+!**/gold/*.vtk
+!**/gold/*.vtu
+!**/gold/*.pvtu
+!**/gold/*.xml*
+!**/gold/*.json*
+
+peacock_run_tmp.i
+yaml_dump*
+test/tests/outputs/format/dump.i
+
+# Generated header file
+MooseRevision.h
+
+# Precompiled headers
+moose/include/base/Precompiled.h.gch
+
+# test garbagge
+*.FAILED.txt
+
+# eclipse garbage
+.project
+.cproject
+.metadata
+.settings
+.pydevproject
+
+# vim garbage
+*~
+.*.swp
+.*.swo
+
+framework/contrib/exodiff/exodiff
+
+# Mac garbage
+.DS_Store
+*.dSYM
+
+# Unit testing stuffbmoose_unit/test_results.xml
+!unit/data/csv/*.csv
+
+# gcov code coverage files
+*.gcno
+*.gcda
+*.gcov
+
+# paraview state files
+*.pvsm
+
+#Peacock generated files
+peacock_*.i
+peacock_*.e
+
+# On linux, shared libs end in .0 sometimes
+libpcre-opt*
+libpcre-dbg*
+libmoose-opt*
+libmoose-dbg*
+
+#doxygen generated
+*/doc/doxygen/html/*
+*/doc/doxygen/**/*
+moose/doc/doxygen/html/*
+modules/*/doc/doxygen/html/*
+tutorials/*/*/doc/doxygen/html/*
+ICE/
+framework/contrib/asio/
+
+# Restartable Data
+*.rd
+*.rd-*
+
+# Checkpoint Files
+*.cpa
+*.cpr
+*.cpa-*
+*.cpr-*
+
+# Ignore petsc arch
+petsc/arch-*/*
+
+# phase_field/tests/solution_rasterizer
+out.xyz
+
+# JIT and automatic differentiation cache files
+.jitcache/
+.jitdir/
+tmp_jit_*
+
+# Do not store ipython notebook checkpoints
+*-checkpoint.ipynb*
+
+# HIT
+framework/contrib/hit/hit
+
+# MooseDocs
+site
+python/MooseDocs/test/output
+!**/doc/content/**/*.md
+!**/doc/content/**/*.jpg
+!**/doc/content/**/*.jpeg
+!**/doc/content/**/*.gif
+!**/doc/content/**/*.png
+!**/doc/content/**/*.svg
+!**/doc/content/**/*.ogg
+!**/doc/content/**/*.webm
+!**/doc/content/**/*.mp4
+!**/doc/content/**/*.css
+!**/doc/content/**/*.js
+!**/doc/content/**/*.bib
+!**/doc/content/**/*.woff
+!**/doc/content/**/*.woff2
+!python/MooseDocs/test/gold/**/*.json
+!python/MooseDocs/test/gold/**/*.html
+!python/MooseDocs/test/gold/**/*.tex
+.ruby-version
+
+# Chigger
+!python/chigger/tests/**/gold/*.png
+!python/chigger/tests/input/*.e*
+!python/chigger/logos/*.png
+!python/chigger/contrib/*.xml
+
+# Peacock
+python/peacock/tests/exodus_tab/TestOutputPlugin_repr.py
+python/peacock/tests/exodus_tab/TestExodusPluginManager_repr.py
+python/peacock/tests/input_tab/InputFileEditor/fsp_test.i
+python/peacock/tests/postprocessor_tab/TestPostprocessorPluginManager_test_script.py
+!python/peacock/tests/**/gold/*.png
+!python/peacock/icons/**/*.*
+!python/peacock/tests/**/input/*.*
+peacock_tmp_diff.exo
+*.e.diff
+
+# configure
+_configs.sed
+autom4te.cache
+config.status
+*MooseConfig.h
+*MooseConfig.h.tmp
+conf_vars.mk
+
+# GPerf performance
+*.prof
+*.heap

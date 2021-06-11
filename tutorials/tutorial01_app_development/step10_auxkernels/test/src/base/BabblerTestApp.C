@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "ModulesApp.h"
 
 InputParameters
 BabblerTestApp::validParams()
