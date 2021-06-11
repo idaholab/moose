@@ -146,6 +146,9 @@
     type = ComputeElasticityTensorConstantRotationCP
     C_ijkl = '1.622e5 9.18e4 6.88e4 1.622e5 6.88e4 1.805e5 4.67e4 4.67e4 4.67e4' #alpha Ti, Alankar et al. Acta Materialia 59 (2011) 7003-7009
     fill_method = symmetric9
+    euler_angle_1 = 45
+    euler_angle_2 = 60
+    euler_angle_3 = 30
   []
   [stress]
     type = ComputeMultipleCrystalPlasticityStress
@@ -156,9 +159,24 @@
     type = CrystalPlasticityHCPDislocationSlipBeyerleinUpdate
     number_slip_systems = 5
     slip_sys_file_name = select_input_slip_sys_hcp.txt
-    unit_cell_dimension = '2.951e-7 2.951e-7 4.684e-7' #alpha Ti, Wood. Proc. Phys. Soc. 80 (1962) 783-786
-    # unit_cell_dimension = '2.951 2.951 4.684' #in Angstroms, alpha Ti, Wood. Proc. Phys. Soc. 80 (1962) 783-786
-    unit_cell_type = HCP
+    unit_cell_dimension = '2.934e-7 2.934e-7 4.657e-7' #Ti, in mm, https://materialsproject.org/materials/mp-46/
+    temperature = temperature
+    initial_forest_dislocation_density = 15.0e5
+    initial_substructure_density = 1.0e3
+    slip_system_modes = 4
+    number_slip_systems_per_mode = '1 1 2 1'
+    lattice_friction_per_mode = '10 10 15 30'
+    effective_shear_modulus_per_mode = '47e3 47e3 47e3 47e3'
+    burgers_vector_per_mode = '2.934e-7 2.934e-7 2.934e-7 6.586e-7' #Ti, in mm, https://materialsproject.org/materials/mp-46/
+    slip_generation_coefficient_per_mode = '2e7 1e5 2e7 2e7'
+    normalized_slip_activiation_energy_per_mode = '3e-2 4e-3 3e-2 3e-2'
+    slip_energy_proportionality_factor_per_mode = '100 330 100 100'
+    substructure_rate_coefficient_per_mode = '100 400 1 1'
+    applied_strain_rate = 0.001
+    gamma_o = 1.0e-3
+    strain_rate_sensitivity_exponent = 0.05
+    Hall_Petch_like_constant_per_mode = '10 10 10 10'
+    grain_size = 20.0e-3 #20 microns,
   []
 []
 
@@ -220,8 +238,8 @@
 
   dt = 0.05
   dtmin = 0.01
-  dtmax = 10.0
-  num_steps = 1
+  dtmax = 0.1
+  end_time = 0.4
 []
 
 [Outputs]

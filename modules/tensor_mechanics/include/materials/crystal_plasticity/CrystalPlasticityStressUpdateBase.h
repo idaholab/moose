@@ -51,7 +51,7 @@ public:
    * crystals into a a 3-index Cartesian representation, using the convention
    * a$_1$ = x of axis alignment in the basal plane
    */
-   void transformHexagonalMillerBravisSlipSystems(const MooseUtils::DelimitedFileReader & reader);
+  void transformHexagonalMillerBravisSlipSystems(const MooseUtils::DelimitedFileReader & reader);
 
   /**
    * Computes the Schmid tensor (m x n) for the original (reference) crystal
@@ -184,7 +184,7 @@ protected:
   /// multi-material systems
   const std::string _base_name;
 
-  const enum class UnitCellType { BCC, FCC, HCP } _unit_cell_type;
+  const enum class CrystalLatticeType { BCC, FCC, HCP } _crystal_lattice_type;
 
   const std::vector<Real> _unit_cell_dimension;
 

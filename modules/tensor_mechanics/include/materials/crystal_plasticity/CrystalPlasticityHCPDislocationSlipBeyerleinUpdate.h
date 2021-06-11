@@ -26,7 +26,7 @@ public:
   CrystalPlasticityHCPDislocationSlipBeyerleinUpdate(const InputParameters & parameters);
 
 protected:
-//  TODO: add in capability to read the resistance parameters from the file?
+  //  TODO: add in capability to read the resistance parameters from the file?
 
   /**
    * initializes the stateful properties such as
@@ -57,13 +57,11 @@ protected:
 
   virtual bool calculateSlipRate() override;
 
-  virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & dslip_dtau) override;
-
   /**
    * Calculates the value of the plastic slip derivative with respect to dislocation
-   * slip alone, to allow for flexibility to add additional dislocation mechanisms
+   * slip alone
    */
-  void calculateSlipDerivative(std::vector<Real> & ddislocaitonslip_dtau);
+  virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & dslip_dtau) override;
 
   /**
    * Finalizes the values of the state variables and slip system resistance
@@ -113,7 +111,7 @@ protected:
   /**
    * Calculates the current value of the incremented substructure dislocations
    */
-   bool calculateSubstructureDislocationDensity();
+  bool calculateSubstructureDislocationDensity();
 
   /**
    * Calculates the sum of the contribution of the initial slip resistance and the
@@ -215,7 +213,6 @@ protected:
 
   /// Value of the grain size, either average or associated with a particular block
   const Real _grain_size;
-
 
   ///@{Stores the slip system resistance, dislocation densities from the previous substep
   std::vector<Real> _previous_substep_slip_resistance;

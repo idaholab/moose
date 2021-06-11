@@ -235,6 +235,10 @@ ComputeMultipleCrystalPlasticityStress::updateStress(RankTwoTensor & cauchy_stre
 
       if (_convergence_failed)
       {
+#ifdef DEBUG
+        mooseWarning("The crystal plasticity constitutive model has failed to converge. Increasing "
+                     "the number of substeps.");
+#endif
         substep_iter++;
         num_substep *= 2;
         break;

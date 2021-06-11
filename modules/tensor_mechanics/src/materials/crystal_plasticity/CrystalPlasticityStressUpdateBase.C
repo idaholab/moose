@@ -29,9 +29,10 @@ CrystalPlasticityStressUpdateBase::validParams()
   params.set<bool>("compute") = false;
   params.suppressParameter<bool>("compute");
 
-  params.addParam<MooseEnum>("unit_cell_type",
-                             MooseEnum("BCC FCC HCP", "FCC"),
-                             "Type of the unit cell, i.e., BCC, FCC, HCP, etc.");
+  params.addParam<MooseEnum>(
+      "crystal_lattice_type",
+      MooseEnum("BCC FCC HCP", "FCC"),
+      "Crystal lattice type or representative unit cell, i.e., BCC, FCC, HCP, etc.");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "unit_cell_dimension",
@@ -45,8 +46,10 @@ CrystalPlasticityStressUpdateBase::validParams()
   params.addRequiredParam<unsigned int>(
       "number_slip_systems",
       "The total number of possible active slip systems for the crystalline material");
-  params.addRequiredParam<FileName>("slip_sys_file_name",
-                                    "Name of the file containing the slip systems");
+  params.addRequiredParam<FileName>(
+      "slip_sys_file_name",
+      "Name of the file containing the slip systems, one slip system per row, with the slip plane "
+      "normal given before the slip plane direction.");
   params.addParam<Real>("number_cross_slip_directions",
                         0,
                         "Quanity of unique slip directions, used to determine cross slip familes");
@@ -75,7 +78,8 @@ CrystalPlasticityStressUpdateBase::CrystalPlasticityStressUpdateBase(
     const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _unit_cell_type(getParam<MooseEnum>("unit_cell_type").getEnum<UnitCellType>()),
+    _crystal_lattice_type(
+        getParam<MooseEnum>("crystal_lattice_type").getEnum<CrystalLatticeType>()),
     _unit_cell_dimension(getParam<std::vector<Real>>("unit_cell_dimension")),
     _number_slip_systems(getParam<unsigned int>("number_slip_systems")),
     _slip_sys_file_name(getParam<FileName>("slip_sys_file_name")),
@@ -144,9 +148,10 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
     _slip_plane_normal[i].resize(LIBMESH_DIM);
   }
 
-  if (_unit_cell_type == UnitCellType::HCP)
+  if (_crystal_lattice_type == CrystalLatticeType::HCP)
     transformHexagonalMillerBravisSlipSystems(_reader);
-  else if (_unit_cell_type == UnitCellType::BCC || _unit_cell_type == UnitCellType::FCC)
+  else if (_crystal_lattice_type == CrystalLatticeType::BCC ||
+           _crystal_lattice_type == CrystalLatticeType::FCC)
   {
     for (unsigned int i = 0; i < _number_slip_systems; ++i)
     {
@@ -168,7 +173,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
     _slip_plane_normal[i].scale(1.0 / _slip_plane_normal[i].l2_norm());
     _slip_direction[i].scale(1.0 / _slip_direction[i].l2_norm());
 
-    if (_unit_cell_type != UnitCellType::HCP)
+    if (_crystal_lattice_type != CrystalLatticeType::HCP)
     {
       // check if slip direction is normal to the slip plane normal
       auto magnitude = _slip_plane_normal[i].dot(_slip_direction[i]);
@@ -187,7 +192,8 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
 }
 
 void
-CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(const MooseUtils::DelimitedFileReader & reader)
+CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
+    const MooseUtils::DelimitedFileReader & reader)
 {
   const unsigned int miller_bravis_indices = 4;
   std::vector<Real> miller_bravis_slip_direction, temporary_slip_direction, temporary_slip_plane;
@@ -223,21 +229,36 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(con
     // read in raw data from file and store in the temporary vectors
     for (unsigned int j = 0; j < reader.getData(i).size(); ++j)
     {
+      // Check that the indices of the basal plane sum to zero for consistency
+      Real basal_pl_sum = 0.0;
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        basal_pl_sum += reader.getData(i)[k];
+
+      if (basal_pl_sum > _zero_tol)
+        mooseError(
+            "CrystalPlasticityStressUpdateBase Error: The specified HCP basal plane Miller-Bravis "
+            "indices do not sum to zero. Check the values supplied in the associated text file.");
+
       if (j < miller_bravis_indices)
       {
-        // Planes are directly copied over, per a_1 = convention used here
+        // Planes are directly copied over, per a_1 = x convention used here:
+        // Store the first two indices for the basal plane, (h and k), and drop
+        // the redundant third basal plane index (i)
         if (j < 2)
           temporary_slip_plane[j] = reader.getData(i)[j];
+        // Store the c-axis index as the third entry in the orthorombic index convention
         else if (j == 3)
-          temporary_slip_plane[j-1] = reader.getData(i)[j];
+          temporary_slip_plane[j - 1] = reader.getData(i)[j];
       }
       else
         miller_bravis_slip_direction[j - miller_bravis_indices] = reader.getData(i)[j];
     }
 
     // save the 3-index combinations, with the convention a_1 = x
-    temporary_slip_direction[0] = 2.0 * miller_bravis_slip_direction[0] + miller_bravis_slip_direction[1];
-    temporary_slip_direction[1] = miller_bravis_slip_direction[0] + 2.0 * miller_bravis_slip_direction[1];
+    temporary_slip_direction[0] =
+        2.0 * miller_bravis_slip_direction[0] + miller_bravis_slip_direction[1];
+    temporary_slip_direction[1] =
+        miller_bravis_slip_direction[0] + 2.0 * miller_bravis_slip_direction[1];
     temporary_slip_direction[2] = miller_bravis_slip_direction[3];
 
     // perform transformation calculation
@@ -382,6 +403,7 @@ CrystalPlasticityStressUpdateBase::calculateShearStress(
   {
     for (unsigned int i = 0; i < _number_slip_systems; ++i)
       _tau[_qp][i] = pk2.doubleContraction(_flow_direction[_qp][i]);
+
     return;
   }
 
