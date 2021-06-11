@@ -162,5 +162,19 @@ class Test(unittest.TestCase):
         hashes = mooseutils.git_civet_hashes('df827bfaf6ea29394ce609bdf032bd40a9818cfc')
         self.assertEqual(hashes, gold)
 
+    def testGitIsConfig(self):
+        with mock.patch('mooseutils.check_output', return_value='moosetest') as mock_check_output:
+            self.assertTrue(mooseutils.git_is_config('user.name', 'moosetest', '/working/dir'))
+        mock_check_output.assert_called_with(['git', 'config', '--get', 'user.name'], cwd='/working/dir')
+
+    def testGitIsBranch(self):
+        with mock.patch('mooseutils.check_output', side_effect=['true', 'main']) as mock_check_output:
+            self.assertTrue(mooseutils.git_is_branch('main', '/working/dir'))
+        mock_check_output.assert_called_with(['git', 'branch', '--show-current'], cwd='/working/dir')
+
+        with mock.patch('mooseutils.check_output', side_effect=['false']) as mock_check_output:
+            self.assertFalse(mooseutils.git_is_branch('main', '/working/dir'))
+        mock_check_output.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)
