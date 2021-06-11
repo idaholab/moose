@@ -29,7 +29,7 @@ Test specification files are [!ac](HIT) formatted ones that define the tests to 
 The `type` parameter specifies one of the available test methods. In the above case, the `Exodiff` object is used, which requires an input file be specified with the `input` parameter and an ExodusII formatted gold file be specified with the `exodiff` parameter. The [#demo] section will show how to use the `Exodiff` and `RunException` testers on the `DarcyPressure` class. For a complete list of test objects, please see the discussion about [testers](python/TestHarness.md#testers).
 
 !alert tip title=Tests should be simple and cheap.
-Although it is important that regression tests be comprehensive, ideally, they should also be as simple as possible and not have to process any unnecessary source code. Thus, the input file should create as few objects as possible beyond one for the class being tested. MOOSE developers abide by the "2 second rule," i.e., a test should complete in no more than two seconds.
+Although it is important that regression tests be comprehensive, ideally, they should also be as simple as possible and not have to process any unnecessary source code. The input file should create as few objects as possible beyond one for the class being tested. MOOSE developers abide by the "2 second rule," i.e., a test should complete in no more than two seconds.
 
 ### Run Tests
 
@@ -37,19 +37,27 @@ The [`run_tests`](tutorials/tutorial01_app_development/step08_test_harness/run_t
 
 !include commands/run_tests.md
 
-This will execute the [`simple_diffusion.i`](tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/simple_diffusion/simple_diffusion.i) file on four processors and conduct the `Exodiff` procedure. When the [#test-demo] section introduces two new specifications, it will be shown that the above command will cause those tests to run as well.
+This will execute the [`simple_diffusion.i`](tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/simple_diffusion/simple_diffusion.i) file and conduct the `Exodiff` procedure. When the [#test-demo] section introduces two new specifications, it will be shown that the above command will cause those tests to run as well.
 
-!alert note title=Tests can be executed in parallel.
-The `run_tests` script accepts the "`-j <n>`" argument for specifying the number of processors, `<n>`, to use. Besides increasing performance, using this command is also a test in itself, since it ought to be confirmed that the application is capable of producing the expected results in parallel. See the discussion about [parallel test execution](python/TestHarness.md#parallel) for more information.
+!alert! note title=Tests can be executed in parallel (in a variety of ways).
+The `run_tests` script has several command-line options that can be useful to developers (see [python/TestHarness.md#moreoptions]). The most common is the "`-j <n>`" argument for specifying the number of tests to run simultaneously. When used, each of the `n` processors will independently run one of the test specifications, which decreases the total time it takes to run all tests.
+
+A given test specification can also be made to run in parallel and/or with multithreading in the manner discussed in the [previous step](tutorial01_app_development/step07_parallel.md). So in addition to running multiple unique tests simultaneously by specifying the `-j` argument, each can invoke [!ac](MPI) using `-p <n>` and/or threads using `--n-threads <n>` (or `--n-threads=<n>`). For example, the command below will run four test jobs on two processors and two threads each.
+
+!include commands/run_tests.md
+         replace=['-j4', '-j4 -p2 --n-threads\=2']
+
+Regression tests are usually cheap, and so individual parallelism generally won't increase overall testing speed. But besides possibly increasing performance, using the `-p` command is also a test in itself, since it ought to be confirmed that the application is capable of producing the expected results in parallel. See the discussion about [parallel test execution](python/TestHarness.md#parallel) for more information.
+!alert-end!
 
 ## Demonstration id=demo
 
-This demonstration will show how to create the [three test setup items](#setup) that were mentioned earlier in order to have an official test of the `DarcyPressure` kernel. But, first, notice that the weak form requires that $\mu_{f} \; {=}\mathllap{\small{/}\,} \; 0$:
+This demonstration will show how to create the [three test setup items](#setup) that were mentioned earlier in order to have an official test of the `DarcyPressure` kernel. But, first, notice that the weak form requires that $\mu \; {=}\mathllap{\small{/}\,} \; 0$:
 
 !equation
-(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-If $\mu_{f} = 0$, the residual would yield a [`NaN`](https://en.wikipedia.org/wiki/NaN) value and the application would crash. Thus, the source code shall be modified to prevent this condition and a second test will be created with the input, `viscosity = 0`, to verify that a proper, unambiguous error occurs.
+If $\mu = 0$, the residual would yield a [`NaN`](https://en.wikipedia.org/wiki/NaN) value and the application would crash. Thus, the source code shall be modified to prevent this condition and a second test will be created with the input `viscosity = 0` to verify that a proper, unambiguous error occurs.
 
 ### Source Code id=source-demo
 
@@ -79,11 +87,10 @@ The simple diffusion test is a great example of a regression test that is simple
 
 Start by creating a directory to store test files related to the `DarcyPressure` class:
 
-!listing language=bash
-cd ~/projects/babbler
-mkdir test/tests/kernels/darcy_pressure
+!include commands/mkdir.md
+         replace=['<d>', 'test/tests/kernels/darcy_pressure']
 
-In this folder, create a file named `darcy_pressure_test.i` and add the inputs given in [darcy-kernel-test]. Here, the value input for the permeability represents the steel ball medium as it was given on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page. The `"exodus"` parameter was set to `true` in the `[Outputs]` block so that an `Exodiff` object can reference the output file.
+In this folder, create a file named `darcy_pressure_test.i` and add the inputs given in [darcy-kernel-test]. Here, the value input for the permeability is that for the 1 mm steel sphere medium and the viscosity is left as the default value $\mu_{f}$. The `"exodus"` parameter was set to `true` in the `[Outputs]` block so that an `Exodiff` object can reference the output file.
 
 !listing tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/darcy_pressure/darcy_pressure_test.i
          link=False
@@ -113,9 +120,9 @@ cd ~/projects/babbler/test/tests/kernels/darcy_pressure
 
 Visualize the results of the `darcy_pressure_test.i` input file with PEACOCK:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/kernels/darcy_pressure
-peacock -r darcy_pressure_test_out.e
+!include commands/peacock_r.md
+         replace=['<d>', 'test/tests/kernels/darcy_pressure',
+                  '<e>', 'darcy_pressure_test_out']
 
 Confirm that the solution resembles that which is shown in [results]. Notice that the solution satisfies the BVP: $p(0, y) = 0$ and $p(1, y) = 1$, $\forall \, y \in [0, 1]$. Also, notice that the solution directly maps to the spatial coordinates along the $x$-direction as expected. This result is clearly indicated by the contour colors displayed by [results]. Thus, one may declare that the solution is good and, therefore, that the `DarcyPressure` class is functioning properly.
 
@@ -128,10 +135,9 @@ Confirm that the solution resembles that which is shown in [results]. Notice tha
 
 Since the results of the `darcy_pressure_test.i` input file have been deemed good, the ExodusII output can now become a certified gold file:
 
-!listing language=bash
-cd ~/projects/babbler/test/tests/kernels/darcy_pressure
-mkdir gold
-mv darcy_pressure_test_out.e gold
+!include commands/new_gold.md
+         replace=['<d>', 'kernels/darcy_pressure',
+                  '<e>', 'darcy_pressure_test_out']
 
 Next, create a file named `tests` in `test/tests/kernels/darcy_pressure` and add the inputs given in [darcy-test-spec]. The first test is defined in the `[test]` block, which creates an `Exodiff` object that will attempt to match the output from `darcy_pressure_test.i` to the gold file just created. The second test is defined in the `[zero_viscosity_error]` block, which creates a `RunException` object that attempts to match the error message incurred by `zero_viscosity_error.i` to the string specified for the `expect_err` parameter.
 
@@ -152,7 +158,7 @@ test:kernels/darcy_pressure.test ...............................................
 test:kernels/simple_diffusion.test ........................................................................ OK
 test:kernels/darcy_pressure.zero_viscosity_error .......................................................... OK
 --------------------------------------------------------------------------------------------------------------
-Ran 3 tests in 0.4 seconds.
+Ran 3 tests in 0.4 seconds. Average test time 0.1 seconds, maximum test time 0.1 seconds.
 3 passed, 0 skipped, 0 pending, 0 failed
 ```
 
@@ -160,9 +166,8 @@ Ran 3 tests in 0.4 seconds.
 
 Update the `DarcyPressure.C` file and add all of the new test files to the git tracker:
 
-!listing language=bash
-cd ~/projects/babbler
-git add src/kernels/DarcyPressure.C test/tests/kernels/darcy_pressure/
+!include commands/git_add.md
+         replace=['*', 'src/kernels/DarcyPressure.C test/tests/kernels/darcy_pressure']
 
 Now, commit and push the changes to the remote repository:
 

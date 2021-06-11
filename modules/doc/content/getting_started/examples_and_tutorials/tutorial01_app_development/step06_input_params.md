@@ -4,7 +4,7 @@
 
 # Step 6: Define a Set of Input Parameters
 
-This step introduces the class used to a define a unique set of parameters for a `MooseObject`. The values for these parameters can be specified by users via input files. For the demonstration, the `DarcyPressure` class, which was created in the [previous step](tutorial01_app_development/step05_kernel_object.md#source-demo), will be modified to accept any arbitrary real number for the `_permeability` and `_viscosity` variables. Then, the values for $K$ and $\mu_{f}$ will be specified in the input file.
+This step introduces the class used to a define a unique set of parameters for a `MooseObject`. The values for these parameters can be specified by users via input files. For the demonstration, the `DarcyPressure` class, which was created in the [previous step](tutorial01_app_development/step05_kernel_object.md#source-demo), will be modified to accept any arbitrary real numbers for the `_permeability` and `_viscosity` variables instead of hard-coding ones.
 
 ## Input Parameters
 
@@ -14,9 +14,8 @@ Every `MooseObject` includes a set of custom parameters within a single [`InputP
 
 When coding a `validParams()` function, it is customary to declare a `params` variable and initialize it with the `validParams()` output from the base class, e.g.,
 
-```C++
+!listing language=C++
 InputParameters params = ADKernelGrad::validParams();
-```
 
 This initialization means that the parameters for the given `MooseObject` always includes those which are defined for the base class. These parameters provide standard usability for inherited classes, e.g., `"variable"`, `"block"`, or `"boundary"`.
 
@@ -30,15 +29,13 @@ The first item appended to `params` should be an `addClassDescription()` object,
 
 There are many more methods available to `InputParameters` objects. All of which provide different strategies to lend, or limit, user-control over an object's construction. One of the most basic is `addRequiredParam()`. This can be used to define parameters that *must* be set by a user:
 
-```C++
+!listing language=C++
 params.addRequiredParam<T>("name", "description");
-```
 
 where `T` is the required data type of the input, e.g., `Real`, `std::vector<Real>`, or `std::string`. Another basic method is `addParam()`, which can be used to define optional parameters:
 
-```C++
+!listing language=C++
 params.addParam<T>("name", value, "description");
-```
 
 where `value` is the default value set for the parameter if one is not specified in the input file.
 
@@ -60,16 +57,16 @@ The `getParam()` method can be called from within any member---not just the cons
 
 ## Demonstration id=demo
 
-Recall from the [previous step](tutorial01_app_development/step05_kernel_object.md#physics) that, upon applying the [!ac](BVP), the weak form of Darcy's pressure equation is
+Recall from the [previous step](tutorial01_app_development/step05_kernel_object.md#physics) that, upon applying the [!ac](BVP) and the isotropy assumption, the weak form of Darcy's pressure equation is
 
 !equation id=darcy-weak
-(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-Also, recall that the property values are $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ and $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$.
+The `DarcyPressure` object shall be modified to allow users to define the constant properties $K$ and $\mu$.
 
 ### Source Code id=source-demo
 
-The `DarcyPressure` object shall be modified to allow users to define the constant properties. A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu_{f}$. Assuming that $K$ and $\mu_{f}$ are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
+A required parameter `"permeability"` shall be used to set the value of $K$ and an optional parameter `"viscosity"` whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu$. Assuming that both are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
 
 In `DarcyPressure.h`, declare `_permeability` and `_viscosity` as reference variables so that their input value may be accessed without having to create additional copies of them:
 
@@ -107,37 +104,32 @@ The properties in [darcy-weak] can now be specified in the input file. However, 
 
 Now, execute the input file:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
-```
 
 ### Results id=result-demo
 
 Run the following commands to visualize the solution with PEACOCK:
 
-```bash
-cd ~/projects/babbler/problems
-peacock -r pressure_diffusion_out.e
-```
+!include commands/peacock_r.md
+         replace=['<d>', 'problems',
+                  '<e>', 'pressure_diffusion_out']
 
 Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [application_usage/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
 
 ### Commit id=commit-demo
 
-Add the changes made for `DarcyPressure.C` and `pressure_diffusion.i`:
+Add the changes made to the `DarcyPressure` object files and `pressure_diffusion.i`:
 
-```bash
-cd ~/projects/babbler
-git add src/kernels/DarcyPressure.C problems/pressure_diffusion.i
-```
+!include commands/git_add.md
+         replace=['*', 'include/kernels/DarcyPressure.h src/kernels/DarcyPressure.C problems/pressure_diffusion.i']
 
 Now, commit and push the changes to the remote repository:
 
-```bash
+!listing language=bash
 git commit -m 'defined "permeability" and "viscosity" input parameters'
 git push
-```
 
 !content pagination previous=tutorial01_app_development/step05_kernel_object.md
                     next=tutorial01_app_development/step07_parallel.md

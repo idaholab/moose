@@ -23,9 +23,9 @@ BabblerApp::BabblerApp(InputParameters parameters) : MooseApp(parameters)
 BabblerApp::~BabblerApp() {}
 
 void
-BabblerApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+BabblerApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAll(f, af, s);
+  ModulesApp::registerAll(f, af, syntax);
   Registry::registerObjectsTo(f, {"BabblerApp"});
   Registry::registerActionsTo(af, {"BabblerApp"});
 

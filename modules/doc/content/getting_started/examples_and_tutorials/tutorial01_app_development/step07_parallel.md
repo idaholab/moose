@@ -10,30 +10,28 @@ A major objective of MOOSE is performance. This step briefly introduces parallel
 
 There are two types of parallelism supported by MOOSE: [multiprocessing](https://en.wikipedia.org/wiki/Multiprocessing) and [multithreading](https://en.wikipedia.org/wiki/Thread_(computing%29). At its core, MOOSE is designed to run in parallel by using the [Message Passing Interface](https://en.wikipedia.org/wiki/Message_Passing_Interface) protocol. [!ac](MPI) is a library of programming tools for accessing hardware and controlling how multiple CPUs exchange information while working simultaneously to run a single computer program. Shared memory parallelism is also supported through various threading libraries and can be used in union with [!ac](MPI).
 
-The general approach to solving a [!ac](FE) simulation in parallel is to partition the mesh and run an individual process that assembles and solves the system of equations for each of those mesh partitions. In general, the duration the solve procedure decreases as the number of CPUs increases.
+The general approach to solving a [!ac](FE) simulation in parallel is to partition the mesh and run an individual process that assembles and solves the system of equations for each of those mesh partitions. In general, the duration of the solve procedure decreases as the number of CPUs increases.
 
 ### Basic Commands id=commands
 
 The `mpiexec` command is used to execute a MOOSE-based application using [!ac](MPI). For example, the tutorial application can be executed with the following syntax, where the `-n 4` is an argument supplied to the `mpiexec` command that indicates to use 4 processors for execution:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 mpiexec -n 4 ./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i
-```
 
 In most cases, using [!ac](MPI) alone is the best coarse of action. If desired, threading may
 be enabled using the `--n-threads` option, which is supplied directly to the application executable.
 For example, the following runs the application with 4 threads:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 ./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i --n-threads=4
-```
 
 It is possible to use both [!ac](MPI) and threading. This is accomplished by combining the two
 methods described above.
 
-!alert tip title=Optimum numbers are hardware and problem dependent
+!alert tip title=Optimum numbers are hardware and problem dependent.
 The number of processors and threads available for execution is hardware dependent. A modern laptop
 typically has 4 processors, with 2 threads each. In general, it is recommended to begin with
 using just [!ac](MPI). Thus, it is typical to use between 4 and 8 processors for the `mpiexec`
@@ -41,7 +39,7 @@ command. If threading is added, then using 4 processors for [!ac](MPI) and 2 for
 typical. The optimum arrangement for parallel execution will be hardware and problem dependent. It
 may be worth while exploring differing arrangements before running a full-scale problem.
 
-!alert note title=Parallel can be enabled in Peacock
+!alert note title=Parallelism can be enabled in Peacock.
 In the "Execute" tab of Peacock, the `mpiexec` and `--n-threads` options can be used by selecting the "Use MPI" and "Use Threads" checkboxes and specifying the command syntax. These options can be set and enabled by default in +Peacock > Preferences+.
 
 *For more information about command-line options, please visit the [application_usage/command_line_usage.md] page.*
@@ -68,7 +66,7 @@ MOOSE includes a tool for evaluating performance: [PerfGraphOutput.md]. This ena
 
 There is an entire field of science about [!ac](HPC) and massively parallel processing. Although it is a valuable one, a formal discussion cannot be made here. One concept worth mentioning is [scalable parallelism](https://en.wikipedia.org/wiki/Scalable_parallelism), which refers to software that performs at the same level for larger problems that use more processes as it does for smaller problems that use fewer processes. In MOOSE, selecting a number of processes based on the number of [!ac](DOFs) in the system is a simple way to try and achieve scalability.
 
-!alert tip title=Try to target 20,000 [!ac](DOFs)-per-process
+!alert tip title=Try to target 20,000 [!ac](DOFs)-per-process.
 MOOSE developers tend to agree that 20,000 is the ideal number of [!ac](DOFs) that a single process may be responsible for. This value is reported as "`Num Local DOFs`" in the terminal printout at the beginning of every execution. There are, of course, some exceptions; if a problem exhibits speedup with less than 20,000 [!ac](DOFs)/process, then just use that.
 
 *For more information about application performance, please visit the [application_development/performance_benchmarking.md] page.*
@@ -80,12 +78,11 @@ ran, but with two particular command-line options: First, the performance inform
 included using the `--timing` option and second, the mesh will be uniformly refined using the `-r`
 option to make the problem large enough for analysis.
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ./babbler-opt -i pressure_diffusion.i -r 4 --timing
-```
 
-!alert warning title=Use less refinement for older hardware
+!alert warning title=Use less refinement for older hardware.
 Running this problem with 4 levels of refinement may be too much for older systems. It is still
 possible to follow along with this example using less levels of refinement.
 
@@ -108,7 +105,7 @@ the root processor and is roughly equivalent to the number on the other processo
 
 The performance information is presented at the end of the simulation, as demonstrated below.
 
-```bash
+```
 Performance Graph:
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 |                  Section                 | Calls |   Self(s)  |   Avg(s)   |    %   | Children(s) |   Avg(s)   |    %   |  Total(s)  |   Avg(s)   |    %   |
@@ -132,10 +129,9 @@ To test the parallel scaling of this [!ac](FE) model it can be executed with an 
 of processors. For example, the following executes the same problem with two processors. If the
 problem is scalable, then the expectation is that the +solve time+ should be twice as fast.
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 mpiexec -n 2 ./babbler-opt -i pressure_diffusion.i -r 4 --timing
-```
 
 The data presented in [scale] shows decreasing solve time as the number of processors increases.
 This problem was executed on a 2019 Mac Pro with a 2.5 GHz 28-Core Intel Xeon W. For perfect
