@@ -98,6 +98,7 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
   _Wij.setZero();
   _Wij_old.setZero();
   _WijPrime.setZero();
+  _converged = true;
 }
 
 void
@@ -162,7 +163,7 @@ BetterSubChannel1PhaseProblem::~BetterSubChannel1PhaseProblem()
 bool
 BetterSubChannel1PhaseProblem::converged()
 {
-  return true;
+  return _converged;
 }
 
 double
@@ -752,6 +753,11 @@ BetterSubChannel1PhaseProblem::externalSolve()
   while (P_error > P_tol && P_it < P_it_max)
   {
     P_it += 1;
+    if (P_it == P_it_max and _n_blocks != 1)
+    {
+      _console << "Reached maximum number of axial pressure iterations" << std::endl;
+      _converged = false;
+    }
     _console << "Solving Outer Iteration : " << P_it << std::endl;
     auto mdot_L2norm_old_axial = _mdot_soln->L2norm();
     auto P_L2norm_old_axial = _P_soln->L2norm();
@@ -771,6 +777,12 @@ BetterSubChannel1PhaseProblem::externalSolve()
       while (T_block_error > T_tol && T_it < T_it_max)
       {
         T_it += 1;
+        if (T_it == T_it_max)
+        {
+          _console << "Reached maximum number of temperature iterations for block :" << iblock
+                   << std::endl;
+          _converged = false;
+        }
         auto T_L2norm_old_block = _T_soln->L2norm();
 
         computeWij(iblock);
