@@ -47,7 +47,7 @@ class CommitCommand(command.CommandComponent):
         if content:
             raise exceptions.MooseDocsException("Content is not supported for the 'git commit' command.")
 
-        if not mooseutils.is_git_repo():
+        if not mooseutils.git_is_repo():
             raise exceptions.MooseDocsException("The current working directory is not a git repository.")
 
         core.Word(parent, content=mooseutils.git_commit())
