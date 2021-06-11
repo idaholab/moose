@@ -73,6 +73,17 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowSink", "permeability_qp");
   _deps.insertDependency("PorousFlowSink", "thermal_conductivity_qp");
 
+  _deps.insertDependency("PorousFlowOutflowBC", "pressure_saturation_qp");
+  _deps.insertDependency("PorousFlowOutflowBC", "density_qp");
+  _deps.insertDependency("PorousFlowOutflowBC", "permeability_qp");
+  _deps.insertDependency("PorousFlowOutflowBC", "viscosity_nodal");
+  _deps.insertDependency("PorousFlowOutflowBC", "density_nodal");
+  _deps.insertDependency("PorousFlowOutflowBC", "relative_permeability_nodal");
+  _deps.insertDependency("PorousFlowOutflowBC", "mass_fraction_nodal");
+  _deps.insertDependency("PorousFlowOutflowBC", "enthalpy_nodal");
+  _deps.insertDependency("PorousFlowOutflowBC", "thermal_conductivity_qp");
+  _deps.insertDependency("PorousFlowOutflowBC", "temperature_qp");
+
   // Dirac kernel dependencies
   _deps.insertDependency("PorousFlowPeacemanBorehole", "PorousFlowLineSink");
   _deps.insertDependency("PorousFlowPolyLineSink", "PorousFlowLineSink");
