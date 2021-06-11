@@ -8,5 +8,6 @@
     abs_zero = 1.0e-8
     rel_err = 1.0e-5
     cli_args = "Postprocessors/active=''"
+    requirement = 'Contact module action shall allow for multiple contact pairs when selecting node-face formulation.'
   []
 []
