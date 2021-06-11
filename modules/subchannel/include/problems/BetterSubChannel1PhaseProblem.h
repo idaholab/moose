@@ -69,6 +69,8 @@ protected:
   const bool _compute_viscosity;
   /// Flag that informs if we need to solve the Enthalpy/Temperature equations or not
   const bool _compute_power;
+  /// Variable that informs whether we exited external solve with a converged solution or not
+  bool _converged;
   /// Time step
   const Real & _dt;
   /// Outlet Pressure
