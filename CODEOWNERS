@@ -15,6 +15,7 @@
 
 /.github @permcody
 
+/framework/*/executioners/*Solve* @GiudGiud
 /framework/*/fv* @rwcarlsen @lindsayad
 /framework/*/interfacekernels @lindsayad
 /framework/*/materials @rwcarlsen
@@ -34,7 +35,7 @@
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @rwcarlsen @andrsd
 /modules/fsi @fdkong
-/modules/navier_stokes @lindsayad
+/modules/navier_stokes @lindsayad @GiudGiud
 /modules/ray_tracing @loganharbour
 /modules/stochastic_tools @aeslaughter @zachmprince
 
