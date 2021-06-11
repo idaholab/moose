@@ -375,3 +375,71 @@ The input file using the fully-saturated Kernels:
 !listing modules/porous_flow/test/tests/sinks/s09_fully_saturated.i
 
 !media sinks/s09.png style=width:80%;margin-left:10px caption=Results of the advection of a fluid component test, illustrating that the numerical implementation of porous flow within MOOSE diffuses sharp fronts, but advects them at the correct velocity (which is 1m/s in this case).  Notice the centre of the front is at the correct position in each picture.  Less diffusion is experienced when upwinding is not used, but notice the slight "bump" in the non-upwinded version at early times.  id=s09_fig
+
+## PorousFlowOutflowBC and advection of a fluid component
+
+The same problem as described in the previous section may also be modelled using a [PorousFlowOutflowBC](PorousFlowOutflowBC.md) on the right-hand boundary to allow `component = 1` to exit the system:
+
+!listing sinks/s13.i block=BCs
+
+Again the sharp front (described by the advection equation
+with the initial and boundary conditions) is not maintained by the fully-upwind stabilization used.  For many more details, see the [stabilization page](stabilization.md).
+Nevertheless, MOOSE advects the smooth front with the correct
+velocity, as shown in [s09_fig], and the PorousFlowOutflowBC allows the fluid to freely exit the right-hand boundary.
+
+!media sinks/s13.png style=width:80%;margin-left:10px caption=Results of the advection of a fluid component test utilizing a PorousFlowOutflowBC on the right-hand side to allow the fluid to flow freely from that boundary.  id=s13_fig
+
+## PorousFlowOutflowBC recording fluid flow rates through a boundary
+
+A [PorousFlowPointSourceFromPostprocessor](PorousFlowPointSourceFromPostprocessor.md) injects 1$\,$kg.s$^{-1}$ into a 2D model containing a fully-saturated, single-component fluid:
+
+!listing sinks/s14.i block=DiracKernels
+
+[PorousFlowOutflowBCs](PorousFlowOutflowBC.md) are applied to all the outer boundaries to allow the fluid to escape freely from the model:
+
+!listing sinks/s14.i block=BCs
+
+The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](NodalSum.md) postprocessor:
+
+!listing sinks/s14.i block=Postprocessors
+
+The results are shown in [s14_fig] where it is clear that the total outflow approaches the expected value of 1$\,$kg.s$^{-1}$.
+
+!media sinks/s14.png style=width:80%;margin-left:10px caption=Total flow rate from a model that includes a 1kg/s source of fluid.  id=s14_fig
+
+## PorousFlowOutflowBC recording heat flow rates through a boundary
+
+A thermo-hydro simulation involving a fully-saturated, single-component fluid coupled with temperature is considered here:
+
+!listing sinks/s15.i block=PorousFlowFullySaturated
+
+A [PorousFlowPointSourceFromPostprocessor](PorousFlowPointSourceFromPostprocessor.md) injects 1$\,$J.s$^{-1}$ into the model:
+
+!listing sinks/s15.i block=DiracKernels
+
+[PorousFlowOutflowBCs](PorousFlowOutflowBC.md) with `flux_type = heat` and `variable = T` allows heat-energy to escape freely from the model:
+
+!listing sinks/s15.i block=BCs
+
+The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](NodalSum.md) postprocessor:
+
+!listing sinks/s15.i block=Postprocessors
+
+The results are shown in [s15_fig] where it is clear that the total outflow approaches the expected value of 1$\,$J.s$^{-1}$.
+
+!media sinks/s15.png style=width:80%;margin-left:10px caption=Total flow rate from a model that includes a 1J/s source of fluid.  id=s15_fig
+
+
+## PorousFlowOutflowBC allowing fluid to exit a 2-phase, 2-component system
+
+In a 2-phase, 2-component system, the components are allowed to freely exit the system with using two [PorousFlowOutflowBCs](PorousFlowOutflowBC.md):
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg_outflowBC.i block=BCs
+
+This test checks that the BCs remove fluid at the correct rate.  The verification is plotted in [ip_outflowBC], where it can be seen that the asymptotic values are correct.
+
+!media sinks/ip_outflowBC.png
+	style=width:60%;margin:auto;padding-top:2.5%;
+	id=ip_outflowBC
+	caption=Mass flow rates from the two-phase model that contains a 0.01g/s source of water and a 0.02g/s source of gas, as well as PorousFlowOutflowBC boundary conditions that allow the fluids to freely exit the model.
+

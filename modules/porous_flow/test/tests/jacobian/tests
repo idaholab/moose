@@ -1164,4 +1164,44 @@
     issues = '#15742'
     design = 'PorousFlowPointEnthalpySourceFromPostprocessor.md'
   [../]
+  [./outflowbc01]
+    type = 'PetscJacobianTester'
+    input = 'outflowbc01.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all BCs"
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflowbc02]
+    type = 'PetscJacobianTester'
+    input = 'outflowbc02.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all BCs"
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflowbc03]
+    type = 'PetscJacobianTester'
+    input = 'outflowbc03.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all BCs"
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflowbc04]
+    type = 'PetscJacobianTester'
+    input = 'outflowbc04.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all BCs"
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
 []
