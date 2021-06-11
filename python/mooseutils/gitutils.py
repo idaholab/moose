@@ -29,7 +29,7 @@ def git_is_branch(name, working_dir=os.getcwd()):
     If the current location is not a repository, False is returned.
     """
     if git_is_repo(working_dir):
-        out = mooseutils.check_output(['git', 'branch', '--show-current'], cwd=working_dir).strip()
+        out = mooseutils.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd=working_dir).strip()
         return out == name
     return False
 

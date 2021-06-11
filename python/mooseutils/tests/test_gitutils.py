@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
     def testGitIsBranch(self):
         with mock.patch('mooseutils.check_output', side_effect=['true', 'main']) as mock_check_output:
             self.assertTrue(mooseutils.git_is_branch('main', '/working/dir'))
-        mock_check_output.assert_called_with(['git', 'branch', '--show-current'], cwd='/working/dir')
+        mock_check_output.assert_called_with(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd='/working/dir')
 
         with mock.patch('mooseutils.check_output', side_effect=['false']) as mock_check_output:
             self.assertFalse(mooseutils.git_is_branch('main', '/working/dir'))
