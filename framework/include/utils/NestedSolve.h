@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "RankTwoTensorForward.h"
 #include "InputParameters.h"
 
 #include "Eigen/Core"
@@ -78,18 +79,6 @@ protected:
   template <typename T>
   struct CorrespondingJacobianTempl;
 
-  template <>
-  struct CorrespondingJacobianTempl<Real>
-  {
-    using type = Real;
-  };
-
-  template <>
-  struct CorrespondingJacobianTempl<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
-  {
-    using type = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
-  };
-
   template <int N>
   struct CorrespondingJacobianTempl<Eigen::Matrix<Real, N, 1>>
   {
@@ -131,6 +120,7 @@ protected:
   }
 
   void linear(Real A, Real & x, Real b) const { x = b / A; }
+  void linear(RankTwoTensor A, RealVectorValue & x, RealVectorValue b) const;
 
   /**
    * Compute squared norm of v
@@ -142,6 +132,25 @@ protected:
   }
 
   Real normSquare(Real v) const { return v * v; }
+  Real normSquare(RealVectorValue v) const;
+};
+
+template <>
+struct NestedSolve::CorrespondingJacobianTempl<Real>
+{
+  using type = Real;
+};
+
+template <>
+struct NestedSolve::CorrespondingJacobianTempl<RealVectorValue>
+{
+  using type = RankTwoTensor;
+};
+
+template <>
+struct NestedSolve::CorrespondingJacobianTempl<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
+{
+  using type = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
 };
 
 template <typename V, typename T>

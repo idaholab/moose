@@ -8,11 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NestedSolve.h"
+#include "RankTwoTensor.h"
 
 #include "libmesh/utility.h"
+#include "libmesh/vector_value.h"
 
 InputParameters
-ßvalidParams()
+NestedSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -26,7 +28,7 @@ InputParameters
   params.addParam<unsigned int>(
       "min_iterations",
       NestedSolve::minIterationsDefault(),
-      "Minimum number of non linear iterations to execute befor accpting concergence");
+      "Minimum number of non linear iterations to execute before accepting convergence");
   params.addParam<unsigned int>("max_iterations",
                                 NestedSolve::maxIterationsDefault(),
                                 "Maximum number of non linear iterations");
@@ -49,4 +51,16 @@ NestedSolve::NestedSolve(const InputParameters & params)
     _max_iterations(params.get<unsigned int>("max_iterations")),
     _state(State::NONE)
 {
+}
+
+void
+NestedSolve::linear(RankTwoTensor A, RealVectorValue & x, RealVectorValue b) const
+{
+  x = A.inverse() * b;
+}
+
+Real
+NestedSolve::normSquare(RealVectorValue v) const
+{
+  return v.norm_sq();
 }

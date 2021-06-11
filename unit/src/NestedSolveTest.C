@@ -10,8 +10,11 @@
 #include "gtest/gtest.h"
 
 #include "NestedSolve.h"
+#include "RankTwoTensor.h"
 
-TEST(FixedSize, test)
+#include "libmesh/vector_value.h"
+
+TEST(NestedSolve, FixedSize)
 {
   auto compute = [&](const NestedSolve::Value<2> & guess,
                      NestedSolve::Value<2> & residual,
@@ -34,7 +37,7 @@ TEST(FixedSize, test)
   EXPECT_NEAR(solution(1), 1, 1e-6);
 }
 
-TEST(DynamicSize, test)
+TEST(NestedSolve, DynamicSize)
 {
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
@@ -58,7 +61,28 @@ TEST(DynamicSize, test)
   EXPECT_NEAR(solution(1), 1, 1e-6);
 }
 
-TEST(Scalar, test)
+TEST(NestedSolve, RankTwoTensor)
+{
+  auto compute =
+      [&](const RealVectorValue & guess, RealVectorValue & residual, RankTwoTensor & jacobian) {
+        //  x + 2 * y - 2 * z + 15 = 0
+        //  2 * x + y - 5 * z + 21 = 0
+        //  x - 4 * y + z -18 = 0
+
+        jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose();
+        residual = jacobian * guess + RealVectorValue(15, 21, -18);
+      };
+
+  NestedSolve solver;
+  RealVectorValue solution;
+  solver.nonlinear(solution, compute);
+
+  EXPECT_NEAR(solution(0), -1, 1e-6);
+  EXPECT_NEAR(solution(1), -4, 1e-6);
+  EXPECT_NEAR(solution(2), 3, 1e-6);
+}
+
+TEST(NestedSolve, Scalar)
 {
   auto compute = [&](const Real & guess, Real & residual, Real & jacobian) {
     residual = guess * guess * guess - 8;
