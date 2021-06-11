@@ -18,6 +18,14 @@ class MooseAppRunner(runners.RunCommand):
                    doc="The input file (*.i) to utilize for running application. The file should be defined relative to the HIT test specification or the current working directory if the object is not being instantiated with a test specification.")
 
 
+        params.add('scale_refine')
+        params.add('cli_args')
+        params.add('prereq')
+
+        params.add('recover')
+        params.add('petsc_version')
+
+
         # TODO: Create SQAController, then set the sqa_design, etc. parameters using these, perhaps
         #       a mixin object in MOOSE can do this sort of thig
         params.add('design')
@@ -38,7 +46,7 @@ class MooseAppRunner(runners.RunCommand):
 
         # Determine working location
         base_dir = helpers.get_file_base(self)
-b
+
         # Locate MOOSE application executable
         exe = find_moose_executable_recursive(base_dir)
         if exe is None:
