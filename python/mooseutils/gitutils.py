@@ -46,7 +46,7 @@ def git_civet_hashes(start='HEAD', author='moosetest', working_dir=os.getcwd()):
     match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
     return (match.group('master'), match.group('devel')) if match else None
 
-def is_git_repo(working_dir=os.getcwd()):
+def git_is_repo(working_dir=os.getcwd()):
     """
     Return true if the repository is a git repo.
     """

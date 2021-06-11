@@ -43,7 +43,7 @@ class SQADocumentReport(SQAReport):
         file_list = list()
         for working_dir in self.working_dirs:
             path = mooseutils.eval_path(working_dir)
-            if mooseutils.is_git_repo(path):
+            if mooseutils.git_is_repo(path):
                 file_list += mooseutils.git_ls_files(path)
             else:
                 file_list += glob.glob(os.path.join(path,'**', '*.*'), recursive=True)

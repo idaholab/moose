@@ -9,7 +9,7 @@ try:
 except ImportError:
 
     # If the repository is not a git repository, then give up otherwise try to figure out what to do
-    if not mooseutils.is_git_repo(os.path.dirname(__file__)):
+    if not mooseutils.git_is_repo(os.path.dirname(__file__)):
         raise
 
     moose_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
