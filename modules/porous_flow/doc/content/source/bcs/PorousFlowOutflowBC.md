@@ -25,7 +25,7 @@ To allow a fluid species, $\kappa$, to flow freely out of the model, the [govern
 \begin{equation}
 \mathbf{F} = \sum_{\beta}\chi_{\beta}^{\kappa}\mathbf{F}_{\beta}^{\mathrm{advective}} + \mathbf{F}^{\kappa}_{\mathrm{diffusion+dispersion}} \ ,
 \end{equation}
-where the standard [porous flow nomenclature](/porous_flow/nomenclature.md) has been used.  Many PorousFlow simulations do not involve diffusion and dispersion, so the latter term is not included in `PorousFlowOutflowBC`: $\mathbf{F}$ is simply
+where the standard [Porous Flow nomenclature](/porous_flow/nomenclature.md) has been used.  Many PorousFlow simulations do not involve diffusion and dispersion, so the latter term is not included in `PorousFlowOutflowBC`: $\mathbf{F}$ is simply
 \begin{equation}
 \mathbf{F} = \sum_{\beta}\chi_{\beta}^{\kappa}\mathbf{F}_{\beta}^{\mathrm{advective}} = -\sum_{\beta}\chi_{\beta}^{\kappa}\rho_{\beta}\frac{k\,k_{\mathrm{r,}\beta}}{\mu_{\beta}}(\nabla
 P_{\beta} - \rho_{\beta} \mathbf{g}) \ .

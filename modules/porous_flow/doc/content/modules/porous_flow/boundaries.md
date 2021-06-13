@@ -263,9 +263,9 @@ imagine $\partial\Omega$ being an outside boundary of the MOOSE numerical model.
 
 - If $\mathbf{n}\cdot\mathbf{V}>0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Outflow` BC is exactly the final term in [eq:adv_eqn_weak].  This removes fluid through $\partial\Omega$ at exactly the rate specified by the advection equation, so this is a "free" boundary that is "invisible" to the simulation.
 
-- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  If no BC is used then no fluid enters the domain through $\partial\Omega$ (and $u$ will reduce).
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from outside the model through the boundary and into the model.  However, if no BC is used then no fluid enters the domain through $\partial\Omega$ (and $u$ will reduce).
 
-- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Inflow` `BC`, which is exactly the last term in [eq:adv_eqn_weak] with $u=u_{B}$ fixed, may be used to specify an injection rate through this boundary ($u_{B}$ has units kg.s$^{-1}$.m$^{-2}$).
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from outside the model through the boundary and into the model.  An `Inflow` `BC`, which is exactly the last term in [eq:adv_eqn_weak] with $u=u_{B}$ fixed, may be used to specify an injection rate through this boundary ($u_{B}$ has units kg.s$^{-1}$.m$^{-2}$).
 
 
 ### The diffusion equation
@@ -349,7 +349,7 @@ This has SI units kg.s$^{-1}$.
 
 Inclusion of a BC for porepressure or mass fraction in a MOOSE input file will specify something about the flux from the boundary.
 
-- Using no BCs means the final term [eqn.pf.mass.flux.weak] is missing from the system of equations that MOOSE solves, in other words, it is zero.  Hence, no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable", and moose will find the solution $\mathbf{n}\cdot\mathbf{F}^{\kappa} = 0$.
+- Using no BCs means the final term [eqn.pf.mass.flux.weak] is missing from the system of equations that MOOSE solves, in other words, it is zero.  Hence, no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable", and MOOSE will find the solution $\mathbf{n}\cdot\mathbf{F}^{\kappa} = 0$.
 
 - A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value, $h$, (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid species, and MOOSE will find the solution that has ${\mathbf{n}}\cdot \mathbf{F}^{\kappa} = -h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
 
