@@ -24,6 +24,8 @@ import MooseDocs
 from .. import common
 from ..tree import pages
 
+LOG = logging.getLogger('MooseDocs.build')
+
 def command_line_options(subparser, parent):
     """
     Define the command line options for the build command.
@@ -32,7 +34,9 @@ def command_line_options(subparser, parent):
                                   help='Convert markdown into HTML or LaTeX.')
 
     parser.add_argument('--config', default='config.yml',
-                        help="The configuration file.")
+                        help="The primary configuration file.")
+    parser.add_argument('--subconfigs', default=[], nargs='*',
+                        help="A list of additional configuration files to build pages from.")
     parser.add_argument('--args', default=None, type=lambda a: yaml.load(a, yaml.Loader),
                         help="YAML content to override configuration items supplied in file.")
     parser.add_argument('--disable', nargs='*', default=[],
@@ -44,8 +48,7 @@ def command_line_options(subparser, parent):
                              "(default: MooseDocs.base.ParallelBarrier).")
     parser.add_argument('--profile', action='store_true',
                         help="Build the pages with python profiling.")
-    parser.add_argument('--destination',
-                        default=None,
+    parser.add_argument('--destination', default=None,
                         help="Destination for writing build content.")
     parser.add_argument('--serve', action='store_true',
                         help="Create a local live server.")
@@ -136,7 +139,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 page.base = self._translator.get('destination')
                 if isinstance(page, pages.Source):
                     page.output_extension = self._translator.renderer.EXTENSION
-                self._translator.addContent(page)
+                self._translator.addContent(page) # shoudldn't this be addPage()???
                 return page
 
 def main(options):
@@ -158,27 +161,35 @@ def main(options):
     if options.stable:
         pass
     elif options.fast:
-        options.disable += ['MooseDocs.extensions.appsyntax', 'MooseDocs.extensions.navigation',
-                            'MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet',
-                            'MooseDocs.extensions.gitutils']
+        options.disable += ['appsyntax', 'navigation', 'sqa', 'civet', 'gitutils']
     else:
-        options.disable += ['MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet',
-                            'MooseDocs.extensions.gitutils']
+        options.disable += ['sqa', 'civet', 'gitutils']
 
     for name in options.disable:
-        kwargs['Extensions'][name] = dict(active=False)
+        ext = '.'.join(['MooseDocs', 'extensions', name.lower()])
+        kwargs['Extensions'][ext] = dict(active=False)
 
     # Apply '--args' and override anything already set
     if options.args is not None:
         mooseutils.recursive_update(kwargs, options.args)
 
-    # Create translator, provide kwargs to override content of file
-    translator, _ = common.load_config(options.config, **kwargs)
+    # Create translators for the primary and sub configs, provide kwargs to override the configs
+    configs = [options.config] + options.subconfigs
+    translators, contents, _ = common.load_configs(configs, **kwargs)
+
+    # Initialize the primary (first) translator, including content from any subconfigs
+    primary = translators[0]
     if options.destination:
-        translator.update(destination=mooseutils.eval_path(options.destination))
+        primary.update(destination=mooseutils.eval_path(options.destination))
     if options.profile:
-        translator.executioner.update(profile=True)
-    translator.init()
+        primary.executioner.update(profile=True)
+    primary.init()
+
+    # For all translators loaded from subconfigs, initialize only content they're responsible for
+    for idx, translator in enumerate(translators[1:], 1):
+        LOG.info('Initializing translator object from {}'.format(configs[idx]))
+        translator.update(destination=primary['destination'], profile=primary['profile'])
+        translator.init(contents[idx])
 
     # TODO: See `navigation.postExecute`
     #       The navigation "home" should be a markdown file, when all the apps update to this we
@@ -188,15 +199,15 @@ def main(options):
         home = 'http://127.0.0.1:{}'.format(options.port)
 
     if home is not None:
-        for ext in translator.extensions:
+        for ext in primary.extensions:
             if 'home' in ext:
                 ext.update(home=home)
 
-    # Dump page tree
+    # Dump page tree from primary translator
     if options.dump:
-        for page in translator.getPages():
+        for page in primary.getPages():
             print('{}: {}'.format(page.local, page.source))
-        for ext in translator.extensions:
+        for ext in primary.extensions:
             if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
                 ext.preExecute()
                 print(ext.syntax)
@@ -208,23 +219,27 @@ def main(options):
     else:
         options.clean = options.clean.lower() in ['true', 'yes', '1']
 
-    if options.clean and os.path.exists(translator['destination']):
-        log = logging.getLogger('MooseDocs.build')
-        log.info("Cleaning destination %s", translator['destination'])
-        shutil.rmtree(translator['destination'])
+    if options.clean and os.path.exists(primary['destination']):
+        LOG.info("Cleaning destination %s", primary['destination'])
+        shutil.rmtree(primary['destination'])
 
-    # Perform build
-    if options.files:
-        nodes = []
-        for filename in options.files:
-            nodes += translator.findPages(filename)
-        translator.execute(nodes, options.num_threads)
-    else:
-        translator.execute(None, options.num_threads)
+    # Execute all translators to build the content each is responsible for
+    for idx, translator in enumerate(translators):
+        if options.subconfigs:
+            LOG.info('Building content from {}'.format(configs[idx]))
 
+        if options.files:
+            func = lambda p: any([file.endswith(p) for file in options.files])
+            translator.execute(translator.findPages(func), options.num_threads)
+        else:
+            translator.execute(contents[idx], options.num_threads)
+
+    # Run live server and watch for content changes
+    #
+    # TODO: implement routines to handle case of multiple translators
     if options.serve:
-        watcher = MooseDocsWatcher(translator, options)
+        watcher = MooseDocsWatcher(primary, options)
         server = livereload.Server(watcher=watcher)
-        server.serve(root=translator['destination'], host=options.host, port=options.port)
+        server.serve(root=primary['destination'], host=options.host, port=options.port)
 
     return 0

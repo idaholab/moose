@@ -586,7 +586,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
         # Always search entire syntax tree for group members when listing root systems by setting
         # `recursive=True`. This is so that top level headers are always rendered even if a system
         # only has actions and/or subsystems available for the group and no child objects.
-        self._addList(parent, info, page, obj, self.settings['level'], recursive=True)
+        self._addList(parent, info, page, obj, self.settings['level'], True)
         return parent
 
     def _addList(self, parent, info, page, obj, level, recursive=False):
