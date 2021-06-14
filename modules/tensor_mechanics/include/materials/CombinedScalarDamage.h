@@ -10,16 +10,16 @@
 #pragma once
 
 #include "ScalarDamageBase.h"
-
 /**
  * Scalar damage model computed as the combination of multiple damage models
  */
-class CombinedScalarDamage : public ScalarDamageBase
+template <bool is_ad>
+class CombinedScalarDamageTempl : public ScalarDamageBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CombinedScalarDamage(const InputParameters & parameters);
+  CombinedScalarDamageTempl(const InputParameters & parameters);
 
   void initialSetup() override;
 
@@ -37,5 +37,12 @@ protected:
 
   std::vector<MaterialName> _damage_models_names;
 
-  std::vector<ScalarDamageBase *> _damage_models;
+  std::vector<ScalarDamageBaseTempl<is_ad> *> _damage_models;
+
+  using ScalarDamageBaseTempl<is_ad>::_qp;
+  using ScalarDamageBaseTempl<is_ad>::_damage_index;
+  using ScalarDamageBaseTempl<is_ad>::_damage_index_old;
 };
+
+typedef CombinedScalarDamageTempl<false> CombinedScalarDamage;
+typedef CombinedScalarDamageTempl<true> ADCombinedScalarDamage;
