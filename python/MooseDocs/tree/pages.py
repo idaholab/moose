@@ -20,7 +20,8 @@ class Page(object):
     This classes uses properties to minimize modifications after construction.
     """
     def __init__(self, fullname, **kwargs):
-        self.base = kwargs.pop('base', None) # set by Translator::init
+        self.base = kwargs.pop('translator_uid', None) # set by Translator.__init__()
+        self.base = kwargs.pop('base', None) # set by Translator.init()
         self.source = kwargs.pop('source') # supplied source file/directory
         self.external = kwargs.pop('external', False) # set by get_content.py used by appsyntax.py
         self.attributes = kwargs

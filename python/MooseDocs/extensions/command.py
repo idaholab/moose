@@ -41,16 +41,22 @@ class CommandExtension(Extension):
         else:
             subcommands = command.SUBCOMMAND
 
+        # Retrieve the 'uid' key from the translator to use as the dictionary key for the current
+        # pool of extension commands. If the key doesn't exist yet, then create it.
+        uid = self.translator.uid
+        if uid not in CommandExtension.EXTENSION_COMMANDS:
+            CommandExtension.EXTENSION_COMMANDS[uid] = dict()
+
         # Add the command and error if it exists
         for cmd in commands:
             for sub in subcommands:
                 pair = (cmd, sub)
-                if pair in CommandExtension.EXTENSION_COMMANDS:
+                if pair in CommandExtension.EXTENSION_COMMANDS[uid]:
                     msg = "A CommandComponent object exists with the command '{}' and " \
                           "subcommand '{}'."
                     raise common.exceptions.MooseDocsException(msg, pair[0], pair[1])
 
-                CommandExtension.EXTENSION_COMMANDS[pair] = command
+                CommandExtension.EXTENSION_COMMANDS[uid][pair] = command
 
     def extend(self, reader, renderer):
         self.requires(core)
@@ -81,7 +87,7 @@ class CommandBase(components.ReaderComponent):
         components.ReaderComponent.__init__(self, *args, **kwargs)
 
     def createToken(self, parent, info, page):
-
+        uid = page.translator_uid
         cmd = (info['command'], info['subcommand'])
         settings = info['settings']
 
@@ -98,12 +104,12 @@ class CommandBase(components.ReaderComponent):
                 settings = info['subcommand'] + ' ' + settings
                 cmd = (info['command'], None)
 
-        # Locate the command object to call
+        # Locate the command object to call from pool built by current translator object
         try:
-            obj = CommandExtension.EXTENSION_COMMANDS[cmd]
+            obj = CommandExtension.EXTENSION_COMMANDS[uid][cmd]
         except KeyError:
             try:
-                obj = CommandExtension.EXTENSION_COMMANDS[(cmd[0], '*')]
+                obj = CommandExtension.EXTENSION_COMMANDS[uid][(cmd[0], '*')]
             except KeyError:
                 msg = "The following command combination is unknown: '{} {}'."
                 raise common.exceptions.MooseDocsException(msg.format(*cmd))
@@ -122,7 +128,8 @@ class CommandBase(components.ReaderComponent):
         return token
 
     def setTranslator(self, translator):
-        for comp in CommandExtension.EXTENSION_COMMANDS.values():
+        """Sets the translator object to use for extension components corresponding to commands."""
+        for comp in CommandExtension.EXTENSION_COMMANDS[translator.uid].values():
             comp.setTranslator(translator)
 
 class BlockInlineCommand(CommandBase):

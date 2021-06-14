@@ -85,6 +85,43 @@ def load_config(filename, **kwargs):
 
     return translator, config
 
+def load_configs(filenames, **kwargs):
+    """
+    Read the config.yml files listed in filenames and create unique Translator objects for each.
+
+    The primary (first) configuration file is treated specially in that the content identified by
+    all of the others is pooled into its corresponding Translator object. For any sub (non-first)
+    configuration, only content from the primary one is added to its own. Note that the kwargs are
+    applied to all configurations.
+
+    The contents ouput lists the list of pages that each Translator object in the translators list
+    is responsible for. The primary translator is responsible for building any redundant content.
+    """
+    translators = list()
+    configurations = list()
+    for file in filenames:
+        trans, config = load_config(file, **kwargs)
+        translators.append(trans)
+        configurations.append(config)
+
+    # Exchange content between primary translator and all subtranslators
+    contents = [[page for page in translators[0].getPages()]]
+    primary_content = [page.local for page in contents[0]]
+    for translator in translators[1:]:
+        contents.append(list())
+        for page in [p for p in translator.getPages()]:
+            if page.local in primary_content:
+                translator.removePage(page)
+            else:
+                contents[-1].append(page)
+                translators[0].addPage(page, False)
+
+        # Add content from the primary translator
+        for page in contents[0]:
+            translator.addPage(page, False)
+
+    return translators, contents, configurations
+
 def load_extensions(ext_list, ext_configs=None):
     """
     Convert the supplied list into MooseDocs extension objects by calling the make_extension method.
@@ -173,7 +210,6 @@ def _yaml_load_object(name, config, default, *args):
     except NameError:
         msg = "ERROR: The %s block must contain a valid object name."
         LOG.error(msg, name)
-
 
 def _yaml_load_content(config, in_ext):
     """Load the 'Content' section."""
