@@ -77,7 +77,7 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
     RequirementLogHelper.COLOR_TEXT = color_text
 
     # Setup file_list, if not provided
-    if (file_list is None) and (not mooseutils.is_git_repo()):
+    if (file_list is None) and (not mooseutils.git_is_repo()):
         msg = "If the 'file_list' is not provided then the working directory must be a git repository."
         raise ValueError(msg)
     elif file_list is None:

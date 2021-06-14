@@ -34,6 +34,8 @@ class CivetExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['remotes'] = (dict(), "Remote CIVET repositories to pull result; each item in the dict should have another dict with a 'url' and 'repo' key.")
+        config['branch'] = ('master', "The main stable branch for extracting test results.")
+        config['author'] = ('moosetest', "The 'author' of the merge commit into the stable main branch.")
 
         config['download_test_results'] = (True, "Automatically download and aggregate test results for the current merge commits.")
         config['generate_test_reports'] = (True, "Generate test report pages, if results exist from download or local file(s).")
@@ -80,31 +82,35 @@ class CivetExtension(command.CommandExtension):
         """(override) Generate test reports."""
 
         # Test result database
-        start = time.time()
-        LOG.info("Collecting CIVET results...")
-
         self.__database = dict()
-        for name, category in self.get('remotes').items():
-            working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
-            LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
-            hashes = None
-            if category.get('download_test_results', self.get('download_test_results', True)):
-                hashes = mooseutils.git_merge_commits(working_dir)
-                LOG.info("Downloading CIVET results for '%s' category in %s", name, working_dir)
 
-            local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
-            site = (category['url'], category['repo'])
-            local_db = mooseutils.get_civet_results(local=local,
-                                                    hashes=hashes,
-                                                    site=site,
-                                                    cache=local,
-                                                    possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
-                                                    logger=LOG)
-            self.__database.update(local_db)
-        LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
+        # Only populate the database if the specified branch and author match current repository
+        if mooseutils.git_is_branch(self.get('branch')) and \
+           mooseutils.git_is_config('user.name', self.get('author')):
+
+            start = time.time()
+            LOG.info("Collecting CIVET results...")
+            for name, category in self.get('remotes').items():
+                working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
+                LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
+                hashes = None
+                if category.get('download_test_results', self.get('download_test_results', True)):
+                    hashes = mooseutils.git_civet_hashes(start=self.get('branch'), author=self.get('author'), working_dir=working_dir)
+                    LOG.info("Downloading CIVET results for '%s' category in %s", name, working_dir)
+
+                local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
+                site = (category['url'], category['repo'])
+                local_db = mooseutils.get_civet_results(local=local,
+                                                        hashes=hashes,
+                                                        site=site,
+                                                        cache=local,
+                                                        possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
+                                                        logger=LOG)
+                self.__database.update(local_db)
+            LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
-            LOG.warning("'generate_test_reports' is being disabled, it requires results to exist but none were located.")
+            LOG.info("CIVET test result reports are being disabled, it requires results to exist and the specified branch ('%s') and author ('%s') to match the current repository.", self.get('branch'), self.get('author'))
             self.update(generate_test_reports=False)
 
         if self.get('generate_test_reports', True):
@@ -191,7 +197,8 @@ class CivetMergeResultsCommand(CivetCommandBase):
         site, repo = self.getCivetInfo()
 
         rows = []
-        for sha in mooseutils.git_merge_commits():
+        for sha in mooseutils.git_civet_hashes(start=self.extension.get('branch'),
+                                               author=self.extension.get('author')):
             url = '{}/sha_events/{}/{}'.format(site, repo, sha)
             link = core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
