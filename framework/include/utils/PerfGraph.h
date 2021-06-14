@@ -450,12 +450,6 @@ protected:
   /// Tell the print thread to teardown
   std::atomic<bool> _destructing;
 
-  /// The object that is doing live printing
-  std::unique_ptr<PerfGraphLivePrint> _live_print;
-
-  /// The thread for printing sections as they execute
-  std::thread _print_thread;
-
   /// The mutex to use with a condition_variable for waking up the print thread
   std::mutex _print_thread_mutex;
 
@@ -467,6 +461,12 @@ protected:
 
   /// The memory limit before a message is printed (in MB)
   unsigned int _live_print_mem_limit;
+
+  /// The object that is doing live printing
+  std::unique_ptr<PerfGraphLivePrint> _live_print;
+
+  /// The thread for printing sections as they execute
+  std::thread _print_thread;
 
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;

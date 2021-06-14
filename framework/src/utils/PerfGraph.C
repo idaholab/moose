@@ -44,9 +44,9 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _active(true),
     _live_print_active(true),
     _destructing(false),
-    _live_print(std::make_unique<PerfGraphLivePrint>(*this, app)),
     _live_print_time_limit(1.0),
-    _live_print_mem_limit(100)
+    _live_print_mem_limit(100),
+    _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
   if (_pid == 0 && !_disable_live_print)
   {
@@ -211,7 +211,7 @@ PerfGraph::push(const PerfID id)
 
   PerfNode * new_node = nullptr;
 
-  if (_current_position == -1) // Must be the root node - need to makew it
+  if (_current_position == -1) // Must be the root node - need to make it
   {
     _root_node = libmesh_make_unique<PerfNode>(id);
     new_node = _root_node.get();
@@ -220,9 +220,16 @@ PerfGraph::push(const PerfID id)
     new_node = _stack[_current_position]->getChild(id);
 
   MemoryUtils::Stats stats;
-  MemoryUtils::getMemoryStats(stats);
-  auto start_memory =
-      MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+  auto memory_success = MemoryUtils::getMemoryStats(stats);
+
+  long int start_memory = 0;
+
+  if (memory_success)
+    start_memory =
+        MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+  else if (_current_position !=
+           -1) // If we weren't able to get the memory stats, let's just use the parent's
+    start_memory = _stack[_current_position]->startMemory();
 
   // Set the start time
   auto current_time = std::chrono::steady_clock::now();
@@ -253,14 +260,21 @@ PerfGraph::pop()
   if (!_active && !_live_print_active)
     return;
 
-  MemoryUtils::Stats stats;
-  MemoryUtils::getMemoryStats(stats);
-  auto current_memory =
-      MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
-
   auto current_time = std::chrono::steady_clock::now();
 
   auto & current_node = _stack[_current_position];
+
+  MemoryUtils::Stats stats;
+  auto memory_success = MemoryUtils::getMemoryStats(stats);
+
+  long int current_memory = 0;
+
+  if (memory_success)
+    current_memory =
+        MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+  else if (_current_position !=
+           -1) // If we weren't able to get the memory stats, let's just use the start memory
+    current_memory = _stack[_current_position]->startMemory();
 
   current_node->addTimeAndMemory(current_time, current_memory);
 

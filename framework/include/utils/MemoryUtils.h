@@ -43,10 +43,10 @@ MooseEnum getMemUnitsEnum();
 std::size_t getTotalRAM();
 
 /// get all memory stats for the current process
-void getMemoryStats(Stats & stats);
+/// @return true for success, false for failure
+bool getMemoryStats(Stats & stats);
 
 /// convert bytes to selected unit prefix
 std::size_t convertBytes(std::size_t bytes, MemUnits unit);
 
 } // namespace MemoryUtils
-

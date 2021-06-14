@@ -229,7 +229,8 @@ IterationAdaptiveDT::computeDT()
     dt = _time_ipol.sample(_time_old);
 
     if (_verbose)
-      _console << "Setting dt to value specified by dt function: " << std::setw(9) << dt << std::endl;
+      _console << "Setting dt to value specified by dt function: " << std::setw(9) << dt
+               << std::endl;
   }
   else if (_sync_last_step)
   {

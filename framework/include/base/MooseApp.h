@@ -885,14 +885,8 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
 
-  /// The RankMap is a useful object for determining how
-  const RankMap _rank_map;
-
   /// Input file names used
   std::vector<std::string> _input_filenames;
-
-  /// Input file name used
-  std::string _input_filename;
 
   /// The output file basename
   std::string _output_file_base;
@@ -927,7 +921,7 @@ protected:
   /// The PerfGraph object for this application
   PerfGraph _perf_graph;
 
-  /// The RankMap is a useful object for determining how
+  /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;
 
   /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)

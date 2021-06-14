@@ -75,9 +75,15 @@ getTotalRAM()
   return 0;
 }
 
-void
+std::mutex memory_stats_mutex;
+
+bool
 getMemoryStats(Stats & stats)
 {
+  bool retval = true;
+
+  const std::lock_guard<std::mutex> lock(memory_stats_mutex);
+
   enum StatItem
   {
     index_page_faults = 8,
@@ -89,17 +95,32 @@ getMemoryStats(Stats & stats)
   // inspect /proc
   std::ifstream stat_stream("/proc/self/stat", std::ios_base::in);
   std::array<std::size_t, 21> val;
+
   if (stat_stream)
   {
     // if the proc filesystem file is found (Linux) read its contents
     std::string pid, comm, state;
     stat_stream >> pid >> comm >> state;
-    for (unsigned int i = 0; i < num; ++i)
-      stat_stream >> val[i];
 
-      // resident size is reported as number of pages in /proc
+    unsigned int i = 0;
+
+    while (!stat_stream.eof() && i < 21)
+    {
+      stat_stream >> val[i];
+      i++;
+    }
+
+    // Handle the case where we didn't get enough values by just zeroing everything
+    // since we probably got junk
+    if (i != 22)
+    {
+      retval = false; // Set an error return value
+      val.fill(0);
+    }
+
+    // resident size is reported as number of pages in /proc
 #ifndef __WIN32__
-    val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
+    val[index_resident_size] *= 2; // sysconf(_SC_PAGE_SIZE);
 #endif
   }
   else
@@ -143,10 +164,12 @@ getMemoryStats(Stats & stats)
   stats._physical_memory = val[index_resident_size];
 
   // virtual mem
-  stats._virtual_memory = val[index_virtual_size];
+  stats._virtual_memory = 100; // val[index_virtual_size];
 
   // page faults
-  stats._page_faults = val[index_page_faults];
+  stats._page_faults = 100; // val[index_page_faults];
+
+  return retval;
 }
 
 std::size_t
