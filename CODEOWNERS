@@ -15,18 +15,26 @@
 
 /.github @permcody
 
+/framework/*/constraints @lindsayad
+/framework/*/dgkernels @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud
 /framework/*/fv* @rwcarlsen @lindsayad
 /framework/*/interfacekernels @lindsayad
+/framework/*/interfaces @lindsayad
+/framework/*/linesearches @lindsayad
+/framework/*/loops @lindsayad
 /framework/*/materials @rwcarlsen
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
+/framework/*/nodalkernels @lindsayad
 /framework/*/parser @rwcarlsen
 /framework/*/preconditioners @fdkong
+/framework/*/problems @lindsayad
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @aeslaughter
 /framework/*/samplers @aeslaughter @zachmprince
+/framework/*/systems @lindsayad
 /framework/*/systems/NonlinearEigenSystem* @fdkong
 /framework/*/transfers @fdkong
 /framework/*/utils/PetscSupport* @fdkong
@@ -34,10 +42,12 @@
 /framework/*/utils/Units* @dschwen
 /framework/*/variables @rwcarlsen
 
+/modules/contact @bwspenc @lindsayad
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @rwcarlsen @andrsd
 /modules/fsi @fdkong
+/modules/functional_expansion_tools @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud
 /modules/phase_field @dschwen
 /modules/ray_tracing @loganharbour
