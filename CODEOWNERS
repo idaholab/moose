@@ -53,6 +53,7 @@
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel
 /modules/stochastic_tools @aeslaughter @zachmprince
+/modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
 /modules/xfem @bwspenc @jiangwen84
 
 /scripts/hpc_proxy.pac @loganharbour
