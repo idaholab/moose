@@ -27,5 +27,12 @@
                    '\'BCs/right/invalid_param\''
       detail = 'while locating input errors in the correct file'
     []
+
+    [three_inputs_override_message]
+      type = 'RunApp'
+      input = 'diffusion1a.i diffusion1b.i diffusion1c.i'
+      expect_out = '/diffusion1c.i:18:  Parameter \'BCs/right/value\' overrides the same parameter in .*/diffusion1b.i:3'
+      detail = 'and inform the user of parameters from earlier files being overidden by later files'
+    []
   []
 []

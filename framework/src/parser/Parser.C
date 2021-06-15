@@ -33,6 +33,7 @@
 #include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
 #include "MooseUtils.h"
+#include "Conversion.h"
 #include "Units.h"
 
 #include "libmesh/parallel.h"
@@ -228,7 +229,7 @@ public:
       }
       errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
     }
-    _have[n->fullpath()] = n;
+    _have[fullpath] = n;
   }
 
   std::vector<std::string> errors;
@@ -236,6 +237,44 @@ public:
 private:
   std::set<std::string> _duplicates;
   std::map<std::string, hit::Node *> _have;
+};
+
+class CompileParamWalker : public hit::Walker
+{
+public:
+  typedef std::map<std::string, hit::Node *> ParamMap;
+  CompileParamWalker(ParamMap & map) : _map(map) {}
+  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    if (n->type() == hit::NodeType::Field)
+      _map[fullpath] = n;
+  }
+
+private:
+  ParamMap & _map;
+};
+
+class OverrideParamWalker : public hit::Walker
+{
+public:
+  OverrideParamWalker(const CompileParamWalker::ParamMap & map) : _map(map) {}
+  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    const auto it = _map.find(fullpath);
+    if (it != _map.end())
+      warnings.push_back(hit::errormsg(n,
+                                       " Parameter '",
+                                       fullpath,
+                                       "' overrides the same parameter in ",
+                                       it->second->filename(),
+                                       ":",
+                                       it->second->line()));
+  }
+
+  std::vector<std::string> warnings;
+
+private:
+  const CompileParamWalker::ParamMap & _map;
 };
 
 std::vector<std::string>
@@ -582,6 +621,10 @@ Parser::parse(const std::vector<std::string> & input_filenames)
     for (auto & input_filename : _input_filenames)
       input_filename = MooseUtils::realpath(input_filename);
 
+  CompileParamWalker::ParamMap override_map;
+  CompileParamWalker cpw(override_map);
+  OverrideParamWalker opw(override_map);
+
   for (auto & input_filename : _input_filenames)
   {
     MooseUtils::checkFileReadable(input_filename, true);
@@ -597,13 +640,22 @@ Parser::parse(const std::vector<std::string> & input_filenames)
       if (!_root)
         _root = std::move(root);
       else
+      {
+        root->walk(&opw, hit::NodeType::Field);
         hit::merge(root.get(), _root.get());
+      }
+
+      _root->walk(&cpw, hit::NodeType::Field);
     }
     catch (hit::ParseError & err)
     {
       mooseError(err.what());
     }
   }
+
+  // warn about overridden parameters in multiple inputs
+  if (!opw.warnings.empty())
+    mooseInfo(Moose::stringify(opw.warnings), "\n");
 
   // add in command line arguments
   try
