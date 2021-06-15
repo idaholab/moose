@@ -73,3 +73,6 @@ protected:
   /// Base name optionally used as prefix to material tensor names
   const std::string _base_name;
 };
+
+typedef DamageBaseTempl<false> DamageBase;
+typedef DamageBaseTempl<true> ADDamageBase;

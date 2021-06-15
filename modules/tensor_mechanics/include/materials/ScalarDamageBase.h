@@ -68,5 +68,5 @@ protected:
   using DamageBaseTempl<is_ad>::_dt;
 };
 
-typedef ScalarDamageBaseTempl<false> DamageBase;
-typedef ScalarDamageBaseTempl<true> ADDamageBase;
+typedef ScalarDamageBaseTempl<false> ScalarDamageBase;
+typedef ScalarDamageBaseTempl<true> ADScalarDamageBase;

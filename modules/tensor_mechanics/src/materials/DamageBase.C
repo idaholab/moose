@@ -62,3 +62,6 @@ DamageBaseTempl<is_ad>::finiteStrainRotation(
     const GenericRankTwoTensor<is_ad> & /*rotation_increment*/)
 {
 }
+
+template class DamageBaseTempl<false>;
+template class DamageBaseTempl<true>;
