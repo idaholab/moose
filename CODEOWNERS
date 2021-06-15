@@ -34,7 +34,6 @@
 /framework/*/utils/Units* @dschwen
 /framework/*/variables @rwcarlsen
 
-
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @rwcarlsen @andrsd
@@ -44,6 +43,7 @@
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel
 /modules/stochastic_tools @aeslaughter @zachmprince
+/modules/xfem @bwspenc @jiangwen84
 
 /scripts/hpc_proxy.pac @loganharbour
 /scripts/update_and_rebuild_petsc.sh @fdkong
