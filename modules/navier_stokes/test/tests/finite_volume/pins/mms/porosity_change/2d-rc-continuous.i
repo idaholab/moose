@@ -16,6 +16,10 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  cache_face_values = true
+[]
+
 [Problem]
   fv_bcs_integrity_check = true
 []

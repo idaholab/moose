@@ -5,6 +5,10 @@ velocity_interp_method='rc'
 
 restricted_blocks = '1'
 
+[GlobalParams]
+  cache_face_values = true
+[]
+
 [Mesh]
   parallel_type = 'replicated'
   [mesh]

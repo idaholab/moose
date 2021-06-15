@@ -3,6 +3,10 @@ rho=1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
+[GlobalParams]
+  cache_face_values = true
+[]
+
 [Mesh]
   file = diverging.msh
   uniform_refine = 2
