@@ -97,7 +97,7 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
     _all_models_isotropic(true),
     _damage_model(isParamValid("damage_model")
-                      ? dynamic_cast<DamageBase *>(&getMaterial("damage_model"))
+                      ? dynamic_cast<DamageBaseTempl<false> *>(&getMaterial("damage_model"))
                       : nullptr)
 {
   if (_inelastic_weights.size() != _num_models)

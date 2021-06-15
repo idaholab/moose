@@ -10,10 +10,8 @@
 #pragma once
 
 #include "ComputeFiniteStrainElasticStress.h"
-
+#include "DamageBase.h"
 #include "StressUpdateBase.h"
-
-class DamageBase;
 
 /**
  * ComputeMultipleInelasticStress computes the stress, the consistent tangent
@@ -179,7 +177,7 @@ protected:
   bool _all_models_isotropic;
 
   /// Pointer to the damage model
-  DamageBase * _damage_model;
+  DamageBaseTempl<false> * _damage_model;
 
   RankTwoTensor _undamaged_stress_old;
 };

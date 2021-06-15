@@ -57,6 +57,8 @@ ADComputeMultipleInelasticStress::validParams()
                                      "parameter is set to 1 if the number of models = 1");
   params.addParam<bool>(
       "cycle_models", false, "At time step N use only inelastic model N % num_models.");
+  params.addParam<MaterialName>("damage_model", "Name of the damage model");
+
   return params;
 }
 
@@ -76,7 +78,11 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(getParam<bool>("cycle_models")),
-    _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit"))
+    _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
+    _is_elasticity_tensor_guaranteed_isotropic(false),
+    _damage_model(isParamValid("damage_model")
+                      ? dynamic_cast<DamageBaseTempl<true> *>(&getMaterial("damage_model"))
+                      : nullptr)
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",
@@ -117,12 +123,37 @@ ADComputeMultipleInelasticStress::initialSetup()
     else
       mooseError("Model " + models[i] + " is not compatible with ADComputeMultipleInelasticStress");
   }
+
+  if (isParamValid("damage_model") && !_damage_model)
+    paramError("damage_model",
+               "Damage Model " + _damage_model->name() +
+                   " is not compatible with ADComputeMultipleInelasticStress");
 }
 
 void
 ADComputeMultipleInelasticStress::computeQpStress()
 {
+  if (_damage_model)
+  {
+    _undamaged_stress_old = _stress_old[_qp];
+    _damage_model->setQp(_qp);
+    _damage_model->computeUndamagedOldStress(_undamaged_stress_old);
+  }
+
   computeQpStressIntermediateConfiguration();
+
+  if (_damage_model)
+  {
+    _damage_model->setQp(_qp);
+    _damage_model->updateDamage();
+    _damage_model->updateStressForDamage(_stress[_qp]);
+    _damage_model->finiteStrainRotation(_rotation_increment[_qp]);
+
+    const Real damage_timestep_limit = _damage_model->computeTimeStepLimit();
+    if (_material_timestep_limit[_qp] > damage_timestep_limit)
+      _material_timestep_limit[_qp] = damage_timestep_limit;
+  }
+
   if (_perform_finite_strain_rotations)
     finiteStrainRotation();
 }
@@ -143,11 +174,16 @@ ADComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
       _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
     else
     {
+      if (_damage_model)
+        paramError(
+            "damage_model",
+            "Damage models cannot be used with inelastic models and elastic anisotropic behavior");
+
       ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
       elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
       _stress[_qp] =
-          elasticity_tensor_rotated * (_elastic_strain_old[_qp] + elastic_strain_increment);
+          elasticity_tensor_rotated * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
 
       // Update current total rotation matrix to be used in next step
       _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
@@ -220,6 +256,11 @@ ADComputeMultipleInelasticStress::updateQpState(
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
       else
       {
+        if (_damage_model)
+          paramError("damage_model",
+                     "Damage models cannot be used with inelastic models and elastic anisotropic "
+                     "behavior");
+
         ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
         elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
@@ -316,6 +357,11 @@ ADComputeMultipleInelasticStress::updateQpStateSingleModel(
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
   else
   {
+    if (_damage_model)
+      paramError(
+          "damage_model",
+          "Damage models cannot be used with inelastic models and elastic anisotropic behavior");
+
     ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
     elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
@@ -344,8 +390,16 @@ ADComputeMultipleInelasticStress::computeAdmissibleState(
     ADRankTwoTensor & elastic_strain_increment,
     ADRankTwoTensor & inelastic_strain_increment)
 {
-  if (_models[model_number]->substeppingCapabilityEnabled() &&
-      (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations))
+  if (_damage_model)
+    _models[model_number]->updateState(elastic_strain_increment,
+                                       inelastic_strain_increment,
+                                       _rotation_increment[_qp],
+                                       _stress[_qp],
+                                       _undamaged_stress_old,
+                                       _elasticity_tensor[_qp],
+                                       _elastic_strain_old[_qp]);
+  else if (_models[model_number]->substeppingCapabilityEnabled() &&
+           (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations))
   {
     _models[model_number]->updateStateSubstep(elastic_strain_increment,
                                               inelastic_strain_increment,
