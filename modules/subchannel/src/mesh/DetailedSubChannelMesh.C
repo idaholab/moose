@@ -97,12 +97,14 @@ DetailedSubChannelMesh::buildMesh()
   }
   // Add the points to the mesh.
   unsigned int node_id = 0;
+  Real offset_x = (_nx - 1) * _pitch / 2.0;
+  Real offset_y = (_ny - 1) * _pitch / 2.0;
   for (unsigned int iy = 0; iy < _ny; iy++)
   {
-    Point y0 = {0, _pitch * iy, 0};
+    Point y0 = {0, _pitch * iy - offset_y, 0};
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      Point x0 = {_pitch * ix, 0, 0};
+      Point x0 = {_pitch * ix - offset_x, 0, 0};
       for (auto z : _z_grid)
       {
         Point z0{0, 0, z};

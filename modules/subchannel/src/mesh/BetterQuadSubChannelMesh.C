@@ -146,6 +146,8 @@ BetterQuadSubChannelMesh::buildMesh()
   // on the xy-plane with a spacing of `pitch` between points.  The grid along
   // z is irregular to account for rod spacers.  Store pointers in the _nodes
   // array so we can keep track of which points are in which channels.
+  Real offset_x = (_nx - 1) * _pitch / 2.0;
+  Real offset_y = (_ny - 1) * _pitch / 2.0;
   unsigned int node_id = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
   {
@@ -155,8 +157,8 @@ BetterQuadSubChannelMesh::buildMesh()
       _nodes[i_ch].reserve(_n_cells);
       for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
       {
-        _nodes[i_ch].push_back(
-            mesh.add_point(Point(_pitch * ix, _pitch * iy, _z_grid[iz]), node_id++));
+        _nodes[i_ch].push_back(mesh.add_point(
+            Point(_pitch * ix - offset_x, _pitch * iy - offset_y, _z_grid[iz]), node_id++));
       }
     }
   }
@@ -196,7 +198,9 @@ BetterQuadSubChannelMesh::buildMesh()
 unsigned int
 BetterQuadSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 {
-  unsigned int i = (p(0) + 0.5 * _pitch) / _pitch;
-  unsigned int j = (p(1) + 0.5 * _pitch) / _pitch;
+  Real offset_x = (_nx - 1) * _pitch / 2.0;
+  Real offset_y = (_ny - 1) * _pitch / 2.0;
+  unsigned int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
+  unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
   return j * _nx + i;
 }
