@@ -50,7 +50,7 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  abeta = 0.006
+  abeta = 0.08
   CT = 1.0
   enforce_uniform_pressure = false
 []
@@ -82,7 +82,7 @@ P_out = 4.923e6 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = 0.0
+    value = ${P_out}
   []
 
   [DP_ic]
@@ -94,7 +94,7 @@ P_out = 4.923e6 # Pa
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = ${P_out}
+    p = P
     T = T
     fp = water
   []
@@ -102,7 +102,7 @@ P_out = 4.923e6 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = ${P_out}
+    p = P
     T = T
     fp = water
   []
@@ -115,6 +115,13 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
+  [P_out_bc]
+    type = ConstantAux
+    variable = P
+    boundary = outlet
+    value = ${P_out}
+    execute_on = 'timestep_begin'
+  []
   [T_in_bc]
     type = ConstantAux
     variable = T
