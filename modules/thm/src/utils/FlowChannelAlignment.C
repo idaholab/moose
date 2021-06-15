@@ -60,9 +60,15 @@ FlowChannelAlignment::check(const std::vector<dof_id_type> & fch_elem_ids) const
 {
   if (_master_points.size() > 0 && _slave_points.size() > 0)
   {
-    // Go over all elements in the flow channel. Take the center of each element and project it onto
-    // the side of the 2D component. Then check that the projected location matches the location of
-    // the original center of the flow channel element
+    // Go over all elements in the flow channel. For the first element in the
+    // loop compute the translation vector between its centroid and its neighbor
+    // heat structure centroid. Then for the remaining elements, check that the
+    // neighbors all have the same translation vector. If this is true, then it
+    // can be inferred that all flow channel elements have a unique neighbor.
+    // Note that for very coarse discretizations, it is possible for the heat
+    // structure to be offset in the axial direction from the flow channel.
+    bool set_translation_vec = false;
+    RealVectorValue translation_vec;
     for (const auto & elem_id : fch_elem_ids)
     {
       const Elem * elem = _mesh.elemPtr(elem_id);
@@ -72,13 +78,16 @@ FlowChannelAlignment::check(const std::vector<dof_id_type> & fch_elem_ids) const
       const unsigned int & hs_elem_side = _nearest_elem_side.at(hs_elem_id);
       const Elem * neighbor = _mesh.elemPtr(hs_elem_id);
       const Elem * neighbor_side_elem = neighbor->build_side_ptr(hs_elem_side).release();
-      unsigned int neighbor_dim = neighbor_side_elem->dim();
-      Point ref_pt =
-          FEInterface::inverse_map(neighbor_dim, FEType(), neighbor_side_elem, center_pt);
-      Point hs_pt = FEInterface::map(neighbor_dim, FEType(), neighbor_side_elem, ref_pt);
+      const Point hs_pt = neighbor_side_elem->centroid();
       delete neighbor_side_elem;
 
-      if (!center_pt.absolute_fuzzy_equals(hs_pt))
+      if (!set_translation_vec)
+      {
+        translation_vec = hs_pt - center_pt;
+        set_translation_vec = true;
+      }
+
+      if (!(center_pt + translation_vec).absolute_fuzzy_equals(hs_pt))
         return false;
     }
   }
