@@ -7,6 +7,7 @@ restricted_blocks = '1'
 
 [GlobalParams]
   two_term_boundary_expansion = true
+  cache_face_values = true
 []
 
 [Mesh]

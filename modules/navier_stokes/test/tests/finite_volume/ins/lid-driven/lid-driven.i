@@ -6,6 +6,7 @@ rho=1
   velocity_interp_method = 'rc'
   advected_interp_method = 'average'
   two_term_boundary_expansion = true
+  cache_face_values = true
 []
 
 [Mesh]

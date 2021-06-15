@@ -31,6 +31,7 @@ a=1.1
     order = CONSTANT
     fv = true
     two_term_boundary_expansion = true
+    cache_face_values = true
     type = MooseVariableFVReal
   [../]
 []

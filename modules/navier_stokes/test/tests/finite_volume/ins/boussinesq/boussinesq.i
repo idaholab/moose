@@ -12,6 +12,7 @@ temp_ref=${fparse hot_temp / 2.}
 
 [GlobalParams]
   two_term_boundary_expansion = true
+  cache_face_values = true
 []
 
 [Mesh]
