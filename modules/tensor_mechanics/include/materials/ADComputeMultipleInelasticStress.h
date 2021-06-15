@@ -13,6 +13,7 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "StressUpdateBase.h"
+#include "DamageBase.h"
 
 /**
  * ADComputeMultipleInelasticStress computes the stress and a decomposition of the strain
@@ -136,4 +137,9 @@ protected:
 
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
+
+  /// Pointer to the damage model
+  DamageBaseTempl<true> * _damage_model;
+
+  RankTwoTensor _undamaged_stress_old;
 };
