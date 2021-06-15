@@ -19,6 +19,8 @@
 /framework/*/fv* @rwcarlsen @lindsayad
 /framework/*/interfacekernels @lindsayad
 /framework/*/materials @rwcarlsen
+/framework/*/materials/Derivative* @dschwen
+/framework/*/materials/Parsed* @dschwen
 /framework/*/parser @rwcarlsen
 /framework/*/preconditioners @fdkong
 /framework/*/problems/EigenProblem* @fdkong
@@ -29,13 +31,16 @@
 /framework/*/transfers @fdkong
 /framework/*/utils/PetscSupport* @fdkong
 /framework/*/utils/SlepcSupport* @fdkong
+/framework/*/utils/Units* @dschwen
 /framework/*/variables @rwcarlsen
+
 
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @rwcarlsen @andrsd
 /modules/fsi @fdkong
 /modules/navier_stokes @lindsayad @GiudGiud
+/modules/phase_field @dschwen
 /modules/ray_tracing @loganharbour
 /modules/stochastic_tools @aeslaughter @zachmprince
 
