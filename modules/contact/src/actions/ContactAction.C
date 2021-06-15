@@ -236,10 +236,19 @@ ContactAction::act()
     if (!_problem->getDisplacedProblem())
       mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                  "Mesh block.");
-
     {
       InputParameters params = _factory.getValidParams("PenetrationAux");
-      params.applyParameters(parameters(), {"secondary_gap_offset", "mapped_primary_gap_offset"});
+      params.applyParameters(parameters(),
+                             {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+
+      std::vector<VariableName> displacements =
+          getParam<std::vector<VariableName>>("displacements");
+      const auto order = _problem->systemBaseNonlinear()
+                             .system()
+                             .variable_type(displacements[0])
+                             .order.get_order();
+
+      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
       params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
       params.set<BoundaryName>("paired_boundary") = _primary;
@@ -259,8 +268,16 @@ ContactAction::act()
     // Add ContactPressureAuxAction
     {
       InputParameters params = _factory.getValidParams("ContactPressureAux");
-      params.applyParameters(parameters());
+      params.applyParameters(parameters(), {"order"});
 
+      std::vector<VariableName> displacements =
+          getParam<std::vector<VariableName>>("displacements");
+      const auto order = _problem->systemBaseNonlinear()
+                             .system()
+                             .variable_type(displacements[0])
+                             .order.get_order();
+
+      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
       params.set<BoundaryName>("paired_boundary") = _primary;
       params.set<AuxVariableName>("variable") = "contact_pressure";
@@ -280,10 +297,13 @@ ContactAction::act()
 
   if (_current_task == "add_aux_variable")
   {
+    std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
+    const auto order =
+        _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
     // Add ContactPenetrationVarAction
     {
       auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       var_params.set<MooseEnum>("family") = "LAGRANGE";
 
       _problem->addAuxVariable("MooseVariable", "penetration", var_params);
@@ -291,7 +311,7 @@ ContactAction::act()
     // Add ContactPressureVarAction
     {
       auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       var_params.set<MooseEnum>("family") = "LAGRANGE";
 
       _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
@@ -299,7 +319,7 @@ ContactAction::act()
     // Add nodal area contact variable
     {
       auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       var_params.set<MooseEnum>("family") = "LAGRANGE";
 
       _problem->addAuxVariable("MooseVariable", "nodal_area_" + _name, var_params);
@@ -603,7 +623,6 @@ void
 ContactAction::addNodeFaceContact()
 {
   std::string action_name = MooseUtils::shortName(name());
-
   std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
   const unsigned int ndisp = displacements.size();
 
@@ -616,10 +635,16 @@ ContactAction::addNodeFaceContact()
 
   InputParameters params = _factory.getValidParams(constraint_type);
 
-  params.applyParameters(parameters(),
-                         {"displacements", "secondary_gap_offset", "mapped_primary_gap_offset"});
+  params.applyParameters(
+      parameters(),
+      {"displacements", "secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+
+  const auto order =
+      _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
+
   params.set<std::vector<VariableName>>("displacements") = displacements;
   params.set<bool>("use_displaced_mesh") = true;
+  params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
 
   if (_formulation != "ranfs")
   {
@@ -683,9 +708,6 @@ InputParameters
 ContactAction::commonParameters()
 {
   InputParameters params = emptyInputParameters();
-
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
 
   params.addParam<MooseEnum>("normal_smoothing_method",
                              ContactAction::getSmoothingEnum(),
