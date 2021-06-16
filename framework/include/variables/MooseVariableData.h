@@ -315,6 +315,20 @@ public:
     return _ad_u_dot;
   }
 
+  const ADTemplateVariableValue<OutputType> & adUDotDot() const
+  {
+    _need_ad = _need_ad_u_dotdot = true;
+
+    if (!_time_integrator)
+      // If we don't have a time integrator (this will be the case for variables that are a part
+      // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
+      // going to copy the values from _u_dotdot. Of course in order to be able to do that we need
+      // to calculate _u_dotdot
+      _need_u_dotdot = true;
+
+    return _ad_u_dotdot;
+  }
+
   const FieldVariableValue & uDot() const;
 
   const FieldVariableValue & uDotDot() const;
@@ -580,6 +594,7 @@ private:
   mutable bool _need_u_dot;
   mutable bool _need_ad_u_dot;
   mutable bool _need_u_dotdot;
+  mutable bool _need_ad_u_dotdot;
   mutable bool _need_u_dot_old;
   mutable bool _need_u_dotdot_old;
   mutable bool _need_du_dot_du;
@@ -678,7 +693,9 @@ private:
   ADTemplateVariableSecond<OutputType> _ad_second_u;
   MooseArray<ADReal> _ad_dof_values;
   MooseArray<ADReal> _ad_dofs_dot;
+  MooseArray<ADReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputType> _ad_u_dot;
+  ADTemplateVariableValue<OutputType> _ad_u_dotdot;
 
   // time derivatives
 

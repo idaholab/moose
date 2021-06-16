@@ -34,7 +34,9 @@ public:
   virtual void init() override;
   virtual int order() override { return 2; }
   virtual void computeTimeDerivatives() override;
-  void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const override;
+  void computeADTimeDerivatives(DualReal & ad_u_dot,
+                                const dof_id_type & dof,
+                                DualReal * ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual void postStep() override;
 
@@ -55,4 +57,3 @@ CrankNicolson::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 2. / _dt;
 }
-

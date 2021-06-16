@@ -877,7 +877,8 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
     if (_need_ad_u_dot && safeToComputeADUDot() && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
-      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
+      ADReal * ad_dofs_dotdot_ptr = nullptr;
+      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i], ad_dofs_dotdot_ptr);
     }
   }
 
