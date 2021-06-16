@@ -31,6 +31,22 @@
 #include <vector>
 #include <array>
 
+// Eigen includes
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
+
+namespace Eigen
+{
+namespace internal
+{
+template <>
+struct cast_impl<ADReal, int>
+{
+  static inline int run(const ADReal & x) { return static_cast<int>(MetaPhysicL::raw_value(x)); }
+};
+} // namespace internal
+} // namespace Eigen
+
 template <typename T>
 constexpr Real RankTwoTensorTempl<T>::identityCoords[];
 
@@ -875,51 +891,29 @@ void
 ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigvals,
                                                   ADRankTwoTensor & eigvecs) const
 {
-  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
-
-  eigvals.resize(N);
-  ADRankTwoTensor D, Q, R;
-  this->hessenberg(D, eigvecs);
-
-  unsigned int iter = 0;
-  for (unsigned m = N - 1; m > 0; m--)
-    do
+  typedef Eigen::Matrix<ADReal, N, N, Eigen::DontAlign> RankTwoMatrix;
+  RankTwoMatrix self;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = i; j < N; ++j)
     {
-      iter++;
-      auto shift = D(m, m);
-      D.addIa(-shift);
-      D.QR(Q, R, m + 1);
-      D = R * Q;
-      D.addIa(shift);
-      eigvecs = eigvecs * Q;
-    } while (std::abs(D(m, m - 1)) > eps);
-
-  for (unsigned int i = 0; i < N; i++)
-    eigvals[i] = D(i, i);
-
-  // Sort eigenvalues and corresponding vectors.
-  for (unsigned int i = 0; i < N - 1; i++)
-  {
-    unsigned int k = i;
-    auto p = eigvals[i];
-    for (unsigned int j = i + 1; j < N; j++)
-      if (eigvals[j] < p)
-      {
-        k = j;
-        p = eigvals[j];
-      }
-    if (k != i)
-    {
-      eigvals[k] = eigvals[i];
-      eigvals[i] = p;
-      for (unsigned int j = 0; j < N; j++)
-      {
-        p = eigvecs(j, i);
-        eigvecs(j, i) = eigvecs(j, k);
-        eigvecs(j, k) = p;
-      }
+      auto & v = self(j, i);
+      v = (*this)(i, j);
+      if (i != j && MooseUtils::absoluteFuzzyEqual(v, 0.0))
+        v.value() = 0.0;
     }
-  }
+
+  Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es;
+  es.compute(self);
+
+  auto lambda = es.eigenvalues();
+  eigvals.resize(N);
+  for (unsigned int i = 0; i < N; ++i)
+    eigvals[i] = lambda(i);
+
+  auto v = es.eigenvectors();
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      eigvecs(i, j) = v(i, j);
 }
 
 template <typename T>
