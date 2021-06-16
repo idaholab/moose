@@ -107,15 +107,15 @@
   [err:wrong_position]
     type = 'RunException'
     input = 'err.1phase.i'
-    cli_args = "Components/pipe/position='0 0 0' Components/hx/Hw=300"
-    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not equal the centers of the specified heat structure side."
+    cli_args = "Components/pipe/position='0 0.2 0.5' Components/hx/Hw=300 Components/pipe/n_elems=10 Components/hs/n_elems=10"
+    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
   []
 
   [err:wrong_orientation]
     type = 'RunException'
     input = 'err.1phase.i'
     cli_args = "Components/pipe/orientation='0 1 0' Components/hx/Hw=300"
-    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not equal the centers of the specified heat structure side."
+    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
   []
 
   [err:zero_p_hs_radius]
