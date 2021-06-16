@@ -12,7 +12,7 @@
       valgrind = NONE
       detail = "that distributes samples in parallel and"
       python = 3
-      required_python_packages = 'pandas' # uncomment with upstream/python-3 is merged
+      required_python_packages = 'pandas matplotlib tornado'
     []
     [plot]
       type = CheckFiles
@@ -22,7 +22,7 @@
       valgrind = NONE
       prereq = scale/execute
       python = 3
-      required_python_packages = 'pandas matplotlib' # uncomment with upstream/python-3 is merged
+      required_python_packages = 'pandas matplotlib'
       detail = "demonstrates efficient parallel scaling of memory use."
     []
   []
