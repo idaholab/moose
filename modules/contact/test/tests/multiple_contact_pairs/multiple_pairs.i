@@ -82,7 +82,7 @@ offset = 1e-2
 
 [Executioner]
   type = Transient
-  end_time = 100
+  end_time = 60
   dt = 2.0
   dtmin = .1
   solve_type = 'PJFNK'
