@@ -1,0 +1,9 @@
+[Tests]
+  [friction]
+    type = Exodiff
+    input = two_channel.i
+    exodiff = two_channel_out.e
+    method = '!DBG'
+    valgrind = NONE
+  []
+[]
