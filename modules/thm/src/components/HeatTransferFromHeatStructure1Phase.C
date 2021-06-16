@@ -101,7 +101,7 @@ HeatTransferFromHeatStructure1Phase::check() const
       if (!_fch_alignment.check(flow_channel.getElementIDs()))
         logError("The centers of the elements of flow channel '",
                  _flow_channel_name,
-                 "' do not equal the centers of the specified heat structure side.");
+                 "' do not align with the centers of the specified heat structure side.");
     }
   }
 }
