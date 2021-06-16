@@ -18,9 +18,9 @@ velocity_face_value_caching = true
     ymax = 1
     zmin = -1
     zmax = 1
-    nx = 21
-    ny = 7
-    nz = 7
+    nx = 15
+    ny = 5
+    nz = 5
   []
 []
 
@@ -224,6 +224,7 @@ velocity_face_value_caching = true
 []
 
 [Outputs]
+  hide = 'physical'
   perf_graph = true
   exodus = true
   csv = true

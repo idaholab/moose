@@ -56,6 +56,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
 
     grad_pointer = &pr.first->second;
   }
+  else
+    _temp_face_gradients[_tid] = 0;
 
   VectorValue<ADReal> & grad = *grad_pointer;
 

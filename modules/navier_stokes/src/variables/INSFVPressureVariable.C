@@ -12,16 +12,7 @@
 registerMooseObject("NavierStokesApp", INSFVPressureVariable);
 
 InputParameters
-INSFVPressureVariable::validParams()
-{
-  InputParameters params = INSFVVariable::validParams();
-
-  // The pressure gradient is used by INSFVMomentumPressure and by Rhie Chow interpolation
-  // in INSFVMomentumAdvection also for each direction.
-  params.set<bool>("cache_face_gradients") = true;
-
-  return params;
-}
+INSFVPressureVariable::validParams(){ return INSFVVariable::validParams(); }
 
 INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) : INSFVVariable(params)
 {
