@@ -1,6 +1,4 @@
-# Finite Volume Navier Stokes
-
-## Incompressible
+# Incompressible Finite Volume Navier Stokes
 
 MOOSE's Incompressible Navier Stokes Finite Volume (INSFV) implementation uses a
 colocated grid. To suppress the checkerboard pattern in the pressure field,

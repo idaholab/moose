@@ -9,7 +9,8 @@ For documentation specific to finite element or finite volume implementations,
 please refer to the below pages:
 
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
-- [Finite Volume](navier_stokes/fv.md)
+- [Incompressible Finite Volume](navier_stokes/fv.md)
+- [Porous media Incompressible Finite Volume](navier_stokes/pinsfv.md)
 - [Turbulence Modeling Theory](navier_stokes/rans_theory.md)
 
 !syntax complete groups=NavierStokesApp

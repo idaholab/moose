@@ -86,7 +86,7 @@ for the first component of the superficial velocity:
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-u
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-p
 
-- inlet mass flux
+- inlet velocity, to specify mass flux given that density is constant
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/inlet-u
 
 - momentum advection outflow (only for a mean-pressure approach, equivalent to executing the momentum advection kernel on the boundary)
