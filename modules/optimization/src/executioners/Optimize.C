@@ -12,9 +12,9 @@ Optimize::validParams()
   return params;
 }
 
-Optimize::Optimize(const InputParameters & parameters) : Steady(parameters), _optim_solve(this)
+Optimize::Optimize(const InputParameters & parameters) : Steady(parameters), _optim_solve(*this)
 {
-  _optim_solve.setInnerSolve(_picard_solve);
+  _optim_solve.setInnerSolve(picardSolve());
 }
 
 void

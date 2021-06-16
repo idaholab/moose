@@ -14,7 +14,7 @@ class OptimizeSolve : public SolveObject
 {
 public:
   static InputParameters validParams();
-  OptimizeSolve(Executioner * ex);
+  OptimizeSolve(Executioner & ex);
 
   virtual bool solve() override;
 

@@ -20,7 +20,7 @@ OptimizeSolve::validParams()
   return params;
 }
 
-OptimizeSolve::OptimizeSolve(Executioner * ex)
+OptimizeSolve::OptimizeSolve(Executioner & ex)
   : SolveObject(ex),
     _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
