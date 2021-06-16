@@ -44,6 +44,7 @@ velocity_interp_method='average'
 [GlobalParams]
   two_term_boundary_expansion = true
   cache_face_values = true
+  cache_face_gradients = true
 []
 
 [Variables]

@@ -36,9 +36,7 @@ velocity_interp_method='rc'
 
 [AuxVariables]
   [porosity]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 

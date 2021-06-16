@@ -594,6 +594,9 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
 
     value_pointer = &pr.first->second;
   }
+  else
+    _temp_face_values[_tid] = 0;
+
   ADReal & value = *value_pointer;
 
   if (_use_extended_stencil)
@@ -655,6 +658,8 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
 
     value_pointer = &pr.first->second;
   }
+  else
+    _temp_face_values[_tid] = 0;
 
   ADReal & value = *value_pointer;
 
