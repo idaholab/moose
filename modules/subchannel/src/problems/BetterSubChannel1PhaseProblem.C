@@ -825,11 +825,7 @@ BetterSubChannel1PhaseProblem::externalSolve()
 
   // update old crossflow matrix
   _Wij_old = _Wij;
-  // Save Wij
-  std::ofstream myfile1;
-  myfile1.open("Wij", std::ofstream::trunc);
-  myfile1 << std::setprecision(12) << std::scientific << _Wij << "\n";
-  myfile1.close();
+
   _console << "Finished executing subchannel solver\n";
   _aux->solution().close();
 }
