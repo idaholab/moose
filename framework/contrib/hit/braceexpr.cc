@@ -70,8 +70,7 @@ ReplaceEvaler::eval(Field * n, const std::list<std::string> & args, BraceExpande
     }
   }
 
-  exp.errors.push_back(
-      errormsg(exp.fname, n, "no variable '", var, "' found for substitution expression"));
+  exp.errors.push_back(errormsg(n, "no variable '", var, "' found for substitution expression"));
   return n->val();
 }
 
@@ -108,7 +107,7 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
   }
   catch (Error & err)
   {
-    errors.push_back(errormsg(fname, f, err.what()));
+    errors.push_back(errormsg(f, err.what()));
     return;
   }
 }
