@@ -19,7 +19,7 @@ from .check_requirements import check_requirements, RequirementLogHelper
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
 
-@mooseutils.addProperty('working_dir', ptype=str)
+@mooseutils.addProperty('working_dirs', ptype=list)
 @mooseutils.addProperty('directories', ptype=list)
 @mooseutils.addProperty('specs', ptype=str)
 @mooseutils.addProperty('test_names', ptype=set)
@@ -35,24 +35,15 @@ class SQARequirementReport(SQAReport):
         """
 
         # Extract configuration parameters
-        working_dir = self.working_dir or mooseutils.git_root_dir()
-        local_dirs = self.directories
         specs = self.specs or 'tests'
 
         # Get complete directory paths
-        if local_dirs:
-            directories = list()
-            for local_dir in local_dirs:
-                d = mooseutils.eval_path(local_dir)
-                if not os.path.isdir(d):
-                    d = os.path.join(working_dir, d)
-                directories.append(d)
-        else:
-            directories = [working_dir]
-
-        # Check that directories exist
-        for d in directories:
+        root_dir = mooseutils.git_root_dir()
+        directories = [mooseutils.eval_path(d) for d in (self.directories or [root_dir])]
+        for i, d in enumerate(directories):
             if not os.path.isdir(d):
+                directories[i] = os.path.join(root_dir, d)
+            if not os.path.isdir(directories[i]):
                 raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
 
         # Build Requirement objects and remove directory based dict
@@ -66,8 +57,12 @@ class SQARequirementReport(SQAReport):
         for req in requirements:
             self.test_names.add((req.filename, req.name, req.line))
 
+        # Get list of files to search
+        if self.working_dirs is None: self.working_dirs = [mooseutils.git_root_dir()]
+        file_list = SQAReport._getFiles(self.working_dirs)
+
         # Check the requirements
-        logger = check_requirements(requirements, color_text=self.color_text, **kwargs)
+        logger = check_requirements(requirements, color_text=self.color_text, file_list=file_list, **kwargs)
         return logger
 
 @mooseutils.addProperty('reports', ptype=list)
