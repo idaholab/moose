@@ -24,14 +24,14 @@ template <bool is_ad>
 InputParameters
 SideDiffusiveFluxAverageTempl<is_ad>::validParams()
 {
-  InputParameters params = SideDiffusiveFluxIntegralTempl<is_ad>::validParams();
+  InputParameters params = SideDiffusiveFluxIntegralTempl<is_ad, Real>::validParams();
   return params;
 }
 
 template <bool is_ad>
 SideDiffusiveFluxAverageTempl<is_ad>::SideDiffusiveFluxAverageTempl(
     const InputParameters & parameters)
-  : SideDiffusiveFluxIntegralTempl<is_ad>(parameters), _volume(0)
+  : SideDiffusiveFluxIntegralTempl<is_ad, Real>(parameters), _volume(0)
 {
 }
 
@@ -39,7 +39,7 @@ template <bool is_ad>
 void
 SideDiffusiveFluxAverageTempl<is_ad>::initialize()
 {
-  SideDiffusiveFluxIntegralTempl<is_ad>::initialize();
+  SideDiffusiveFluxIntegralTempl<is_ad, Real>::initialize();
   _volume = 0;
 }
 
@@ -47,7 +47,7 @@ template <bool is_ad>
 void
 SideDiffusiveFluxAverageTempl<is_ad>::execute()
 {
-  SideDiffusiveFluxIntegralTempl<is_ad>::execute();
+  SideDiffusiveFluxIntegralTempl<is_ad, Real>::execute();
   _volume += this->_current_side_volume;
 }
 
@@ -55,7 +55,7 @@ template <bool is_ad>
 Real
 SideDiffusiveFluxAverageTempl<is_ad>::getValue()
 {
-  Real integral = SideDiffusiveFluxIntegralTempl<is_ad>::getValue();
+  Real integral = SideDiffusiveFluxIntegralTempl<is_ad, Real>::getValue();
 
   this->gatherSum(_volume);
 
@@ -66,7 +66,7 @@ template <bool is_ad>
 void
 SideDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  SideDiffusiveFluxIntegralTempl<is_ad>::threadJoin(y);
+  SideDiffusiveFluxIntegralTempl<is_ad, Real>::threadJoin(y);
   const SideDiffusiveFluxAverageTempl<is_ad> & pps =
       static_cast<const SideDiffusiveFluxAverageTempl<is_ad> &>(y);
   _volume += pps._volume;

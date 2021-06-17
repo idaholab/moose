@@ -24,9 +24,9 @@ registerMooseObjectRenamed("MooseApp",
 
 defineLegacyParams(SideDiffusiveFluxIntegral);
 
-template <bool is_ad, T material_type>
+template <bool is_ad, typename T>
 InputParameters
-SideDiffusiveFluxIntegralTempl<is_ad, material_type>::validParams()
+SideDiffusiveFluxIntegralTempl<is_ad, T>::validParams()
 {
   InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>(
@@ -37,18 +37,18 @@ SideDiffusiveFluxIntegralTempl<is_ad, material_type>::validParams()
   return params;
 }
 
-template <bool is_ad, T material_type>
-SideDiffusiveFluxIntegralTempl<is_ad, material_type>::SideDiffusiveFluxIntegralTempl(
+template <bool is_ad, typename T>
+SideDiffusiveFluxIntegralTempl<is_ad, T>::SideDiffusiveFluxIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
     _diffusivity(getParam<MaterialPropertyName>("diffusivity")),
-    _diffusion_coef(getGenericMaterialProperty<material_type, is_ad>(_diffusivity))
+    _diffusion_coef(getGenericMaterialProperty<T, is_ad>(_diffusivity))
 {
 }
 
-template <bool is_ad, T material_type>
+template <bool is_ad, typename T>
 Real
-SideDiffusiveFluxIntegralTempl<is_ad, material_type>::computeQpIntegral()
+SideDiffusiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
 {
   if (_fv)
   {
@@ -68,14 +68,26 @@ SideDiffusiveFluxIntegralTempl<is_ad, material_type>::computeQpIntegral()
         MetaPhysicL::raw_value(_diffusion_coef[_qp]), _grad_u[_qp]) * _normals[_qp];
 }
 
-template <bool is_ad, T material_type>
+template <bool is_ad, typename T>
 RealVectorValue
-SideDiffusiveFluxIntegralTempl<is_ad, material_type>::diffusivity_gradient_product(
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivity_gradient_product(
     RealVectorValue grad_u,
-    material_type diffusivity)
+    Real diffusivity)
 {
-
   return grad_u * diffusivity;
+}
+
+template <bool is_ad, typename T>
+RealVectorValue
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivity_gradient_product(
+    RealVectorValue grad_u,
+    RealVectorValue diffusivity)
+{
+  RealVectorValue d_grad_u = grad_u;
+  for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    d_grad_u *= diffusivity(i);
+
+  return d_grad_u;
 }
 
 template class SideDiffusiveFluxIntegralTempl<false, Real>;

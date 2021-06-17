@@ -13,7 +13,7 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-template <bool, T>
+template <bool, typename>
 class SideDiffusiveFluxIntegralTempl;
 typedef SideDiffusiveFluxIntegralTempl<false, Real> SideDiffusiveFluxIntegral;
 typedef SideDiffusiveFluxIntegralTempl<true, Real> ADSideDiffusiveFluxIntegral;
@@ -26,7 +26,7 @@ InputParameters validParams<SideDiffusiveFluxIntegral>();
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
-template <bool is_ad, T material_type>
+template <bool is_ad, typename T>
 class SideDiffusiveFluxIntegralTempl : public SideIntegralVariablePostprocessor
 {
 public:
@@ -37,8 +37,13 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  RealVectorValue diffusivity_gradient_product<material_type>(RealVectorValue grad_u, T diffusivity);
-
   MaterialPropertyName _diffusivity;
-  const GenericMaterialProperty<material_type, is_ad> & _diffusion_coef;
+  const GenericMaterialProperty<T, is_ad> & _diffusion_coef;
+
+private:
+  /// Routine to get the diffusive flux with a Real diffusivity
+  RealVectorValue diffusivity_gradient_product(RealVectorValue grad_u, Real diffusivity);
+
+  /// Routine to get the diffusive flux with a RealVectorValue diffusivity
+  RealVectorValue diffusivity_gradient_product(RealVectorValue grad_u, RealVectorValue diffusivity);
 };
