@@ -20,100 +20,100 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
-  [./flux]
+  []
+  [flux]
     type = PorousFlowAdvectiveFlux
     variable = pp
     gravity = '0 0 0'
     fluid_component = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1e-7
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       viscosity = 0.001
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-14 0 0 0 1E-14 0 0 0 1E-14'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 0
     phase = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./porepressure]
+  [porepressure]
     type = PointValue
     point = '0 0 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./total_mass]
+  []
+  [total_mass]
     type = PorousFlowFluidMass
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -127,51 +127,51 @@
 [Outputs]
   perf_graph = true
   file_base = theis1
-  [./csv]
+  [csv]
     type = CSV
     execute_on = final
-  [../]
+  []
 []
 
 [ICs]
-  [./PressureIC]
+  [PressureIC]
     variable = pp
     type = ConstantIC
     value = 20e6
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./sink]
+  [sink]
     type = PorousFlowSquarePulsePointSource
     end_time = 1000
     point = '0 0 0'
     mass_flux = -0.04
     variable = pp
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = DirichletBC
     variable = pp
     value = 20e6
     boundary = right
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = pp
     value = 20e6
     boundary = top
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./pressure]
+  [pressure]
     type = SideValueSampler
     variable = pp
     sort_by = x
     execute_on = timestep_end
     boundary = bottom
-  [../]
+  []
 []

@@ -18,95 +18,95 @@
 []
 
 [Variables]
-  [./ppwater]
-  [../]
-  [./ppgas]
-  [../]
+  [ppwater]
+  []
+  [ppgas]
+  []
 []
 
 [AuxVariables]
-  [./massfrac_ph0_sp0]
-  [../]
-  [./massfrac_ph1_sp0]
-  [../]
+  [massfrac_ph0_sp0]
+  []
+  [massfrac_ph1_sp0]
+  []
 []
 
 [ICs]
-  [./ppwater]
+  [ppwater]
     type = RandomIC
     variable = ppwater
     min = -1
     max = 0
-  [../]
-  [./ppgas]
+  []
+  [ppgas]
     type = RandomIC
     variable = ppgas
     min = 0
     max = 1
-  [../]
-  [./massfrac_ph0_sp0]
+  []
+  [massfrac_ph0_sp0]
     type = RandomIC
     variable = massfrac_ph0_sp0
     min = 0
     max = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     type = RandomIC
     variable = massfrac_ph1_sp0
     min = 0
     max = 1
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./grad0]
+  [grad0]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     component = 0
     variable = ppwater
-  [../]
-  [./grad1]
+  []
+  [grad1]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     component = 1
     variable = ppgas
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater ppgas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./ppss]
+  [ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
     capillary_pressure = pc
-  [../]
-  [./p_eff]
+  []
+  [p_eff]
     type = PorousFlowEffectiveFluidPressure
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

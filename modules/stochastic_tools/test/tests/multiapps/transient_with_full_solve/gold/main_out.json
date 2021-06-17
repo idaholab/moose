@@ -1,0 +1,61 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "results": {
+                    "values": [
+                        {
+                            "name": "results:center",
+                            "type": "std::vector<double>",
+                            "value": []
+                        }
+                    ]
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": {
+                "results": {
+                    "values": [
+                        {
+                            "name": "results:center",
+                            "type": "std::vector<double>",
+                            "value": [
+                                4.073719836648167,
+                                1.2192108004097597,
+                                2.258542696675286,
+                                4.714183201250597,
+                                3.45428257570401
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "reporters": {
+                "results": {
+                    "values": [
+                        {
+                            "name": "results:center",
+                            "type": "std::vector<double>",
+                            "value": [
+                                4.073719836648167,
+                                1.2192108004097597,
+                                2.258542696675286,
+                                4.714183201250597,
+                                3.45428257570401
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

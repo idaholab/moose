@@ -59,10 +59,18 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),
-    _radius(getParam<Real>("radius"))
+    _radius(getParam<Real>("radius")),
+    _nodal(false)
 {
   if (_directions.contains(TO_MULTIAPP))
     paramError("Can't interpolate to a MultiApp!");
+
+  auto & to_fe_type = _multi_app->problemBase().getStandardVariable(0, _to_var_name).feType();
+  if ((to_fe_type.order != CONSTANT || to_fe_type.family != MONOMIAL) &&
+      (to_fe_type.order != FIRST || to_fe_type.family != LAGRANGE))
+    paramError("variable", "Must be either CONSTANT MONOMIAL or FIRST LAGRANGE");
+
+  _nodal = to_fe_type.family == LAGRANGE;
 }
 
 void
@@ -129,24 +137,52 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 
         vars.push_back(_to_var_name);
 
-        for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
+        if (_nodal)
         {
-          if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+          // handle linear lagrange shape functions
+          for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
           {
-            std::vector<Point> pts;
-            std::vector<Number> vals;
+            if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+            {
+              std::vector<Point> pts;
+              std::vector<Number> vals;
 
-            pts.push_back(*node);
-            vals.resize(1);
+              pts.push_back(*node);
+              vals.resize(1);
 
-            idi->interpolate_field_data(vars, pts, vals);
+              idi->interpolate_field_data(vars, pts, vals);
 
-            Real value = vals.front();
+              Real value = vals.front();
 
-            // The zero only works for LAGRANGE!
-            dof_id_type dof = node->dof_number(sys_num, var_num, 0);
+              // The zero only works for LAGRANGE!
+              dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
-            solution.set(dof, value);
+              solution.set(dof, value);
+            }
+          }
+        }
+        else
+        {
+          // handle constant monomial shape functions
+          for (const auto & elem :
+               as_range(mesh.getMesh().local_elements_begin(), mesh.getMesh().local_elements_end()))
+          {
+            // Exclude the elements without dofs
+            if (elem->n_dofs(sys_num, var_num) > 0)
+            {
+              std::vector<Point> pts;
+              std::vector<Number> vals;
+
+              pts.push_back(elem->centroid());
+              vals.resize(1);
+
+              idi->interpolate_field_data(vars, pts, vals);
+
+              Real value = vals.front();
+
+              dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
+              solution.set(dof, value);
+            }
           }
         }
 

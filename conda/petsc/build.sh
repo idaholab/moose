@@ -1,5 +1,7 @@
 #!/bin/bash
 set -eu
+export PATH=/bin:$PATH
+
 export PETSC_DIR=$SRC_DIR
 export PETSC_ARCH=arch-conda-c-opt
 
@@ -42,6 +44,7 @@ BUILD_CONFIG=`cat <<"EOF"
   --with-cxx-dialect=C++11 \
   --with-shared-libraries=1 \
   --download-mumps=1 \
+  --download-strumpack=1 \
   --download-hypre=1 \
   --download-metis=1 \
   --download-slepc=1 \
@@ -51,6 +54,7 @@ BUILD_CONFIG=`cat <<"EOF"
   --download-superlu_dist=1 \
   --with-fortran-bindings=0 \
   --with-sowing=0 \
+  --with-64-bit-indices \
 EOF
 `
 

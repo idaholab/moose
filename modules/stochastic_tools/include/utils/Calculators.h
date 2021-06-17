@@ -17,13 +17,6 @@ class MooseEnumItem;
 
 namespace StochasticTools
 {
-class Calculator;
-
-/*
- * Free function for building a const Calculator object for use by Statistics object
- */
-std::unique_ptr<const Calculator> makeCalculator(const MooseEnumItem & item,
-                                                 const libMesh::ParallelObject & other);
 
 /*
  * Free function that returns the available statistics available to the Statistics object(s)
@@ -42,68 +35,97 @@ MultiMooseEnum makeCalculatorEnum();
  *
  * To create new Calculator objects first create the Calculator class and then update the
  * above free functions above.
+ *
+ * Explicit instantiations are generated in the C file.
  */
+template <typename InType, typename OutType>
 class Calculator : public libMesh::ParallelObject
 {
 public:
-  Calculator(const libMesh::ParallelObject &);
+  Calculator(const libMesh::ParallelObject & other, const std::string & name)
+    : libMesh::ParallelObject(other), _name(name)
+  {
+  }
+
   virtual ~Calculator() = default;
-  virtual Real compute(const std::vector<Real> &, bool) const = 0;
+  virtual OutType compute(const InType &, bool) const = 0;
+  const std::string & name() const { return _name; }
+
+private:
+  const std::string _name;
 };
 
-class Mean : public Calculator
+template <typename InType, typename OutType>
+class Mean : public Calculator<InType, OutType>
 {
 public:
-  Mean(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class Min : public Calculator
+template <typename InType, typename OutType>
+class Min : public Calculator<InType, OutType>
 {
 public:
-  Min(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class Max : public Calculator
+template <typename InType, typename OutType>
+class Max : public Calculator<InType, OutType>
 {
 public:
-  Max(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class Sum : public Calculator
+template <typename InType, typename OutType>
+class Sum : public Calculator<InType, OutType>
 {
 public:
-  Sum(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class StdDev : public Calculator
+template <typename InType, typename OutType>
+class StdDev : public Calculator<InType, OutType>
 {
 public:
-  StdDev(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class StdErr : public StdDev
+template <typename InType, typename OutType>
+class StdErr : public StdDev<InType, OutType>
 {
 public:
-  StdErr(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using StdDev<InType, OutType>::StdDev;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class Ratio : public Calculator
+template <typename InType, typename OutType>
+class Ratio : public Calculator<InType, OutType>
 {
 public:
-  Ratio(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
 
-class L2Norm : public Calculator
+template <typename InType, typename OutType>
+class L2Norm : public Calculator<InType, OutType>
 {
 public:
-  L2Norm(const libMesh::ParallelObject &);
-  virtual Real compute(const std::vector<Real> &, bool) const override;
+  using Calculator<InType, OutType>::Calculator;
+  virtual OutType compute(const InType &, bool) const override;
 };
+
+/*
+ * Free function for building a const Calculator object for use by Statistics object.
+ *
+ * Explicit instantiations in C file.
+ */
+template <typename InType = std::vector<Real>, typename OutType = Real>
+std::unique_ptr<const Calculator<InType, OutType>>
+makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
+
 } // namespace

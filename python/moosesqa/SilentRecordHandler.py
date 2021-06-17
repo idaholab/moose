@@ -23,8 +23,15 @@ class SilentRecordHandler(logging.NullHandler):
     def getRecords(self):
         return copy.copy(self._records)
 
+    def clear(self):
+        self.clearRecords()
+        self.clearCounts()
+
     def clearRecords(self):
         self._records.clear()
+
+    def clearCounts(self):
+        self.COUNTS.clear()
 
     def handle(self, record):
         self._records[record.levelno].add(record)

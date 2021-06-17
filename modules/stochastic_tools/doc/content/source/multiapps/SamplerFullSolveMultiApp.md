@@ -26,6 +26,19 @@ sub-application is a [transient](Transient.md) simulation, the parameter
 [!param](/Executioner/Transient/error_on_dtmin) +must+ be set to false in the
 `Executioner` block.
 
+!! min_procs_begin
+
+## Defining Minimum Processors Per App
+
+It is often useful to define the minimum processors to use when running sub-applications.
+Typically this is done for large models in batch mode to avoid excessive memory usage.
+The [!param](/MultiApps/SamplerFullSolveMultiApp/min_procs_per_app) will utilize this
+capability, however it is +required+ that the [!param](/Samplers/MonteCarlo/min_procs_per_row)
+parameter in the `Samplers` block be set to the same value. This is to enusre that
+the sampler partitioning is equivalent to the multiapp partitioning.
+
+!! min_procs_end
+
 ## Example Syntax
 
 !listing modules/stochastic_tools/test/tests/multiapps/sampler_full_solve_multiapp/master_full_solve.i block=MultiApps

@@ -4,8 +4,20 @@
 
 Sets up a single material property that is computed using a parsed function expression.
 
-A `ParsedMaterial` object takes the function expression as an input parameter in the form of a Function Parser expression. Parsed materials (unlike `ParsedFunctions`) can couple to non-linear variables and material properties.
-In its configuration block all non-linear variables the free energy depends on (`args`), as well as constants (`constant_names` and `constant_expressions`) and other material properties (`material_property_names`) are declared. Constants can be declared as parsed expressions (which can depend on previously defined constants). One application would be the definition of a temperature $T$, the Boltzmann constant $k_B$, a defect formation energy $E_F$, and then an equilibrium defect concentration defined using a Boltzmann factor $\exp(-\frac{E_d}{k_BT})$.
+A `ParsedMaterial` object takes the function expression as an input parameter in
+the form of a Function Parser expression. Parsed materials (unlike
+`ParsedFunctions`) can couple to non-linear variables and material properties.
+In its configuration block all non-linear variables the function depends on
+([!param](/Materials/ParsedMaterial/args)), as well as constants
+([!param](/Materials/ParsedMaterial/constant_names) and
+[!param](/Materials/ParsedMaterial/constant_expressions)), other material
+properties ([!param](/Materials/ParsedMaterial/material_property_names)), and
+postprocessors ([!param](/Materials/ParsedMaterial/postprocessor_names)) are
+declared. Constants can be declared as parsed expressions (which can depend on
+previously defined constants). One application would be the definition of a
+temperature $T$, the Boltzmann constant $k_B$, a defect formation energy $E_F$,
+and then an equilibrium defect concentration defined using a Boltzmann factor
+$\exp(-\frac{E_d}{k_BT})$.
 
 ## Example
 

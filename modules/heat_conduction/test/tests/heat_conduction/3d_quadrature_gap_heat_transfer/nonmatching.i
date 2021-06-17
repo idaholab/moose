@@ -52,13 +52,13 @@
 
 [Postprocessors]
   [./left]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = leftright
     diffusivity = thermal_conductivity
   [../]
   [./right]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = rightleft
     diffusivity = thermal_conductivity

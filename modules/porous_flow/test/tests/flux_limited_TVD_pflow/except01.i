@@ -10,18 +10,18 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./tracer]
-  [../]
+  [pp]
+  []
+  [tracer]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -31,17 +31,17 @@
 []
 
 [UserObjects]
-  [./advective_flux_calculator]
+  [advective_flux_calculator]
     type = PorousFlowAdvectiveFluxCalculatorSaturated
     phase = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 [Executioner]

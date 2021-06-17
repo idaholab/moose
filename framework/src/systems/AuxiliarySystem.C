@@ -35,10 +35,9 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
   : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _fe_problem(subproblem),
-    _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
-    _current_solution(NULL),
+    _sys(subproblem.es().add_system<ExplicitSystem>(name)),
+    _current_solution(_sys.current_local_solution.get()),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
-    _solution_previous_nl(NULL),
     _u_dot(NULL),
     _u_dotdot(NULL),
     _u_dot_old(NULL),
@@ -74,10 +73,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
     dof_map.set_implicit_neighbor_dofs(false);
   }
-
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
 }
 
 AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }
@@ -96,15 +91,10 @@ AuxiliarySystem::addDotVectors()
 }
 
 void
-AuxiliarySystem::addExtraVectors()
-{
-  if (_fe_problem.needsPreviousNewtonIteration())
-    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
-}
-
-void
 AuxiliarySystem::initialSetup()
 {
+  SystemBase::initialSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
@@ -133,6 +123,8 @@ AuxiliarySystem::initialSetup()
 void
 AuxiliarySystem::timestepSetup()
 {
+  SystemBase::timestepSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
@@ -148,6 +140,8 @@ AuxiliarySystem::timestepSetup()
 void
 AuxiliarySystem::subdomainSetup()
 {
+  SystemBase::subdomainSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
@@ -163,6 +157,8 @@ AuxiliarySystem::subdomainSetup()
 void
 AuxiliarySystem::jacobianSetup()
 {
+  SystemBase::jacobianSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
@@ -178,6 +174,8 @@ AuxiliarySystem::jacobianSetup()
 void
 AuxiliarySystem::residualSetup()
 {
+  SystemBase::residualSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
@@ -240,7 +238,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
     {
       MooseVariableBase * var_base = _vars[tid].getVariable(name);
 
-      MooseVariable * var = dynamic_cast<MooseVariable *>(var_base);
+      auto * const var = dynamic_cast<MooseVariableField<Real> *>(var_base);
 
       if (var)
       {
@@ -256,7 +254,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
         }
       }
 
-      ArrayMooseVariable * avar = dynamic_cast<ArrayMooseVariable *>(var_base);
+      auto * const avar = dynamic_cast<MooseVariableField<RealEigenVector> *>(var_base);
 
       if (avar)
       {

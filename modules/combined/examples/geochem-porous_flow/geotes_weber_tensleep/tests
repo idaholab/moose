@@ -1,0 +1,95 @@
+[Tests]
+  [./eqm_model_25degC]
+    type = 'RunApp'
+    input = 'eqm_model_25degC_no_precip.i'
+    expect_out = 'Minerals:
+Illite = 5*H2O - 8*H+ + 3.5*SiO2(aq) + 2.3*Al+++ + 0.25*Mg++ + 0.6*K+;  log10K = 9.7964;  SI = 9.7925
+Kaolinite = 5*H2O - 6*H+ + 2*SiO2(aq) + 2*Al+++;  log10K = 7.4341;  SI = 7.734
+K-feldspar = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*K+;  log10K = 0.065455;  SI = 7.1657
+Albite = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*Na+;  log10K = 3.0808;  SI = 5.7026
+Pyrrhotite = -0.125*H2O - 0.71875*H+ + 0.03125*SO4-- + 0.875*Fe++ + 0.96875*HS-;  log10K = -5.5573;  SI = 3.5197
+Barite = 1*SO4-- + 1*Ba++;  log10K = -9.9729;  SI = 2.6139
+Quartz = 1*SiO2(aq);  log10K = -4.0098;  SI = 1.3755
+Chalcedony = 1*SiO2(aq);  log10K = -3.7384;  SI = 1.1042
+Siderite = -1*H+ + 1*HCO3- + 1*Fe++;  log10K = -0.22246;  SI = 0.81967
+Dolomite = -2*H+ + 2*HCO3- + 1*Ca++ + 1*Mg++;  log10K = 2.5162;  SI = 0.3875
+Calcite = -1*H+ + 1*HCO3- + 1*Ca++;  log10K = 1.7105;  SI = 0.018304
+Fluorite = 1*Ca++ + 2*F-;  log10K = -10.968;  SI = -0.11047
+Celestite = 1*SO4-- + 1*Sr++;  log10K = -6.4427;  SI = -0.62617
+Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.2739;  SI = -1.1179
+Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.3083;  SI = -1.2487'
+    match_literal = true
+    requirement = "The geochemistry model shall be able to report the saturation indices of minerals"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+  [./eqm_model_25_to_92degC]
+    type = 'RunApp'
+    input = 'eqm_model_25_to_92degC.i'
+    expect_out = 'Basis Species:
+Quartz;  bulk_moles = 322.4mol;  bulk_conc = 1.767e+07mg/kg(soln);  free_moles = 322.4mol;  free_mass = 1.937e+07mg
+Calcite;  bulk_moles = 12.11mol;  bulk_conc = 1.106e+06mg/kg(soln);  free_moles = 12.11mol;  free_mass = 1.212e+06mg
+K-feldspar;  bulk_moles = 6.827mol;  bulk_conc = 1.733e+06mg/kg(soln);  free_moles = 6.828mol;  free_mass = 1.9e+06mg
+Siderite;  bulk_moles = 6.284mol;  bulk_conc = 6.642e+05mg/kg(soln);  free_moles = 6.283mol;  free_mass = 7.279e+05mg
+Dolomite;  bulk_moles = 2.867mol;  bulk_conc = 4.823e+05mg/kg(soln);  free_moles = 2.867mol;  free_mass = 5.287e+05mg
+Na+;  bulk_moles = 1.588mol;  bulk_conc = 3.33e+04mg/kg(soln);  molality = 1.484mol/kg(solvent water);  free_conc = 3.106e+04mg/kg(soln);  act_coeff = 0.6344;  log10(a) = -0.02618
+Cl-;  bulk_moles = 1.506mol;  bulk_conc = 4.871e+04mg/kg(soln);  molality = 1.432mol/kg(solvent water);  free_conc = 4.622e+04mg/kg(soln);  act_coeff = 0.564;  log10(a) = -0.09277
+Anhydrite;  bulk_moles = 1.191mol;  bulk_conc = 1.479e+05mg/kg(soln);  free_moles = 1.168mol;  free_mass = 1.591e+05mg
+Pyrrhotite;  bulk_moles = 0.5147mol;  bulk_conc = 3.8e+04mg/kg(soln);  free_moles = 0.5155mol;  free_mass = 4.172e+04mg
+Illite;  bulk_moles = 0.3733mol;  bulk_conc = 1.307e+05mg/kg(soln);  free_moles = 0.3689mol;  free_mass = 1.416e+05mg
+Kaolinite;  bulk_moles = 0.209mol;  bulk_conc = 4.923e+04mg/kg(soln);  free_moles = 0.2137mol;  free_mass = 5.516e+04mg
+SO4--;  bulk_moles = 0.04679mol;  bulk_conc = 4100mg/kg(soln);  molality = 0.03182mol/kg(solvent water);  free_conc = 2782mg/kg(soln);  act_coeff = 0.09629;  log10(a) = -2.514
+Li+;  bulk_moles = 0.01311mol;  bulk_conc = 83.02mg/kg(soln);  molality = 0.01293mol/kg(solvent water);  free_conc = 81.68mg/kg(soln);  act_coeff = 0.7376;  log10(a) = -2.021
+B(OH)3;  bulk_moles = 0.006663mol;  bulk_conc = 375.9mg/kg(soln);  molality = 0.001413mol/kg(solvent water);  free_conc = 79.56mg/kg(soln);  act_coeff = 1.33;  log10(a) = -2.726
+Br-;  bulk_moles = 0.001239mol;  bulk_conc = 90.32mg/kg(soln);  molality = 0.001242mol/kg(solvent water);  free_conc = 90.32mg/kg(soln);  act_coeff = 0.564;  log10(a) = -3.155
+F-;  bulk_moles = 0.0003211mol;  bulk_conc = 5.565mg/kg(soln);  molality = 0.0002374mol/kg(solvent water);  free_conc = 4.106mg/kg(soln);  act_coeff = 0.6012;  log10(a) = -3.846
+Barite;  bulk_moles = 0.0001866mol;  bulk_conc = 39.73mg/kg(soln);  free_moles = 0.0001853mol;  free_mass = 43.26mg
+Sr++;  bulk_moles = 0.0001598mol;  bulk_conc = 12.77mg/kg(soln);  molality = 0.0001312mol/kg(solvent water);  free_conc = 10.46mg/kg(soln);  act_coeff = 0.1356;  log10(a) = -4.75
+NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e-07mol/kg(solvent water);  free_conc = 0.004904mg/kg(soln);  act_coeff = 1;  log10(a) = -6.5'
+    match_literal = true
+    requirement = "It shall be possible to change temperature in a geochemistry model"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+  [./scaling]
+    type = 'CSVDiff'
+    input = 'scaling.i'
+    csvdiff = 'scaling_out.csv'
+    heavy = true
+    requirement = "It shall be possible to study scaling using a geochemistry model"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+  [./aquifer_geochemistry_only]
+    type = 'CSVDiff'
+    input = 'aquifer_geochemistry.i'
+    csvdiff = 'aquifer_geochemistry_out.csv'
+    cli_args = 'Outputs/exodus=false Executioner/end_time=1E4'
+    heavy = true
+    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+  [./porous_flow]
+    type = 'Exodiff'
+    input = 'porous_flow.i'
+    exodiff = 'porous_flow_out_react0.e'
+    cli_args = 'Executioner/end_time=1E4'
+    prereq = 'aquifer_geochemistry_only'
+    heavy = true
+    requirement = "Porous-flow simulations should be able to couple to spatially-dependent geochemical models to simulate reactive transport"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+  [./whole_sim]
+    type = 'CSVDiff'
+    input = 'exchanger.i'
+    csvdiff = 'exchanger_out_porous_flow_sim0_react0.csv'
+    cli_args = 'Executioner/end_time=2E4'
+    prereq = 'porous_flow'
+    heavy = true
+    requirement = "Geochemical models should be able to two-way couple with porous-flow simulations"
+    issues = '#15693'
+    design = 'geotes_weber_tensleep.md'
+  [../]
+[]

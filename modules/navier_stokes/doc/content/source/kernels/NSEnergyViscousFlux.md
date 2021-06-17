@@ -1,3 +1,5 @@
+# NSEnergyViscousFlux
+
 !syntax description /Kernels/NSEnergyViscousFlux
 
 !syntax parameters /Kernels/NSEnergyViscousFlux

@@ -42,11 +42,4 @@ private:
    * Performs the transfer for the variable of index i
    */
   void transferVariable(unsigned int i);
-
-  /// To send points to other processors
-  std::vector<std::vector<Parallel::Request>> _send_points;
-  /// To send values to other processors
-  std::vector<std::vector<Parallel::Request>> _send_evals;
-  /// To send app ids to other processors
-  std::vector<std::vector<Parallel::Request>> _send_ids;
 };

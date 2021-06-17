@@ -1,3 +1,5 @@
+# NSEnergyInviscidUnspecifiedBC
+
 !syntax description /BCs/NSEnergyInviscidUnspecifiedBC
 
 !syntax parameters /BCs/NSEnergyInviscidUnspecifiedBC

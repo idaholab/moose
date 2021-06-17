@@ -1,5 +1,7 @@
 # LayeredSideFluxAverage
 
+This object is deprecated. See [LayeredSideDiffusiveFluxAverage](/LayeredSideDiffusiveFluxAverage.md) 
+
 !alert! construction title=Undocumented Class
 The LayeredSideFluxAverage has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a

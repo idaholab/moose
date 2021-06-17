@@ -63,14 +63,14 @@ ScalarLagrangeMultiplier::computeOffDiagJacobianScalar(unsigned int jvar)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        Real value = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        Real value = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
         ken(_i, _j) += value;
         kne(_j, _i) += value;
       }
 }
 
 Real
-ScalarLagrangeMultiplier::computeQpOffDiagJacobian(unsigned int jvar)
+ScalarLagrangeMultiplier::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _lambda_var)
     return _test[_i][_qp];

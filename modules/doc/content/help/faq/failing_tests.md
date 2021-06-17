@@ -13,11 +13,11 @@ make -j 8
 !alert note title=did make -j 8 fail?
 If `make -j 8` fails, please proceed to [Build Issues](help/troubleshooting.md#buildissues) above. This is most likely why all your tests are failing.
 
-This test, proves the TestHarness is available. That libMesh is built, and the TestHarness has a working MOOSE framework available to it. Meaning, your test that is failing may be beyond the scope of this troubleshooting guide. However, do continue to read through the bolded situations below. If the error is not listed, please submit your failed test results to our [mailing list](https://groups.google.com/forum/#!forum/moose-users) for help.
+This test, proves the TestHarness is available. That libMesh is built, and the TestHarness has a working MOOSE framework available to it. Meaning, your test that is failing may be beyond the scope of this troubleshooting guide. However, do continue to read through the bolded situations below. If the error is not listed, please submit your failed test results to the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) for help.
 
 If the test did fail, chances are your test and our test is failing for the same reason:
 
-- +Environment Variables+ is somehow instructing the TestHarness to use improper paths. Try each of the following and re-run your test again. You may find you receive a different error each time. Simply continue troubleshooting using that new error, and work your way down. If the error is not listed here, then it is time to ask the [mailing list](https://groups.google.com/forum/#!forum/moose-users) for help:
+- +Environment Variables+ is somehow instructing the TestHarness to use improper paths. Try each of the following and re-run your test again. You may find you receive a different error each time. Simply continue troubleshooting using that new error, and work your way down. If the error is not listed here, then it is time to ask the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) for help:
 
   - check if `echo $METHOD` returns anything. If it does, try unsetting it with `unset METHOD`
   - check if `echo $MOOSE_DIR` returns anything. If it does, try unsetting it with `unset MOOSE_DIR`

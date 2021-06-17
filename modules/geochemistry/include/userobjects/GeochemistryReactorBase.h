@@ -25,67 +25,60 @@ public:
   static InputParameters validParams();
   GeochemistryReactorBase(const InputParameters & parameters);
   virtual void initialize() override;
-  virtual void threadJoin(const UserObject & uo) override final;
+  virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
   virtual void execute() override;
-
-  /**
-   * @return a reference to the equilibrium geochemical system at the given point
-   * @param point the point of interest
-   */
-  virtual const GeochemicalSystem & getGeochemicalSystem(const Point & point) const = 0;
 
   /**
    * @return a reference to the equilibrium geochemical system at the given node
    * @param node_id the ID of the node
    */
-  virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const = 0;
+  virtual const GeochemicalSystem & getGeochemicalSystem(dof_id_type node_id) const = 0;
 
   /**
    * @return a reference to the most recent solver output (containing iteration info, swap info,
-   * residuals, etc)
-   * @param point the point of interest
-   */
-  virtual const std::stringstream & getSolverOutput(const Point & point) const = 0;
-
-  /**
-   * @return the total number of iterations used by the most recent solve at the point
-   * @param point the point of interest
-   */
-  virtual unsigned getSolverIterations(const Point & point) const = 0;
-
-  /**
-   * @return the L1norm of the residual at the end of the most recent solve at the point
-   * @param point the point of interest
-   */
-  virtual Real getSolverResidual(const Point & point) const = 0;
-
-  /**
-   * @return the mole additions (the first num_basis of these are additions to the bulk composition
-   * of the equilibrium system, the last num_kin of these are -dt*kinetic_reaction_rate, ie
-   * dt*dissolution_rate)
+   * residuals, etc) at the specified node_id
    * @param node_id the node ID
    */
-  virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const = 0;
+  virtual const std::stringstream & getSolverOutput(dof_id_type node_id) const = 0;
+
+  /**
+   * @return the total number of iterations used by the most recent solve at the specified node_id
+   * @param node_id the node ID
+   */
+  virtual unsigned getSolverIterations(dof_id_type node_id) const = 0;
+
+  /**
+   * @return the L1norm of the residual at the end of the most recent solve at the specified node_id
+   * @param node_id the node ID
+   */
+  virtual Real getSolverResidual(dof_id_type node_id) const = 0;
 
   /**
    * @return the mole additions (the first num_basis of these are additions to the bulk composition
    * of the equilibrium system, the last num_kin of these are -dt*kinetic_reaction_rate, ie
-   * dt*dissolution_rate)
-   * @param point the point of interest
+   * dt*dissolution_rate) at the specified node_id
+   * @param node_id the node ID
    */
-  virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const = 0;
+  virtual const DenseVector<Real> & getMoleAdditions(dof_id_type node_id) const = 0;
 
   /**
    * @return the moles dumped of the given species at the specified node_id
    * @param species the name of the species
    * @param node_id the node ID
    */
-  virtual Real getMolesDumped(unsigned node_id, const std::string & species) const = 0;
+  virtual Real getMolesDumped(dof_id_type node_id, const std::string & species) const = 0;
+
+  /// returns a reference to the PertinentGeochemicalSystem used to creat the ModelGeochemicalDatabase
+  const PertinentGeochemicalSystem & getPertinentGeochemicalSystem() const { return _pgs; };
 
 protected:
+  /// Number of nodes handled by this processor (will need to be made un-const when mesh adaptivity is handled)
+  const unsigned _num_my_nodes;
   /// my copy of the underlying ModelGeochemicalDatabase
   ModelGeochemicalDatabase _mgd;
+  /// Reference to the original PertinentGeochemicalSystem used to create the ModelGeochemicalDatabase
+  const PertinentGeochemicalSystem & _pgs;
   /// number of basis species
   const unsigned _num_basis;
   /// number of equilibrium species
@@ -102,10 +95,10 @@ protected:
   GeochemistrySpeciesSwapper _swapper;
   /// A small value of molality
   const Real _small_molality;
-  /// The solver output
-  std::stringstream _solver_output;
-  /// Number of iterations used by the solver
-  unsigned _tot_iter;
-  /// L1norm of the solver residual
-  Real _abs_residual;
+  /// The solver output at each node
+  std::vector<std::stringstream> _solver_output;
+  /// Number of iterations used by the solver at each node
+  std::vector<unsigned> _tot_iter;
+  /// L1norm of the solver residual at each node
+  std::vector<Real> _abs_residual;
 };

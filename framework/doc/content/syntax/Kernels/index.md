@@ -92,19 +92,19 @@ $\left(\frac{\partial (.)}{\partial u_j}\right)$, is defined as:
 
 As mentioned, the `computeQpResidual` method must be overridden for both flavors of kernels non-AD
 and AD. The `computeQpResidual` method for the non-AD version, [`Diffusion`](/Diffusion.md), is
-provided in [#non-ad-residual].
+provided in [non-ad-residual].
 
 !listing framework/src/kernels/Diffusion.C id=non-ad-residual
          re=Real\nDiffusion::computeQpResidual.*?}
-         caption=The C++ weak-form residual statement of [#weak-form] as implemented in the Diffusion kernel.
+         caption=The C++ weak-form residual statement of [weak-form] as implemented in the Diffusion kernel.
 
-This object also overrides the `computeQpJacobian` method to define Jacobian term of [#jacobian] as
-shown in [#non-ad-jacobian].
+This object also overrides the `computeQpJacobian` method to define Jacobian term of [jacobian] as
+shown in [non-ad-jacobian].
 
 
-!listing framework/src/kernels/Diffusion.C id=non-ad-residual
+!listing framework/src/kernels/Diffusion.C id=non-ad-jacobian
          re=Real\nDiffusion::computeQpJacobian.*?}
-         caption=The C++ weak-form Jacobian statement of [#jacobian] as implemented in the Diffusion kernel.
+         caption=The C++ weak-form Jacobian statement of [jacobian] as implemented in the Diffusion kernel.
 
 
 The AD version of this object, [`ADDiffusion`](/ADDiffusion.md), relies on an optimized kernel object
@@ -112,7 +112,7 @@ The AD version of this object, [`ADDiffusion`](/ADDiffusion.md), relies on an op
 
 !listing framework/src/kernels/ADDiffusion.C id=ad-residual
          re=ADDiffusion::precomputeQpResidual.*?}
-         caption=The C++ pre-computed portions of the weak-form residual statement of [#weak-form] as implemented in the ADDiffusion kernel.
+         caption=The C++ pre-computed portions of the weak-form residual statement of [weak-form] as implemented in the ADDiffusion kernel.
 
 
 ## Time Derivative Kernels

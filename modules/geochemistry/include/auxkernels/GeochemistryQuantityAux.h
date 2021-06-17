@@ -43,7 +43,8 @@ protected:
     TEMPERATURE,
     KINETIC_MOLES,
     KINETIC_ADDITIONS,
-    MOLES_DUMPED
+    MOLES_DUMPED,
+    TRANSPORTED_MOLES_IN_ORIGINAL_BASIS
   } _quantity_choice;
 
   /**

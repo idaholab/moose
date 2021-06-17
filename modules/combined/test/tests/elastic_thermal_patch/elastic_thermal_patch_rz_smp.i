@@ -153,8 +153,6 @@
     type = Density
     block = 1
     density = 0.283
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 

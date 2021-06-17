@@ -41,9 +41,15 @@ ParsedMaterialBase::validParams()
       std::vector<std::string>(),
       "Vector of material properties used in the parsed function");
 
+  // Postprocessors
+  params.addParam<std::vector<PostprocessorName>>(
+      "postprocessor_names",
+      std::vector<PostprocessorName>(),
+      "Vector of postprocessor names used in the parsed function");
+
   // Function expression
-  params.addRequiredParam<std::string>("function",
-                                       "FParser function expression for the phase free energy");
+  params.addRequiredCustomTypeParam<std::string>(
+      "function", "FunctionExpression", "FParser function expression for the parsed material");
 
   return params;
 }

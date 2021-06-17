@@ -66,6 +66,7 @@ class MooseDocsTestCase(unittest.TestCase):
             self.__setup(*args, **kwargs)
 
         base.Executioner.setMutable(self.__text, True)
+        self.__translator.executioner.read(self.__text) # runs pre- and post-read methods
         self.__ast = self.__translator.executioner.tokenize(self.__text, text)
         base.Executioner.setMutable(self.__text, False)
         return self.__ast

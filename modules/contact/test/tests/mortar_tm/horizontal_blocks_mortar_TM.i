@@ -128,8 +128,6 @@ offset = 0.01
 
 [Contact]
   [./leftright]
-    disp_x = disp_x
-    disp_y = disp_y
 
     mesh = block_rename
     secondary = lb_right

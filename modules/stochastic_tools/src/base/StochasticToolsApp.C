@@ -17,9 +17,6 @@ StochasticToolsApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
-
   params.set<bool>("use_legacy_material_output") = false;
 
   return params;
@@ -43,7 +40,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   // Adds [Trainers] block
   registerSyntaxTask("AddSurrogateAction", "Trainers/*", "add_trainer");
   registerMooseObjectTask("add_trainer", SurrogateTrainer, false);
-  addTaskDependency("add_trainer", "add_user_object");
+  addTaskDependency("add_trainer", "add_sampler");
 
   // Adds [Surrogates] block
   registerSyntaxTask("AddSurrogateAction", "Surrogates/*", "add_surrogate");

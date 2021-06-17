@@ -1,3 +1,25 @@
+CONDA_BUILD_SYSROOT:           # [osx]
+  - /opt/MacOSX10.9.sdk        # [osx]
+
+macos_min_version:             # [osx]
+  - 10.9                       # [osx]
+
+macos_machine:                 # [osx]
+  - x86_64-apple-darwin13.4.0  # [osx]
+
+MACOSX_DEPLOYMENT_TARGET:      # [osx]
+  - 10.9                       # [osx]
+
+clangxx:
+  - 11.0.0 default_h9e6edd0_2
+
+gxx:
+  - 7.3.0 h553295d_16
+
 python:
- - 3.7
- - 3.6
+  - 3.6.11
+  - 3.7.8
+  - 3.8.3
+
+pin_run_as_build:
+  python: x.x

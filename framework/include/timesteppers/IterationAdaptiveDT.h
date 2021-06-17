@@ -75,9 +75,9 @@ protected:
   /// if specified, the postprocessor value is an upper limit for the time step length
   const PostprocessorValue * const _pps_value;
 
-  const Function * _timestep_limiting_function;
-  const PiecewiseBase * _piecewise_timestep_limiting_function;
-  const PiecewiseLinear * _piecewise_linear_timestep_limiting_function;
+  std::vector<const Function *> _timestep_limiting_functions;
+  std::vector<const PiecewiseBase *> _piecewise_timestep_limiting_functions;
+  std::vector<const PiecewiseLinear *> _piecewise_linear_timestep_limiting_functions;
 
   /// time point defined in the piecewise function
   std::vector<Real> _times;

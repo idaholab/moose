@@ -10,19 +10,25 @@
 #pragma once
 
 #include "ComputeFiniteStrainElasticStress.h"
+#include "ADComputeFiniteStrainElasticStress.h"
+#include "DamageBase.h"
 
-class DamageBase;
+// Forward declaration
+template <bool is_ad>
+using ComputeFiniteStrainElasticStressTempl = typename std::
+    conditional<is_ad, ADComputeFiniteStrainElasticStress, ComputeFiniteStrainElasticStress>::type;
 
 /**
  * ComputeDamageStress computes the stress for a damaged elasticity material. This
  * model must be used in conjunction with a damage model (derived from DamageBase)
  */
-class ComputeDamageStress : public ComputeFiniteStrainElasticStress
+template <bool is_ad>
+class ComputeDamageStressTempl : public ComputeFiniteStrainElasticStressTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeDamageStress(const InputParameters & parameters);
+  ComputeDamageStressTempl(const InputParameters & parameters);
 
   void initialSetup() override;
 
@@ -30,8 +36,13 @@ protected:
   virtual void computeQpStress() override;
 
   /// Property that stores the time step limit
-  MaterialProperty<Real> & _matl_timestep_limit;
+  MaterialProperty<Real> & _material_timestep_limit;
 
   /// Pointer to the damage model
-  DamageBase * _damage_model;
+  DamageBaseTempl<is_ad> * _damage_model;
+
+  using MaterialBase::_qp;
 };
+
+typedef ComputeDamageStressTempl<false> ComputeDamageStress;
+typedef ComputeDamageStressTempl<true> ADComputeDamageStress;

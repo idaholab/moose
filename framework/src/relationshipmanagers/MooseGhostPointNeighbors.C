@@ -58,13 +58,13 @@ MooseGhostPointNeighbors::getInfo() const
 }
 
 bool
-MooseGhostPointNeighbors::operator==(const RelationshipManager & rhs) const
+MooseGhostPointNeighbors::operator>=(const RelationshipManager & rhs) const
 {
   const auto * rm = dynamic_cast<const MooseGhostPointNeighbors *>(&rhs);
   if (!rm)
     return false;
   else
-    return isType(rm->_rm_type);
+    return baseGreaterEqual(*rm);
 }
 
 void

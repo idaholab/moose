@@ -87,6 +87,12 @@ public:
 
   virtual void forceTimeStep(Real dt);
 
+  /**
+   * Set the number of time steps
+   * @param num_steps number of time steps
+   */
+  virtual void forceNumSteps(const unsigned int num_steps);
+
   ///@{
   /**
    * Add a sync time

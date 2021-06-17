@@ -25,7 +25,7 @@ public:
   ADInterfaceKernelTempl(const InputParameters & parameters);
 
   /// The primary variable that this interface kernel operates on
-  MooseVariableFE<T> & variable() const override { return _var; }
+  const MooseVariableFE<T> & variable() const override { return _var; }
 
   /// The neighbor variable number that this interface kernel operates on
   const MooseVariableFE<T> & neighborVariable() const override { return _neighbor_var; }

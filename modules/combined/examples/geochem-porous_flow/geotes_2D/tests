@@ -1,0 +1,68 @@
+[Tests]
+  [./aquifer_equilibrium]
+    type = CSVDiff
+    input = aquifer_equilibrium.i
+    csvdiff = aquifer_equilibrium_out.csv
+    requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./aquifer_un_quartz_equilibrium]
+    type = CSVDiff
+    input = aquifer_un_quartz_equilibrium.i
+    csvdiff = aquifer_un_quartz_equilibrium_out.csv
+    requirement = "The geochemistry model shall be able to find the molality of species at equilibrium with free minerals"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./aquifer_geochemistry_only]
+    type = 'CSVDiff'
+    input = 'aquifer_geochemistry.i'
+    csvdiff = 'aquifer_geochemistry_out.csv'
+    cli_args = 'Outputs/exodus=false Executioner/end_time=1E5'
+    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./aquifer_un_quartz_geochemistry_only]
+    type = 'CSVDiff'
+    input = 'aquifer_un_quartz_geochemistry.i'
+    csvdiff = 'aquifer_un_quartz_geochemistry_out.csv'
+    cli_args = 'Outputs/exodus=false Executioner/end_time=1E5'
+    requirement = "Spatially-dependent aquifer geochemical models shall be possible in the geochemistry module"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./porous_flow]
+    type = 'Exodiff'
+    input = 'porous_flow.i'
+    exodiff = 'porous_flow_out_react0.e'
+    cli_args = 'Executioner/end_time=1E5'
+    heavy = true
+    requirement = "Porous-flow simulations should be able to couple to spatially-dependent geochemical models to simulate reactive transport"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./exchanger]
+    type = CSVDiff
+    input = exchanger.i
+    csvdiff = exchanger_2steps.csv
+    cli_args = 'Executioner/end_time=2E5 Outputs/file_base=exchanger_2steps'
+    heavy = true
+    prereq = porous_flow
+    requirement = "Porous-flow simulations should be able to two-way couple to spatially-dependent geochemical models to simulate reactive transport"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+  [./exchanger_un_quartz]
+    type = CSVDiff
+    input = exchanger_un_quartz.i
+    csvdiff = exchanger_un_quartz_2steps.csv
+    cli_args = 'Executioner/end_time=2E5 Outputs/file_base=exchanger_un_quartz_2steps'
+    heavy = true
+    prereq = porous_flow
+    requirement = "Porous-flow simulations should be able to two-way couple to spatially-dependent geochemical models to simulate reactive transport"
+    issues = '#15693'
+    design = 'geotes_2D.md'
+  [../]
+[]

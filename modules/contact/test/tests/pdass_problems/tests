@@ -1,0 +1,54 @@
+[Tests]
+  design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md'
+  issues = '#17495'
+  [cylinder_friction]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_chkfile_friction_0004.csv cylinder_friction_chkfile_x_disp_0004.csv '
+              'cylinder_friction_chkfile_y_disp_0004.csv '
+              'cylinder_friction_chkfile_cont_press_0004.csv'
+    input = 'cylinder_friction.i'
+    rel_err = 1.0e-4
+    min_parallel = 4
+    max_parallel = 4
+    heavy = true
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve frictional contact between a cylinder and a plane.'
+  []
+  [ironing]
+    type = 'CSVDiff'
+    csvdiff = 'ironing_chkfile_cont_press_0009.csv ironing_chkfile_friction_0009.csv'
+    input = 'ironing.i'
+    rel_err = 1.0e-4
+    min_parallel = 4
+    heavy = true
+    min_ad_size = '200'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve frictional contact between a semicircular tool and '
+                  'flexible base material.'
+  []
+  [frictional_bouncing_block]
+    type = 'CSVDiff'
+    csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
+              'frictional_bouncing_block_checkfile_friction_0029.csv'
+    input = 'frictional_bouncing_block.i'
+    rel_err = 1.0e-4
+    min_ad_size = '50'
+    heavy = true
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve frictional contact between a bouncing block and '
+                  'flexible base material.'
+  []
+  [frictional_bouncing_block_action]
+    type = 'CSVDiff'
+    csvdiff = 'frictional_bouncing_block_action_checkfile_cont_press_0029.csv '
+              'frictional_bouncing_block_action_checkfile_friction_0029.csv'
+    input = 'frictional_bouncing_block_action.i'
+    rel_err = 1.0e-4
+    min_ad_size = '50'
+    heavy = true
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve frictional contact between a bouncing block and '
+                  'flexible base material verifying setup in the contact action.'
+  []
+[]

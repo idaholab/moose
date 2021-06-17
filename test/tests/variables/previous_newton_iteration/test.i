@@ -10,6 +10,10 @@
   elem_type = QUAD9
 []
 
+[Problem]
+  previous_nl_solution_required = true
+[]
+
 [Functions]
   [./v_fn]
     type = ParsedFunction

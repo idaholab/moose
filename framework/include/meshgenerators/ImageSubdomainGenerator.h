@@ -31,5 +31,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// the mesh to modify
   std::unique_ptr<MeshBase> & _input;
 };

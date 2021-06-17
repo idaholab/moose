@@ -17,7 +17,7 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 #include "Attributes.h"
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 #include "SubProblem.h"
 #include "FVKernel.h"
 #include "ADUtils.h"
@@ -107,6 +107,17 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
 
   _need_matrix_tag_u.resize(num_matrix_tags);
   _matrix_tag_u.resize(num_matrix_tags);
+}
+
+template <typename OutputType>
+unsigned int
+MooseVariableDataFV<OutputType>::oldestSolutionStateRequested() const
+{
+  if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
+    return 2;
+  if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
+    return 1;
+  return 0;
 }
 
 template <typename OutputType>
@@ -525,7 +536,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
   _has_dirichlet_bc = false;
   initializeSolnVars();
 
-  std::vector<FVDirichletBC *> bcs;
+  std::vector<FVDirichletBCBase *> bcs;
 
   // TODO: this query probably (maybe?)needs to also filter based on the
   // active tags - these currently live in the flux thread loop object and I'm
@@ -566,6 +577,24 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       "I only really understand having a time derivative for this and not having a time "
       "derivative for the other if this is elemental data and the other is not elemental data.");
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const ADReal u_other = _subproblem.currentlyComputingJacobian()
+                             ? other_face.adSln()[0]
+                             : other_face.sln(Moose::Current)[0];
+  const auto & u_face = _var.getBoundaryFaceValue(fi);
+  const auto u_ghost = 2 * u_face - u_other;
+
+  if (_need_ad_u)
+    assignForAllQps(u_ghost, _ad_u, nqp);
+  assignForAllQps(u_ghost.value(), _u, nqp);
+
+  // If people have time derivatives on faces, then they're in trouble (for now) because we do not
+  // know the time dependence of u_face. Let's try to do better than silent wrong values at least in
+  // debugging modes by tossing some NaNs in
+  if (_need_ad_u_dot && other_face._need_ad_u_dot)
+    assignForAllQps(std::numeric_limits<typename ADReal::value_type>::quiet_NaN(), _ad_u_dot, nqp);
+
+#else
   if (_has_dirichlet_bc)
   {
     // extrapolate from the boundary element across the boundary face using
@@ -618,10 +647,12 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       // Since we are simply tracking the other face's value, the time derivative is also the same
       assignForAllQps(other_face.adUDot()[0], _ad_u_dot, nqp);
   }
+#endif
 
-  // At this point we're only doing const monomials and we're no doing reconstruction, so any
-  // spatial derivatives are zero. We need to explicitly assign here to ensure that the values and
-  // DualNumber derivatives are properly initialized
+  // At this point we're only doing const monomials and we're not accessing reconstruction
+  // information through no-param-accessors (e.g. adGradSln()), so any spatial derivatives are zero.
+  // We need to explicitly assign here to ensure that the values and DualNumber derivatives are
+  // properly initialized
   if (_need_ad_grad_u)
     assignForAllQps(0, _ad_grad_u, nqp);
   if (_need_ad_second_u)
@@ -825,12 +856,6 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 #endif
 #endif
 
-  if (_need_ad_u)
-    assignForAllQps(_ad_zero, _ad_u, nqp);
-
-  if (_need_ad_grad_u)
-    assignForAllQps(_ad_zero, _ad_grad_u, nqp);
-
   if (_need_ad_second_u)
     assignForAllQps(0, _ad_second_u, nqp);
 
@@ -858,6 +883,16 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 
   if (_need_ad_u)
     assignForAllQps(_ad_dof_values[0], _ad_u, nqp);
+
+  if (_need_ad_grad_u)
+    assignForAllQps(
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        _var.adGradSln(_elem),
+#else
+        _ad_zero,
+#endif
+        _ad_grad_u,
+        nqp);
 
   if (_need_ad_u_dot && _time_integrator)
     assignForAllQps(_ad_dofs_dot[0], _ad_u_dot, nqp);

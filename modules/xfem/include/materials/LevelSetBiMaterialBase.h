@@ -27,6 +27,7 @@ public:
   LevelSetBiMaterialBaseTempl(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;
 

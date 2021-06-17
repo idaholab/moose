@@ -3,43 +3,43 @@
 []
 
 [Variables]
-  [./T]
-  [../]
+  [T]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = 2
     variable = T
     value = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = T
-  [../]
-  [./fracture_diffusion]
+  []
+  [fracture_diffusion]
     type = AnisotropicDiffusion
     block = 1
     tensor_coeff = '1 0 0  0 1 0  0 0 1'
     variable = T
-  [../]
-  [./matrix_diffusion]
+  []
+  [matrix_diffusion]
     type = AnisotropicDiffusion
     block = '2 3'
     tensor_coeff = '0 0 0  0 0 0  0 0 0'
     variable = T
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./entire_jacobian]
+  [entire_jacobian]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,0 +1,12 @@
+[Tests]
+  design = 'Reporters/index.md'
+  issues = '#17605'
+
+  [test]
+    type = RunApp
+    input = 'debug_show_reporters.i'
+    expect_out = 'Reporter "constant_reporter/integer":.*ReporterGeneralContext<std::string>.*VectorPostprocessor "constant_vpp/value1":.*Postprocessor "function":.*ScalePostprocessor "scale" \(mode: ROOT\)'
+
+    requirement = 'The system shall support the detailed on-screen output of all of the Reporters that were declared and requested, including type, producer, context, and consumers.'
+  []
+[]

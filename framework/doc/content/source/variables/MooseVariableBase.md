@@ -73,6 +73,15 @@ similar methods of `MooseVariableFE<Real>`.
 There are a myriad of ways to access Moose variables from user interfaces. We'll
 outline a few below.
 
+## Restart
+
+Variables can be restarted/initialized from variable values in a file on disk by
+setting the parameter `initial_from_file_var = source_var_name` in the variable
+sub-block, where `source_var_name` is the name of the source variable in the
+file. Note that the user will also have to set parameters in the `[Mesh]` block
+in order for this to work, as described for example in the documentation of the
+[FileMeshGenerator.md].
+
 ### SystemBase
 
 It's common for interface objects (`Kernel` objects for example) to have a `_sys`

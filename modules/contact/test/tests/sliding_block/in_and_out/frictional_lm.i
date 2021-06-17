@@ -101,8 +101,11 @@
   dtmin = 0.01
   l_max_its = 30
   nl_max_its = 20
+  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-9
   line_search = 'none'
   timestep_tolerance = 1e-6
+  snesmf_reuse_base = false
 
   [./Predictor]
     type = SimplePredictor

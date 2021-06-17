@@ -155,4 +155,7 @@ protected:
 
   /// d(internal_energy of each phase)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dinternal_energy_dvar;
+
+  /// mass flux is multiplied by this variable evaluated at quadpoints
+  const VariableValue & _multiplying_var;
 };

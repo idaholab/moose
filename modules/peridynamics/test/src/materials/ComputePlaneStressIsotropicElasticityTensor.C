@@ -39,9 +39,12 @@ ComputePlaneStressIsotropicElasticityTensor::residualSetup()
 
   // Reconstructe the elasticity tensor specific for plane stress case
   _Cijkl.zero();
-  _Cijkl(0, 0, 0, 0) = _Cijkl(1, 1, 1, 1) =
-      youngs_modulus / (1.0 + poissons_ratio) / (1.0 - poissons_ratio);
-  _Cijkl(0, 0, 1, 1) = _Cijkl(1, 1, 0, 0) =
-      youngs_modulus * poissons_ratio / (1.0 + poissons_ratio) / (1.0 - poissons_ratio);
-  _Cijkl(0, 1, 0, 1) = _Cijkl(1, 0, 1, 0) = 0.5 * youngs_modulus / (1.0 + poissons_ratio);
+  _Cijkl(0, 0, 0, 0) = youngs_modulus / (1.0 - poissons_ratio * poissons_ratio);
+  _Cijkl(1, 1, 1, 1) = _Cijkl(0, 0, 0, 0);
+  _Cijkl(0, 0, 1, 1) = _Cijkl(0, 0, 0, 0) * poissons_ratio;
+  _Cijkl(1, 1, 0, 0) = _Cijkl(0, 0, 1, 1);
+  _Cijkl(0, 1, 0, 1) = youngs_modulus / 2.0 / (1.0 + poissons_ratio);
+  _Cijkl(0, 1, 1, 0) = _Cijkl(0, 1, 0, 1);
+  _Cijkl(1, 0, 0, 1) = _Cijkl(0, 1, 0, 1);
+  _Cijkl(1, 0, 1, 0) = _Cijkl(0, 1, 0, 1);
 }

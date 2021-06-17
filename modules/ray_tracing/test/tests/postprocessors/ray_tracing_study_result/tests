@@ -1,0 +1,17 @@
+[Tests]
+  design = 'RayTracingStudyResult.md RayTracingStudy.md'
+  issues = '#16028'
+  [test]
+    type = 'CSVDiff'
+    input = 'ray_tracing_study_result.i'
+    csvdiff = 'ray_tracing_study_result_out.csv'
+    allow_test_objects = true
+
+    # ignore the partitioning-specific columns
+    override_columns = 'total_processor_crossings max_processor_crossings'
+    override_rel_err = '1e12 1e12'
+    override_abs_zero = '1e-10 1e-10'
+
+    requirement = 'The system shall support the output of the total number of rays started, the total distance traveled by rays, and the number of processor crossings the rays have encountered.'
+  []
+[]

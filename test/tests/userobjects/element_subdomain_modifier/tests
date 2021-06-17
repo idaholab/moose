@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#15795 #17100 #17239'
+  design = 'CoupledVarThresholdElementSubdomainModifier.md'
+  [group]
+    requirement = 'The framework shall include the ability to change element subdomain during '
+                  'simulation'
+
+    [reversible]
+      type = 'Exodiff'
+      input = 'reversible.i'
+      exodiff = 'reversible_out.e reversible_out.e-s002 reversible_out.e-s003 reversible_out.e-s004'
+      detail = 'reversibly,'
+    []
+
+    [block_restricted]
+      type = 'Exodiff'
+      input = 'block_restricted.i'
+      exodiff = 'block_restricted_out.e block_restricted_out.e-s002 block_restricted_out.e-s003 '
+                'block_restricted_out.e-s004'
+      detail = 'irreversibly, '
+    []
+
+    [no_moving_boundary]
+      type = 'Exodiff'
+      input = 'no_moving_boundary.i'
+      exodiff = 'no_moving_boundary_out.e no_moving_boundary_out.e-s002 '
+                'no_moving_boundary_out.e-s003 no_moving_boundary_out.e-s004'
+      detail = 'with and without a specified boundary,'
+    []
+
+    [initial_condition]
+      type = 'Exodiff'
+      input = 'initial_condition.i'
+      exodiff = 'initial_condition_out.e initial_condition_out.e-s002 initial_condition_out.e-s003 '
+                'initial_condition_out.e-s004'
+      detail = 'with solution'
+    []
+
+    [stateful_property]
+      type = 'Exodiff'
+      input = 'stateful_property.i'
+      exodiff = 'stateful_property_out.e stateful_property_out.e-s002 stateful_property_out.e-s003 '
+                'stateful_property_out.e-s004'
+      detail = 'and stateful material properties properly initialized.'
+    []
+  []
+
+  [steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The framework shall include the ability to change element subdomain for a steady '
+                  'state simulation'
+  []
+[]

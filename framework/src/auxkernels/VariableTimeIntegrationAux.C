@@ -28,7 +28,9 @@ VariableTimeIntegrationAux::validParams()
 VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _coef(getParam<Real>("coefficient")),
-    _order(getParam<unsigned int>("order"))
+    _order(getParam<unsigned int>("order")),
+    _u_old(_order != 3 ? uOld() : genericZeroValue<false>()),
+    _u_older(_order == 3 ? uOlder() : genericZeroValue<false>())
 {
   switch (_order)
   {

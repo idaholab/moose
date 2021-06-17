@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'reuse_rays.i'
+    csvdiff = 'reuse_rays_out.csv'
+    allow_test_objects = true
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+    requirement = 'The system shall support the re-use of traced rays.'
+  []
+[]

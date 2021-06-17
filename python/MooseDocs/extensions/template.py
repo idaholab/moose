@@ -23,7 +23,6 @@ LOG = logging.getLogger(__name__)
 
 TemplateItem = tokens.newToken('TemplateItem', key='')
 TemplateField = tokens.newToken('TemplateField', key='', required=True)
-TemplateSubField = tokens.newToken('TemplateSubField')
 
 def make_extension(**kwargs):
     return TemplateExtension(**kwargs)
@@ -38,7 +37,9 @@ class TemplateExtension(include.IncludeExtension):
     @staticmethod
     def defaultConfig():
         config = include.IncludeExtension.defaultConfig()
-        config['args'] = (dict(), "Template arguments to be applied to templates.")
+        config['args'] = (dict(), "Key value pair template arguments to be applied. The key " \
+                                  "should  exist within the template file as {{key}}, which is " \
+                                  "replaced by value when loaded.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -50,16 +51,15 @@ class TemplateExtension(include.IncludeExtension):
         self.addCommand(reader, TemplateLoadCommand())
         self.addCommand(reader, TemplateFieldCommand())
         self.addCommand(reader, TemplateItemCommand())
-        self.addCommand(reader, TemplateFieldContentCommand())
 
         renderer.add('TemplateField', RenderTemplateField())
 
     def initPage(self, page):
         """Initialize page with Extension settings."""
         self.initConfig(page, 'args')
+        page['dependencies'] = set()
 
     def postTokenize(self, page, ast):
-
         items = set()
         fields = set()
 
@@ -71,8 +71,8 @@ class TemplateExtension(include.IncludeExtension):
 
         unknown_items = items.difference(fields)
         if unknown_items:
-            msg = "Unknown template item(s): {}".format(', '.join(unknown_items))
-            raise exceptions.MooseDocsException(msg)
+            msg = "Unknown template item(s): {}\n{}"
+            raise exceptions.MooseDocsException(msg, ', '.join(unknown_items), page.source)
 
 class TemplateLoadCommand(command.CommandComponent):
     """
@@ -141,25 +141,13 @@ class TemplateItemCommand(command.CommandComponent):
             self.reader.tokenize(item, content, page, line=info.line, group=group)
         return parent
 
-class TemplateFieldContentCommand(command.CommandComponent):
-    COMMAND = 'template'
-    SUBCOMMAND = ('field-begin', 'field-end')
-
-    def createToken(self, parent, info, page):
-
-        if parent.name != 'TemplateField':
-            msg = "The '!template {}' command must be within a '!template field' command."
-            raise exceptions.MooseDocsException(msg, info['subcommand'])
-
-        return TemplateSubField(parent, command=info['subcommand'])
-
 class RenderTemplateField(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
         pass
 
     def createMaterialize(self, parent, token, page):
-        self._renderField(parent, token, page, True)
+        self._renderField(parent, token, page)
 
     def createLatex(self, parent, token, page):
         self._renderField(parent, token, page, False)
@@ -173,18 +161,8 @@ class RenderTemplateField(components.RenderComponent):
         replacement = moosetree.find(token.root, func)
 
         if replacement:
-            # Add beginning TemplateSubField
-            for child in token:
-                if (child.name == 'TemplateSubField') and (child['command'] == 'field-begin'):
-                    self.renderer.render(parent, child, page)
-
             # Render TemplateItem
             self.renderer.render(parent, replacement, page)
-
-            # Add ending TemplateSubField
-            for child in token:
-                if (child.name == 'TemplateSubField') and (child['command'] == 'field-end'):
-                    self.renderer.render(parent, child, page)
 
             # Remove the TemplateFieldItem, otherwise the content will be rendered again
             replacement.parent = None
@@ -205,29 +183,19 @@ class RenderTemplateField(components.RenderComponent):
         filename = page.local
         key = token['key']
         err = alert.AlertToken(None, brand='error')
-        alert_title = alert.AlertTitle(err,
-                                       brand='error',
+        alert_title = alert.AlertTitle(err, icon_name='error', brand='error',
                                        string='Missing Template Item: "{}"'.format(key))
         alert_content = alert.AlertContent(err, brand='error')
         token.copyToToken(alert_content)
 
-        if modal_flag:
-            modal_content = tokens.Token(None)
-            core.Paragraph(modal_content,
-                           string="The document must include the \"{0}\" template item, this can "\
-                           "be included by add adding the following to the markdown " \
-                           "file ({1}):".format(key, filename))
+        core.Paragraph(alert_content,
+                       string="The document must include the \"{0}\" template item, this can "\
+                       "be included by add adding the following to the markdown " \
+                       "file ({1}):".format(key, filename))
 
-            core.Code(modal_content,
-                      content="!template! item key={0}\nInclude text (in MooseDocs format) " \
-                      "regarding the \"{0}\" template item here.\n" \
-                      "!template-end!".format(key))
-
-            link = floats.create_modal_link(alert_title,
-                                            title='Missing Template Item "{}"'.format(key),
-                                            content=modal_content)
-            materialicon.Icon(link, icon='help_outline',
-                              class_='small',
-                              style='float:right;color:white;margin-bottom:5px;')
+        core.Code(alert_content,
+                  content="!template! item key={0}\nInclude text (in MooseDocs format) " \
+                  "regarding the \"{0}\" template item here.\n" \
+                  "!template-end!".format(key))
 
         self.renderer.render(parent, err, page)

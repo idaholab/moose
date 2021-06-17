@@ -35,6 +35,15 @@
       detail = 'for multiple parameters, and'
     []
 
+    [vector]
+      type = CSVDiff
+      input = master_vector.i
+      csvdiff = 'master_vector_out_storage_0002.csv master_vector_out_prop_A_0002.csv master_vector_out_prop_B_0002.csv master_vector_out_prop_C_0002.csv master_vector_out_prop_D_0002.csv'
+      max_parallel = 3
+
+      detail = 'for vector parameters for a batch of sub-applications,'
+    []
+
     [multiple_batch]
       type = CSVDiff
       input = master_multiple.i
@@ -43,6 +52,17 @@
       max_parallel = 3
 
       detail = 'for multiple parameters for a batch of sub-applications.'
+    []
+
+    [multiple_batch_with_index]
+      type = CSVDiff
+      input = master_multiple.i
+      csvdiff = 'master_multiple_out_storage_0002.csv'
+      cli_args = "Controls/cmdline/param_names='Mesh/ymax[1] Mesh/xmax[0]'"
+      prereq = master/multiple_normal
+      max_parallel = 3
+
+      detail = 'for multiple parameters using their global column indexes for a batch of sub-applications.'
     []
 
   []
@@ -68,6 +88,23 @@
     requirement = "The system shall error when the supplied sampler does not use the correct "
                   "execution flags."
     prereq = master/multiple_batch
+    max_parallel = 3
+  []
+
+  [vector_no_bracket]
+    type = RunException
+    input = master_vector.i
+    cli_args = "Controls/cmdline/param_names='Mesh/xmax[0] Materials/const/prop_values[1,(1.5),2,2] Mesh/ymax'"
+    expect_err = "If the bracket is used, it must be provided to every parameter."
+    requirement = "The system shall error when '[]' syntax is not used for all parameters."
+    max_parallel = 3
+  []
+  [vector_out_of_bound]
+    type = RunException
+    input = master_vector.i
+    cli_args = "Controls/cmdline/param_names='Mesh/xmax[0] Materials/const/prop_values[1,(1.5),2,2] Mesh/ymax[4]'"
+    expect_err = "The provided global column index \(4\) for Mesh/ymax is out of bound."
+    requirement = "The system shall error when provided global column index is out of bound."
     max_parallel = 3
   []
 []

@@ -1,1 +1,1 @@
-../../combined/doc/moosedocs.py
+../../doc/moosedocs.py

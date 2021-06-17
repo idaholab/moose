@@ -26,38 +26,38 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
     scaling = 1E11
-  [../]
+  []
 []
 
 [ICs]
-  [./porepressure]
+  [porepressure]
     type = FunctionIC
     variable = porepressure
     function = '-10000*z'  # approximately correct
-  [../]
+  []
 []
 
 [Functions]
-  [./ini_stress_zz]
+  [ini_stress_zz]
     type = ParsedFunction
     value = '(25000 - 0.6*10000)*z' # remember this is effective stress
-  [../]
-  [./cyclic_porepressure]
+  []
+  [cyclic_porepressure]
     type = ParsedFunction
     value = 'if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
-  [../]
-  [./neg_cyclic_porepressure]
+  []
+  [neg_cyclic_porepressure]
     type = ParsedFunction
     value = '-if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
-  [../]
+  []
 []
 
 [BCs]
@@ -67,48 +67,48 @@
   # ymax is called 'top'
   # xmin is called 'left'
   # xmax is called 'right'
-  [./no_x_disp]
+  [no_x_disp]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'bottom top' # because of 1-element meshing, this fixes u_x=0 everywhere
-  [../]
-  [./no_y_disp]
+  []
+  [no_y_disp]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top' # because of 1-element meshing, this fixes u_y=0 everywhere
-  [../]
-  [./no_z_disp_at_bottom]
+  []
+  [no_z_disp_at_bottom]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = back
-  [../]
-  [./pp]
+  []
+  [pp]
     type = FunctionDirichletBC
     variable = porepressure
     function = cyclic_porepressure
     boundary = front
-  [../]
-  [./total_stress_at_top]
+  []
+  [total_stress_at_top]
     type = FunctionNeumannBC
     variable = disp_z
     function = neg_cyclic_porepressure
     boundary = front
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0.0
       bulk_modulus = 2E9
       viscosity = 1E-3
       density0 = 1000.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -120,70 +120,70 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 10.0E9 # drained bulk modulus
     poissons_ratio = 0.25
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 0  0 0 0  0 0 ini_stress_zz'
     eigenstrain_name = ini_stress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
     porosity = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     solid_bulk_compliance = 1E-10
     fluid_bulk_modulus = 2E9
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-14'
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2500.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = porepressure
-  [../]
-  [./uz0]
+  []
+  [uz0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = disp_z
-  [../]
-  [./p100]
+  []
+  [p100]
     type = PointValue
     outputs = csv
     point = '0 0 -100'
     variable = porepressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

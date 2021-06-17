@@ -18,93 +18,93 @@
 []
 
 [Variables]
-  [./md]
-  [../]
+  [md]
+  []
 []
 
 [ICs]
-  [./md]
+  [md]
     type = RandomIC
     min = -1
     max = -0.224 # unsaturated for md<log(density_P0=0.8)=-0.223
     variable = md
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux0]
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = md
     gravity = '-1 -0.1 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'md'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       density0 = 1
       thermal_expansion = 0
       viscosity = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseMD_Gaussian
     mass_density = md
     al = 1.1
     density_P0 = 0.8
     bulk_modulus = 1.5
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
+  []
+  [check]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

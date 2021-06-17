@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#10327'
+  design = 'ChangeOverFixedPointPostprocessor.md'
+
+  [change_over_fixed_point]
+    requirement = 'The system shall support calculating the value change overFixedPoint'
+
+    [change_with_respect_to_previous]
+      type = 'CSVDiff'
+      input = 'change_over_fixed_point.i'
+      csvdiff = 'change_over_fixed_point_previous.csv'
+
+      detail = 'with respect to the previous calculation and'
+    []
+    [change_with_respect_to_initial]
+      type = 'CSVDiff'
+      input = 'change_over_fixed_point.i'
+      cli_args = "Postprocessors/change_over_fixed_point/change_with_respect_to_initial=true "
+                 "Outputs/file_base='change_over_fixed_point_initial'"
+      csvdiff = 'change_over_fixed_point_initial.csv'
+
+      detail = 'with respect to the initial calculation.'
+    []
+  []
+
+  [change_over_fixed_point_error]
+    requirement = 'The system shall issue an error when the dependent "change ofFixedPoint" calculation'
+
+    [change_with_respect_to_initial_error_dependent]
+      type = 'RunException'
+      input = 'change_over_fixed_point.i'
+      cli_args = "Postprocessors/change_over_fixed_point/change_with_respect_to_initial=true "
+                 "Postprocessors/norm/execute_on='timestep_end'"
+      expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
+                   "the dependent post-processor \('norm'\) must include 'initial'"
+
+      detail = "\"with respect to initial\" isn't calculated at the initial step and"
+    []
+    [change_with_respect_to_initial_error_this]
+      type = 'RunException'
+      input = 'change_over_fixed_point.i'
+      cli_args = "Postprocessors/change_over_fixed_point/change_with_respect_to_initial=true "
+                 "Postprocessors/change_over_fixed_point/execute_on='timestep_end'"
+      expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for "
+                   "the ChangeOverFixedPointPostprocessor \('change_over_fixed_point'\) must include 'initial'"
+
+      detail = "\"with respect to previous\" isn't calculated at the previous step."
+    []
+  []
+[]

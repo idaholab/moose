@@ -84,7 +84,16 @@ PatternedMeshGenerator::generate()
   // Read in all of the meshes
   for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
   {
-    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
+    std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
+    if (!mesh)
+      paramError("inputs",
+                 "The input mesh '",
+                 _input_names[i],
+                 "' is not a replicated mesh.\n\n",
+                 type(),
+                 " only works with inputs that are replicated.\n\n",
+                 "Try running without distributed mesh.");
+    _meshes.push_back(std::move(mesh));
   }
 
   // Data structure that holds each row
@@ -133,7 +142,6 @@ PatternedMeshGenerator::generate()
       // If this is the first cell of the row initialize the row mesh
       if (j == 0)
       {
-        //_row_meshes[i] = _mesh_ptrs[_pattern[i][j]]->clone();
         auto clone = _meshes[_pattern[i][j]]->clone();
         _row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
 

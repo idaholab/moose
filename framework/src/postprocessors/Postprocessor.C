@@ -11,6 +11,7 @@
 #include "UserObject.h"
 #include "ReporterName.h"
 #include "ReporterContext.h"
+#include "FEProblemBase.h"
 
 defineLegacyParams(Postprocessor);
 
@@ -28,7 +29,26 @@ Postprocessor::validParams()
   return params;
 }
 
-Postprocessor::Postprocessor(const InputParameters & parameters)
-  : OutputInterface(parameters), _pp_name(parameters.get<std::string>("_object_name"))
+Postprocessor::Postprocessor(const MooseObject * moose_object)
+  : OutputInterface(moose_object->parameters()), _pp_name(moose_object->name())
 {
+  auto & fe_problem =
+      *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+
+  const PostprocessorReporterName r_name(moose_object->name());
+
+  // Declare the Reporter value on thread 0 only; this lets us add error checking to
+  // make sure that it really is added only once
+  if (moose_object->parameters().get<THREAD_ID>("_tid") == 0)
+  {
+    mooseAssert(!fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
+                "Postprocessor Reporter value is already declared");
+
+    fe_problem.getReporterData(ReporterData::WriteKey())
+        .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
+            r_name, REPORTER_MODE_UNSET, *moose_object);
+  }
+  else
+    mooseAssert(fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
+                "Postprocessor Reporter value is not declared");
 }

@@ -9,20 +9,16 @@ class Node(object):
     """
     Base class for tree nodes that accepts arbitrary attributes.
 
-    Inputs:
-        parent[Node]: The parent Node (use None for the root)
-        name[str]: The name of the node.
-        **kwargs: Arbitrary key, value pairs
+    Create a new node in the tree that is a child of *parent* with the given *name*. The supplied
+    *parent* must be another `Node` object. All keyword arguments are stored as "attributes" and may
+    be of any type.
 
-    IMPORTANT
+    !alert warning title=Speed is Important!
     The need for this object comes from the MooseDocs package, which uses tree objects extensively.
     Originally, MooseDocs used the anytree package for these structures. As the MooseDocs system
     evolved as well as the amount of documentation, in particular the amount of generated HTML
     output, the speed in creating the tree nodes became critical. The anytree package is robust and
     well designed, but the construction of the nodes was not fast enough.
-
-    This object mimics the behavior of anytree but does not perform any sanity checks, the resulting
-    construction speedup is about 4 times over anytree. See tests/test_Node.py for a comparison test.
     """
 
     def __init__(self, parent, name, **kwargs):
@@ -52,7 +48,7 @@ class Node(object):
 
     @parent.setter
     def parent(self, new_parent):
-        """Set the parent Node object, use None to remove the node from the tree."""
+        """Set the parent Node object to *new_parent*, use None to remove the node from the tree."""
         if (self.__parent is not None) and (self in self.__parent.__children):
             self.__parent.__children.remove(self)
 
@@ -64,7 +60,8 @@ class Node(object):
     def children(self):
         """Return a list of children.
 
-        NOTE: the list is a copy but the Node objects in the list are not.
+        !alert note
+        The list is a copy but the Node objects in the list are not.
         """
         return copy.copy(self.__children)
 
@@ -75,7 +72,7 @@ class Node(object):
 
     @property
     def count(self):
-        """Return the number of all descendents"""
+        """Return the number of all descendants"""
         count = len(self.__children)
         for child in self.__children:
             count += child.count
@@ -86,7 +83,7 @@ class Node(object):
         return iter(self.__children)
 
     def insert(self, idx, child):
-        """Insert a child node."""
+        """Insert a nod *child* before the supplied *idx* in the list of children."""
         self.__children.insert(idx, child)
         child.__parent = self
 
@@ -122,7 +119,7 @@ class Node(object):
     @property
     def previous(self):
         """Return the previous sibling, if it exists."""
-        if self.__parent is not None:
+        if (self.__parent is not None) and (self.__parent.__children):
             idx = self.__parent.__children.index(self)
             if idx > 0:
                 return self.__parent.__children[idx-1]
@@ -130,7 +127,7 @@ class Node(object):
     @property
     def next(self):
         """Return the next sibling, if it exists."""
-        if self.__parent is not None:
+        if (self.__parent is not None) and (self.__parent.__children):
             idx = self.__parent.__children.index(self)
             if idx < len(self.__parent.__children) - 1:
                 return self.__parent.__children[idx+1]
@@ -160,7 +157,7 @@ class Node(object):
         return key in self.__attributes
 
     def get(self, key, default=None):
-        """Get the value of an attribute and return a default value if it doesn't exist."""
+        """Return the value of an attribute *key* or *default* if it does not exist."""
         return self.__attributes.get(key, default)
 
     def items(self):

@@ -16,6 +16,7 @@
 #include "ExecFlagEnum.h"
 #include "InfixIterator.h"
 
+#include "libmesh/utility.h"
 #include "libmesh/elem.h"
 
 // External includes
@@ -50,6 +51,55 @@ std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpo
 
 namespace MooseUtils
 {
+std::string
+pathjoin(const std::string & s)
+{
+  return s;
+}
+
+std::string
+runTestsExecutable()
+{
+  auto build_loc = pathjoin(Moose::getExecutablePath(), "run_tests");
+  if (pathExists(build_loc) && checkFileReadable(build_loc))
+    return build_loc;
+  // TODO: maybe no path prefix - just moose_test_runner here?
+  return pathjoin(Moose::getExecutablePath(), "moose_test_runner");
+}
+std::string
+findTestRoot()
+{
+  std::string path = ".";
+  for (int i = 0; i < 5; i++)
+  {
+    auto testroot = pathjoin(path, "testroot");
+    if (pathExists(testroot) && checkFileReadable(testroot))
+      return testroot;
+    path += "/..";
+  }
+  return "";
+}
+
+std::string
+installedTestsDir(const std::string & app_name)
+{
+  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "test");
+
+  auto testroot = pathjoin(installed_path, "testroot");
+  if (pathExists(testroot) && checkFileReadable(testroot))
+    return installed_path;
+  return "";
+}
+
+std::string
+docsDir(const std::string & app_name)
+{
+  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "doc");
+  auto docfile = pathjoin(installed_path, "css/moose.css");
+  if (pathExists(docfile) && checkFileReadable(docfile))
+    return installed_path;
+  return "";
+}
 
 std::string
 replaceAll(std::string str, const std::string & from, const std::string & to)
@@ -165,7 +215,10 @@ pathExists(const std::string & path)
 }
 
 bool
-checkFileReadable(const std::string & filename, bool check_line_endings, bool throw_on_unreadable)
+checkFileReadable(const std::string & filename,
+                  bool check_line_endings,
+                  bool throw_on_unreadable,
+                  bool check_for_git_lfs_pointer)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
   if (in.fail())
@@ -189,15 +242,35 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
         mooseError(filename + " contains Windows(DOS) line endings which are not supported.");
   }
 
+  if (check_for_git_lfs_pointer && checkForGitLFSPointer(in))
+    mooseError(filename + " appears to be a Git-LFS pointer. Make sure you have \"git-lfs\" "
+                          "installed so that you may pull this file.");
   in.close();
 
   return true;
 }
 
 bool
+checkForGitLFSPointer(std::ifstream & file)
+{
+  mooseAssert(file.is_open(), "Passed in file handle is not open");
+
+  std::string line;
+
+  // git-lfs pointer files contain several name value pairs. The specification states that the
+  // first name/value pair must be "version {url}". We'll do a simplified check for that.
+  file.seekg(0);
+  std::getline(file, line);
+  if (line.find("version https://") != std::string::npos)
+    return true;
+  else
+    return false;
+}
+
+bool
 checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
 {
-  std::ofstream out(filename.c_str(), std::ofstream::out);
+  std::ofstream out(filename.c_str(), std::ios_base::app);
   if (out.fail())
   {
     if (throw_on_unwritable)
@@ -335,6 +408,125 @@ splitFileName(std::string full_file)
 
   // Return the path and file as a pair
   return std::pair<std::string, std::string>(path, file);
+}
+
+void
+makedirs(const std::string & dir_name, bool throw_on_failure)
+{
+  // split path into directories with delimiter '/'
+  std::vector<std::string> split_dir_names;
+  MooseUtils::tokenize(dir_name, split_dir_names);
+
+  auto n = split_dir_names.size();
+
+  // remove '.' and '..' when possible
+  auto i = n;
+  i = 0;
+  while (i != n)
+  {
+    if (split_dir_names[i] == ".")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 1] = split_dir_names[j];
+      --n;
+    }
+    else if (i > 0 && split_dir_names[i] == ".." && split_dir_names[i - 1] != "..")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 2] = split_dir_names[j];
+      n -= 2;
+      --i;
+    }
+    else
+      ++i;
+  }
+  if (n == 0)
+    return;
+
+  split_dir_names.resize(n);
+
+  // start creating directories recursively
+  std::string cur_dir = dir_name[0] == '/' ? "" : ".";
+  for (auto & dir : split_dir_names)
+  {
+    cur_dir += "/" + dir;
+
+    if (!pathExists(cur_dir))
+    {
+      auto code = Utility::mkdir(cur_dir.c_str());
+      if (code != 0)
+      {
+        std::string msg = "Failed creating directory " + dir_name;
+        if (throw_on_failure)
+          throw std::invalid_argument(msg);
+        else
+          mooseError(msg);
+      }
+    }
+  }
+}
+
+void
+removedirs(const std::string & dir_name, bool throw_on_failure)
+{
+  // split path into directories with delimiter '/'
+  std::vector<std::string> split_dir_names;
+  MooseUtils::tokenize(dir_name, split_dir_names);
+
+  auto n = split_dir_names.size();
+
+  // remove '.' and '..' when possible
+  auto i = n;
+  i = 0;
+  while (i != n)
+  {
+    if (split_dir_names[i] == ".")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 1] = split_dir_names[j];
+      --n;
+    }
+    else if (i > 0 && split_dir_names[i] == ".." && split_dir_names[i - 1] != "..")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 2] = split_dir_names[j];
+      n -= 2;
+      --i;
+    }
+    else
+      ++i;
+  }
+  if (n == 0)
+    return;
+
+  split_dir_names.resize(n);
+
+  // start removing directories recursively
+  std::string base_dir = dir_name[0] == '/' ? "" : ".";
+  for (i = n; i > 0; --i)
+  {
+    std::string cur_dir = base_dir;
+    auto j = i;
+    for (j = 0; j < i; ++j)
+      cur_dir += "/" + split_dir_names[j];
+
+    // listDir should return at least '.' and '..'
+    if (pathExists(cur_dir) && listDir(cur_dir).size() == 2)
+    {
+      auto code = rmdir(cur_dir.c_str());
+      if (code != 0)
+      {
+        std::string msg = "Failed removing directory " + dir_name;
+        if (throw_on_failure)
+          throw std::invalid_argument(msg);
+        else
+          mooseError(msg);
+      }
+    }
+    else
+      // stop removing
+      break;
+  }
 }
 
 std::string
@@ -961,6 +1153,24 @@ buildBoundingBox(const Point & p1, const Point & p2)
   bb.union_with(p1);
   bb.union_with(p2);
   return bb;
+}
+
+std::string
+prettyCppType(const std::string & cpp_type)
+{
+  // On mac many of the std:: classes are inline namespaced with __1
+  // On linux std::string can be inline namespaced with __cxx11
+  std::string s = cpp_type;
+  pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
+  // It would be nice if std::string actually looked normal
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+      .GlobalReplace("std::string", &s);
+  // It would be nice if std::vector looked normal
+  pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
+  r.GlobalReplace("std::vector<\\1>", &s);
+  // Do it again for nested vectors
+  r.GlobalReplace("std::vector<\\1>", &s);
+  return s;
 }
 
 } // MooseUtils namespace

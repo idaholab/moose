@@ -67,6 +67,10 @@ ComputeResidualThread::subdomainChanged()
   std::set<TagID> needed_fe_var_vector_tags;
   _kernels.updateBlockFEVariableCoupledVectorTagDependency(
       _subdomain, needed_fe_var_vector_tags, _tid);
+  _integrated_bcs.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
 
   // Update material dependencies
   std::set<unsigned int> needed_mat_props;
@@ -192,6 +196,12 @@ ComputeResidualThread::onBoundary(const Elem * elem,
       if (bc->shouldApply())
         bc->computeResidual();
     }
+
+    if (lower_d_elem)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addResidualLower(_tid);
+    }
   }
 }
 
@@ -250,7 +260,7 @@ ComputeResidualThread::onInternalSide(const Elem * elem, unsigned int side)
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level()))
     {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
 
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
       // still remember to swap back during stack unwinding.
@@ -268,6 +278,7 @@ ComputeResidualThread::onInternalSide(const Elem * elem, unsigned int side)
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         _fe_problem.addResidualNeighbor(_tid);
+        _fe_problem.addResidualLower(_tid);
       }
     }
   }

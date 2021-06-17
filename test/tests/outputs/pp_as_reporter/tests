@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16543'
+  design = 'JSONOutput.md'
+  [test]
+    type = JSONDiff
+    input = pp_as_reporter.i
+    jsondiff = pp_as_reporter_out.json
+
+    requirement = "The system shall support the ability to output single value aggregate calculations to JSON format."
+  []
+[]

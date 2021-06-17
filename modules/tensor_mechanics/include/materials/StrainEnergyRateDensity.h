@@ -13,16 +13,12 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
 #include "RadialReturnCreepStressUpdateBase.h"
-#include "ADRadialReturnCreepStressUpdateBase.h"
 #include "MooseTypes.h"
 
 // select the appropriate class based on the is_ad boolean parameter
 template <bool is_ad>
-using GenericRadialReturnCreepStressUpdateBase =
-    typename std::conditional<is_ad,
-                              ADRadialReturnCreepStressUpdateBase,
-                              RadialReturnCreepStressUpdateBase>::type;
-
+using GenericStressUpdateBase =
+    typename std::conditional<is_ad, ADStressUpdateBase, StressUpdateBase>::type;
 /**
  * StrainEnergyRateDensity calculates the strain energy rate density.
  */
@@ -55,7 +51,7 @@ private:
   const unsigned _num_models;
 
   /// The user supplied list of inelastic models to compute the strain energy release rate
-  std::vector<GenericRadialReturnCreepStressUpdateBase<is_ad> *> _inelastic_models;
+  std::vector<GenericStressUpdateBase<is_ad> *> _inelastic_models;
 };
 
 typedef StrainEnergyRateDensityTempl<false> StrainEnergyRateDensity;

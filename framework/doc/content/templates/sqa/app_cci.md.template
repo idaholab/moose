@@ -1,0 +1,38 @@
+# {{app}} Communication and Contact Information
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](CCI) for provides information for contacting the software development team
+for all aspects of {{app}}. This includes information about reporting a problem with a release,
+asking questions regarding any version of the software, and contributing to the project.
+
+## General Communication
+
+!template field key=general-communication-intro required=False
+This section details how to communicate with the {{app}} development team to get help, report
+a suspected bug, or request an enhancement.
+
+!template field key=general-communication required=True
+This section should discuss how to contact the {{app}} developer for help, bug reports, and
+enhancement requests.
+
+## Problem Reporting
+
+!template field key=problem-reporting-intro required=False
+This section details how to communicate with the {{app}} development team to report a potential
+problem with a specific +release+ of the application.
+
+!template field key=problem-reporting required=True
+This section should discuss how to contact the {{app}} developer to report a potential problem with
+a release version of the {{app}}.
+
+## Contributing
+
+!template field key=contributing-intro required=False
+MOOSE and MOOSE-based applications are always improving and changing to meet the needs of the
+community. In most circumstances changes are welcome. If you are interested in contributing to the
+project please refer to the following instructions.
+
+!template field key=contributing required=True
+This section should detail how to contribute changes to {{app}}.

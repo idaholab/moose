@@ -21,162 +21,162 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
-  [./temperature]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
+  [temperature]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
-  [../]
-  [./p]
+  []
+  [p]
     type = RandomIC
     min = -1
     max = 0
     variable = porepressure
-  [../]
-  [./t]
+  []
+  [t]
     type = RandomIC
     min = 1
     max = 2
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
   # necessary otherwise volumetric strain rate will be zero
-  [./disp_x]
+  [disp_x]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'left right'
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     displacements = 'disp_x disp_y disp_z'
     component = 2
-  [../]
-  [./dummy]
+  []
+  [dummy]
     type = TimeDerivative
     variable = porepressure
-  [../]
-  [./temp]
+  []
+  [temp]
     type = PorousFlowHeatVolumetricExpansion
     variable = temperature
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure temperature disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       density0 = 1
       thermal_expansion = 0
       cv = 1.3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./p_eff]
+  [p_eff]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '2 3'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 
-  [./vol_strain]
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./ppss_nodal]
+  []
+  [ppss_nodal]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -187,21 +187,21 @@
     thermal_expansion_coeff = 0.1
     reference_temperature = 0.1
     reference_porepressure = 0.2
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1.1
     density = 0.5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -39,11 +39,17 @@ ComputeElasticityTensorTempl<is_ad>::ComputeElasticityTensorTempl(
     issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
   else
   {
-    // Define a rotation according to Euler angle parameters
-    RotationTensor R(_Euler_angles); // R type: RealTensorValue
+    // Use user-provided rotation matrix if given
+    if (parameters.isParamValid("rotation_matrix"))
+      _Cijkl.rotate(_rotation_matrix);
+    else
+    {
+      // Define a rotation according to Euler angle parameters
+      RotationTensor R(_Euler_angles); // R type: RealTensorValue
 
-    // rotate elasticity tensor
-    _Cijkl.rotate(R);
+      // rotate elasticity tensor
+      _Cijkl.rotate(R);
+    }
   }
 }
 

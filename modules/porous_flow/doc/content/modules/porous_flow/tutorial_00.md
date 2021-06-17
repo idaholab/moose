@@ -43,7 +43,7 @@ deliberately coarse (so that the tutorial input files may be easily
 run on the smallest computers) and is generated using MOOSE's inbuilt
 meshing capabilities.  Firstly, a 2D annular mesh is created:
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[Mesh] end=[MeshModifiers]
+!listing modules/porous_flow/examples/tutorial/00.i start=[Mesh] end=[make3D]
 
 The radius of the borehole is 1$\,$m, the radius of the model is
 10$\,$m, and only $1/4$ of the annulus is considered.
@@ -51,25 +51,25 @@ The radius of the borehole is 1$\,$m, the radius of the model is
 Now a sequence of `MeshModifiers` are applied to this 2D mesh.  First,
 it is extruded to be 12$\,$m high using:
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[./make3D] end=[./shift_down]
+!listing modules/porous_flow/examples/tutorial/00.i start=[make3D] end=[shift_down]
 
 Then it is shifted downwards (ie, in the negative $z$ direction) by
 6$\,$m to place the injection region around the origin:
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[./shift_down] end=[./aquifer]
+!listing modules/porous_flow/examples/tutorial/00.i start=[shift_down] end=[aquifer]
 
 An aquifer region is created in the central 6$\,$m:
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[./aquifer] end=[./injection_area]
+!listing modules/porous_flow/examples/tutorial/00.i start=[aquifer] end=[injection_area]
 
 and an injection area is created on the borehole's wall in the aquifer region:
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[./injection_area] end=[./rename]
+!listing modules/porous_flow/examples/tutorial/00.i start=[injection_area] end=[rename]
 
 Finally, the subdomains are named "caps" (for the upper and lower
 caprock) and "aquifer":
 
-!listing modules/porous_flow/examples/tutorial/00.i start=[./rename] end=[]
+!listing modules/porous_flow/examples/tutorial/00.i start=[rename] end=[]
 
 This process has created the 3D mesh.  Each of the input files in the
 tutorial follow this process.  The result is shown in [tut00.fig].
@@ -80,8 +80,4 @@ If this were a real simulation rather than just a tutorial, it would
 be much more efficient to use cylindrical coordinates, which are
 called "RZ" coordinates in MOOSE.  The mesh-generation process is
 
-!listing modules/porous_flow/examples/tutorial/00_2D.i start=[Mesh] end=[MeshModifiers]
-
-with `MeshModifiers`:
-
-!listing modules/porous_flow/examples/tutorial/00_2D.i start=[MeshModifiers] end=[Variables]
+!listing modules/porous_flow/examples/tutorial/00_2D.i start=[Mesh] end=[Variables]

@@ -28,4 +28,7 @@ protected:
 private:
   /// The root JSON node for output
   nlohmann::json _json;
+
+  /// True when distributed data exists for output
+  bool _has_distributed = false;
 };

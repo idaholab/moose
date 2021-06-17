@@ -11,8 +11,6 @@
 
 #include "RandomICBase.h"
 
-// Forward Declarations
-
 /**
  * Random initial condition for a polycrystalline material
  */

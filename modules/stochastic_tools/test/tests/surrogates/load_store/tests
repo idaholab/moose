@@ -18,7 +18,7 @@
       csvdiff = evaluate_out_pc_moments_0002.csv
       prereq = surrogate/train # Creates data files that this test uses
       allow_warnings = true
-      detail = "evaluated separately;"
+      detail = "evaluated separately (with replicated data);"
     []
 
     [train_distributed]
@@ -37,7 +37,7 @@
       csvdiff = evaluate_out_pc_moments_0002.csv
       prereq = surrogate/train_distributed # Creates data files that this test uses
       allow_warnings = true
-      detail = "evaluated separately;"
+      detail = "evaluated separately (with distributed data);"
     []
 
     [train_three_ranks]

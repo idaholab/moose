@@ -16,18 +16,19 @@
 /**
  * Base class for scalar damage models.
  */
-class ScalarDamageBase : public DamageBase
+template <bool is_ad>
+class ScalarDamageBaseTempl : public DamageBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ScalarDamageBase(const InputParameters & parameters);
+  ScalarDamageBaseTempl(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;
 
   virtual void updateDamage() override;
 
-  virtual void updateStressForDamage(RankTwoTensor & stress_new) override;
+  virtual void updateStressForDamage(GenericRankTwoTensor<is_ad> & stress_new) override;
 
   virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) override;
 
@@ -35,7 +36,7 @@ public:
 
   virtual Real computeTimeStepLimit() override;
 
-  const Real & getQpDamageIndex(unsigned int qp);
+  const GenericReal<is_ad> & getQpDamageIndex(unsigned int qp);
 
   const std::string getDamageIndexName() const { return _damage_index_name; }
 
@@ -47,7 +48,7 @@ protected:
   virtual void updateQpDamageIndex() = 0;
 
   ///@{ Material property that provides the damage index
-  MaterialProperty<Real> & _damage_index;
+  GenericMaterialProperty<Real, is_ad> & _damage_index;
   const MaterialProperty<Real> & _damage_index_old;
   const MaterialProperty<Real> & _damage_index_older;
   ///@}
@@ -60,4 +61,12 @@ protected:
 
   /// Maximum damage increment allowed for the time step
   const Real & _maximum_damage_increment;
+
+  using DamageBaseTempl<is_ad>::_qp;
+  using DamageBaseTempl<is_ad>::_base_name;
+  using DamageBaseTempl<is_ad>::setQp;
+  using DamageBaseTempl<is_ad>::_dt;
 };
+
+typedef ScalarDamageBaseTempl<false> ScalarDamageBase;
+typedef ScalarDamageBaseTempl<true> ADScalarDamageBase;

@@ -44,7 +44,7 @@ public:
    */
   virtual unsigned int getCurrentNonlinearIterationNumber() override
   {
-    return _transient_sys.get_current_nonlinear_iteration_number();
+    return _nl_implicit_sys.get_current_nonlinear_iteration_number();
   }
 
   virtual void setupFiniteDifferencedPreconditioner() override;
@@ -55,33 +55,24 @@ public:
    */
   virtual bool converged() override;
 
-  virtual NumericVector<Number> & RHS() override { return *_transient_sys.rhs; }
+  virtual NumericVector<Number> & RHS() override { return *_nl_implicit_sys.rhs; }
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override
   {
-    return _transient_sys.nonlinear_solver.get();
+    return _nl_implicit_sys.nonlinear_solver.get();
   }
 
   virtual SNES getSNES() override;
 
-  virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
+  virtual NonlinearImplicitSystem & sys() { return _nl_implicit_sys; }
 
   virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
 
 protected:
-  NumericVector<Number> & solutionOldInternal() const override
-  {
-    return *_transient_sys.old_local_solution;
-  }
-  NumericVector<Number> & solutionOlderInternal() const override
-  {
-    return *_transient_sys.older_local_solution;
-  }
-
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  TransientNonlinearImplicitSystem & _transient_sys;
+  NonlinearImplicitSystem & _nl_implicit_sys;
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
 

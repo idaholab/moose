@@ -25,14 +25,28 @@ GeneralizedPlaneStrainUserObject::validParams()
       "Generalized plane strain UserObject to provide residual and diagonal Jacobian entries.");
   params.addParam<UserObjectName>("subblock_index_provider",
                                   "SubblockIndexProvider user object name");
-  params.addParam<FunctionName>(
+  params.addParam<FunctionName>("out_of_plane_pressure_function",
+                                "Function used to prescribe pressure (applied toward the body) in "
+                                "the out-of-plane direction");
+  params.addDeprecatedParam<FunctionName>(
       "out_of_plane_pressure",
-      "0",
-      "Function used to prescribe pressure in the out-of-plane direction");
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)",
+      "This has been replaced by 'out_of_plane_pressure_function'");
+  params.addParam<MaterialPropertyName>("out_of_plane_pressure_material",
+                                        "0",
+                                        "Material used to prescribe pressure (applied toward the "
+                                        "body) in the out-of-plane direction");
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
-  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
+  params.addDeprecatedParam<Real>(
+      "factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)",
+      "This has been replaced by 'pressure_factor'");
+  params.addParam<Real>(
+      "pressure_factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
   params.addParam<std::string>("base_name", "Material properties base name");
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
 
@@ -46,9 +60,21 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(
     _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _subblock_id_provider(nullptr),
-    _out_of_plane_pressure(getFunction("out_of_plane_pressure")),
-    _factor(getParam<Real>("factor"))
+    _out_of_plane_pressure_function(parameters.isParamSetByUser("out_of_plane_pressure_function")
+                                        ? &getFunction("out_of_plane_pressure_function")
+                                        : parameters.isParamSetByUser("out_of_plane_pressure")
+                                              ? &getFunction("out_of_plane_pressure")
+                                              : nullptr),
+    _out_of_plane_pressure_material(getMaterialProperty<Real>("out_of_plane_pressure_material")),
+    _pressure_factor(parameters.isParamSetByUser("pressure_factor")
+                         ? getParam<Real>("pressure_factor")
+                         : parameters.isParamSetByUser("factor") ? getParam<Real>("factor") : 1.0)
 {
+  if (parameters.isParamSetByUser("out_of_plane_pressure_function") &&
+      parameters.isParamSetByUser("out_of_plane_pressure"))
+    mooseError("Cannot specify both 'out_of_plane_pressure_function' and 'out_of_plane_pressure'");
+  if (parameters.isParamSetByUser("pressure_factor") && parameters.isParamSetByUser("factor"))
+    mooseError("Cannot specify both 'pressure_factor' and 'factor'");
 }
 
 void
@@ -77,11 +103,18 @@ GeneralizedPlaneStrainUserObject::execute()
 
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
+    const Real out_of_plane_pressure =
+        ((_out_of_plane_pressure_function
+              ? _out_of_plane_pressure_function->value(_t, _q_point[_qp])
+              : 0.0) +
+         _out_of_plane_pressure_material[_qp]) *
+        _pressure_factor;
+
     // residual, integral of stress_zz for COORD_XYZ
     _residual[subblock_id] += _JxW[_qp] * _coord[_qp] *
                               (_stress[_qp](_scalar_out_of_plane_strain_direction,
                                             _scalar_out_of_plane_strain_direction) +
-                               _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
+                               out_of_plane_pressure);
 
     _reference_residual[subblock_id] += std::abs(
         _JxW[_qp] * _coord[_qp] *

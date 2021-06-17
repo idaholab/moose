@@ -172,7 +172,13 @@ ADKernelTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jvariable.phiSize(); _j++)
+    {
+#ifndef MOOSE_SPARSE_AD
+      mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                  "Out of bounds access in derivative vector.");
+#endif
       _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
+    }
 
   accumulateTaggedLocalMatrix();
 }
@@ -223,7 +229,8 @@ ADKernelTempl<T>::computeADJacobian(
           if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
             continue;
 
-          addJacobian(jvariable);
+          // Make sure to get the correct undisplaced/displaced variable
+          addJacobian(getVariable(jvariable.number()));
         }
       };
 
@@ -239,7 +246,7 @@ ADKernelTempl<T>::jacobianSetup()
 
 template <typename T>
 void
-ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
+ADKernelTempl<T>::computeOffDiagJacobian(const unsigned int)
 {
   if (_my_elem != _current_elem)
   {

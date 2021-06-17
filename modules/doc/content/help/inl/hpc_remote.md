@@ -21,7 +21,7 @@ Host hpclogin
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
+Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov hpcsc.hpc.inl.gov
   ProxyJump hpclogin
 ```
 
@@ -35,7 +35,7 @@ recognized. Please upgrade your client, if possible. Otherwise, replace
 the ProxyJump directive with the following line:
 
 ```bash
-ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p`
+ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
 ```
 !alert-end!
 
@@ -55,23 +55,18 @@ domain name in your command above because of the "Host" setting in your SSH conf
 
 ## SOCKS Proxy id=socks-proxy
 
-Adjust the SOCKS proxy settings for your +least+ favorite web browser to reflect the following
-settings:
+To access common HPC resources (hpcgitlab.hpc.inl.gov, hpcweb.inl.gov, etc) within a web browser, traffic must be routed through a SOCKS proxy. This can be achieved by using a PAC (Proxy-Auto Configuration) file:
 
-```bash
-localhost:5555
+
+!listing moose/scripts/hpc_proxy.pac
+
+Add the proxy configuration to your browser via the following url:
+
+```
+https://raw.githubusercontent.com/idaholab/moose/master/scripts/hpc_proxy.pac
 ```
 
-Choose your +least+ favorite, because once you adjust this setting, you will have to undo this
-setting once you disconnect for that browser to work again. There are other ways to switch back and
-forth by creating profiles. You may want to consult the Internet on how to set this up for your
-browser or OS. FireFox, for example, allows for custom profiles:
-[Firefox: Profile Manager](https://support.mozilla.org/en-US/kb/profile-manager-create-remove-switch-firefox-profiles)
-
-Finally, you may want to enter a few hostnames that you do +not+ want to go resolve through your
-proxy.  These would typically be external INL systems that are resolvable on the Internet
-(e.g. +gitlab.software.inl.gov+, +www.inl.gov+). This will allow you to both internal and external
-INL sites when connected through the SOCKS proxy.
+Documentation is available for using [Firefox](https://support.mozilla.org/en-US/kb/connection-settings-firefox). Add the URL above within the "Automatic proxy configuration URL" box. We do not recommend utilizing Google Chrome with this functionality because it requires setting a system-wide proxy configuration.
 
 ## Log in to HPC Gitlab
 
@@ -103,7 +98,7 @@ git clone git@hpcgitlab.hpc.inl.gov:<your user id>/<project>.git
 ## View build status on MOOSEBuild
 
 Using the same browser you modified your socks proxy settings, you should be able to navigate to
-[https://moosebuild.inl.gov](https://moosebuild.inl.gov).
+[https://moosebuild.hpc.inl.gov](https://moosebuild.hpc.inl.gov).
 
 ## Visit the internal HPC webpage
 

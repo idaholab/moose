@@ -11,6 +11,7 @@
 
 registerMooseObject("MooseTestApp", CoeffParamDiffusion);
 
+// MooseDocs::start
 InputParameters
 CoeffParamDiffusion::validParams()
 {
@@ -18,6 +19,7 @@ CoeffParamDiffusion::validParams()
   params.addRequiredParam<Real>("D", "The diffusivity coefficient.");
   return params;
 }
+// MooseDocs::end
 
 CoeffParamDiffusion::CoeffParamDiffusion(const InputParameters & parameters)
   : Diffusion(parameters),

@@ -56,7 +56,6 @@
                      absxs0_dist absxs1_dist absxs2_dist absxs3_dist
                      src_dist src_dist src_dist'
     num_rows = 1000
-    num_bins = 10
     execute_on = PRE_MULTIAPP_SETUP
   []
 []

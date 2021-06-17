@@ -125,6 +125,11 @@ public:
 
   std::set<std::string> getTasksByAction(const std::string & action) const;
 
+  /**
+   * Whether or not a task with the name \p task is registered.
+   */
+  bool isRegisteredTask(const std::string & task) const { return _tasks.count(task); }
+
 protected:
   MooseApp & _app;
 
@@ -135,4 +140,7 @@ protected:
 
   /// set<objectname, task> used to track if an object previously added is being added again
   std::set<std::pair<std::string, std::string>> _current_objs;
+
+  /// The registered tasks
+  std::set<std::string> _tasks;
 };

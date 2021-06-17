@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MechanicsBaseNOSPD.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 
 InputParameters
 MechanicsBaseNOSPD::validParams()

@@ -28,12 +28,18 @@ PorousFlowMassTimeDerivative::validParams()
                         "is not necessary for simulations involving only linear lagrange elements. "
                         " If you set this to true, you will also want to set the same parameter to "
                         "true for related Kernels and Materials");
+  params.addParam<bool>(
+      "multiply_by_density",
+      true,
+      "If true, then this Kernel represents the time derivative of the fluid mass.  If false, then "
+      "this Kernel represents the time derivative of the fluid volume (care must then be taken "
+      "when using other PorousFlow objects, such as the PorousFlowFluidMass postprocessor).");
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
-  params.addClassDescription(
-      "Component mass derivative wrt time for component given by fluid_component");
+  params.addClassDescription("Derivative of fluid-component mass with respect to time.  Mass "
+                             "lumping to the nodes is used.");
   return params;
 }
 
@@ -44,6 +50,7 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     _var_is_porflow_var(_dictator.isPorousFlowVariable(_var.number())),
     _num_phases(_dictator.numPhases()),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
+    _multiply_by_density(getParam<bool>("multiply_by_density")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
     _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")),
@@ -52,11 +59,16 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     _nearest_qp(_strain_at_nearest_qp
                     ? &getMaterialProperty<unsigned int>("PorousFlow_nearestqp_nodal")
                     : nullptr),
-    _fluid_density(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
-    _fluid_density_old(
-        getMaterialPropertyOld<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
-    _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_fluid_phase_density_nodal_dvar")),
+    _fluid_density(_multiply_by_density ? &getMaterialProperty<std::vector<Real>>(
+                                              "PorousFlow_fluid_phase_density_nodal")
+                                        : nullptr),
+    _fluid_density_old(_multiply_by_density ? &getMaterialPropertyOld<std::vector<Real>>(
+                                                  "PorousFlow_fluid_phase_density_nodal")
+                                            : nullptr),
+    _dfluid_density_dvar(_multiply_by_density
+                             ? &getMaterialProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_fluid_phase_density_nodal_dvar")
+                             : nullptr),
     _fluid_saturation_nodal(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")),
     _fluid_saturation_nodal_old(
         getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_nodal")),
@@ -85,10 +97,11 @@ PorousFlowMassTimeDerivative::computeQpResidual()
   Real mass_old = 0.0;
   for (unsigned ph = 0; ph < _num_phases; ++ph)
   {
-    mass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] *
-            _mass_frac[_i][ph][_fluid_component];
-    mass_old += _fluid_density_old[_i][ph] * _fluid_saturation_nodal_old[_i][ph] *
-                _mass_frac_old[_i][ph][_fluid_component];
+    const Real dens = (_multiply_by_density ? (*_fluid_density)[_i][ph] : 1.0);
+    mass += dens * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_fluid_component];
+    const Real dens_old = (_multiply_by_density ? (*_fluid_density_old)[_i][ph] : 1.0);
+    mass_old +=
+        dens_old * _fluid_saturation_nodal_old[_i][ph] * _mass_frac_old[_i][ph][_fluid_component];
   }
 
   return _test[_i][_qp] * (_porosity[_i] * mass - _porosity_old[_i] * mass_old) / _dt;
@@ -122,9 +135,11 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
   // of variables, which are NOT lumped to the nodes, hence:
   Real dmass = 0.0;
   for (unsigned ph = 0; ph < _num_phases; ++ph)
-    dmass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] *
-             _mass_frac[_i][ph][_fluid_component] * _dporosity_dgradvar[_i][pvar] *
-             _grad_phi[_j][nearest_qp];
+  {
+    const Real dens = (_multiply_by_density ? (*_fluid_density)[_i][ph] : 1.0);
+    dmass += dens * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_fluid_component] *
+             _dporosity_dgradvar[_i][pvar] * _grad_phi[_j][nearest_qp];
+  }
 
   if (_i != _j)
     return _test[_i][_qp] * dmass / _dt;
@@ -132,14 +147,16 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
   // As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
   for (unsigned ph = 0; ph < _num_phases; ++ph)
   {
-    dmass += _dfluid_density_dvar[_i][ph][pvar] * _fluid_saturation_nodal[_i][ph] *
+    if (_multiply_by_density)
+      dmass += (*_dfluid_density_dvar)[_i][ph][pvar] * _fluid_saturation_nodal[_i][ph] *
+               _mass_frac[_i][ph][_fluid_component] * _porosity[_i];
+    const Real dens = (_multiply_by_density ? (*_fluid_density)[_i][ph] : 1.0);
+    dmass += dens * _dfluid_saturation_nodal_dvar[_i][ph][pvar] *
              _mass_frac[_i][ph][_fluid_component] * _porosity[_i];
-    dmass += _fluid_density[_i][ph] * _dfluid_saturation_nodal_dvar[_i][ph][pvar] *
-             _mass_frac[_i][ph][_fluid_component] * _porosity[_i];
-    dmass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] *
+    dmass += dens * _fluid_saturation_nodal[_i][ph] *
              _dmass_frac_dvar[_i][ph][_fluid_component][pvar] * _porosity[_i];
-    dmass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] *
-             _mass_frac[_i][ph][_fluid_component] * _dporosity_dvar[_i][pvar];
+    dmass += dens * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_fluid_component] *
+             _dporosity_dvar[_i][pvar];
   }
   return _test[_i][_qp] * dmass / _dt;
 }

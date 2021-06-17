@@ -9,31 +9,11 @@
 
 #pragma once
 
-#include "MooseObject.h"
+#include "ResidualObject.h"
 #include "BlockRestrictable.h"
-#include "SetupInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "TransientInterface.h"
-#include "PostprocessorInterface.h"
-#include "VectorPostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
-#include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
-#include "TaggingInterface.h"
 #include "ElementIDInterface.h"
-
-class MooseMesh;
-class SubProblem;
-class KernelBase;
-class Assembly;
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<KernelBase>();
@@ -42,21 +22,11 @@ InputParameters validParams<KernelBase>();
  * This is the common base class for the three main
  * kernel types implemented in MOOSE, Kernel, VectorKernel and ArrayKernel.
  */
-class KernelBase : public MooseObject,
+class KernelBase : public ResidualObject,
                    public BlockRestrictable,
-                   public SetupInterface,
                    public CoupleableMooseVariableDependencyIntermediateInterface,
-                   public FunctionInterface,
-                   public UserObjectInterface,
-                   public TransientInterface,
-                   public PostprocessorInterface,
-                   public VectorPostprocessorInterface,
                    public MaterialPropertyInterface,
-                   public RandomInterface,
                    protected GeometricSearchInterface,
-                   public Restartable,
-                   public MeshChangedInterface,
-                   public TaggingInterface,
                    public ElementIDInterface
 {
 public:
@@ -64,72 +34,8 @@ public:
 
   KernelBase(const InputParameters & parameters);
 
-  virtual ~KernelBase();
-
-  /// Compute this Kernel's contribution to the residual
-  virtual void computeResidual() = 0;
-
-  /// Compute this Kernel's contribution to the diagonal Jacobian entries
-  virtual void computeJacobian() = 0;
-
-  /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) = 0;
-
-  /**
-   * Computes jacobian block with respect to a scalar variable
-   * @param jvar The number of the scalar variable
-   */
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) = 0;
-
-  /**
-   * Compute this Kernel's contribution to the diagonal Jacobian entries
-   * corresponding to nonlocal dofs of the variable
-   */
-  virtual void computeNonlocalJacobian() {}
-
-  /**
-   * Computes d-residual / d-jvar... corresponding to nonlocal dofs of the jvar
-   * and stores the result in nonlocal ke
-   */
-  virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
-
-  /**
-   * Returns the variable that this Kernel operates on.
-   */
-  virtual MooseVariableFEBase & variable() = 0;
-
-  /**
-   * Returns a reference to the SubProblem for which this Kernel is active
-   */
-  SubProblem & subProblem() { return _subproblem; }
-
 protected:
-  /**
-   * Following methods are used for Kernels that need to perform a per-element calculation
-   */
-  virtual void precalculateResidual() {}
-  virtual void precalculateJacobian() {}
-  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
-
-protected:
-  /// Reference to this kernel's SubProblem
-  SubProblem & _subproblem;
-
-  /// Reference to this kernel's FEProblemBase
-  FEProblemBase & _fe_problem;
-
-  /// Reference to the EquationSystem object
-  SystemBase & _sys;
-
-  /// The thread ID for this kernel
-  THREAD_ID _tid;
-
-  /// Reference to this Kernel's assembly object
-  Assembly & _assembly;
-
-  /// Reference to this Kernel's mesh object
-  MooseMesh & _mesh;
-
+  /// Current element
   const Elem * const & _current_elem;
 
   /// Volume of the current element

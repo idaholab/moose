@@ -75,3 +75,18 @@ callMooseErrorRaw(std::string & msg, MooseApp * app)
     prefix = app->name();
   moose::internal::mooseErrorRaw(msg, prefix);
 }
+
+std::string
+MooseObject::errorPrefix(const std::string & error_type) const
+{
+  std::stringstream oss;
+  oss << "The following " << error_type << " occurred in the object \"" << name()
+      << "\", of type \"" << type() << "\".\n\n";
+  return oss.str();
+}
+
+std::string
+MooseObject::typeAndName() const
+{
+  return type() + std::string(" \"") + name() + std::string("\"");
+}

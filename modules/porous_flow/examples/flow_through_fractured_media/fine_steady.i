@@ -19,108 +19,108 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = ConstantIC
     variable = pp
     value = 1e6
-  [../]
+  []
 []
 
 [BCs]
-  [./ptop]
+  [ptop]
     type = DirichletBC
     variable = pp
     boundary =  top
     value = 1e6
-  [../]
-  [./pbottom]
+  []
+  [pbottom]
     type = DirichletBC
     variable = pp
     boundary = bottom
     value = 1.002e6
-  [../]
+  []
 []
 
 [Kernels]
-  [./adv0]
+  [adv0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./relp]
+  []
+  [relp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./permeability1]
+  []
+  [permeability1]
     type = PorousFlowPermeabilityConst
     permeability = '1.8e-11 0 0 0 1.8e-11 0 0 0 1.8e-11' # kf=3e-8, a=6e-4m.  1.8e-11 = kf * a
     block = 'fracture'
-  [../]
-  [./permeability2]
+  []
+  [permeability2]
     type = PorousFlowPermeabilityConst
     permeability = '1e-20 0 0 0 1e-20 0 0 0 1e-20'
     block = 'matrix1 matrix2'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = basic
-  [./mumps_is_best_for_parallel_jobs]
+  [mumps_is_best_for_parallel_jobs]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
-  [./basic]
+  []
+  [basic]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = 'gmres      asm      lu           NONZERO                   2             '
-  [../]
+  []
 []
 
 [Executioner]

@@ -63,14 +63,15 @@ private:
    *                                requesting MooseObject's validParams function
    * @param sys_type A RMSystemType that can be used to limit the systems and consequent dof_maps
    *                 that the RM can be attached to
+   * @return Whether a relationship manager was added
    */
-  void
+  bool
   addRelationshipManager(Moose::RelationshipManagerType input_rm_type,
                          const InputParameters & moose_object_pars,
                          std::string rm_name,
                          Moose::RelationshipManagerType rm_type,
                          Moose::RelationshipManagerInputParameterCallback rm_input_parameter_func,
-                         Moose::RMSystemType sys_type);
+                         Moose::RMSystemType sys_type = Moose::RMSystemType::NONE);
 
 protected:
   /**
@@ -82,8 +83,9 @@ protected:
    *        RelationshipManager as early as you'd like. In these cases, your DistributedMesh may
    *        consume more memory during the problem setup.
    * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
+   * @return Whether a relationship manager was added
    */
-  void addRelationshipManagers(Moose::RelationshipManagerType when_type,
+  bool addRelationshipManagers(Moose::RelationshipManagerType when_type,
                                const InputParameters & moose_object_pars);
 
 public:
@@ -151,7 +153,7 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args)
+  [[noreturn]] void paramError(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
@@ -166,7 +168,7 @@ public:
    * back to the normal behavior of mooseWarning - only printing a message using the given args.
    */
   template <typename... Args>
-  void paramWarning(const std::string & param, Args... args)
+  void paramWarning(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
@@ -182,7 +184,7 @@ public:
    * the given args.
    */
   template <typename... Args>
-  void paramInfo(const std::string & param, Args... args)
+  void paramInfo(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())

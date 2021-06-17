@@ -32,12 +32,12 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  std::vector<boundary_id_type> _old_boundary_id;
-
-  std::vector<BoundaryName> _old_boundary_name;
-
-  std::vector<boundary_id_type> _new_boundary_id;
-
-  std::vector<BoundaryName> _new_boundary_name;
+  /// The old boundaries
+  std::vector<BoundaryName> _old_boundary;
+  /// The new boundaries
+  std::vector<BoundaryName> _new_boundary;
+  /// The name of the parameter that specifies the old boundaries
+  std::string _old_boundary_param_name;
+  /// The name of the parameter that specifies the new boundaries
+  std::string _new_boundary_param_name;
 };
-

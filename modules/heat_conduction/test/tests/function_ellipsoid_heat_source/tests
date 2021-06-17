@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15795'
+  design = 'FunctionPathEllipsoidHeatSource.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'function_heat_source.i'
+    csvdiff = 'function_heat_source_out.csv'
+    requirement = 'The system shall produce a moving heat source where its path is function dependent'
+  [../]
+[]

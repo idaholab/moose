@@ -1,0 +1,11 @@
+[Tests]
+  [./boundary_deletion_test]
+    type = JSONDiff
+    input = 'boundary_deletion.i'
+    jsondiff = 'boundary_deletion_out.json'
+    recover = false
+    requirement = 'The system shall have the capability to remove boundaries in an existing mesh.'
+    design = 'meshgenerators/BoundaryDeletionGenerator.md'
+    issues = '#11174'
+  [../]
+[]

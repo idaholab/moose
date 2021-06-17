@@ -203,6 +203,12 @@ public:
   const MooseArray<Point> & qPoints() const { return _current_q_points; }
 
   /**
+   * Returns the reference to the mortar segment element quadrature points
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const std::vector<Point> & qPointsMortar() const { return _fe_msm->get_xyz(); }
+
+  /**
    * The current points in physical space where we have reinited through reinitAtPhysical()
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -409,12 +415,12 @@ public:
   /*
    * @return The current lower-dimensional element volume
    */
-  const Real & lowerDElemVolume() const { return _current_lower_d_elem_volume; }
+  const Real & lowerDElemVolume() const;
 
   /*
    * @return The current neighbor lower-dimensional element volume
    */
-  const Real & neighborLowerDElemVolume() const { return _current_neighbor_lower_d_elem_volume; }
+  const Real & neighborLowerDElemVolume() const;
 
   /**
    * Return the current subdomain ID
@@ -452,7 +458,7 @@ public:
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
+  const MooseArray<Real> & JxWNeighbor() const;
 
   /**
    * Returns the reference to the current quadrature points being used on the neighbor face
@@ -492,13 +498,21 @@ public:
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   /**
-   * Increases the elemennt/volume quadrature order for the specified mesh
+   * Increases the element/volume quadrature order for the specified mesh
    * block if and only if the current volume quadrature order is lower.  This
-   * can only cause the quadrature level to increase.  If volume_order is
-   * lower than or equal to the current volume/elem quadrature rule order,
-   * then nothing is done (i.e. this function is idempotent).
+   * works exactly like the bumpAllQRuleOrder function, except it only
+   * affects the volume quadrature rule (not face quadrature).
    */
   void bumpVolumeQRuleOrder(Order volume_order, SubdomainID block);
+
+  /**
+   * Increases the element/volume and face/area quadrature orders for the specified mesh
+   * block if and only if the current volume or face quadrature order is lower.  This
+   * can only cause the quadrature level to increase.  If order is
+   * lower than or equal to the current volume+face quadrature rule order,
+   * then nothing is done (i.e. this function is idempotent).
+   */
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   /**
    * Set the qrule to be used for volume integration.
@@ -722,6 +736,11 @@ public:
    */
   void addResidualNeighbor(const std::vector<VectorTag> & vector_tags);
   /**
+   * Add local neighbor residuals of all field variables for a set of tags onto the global residual
+   * vectors associated with the tags.
+   */
+  void addResidualLower(const std::vector<VectorTag> & vector_tags);
+  /**
    * Add residuals of all scalar variables for a set of tags onto the global residual vectors
    * associated with the tags.
    */
@@ -886,6 +905,33 @@ public:
   void addJacobianMortar();
 
   /**
+   * Add *all* portions of the Jacobian except PrimaryPrimary, e.g. LowerLower, LowerSecondary,
+   * LowerPrimary, SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower,
+   * PrimarySecondary, for mortar-like objects. Primary indicates the interior parent element on the
+   * primary side of the mortar interface. Secondary indicates the neighbor of the interior parent
+   * element. Lower denotes the lower-dimensional element living on the primary side of the mortar
+   * interface.
+   */
+  void addJacobianNeighborLowerD();
+
+  /**
+   * Add portions of the Jacobian of LowerLower, LowerSecondary, and SecondaryLower for
+   * boundary conditions. Secondary indicates the boundary element. Lower denotes the
+   * lower-dimensional element living on the boundary side.
+   */
+  void addJacobianLowerD();
+
+  /**
+   * Cache *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
+   * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
+   * PrimaryPrimary for mortar-like objects. Primary indicates the interior parent element on the
+   * primary side of the mortar interface. Secondary indicates the interior parent element on the
+   * secondary side of the interface. Lower denotes the lower-dimensional element living on the
+   * secondary side of the mortar interface; it's the boundary face of the \p Secondary element.
+   */
+  void cacheJacobianMortar();
+
+  /**
    * Adds three neighboring element matrices for ivar rows and jvar columns to the global Jacobian
    * matrix.
    */
@@ -959,7 +1005,7 @@ public:
    */
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0)
   {
-    _jacobian_block_used[tag][ivar][jvar] = 1;
+    jacobianBlockUsed(tag, ivar, jvar, true);
     return _sub_Kee[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
@@ -968,7 +1014,7 @@ public:
    */
   DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, TagID tag = 0)
   {
-    _jacobian_block_nonlocal_used[tag][ivar][jvar] = 1;
+    jacobianBlockNonlocalUsed(tag, ivar, jvar, true);
     return _sub_Keg[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
@@ -998,6 +1044,11 @@ public:
                           TagID tag = 0);
 
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> & couplingEntries()
+  {
+    return _cm_ff_entry;
+  }
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+  couplingEntries() const
   {
     return _cm_ff_entry;
   }
@@ -1493,7 +1544,7 @@ public:
 
   /**
    * Helper function for assembling residual contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param re The local residual
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1502,7 +1553,7 @@ public:
   void saveLocalArrayResidual(DenseVector<Number> & re,
                               unsigned int i,
                               unsigned int ntest,
-                              const RealEigenVector & v)
+                              const RealEigenVector & v) const
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
       re(i) += v(j);
@@ -1510,7 +1561,7 @@ public:
 
   /**
    * Helper function for assembling diagonal Jacobian contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param ke The local Jacobian
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1524,7 +1575,7 @@ public:
                                   unsigned int j,
                                   unsigned int nphi,
                                   unsigned int ivar,
-                                  const RealEigenVector & v)
+                                  const RealEigenVector & v) const
   {
     unsigned int pace = (_component_block_diagonal[ivar] ? 0 : nphi);
     for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += pace)
@@ -1533,7 +1584,7 @@ public:
 
   /**
    * Helper function for assembling full Jacobian contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param ke The local Jacobian
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1550,7 +1601,7 @@ public:
                                   unsigned int nphi,
                                   unsigned int ivar,
                                   unsigned int jvar,
-                                  const RealEigenMatrix & v)
+                                  const RealEigenMatrix & v) const
   {
     unsigned int pace = ((ivar == jvar && _component_block_diagonal[ivar]) ? 0 : nphi);
     unsigned int saved_j = j;
@@ -1598,11 +1649,23 @@ public:
   }
 
   /**
+   * This method is only meant to be called if MOOSE is configured to use global AD indexing.
+   * This simply caches the derivative values for the corresponding column indices for the provided
+   * \p matrix_tags. If called when using local AD indexing, this method will simply error
+   */
+  void processDerivatives(const ADReal & residual,
+                          dof_id_type dof_index,
+                          const std::set<TagID> & matrix_tags);
+
+  /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
    * simply caches the derivative values for the corresponding column indices for the provided
-   * \p matrix_tags. If not using global indexing, then the user must provide a functor which
-   * takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives to be
-   * processed, the \p row_index corresponding to the row index of the matrices that values
+   * \p matrix_tags. Note that this single dof overload will not call \p
+   * DofMap::constraint_element_matrix.
+   *
+   * If not using global indexing, then the user must provide a
+   * functor which takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives
+   * to be processed, the \p row_index corresponding to the row index of the matrices that values
    * should be added to, and the \p matrix_tags specifying the matrices that will  be added into
    */
   template <typename LocalFunctor>
@@ -1614,11 +1677,13 @@ public:
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
    * method simply caches the derivative values for the corresponding column indices for the
-   * provided \p matrix_tags. If not using global indexing, then the user must provide a functor
-   * which takes three arguments: the <tt>std::vector<ADReal> residuals</tt> that contains the
-   * derivatives to be processed, the <tt>std::vector<dof_id_type>row_indices</tt> corresponding to
-   * the row indices of the matrices that values should be added to, and the \p matrix_tags
-   * specifying the matrices that will  be added into
+   * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
+   *
+   * If not using global indexing, then the user must provide a functor which takes three arguments:
+   * the <tt>std::vector<ADReal> residuals</tt> that contains the derivatives to be processed, the
+   * <tt>std::vector<dof_id_type>row_indices</tt> corresponding to the row indices of the matrices
+   * that values should be added to, and the \p matrix_tags specifying the matrices that will be
+   * added into
    */
   template <typename LocalFunctor>
   void processDerivatives(const std::vector<ADReal> & residuals,
@@ -1633,6 +1698,16 @@ public:
    */
   void hasScalingVector();
 #endif
+
+  /**
+   * Modify the weights when using the arbitrary quadrature rule. The intention is to use this when
+   * you wish to supply your own quadrature after calling reinit at physical points.
+   *
+   * You should only use this if the arbitrary quadrature is the current quadrature rule!
+   *
+   * @param weights The weights to fill into _current_JxW
+   */
+  void modifyArbitraryWeights(const std::vector<Real> & weights);
 
 protected:
   /**
@@ -1787,6 +1862,10 @@ protected:
    */
   void addResidualNeighbor(const VectorTag & vector_tag);
   /**
+   * Add local neighbor residuals of all field variables for a tag onto the tag's residual vector
+   */
+  void addResidualLower(const VectorTag & vector_tag);
+  /**
    * Add residuals of all scalar variables for a tag onto the tag's residual vector
    */
   void addResidualScalar(const VectorTag & vector_tag);
@@ -1859,6 +1938,78 @@ private:
    */
   void buildVectorLowerDFE(FEType type) const;
   void buildVectorDualLowerDFE(FEType type) const;
+
+  /**
+   * Sets whether or not Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not neighbor Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockNeighborUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_neighbor_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling neighbor Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockNeighborUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_neighbor_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not lower Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockLowerUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_lower_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling lower Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockLowerUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_lower_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not nonlocal Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockNonlocalUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling nonlocal Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockNonlocalUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
 
   SystemBase & _sys;
   SubProblem & _subproblem;
@@ -1989,12 +2140,42 @@ private:
   /// qrules() function.
   std::unordered_map<SubdomainID, std::vector<QRules>> _qrules;
 
+  /// This is an abstraction over the internal qrules function.  This is
+  /// necessary for faces because (nodes of) faces can exists in more than one
+  /// subdomain.  When this is the case, we need to use the quadrature rule from
+  /// the subdomain that has the highest specified quadrature order.  So when
+  /// you need to access a face quadrature rule, you should retrieve it via this
+  /// function.
+  QBase * qruleFace(const Elem * elem, unsigned int side);
+  ArbitraryQuadrature * qruleArbitraryFace(const Elem * elem, unsigned int side);
+
+  template <typename T>
+  T * qruleFaceHelper(const Elem * elem, unsigned int side, std::function<T *(QRules &)> rule_fn)
+  {
+    auto dim = elem->dim();
+    auto neighbor = elem->neighbor_ptr(side);
+    auto q = rule_fn(qrules(dim, elem->subdomain_id()));
+    if (!neighbor)
+      return q;
+
+    // find the maximum face quadrature order for all blocks the face is in
+    auto neighbor_block = neighbor->subdomain_id();
+    if (neighbor_block == elem->subdomain_id())
+      return q;
+
+    auto q_neighbor = rule_fn(qrules(dim, neighbor_block));
+    if (q->get_order() > q_neighbor->get_order())
+      return q;
+    return q_neighbor;
+  }
+
+  inline QRules & qrules(unsigned int dim) { return qrules(dim, _current_subdomain_id); }
+
   /// This is a helper function for accessing quadrature rules for a
   /// particular dimensionality of element.  All access to quadrature rules in
   /// Assembly should be done via this accessor function.
-  inline QRules & qrules(unsigned int dim)
+  inline QRules & qrules(unsigned int dim, SubdomainID block)
   {
-    auto block = _current_subdomain_id;
     if (_qrules.find(block) == _qrules.end())
     {
       mooseAssert(_qrules.find(Moose::ANY_BLOCK_ID) != _qrules.end(),
@@ -2076,6 +2257,8 @@ private:
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
   /// Vector FE objects for lower dimensional elements
   mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_lower;
+  /// helper object for transforming coordinates for lower dimensional element quadrature points
+  std::map<unsigned int, FEBase **> _holder_fe_lower_helper;
 
   /// quadrature rule used on neighbors. Note that this const version is required because our getter
   /// APIs return a const QBase * const &. Without the const QBase * member we would be casting the
@@ -2085,6 +2268,8 @@ private:
   QBase * _current_qrule_neighbor;
   /// The current quadrature points on the neighbor face
   MooseArray<Point> _current_q_points_face_neighbor;
+  /// Flag to indicate that JxW_neighbor is needed
+  mutable bool _need_JxW_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
@@ -2157,8 +2342,12 @@ protected:
   const Elem * _current_lower_d_elem;
   /// The current neighboring lower dimensional element
   const Elem * _current_neighbor_lower_d_elem;
+  /// Whether we need to compute the lower dimensional element volume
+  mutable bool _need_lower_d_elem_volume;
   /// The current lower dimensional element volume
   Real _current_lower_d_elem_volume;
+  /// Whether we need to compute the neighboring lower dimensional element volume
+  mutable bool _need_neighbor_lower_d_elem_volume;
   /// The current neighboring lower dimensional element volume
   Real _current_neighbor_lower_d_elem_volume;
 
@@ -2516,6 +2705,32 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+inline void
+Assembly::processDerivatives(const ADReal & residual,
+                             const dof_id_type row_index,
+                             const std::set<TagID> & matrix_tags)
+{
+  const auto & derivs = residual.derivatives();
+
+  const auto & column_indices = derivs.nude_indices();
+  const auto & values = derivs.nude_data();
+
+  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
+
+  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+
+  for (std::size_t i = 0; i < column_indices.size(); ++i)
+    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
+}
+#else
+inline void
+Assembly::processDerivatives(const ADReal &, const dof_id_type, const std::set<TagID> &)
+{
+  mooseError("This method should not be used if using local AD indexing");
+}
+#endif
+
 template <typename LocalFunctor>
 void
 Assembly::processDerivatives(const ADReal & residual,
@@ -2528,18 +2743,7 @@ Assembly::processDerivatives(const ADReal & residual,
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  const auto & derivs = residual.derivatives();
-
-  const auto & column_indices = derivs.nude_indices();
-  const auto & values = derivs.nude_data();
-
-  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
-
-  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
-  for (std::size_t i = 0; i < column_indices.size(); ++i)
-    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
-
+  processDerivatives(residual, row_index, matrix_tags);
 #else
   local_functor(residual, row_index, matrix_tags);
 #endif
@@ -2573,10 +2777,18 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
     auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
                                                   resid_it->derivatives().nude_indices().end());
     mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same");
+                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
+                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
+                "same for every residual passed to this method otherwise constrain_element_matrix "
+                "will not work.");
   }
 #endif
   auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
+  // indices to constrain_element_matrix then we will potentially get errors out of BLAS
+  if (!column_indices.size())
+    return;
 
   DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
   for (const auto i : index_range(row_indices))
@@ -2599,4 +2811,18 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif
+}
+
+inline const Real &
+Assembly::lowerDElemVolume() const
+{
+  _need_lower_d_elem_volume = true;
+  return _current_lower_d_elem_volume;
+}
+
+inline const Real &
+Assembly::neighborLowerDElemVolume() const
+{
+  _need_neighbor_lower_d_elem_volume = true;
+  return _current_neighbor_lower_d_elem_volume;
 }

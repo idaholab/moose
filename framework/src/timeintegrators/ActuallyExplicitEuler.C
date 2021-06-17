@@ -27,11 +27,16 @@ ActuallyExplicitEuler::validParams()
   params.addClassDescription(
       "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
 
+  params.addParam<bool>("use_constant_mass",
+                        false,
+                        "If set to true, will only compute the mass matrix in the first time step, "
+                        "and keep using it throughout the simulation.");
+
   return params;
 }
 
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
-  : ExplicitTimeIntegrator(parameters)
+  : ExplicitTimeIntegrator(parameters), _constant_mass(getParam<bool>("use_constant_mass"))
 {
 }
 
@@ -79,8 +84,9 @@ ActuallyExplicitEuler::solve()
 
   // Compute the mass matrix
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-  _fe_problem.computeJacobianTag(
-      *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
+  if (!_constant_mass || (_constant_mass && _t_step == 1))
+    _fe_problem.computeJacobianTag(
+        *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
   // Perform the linear solve
   bool converged = performExplicitSolve(mass_matrix);

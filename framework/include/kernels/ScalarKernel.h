@@ -9,39 +9,17 @@
 
 #pragma once
 
-#include "MooseObject.h"
+#include "ResidualObject.h"
 #include "ScalarCoupleable.h"
-#include "SetupInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "PostprocessorInterface.h"
-#include "TransientInterface.h"
-#include "MeshChangedInterface.h"
-#include "VectorPostprocessorInterface.h"
-#include "TaggingInterface.h"
+#include "MooseVariableScalar.h"
 
 // Forward declarations
 class ScalarKernel;
-class MooseMesh;
-class Problem;
-class SubProblem;
-class Assembly;
-class MooseVariableScalar;
-class SubProblem;
 
 template <>
 InputParameters validParams<ScalarKernel>();
 
-class ScalarKernel : public MooseObject,
-                     public ScalarCoupleable,
-                     public SetupInterface,
-                     public FunctionInterface,
-                     public UserObjectInterface,
-                     public PostprocessorInterface,
-                     public TransientInterface,
-                     public MeshChangedInterface,
-                     protected VectorPostprocessorInterface,
-                     public TaggingInterface
+class ScalarKernel : public ResidualObject, public ScalarCoupleable
 {
 public:
   static InputParameters validParams();
@@ -49,40 +27,31 @@ public:
   ScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() = 0;
-  virtual void computeResidual() = 0;
-  virtual void computeJacobian() = 0;
-  virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /**
    * The variable that this kernel operates on.
    */
-  MooseVariableScalar & variable();
-
-  SubProblem & subProblem();
+  virtual const MooseVariableScalar & variable() const override { return _var; }
 
   /**
    * Use this to enable/disable the constraint
    * @return true if the constrain is active
    */
-  virtual bool isActive();
+  virtual bool isActive() { return true; }
+
+  /**
+   * Retrieves the old value of the variable that this ScalarKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const VariableValue & uOld() const;
 
 protected:
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
   /// Scalar variable
   MooseVariableScalar & _var;
-  MooseMesh & _mesh;
 
   unsigned int _i, _j;
 
-  /// Value(s) of the scalar variable
-  VariableValue & _u;
-
-  /// Old value(s) of the scalar variable
-  VariableValue & _u_old;
+  /// The current solution (old solution if explicit)
+  const VariableValue & _u;
 };
-

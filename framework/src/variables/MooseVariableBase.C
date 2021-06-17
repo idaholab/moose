@@ -52,8 +52,6 @@ MooseVariableBase::validParams()
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
 
-  params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
   // ArrayVariable capability
   params.addRangeCheckedParam<unsigned int>(
       "components", 1, "components>0", "Number of components for an array variable");
@@ -163,23 +161,24 @@ void
 MooseVariableBase::scalingFactor(Real factor)
 {
   _scaling_factor.assign(_count, factor);
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (!MooseUtils::absoluteFuzzyEqual(factor, 1.) && !_sys.hasVector("scaling_factors"))
-    _sys.addScalingVector();
-#endif
 }
 
 void
 MooseVariableBase::scalingFactor(const std::vector<Real> & factor)
 {
   _scaling_factor = factor;
+}
 
+void
+MooseVariableBase::initialSetup()
+{
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (!_sys.hasVector("scaling_factors") &&
-      std::find_if(factor.begin(), factor.end(), [](const Real element) {
-        return !MooseUtils::absoluteFuzzyEqual(element, 1.);
-      }) != factor.end())
+  // Currently the scaling vector is only used through AD residual computing objects
+  if (_subproblem.haveADObjects() &&
+      (_subproblem.automaticScaling() ||
+       (std::find_if(_scaling_factor.begin(), _scaling_factor.end(), [](const Real element) {
+          return !MooseUtils::absoluteFuzzyEqual(element, 1.);
+        }) != _scaling_factor.end())))
     _sys.addScalingVector();
 #endif
 }

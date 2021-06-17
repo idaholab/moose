@@ -79,7 +79,8 @@ public:
    * @param old_norm The old residual norm to compare against
    * @param norm The current residual norm
    */
-  static std::string outputNorm(const Real & old_norm, const Real & norm);
+  static std::string
+  outputNorm(const Real & old_norm, const Real & norm, const unsigned int precision = 6);
 
   /**
    * Return system information flags
@@ -93,10 +94,6 @@ public:
   }
 
 protected:
-  /**
-   * Adds the printing of system information to the init() method
-   */
-  void init();
 
   /**
    * Print the input file at the beginning of the simulation

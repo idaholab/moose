@@ -56,7 +56,7 @@ Seven variables need to be specified and one value is required for each group:
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/cp_user_object/user_object_Voce_BCC.i block=UserObjects/state_var_evol_rate_comp_voce
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/user_object_based/user_object_Voce_BCC.i block=UserObjects/state_var_evol_rate_comp_voce
 
 In this example illustrate a BCC in which slip systems have been grouped by slip system class.
 

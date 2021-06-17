@@ -25,12 +25,12 @@ public:
 
   Eigenvalues(const InputParameters & parameters);
 
-  virtual void initialize() override;
+  virtual void initialize() override {}
   virtual void execute() override;
 
 protected:
+  const bool _inverse;
   VectorPostprocessorValue & _eigen_values_real;
   VectorPostprocessorValue & _eigen_values_imag;
   NonlinearEigenSystem * _nl_eigen;
 };
-

@@ -34,6 +34,7 @@ ActionFactory::reg(const std::string & name,
   build_info._task = task;
   _name_to_build_info.insert(std::make_pair(name, build_info));
   _task_to_action_map.insert(std::make_pair(task, name));
+  _tasks.insert(task);
   _name_to_line.addInfo(name, task, file, line);
 }
 

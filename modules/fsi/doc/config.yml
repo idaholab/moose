@@ -1,0 +1,28 @@
+Content:
+    - framework/doc/content
+    - modules/fsi/doc/content
+    - modules/tensor_mechanics/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/heat_conduction/doc/content
+    - modules/ray_tracing/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: fsi
+        repo: https://github.com/idaholab/moose
+        home: /modules/fsi
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/fsi
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/fsi/include
+            - modules/tensor_mechanics/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa: disable

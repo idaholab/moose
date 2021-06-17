@@ -1,3 +1,5 @@
+# NSEnergyViscousBC
+
 !syntax description /BCs/NSEnergyViscousBC
 
 !syntax parameters /BCs/NSEnergyViscousBC

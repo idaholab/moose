@@ -6,10 +6,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   # we have to impose non-zero initial conditions in order to avoid an initially
   # singular matrix

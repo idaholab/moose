@@ -158,11 +158,11 @@ or quadrature,
 
 !listing poly_chaos/master_2d_quad.i block=Samplers/quadrature
 
-It is important that the order in the quadrature sampler input matches the order in the PolynomialChaos input. The sampler is then used by the MultiApp and Transfers to sample the sub-app, the QoI from the app is then put in a vectorpostprocessor:
+It is important that the order in the quadrature sampler input matches the order in the PolynomialChaos input. The sampler is then used by the MultiApp and Transfers to sample the sub-app, the QoI from the app is then put in a reporter:
 
-!listing poly_chaos/master_2d_quad.i block=VectorPostprocessors/storage
+!listing poly_chaos/master_2d_quad.i block=Reporters
 
-All this information is ready to be sent to the PolynomialChaos user object:
+All this information is ready to be sent to the PolynomialChaos trainer:
 
 !listing poly_chaos/master_2d_quad.i block=Surrogates Trainers
 

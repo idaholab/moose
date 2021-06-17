@@ -133,6 +133,7 @@ FancyExtruderGenerator::generate()
   // Original license is LGPL so it can be used here.
 
   auto mesh = buildMeshBaseObject();
+  mesh->set_mesh_dimension(_input->mesh_dimension() + 1);
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
@@ -561,6 +562,8 @@ FancyExtruderGenerator::generate()
       }
     }
   }
+
+  mesh->set_isnt_prepared();
 
   return mesh;
 }

@@ -33,6 +33,12 @@ public:
   void remove(const std::string & name);
 
   template <typename T>
+  T & setParam(const std::string & name)
+  {
+    return parameters().set<T>(name);
+  }
+
+  template <typename T>
   inline T & setScalarParam(const std::string & name)
   {
     return parameters().set<T>(name);

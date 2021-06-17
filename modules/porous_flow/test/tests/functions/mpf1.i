@@ -10,24 +10,24 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Functions]
-  [./dist]
+  [dist]
     type = PiecewiseLinear
     x = '1 10'  # time
     y = '0 9'   # distance
-  [../]
-  [./moving_planar_front]
+  []
+  [moving_planar_front]
     type = MovingPlanarFront
     start_posn = '1 1 0'
     end_posn = '2 2 0' # it does not matter that dist exceeds this
@@ -35,20 +35,20 @@
     activation_time = 1
     deactivation_time = 9
     distance = dist
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mpf]
-  [../]
+  [mpf]
+  []
 []
 
 [AuxKernels]
-  [./mpf]
+  [mpf]
     type = FunctionAux
     variable = mpf
     function = moving_planar_front
-  [../]
+  []
 []
 
 [Executioner]

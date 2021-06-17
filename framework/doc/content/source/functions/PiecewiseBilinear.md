@@ -11,6 +11,14 @@ the other index if one of them is not given.  If `radius` is given, `xaxis` and 
 are used to orient a cylindrical coordinate system, and the x-y pair used in the query
 will be the radial coordinate and time.
 
+The csv file `data_file` format expected is:
+
+- first line holds the `x` values.
+- each subsequent line holds the `y` value then the list of `z` values for this `y` and
+  all values of `x`.
+
+The csv file `data_file` may be substituted by specifying the `x`, `y` and `z` parameters.
+
 ## Example Input Syntax
 
 !listing test/tests/utils/2d_linear_interpolation/xyz_error.i block=Functions

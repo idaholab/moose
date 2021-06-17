@@ -1,11 +1,15 @@
+!content pagination previous=tutorial01_app_development/problem_statement.md
+                    next=tutorial01_app_development/step02_input_file.md
+                    margin-bottom=0px
+
 # Step 1: Create a Custom MOOSE Application
 
 The first step of this tutorial is to create a custom MOOSE application. The application will contain the customized C++ objects created as part of this tutorial for solving the desired problem.
 
 ## Create a GitHub Account
 
-Development of [!ac](MOOSE) is facilitated by [GitHub](https://github.com). It is recommend that applications
-also use GitHub if possible. Thus, the reader is encourgaged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
+Development of [!ac](MOOSE) is facilitated by [GitHub]. It is recommend that applications
+also use GitHub if possible. Thus, the reader is encouraged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
 
 ## Run the Stork Script and Initialize the New Application id=stork
 
@@ -21,26 +25,22 @@ The name +Babbler+ was selected for the application developed throughout this tu
 
 Once a name has been selected, execute the following command:
 
-```bash
+!listing language=bash
 cd ~/projects
 ./moose/scripts/stork.sh Babbler # substitute "Babbler" for some other name, if desired
-```
 
-This will create directory, `~/projects/babbler`, that contains a new MOOSE application. The terminal will also prompt the user to initialize the new application as a GitHub repository, which will be discussed in the [#git] section.
+This will create a directory `~/projects/babbler` that contains a new MOOSE application. The terminal will also prompt the user to initialize the new application as a GitHub repository, which will be discussed in the [#git] section.
 
 ### Compile the Application Executable id=make
 
 C++ is a compiled language. Therefore, the application code must be first transcribed into a single binary file. During this transcription, the code will be optimized for speed and data allocation. To compile the new application, run the following commands in a terminal (the number following "`make -j`" should be less than, or equal to, the number of CPUs available):
 
-```bash
-cd ~/projects/babbler
-make -j4
-```
+!include commands/make.md
 
 This will create an executable (binary) file called `babbler-opt` in the application root directory that can be used to run simulations. In addition to the application code, the above command will also compile code available from [`moose/framework`](https://github.com/idaholab/moose/tree/master/framework). A MOOSE-based application always has the full power of MOOSE plus its own.
 
-!alert note title=Compiling C++ Code
-Each time a change is made to a C++ file, the application will need to be recompiled, by running `make`, for the changes to take effect.
+!alert note title=Compiling C++ code
+Each time a change is made to a C++ file, the application will need to be recompiled by running `make` for the changes to take effect.
 
 *For more information about compiling MOOSE applications, please visit the [application_development/build_system.md] page.*
 
@@ -48,23 +48,18 @@ Each time a change is made to a C++ file, the application will need to be recomp
 
 MOOSE applications have a testing system to quickly verify that the executable was built properly and that the source code is performing as expected. It works by running a simulation and comparing the output to expected results. Once the `babbler-opt` executable exists, a simple test can be ran:
 
-```bash
-cd ~/projects/babbler
-./run_tests -j4
-```
+!include commands/run_tests.md
 
 If the test passed, the terminal output should look something like that shown below.
 
-```bash
-test:kernels/simple_diffusion.test ...................... OK
-------------------------------------------------------------
-Ran 1 tests in 0.3 seconds.
+```
+test:kernels/simple_diffusion.test ........................................................................ OK
+--------------------------------------------------------------------------------------------------------------
+Ran 1 tests in 0.3 seconds. Average test time 0.1 seconds, maximum test time 0.1 seconds.
 1 passed, 0 skipped, 0 pending, 0 failed
 ```
 
 Later in this tutorial, the testing system will be explored in greater detail and tests will be created for the Babbler application.
-
-*For more information about the MOOSE testing system, please visit the [application_development/test_system.md] page.*
 
 ## Enable Use of GitHub id=git
 
@@ -80,11 +75,10 @@ Once an account has been created, Github's root page will transform into the use
 
 The stork script initializes a new application with a single git commit whose message is "Initial files." To publish the application to the new GitHub repository, run the following commands:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 git remote add origin https://github.com/YourGitHubUserName/babbler
 git push -u origin main
-```
 
 The terminal will prompt for GitHub account credentials before uploading the new repository. Once the data has been uploaded it can be viewed at `github.com/YourGitHubUserName/babbler`.
 
@@ -92,19 +86,21 @@ The terminal will prompt for GitHub account credentials before uploading the new
 
 As changes to the application are made, and more `push` commands are ran, it may become a nuisance to enter GitHub credentials each time. To avoid this, it is possible for a user to associate their computer with their GitHub account using [SSH](https://www.ssh.com/ssh/). To generate an SSH key, open the terminal and enter the following commands:
 
-```bash
+!listing language=bash
 ssh-keygen -t rsa -C YourEmail
+
+When the terminal prompts about where to save the key, just hit enter to use the default file (`~/.ssh/id_rsa.pub`). When it asks whether to overwrite the file, enter "`y`" and when it asks for a passphrase, leave it blank or else the key will require it every time it is used, which defeats its purpose here. Finally, the SSH key is setup and can be printed to the terminal:
+
+!listing language=bash
 cat ~/.ssh/id_rsa.pub
-```
 
 Copy the output from the terminal, which should begin with `ssh-rsa` and end with `YourEmail`. Then, in the GitHub account [Personal settings](https://github.com/settings/profile) page, navigate to the "SSH and GPG keys" tab and paste the output to the "New SSH key" form. This machine will now have secure access to GitHub.
 
 The local repository, where the new application has been stored, needs to be linked to the SSH version of the remote url:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler
 git remote set-url origin git@github.com:YourGitHubUserName/babbler.git
-```
 
 From now on, credentials are no longer required when interacting with this repository from the terminal. There are a lot of ways to interact with Git, and the reader is encouraged to learn more at their own will.
 

@@ -82,8 +82,9 @@ class RunPBS(QueueManager):
         template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
 
         # Compute node requirement
-        if self.options.pbs_node_cpus:
+        if self.options.pbs_node_cpus and template['mpi_procs'] > self.options.pbs_node_cpus:
             nodes = template['mpi_procs']/self.options.pbs_node_cpus
+            template['mpi_procs'] = self.options.pbs_node_cpus
         else:
             nodes = 1
         template['nodes'] = math.ceil(nodes)

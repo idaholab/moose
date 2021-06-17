@@ -44,6 +44,7 @@
   strain = SMALL
   incremental = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+  temperature = temp
 
   [./block1]
     eigenstrain_names = eigenstrain1
@@ -255,9 +256,6 @@
     type = Density
     block = '1 2 3 4 5 6 7'
     density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

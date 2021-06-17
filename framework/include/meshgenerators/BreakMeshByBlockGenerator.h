@@ -17,6 +17,9 @@ class BreakMeshByBlockGenerator;
 template <>
 InputParameters validParams<BreakMeshByBlockGenerator>();
 
+/*
+ * A mesh generator to split a mesh by a set of blocks
+ */
 class BreakMeshByBlockGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:
@@ -28,7 +31,7 @@ public:
 
 protected:
   /// This is a helper method to avoid recoding the same if everywhere.
-  /// If this mesh modifier is used in block restricted mode and the provide
+  /// If this mesh modifier is used in block restricted mode and the provided
   /// element belongs to one of the provided blocks it returns the
   /// element subdomain id, an invalid subdomain id otherwise.
   /// If this mesh modifier is not block restricted, then the method always
@@ -38,13 +41,27 @@ protected:
   /// where not necessary.
   subdomain_id_type blockRestrictedElementSubdomainID(const Elem * elem);
 
+  /// Return true if block_one and block_two are found in users' provided block_pairs list
+  bool findBlockPairs(subdomain_id_type block_one, subdomain_id_type block_two);
+
+  /// the mesh to modify
   std::unique_ptr<MeshBase> & _input;
-  const std::vector<SubdomainID> _block;
-  const std::unordered_set<SubdomainID> _block_set;
-  const bool _block_restricted;
+  /// set of subdomain pairs between which interfaces will be generated.
+  std::unordered_set<std::pair<SubdomainID, SubdomainID>> _block_pairs;
+  /// set of the blocks to split the mesh on
+  std::unordered_set<SubdomainID> _block_set;
+  /// whether interfaces will be generated between block pairs
+  const bool _block_pairs_restricted;
+  /// whether interfaces will be generated surrounding blocks
+  const bool _surrounding_blocks_restricted;
+  /// whether to add a boundary when splitting the mesh
   const bool _add_transition_interface;
+  /// whether to split the transition boundary between the blocks and the rest of the mesh
   const bool _split_transition_interface;
+  /// the name of the transition interface
   const BoundaryName _interface_transition_name;
+  /// whether to add two sides interface boundaries
+  const bool _add_interface_on_two_sides;
 
 private:
   /// generate the new boundary interface

@@ -29,7 +29,7 @@ TimeSequenceStepperFailTest::step()
 {
   TimeStepper::step();
 
-  // The goal is to fail exactly one timestep which matches its
+  // The goal is to fail exactly on the timestep which matches its
   // original sequence point order, other than the initial condition.
   // This can only happen once, since after you fail, you are no
   // longer on the original time sequence (off by one or more).  Since

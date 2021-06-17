@@ -60,6 +60,8 @@ RinglebMeshGenerator::RinglebMeshGenerator(const InputParameters & parameters)
     _outer_wall_bid(getParam<boundary_id_type>("outer_wall_bid")),
     _triangles(getParam<bool>("triangles"))
 {
+  declareMeshProperty("use_distributed_mesh", false);
+
   // catch likely user errors
   if (_kmax <= _kmin)
     mooseError("RinglebMesh: kmax must be greater than kmin");
@@ -105,6 +107,7 @@ std::unique_ptr<MeshBase>
 RinglebMeshGenerator::generate()
 {
   std::unique_ptr<ReplicatedMesh> mesh = buildReplicatedMesh(2);
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   /// Data structure that holds pointers to the Nodes of each streamline.
   std::vector<std::vector<Node *>> stream_nodes(_num_k_pts);
@@ -181,13 +184,13 @@ RinglebMeshGenerator::generate()
         elem->set_node(3) = stream_nodes[i + 1][j];
 
         if (i == 0)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);
         if (j == 0)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/3, _inflow_bid);
+          boundary_info.add_side(elem->id(), /*side=*/3, _inflow_bid);
         if (j == 2 * (_num_q_pts + _n_extra_q_pts) - 2)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/1, _outflow_bid);
+          boundary_info.add_side(elem->id(), /*side=*/1, _outflow_bid);
         if (i == _num_k_pts - 2)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/2, _inner_wall_bid);
       }
       else if (j == _num_q_pts + _n_extra_q_pts - 2)
       {
@@ -198,9 +201,9 @@ RinglebMeshGenerator::generate()
         elem->set_node(3) = stream_nodes[i + 1][j];
 
         if (i == 0)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);
         if (i == _num_k_pts - 2)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/2, _inner_wall_bid);
       }
     }
   }
@@ -213,10 +216,10 @@ RinglebMeshGenerator::generate()
     MeshTools::Modification::all_tri(*mesh);
 
   /// Create sideset names.
-  mesh->boundary_info->sideset_name(_inflow_bid) = "inflow";
-  mesh->boundary_info->sideset_name(_outflow_bid) = "outflow";
-  mesh->boundary_info->sideset_name(_inner_wall_bid) = "inner_wall";
-  mesh->boundary_info->sideset_name(_outer_wall_bid) = "outer_wall";
+  boundary_info.sideset_name(_inflow_bid) = "inflow";
+  boundary_info.sideset_name(_outflow_bid) = "outflow";
+  boundary_info.sideset_name(_inner_wall_bid) = "inner_wall";
+  boundary_info.sideset_name(_outer_wall_bid) = "outer_wall";
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

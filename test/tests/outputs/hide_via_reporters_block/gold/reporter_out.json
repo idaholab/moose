@@ -1,0 +1,42 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "day": {
+                    "info": {
+                        "name": "day",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "day",
+                            "type": "int",
+                            "value": 24
+                        }
+                    ]
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": {
+                "day": {
+                    "info": {
+                        "name": "day",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "day",
+                            "type": "int",
+                            "value": 24
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

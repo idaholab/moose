@@ -14,6 +14,9 @@
 [Mesh]#Comment
   file = indenter_rz_fine.e
   displacements = 'disp_x disp_y'
+
+  # For NodalVariableValue to work with distributed mesh
+  allow_renumbering = false
 [] # Mesh
 
 [Functions]

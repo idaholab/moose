@@ -53,6 +53,8 @@ AddVariableAction::validParams()
                              "allowed)");
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     "Specifies the initial condition for this variable");
   return params;
 }
 
@@ -130,7 +132,8 @@ AddVariableAction::init()
 
   // Determine the MooseVariable type
   bool is_fv = _moose_object_pars.get<bool>("fv");
-  _type = determineType(_fe_type, _components, is_fv);
+  if (_type == "MooseVariableBase")
+    _type = determineType(_fe_type, _components, is_fv);
   if (is_fv)
     _problem->needFV();
 
@@ -150,7 +153,7 @@ AddVariableAction::act()
   addVariable(var_name);
 
   // Set the initial condition
-  if (_moose_object_pars.isParamValid("initial_condition"))
+  if (_pars.isParamValid("initial_condition"))
     createInitialConditionAction();
 }
 
@@ -160,7 +163,7 @@ AddVariableAction::createInitialConditionAction()
   // Variable name
   std::string var_name = name();
 
-  auto value = _moose_object_pars.get<std::vector<Real>>("initial_condition");
+  auto value = _pars.get<std::vector<Real>>("initial_condition");
 
   // Create the object name
   std::string long_name("");

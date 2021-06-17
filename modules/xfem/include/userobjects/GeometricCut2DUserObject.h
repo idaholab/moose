@@ -22,29 +22,17 @@ public:
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutNode> & cut_nodes) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces,
-                                    Real time) const override;
+                                    std::vector<Xfem::CutFace> & cut_faces) const override;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutEdge> & cut_edges) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces,
-                                     Real time) const override;
+                                     std::vector<Xfem::CutFace> & cut_faces) const override;
 
 protected:
   std::vector<std::pair<Point, Point>> _cut_line_endpoints;
-
-  bool IntersectSegmentWithCutLine(const Point & segment_point1,
-                                   const Point & segment_point2,
-                                   const std::pair<Point, Point> & cutting_line_points,
-                                   const Real & cutting_line_fraction,
-                                   Real & segment_intersection_fraction) const;
-
-  Real crossProduct2D(const Point & point_a, const Point & point_b) const;
 
   /**
    * Find the fractional distance along a specified cut line for the current time
@@ -53,7 +41,7 @@ protected:
    * @param time      Current simulation time
    * @return Current fractional distance
    */
-  virtual Real cutFraction(unsigned int cut_num, Real time) const;
+  virtual Real cutFraction(unsigned int cut_num) const;
 
   /// Vector of start/end times for each cut segment
   std::vector<std::pair<Real, Real>> _cut_time_ranges;

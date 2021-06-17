@@ -54,11 +54,30 @@ DistributedRectilinearMeshGenerator::validParams()
   params.addParam<processor_id_type>(
       "num_cores_for_partition", 0, "Number of cores for partitioning the graph");
 
-  params.addParam<bool>("linear_partition",
-                        false,
-                        "Whether or not to partition mesh linearly."
-                        " This parameter is mainly used for setting up regression tests."
-                        " For the production run, please do not use it.  ");
+  params.addRangeCheckedParam<unsigned>(
+      "num_side_layers",
+      2,
+      "num_side_layers>=1 & num_side_layers<5",
+      "Number of layers of off-processor side neighbors is reserved during mesh generation");
+
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        // Let this RM safeguard users specified ghosted layers
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers");
+        // We can not attach geometric early here because some simulation related info, such as,
+        // periodic BCs is not available yet during an early stage. Periodic BCs will be passed
+        // into ghosting functor during initFunctor of ElementSideNeighborLayers. There is no hurt
+        // to attach geometric late for general simulations that do not have extra requirements on
+        // ghosting elements. That is especially true distributed generated meshes since there is
+        // not much redundant info.
+        rm_params.set<bool>("attach_geometric_early") = false;
+      });
+
+  MooseEnum partition("graph linear square", "graph", false);
+  params.addParam<MooseEnum>(
+      "partition", partition, "Which method (graph linear square) use to partition mesh");
 
   MooseEnum elem_types(
       "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
@@ -112,8 +131,10 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     _bias_z(getParam<Real>("bias_z")),
     _part_package(getParam<MooseEnum>("part_package")),
     _num_parts_per_compute_node(getParam<processor_id_type>("num_cores_per_compute_node")),
-    _linear_partition(getParam<bool>("linear_partition"))
+    _partition_method(getParam<MooseEnum>("partition")),
+    _num_side_layers(getParam<unsigned>("num_side_layers"))
 {
+  declareMeshProperty("use_distributed_mesh", true);
 }
 
 template <>
@@ -180,18 +201,18 @@ DistributedRectilinearMeshGenerator::getIndices<Edge2>(const dof_id_type /*nx*/,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(const dof_id_type nx,
-                                                              const dof_id_type /*ny*/,
-                                                              const dof_id_type /*nz*/,
-                                                              const MeshBase & mesh,
-                                                              std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(
+    const dof_id_type nx,
+    const dof_id_type /*ny*/,
+    const dof_id_type /*nz*/,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   std::vector<dof_id_type> neighbors(2);
 
-  for (auto elem_ptr : mesh.element_ptr_range())
+  for (auto elem_id : current_elems)
   {
-    auto elem_id = elem_ptr->id();
-
     getNeighbors<Edge2>(nx, 0, 0, elem_id, 0, 0, neighbors, true);
 
     for (auto neighbor : neighbors)
@@ -388,20 +409,20 @@ DistributedRectilinearMeshGenerator::getIndices<Quad4>(const dof_id_type nx,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type /*nz*/,
-                                                              const MeshBase & mesh,
-                                                              std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type /*nz*/,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   dof_id_type i, j, k;
 
   std::vector<dof_id_type> neighbors(9);
 
-  for (auto elem_ptr : mesh.element_ptr_range())
+  for (auto elem_id : current_elems)
   {
-    auto elem_id = elem_ptr->id();
-
     getIndices<Quad4>(nx, 0, elem_id, i, j, k);
 
     getNeighbors<Quad4>(nx, ny, 0, i, j, 0, neighbors, true);
@@ -771,20 +792,20 @@ DistributedRectilinearMeshGenerator::getIndices<Hex8>(const dof_id_type nx,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(const dof_id_type nx,
-                                                             const dof_id_type ny,
-                                                             const dof_id_type nz,
-                                                             const MeshBase & mesh,
-                                                             std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   dof_id_type i, j, k;
 
   std::vector<dof_id_type> neighbors(27);
 
-  for (auto elem_ptr : mesh.element_ptr_range())
+  for (auto elem_id : current_elems)
   {
-    auto elem_id = elem_ptr->id();
-
     getIndices<Hex8>(nx, ny, elem_id, i, j, k);
 
     getNeighbors<Hex8>(nx, ny, nz, i, j, k, neighbors, true);
@@ -826,6 +847,157 @@ DistributedRectilinearMeshGenerator::scaleNodalPositions<Hex8>(dof_id_type /*nx*
     (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
     (*node_ptr)(2) = (*node_ptr)(2) * (zmax - zmin) + zmin;
   }
+}
+
+template <>
+void
+DistributedRectilinearMeshGenerator::paritionSquarely<Edge2>(const dof_id_type nx,
+                                                             const dof_id_type /*ny*/,
+                                                             const dof_id_type /*nz*/,
+                                                             const processor_id_type num_procs,
+                                                             std::vector<dof_id_type> & istarts,
+                                                             std::vector<dof_id_type> & jstarts,
+                                                             std::vector<dof_id_type> & kstarts)
+{
+  // Starting indices along x direction
+  istarts.resize(num_procs + 1);
+  // Starting indices along y direction
+  // There is only one processor along y direction since it is a 1D mesh
+  jstarts.resize(2);
+  jstarts[0] = 0;
+  jstarts[1] = 1;
+  // Starting indices along z direction
+  // There is only one processor along z direction since it is a 1D mesh
+  kstarts.resize(2);
+  kstarts[0] = 0;
+  kstarts[1] = 1;
+
+  istarts[0] = 0;
+  for (processor_id_type pid = 0; pid < num_procs; pid++)
+    // Partition mesh evenly. The extra elements are assigned to the front processors
+    istarts[pid + 1] = istarts[pid] + (nx / num_procs + ((nx % num_procs) > pid));
+}
+
+template <>
+void
+DistributedRectilinearMeshGenerator::paritionSquarely<Quad4>(const dof_id_type nx,
+                                                             const dof_id_type ny,
+                                                             const dof_id_type /*nz*/,
+                                                             const processor_id_type num_procs,
+                                                             std::vector<dof_id_type> & istarts,
+                                                             std::vector<dof_id_type> & jstarts,
+                                                             std::vector<dof_id_type> & kstarts)
+{
+  // Try for squarish distribution
+  // The number of processors along x direction
+  processor_id_type px =
+      (processor_id_type)(0.5 + std::sqrt(((Real)nx) * ((Real)num_procs) / ((Real)ny)));
+
+  if (!px)
+    px = 1;
+
+  // The number of processors along y direction
+  processor_id_type py = 1;
+  // Fact num_procs into px times py
+  while (px > 0)
+  {
+    py = num_procs / px;
+    if (py * px == num_procs)
+      break;
+    px--;
+  }
+  // More processors are needed for denser side
+  if (nx > ny && py < px)
+    std::swap(px, py);
+
+  // Starting indices along x direction
+  istarts.resize(px + 1);
+  // Starting indices along y direction
+  jstarts.resize(py + 1);
+  // Starting indices along z direction
+  kstarts.resize(2);
+  // There is no elements along z direction
+  kstarts[0] = 0;
+  kstarts[1] = 1;
+
+  istarts[0] = 0;
+  for (processor_id_type pxid = 0; pxid < px; pxid++)
+    // Partition elements evenly along x direction
+    istarts[pxid + 1] = istarts[pxid] + nx / px + ((nx % px) > pxid);
+
+  jstarts[0] = 0;
+  for (processor_id_type pyid = 0; pyid < py; pyid++)
+    // Partition elements evenly along y direction
+    jstarts[pyid + 1] = jstarts[pyid] + (ny / py + ((ny % py) > pyid));
+}
+
+template <>
+void
+DistributedRectilinearMeshGenerator::paritionSquarely<Hex8>(const dof_id_type nx,
+                                                            const dof_id_type ny,
+                                                            const dof_id_type nz,
+                                                            const processor_id_type num_procs,
+                                                            std::vector<dof_id_type> & istarts,
+                                                            std::vector<dof_id_type> & jstarts,
+                                                            std::vector<dof_id_type> & kstarts)
+{
+  /* Try for squarish distribution */
+  // The number of processors along y direction
+  processor_id_type py = (processor_id_type)(
+      0.5 + std::pow(((Real)ny * ny) * ((Real)num_procs) / ((Real)nz * nx), (Real)(1. / 3.)));
+  if (!py)
+    py = 1;
+  // The number of processors for pxpz plane
+  processor_id_type pxpz = 1;
+  // Factorize num_procs into py times pxpz
+  while (py > 0)
+  {
+    pxpz = num_procs / py;
+    if (py * pxpz == num_procs)
+      break;
+    py--;
+  }
+
+  if (!py)
+    py = 1;
+
+  // There number of processors along x direction
+  processor_id_type px =
+      (processor_id_type)(0.5 + std::sqrt(((Real)nx) * ((Real)num_procs) / ((Real)nz * py)));
+  if (!px)
+    px = 1;
+  // The number of processors along z direction
+  processor_id_type pz = 1;
+  // Factorize num_procs into px times py times pz
+  while (px > 0)
+  {
+    pz = num_procs / (px * py);
+    if (px * py * pz == num_procs)
+      break;
+    px--;
+  }
+  // denser mesh takes more processors
+  if (nx > nz && px < pz)
+    std::swap(px, pz);
+
+  istarts.resize(px + 1);
+  jstarts.resize(py + 1);
+  kstarts.resize(pz + 1);
+
+  istarts[0] = 0;
+  for (processor_id_type pxid = 0; pxid < px; pxid++)
+    // Partition mesh evenly along x direction
+    istarts[pxid + 1] = istarts[pxid] + nx / px + ((nx % px) > pxid);
+
+  jstarts[0] = 0;
+  for (processor_id_type pyid = 0; pyid < py; pyid++)
+    // Partition mesh evenly along y direction
+    jstarts[pyid + 1] = jstarts[pyid] + (ny / py + ((ny % py) > pyid));
+
+  kstarts[0] = 0;
+  for (processor_id_type pzid = 0; pzid < pz; pzid++)
+    // Partition mesh evenly along z direction
+    kstarts[pzid + 1] = kstarts[pzid] + (nz / pz + ((nz % pz) > pzid));
 }
 
 template <typename T>
@@ -918,7 +1090,7 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
   // Partition the distributed graph
   std::vector<dof_id_type> partition_vec;
-  if (_linear_partition)
+  if (_partition_method == "linear")
   {
     mooseWarning(" LinearPartitioner is mainly used for setting up regression tests. For the "
                  "production run, please do not use it.");
@@ -927,11 +1099,47 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
     // We use it as is
     std::fill(partition_vec.begin(), partition_vec.end(), pid);
   }
-  else
+  else if (_partition_method == "square")
   {
+    // Starting partition indices along x direction
+    std::vector<dof_id_type> istarts;
+    // Starting partition indices along y direction
+    std::vector<dof_id_type> jstarts;
+    // Starting partition indices along z direction
+    std::vector<dof_id_type> kstarts;
+    partition_vec.resize(num_local_elems);
+
+    // Partition mesh evenly along each direction
+    paritionSquarely<T>(nx, ny, nz, num_procs, istarts, jstarts, kstarts);
+    // At least one processor
+    mooseAssert(istarts.size() > 1, "At least there is one processor along x direction");
+    processor_id_type px = istarts.size() - 1;
+    // At least one processor
+    mooseAssert(jstarts.size() > 1, "At least there is one processor along y direction");
+    processor_id_type py = jstarts.size() - 1;
+    // At least one processor
+    mooseAssert(kstarts.size() > 1, "At least there is one processor along z direction");
+    // processor_id_type pz = kstarts.size() -1;
+    for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
+    {
+      dof_id_type i = 0, j = 0, k = 0;
+      getIndices<T>(nx, ny, e_id, i, j, k);
+      processor_id_type pi = 0, pj = 0, pk = 0;
+
+      pi = (std::upper_bound(istarts.begin(), istarts.end(), i) - istarts.begin()) - 1;
+      pj = (std::upper_bound(jstarts.begin(), jstarts.end(), j) - jstarts.begin()) - 1;
+      pk = (std::upper_bound(kstarts.begin(), kstarts.end(), k) - kstarts.begin()) - 1;
+
+      partition_vec[e_id - local_elems_begin] = pk * px * py + pj * px + pi;
+
+      mooseAssert((pk * px * py + pj * px + pi) < num_procs, "processor id is too large");
+    }
+  }
+  else if (_partition_method == "graph")
     PetscExternalPartitioner::partitionGraph(
         comm, graph, {}, {}, num_procs, _num_parts_per_compute_node, _part_package, partition_vec);
-  }
+  else
+    mooseError("Unsupported partition method " + _partition_method);
 
   mooseAssert(partition_vec.size() == num_local_elems, " Invalid partition was generateed ");
 
@@ -966,7 +1174,24 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
-  getGhostNeighbors<T>(nx, ny, nz, mesh, ghost_elems);
+  // Current local elements
+  std::set<dof_id_type> current_elems;
+
+  // Fill current elems
+  // We will grow domain from current elements
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    current_elems.insert(elem_ptr->id());
+
+  // Grow domain layer by layer
+  for (unsigned layer = 0; layer < _num_side_layers; layer++)
+  {
+    // getGhostNeighbors produces one layer of side neighbors
+    getGhostNeighbors<T>(nx, ny, nz, mesh, current_elems, ghost_elems);
+    // Merge ghost elements into current element list
+    current_elems.insert(ghost_elems.begin(), ghost_elems.end());
+  }
+  // We do not need it anymore
+  current_elems.clear();
 
   // Elements we're going to request from others
   std::map<processor_id_type, std::vector<dof_id_type>> ghost_elems_to_request;

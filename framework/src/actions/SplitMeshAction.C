@@ -12,6 +12,8 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
+#include "RestartableDataIO.h"
+
 #include "libmesh/checkpoint_io.h"
 
 registerMooseAction("MooseApp", SplitMeshAction, "split_mesh");
@@ -72,6 +74,15 @@ SplitMeshAction::act()
                  ", must not end in a file extension other than .cpr or .cpa");
   }
 
+  // To name the split files, we start with the given mesh filename
+  // (if set) or the argument to --split-file, strip any existing
+  // extension, and then append either .cpr or .cpa depending on the
+  // checkpoint_binary_flag.
+  auto fname = mesh->getFileName();
+  if (fname == "")
+    fname = split_file_arg;
+  fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+
   for (std::size_t i = 0; i < splits.size(); i++)
   {
     processor_id_type n = splits[i];
@@ -82,14 +93,21 @@ SplitMeshAction::act()
                << std::endl;
     cp->binary() = checkpoint_binary_flag;
 
-    // To name the split files, we start with the given mesh filename
-    // (if set) or the argument to --split-file, strip any existing
-    // extension, and then append either .cpr or .cpa depending on the
-    // checkpoint_binary_flag.
-    auto fname = mesh->getFileName();
-    if (fname == "")
-      fname = split_file_arg;
-    fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+    // different splits will be written into subfolders with n being the folder name
     cp->write(fname);
+  }
+
+  if (processor_id() == 0)
+  {
+    RestartableDataIO restartable_data_io(_app);
+    auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+    if (!meta_data.empty())
+    {
+      const std::string filename(fname + "/meta_data_mesh" +
+                                 restartable_data_io.getRestartableDataExt());
+      Moose::out << "Meta data are written into " << filename << "." << std::endl;
+
+      restartable_data_io.writeRestartableData(filename, meta_data);
+    }
   }
 }

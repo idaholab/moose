@@ -10,9 +10,7 @@ To split the mesh, nodes shared by multiple blocks are duplicated N-1 times (whe
 
 As an option, the interface can be split into $Q$ different sidesets, where $Q$ is the number of adjacent block pairs. This is achieved by setting `split_interface=true` and is useful when modeling interfaces with different parameters.
 
-The split can be restricted to the blocks listed in the `block` input parameter. When blocks are provided the additional boundary `interface_transition` is added. The `interface_transition` boundary identifies the interface between the provided blocks and the rest of the mesh. The creation of `interface_transition` boundary can be inhibited by setting `add_transition_interface=false` and transition boundaries are added to the `interface` sidesets.
-The `interface_transition_name` parameter allows to change the name of the resulting interface transition boundary.  
-If present, the `interface_transition` boundary can be split by setting `split_transition_interface=true`.
+Two types of block restricted option are provided, namely `surrounding_blocks` and `block_pairs`. The `surrounding_blocks` will create interfaces surrounding specified block. When `surrounding_blocks` is provided, the additional boundary `interface_transition` can be added by setting `add_transition_interface=true`. The `interface_transition` boundary identifies the interface between the provided blocks and the rest of the mesh. The `block_pairs` option will create interfaces  only \emph{between} the specified block pairs. Multiple block pairs can be provided, and they are separated by semicolon (`;`). The `block_pairs` option does not work with `add_transition_interface`. By default when no block restricted option is used, interfaces will be generated between all blocks. In addition, the `add_interface_on_two_sides` parameter allows to generate interface boundaries on both sides of the interface which can be used to enforce thermal and mechanical contact at the interface.
 
 ## Example Input File Syntax
 
@@ -36,3 +34,13 @@ interface will be named `wood_Block2`.
 !syntax parameters /Mesh/BreakMeshByBlockGenerator
 
 !syntax inputs /Mesh/BreakMeshByBlockGenerator
+
+
+### block_pair option
+
+For `block_pair` option, only the nodes that are shared by specific block pairs will be newly created. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
+
+!media media/meshgenerators/3_blocks_example.png style=width:100%;
+
+!listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_block_pairs_restricted_3blocks.i
+         block=Mesh

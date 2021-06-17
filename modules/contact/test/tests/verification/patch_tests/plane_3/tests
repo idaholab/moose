@@ -9,6 +9,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     petsc_version = '>=3.7.6'
     requirement = "The Contact system shall enforce glued, kinematic contact
@@ -22,6 +23,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce glued, penalty contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -34,6 +36,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     petsc_version = '>=3.7.6'
     requirement = "The Contact system shall enforce frictionless, kinematic contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -46,6 +49,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictionless, penalty contact for
     2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -58,6 +62,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test
@@ -71,6 +76,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test
@@ -83,6 +89,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D QUAD8 plane geometry (NAFEMS CGS1 contact patch test with matched

@@ -11,4 +11,6 @@ The [!ac](STP) details the objectives, resources, and processes utilized for tes
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](STP) for {{app}} is dependent upon the following documents.
 
+!template! field key=dependencies required=False
 !sqa dependencies suffix=stp category={{category}}
+!template-end!

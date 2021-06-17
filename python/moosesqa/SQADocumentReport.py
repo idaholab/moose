@@ -10,12 +10,13 @@
 import os
 import urllib
 import logging
+import glob
 import mooseutils
 from .SQAReport import SQAReport
 from .get_documents import get_documents, INL_DOCUMENTS
 from .check_documents import check_documents
 
-@mooseutils.addProperty('working_dir', ptype=str)
+@mooseutils.addProperty('working_dirs', ptype=list)
 @mooseutils.addProperty('required_documents', ptype=list)
 class SQADocumentReport(SQAReport):
     """
@@ -24,12 +25,28 @@ class SQADocumentReport(SQAReport):
     def __init__(self, **kwargs):
         self._documents = dict()
         kwargs.setdefault('required_documents', INL_DOCUMENTS)
-        self._documents = {name:kwargs.pop(name, None) for name in kwargs.get('required_documents')}
+        for name in kwargs.get('required_documents'):
+            doc = kwargs.pop(name, None)
+            if doc is not None:
+                doc = mooseutils.eval_path(doc)
+            self._documents[name] = doc
+
         super().__init__(**kwargs)
-        self.working_dir = self.working_dir or mooseutils.git_root_dir()
+        if self.working_dirs is None: self.working_dirs = [mooseutils.git_root_dir()]
+
+    @property
+    def documents(self):
+        return get_documents(self.required_documents, **self._documents)
 
     def execute(self, **kwargs):
         """Determine the status"""
-        documents = get_documents(self.required_documents, **self._documents)
-        logger = check_documents(documents, None, **kwargs)
+        file_list = list()
+        for working_dir in self.working_dirs:
+            path = mooseutils.eval_path(working_dir)
+            if mooseutils.git_is_repo(path):
+                file_list += mooseutils.git_ls_files(path)
+            else:
+                file_list += glob.glob(os.path.join(path,'**', '*.*'), recursive=True)
+
+        logger = check_documents(self.documents, file_list, **kwargs)
         return logger

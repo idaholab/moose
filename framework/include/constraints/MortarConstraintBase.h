@@ -50,6 +50,15 @@ public:
 
   MortarConstraintBase(const InputParameters & parameters);
 
+  virtual void computeResidual() override final
+  {
+    mooseError("MortarConstraintBase do not need computeResidual()");
+  }
+  virtual void computeJacobian() override final
+  {
+    mooseError("MortarConstraintBase do not need computeJacobian()");
+  }
+
   /**
    * Method for computing the residual
    * @param has_primary Whether the mortar segment element projects onto the primary face
@@ -75,12 +84,29 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  const MooseVariable * variable() const { return _var; }
+  const MooseVariable & variable() const override { return *_var; }
 
   /**
    * Whether to use dual mortar
    */
   bool useDual() const { return _use_dual; }
+
+  /**
+   * Set the normals vector
+   */
+  void setNormals(const std::vector<Point> & normals) { _normals = normals; }
+
+  /**
+   * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
+   * points). If this is set to false, then non-interpolated nodal normals will be used, and then
+   * the _normals member should be indexed with _i instead of _qp
+   */
+  bool interpolateNormals() const { return _interpolate_normals; }
+
+  /**
+   * This method will be called after the loop over the mortar segment mesh
+   */
+  virtual void post() {}
 
 private:
   /// Reference to the finite element problem
@@ -113,8 +139,8 @@ protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 
-  /// the normals along the secondary face
-  const MooseArray<Point> & _normals;
+  /// the normals
+  std::vector<Point> _normals;
 
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
@@ -130,6 +156,9 @@ protected:
 
   /// The quadrature rule
   const QBase * const & _qrule_msm;
+
+  /// The quadrature points in physical space
+  const std::vector<Point> & _q_point;
 
   /// The shape functions corresponding to the lagrange multiplier variable
   const VariableTestValue & _test;
@@ -168,9 +197,9 @@ protected:
   /// interface. It is these split elements that are the mortar segment mesh elements
   Elem const * const & _lower_primary_elem;
 
-  /// The secondary face lower dimensional element (not the mortar element!) volume
-  const Real & _lower_secondary_volume;
+  /// Whether this object operates on the displaced mesh
+  const bool _displaced;
 
-  /// The primary face lower dimensional element volume (not the mortar element!)
-  const Real & _lower_primary_volume;
+  /// Whether to interpolate the nodal normals
+  const bool _interpolate_normals;
 };

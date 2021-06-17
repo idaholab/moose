@@ -90,6 +90,11 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         mixins.TranslatorObject.__init__(self)
         self._page_objects = list()
 
+        # The get/setGlobalAttribute methods assume that self._global_attributes behaves
+        # like a dict(), the type should actually be updated to work in parallel, for example
+        # in ParallelBarrier it is a multiprocessing Manger.dict() object.
+        self._global_attributes = dict()
+
     def init(self, destination):
         """Initialize the Page objects."""
 
@@ -126,6 +131,18 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     def getPages(self):
         """Return a list of Page objects."""
         return self._page_objects
+
+    def setGlobalAttribute(self, key, value):
+        """Set a global attribute to be communicated across processors."""
+        self._global_attributes[key] = value
+
+    def getGlobalAttribute(self, key, default=None):
+        """Get a global attribute that was communicated across processors."""
+        return self._global_attributes.get(key, default)
+
+    def getGlobalAttributeItems(self):
+        """Return iterator to underlying global attribute dict."""
+        return self._global_attributes.items()
 
     def execute(self, nodes, num_threads=1):
         """
@@ -215,7 +232,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             if node.get('render', True):
                 self.translator.renderer.render(result, ast, node)
             self.translator.executePageMethod('postRender', node, args=(result,))
-
         return result
 
     def write(self, node, result):
@@ -299,6 +315,9 @@ class ParallelQueue(Executioner):
         self._page_content = None
         self._page_ast = None
         self._page_result = None
+
+        self._manager = multiprocessi.Manger()
+        self._global_attributes = self._manager.dict()
 
     def execute(self, nodes, num_threads=1):
 
@@ -418,6 +437,7 @@ class ParallelBarrier(Executioner):
         barrier = multiprocessing.Barrier(num_threads)
         manager = multiprocessing.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
+        self._global_attributes = manager.dict()
 
         # Initialize the page attributes container using the existing list of Page node objects
         for i in range(len(page_attributes)):
@@ -514,6 +534,9 @@ class ParallelPipe(Executioner):
         self._page_content = None
         self._page_ast = None
         self._page_result = None
+
+        self._manager = multiprocessi.Manger()
+        self._global_attributes = self._manager.dict()
 
     def execute(self, nodes, num_threads=1):
 

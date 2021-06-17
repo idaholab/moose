@@ -34,13 +34,26 @@ GeneralizedPlaneStrainAction::validParams()
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
-  params.addParam<FunctionName>("out_of_plane_pressure",
-                                "0",
-                                "Function used to prescribe pressure "
-                                "in the out-of-plane direction (y "
-                                "for 1D Axisymmetric or z for 2D "
-                                "Cartesian problems)");
-  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
+  params.addParam<FunctionName>(
+      "out_of_plane_pressure_function",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
+  params.addDeprecatedParam<FunctionName>(
+      "out_of_plane_pressure",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)",
+      "This has been replaced by 'out_of_plane_pressure_function'");
+  params.addParam<MaterialPropertyName>("out_of_plane_pressure_material",
+                                        "0",
+                                        "Material used to prescribe pressure (applied toward the "
+                                        "body) in the out-of-plane direction");
+  params.addDeprecatedParam<Real>(
+      "factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)",
+      "This has been replaced by 'pressure_factor'");
+  params.addParam<Real>(
+      "pressure_factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<SubdomainName>>("block",
@@ -116,7 +129,24 @@ GeneralizedPlaneStrainAction::act()
     std::string uo_type = "GeneralizedPlaneStrainUserObject";
     InputParameters params = _factory.getValidParams(uo_type);
 
-    params.applyParameters(parameters());
+    // Skipping selected parameters in applyParameters() and then manually setting them only if they
+    // are set by the user is just to prevent both the current and deprecated variants of these
+    // parameters from both getting passed to the UserObject. Once we get rid of the deprecated
+    // versions, we can just set them all with applyParameters().
+    params.applyParameters(
+        parameters(),
+        {"out_of_plane_pressure", "out_of_plane_pressure_function", "factor", "pressure_factor"});
+    if (parameters().isParamSetByUser("out_of_plane_pressure"))
+      params.set<FunctionName>("out_of_plane_pressure") =
+          getParam<FunctionName>("out_of_plane_pressure");
+    if (parameters().isParamSetByUser("out_of_plane_pressure_function"))
+      params.set<FunctionName>("out_of_plane_pressure_function") =
+          getParam<FunctionName>("out_of_plane_pressure_function");
+    if (parameters().isParamSetByUser("factor"))
+      params.set<Real>("factor") = getParam<Real>("factor");
+    if (parameters().isParamSetByUser("pressure_factor"))
+      params.set<Real>("pressure_factor") = getParam<Real>("pressure_factor");
+
     params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
 
     _problem->addUserObject(uo_type, uo_name, params);

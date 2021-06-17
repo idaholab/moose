@@ -1,0 +1,53 @@
+[Tests]
+  design = 'TensorMechanicsPlasticOrthotropic.md'
+  issues = '#16016'
+
+  [anis_plasticity_test]
+    type = 'CSVDiff'
+    input = 'anis_plasticity_test.i'
+    csvdiff = 'anis_plasticity_test_out.csv'
+    requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
+                  'yield condition is never met'
+  []
+
+  [anis_elasticity_test]
+    type = 'CSVDiff'
+    input = 'anis_elasticity_test.i'
+    csvdiff = 'anis_elasticity_test_out.csv'
+    requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
+                  'yield condition is never met --elasticity'
+  []
+
+  [ad_aniso_plasticity_x]
+    type = 'CSVDiff'
+    abs_zero = 1.0e-9
+    rel_err = 1.0e-5
+    heavy = true
+    input = 'ad_aniso_plasticity_x.i'
+    csvdiff = 'ad_aniso_plasticity_x_out.csv'
+    requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified '
+                  'verification problem along x axis'
+  []
+
+  [ad_aniso_plasticity_x_rotate]
+    type = 'CSVDiff'
+    abs_zero = 1.0e-9
+    rel_err = 1.0e-5
+    heavy = true
+    input = 'ad_aniso_plasticity_x_rotate.i'
+    csvdiff = 'ad_aniso_plasticity_x_rotate_out.csv'
+    requirement = 'Anisotropic plasticity with hill tensor rotation must produce simplified '
+                  'verification problem along x axis'
+  []
+
+  [ad_aniso_plasticity_y]
+    type = 'CSVDiff'
+    abs_zero = 1.0e-9
+    rel_err = 1.0e-5
+    heavy = true
+    input = 'ad_aniso_plasticity_y.i'
+    csvdiff = 'ad_aniso_plasticity_y_out.csv'
+    requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified '
+                  'verification problem along y axis'
+  []
+[]

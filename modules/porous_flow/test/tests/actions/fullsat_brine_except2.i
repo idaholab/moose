@@ -1,6 +1,5 @@
 # Check error when using PorousFlowFullySaturated action,
-# attempting to set nacl_index to value greater than or
-# equal to number of components.
+# attempting to use both brine and single-component fluids
 
 [Mesh]
   type = GeneratedMesh
@@ -19,21 +18,30 @@
   porepressure = pp
   temperature = temp
   mass_fraction_vars = "nacl"
-  use_brine = true
-  nacl_index = 1
+  fluid_properties_type = PorousFlowBrine
+  nacl_name = nacl
+  fp = simple_fluid
   dictator_name = dictator
 []
 
+[Modules]
+  [FluidProperties]
+    [simple_fluid]
+      type = SimpleFluidProperties
+    []
+  []
+[]
+
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 20E6
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 323.15
-  [../]
-  [./nacl]
+  []
+  [nacl]
     initial_condition = 0.1047
-  [../]
+  []
 []
 
 [Kernels]
@@ -41,59 +49,59 @@
 []
 
 [BCs]
-  [./t_bdy]
+  [t_bdy]
     type = DirichletBC
     variable = temp
     boundary = 'left right'
     value = 323.15
-  [../]
-  [./p_bdy]
+  []
+  [p_bdy]
     type = DirichletBC
     variable = pp
     boundary = 'left right'
     value = 20E6
-  [../]
-  [./nacl_bdy]
+  []
+  [nacl_bdy]
     type = DirichletBC
     variable = nacl
     boundary = 'left right'
     value = 0.1047
-  [../]
+  []
 []
 
 [Materials]
   # Thermal conductivity
-  [./thermal_conductivity]
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
     wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-  [../]
+  []
 
   # Specific heat capacity
-  [./rock_heat]
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 850
     density = 2700
-  [../]
+  []
 
   # Permeability
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
-  [../]
+  []
 
   # Porosity
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

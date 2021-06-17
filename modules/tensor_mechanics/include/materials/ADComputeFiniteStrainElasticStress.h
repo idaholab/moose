@@ -24,6 +24,7 @@ public:
   ADComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
   void initialSetup() override;
+  virtual void initQpStatefulProperties() override;
 
 protected:
   virtual void computeQpStress() override;
@@ -32,8 +33,12 @@ protected:
   const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
   const ADMaterialProperty<RankFourTensor> & _elasticity_tensor;
-
   const ADMaterialProperty<RankTwoTensor> & _strain_increment;
+  /// Rotation up to current step "n" to compute anisotropic elasticity tensor
+  ADMaterialProperty<RankTwoTensor> & _rotation_total;
+  /// Rotation up to "n - 1" (previous) step to compute anisotropic elasticity tensor
+  const MaterialProperty<RankTwoTensor> & _rotation_total_old;
+
   const ADMaterialProperty<RankTwoTensor> & _rotation_increment;
 
   /// The old stress tensor

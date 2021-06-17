@@ -42,9 +42,6 @@
 
 [DomainIntegral]
   integrals = 'KfromJIntegral'
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.3'
   radius_outer = '0.6'

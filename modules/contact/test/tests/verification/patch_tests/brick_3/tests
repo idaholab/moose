@@ -9,6 +9,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     deleted = '#6924'
     requirement = "The Contact system shall enforce glued, kinematic contact
@@ -22,6 +23,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     deleted = 'Ticket #7073'
     requirement = "The Contact system shall enforce glued, penalty contact
@@ -35,6 +37,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -47,6 +50,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
@@ -59,6 +63,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch
@@ -72,6 +77,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch
@@ -84,6 +90,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 3D HEX20 brick geometry (NAFEMS CGS1 contact patch

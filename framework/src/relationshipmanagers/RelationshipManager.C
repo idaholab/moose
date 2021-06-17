@@ -44,14 +44,6 @@ RelationshipManager::validParams()
   params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
 
   /**
-   * This parameter is used to indicate which system and subsequent DofMap this relationship manager
-   * should be applied to. This parameter is not meaningful when the RM is of geometric type only.
-   * If this parameter is equal to ANY, then this RM can be applied to both non-linear and aux
-   * systems.
-   */
-  params.addPrivateParam<Moose::RMSystemType>("system_type", Moose::RMSystemType::NONE);
-
-  /**
    * The name of the object (or Action) requesting this RM
    */
   params.addRequiredParam<std::string>("for_whom", "What object is requesting this RM?");
@@ -76,11 +68,9 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
         "mesh",
         "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
         "was supplied and no generation block was provided")),
-    _dof_map(nullptr),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _system_type(getParam<Moose::RMSystemType>("system_type"))
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }
@@ -89,12 +79,10 @@ RelationshipManager::RelationshipManager(const RelationshipManager & other)
   : MooseObject(other._pars),
     GhostingFunctor(other),
     _moose_mesh(other._moose_mesh),
-    _dof_map(other._dof_map),
     _attach_geometric_early(other._attach_geometric_early),
     _rm_type(other._rm_type),
     _for_whom(other._for_whom),
-    _use_displaced_mesh(other._use_displaced_mesh),
-    _system_type(other._system_type)
+    _use_displaced_mesh(other._use_displaced_mesh)
 {
 }
 
@@ -117,6 +105,18 @@ RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
 {
   return (input_rm & Moose::RelationshipManagerType::COUPLING) ==
          Moose::RelationshipManagerType::COUPLING;
+}
+
+bool
+RelationshipManager::baseGreaterEqual(const RelationshipManager & rhs) const
+{
+  // !attach early = attach late
+  // If we are supposed to be attached late, then we should take precedence over the rhs. You can
+  // think of this as being >= because we if we are attaching late, then we are asking that *all*
+  // elements be geometrically ghosted during the initial mesh preparation phase. We will only allow
+  // remote elements to be deleted later on after addition of late geomeric ghosting functors (at
+  // the same time as algebraic and coupling)
+  return isType(rhs._rm_type) && (!_attach_geometric_early >= !rhs._attach_geometric_early);
 }
 
 Moose::RelationshipManagerType RelationshipManager::geo_and_alg =
@@ -152,4 +152,24 @@ RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
   auto params = dummyParams();
   params.addRelationshipManager("ElementSideNeighborLayers", rm_type);
   return params;
+}
+
+void
+RelationshipManager::init(const MeshBase & mesh, const DofMap * const dof_map)
+{
+  mooseAssert(_dof_map ? dof_map == _dof_map : true,
+              "Trying to initialize with a different dof map");
+
+  _dof_map = dof_map;
+
+  // It is conceivable that this init method gets called twice, once during early geometric setup
+  // and later when we're doing algebraic/coupling (and late geometric) setup. There might be new
+  // information available during the latter call that the derived RelationshipManager can
+  // leverage, so we should make sure we call through to internal init both times
+  internalInitWithMesh(mesh);
+
+  // One would hope that internalInitWithMesh set the mesh, but we can't be sure
+  set_mesh(&mesh);
+
+  _inited = true;
 }

@@ -32,7 +32,7 @@ a + b  \rightleftharpoons  \mathrm{mineral}
 \end{equation}
 and including diffusion and dispersion, the `Kernels` block looks like
 
-!listing modules/porous_flow/test/tests/chemistry/2species_predis.i start=[Kernels] end=[]
+!listing modules/porous_flow/test/tests/chemistry/2species_predis.i start=[mass_a] end=[UserObjects]
 
 Appropriate stoichiometric coefficients must be supplied to this `Kernel`.  Consider the reaction
 system

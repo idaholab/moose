@@ -65,17 +65,8 @@
   [../]
 []
 
-[Preconditioning]
-  active = 'smp'
-  [./smp]
-    type = SMP
-    full = true
-  [../]
-[]
-
 [Executioner]
-  type = Transient #Transient
-
+  type = Transient
   solve_type = NEWTON
   petsc_options = '-snes_check_jacobian -snes_check_jacobian_view'
 

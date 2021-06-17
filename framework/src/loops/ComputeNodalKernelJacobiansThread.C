@@ -15,13 +15,13 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
-#include "NodalKernel.h"
+#include "NodalKernelBase.h"
 
 #include "libmesh/sparse_matrix.h"
 
 ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
     FEProblemBase & fe_problem,
-    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+    MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _fe_problem(fe_problem),
@@ -72,7 +72,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     unsigned int jvar = jvariable.number();
 
     // The NodalKernels that are active and are coupled to the jvar in question
-    std::vector<std::shared_ptr<NodalKernel>> active_involved_kernels;
+    std::vector<std::shared_ptr<NodalKernelBase>> active_involved_kernels;
 
     const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (const auto & block : block_ids)

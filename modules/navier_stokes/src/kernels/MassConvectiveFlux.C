@@ -18,6 +18,8 @@ MassConvectiveFlux::validParams()
   params.addRequiredCoupledVar("vel_x", "x-component of the velocity vector");
   params.addCoupledVar("vel_y", "y-component of the velocity vector");
   params.addCoupledVar("vel_z", "z-component of the velocity vector");
+  params.addClassDescription("Implements the advection term for the Navier Stokes mass equation.");
+
   return params;
 }
 

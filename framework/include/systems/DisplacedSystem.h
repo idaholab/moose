@@ -100,6 +100,7 @@ public:
   }
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;
+  virtual const NumericVector<Number> & getVector(const std::string & name) const override;
 
   virtual NumericVector<Number> & serializedSolution() override
   {
@@ -235,8 +236,6 @@ protected:
   {
     return _undisplaced_system.solution();
   }
-  NumericVector<Number> & solutionOldInternal() const override;
-  NumericVector<Number> & solutionOlderInternal() const override;
 
   SystemBase & _undisplaced_system;
   TransientExplicitSystem & _sys;

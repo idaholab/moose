@@ -20,13 +20,13 @@ TEST_F(PorousFlowBrineCO2Test, name) { EXPECT_EQ("brine-co2", _fs->fluidStateNam
  */
 TEST_F(PorousFlowBrineCO2Test, indices)
 {
-  EXPECT_EQ(2, _fs->numPhases());
-  EXPECT_EQ(3, _fs->numComponents());
-  EXPECT_EQ(0, _fs->aqueousPhaseIndex());
-  EXPECT_EQ(1, _fs->gasPhaseIndex());
-  EXPECT_EQ(0, _fs->aqueousComponentIndex());
-  EXPECT_EQ(1, _fs->gasComponentIndex());
-  EXPECT_EQ(2, _fs->saltComponentIndex());
+  EXPECT_EQ((unsigned int)2, _fs->numPhases());
+  EXPECT_EQ((unsigned int)3, _fs->numComponents());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousPhaseIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasPhaseIndex());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousComponentIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasComponentIndex());
+  EXPECT_EQ((unsigned int)2, _fs->saltComponentIndex());
 }
 
 /*
@@ -91,8 +91,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
 
   DualReal phiH2O, phiCO2;
   _fs->fugacityCoefficientsLowTemp(p, T, co2_density, phiCO2, phiH2O);
-
-  ABS_TEST(phiCO2.value(), 0.401939178735, 1.0e-8);
+  ABS_TEST(phiCO2.value(), 0.401939386415, 1.0e-8);
   ABS_TEST(phiH2O.value(), 0.0898968578757, 1.0e-8);
 
   // Test the high temperature formulation
@@ -982,8 +981,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
 
   DualReal x, y;
   _fs->equilibriumMoleFractions(p, T, Xnacl, x, y);
-  ABS_TEST(y.value(), 0.0069638270001, 1.0e-8);
-  ABS_TEST(x.value(), 0.0236535616524, 1.0e-8);
+  ABS_TEST(y.value(), 0.00696393845155, 1.0e-8);
+  ABS_TEST(x.value(), 0.0236554537395, 1.0e-8);
 
   // Intermediate temperature regime
   T = 373.15;
@@ -1015,8 +1014,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
   Xnacl = 0.1;
 
   _fs->equilibriumMoleFractions(p, T, Xnacl, x, y);
-  ABS_TEST(y.value(), 0.00657324876094, 1.0e-8);
-  ABS_TEST(x.value(), 0.0152851601478, 1.0e-8);
+  ABS_TEST(y.value(), 0.00657335846826, 1.0e-8);
+  ABS_TEST(x.value(), 0.0152863933134, 1.0e-8);
 
   // Intermediate temperature regime
   T = 373.15;

@@ -16,6 +16,7 @@
 #include "MooseVariableFieldBase.h"
 #include "FVFluxKernel.h"
 #include "FVFluxBC.h"
+#include "FVInterfaceKernel.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
 #include "MaterialBase.h"
@@ -282,6 +283,8 @@ private:
   std::vector<std::shared_ptr<MaterialBase>> _neigh_sub_neigh_face_mats;
 
   const bool _do_jacobian;
+  const bool _scaling_jacobian;
+  const bool _scaling_residual;
   unsigned int _num_cached = 0;
 
   using ThreadedFaceLoop<RangeType>::_fe_problem;
@@ -296,13 +299,19 @@ template <typename RangeType>
 ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
                                                     const std::set<TagID> & tags)
   : ThreadedFaceLoop<RangeType>(fe_problem, tags),
-    _do_jacobian(fe_problem.currentlyComputingJacobian())
+    _do_jacobian(fe_problem.currentlyComputingJacobian()),
+    _scaling_jacobian(fe_problem.computingScalingJacobian()),
+    _scaling_residual(fe_problem.computingScalingResidual())
 {
 }
 
 template <typename RangeType>
 ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split)
-  : ThreadedFaceLoop<RangeType>(x, split), _fv_vars(x._fv_vars), _do_jacobian(x._do_jacobian)
+  : ThreadedFaceLoop<RangeType>(x, split),
+    _fv_vars(x._fv_vars),
+    _do_jacobian(x._do_jacobian),
+    _scaling_jacobian(x._scaling_jacobian),
+    _scaling_residual(x._scaling_residual)
 {
 }
 
@@ -351,10 +360,10 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
+  reinitVariables(fi);
+
   if (_fv_flux_kernels.size() == 0)
     return;
-
-  reinitVariables(fi);
 
   for (const auto k : _fv_flux_kernels)
     if (_do_jacobian)
@@ -367,6 +376,19 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
+  // We don't want to do bcs when computing a scaling Jacobian or residual because they might
+  // introduce things like penalty factors
+  mooseAssert(
+      !_do_jacobian ? !_scaling_jacobian : true,
+      "If we're computing the residual, then we definitely shouldn't be computing a scaling "
+      "Jacobian.");
+  mooseAssert(_do_jacobian ? !_scaling_residual : true,
+              "If we're computing the Jacobian, then we definitely shouldn't be computing a "
+              "scaling residual");
+
+  if (_scaling_jacobian || _scaling_residual)
+    return;
+
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
@@ -375,16 +397,27 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .template condition<AttribVectorTags>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
       .queryInto(bcs);
-  if (bcs.size() == 0)
-    return;
-
-  reinitVariables(fi);
 
   for (const auto & bc : bcs)
     if (_do_jacobian)
       bc->computeJacobian(fi);
     else
       bc->computeResidual(fi);
+
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(iks);
+
+  for (const auto & ik : iks)
+    if (_do_jacobian)
+      ik->computeJacobian(fi);
+    else
+      ik->computeResidual(fi);
 }
 
 template <typename RangeType>
@@ -468,24 +501,41 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
     fv_kernel_requested_props.insert(mp_deps.begin(), mp_deps.end());
   }
 
+  std::set<std::string> same_matprop_name;
   for (std::shared_ptr<MaterialBase> mat : mats)
   {
     for (const auto prop_id : mat->getSuppliedPropIDs())
     {
       auto pr = supplied_props.insert(prop_id);
-      mooseAssert(pr.second,
-                  "Multiple objects supply property ID "
-                      << pr.second
-                      << ". Do you have different block-restricted physics *and* different "
-                         "block-restricted materials "
-                         "on either side of an interface that define the same "
-                         "property name? Unfortunately that is not supported in FV because we have "
-                         "to allow ghosting of material properties for block-restricted physics.");
+      if (!pr.second)
+      {
+        const auto & prop_ids = MaterialPropertyStorage::propIDs();
+        auto same_matprop_name_it =
+            std::find_if(prop_ids.begin(),
+                         prop_ids.end(),
+                         [prop_id](const std::pair<std::string, unsigned int> & map_pr) {
+                           return map_pr.second == prop_id;
+                         });
+        same_matprop_name.insert(same_matprop_name_it->first);
+      }
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
     emptyDifferenceTest(mp_deps, supplied_props, props_diff);
   }
+
+  // Print a warning if block restricted materials are used
+  auto same_matprop_name_str = MooseUtils::join(same_matprop_name, " ");
+
+  if (same_matprop_name.size() > 0)
+    mooseDoOnce(
+        mooseWarning("Multiple objects supply properties of name ",
+                     same_matprop_name_str,
+                     ".\nDo you have different block-restricted physics *and* different "
+                     "block-restricted \nmaterials "
+                     "on either side of an interface that define the same "
+                     "property name? \nUnfortunately that is not supported in FV because we have "
+                     "to allow ghosting \nof material properties for block-restricted physics."));
 
   emptyDifferenceTest(fv_kernel_requested_props, supplied_props, props_diff);
 #endif
@@ -676,6 +726,49 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::pre()
 {
+  std::vector<FVFluxBC *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(bcs);
+
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(iks);
+
+  std::vector<FVFluxKernel *> kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(kernels);
+
+  if (_do_jacobian)
+  {
+    for (auto * bc : bcs)
+      bc->jacobianSetup();
+    for (auto * ik : iks)
+      ik->jacobianSetup();
+    for (auto * kernel : kernels)
+      kernel->jacobianSetup();
+  }
+  else
+  {
+    for (auto * bc : bcs)
+      bc->residualSetup();
+    for (auto * ik : iks)
+      ik->residualSetup();
+    for (auto * kernel : kernels)
+      kernel->residualSetup();
+  }
+
   // Clear variables
   _fv_vars.clear();
   _elem_sub_fv_vars.clear();

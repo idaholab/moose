@@ -16,6 +16,9 @@
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
+#include "FaceInfo.h"
+
+#include <set>
 
 /**
  *  Base class for implementing interface user objects
@@ -34,6 +37,16 @@ public:
   InterfaceUserObject(const InputParameters & parameters);
 
 protected:
+  /**
+   * Execute method.
+   */
+  virtual void execute() override;
+
+  /**
+   * Called before execute() is ever called so that data can be cleared.
+   */
+  virtual void initialize() override;
+
   MooseMesh & _mesh;
 
   const MooseArray<Point> & _q_point;
@@ -60,4 +73,13 @@ protected:
 
   /// The volume (or length) of the current neighbor
   const Real & getNeighborElemVolume();
+
+  /// Whether finite volume variables are involved in the user object
+  bool _has_fv_vars;
+
+  /// A pointer to a face info, useful when working with FV
+  const FaceInfo * _fi;
+
+  /// A set of all the face infos that have been already looked at
+  std::unordered_set<const FaceInfo *> _face_infos_processed;
 };

@@ -59,7 +59,9 @@ PorousFlowDarcyVelocityComponentLowerDimensional::computeValue()
     // tang_eta is the element's tangent vector in eta direction
     const std::vector<RealGradient> & tang_eta =
         _assembly.getFE(FEType(), elem_dim)->get_dxyzdeta();
-    tangential_gravity += (_gravity * tang_eta[_qp] / tang_eta[_qp].norm_sq()) * tang_eta[_qp];
+    const RealGradient normal_to_xi =
+        tang_eta[_qp] - (tang_eta[_qp] * tang_xi[_qp] / tang_xi[_qp].norm_sq()) * tang_xi[_qp];
+    tangential_gravity += (_gravity * normal_to_xi / normal_to_xi.norm_sq()) * normal_to_xi;
   }
 
   return -(_permeability[_qp] *

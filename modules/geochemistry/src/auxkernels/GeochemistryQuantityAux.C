@@ -18,18 +18,19 @@ GeochemistryQuantityAux::validParams()
   params.addClassDescription(
       "Extracts information from the Reactor and records it in the AuxVariable");
   params.addRequiredParam<std::string>("species", "Species name");
-  MooseEnum quantity_choice(
-      "molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
-      "surface_charge surface_potential temperature kinetic_moles kinetic_additions moles_dumped",
-      "molal");
+  MooseEnum quantity_choice("molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
+                            "surface_charge surface_potential temperature kinetic_moles "
+                            "kinetic_additions moles_dumped transported_moles_in_original_basis",
+                            "molal");
   params.addParam<MooseEnum>(
       "quantity",
       quantity_choice,
       "Type of quantity to output.  These are available for non-kinetic species: activity (which "
       "equals "
       "fugacity for gases); bulk moles (this will be zero if the species is not in the basis); "
-      "neglog10a = -log10(activity).  These are available only for non-kinetic non-minerals: molal "
-      "= "
+      "neglog10a = -log10(activity); transported_moles_in_original_basis (will throw an error if "
+      "species is not in original basis).  These are available only for non-kinetic non-minerals: "
+      "molal = "
       "mol(species)/kg(solvent_water); mg_per_kg = mg(species)/kg(solvent_water).  These are "
       "available only for minerals: "
       "free_mg = free mg; free_cm3 = free cubic-centimeters; moles_dumped = moles dumped when "
@@ -53,7 +54,7 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
     _surface_sorption_mineral_index(0)
 {
   const ModelGeochemicalDatabase & mgd =
-      _reactor.getGeochemicalSystem(0).getModelGeochemicalDatabase();
+      _reactor.getPertinentGeochemicalSystem().modelGeochemicalDatabase();
   if (!(mgd.basis_species_index.count(_species) == 1 ||
         mgd.eqm_species_index.count(_species) == 1 || mgd.kin_species_index.count(_species) == 1))
     paramError(
@@ -105,6 +106,9 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
                      _quantity_choice == QuantityChoiceEnum::ACTIVITY ||
                      _quantity_choice == QuantityChoiceEnum::BULK_MOLES))
     paramError("species", "cannot record activity, neglog10a or bulk_moles for a kinetic species");
+  if (_quantity_choice == QuantityChoiceEnum::TRANSPORTED_MOLES_IN_ORIGINAL_BASIS)
+    _reactor.getPertinentGeochemicalSystem().getIndexOfOriginalBasisSpecies(
+        _species); // will throw error if species not in original basis
 }
 
 Real
@@ -113,6 +117,7 @@ GeochemistryQuantityAux::computeValue()
   Real ret = 0.0;
   const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(_current_node->id());
   const ModelGeochemicalDatabase & mgd = egs.getModelGeochemicalDatabase();
+  const PertinentGeochemicalSystem & pgs = _reactor.getPertinentGeochemicalSystem();
   if (_quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE)
     ret = egs.getSurfaceCharge(_surface_sorption_mineral_index);
   else if (_quantity_choice == QuantityChoiceEnum::SURFACE_POTENTIAL)
@@ -121,6 +126,8 @@ GeochemistryQuantityAux::computeValue()
     ret = egs.getTemperature();
   else if (_quantity_choice == QuantityChoiceEnum::MOLES_DUMPED)
     ret = _reactor.getMolesDumped(_current_node->id(), _species);
+  else if (_quantity_choice == QuantityChoiceEnum::TRANSPORTED_MOLES_IN_ORIGINAL_BASIS)
+    ret = egs.getTransportedBulkInOriginalBasis()(pgs.getIndexOfOriginalBasisSpecies(_species));
   else
   {
     if (mgd.basis_species_index.count(_species) == 1)

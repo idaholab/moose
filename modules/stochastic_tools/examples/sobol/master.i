@@ -30,14 +30,12 @@
     type = LatinHypercube
     num_rows = 10000
     distributions = 'gamma q_0 T_0 s'
-    num_bins = 10
     seed = 2011
   []
   [hypercube_b]
     type = LatinHypercube
     num_rows = 10000
     distributions = 'gamma q_0 T_0 s'
-    num_bins = 10
     seed = 2013
   []
   [sobol]

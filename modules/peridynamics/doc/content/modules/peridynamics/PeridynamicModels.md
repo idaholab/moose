@@ -3,13 +3,13 @@
 !media peridynamic_models.png style=width:1000px;padding-left:20px;float:top;
        caption=Schematics of bond-based (a), ordinary (b) and non-ordinary (c) state based peridynamic material response
 
-The first peridynamic model, termed the bond-based peridynamic model (BPD), was proposed by Silling in the year of 2000 [citep:](Silling2000bond). In BPD, material points interact in a pair-wise fashion with neighboring material points that fall within their horizon. The interaction between two material points depends only on their own deformations.
+The first peridynamic model, termed the bond-based peridynamic model (BPD), was proposed by Silling in the year of 2000 [!citep](Silling2000bond). In BPD, material points interact in a pair-wise fashion with neighboring material points that fall within their horizon. The interaction between two material points depends only on their own deformations.
 
-Later, Silling et al. [citep:](Silling2007states) generalized BPD model in what is termed state-based peridynamic models (SPD) by introducing the concept of states. In SPD, the force state between two material points depends not only on their own deformation states, but also on the deformation states of other material points within their horizons. Depending on the direction of force state between a material point pair, SPD models can be classified into ordinary state-based peridynamic (OSPD) and non-ordinary state-based peridynamic (NOSPD) models.
+Later, Silling et al. [!citep](Silling2007states) generalized BPD model in what is termed state-based peridynamic models (SPD) by introducing the concept of states. In SPD, the force state between two material points depends not only on their own deformation states, but also on the deformation states of other material points within their horizons. Depending on the direction of force state between a material point pair, SPD models can be classified into ordinary state-based peridynamic (OSPD) and non-ordinary state-based peridynamic (NOSPD) models.
 
 SPD models overcome several issues within BPD model, such as only permitting a fixed Poisson's ratio of 0.25, inconsistency in modeling plastic deformation for metals, and requiring a complete recast of standard continuum material models in terms of pairwise force function to permit their use within peridynamics. A review of BPD and SPD and their applications can be found in [!citep](Bobaru2016handbook).
 
-In peridynamics theory, the Equation of Motion (EOM) for a material point $\mathbf{X}$ in the reference configuration at time $t$ is given by
+In peridynamics theory, the Equations of Motion (EOM) for a material point $\mathbf{X}$ in the reference configuration at time $t$ is given by
 
 \begin{equation}
   \rho\left(\mathbf{X}\right) \ddot{\mathbf{u}}\left( \mathbf{X},t \right) = \int_{\mathcal{H}_{\mathbf{X}}}\mathbf{f}\left(\mathbf{X},\mathbf{X}^{\prime},t \right)dV_{X^{\prime}} + \mathbf{b}\left( \mathbf{X},t \right), \hspace{20 pt} \forall\left(\mathbf{X},t\right) \in \Omega_{r} \times \left(0, \tau \right)
@@ -129,7 +129,7 @@ for $\textbf{irregular non-uniform}$ spatial discretization
 \end{equation}
 with $\mu$ is the shear modulus.
 
-Reference for case of regular uniform spatial discretization can be found at [citep:](Madenci2014book) and [citep:](VanLe2018). For case of irregular non-uniform spatial discretization can be found at [citep:](Hu2018irregular).
+Reference for case of regular uniform spatial discretization can be found at [!citep](Madenci2014book) and [!citep](VanLe2018). For case of irregular non-uniform spatial discretization can be found at [!citep](Hu2018irregular).
 
 ## Non-ordinary state-based models
 
@@ -139,7 +139,7 @@ The general expression for force density function can be written as:
 \end{equation}
 where $\underline{\mathbf{T}} \left[ \mathbf{X}, t \right] \left\langle \mathbf{X}^{\prime} - \mathbf{X} \right\rangle$, in short $\underline{\mathbf{T}} \left\langle \boldsymbol{\xi} \right\rangle$, is the force density state exerted on material point $\mathbf{X}$ from $\mathbf{X}^{\prime}$, while $\underline{\mathbf{T}}\left[\mathbf{X}^{\prime}, t \right] \left\langle \mathbf{X} - \mathbf{X}^{\prime} \right\rangle$, in short $\underline{\mathbf{T}} \left\langle  - \boldsymbol{\xi} \right\rangle$, is the force density state exerted on material point $\mathbf{X}^{\prime}$ from $\mathbf{X}$.
 
-### Conventional correspondence material model
+### Conventional material correspondence model
 
 \begin{equation}
   \underline{\mathbf{T}} \left\langle \boldsymbol{\xi} \right\rangle = \underline{\omega} \left\langle \boldsymbol{\xi} \right\rangle \mathbf{P}_{\mathbf{X}} \mathbf{K}_{\mathbf{X}}^{-1} \boldsymbol{\xi}
@@ -150,15 +150,32 @@ where $\underline{\mathbf{T}} \left[ \mathbf{X}, t \right] \left\langle \mathbf{
 \end{equation}
 where $\mathbf{P}$ is the first Piola-Kirchhoff stress tensor and $\mathbf{K}$ is the shape tensor. Definition of shape tensor can be found on [Deformation Gradients](peridynamics/DeformationGradients.md) page.
 
-### Bond-associated correspondence material model
+### Bond-horizon stabilized material correspondence models
+
+Two formulations of bond-horizon stabilized material correspondence model are available. In Form I formulation [!citep](Chen2018bond1, Chen2019bond2), although the calculation of bond-associated deformation gradient (see [Deformation Gradients](peridynamics/DeformationGradients.md) page), hence bond-associated force state, uses deformation states of other material points within a material point's horizon, this formulated bond-associated deformation gradient does not contribute to the force state of other bonds connecting the reference material point with these material points. To compensate this nonlocal effect, a volume fraction factor is used in Form I formulation to approximate the correct force states. However, this greatly reduces the nonlocality of the formulation, hence is computationally less expensive. In Form II formulation, this nonlocal effect is explicitly accounted, i.e., the force state of a bond is the sum of contributions from all bond-associated deformation gradient. No volume fraction factor is used. However, a weight function based on a volume fraction is used to distribute the energy associated with a material point to different bond-associated horizons.
+
+In Form I formulation, the force states have the following expressions:
 
 \begin{equation}
-  \underline{\mathbf{T}} \left\langle \boldsymbol{\xi} \right\rangle = \frac{\int_{\mathcal{H}_{\mathbf{X}} \cap h_{\mathbf{X}, \boldsymbol{\xi}}} 1 dV_{\mathbf{X}^{\prime}}}{\int_{\mathcal{H}_{\mathbf{X}}} 1 dV_{\mathbf{X}^{\prime}}} \underline{\omega} \left\langle \boldsymbol{\xi} \right\rangle \mathbf{P}_{\mathbf{X, \boldsymbol{\xi}}} \mathbf{K}_{\mathbf{X, \boldsymbol{\xi}}}^{-1} \boldsymbol{\xi}
+  \underline{\mathbf{T}}\left[\mathbf{X},t\right]\left\langle \mathbf{X}^{\prime}-\mathbf{X} \right\rangle = \frac{\int_{\mathcal{H}_{\mathbf{X}} \cap h_{\boldsymbol{\xi}}}1dV_{\mathbf{X}''}}{\int_{\mathcal{H}_{\mathbf{X}}}1 dV_{\mathbf{X}''}} \underline{\omega}\left\langle \boldsymbol{\xi} \right\rangle \mathbf{P}_{\boldsymbol{\xi}} \mathbf{K}_{\boldsymbol{\xi}}^{-1} \boldsymbol{\xi}
 \end{equation}
 
 \begin{equation}
-  \underline{\mathbf{T}} \left\langle - \boldsymbol{\xi} \right\rangle = - \frac{\int_{\mathcal{H}_{\mathbf{X}^{\prime}} \cap h_{\mathbf{X}^{\prime}, - \boldsymbol{\xi}}} 1 dV_{\mathbf{X}}}{\int_{\mathcal{H}_{\mathbf{X}^{\prime}}} 1 dV_{\mathbf{X}}} \underline{\omega} \left\langle \boldsymbol{\xi} \right\rangle \mathbf{P}_{\mathbf{X}^{\prime}, - \boldsymbol{\xi}} \mathbf{K}_{\mathbf{X}^{\prime}, - \boldsymbol{\xi}}^{-1} \boldsymbol{\xi}
+  \underline{\mathbf{T}}\left[\mathbf{X}^{\prime},t\right]\left\langle \mathbf{X}-\mathbf{X}^{\prime} \right\rangle = \frac{\int_{\mathcal{H}_{\mathbf{X}^{\prime}} \cap h_{-\boldsymbol{\xi}}}1dV_{\mathbf{X}''}}{\int_{\mathcal{H}_{\mathbf{X}^{\prime}}}1 dV_{\mathbf{X}''}} \underline{\omega}\left\langle -\boldsymbol{\xi} \right\rangle \mathbf{P}_{-\boldsymbol{\xi}} \mathbf{K}_{-\boldsymbol{\xi}}^{-1} (-\boldsymbol{\xi})
 \end{equation}
+
+In Form II formulation, the force states have the following expressions:
+
+\begin{equation}
+  \underline{\mathbf{T}}\left[\mathbf{X},t\right]\left\langle \mathbf{X}^{\prime}-\mathbf{X} \right\rangle =
+  \sum_{n=1}^{N_{\mathbf{\xi}}} \frac{\int_{\mathcal{H}_{\mathbf{X}} \cap h_{\mathbf{X}_{n}^{\prime}}}1dV_{\mathbf{X}''}}{\sum_{m=1}^{N_{\mathbf{X}}} \int_{\mathcal{H}_{\mathbf{X}} \cap h_{\mathbf{X}_{m}^{\prime}}}1dV_{\mathbf{X}''}} \underline{\omega}\left\langle \boldsymbol{\xi} \right\rangle \mathbf{P}_{\boldsymbol{\xi},n} \mathbf{K}_{\boldsymbol{\xi},n}^{-1} \boldsymbol{\xi}
+\end{equation}
+
+\begin{equation}
+  \underline{\mathbf{T}}\left[\mathbf{X}^{\prime},t\right]\left\langle \mathbf{X}-\mathbf{X}^{\prime} \right\rangle =
+  \sum_{n=1}^{N_{-\mathbf{\xi}}} \frac{\int_{\mathcal{H}_{\mathbf{X}^{\prime}} \cap h_{\mathbf{X}_{n}}}1dV_{\mathbf{X}''}}{\sum_{m=1}^{N_{\mathbf{X}^{\prime}}} \int_{\mathcal{H}_{\mathbf{X}^{\prime}} \cap h_{\mathbf{X}_{m}}}1dV_{\mathbf{X}''}} \underline{\omega}\left\langle -\boldsymbol{\xi} \right\rangle \mathbf{P}_{-\boldsymbol{\xi},n} \mathbf{K}_{-\boldsymbol{\xi},n}^{-1} (-\boldsymbol{\xi})
+\end{equation}
+where $N_{\mathbf{X}$ and $N_{\mathbf{\xi}}$ are the total number of material points in the material point horizon and the intersect of the material point horizon and a bond-associated horizon.
 
 It should be noted that the First Piola-Kirchhoff stress tensor $\mathbf{P}$ and shape tensor $\mathbf{K}$ are all bond-associated quatities.
 

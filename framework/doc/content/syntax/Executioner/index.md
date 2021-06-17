@@ -11,19 +11,21 @@ Executioner block. Please see the online
 [PETSc documentation](http://www.mcs.anl.gov/petsc/documentation/index.html) for
 detailed information about these options.
 
-MOOSE provides Picard iterations in all its executioners for tightly-coupled multiphysics simulations.
-MultiApps of two groups of before and after master app and master app are solved sequentially within one Picard iteration.
-The execution order of MutliApps within one group is undefined.
+MOOSE provides MultiApp coupling algorithms in all its executioners for tightly-coupled multiphysics simulations.
+MultiApps of two groups, those executed before and after the main app, and the main app are solved sequentially within one app coupling iteration.
+The execution order of MultiApps within one group is undefined.
 Relevant data transfers happen before and after each of the two groups of MultiApps runs.
-Because MultiApp allows wrapping another levels of MultiApps, the design enables multi-level Picard iterations automatically.
-Picard iterations can be relaxed to improve the stability of the convergence.
-When a MultiApp is a subapp of a master and a master of its own subapps, MOOSE allows relaxation of the MultiApp solution
-within the master Picard iterations and within the Picard iterations, where the MultiApp is the master, independently.
+
+Because MultiApp allows wrapping another levels of MultiApps, the design enables multi-level app coupling iterations automatically.
+App coupling iterations can be relaxed to improve the stability of the convergence.
+When a MultiApp is a subapp of a main application and is also the main application for its own subapps, MOOSE allows relaxation of the MultiApp solution
+within the main coupling iterations and within the coupling iterations, where the MultiApp is the main application, independently.
+More details about the MultiApp coupling algorithms may be found in [FixedPointAlgorithms/index.md])
 
 ## Automatic and Default Preconditioning
 
 For most simulations there are two types of solve types that will be used: Newton or Preconditioned
-Jacobian Free Newton Krylov (PJFNK). The type is specified using the "solve_type" parameter withing the
+Jacobian Free Newton Krylov (PJFNK). The type is specified using the "solve_type" parameter within the
 Executioner block.
 
 Regardless of solve type, NEWTON or PJFNK, preconditioning is an import part of any simulation

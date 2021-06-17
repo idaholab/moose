@@ -18,6 +18,7 @@ ArrayCoupledForce::validParams()
 {
   InputParameters params = ArrayKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
+  params.addParam<bool>("is_v_array", false, "Whether v is a array variable or not");
   params.addRequiredParam<RealEigenVector>(
       "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription(
@@ -28,28 +29,46 @@ ArrayCoupledForce::validParams()
 
 ArrayCoupledForce::ArrayCoupledForce(const InputParameters & parameters)
   : ArrayKernel(parameters),
+    _is_v_array(getParam<bool>("is_v_array")),
     _v_var(coupled("v")),
-    _v(coupledValue("v")),
+    _v(_is_v_array ? nullptr : &coupledValue("v")),
+    _v_array(_is_v_array ? &coupledArrayValue("v") : nullptr),
     _coef(getParam<RealEigenVector>("coef"))
 {
   if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
+    paramError("v",
+               "Coupled variable 'v' needs to be different from 'variable' with ArrayCoupledForce, "
                "consider using Reaction or somethig similar");
-  if (getVar("v", 0)->count() > 1)
-    mooseError("We are testing the coupling of a standard variable to an array variable");
+  if (_is_v_array && getArrayVar("v", 0)->count() != _count)
+    paramError("v",
+               "Needs to be either a standard variable or an array variable with the same "
+               "number of components of 'variable'");
 }
 
-RealEigenVector
-ArrayCoupledForce::computeQpResidual()
+void
+ArrayCoupledForce::computeQpResidual(RealEigenVector & residual)
 {
-  return -_coef * (_v[_qp] * _test[_i][_qp]);
+  if (_is_v_array)
+    residual = -_coef.cwiseProduct((*_v_array)[_qp]) * _test[_i][_qp];
+  else
+    residual = -_coef * (*_v)[_qp] * _test[_i][_qp];
 }
 
 RealEigenMatrix
-ArrayCoupledForce::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayCoupledForce::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _v_var)
-    return _coef * (-_phi[_j][_qp] * _test[_i][_qp]);
+  {
+    RealEigenVector v = _coef * (-_phi[_j][_qp] * _test[_i][_qp]);
+    if (_is_v_array)
+    {
+      RealEigenMatrix t = RealEigenMatrix::Zero(_var.count(), _var.count());
+      t.diagonal() = v;
+      return t;
+    }
+    else
+      return v;
+  }
   else
     return RealEigenMatrix::Zero(_var.count(), jvar.count());
 }

@@ -20,10 +20,10 @@ public:
   ExampleShapeElementKernel2(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   /// new method for off-diagonal jacobian contributions corresponding to non-local dofs
-  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index);
+  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index) override;
 
   const ExampleShapeElementUserObject & _shp;
   const Real & _shp_integral;

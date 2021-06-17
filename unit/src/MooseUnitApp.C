@@ -9,7 +9,6 @@
 
 #include "MooseUnitApp.h"
 #include "Moose.h"
-#include "ModulesApp.h"
 
 template <>
 InputParameters
@@ -26,9 +25,8 @@ MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parame
 }
 
 void
-MooseUnitApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+MooseUnitApp::registerAll(Factory & f, ActionFactory &, Syntax &)
 {
-  ModulesApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"MooseUnitApp"});
 }
 

@@ -36,18 +36,26 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = grid
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg max'
+    stochastic_reporter = results
+    from_reporter = 'avg/value max/value'
+  []
+[]
+
+[Reporters]
+  [results]
+    type = StochasticReporter
+    outputs = none
   []
 []
 
 [VectorPostprocessors]
-  [results]
-    type = StochasticResults
-    outputs = none
+  [sampler_data]
+    type = SamplerData
+    sampler = grid
+    parallel_type = DISTRIBUTED
   []
 []
 
@@ -56,15 +64,15 @@
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    results_vpp = results
-    results_vector = data:avg
+    predictors = 'sampler_data/grid_0'
+    predictor_cols = '1 2 3'
+    response = results/data:avg:value
   []
   [nearest_point_max]
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    results_vpp = results
-    results_vector = data:max
+    response = results/data:max:value
   []
 []
 

@@ -1,0 +1,111 @@
+a=1.1
+diff=1.1
+
+[Mesh]
+  [gen_mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 2
+    xmax = 3
+    ymin = 0
+    ymax = 1
+    nx = 2
+    ny = 2
+  []
+[]
+
+[Problem]
+  kernel_coverage_check = off
+  coord_type = 'RZ'
+[]
+
+[Variables]
+  [v]
+    family = MONOMIAL
+    order = CONSTANT
+    fv = true
+    initial_condition = 1
+  []
+[]
+
+[FVKernels]
+  [advection]
+    type = FVElementalAdvection
+    variable = v
+    velocity = '${a} ${a} 0'
+    advected_quantity = 'mat_u'
+    grad_advected_quantity = 'mat_grad_u'
+  []
+  [reaction]
+    type = FVReaction
+    variable = v
+  []
+  [diff_v]
+    type = FVDiffusion
+    variable = v
+    coeff = ${diff}
+  []
+  [body_v]
+    type = FVBodyForce
+    variable = v
+    function = 'forcing'
+  []
+[]
+
+[FVBCs]
+  [diri]
+    type = FVFunctionDirichletBC
+    boundary = 'left right top bottom'
+    function = 'exact'
+    variable = v
+  []
+[]
+
+[Materials]
+  [mat]
+    type = ADCoupledGradientMaterial
+    mat_prop = 'mat_u'
+    grad_mat_prop = 'mat_grad_u'
+    u = v
+  []
+[]
+
+[Functions]
+  [exact]
+    type = ParsedFunction
+    value = 'sin(x)*cos(y)'
+  []
+  [forcing]
+    type = ParsedFunction
+    value = '-a*sin(x)*sin(y) + diff*sin(x)*cos(y) + sin(x)*cos(y) + (x*a*cos(x)*cos(y) + a*sin(x)*cos(y))/x - (-x*diff*sin(x)*cos(y) + diff*cos(x)*cos(y))/x'
+    vars = 'a diff'
+    vals = '${a} ${diff}'
+  []
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -sub_pc_factor_shift_type -sub_pc_type'
+  petsc_options_value = 'asm      NONZERO                   lu'
+[]
+
+[Outputs]
+  exodus = true
+  csv = true
+[]
+
+[Postprocessors]
+  [error]
+    type = ElementL2Error
+    variable = v
+    function = exact
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
+  [h]
+    type = AverageElementSize
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
+[]

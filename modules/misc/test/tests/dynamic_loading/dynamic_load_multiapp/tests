@@ -1,4 +1,6 @@
 [Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#12266'
   [./dynamic_load]
     type = 'Exodiff'
     input = 'misc_master.i'
@@ -6,6 +8,7 @@
     allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
+    requirement = "The system shall be able to dynamically load a multiapp from a dynamic library."
   [../]
 
   [./dynamic_load_w_name]
@@ -18,6 +21,7 @@
     method = OPT # because the library name is explicitly given
     prereq = 'dynamic_load'
     recover = false # See #5207
+    requirement = 'The system shall be able to dynamically load a multiapp using the library name, to select a compiling optimization level for example.'
   [../]
 
   [./dynamic_load_error_check]
@@ -26,5 +30,6 @@
     expect_err = 'Unable to locate library for "InvalidApp"'
     allow_warnings = true
     library_mode = 'DYNAMIC'
+    requirement = "The system shall error out if the type of application to dynamically load is not included in the dynamic library."
   [../]
 []

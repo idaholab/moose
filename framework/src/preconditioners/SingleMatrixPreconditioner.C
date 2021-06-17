@@ -47,6 +47,11 @@ SingleMatrixPreconditioner::validParams()
                         "Set to true if you want the full set of couplings.  Simply "
                         "for convenience so you don't have to set every "
                         "off_diag_row and off_diag_column combination.");
+  params.addParam<bool>(
+      "trust_my_coupling",
+      false,
+      "Whether to trust my coupling even if the framework wants to be paranoid and create a full "
+      "coupling matrix, which can happen when using global AD indexing for example.");
 
   return params;
 }
@@ -106,4 +111,6 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
   }
 
   _fe_problem.setCouplingMatrix(std::move(cm));
+  if (getParam<bool>("trust_my_coupling"))
+    _fe_problem.trustUserCouplingMatrix();
 }

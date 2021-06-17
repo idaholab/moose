@@ -43,6 +43,7 @@ const ExecFlagType EXEC_PRE_DISPLACE("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP("PRE_MULTIAPP_SETUP");
 const ExecFlagType EXEC_TRANSFER("TRANSFER");
+const ExecFlagType EXEC_PRE_KERNELS("PRE_KERNELS");
 
 namespace Moose
 {
@@ -131,6 +132,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);
+  registerMooseObjectTask("add_fv_ik",                    FVInterfaceKernel,      false);
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
   appendMooseObjectTask  ("add_interface_kernel",         VectorInterfaceKernel);
   registerMooseObjectTask("add_constraint",               Constraint,             false);
@@ -185,6 +187,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_mesh_complete", true); // calls prepare
   registerTask("add_geometric_rm", false);
   registerTask("attach_geometric_rm", true);
+  registerTask("attach_geometric_rm_final", true);
 
   registerTask("init_displaced_problem", false);
 
@@ -251,12 +254,12 @@ addActionTypes(Syntax & syntax)
                            "(check_copy_nodal_vars)"
                            "(setup_mesh)"
                            "(add_geometric_rm)"
+                           "(add_partitioner)"
                            "(add_mesh_generator)"
                            "(append_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(recover_meta_data)"
                            "(set_mesh_base)"
-                           "(add_partitioner)"
                            "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
@@ -303,19 +306,21 @@ addActionTypes(Syntax & syntax)
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(add_coupling_rm)"
+                           "(attach_geometric_rm_final)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
                            "(delete_remote_elements_after_late_geometric_ghosting)"
-                           "(init_problem)"
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
                            "(add_reporter)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_interface_kernel,"
-                           " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
+                           " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
+                           " add_indicator, add_marker)"
                            "(coupling_functor_check)"
+                           "(init_problem)"
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)");
@@ -386,6 +391,7 @@ registerExecFlags(Factory & factory)
   registerExecFlag(EXEC_PRE_DISPLACE);
   registerExecFlag(EXEC_SAME_AS_MULTIAPP);
   registerExecFlag(EXEC_PRE_MULTIAPP_SETUP);
+  registerExecFlag(EXEC_PRE_KERNELS);
 }
 
 void
@@ -451,7 +457,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
 
-  registerSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
   syntax.registerSyntaxType("Postprocessors/*", "UserObjectName");
@@ -489,6 +494,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddDGKernelAction", "DGKernels/*");
   registerSyntax("AddFVKernelAction", "FVKernels/*");
   registerSyntax("AddFVBCAction", "FVBCs/*");
+  registerSyntax("AddFVInterfaceKernelAction", "FVInterfaceKernels/*");
   registerSyntax("CheckFVBCAction", "FVBCs");
 
   registerSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");

@@ -26,11 +26,14 @@ NodalRankTwoPD::validParams()
   params.addCoupledVar("temperature", "Nonlinear variable name for the temperature");
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for strain in the out-of-plane direction");
-  params.addParam<bool>("plane_stress", false, "Plane stress problem or not");
-  params.addParam<Real>("youngs_modulus", 0.0, "Material constant: Young's modulus");
-  params.addParam<Real>("poissons_ratio", 0.0, "Material constant: Poisson's ratio");
-  params.addParam<Real>(
-      "thermal_expansion_coeff", 0.0, "Value of material thermal expansion coefficient");
+  params.addParam<bool>(
+      "plane_stress",
+      false,
+      "Plane stress problem or not. This option applies to BPD and OSPD models only");
+  params.addParam<Real>("youngs_modulus", "Material constant: Young's modulus");
+  params.addParam<Real>("poissons_ratio", "Material constant: Poisson's ratio");
+  params.addParam<Real>("thermal_expansion_coeff",
+                        "Value of material thermal expansion coefficient");
   params.addParam<Real>("stress_free_temperature", 0.0, "Stress free temperature");
   params.addRequiredParam<std::string>(
       "rank_two_tensor",
@@ -38,10 +41,8 @@ NodalRankTwoPD::validParams()
   params.addRequiredParam<std::string>("output_type", "Type of output: component or scalar");
   params.addParam<MooseEnum>(
       "scalar_type", RankTwoScalarTools::scalarOptions(), "Type of scalar output");
-  params.addParam<unsigned int>(
-      "index_i", 0, "The index i of ij for the tensor to output (0, 1, 2)");
-  params.addParam<unsigned int>(
-      "index_j", 0, "The index j of ij for the tensor to output (0, 1, 2)");
+  params.addParam<unsigned int>("index_i", "The index i of ij for the tensor to output (0, 1, 2)");
+  params.addParam<unsigned int>("index_j", "The index j of ij for the tensor to output (0, 1, 2)");
   params.addParam<Point>("point1",
                          Point(0, 0, 0),
                          "Start point for axis used to calculate some direction dependent material "
@@ -64,18 +65,12 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
                                     ? coupledScalarValue("scalar_out_of_plane_strain")
                                     : _zero),
     _plane_stress(getParam<bool>("plane_stress")),
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poissons_ratio(getParam<Real>("poissons_ratio")),
-    _alpha(getParam<Real>("thermal_expansion_coeff")),
     _temp_ref(getParam<Real>("stress_free_temperature")),
     _rank_two_tensor(getParam<std::string>("rank_two_tensor")),
     _output_type(getParam<std::string>("output_type")),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
-    _i(getParam<unsigned int>("index_i")),
-    _j(getParam<unsigned int>("index_j")),
     _point1(parameters.get<Point>("point1")),
-    _point2(parameters.get<Point>("point2")),
-    _singular_shape_tensor(false)
+    _point2(parameters.get<Point>("point2"))
 {
   if (!_var.isNodal())
     mooseError("NodalRankTwoPD operates on nodal variable!");
@@ -85,23 +80,42 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
   for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
     _disp_var.push_back(getVar("displacements", i));
 
-  if (_rank_two_tensor == "stress" && !isParamValid("youngs_modulus") &&
-      !isParamValid("poissons_ratio"))
-    mooseError("Both Young's modulus and Poisson's ratio must be provided for stress calculation");
+  _Cijkl.zero();
+  if (_rank_two_tensor == "stress")
+  {
+    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
+      mooseError(
+          "Both Young's modulus and Poisson's ratio must be provided for stress calculation");
+    else
+    {
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+      _poissons_ratio = getParam<Real>("poissons_ratio");
+    }
 
-  std::vector<Real> iso_const(2);
-  iso_const[0] =
-      _youngs_modulus * _poissons_ratio / ((1.0 + _poissons_ratio) * (1.0 - 2.0 * _poissons_ratio));
-  iso_const[1] = _youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
+    std::vector<Real> iso_const(2);
+    iso_const[0] = _youngs_modulus * _poissons_ratio /
+                   ((1.0 + _poissons_ratio) * (1.0 - 2.0 * _poissons_ratio));
+    iso_const[1] = _youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
 
-  // fill elasticity tensor
-  _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
+    // fill elasticity tensor
+    _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
+  }
 
   if (_has_temp && !isParamValid("thermal_expansion_coeff"))
     mooseError("thermal_expansion_coeff is required when temperature is coupled");
+  else if (_has_temp)
+    _alpha = getParam<Real>("thermal_expansion_coeff");
 
-  if (_output_type == "component" && !(isParamValid("index_i") || isParamValid("index_j")))
-    mooseError("The output_type is 'component', but no 'index_i' and 'index_j' are provided!");
+  if (_output_type == "component")
+  {
+    if (!isParamValid("index_i") || !isParamValid("index_j"))
+      mooseError("The output_type is 'component', both 'index_i' and 'index_j' must be provided!");
+    else
+    {
+      _i = getParam<unsigned int>("index_i");
+      _j = getParam<unsigned int>("index_j");
+    }
+  }
 
   if (_output_type == "scalar" && !isParamValid("scalar_type"))
     mooseError("The output_type is 'scalar', but no 'scalar_type' is provided!");
@@ -164,7 +178,7 @@ NodalRankTwoPD::computeRankTwoTensors()
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
     {
       Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
-      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+      vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
       origin_vec = *neighbor_nb - *_pdmesh.nodePtr(_current_node->id());
 
       for (unsigned int k = 0; k < _dim; ++k)
@@ -182,7 +196,7 @@ NodalRankTwoPD::computeRankTwoTensors()
     }
 
   // finalize the deformation gradient tensor
-  if (!MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
+  if (shape.det() != 0.)
   {
     dgrad *= shape.inverse();
 

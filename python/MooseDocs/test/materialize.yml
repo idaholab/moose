@@ -13,6 +13,14 @@ Content:
             - js/*
     test:
         root_dir: python/MooseDocs/test/content
+        content:
+            - "**"
+            - ~/extensions/external.md
+    external:
+        root_dir: python/MooseDocs/test/content
+        external: True
+        content:
+            - extensions/external.md
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -46,6 +54,10 @@ Extensions:
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pdf: default
+    MooseDocs.extensions.pysyntax: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.datetime: default
+    MooseDocs.extensions.gitutils: default
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:
@@ -62,6 +74,7 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+
     MooseDocs.extensions.civet:
         active: False
         test_results_cache: '/tmp/civet/jobs'
@@ -95,12 +108,13 @@ Extensions:
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
         active: True
-
         executable: ${MOOSE_DIR}/test
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include
             - test/include
+    MooseDocs.extensions.ifelse:
+        active: True
 
 Translator:
     type: MooseDocs.base.Translator

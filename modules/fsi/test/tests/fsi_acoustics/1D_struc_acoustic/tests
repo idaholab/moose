@@ -1,0 +1,11 @@
+[Tests]
+  design = 'fsi_acoustics.md'
+  issues = '#15712'
+  [./1D_struc_acoustic_test]
+    type = 'CSVDiff'
+    input = '1D_struc_acoustic.i'
+    csvdiff = '1D_struc_acoustic_out.csv'
+    abs_zero = 1e-08
+    requirement = 'The system shall reproduce fluid pressures and structural stresses that match accurately with the ones provided.'
+  [../]
+[]

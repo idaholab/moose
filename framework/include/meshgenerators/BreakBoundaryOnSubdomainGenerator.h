@@ -18,7 +18,7 @@ template <>
 InputParameters validParams<BreakBoundaryOnSubdomainGenerator>();
 
 /**
- * MeshGenerator for
+ * MeshGenerator for breaking all boundaries based on which block they are attached to
  */
 class BreakBoundaryOnSubdomainGenerator : public MeshGenerator
 {
@@ -30,6 +30,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// the input mesh to be modified
   std::unique_ptr<MeshBase> & _input;
 };
-

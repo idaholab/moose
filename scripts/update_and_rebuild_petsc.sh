@@ -89,13 +89,19 @@ if [ ! -z "$PETSC_PREFIX" ]; then
   PFX_STR="--prefix=$PETSC_PREFIX"
 fi
 
+# Use --with-make-np if MOOSE_JOBS is given
+MAKE_NP_STR=""
+if [ ! -z "$MOOSE_JOBS" ]; then
+  MAKE_NP_STR="--with-make-np=$MOOSE_JOBS"
+fi
+
 cd $SCRIPT_DIR/../petsc
 
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure $(echo $PFX_STR) \
+  ./configure $(echo $PFX_STR) $(echo $MAKE_NP_STR) \
       --download-hypre=1 \
       --with-debugging=no \
       --with-shared-libraries=1 \
@@ -105,18 +111,20 @@ if [ -z "$go_fast" ]; then
       --download-parmetis=1 \
       --download-superlu_dist=1 \
       --download-mumps=1 \
+      --download-strumpack=1 \
       --download-scalapack=1 \
       --download-slepc=1 \
       --with-mpi=1 \
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
+      --with-64-bit-indices \
       $*
 
   exitIfExitCode $?
 fi
 
-make all -j ${MOOSE_JOBS:-1}
+make all
 exitIfExitCode $?
 
 if [ ! -z "$PFX_STR" ]; then

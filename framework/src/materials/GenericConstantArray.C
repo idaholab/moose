@@ -21,9 +21,9 @@ GenericConstantArray::validParams()
 
   InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("prop_name",
-                                       "The names of the properties this material will have");
+                                       "The name of the property this material will have");
   params.addRequiredParam<RealEigenVector>("prop_value",
-                                           "The values associated with the named properties");
+                                           "The values associated with the named property");
   params.declareControllable("prop_value");
   params.addClassDescription(
       "A material evaluating one material property in type of RealEigenVector");

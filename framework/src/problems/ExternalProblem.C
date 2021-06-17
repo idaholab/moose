@@ -42,6 +42,9 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
 
   // Create extra vectors and matrices if any
   createTagVectors();
+
+  // Create extra solution vectors if any
+  createTagSolutions();
 }
 
 void

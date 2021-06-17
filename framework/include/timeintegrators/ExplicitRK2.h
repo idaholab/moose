@@ -83,6 +83,9 @@ protected:
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_old;
 
+  /// The older solution
+  const NumericVector<Number> & _solution_older;
+
   /// The method coefficients.  See the table above for description.
   /// These are pure virtual in the base class, and must be overridden
   /// in subclasses to implement different schemes.
@@ -102,4 +105,3 @@ ExplicitRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T3 &
 
   u_dot *= 1. / _dt;
 }
-

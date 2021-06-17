@@ -20,6 +20,8 @@ class GeochemistryActivityCoefficients
 public:
   GeochemistryActivityCoefficients(){};
 
+  bool operator==(const GeochemistryActivityCoefficients & /*rhs*/) const { return true; };
+
   /**
    * Sets internal parameters, such as the ionic strength and Debye-Huckel parameters, prior to
    * computing activity coefficients and activity of water.  If using a Debye-Huckel activity model,

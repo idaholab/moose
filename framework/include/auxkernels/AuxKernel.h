@@ -118,39 +118,6 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
-  template <typename T>
-  const T & getUserObject(const UserObjectName & name);
-  template <typename T>
-  const T & getUserObjectByName(const UserObjectName & name);
-
-  const UserObject & getUserObjectBase(const UserObjectName & name);
-  const UserObject & getUserObjectBaseByName(const UserObjectName & name);
-
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                           unsigned int index = 0);
-  virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
-
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName &,
-                                    const std::string & vector_name) override;
-
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(
-      const std::string & name, const std::string & vector_name, bool needs_broadcast) override;
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName &,
-                                    const std::string & vector_name,
-                                    bool needs_broadcast) override;
-
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & name,
-                                     const std::string & vector_name) override;
-
-  virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueByName(const std::string & name,
-                                           const std::string & vector_name) override;
-
 protected:
   /**
    * Compute and return the value of the aux variable.
@@ -165,6 +132,30 @@ protected:
 
   /// This callback is used for AuxKernelTempls that need to perform a per-element calculation
   virtual void precalculateValue() {}
+
+  /**
+   * Retrieves the old value of the variable that this AuxKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const typename OutputTools<ComputeValueType>::VariableValue & uOld() const;
+
+  /**
+   * Retrieves the older value of the variable that this AuxKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const typename OutputTools<ComputeValueType>::VariableValue & uOlder() const;
+
+  /**
+   * Whether or not to check for repeated element sides on the sideset to which
+   * the auxkernel is restricted (if boundary restricted _and_ elemental). Setting
+   * this to false will allow an element with more than one face on the boundary
+   * to which it is restricted allow contribution to the element's value(s). This
+   * flag allows auxkernels that evaluate boundary-restricted elemental auxvariables
+   * to have more than one element face on the boundary of interest.
+   */
+  const bool & _check_boundary_restricted;
 
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
@@ -184,12 +175,6 @@ protected:
 
   /// Holds the solution at current quadrature points
   const typename OutputTools<ComputeValueType>::VariableValue & _u;
-
-  /// Holds the previous solution at the current quadrature point.
-  const typename OutputTools<ComputeValueType>::VariableValue & _u_old;
-
-  /// Holds the t-2 solution at the current quadrature point.
-  const typename OutputTools<ComputeValueType>::VariableValue & _u_older;
 
   /// Holds the the test functions
   const typename OutputTools<ComputeValueType>::VariableTestValue & _test;
@@ -231,15 +216,11 @@ protected:
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
 
+  /// Flag indicating if this aux kernel is boundary restricted
+  const bool _boundary_restricted;
+
   /// Quadrature point index
   unsigned int _qp;
-
-  /// Depend AuxKernelTempls
-  mutable std::set<std::string> _depend_vars;
-  std::set<std::string> _supplied_vars;
-
-  /// Depend UserObjects
-  std::set<UserObjectName> _depend_uo;
 
   /// number of local dofs for elemental variables
   unsigned int _n_local_dofs;
@@ -256,6 +237,11 @@ protected:
   using MooseVariableInterface<ComputeValueType>::mooseVariableBase;
 
 private:
+  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
+  void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  void
+  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override final;
+
   /**
    * Currently only used when the auxiliary variable is a finite volume variable, this helps call
    * through to the variable's \p setDofValue method. This helper is necessary because \p
@@ -264,6 +250,13 @@ private:
    * ComputeValueType is \p RealVectorValue
    */
   void setDofValueHelper(const ComputeValueType & dof_value);
+
+  /// Depend AuxKernelTempls
+  mutable std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
+
+  /// Depend UserObjects
+  mutable std::set<UserObjectName> _depend_uo;
 };
 
 template <typename ComputeValueType>
@@ -332,30 +325,4 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & n
                "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
-}
-
-template <typename ComputeValueType>
-template <typename T>
-const T &
-AuxKernelTempl<ComputeValueType>::getUserObject(const UserObjectName & name)
-{
-  _depend_uo.insert(_pars.get<UserObjectName>(name));
-  auto & uo = UserObjectInterface::getUserObject<T>(name);
-  auto indirect_dependents = uo.getDependObjects();
-  for (auto & indirect_dependent : indirect_dependents)
-    _depend_uo.insert(indirect_dependent);
-  return uo;
-}
-
-template <typename ComputeValueType>
-template <typename T>
-const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & name)
-{
-  _depend_uo.insert(name);
-  auto & uo = UserObjectInterface::getUserObjectByName<T>(name);
-  auto indirect_dependents = uo.getDependObjects();
-  for (auto & indirect_dependent : indirect_dependents)
-    _depend_uo.insert(indirect_dependent);
-  return uo;
 }

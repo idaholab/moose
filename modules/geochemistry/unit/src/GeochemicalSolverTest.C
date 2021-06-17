@@ -21,14 +21,22 @@ const PertinentGeochemicalSystem
     model_simplest(db_solver, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
 GeochemistrySpeciesSwapper swapper2(2, 1E-6);
 GeochemistrySpeciesSwapper swapper_kin(4, 1E-6);
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2 = {
-    GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm4 = {
-    GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2 = {
+    GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2 = {
+    GeochemistryUnitConverter::GeochemistryUnit::KG,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES};
+const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm4 = {
+    GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+    GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu4 = {
+    GeochemistryUnitConverter::GeochemistryUnit::KG,
+    GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES};
 GeochemistryIonicStrength is_solver(3.0, 3.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver, db_solver);
 
@@ -45,16 +53,29 @@ TEST(GeochemicalSolverTest, exception)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 3.0},
+                        cu2,
                         cm2,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 1, 1E100, 0.1, 1, {}, 3.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   1.0,
+                                   0.1,
+                                   1,
+                                   1E100,
+                                   0.1,
+                                   1,
+                                   {},
+                                   3.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -67,8 +88,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 100, 0.0, 0.1, 1, {}, 3.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   1.0,
+                                   0.1,
+                                   100,
+                                   0.0,
+                                   0.1,
+                                   1,
+                                   {},
+                                   3.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -81,8 +113,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, 1, {}, -1.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   1.0,
+                                   0.1,
+                                   100,
+                                   1E100,
+                                   0.1,
+                                   1,
+                                   {},
+                                   -1.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -95,8 +138,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, -0.1, 100, 1E100, 0.1, 1, {}, 1.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   1.0,
+                                   -0.1,
+                                   100,
+                                   1E100,
+                                   0.1,
+                                   1,
+                                   {},
+                                   1.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -108,8 +162,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, -1.0, 0.1, 100, 1E100, 0.1, 1, {}, 1.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   -1.0,
+                                   0.1,
+                                   100,
+                                   1E100,
+                                   0.1,
+                                   1,
+                                   {},
+                                   1.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -121,8 +186,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    const GeochemicalSolver solver(
-        mgd, egs, is_solver, 0.0, 0.0, 100, 1E100, 0.1, 1, {}, 1.0, 10, true);
+    const GeochemicalSolver solver(mgd.basis_species_name.size(),
+                                   mgd.kin_species_name.size(),
+                                   is_solver,
+                                   0.0,
+                                   0.0,
+                                   100,
+                                   1E100,
+                                   0.1,
+                                   1,
+                                   {},
+                                   1.0,
+                                   10,
+                                   true);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -135,7 +211,19 @@ TEST(GeochemicalSolverTest, exception)
 
   try
   {
-    GeochemicalSolver solver(mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, 1, {}, 1.0, 10, true);
+    GeochemicalSolver solver(mgd.basis_species_name.size(),
+                             mgd.kin_species_name.size(),
+                             is_solver,
+                             1.0,
+                             0.1,
+                             100,
+                             1E100,
+                             0.1,
+                             1,
+                             {},
+                             1.0,
+                             10,
+                             true);
     solver.setMaxInitialResidual(0.0);
     FAIL() << "Missing expected exception.";
   }
@@ -161,14 +249,27 @@ TEST(GeochemicalSolverTest, solve1)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 1},
+                        cu2,
                         cm2,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 10.0, 0.1, 1, {}, 3.0, 0, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           10.0,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           false);
 
   std::stringstream ss;
   unsigned tot_iter;
@@ -176,10 +277,10 @@ TEST(GeochemicalSolverTest, solve1)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check that equilibrium molality is set correctly
@@ -233,18 +334,30 @@ TEST(GeochemicalSolverTest, solve2)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -265,16 +378,18 @@ TEST(GeochemicalSolverTest, solve2)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver
-  GeochemicalSolver solver(mgd,
-                           egs,
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
                            is_solver,
                            1.0E-15,
                            1.0E-200,
@@ -307,18 +422,18 @@ TEST(GeochemicalSolverTest, solve2)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)11);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 0);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)0);
 
   // check that the constraints are satisfied
   for (unsigned i = 0; i < egs.getNumInBasis(); ++i)
@@ -522,18 +637,30 @@ TEST(GeochemicalSolverTest, solve3)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -554,16 +681,18 @@ TEST(GeochemicalSolverTest, solve3)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver (4 swaps are needed to solve this system)
-  GeochemicalSolver solver(mgd,
-                           egs,
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
                            is_solver,
                            1.0E-15,
                            1.0E-200,
@@ -583,16 +712,16 @@ TEST(GeochemicalSolverTest, solve3)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)11);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -738,7 +867,7 @@ TEST(GeochemicalSolverTest, solve3)
       res += nw * egs.getSolventMassAndFreeMolalityAndMineralMoles()[i];
     for (unsigned j = 0; j < mgd.eqm_species_name.size(); ++j)
       res += nw * mgd.eqm_stoichiometry(j, i) * egs.getEquilibriumMolality(j);
-    EXPECT_LE(std::abs(res), 1E-14);
+    EXPECT_LE(std::abs(res), 1E-13);
   }
   // surface potentials
   const Real prefactor = std::sqrt(GeochemistryConstants::GAS_CONSTANT *
@@ -790,7 +919,7 @@ TEST(GeochemicalSolverTest, solve3)
   }
 }
 
-/// Solve realistic case with minerals that precipitate, no redox, no sorption, and then "restore" to check it works correctly
+/// Solve realistic case with minerals that precipitate, no redox, no sorption, and then "restore" to check it works correctly, and then check copy-assignment of GeochemicalSystem works properly
 TEST(GeochemicalSolverTest, solve3_restore)
 {
   // build the model
@@ -821,18 +950,30 @@ TEST(GeochemicalSolverTest, solve3_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -853,16 +994,18 @@ TEST(GeochemicalSolverTest, solve3_restore)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver
-  GeochemicalSolver solver(mgd,
-                           egs,
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
                            is_solver,
                            1.0E-15,
                            1.0E-200,
@@ -882,11 +1025,11 @@ TEST(GeochemicalSolverTest, solve3_restore)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // retrieve the molalities, and set them into egs: this should result in no change if the
@@ -902,8 +1045,8 @@ TEST(GeochemicalSolverTest, solve3_restore)
       names, molal, com_false);
 
   // build solver with no ramping of the maximum ionic strength
-  GeochemicalSolver solver0(mgd,
-                            egs,
+  GeochemicalSolver solver0(mgd.basis_species_name.size(),
+                            mgd.kin_species_name.size(),
                             is_solver,
                             1.0E-15,
                             1.0E-200,
@@ -917,10 +1060,10 @@ TEST(GeochemicalSolverTest, solve3_restore)
                             false);
 
   // solve this: no swaps should be necessary
-  solver0.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not changed
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_EQ(abs_residual, old_residual);
 
   // Now use constraints_from_molalities = true
@@ -928,11 +1071,61 @@ TEST(GeochemicalSolverTest, solve3_restore)
   egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       names, molal, com_true);
 
-  solver0.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not increased
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
+
+  // now check the copy-assignment of GeochemicalSystem
+  const PertinentGeochemicalSystem model_dest(
+      db_full,
+      {"H2O", "H+", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)", "O2(aq)"},
+      {"Antigorite",
+       "Tremolite",
+       "Talc",
+       "Chrysotile",
+       "Sepiolite",
+       "Anthophyllite",
+       "Dolomite",
+       "Dolomite-ord",
+       "Huntite",
+       "Dolomite-dis",
+       "Magnesite",
+       "Calcite",
+       "Aragonite",
+       "Quartz"},
+      {},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd_dest = model_dest.modelGeochemicalDatabase();
+  GeochemicalSystem egs_dest(
+      mgd_dest,
+      ac_solver,
+      is_solver,
+      swapper,
+      {"H+"},
+      {"MgCO3"},
+      "Cl-",
+      {"H2O", "MgCO3", "O2(aq)", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)"},
+      {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+      cu,
+      cm,
+      25,
+      0,
+      1E-20,
+      {},
+      {},
+      {});
+
+  // change constraint meanings in egs to provide a more thorough check of the copy assignment
+  egs.closeSystem();
+  // copy assignment
+  egs_dest = egs;
+  EXPECT_EQ(egs_dest, egs);
 }
 
 /// Solve realistic case with redox disequilibrium, no minerals, no sorption
@@ -965,21 +1158,36 @@ TEST(GeochemicalSolverTest, solve4)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(14, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1015,16 +1223,29 @@ TEST(GeochemicalSolverTest, solve4)
                          0.005042E-3,
                          0.001897E-3,
                          0.01562E-3},
+                        cu,
                         cm,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
 
   // build solver
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 10, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1E-2,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           10,
+                           false);
 
   // solve
   std::stringstream ss;
@@ -1033,16 +1254,16 @@ TEST(GeochemicalSolverTest, solve4)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 14);
-  EXPECT_EQ(egs.getNumRedox(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)14);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -1279,21 +1500,36 @@ TEST(GeochemicalSolverTest, solve4_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(14, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1329,16 +1565,29 @@ TEST(GeochemicalSolverTest, solve4_restore)
                          0.005042E-3,
                          0.001897E-3,
                          0.01562E-3},
+                        cu,
                         cm,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
 
   // build solver
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 10, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1E-2,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           10,
+                           false);
 
   // solve
   std::stringstream ss;
@@ -1347,11 +1596,11 @@ TEST(GeochemicalSolverTest, solve4_restore)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // retrieve the molalities, and set them into egs: this should result in no change if the
@@ -1367,14 +1616,25 @@ TEST(GeochemicalSolverTest, solve4_restore)
       names, molal, com_false);
 
   // build solver with no ramping of the maximum ionic strength
-  GeochemicalSolver solver0(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 0, false);
+  GeochemicalSolver solver0(mgd.basis_species_name.size(),
+                            mgd.kin_species_name.size(),
+                            is_solver,
+                            1.0E-15,
+                            1.0E-200,
+                            100,
+                            1E-2,
+                            0.1,
+                            1,
+                            {},
+                            3.0,
+                            0,
+                            false);
 
-  solver0.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not changed (up to
   // precision-loss)
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
 
   // Now use constraints_from_molalities = true
@@ -1382,10 +1642,10 @@ TEST(GeochemicalSolverTest, solve4_restore)
   egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       names, molal, com_true);
 
-  solver0.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not increased
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
 }
 
@@ -1407,17 +1667,28 @@ TEST(GeochemicalSolverTest, solve5)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(10, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1428,16 +1699,29 @@ TEST(GeochemicalSolverTest, solve5)
       "Cl-",
       {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
       {1.0, 1.0E-4, 10E-3, 10E-3, 0.1E-3, 0.1E-3, 0.2E-3, 9.3573E-3, 4.6786E-5, 1.87145E-3},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1.0, 0.1, 1, {}, 3.0, 10, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1.0,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           10,
+                           false);
 
   // solve
   std::stringstream ss;
@@ -1446,16 +1730,16 @@ TEST(GeochemicalSolverTest, solve5)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 10);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 1);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)10);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)1);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -1637,7 +1921,7 @@ TEST(GeochemicalSolverTest, solve5)
   }
 }
 
-/// Repeat the realistic case with sorption and minerals, no redox, this time with a "restore"
+/// Repeat the realistic case with sorption and minerals, no redox, this time with a "restore", and then use the copy assignment operator of GeochemicalSystem to create a new geochemical system
 TEST(GeochemicalSolverTest, solve5_restore)
 {
   // build the model
@@ -1655,17 +1939,28 @@ TEST(GeochemicalSolverTest, solve5_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(10, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1676,16 +1971,29 @@ TEST(GeochemicalSolverTest, solve5_restore)
       "Cl-",
       {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
       {1.0, 1.0E-4, 10E-3, 10E-3, 0.1E-3, 0.1E-3, 0.2E-3, 9.3573E-3, 4.6786E-5, 1.87145E-3},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1.0, 0.1, 1, {}, 3.0, 0, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1.0,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           false);
 
   // solve
   std::stringstream ss;
@@ -1694,11 +2002,11 @@ TEST(GeochemicalSolverTest, solve5_restore)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // now setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles to the solution
@@ -1720,8 +2028,8 @@ TEST(GeochemicalSolverTest, solve5_restore)
   egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       names, molal, com_false);
 
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
-  EXPECT_EQ(tot_iter, 0);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, 2.0 * old_residual);
 
   // Now use constraints_from_molalities = true
@@ -1729,10 +2037,51 @@ TEST(GeochemicalSolverTest, solve5_restore)
   egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       names, molal, com_true);
 
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, 2.0 * old_residual);
+
+  // now check the copy-assignment operator of GeochemicalSystem
+
+  // build the destination model
+  const PertinentGeochemicalSystem dest_model(
+      db_ferric,
+      {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {"Fe(OH)3(ppd)"},
+      {},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase dest_mgd = dest_model.modelGeochemicalDatabase();
+
+  // build the destination equilibrium system
+  GeochemicalSystem dest_egs(
+      dest_mgd,
+      ac_solver,
+      is_solver,
+      swapper,
+      {"Fe+++"},
+      {"Fe(OH)3(ppd)"},
+      "Cl-",
+      {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
+      {2.0, 2.0E-4, 20E-3, 20E-3, 0.2E-3, 0.2E-3, 0.4E-3, 19.3573E-3, 14.6786E-5, 2.87145E-3},
+      cu,
+      cm,
+      250,
+      0,
+      1E-20,
+      {},
+      {},
+      {});
+
+  // change constraint meanings in egs to provide a more thorough check of the copy assignment
+  egs.closeSystem();
+  // copy assignment
+  dest_egs = egs;
+  EXPECT_EQ(dest_egs, egs);
 }
 
 /// Test progressively adding H+ to a system
@@ -1748,14 +2097,27 @@ TEST(GeochemicalSolverTest, solve_addH)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 1},
+                        cu2,
                         cm2,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-12, 1.0E-200, 100, 10.0, 0.1, 1, {}, 3.0, 0, false);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-12,
+                           1.0E-200,
+                           100,
+                           10.0,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           false);
 
   std::stringstream ss;
   unsigned tot_iter;
@@ -1763,10 +2125,10 @@ TEST(GeochemicalSolverTest, solve_addH)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -1786,10 +2148,10 @@ TEST(GeochemicalSolverTest, solve_addH)
 
   // add 1 mol of water
   mole_additions(0) = 1.0;
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -1801,10 +2163,10 @@ TEST(GeochemicalSolverTest, solve_addH)
   // it!
   mole_additions(0) = 0.0;
   mole_additions(1) = 1.0;
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -1844,18 +2206,30 @@ TEST(GeochemicalSolverTest, maxSwapsException)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1876,16 +2250,18 @@ TEST(GeochemicalSolverTest, maxSwapsException)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
       1E-20,
       {},
+      {},
       {});
 
   // build solver (4 swaps are needed to solve this system)
-  GeochemicalSolver solver(mgd,
-                           egs,
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
                            is_solver,
                            1.0E-15,
                            1.0E-200,
@@ -1907,7 +2283,7 @@ TEST(GeochemicalSolverTest, maxSwapsException)
     DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
     DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                       egs.getNumInBasis() + egs.getNumKinetic());
-    solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+    solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1931,15 +2307,29 @@ TEST(GeochemicalSolverTest, setRampMaxIonicStrength)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 3.0},
+                        cu2,
                         cm2,
                         25,
                         0,
                         1E-20,
                         {},
+                        {},
                         {});
-  GeochemicalSolver solver(mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, 1, {}, 3.0, 10, true);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0,
+                           0.1,
+                           100,
+                           1E100,
+                           0.1,
+                           1,
+                           {},
+                           3.0,
+                           10,
+                           true);
 
-  ASSERT_EQ(solver.getRampMaxIonicStrength(), 10);
+  ASSERT_EQ(solver.getRampMaxIonicStrength(), (unsigned)10);
   try
   {
     solver.setRampMaxIonicStrength(101);
@@ -1953,7 +2343,7 @@ TEST(GeochemicalSolverTest, setRampMaxIonicStrength)
         << "Failed with unexpected error message: " << msg;
   }
   solver.setRampMaxIonicStrength(21);
-  ASSERT_EQ(solver.getRampMaxIonicStrength(), 21);
+  ASSERT_EQ(solver.getRampMaxIonicStrength(), (unsigned)21);
 }
 
 /// Solve case that involves kinetic species with zero rates (so kinetic species should have no impact except to modify the bulk composition)
@@ -1969,6 +2359,9 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
                                          "O2(aq)",
                                          "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> ku;
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1978,14 +2371,27 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
                         1E-20,
                         {"Something", "Fe(OH)3(ppd)fake"},
-                        {1.0E-6, 2.0E-6});
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-5, 1E-16, 1, {}, 3.0, 0, true);
+                        {1.0E-6, 2.0E-6},
+                        ku);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1E-5,
+                           1E-16,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           true);
 
   std::stringstream ss;
   unsigned tot_iter;
@@ -1993,18 +2399,18 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
-  solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 2);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)2);
 
   // check that kinetic moles have not changed (kinetic rates are zero)
   for (unsigned k = 0; k < egs.getNumKinetic(); ++k)
@@ -2037,7 +2443,7 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6 + 2 * 2E-6, 1.0E-15);
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {
@@ -2090,7 +2496,7 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
       res += mgd.kin_stoichiometry(k, i) *
              egs.getKineticMoles(
                  k); // this should be the only important kinetic contribution to this test!
-    EXPECT_LE(std::abs(res), 1E-14);
+    EXPECT_LE(std::abs(res), 1E-13);
   }
 
   // check equilibrium mass balance
@@ -2139,6 +2545,9 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
   model.addKineticRate(rate_Fe);
 
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> ku;
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -2148,50 +2557,65 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
                         1E-20,
                         {"Something", "Fe(OH)3(ppd)fake"},
-                        {1.0E-6, 2.0E-6});
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-5, 1E-16, 1, {}, 3.0, 0, true);
+                        {1.0E-6, 2.0E-6},
+                        ku);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1E-5,
+                           1E-16,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           true);
+
+  const unsigned index_something = mgd.kin_species_index.at("Something");
+  const unsigned index_fe = mgd.kin_species_index.at("Fe(OH)3(ppd)fake");
 
   std::stringstream ss;
   unsigned tot_iter;
   Real abs_residual;
   DenseVector<Real> mole_additions(egs.getNumInBasis() + egs.getNumKinetic());
+  mole_additions(egs.getNumInBasis() + index_something) = 1.5E-6; // external input to "Something"
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
   // solve with a time-step size of 10.0
-  solver.solveSystem(ss, tot_iter, abs_residual, 10.0, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 10.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 2);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)2);
 
   // check activity products and log10K are ordered as calculated above
-  const unsigned index_something = mgd.kin_species_index.at("Something");
-  const unsigned index_fe = mgd.kin_species_index.at("Fe(OH)3(ppd)fake");
   EXPECT_GT(egs.log10KineticActivityProduct(index_something),
             egs.getKineticLog10K(index_something));
   EXPECT_LT(egs.log10KineticActivityProduct(index_fe), egs.getKineticLog10K(index_fe));
 
   // check that mole additions is as calculated above
-  EXPECT_EQ(mole_additions(egs.getNumInBasis() + index_something), 1.0E-6);
+  EXPECT_EQ(mole_additions(egs.getNumInBasis() + index_something), 1.5E-6 + 1.0E-6);
   EXPECT_EQ(mole_additions(egs.getNumInBasis() + index_fe), -1.0E-6);
 
   // check that kinetic moles have changed according to the constant rates
   for (unsigned k = 0; k < egs.getNumKinetic(); ++k)
     if (mgd.kin_species_name[k] == "Something")
-      EXPECT_EQ(egs.getKineticMoles(k), 2.0E-6);
+      EXPECT_NEAR(egs.getKineticMoles(k), 2.0E-6 + 1.5E-6, 1.0E-12);
     else if (mgd.kin_species_name[k] == "Fe(OH)3(ppd)fake")
       EXPECT_EQ(egs.getKineticMoles(k), 1.0E-6);
     else
@@ -2219,7 +2643,7 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6 + 2 * 2E-6, 1.0E-15);
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {
@@ -2310,6 +2734,8 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
   model.addKineticRate(rate_Something);
 
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> ku;
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -2319,14 +2745,27 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
                         1E-20,
                         {"Something"},
-                        {1.0E-6});
-  GeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-5, 1E-16, 1, {}, 3.0, 0, true);
+                        {1.0E-6},
+                        ku);
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0E-15,
+                           1.0E-200,
+                           100,
+                           1E-5,
+                           1E-16,
+                           1,
+                           {},
+                           3.0,
+                           0,
+                           true);
 
   std::stringstream ss;
   unsigned tot_iter;
@@ -2335,18 +2774,18 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
   DenseMatrix<Real> dmole_additions(egs.getNumInBasis() + egs.getNumKinetic(),
                                     egs.getNumInBasis() + egs.getNumKinetic());
   // solve with a time-step size of 1E4
-  solver.solveSystem(ss, tot_iter, abs_residual, 1.0E4, mole_additions, dmole_additions);
+  solver.solveSystem(egs, ss, tot_iter, abs_residual, 1.0E4, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 1);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)1);
 
   // check activity products and log10K are ordered as calculated above
   const unsigned index_something = 0;
@@ -2390,7 +2829,7 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6, 1E-15); // 1E-6 from Something
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {

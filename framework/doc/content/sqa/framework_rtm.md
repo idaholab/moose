@@ -1,4 +1,4 @@
-!template load file=rtm.md.template category=framework project=Framework
+!template load file=rtm.md.template project=Framework
 
 !template! item key=minimum_requirements
 !include sqa/minimum_requirements.md
@@ -37,6 +37,14 @@ can be found in the [Software Test Plan](sqa/framework_stp.md).
 
 !template-end!
 
-!template! item key=requirements-traceability-matrix
-!sqa requirements category=framework
-!template-end!
+!template item key=functional-requirements
+!sqa requirements collections=FUNCTIONAL category=framework
+
+!template item key=usability-requirements
+!sqa requirements collections=USABILITY category=framework
+
+!template item key=performance-requirements
+!sqa requirements collections=PERFORMANCE category=framework
+
+!template item key=system-interfaces-requirements
+!sqa requirements collections=SYSTEM category=framework

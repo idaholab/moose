@@ -17,6 +17,7 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 
 # Extra stuff for GTEST
 ADDITIONAL_INCLUDES := -isystem $(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_INCLUDES	:= -isystem $(MOOSE_DIR)/unit/include
 ADDITIONAL_LIBS     := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # framework

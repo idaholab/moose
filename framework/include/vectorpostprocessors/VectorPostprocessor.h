@@ -39,14 +39,14 @@ class VectorPostprocessor : public OutputInterface
 public:
   static InputParameters validParams();
 
-  VectorPostprocessor(const InputParameters & parameters);
+  VectorPostprocessor(const MooseObject * moose_object);
 
   virtual ~VectorPostprocessor() = default;
 
   /**
    * Returns the name of the VectorPostprocessor.
    */
-  std::string PPName() { return _vpp_name; }
+  std::string PPName() const { return _vpp_name; }
 
   /**
    * Return whether or not this VectorPostprocessor contains complete history
@@ -70,10 +70,10 @@ protected:
   VectorPostprocessorValue & declareVector(const std::string & vector_name);
 
   /// The name of the VectorPostprocessor
-  std::string _vpp_name;
+  const std::string _vpp_name;
 
-  /// Pointer to FEProblemBase
-  FEProblemBase * _vpp_fe_problem;
+  /// The FEProblemBase
+  FEProblemBase & _vpp_fe_problem;
 
   /// DISTRIBUTED or REPLICATED
   const MooseEnum & _parallel_type;
@@ -81,7 +81,9 @@ protected:
   friend class SamplerBase;
 
 private:
-  THREAD_ID _vpp_tid;
+  const MooseObject & _vpp_moose_object;
+
+  const THREAD_ID _vpp_tid;
 
   const bool _contains_complete_history;
 
@@ -109,10 +111,12 @@ extern const ReporterMode REPORTER_MODE_VPP_SCATTER;
  * @see VectorPostprocessorInterface
  */
 template <typename T>
-class VectorPostprocessorContext : public ReporterContext<T>
+class VectorPostprocessorContext : public ReporterGeneralContext<T>
 {
 public:
-  VectorPostprocessorContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
+  VectorPostprocessorContext(const libMesh::ParallelObject & other,
+                             const MooseObject & producer,
+                             ReporterState<T> & state);
   virtual void finalize() override;
   virtual void copyValuesBack() override;
 

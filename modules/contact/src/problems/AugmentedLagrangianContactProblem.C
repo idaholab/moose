@@ -64,7 +64,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                              const Real abstol,
                                                              const PetscInt nfuncs,
                                                              const PetscInt /*max_funcs*/,
-                                                             const PetscBool force_iteration,
                                                              const Real ref_resid,
                                                              const Real /*div_threshold*/)
 {
@@ -84,7 +83,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                           abstol,
                                                           nfuncs,
                                                           my_max_funcs,
-                                                          force_iteration,
                                                           ref_resid,
                                                           my_div_threshold);
 

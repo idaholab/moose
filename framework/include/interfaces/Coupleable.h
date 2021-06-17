@@ -96,6 +96,16 @@ public:
 
   std::set<TagID> & getFEVariableCoupleableMatrixTags() { return _fe_coupleable_matrix_tags; }
 
+  const std::set<TagID> & getFEVariableCoupleableVectorTags() const
+  {
+    return _fe_coupleable_vector_tags;
+  }
+
+  const std::set<TagID> & getFEVariableCoupleableMatrixTags() const
+  {
+    return _fe_coupleable_matrix_tags;
+  }
+
 protected:
   /**
    * A call-back function provided by the derived object for actions before coupling a variable
@@ -237,6 +247,10 @@ protected:
   virtual const VariableValue &
   coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledVectorTagValue(const std::string & var_name,
+                                                      const std::string & tag_name,
+                                                      unsigned int comp = 0) const;
+
   /**
    * Returns the values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -245,6 +259,36 @@ protected:
    */
   std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
                                                             TagID tag) const;
+
+  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
+                                                            const std::string & tag_name) const;
+
+  /**
+   * Returns gradient of a coupled variable for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  virtual const VariableGradient &
+  coupledVectorTagGradient(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+
+  virtual const VariableGradient & coupledVectorTagGradient(const std::string & var_name,
+                                                            const std::string & tag_name,
+                                                            unsigned int comp = 0) const;
+
+  /**
+   * Returns gradients for all of a coupled variable's components for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @return Vector of VariableGradient pointers for each component of \p var_name
+   */
+  std::vector<const VariableGradient *> coupledVectorTagGradients(const std::string & var_name,
+                                                                  TagID tag) const;
+
+  std::vector<const VariableGradient *>
+  coupledVectorTagGradients(const std::string & var_name, const std::string & tag_name) const;
 
   /**
    * Returns dof value of a coupled variable for a given tag
@@ -256,6 +300,10 @@ protected:
   virtual const VariableValue &
   coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledVectorTagDofValue(const std::string & var_name,
+                                                         const std::string & tag_name,
+                                                         unsigned int comp = 0) const;
+
   /**
    * Returns the dof values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -264,6 +312,9 @@ protected:
    */
   std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
                                                                TagID tag) const;
+
+  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
+                                                               const std::string & tag_name) const;
 
   /**
    * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
@@ -276,6 +327,10 @@ protected:
   virtual const VariableValue &
   coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledMatrixTagValue(const std::string & var_name,
+                                                      const std::string & tag_name,
+                                                      unsigned int comp = 0) const;
+
   /**
    * Returns the diagonal matrix values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -284,6 +339,9 @@ protected:
    */
   std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
                                                             TagID tag) const;
+
+  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
+                                                            const std::string & tag_name) const;
 
   /**
    * Returns value of a coupled vector variable
@@ -942,6 +1000,14 @@ protected:
                                                  unsigned int comp = 0) const;
 
   /**
+   * Returns DoFs in the current solution vector of all of a coupled variable's components for the
+   * local element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValues(const std::string & var_name) const;
+
+  /**
    * Returns DoFs in the old solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -951,6 +1017,14 @@ protected:
                                                     unsigned int comp = 0) const;
 
   /**
+   * Returns DoFs in the old solution vector of all of a coupled variable's components for the local
+   * element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValuesOld(const std::string & var_name) const;
+
+  /**
    * Returns DoFs in the older solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -958,6 +1032,23 @@ protected:
    */
   virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
                                                       unsigned int comp = 0) const;
+
+  /**
+   * Returns DoFs in the older solution vector of all of a coupled variable's components for the
+   * local element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValuesOlder(const std::string & var_name) const;
+
+  /**
+   * Returns DoFs in the current solution vector of a coupled array variable for the local element
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a VariableValue for the DoFs of the coupled variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDofValues(const std::string & var_name,
+                                                           unsigned int comp = 0) const;
   // coupled-dof-values-end
 
   /**
@@ -1004,6 +1095,8 @@ protected:
 
   /// The name of the object this interface is part of
   const std::string & _c_name;
+  /// The type of the object this interface is part of
+  const std::string & _c_type;
 
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;
@@ -1050,7 +1143,7 @@ protected:
       _default_vector_value;
 
   /// Will hold the default value for optional array coupled variables.
-  mutable std::map<std::string, ArrayVariableValue *> _default_array_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<ArrayVariableValue>> _default_array_value;
 
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
@@ -1060,22 +1153,22 @@ protected:
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
    */
-  VariableValue _default_value_zero;
+  mutable VariableValue _default_value_zero;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VariableGradient _default_gradient;
+  mutable VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealVectorValue> _ad_default_gradient;
+  mutable MooseArray<ADRealVectorValue> _ad_default_gradient;
 
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
-  MooseArray<ADRealTensorValue> _ad_default_vector_gradient;
+  mutable MooseArray<ADRealTensorValue> _ad_default_vector_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VariableSecond _default_second;
+  mutable VariableSecond _default_second;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealTensorValue> _ad_default_second;
+  mutable MooseArray<ADRealTensorValue> _ad_default_second;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -1103,13 +1196,13 @@ protected:
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
    */
-  VectorVariableValue _default_vector_value_zero;
+  mutable VectorVariableValue _default_vector_value_zero;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VectorVariableGradient _default_vector_gradient;
+  mutable VectorVariableGradient _default_vector_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VectorVariableCurl _default_vector_curl;
+  mutable VectorVariableCurl _default_vector_curl;
 
   /**
    * This will always be zero because the default values for optionally coupled variables is always

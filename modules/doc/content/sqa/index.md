@@ -15,26 +15,18 @@ engineers and is supported by various funding agencies including the
 [United States Department of Energy](http://energy.gov/). Development is ongoing at INL and by
 collaborators throughout the world.
 
-The software quality documents for MOOSE are listed below:
+!sqa records
 
-- [Software Test Plan (STP)](sqa/moose_stp.md)
-- [System Requirement Specification (SRS)](sqa/moose_srs.md)
-- [Requirements Traceability Matrix (RTM)](sqa/moose_rtm.md)
-- [System Design Description (SDD)](sqa/moose_sdd.md)
-- [Verification and Validation Report](sqa/moose_vvr.md)
-
-The following link(s) may also be of interest when creating documentation related to software
-quality.
-
-- [what_is_a_requirement.md]
+## Test Results and Releases
 
 MOOSE employs a continuous integration strategy using [!ac](CIVET); the testing results for
 this version of the documentation is available at the following links:
 
-+Test Results+:
-
 !civet mergeresults
 
-+Releases+: [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
+The documentation for the SQA releases can be found using the following links:
+
+- [2021-05-18](https://mooseframework.org/releases/moose/2021-05-18)
+- [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
 
 !sqa report

@@ -1,0 +1,20 @@
+[Tests]
+  design = 'syntax/Executioner/index.md'
+  [./test_nl_forced_iterations]
+    type = RunApp
+    input = 'nl_forced_its.i'
+    expect_out = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 2"
+    requirement = 'The system shall perform n non linear iterations before checking for non linear divergence'
+    issues = '#16474'
+    design = 'FEProblemSolve.md'
+  [../]
+  [./test_force_2_nl_iterations]
+    type = 'RunApp'
+    input = '2d_diffusion_test.i'
+    expect_out = 'Nonlinear solve converged due to CONVERGED_FNORM_ABS iterations 2'
+    requirement = 'MOOSE shall force the prescribed number of non linear iterations even if convergence tolerance is already satisfied.'
+    issues = '#16474'
+    design = 'FEProblemSolve.md'
+    cli_args = "-snes_converged_reason"
+  [../]
+[]

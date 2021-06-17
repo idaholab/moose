@@ -48,7 +48,7 @@
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=moles_dumped'
     expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
-    requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a non-mineral species'
+    requirement = 'An error will be thrown when trying to set dumped-moles information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -255,7 +255,7 @@
     input = 'kinetic_moles.i'
     cli_args = 'AuxKernels/the_aux/quantity=free_cm3 Outputs/file_base=kinetic_free_cm3_out Postprocessors/value_from_action/variable="free_cm3_Fe(OH)3(ppd)"'
     csvdiff = 'kinetic_free_cm3_out.csv'
-    requirement = 'It shall be possible to set an AuxVariable corresponding to free cm3 for kinetic species
+    requirement = 'It shall be possible to set an AuxVariable corresponding to free cm3 for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -263,7 +263,7 @@
     type = 'CSVDiff'
     input = 'kinetic_rate.i'
     csvdiff = 'kinetic_rate_out.csv'
-    requirement = 'It shall be possible to set an AuxVariable corresponding to the kinetic-rate for kinetic species
+    requirement = 'It shall be possible to set an AuxVariable corresponding to the kinetic-rate for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]

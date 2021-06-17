@@ -22,7 +22,7 @@ and geomechanics.
 - [Boundaries](porous_flow/boundaries.md)
 - [Point and line sources and sinks](porous_flow/sinks.md)
 - [Flow models](porous_flow/flow_models.md)
-- [Additional objects](porous_flow/additional_objects.md)
+- [Additional objects (actions, postprocessors, etc)](porous_flow/additional_objects.md)
 - [Full system documentation](porous_flow/systems.md)
 - [A to Z Index](porous_flow/contents.md)
 
@@ -34,15 +34,8 @@ and geomechanics.
 
 - [Getting started](porous_flow/getting_started_with_pf.md)
 - [PorousFlow tutorial](porous_flow/tutorial_00.md)
-- [Flow in fractures](porous_flow/flow_through_fractured_media.md)
-- [Underground mining](porous_flow/coal_mining.md)
-- [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
-- [Convective mixing](porous_flow/lava_lamp.md)
-- [Two-phase THM injection benchmark example](porous_flow/thm_example.md) and a [THMC problem](porous_flow/thmc_example.md)
-- [Tidal impacts on porepressure](porous_flow/tidal.md)
-- [Restarting from previous simulation](porous_flow/restart.md)
-- [Heterogeneous models](porous_flow/heterogeneous_models.md)
-- [QA tests](porous_flow/tests.md)
+
+!include modules/porous_flow/porous_flow_examples.md
 
 !col-end!
 
@@ -64,10 +57,9 @@ and geomechanics.
 ## Become a developer
 
 The PorousFlow module is being developed by users at national laboratories
-and universities around the world. The developers can be contacted through the
-[moose-users email list](help/contact_us.md optional=True).
+and universities around the world. Learn how to get in touch with the developers
+on the [help/contact_us.md optional=True] page.
 
 All users of PorousFlow are encouraged to assist in the development of this module. There are
 a large number of possible enhancements that can be implemented, and better documentation that could
-be contributed, so consider becoming a developer yourself. Follow the MOOSE standards for [contributing code](framework_development/contributing.md optional=True) and
-[documentation](MooseDocs/generate.md optional=True).
+be contributed, so consider becoming a developer yourself. Follow the MOOSE standards for [contributing code](framework/contributing.md).

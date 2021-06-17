@@ -14,12 +14,12 @@
 #include "NonlinearSystemBase.h"
 #include "SlepcEigenSolverConfiguration.h"
 
-#include "libmesh/transient_system.h"
 #include "libmesh/eigen_system.h"
 
 // forward declarations
 class EigenProblem;
 class KernelBase;
+class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -65,8 +65,6 @@ public:
    */
   NumericVector<Number> & residualVectorBX();
 
-  virtual void initialSetup() override;
-
   void attachSLEPcCallbacks();
 
   /**
@@ -74,7 +72,7 @@ public:
    *
    * @return The number of converged eigenvalues
    */
-  unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
+  unsigned int getNumConvergedEigenvalues() const { return _eigen_sys.get_n_converged(); };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
@@ -84,7 +82,7 @@ public:
    */
   virtual SNES getSNES() override;
 
-  TransientEigenSystem & sys() { return _transient_sys; }
+  EigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -163,40 +161,13 @@ public:
 
   virtual void turnOffJacobian() override;
 
-private:
-  /**
-   * Add the eigen tag to the right kernels
-   */
-  template <typename T>
-  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Add the precond tag to eigen kernels
-   */
-  template <typename T>
-  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Mark a variable an eigen variable if it operates on eigen kernels
-   */
-  template <typename T>
-  void markEigenVariables(MooseObjectTagWarehouse<T> & warehouse);
-
 protected:
-  NumericVector<Number> & solutionOldInternal() const override
-  {
-    return *_transient_sys.old_local_solution;
-  }
-
-  NumericVector<Number> & solutionOlderInternal() const override
-  {
-    return *_transient_sys.older_local_solution;
-  }
+  virtual void postAddResidualObject(ResidualObject & object) override;
 
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  TransientEigenSystem & _transient_sys;
+  EigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;

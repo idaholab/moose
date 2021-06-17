@@ -27,15 +27,15 @@ porosity0 = 0.1
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0 # Not doing a thermal simulation
       bulk_modulus = 2E9
       density0 = ${fluid_density}
       viscosity = 5E-4
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -45,131 +45,132 @@ porosity0 = 0.1
   fp = simple_fluid
   add_darcy_aux = false
   add_stress_aux = false
+  stabilization = none
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./pp]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [pp]
     scaling = 1E6
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = ini_pp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Functions]
-  [./ini_stress]
+  [ini_stress]
     type = ParsedFunction
     value = '-${gravity} * z * (${solid_density} - ${fluid_density}) * (1.0 - ${porosity0})'  # initial effective stress that should result from weight force
-  [../]
+  []
 
-  [./ini_pp]
+  [ini_pp]
     type = ParsedFunction
     value = '${gravity} * z * ${fluid_density} + 1E5'
-  [../]
+  []
 []
 
 [BCs]
-  [./p_top]
+  [p_top]
     type = FunctionDirichletBC
     variable = pp
     boundary = front
     function = ini_pp
-  [../]
+  []
 
-  [./x_roller]
+  [x_roller]
     type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0
-  [../]
-  [./y_roller]
+  []
+  [y_roller]
     type = DirichletBC
     variable = disp_y
     boundary = 'top bottom'
     value = 0
-  [../]
-  [./z_confined]
+  []
+  [z_confined]
     type = DirichletBC
     variable = disp_z
     boundary = 'back front'
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./pls_total_outflow_mass]
+  [pls_total_outflow_mass]
     type = PorousFlowSumQuantity
-  [../]
+  []
 
   # Cohesion
-  [./mc_coh]
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 6.0E6
-  [../]
+  []
 
   # Friction angle
-  [./mc_phi]
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 35.0
     convert_to_radians = true
-  [../]
+  []
 
   # Dilation angle
-  [./mc_psi]
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 2
     convert_to_radians = true
-  [../]
+  []
 
   # Drucker-Prager objects
-  [./dp]
+  [dp]
     type = TensorMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = mc_phi
     mc_dilation_angle = mc_psi
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-6
-  [../]
+  []
 
   # Tensile strength
-  [./tens]
+  [tens]
     type = TensorMechanicsHardeningConstant
     value = 3.0E6
-  [../]
+  []
 
   # Compressive strength (cap on yield envelope)
-  [./compr_all]
+  [compr_all]
     type = TensorMechanicsHardeningConstant
     value = 1E10
-  [../]
+  []
 []
 
 [Materials]
-  [./strain]
+  [strain]
     type = ComputeIncrementalSmallStrain
     eigenstrain_names = eigenstrain_all
-  [../]
+  []
 
-  [./eigenstrain_all]
+  [eigenstrain_all]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = 'ini_stress 0 0  0 ini_stress 0  0 0 ini_stress'
     eigenstrain_name = eigenstrain_all
-  [../]
+  []
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 3.3333E9
     shear_modulus = 2.5E9
-  [../]
+  []
 
-  [./dp_mat]
+  [dp_mat]
     type = CappedDruckerPragerStressUpdate
     DP_model = dp
     tensile_strength = tens
@@ -177,38 +178,38 @@ porosity0 = 0.1
     smoothing_tol = 1E5
     yield_function_tol = 1E-3
     tip_smoother = 0
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = dp_mat
-  [../]
+  []
 
   # Permeability
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
-  [../]
+  []
 
   # Porosity
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = ${porosity0}
     biot_coefficient = 1.0
     solid_bulk = 1.0 # Required but irrelevant when biot_coefficient is unity
     mechanical = true
     fluid = true
-  [../]
+  []
 
   # Density of saturated rock
-  [./density]
+  [density]
     type = PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
     rho_s = ${solid_density}
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./pls]
+  [pls]
     type = PorousFlowPolyLineSink
     variable = pp
     SumQuantityUO = pls_total_outflow_mass
@@ -217,14 +218,14 @@ porosity0 = 0.1
     fluid_phase = 0
     p_or_t_vals = '0 1E7'
     fluxes = '-1.59 -1.59'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -10,6 +10,18 @@
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#11640'
   [../]
+  [./annular_mesh_generator_negative_growth]
+    type = 'Exodiff'
+    input = 'annular_mesh_generator_negative_growth.i'
+    cli_args = '--mesh-only'
+    exodiff = 'annular_mesh_generator_negative_growth_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the capability of generating a mesh based upon an annular geometry '
+                  'with a negative growth ratio.'
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#16699'
+  [../]
   [./annular_mesh_generator_deprecated]
     type = 'Exodiff'
     input = 'annular_mesh_generator_deprecated.i'

@@ -27,14 +27,12 @@ public:
   virtual void initialSetup() override;
   virtual void execute() override;
 
-  virtual const GeochemicalSystem & getGeochemicalSystem(const Point & point) const override;
-  virtual const std::stringstream & getSolverOutput(const Point & point) const override;
-  virtual unsigned getSolverIterations(const Point & point) const override;
-  virtual Real getSolverResidual(const Point & point) const override;
-  virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
-  virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const override;
-  virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const override;
-  virtual Real getMolesDumped(unsigned node_id, const std::string & species) const override;
+  virtual const GeochemicalSystem & getGeochemicalSystem(dof_id_type node_id) const override;
+  virtual const std::stringstream & getSolverOutput(dof_id_type node_id) const override;
+  virtual unsigned getSolverIterations(dof_id_type node_id) const override;
+  virtual Real getSolverResidual(dof_id_type node_id) const override;
+  virtual const DenseVector<Real> & getMoleAdditions(dof_id_type node_id) const override;
+  virtual Real getMolesDumped(dof_id_type node_id, const std::string & species) const override;
 
 protected:
   const Real _temperature;

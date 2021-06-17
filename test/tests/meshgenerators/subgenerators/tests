@@ -1,0 +1,16 @@
+[Tests]
+  [stitched_subgenerators]
+    design = 'meshgenerators/MeshGenerator.md'
+    issues = '#17184'
+    requirement = "The system mesh generation capability shall be
+                   extensible to allow composition of existing mesh generators."
+
+    type = 'Exodiff'
+    input = 'stitched_subgenerators.i'
+    cli_args = '--mesh-only'
+    exodiff = 'stitched_subgenerators_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    allow_test_objects = true
+  []
+[]

@@ -13,63 +13,63 @@
 []
 
 [Variables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [ICs]
-  [./tinit]
+  [tinit]
     type = FunctionIC
     function = '100*x'
     variable = temp
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'temp'
     number_fluid_phases = 0
     number_fluid_components = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 2.2
     density = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_heat]
+  [total_heat]
     type = PorousFlowHeatEnergy
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1 1 10000'
-  [../]
+  []
 []
 
 [Executioner]

@@ -167,8 +167,8 @@ It is divided into three pieces, each implemented in their own kernel, as shown 
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | | | [`TimeDerivative`](/TimeDerivative.md) |
-$\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | | [`ACInterface`](/ACInterface,md) |
+$\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
+$\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | - | [`ACInterface`](/ACInterface.md) |
 $L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)$ | $\eta_j$ | $L$ | $\frac{\partial f_{loc} }{\partial \eta_j}, \frac{\partial E_d }{\partial \eta_j}$ | [`AllenCahn`](/AllenCahn.md) |
 
 The residual for the direct solution of the Cahn-Hilliard equation (without boundary terms) is
@@ -179,8 +179,8 @@ The residual for the direct solution of the Cahn-Hilliard equation (without boun
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $c_i$ | | | [`TimeDerivative`](/TimeDerivative.md) |
-$\left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right)$ | $c_i$ | $\kappa_i$, $M_i$, $\nabla M_i$ | | [`CHInterface`](/CHInterface.md) |
+$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $c_i$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
+$\left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right)$ | $c_i$ | $\kappa_i$, $M_i$, $\nabla M_i$ | - | [`CHInterface`](/CHInterface.md) |
 $\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right),\nabla \psi \right)$ | $c_i$ | $M_i$ | $\frac{\partial^2 f_{loc} }{\partial c_i^2}$, $\frac{\partial^2 E_d }{\partial c_i^2}$ | [`CahnHilliard`](/CahnHilliard.md) |
 
 In the split form of the Cahn-Hilliard solution, the two residual equations are
@@ -193,16 +193,16 @@ In the split form of the Cahn-Hilliard solution, the two residual equations are
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-| $\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu$ | | | [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) |
-|$\left( M_i  \nabla \mu, \nabla \psi_m \right)$ | $\mu$ | $M_i$ | | [`SplitCHWRes`](/SplitCHWRes.md) |
-| $\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
+$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu$ | - | - | [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) |
+$\left( M_i  \nabla \mu, \nabla \psi_m \right)$ | $\mu$ | $M_i$ | - | [`SplitCHWRes`](/SplitCHWRes.md) |
+$\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
 
 ## See also
 
-- [Phase Field FAQ](FAQ) - Frequently asked questions for MOOSE phase-field models.
+- [Phase Field FAQ](FAQ.md) - Frequently asked questions for MOOSE phase-field models.
 - [Actions](phase_field/Actions.md) - Simplify the setup of of the phase field equations using MOOSE actions
-- [Free Energy Materials](FunctionMaterials/FreeEnergy) - The key component in the modular free energy phase field modeling approach. This page lists the available function materials and explains how to define a free energy function and combine multiple free energy contributions (including elastic energy) into a total free energy.
-- [Function Material Kernels](FunctionMaterialKernels) - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
-- [ExpressionBuilder](ExpressionBuilder) - Use automatic differentiation with Free energies defined in the C++ code.
-- [Multi Phase Models](MultiPhaseModels) - Combine multiple single phase free energies into multiphase field models using these tools.
-- Free energies can also be combined with the deformation energy calculated using the Tensor Mechanics module.
+- [Free Energy Materials](FunctionMaterials/FreeEnergy.md) - The key component in the modular free energy phase field modeling approach. This page lists the available function materials and explains how to define a free energy function and combine multiple free energy contributions (including elastic energy) into a total free energy.
+- [Function Material Kernels](FunctionMaterialKernels.md) - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
+- [ExpressionBuilder](FunctionMaterials/ExpressionBuilder.md) - Use automatic differentiation with Free energies defined in the C++ code.
+- [Multi-Phase Models](MultiPhase/WBM.md) - Combine multiple single phase free energies into multiphase field models using these tools.
+- [Mechanics Coupling](Mechanics_Coupling.md) - Free energies can also be combined with the deformation energy calculated using the Tensor Mechanics module.

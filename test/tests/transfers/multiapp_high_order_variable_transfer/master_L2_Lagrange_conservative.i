@@ -54,7 +54,6 @@
   [./from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = power_density
-    execute_on = 'Nonlinear TIMESTEP_END'
   [../]
 []
 

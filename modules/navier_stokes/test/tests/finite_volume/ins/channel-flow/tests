@@ -1,0 +1,129 @@
+[Tests]
+  issues = '#15640'
+  design = 'navier_stokes/fv.md'
+  [1d-rc]
+    type = 'Exodiff'
+    input = 1d-rc.i
+    exodiff = 1d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a 1D channel; specifically the tangential velocity shall have a uniform value of unity and the pressure shall not change.'
+    ad_indexing_type = 'global'
+  []
+  [free-slip]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = 2d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
+  []
+  [no-slip]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip.i
+    exodiff = 2d-rc-no-slip_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+  [scalar-transport]
+    type = 'Exodiff'
+    input = 2d-scalar-transport.i
+    exodiff = 2d-scalar-transport_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to transport arbitrary scalar field variables in a fluid flow field.'
+    ad_indexing_type = 'global'
+    design = 'INSFVScalarFieldAdvection.md'
+    issues = '#16732'
+  []
+  [momentum-outflow-bcs]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip-outflow-bcs.i
+    exodiff = 2d-rc-no-slip-outflow-bcs_out.e
+    requirement = 'The system shall be able to use flux boundary conditions for the momentum and match results produced by using flux kernels.'
+    design = 'INSFVMomentumAdvectionOutflowBC.md'
+    issues = '#16854'
+    ad_indexing_type = 'global'
+    abs_zero = 2e-9
+  []
+  [extrapolated-outlet-pressure]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip-extrapolated-outlet-pressure.i
+    exodiff = 2d-rc-no-slip-extrapolated-outlet-pressure_out.e
+    requirement = 'The system shall be able to extrapolate a pressure value at a fully developed outflow boundary and use a mean pressure approach to eliminate the nullspace for the pressure.'
+    design = 'INSFVMassAdvectionOutflowBC.md'
+    issues = '#16854'
+    ad_indexing_type = 'global'
+    abs_zero = 6e-9
+    cli_args = '-pc_type lu -sub_pc_factor_shift_type NONZERO'
+  []
+  [mixing-length]
+    type = 'Exodiff'
+    input = 2d-mixing-length.i
+    exodiff = 2d-mixing-length_out.e
+    requirement = 'The system shall be able to model the effect of Reynolds-averaged parameters on the momentum and passive scalar advection equations using a mixing length model'
+    ad_indexing_type = 'global'
+    design = 'navier_stokes/rans_theory.md'
+    issues = '#16794 #16937'
+    mesh_mode = REPLICATED
+  []
+  [linear-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction_out.e
+    requirement = 'The system shall be able to model linear volumetric friction in a channel.'
+    issues = '#16872'
+    ad_indexing_type = 'global'
+    design = 'NSFVMomentumFriction.md'
+  []
+  [quadratic-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction-quad_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel.'
+    issues = '#16872'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear v_friction_linear'"
+    design = 'NSFVMomentumFriction.md'
+  []
+  [ambient-convection]
+    type = 'Exodiff'
+    input = 2d-rc-ambient-convection.i
+    exodiff = 2d-rc-ambient-convection_out.e
+    requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
+    issues = '#16948'
+    ad_indexing_type = 'global'
+    design = 'NSFVEnergyAmbientConvection.md'
+  []
+  [triangles]
+    requirement = 'The system shall be able to run incompressible Navier-Stokes channel-flow simulations with'
+    issues = '#16822'
+    design = 'MooseVariableFV.md'
+    [tris]
+      type = 'Exodiff'
+      input = 2d-rc-no-slip.i
+      exodiff = 2d-rc-no-slip-tris.e
+      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris'
+      ad_indexing_type = 'global'
+      detail = 'two-dimensional triangular elements'
+    []
+    [tets]
+      type = 'Exodiff'
+      input = 3d-rc-no-slip.i
+      exodiff = 3d-rc-no-slip_out.e
+      ad_indexing_type = 'global'
+      detail = 'three-dimensional tetrahedral elements'
+      mumps = true
+      heavy = true
+    []
+  []
+  [3d-rc]
+    type = 'Exodiff'
+    input = 3d-rc.i
+    exodiff = 3d-rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a 3D square channel; specifically the tangential velocity shall have a uniform value of unity and the pressure shall not change.'
+    ad_indexing_type = 'global'
+  []
+[]

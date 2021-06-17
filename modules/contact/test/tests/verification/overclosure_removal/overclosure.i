@@ -201,8 +201,6 @@
 [Contact]
   [./leftright]
     secondary = 4
-    disp_y = disp_y
-    disp_x = disp_x
     primary = 3
     model = frictionless
     formulation = penalty

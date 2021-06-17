@@ -1,21 +1,23 @@
 Content:
     - framework/doc/content
     - modules/heat_conduction/doc/content
+    - modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
 Extensions:
     MooseDocs.extensions.navigation:
-        name: MOOSE Functional Expansion Tools Module
+        name: MOOSE Heat Conduction Module
         repo: https://github.com/idaholab/moose
-        home: /modules/functional_expansion_tools
+        home: /modules/heat_conduction
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/heat_conduction
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include
             - modules/heat_conduction/include
+            - modules/ray_tracing/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -24,6 +26,8 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include modules/heat_conduction/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
             heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml

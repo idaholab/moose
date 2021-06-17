@@ -2,17 +2,16 @@
   design = 'ErrorFractionMarker.md'
   issues = '#1301'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'error_fraction_marker_test.i'
     exodiff = 'error_fraction_marker_test_out.e'
     scale_refine = 2
 
     requirement = "The system shall include a means for setting mesh refinement flags based on percent of error for a sorted vector of error values computed for each finite element."
-  [../]
+  []
 
-
-  [./no_clear]
+  [no_clear]
     type = 'Exodiff'
     input = 'error_fraction_marker_no_clear_test.i'
     exodiff = 'error_fraction_marker_no_clear_test_out.e-s003'
@@ -20,5 +19,12 @@
 
     issues = '#9914'
     requirement = "The system shall include the ability to use the same error extremes during all calculations of error fraction values during mesh adaptivity."
-  [../]
+  []
+  [fv]
+    type = 'Exodiff'
+    input = 'error_fraction_marker_fv.i'
+    exodiff = 'error_fraction_marker_fv_out.e'
+    issues = '#16069'
+    requirement = "The system shall include a means for setting mesh refinement flags based on percent of error for a sorted vector of error values computed for each finite element using FV variables"
+  []
 []

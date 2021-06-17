@@ -21,9 +21,6 @@ def make_extension(**kwargs):
 
 Float = tokens.newToken('Float', img=False, bottom=False, command='figure')
 FloatCaption = tokens.newToken('FloatCaption', key='', prefix='', number='?')
-ModalLink = tokens.newToken('ModalLink', bookmark=True, bottom=False, close=True)
-ModalLinkTitle = tokens.newToken('ModalLinkTitle')
-ModalLinkContent = tokens.newToken('ModalLinkContent')
 
 def create_float(parent, extension, reader, page, settings, bottom=False, img=False,
                  token_type=Float, **kwargs):
@@ -77,35 +74,6 @@ def _add_caption(parent, extension, reader, page, settings):
         reader.tokenize(caption, cap, page, MarkdownReader.INLINE)
     return caption, prefix
 
-def create_modal(parent, title=None, content=None, **kwargs):
-    """
-    Create the necessary Modal tokens for creating modal windows with materialize.
-    """
-    modal = ModalLink(parent.root, **kwargs)
-    if isinstance(title, str):
-        ModalLinkTitle(modal, string=title)
-    elif isinstance(title, tokens.Token):
-        title.parent = ModalLinkTitle(modal)
-
-    if isinstance(content, str):
-        ModalLinkContent(modal, string=content)
-    elif isinstance(content, tokens.Token):
-        content.parent = ModalLinkContent(modal)
-
-    return parent
-
-def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
-    """
-    Create the necessary tokens to create a link to a modal window with materialize.
-    """
-    kwargs.setdefault('bookmark', str(uuid.uuid4()))
-    link = core.Link(parent,
-                     url='#{}'.format(kwargs['bookmark']),
-                     class_='modal-trigger',
-                     string=string)
-    create_modal(parent, title, content, **kwargs)
-    return link
-
 class FloatExtension(Extension):
     """
     Provides ability to add caption float elements (e.g., figures, table, etc.). This is only a
@@ -115,16 +83,13 @@ class FloatExtension(Extension):
     def extend(self, reader, renderer):
         renderer.add('Float', RenderFloat())
         renderer.add('FloatCaption', RenderFloatCaption())
-        renderer.add('ModalLink', RenderModalLink())
-        renderer.add('ModalLinkTitle', RenderModalLinkTitle())
-        renderer.add('ModalLinkContent', RenderModalLinkContent())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('caption', labelsep='period')
 
     def postTokenize(self, page, ast):
         """Set float number for each counter."""
-        counts = page.get('counts', collections.defaultdict(int))
+        counts = collections.defaultdict(int)
         for node in moosetree.iterate(ast, lambda n: n.name == 'FloatCaption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
@@ -201,45 +166,3 @@ class RenderFloatCaption(components.RenderComponent):
         if token['key']:
             latex.Command(caption, 'label', string=token['key'], escape=True)
         return caption
-
-class RenderModalLink(core.RenderLink):
-
-    def createLatex(self, parent, token, page):
-        return None
-
-    def createHTML(self, parent, token, page):
-        return None
-
-    def createMaterialize(self, parent, token, page):
-
-        cls = "modal bottom-sheet" if token['bottom'] else "modal"
-        modal = html.Tag(parent, 'div', class_=cls, id_=token['bookmark'])
-        modal.addClass('moose-modal')
-        modal_content = html.Tag(modal, 'div', class_="modal-content")
-
-        if token['close']:
-            footer = html.Tag(modal, 'div', class_='modal-footer')
-            html.Tag(footer, 'a', class_='modal-close btn-flat', string='Close')
-        return modal_content
-
-class RenderModalLinkTitle(components.RenderComponent):
-
-    def createHTML(self, parent, token, page):
-        return None
-
-    def createMaterialize(self, parent, token, page):
-        return html.Tag(parent, 'h4')
-
-    def createLatex(self, parent, token, page):
-        return None
-
-class RenderModalLinkContent(components.RenderComponent):
-
-    def createHTML(self, parent, token, page):
-        return None
-
-    def createMaterialize(self, parent, token, page):
-        return parent
-
-    def createLatex(self, parent, token, page):
-        return None

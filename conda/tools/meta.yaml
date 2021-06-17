@@ -1,25 +1,26 @@
 {% set build = 0 %}
-{% set version = "2020.04.13" %}
-
-{% set sha256 = "3a12dc808c116f6593f7c95519ed2410b3e61bde9c3b426a58c07c7f6a6dd4c2" %}
+{% set version = "2021.01.06" %}
 
 package:
   name: moose-tools
   version: {{ version }}
 
 source:
-  url: https://mooseframework.org/source_packages/moose-python-deps.tar.gz
-  sha256: {{ sha256 }}
+  path: ../tools
 
 build:
   number: {{ build }}
-  skip: true                 # [win]
+  skip: True # [not linux]
+  noarch: python
 
 requirements:
-  build:
-    - python {{ python }}
-    - vtk {{ vtk }}
+  host:
+    - python >=3.6,<3.8
+    - vtk 8.2.0
+
   run:
+    - python >=3.6,<3.8
+    - vtk 8.2.0
     - numpy
     - pyqt
     - matplotlib
@@ -32,15 +33,26 @@ requirements:
     - mock
     - lxml
     - scikit-image
-    - vtk {{ vtk }}
     - pylatexenc
     - jinja2
     - mako
-    - python {{ python }}
 
 test:
-  commands:
-    - test -f $PREFIX/share/moose-tools
+  imports:
+    - numpy
+    - PyQt5
+    - matplotlib
+    - pandas
+    - livereload
+    - yaml
+    - bs4
+    - pybtex
+    - mock
+    - lxml
+    - skimage
+    - vtk
+    - pylatexenc
+    - jinja2
 
 about:
   home: https://mooseframework.org/

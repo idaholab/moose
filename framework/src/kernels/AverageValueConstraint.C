@@ -36,8 +36,6 @@ AverageValueConstraint::AverageValueConstraint(const InputParameters & parameter
 {
 }
 
-AverageValueConstraint::~AverageValueConstraint() {}
-
 void
 AverageValueConstraint::reinit()
 {
@@ -79,12 +77,12 @@ AverageValueConstraint::computeQpJacobian()
 }
 
 void
-AverageValueConstraint::computeOffDiagJacobian(unsigned int /*jvar*/)
+AverageValueConstraint::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
 }
 
 Real
-AverageValueConstraint::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+AverageValueConstraint::computeQpOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
   // The off-diagonal contribution for this ScalarKernel (derivative
   // wrt the "primal" field variable) is not _actually_ zero, but we

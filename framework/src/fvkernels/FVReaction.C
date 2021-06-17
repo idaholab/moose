@@ -16,13 +16,17 @@ FVReaction::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Simple consuming reaction term");
+  params.addParam<Real>("rate", 1.0, "Relative amount consumed per unit time.");
   return params;
 }
 
-FVReaction::FVReaction(const InputParameters & parameters) : FVElementalKernel(parameters) {}
+FVReaction::FVReaction(const InputParameters & parameters)
+  : FVElementalKernel(parameters), _rate(getParam<Real>("rate"))
+{
+}
 
 ADReal
 FVReaction::computeQpResidual()
 {
-  return _u[_qp];
+  return _rate * _u[_qp];
 }

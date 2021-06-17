@@ -17,17 +17,19 @@
 #include "SubProblem.h"
 
 ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
-  : _sc_parameters(moose_object->parameters()),
-    _sc_name(_sc_parameters.get<std::string>("_object_name")),
-    _sc_fe_problem(*_sc_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit")
-                        ? _sc_parameters.get<bool>("implicit")
-                        : true),
-    _coupleable_params(_sc_parameters),
-    _sc_tid(_sc_parameters.isParamValid("_tid") ? _sc_parameters.get<THREAD_ID>("_tid") : 0),
+  : _sc_fe_problem(
+        *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _sc_tid(moose_object->parameters().isParamValid("_tid")
+                ? moose_object->parameters().get<THREAD_ID>("_tid")
+                : 0),
     _real_zero(_sc_fe_problem._real_zero[_sc_tid]),
     _scalar_zero(_sc_fe_problem._scalar_zero[_sc_tid]),
-    _point_zero(_sc_fe_problem._point_zero[_sc_tid])
+    _point_zero(_sc_fe_problem._point_zero[_sc_tid]),
+    _sc_parameters(moose_object->parameters()),
+    _sc_name(_sc_parameters.get<std::string>("_object_name")),
+    _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit")
+                        ? _sc_parameters.get<bool>("implicit")
+                        : true)
 {
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
@@ -64,14 +66,8 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
   }
 }
 
-const std::vector<MooseVariableScalar *> &
-ScalarCoupleable::getCoupledMooseScalarVars()
-{
-  return _coupled_moose_scalar_vars;
-}
-
 bool
-ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
+ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i) const
 {
   auto it = _coupled_scalar_vars.find(var_name);
   if (it != _coupled_scalar_vars.end())
@@ -79,7 +75,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
   else
   {
     // Make sure the user originally requested this value in the InputParameter syntax
-    if (!_coupleable_params.hasCoupledValue(var_name))
+    if (!_sc_parameters.hasCoupledValue(var_name))
       mooseError(_sc_name,
                  ": The coupled scalar variable \"",
                  var_name,
@@ -92,14 +88,14 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
 }
 
 unsigned int
-ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   return getScalarVar(var_name, comp)->number();
 }
 
 Order
-ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
@@ -108,39 +104,39 @@ ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int 
   return getScalarVar(var_name, comp)->order();
 }
 
-VariableValue *
-ScalarCoupleable::getDefaultValue(const std::string & var_name)
+const VariableValue *
+ScalarCoupleable::getDefaultValue(const std::string & var_name) const
 {
   auto default_value_it = _default_value.find(var_name);
   if (default_value_it == _default_value.end())
   {
-    auto value = libmesh_make_unique<VariableValue>(
-        _sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
+    auto value = libmesh_make_unique<VariableValue>(_sc_fe_problem.getMaxScalarOrder(),
+                                                    _sc_parameters.defaultCoupledValue(var_name));
     default_value_it = _default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
   return default_value_it->second.get();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return (_sc_is_implicit) ? var->sln() : var->slnOld();
+  auto var = getScalarVar(var_name, comp);
+  return _sc_is_implicit ? var->sln() : var->slnOld();
 }
 
 const ADVariableValue &
-ScalarCoupleable::adCoupledScalarValue(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::adCoupledScalarValue(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getADDefaultValue(var_name);
 
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
+  auto var = getScalarVar(var_name, comp);
 
   if (_sc_is_implicit)
     return var->adSln();
@@ -151,36 +147,38 @@ ScalarCoupleable::adCoupledScalarValue(const std::string & var_name, unsigned in
 
 template <>
 const GenericVariableValue<false> &
-ScalarCoupleable::coupledGenericScalarValue<false>(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledGenericScalarValue<false>(const std::string & var_name,
+                                                   unsigned int comp) const
 {
   return coupledScalarValue(var_name, comp);
 }
 
 template <>
 const GenericVariableValue<true> &
-ScalarCoupleable::coupledGenericScalarValue<true>(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledGenericScalarValue<true>(const std::string & var_name,
+                                                  unsigned int comp) const
 {
   return adCoupledScalarValue(var_name, comp);
 }
 
-ADVariableValue *
-ScalarCoupleable::getADDefaultValue(const std::string & var_name)
+const ADVariableValue *
+ScalarCoupleable::getADDefaultValue(const std::string & var_name) const
 {
   auto default_value_it = _dual_default_value.find(var_name);
   if (default_value_it == _dual_default_value.end())
   {
-    auto value = libmesh_make_unique<ADVariableValue>(
-        _sc_fe_problem.getMaxScalarOrder(), _coupleable_params.defaultCoupledValue(var_name));
+    auto value = libmesh_make_unique<ADVariableValue>(_sc_fe_problem.getMaxScalarOrder(),
+                                                      _sc_parameters.defaultCoupledValue(var_name));
     default_value_it = _dual_default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
   return default_value_it->second.get();
 }
 
-VariableValue &
+const VariableValue &
 ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
                                               TagID tag,
-                                              unsigned int comp)
+                                              unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
@@ -193,109 +191,101 @@ ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
                _sc_name,
                ", but a vector tag with that ID does not exist");
 
-  addScalarVariableCoupleableVectorTag(tag);
+  _sc_coupleable_vector_tags.insert(tag);
 
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->vectorTagSln(tag);
+  return getScalarVar(var_name, comp)->vectorTagSln(tag);
 }
 
-VariableValue &
+const VariableValue &
 ScalarCoupleable::coupledMatrixTagScalarValue(const std::string & var_name,
                                               TagID tag,
-                                              unsigned int comp)
+                                              unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
-  addScalarVariableCoupleableMatrixTag(tag);
+  _sc_coupleable_matrix_tags.insert(tag);
 
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->matrixTagSln(tag);
+  return getScalarVar(var_name, comp)->matrixTagSln(tag);
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name, "coupledScalarValueOld");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return (_sc_is_implicit) ? var->slnOld() : var->slnOlder();
+  auto var = getScalarVar(var_name, comp);
+  return _sc_is_implicit ? var->slnOld() : var->slnOlder();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
   validateExecutionerType(var_name, "coupledScalarValueOlder");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
+  auto var = getScalarVar(var_name, comp);
   if (_sc_is_implicit)
     return var->slnOlder();
   else
     mooseError("Older values not available for explicit schemes");
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDot");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->uDot();
+  return getScalarVar(var_name, comp)->uDot();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarDotDot(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDotDot(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDotDot");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->uDotDot();
+  return getScalarVar(var_name, comp)->uDotDot();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarDotOld(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDotOld(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDotOld");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->uDotOld();
+  return getScalarVar(var_name, comp)->uDotOld();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarDotDotOld(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDotDotOld(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDotDotOld");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->uDotDotOld();
+  return getScalarVar(var_name, comp)->uDotDotOld();
 }
-VariableValue &
-ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDotDu");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->duDotDu();
+  return getScalarVar(var_name, comp)->duDotDu();
 }
 
-VariableValue &
-ScalarCoupleable::coupledScalarDotDotDu(const std::string & var_name, unsigned int comp)
+const VariableValue &
+ScalarCoupleable::coupledScalarDotDotDu(const std::string & var_name, unsigned int comp) const
 {
   checkVar(var_name);
   validateExecutionerType(var_name, "coupledScalarDotDotDu");
-  MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->duDotDotDu();
+  return getScalarVar(var_name, comp)->duDotDotDu();
 }
 
 void
-ScalarCoupleable::checkVar(const std::string & var_name)
+ScalarCoupleable::checkVar(const std::string & var_name) const
 {
   auto it = _sc_coupled_vars.find(var_name);
   if (it != _sc_coupled_vars.end())
@@ -313,13 +303,15 @@ ScalarCoupleable::checkVar(const std::string & var_name)
   // NOTE: non-existent variables are handled in the constructor
 }
 
-MooseVariableScalar *
-ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp)
+const MooseVariableScalar *
+ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp) const
 {
-  if (_coupled_scalar_vars.find(var_name) != _coupled_scalar_vars.end())
+  const auto it = _coupled_scalar_vars.find(var_name);
+  if (it != _coupled_scalar_vars.end())
   {
-    if (comp < _coupled_scalar_vars[var_name].size())
-      return _coupled_scalar_vars[var_name][comp];
+    const auto & entry = it->second;
+    if (comp < entry.size())
+      return entry[comp];
     else
       mooseError(_sc_name, ": Trying to get a non-existent component of variable '", var_name, "'");
   }
@@ -342,7 +334,11 @@ ScalarCoupleable::validateExecutionerType(const std::string & name,
 }
 
 unsigned int
-ScalarCoupleable::coupledScalarComponents(const std::string & var_name)
+ScalarCoupleable::coupledScalarComponents(const std::string & var_name) const
 {
-  return _coupled_scalar_vars[var_name].size();
+  const auto it = _coupled_scalar_vars.find(var_name);
+  if (it != _coupled_scalar_vars.end())
+    return it->second.size();
+
+  mooseError(_sc_name, ": Trying to get a non-existent variable '", var_name, "'");
 }

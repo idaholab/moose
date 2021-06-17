@@ -39,7 +39,7 @@ RankFourTensorTempl<T>::fillMethodEnum()
 {
   return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic "
                    "symmetric_isotropic_E_nu antisymmetric_isotropic axisymmetric_rz general "
-                   "principal");
+                   "principal orthotropic");
 }
 
 template <typename T>
@@ -113,7 +113,8 @@ RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
 
 template <typename T>
 template <template <typename> class Tensor, typename T2>
-auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
+auto
+RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
     typename std::enable_if<TwoTensorMultTraits<Tensor, T2>::value,
                             RankTwoTensorTempl<decltype(T() * T2())>>::type
 {
@@ -204,7 +205,8 @@ RankFourTensorTempl<T>::operator-() const
 
 template <typename T>
 template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
+auto
+RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
     -> RankFourTensorTempl<decltype(T() * T2())>
 {
   typedef decltype(T() * T2()) ValueType;
@@ -344,7 +346,8 @@ RankFourTensorTempl<Real>::invSymm() const
         {
           if (i == j)
             mat[k == l ? i * ntens + k : i * ntens + k + nskip + l] += _vals[index];
-          else // i!=j
+          else
+            // i!=j
             mat[k == l ? (nskip + i + j) * ntens + k : (nskip + i + j) * ntens + k + nskip + l] +=
                 _vals[index]; // note the +=, which results in double-counting and is rectified
                               // below
@@ -369,7 +372,8 @@ RankFourTensorTempl<Real>::invSymm() const
           if (i == j)
             result._vals[index] =
                 k == l ? mat[i * ntens + k] : mat[i * ntens + k + nskip + l] / 2.0;
-          else // i!=j
+          else
+            // i!=j
             result._vals[index] = k == l ? mat[(nskip + i + j) * ntens + k]
                                          : mat[(nskip + i + j) * ntens + k + nskip + l] / 2.0;
           index++;
@@ -534,154 +538,12 @@ RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMe
     case principal:
       fillPrincipalFromInputVector(input);
       break;
+    case orthotropic:
+      fillGeneralOrthotropicFromInputVector(input);
+      break;
     default:
       mooseError("fillFromInputVector called with unknown fill_method of ", fill_method);
   }
-}
-
-template <typename T>
-void
-RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const std::vector<T> & input)
-{
-  mooseAssert(input.size() == 9,
-              "To use fillSymmetric9FromInputVector, your input must have size 9.");
-
-  zero();
-
-  (*this)(0, 0, 0, 0) = input[0]; // C1111
-  (*this)(1, 1, 1, 1) = input[3]; // C2222
-  (*this)(2, 2, 2, 2) = input[5]; // C3333
-
-  (*this)(0, 0, 1, 1) = input[1]; // C1122
-  (*this)(1, 1, 0, 0) = input[1];
-
-  (*this)(0, 0, 2, 2) = input[2]; // C1133
-  (*this)(2, 2, 0, 0) = input[2];
-
-  (*this)(1, 1, 2, 2) = input[4]; // C2233
-  (*this)(2, 2, 1, 1) = input[4];
-
-  (*this)(1, 2, 1, 2) = input[6]; // C2323
-  (*this)(2, 1, 2, 1) = input[6];
-  (*this)(2, 1, 1, 2) = input[6];
-  (*this)(1, 2, 2, 1) = input[6];
-
-  (*this)(0, 2, 0, 2) = input[7]; // C1313
-  (*this)(2, 0, 2, 0) = input[7];
-  (*this)(2, 0, 0, 2) = input[7];
-  (*this)(0, 2, 2, 0) = input[7];
-
-  (*this)(0, 1, 0, 1) = input[8]; // C1212
-  (*this)(1, 0, 1, 0) = input[8];
-  (*this)(1, 0, 0, 1) = input[8];
-  (*this)(0, 1, 1, 0) = input[8];
-}
-template <typename T>
-void
-RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const std::vector<T> & input)
-{
-  mooseAssert(input.size() == 21,
-              "To use fillSymmetric21FromInputVector, your input must have size 21.");
-
-  (*this)(0, 0, 0, 0) = input[0];  // C1111
-  (*this)(1, 1, 1, 1) = input[6];  // C2222
-  (*this)(2, 2, 2, 2) = input[11]; // C3333
-
-  (*this)(0, 0, 1, 1) = input[1]; // C1122
-  (*this)(1, 1, 0, 0) = input[1];
-
-  (*this)(0, 0, 2, 2) = input[2]; // C1133
-  (*this)(2, 2, 0, 0) = input[2];
-
-  (*this)(1, 1, 2, 2) = input[7]; // C2233
-  (*this)(2, 2, 1, 1) = input[7];
-
-  (*this)(0, 0, 0, 2) = input[4]; // C1113
-  (*this)(0, 0, 2, 0) = input[4];
-  (*this)(0, 2, 0, 0) = input[4];
-  (*this)(2, 0, 0, 0) = input[4];
-
-  (*this)(0, 0, 0, 1) = input[5]; // C1112
-  (*this)(0, 0, 1, 0) = input[5];
-  (*this)(0, 1, 0, 0) = input[5];
-  (*this)(1, 0, 0, 0) = input[5];
-
-  (*this)(1, 1, 1, 2) = input[8]; // C2223
-  (*this)(1, 1, 2, 1) = input[8];
-  (*this)(1, 2, 1, 1) = input[8];
-  (*this)(2, 1, 1, 1) = input[8];
-
-  (*this)(1, 1, 1, 0) = input[10];
-  (*this)(1, 1, 0, 1) = input[10];
-  (*this)(1, 0, 1, 1) = input[10];
-  (*this)(0, 1, 1, 1) = input[10]; // C2212 //flipped for filling purposes
-
-  (*this)(2, 2, 2, 1) = input[12];
-  (*this)(2, 2, 1, 2) = input[12];
-  (*this)(2, 1, 2, 2) = input[12];
-  (*this)(1, 2, 2, 2) = input[12]; // C3323 //flipped for filling purposes
-
-  (*this)(2, 2, 2, 0) = input[13];
-  (*this)(2, 2, 0, 2) = input[13];
-  (*this)(2, 0, 2, 2) = input[13];
-  (*this)(0, 2, 2, 2) = input[13]; // C3313 //flipped for filling purposes
-
-  (*this)(0, 0, 1, 2) = input[3]; // C1123
-  (*this)(0, 0, 2, 1) = input[3];
-  (*this)(1, 2, 0, 0) = input[3];
-  (*this)(2, 1, 0, 0) = input[3];
-
-  (*this)(1, 1, 0, 2) = input[9];
-  (*this)(1, 1, 2, 0) = input[9];
-  (*this)(0, 2, 1, 1) = input[9]; // C2213  //flipped for filling purposes
-  (*this)(2, 0, 1, 1) = input[9];
-
-  (*this)(2, 2, 0, 1) = input[14];
-  (*this)(2, 2, 1, 0) = input[14];
-  (*this)(0, 1, 2, 2) = input[14]; // C3312 //flipped for filling purposes
-  (*this)(1, 0, 2, 2) = input[14];
-
-  (*this)(1, 2, 1, 2) = input[15]; // C2323
-  (*this)(2, 1, 2, 1) = input[15];
-  (*this)(2, 1, 1, 2) = input[15];
-  (*this)(1, 2, 2, 1) = input[15];
-
-  (*this)(0, 2, 0, 2) = input[18]; // C1313
-  (*this)(2, 0, 2, 0) = input[18];
-  (*this)(2, 0, 0, 2) = input[18];
-  (*this)(0, 2, 2, 0) = input[18];
-
-  (*this)(0, 1, 0, 1) = input[20]; // C1212
-  (*this)(1, 0, 1, 0) = input[20];
-  (*this)(1, 0, 0, 1) = input[20];
-  (*this)(0, 1, 1, 0) = input[20];
-
-  (*this)(1, 2, 0, 2) = input[16];
-  (*this)(0, 2, 1, 2) = input[16]; // C2313 //flipped for filling purposes
-  (*this)(2, 1, 0, 2) = input[16];
-  (*this)(1, 2, 2, 0) = input[16];
-  (*this)(2, 0, 1, 2) = input[16];
-  (*this)(0, 2, 2, 1) = input[16];
-  (*this)(2, 1, 2, 0) = input[16];
-  (*this)(2, 0, 2, 1) = input[16];
-
-  (*this)(1, 2, 0, 1) = input[17];
-  (*this)(0, 1, 1, 2) = input[17]; // C2312 //flipped for filling purposes
-  (*this)(2, 1, 0, 1) = input[17];
-  (*this)(1, 2, 1, 0) = input[17];
-  (*this)(1, 0, 1, 2) = input[17];
-  (*this)(0, 1, 2, 1) = input[17];
-  (*this)(2, 1, 1, 0) = input[17];
-  (*this)(1, 0, 2, 1) = input[17];
-
-  (*this)(0, 2, 0, 1) = input[19];
-  (*this)(0, 1, 0, 2) = input[19]; // C1312 //flipped for filling purposes
-  (*this)(2, 0, 0, 1) = input[19];
-  (*this)(0, 2, 1, 0) = input[19];
-  (*this)(1, 0, 0, 2) = input[19];
-  (*this)(0, 1, 2, 0) = input[19];
-  (*this)(2, 0, 1, 0) = input[19];
-  (*this)(1, 0, 2, 0) = input[19];
 }
 
 template <typename T>
@@ -744,7 +606,7 @@ RankFourTensorTempl<T>::fillGeneralIsotropicFromInputVector(const std::vector<T>
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillGeneralIsotropic(T i0, T i1, T i2)
+RankFourTensorTempl<T>::fillGeneralIsotropic(const T & i0, const T & i1, const T & i2)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -773,7 +635,7 @@ RankFourTensorTempl<T>::fillAntisymmetricIsotropicFromInputVector(const std::vec
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillAntisymmetricIsotropic(T i0)
+RankFourTensorTempl<T>::fillAntisymmetricIsotropic(const T & i0)
 {
   fillGeneralIsotropic(0.0, 0.0, i0);
 }
@@ -789,10 +651,17 @@ RankFourTensorTempl<T>::fillSymmetricIsotropicFromInputVector(const std::vector<
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricIsotropic(T lambda, T G)
+RankFourTensorTempl<T>::fillSymmetricIsotropic(const T & lambda, const T & G)
 {
-  fillSymmetric9FromInputVector(
-      {lambda + 2.0 * G, lambda, lambda, lambda + 2.0 * G, lambda, lambda + 2.0 * G, G, G, G});
+  // clang-format off
+  fillSymmetric21FromInputVector(std::array<T,21>
+  {{lambda + 2.0 * G, lambda,           lambda,           0.0, 0.0, 0.0,
+                      lambda + 2.0 * G, lambda,           0.0, 0.0, 0.0,
+                                        lambda + 2.0 * G, 0.0, 0.0, 0.0,
+                                                            G, 0.0, 0.0,
+                                                                 G, 0.0,
+                                                                      G}});
+  // clang-format on
 }
 
 template <typename T>
@@ -810,7 +679,7 @@ RankFourTensorTempl<T>::fillSymmetricIsotropicEandNuFromInputVector(const std::v
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(T E, T nu)
+RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(const T & E, const T & nu)
 {
   // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
   const T & lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
@@ -826,17 +695,21 @@ RankFourTensorTempl<T>::fillAxisymmetricRZFromInputVector(const std::vector<T> &
   mooseAssert(input.size() == 5,
               "To use fillAxisymmetricRZFromInputVector, your input must have size 5.");
 
-  // C1111     C1122     C1133     C2222     C2233=C1133
-  fillSymmetric9FromInputVector({input[0],
-                                 input[1],
-                                 input[2],
-                                 input[0],
-                                 input[2],
-                                 // C3333     C2323     C3131=C2323   C1212
-                                 input[3],
-                                 input[4],
-                                 input[4],
-                                 (input[0] - input[1]) * 0.5});
+  // C1111  C1122     C1133       0         0         0
+  //        C2222  C2233=C1133    0         0         0
+  //                  C3333       0         0         0
+  //                            C2323       0         0
+  //                                   C3131=C2323    0
+  //                                                C1212
+  // clang-format off
+  fillSymmetric21FromInputVector(std::array<T,21>
+  {{input[0],input[1],input[2],      0.0,      0.0, 0.0,
+             input[0],input[2],      0.0,      0.0, 0.0,
+                      input[3],      0.0,      0.0, 0.0,
+                                input[4],      0.0, 0.0,
+                                          input[4], 0.0,
+                                                    (input[0] - input[1]) * 0.5}});
+  // clang-format on
 }
 
 template <typename T>
@@ -870,6 +743,86 @@ RankFourTensorTempl<T>::fillPrincipalFromInputVector(const std::vector<T> & inpu
   (*this)(2, 2, 0, 0) = input[6];
   (*this)(2, 2, 1, 1) = input[7];
   (*this)(2, 2, 2, 2) = input[8];
+}
+
+template <typename T>
+void
+RankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<T> & input)
+{
+  if (input.size() != 12)
+    mooseError("To use fillGeneralOrhotropicFromInputVector, your input must have size 12. Yours "
+               "has size ",
+               input.size());
+
+  const T & Ea = input[0];
+  const T & Eb = input[1];
+  const T & Ec = input[2];
+  const T & Gab = input[3];
+  const T & Gbc = input[4];
+  const T & Gca = input[5];
+  const T & nuba = input[6];
+  const T & nuca = input[7];
+  const T & nucb = input[8];
+  const T & nuab = input[9];
+  const T & nuac = input[10];
+  const T & nubc = input[11];
+
+  // Input must satisfy constraints.
+  bool preserve_symmetry = MooseUtils::absoluteFuzzyEqual(nuab * Eb, nuba * Ea) &&
+                           MooseUtils::absoluteFuzzyEqual(nuca * Ea, nuac * Ec) &&
+                           MooseUtils::absoluteFuzzyEqual(nubc * Ec, nucb * Eb);
+
+  if (!preserve_symmetry)
+    mooseError("Orthotropic elasticity tensor input is not consistent with symmetry requirements. "
+               "Check input for accuracy");
+
+  unsigned int ntens = N * (N + 1) / 2;
+
+  std::vector<T> mat;
+  mat.assign(ntens * ntens, 0);
+
+  T k = 1 - nuab * nuba - nubc * nucb - nuca * nuac - nuab * nubc * nuca - nuba * nucb * nuac;
+
+  bool is_positive_definite =
+      (k > 0) && (1 - nubc * nucb) > 0 && (1 - nuac * nuca) > 0 && (1 - nuab * nuba) > 0;
+  if (!is_positive_definite)
+    mooseError("Orthotropic elasticity tensor input is not positive definite. Check input for "
+               "accuracy");
+
+  mat[0] = Ea * (1 - nubc * nucb) / k;
+  mat[1] = Ea * (nubc * nuca + nuba) / k;
+  mat[2] = Ea * (nuba * nucb + nuca) / k;
+
+  mat[6] = Eb * (nuac * nucb + nuab) / k;
+  mat[7] = Eb * (1 - nuac * nuca) / k;
+  mat[8] = Eb * (nuab * nuca + nucb) / k;
+
+  mat[12] = Ec * (nuab * nubc + nuac) / k;
+  mat[13] = Ec * (nuac * nuba + nubc) / k;
+  mat[14] = Ec * (1 - nuab * nuba) / k;
+
+  mat[21] = 2 * Gab;
+  mat[28] = 2 * Gca;
+  mat[35] = 2 * Gbc;
+
+  // Switching from Voigt to fourth order tensor
+  // Copied from existing code (invSymm)
+  int nskip = N - 1;
+
+  unsigned int index = 0;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+        {
+          if (i == j)
+            (*this)._vals[index] =
+                k == l ? mat[i * ntens + k] : mat[i * ntens + k + nskip + l] / 2.0;
+          else
+            (*this)._vals[index] = k == l ? mat[(nskip + i + j) * ntens + k]
+                                          : mat[(nskip + i + j) * ntens + k + nskip + l] / 2.0;
+          index++;
+        }
 }
 
 template <typename T>

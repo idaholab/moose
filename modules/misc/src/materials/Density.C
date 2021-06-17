@@ -16,11 +16,6 @@ Density::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addCoupledVar("disp_r", "The r displacement");
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-
   params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -37,68 +32,32 @@ Density::validParams()
 
 Density::Density(const InputParameters & parameters)
   : Material(parameters),
-    _is_coupled(true),
-    _disp_r(isCoupled("displacements") ? coupledValue("displacements", 0)
-                                       : (isCoupled("disp_r") ? coupledValue("disp_r") : _zero)),
+    _is_coupled(isCoupled("displacements")),
+    _coord_system(getBlockCoordSystem()),
+    _disp_r(_is_coupled ? coupledValue("displacements", 0) : _zero),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _orig_density(getParam<Real>("density")),
+    _initial_density(getParam<Real>("density")),
+    _grad_disp(_is_coupled ? coupledGradients("displacements")
+                           : std::vector<const VariableGradient *>()),
     _density(declareProperty<Real>(_base_name + "density"))
 {
-  // new parameter scheme
-  if (isCoupled("displacements"))
-  {
-    // get coordinate system
-    _coord_system = getBlockCoordSystem();
-
-    // get coupled gradients
-    _grad_disp = coupledGradients("displacements");
-
-    // fill remaining components with zero
-    _grad_disp.resize(3, &_grad_zero);
-  }
-
-  // old deprecated parameters
-  else if (isCoupled("disp_x") || isCoupled("disp_r"))
-  {
-    // guess(!) coordinate system
-    if (isCoupled("disp_r"))
-    {
-      if (isCoupled("disp_z"))
-        _coord_system = Moose::COORD_RZ;
-      else
-        _coord_system = Moose::COORD_RSPHERICAL;
-    }
-    else
-      _coord_system = Moose::COORD_XYZ;
-
-    // couple gradients
-    _grad_disp = {
-        isCoupled("disp_x") ? &coupledGradient("disp_x")
-                            : (isCoupled("disp_r") ? &coupledGradient("disp_r") : &_grad_zero),
-        isCoupled("disp_y") ? &coupledGradient("disp_y")
-                            : (isCoupled("disp_z") ? &coupledGradient("disp_z") : &_grad_zero),
-        _coord_system != Moose::COORD_RZ && isCoupled("disp_z") ? &coupledGradient("disp_z")
-                                                                : &_grad_zero};
-  }
-
-  // no coupling
-  else
-  {
-    _is_coupled = false;
-    // TODO: We should deprecate this case and have the user use a GenericConstantMaterial for this
-  }
+  // fill remaining components with zero
+  _grad_disp.resize(3, &_grad_zero);
 }
 
 void
 Density::initQpStatefulProperties()
 {
-  _density[_qp] = _orig_density;
+  _density[_qp] = _initial_density;
 }
 
 void
 Density::computeQpProperties()
 {
-  Real density = _orig_density;
+  Real density = _initial_density;
+
+  // TODO: We should deprecate the !_is_coupled case and have the
+  // user use a GenericConstantMaterial
   if (_is_coupled)
   {
     // rho * V = rho0 * V0

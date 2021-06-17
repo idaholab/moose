@@ -1,0 +1,19 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#16177'
+  [exo]
+    type = Exodiff
+    input = test.i
+    exodiff = 'test_out.e'
+    requirement = 'The system shall give access to the locations in physical space of mortar segment element quadrature points.'
+    abs_zero = 5e-10
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = test.i
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall compute an exact Jacobian for a simulation involving the physical space location of mortar quadrature points.'
+  []
+[]

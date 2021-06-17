@@ -18,7 +18,7 @@ registerMooseAction("FluidPropertiesApp", AddFluidPropertiesInterrogatorAction, 
 registerMooseAction("FluidPropertiesApp",
                     AddFluidPropertiesInterrogatorAction,
                     "setup_executioner");
-registerMooseAction("FluidPropertiesApp", AddFluidPropertiesInterrogatorAction, "add_output");
+registerMooseAction("FluidPropertiesApp", AddFluidPropertiesInterrogatorAction, "add_fp_output");
 registerMooseAction("FluidPropertiesApp", AddFluidPropertiesInterrogatorAction, "common_output");
 registerMooseAction("FluidPropertiesApp",
                     AddFluidPropertiesInterrogatorAction,
@@ -58,6 +58,7 @@ AddFluidPropertiesInterrogatorAction::AddFluidPropertiesInterrogatorAction(Input
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   pars.addParam<ExecFlagEnum>("execute_on", exec_enum, "(Does not need to be set)");
   pars.addParam<bool>("print_perf_log", false, "(Does not need to be set)");
+  pars.addParam<bool>("print_linear_residuals", false, "(Does not need to be set)");
 }
 
 void
@@ -104,17 +105,20 @@ AddFluidPropertiesInterrogatorAction::act()
     _app.setExecutioner(std::move(executioner));
   }
   // Create a console that executes only on FINAL and does not print system info
-  else if (_current_task == "add_output")
+  else if (_current_task == "add_fp_output")
   {
-    const std::string class_name = "Console";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
-    params.set<std::string>("file_base") = _app.getOutputFileBase();
-    params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
-    params.set<MultiMooseEnum>("system_info") = "";
-    std::shared_ptr<Output> output = _factory.create<Output>(class_name, "Console", params);
     OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
-    output_warehouse.addOutput(output);
+    if (!output_warehouse.hasOutput("console"))
+    {
+      const std::string class_name = "Console";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
+      params.set<std::string>("file_base") = _app.getOutputFileBase();
+      params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
+      params.set<MultiMooseEnum>("system_info") = "";
+      std::shared_ptr<Output> output = _factory.create<Output>(class_name, "Console", params);
+      output_warehouse.addOutput(output);
+    }
   }
   else if (_current_task == "common_output")
   {

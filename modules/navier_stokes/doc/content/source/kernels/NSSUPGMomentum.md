@@ -1,3 +1,5 @@
+# NSSUPGMomentum
+
 !syntax description /Kernels/NSSUPGMomentum
 
 !syntax parameters /Kernels/NSSUPGMomentum

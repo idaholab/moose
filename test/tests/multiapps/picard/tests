@@ -68,8 +68,8 @@
   [./steady_fixed_picard_its]
     type = RunApp
     input = 'steady_picard_master.i'
-    cli_args = 'Executioner/disable_picard_residual_norm_check=true Executioner/accept_on_max_picard_iteration=true'
-    expect_out = 'Picard converged reason: REACH_MAX_ITS'
+    cli_args = 'Executioner/disable_fixed_point_residual_norm_check=true Executioner/accept_on_max_fixed_point_iteration=true'
+    expect_out = 'Fixed point convergence reason: REACH_MAX_ITS'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
@@ -87,7 +87,7 @@
     requirement = "The system shall allow custom convergence check on Picard iteration with derived executioners"
   [../]
 
-  [./steady_with_pseudo_stransient_sub]
+  [./steady_with_pseudo_transient_sub]
     type = 'Exodiff'
     input = 'pseudo_transient_picard_master.i'
     exodiff = 'pseudo_transient_picard_master_out.e pseudo_transient_picard_master_out_sub0.e'
@@ -111,10 +111,20 @@
     type = 'Exodiff'
     input = 'picard_custom_postprocessor.i'
     exodiff = 'picard_custom_diff_out.e picard_custom_diff_out_sub0.e'
-    cli_args = 'Executioner/picard_custom_pp=unorm Executioner/custom_rel_tol=1e-4 Outputs/file_base=picard_custom_diff_out'
+    cli_args = 'Executioner/custom_pp=unorm Executioner/custom_rel_tol=1e-4 Outputs/file_base=picard_custom_diff_out'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#14642'
     requirement = "The system shall allow convergence check with the convergence of a user defined postprocessor."
+  [../]
+  [./postprocessor_convergence_history]
+    type = 'RunApp'
+    input = 'picard_custom_postprocessor.i'
+    cli_args = 'Executioner/direct_pp_value=true Outputs/file_base=picard_custom_pp_history_out'
+    expect_out = '9 fixed point unorm_err'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#16940'
+    requirement = "The system shall show the Multiapp coupling convergence history of a user defined postprocessor that is used for convergence check."
   [../]
 []

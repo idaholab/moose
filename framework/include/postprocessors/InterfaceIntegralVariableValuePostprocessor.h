@@ -39,6 +39,9 @@ protected:
 
   /// the type of interface value we want to compute
   const MooseEnum _interface_value_type;
+  /// the fv variable for the neighbor variable
+  const MooseVariableFV<Real> * const _neighbor_fv_variable;
+
   /// the contribution of a qp to the integral
   virtual Real computeQpIntegral() override;
 };

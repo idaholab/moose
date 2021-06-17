@@ -25,7 +25,7 @@ ComputeFiniteStrainNOSPD::validParams()
   InputParameters params = ComputeStrainBaseNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
-      "for peridynamic correspondence model under finite strain assumptions");
+      "for peridynamic correspondence models under finite strain assumptions");
 
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrainNOSPD::decompositionType(),

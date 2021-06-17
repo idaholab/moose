@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#16584'
+  design = 'Reporters/index.md outputs/JSONOutput.md'
+
+  [declareInitialSetup]
+    requirement = "The system shall output aggregate simulation information to JSON format"
+    [initialSetup_only]
+      type = JSONDiff
+      input = declare_initial_setup.i
+      jsondiff = declare_initial_setup_out.json
+
+      detail = "when the aggregate value is declared after object construction"
+    []
+
+    [initialSetup_with_info]
+      type = JSONDiff
+      input = declare_initial_setup.i
+      jsondiff = declare_initial_setup_with_info.json
+      cli_args = "Reporters/active='initialSetup info' Outputs/file_base=declare_initial_setup_with_info"
+
+      detail = "and with other values declared at construction time."
+    []
+  []
+
+  [decalareInitialSetup_with_get]
+    requirement = "The system shall support getting a reference to an aggregate calculation before it is created."
+    issues = '#17468'
+    type = JSONDiff
+    input = declare_initial_setup_with_get.i
+    jsondiff = declare_initial_setup_with_get_out.json
+  []
+[]

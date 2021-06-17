@@ -1,10 +1,12 @@
 [Tests]
+  issues = '#4763'
+  design = 'phase_field/Nucleation/LangevinNoise.md'
+
   [./integral]
     type = 'CSVDiff'
     input = 'integral.i'
     csvdiff = 'integral.csv'
-    issues = '#4763'
-    design = '/Nucleation/conservednoise_include.md'
+
     requirement = 'A system to supply a noise field with a domain integral of zero shall be provided'
   [../]
   [./normal]
@@ -12,8 +14,7 @@
     type = 'Exodiff'
     input = 'normal.i'
     exodiff = 'normal.e'
-    issues = '#4763'
-    design = '/Nucleation/conservednoise_include.md'
+
     requirement = 'A system to supply a normal distributed noise field with a domain integral of zero shall be provided'
   [../]
   [./uniform]
@@ -21,16 +22,14 @@
     type = 'Exodiff'
     input = 'uniform.i'
     exodiff = 'uniform.e'
-    issues = '#4763'
-    design = '/Nucleation/conservednoise_include.md'
+
     requirement = 'A system to supply a uniformly distributed noise field with a domain integral of zero shall be provided'
   [../]
   [./integral_normal_masked]
     type = 'CSVDiff'
     input = 'normal_masked.i'
     csvdiff = 'normal_masked.csv'
-    issues = '#4763'
-    design = '/Nucleation/conservednoise_include.md'
+
     requirement = 'A system to supply a normal distributed noise field with an amplitude mask and a domain integral of zero shall be provided'
   [../]
 
@@ -39,8 +38,7 @@
     input = 'integral.i'
     cli_args = 'Kernels/conserved_langevin/seed=1234'
     expect_err = "This parameter has no effect in this kernel. The noise is generated in the user object"
-    issues = '#14368'
-    design = '/Nucleation/conservednoise_include.md'
+
     requirement = "The conserved noise kernel shall error out with a helpful message if a 'seed' parameter is supplied"
   [../]
 []

@@ -37,7 +37,7 @@ PFCElementEnergyIntegral::PFCElementEnergyIntegral(const InputParameters & param
     _u_dot(_var.uDot()),
     _temp(getParam<Real>("temp")) // K
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real

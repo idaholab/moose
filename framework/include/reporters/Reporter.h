@@ -9,9 +9,15 @@
 
 #pragma once
 
+// Moose includes
 #include "OutputInterface.h"
 #include "ReporterData.h"
 #include "InputParameters.h"
+
+// System includes
+#include <type_traits>
+
+// Forward declarations
 class FEProblemBase;
 
 /**
@@ -41,8 +47,9 @@ class Reporter : public OutputInterface
 {
 public:
   static InputParameters validParams();
-  Reporter(const InputParameters & parameters);
+  Reporter(const MooseObject * moose_object);
   virtual ~Reporter() = default;
+  virtual void store(nlohmann::json & json) const;
 
 protected:
   ///@{
@@ -85,17 +92,72 @@ protected:
    * a declareBroadcastValue, etc. Please refer to the ReporterData object for more information
    * on how the data system operates for Reporter values.
    */
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & param_name, Args &&... args0);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args0);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValueByName(const ReporterValueName & value_name, Args &&... args0);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args0);
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
+  T & declareValue(const std::string & param_name, Args &&... args);
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
+  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args);
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
+
+  template <typename T, typename S, typename... Args>
+  T & declareValue(const std::string & param_name, Args &&... args);
+  template <typename T, typename S, typename... Args>
+  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args);
+  template <typename T, typename S, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
+  template <typename T, typename S, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
   ///@}
 
+  /**
+   * Declare a unused value with type T.
+   *
+   * This is useful when you have a reporter that has optional values. In this case,
+   * you want to create references to all reporter values. However, because some values
+   * are optional, you need _something_ to fill into the reference. This helper will
+   * create a unused value. It also allows for the passing of arguments in the case
+   * that your value is not trivially default constructable (constructable by default
+   * without arguments).
+   */
+  template <typename T, typename... Args>
+  T & declareUnusedValue(Args &&... args);
+
 private:
+  /**
+   * Internal base struct for use in storing unused values.
+   *
+   * In order to store a vector of arbitrary unused values for declareUnusedValue(),
+   * we need some base object that is constructable without template arguments.
+   */
+  struct UnusedWrapperBase
+  {
+    /// Needed for polymorphism
+    virtual ~UnusedWrapperBase() {}
+  };
+
+  /**
+   * Internal struct for storing a unused value. This allows for the storage
+   * of arbitrarily typed objects in a single vector for use in
+   * declareUnusedValue().
+   */
+  template <typename T>
+  struct UnusedWrapper : UnusedWrapperBase
+  {
+    T value;
+  };
+
+  /**
+   * @returns The ReporterValueName associated with the parameter \p param_name.
+   *
+   * Performs error checking on if the parameter is valid.
+   */
+  const ReporterValueName & getReporterValueName(const std::string & param_name) const;
+
+  /// The MooseObject creating this Reporter
+  const MooseObject & _reporter_moose_object;
+
   /// Ref. to MooseObject params
   const InputParameters & _reporter_params;
 
@@ -107,29 +169,44 @@ private:
 
   /// Data storage
   ReporterData & _reporter_data;
+
+  /// Storage for unused values declared with declareUnusedValue().
+  std::vector<std::unique_ptr<UnusedWrapperBase>> _unused_values;
 };
 
 template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValue(const std::string & param_name, Args &&... args)
 {
-  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
-  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+  return declareValue<T, S<T>>(param_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
 {
-  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
-  return declareValueByName<T, S>(value_name, mode, args...);
+  return declareValue<T, S<T>>(param_name, mode, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValue(const std::string & param_name, Args &&... args)
+{
+  return declareValue<T, S>(param_name, REPORTER_MODE_UNSET, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
+{
+  return declareValueByName<T, S>(getReporterValueName(param_name), mode, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... args)
 {
-  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+  return declareValueByName<T, S<T>>(value_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
@@ -138,6 +215,35 @@ Reporter::declareValueByName(const ReporterValueName & value_name,
                              ReporterMode mode,
                              Args &&... args)
 {
-  ReporterName state_name(_reporter_name, value_name);
-  return _reporter_data.declareReporterValue<T, S>(state_name, mode, args...);
+  return declareValueByName<T, S<T>>(value_name, mode, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... args)
+{
+  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name,
+                             ReporterMode mode,
+                             Args &&... args)
+{
+  const ReporterName state_name(_reporter_name, value_name);
+
+  buildOutputHideVariableList({state_name.getCombinedName()});
+
+  return _reporter_data.declareReporterValue<T, S>(
+      state_name, mode, _reporter_moose_object, args...);
+}
+
+template <typename T, typename... Args>
+T &
+Reporter::declareUnusedValue(Args &&... args)
+{
+  _unused_values.emplace_back(libmesh_make_unique<UnusedWrapper<T>>(std::forward(args)...));
+  UnusedWrapper<T> * wrapper = dynamic_cast<UnusedWrapper<T> *>(_unused_values.back().get());
+  return wrapper->value;
 }

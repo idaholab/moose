@@ -76,7 +76,11 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     # Run input file and build up output
     x = []
     y = [ [] for _ in range(len(y_pp)) ]
-    for step in range(0, num_refinements):
+
+    if not isinstance(num_refinements, list):
+        num_refinements = list(range(num_refinements))
+
+    for step in num_refinements:
         a = copy.copy(cli_args)
         if rtype == SPATIAL:
             a.append('Mesh/uniform_refine={}'.format(step))

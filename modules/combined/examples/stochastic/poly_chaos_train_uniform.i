@@ -85,19 +85,19 @@
     check_multiapp_execute_on = false
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = sample
-    to_vector_postprocessor = storage
-    from_postprocessor = 'temp_center_inner  temp_center_outer  temp_end_inner  temp_end_outer
-                          dispx_center_inner dispx_center_outer dispx_end_inner dispx_end_outer
-                          dispz_inner dispz_outer'
+    stochastic_reporter = storage
+    from_reporter = 'temp_center_inner/value  temp_center_outer/value  temp_end_inner/value  temp_end_outer/value
+                     dispx_center_inner/value dispx_center_outer/value dispx_end_inner/value dispx_end_outer/value
+                     dispz_inner/value dispz_outer/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
+    type = StochasticReporter
   []
 []
 
@@ -107,80 +107,70 @@
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:temp_center_inner'
+    response = storage/data:temp_center_inner:value
   []
   [temp_center_outer]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:temp_center_outer'
+    response = storage/data:temp_center_outer:value
   []
   [temp_end_inner]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:temp_end_inner'
+    response = storage/data:temp_end_inner:value
   []
   [temp_end_outer]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:temp_end_outer'
+    response = storage/data:temp_end_outer:value
   []
   [dispx_center_inner]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispx_center_inner'
+    response = storage/data:dispx_center_inner:value
   []
   [dispx_center_outer]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispx_center_outer'
+    response = storage/data:dispx_center_outer:value
   []
   [dispx_end_inner]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispx_end_inner'
+    response = storage/data:dispx_end_inner:value
   []
   [dispx_end_outer]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispx_end_outer'
+    response = storage/data:dispx_end_outer:value
   []
   [dispz_inner]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispz_inner'
+    response = storage/data:dispz_inner:value
   []
   [dispz_outer]
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 4
     sampler = sample
-    results_vpp = storage
-    results_vector = 'data:dispz_outer'
+    response = storage/data:dispz_outer:value
   []
 []
 

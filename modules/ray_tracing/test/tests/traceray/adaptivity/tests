@@ -1,0 +1,40 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [elem_tests]
+    requirement = 'The system shall be able to trace rays in a mesh that utilizes adaptiviy with the element types '
+    [quad4]
+      type = 'CSVDiff'
+      input = 'adaptivity_2d.i'
+      cli_args = 'Mesh/gmg/elem_type=QUAD4 Outputs/file_base=adaptivity_quad4_out'
+      csvdiff = 'adaptivity_quad4_out.csv'
+      allow_test_objects = true
+      detail = 'QUAD4, '
+    []
+    [tri3]
+      type = 'CSVDiff'
+      input = 'adaptivity_2d.i'
+      csvdiff = 'adaptivity_tri3_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=TRI3 Outputs/file_base=adaptivity_tri3_out'
+      allow_test_objects = true
+      detail = 'TRI3, '
+    []
+    [hex8]
+      type = 'CSVDiff'
+      input = 'adaptivity_3d.i'
+      csvdiff = 'adaptivity_hex8_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=HEX8 Outputs/file_base=adaptivity_hex8_out'
+      allow_test_objects = true
+      detail = 'HEX8, '
+    []
+    [edge2]
+      type = 'CSVDiff'
+      input = 'adaptivity_1d.i'
+      csvdiff = 'adaptivity_edge2_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=EDGE2 Outputs/file_base=adaptivity_edge2_out'
+      allow_test_objects = true
+      detail = 'and EDGE2.'
+    []
+  []
+[]

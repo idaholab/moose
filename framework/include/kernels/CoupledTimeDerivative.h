@@ -36,4 +36,3 @@ protected:
   const VariableValue & _dv_dot;
   const unsigned int _v_var;
 };
-

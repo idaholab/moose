@@ -13,6 +13,7 @@
 #include "ScalarCoupleable.h"
 #include "NeighborMooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "InputParameters.h"
 
 /**
  * Intermediate base class that ties together all the interfaces for getting
@@ -24,6 +25,8 @@ class NeighborCoupleableMooseVariableDependencyIntermediateInterface
     public MooseVariableDependencyInterface
 {
 public:
+  static InputParameters validParams() { return emptyInputParameters(); }
+
   NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                                  bool nodal,
                                                                  bool neighbor_nodal,

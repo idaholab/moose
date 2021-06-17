@@ -51,25 +51,16 @@ public:
 #ifdef LIBMESH_HAVE_SLEPC
   virtual void init() override;
 
-  /*
-   * Prepare right petsc options
-   */
-  void prepareSolverOptions();
-
   /**
    * Eigenvalue executioner does not allow time kernels
    */
   virtual void checkIntegrity();
 
-  /**
-   *  There are two ways to output eigenvalue. "inverse" corresponds to k-eigenvalue
-   */
-  virtual void outputInverseEigenvalue(bool inverse);
-
 private:
-  void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
-
-  void clearFreeNonlinearPowerIterations();
+  /**
+   * Prepare right petsc options
+   */
+  void prepareSolverOptions();
 #endif
 
 protected:

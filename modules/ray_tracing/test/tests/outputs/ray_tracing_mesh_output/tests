@@ -1,0 +1,166 @@
+[Tests]
+  issues = '#16028 #16320'
+
+  [elem_type]
+    requirement = 'The system shall support the mesh output of traced rays on meshes of element types '
+    design = 'RayTracingMeshOutput.md'
+
+    [quad4]
+      type = 'Exodiff'
+      input = 'ray_mesh_output.i'
+      exodiff = 'quad4_rays.e'
+      cli_args = 'Outputs/rays/file_base=quad4_rays'
+
+      detail = 'QUAD4,'
+    []
+    [tri3]
+      type = 'Exodiff'
+      input = 'ray_mesh_output.i'
+      exodiff = 'tri3_rays.e'
+      cli_args = 'Mesh/gmg/elem_type=TRI3
+                  Outputs/rays/file_base=tri3_rays'
+      detail = 'TRI3,'
+    []
+    [hex8]
+      type = 'Exodiff'
+      input = 'ray_mesh_output_3d.i'
+      exodiff = 'hex8_rays.e'
+      cli_args = 'Outputs/rays/file_base=hex8_rays'
+      detail = 'HEX8, and'
+    []
+    [tet4]
+      type = 'Exodiff'
+      input = 'ray_mesh_output_3d.i'
+      exodiff = 'tet4_rays.e'
+      cli_args = 'Mesh/gmg/elem_type=tet4
+                  Outputs/rays/file_base=tet4_rays'
+      detail = 'TET4.'
+    []
+  []
+
+  [nemesis]
+    type = Exodiff
+    input = 'ray_mesh_output.i'
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner
+                Mesh/Partitioner/nx=2
+                Mesh/Partitioner/ny=2
+                Outputs/rays/type=RayTracingNemesis
+                "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                Outputs/rays/file_base=nemesis_rays'
+    exodiff = 'nemesis_rays.e.4.0 nemesis_rays.e.4.1 nemesis_rays.e.4.2 nemesis_rays.e.4.3'
+    min_parallel = 4
+    max_parallel = 4
+    recover = false
+    requirement = 'The system shall support the mesh output of traced rays using the Nemesis format.'
+    design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
+  []
+
+  [no_segments]
+    design = 'RayTracingMeshOutput.md'
+    requirement = 'The system shall support the mesh output of traced rays using the fewest segments possible to represent the trace in '
+    [exodus]
+      type = Exodiff
+      input = 'ray_mesh_output.i'
+      cli_args = 'Mesh/Partitioner/type=GridPartitioner
+                  Mesh/Partitioner/ny=3
+                  UserObjects/study/segments_on_cache_traces=false
+                  "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                  Outputs/rays/file_base=no_segments_rays'
+      exodiff = 'no_segments_rays.e'
+      min_parallel = 3
+      max_parallel = 3
+      recover = false
+      detail = 'Exodus format and'
+    []
+    [nemesis]
+      type = Exodiff
+      input = 'ray_mesh_output.i'
+      cli_args = 'Mesh/Partitioner/type=GridPartitioner
+                  Mesh/Partitioner/ny=2
+                  Outputs/rays/type=RayTracingNemesis
+                  UserObjects/study/segments_on_cache_traces=false
+                  "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                  Outputs/rays/file_base=no_segments_nemesis_rays'
+      exodiff = 'no_segments_nemesis_rays.e.2.0 no_segments_nemesis_rays.e.2.1'
+      min_parallel = 2
+      max_parallel = 2
+      recover = false
+      detail = 'in Nemesis format.'
+    []
+  []
+
+  [data]
+    requirement = 'The sytem shall support the output of ray data when outputting rays in a mesh format using'
+    design = 'RayTracingMeshOutput.md'
+    [exodus]
+      type = Exodiff
+      input = 'ray_mesh_output_data.i'
+      exodiff = 'ray_mesh_output_data_rays.e ray_mesh_output_data_rays_nodal.e'
+      detail = 'exodus and'
+    []
+    [nemesis]
+      type = Exodiff
+      input = 'ray_mesh_output_data.i'
+      cli_args = 'Mesh/Partitioner/type=GridPartitioner
+                  Mesh/Partitioner/nx=2
+                  Outputs/rays/type=RayTracingNemesis
+                  Outputs/rays_nodal/type=RayTracingNemesis'
+      exodiff = 'ray_mesh_output_data_rays.e.2.0 ray_mesh_output_data_rays.e.2.1 ray_mesh_output_data_rays_nodal.e.2.0 ray_mesh_output_data_rays_nodal.e.2.1'
+      min_parallel = 2
+      max_parallel = 2
+      recover = false
+      detail = 'nemesis formats.'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall report an error when ouputting rays in a mesh format when'
+    design = 'RayTracingMeshOutput.md'
+
+    [no_cached_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'Outputs/rays/output_data=true'
+      expect_err = "In order to output Ray data in output 'rays', the RayTracingStudy 'study' must set data_on_cache_traces = true"
+
+      detail = 'ray data is requested to be output but it is not cached,'
+    []
+    [no_cached_aux_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'Outputs/rays/output_aux_data=true'
+      expect_err = "In order to output Ray aux data in output 'rays', the RayTracingStudy 'study' must set aux_data_on_cache_traces = true"
+
+      detail = 'aux data is requested to be output but it is not cached,'
+    []
+    [data_nodal_and_non_nodal]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  Outputs/rays/output_data=true
+                  Outputs/rays/output_data_nodal=true'
+      expect_err = "Either choose output_data = true or output_data_nodal = true, not both."
+
+      detail = 'both nodal and non-nodal data is requested to be output,'
+    []
+    [nodal_no_segments]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  UserObjects/study/segments_on_cache_traces=false
+                  Outputs/rays/output_data_nodal=true'
+      expect_err = "Not supported when study segments_on_cache_traces = false"
+
+      detail = 'and when nodal data is requested to be output but segment-wise information is not cached.'
+    []
+  []
+
+  [no_segments_warning]
+    type = RunException
+    input = 'ray_mesh_output_errors.i'
+    expect_err = "No cached trace segments were found in the study 'study'."
+
+    design = 'RayTracingMeshOutput.md'
+    requirement = 'The system shall report a warning when rays are requested to be output in a mesh format but cached ray inforamtion is not found.'
+  []
+[]

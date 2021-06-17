@@ -39,19 +39,21 @@ AnnularMeshGenerator::validParams()
   params.addDeprecatedParam<Real>(
       "tmax",
       2 * M_PI,
-      "Maximum angle, measured in radians anticlockwise from x axis.  If "
-      "tmin=0 and tmax=2Pi an annular mesh is created.  "
+      "Maximum angle, measured in radians anticlockwise from x axis. If "
+      "tmin=0 and tmax=2Pi an annular mesh is created. "
       "Otherwise, only a sector of an annulus is created",
       "Use dmin instead");
   params.addParam<Real>(
       "dmin", 0.0, "Minimum degree, measured in degrees anticlockwise from x axis");
   params.addParam<Real>("dmax",
                         360.0,
-                        "Maximum angle, measured in degrees anticlockwise from x axis.  If "
-                        "dmin=0 and dmax=360 an annular mesh is created.  "
+                        "Maximum angle, measured in degrees anticlockwise from x axis. If "
+                        "dmin=0 and dmax=360 an annular mesh is created. "
                         "Otherwise, only a sector of an annulus is created");
-  params.addRangeCheckedParam<Real>(
-      "growth_r", 1.0, "growth_r>0.0", "The ratio of radial sizes of successive rings of elements");
+  params.addRangeCheckedParam<Real>("growth_r",
+                                    1.0,
+                                    "growth_r!=0.0",
+                                    "The ratio of radial sizes of successive rings of elements");
   params.addParam<SubdomainID>(
       "quad_subdomain_id", 0, "The subdomain ID given to the QUAD4 elements");
   params.addParam<SubdomainID>("tri_subdomain_id",
@@ -59,11 +61,11 @@ AnnularMeshGenerator::validParams()
                                "The subdomain ID given to the TRI3 elements "
                                "(these exist only if rmin=0, and they exist "
                                "at the center of the disc");
-  params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements.  For rmin=0: "
-                             "creates a disc mesh of QUAD4 and TRI3 elements.  Boundary sidesets "
-                             "are created at rmax and rmin, and given these names.  If dmin!=0 and "
-                             "dmax!=360, a sector of an annulus or disc is created.  In this case "
-                             "boundary sidesets are also created a dmin and dmax, and "
+  params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements. For rmin=0: "
+                             "creates a disc mesh of QUAD4 and TRI3 elements. Boundary sidesets "
+                             "are created at rmax and rmin, and given these names. If dmin!=0 and "
+                             "dmax!=360, a sector of an annulus or disc is created. In this case "
+                             "boundary sidesets are also created at dmin and dmax, and "
                              "given these names");
 
   return params;
@@ -83,7 +85,8 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
                                                                                           : false),
     _growth_r(getParam<Real>("growth_r")),
     _len(_growth_r == 1.0 ? (_rmax - _rmin) / _nr
-                          : (_rmax - _rmin) * (1.0 - _growth_r) / (1.0 - std::pow(_growth_r, _nr))),
+                          : (_rmax - _rmin) * (1.0 - std::abs(_growth_r)) /
+                                (1.0 - std::pow(std::abs(_growth_r), _nr))),
     _full_annulus(_dmin == 0.0 && _dmax == 360),
     _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
     _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
@@ -143,7 +146,12 @@ AnnularMeshGenerator::generate()
     if (layer_num == 1)
       current_r = _rmin; // account for precision loss
     else
-      current_r -= _len * std::pow(_growth_r, layer_num - 1);
+    {
+      if (_growth_r > 0)
+        current_r -= _len * std::pow(_growth_r, layer_num - 1);
+      else
+        current_r -= _len * std::pow(std::abs(_growth_r), _nr - layer_num);
+    }
 
     // add node at angle = _dmin
     nodes[node_id] = mesh->add_point(Point(current_r * std::cos(_dmin * M_PI / 180.0),

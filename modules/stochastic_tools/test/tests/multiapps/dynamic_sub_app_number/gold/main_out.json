@@ -1,0 +1,85 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "storage": {
+                    "values": [
+                        {
+                            "name": "data:center",
+                            "type": "std::vector<double>",
+                            "value": []
+                        }
+                    ]
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": {
+                "storage": {
+                    "values": [
+                        {
+                            "name": "data:center",
+                            "type": "std::vector<double>",
+                            "value": [
+                                0.8606526499348421,
+                                0.5563640671508739,
+                                0.6671560897029692,
+                                0.9289255772386809,
+                                0.7946210858567002
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "reporters": {
+                "storage": {
+                    "values": [
+                        {
+                            "name": "data:center",
+                            "type": "std::vector<double>",
+                            "value": [
+                                0.7479191065926474,
+                                0.813447922433415,
+                                0.533102496194665,
+                                0.6550691643974668,
+                                0.8797898413914109,
+                                0.5723971110046696
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "reporters": {
+                "storage": {
+                    "values": [
+                        {
+                            "name": "data:center",
+                            "type": "std::vector<double>",
+                            "value": [
+                                0.5408404542817916,
+                                0.889665333364593,
+                                0.5976630446063532,
+                                0.7760906731535501,
+                                0.7274686842616979,
+                                0.815483226648783,
+                                0.926813612580807
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 3.0,
+            "time_step": 3
+        }
+    ]
+}

@@ -50,6 +50,9 @@ PertinentGeochemicalSystem::PertinentGeochemicalSystem(
   // "secondary species" and "surface species"
   buildSecondarySpecies();
 
+  // Build minerals in the case that minerals = {"*"}
+  buildAllMinerals(minerals);
+
   // Check that everything can be expressed in terms of the basis, possibly via redox and secondary
   // species
   checkMinerals(_mineral_info);
@@ -60,6 +63,32 @@ PertinentGeochemicalSystem::PertinentGeochemicalSystem(
 
   // Populate _model
   createModel();
+}
+
+unsigned
+PertinentGeochemicalSystem::getIndexOfOriginalBasisSpecies(const std::string & name) const
+{
+  try
+  {
+    return _basis_index.at(name);
+  }
+  catch (const std::out_of_range &)
+  {
+    mooseError("species ", name, " is not in the original basis");
+  }
+  catch (...)
+  {
+    throw;
+  }
+}
+
+std::vector<std::string>
+PertinentGeochemicalSystem::originalBasisNames() const
+{
+  std::vector<std::string> names(_basis_info.size());
+  for (const auto & name_ind : _basis_index)
+    names[name_ind.second] = name_ind.first;
+  return names;
 }
 
 void
@@ -96,6 +125,8 @@ void
 PertinentGeochemicalSystem::buildMinerals(const std::vector<std::string> & minerals)
 {
   unsigned ind = 0;
+  if (minerals.size() == 1 && minerals[0] == "*")
+    return; // buildAllMinerals is called later
   for (const auto & name : minerals)
   {
     if (_mineral_index.count(name) == 1)
@@ -265,6 +296,35 @@ PertinentGeochemicalSystem::buildSecondarySpecies()
   }
 }
 
+void
+PertinentGeochemicalSystem::buildAllMinerals(const std::vector<std::string> & minerals)
+{
+  if (!(minerals.size() == 1 && minerals[0] == "*"))
+    return; // buildMinerals has done its job of building _mineral_info and _mineral_index
+  unsigned ind = 0;
+  for (const auto & name_ms : _db.getMineralSpecies(_db.mineralSpeciesNames()))
+  {
+    if (_kinetic_mineral_index.count(name_ms.first) == 1)
+      continue;
+    bool known_basis_only = true;
+    for (const auto & basis_stoi : name_ms.second.basis_species)
+    {
+      if (_basis_index.count(basis_stoi.first) == 0 &&
+          _secondary_index.count(basis_stoi.first) == 0)
+      {
+        known_basis_only = false;
+        break;
+      }
+    }
+    if (known_basis_only)
+    {
+      _mineral_index.emplace(name_ms.first, ind);
+      ind += 1;
+      _mineral_info.push_back(name_ms.second);
+    }
+  }
+}
+
 bool
 PertinentGeochemicalSystem::checkRedoxe()
 {
@@ -386,6 +446,10 @@ PertinentGeochemicalSystem::createModel()
   // initially no basis species are gases
   _model.basis_species_gas = std::vector<bool>(num_cols, false);
 
+  // initially all basis species are involved in transport (this gets modified for surface species
+  // below)
+  _model.basis_species_transported = std::vector<bool>(num_cols, true);
+
   // record the charge
   _model.basis_species_charge = std::vector<Real>(num_cols, 0.0);
   for (const auto & species : _basis_info)
@@ -452,6 +516,12 @@ PertinentGeochemicalSystem::createModel()
     _model.eqm_species_gas[_model.eqm_species_index[species.name]] = false;
   for (const auto & species : _gas_info)
     _model.eqm_species_gas[_model.eqm_species_index[species.name]] = true;
+
+  // create the eqm_species_transported vector (true for non-minerals) - gets modified below for
+  // surface species
+  _model.eqm_species_transported = std::vector<bool>(num_rows, true);
+  for (const auto & species : _mineral_info)
+    _model.eqm_species_transported[_model.eqm_species_index.at(species.name)] = false;
 
   // record the charge
   _model.eqm_species_charge =
@@ -656,6 +726,13 @@ PertinentGeochemicalSystem::createModel()
   for (const auto & species : _kinetic_surface_info)
     _model.kin_species_mineral[_model.kin_species_index[species.name]] = false;
 
+  // create the kin_species_transported vector (false for minerals and surface species)
+  _model.kin_species_transported = std::vector<bool>(num_kin, true);
+  for (const auto & species : _kinetic_mineral_info)
+    _model.kin_species_transported[_model.kin_species_index.at(species.name)] = false;
+  for (const auto & species : _kinetic_surface_info)
+    _model.kin_species_transported[_model.kin_species_index.at(species.name)] = false;
+
   // build the kin_species_charge info
   _model.kin_species_charge = std::vector<Real>(num_kin, 0.0);
   for (const auto & species : _kinetic_redox_info)
@@ -721,12 +798,18 @@ PertinentGeochemicalSystem::createModel()
       else
         all_sorbing_sites.push_back(name_frac.first);
 
-  // build the information related to surface sorption
+  // build the information related to surface sorption, and modify the species_transported vectors
   _model.surface_sorption_related.assign(num_rows, false);
   _model.surface_sorption_number.assign(num_rows, 99);
   for (const auto & name_info :
        _model.surface_complexation_info) // all minerals involved in surface complexation
   {
+    for (const auto & name_frac :
+         name_info.second.sorption_sites) // all sorption sites on the given mineral
+    {
+      const unsigned basis_index_of_sorption_site = _model.basis_species_index.at(name_frac.first);
+      _model.basis_species_transported[basis_index_of_sorption_site] = false;
+    }
     bool mineral_involved_in_eqm = false;
     for (const auto & name_frac :
          name_info.second.sorption_sites) // all sorption sites on the given mineral
@@ -757,6 +840,7 @@ PertinentGeochemicalSystem::createModel()
                        ") to have a reaction involving more than one sorbing site");
           _model.surface_sorption_related[j] = true;
           _model.surface_sorption_number[j] = num_surface_sorption;
+          _model.eqm_species_transported[j] = false;
         }
     }
   }

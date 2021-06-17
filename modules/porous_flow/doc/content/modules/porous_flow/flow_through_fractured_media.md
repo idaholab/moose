@@ -247,9 +247,9 @@ The remaining relevant input parameters are tabulated in [ParameterTable]
 
 The important parts of the mixed-dimensional input file are
 
-!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i start=[./permeability_fracture] end=[]
+!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i start=[permeability_fracture] end=[Functions]
 
-!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i start=[./poro_fracture] end=[./poro_fracture_nodal]
+!listing modules/porous_flow/examples/flow_through_fractured_media/fine_transient.i start=[poro_fracture] end=[diff1]
 
 
 ### AuxKernels

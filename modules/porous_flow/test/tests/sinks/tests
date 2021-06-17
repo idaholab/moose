@@ -160,6 +160,84 @@
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
+  [./s11]
+    type = Exodiff
+    input = s11.i
+    exodiff = s11.e
+    threading = '!pthreads'
+    cli_args = 'BCs/left_T/fluid_phase=0'
+    requirement = 'PorousFlow shall be able to inject fluid at user specified temperature.'
+    design = 'PorousFlowEnthalpySink.md'
+    issues = '#15742'
+  [../]
+  [./s11_act]
+    type = Exodiff
+    input = s11_act.i
+    exodiff = s11.e
+    prereq = 's11'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to setup fluid injection at user specified temperature using a simplified syntax.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_act_too_many_vars]
+    type = RunException
+    input = s11_act.i
+    threading = '!pthreads'
+    cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp pp1 temp"'
+    expect_err = "Number of porous flow variables in simulation is '3', but this BC can be used only with pressure and temperature."
+    requirement = 'PorousFlow shall report an error when incorrect number of variables is used when using a simplified enthalpy sink BC syntax.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_act_too_many_pressure_vars]
+    type = RunException
+    input = s11_act.i
+    threading = '!pthreads'
+    cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp temp" Modules/PorousFlow/BCs/left/porepressure_var="pp pp1"'
+    expect_err = "'porepressure_var' parameter can currently take only a single value"
+    requirement = 'PorousFlow shall report an error when more than 2 porepressure variables are specified when using a simplified BC syntax.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_overspecified_pressure]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    cli_args = 'AuxVariables/press/initial_condition=3 BCs/left_T/porepressure_var=press BCs/left_T/fluid_phase=0'
+    expect_err = "Cannot specify both pressure and pore pressure."
+    requirement = 'PorousFlow shall report an error when both external and pore pressures are specified.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_underspecified_pressure]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    expect_err = "You have to specify either 'pressure' or 'fluid_phase'."
+    requirement = 'PorousFlow shall report an error when neither external and pore pressures are specified.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_incorrect_fluid_phase]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    cli_args = "BCs/left_T/fluid_phase=2"
+    expect_err = "Specified 'fluid_phase' is larger than the number of phases available in the simulation \(1\)."
+    requirement = 'PorousFlow shall report an error when incorrect fluid phase is specified in a BC for injecting fluid at user specified temperature.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s12]
+    type = CSVDiff
+    input = s12.i
+    csvdiff = s12.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to inject fluid at user specified pressure and temperature.'
+    design = 'PorousFlowEnthalpySink.md'
+    issues = '#15742'
+  [../]
   [./injection_production_eg]
     type = 'CSVDiff'
     input = 'injection_production_eg.i'

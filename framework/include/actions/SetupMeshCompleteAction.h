@@ -23,10 +23,7 @@ public:
 
   SetupMeshCompleteAction(InputParameters params);
 
-  bool completeSetup(MooseMesh * mesh);
-
   virtual void act() override;
 
   PerfID _uniform_refine_timer;
 };
-

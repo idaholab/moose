@@ -20,10 +20,10 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::validParams()
       "List of variables that represent the mass fractions.  For the aqueous phase these are "
       "concentrations of the primary species with units m^{3}(chemical)/m^{3}(fluid phase).  For "
       "the other phases (if any) these will typically be initialised to zero and will not change "
-      "throughout the simulation.  Format is 'f_ph0^c0 f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-1) f_ph1^c0 "
-      "f_ph1^c1 fph1^c2 ... fph1^c(N-1) ... fphP^c0 f_phP^c1 fphP^c2 ... fphP^c(N-1)' where "
+      "throughout the simulation.  Format is 'f_ph0^c0 f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-2) f_ph1^c0 "
+      "f_ph1^c1 fph1^c2 ... fph1^c(N-2) ... fphP^c0 f_phP^c1 fphP^c2 ... fphP^c(N-2)' where "
       "N=number of primary species and P=num_phases, and it is assumed that "
-      "f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.");
+      "f_ph^c(N-1)=1-sum(f_ph^c,{c,0,N-2}) so that f_ph^c(N-1) need not be given.");
   params.addRequiredParam<unsigned>("num_reactions",
                                     "Number of equations in the system of chemical reactions");
   params.addParam<bool>("equilibrium_constants_as_log10",

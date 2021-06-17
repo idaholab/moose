@@ -16,6 +16,9 @@
 #include "Factory.h"
 #include "AddMeshGeneratorAction.h"
 
+#include <functional>
+#include <algorithm>
+
 registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
 registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
 registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
@@ -283,8 +286,9 @@ SetupMeshAction::act()
       // We want to set the MeshBase object to that coming from mesh generators when the following
       // conditions are met:
       // 1. We have mesh generators
-      // 2. We are not: recovering/restarting and we are the master application
-      if (!_app.getMeshGeneratorNames().empty() &&
+      // 2. We are not using the pre-split mesh
+      // 3. We are not: recovering/restarting and we are the master application
+      if (!_app.getMeshGeneratorNames().empty() && !_app.isUseSplit() &&
           !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
       {
         auto mesh_base = _app.getMeshGeneratorMesh();
@@ -294,7 +298,27 @@ SetupMeshAction::act()
         _mesh->setMeshBase(std::move(mesh_base));
       }
       else
+      {
+        const auto & mg_names = _app.getMeshGeneratorNames();
+        std::vector<bool> use_dm;
+        for (const auto & mg_name : mg_names)
+          if (hasMeshProperty("use_distributed_mesh", mg_name))
+            use_dm.push_back(getMeshProperty<bool>("use_distributed_mesh", mg_name));
+
+        if (!use_dm.empty())
+        {
+          if (std::adjacent_find(use_dm.begin(), use_dm.end(), std::not_equal_to<bool>()) !=
+              use_dm.end())
+            mooseError("You cannot use mesh generators that set different values of the mesh "
+                       "property 'use_distributed_mesh' within the same simulation.");
+
+          const auto ptype = use_dm.front() ? MooseMesh::ParallelType::DISTRIBUTED
+                                            : MooseMesh::ParallelType::REPLICATED;
+          _mesh->setParallelType(ptype);
+        }
+
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+      }
     }
   }
 

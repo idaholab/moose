@@ -10,13 +10,11 @@
 #include "ReporterName.h"
 
 ReporterName::ReporterName(const std::string & object_name, const std::string & value_name)
-  : _object_name(object_name),
-    _value_name(value_name),
-    _combined_name(object_name + "/" + value_name)
+  : _object_name(object_name), _value_name(value_name)
 {
 }
 
-ReporterName::ReporterName(const std::string & combined_name) : _combined_name(combined_name)
+ReporterName::ReporterName(const std::string & combined_name)
 {
   std::size_t idx = combined_name.rfind("/");
   if (idx != std::string::npos)
@@ -27,6 +25,8 @@ ReporterName::ReporterName(const std::string & combined_name) : _combined_name(c
   else
     mooseError("Invalid combined Reporter name: ", combined_name);
 }
+
+ReporterName::ReporterName(const char * combined_name) : ReporterName(std::string(combined_name)) {}
 
 const std::string &
 ReporterName::getObjectName() const
@@ -40,44 +40,50 @@ ReporterName::getValueName() const
   return _value_name;
 }
 
-const std::string &
+const std::string
 ReporterName::getCombinedName() const
 {
-  return _combined_name;
+  return _object_name + "/" + _value_name;
 }
 
-ReporterName::operator std::string() const { return _combined_name; }
+std::string
+ReporterName::getRestartableName() const
+{
+  return "ReporterData/" + getCombinedName();
+}
+
+ReporterName::operator std::string() const { return getCombinedName(); }
 
 bool
 ReporterName::operator==(const ReporterName & rhs) const
 {
-  return _combined_name == rhs._combined_name;
+  // Note here that we do not check if _special_type is the same. This is because
+  // we want to store reporter names as a single name regardless of the type
+  return _object_name == rhs._object_name && _value_name == rhs._value_name;
 }
 
 bool
 ReporterName::operator==(const std::string & combined_name) const
 {
-  return _combined_name == combined_name;
+  return getCombinedName() == combined_name;
 }
 
 bool
 ReporterName::operator<(const ReporterName & rhs) const
 {
-  return _combined_name < rhs._combined_name;
+  // Note here that we do not sort by _special_type. This is because
+  // we want to store reporter names as a single name regardless of the type
+  return getCombinedName() < rhs.getCombinedName();
 }
 
-ReporterName::ReporterName(const ReporterName & other)
-  : ReporterName(other._object_name, other._value_name)
+std::string
+ReporterName::specialTypeToName() const
 {
-}
-
-ReporterName &
-ReporterName::operator=(const ReporterName & other)
-{
-  _object_name = other._object_name;
-  _value_name = other._value_name;
-  _combined_name = other._combined_name;
-  return *this;
+  if (isPostprocessor())
+    return "Postprocessor";
+  if (isVectorPostprocessor())
+    return "VectorPostprocessor";
+  return "Reporter";
 }
 
 std::ostream &
@@ -85,4 +91,17 @@ operator<<(std::ostream & os, const ReporterName & state)
 {
   os << state.getCombinedName();
   return os;
+}
+
+PostprocessorReporterName::PostprocessorReporterName(const PostprocessorName & name)
+  : ReporterName(name, "value")
+{
+  setIsPostprocessor();
+}
+
+VectorPostprocessorReporterName::VectorPostprocessorReporterName(
+    const VectorPostprocessorName & name, const std::string & vector_name)
+  : ReporterName(name, vector_name)
+{
+  setIsVectorPostprocessor();
 }

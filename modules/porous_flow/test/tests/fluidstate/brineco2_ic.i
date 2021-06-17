@@ -14,15 +14,15 @@
 []
 
 [Variables]
-  [./pgas]
+  [pgas]
     initial_condition = 1e6
-  [../]
-  [./z]
-  [../]
+  []
+  [z]
+  []
 []
 
 [ICs]
-  [./z]
+  [z]
     type = PorousFlowFluidStateIC
     saturation = 0.5
     gas_porepressure = pgas
@@ -30,111 +30,111 @@
     variable = z
     xnacl = 0.1
     fluid_state = fs
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./saturation_gas]
+  [saturation_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./saturation_water]
+  []
+  [saturation_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./saturation_water]
+  [saturation_water]
     type = PorousFlowPropertyAux
     variable = saturation_water
     property = saturation
     phase = 0
     execute_on = timestep_end
-  [../]
-  [./saturation_gas]
+  []
+  [saturation_gas]
     type = PorousFlowPropertyAux
     variable = saturation_gas
     property = saturation
     phase = 1
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = pgas
     fluid_component = 0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     variable = z
     fluid_component = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas z'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowBrineCO2
     brine_fp = brine
     co2_fp = co2
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./brine]
+    []
+    [brine]
       type = BrineFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 50
-  [../]
-  [./waterncg]
+  []
+  [waterncg]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     fluid_state = fs
     capillary_pressure = pc
     xnacl = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -146,28 +146,28 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sg]
+  [sg]
     type = ElementIntegralVariablePostprocessor
     variable = saturation_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./sw]
+  []
+  [sw]
     type = ElementIntegralVariablePostprocessor
     variable = saturation_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./z]
+  []
+  [z]
     type = ElementIntegralVariablePostprocessor
     variable = z
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

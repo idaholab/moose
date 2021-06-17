@@ -11,8 +11,9 @@
 
 #include "MooseMesh.h"
 
+template <bool is_ad>
 InputParameters
-StressUpdateBase::validParams()
+StressUpdateBaseTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Calculates an admissible state (stress that lies on or within the "
@@ -31,42 +32,86 @@ StressUpdateBase::validParams()
   return params;
 }
 
-StressUpdateBase::StressUpdateBase(const InputParameters & parameters)
+template <bool is_ad>
+StressUpdateBaseTempl<is_ad>::StressUpdateBaseTempl(const InputParameters & parameters)
   : Material(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
+    _base_name(this->isParamValid("base_name")
+                   ? this->template getParam<std::string>("base_name") + "_"
+                   : "")
 {
 }
 
+template <bool is_ad>
 void
-StressUpdateBase::setQp(unsigned int qp)
+StressUpdateBaseTempl<is_ad>::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
+template <bool is_ad>
 void
-StressUpdateBase::propagateQpStatefulProperties()
+StressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
 {
   mooseError(
       "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }
 
+template <bool is_ad>
 Real
-StressUpdateBase::computeTimeStepLimit()
+StressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
 }
 
+template <bool is_ad>
 void
-StressUpdateBase::updateStateSubstep(RankTwoTensor & /*strain_increment*/,
-                                     RankTwoTensor & /*inelastic_strain_increment*/,
-                                     const RankTwoTensor & /*rotation_increment*/,
-                                     RankTwoTensor & /*stress_new*/,
-                                     const RankTwoTensor & /*stress_old*/,
-                                     const RankFourTensor & /*elasticity_tensor*/,
-                                     const RankTwoTensor & /*elastic_strain_old*/,
-                                     bool /*compute_full_tangent_operator*/,
-                                     RankFourTensor & /*tangent_operator*/)
+StressUpdateBaseTempl<is_ad>::updateState(
+    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+    const RankTwoTensor & /*stress_old*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    bool /*compute_full_tangent_operator = false*/,
+    RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
-  paramError("use_substep",
-             "updateStateSubstep called: it needs to be implemented by your inelastic model");
+  mooseError("updateState called: it needs to be implemented by your inelastic model");
 }
+
+template <bool is_ad>
+void
+StressUpdateBaseTempl<is_ad>::updateStateSubstep(
+    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+    const RankTwoTensor & /*stress_old*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    bool /*compute_full_tangent_operator*/,
+    RankFourTensor & /*tangent_operator*/)
+{
+  this->template paramError(
+      "use_substep",
+      "updateStateSubstep called: it needs to be implemented by your inelastic model");
+}
+
+template <bool is_ad>
+TangentCalculationMethod
+StressUpdateBaseTempl<is_ad>::getTangentCalculationMethod()
+{
+  return TangentCalculationMethod::ELASTIC;
+}
+
+template <>
+TangentCalculationMethod
+StressUpdateBaseTempl<true>::getTangentCalculationMethod()
+{
+  mooseError(
+      "getTangentCalculationMethod called: no tangent calculationg is needed while using AD");
+  return TangentCalculationMethod::ELASTIC;
+}
+
+template class StressUpdateBaseTempl<false>;
+template class StressUpdateBaseTempl<true>;

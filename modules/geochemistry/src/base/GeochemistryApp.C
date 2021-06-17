@@ -17,9 +17,6 @@ GeochemistryApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
-
   params.set<bool>("use_legacy_material_output") = false;
 
   return params;
@@ -41,6 +38,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddTimeIndependentReactionSolverAction", "TimeIndependentReactionSolver");
   registerSyntax("AddTimeDependentReactionSolverAction", "TimeDependentReactionSolver");
+  registerSyntax("AddSpatialReactionSolverAction", "SpatialReactionSolver");
 
   registerMooseObjectTask("add_geochemistry_reactor", AddGeochemistrySolverAction, false);
   addTaskDependency("add_geochemistry_reactor",

@@ -26,13 +26,14 @@ ADDensity::validParams()
 ADDensity::ADDensity(const InputParameters & parameters)
   : ADMaterial(parameters),
     _coord_system(getBlockCoordSystem()),
-    _grad_disp(adCoupledGradients("displacements")),
-    _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),
     _initial_density(getParam<Real>("density")),
+    _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),
+    _grad_disp(adCoupledGradients("displacements")),
     _density(declareADProperty<Real>("density"))
 {
   if (getParam<bool>("use_displaced_mesh"))
-    paramError("ADDensity needs to act on an undisplaced mesh. Use of a displaced mesh leads to "
+    paramError("use_displaced_mesh",
+               "ADDensity needs to act on an undisplaced mesh. Use of a displaced mesh leads to "
                "incorrect gradient values");
 
   // get coupled gradients

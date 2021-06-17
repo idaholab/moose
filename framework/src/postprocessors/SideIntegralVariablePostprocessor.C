@@ -9,6 +9,8 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
 
 defineLegacyParams(SideIntegralVariablePostprocessor);
@@ -32,13 +34,21 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable"))
+    _grad_u(coupledGradient("variable")),
+    _fv(_fv_variable)
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real
 SideIntegralVariablePostprocessor::computeQpIntegral()
 {
-  return _u[_qp];
+  if (_fv)
+  {
+    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "We should have an fi");
+    return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
+  }
+  else
+    return _u[_qp];
 }

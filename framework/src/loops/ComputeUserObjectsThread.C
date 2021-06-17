@@ -19,6 +19,7 @@
 #include "NodalUserObject.h"
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
+#include "MaterialBase.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -67,25 +68,38 @@ ComputeUserObjectsThread::subdomainChanged()
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
+  std::set<TagID> needed_fe_var_vector_tags;
   for (const auto obj : objs)
   {
     auto v_obj = dynamic_cast<MooseVariableDependencyInterface *>(obj);
-    if (!v_obj)
-      mooseError("robert wrote broken code");
-    const auto & v_deps = v_obj->getMooseVariableDependencies();
-    needed_moose_vars.insert(v_deps.begin(), v_deps.end());
+    if (v_obj)
+    {
+      const auto & v_deps = v_obj->getMooseVariableDependencies();
+      needed_moose_vars.insert(v_deps.begin(), v_deps.end());
+    }
 
     auto m_obj = dynamic_cast<MaterialPropertyInterface *>(obj);
-    if (!m_obj)
-      mooseError("robert wrote broken code again");
-    auto & m_deps = m_obj->getMatPropDependencies();
-    needed_mat_props.insert(m_deps.begin(), m_deps.end());
+    if (m_obj)
+    {
+      auto & m_deps = m_obj->getMatPropDependencies();
+      needed_mat_props.insert(m_deps.begin(), m_deps.end());
+    }
+
+    auto c_obj = dynamic_cast<Coupleable *>(obj);
+    if (c_obj)
+    {
+      const auto & tag_deps = c_obj->getFEVariableCoupleableVectorTags();
+      needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
+    }
 
     obj->subdomainSetup();
   }
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 
   querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);

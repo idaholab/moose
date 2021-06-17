@@ -8,8 +8,8 @@
 # Specific enthalpy should equal 4000 * 300 + 10e6 / 1426.844 = 1.207008E6 J/kg
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 2.0E-4
       cv = 4000.0
@@ -18,8 +18,8 @@
       thermal_conductivity = 1.0
       viscosity = 1.1E-3
       density0 = 1500.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Mesh]
@@ -33,77 +33,77 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp T'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 10E6
-  [../]
-  [./T]
+  []
+  [T]
     initial_condition = 300.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy_p]
+  [dummy_p]
     type = Diffusion
     variable = pp
-  [../]
-  [./dummy_T]
+  []
+  [dummy_T]
     type = Diffusion
     variable = T
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = T
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     temperature_unit = Kelvin
     time_unit = years
     fp = the_simple_fluid
     phase = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pressure]
+  [pressure]
     type = ElementIntegralVariablePostprocessor
     variable = pp
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementIntegralVariablePostprocessor
     variable = T
-  [../]
-  [./density]
+  []
+  [density]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_density_qp0'
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity_qp0'
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_internal_energy_qp0'
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
-  [../]
+  []
 []
 
 [Executioner]

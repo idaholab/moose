@@ -6,7 +6,9 @@
     requirement = "The system shall be able to divide a sideset into patches for more accurate radiative transfer modeling."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = '--mesh-only'
+    mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_linear]
@@ -16,7 +18,9 @@
     requirement = "The system shall be able to use linear partitioner for subdividing sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=linear --mesh-only generate_radiation_patch_linear.e'
+    mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_centroid]
@@ -26,7 +30,9 @@
     requirement = "The system shall be able to use centroid partitioner for subdividing sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=centroid Mesh/patch/centroid_partitioner_direction=x --mesh-only generate_radiation_patch_centroid.e'
+    mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_centroid_error]
@@ -36,7 +42,9 @@
     requirement = "The system shall error when centroid partitioner is used but centroid_partitioner_direction is not provided."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=centroid --mesh-only generate_radiation_patch_centroid.e'
+    mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid]
@@ -46,7 +54,9 @@
     requirement = "The system shall be able to use a uniform grid for subdividing sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid.e'
+    mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid_2D]
@@ -56,7 +66,9 @@
     requirement = "The system shall be able to use a uniform grid for subdividing 1D sidesets into patches."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=grid --mesh-only'
+    mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid_2D_overpart]
@@ -66,6 +78,8 @@
     requirement = "The system shall be able to adjust the number of patches of partitions that end up empty."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/n_patches=61 Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid_2D_overpart.e'
+    mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 []

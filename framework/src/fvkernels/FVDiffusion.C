@@ -37,8 +37,12 @@ FVDiffusion::computeQpResidual()
   // input parameters to change between different interpolation methods for
   // this.
   ADReal k;
-  interpolate(
-      Moose::FV::InterpMethod::Average, k, _coeff_elem[_qp], _coeff_neighbor[_qp], *_face_info);
+  interpolate(Moose::FV::InterpMethod::Average,
+              k,
+              _coeff_elem[_qp],
+              _coeff_neighbor[_qp],
+              *_face_info,
+              true);
 
   return -1 * k * dudn;
 }

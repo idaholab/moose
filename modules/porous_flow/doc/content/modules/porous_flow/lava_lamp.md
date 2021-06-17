@@ -8,46 +8,46 @@ that the single-phase model is run using at least four cores, and the two-phase 
 
 Because this problem involves the disappearance of the gaseous phase, the simulation utilises persistent primary variables and a vapor-liquid flash.
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[Variables] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Variables
 
 Here `pgas` is the gas-state pressure (the capillary pressure is zero, so this is also the brine porepressure) and `zi` is the total mass fraction of the CO$_{2}$ summed over the two phases.  In this input file, the salt content of the brine is fixed at 0.01:
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[./xnacl] end=[../]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[xnacl] end=[]
 
 and the temperature at 45$^{\circ}$C:
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[./temperature] end=[../]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[temperature] end=[brineco2]
 
 The porepressure is initialised to approximate hydrostatic conditions, and the total mass fraction of CO$_{2}$ is zero except towards the top of the model domain where it is 0.2.  This corresponds to a gas saturation of 0.29 (the gas is almost all CO$_{2}$ and only about 0.2% brine) and the mass-fraction of CO$_{2}$ in the liquid phase is 0.048.  The porosity is slightly randomised by sampling from a uniform distribution between the minimum and maximum values specified in the [RandomIC](RandomIC.md) initial condition, and this promotes initiation of the beautiful "fingers" of CO$_{2}$-rich brine seen in the results. The random field seed can be changed in the input file, or on the command line using [command line overriding](command_line_usage.md optional=True). The porosity field is output in the Exodus file that is created, so
 can be visualized in the MOOSE GUI [peacock](peacock.md optional=True) or in an external visualization package.
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[ICs] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=ICs
 
 The equations of state for the liquid brine, the CO$_{2}$ and the liquid brine-CO$_{2}$ mixture are the high-precision versions supplied by the [fluid_properties module](fluid_properties/index.md):
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[Modules] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Modules
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[./fs] end=[../]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[fs] end=[]
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[./brineco2] end=[../]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[brineco2] end=[porosity]
 
 Quantities of interest are tracked using `AuxVariables` populated using the following `AuxKernels`
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[AuxKernels] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=AuxKernels
 
 The usual 2-phase Kernels are used in this example with zero molecular dispersion (but the diffusion coefficient is nonzero)
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[Kernels] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Kernels
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[./diffusivity] end=[../]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[diffusivity] end=[]
 
 Various postprocessors help with tracking the total quantity of CO$_{2}$ in the two phases, and the flux of CO$_{2}$ into the brine:
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[Postprocessors] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Postprocessors
 
 Mesh adaptivity is used to refine the mesh as the fingers form, based on the jump in the gradient of the total mass fraction of CO$_{2}$ summed over the two phases:
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[Adaptivity] end=[]
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Adaptivity
 
 The evolution of the CO$_{2}$ mass fraction is shown in the animation below
 

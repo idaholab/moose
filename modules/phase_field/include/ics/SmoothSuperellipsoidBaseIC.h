@@ -12,8 +12,6 @@
 #include "InitialCondition.h"
 #include "MooseRandom.h"
 
-// Forward Declarations
-
 /**
  * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create
  * superellipsoids.

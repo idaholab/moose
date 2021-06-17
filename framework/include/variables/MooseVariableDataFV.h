@@ -279,6 +279,12 @@ public:
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }
 
+  /**
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
+   */
+  unsigned int oldestSolutionStateRequested() const;
+
 private:
   void initializeSolnVars();
 

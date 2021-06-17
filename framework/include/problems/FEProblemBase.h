@@ -100,7 +100,8 @@ enum class MooseNonlinearConvergenceReason
   DIVERGED_FUNCTION_COUNT = -2,
   DIVERGED_FNORM_NAN = -4,
   DIVERGED_LINE_SEARCH = -6,
-  DIVERGED_DTOL = -9
+  DIVERGED_DTOL = -9,
+  DIVERGED_NL_RESIDUAL_PINGPONG = -10
 };
 
 // The idea with these enums is to abstract the reasons for
@@ -177,7 +178,14 @@ public:
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
 
-  bool areCoupled(unsigned int ivar, unsigned int jvar);
+  bool areCoupled(unsigned int ivar, unsigned int jvar) const;
+
+  /**
+   * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
+   * create a full coupling matrix. See https://github.com/idaholab/moose/issues/16395 for detailed
+   * background
+   */
+  void trustUserCouplingMatrix();
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   couplingEntries(THREAD_ID tid);
@@ -185,14 +193,14 @@ public:
   nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
-   * Check for converence of the nonlinear solution
+   * Check for convergence of the nonlinear solution
    * @param msg            Error message that gets sent back to the solver
    * @param it             Iteration counter
    * @param xnorm          Norm of the solution vector
    * @param snorm          Norm of the change in the solution vector
    * @param fnorm          Norm of the residual vector
    * @param rtol           Relative residual convergence tolerance
-   * @param divtol           Relative residual divergence tolerance
+   * @param divtol         Relative residual divergence tolerance
    * @param stol           Solution change convergence tolerance
    * @param abstol         Absolute residual convergence tolerance
    * @param nfuncs         Number of function evaluations
@@ -213,7 +221,6 @@ public:
                             const Real abstol,
                             const PetscInt nfuncs,
                             const PetscInt max_funcs,
-                            const PetscBool force_iteration,
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
@@ -225,6 +232,8 @@ public:
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type =
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
+  MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+                                                  const std::string & var_name) override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -297,13 +306,15 @@ public:
                             SubdomainID block = Moose::ANY_BLOCK_ID);
 
   /**
-   * Increases the elemennt/volume quadrature order for the specified mesh
+   * Increases the element/volume quadrature order for the specified mesh
    * block if and only if the current volume quadrature order is lower.  This
    * can only cause the quadrature level to increase.  If volume_order is
    * lower than or equal to the current volume/elem quadrature rule order,
    * then nothing is done (i.e. this function is idempotent).
    */
   void bumpVolumeQRuleOrder(Order order, SubdomainID block);
+
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
@@ -349,10 +360,6 @@ public:
    */
   virtual std::vector<VariableName> getVariableNames();
 
-  /**
-   * A place to add extra vectors to the simulation. It is called early during initialSetup.
-   */
-  virtual void addExtraVectors();
   virtual void initialSetup();
   virtual void timestepSetup();
 
@@ -379,8 +386,7 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid,
-                              bool suppress_displaced_init = false) override;
+                              THREAD_ID tid) override;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
   virtual void reinitLowerDElem(const Elem * lower_d_elem,
@@ -399,6 +405,8 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) override;
+  virtual void
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) override;
   virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
@@ -415,6 +423,15 @@ public:
   virtual void init() override;
   virtual void solve() override;
 
+  /**
+   * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}. That is,
+   * the number of evaluable elements does NOT necessarily equal to the number of local and
+   * algebraic ghosting elements. For example, if using a Lagrange basis for all variables,
+   * if a non-local, non-algebraically-ghosted element is surrounded by neighbors which are
+   * local or algebraically ghosted, then all the nodal (Lagrange) degrees of freedom associated
+   * with the non-local, non-algebraically-ghosted element will be evaluable, and hence that
+   * element will be considered evaluable.
+   */
   const ConstElemRange & getEvaluableElementRange();
 
   /**
@@ -679,6 +696,9 @@ public:
 
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
+  void addFVInterfaceKernel(const std::string & fv_ik_name,
+                            const std::string & name,
+                            InputParameters & parameters);
 
   // Interface /////
   virtual void addInterfaceKernel(const std::string & kernel_name,
@@ -691,6 +711,14 @@ public:
                                    InputParameters & parameters);
 
   void projectSolution();
+
+  /**
+   * Project initial conditions for custom \p elem_range and \p bnd_node_range
+   * This is needed when elements/boundary nodes are added to a specific subdomain
+   * at an intermediate step
+   */
+  void projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
+                                            ConstBndNodeRange & bnd_node_range);
 
   // Materials /////
   virtual void addMaterial(const std::string & kernel_name,
@@ -768,7 +796,7 @@ public:
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
 
   /**
-   * Method for creating an adding an object to the warehouse.
+   * Method for creating and adding an object to the warehouse.
    *
    * @tparam T The base object type (registered in the Factory)
    * @param type String type of the object (registered in the Factory)
@@ -855,9 +883,10 @@ public:
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
+   * @param tid The thread of the user object (defaults to 0)
    * @return Const reference to the user object
    */
-  const UserObject & getUserObjectBase(const std::string & name) const;
+  const UserObject & getUserObjectBase(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
    * Check if there if a user object of given name
@@ -867,17 +896,24 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
-   * Initializes the postprocessor data
-   *
-   * This is needed to correctly handle the default values
-   * @see SetupPostprocessorDataAction, PostprocessorInterface
+   * No longer used. To be removed after application patching
    */
-  void initPostprocessorData(const std::string & name);
+  void initPostprocessorData(const std::string &) {}
+
+  /**
+   * Whether or not a Postprocessor value exists by a given name.
+   * @param name The name of the Postprocessor
+   * @return True if a Postprocessor value exists
+   *
+   * Note: You should prioritize the use of PostprocessorInterface::hasPostprocessor
+   * and PostprocessorInterface::hasPostprocessorByName over this method when possible.
+   */
+  bool hasPostprocessorValueByName(const PostprocessorName & name) const;
 
   /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    * @return The reference to the value at the given time index
    *
    * Note: This method is only for retrieving values that already exist, the Postprocessor and
@@ -890,7 +926,7 @@ public:
   /**
    * Set the value of a PostprocessorValue.
    * @param name The name of the post-processor
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    * @return The reference to the value at the given time index
    *
    * Note: This method is only for setting values that already exist, the Postprocessor and
@@ -904,17 +940,11 @@ public:
   void setPostprocessorValueByName(const PostprocessorName & name,
                                    const PostprocessorValue & value,
                                    std::size_t t_index = 0);
-  ///@}
 
-  ///@{
   /**
-   * Deprecated
+   * Deprecated. Use hasPostprocessorValueByName
    */
   bool hasPostprocessor(const std::string & name) const;
-  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
-  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
-  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
-  ///@}
 
   /**
    * Get a read-only reference to the vector value associated with the VectorPostprocessor.
@@ -936,7 +966,7 @@ public:
    * @param object_name The name of the VPP object
    * @param vector_name The name of the declared vector
    * @param value The data to apply to the vector
-   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @param t_index Flag for getting current (0), old (1), or older (2) values
    */
   void setVectorPostprocessorValueByName(const std::string & object_name,
                                          const std::string & vector_name,
@@ -953,24 +983,6 @@ public:
    */
   const VectorPostprocessor & getVectorPostprocessorObjectByName(const std::string & object_name,
                                                                  THREAD_ID tid = 0) const;
-
-  ///@{
-  /**
-   * DEPRECATED
-   */
-  bool hasVectorPostprocessor(const std::string & name);
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name);
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name);
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name,
-                                                         bool needs_broadcast);
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name,
-                                                            bool needs_broadcast);
-  bool vectorPostprocessorHasVectors(const std::string & vpp_name);
-  ///@}
 
   ///@{
   /**
@@ -1028,7 +1040,7 @@ public:
   getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const;
 
   /**
-   * Execute MultiAppTransfers associate with execution flag and direction.
+   * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
    */
@@ -1268,6 +1280,7 @@ public:
 
   virtual void addResidual(THREAD_ID tid) override;
   virtual void addResidualNeighbor(THREAD_ID tid) override;
+  virtual void addResidualLower(THREAD_ID tid) override;
   virtual void addResidualScalar(THREAD_ID tid = 0);
 
   virtual void cacheResidual(THREAD_ID tid) override;
@@ -1288,6 +1301,8 @@ public:
 
   virtual void addJacobian(THREAD_ID tid) override;
   virtual void addJacobianNeighbor(THREAD_ID tid) override;
+  virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
+  virtual void addJacobianLowerD(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -1449,6 +1464,13 @@ public:
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
   /**
+   * Initialize stateful properties for elements in a specific \p elem_range
+   * This is needed when elements/boundary nodes are added to a specific subdomain
+   * at an intermediate step
+   */
+  void initElementStatefulProps(const ConstElemRange & elem_range);
+
+  /**
    * Method called to perform a series of sanity checks before a simulation is run. This method
    * doesn't return when errors are found, instead it generally calls mooseError() directly.
    */
@@ -1597,7 +1619,9 @@ public:
   /**
    * Compute an user object with the given name
    */
-  virtual void computeUserObjectByName(const ExecFlagType & type, const std::string & name);
+  virtual void computeUserObjectByName(const ExecFlagType & type,
+                                       const Moose::AuxGroup & group,
+                                       const std::string & name);
 
   /**
    * Call compute methods on AuxKernels
@@ -1722,22 +1746,6 @@ public:
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
 #endif
 
-  /**
-   * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
-   * requested an AD material property or whether any suppier has declared an AD material property
-   */
-  void usingADMatProps(bool using_ad_mat_props)
-  {
-    _using_ad_mat_props = using_ad_mat_props;
-    if (_using_ad_mat_props)
-      haveADObjects(true);
-  }
-
-  /**
-   * Whether any object has requested/supplied an AD material property
-   */
-  bool usingADMatProps() const { return _using_ad_mat_props; }
-
   /// Set boolean flag to true to store solution time derivative
   virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
 
@@ -1808,7 +1816,10 @@ public:
   virtual bool hasMortarCoupling() const { return _has_mortar; }
 
   using SubProblem::computingNonlinearResid;
-  void computingNonlinearResid(bool computing_nonlinear_residual) override;
+  void computingNonlinearResid(bool computing_nonlinear_residual) final;
+
+  using SubProblem::currentlyComputingResidual;
+  void setCurrentlyComputingResidual(bool currently_computing_residual) final;
 
   /**
    * Set the number of steps in a grid sequences
@@ -1888,9 +1899,53 @@ public:
 
   bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
+  /// method setting the maximum number of allowable non linear residual pingpong
+  void setMaxNLPingPong(const unsigned int n_max_nl_pingpong)
+  {
+    _n_max_nl_pingpong = n_max_nl_pingpong;
+  }
+
+  /// method setting the minimum number of nonlinear iterations before performing divergence checks
+  void setNonlinearForcedIterations(const unsigned int nl_forced_its)
+  {
+    _nl_forced_its = nl_forced_its;
+  }
+
+  /// method returning the number of forced nonlinear iterations
+  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; };
+
+  /// method setting the absolute divergence tolerance
+  void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
+  {
+    _nl_abs_div_tol = nl_abs_div_tol;
+  }
+
+  /**
+   * Setter for whether we're computing the scaling jacobian
+   */
+  void computingScalingJacobian(bool computing_scaling_jacobian)
+  {
+    _computing_scaling_jacobian = computing_scaling_jacobian;
+  }
+
+  bool computingScalingJacobian() const override final { return _computing_scaling_jacobian; }
+
+  /**
+   * Setter for whether we're computing the scaling residual
+   */
+  void computingScalingResidual(bool computing_scaling_residual)
+  {
+    _computing_scaling_residual = computing_scaling_residual;
+  }
+
+  bool computingScalingResidual() const override final { return _computing_scaling_residual; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
+
+  /// Create extra tagged solution vectors
+  void createTagSolutions();
 
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -1909,6 +1964,16 @@ protected:
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
+
+  /// maximum numbver
+  unsigned int _n_nl_pingpong = 0;
+  unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
+
+  /// the number of forced nonlinear iterations
+  int _nl_forced_its = 0;
+
+  /// the absolute non linear divergence tolerance
+  Real _nl_abs_div_tol = -1;
 
   std::shared_ptr<NonlinearSystemBase> _nl;
   std::shared_ptr<AuxiliarySystem> _aux;
@@ -2252,6 +2317,16 @@ private:
   /// MooseEnum describing how to obtain reference points for displaced mesh dgkernels and/or
   /// interface kernels. Options are invert_elem_phys, use_undisplaced_ref, and the default unset.
   MooseEnum _displaced_neighbor_ref_pts;
+
+  /// Whether to trust the user coupling matrix no matter what. See
+  /// https://github.com/idaholab/moose/issues/16395 for detailed background
+  bool _trust_user_coupling_matrix = false;
+
+  /// Flag used to indicate whether we are computing the scaling Jacobian
+  bool _computing_scaling_jacobian = false;
+
+  /// Flag used to indicate whether we are computing the scaling Residual
+  bool _computing_scaling_residual = false;
 };
 
 template <typename T>

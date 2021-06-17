@@ -1,4 +1,4 @@
-# Using upwinded and mass-lumped PorousFlow Kernels
+# Using upwinded and mass-lumped PorousFlow Kernels: this is equivalent of fully_saturated_action.i with stabilization = Full
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -13,62 +13,62 @@
 []
 
 [Variables]
-  [./porepressure]
-  [../]
-  [./tracer]
-  [../]
+  [porepressure]
+  []
+  [tracer]
+  []
 []
 
 [ICs]
-  [./porepressure]
+  [porepressure]
     type = FunctionIC
     variable = porepressure
     function = '1 - x'
-  [../]
-  [./tracer]
+  []
+  [tracer]
     type = FunctionIC
     variable = tracer
     function = 'if(x<0.1,0,if(x>0.3,0,1))'
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = tracer
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = tracer
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = porepressure
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = porepressure
-  [../]
+  []
 []
 
 [BCs]
-  [./constant_injection_porepressure]
+  [constant_injection_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1
     boundary = left
-  [../]
-  [./no_tracer_on_left]
+  []
+  [no_tracer_on_left]
     type = DirichletBC
     variable = tracer
     value = 0
     boundary = left
-  [../]
-  [./remove_component_1]
+  []
+  [remove_component_1]
     type = PorousFlowPiecewiseLinearSink
     variable = porepressure
     boundary = right
@@ -78,8 +78,8 @@
     mass_fraction_component = 1
     use_mobility = true
     flux_function = 1E3
-  [../]
-  [./remove_component_0]
+  []
+  [remove_component_0]
     type = PorousFlowPiecewiseLinearSink
     variable = tracer
     boundary = right
@@ -89,91 +89,91 @@
     mass_fraction_component = 0
     use_mobility = true
     flux_function = 1E3
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E9
       thermal_expansion = 0
       viscosity = 1.0
       density0 = 1000.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure tracer'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = tracer
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = the_simple_fluid
     phase = 0
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-2 0 0   0 1E-2 0   0 0 1E-2'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = basic
-  [./basic]
+  [basic]
     type = SMP
     full = true
     petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = ' asm      lu           NONZERO                   2'
-  [../]
-  [./preferred_but_might_not_be_installed]
+  []
+  [preferred_but_might_not_be_installed]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./tracer]
+  [tracer]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
     num_points = 101
     sort_by = x
     variable = tracer
-  [../]
+  []
 []
 
 [Executioner]
@@ -186,8 +186,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     execute_on = final
-  [../]
+  []
 []

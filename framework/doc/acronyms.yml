@@ -1,26 +1,34 @@
 AD: automatic differentiation
 API: Application Programming Interface
+AMP: Asset Management Plan
+BC: boundary condition
+BCs: boundary conditions
 BVP: boundary value problem
+CCI: Communication and Contact Information
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
+CMP: Configuration Management Plan
 CSV: comma-separated values
 DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
 DOF: degree-of-freedom
 DOFs: degrees-of-freedom
-FE: Finite Element
+EA: Enterprise Architecture
+FE: finite element
 FEM: Finite Element Method
-GMRES: Gernalized Minimum Residual Method
+GMRES: Generalized Minimum Residual Method
 GUI: graphical user interface
 HIT: Hierarchical Input Text
 HPC: High Performance Computing
 I/O: Input/Output
 INL: Idaho National Laboratory
+IT: Information Technology
 JFNK: Jacobian-Free Newton-Krylov
 JSON: JavaScript Object Notation
 LGPL: GNU Lesser General Public License
+LWP: Laboratory Wide Procedure
 MMS: Method of Manufactured Solutions
 MWR: Method of Mean Weighted Residuals
-MPI: Method Passing Interface
+MPI: Message Passing Interface
 MOOSE: Multiphysics Object Oriented Simulation Environment
 NE: Nuclear Energy
 NQA-1: Nuclear Quality Assurance Level 1
@@ -29,9 +37,20 @@ POSIX: Portable Operating System Interface
 PBS: Portable Batch System
 PDE: partial differential equation
 PDEs: partial differential equations
-PJFNK: Preconditioned Jacobian Free Newtwon Krylov
+PJFNK: Preconditioned Jacobian Free Newton Krylov
+PMP: Project Management Plan
 RTM: Requirement Traceability Matrix
+SCS: Software Coding Standards
 SDD: Software Design Description
+SLL: Software Library List
 SRS: Software Requirement Specification
+SSD: Safety Software Determination
 STP: Software Test Plan
+SQAP: Software Quality Assurance Plan
+SQP: Software Quality Plan
 VVR: Verification and Validation Report
+VVP: Verification and Validation Plan
+FAR: Failure Analysis Report
+QLD: Quality Level Determination
+QP: quadrature point
+QPs: quadrature points

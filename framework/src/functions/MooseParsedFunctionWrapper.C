@@ -104,7 +104,7 @@ MooseParsedFunctionWrapper::initialize()
     // Case when a scalar variable is found by the name given in the input values
     else if (_feproblem.hasScalarVariable(_vals_input[i]))
     {
-      Real & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln()[0];
+      auto & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln()[0];
       _initial_vals.push_back(scalar_val);
       _scalar_vals.push_back(&scalar_val);
       _scalar_index.push_back(i);

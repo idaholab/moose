@@ -62,6 +62,8 @@ SpiralAnnularMeshGenerator::SpiralAnnularMeshGenerator(const InputParameters & p
     _exterior_bid(getParam<boundary_id_type>("exterior_bid")),
     _initial_delta_r(2 * libMesh::pi * _inner_radius / _nodes_per_ring)
 {
+  declareMeshProperty("use_distributed_mesh", false);
+
   // catch likely user errors
   if (_outer_radius <= _inner_radius)
     mooseError("SpiralAnnularMesh: outer_radius must be greater than inner_radius");
@@ -71,6 +73,7 @@ std::unique_ptr<MeshBase>
 SpiralAnnularMeshGenerator::generate()
 {
   std::unique_ptr<ReplicatedMesh> mesh = buildReplicatedMesh(2);
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   {
     // Compute the radial bias given:
@@ -167,7 +170,7 @@ SpiralAnnularMeshGenerator::generate()
 
         // Add interior faces to 'cylinder' sideset if we are on ring 0.
         if (r == 0)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/2, _cylinder_bid);
+          boundary_info.add_side(elem->id(), /*side=*/2, _cylinder_bid);
       }
 
       // Outer ring (n*, n+1*, n+1)
@@ -183,7 +186,7 @@ SpiralAnnularMeshGenerator::generate()
         // Add exterior faces to 'exterior' sideset if we're on the last ring.
         // Note: this code appears in two places since we could end on either an even or odd ring.
         if (r == _num_rings - 2)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/0, _exterior_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _exterior_bid);
       }
     }
     else
@@ -212,7 +215,7 @@ SpiralAnnularMeshGenerator::generate()
 
         // Add exterior faces to 'exterior' sideset if we're on the last ring.
         if (r == _num_rings - 2)
-          mesh->boundary_info->add_side(elem->id(), /*side=*/0, _exterior_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _exterior_bid);
       }
     }
   }
@@ -229,8 +232,8 @@ SpiralAnnularMeshGenerator::generate()
   }
 
   // Create sideset names.
-  mesh->boundary_info->sideset_name(_cylinder_bid) = "cylinder";
-  mesh->boundary_info->sideset_name(_exterior_bid) = "exterior";
+  boundary_info.sideset_name(_cylinder_bid) = "cylinder";
+  boundary_info.sideset_name(_exterior_bid) = "exterior";
 
   // Find neighbors, etc.
   mesh->prepare_for_use();

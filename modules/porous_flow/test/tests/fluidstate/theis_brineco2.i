@@ -25,142 +25,143 @@
 []
 
 [AuxVariables]
-  [./saturation_gas]
+  [saturation_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x1]
+  []
+  [x1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./y0]
+  []
+  [y0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./saturation_gas]
+  [saturation_gas]
     type = PorousFlowPropertyAux
     variable = saturation_gas
     property = saturation
     phase = 1
     execute_on = timestep_end
-  [../]
-  [./x1]
+  []
+  [x1]
     type = PorousFlowPropertyAux
     variable = x1
     property = mass_fraction
     phase = 0
     fluid_component = 1
     execute_on = timestep_end
-  [../]
-  [./y0]
+  []
+  [y0]
     type = PorousFlowPropertyAux
     variable = y0
     property = mass_fraction
     phase = 1
     fluid_component = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Variables]
-  [./pgas]
+  [pgas]
     initial_condition = 20e6
-  [../]
-  [./zi]
+  []
+  [zi]
     initial_condition = 0
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pgas
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pgas
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = zi
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = zi
-  [../]
-  [./mass2]
+  []
+  [mass2]
     type = PorousFlowMassTimeDerivative
     fluid_component = 2
     variable = xnacl
-  [../]
-  [./flux2]
+  []
+  [flux2]
     type = PorousFlowAdvectiveFlux
     fluid_component = 2
     variable = xnacl
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas zi xnacl'
     number_fluid_phases = 2
     number_fluid_components = 3
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowBrineCO2
     brine_fp = brine
     co2_fp = co2
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2sw]
+  [FluidProperties]
+    [co2sw]
       type = CO2FluidProperties
-    [../]
-    [./co2]
+    []
+    [co2]
       type = TabulatedFluidProperties
       fp = co2sw
-    [../]
-    [./water]
+    []
+    [water]
       type = Water97FluidProperties
-    [../]
-    [./watertab]
+    []
+    [watertab]
       type = TabulatedFluidProperties
       fp = water
       temperature_min = 273.15
       temperature_max = 573.15
       fluid_property_file = water_fluid_properties.csv
       save_file = false
-    [../]
-    [./brine]
+    []
+    [brine]
       type = BrineFluidProperties
       water_fp = watertab
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./brineco2]
+    temperature = 20
+  []
+  [brineco2]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
@@ -168,67 +169,67 @@
     xnacl = xnacl
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./rightwater]
+  [rightwater]
     type = DirichletBC
     boundary = right
     value = 20e6
     variable = pgas
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./source]
+  [source]
     type = PorousFlowSquarePulsePointSource
     point = '0 0 0'
     mass_flux = 2
     variable = zi
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
   end_time = 1e5
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     growth_factor = 1.5
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./line]
+  [line]
     type = LineValueSampler
     sort_by = x
     start_point = '0 0 0'
@@ -236,52 +237,52 @@
     num_points = 10000
     variable = 'pgas zi xnacl x1 saturation_gas'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pgas]
+  [pgas]
     type = PointValue
     point = '4 0 0'
     variable = pgas
-  [../]
-  [./sgas]
+  []
+  [sgas]
     type = PointValue
     point = '4 0 0'
     variable = saturation_gas
-  [../]
-  [./zi]
+  []
+  [zi]
     type = PointValue
     point = '4 0 0'
     variable = zi
-  [../]
-  [./massgas]
+  []
+  [massgas]
     type = PorousFlowFluidMass
     fluid_component = 1
-  [../]
-  [./x1]
+  []
+  [x1]
     type = PointValue
     point = '4 0 0'
     variable = x1
-  [../]
-  [./y0]
+  []
+  [y0]
     type = PointValue
     point = '4 0 0'
     variable = y0
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     type = PointValue
     point = '4 0 0'
     variable = xnacl
-  [../]
+  []
 []
 
 [Outputs]
   print_linear_residuals = false
   perf_graph = true
-  [./csvout]
+  [csvout]
     type = CSV
     execute_on = timestep_end
     execute_vector_postprocessors_on = final
-  [../]
+  []
 []

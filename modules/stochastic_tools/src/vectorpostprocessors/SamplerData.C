@@ -61,10 +61,13 @@ SamplerData::execute()
 {
   if (_sampler_method == "get_global_samples")
   {
-    DenseMatrix<Real> data = _sampler.getGlobalSamples();
-    for (unsigned int j = 0; j < data.n(); ++j)
-      for (unsigned int i = 0; i < data.m(); ++i)
-        (*_sample_vectors[j])[i] = data(i, j);
+    if (processor_id() == 0)
+    {
+      DenseMatrix<Real> data = _sampler.getGlobalSamples();
+      for (unsigned int j = 0; j < data.n(); ++j)
+        for (unsigned int i = 0; i < data.m(); ++i)
+          (*_sample_vectors[j])[i] = data(i, j);
+    }
   }
 
   else if (_sampler_method == "get_local_samples")

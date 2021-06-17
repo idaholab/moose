@@ -19,6 +19,8 @@ public:
   TensorMechanicsActionBase(const InputParameters & params);
 
   static MultiMooseEnum outputPropertiesType();
+  static MultiMooseEnum materialOutputOrders();
+  static MultiMooseEnum materialOutputFamilies();
 
 public:
   ///@{ table data for output generation

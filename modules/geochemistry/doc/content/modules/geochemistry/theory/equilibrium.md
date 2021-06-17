@@ -32,7 +32,7 @@ All secondary species are in equilibrium with the basis.  They are not sorbing, 
 \begin{equation}
 A_{j} \rightleftharpoons \nu_{wj}A_{w} + \sum_{i}\nu_{ij}A_{i} + \sum_{k}\nu_{kj}A_{k} + \sum_{m}\nu_{mj}A_{m} \ .
 \end{equation}
-This equation is specified in the [database](database.md) with the $\nu$ being the stoichiometric reaction coefficients.  The database specifies the equilibrium constant, $K_{j}$, and [mass-action equilibrium](equilibrium_reactions.md) reads
+This equation is specified in the [database](geochemistry/database/index.md) with the $\nu$ being the stoichiometric reaction coefficients.  The database specifies the equilibrium constant, $K_{j}$, and [mass-action equilibrium](equilibrium_reactions.md) reads
 \begin{equation}
 K_{j} = \frac{a_{w}^{\nu_{wj}}\cdot \prod_{i}(\gamma_{i}m_{i})^{\nu_{ij}} \cdot \prod_{k}a_{k}^{\nu_{kj}} \cdot \prod_{m}f_{m}^{\nu_{mj}}}{\gamma_{j}m_{j}} \ .
 \end{equation}

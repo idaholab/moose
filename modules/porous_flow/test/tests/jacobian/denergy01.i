@@ -15,66 +15,66 @@
 []
 
 [Variables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [ICs]
-  [./temp]
+  [temp]
     type = RandomIC
     variable = temp
     max = 1.0
     min = 0.0
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./energy_dot]
+  [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'temp'
     number_fluid_phases = 0
     number_fluid_components = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1.1
     density = 0.5
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
+  []
+  [check]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

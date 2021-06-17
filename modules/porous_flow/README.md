@@ -49,4 +49,4 @@ You are free to contribute to PorousFlow, and the process is described [here](ht
 
 ## Contact
 
-Please contact the main MOOSE discussion list moose-users@googlegroups.com.  A PorousFlow developer will answer your question.
+Please contact the main [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).  A PorousFlow developer will answer your question.

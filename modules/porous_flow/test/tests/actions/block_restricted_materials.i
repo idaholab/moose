@@ -13,150 +13,150 @@
     dim = 2
     ny = 2
   []
-  [./subdomain0]
+  [subdomain0]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 0.5 0'
     block_id = 0
-  [../]
-  [./subdomain1]
+  []
+  [subdomain1]
     input = subdomain0
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0.5 0'
     top_right = '1 1 0'
     block_id = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./p0]
+  [p0]
     initial_condition = 1
-  [../]
-  [./p1]
+  []
+  [p1]
     initial_condition = 1.1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
+  [porosity]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./kl]
+  []
+  [kl]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./kg]
+  []
+  [kg]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
-  [./kl]
+  []
+  [kl]
     type = PorousFlowPropertyAux
     property = relperm
     variable = kl
     phase = 0
-  [../]
-  [./kg]
+  []
+  [kg]
     type = PorousFlowPropertyAux
     property = relperm
     variable = kg
     phase = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./p0]
+  [p0]
     type = PorousFlowMassTimeDerivative
     variable = p0
-  [../]
-  [./p1]
+  []
+  [p1]
     type = PorousFlowAdvectiveFlux
     gravity = '0 0 0'
     variable = p1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./fluid0]
+  [FluidProperties]
+    [fluid0]
       type = SimpleFluidProperties
-    [../]
-    [./fluid1]
+    []
+    [fluid1]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = p0
     phase1_porepressure = p1
     capillary_pressure = pc
-  [../]
-  [./krl0]
+  []
+  [krl0]
     type = PorousFlowRelativePermeabilityConst
     kr = 0.7
     phase = 0
     block = 0
-  [../]
-  [./krg0]
+  []
+  [krg0]
     type = PorousFlowRelativePermeabilityConst
     kr = 0.8
     phase = 1
     block = 0
-  [../]
-  [./krl1]
+  []
+  [krl1]
     type = PorousFlowRelativePermeabilityConst
     kr = 0.5
     phase = 0
     block = 1
-  [../]
-  [./krg1]
+  []
+  [krg1]
     type = PorousFlowRelativePermeabilityConst
     kr = 0.4
     phase = 1
     block = 1
-  [../]
-  [./perm]
+  []
+  [perm]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 1 0 0 0 1'
-  [../]
-  [./fluid0]
+  []
+  [fluid0]
     type = PorousFlowSingleComponentFluid
     fp = fluid0
     phase = 0
-  [../]
-  [./fluid1]
+  []
+  [fluid1]
     type = PorousFlowSingleComponentFluid
     fp = fluid1
     phase = 1
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./porosity0]
+  []
+  [porosity0]
     type = PorousFlowPorosityConst
     porosity = 0.1
     block = 0
-  [../]
-  [./porosity1]
+  []
+  [porosity1]
     type = PorousFlowPorosityConst
     porosity = 0.2
     block = 1
-  [../]
+  []
 []
 
 
@@ -167,16 +167,16 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'p0 p1'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
+  []
 []
 
 [Outputs]

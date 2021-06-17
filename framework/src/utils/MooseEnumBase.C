@@ -193,3 +193,19 @@ MooseEnumBase::find(const MooseEnumItem & other) const
     return item.id() == other.id();
   });
 }
+
+MooseEnumBase &
+MooseEnumBase::operator+=(const std::string & name)
+{
+  addEnumerationName(name);
+  checkDeprecated();
+  return *this;
+}
+
+MooseEnumBase &
+MooseEnumBase::operator+=(const std::initializer_list<std::string> & names)
+{
+  for (const auto & name : names)
+    *this += name;
+  return *this;
+}

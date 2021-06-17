@@ -42,6 +42,54 @@ class NumericVector;
 template <>
 InputParameters validParams<MultiApp>();
 
+/// Holds app partitioning information relevant to the a particular rank for a
+/// multiapp scenario.
+struct LocalRankConfig
+{
+  /// The number of simulations that should/will be run locally on this rank.
+  dof_id_type num_local_sims;
+  /// The (global) index of the first local simulation for this rank.  All
+  /// ranks that are used to perform multi-proc parallel runs for a given
+  /// simulation will have the same first_local_sim_index as each other.
+  dof_id_type first_local_sim_index;
+  /// The number of (sub)apps that should/will be run locally on this rank.
+  /// This will generally be identical to num_local_sims unless operating in
+  /// some sort of "batch" mode where a single subapp is reused for multiple
+  /// simulations.
+  dof_id_type num_local_apps;
+  /// The (global) index of the first local app for this rank.  All ranks that
+  /// are used to perform multi-proc parallel runs for a given app will have
+  /// the same first_local_app_index as each other.  This will generally be
+  /// identical to first_local_sim_index unless operating in some sort of "batch" mode
+  /// where a single subapp is reused for multiple simulations.
+  dof_id_type first_local_app_index;
+  /// This is true if this rank is the primary/zero rank for a (sub)app slot.
+  /// A slot is all ranks that are grouped together to run a single (sub)app
+  /// together.  This field will be true for exactly one rank in each slot.
+  /// This is important for things like multiapp transfers where you want to
+  /// only transfer data to a given subapp once even though it may be running on
+  /// multiple procs/ranks.
+  bool is_first_local_rank;
+};
+
+/// Returns app partitioning information relevant to the given rank for a
+/// multiapp scenario with the given number of apps (napps) and parallel/mpi
+/// procs (nprocs).  min_app_procs and max_app_procs define the min and max
+/// number of procs that must/can be used in parallel to run a given (sub)app.
+/// batch_mode affects whether 1 subapp is assigned per rank to be re-used to
+/// run each of the (napps) simulations or whether 1 subapp is created for
+/// each napps simulation (globally).
+///
+/// Each proc calls this function in order to determine which (sub)apps among
+/// the global list of all subapps for a multiapp should be run by the given
+/// rank.
+LocalRankConfig rankConfig(dof_id_type rank,
+                           dof_id_type nprocs,
+                           dof_id_type napps,
+                           dof_id_type min_app_procs,
+                           dof_id_type max_app_procs,
+                           bool batch_mode = false);
+
 /**
  * Helper class for holding Sub-app backups
  */
@@ -75,20 +123,24 @@ public:
   virtual void finalize();
 
   /**
-   * Method called at the end of the simulation (after finalize)
+   * Method called at the end of the simulation (after finalize).
    */
   virtual void postExecute();
 
   /**
-   * Called just after construction to allow derived classes to set _positions;
+   * Called just after construction to allow derived classes to set _positions and create
+   * sub-apps accordingly.
    */
   void setupPositions();
 
+  /**
+   * Method to be called in main-app initial setup for create sub-apps if using positions is false.
+   */
   virtual void initialSetup() override;
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp
-   * (Which is just before the MultiApp is solved)
+   * (Which is just before the MultiApp is solved).
    */
   virtual void preTransfer(Real dt, Real target_time);
 
@@ -286,6 +338,11 @@ public:
    */
   bool isRootProcessor() { return _my_rank == 0; }
 
+  /**
+   * Whether or not this MultiApp is using positions or its own way for constructing sub-apps.
+   */
+  bool usingPositions() const { return _use_positions; }
+
 protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps
@@ -305,7 +362,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  void buildComm();
+  LocalRankConfig buildComm(bool batch_mode);
 
   /**
    * Map a global App number to the local number.
@@ -327,11 +384,16 @@ protected:
   virtual std::string getCommandLineArgsParamHelper(unsigned int local_app);
 
   /**
-   * Initialize the MultiApp by creating the provided number of apps.
-   *
-   * This is called in the constructor, by default it utilizes the 'positions' input parameters.
+   * Build communicators and reserve backups.
    */
-  void init(unsigned int num);
+  void init(unsigned int num_apps, bool batch_mode = false);
+
+  /**
+   * Create the provided number of apps.
+   *
+   * This is called in the setupPositions().
+   */
+  void createApps();
 
   /**
    * Reserve the solution from the previous simulation,
@@ -405,6 +467,9 @@ protected:
   /// Maximum number of processors to give to each app
   unsigned int _max_procs_per_app;
 
+  /// Minimum number of processors to give to each app
+  unsigned int _min_procs_per_app;
+
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
 
@@ -446,6 +511,9 @@ protected:
 
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
   std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
+
+  /// The app configuration resulting from calling init
+  LocalRankConfig _rank_config;
 
 private:
   PerfID _perf_backup;

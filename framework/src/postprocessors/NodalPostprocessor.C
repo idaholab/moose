@@ -23,6 +23,6 @@ NodalPostprocessor::validParams()
 }
 
 NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters)
-  : NodalUserObject(parameters), Postprocessor(parameters)
+  : NodalUserObject(parameters), Postprocessor(this)
 {
 }

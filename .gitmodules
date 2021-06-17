@@ -8,3 +8,6 @@
 [submodule "petsc"]
     path = petsc
     url = https://gitlab.com/petsc/petsc.git
+[submodule "moosetools"]
+    path = moosetools
+    url = ../../idaholab/moosetools

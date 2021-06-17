@@ -18,7 +18,7 @@ The inner radius and the outer radius must be specified. If the inner radius is 
 
 The minimum and maximum angle may also be specified. These default to zero and 360, respectively. If other values are chosen, a sector of an annulus, or a sector of a disc will be created. Both angles are measured anti-clockwise from the xx axis.
 
-The number of elements in the radial direction and the angular direction may be specified. In addition, a growth factor on the element size in the radial direction may be chosen. The element-size (in the radial direction) is multiplied by this factor for each concentric ring of elements, moving from the inner to the outer radius.
+The number of elements in the radial direction and the angular direction may be specified. In addition, a growth factor on the element size in the radial direction may be chosen. The element-size (in the radial direction) is multiplied by this factor for each concentric ring of elements, moving from the inner to the outer radius. If the growth factor is positive, element thicknesses increase in the radial direction, while if the growth factor is negative, element thicknesses decrease in the radial direction.
 
 Sidesets are also created:
 

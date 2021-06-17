@@ -1,3 +1,5 @@
+# NSStagnationPressureBC
+
 !syntax description /BCs/NSStagnationPressureBC
 
 !syntax parameters /BCs/NSStagnationPressureBC

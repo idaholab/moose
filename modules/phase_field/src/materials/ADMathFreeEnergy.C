@@ -16,7 +16,7 @@ ADMathFreeEnergy::validParams()
 {
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Material that implements the math free energy and its derivatives: "
-                             "\nF = 1/4(1 + c)^2*(1 - c)^2");
+                             "\n$F = 1/4(1 + c)^2(1 - c)^2$");
   params.addParam<MaterialPropertyName>("f_name", "F", "function property name");
   params.addRequiredCoupledVar("c", "Concentration variable");
   return params;

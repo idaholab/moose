@@ -66,10 +66,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
   dt = 100
   num_steps = 6
 []

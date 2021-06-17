@@ -11,8 +11,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-
 /**
  * SmoothMultiBoundingBoxBaseIC is the base class for IsolatedBoundingBoxIC and NestedBoundingBoxIC.
  * The boxes can finite interface width.

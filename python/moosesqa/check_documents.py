@@ -20,12 +20,13 @@ def check_documents(documents, file_list=None, **kwargs):
     """
 
     # Setup logger, assume the names of the documents with a "log_" prefix are the logging flags (see get_documents)
+    log_default = kwargs.get('log_default', logging.ERROR)
     for doc in documents:
-        kwargs.setdefault("log_" + doc.name, logging.ERROR)
+        kwargs.setdefault("log_" + doc.name, log_default)
     logger = LogHelper(__name__, **kwargs)
 
     # Setup file_list, if not provided
-    if (file_list is None) and (not mooseutils.is_git_repo()):
+    if (file_list is None) and (not mooseutils.git_is_repo()):
         msg = "If the 'file_list' is not provided then the working directory must be a git repository."
         raise ValueError(msg)
     elif file_list is None:
@@ -56,7 +57,7 @@ def _check_document(name, filename, file_list, logger):
     else:
         found = list()
         for fname in file_list:
-            if fname.endswith(filename):
+            if fname.endswith(filename.split('#')[0]):
                 found.append(filename)
 
         if len(found) == 0:

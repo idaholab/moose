@@ -1,0 +1,15 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'debug_pid_aux.i'
+    exodiff = 'debug_pid_aux_out.e'
+
+    requirement = 'The system shall support the output a processor id field for the purposes of debugging'
+    issues = '#16154'
+    design = 'SetupDebugAction.md ProcessorIDAux.md'
+
+    min_parallel = 4
+    max_parallel = 4
+    mesh_mode = REPLICATED
+  []
+[]

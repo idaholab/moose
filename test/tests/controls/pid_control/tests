@@ -1,0 +1,45 @@
+[Tests]
+  [pid]
+    requirement = "The Control system shall be able to control an input parameter to make a postprocessor match a target value,"
+    issues = '#17271'
+    design = 'syntax/Controls/index.md source/controls/PIDTransientControl.md'
+    [basic]
+      type = 'CSVDiff'
+      input = 'pid_control.i'
+      csvdiff = 'out.csv'
+      recover = false
+      detail = 'using the principle of Proportional Integral Derivative control,'
+    []
+    [basic_postprocessor]
+      type = 'CSVDiff'
+      input = 'pid_pp_control.i'
+      csvdiff = 'pp_out.csv'
+      recover = false
+      cli_args = "Outputs/file_base=pp_out"
+      detail = 'using a input postprocessor in lieu of an input parameter,'
+    []
+    [windup]
+      type = 'CSVDiff'
+      input = 'pid_control.i'
+      csvdiff = 'windup_out.csv'
+      recover = false
+      cli_args = 'Outputs/file_base=windup_out Controls/integral_value/reset_integral_windup=true'
+      detail = 'with integral windup control, resetting the integral term if the error crosses zero,'
+    []
+    [picard]
+      type = 'CSVDiff'
+      input = 'pid_pp_control.i'
+      csvdiff = 'picard_out.csv'
+      cli_args = "Outputs/file_base=picard_out Controls/integral_value/reset_every_timestep=true MultiApps/inactive=''"
+      detail = 'keeping the PID process within a single timestep,'
+    []
+    [resistance_to_solver_fails]
+      type = 'CSVDiff'
+      input = 'pid_pp_control.i'
+      recover = false
+      csvdiff = 'picard_resets_out.csv'
+      cli_args = "--no-trap-fpe Outputs/file_base=picard_resets_out MultiApps/inactive='' Controls/inactive='' Kernels/inactive='' Controls/integral_value/execute_on=timestep_begin"
+      detail = 'and resetting the PID process correctly if the solver fails during a Picard/coupling iteration.'
+    []
+  []
+[]

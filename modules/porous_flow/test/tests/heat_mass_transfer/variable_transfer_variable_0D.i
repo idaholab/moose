@@ -7,47 +7,47 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./v]
+  [v]
     initial_condition = 10
-  [../]
-  [./c]
+  []
+  [c]
     initial_condition = 1e-1
-  [../]
+  []
 []
 
 [Kernels]
-  [./u_dot]
+  [u_dot]
     type = TimeDerivative
     variable = u
-  [../]
-  [./value_transfer]
+  []
+  [value_transfer]
     type = PorousFlowHeatMassTransfer
     variable = u
     v = v
     transfer_coefficient = c
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./point_value]
+  [point_value]
     type = PointValue
     variable = u
     point = '0.5 0.5 0.'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./basic]
+  [basic]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

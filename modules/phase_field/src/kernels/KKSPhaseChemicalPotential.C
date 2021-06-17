@@ -19,8 +19,8 @@ KKSPhaseChemicalPotential::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical "
-                             "potentials  dFa/dca = dFb/dcb. The non-linear variable of this "
-                             "kernel is ca.");
+                             "potentials $dF_a/dc_a = dF_b/dc_b$. The non-linear variable of this "
+                             "kernel is $c_a$.");
   params.addRequiredCoupledVar(
       "cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
   params.addRequiredParam<MaterialPropertyName>("fa_name",

@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15232'
+  design = 'examples_and_tutorials/tutorial01_app_development/step10_auxkernels.md'
+  [test]
+    type = Exodiff
+    input = darcy_velocity_test.i
+    exodiff = darcy_velocity_test_out.e
+    requirement = "The system shall include a tutorial that introduces the ability to compute the velocity field assosciated with a pressure gradient in accordance with Darcy's law as an auxiliary task."
+  []
+[]

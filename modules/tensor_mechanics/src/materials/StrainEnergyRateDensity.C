@@ -47,12 +47,11 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
 
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
 
-  // Store inelastic models as generic RadialreturnCreepStressUpdateBase.
+  // Store inelastic models as generic StressUpdateBase.
   for (unsigned int i = 0; i < _num_models; ++i)
   {
-    GenericRadialReturnCreepStressUpdateBase<is_ad> * inelastic_model_stress_update =
-        dynamic_cast<GenericRadialReturnCreepStressUpdateBase<is_ad> *>(
-            &getMaterialByName(models[i]));
+    GenericStressUpdateBase<is_ad> * inelastic_model_stress_update =
+        dynamic_cast<GenericStressUpdateBase<is_ad> *>(&getMaterialByName(models[i]));
 
     if (inelastic_model_stress_update)
       _inelastic_models.push_back(inelastic_model_stress_update);

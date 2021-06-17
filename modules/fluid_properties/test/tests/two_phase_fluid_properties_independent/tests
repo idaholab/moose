@@ -1,13 +1,29 @@
 [Tests]
-  [./test]
+  [test]
     type = CSVDiff
     input = 'test.i'
     csvdiff = 'test_out.csv'
     rel_err = 1e-8
     allow_test_objects = true
     threading = '!pthreads'
-  [../]
-  [./call_2phase_property]
+  []
+  [no_error_on_unimplemented]
+    type = RunApp
+    input = 'test.i'
+    cli_args = "
+      Modules/FluidProperties/fp_2phase/error_on_unimplemented=false
+      AuxVariables/T_sat/family=LAGRANGE
+      AuxVariables/T_sat/order=FIRST
+      AuxKernels/T_sat_aux/type=SaturationTemperatureAux
+      AuxKernels/T_sat_aux/variable=T_sat
+      AuxKernels/T_sat_aux/p=p
+      AuxKernels/T_sat_aux/fp_2phase=fp_2phase
+      AuxKernels/T_sat_aux/execute_on=initial
+      Outputs/csv=false"
+    allow_test_objects = true
+    threading = '!pthreads'
+  []
+  [error:error_on_unimplemented]
     type = 'RunException'
     input = 'test.i'
     cli_args = "
@@ -21,5 +37,5 @@
     expect_err = "The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow calling any 2-phase property interfaces"
     allow_test_objects = true
     threading = '!pthreads'
-  [../]
+  []
 []

@@ -86,14 +86,17 @@ class CommandBase(components.ReaderComponent):
         settings = info['settings']
 
         # Handle filename and None subcommand
-        match = self.FILENAME_RE.search(info['subcommand']) if info['subcommand'] else None
-        if match:
-            cmd = (info['command'], match.group('ext'))
-        elif info['subcommand'] and info['subcommand'].startswith('http'):
-            cmd = (info['command'], None)
-        elif info['subcommand'] and '=' in info['subcommand']:
-            settings = info['subcommand'] + ' ' + settings
-            cmd = (info['command'], None)
+        if info['subcommand']:
+            match = self.FILENAME_RE.search(info['subcommand'])
+            if match:
+                cmd = (info['command'], match.group('ext'))
+            elif info['subcommand'].endswith('/tests'):
+                cmd = (info['command'], 'hit') # consider 'tests' as input files for hit formatting
+            elif info['subcommand'].startswith('http'):
+                cmd = (info['command'], None)
+            elif '=' in info['subcommand']:
+                settings = info['subcommand'] + ' ' + settings
+                cmd = (info['command'], None)
 
         # Locate the command object to call
         try:

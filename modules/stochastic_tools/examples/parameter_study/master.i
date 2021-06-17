@@ -30,7 +30,6 @@
     type = LatinHypercube
     num_rows = 5000
     distributions = 'gamma q_0 T_0 s'
-    num_bins = 10
   []
 []
 

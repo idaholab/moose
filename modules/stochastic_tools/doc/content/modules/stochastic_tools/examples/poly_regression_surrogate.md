@@ -111,17 +111,17 @@ to match the number of samples in the tensor-product quadrature set of [Quadratu
 
 !listing surrogates/polynomial_regression/normal_train.i block=Samplers  
 
-The objects in blocks `Controls`, `MultiApps`, `Transfers` and `VectorPostprocessors`
+The objects in blocks `Controls`, `MultiApps`, `Transfers` and `Reporters`
 are responsible for managing the communication between master and sub-applications,
 execution of the sub-applications and the collection of the results.
 For a more detailed description of these blocks see [examples/parameter_study.md]
 and [surrogate_training.md].
 
-!listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers VectorPostprocessors
+!listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers Reporters
 
 The next step is to set up two `Trainer` objects to generate the surrogate models
 from the available data. This can be done in the `Trainers` block. It is visible that
-both examples use the data from `Sampler` and `VectorPostprocessor` objects. A polynomial chaos surrogate of
+both examples use the data from `Sampler` and `Reporter` objects. A polynomial chaos surrogate of
 order 8 and a polynomial regression surrogate with a
 polynomial of degree at most 4 is used in this study.
 The [PolynomialChaosTrainer.md] also needs knowledge about the underlying parameter distributions
@@ -176,13 +176,12 @@ The statistical moments obtained by the execution of the
 !table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models assuming uniform parameter distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
-| $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3351 | 301.3332 |
-| $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9548 | 5.9537 |
+| $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3234 | 301.3220 |
+| $\sigma_{T_{max}}$ | 5.9585 | 5.9586 | 5.9625 | 5.9655 |
 
 It can be observed that the polynomial chaos surrogate gives results closer to the reference values.
 It is also visible that by increasing the polynomial order for the regression, the accuracy
-in the standard deviation slightly decreases. This behavior is often referred to as [overfitting](https://en.wikipedia.org/wiki/Overfitting)
-which decreases the accuracy with the increasing model parameters.
+in the standard deviation slightly decreases.
 The histogram of the results is presented in [uniform_hist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
 It is apparent that the two methods give similar solutions.
@@ -200,37 +199,18 @@ The statistical moments of the results from testing the
 !table id=stats_normal caption=Comparison of the statistical moments from different surrogate models assuming normal distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
-| $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.6289 | 301.7549 |
-| $\sigma_{T_{max}}$ | 10.0011 | 10.1125 | 11.2611 | 59.6608 |
+| $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.5663 | 301.5810 |
+| $\sigma_{T_{max}}$ | 10.0011 | 10.1125 | 11.2912 | 30.1675 |
 
 It is visible that polynomial chaos surrogate gives the closest results to the reference values.
-The overfitting phenomenon can also be observed, since the increase in the polynomial degree
+Furthermore, the increase in the polynomial degree
 for the regression leads to a decrease in accuracy for both the mean and the standard deviation.
+This behavior is often referred to as [overfitting](https://en.wikipedia.org/wiki/Overfitting)
+which decreases the accuracy with the increasing model parameters.
 The histogram of the results is presented in [normal_hist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
-It is apparent that the two methods give similar solutions, however the tails of the Histogram
-from the polynomial regression are longer.
+It is apparent that the two methods give similar solutions, however the tails of the histogram
+of the polynomial regression are longer.
 
 !media poly_reg_example_normal_hist.svg id=normal_hist
        caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models and assuming normal parameter distributions.
-
-An explanation for this can be that the normal parameter distributions result in more
-outliers in terms of QoIs. The least squares regression is sensitive to these outliers
-because even if there are a few of them, their contribution to the squared error can
-be considerable. This is not an issue for the polynomial chaos surrogate, since it
-includes additional weighting functions in the integrals. To further demonstrate this,
-`num_bins=20` is set in the [LatinHypercubeSampler.md] to create the training set
-for the polynomial regression surrogate. This allows more samples on the tails of
-the bell curves, thus the number of outliers potentially increases.
-The histogram of the testing results compared to that of the polynomial chaos surrogate
-is presented in [normal_hist_outlier]. It is visible that the tails of the histogram
-further increased and the mean got distorted as well.
-
-!media poly_reg_example_normal_hist_outlier.svg id=normal_hist_outlier
-       caption=Histogram of the maximum temperature presenting the effect of increasing the outliers in the training of the polynomial regression surrogate.
-
-To conclude, it is apparent that there are potential issues associated with the polynomial regression
-such as overfitting and the bias introduced by the outliers. For this reason, the utilization
-of polynomial regression surrogates may require several optimization steps to set the
-best maximum degree and filter potential outliers. Alternatively, the utilization of
-a regularizer can be considered as well.

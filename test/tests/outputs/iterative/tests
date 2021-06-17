@@ -31,20 +31,20 @@
       # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
       type = 'Exodiff'
       input = 'iterative_steady_sequence.i'
-      exodiff = 'iterative_steady_sequence_out.e
-                 iterative_steady_sequence_out.e-s002
-                 iterative_steady_sequence_out.e-s003
-                 iterative_steady_sequence_out.e-s004
-                 iterative_steady_sequence_out.e-s005
-                 iterative_steady_sequence_out.e-s006
-                 iterative_steady_sequence_out.e-s007
-                 iterative_steady_sequence_out.e-s008
-                 iterative_steady_sequence_out.e-s009
-                 iterative_steady_sequence_out.e-s010
-                 iterative_steady_sequence_out.e-s011
-                 iterative_steady_sequence_out.e-s012
-                 iterative_steady_sequence_out.e-s013
-                 iterative_steady_sequence_out.e-s014'
+      exodiff = 'iterative_steady_sequence_out.e '
+                'iterative_steady_sequence_out.e-s002 '
+                'iterative_steady_sequence_out.e-s003 '
+                'iterative_steady_sequence_out.e-s004 '
+                'iterative_steady_sequence_out.e-s005 '
+                'iterative_steady_sequence_out.e-s006 '
+                'iterative_steady_sequence_out.e-s007 '
+                'iterative_steady_sequence_out.e-s008 '
+                'iterative_steady_sequence_out.e-s009 '
+                'iterative_steady_sequence_out.e-s010 '
+                'iterative_steady_sequence_out.e-s011 '
+                'iterative_steady_sequence_out.e-s012 '
+                'iterative_steady_sequence_out.e-s013 '
+                'iterative_steady_sequence_out.e-s014'
 
       # This test relies on number of residuals being the same, so run it serially
       max_parallel = 1

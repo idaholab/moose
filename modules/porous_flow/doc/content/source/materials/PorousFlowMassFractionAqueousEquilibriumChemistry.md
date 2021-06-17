@@ -5,7 +5,7 @@
 This forms `PorousFlow` mass-fractions appropriate for an aqueous equilibrium chemistry simulation.
 The first $N-1$ of these are the total concentrations of the primary species of the chemical reaction
 system, while the last one is the mass-fraction of the remaining component, which is assumed to be
-pure water.
+pure water.  See [PorousFlowMassFraction](PorousFlowMassFraction.md) for the non-chemistry version.
 
 !alert warning
 The numerical implementation of the chemical-reactions part of `PorousFlow` is quite simplistic, with
@@ -36,7 +36,7 @@ differences between the `chemical reactions` module and `PorousFlow`.  These are
   Then the `reactions` input is `1 2 -3 4 -5 6`.
 
 !alert note
-If the equilibrium constants are AuxVariables that depend on temperature (or other Variables) the computed Jacobian will not be exact and you may experience poor nonlinear convergence.  If this becomes frustrating, please contact the moose-users google group.
+If the equilibrium constants are AuxVariables that depend on temperature (or other Variables) the computed Jacobian will not be exact and you may experience poor nonlinear convergence.  If this becomes frustrating, please contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 
 !syntax parameters /Materials/PorousFlowMassFractionAqueousEquilibriumChemistry

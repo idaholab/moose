@@ -6,6 +6,7 @@ Content:
     - modules/contact/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
+    - modules/fsi/doc/content
     - modules/functional_expansion_tools/doc/content
     - modules/heat_conduction/doc/content
     - modules/level_set/doc/content
@@ -14,6 +15,7 @@ Content:
     - modules/peridynamics/doc/content
     - modules/phase_field/doc/content
     - modules/porous_flow/doc/content
+    - modules/ray_tracing/doc/content
     - modules/rdg/doc/content
     - modules/richards/doc/content
     - modules/stochastic_tools/doc/content
@@ -50,23 +52,8 @@ Extensions:
             framework: !include framework/doc/unregister.yml
         remove:
             framework: !include framework/doc/remove.yml
-            #chemical_reactions: !include modules/chemical_reactions/doc/remove.yml
-            #combined: !include modules/combined/doc/remove.yml
-            #contact: !include modules/contact/doc/remove.yml
-            #fluid_properties: !include modules/fluid_properties/doc/remove.yml
-            #functional_expansion_tools: !include modules/functional_expansion_tools/doc/remove.yml
-            #heat_conduction: !include modules/heat_conduction/doc/remove.yml
-            #level_set: !include modules/level_set/doc/remove.yml
-            #misc: !include modules/misc/doc/remove.yml
-            #navier_stokes: !include modules/navier_stokes/doc/remove.yml
-            #peridynamics: !include modules/peridynamics/doc/remove.yml
-            #phase_field: !include modules/phase_field/doc/remove.yml
-            #porous_flow: !include modules/porous_flow/doc/remove.yml
-            #rdg: !include modules/rdg/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
-            #tensor_mechanics: !include modules/tensor_mechanics/doc/remove.yml
-            #xfem: !include modules/xfem/doc/remove.yml
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -87,27 +74,35 @@ Extensions:
             functions: syntax/Functions/index.md
             fvbcs: syntax/FVBCs/index.md
             fvkernels: syntax/FVKernels/index.md
+            fviks: syntax/FVInterfaceKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
             interfacekernels: syntax/InterfaceKernels/index.md
             interfaces: framework_development/interfaces/index.md
             kernels: syntax/Kernels/index.md
+            linesearches: syntax/LineSearches/index.md
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
-            meshmodifiers: syntax/MeshModifiers/index.md
+            meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
             outputs: syntax/Outputs/index.md
+            parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md
             postprocessors: syntax/Postprocessors/index.md
             preconditioners: syntax/Preconditioning/index.md
             predictors: syntax/Executioner/Predictor/index.md
             problems: syntax/Problem/index.md
+            raybcs: syntax/RayBCs/index.md
+            raykernels: syntax/RayKernels/index.md
+            relationshipmanagers: source/relationshipmanagers/RelationshipManager.md
+            reporters: syntax/Reporters/index.md
             restart: application_usage/restart_recover.md
             samplers: syntax/Samplers/index.md
             scalarkernels: syntax/ScalarKernels/index.md
             splits: syntax/Preconditioning/index.md
+            surrogates: syntax/Surrogates/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
             timesteppers: syntax/Executioner/TimeStepper/index.md
             transfers: syntax/Transfers/index.md
@@ -124,6 +119,8 @@ Extensions:
                 repo: idaholab/moose
     MooseDocs.extensions.template:
         active: True
+        args:
+            company: Ford # used for example in python/MooseDocs/extensions/template.md
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/doc/sqa_reports.yml
@@ -137,6 +134,10 @@ Extensions:
             misc: !include modules/misc/doc/sqa_misc.yml
             phase_field: !include modules/phase_field/doc/sqa_phase_field.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
+            navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
+            rdg: !include modules/rdg/doc/sqa_rdg.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+            fsi: !include modules/fsi/doc/sqa_fsi.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects

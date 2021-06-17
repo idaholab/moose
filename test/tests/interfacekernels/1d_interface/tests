@@ -135,4 +135,13 @@
     requirement = "The Jacobian from InterfaceReaction shall be perfect"
     design = 'InterfaceReaction.md'
   [../]
+
+  [sort_interface_materials]
+    type = Exodiff
+    input = 'sorted-interface-materials.i'
+    exodiff = 'sorted-interface-materials_out.e'
+    requirement = 'The system shall ensure that interfacial materials are sorted such that consumers execute after producers.'
+    issues = '#17171'
+    design = 'Materials/index.md'
+  []
 []

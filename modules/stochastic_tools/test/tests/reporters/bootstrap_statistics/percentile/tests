@@ -1,0 +1,42 @@
+[Tests]
+  design = StatisticsReporter.md
+  issues = '#14409 #16584'
+
+  [percentile]
+    requirement = "The system shall support computing percentile confidence level intervals of statistics"
+
+    [basic]
+      type = JSONDiff
+      input = percentile.i
+      jsondiff = percentile_out.json
+
+      detail = "of a vector of data"
+    []
+
+    # These two tests are restricted to 3 processors because the Test VPP creates unique data
+    # depending on the number of cores used
+    [replicated]
+      type = JSONDiff
+      input = percentile_distributed.i
+      jsondiff = percentile_distributed_out.json
+      cli_args = "VectorPostprocessors/data/parallel_type=replicated"
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+
+      detail = "using data that is replicated or"
+    []
+
+    [distributed]
+      type = JSONDiff
+      input = percentile_distributed.i
+      jsondiff = percentile_distributed_out.json
+      prereq = percentile/replicated
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+
+      detail = "distributed across processors."
+    []
+  []
+[]

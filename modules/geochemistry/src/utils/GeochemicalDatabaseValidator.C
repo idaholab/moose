@@ -68,10 +68,10 @@ GeochemicalDatabaseValidator::validate()
         if (coeffs.key() == "note")
           continue;
 
-        // Check that all temperature values are real numbers
+        // Check that there are a correct number of values and that they are real numbers
         auto values = coeffs.value();
-        checkArraySize(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
-        checkArrayValues(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
+        checkArraySize(values, "Header:neutral species:" + ns.key() + ":" + coeffs.key());
+        checkArrayValues(values, "Header:neutral species:" + ns.key() + ":" + coeffs.key());
       }
 
   // Check the element data
@@ -121,6 +121,8 @@ GeochemicalDatabaseValidator::validate()
 bool
 GeochemicalDatabaseValidator::isValueReal(const nlohmann::json & value) const
 {
+  if (value.is_number())
+    return true;
   try
   {
     MooseUtils::convert<Real>(value, true);
@@ -210,11 +212,9 @@ GeochemicalDatabaseValidator::checkHeaderField(const std::string field) const
 void
 GeochemicalDatabaseValidator::checkHeaderArray(const std::string field) const
 {
-  // Check that all values are real numbers
-  auto values = _root["Header"][field];
-
-  checkArraySize(values, "Header:" + field);
-  checkArrayValues(values, "Header:" + field);
+  // Check that all values are real numbers and of size equal to the temperature
+  checkArraySize(_root["Header"][field], "Header:" + field);
+  checkArrayValues(_root["Header"][field], "Header:" + field);
 }
 
 void
@@ -222,7 +222,7 @@ GeochemicalDatabaseValidator::checkSpeciesValue(const std::string type,
                                                 const std::string species,
                                                 const std::string field) const
 {
-  if (!_root[type][species][field])
+  if (!_root[type].contains(species) || !_root[type][species].contains(field))
     mooseError("The ", type, " ", species, " in ", _filename, " does not have a ", field);
 
   // The field value should be a real number
@@ -244,7 +244,7 @@ GeochemicalDatabaseValidator::checkSpeciesWeightValue(const std::string type,
                                                       const std::string species,
                                                       const std::string field) const
 {
-  if (!_root[type][species][field])
+  if (!_root[type].contains(species) || !_root[type][species].contains(field))
     mooseError("The ", type, " ", species, " in ", _filename, " does not have a ", field);
 
   // Each weight value for each constituent should be a real number

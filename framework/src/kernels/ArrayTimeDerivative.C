@@ -19,9 +19,9 @@ ArrayTimeDerivative::validParams()
   InputParameters params = ArrayTimeKernel::validParams();
   params.addClassDescription("Array time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
-  params.addParam<MaterialPropertyName>("time_derivative_coefficient",
-                                        "The name of the time derivative coefficient. "
-                                        "Can be scalar, vector, or matrix");
+  params.addRequiredParam<MaterialPropertyName>("time_derivative_coefficient",
+                                                "The name of the time derivative coefficient. "
+                                                "Can be scalar, vector, or matrix");
   return params;
 }
 
@@ -44,17 +44,18 @@ ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
   }
 }
 
-RealEigenVector
-ArrayTimeDerivative::computeQpResidual()
+void
+ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
   if (_coeff)
-    return (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
+    residual = (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   else if (_coeff_array)
   {
     mooseAssert((*_coeff_array)[_qp].size() == _var.count(),
                 "time_derivative_coefficient size is inconsistent with the number of components "
                 "in array variable");
-    return ((*_coeff_array)[_qp].array() * _u_dot[_qp].array()) * _test[_i][_qp];
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
+    residual.noalias() = (*_coeff_array)[_qp].asDiagonal() * _u_dot[_qp] * _test[_i][_qp];
   }
   else
   {
@@ -64,7 +65,8 @@ ArrayTimeDerivative::computeQpResidual()
     mooseAssert((*_coeff_2d_array)[_qp].rows() == _var.count(),
                 "time_derivative_coefficient size is inconsistent with the number of components "
                 "in array variable");
-    return (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
+    residual.noalias() = (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   }
 }
 
@@ -81,7 +83,7 @@ ArrayTimeDerivative::computeQpJacobian()
 }
 
 RealEigenMatrix
-ArrayTimeDerivative::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayTimeDerivative::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _coeff_2d_array)
     return _phi[_j][_qp] * _test[_i][_qp] * _du_dot_du[_qp] * (*_coeff_2d_array)[_qp];
