@@ -18,7 +18,7 @@ class SideDiffusiveFluxIntegralTempl;
 typedef SideDiffusiveFluxIntegralTempl<false, Real> SideDiffusiveFluxIntegral;
 typedef SideDiffusiveFluxIntegralTempl<true, Real> ADSideDiffusiveFluxIntegral;
 typedef SideDiffusiveFluxIntegralTempl<false, RealVectorValue> SideVectorDiffusivityFluxIntegral;
-typedef SideDiffusiveFluxIntegralTempl<true, RealVectorValue> ADVectorSideDiffusivityFluxIntegral;
+typedef SideDiffusiveFluxIntegralTempl<true, RealVectorValue> ADSideVectorDiffusivityFluxIntegral;
 
 template <>
 InputParameters validParams<SideDiffusiveFluxIntegral>();
