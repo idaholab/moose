@@ -13,197 +13,197 @@
 []
 
 [Variables]
-  [./pwater]
+  [pwater]
     initial_condition = 1e6
-  [../]
-  [./sgas]
+  []
+  [sgas]
     initial_condition = 0.3
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 50
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./x0]
+  [x0]
     initial_condition = 0.1
-  [../]
-  [./x1]
+  []
+  [x1]
     initial_condition = 0.5
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pwater
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = sgas
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pwater
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = sgas
-  [../]
-  [./energy_dot]
+  []
+  [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temperature
-  [../]
-  [./heat_advection]
+  []
+  [heat_advection]
     type = PorousFlowHeatAdvection
     variable = temperature
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pwater sgas temperature'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1e-5
     pc_max = 1e7
     sat_lr = 0.1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 1e9
       viscosity = 1e-3
       density0 = 1000
       thermal_expansion = 0
       cv = 2
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 1e9
       viscosity = 1e-4
       density0 = 20
       thermal_expansion = 0
       cv = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 50
-  [../]
-  [./temperature_nodal]
+  []
+  [temperature_nodal]
     type = PorousFlowTemperature
     at_nodes = true
     temperature = 50
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = pwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./ppss_nodal]
+  []
+  [ppss_nodal]
     type = PorousFlow2PhasePS
     at_nodes = true
     phase0_porepressure = pwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'x0 x1'
-  [../]
-  [./massfrac_nodal]
+  []
+  [massfrac_nodal]
     type = PorousFlowMassFraction
     at_nodes = true
     mass_fraction_vars = 'x0 x1'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid0_nodal]
+  []
+  [simple_fluid0_nodal]
     type = PorousFlowSingleComponentFluid
     at_nodes = true
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./simple_fluid1_nodal]
+  []
+  [simple_fluid1_nodal]
     type = PorousFlowSingleComponentFluid
     at_nodes = true
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.11
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
     s_res = 0.01
     sum_s_res = 0.11
-  [../]
-  [./relperm0_nodal]
+  []
+  [relperm0_nodal]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     at_nodes = true
-  [../]
-  [./relperm1_nodal]
+  []
+  [relperm1_nodal]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
     at_nodes = true
-  [../]
-  [./porosity_nodal]
+  []
+  [porosity_nodal]
     type = PorousFlowPorosityConst
     porosity = 0.1
     at_nodes = true
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1.0
     density = 125
-  [../]
-  [./unused]
+  []
+  [unused]
     type = GenericConstantMaterial
     prop_names = unused
     prop_values = 0
-  [../]
+  []
 []
 
 [Executioner]

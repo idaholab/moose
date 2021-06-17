@@ -10,10 +10,8 @@
 #pragma once
 
 #include "ComputeFiniteStrainElasticStress.h"
-
+#include "DamageBase.h"
 #include "StressUpdateBase.h"
-
-class DamageBase;
 
 /**
  * ComputeMultipleInelasticStress computes the stress, the consistent tangent
@@ -156,7 +154,7 @@ protected:
   /// whether to cycle through the models, using only one model per timestep
   const bool _cycle_models;
 
-  MaterialProperty<Real> & _matl_timestep_limit;
+  MaterialProperty<Real> & _material_timestep_limit;
 
   /**
    * Rank four symmetric identity tensor
@@ -179,7 +177,7 @@ protected:
   bool _all_models_isotropic;
 
   /// Pointer to the damage model
-  DamageBase * _damage_model;
+  DamageBaseTempl<false> * _damage_model;
 
   RankTwoTensor _undamaged_stress_old;
 };

@@ -13,22 +13,13 @@ InputParameters
 ADDirichletBCBase::validParams()
 {
   InputParameters params = ADNodalBC::validParams();
-  params.addParam<bool>("preset",
-                        true,
-                        "Whether or not to preset the BC (apply the value before the solve "
-                        "begins). Note that the default value of this parameter is handled by the "
-                        "use_legacy_dirichlet_bc parameter on the MooseApp.");
+  params.addParam<bool>(
+      "preset", true, "Whether or not to preset the BC (apply the value before the solve begins).");
   return params;
 }
 
 ADDirichletBCBase::ADDirichletBCBase(const InputParameters & parameters)
-  : ADNodalBC(parameters),
-    // If the user sets preset, abide by it. Otherwise, pick the default depending on the
-    // application's preference to using the legacy dirichlet BC (legacy: preset = false,
-    // non-legacy: preset = true)
-    _preset(parameters.isParamSetByUser("preset")
-                ? getParam<bool>("preset")
-                : !this->_app.parameters().template get<bool>("use_legacy_dirichlet_bc"))
+  : ADNodalBC(parameters), _preset(getParam<bool>("preset"))
 {
 }
 

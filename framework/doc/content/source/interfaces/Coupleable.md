@@ -135,4 +135,4 @@ It is possible to retrieve the solution DOFs of an element in an elemental loop.
 DOFs all the user to perform their own integration or other evaluation without going through the interpolation
 process. These functions can be found here:
 
-!listing moose/framework/include/interfaces/Coupleable.h start=coupled-dof-values-begin end=coupled-dof-values-end include-start=false
+!listing framework/include/interfaces/Coupleable.h start=coupled-dof-values-begin end=coupled-dof-values-end include-start=false

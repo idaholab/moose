@@ -37,14 +37,13 @@ GeometricCut2DUserObject::GeometricCut2DUserObject(const InputParameters & param
 bool
 GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
                                                std::vector<Xfem::CutEdge> & cut_edges,
-                                               std::vector<Xfem::CutNode> & cut_nodes,
-                                               Real time) const
+                                               std::vector<Xfem::CutNode> & cut_nodes) const
 {
   bool cut_elem = false;
 
   for (unsigned int cut = 0; cut < _cut_line_endpoints.size(); ++cut)
   {
-    Real fraction = cutFraction(cut, time);
+    Real fraction = cutFraction(cut);
 
     if (fraction > 0.0)
     {
@@ -65,7 +64,7 @@ GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
         const Node * node2 = curr_side->node_ptr(1);
         Real seg_int_frac = 0.0;
 
-        if (IntersectSegmentWithCutLine(
+        if (Xfem::intersectSegmentWithCutLine(
                 *node1, *node2, _cut_line_endpoints[cut], fraction, seg_int_frac))
         {
           if (seg_int_frac > Xfem::tol && seg_int_frac < 1.0 - Xfem::tol)
@@ -95,8 +94,7 @@ GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 GeometricCut2DUserObject::cutElementByGeometry(const Elem * /*elem*/,
-                                               std::vector<Xfem::CutFace> & /*cut_faces*/,
-                                               Real /*time*/) const
+                                               std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("Invalid method: must use vector of element edges for 2D mesh cutting");
   return false;
@@ -104,14 +102,13 @@ GeometricCut2DUserObject::cutElementByGeometry(const Elem * /*elem*/,
 
 bool
 GeometricCut2DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                                std::vector<Xfem::CutEdge> & cut_edges,
-                                                Real time) const
+                                                std::vector<Xfem::CutEdge> & cut_edges) const
 {
   bool cut_frag = false;
 
   for (unsigned int cut = 0; cut < _cut_line_endpoints.size(); ++cut)
   {
-    Real fraction = cutFraction(cut, time);
+    Real fraction = cutFraction(cut);
 
     if (fraction > 0.0)
     {
@@ -121,11 +118,11 @@ GeometricCut2DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> 
       {
         Real seg_int_frac = 0.0;
 
-        if (IntersectSegmentWithCutLine(frag_edges[i][0],
-                                        frag_edges[i][1],
-                                        _cut_line_endpoints[cut],
-                                        fraction,
-                                        seg_int_frac))
+        if (Xfem::intersectSegmentWithCutLine(frag_edges[i][0],
+                                              frag_edges[i][1],
+                                              _cut_line_endpoints[cut],
+                                              fraction,
+                                              seg_int_frac))
         {
           cut_frag = true;
           Xfem::CutEdge mycut;
@@ -143,78 +140,30 @@ GeometricCut2DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> 
 
 bool
 GeometricCut2DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                                std::vector<Xfem::CutFace> & /*cut_faces*/,
-                                                Real /*time*/) const
+                                                std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("Invalid method: must use vector of element edges for 2D mesh cutting");
   return false;
 }
 
-bool
-GeometricCut2DUserObject::IntersectSegmentWithCutLine(
-    const Point & segment_point1,
-    const Point & segment_point2,
-    const std::pair<Point, Point> & cutting_line_points,
-    const Real & cutting_line_fraction,
-    Real & segment_intersection_fraction) const
-{
-  // Use the algorithm described here to determine whether a line segment is intersected
-  // by a cutting line, and to compute the fraction along that line where the intersection
-  // occurs:
-  // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-
-  bool cut_segment = false;
-  Point seg_dir = segment_point2 - segment_point1;
-  Point cut_dir = cutting_line_points.second - cutting_line_points.first;
-  Point cut_start_to_seg_start = segment_point1 - cutting_line_points.first;
-
-  Real cut_dir_cross_seg_dir = crossProduct2D(cut_dir, seg_dir);
-
-  if (std::abs(cut_dir_cross_seg_dir) > Xfem::tol)
-  {
-    // Fraction of the distance along the cutting segment where it intersects the edge segment
-    Real cut_int_frac = crossProduct2D(cut_start_to_seg_start, seg_dir) / cut_dir_cross_seg_dir;
-
-    if (cut_int_frac >= 0.0 && cut_int_frac <= cutting_line_fraction)
-    { // Cutting segment intersects the line of the edge segment, but the intersection point may
-      // be
-      // outside the segment
-      Real int_frac = crossProduct2D(cut_start_to_seg_start, cut_dir) / cut_dir_cross_seg_dir;
-      if (int_frac >= 0.0 &&
-          int_frac <= 1.0) // TODO: revisit end cases for intersections with corners
-      {
-        cut_segment = true;
-        segment_intersection_fraction = int_frac;
-      }
-    }
-  }
-  return cut_segment;
-}
-
 Real
-GeometricCut2DUserObject::crossProduct2D(const Point & point_a, const Point & point_b) const
-{
-  return (point_a(0) * point_b(1) - point_b(0) * point_a(1));
-}
-
-Real
-GeometricCut2DUserObject::cutFraction(unsigned int cut_num, Real time) const
+GeometricCut2DUserObject::cutFraction(unsigned int cut_num) const
 {
   mooseAssert(_cut_time_ranges.size() > cut_num,
               "cut_num is outside the bounds of _cut_time_ranges");
 
   Real fraction = 0.0;
 
-  if (time >= _cut_time_ranges[cut_num].first)
+  if (_t >= _cut_time_ranges[cut_num].first)
   {
-    if (time >= _cut_time_ranges[cut_num].second)
+    if (_t >= _cut_time_ranges[cut_num].second)
       fraction = 1.0;
     else
     {
       Real denominator = _cut_time_ranges[cut_num].second - _cut_time_ranges[cut_num].first;
       if (MooseUtils::absoluteFuzzyEqual(denominator, 0.0))
         mooseError("time_start_cut and time_end_cut cannot have the same value");
-      fraction = (time - _cut_time_ranges[cut_num].first) / denominator;
+      fraction = (_t - _cut_time_ranges[cut_num].first) / denominator;
     }
   }
   return fraction;

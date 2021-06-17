@@ -10,11 +10,13 @@
 #include "MaterialPropertyValue.h"
 
 registerMooseObject("MooseApp", MaterialPropertyValue);
+registerMooseObject("MooseApp", ADMaterialPropertyValue);
 
+template <bool is_ad>
 InputParameters
-MaterialPropertyValue::validParams()
+MaterialPropertyValueTempl<is_ad>::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = KernelValueParent<is_ad>::validParams();
   params.addClassDescription(
       "Residual term (u - prop) to set variable u equal to a given material property prop");
   params.addRequiredParam<MaterialPropertyName>(
@@ -24,21 +26,41 @@ MaterialPropertyValue::validParams()
   return params;
 }
 
-MaterialPropertyValue::MaterialPropertyValue(const InputParameters & parameters)
-  : KernelValue(parameters),
-    _kernel_sign(getParam<bool>("positive") ? 1.0 : -1.0),
-    _prop(getMaterialProperty<Real>("prop_name"))
+template <bool is_ad>
+MaterialPropertyValueTempl<is_ad>::MaterialPropertyValueTempl(const InputParameters & parameters)
+  : KernelValueParent<is_ad>(parameters),
+    _kernel_sign(this->template getParam<bool>("positive") ? 1.0 : -1.0),
+    _prop(this->template getGenericMaterialProperty<Real, is_ad>("prop_name"))
 {
 }
 
+template <>
 Real
-MaterialPropertyValue::precomputeQpResidual()
+MaterialPropertyValueTempl<false>::precomputeQpResidual()
 {
   return _kernel_sign * (_prop[_qp] - _u[_qp]);
 }
 
+template <>
+ADReal
+MaterialPropertyValueTempl<true>::precomputeQpResidual()
+{
+  return _kernel_sign * (_prop[_qp] - _u[_qp]);
+}
+
+template <>
 Real
-MaterialPropertyValue::precomputeQpJacobian()
+MaterialPropertyValueTempl<false>::precomputeQpJacobian()
 {
   return -_kernel_sign * _phi[_j][_qp];
 }
+
+template <>
+Real
+MaterialPropertyValueTempl<true>::precomputeQpJacobian()
+{
+  mooseError("This should never get called");
+}
+
+template class MaterialPropertyValueTempl<false>;
+template class MaterialPropertyValueTempl<true>;

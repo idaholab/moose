@@ -198,12 +198,24 @@ public:
   void executeActionsWithAction(const std::string & name);
 
   /**
-   * This method sets a Boolean which is used to show debugging information during
-   * various warehouse operations during the problem setup phase.
+   * This method sets a Boolean which is used to print information about action dependencies
+   * before various warehouse operations during the problem setup phase.
+   * @param state Flag indicating whether to print action dependencies.
+   */
+  void showActionDependencies(bool state = true) { _show_action_dependencies = state; }
+
+  /**
+   * This method sets a Boolean which is used to show information about action execution
+   * of various warehouse operations during the problem setup phase.
    * @param state Flag indicating whether to show action information.
    */
   void showActions(bool state = true) { _show_actions = state; }
 
+  /**
+   * This method sets a Boolean which is used to show debugging information when
+   * actions are inserted in the warehouse by the parser.
+   * @param state Flag indicating whether to show action insertion.
+   */
   void showParser(bool state = true) { _show_parser = state; }
 
   //// Getters
@@ -228,6 +240,11 @@ public:
 
   std::string getCurrentActionName() const;
 
+  /**
+   * @returns True if the registered task with the name \p task is complete.
+   */
+  bool isTaskComplete(const std::string & task) const;
+
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.
@@ -250,6 +267,8 @@ protected:
   std::map<std::string, std::list<Action *>> _action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
+  /// The completed tasks
+  std::set<std::string> _completed_tasks;
   /// Use to store the current list of unsatisfied dependencies
   std::set<std::string> _unsatisfied_dependencies;
 
@@ -260,8 +279,11 @@ protected:
    */
   bool _generator_valid;
 
-  // DEBUGGING
+  /// Whether or not the action warehouse prints the action dependency information
+  bool _show_action_dependencies;
+  /// Whether or not the action warehouse prints the action execution information
   bool _show_actions;
+  /// Whether or not to print messages when actions are inserted in the warehouse by the parser
   bool _show_parser;
 
   // When executing the actions in the warehouse, this string will always contain

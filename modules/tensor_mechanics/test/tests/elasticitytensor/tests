@@ -5,6 +5,22 @@
     exodiff = 'composite_out.e'
     issues = '#5850'
     design = 'CompositeElasticityTensor.md'
-    requirement = 'The system shall provide a method for assembleing an elasticity tensor from multiple tensor contributions weighted by material properties.'
+    requirement = 'The system shall provide a method for assembling an elasticity tensor from multiple tensor contributions weighted by material properties.'
+  [../]
+  [./rotation_matrix_one_rotation]
+    type = 'Exodiff'
+    input = 'rotation_matrix_1_rotation.i'
+    exodiff = 'rotation_matrix_1_rotation_out.e'
+    issues = '#16340'
+    design = 'ComputeElasticityTensor.md'
+    requirement = 'The system shall provide a method for rotating a tensor using a rotation matrix.'
+  [../]
+  [./rotation_matrix_two_rotations]
+    type = 'Exodiff'
+    input = 'rotation_matrix_2_rotations.i'
+    exodiff = 'rotation_matrix_2_rotations_out.e'
+    issues = '#16340'
+    design = 'ComputeElasticityTensor.md'
+    requirement = 'The system shall provide a method for rotating a tensor using a rotation matrix requiring more than one rotation.'
   [../]
 []

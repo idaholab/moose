@@ -1,3 +1,5 @@
+# INSCourant
+
 !syntax description /AuxKernels/INSCourant
 
 !syntax parameters /AuxKernels/INSCourant

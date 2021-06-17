@@ -1,10 +1,36 @@
 [Tests]
-  issues = '#3114'
-  design = 'source/auxkernels/MaterialRealAux.md'
   [./test]
     type = 'Exodiff'
     input = 'element_aux_boundary.i'
     exodiff = 'element_aux_boundary_out.e'
     requirement = "The variable data created by a MaterialRealAux object shall support being limited to boundaries."
+    issues = '#3114'
+    design = 'source/auxkernels/MaterialRealAux.md'
+  [../]
+  [./ho_boundary_restricted_test]
+    type = 'Exodiff'
+    input = 'high_order_boundary_aux.i'
+    exodiff = 'high_order_boundary_aux_out.e'
+    requirement = "MOOSE shall support boundary restricted auxiliary elemental variables with high order shape functions."
+    issues = '#16895'
+    design = 'syntax/AuxKernels/index.md'
+  [../]
+  [./boundary_restricted_error_test]
+    type = RunException
+    input = 'high_order_boundary_aux.i'
+    cli_args = "AuxKernels/real_property/boundary='0 1' --color off"
+    expect_err = "Boundary restricted auxiliary kernel 'real_property' has element \(id=[0-9]+\) connected with more than one boundary sides."
+    requirement = "MOOSE shall error if a boundary restricted elemental auxiliary kernel is evaluated on an element with multiple boundary sides"
+    issues = '#5061'
+    design = 'syntax/AuxKernels/index.md'
+  [../]
+  [./boundary_unrestricted_error_test]
+    type = RunApp
+    input = 'high_order_boundary_aux.i'
+    cli_args = "AuxKernels/real_property/boundary='0 1' AuxKernels/real_property/check_boundary_restricted=false --color off"
+    requirement = "The system shall allow a boundary restricted elemental auxiliary kernel to be evaluated on an element with multiple boundary sides by setting an input parameter."
+    issues = '#17424'
+    design = 'syntax/AuxKernels/index.md'
+    prereq = 'ho_boundary_restricted_test'
   [../]
 []

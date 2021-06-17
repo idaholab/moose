@@ -21,14 +21,9 @@ defineLegacyParams(InterfaceKernelBase);
 InputParameters
 InterfaceKernelBase::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
   params += BoundaryRestrictable::validParams();
-  params += MeshChangedInterface::validParams();
-  params += TaggingInterface::validParams();
 
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -80,24 +75,11 @@ Threads::spin_mutex InterfaceKernelBase::_resid_vars_mutex;
 Threads::spin_mutex InterfaceKernelBase::_jacoby_vars_mutex;
 
 InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
-  : MooseObject(parameters),
+  : NeighborResidualObject(parameters),
     BoundaryRestrictable(this, false), // false for _not_ nodal
-    SetupInterface(this),
-    TransientInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    PostprocessorInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    Restartable(this, "InterfaceKernels"),
-    MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    TaggingInterface(this),
     ElementIDInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _neighbor_elem(_assembly.neighbor()),
@@ -122,4 +104,10 @@ const Real &
 InterfaceKernelBase::getNeighborElemVolume()
 {
   return _assembly.neighborVolume();
+}
+
+void
+InterfaceKernelBase::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareFaceShapes(var_num, _tid);
 }

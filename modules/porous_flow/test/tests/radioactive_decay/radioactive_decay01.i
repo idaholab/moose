@@ -20,111 +20,111 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [ICs]
-  [./pinit]
+  [pinit]
     type = FunctionIC
     function = 10
     variable = pp
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
-  [./decay]
+  []
+  [decay]
     type = PorousFlowMassRadioactiveDecay
     fluid_component = 0
     variable = pp
     decay_rate = 2.0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1
       density0 = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_mass]
+  [total_mass]
     type = PorousFlowFluidMass
     execute_on = 'timestep_end'
-  [../]
-  [./total_mass0]
+  []
+  [total_mass0]
     type = PorousFlowFluidMass
     execute_on = 'timestep_begin'
-  [../]
-  [./should_be_zero]
+  []
+  [should_be_zero]
     type = FunctionValuePostprocessor
     function = should_be_0
-  [../]
+  []
 []
 
 [Functions]
-  [./should_be_0]
+  [should_be_0]
     type = ParsedFunction
     vars = 'm0 m rate dt'
     vals = 'total_mass0 total_mass 2.0 1'
     value = 'm-m0/(1.0+rate*dt)'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

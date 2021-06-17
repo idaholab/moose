@@ -12,6 +12,7 @@
 #include "ALEKernel.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "JvarMapInterface.h"
 
 // Forward Declarations
 
@@ -20,7 +21,7 @@
  * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
  * to allow for more mathematical transparancy.
  */
-class StressDivergenceTensors : public ALEKernel
+class StressDivergenceTensors : public JvarMapKernelInterface<ALEKernel>
 {
 public:
   static InputParameters validParams();
@@ -28,8 +29,7 @@ public:
   StressDivergenceTensors(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   virtual void initialSetup() override;
@@ -67,11 +67,8 @@ protected:
   /// Displacement variables IDs
   std::vector<unsigned int> _disp_var;
 
-  const bool _temp_coupled;
-  const unsigned int _temp_var;
-
-  /// d(strain)/d(temperature), if computed by ComputeThermalExpansionEigenstrain
-  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
+  /// eigen strain derivatives wrt coupled variables
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _deigenstrain_dargs;
 
   const bool _out_of_plane_strain_coupled;
   const VariableValue * const _out_of_plane_strain;

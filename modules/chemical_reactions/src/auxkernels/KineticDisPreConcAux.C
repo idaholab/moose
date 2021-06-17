@@ -20,7 +20,7 @@ KineticDisPreConcAux::validParams()
 }
 
 KineticDisPreConcAux::KineticDisPreConcAux(const InputParameters & parameters)
-  : KineticDisPreRateAux(parameters)
+  : KineticDisPreRateAux(parameters), _u_old(uOld())
 {
 }
 

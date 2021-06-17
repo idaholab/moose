@@ -1,10 +1,10 @@
 # temperature is x and t dependent.  This simulation only converges if adaptive_timestepping = true
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl-"
-  [../]
+  []
 []
 
 [SpatialReactionSolver]
@@ -12,7 +12,8 @@
     charge_balance_species = "Cl-"
     constraint_species = "H2O H+ Cl-"
     constraint_value = "  55.5 1E-1 1E-1"
-    constraint_meaning = "moles_bulk_water moles_bulk_species moles_bulk_species"
+    constraint_meaning = "bulk_composition bulk_composition bulk_composition"
+    constraint_unit = "moles moles moles"
     temperature = temp_controller
     execute_console_output_on = 'timestep_end'
     point = '10 0 0'
@@ -22,28 +23,28 @@
 []
 
 [VectorPostprocessors]
-  [./temperature]
+  [temperature]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '10 0 0'
     sort_by = x
     num_points = 2
     variable = 'solution_temperature'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temp_controller]
-  [../]
+  [temp_controller]
+  []
 []
 
 [AuxKernels]
-  [./temp_controller]
+  [temp_controller]
     type = FunctionAux
     variable = temp_controller
     function = 'if(t <= 1, 25, 25 + 18 * x)'
     execute_on = timestep_begin # so the Reactor gets the correct value
-  [../]
+  []
 []
 
 [Mesh]

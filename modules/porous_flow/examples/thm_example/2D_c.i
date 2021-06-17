@@ -36,209 +36,209 @@
 []
 
 [Variables]
-  [./pwater]
+  [pwater]
     initial_condition = 18.3e6
-  [../]
-  [./sgas]
+  []
+  [sgas]
     initial_condition = 0.0
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 358
-  [../]
-  [./disp_r]
-  [../]
+  []
+  [disp_r]
+  []
 []
 
 [AuxVariables]
-  [./rate]
-  [../]
-  [./disp_z]
-  [../]
-  [./massfrac_ph0_sp0]
+  [rate]
+  []
+  [disp_z]
+  []
+  [massfrac_ph0_sp0]
     initial_condition = 1 # all H20 in phase=0
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     initial_condition = 0 # no H2O in phase=1
-  [../]
-  [./pgas]
+  []
+  [pgas]
     family = MONOMIAL
     order = FIRST
-  [../]
-  [./swater]
+  []
+  [swater]
     family = MONOMIAL
     order = FIRST
-  [../]
-  [./stress_rr]
+  []
+  [stress_rr]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_tt]
+  []
+  [stress_tt]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mineral_conc_m3_per_m3]
+  []
+  [mineral_conc_m3_per_m3]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = 0.1
-  [../]
-  [./eqm_const]
+  []
+  [eqm_const]
     initial_condition = 0.0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass_water_dot]
+  [mass_water_dot]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     use_displaced_mesh = false
     variable = pwater
-  [../]
-  [./flux_water]
+  []
+  [flux_water]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     use_displaced_mesh = false
     variable = pwater
-  [../]
-  [./mass_co2_dot]
+  []
+  [mass_co2_dot]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     use_displaced_mesh = false
     variable = sgas
-  [../]
-  [./flux_co2]
+  []
+  [flux_co2]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     use_displaced_mesh = false
     variable = sgas
-  [../]
-  [./energy_dot]
+  []
+  [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     use_displaced_mesh = false
     variable = temp
-  [../]
-  [./advection]
+  []
+  [advection]
     type = PorousFlowHeatAdvection
     use_displaced_mesh = false
     variable = temp
-  [../]
-  [./conduction]
+  []
+  [conduction]
     type = PorousFlowExponentialDecay
     use_displaced_mesh = false
     variable = temp
     reference = 358
     rate = rate
-  [../]
-  [./grad_stress_r]
+  []
+  [grad_stress_r]
     type = StressDivergenceRZTensors
     temperature = temp
     eigenstrain_names = thermal_contribution
     variable = disp_r
     use_displaced_mesh = false
     component = 0
-  [../]
-  [./poro_r]
+  []
+  [poro_r]
     type = PorousFlowEffectiveStressCoupling
     variable = disp_r
     use_displaced_mesh = false
     component = 0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./rate]
+  [rate]
     type = FunctionAux
     variable = rate
     execute_on = timestep_begin
     function = decay_rate
-  [../]
-  [./pgas]
+  []
+  [pgas]
     type = PorousFlowPropertyAux
     property = pressure
     phase = 1
     variable = pgas
-  [../]
-  [./swater]
+  []
+  [swater]
     type = PorousFlowPropertyAux
     property = saturation
     phase = 0
     variable = swater
-  [../]
-  [./stress_rr]
+  []
+  [stress_rr]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_rr
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_tt]
+  []
+  [stress_tt]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_tt
     index_i = 2
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 1
     index_j = 1
-  [../]
-  [./mineral]
+  []
+  [mineral]
     type = PorousFlowPropertyAux
     property = mineral_concentration
     mineral_species = 0
     variable = mineral_conc_m3_per_m3
-  [../]
-  [./eqm_const_auxk]
+  []
+  [eqm_const_auxk]
     type = ParsedAux
     variable = eqm_const
     args = temp
     function = '(358 - temp) / (358 - 294)'
-  [../]
-  [./porosity_auxk]
+  []
+  [porosity_auxk]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
+  []
 []
 
 [Functions]
-  [./decay_rate]
+  [decay_rate]
 # Eqn(26) of the first paper of LaForce et al.
 # Ka * (rho C)_a = 10056886.914
 # h = 11
     type = ParsedFunction
     value = 'sqrt(10056886.914/t)/11.0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'temp pwater sgas disp_r'
     number_fluid_phases = 2
     number_fluid_components = 2
     number_aqueous_kinetic = 1
     aqueous_phase_number = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./water]
+  [FluidProperties]
+    [water]
       type = SimpleFluidProperties
       bulk_modulus = 2.27e14
       density0 = 970.0
@@ -247,8 +247,8 @@
       cp = 4149.0
       porepressure_coefficient = 0.0
       thermal_expansion = 0
-    [../]
-    [./co2]
+    []
+    [co2]
       type = SimpleFluidProperties
       bulk_modulus = 2.27e14
       density0 = 516.48
@@ -257,102 +257,102 @@
       cp = 2920.5
       porepressure_coefficient = 0.0
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = pwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
-  [../]
-  [./water]
+  []
+  [water]
     type = PorousFlowSingleComponentFluid
     fp = water
     phase = 0
-  [../]
-  [./gas]
+  []
+  [gas]
     type = PorousFlowSingleComponentFluid
     fp = co2
     phase = 1
-  [../]
-  [./porosity_reservoir]
+  []
+  [porosity_reservoir]
     type = PorousFlowPorosity
     porosity_zero = 0.2
     chemical = true
     reference_chemistry = 0.1
     initial_mineral_concentrations = 0.1
-  [../]
-  [./permeability_reservoir]
+  []
+  [permeability_reservoir]
     type = PorousFlowPermeabilityConst
     permeability = '2e-12 0 0  0 0 0  0 0 0'
-  [../]
-  [./relperm_liquid]
+  []
+  [relperm_liquid]
     type = PorousFlowRelativePermeabilityCorey
     n = 4
     phase = 0
     s_res = 0.200
     sum_s_res = 0.405
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityBC
     phase = 1
     s_res = 0.205
     sum_s_res = 0.405
     nw_phase = true
     lambda = 2
-  [../]
-  [./thermal_conductivity_reservoir]
+  []
+  [thermal_conductivity_reservoir]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '0 0 0  0 1.320 0  0 0 0'
     wet_thermal_conductivity = '0 0 0  0 3.083 0  0 0 0'
-  [../]
-  [./internal_energy_reservoir]
+  []
+  [internal_energy_reservoir]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1100
     density = 2350.0
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     shear_modulus = 6.0E9
     poissons_ratio = 0.2
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeAxisymmetricRZSmallStrain
     eigenstrain_names = 'thermal_contribution ini_stress'
-  [../]
-  [./ini_strain]
+  []
+  [ini_strain]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '-12.8E6 0 0  0 -51.3E6 0  0 0 -12.8E6'
     eigenstrain_name = ini_stress
-  [../]
-  [./thermal_contribution]
+  []
+  [thermal_contribution]
     type = ComputeThermalExpansionEigenstrain
     temperature = temp
     stress_free_temperature = 358
     thermal_expansion_coeff = 5E-6
     eigenstrain_name = thermal_contribution
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./predis]
+  []
+  [predis]
     type = PorousFlowAqueousPreDisChemistry
     num_reactions = 1
     primary_concentrations = 1.0 # fixed activity
@@ -364,12 +364,12 @@
     molar_volume = 1.0
     specific_reactive_surface_area = 1.0
     activation_energy = 0.0 # no Arrhenius
-  [../]
-  [./mineral_conc]
+  []
+  [mineral_conc]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = 0.1
-  [../]
-  [./predis_nodes]
+  []
+  [predis_nodes]
     type = PorousFlowAqueousPreDisChemistry
     at_nodes = true
     num_reactions = 1
@@ -382,40 +382,40 @@
     molar_volume = 1.0
     specific_reactive_surface_area = 1.0
     activation_energy = 0.0 # no Arrhenius
-  [../]
-  [./mineral_conc_nodes]
+  []
+  [mineral_conc_nodes]
     type = PorousFlowAqueousPreDisMineral
     at_nodes = true
     initial_concentrations = 0.1
-  [../]
+  []
 []
 
 [BCs]
-  [./outer_pressure_fixed]
+  [outer_pressure_fixed]
     type = DirichletBC
     boundary = right
     value = 18.3e6
     variable = pwater
-  [../]
-  [./outer_saturation_fixed]
+  []
+  [outer_saturation_fixed]
     type = DirichletBC
     boundary = right
     value = 0.0
     variable = sgas
-  [../]
-  [./outer_temp_fixed]
+  []
+  [outer_temp_fixed]
     type = DirichletBC
     boundary = right
     value = 358
     variable = temp
-  [../]
-  [./fixed_outer_r]
+  []
+  [fixed_outer_r]
     type = DirichletBC
     variable = disp_r
     value = 0
     boundary = right
-  [../]
-  [./co2_injection]
+  []
+  [co2_injection]
     type = PorousFlowSink
     boundary = left
     variable = sgas
@@ -423,41 +423,41 @@
     use_relperm = false
     fluid_phase = 1
     flux_function = 'min(t/100.0,1)*(-2.294001475)' # 5.0E5 T/year = 15.855 kg/s, over area of 2Pi*0.1*11
-  [../]
-  [./cold_co2]
+  []
+  [cold_co2]
     type = DirichletBC
     boundary = left
     variable = temp
     value = 294
-  [../]
-  [./cavity_pressure_x]
+  []
+  [cavity_pressure_x]
     type = Pressure
     boundary = left
     variable = disp_r
     component = 0
     postprocessor = p_bh # note, this lags
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p_bh]
+  [p_bh]
     type = PointValue
     variable = pwater
     point = '0.1 0 0'
     execute_on = timestep_begin
     use_displaced_mesh = false
-  [../]
-  [./mineral_bh] # mineral concentration (m^3(mineral)/m^3(rock)) at the borehole
+  []
+  [mineral_bh] # mineral concentration (m^3(mineral)/m^3(rock)) at the borehole
     type = PointValue
     variable = mineral_conc_m3_per_m3
     point = '0.1 0 0'
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./ptsuss]
+  [ptsuss]
     type = LineValueSampler
     use_displaced_mesh = false
     start_point = '0.1 0 0'
@@ -466,25 +466,25 @@
     num_points = 50000
     outputs = csv
     variable = 'pwater temp sgas disp_r stress_rr stress_tt mineral_conc_m3_per_m3 porosity'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'smp'
-  [./smp]
+  [smp]
     type = SMP
     full = true
     #petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E2       1E-5        50'
-  [../]
-  [./mumps]
+  []
+  [mumps]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
     petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -snes_rtol -snes_atol -snes_max_it'
     petsc_options_value = 'gmres      lu       mumps                         NONZERO               1E-5       1E2       50'
-  [../]
+  []
 []
 
 [Executioner]
@@ -492,11 +492,11 @@
   solve_type = NEWTON
   end_time = 1.5768e8
   #dtmax = 1e6
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     growth_factor = 1.1
-  [../]
+  []
 []
 
 [Outputs]
@@ -504,8 +504,8 @@
   sync_times = '3600 86400 2.592E6 1.5768E8'
   perf_graph = true
   exodus = true
-  [./csv]
+  [csv]
     type = CSV
     sync_only = true
-  [../]
+  []
 []

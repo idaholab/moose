@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import sys, os
+
+mydir = os.path.dirname(os.path.realpath(__file__))
+moose_config_path = os.path.join(mydir, '..', 'share', 'moose', 'moose_config.py')
+if not os.path.exists(moose_config_path):
+    print('Could not locate the moose config python script', file=sys.stderr)
+    sys.exit(1)
+
+import importlib.util
+spec = importlib.util.spec_from_file_location("module.name", moose_config_path)
+moose_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(moose_config)
+
+try:
+    moose_config.libmesh_install_dir
+except:
+    print('Could not locate find libmesh install dir from moose config file', file=sys.stderr)
+    sys.exit(1)
+
+os.environ['LIBMESH_DIR'] = moose_config.libmesh_install_dir
+MOOSE_DIR = os.path.abspath(os.path.join(mydir, '..'))
+MOOSE_PYTHON_DIR = os.path.abspath(os.path.join(MOOSE_DIR, 'share', 'moose', 'python'))
+if not os.path.isdir(MOOSE_PYTHON_DIR):
+    print('Could not locate the moose python directory', file=sys.stderr)
+    sys.exit(1)
+
+sys.path.append(MOOSE_PYTHON_DIR)
+
+from TestHarness import TestHarness
+TestHarness.buildAndRun(sys.argv, None, MOOSE_DIR, moose_python=MOOSE_PYTHON_DIR)

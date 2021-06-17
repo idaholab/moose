@@ -85,6 +85,10 @@
 [Outputs]
   exodus = true
   csv = true
+  [console]
+    type = Console
+    system_info = 'framework mesh aux nonlinear relationship execution'
+  []
 []
 
 [Problem]

@@ -48,6 +48,7 @@
     decomposition_method = EigenSolution
     add_variables  = true
     generate_output = 'vonmises_stress'
+    temperature = temp
   [../]
 []
 
@@ -126,9 +127,6 @@
   [./density]
     type = Density
     density = 10963.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

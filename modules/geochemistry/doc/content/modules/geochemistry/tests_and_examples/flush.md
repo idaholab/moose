@@ -46,16 +46,16 @@ This is run in MOOSE using a 2-stage approach.  The first stage finds the free m
 
 This stage adds the NaOH solution and uses a kinetically-controlled quartz.  The [GeochemicalModelDefinition](GeochemicalModelDefinition.md) defines the basis species and equilibrium minerals.  It also specifies that `Quartz` is a kinetic mineral:
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[./definition] end=[]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[definition] end=[]
 
 The kinetic rate for Quartz is specified by a [GeochemistryKineticRate](GeochemistryKineticRate.md) UserObject
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[./rate_quartz] end=[./definition]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[rate_quartz] end=[definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) specifies:
 
 - the swaps;
-- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note this is [different than GWB](theory/gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
+- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note the [difference for Ca++ compared with GWB](theory/gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
 - the temperature;
 - the initial number of moles for Quartz
 - that the kinetic rate should be updated during the Newton process that finds the equilibrium configuration at each time-step (which is unnecessary and computationally inefficient for this example, but is included for illustration)
@@ -74,7 +74,7 @@ The graphs below were generated using `dt = 0.2` but the file in the test suite 
 
 A set of `Postprocessors` record the desired information using the `AuxVariables` automatically added by the [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md).  For example:
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[./pH] end=[./cm3_Analcime]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[pH] end=[cm3_Analcime]
 
 ## GWB input file
 

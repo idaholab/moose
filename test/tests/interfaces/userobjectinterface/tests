@@ -1,0 +1,95 @@
+[Tests]
+  design = 'UserObjectInterface.md'
+  issues = '#17446 #17512 #17949'
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when requesting a UserObject when'
+
+    [missing_parameter]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/missing_parameter=true'
+      expect_err = 'Failed to get a parameter with the name "missing" when getting a UserObjectName.'
+
+      detail = 'getting the name from a parameter and the parameter is not found,'
+    []
+    [bad_parameter_type]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/bad_parameter_type=true'
+      expect_err = 'Parameter of type "bool" is not an expected type for getting the name of a UserObject.'
+
+      detail = 'getting the name from a parameter and the parameter does not represent a name,'
+    []
+    [not_found_by_param]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/not_found_by_param=true
+                  UserObjects/test/uo=bad_uo'
+      expect_err = 'uo\)\:.*The requested UserObject with the name "bad_uo" was not found.'
+
+      detail = 'getting the name from a parameter and the user object is not found,'
+    []
+    [not_found_by_name]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/not_found_by_name=true'
+      expect_err = 'The requested UserObject with the name "not_found_by_name" was not found.'
+
+      detail = 'getting the UserObject by name and the user object is not found,'
+    []
+    [bad_cast]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/bad_cast=true'
+      expect_err = 'uo\)\:.*The provided UserObject "other_uo" of type UserObjectInterfaceTest is not derived from the required type..*The UserObject must derive from ThreadedGeneralUserObject.'
+
+      detail = 'getting the name from a paremeter and the provided object is not of the correct type, and'
+    []
+    [bad_cast_by_name]
+      type = RunException
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/bad_cast_by_name=true'
+      expect_err = 'The provided UserObject "other_uo" of type UserObjectInterfaceTest is not derived from the required type..*The UserObject must derive from ThreadedGeneralUserObject.'
+
+      detail = 'getting the UserObject by name and the provided object is not of the correct type.'
+    []
+  []
+
+  [has_uo]
+    requirement = 'The system shall provide an interface that reports if a UserObject exists by'
+
+    [param]
+      type = RunApp
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/has=true'
+      expect_out = 'hasUserObject success'
+
+      detail = 'parameter,'
+    []
+    [name]
+      type = RunApp
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/has_by_name=true'
+      expect_out = 'hasUserObjectByName success'
+
+      detail = 'name,'
+    []
+    [param_T]
+      type = RunApp
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/has_T=true'
+      expect_out = 'hasUserObject<T> success'
+
+      detail = 'parameter and type, and'
+    []
+    [name_T]
+      type = RunApp
+      input = 'uoi.i'
+      cli_args = 'UserObjects/test/has_T_by_name=true'
+      expect_out = 'hasUserObjectByName<T> success'
+
+      detail = 'name and type.'
+    []
+  []
+[]

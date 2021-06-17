@@ -2,7 +2,7 @@
 name: Bug Report
 about: Report a bug that is preventing proper operation of the framework or an application
 title: ''
-labels: 'T: defect'
+labels: 'T: defect, P: normal'
 assignees: ''
 
 ---

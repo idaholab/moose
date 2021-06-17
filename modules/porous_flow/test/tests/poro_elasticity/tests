@@ -62,6 +62,17 @@
     issues = '#13155'
     design = 'porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
   [../]
+  [./pp_generation_unconfined_constM_action]
+    type = CSVDiff
+    input = pp_generation_unconfined_constM_action.i
+    prereq = pp_generation_unconfined_constM
+    cli_args = 'Outputs/file_base=pp_generation_unconfined_constM'
+    csvdiff = pp_generation_unconfined_constM.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model standard poroelasticity and be able to correctly simulate fluid injection into a mechanically-unconstrained solid, using a constant Biot modulus, and be able to simulate this using an Action'
+    issues = '#16841'
+    design = 'PorousFlowFullySaturated.md porous_flow/tests/poro_elasticity/poro_elasticity_tests.md'
+  [../]
   [./pp_generation_unconfined_fully_saturated]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated.i

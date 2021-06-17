@@ -58,6 +58,12 @@ LevelSetBiMaterialBaseTempl<is_ad>::LevelSetBiMaterialBaseTempl(const InputParam
 
 template <bool is_ad>
 void
+LevelSetBiMaterialBaseTempl<is_ad>::initQpStatefulProperties()
+{
+}
+
+template <bool is_ad>
+void
 LevelSetBiMaterialBaseTempl<is_ad>::computeProperties()
 {
   const Node * node = _current_elem->node_ptr(0);

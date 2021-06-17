@@ -17,7 +17,7 @@ InputParameters
 InversePowerMethod::validParams()
 {
   InputParameters params = EigenExecutionerBase::validParams();
-  params.addClassDescription("Inverse power method for Eigen value problems.");
+  params.addClassDescription("Inverse power method for eigenvalue problems.");
   params.addParam<PostprocessorName>(
       "xdiff", "", "To evaluate |x-x_previous| for power iterations");
   params.addParam<unsigned int>(

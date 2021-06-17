@@ -16,143 +16,143 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./pgas]
-  [../]
-  [./pwater]
-  [../]
-  [./temp]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [pgas]
+  []
+  [pwater]
+  []
+  [temp]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = -0.1
     max = 0.0
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.1
     max = 0.0
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.1
     max = 0.0
-  [../]
-  [./pgas]
+  []
+  [pgas]
     type = RandomIC
     variable = pgas
     max = 0.01
     min = 0.0
-  [../]
-  [./pwater]
+  []
+  [pwater]
     type = RandomIC
     variable = pwater
     max = 0.0
     min = -0.01
-  [../]
-  [./temp]
+  []
+  [temp]
     type = RandomIC
     variable = temp
     max = 1.0
     min = 0.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./dummy_pgas]
+  []
+  [dummy_pgas]
     type = Diffusion
     variable = pgas
-  [../]
-  [./dummy_pwater]
+  []
+  [dummy_pwater]
     type = Diffusion
     variable = pwater
-  [../]
-  [./energy_dot]
+  []
+  [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas temp pwater disp_x disp_y disp_z'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       density0 = 1
       thermal_expansion = 0
       cv = 1.3
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 0.5
       density0 = 0.5
       thermal_expansion = 0
       cv = 0.7
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '0.5 0.75'
     # bulk modulus is lambda + 2*mu/3 = 0.5 + 2*0.75/3 = 1
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -161,47 +161,47 @@
     thermal_expansion_coeff = 0.7
     biot_coefficient = 0.9
     solid_bulk = 10
-  [../]
-  [./p_eff]
+  []
+  [p_eff]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1.1
     density = 0.5
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = pwater
     phase1_porepressure = pgas
     capillary_pressure = pc
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
+  []
+  [check]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

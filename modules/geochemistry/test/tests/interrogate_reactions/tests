@@ -5,7 +5,7 @@
     expect_err = 'Matrix is not invertible, which signals an invalid basis swap'
     requirement = 'The geochemistry interrogator will throw an error for an invalid swap'
     issues = '#14981'
-    design = 'GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./gypsum]
     type = 'RunApp'
@@ -16,7 +16,7 @@ Gypsum.  T = 43.6625degC'
     match_literal = true
     requirement = "The geochemistry interrogator shall be able to compute temperature at equilibrium, given enough information about activity values"
     issues = '#14981'
-    design = 'eqm_temp_a.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'eqm_temp_a.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./hematite]
     type = 'RunApp'
@@ -25,7 +25,7 @@ Gypsum.  T = 43.6625degC'
     match_literal = true
     requirement = "The geochemistry interrogator shall be output equations involving pH and pe for equilibrium reactions"
     issues = '#14981'
-    design = 'pH_pe.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'pH_pe.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./muscovite]
     type = 'RunApp'
@@ -35,7 +35,7 @@ Gypsum.  T = 43.6625degC'
     match_literal = true
     requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
     issues = '#14981'
-    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./muscovite2]
     type = 'RunApp'
@@ -48,9 +48,9 @@ Gypsum.  T = 43.6625degC'
 (A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.31
 (A_K+)^-2 (A_H+)^2 = 10^-1.967'
     match_literal = true
-    requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
+    requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components, which shall be demonstrated through the example of muscovite."
     issues = '#14981'
-    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./pyrite]
     type = 'RunApp'
@@ -61,9 +61,9 @@ Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
 Pyrite = -1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.39
 Pyrite = -1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.54'
     match_literal = true
-    requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components."
+    requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components, which shall be demonstrated through the example of pyrite."
     issues = '#14981'
-    design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./clinoptilolite]
     type = 'RunApp'
@@ -73,9 +73,9 @@ Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*SiO2(aq) - 1.333*H+ - 0.666
 Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz - 1.333*H+ - 0.6667*K+  .  log10(K) = 13.16
 Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.6667*K+  .  log10(K) = -5.484'
     match_literal = true
-    requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components."
+    requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components, which shall be demonstrated through the example of clinoptilolite."
     issues = '#14981'
-    design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
   [./clinoptilolite2]
     type = 'RunApp'
@@ -84,8 +84,8 @@ Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.
 (A_Ca++)^-1 (A_SiO2(aq))^7 (A_H+)^2 = 10^-27.22
 (A_Ca++)^-1 (A_H+)^2 = 10^-10.23'
     match_literal = true
-    requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
+    requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components, which shall be demonstrated through the example of clinoptilolite."
     issues = '#14981'
-    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
+    design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelDefinition.md'
   [../]
 []

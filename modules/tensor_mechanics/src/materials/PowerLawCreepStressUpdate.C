@@ -50,7 +50,7 @@ PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & par
 }
 
 void
-PowerLawCreepStressUpdate::computeStressInitialize(const Real /*effective_trial_stress*/,
+PowerLawCreepStressUpdate::computeStressInitialize(const Real & /*effective_trial_stress*/,
                                                    const RankFourTensor & /*elasticity_tensor*/)
 {
   if (_has_temp)
@@ -62,7 +62,7 @@ PowerLawCreepStressUpdate::computeStressInitialize(const Real /*effective_trial_
 }
 
 Real
-PowerLawCreepStressUpdate::computeResidual(const Real effective_trial_stress, const Real scalar)
+PowerLawCreepStressUpdate::computeResidual(const Real & effective_trial_stress, const Real & scalar)
 {
   const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const Real creep_rate =
@@ -71,7 +71,8 @@ PowerLawCreepStressUpdate::computeResidual(const Real effective_trial_stress, co
 }
 
 Real
-PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, const Real scalar)
+PowerLawCreepStressUpdate::computeDerivative(const Real & effective_trial_stress,
+                                             const Real & scalar)
 {
   const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *

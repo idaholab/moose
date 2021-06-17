@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#11323'
+  issues = '#11323 #16886 #16887'
   design = 'MeshInfo.md'
   [info]
     requirement = "The system shall include the ability to report mesh information:"
@@ -7,22 +7,11 @@
     [default]
       type = JSONDiff
       input = mesh_info.i
-      platform = DARWIN # partitioning not consistent across OS
       jsondiff = 'mesh_info_out.json mesh_info_out.json.1'
       min_parallel = 2
       max_parallel = 2
 
-      detail = "that outputs all information be default,"
-    []
-
-    [files]
-      type = CheckFiles
-      input = mesh_info.i
-      check_files = 'mesh_info_out.json mesh_info_out.json.1'
-      min_parallel = 2
-      max_parallel = 2
-
-      detail = "including parallel files;"
+      detail = "that outputs all information be default and"
     []
 
     [limit]

@@ -47,6 +47,16 @@ The same AuxKernel object can be designed work both as elemental or nodal, for e
 `computeValue` method for the [FunctionAux.md] object properly handles using the correct spatial
 location based on if the object is nodal or elemental with the `isNodal` method.
 
+## Block vs Boundary Restricted AuxKernel Objects
+
+While auxiliary variables are always defined on mesh subdomains, MOOSE allows auxiliary kernels to be either block (mesh subdomain) or boundary restricted.
+When an auxiliary kernel is boundary restricted, it evaluates an auxiliary variable only on the designated boundaries.
+Because of this, the auxiliary variable will only have meaningful values on the boundaries even though it is defined on mesh subdomains.
+When an auxiliary kernel is block restricted, the variable that it evaluates must be defined on a subdomain covering the blocks where the auxiliary kernel is defined.
+When an auxiliary kernel is boundary restricted, the variable must be defined on a subdomain that all the sides on the boundaries are connected with.
+An elemental auxiliary variable defined on an element that has multiple boundary sides cannot be properly evaluated within a boundary restricted auxiliary kernel because elemental auxiliary variables can only store one value per element.
+Users can split the boundaries and define multiple elemental auxiliary variables for each split to avoid the situation of element connecting with multiple boundary sides.
+
 !listing auxkernels/FunctionAux.C re=Real\sFunctionAux::compute.*}
 
 Nodal AuxKernel objects abuse the notion of quadrature points, the `_qp` member variable is set

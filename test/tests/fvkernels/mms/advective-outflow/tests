@@ -7,4 +7,21 @@
     exodiff = advection-diffusion_out.e
     requirement = 'The system shall be able to to solve an advection-diffusion equation with a dirichlet condition on the left boundary and a zero gradient condition on the right boundary and display second order convergence with the finite volume method.'
   []
+  [outflow]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestOutflow
+    requirement = 'The system shall, while using an advective outflow boundary condition, demonstrate second order convergence if a two term Taylor series is used to approximate the face value and first order convergence if a one term Taylor series is used.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [extrapolate]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestExtrapolation
+    issues = '#16169'
+    requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
 []

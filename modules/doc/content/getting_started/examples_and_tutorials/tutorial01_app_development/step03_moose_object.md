@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step02_input_file.md
+                    next=tutorial01_app_development/step04_weak_form.md
+                    margin-bottom=0px
+
 # Step 3: Introduction to MOOSE Objects
 
 In this step, [#objects], and the purposes they serve, will be introduced.
@@ -60,7 +64,7 @@ Recall, from [Step 2](tutorial01_app_development/step02_input_file.md#demo), tha
 It is necessary to acknowledge that [!ac](PDEs) must be expressed in a certain format to be able to solve them with MOOSE. That is, assuming that the natural boundary condition, $\nabla u \cdot \hat{n} = 0$, is satisfied, then the *weak form* of [laplace] is
 
 !equation id=weak
-\int_{\Omega} \nabla \psi \cdot \nabla u \, d\Omega = 0, \,\,\, \forall \, \psi
+\int_{\Omega} \nabla \psi \cdot \nabla u \, d\Omega = 0, \enspace \forall \, \psi
 
 In the [next step](tutorial01_app_development/step04_weak_form.md), exactly what is meant by the terminology, "weak form," will be explained, so do not worry about this just yet.
 
@@ -75,7 +79,7 @@ A `MooseObject` that was capable of solving the Laplace equation was required fo
 Here, the $\nabla \psi$ term in [weak],
 is automatically handled by the `precomputeQpResidual()` method of the [`ADKernelGrad`](source/kernels/ADKernelGrad.md) base class, so there was no need to include this term manually.
 
-!alert tip title=MOOSE does a lot already
+!alert tip title=MOOSE does a lot already.
 Before developing a new `MooseObject` in an application, confirm that something like it does not already exist. All MOOSE applications posses the full capability of the framework and physics modules (more on this later), in addition to their own capabilities.
 
 !content pagination previous=tutorial01_app_development/step02_input_file.md

@@ -18,6 +18,7 @@
  * where mass_component =
  * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * which is lumped to the nodes
+ * If _multiply_by_density = false then density_phase does not appear in the above expression
  */
 class PorousFlowMassVolumetricExpansion : public TimeKernel
 {
@@ -46,8 +47,14 @@ protected:
   /// Variable number of the displacements variables
   std::vector<unsigned int> _disp_var_num;
 
+  /// Number of fluid phases
+  const unsigned int _num_phases;
+
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
+
+  /// Whether to multiply by density: if true then this Kernel involves the fluid mass, otherwise it involves the fluid volume
+  const bool _multiply_by_density;
 
   /// Porosity
   const MaterialProperty<Real> & _porosity;
@@ -62,10 +69,10 @@ protected:
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// Fluid density
-  const MaterialProperty<std::vector<Real>> & _fluid_density;
+  const MaterialProperty<std::vector<Real>> * const _fluid_density;
 
   /// d(fluid density)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Fluid saturation
   const MaterialProperty<std::vector<Real>> & _fluid_saturation;

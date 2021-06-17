@@ -1,3 +1,5 @@
+# AEFVKernel
+
 !syntax description /DGKernels/AEFVKernel
 
 !syntax parameters /DGKernels/AEFVKernel

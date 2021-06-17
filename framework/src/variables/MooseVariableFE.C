@@ -48,6 +48,19 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
 }
 
 template <typename OutputType>
+std::string
+MooseVariableFE<OutputType>::componentName(const unsigned int comp) const
+{
+  if (comp >= _count)
+    mooseError("Component index must be less than the number of components of variable ",
+               _var_name);
+  if (std::is_same<OutputType, RealEigenVector>::value)
+    return this->_subproblem.arrayVariableComponent(_var_name, comp);
+  else
+    return _var_name;
+}
+
+template <typename OutputType>
 const std::set<SubdomainID> &
 MooseVariableFE<OutputType>::activeSubdomains() const
 {
@@ -787,6 +800,26 @@ bool
 MooseVariableFE<OutputType>::isNodalNeighborDefined() const
 {
   return _neighbor_data->isNodalDefined();
+}
+
+template <typename OutputType>
+unsigned int
+MooseVariableFE<OutputType>::oldestSolutionStateRequested() const
+{
+  unsigned int state = 0;
+  state = std::max(state, _element_data->oldestSolutionStateRequested());
+  state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
+  state = std::max(state, _lower_data->oldestSolutionStateRequested());
+  return state;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::clearAllDofIndices()
+{
+  _element_data->clearDofIndices();
+  _neighbor_data->clearDofIndices();
+  _lower_data->clearDofIndices();
 }
 
 template class MooseVariableFE<Real>;

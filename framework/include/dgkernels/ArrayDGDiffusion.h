@@ -27,11 +27,15 @@ public:
   ArrayDGDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual RealEigenVector computeQpResidual(Moose::DGResidualType type) override;
+  virtual void initQpResidual(Moose::DGResidualType type) override;
+  virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;
   virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) override;
 
   Real _epsilon;
   Real _sigma;
   const MaterialProperty<RealEigenVector> & _diff;
   const MaterialProperty<RealEigenVector> & _diff_neighbor;
+
+  RealEigenVector _res1;
+  RealEigenVector _res2;
 };

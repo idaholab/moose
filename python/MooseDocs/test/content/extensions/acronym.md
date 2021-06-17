@@ -4,14 +4,14 @@
 
 [!ac](MTU)
 
-# Page Acronym List
+## Page Acronym List
 
 !acronym list
 
-# Directory Acronym List
+## Directory Acronym List
 
 !acronym list location=extensions
 
-# Complete Acronym List
+## Complete Acronym List
 
 !acronym list complete=True

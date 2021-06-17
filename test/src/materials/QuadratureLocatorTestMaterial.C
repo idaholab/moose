@@ -34,7 +34,6 @@ QuadratureLocatorTestMaterial::validParams()
 
 QuadratureLocatorTestMaterial::QuadratureLocatorTestMaterial(const InputParameters & parameters)
   : Material(parameters),
-    GeometricSearchInterface(this),
     _penetration_locator(getQuadraturePenetrationLocator(
         parameters.get<BoundaryName>("paired_boundary"),
         boundaryNames()[0],

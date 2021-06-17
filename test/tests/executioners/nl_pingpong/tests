@@ -1,0 +1,10 @@
+[Tests]
+  [./nl_pingpong]
+    type = RunApp
+    input = 'nonlinear_residual_pingpong.i'
+    expect_out = "Solve Did NOT Converge"
+    requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual oscillates by a user-controlled number of times.'
+    issues = '#16376'
+    design = 'FEProblemSolve.md'
+  [../]
+[]

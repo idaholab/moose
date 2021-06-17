@@ -23,168 +23,169 @@
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = FunctionIC
       function = 'max((1000000-x/5*1000000)-20000,-20000)'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pp
     gravity = '0 0 0'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = pp
     boundary = left
     value = 980000
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sat]
+  [sat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sat]
+  [sat]
     type = MaterialStdVectorAux
     variable = sat
     execute_on = timestep_end
     index = 0
     property = PorousFlow_saturation_qp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.8
     alpha = 1e-3
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e6
       viscosity = 1e-3
       density0 = 1000
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-10 0 0  0 1E-10 0  0 0 1E-10'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.15
-  [../]
+  []
 []
 
 [Preconditioning]
   active = andy
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 20'
-  [../]
+  []
 []
 
 [Functions]
-  [./timestepper]
+  [timestepper]
     type = PiecewiseLinear
     x = '0    0.01 0.1 1   1.5 2   20  30  40  50'
     y = '0.01 0.1  0.2 0.3 0.1 0.3 0.3 0.4 0.4 0.5'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
+  solve_type = Newton
   end_time = 50
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = timestepper
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./pp]
+  [pp]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '15 0 0'
     num_points = 150
     sort_by = x
     variable = pp
-  [../]
-  [./sat]
+  []
+  [sat]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '15 0 0'
     num_points = 150
     sort_by = x
     variable = sat
-  [../]
+  []
 []
 
 
 [Outputs]
   file_base = bl01
-  [./csv]
+  [csv]
     type = CSV
     sync_only = true
     sync_times = '0.01 50'
-  [../]
-  [./exodus]
+  []
+  [exodus]
     type = Exodus
     execute_on = 'initial final'
-  [../]
+  []
 []

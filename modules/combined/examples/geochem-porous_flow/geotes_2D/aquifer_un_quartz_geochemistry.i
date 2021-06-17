@@ -23,11 +23,13 @@
   constraint_species = "H2O              Na+                Cl-                SiO2(aq)"
 # ASSUME that 1 litre of solution contains:
   constraint_value = "  1.0              0.1                0.1                0.00172249633"
-  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species free_molality"
+  constraint_meaning = "kg_solvent_water bulk_composition bulk_composition free_concentration"
+  constraint_unit = "   kg               moles              moles              molal"
   initial_temperature = 50.0
   kinetic_species_name = QuartzUnlike
-# Per 1 litre (1000cm^3) of aqueous solution (1kg of solvent water), there is 9000cm^3 of QuartzUnlike, which means the initial porosity is 0.1.  QuartzUnlike has 22.688cm^3/mol, so 9000cm^3 corresponds to 396.685 moles
-  kinetic_species_initial_moles = 396.685
+# Per 1 litre (1000cm^3) of aqueous solution (1kg of solvent water), there is 9000cm^3 of QuartzUnlike, which means the initial porosity is 0.1.
+  kinetic_species_initial_value = 9000
+  kinetic_species_unit = cm3
   temperature = temperature
   source_species_names = 'H2O    Na+   Cl-   SiO2(aq)'
   source_species_rates = 'rate_H2O_per_1l rate_Na_per_1l rate_Cl_per_1l rate_SiO2_per_1l'
@@ -38,21 +40,21 @@
 []
 
 [UserObjects]
-  [./rate_quartz]
+  [rate_quartz]
     type = GeochemistryKineticRate
     kinetic_species_name = QuartzUnlike
     intrinsic_rate_constant = 1.0E-2
     multiply_by_mass = true
     area_quantity = 1
     activation_energy = 72800.0
-  [../]
-  [./definition]
+  []
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "small_database.json"
     basis_species = "H2O SiO2(aq) Na+ Cl-"
     kinetic_minerals = "QuartzUnlike"
     kinetic_rate_descriptions = "rate_quartz"
-  [../]
+  []
 []
 
 
@@ -63,72 +65,72 @@
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = 50.0
-  [../]
-  [./nodal_volume]
-  [../]
-  [./porosity]
-  [../]
-  [./nodal_void_volume]
-  [../]
-  [./pf_rate_H2O] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
-  [../]
-  [./pf_rate_Na] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
-  [../]
-  [./pf_rate_Cl] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
-  [../]
-  [./pf_rate_SiO2] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
-  [../]
-  [./rate_H2O_per_1l] # rate per 1 litre of aqueous solution that we consider at each node
-  [../]
-  [./rate_Na_per_1l]
-  [../]
-  [./rate_Cl_per_1l]
-  [../]
-  [./rate_SiO2_per_1l]
-  [../]
-  [./transported_H2O]
-  [../]
-  [./transported_Na]
-  [../]
-  [./transported_Cl]
-  [../]
-  [./transported_SiO2]
-  [../]
-  [./transported_mass]
-  [../]
-  [./massfrac_Na]
-  [../]
-  [./massfrac_Cl]
-  [../]
-  [./massfrac_SiO2]
-  [../]
-  [./massfrac_H2O]
-  [../]
+  []
+  [nodal_volume]
+  []
+  [porosity]
+  []
+  [nodal_void_volume]
+  []
+  [pf_rate_H2O] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
+  []
+  [pf_rate_Na] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
+  []
+  [pf_rate_Cl] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
+  []
+  [pf_rate_SiO2] # change in H2O mass (kg/s) at each node provided by the porous-flow simulation
+  []
+  [rate_H2O_per_1l] # rate per 1 litre of aqueous solution that we consider at each node
+  []
+  [rate_Na_per_1l]
+  []
+  [rate_Cl_per_1l]
+  []
+  [rate_SiO2_per_1l]
+  []
+  [transported_H2O]
+  []
+  [transported_Na]
+  []
+  [transported_Cl]
+  []
+  [transported_SiO2]
+  []
+  [transported_mass]
+  []
+  [massfrac_Na]
+  []
+  [massfrac_Cl]
+  []
+  [massfrac_SiO2]
+  []
+  [massfrac_H2O]
+  []
 []
 [AuxKernels]
-  [./nodal_volume] # TODO: change this hard-coded version once PR is merged
+  [nodal_volume] # TODO: change this hard-coded version once PR is merged
     type = FunctionAux
     variable = nodal_volume
     function = 'if(abs(x) = 70 & abs(y) = 40, 2.5, if(abs(x) = 70 | abs(y) = 40, 5, 10))'
     execute_on = 'initial'
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = ParsedAux
     args = free_cm3_QuartzUnlike
     function = '1000.0 / (1000.0 + free_cm3_QuartzUnlike)'
     variable = porosity
     execute_on = 'timestep_begin timestep_end'
-  [../]
-  [./nodal_void_volume]
+  []
+  [nodal_void_volume]
     type = ParsedAux
     args = 'porosity nodal_volume'
     variable = nodal_void_volume
     function = 'porosity * nodal_volume'
     execute_on = 'timestep_begin'
-  [../]
-  [./rate_H2O_per_1l]
+  []
+  [rate_H2O_per_1l]
     type = ParsedAux
     args = 'pf_rate_H2O nodal_void_volume'
     variable = rate_H2O_per_1l
@@ -137,121 +139,121 @@
 # pf_rate * 1000 / molar_mass / (nodal_void_volume_in_m^3 * 1000) = change in moles per litre of aqueous solution
     function = 'pf_rate_H2O / 18.0152 / nodal_void_volume'
     execute_on = 'timestep_begin'
-  [../]
-  [./rate_Na_per_1l]
+  []
+  [rate_Na_per_1l]
     type = ParsedAux
     args = 'pf_rate_Na nodal_void_volume'
     variable = rate_Na_per_1l
     function = 'pf_rate_Na / 22.9898 / nodal_void_volume'
     execute_on = 'timestep_begin'
-  [../]
-  [./rate_Cl_per_1l]
+  []
+  [rate_Cl_per_1l]
     type = ParsedAux
     args = 'pf_rate_Cl nodal_void_volume'
     variable = rate_Cl_per_1l
     function = 'pf_rate_Cl / 35.453 / nodal_void_volume'
     execute_on = 'timestep_begin'
-  [../]
-  [./rate_SiO2_per_1l]
+  []
+  [rate_SiO2_per_1l]
     type = ParsedAux
     args = 'pf_rate_SiO2 nodal_void_volume'
     variable = rate_SiO2_per_1l
     function = 'pf_rate_SiO2 / 60.0843 / nodal_void_volume'
     execute_on = 'timestep_begin'
-  [../]
-  [./transported_H2O]
+  []
+  [transported_H2O]
     type = GeochemistryQuantityAux
     variable = transported_H2O
     species = H2O
     quantity = transported_moles_in_original_basis
     execute_on = 'timestep_end'
-  [../]
-  [./transported_Na]
+  []
+  [transported_Na]
     type = GeochemistryQuantityAux
     variable = transported_Na
     species = Na+
     quantity = transported_moles_in_original_basis
     execute_on = 'timestep_end'
-  [../]
-  [./transported_Cl]
+  []
+  [transported_Cl]
     type = GeochemistryQuantityAux
     variable = transported_Cl
     species = Cl-
     quantity = transported_moles_in_original_basis
     execute_on = 'timestep_end'
-  [../]
-  [./transported_SiO2]
+  []
+  [transported_SiO2]
     type = GeochemistryQuantityAux
     variable = transported_SiO2
     species = 'SiO2(aq)'
     quantity = transported_moles_in_original_basis
     execute_on = 'timestep_end'
-  [../]
-  [./transported_mass]
+  []
+  [transported_mass]
     type = ParsedAux
     args = 'transported_H2O transported_Na transported_Cl transported_SiO2'
     variable = transported_mass
     function = 'transported_H2O * 18.0152 + transported_Na * 22.9898 + transported_Cl * 35.453 + transported_SiO2 * 60.0843'
     execute_on = 'timestep_end'
-  [../]
-  [./massfrac_H2O]
+  []
+  [massfrac_H2O]
     type = ParsedAux
     args = 'transported_H2O transported_mass'
     variable = massfrac_H2O
     function = 'transported_H2O * 18.0152 / transported_mass'
     execute_on = 'timestep_end'
-  [../]
-  [./massfrac_Na]
+  []
+  [massfrac_Na]
     type = ParsedAux
     args = 'transported_Na transported_mass'
     variable = massfrac_Na
     function = 'transported_Na * 22.9898 / transported_mass'
     execute_on = 'timestep_end'
-  [../]
-  [./massfrac_Cl]
+  []
+  [massfrac_Cl]
     type = ParsedAux
     args = 'transported_Cl transported_mass'
     variable = massfrac_Cl
     function = 'transported_Cl * 35.453 / transported_mass'
     execute_on = 'timestep_end'
-  [../]
-  [./massfrac_SiO2]
+  []
+  [massfrac_SiO2]
     type = ParsedAux
     args = 'transported_SiO2 transported_mass'
     variable = massfrac_SiO2
     function = 'transported_SiO2 * 60.0843 / transported_mass'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 [Postprocessors]
-  [./cm3_quartz]
+  [cm3_quartz]
     type = PointValue
     variable = free_cm3_QuartzUnlike
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PointValue
     variable = porosity
-  [../]
-  [./solution_temperature]
+  []
+  [solution_temperature]
     type = PointValue
     variable = solution_temperature
-  [../]
-  [./massfrac_H2O]
+  []
+  [massfrac_H2O]
     type = PointValue
     variable = massfrac_H2O
-  [../]
-  [./massfrac_Na]
+  []
+  [massfrac_Na]
     type = PointValue
     variable = massfrac_Na
-  [../]
-  [./massfrac_Cl]
+  []
+  [massfrac_Cl]
     type = PointValue
     variable = massfrac_Cl
-  [../]
-  [./massfrac_SiO2]
+  []
+  [massfrac_SiO2]
     type = PointValue
     variable = massfrac_SiO2
-  [../]
+  []
 []
 [Outputs]
   exodus = true

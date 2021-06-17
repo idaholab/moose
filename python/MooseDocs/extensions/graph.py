@@ -50,21 +50,23 @@ class GraphExtension(command.CommandExtension):
         renderer.add('ScatterToken', RenderScatter())
         renderer.add('HistogramToken', RenderHistogram())
 
-        if isinstance(renderer, renderers.HTMLRenderer):
-            renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", head=True)
-
         if isinstance(renderer, renderers.LatexRenderer):
             if not HAVE_PYTHON_PLOTLY and not self.get('draft'):
                 self.update(draft=True)
                 renderer.addPackage('draftfigure',
-                                    content="{Draft mode enabled, plotly package failed to load, "
-                                            "install with 'conda install plolty plotly-orca'}")
+                                        content="{Draft mode enabled, plotly package failed to load, "
+                                                "install with 'conda install plolty plotly-orca'}")
             elif self.get('draft'):
                 renderer.addPackage('draftfigure',
                                     content="{Draft mode enabled in the graph extension.}")
 
             renderer.addPackage('graphicx')
 
+    def postTokenize(self, page, ast):
+        if common.has_tokens(ast, 'ScatterToken', 'HistogramToken'):
+            renderer = self.translator.renderer
+            if isinstance(renderer, renderers.HTMLRenderer):
+                renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", head=True, puid=page.uid)
 
 class GraphScatter(command.CommandComponent):
     """
@@ -239,7 +241,7 @@ class GraphTemplate(object):
 
     def __call__(self, **kwargs):
         """Replace the markers with the supplied key, value pairs."""
-        for key in kwargs:
+        for key in list(kwargs.keys()):
             if key.endswith('_'):
                 kwargs[key[:-1]] = kwargs.pop(key)
 

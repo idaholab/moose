@@ -102,6 +102,11 @@ ADNodalBCTempl<T>::computeJacobian()
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
+        {
+#ifndef MOOSE_SPARSE_AD
+          mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                      "Out of bounds access in derivative vector.");
+#endif
           _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
                                                 cached_rows[i],
                                                 conversionHelper(residual, i)
@@ -113,18 +118,19 @@ ADNodalBCTempl<T>::computeJacobian()
 #endif
           ],
                                                 tag);
+        }
 }
 
 template <typename T>
 void
-ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
+ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (jvar == _var.number())
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-    auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerNode());
+    auto ad_offset = Moose::adOffset(jvar_num, _sys.getMaxVarNDofsPerNode());
 #endif
     auto residual = computeQpResidual();
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
@@ -133,13 +139,18 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
                 "The number of dof indices must be less than the number of settable components");
 
     // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
       if (_sys.hasMatrix(tag))
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
+          {
+#ifndef MOOSE_SPARSE_AD
+            mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                        "Out of bounds access in derivative vector.");
+#endif
             _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
                                                   cached_col,
                                                   conversionHelper(residual, i)
@@ -151,6 +162,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
 #endif
             ],
                                                   tag);
+          }
   }
 }
 
@@ -182,6 +194,11 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
+        {
+#ifndef MOOSE_SPARSE_AD
+          mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                      "Out of bounds access in derivative vector.");
+#endif
           _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
                                                 scalar_dof_indices[0],
                                                 conversionHelper(residual, i)
@@ -193,6 +210,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
 #endif
           ],
                                                 tag);
+        }
 }
 
 template class ADNodalBCTempl<Real>;

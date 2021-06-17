@@ -1,3 +1,5 @@
+# NSEnergyInviscidSpecifiedNormalFlowBC
+
 !syntax description /BCs/NSEnergyInviscidSpecifiedNormalFlowBC
 
 !syntax parameters /BCs/NSEnergyInviscidSpecifiedNormalFlowBC

@@ -7,39 +7,42 @@
 #  - 2 threads and 2 processes
 # Each time should give the same result
 [Mesh]
-  [./left]
+  [left]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 4
     xmin = 0
     xmax = 8
-  [../]
-  [./right]
+  []
+  [right]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 4
     xmin = 12
     xmax = 20
-  [../]
-  [./combiner]
+  []
+  [combiner]
     type = CombinerGenerator
     inputs = 'left right'
-  [../]
+  []
+
+  # For consistency with distributed mesh
+  allow_renumbering = false
 []
 
 [UserObjects]
-  [./nnn_uo]
+  [nnn_uo]
     type = NearestNodeNumberUO
     point = '10 0 0'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 [Postprocessors]
-  [./nnn]
+  [nnn]
     type = NearestNodeNumber
     nearest_node_number_uo = nnn_uo
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Problem]

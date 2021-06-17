@@ -13,7 +13,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 #include "MooseMesh.h"
 #include "Output.h"
 #include "TimeStepper.h"
@@ -208,7 +208,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
       // Maybe this MultiApp was already solved
-      if ((ex->getTime() + app_time_offset + 2e-14 >= target_time) ||
+      if ((ex->getTime() + app_time_offset + ex->timestepTol() >= target_time) ||
           (ex->getTime() >= ex->endTime()))
         continue;
 
@@ -232,7 +232,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           transfer_old.close();
 
           // Snag all of the local dof indices for all of these variables
-          AllLocalDofIndicesThread aldit(libmesh_aux_system, _transferred_vars);
+          AllLocalDofIndicesThread aldit(problem, _transferred_vars);
           ConstElemRange & elem_range = *problem.mesh().getActiveLocalElementRange();
           Threads::parallel_reduce(elem_range, aldit);
 
@@ -262,7 +262,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while ((!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time) ||
+        while ((!at_steady && ex->getTime() + app_time_offset + ex->timestepTol() < target_time) ||
                !ex->lastSolveConverged())
         {
           if (local_first != true)

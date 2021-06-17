@@ -156,7 +156,7 @@ ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params)
     if (_subid_di[j].size() != array_length[j])
       mooseError("Error reading subid_di.");
     for (unsigned int i = 0; i < _subid_di[j].size(); ++i)
-      if (_subid_di[j][i] != (j + 2) * 10 + i + 2)
+      if (_subid_di[j][i] != static_cast<SubdomainID>((j + 2) * 10 + i + 2))
         mooseError("Error reading subid_di.");
   }
 

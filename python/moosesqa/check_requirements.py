@@ -13,10 +13,11 @@ import logging
 import enum
 import pyhit
 import mooseutils
+import moosesqa
 from .Requirement import Requirement
 from .LogHelper import LogHelper
 
-ISSUE_RE = re.compile(r'^([0-9a-f]{6,40})$|^(\w*#[0-9]+)$', flags=re.MULTILINE)
+ISSUE_RE = re.compile(r'^([0-9a-f]{6,40})$|^(.*#[0-9]+)$', flags=re.MULTILINE)
 
 class RequirementLogHelper(LogHelper):
     COLOR_TEXT = True
@@ -33,7 +34,7 @@ class RequirementLogHelper(LogHelper):
         line = mooseutils.colorText(str(line if (line is not None) else req.line), 'CYAN', colored=RequirementLogHelper.COLOR_TEXT)
         return '{}:{}:{}\n'.format(filename, name, line)
 
-def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
+def check_requirements(requirements, file_list=None, color_text=True, allowed_collections=None, allowed_classifications=None, **kwargs):
     """
     Tool for checking Requirement for deficiencies
     """
@@ -59,10 +60,11 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
     kwargs.setdefault('log_top_level_detail', log_default)
     kwargs.setdefault('log_missing_detail', log_default)
     kwargs.setdefault('log_empty_detail', log_default)
-    kwargs.setdefault('log_deprecated_detail', log_default)
     kwargs.setdefault('log_extra_requirement', log_default)
     kwargs.setdefault('log_extra_design', log_default)
     kwargs.setdefault('log_extra_issues', log_default)
+    kwargs.setdefault('log_extra_collections', log_default)
+    kwargs.setdefault('log_invalid_collection', log_default)
     kwargs.setdefault('log_issue_format', log_default)
     kwargs.setdefault('log_design_files', log_default)
     kwargs.setdefault('log_validation_files', log_default)
@@ -75,7 +77,7 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
     RequirementLogHelper.COLOR_TEXT = color_text
 
     # Setup file_list, if not provided
-    if (file_list is None) and (not mooseutils.is_git_repo()):
+    if (file_list is None) and (not mooseutils.git_is_repo()):
         msg = "If the 'file_list' is not provided then the working directory must be a git repository."
         raise ValueError(msg)
     elif file_list is None:
@@ -83,12 +85,16 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
         ver = mooseutils.git_version()
         file_list = mooseutils.git_ls_files(root, recurse_submodules=True)
 
+    # Setup allowed collections
+    if allowed_collections is None:
+        allowed_collections = set(moosesqa.MOOSESQA_COLLECTIONS)
+
     # Storage container for duplicate detection
     requirement_dict = collections.defaultdict(set)
 
     # Check each Requirement object for deficiencies
     for req in requirements:
-        _check_requirement(req, logger, file_list)
+        _check_requirement(req, logger, file_list, allowed_collections)
         if req.requirement is not None:
             key = [req.requirement]
             for detail in req.details:
@@ -109,7 +115,7 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
 
     return logger
 
-def _check_requirement(req, logger, file_list):
+def _check_requirement(req, logger, file_list, allowed_collections):
     """Opens tests specification and extracts requirement items."""
 
     # Test for 'deprecated' with other parameters
@@ -169,7 +175,7 @@ def _check_requirement(req, logger, file_list):
             logger.log('log_empty_validation', req, "Empty 'validation' supplied", line=req.validation_line)
 
         # Test for 'detail' at top level
-        if req.detail is not None:
+        if hasattr(req, 'detail') and req.detail is not None:
             logger.log('log_top_level_detail', req, "Top level 'detail' supplied", line=req.detail_line)
 
         # Test for 'detail'
@@ -183,17 +189,20 @@ def _check_requirement(req, logger, file_list):
                 logger.log('log_empty_detail', detail, "Empty 'detail' supplied", line=detail.detail_line)
 
             # Extra 'requirement', 'design', 'issues', and/or 'deprecated'
-            if detail.requirement is not None:
+            if hasattr(detail, 'requirement') and detail.requirement is not None:
                 logger.log('log_extra_requirement', detail, "Extra 'requirement' supplied", line=detail.requirement_line)
 
-            if detail.design is not None:
+            if hasattr(detail, 'design') and detail.design is not None:
                 logger.log('log_extra_design', detail, "Extra 'design' supplied", line=detail.design_line)
 
-            if detail.issues is not None:
+            if hasattr(detail, 'issues') and detail.issues is not None:
                 logger.log('log_extra_issues', detail, "Extra 'issues' supplied", line=detail.issues_line)
 
-            if detail.deprecated:
-                logger.log('log_detail_deprecated', detail, "Sub-block with 'deprecated' supplied", line=detail.issues_line)
+            if hasattr(detail, 'collections') and detail.collections is not None:
+                logger.log('log_extra_collections', detail, "Extra 'collections' supplied", line=detail.collections_line)
+
+            if hasattr(detail, 'deprecated') and detail.deprecated:
+                logger.log('log_deprecated_detail', detail, "Sub-block with 'deprecated' supplied", line=detail.issues_line)
 
         # Test format of 'issues'
         if req.issues is not None:
@@ -230,7 +239,8 @@ def _check_requirement(req, logger, file_list):
         # Test for duplicate details
         details_dict = collections.defaultdict(set)
         for detail in req.details:
-            details_dict[detail.detail].add(detail)
+            if detail.detail is not None:
+                details_dict[detail.detail].add(detail)
         for txt, value in details_dict.items():
             if len(value) > 1:
                 msg = 'Duplicate details found:'
@@ -239,6 +249,13 @@ def _check_requirement(req, logger, file_list):
                     r.duplicate = True
                     msg += RequirementLogHelper._colorTestInfo(r, None, None, None)
                 LogHelper.log(logger, 'log_duplicate_detail', msg.strip('\n'))
+
+        # Test for invalid 'collections'
+        if (allowed_collections is not None) and (req.collections):
+            wrong = req.collections.difference(allowed_collections)
+            if wrong:
+                msg = 'Invalid collection names found: {}'.format(' '.join(wrong))
+                LogHelper.log(logger, 'log_invalid_collection', msg)
 
 def _has_file(filename, file_list):
     """Test if the filename is located in the list"""

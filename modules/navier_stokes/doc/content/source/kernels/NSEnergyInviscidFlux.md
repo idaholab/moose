@@ -1,3 +1,5 @@
+# NSEnergyInviscidFlux
+
 !syntax description /Kernels/NSEnergyInviscidFlux
 
 !syntax parameters /Kernels/NSEnergyInviscidFlux

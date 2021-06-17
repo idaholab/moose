@@ -30,7 +30,7 @@ MaterialTimeStepPostprocessor::validParams()
   params.addParam<bool>("use_material_timestep_limit",
                         true,
                         "if true, the time step is limited by the minimum value of the "
-                        "matl_timestep_limit property");
+                        "material_timestep_limit property");
 
   params.addParam<MaterialPropertyName>("elements_changed_property",
                                         "Name of the material property used to limit the time step "
@@ -57,7 +57,7 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
   : ElementPostprocessor(parameters),
     _use_material_timestep_limit(getParam<bool>("use_material_timestep_limit")),
     _matl_time_step(_use_material_timestep_limit
-                        ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
+                        ? &getMaterialPropertyByName<Real>("material_timestep_limit")
                         : nullptr),
     _matl_value(std::numeric_limits<Real>::max()),
     _use_elements_changed(parameters.isParamSetByUser("elements_changed_property")),

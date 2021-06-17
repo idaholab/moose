@@ -20,13 +20,17 @@ public:
 
   ADViscoplasticityStressUpdate(const InputParameters & parameters);
 
+  using ADViscoplasticityStressUpdateBase::updateState;
+
   virtual void updateState(ADRankTwoTensor & strain_increment,
                            ADRankTwoTensor & inelastic_strain_increment,
                            const ADRankTwoTensor & rotation_increment,
                            ADRankTwoTensor & stress_new,
                            const RankTwoTensor & stress_old,
                            const ADRankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old) override;
+                           const RankTwoTensor & elastic_strain_old,
+                           bool compute_full_tangent_operator = false,
+                           RankFourTensor & tangent_operator = _identityTensor) override;
 
   virtual ADReal minimumPermissibleValue(const ADReal & effective_trial_stress) const override;
 

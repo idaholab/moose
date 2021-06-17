@@ -91,6 +91,16 @@
     requirement = "MOOSE shall support periodic boundary conditions with transforms prescribed as a translation."
   [../]
 
+  [./testperiodic_vector]
+    type = 'Exodiff'
+    input = 'periodic_vector_bc_test.i'
+    exodiff = 'vector_out.e'
+    group = 'periodic'
+    abs_zero = 1e-6
+    rel_err = 1e-5
+    requirement = "MOOSE shall support periodic boundary conditions on vector variables with transforms prescribed as a translation."
+  [../]
+
   [./testperiodic_dp]
     type = 'Exodiff'
     input = 'periodic_bc_displaced_problem.i'

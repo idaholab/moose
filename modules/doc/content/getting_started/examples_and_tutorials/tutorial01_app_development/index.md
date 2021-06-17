@@ -8,7 +8,7 @@ In this tutorial, the reader shall work through the steps to create a custom MOO
 This tutorial is the focus of the live hosted [examples_and_tutorials/index.md#workshop]. New users are encouraged to engage themselves in this training by +reading the content carefully and reproducing the steps, without simply copying and pasting code+. This tutorial is designed to be an in-depth explanation of creating a complete, custom multiphysics application including the process of using a repository and testing.
 
 !media tutorial01_app_development/moose_intro.png
-       style=width:80%;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
 <!--Delete this image from `large_media/` or just use it here? I think it looks kind of nice here-->
 
 ## Tutorial Contents id=contents

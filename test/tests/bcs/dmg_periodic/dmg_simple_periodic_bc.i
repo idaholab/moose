@@ -9,8 +9,6 @@
     ymax = 1
     zmax = 1
   []
-  # We need this for recovering
-  parallel_type = distributed
 []
 
 [Variables]

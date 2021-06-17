@@ -3,9 +3,10 @@
   swap_out_of_basis = "Ca++"
   swap_into_basis = "Gypsum"
   charge_balance_species = "SO4--"
-  constraint_species = "H2O              Cl-           Na+           SO4--              Gypsum"
-  constraint_value = "  1.0              1E-10         1E-10         1E-6               0.5814"
-  constraint_meaning = "kg_solvent_water free_molality free_molality moles_bulk_species free_moles_mineral_species"
+  constraint_species = "H2O              Cl-                Na+                SO4--            Gypsum"
+  constraint_value = "  1.0              1E-10              1E-10              1E-6             0.5814"
+  constraint_meaning = "kg_solvent_water free_concentration free_concentration bulk_composition free_mineral"
+  constraint_unit = "   kg               molal              molal              moles            moles"
   source_species_names = 'NaCl'
   source_species_rates = '1.0'
   add_aux_pH = false # there is no H+ in the problem
@@ -16,29 +17,29 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Cl- Na+ SO4-- Ca++"
     equilibrium_minerals = "Gypsum"
     piecewise_linear_interpolation = true # for comparison with GWB
-  [../]
+  []
 []
 
 [Functions]
-  [./timestepper]
+  [timestepper]
     type = PiecewiseLinear
     x = '0    0.1'
     y = '0.01 0.1'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = timestepper
-  [../]
+  []
   end_time = 3
 []
 
@@ -47,28 +48,28 @@
 []
 
 [AuxVariables]
-  [./dissolved_gypsum_moles]
-  [../]
+  [dissolved_gypsum_moles]
+  []
 []
 [AuxKernels]
-  [./dissolved_gypsum_moles]
+  [dissolved_gypsum_moles]
     type = ParsedAux
     args = 'bulk_moles_Gypsum free_mg_Gypsum'
     function = 'bulk_moles_Gypsum - free_mg_Gypsum / 1000 / 172.168 '
     variable = dissolved_gypsum_moles
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./cl_molal]
+  [cl_molal]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_Cl-'
-  [../]
-  [./dissolved_gypsum_mol]
+  []
+  [dissolved_gypsum_mol]
     type = PointValue
     point = '0 0 0'
     variable = dissolved_gypsum_moles
-  [../]
+  []
 []

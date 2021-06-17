@@ -9,6 +9,10 @@
   []
 []
 
+[Debug]
+  show_mesh_meta_data = true
+[]
+
 [Variables]
   [./u]
   [../]

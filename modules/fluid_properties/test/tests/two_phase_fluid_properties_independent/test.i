@@ -9,6 +9,9 @@
   type = GeneratedMesh
   dim = 1
   nx = 1
+
+  # Required for NodalVariableValue on distributed mesh
+  allow_renumbering = false
 []
 
 [Problem]

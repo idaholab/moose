@@ -14,15 +14,14 @@ registerMooseObject("MooseApp", FVDirichletBC);
 InputParameters
 FVDirichletBC::validParams()
 {
-  InputParameters params = FVBoundaryCondition::validParams();
+  InputParameters params = FVDirichletBCBase::validParams();
   params.addClassDescription("Defines a Dirichlet boundary condition for finite volume method.");
   params.addRequiredParam<Real>("value", "value to enforce at the boundary face");
-  params.registerSystemAttributeName("FVDirichletBC");
   return params;
 }
 
 FVDirichletBC::FVDirichletBC(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters), _val(getParam<Real>("value"))
+  : FVDirichletBCBase(parameters), _val(getParam<Real>("value"))
 {
 }
 

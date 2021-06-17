@@ -5,9 +5,10 @@
   swap_out_of_basis = "Al+++ K+ H+ SiO2(aq)"
   swap_into_basis = "Albite Maximum Muscovite Quartz"
   charge_balance_species = "Cl-"
-  constraint_species = "H2O              Muscovite                  Na+                Cl-                Albite                     Maximum                    Quartz"
-  constraint_value = "  1.0              0.03553                    1.14093            1.14093           0.19986                    0.09196                    0.08815"
-  constraint_meaning = "kg_solvent_water free_moles_mineral_species moles_bulk_species moles_bulk_species free_moles_mineral_species free_moles_mineral_species free_moles_mineral_species"
+  constraint_species = "H2O              Muscovite    Na+              Cl-              Albite       Maximum      Quartz"
+  constraint_value = "  1.0              5            1.14093          1.14093          20           10           2"
+  constraint_meaning = "kg_solvent_water free_mineral bulk_composition bulk_composition free_mineral free_mineral free_mineral"
+  constraint_unit =    "kg               cm3          moles            moles            cm3          cm3          cm3"
   initial_temperature = 300
   temperature = temperature
   ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
@@ -17,44 +18,44 @@
 []
 
 [AuxVariables]
-  [./temperature]
-  [../]
+  [temperature]
+  []
 []
 [AuxKernels]
-  [./temperature]
+  [temperature]
     type = FunctionAux
     variable = temperature
     function = '300 - t'
     execute_on = 'timestep_begin' # so that it is correct when we solve the system
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./solution_temperature]
+  [solution_temperature]
     type = PointValue
     point = '0 0 0'
     variable = 'temperature'
-  [../]
-  [./cm3_Max_Micro]
+  []
+  [cm3_Max_Micro]
     type = PointValue
     point = '0 0 0'
     variable = 'free_cm3_Maximum'
-  [../]
-  [./cm3_Albite]
+  []
+  [cm3_Albite]
     type = PointValue
     point = '0 0 0'
     variable = 'free_cm3_Albite'
-  [../]
-  [./cm3_Muscovite]
+  []
+  [cm3_Muscovite]
     type = PointValue
     point = '0 0 0'
     variable = 'free_cm3_Muscovite'
-  [../]
-  [./cm3_Quartz]
+  []
+  [cm3_Quartz]
     type = PointValue
     point = '0 0 0'
     variable = 'free_cm3_Quartz'
-  [../]
+  []
 []
 
 [Executioner]
@@ -68,12 +69,12 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Na+ Cl- Al+++ K+ SiO2(aq)"
     equilibrium_minerals = "Albite Maximum Muscovite Quartz"
     remove_all_extrapolated_secondary_species = true # this removes Al13O4(OH)24(7+) that has extreme logK values
-  [../]
+  []
 []
 

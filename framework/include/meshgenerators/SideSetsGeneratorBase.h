@@ -27,6 +27,9 @@ typedef FEGenericBase<Real> FEBase;
 template <>
 InputParameters validParams<SideSetsGeneratorBase>();
 
+/*
+ * Base class for mesh generators that add sidesets to the mesh
+ */
 class SideSetsGeneratorBase : public MeshGenerator
 {
 public:

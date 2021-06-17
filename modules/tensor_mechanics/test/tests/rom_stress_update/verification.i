@@ -122,63 +122,62 @@
     strain = FINITE
     add_variables = true
     generate_output = 'vonmises_stress'
-    use_automatic_differentiation = true
   [../]
 []
 
 [BCs]
   [./symmx]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmy]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmz]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./pressure_x]
-    type = ADPressure
+    type = Pressure
     variable = disp_x
     component = 0
     boundary = right
     function = vmJ2_fcn
-    constant = 0.5e6
+    factor = 0.5e6
   [../]
   [./pressure_y]
-    type = ADPressure
+    type = Pressure
     variable = disp_y
     component = 1
     boundary = top
     function = vmJ2_fcn
-    constant = -0.5e6
+    factor = -0.5e6
   [../]
   [./pressure_z]
-    type = ADPressure
+    type = Pressure
     variable = disp_z
     component = 2
     boundary = front
     function = vmJ2_fcn
-    constant = -0.5e6
+    factor = -0.5e6
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e11
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ADComputeMultipleInelasticStress
+    type = ComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]

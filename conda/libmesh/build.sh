@@ -1,5 +1,7 @@
 #!/bin/bash
-set -eux
+set -eu
+export PATH=/bin:$PATH
+
 export PKG_CONFIG_PATH=$BUILD_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export PETSC_DIR=`pkg-config PETSc --variable=prefix`
 
@@ -13,6 +15,11 @@ function sed_replace(){
         sed -i '' -e "s|${BUILD_PREFIX}|${PREFIX}|g" $PREFIX/libmesh/bin/libmesh-config
     else
         sed -i'' -e "s|${BUILD_PREFIX}|${PREFIX}|g" $PREFIX/libmesh/bin/libmesh-config
+
+        # Fix hard paths to /usr/bin/ when most operating system want these tools in /bin
+        sed -i'' -e "s|/usr/bin/sed|/bin/sed|g" $PREFIX/libmesh/contrib/bin/libtool
+        sed -i'' -e "s|/usr/bin/grep|/bin/grep|g" $PREFIX/libmesh/contrib/bin/libtool
+        sed -i'' -e "s|/usr/bin/dd|/bin/dd|g" $PREFIX/libmesh/contrib/bin/libtool
     fi
 }
 

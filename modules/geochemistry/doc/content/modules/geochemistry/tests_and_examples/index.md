@@ -1,6 +1,8 @@
 # The `geochemistry` module: tests and examples
 
-The theory behind the `geochemistry` module has been described mostly in the [equilibrium](equilibrium.md) and [transport](transport.md) pages.  It is hoped that the descriptions of tests and examples found below will help users actually implement their geochemical models.
+The theory behind the `geochemistry` module has been described in the [theory page](theory/index.md).  It is hoped that the descriptions of tests and examples found below will help users actually implement their geochemical models.
+
+The `geochemistry` module's code is accompanied by over 350 tests, ranging from simple unit tests to more complicated benchmarks such as some of those listed below.  Code coverage details may be found [here](https://mooseframework.inl.gov/docs/coverage/geochemistry/index.html).
 
 Many of the tests and examples are drawn from the popular textbook [!cite](bethke_2007).  The textbook is not reproduced here, so if readers are interested in an example's background, details or an analysis of the results they should refer to [!cite](bethke_2007).  To help new `geochemistry` module users, many tests and examples are also provided with a [Geochemists Workbench](https://www.gwb.com/) (GWB) equivalent.  GWB is a "gold-standard" geochemistry solver so its results also act to benchmark the `geochemistry` module.  There are [small input-file related differences](theory/gwb_diff.md) bewteen GWB and `geochemistry` that must be considered when benchmarking to full precision, but in real models their impact is likely to be much less than the errors in the database and experimental observations.
 

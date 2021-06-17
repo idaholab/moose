@@ -69,15 +69,15 @@ The Mesh and Executioner are provided in the input file so that it may be run al
 
 The PorousFlow simulation provides `temperature`, `pf_rate_H2O`, `pf_rate_Na`, `pf_rate_Cl` and `pf_rate_SiO2` as `AuxVariables`.  The `pf_rate` quantities are rates of changes of fluid-component mass (kg.s$^{-1}$) at each node, but the Geochemistry module expects rates-of-changes of moles (mol.s$^{-1}$) at each node.  Moreover, since this input file considers just 1 liter of aqueous solution at every node, the `nodal_void_volume` is used to convert to mol.s$^{-1}$/(liter of aqueous solution).  For instance:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[./rate_H2O_per_1l_auxk] end=[./rate_Na_per_1l]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[rate_H2O_per_1l_auxk] end=[rate_Na_per_1l]
 
 This input file provides the PorousFlow simulation with updated mass-fractions (after `QuartzLike` dissolution has occured to increase the SiO$_{2}$(aq) concentration, for instance).  These are based on the "transported" mole numbers at each node, which are the mole numbers of the transported species in the original basis (mole numbers of H$_{2}$O, Na$^{+}$, Cl$^{-}$ and free moles of SiO$_{2}$(aq) in this case).  These are recorded into `AuxVariables` using, for example:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[./transported_H2O_auxk] end=[./transported_Na]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[transported_H2O_auxk] end=[transported_Na]
 
 The mass fraction is computed using, for example
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[./transported_mass_auxk] end=[./massfrac_Na]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[transported_mass_auxk] end=[massfrac_Na]
 
 
 ## The PorousFlow simulation
@@ -98,15 +98,15 @@ Much of the remainder of this input file is typical of PorousFlow simulations.  
 
 ### Transfer to the aquifer geochemistry simulation
 
-The PorousFlow input file transfers the rates of changes of each species (kg.s$^{-1}$) at each node to the aquifer geochemistry simulation.  This is achieved through saving these changes from Kernel residual evaluations into AuxKernels, such as:
+The PorousFlow input file transfers the rates of changes of each species (kg.s$^{-1}$) at each node to the aquifer geochemistry simulation.  This is achieved through saving these changes from Kernel residual evaluations into AuxKernels, using the `save_component_rate_in`:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./time_deriv_3] end=[./temperature_advection]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i block=PorousFlowFullySaturated
 
 ### Transfer from the aquifer geochemistry simulation
 
 At the end of each time-step, the aquifer geochemistry simulation provides updated mass-fractions to the PorousFlow simulation:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./massfrac_from_geochem] end=[]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[massfrac_from_geochem] end=[]
 
 ### Interfacing with the heat-exchanger simulation
 
@@ -118,7 +118,7 @@ The heat injection is modelled using a fixed value of temperature at the `inject
 
 The `injection_temperature` variable is set by the exchanger simulation (below) via a MultiApp Transfer.  The fluid injection is modelled using a PorousFlowPolyLineSink, such as:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./inject_Na] end=[./inject_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[inject_Na] end=[inject_Cl]
 
 In this block:
 
@@ -130,7 +130,7 @@ The four `injection_rate_massfrac_*` variables are set by the exchanger simulati
 
 The fluid and heat production from the other well are also simulated by PorousFlowPolyLineSinks, such as:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./produce_Na] end=[./produce_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[produce_Na] end=[produce_Cl]
 
 In this block:
 
@@ -140,15 +140,15 @@ In this block:
 
 Heat energy is captured using a similar technique (notice the `use_enthalpy` flag):
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./produce_heat] end=[]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[produce_heat] end=[]
 
 The `produced_mass_*` quantities and the temperature at the production well are provided to the heat-exchanger input file (below).  However, that input file works in mole units, not mass fractions, so a translation is needed:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./kg_Na_produced_this_timestep] end=[./kg_Cl_produced_this_timestep]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[kg_Na_produced_this_timestep] end=[kg_Cl_produced_this_timestep]
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./mole_rate_Na_produced] end=[./mole_rate_Cl_produced]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[mole_rate_Na_produced] end=[mole_rate_Cl_produced]
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[./moles_Na] end=[./moles_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/porous_flow.i start=[moles_Na] end=[moles_Cl]
 
 
 ## The heat-exchanger simulation
@@ -173,11 +173,11 @@ Notice the following points:
 
 This simulation provides the PorousFlow simulation with the injection temperature (200$^{\circ}$C).  It also provides the mass-fractions of the injected fluid.  This is achieved by recording the "transported" mole numbers:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/exchanger.i start=[./transported_H2O_auxk] end=[./transported_Na]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/exchanger.i start=[transported_H2O_auxk] end=[transported_Na]
 
 and converting mole numbers to mass fractions:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_2D/exchanger.i start=[./transported_mass_auxk] end=[./massfrac_Na]
+!listing modules/combined/examples/geochem-porous_flow/geotes_2D/exchanger.i start=[transported_mass_auxk] end=[massfrac_Na]
 
 Quantities of interest are recorded by Postprocessors:
 

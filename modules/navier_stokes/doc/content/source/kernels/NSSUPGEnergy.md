@@ -1,3 +1,5 @@
+# NSSUPGEnergy
+
 !syntax description /Kernels/NSSUPGEnergy
 
 !syntax parameters /Kernels/NSSUPGEnergy

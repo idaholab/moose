@@ -47,6 +47,11 @@
   []
 []
 
+[Executioner]
+  type = Transient
+  num_steps = 2
+[]
+
 [Outputs]
   csv = true
   execute_on = 'TIMESTEP_END'

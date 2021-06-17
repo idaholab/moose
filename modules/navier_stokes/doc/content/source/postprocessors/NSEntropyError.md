@@ -1,3 +1,5 @@
+# NSEntropyError
+
 !syntax description /Postprocessors/NSEntropyError
 
 !syntax parameters /Postprocessors/NSEntropyError

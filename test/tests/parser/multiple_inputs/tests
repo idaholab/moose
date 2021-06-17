@@ -1,0 +1,38 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#17989'
+
+  [merging]
+    requirement = 'The system shall support for multiple input files, which are merged into one '
+                  'input specification for a simulation'
+
+    [two_inputs]
+      type = 'Exodiff'
+      input = 'diffusion1a.i diffusion1c.i'
+      exodiff = 'diffusion1a_out.e'
+      detail = 'where no parameters overlap'
+    []
+
+    [three_inputs_override]
+      type = 'Exodiff'
+      input = 'diffusion1a.i diffusion1b.i diffusion1c.i'
+      exodiff = 'diffusion1a_out.e'
+      detail = 'where input files may override parameters in previous inputs'
+    []
+
+    [three_inputs_error]
+      type = 'RunException'
+      input = 'diffusion1a.i diffusion1c.i diffusion1d.i'
+      expect_err = 'test/tests/parser/multiple_inputs/diffusion1d.i:3: unused parameter '
+                   '\'BCs/right/invalid_param\''
+      detail = 'while locating input errors in the correct file'
+    []
+
+    [three_inputs_override_message]
+      type = 'RunApp'
+      input = 'diffusion1a.i diffusion1b.i diffusion1c.i'
+      expect_out = '/diffusion1c.i:18:  Parameter \'BCs/right/value\' overrides the same parameter in .*/diffusion1b.i:3'
+      detail = 'and inform the user of parameters from earlier files being overidden by later files'
+    []
+  []
+[]

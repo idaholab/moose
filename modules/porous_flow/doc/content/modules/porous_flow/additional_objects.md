@@ -10,8 +10,8 @@ The `Actions` system allows programatic addition of various input file objects, 
 simplifying the input files for various simulations.
 
 - [PorousFlowBasicTHM](PorousFlowBasicTHM.md): Fully-saturated, single-phase, single-component fluid flow
-- [PorousFlowFullySaturated](PorousFlowFullySaturated.md): Fully-saturated, single-phase fluid flow
-- [PorousFlowUnsaturated](PorousFlowUnsaturated.md): Saturated-unsaturated, single-phase fluid flow
+- [PorousFlowFullySaturated](PorousFlowFullySaturated.md): Fully-saturated, multi-component, single-phase fluid flow
+- [PorousFlowUnsaturated](PorousFlowUnsaturated.md): Saturated-unsaturated, multi-component, single-phase fluid flow
 
 ## AuxKernels
 

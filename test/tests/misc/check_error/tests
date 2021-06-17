@@ -10,6 +10,7 @@
     requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
     design = 'Executioner/index.md'
     issues = '#5144 #5153'
+    collections = 'FAILURE_ANALYSIS'
   [../]
 
   [./range_check_param]
@@ -19,6 +20,7 @@
 
     requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
     issues = '#2777'
+    collections = 'FAILURE_ANALYSIS'
   [../]
 
   [./checked_pointer_param_test]
@@ -387,6 +389,24 @@
     issues = '#1405'
   [../]
 
+  [./incomplete_fvkernel_block_coverage_test]
+    type = 'RunException'
+    input = 'incomplete_fvkernel_block_coverage_test.i'
+    expect_err = "The following block\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more domain blocks do not have any active FVKernels objects assigned.'
+    issues = '#1405 #15196'
+  [../]
+
+  [./incomplete_fvkernel_variable_coverage_test]
+    type = 'RunException'
+    input = 'incomplete_fvkernel_variable_coverage_test.i'
+    expect_err = "The following variable\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more variables do not have any active FVKernel objects assigned.'
+    issues = '#1405 #15196'
+  [../]
+
   [./invalid_elemental_to_nodal_couple_test]
     type = 'RunException'
     input = 'invalid_aux_coupling_test.i'
@@ -481,7 +501,7 @@
   [./missing_mesh_test]
     type = 'RunException'
     input = 'missing_mesh_test.i'
-    expect_err = "cannot locate mesh file '\S+'"
+    expect_err = "Unable to open file \S+"
 
     requirement = 'The system shall report an error when the mesh file cannot be found.'
     issues = '#1405'
@@ -663,15 +683,6 @@
     method = '!dbg'
 
     requirement = 'The system shall report an error when an input file block associated with on pluggable system is asked to build an object from a different system.'
-    issues = '#1405'
-  [../]
-
-  [./wrong_object_test2]
-    type = 'RunException'
-    input = 'nonexistent_pps_test.i'
-    expect_err = "The following Reporter values were not declared"
-
-    requirement = 'The system shall report an error when a Postprocessor value is requested from a non-existent Postprocessor.'
     issues = '#1405'
   [../]
 
@@ -1050,5 +1061,14 @@
     requirement = 'The system shall report an error when nodal boundary condition is applied on a non-nodal variable.'
     design = 'NonlinearSystem.md'
     issues = '#14019'
+  [../]
+  [./check_git_lfs_pointer]
+    type = 'RunException'
+    input = 'mesh_pointer_error_check.i'
+    expect_err = 'appears to be a Git-LFS pointer'
+
+    requirement = 'The system shall report an error when a git-lfs file pointer is encountered.'
+    design = 'MooseUtils.md'
+    issues = '#17407'
   [../]
 []

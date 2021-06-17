@@ -203,7 +203,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
       // Look up elem in the mortar_interface_coupling data structure.
-      auto bounds = _amg->mortar_interface_coupling.equal_range(elem->id());
+      auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem->id());
 
       for (const auto & pr : as_range(bounds))
       {
@@ -220,14 +220,14 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 }
 
 bool
-AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
+AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
 {
   if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
   {
     if (_primary_boundary_name == asoi->_primary_boundary_name &&
         _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
-        _secondary_subdomain_name == asoi->_secondary_subdomain_name && isType(asoi->_rm_type))
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name && baseGreaterEqual(*asoi))
       return true;
   }
   return false;

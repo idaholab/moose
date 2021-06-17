@@ -1,0 +1,11 @@
+[Tests]
+  [diffusion]
+    issues = '#17638'
+    design = 'FVDiffusionInterface.md'
+    requirement = 'The system shall be able to solve a diffusion problem with the domain split in half and two finite volume variables living on each side.'
+    type = Exodiff
+    input = test.i
+    exodiff = 'test_out.e'
+    ad_indexing_type = 'global'
+  []
+[]

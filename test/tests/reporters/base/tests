@@ -19,4 +19,54 @@
 
     requirement = "The system shall error if an invalid name is provided when retrieving aggregate value."
    []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when declaring a Reporter value and'
+
+    [missing_param]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Reporters/error_test/missing_param=true'
+      expect_err = 'When getting a ReporterValueName, failed to get a parameter with the name "some_missing_parm".'
+
+      detail = 'the parameter that contains the name was not found,'
+    []
+    [bad_param]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Reporters/error_test/bad_param=true'
+      expect_err = 'Supplied parameter with name "bad_param" of type "bool" is not an expected type for getting a Reporter value.'
+
+      detail = 'the parameter that contains the name is not of the correct type,'
+    []
+    [already_declared]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Reporters/error_test/already_declared=true'
+      expect_err = 'While declaring a Reporter value with the name "value_name" and type "double",.*a Reporter with the same name has already been declared.'
+
+      detail = 'a Reporter with the same name has already been declared, and'
+    []
+    [requested_different_type]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Reporters/error_test/requested_different_type=true'
+      expect_err = 'While declaring a Reporter value with the name "value_name" and type "double",.*a Reporter with the same name has been requested with a different type.'
+
+      detail = 'a Reporter with the same name but a different type has been requested.'
+    []
+  []
+
+  [special_types]
+    type = CSVDiff
+    input = special_types.i
+    csvdiff = 'special_types_out.csv special_types_out_vpp_0001.csv'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the mixing of computing and retreiving aggregate values of arbitrary types with the Postprocessor and VectorPostprocessor system.'
+  []
 []

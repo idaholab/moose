@@ -41,19 +41,21 @@
     to_control = 'stochastic'
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = quad_sub
     sampler = sample
-    to_vector_postprocessor = storage
-    from_postprocessor = avg
+    stochastic_reporter = storage
+    from_reporter = avg/value
+  []
+[]
+
+[Reporters]
+  [storage]
+    type = StochasticReporter
   []
 []
 
 [VectorPostprocessors]
-  [storage]
-    type = StochasticResults
-    parallel_type = REPLICATED
-  []
   [pc_coeff]
     type = PolynomialChaosData
     pc_name = poly_chaos
@@ -82,8 +84,7 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = sample
-    results_vpp = storage
-    results_vector = data:avg
+    response = storage/data:avg:value
   []
 []
 

@@ -9,6 +9,12 @@
     requirement = "TestHarness shall report a non-failing status after a predetermined time of no activity"
     issues = '#9280'
   [../]
+  [./longest_jobs]
+    type = PythonUnitTest
+    input = test_LongestJobs.py
+    requirement = "TestHarness shall support the output of the longest running jobs"
+    issues = '#16752'
+  [../]
   [./csvdiffs]
     type = PythonUnitTest
     input = test_CSVDiffs.py
@@ -26,6 +32,11 @@
     input = test_DiffGold.py
     requirement = "TestHarness shall report a failure when encountering differential result with a custom gold directory."
     issues = '#10647'
+  [../]
+  [./min_ad_size]
+    type = PythonUnitTest
+    input = test_MinADSize.py
+    requirement = "TestHarness shall restrict tests based on the available dual number derivative vector size"
   [../]
   [./cyclic]
     type = PythonUnitTest

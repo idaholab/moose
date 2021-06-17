@@ -1,3 +1,5 @@
+!config navigation collapsible-sections=[None, None, None, None, None, 'close']
+
 # Examples and Tutorials
 
 This page includes various demonstrations intended to introduce the basics of [!ac](MOOSE) for creating custom applications to solve unique and challenging multiphysics problems. Each example or tutorial focuses on different aspects of MOOSE, primarily the fundamental systems that are available to solve multiphysics problems.
@@ -35,10 +37,59 @@ demonstrates and how to use it is provided here:
 - [Example 20: UserObjects](examples/ex20_user_objects.md)
 - [Example 21: Debugging](examples/ex21_debugging.md)
 
+### Module Use Examples
+
+Example problems are provided for some of the individual [modules/index.md]. A comprehensive list of all that are available is given below. Simply expand the example set under a module header and follow their links.
+
+###### Contact
+
+!include modules/contact/contact_examples.md
+
+###### Geochemistry
+
+- [modules/geochemistry/tests_and_examples/index.md]
+
+###### Level Set
+
+!include modules/level_set/level_set_examples.md
+
+###### Porous Flow
+
+!include modules/porous_flow/porous_flow_examples.md
+
+###### Reconstructed Discontinuous Galerkin
+
+- [modules/rdg/index.md#example]
+
+###### Stochastic Tools
+
+!include modules/stochastic_tools/stochastic_tools_examples.md
+
+#### <!--empty header for breaking out of the collapsed section-->
+
+The following example combines the Heat Conduction, Tensor Mechanics, and Stochastic Tools modules and demonstrates one of the core purposes of MOOSE---solving multiphysics problems: [modules/combined/examples/stm_thermomechanics.md]
+
 ## Tutorials
 
-- [Tutorial 1. Application Development](tutorial01_app_development/index.md)\\
-  Learn how to develop a MOOSE-based application to solve coupled systems of differential equations in a multiphysics setting. This tutorial teaches you how to create custom MOOSE objects, setup input files to invoke these objects, and how to process and visualize the results of your simulations.
+!col! small=1 medium=1 large=1
+!style halign=center
+[!icon!school]
+!col-end!
+
+!col! small=11 medium=11 large=11
+[tutorial01_app_development/index.md]\\
+Learn how to develop a MOOSE-based application to solve coupled systems of differential equations in a multiphysics setting. This tutorial teaches you how to create custom MOOSE objects, setup input files to invoke these objects, and how to process and visualize the results of your simulations.
+!col-end!
+
+!col! small=1 medium=1 large=1
+!style halign=center
+[!icon!school]
+!col-end!
+
+!col! small=11 medium=11 large=11
+[Porous Flow Tutorial](modules/porous_flow/tutorial_00.md)\\
+This tutorial guides the user through some commonly-used aspects of the [Porous Flow](modules/porous_flow/index.md) module. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
+!col-end!
 
 ## Workshop id=workshop
 
@@ -47,7 +98,7 @@ The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live workshop
 - [Workshop Slideshow](https://www.mooseframework.org/workshop)
 - [MOOSE Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
 
-MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join one of the [mailing lists](new_users.md#join) for further updates!
+MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
 
 ## C++ Programming References id=programming
 

@@ -43,8 +43,12 @@ protected:
   /// A Userobject that carries the subblock ID for all elements
   const SubblockIndexProvider * _subblock_id_provider;
 
-  const Function & _out_of_plane_pressure;
-  const Real _factor;
+  /// Function defining applied out-of-plane pressure
+  const Function * _out_of_plane_pressure_function;
+  /// Material property defining applied out-of-plane pressure
+  const MaterialProperty<Real> & _out_of_plane_pressure_material;
+  /// Factor applied to out-of-plane pressure applied by function and material
+  const Real _pressure_factor;
 
   /// The direction of the out-of-plane strain scalar variable
   unsigned int _scalar_out_of_plane_strain_direction;

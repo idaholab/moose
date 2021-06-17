@@ -51,4 +51,13 @@
     design = 'NearestPointLayeredAverage.md'
     issues = '#12356'
   [../]
+
+  [./nearest_radius]
+    type = 'Exodiff'
+    input = 'nearest_radius_layered_average.i'
+    exodiff = 'nearest_radius_layered_average_out.e'
+    requirement = 'The system shall compute layered averages for concentric cylindrical rings with equal thickness for a list of points that correspond to the average radius of each ring'
+    design = 'NearestRadiusLayeredAverage.md'
+    issues = '#16829'
+  [../]
 []

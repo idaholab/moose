@@ -45,9 +45,9 @@ MechanicsMaterialBasePD::computeBondCurrentLength()
 
   for (unsigned int i = 0; i < _dim; ++i)
   {
-    dxyz(i) = (_pdmesh.getPDNodeCoord(_current_elem->node_id(1)))(i) +
+    dxyz(i) = (_pdmesh.getNodeCoord(_current_elem->node_id(1)))(i) +
               _disp_var[i]->getNodalValue(*_current_elem->node_ptr(1));
-    dxyz(i) -= (_pdmesh.getPDNodeCoord(_current_elem->node_id(0)))(i) +
+    dxyz(i) -= (_pdmesh.getNodeCoord(_current_elem->node_id(0)))(i) +
                _disp_var[i]->getNodalValue(*_current_elem->node_ptr(0));
   }
 

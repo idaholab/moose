@@ -10,11 +10,13 @@
 #include "SS316HLAROMANCEStressUpdateTest.h"
 
 registerMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
+registerMooseObject("TensorMechanicsTestApp", ADSS316HLAROMANCEStressUpdateTest);
 
+template <bool is_ad>
 InputParameters
-SS316HLAROMANCEStressUpdateTest::validParams()
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::validParams()
 {
-  InputParameters params = ADLAROMANCEStressUpdateBase::validParams();
+  InputParameters params = LAROMANCEStressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription("LAROMANCE creep update model for SS316H");
 
   // Override defaults for material specific parameters below
@@ -42,13 +44,16 @@ SS316HLAROMANCEStressUpdateTest::validParams()
   return params;
 }
 
-SS316HLAROMANCEStressUpdateTest::SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters)
-  : ADLAROMANCEStressUpdateBase(parameters)
+template <bool is_ad>
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::SS316HLAROMANCEStressUpdateTestTempl(
+    const InputParameters & parameters)
+  : LAROMANCEStressUpdateBaseTempl<is_ad>(parameters)
 {
 }
 
+template <bool is_ad>
 std::vector<std::vector<std::vector<ROMInputTransform>>>
-SS316HLAROMANCEStressUpdateTest::getTransform()
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::getTransform()
 {
   return {{{ROMInputTransform::LOG,
             ROMInputTransform::LOG,
@@ -67,16 +72,18 @@ SS316HLAROMANCEStressUpdateTest::getTransform()
             ROMInputTransform::LINEAR}}};
 }
 
+template <bool is_ad>
 std::vector<std::vector<std::vector<Real>>>
-SS316HLAROMANCEStressUpdateTest::getTransformCoefs()
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::getTransformCoefs()
 {
   return {{{1.0, 1.0, 1.0e1, 4.0e-5, 0.0},
            {1.0e13, 1.0, 1.0e1, 0.0, 1.0},
            {0.0, 1.0, 5.0, 1.0e-4, 0.0}}};
 }
 
+template <bool is_ad>
 std::vector<std::vector<std::vector<Real>>>
-SS316HLAROMANCEStressUpdateTest::getInputLimits()
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::getInputLimits()
 {
   return {{{1.32776E+12, 9.99959E+12},
            {2.93039E+11, 9.99798E+11},
@@ -85,8 +92,9 @@ SS316HLAROMANCEStressUpdateTest::getInputLimits()
            {800.0160634, 949.9873586}}};
 }
 
+template <bool is_ad>
 std::vector<std::vector<std::vector<Real>>>
-SS316HLAROMANCEStressUpdateTest::getCoefs()
+SS316HLAROMANCEStressUpdateTestTempl<is_ad>::getCoefs()
 {
   return {
       {{-16.438661699503427,    4.591731583001092,     0.6746168063837104,

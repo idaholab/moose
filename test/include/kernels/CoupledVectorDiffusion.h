@@ -21,7 +21,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   MooseEnum _state;
   const VectorVariableGradient & _grad_v;

@@ -93,11 +93,11 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
                            : std::vector<Real>(_num_models, true)),
     _consistent_tangent_operator(_num_models),
     _cycle_models(getParam<bool>("cycle_models")),
-    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
+    _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
     _all_models_isotropic(true),
     _damage_model(isParamValid("damage_model")
-                      ? dynamic_cast<DamageBase *>(&getMaterial("damage_model"))
+                      ? dynamic_cast<DamageBaseTempl<false> *>(&getMaterial("damage_model"))
                       : nullptr)
 {
   if (_inelastic_weights.size() != _num_models)
@@ -201,8 +201,8 @@ ComputeMultipleInelasticStress::computeQpStress()
     _damage_model->updateJacobianMultForDamage(_Jacobian_mult[_qp]);
 
     const Real damage_timestep_limit = _damage_model->computeTimeStepLimit();
-    if (_matl_timestep_limit[_qp] > damage_timestep_limit)
-      _matl_timestep_limit[_qp] = damage_timestep_limit;
+    if (_material_timestep_limit[_qp] > damage_timestep_limit)
+      _material_timestep_limit[_qp] = damage_timestep_limit;
   }
 
   if (_perform_finite_strain_rotations)
@@ -233,7 +233,7 @@ ComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
     if (_fe_problem.currentlyComputingJacobian())
       _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 
-    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+    _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
   }
   else
   {
@@ -377,14 +377,14 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
   if (_fe_problem.currentlyComputingJacobian())
     computeQpJacobianMult();
 
-  _matl_timestep_limit[_qp] = 0.0;
+  _material_timestep_limit[_qp] = 0.0;
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
-    _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
+    _material_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
-  if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
-    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+  if (MooseUtils::absoluteFuzzyEqual(_material_timestep_limit[_qp], 0.0))
+    _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
   else
-    _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
+    _material_timestep_limit[_qp] = 1.0 / _material_timestep_limit[_qp];
 }
 
 void
@@ -451,7 +451,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
       _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
   }
 
-  _matl_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
+  _material_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
 
   /* propagate internal variables, etc, to this timestep for those inelastic models where
    * "updateState" is not called */

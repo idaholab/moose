@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'multiple_subdomains.i'
+    exodiff = 'multiple_subdomains_out.e'
+    allow_test_objects = true
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+    requirement = 'The system shall support the tracing of rays across multiple subdomains.'
+  []
+[]

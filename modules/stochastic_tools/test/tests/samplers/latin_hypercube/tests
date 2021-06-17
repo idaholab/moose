@@ -2,79 +2,43 @@
   design = LatinHypercubeSampler.md
   issues = '#14830'
 
-  [sample]
-    requirement = "The system shall support the ability to sample data using the Latin Hypercube method:"
-
-    [num_bins_vector]
+  [modes]
+    requirement = "The system shall support the ability to sample data using the Latin Hypercube "
+                  "method that can operate"
+    [global]
       type = CSVDiff
       input = 'latin_hypercube.i'
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_global_samples'
       csvdiff = 'latin_hypercube_out_data_0000.csv latin_hypercube_out_data_0001.csv'
 
-      detail = "with the number of probability bins different for each distribution and"
+      detail = "using global matrix,"
     []
 
-    [num_bins_scalar]
+    [local]
       type = CSVDiff
       input = 'latin_hypercube.i'
-      csvdiff = 'latin_hypercube_scalar_data_0000.csv latin_hypercube_scalar_data_0001.csv'
-      cli_args = 'Samplers/sample/num_bins=2 Outputs/file_base=latin_hypercube_scalar'
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_local_samples'
+      csvdiff = 'latin_hypercube_out_data_0000.csv latin_hypercube_out_data_0001.csv'
 
-      detail = "with constant number of probability bins for each distribution."
+      detail = "a local matrix,"
+    []
+
+    [row]
+      type = CSVDiff
+      input = 'latin_hypercube.i'
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_next_local_row'
+      csvdiff = 'latin_hypercube_out_data_0000.csv latin_hypercube_out_data_0001.csv'
+
+      detail = "or row-by-row."
     []
   []
+  [visualize]
+    type = CheckFiles
+    command = "./latin_hypercube.py"
+    check_files = latin_hypercube.pdf
+    required_python_packages = 'pandas numpy matplotlib'
 
-  [errors]
-    requirement = "The system shall error when defining a Latin Hypercube sampling method:"
-
-    [upper_limits]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/upper_limits='0 1 2'"
-      expect_err = "The length of 'upper_limits' must be one or match the length of 'distributions'"
-
-      detail = "when the number of upper probability limit differs from the number of distribution;"
-    []
-    [lower_limits]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/lower_limits='0 1 2'"
-      expect_err = "The length of 'lower_limits' must be one or match the length of 'distributions'"
-
-      detail = "when the number of lower probability limit differs from the number of distribution;"
-    []
-    [num_bins]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/num_bins='0 1 2'"
-      expect_err = "The length of 'num_bins' must be one or match the length of 'distributions'"
-
-      detail = "when the number of probabilities differs from the number of distribution;"
-    []
-    [upper_limits_range]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/upper_limits='0 2'"
-      expect_err = "The items in 'upper_limits' must be in the range \[0,1\]"
-
-      detail = "when the number of upper probability limit differs from the number of distribution;"
-    []
-    [lower_limits_range]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/lower_limits='0 2'"
-      expect_err = "The items in 'lower_limits' must be in the range \[0,1\]"
-
-      detail = "when the number of lower probability limit differs from the number of distribution; and"
-    []
-    [lower_greater_than_upper]
-      type = RunException
-      input = latin_hypercube.i
-      cli_args = "Samplers/sample/lower_limits='0 1'"
-      expect_err = "The items in 'lower_limits' must be less than the corresponding 'upper_limits' value"
-
-      detail = "when the lower limit is greater than an upper limit."
-
-
-    []
+    requirement = "The system shall include a utility that visually displays results of plotting "
+                  "Latin Hypercube test."
   []
 []

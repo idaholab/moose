@@ -40,6 +40,52 @@ enum XFEM_QRULE
   MOMENT_FITTING,
   DIRECT
 };
+
+/**
+ * Convenient typedef for local storage of stateful material properties. The first (component 0)
+ * entry in the CachedMaterialProperties is a map for old material properties. The second
+ * (component 1) entry is a map for older material properties. The second entry will be empty if
+ * the material storage doesn't have older material properties.
+ */
+typedef std::array<std::unordered_map<unsigned int, std::string>, 2> CachedMaterialProperties;
+
+/**
+ * Information about a cut element. This is a tuple of (0) the parent
+ * element, (1) the geometric cut userobject that cuts the element, (2) the cut
+ * subdomain ID, and (3) the stateful material properties.
+ */
+struct CutElemInfo
+{
+  const Elem * _parent_elem;
+  const GeometricCutUserObject * _geometric_cut;
+  CutSubdomainID _cut_subdomain_id;
+  CachedMaterialProperties _elem_material_properties;
+  CachedMaterialProperties _bnd_material_properties;
+  // TODO: add neighbor material properties
+  // CachedMaterialProperties _neighbor_material_properties;
+
+  CutElemInfo()
+    : _parent_elem(nullptr),
+      _geometric_cut(nullptr),
+      _cut_subdomain_id(std::numeric_limits<CutSubdomainID>::max())
+  {
+  }
+
+  CutElemInfo(const Elem * parent_elem,
+              const GeometricCutUserObject * geometric_cut,
+              CutSubdomainID cut_subdomain_id)
+    : _parent_elem(parent_elem), _geometric_cut(geometric_cut), _cut_subdomain_id(cut_subdomain_id)
+  {
+  }
+
+  // A new child element is said to be previously healed if an entry in the old CutElemInfo has the
+  // same parent element ID, the same cut, AND the same cut subdomain ID.
+  bool match(const CutElemInfo & rhs)
+  {
+    return _parent_elem == rhs._parent_elem && _geometric_cut == rhs._geometric_cut &&
+           _cut_subdomain_id == rhs._cut_subdomain_id;
+  }
+};
 } // namespace Xfem
 
 class XFEMCutElem;
@@ -256,6 +302,16 @@ public:
     return _elem_crack_origin_direction_map;
   }
 
+  /**
+   * Determine which cut subdomain the element belongs to relative to the cut
+   * @param gcuo        The GeometricCutUserObject for the cut
+   * @param cut_elem    The element being cut
+   * @param parent_elem The parent element
+   */
+  CutSubdomainID getCutSubdomainID(const GeometricCutUserObject * gcuo,
+                                   const Elem * cut_elem,
+                                   const Elem * parent_elem = nullptr) const;
+
 private:
   bool _has_secondary_cut;
 
@@ -318,6 +374,18 @@ private:
    * order, followed by the old and older solutions, also in that same order.
    */
   std::map<unique_id_type, std::vector<Real>> _cached_aux_solution;
+
+  /**
+   * All geometrically cut elements and their CutElemInfo during the current execution of
+   * XFEM_MARK. This data structure is updated everytime a new cut element is created.
+   */
+  std::unordered_map<const Elem *, Xfem::CutElemInfo> _geom_cut_elems;
+
+  /**
+   * All geometrically cut elements and their CutElemInfo before the current execution of
+   * XFEM_MARK.
+   */
+  std::unordered_map<const Elem *, Xfem::CutElemInfo> _old_geom_cut_elems;
 
   /**
    * Store the solution in stored_solution for a given node
@@ -398,4 +466,67 @@ private:
    * @param sys  System for which the dof indices are found
    */
   std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
+
+  /**
+   * Get the GeometricCutUserObject associated with an element
+   * @param elem The element
+   * @return     A constant pointer to the GeometricCutUserObject, nullptr if nothing found
+   */
+  const GeometricCutUserObject * getGeometricCutForElem(const Elem * elem) const;
+
+  /**
+   * Store the material properties using dataStore
+   * @param props The material properties
+   * @return      Serialized material properties
+   */
+  std::unordered_map<unsigned int, std::string>
+  storeMaterialProperties(HashMap<unsigned int, MaterialProperties> props) const;
+
+  void storeMaterialPropertiesForElementHelper(const Elem * elem,
+                                               const MaterialPropertyStorage & storage);
+
+  /**
+   * Helper function to store the material properties of a healed element
+   * @param parent_elem The parent element
+   * @param elem1       The first child element
+   * @param elem2       The second child element
+   */
+  void storeMaterialPropertiesForElement(const Elem * parent_elem, const Elem * child_elem);
+
+  /**
+   * Load the material properties
+   * @param props_deserialized The material properties
+   * @param props_serialized   The serialized material properties
+   */
+  void loadMaterialProperties(
+      HashMap<unsigned int, MaterialProperties> props_deserialized,
+      const std::unordered_map<unsigned int, std::string> & props_serialized) const;
+
+  /**
+   * Load the material properties
+   * @param props_deserialized The material properties
+   * @param props_serialized   The serialized material properties
+   */
+  void loadMaterialPropertiesForElementHelper(const Elem * elem,
+                                              const Xfem::CachedMaterialProperties & cached_props,
+                                              const MaterialPropertyStorage & storage) const;
+
+  /**
+   * Helper function to store the material properties of a healed element
+   * @param elem         The cut element to restore material properties to.
+   * @param elem_from    The element to copy material properties from.
+   * @param cached_cei   The material properties cache to use.
+   */
+  void loadMaterialPropertiesForElement(
+      const Elem * elem,
+      const Elem * elem_from,
+      std::unordered_map<const Elem *, Xfem::CutElemInfo> & cached_cei) const;
+
+  /**
+   * Return the first node in the provided element that is found to be in the physical domain
+   * @param e  Constant pointer to the child element
+   * @param e0 Constant pointer to the parent element whose nodes will be querried
+   * @return A constant pointer to the node
+   */
+  const Node * pickFirstPhysicalNode(const Elem * e, const Elem * e0) const;
 };

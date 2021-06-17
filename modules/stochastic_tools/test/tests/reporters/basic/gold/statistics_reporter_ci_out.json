@@ -1,0 +1,142 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "const": {
+                    "info": {
+                        "name": "const",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "const",
+                            "type": "std::vector<double>",
+                            "value": [
+                                2.0,
+                                4.0,
+                                6.0,
+                                8.0,
+                                10.0
+                            ]
+                        }
+                    ]
+                },
+                "stats": {
+                    "info": {
+                        "confidence_intervals": {
+                            "levels": [
+                                0.1,
+                                0.9
+                            ],
+                            "method": "percentile",
+                            "replicates": 10000,
+                            "seed": 1
+                        },
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "const_const_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                10.0,
+                                [
+                                    8.0,
+                                    10.0
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                [
+                                    4.4,
+                                    7.6
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                2.0,
+                                [
+                                    2.0,
+                                    4.0
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                14.832396974191326,
+                                [
+                                    11.135528725660043,
+                                    17.88854381999832
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                5.0,
+                                [
+                                    2.0,
+                                    5.0
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.1622776601683795,
+                                [
+                                    1.6733200530681511,
+                                    3.63318042491699
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.4142135623730951,
+                                [
+                                    0.7483314773547882,
+                                    1.6248076809271919
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "const_const_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                30.0,
+                                [
+                                    22.0,
+                                    38.0
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

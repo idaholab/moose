@@ -16,11 +16,13 @@
 #include "MooseError.h"
 #include "Moose.h"
 #include "DualReal.h"
+#include "ExecutablePath.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
+#include "timpi/standard_type.h"
 
 // C++ includes
 #include <string>
@@ -69,6 +71,33 @@ MetaPhysicL::DualNumber<T, D, asd> abs(MetaPhysicL::DualNumber<T, D, asd> && in)
 
 namespace MooseUtils
 {
+
+std::string pathjoin(const std::string & s);
+
+template <typename... Args>
+std::string
+pathjoin(const std::string & s, Args... args)
+{
+  if (s[s.size() - 1] == '/')
+    return s + pathjoin(args...);
+  return s + "/" + pathjoin(args...);
+}
+
+/// Returns the location of either a local repo run_tests script - or an
+/// installed test runner script if run_tests isn't found.
+std::string runTestsExecutable();
+
+/// Searches in the current working directory and then recursively up in each
+/// parent directory looking for a "testroot" file.  Returns the full path to
+/// the first testroot file found.
+std::string findTestRoot();
+
+/// Returns the directory of any installed tests - or the empty string if none
+/// are found.
+std::string installedTestsDir(const std::string & app_name);
+
+/// Returns the directory of any installed docs/site.
+std::string docsDir(const std::string & app_name);
 
 /// Replaces all occurences of from in str with to and returns the result.
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
@@ -131,11 +160,14 @@ bool pathContains(const std::string & expression,
  * @param filename The filename to check
  * @param check_line_endings Whether or not to see if the file contains DOS line endings.
  * @param throw_on_unreadable Whether or not to throw a MOOSE error if the file doesn't exist
+ * @param check_for_git_lfs_pointer Whether or not to call a subroutine utility to make sure that
+ *   the file in question is not actually a git-lfs pointer.
  * @return a Boolean indicating whether the file exists and is readable
  */
 bool checkFileReadable(const std::string & filename,
                        bool check_line_endings = false,
-                       bool throw_on_unreadable = true);
+                       bool throw_on_unreadable = true,
+                       bool check_for_git_lfs_pointer = true);
 
 /**
  * Check if the file is writable (path exists and permissions)
@@ -144,6 +176,17 @@ bool checkFileReadable(const std::string & filename,
  * return a Boolean indicating whether the file exists and is writable
  */
 bool checkFileWriteable(const std::string & filename, bool throw_on_unwritable = true);
+
+/**
+ * Check if the file is a Git-LFS pointer. When using a repository that utilizes Git-LFS,
+ * it's possible that the client may not have the right packages installed in which case
+ * the clone will contain plain-text files with key information for retrieving the actual
+ * (large) files. This can cause odd errors since the file technically exists, is readable,
+ * and even has the right name/extension. However, the content of the file will not match
+ * the expected content.
+ * @param file A pointer to the open filestream.
+ */
+bool checkForGitLFSPointer(std::ifstream & file);
 
 /**
  * This function implements a parallel barrier function but writes progress
@@ -194,6 +237,26 @@ std::string stripExtension(const std::string & s);
 std::pair<std::string, std::string> splitFileName(std::string full_file);
 
 /**
+ * Recursively make directories
+ * @param dir_name A complete path
+ * @param throw_on_failure True to throw instead of error out when creating a directory is failed.
+ *
+ * The path can be relative like 'a/b/c' or absolute like '/a/b/c'.
+ * The path is allowed to contain '.' or '..'.
+ */
+void makedirs(const std::string & dir_name, bool throw_on_failure = false);
+
+/**
+ * Recursively remove directories from inner-most when the directories are empty
+ * @param dir_name A complete path
+ * @param throw_on_failure True to throw instead of error out when deleting a directory is failed.
+ *
+ * The path can be relative like 'a/b/c' or absolute like '/a/b/c'.
+ * The path is allowed to contain '.' or '..'.
+ */
+void removedirs(const std::string & dir_name, bool throw_on_failure = false);
+
+/**
  * Function for converting a camel case name to a name containing underscores.
  * @param camel_case_name A string containing camel casing
  * @return a string containing no capital letters with underscores as appropriate
@@ -221,6 +284,21 @@ std::string baseName(const std::string & name);
  * Get the hostname the current process is running on
  */
 std::string hostname();
+
+/**
+ * @returns A cleaner representation of the c++ type \p cpp_type.
+ */
+std::string prettyCppType(const std::string & cpp_type);
+
+/**
+ * @returns A cleaner representation of the type for the given object
+ */
+template <typename T>
+std::string
+prettyCppType(const T * = nullptr)
+{
+  return prettyCppType(demangle(typeid(T).name()));
+}
 
 /**
  * This routine is a simple helper function for searching a map by values instead of keys
@@ -787,6 +865,22 @@ template <>
 struct IsLikeReal<DualReal>
 {
   static constexpr bool value = true;
+};
+
+/**
+ * Custom type trait that has a ::value of true for types that can be broadcasted
+ */
+template <typename T>
+struct canBroadcast
+{
+  static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
+                                std::is_same<T, std::string>::value;
+};
+template <typename T>
+struct canBroadcast<std::vector<T>>
+{
+  static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
+                                std::is_same<T, std::string>::value;
 };
 
 /**

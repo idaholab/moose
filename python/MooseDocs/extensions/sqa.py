@@ -28,7 +28,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
-from . import core, command, floats, autolink, civet, appsyntax
+from . import core, command, floats, autolink, civet, appsyntax, table, modal
 
 LOG = logging.getLogger(__name__)
 
@@ -36,24 +36,23 @@ def make_extension(**kwargs):
     return SQAExtension(**kwargs)
 
 SQARequirementMatrix = tokens.newToken('SQARequirementMatrix')
-SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', label=None, reqname=None,
-                                           satisfied=True)
+SQARequirementMatrixHeading = tokens.newToken('SQARequirementMatrixHeading', category=None)
+SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', label=None, reqname=None, satisfied=True)
 SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', label=None)
 SQARequirementText = tokens.newToken('SQARequirementText')
 SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[], line=None, filename=None)
 SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None, url=None)
-SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
-                                              spec_name=None, spec_path=None)
-SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
+SQARequirementCollections = tokens.newToken('SQARequirementCollections', collections=[])
+SQARequirementTypes = tokens.newToken('SQARequirementTypes', types=[])
+SQARequirementPrerequisites = tokens.newToken('SQARequirementPrerequisites', specs=[])
 SQARequirementDetails = tokens.newToken('SQARequirementDetails')
 SQARequirementDetailItem = tokens.newToken('SQARequirementDetailItem', label=None)
-
-SQARequirementMatrixHeading = tokens.newToken('SQARequirementMatrixHeading', category=None)
 
 # use 'Token' suffix to avoid confusion with moosesqa.SQAReport object
 SQADocumentReportToken = tokens.newToken('SQADocumentReportToken', reports=None)
 SQAMooseAppReportToken = tokens.newToken('SQAMooseAppReportToken', reports=None)
 SQARequirementReportToken = tokens.newToken('SQARequirementReportToken', reports=None)
+
 
 LATEX_REQUIREMENT = """
 \\DeclareDocumentEnvironment{Requirement}{m}{%
@@ -81,8 +80,11 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
                                         ", 'dependencies', 'repo', 'reports'.")
+        config['include_non_testable_requirements'] = (False, "Control display of skipped requirements.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
         config['reports'] = (None, "Build SQA reports for dashboard creation.")
+        config['default_collection'] = ('FUNCTIONAL', "The default requirement collection.")
+        config['append_run_exception_to_failure_analysis'] = (True, "Automatically include RunException tests in the 'FAILURE_ANALYSIS' collection.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -125,40 +127,46 @@ class SQAExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Gathering SQA requirement information...")
 
-        repos = self.get('repos')
-        for index, (category, info) in enumerate(self.get('categories').items(), 1):
+        for category, info in self.get('categories').items():
             specs = info.get('specs', ['tests'])
             repo = info.get('repo', 'default')
             reports = info.get('reports', None)
-            directories = []
 
-            for d in info.get('directories'):
+            # Build the requirements, dependencies, remotes, and reports data structures
+            directories = list()
+            for d in info.get('directories', []):
                 path = mooseutils.eval_path(d)
                 if not os.path.isdir(path):
                     path = os.path.join(MooseDocs.ROOT_DIR, d)
                 if not os.path.isdir(path):
                     msg = "Input directory does not exist: %s"
                     LOG.error(msg, path)
-
+                    continue
                 directories.append(path)
 
-            # Create requirement database
-            self.__requirements[category] = moosesqa.get_requirements(directories, specs, 'F', index)
+            # Create requirement database from tests
+            self.__requirements[category] = moosesqa.get_requirements_from_tests(directories, specs,
+                                                                                 self.get('include_non_testable_requirements'))
 
             # Create dependency database
             self.__dependencies[category] = info.get('dependencies', [])
 
             # Create remote repository database
+            repos = self.get('repos')
             self.__remotes[category] = repos.get(repo, None)
 
             # Create reports from included SQA apps (e.g., moose/modulus/stochastic_tools)
             if reports:
                 self.__reports[category] = moosesqa.get_sqa_reports(reports)
 
+        # Number the requirements
+        for c, req_dict in enumerate(self.__requirements.values(), start=1):
+            moosesqa.number_requirements(req_dict, c)
+
         # Report for the entire app (e.g, moose/modules/doc)
         general_reports = self.get('reports')
         if general_reports is not None:
-            self.__reports['__empty__'] = moosesqa.get_sqa_reports(general_reports)
+            self.__reports['_empty_'] = moosesqa.get_sqa_reports(general_reports)
 
         # The following attempts to save computation time by avoiding re-computing the application
         # syntax for each report. This is done by extracting the syntax from the appsyntax extension
@@ -179,12 +187,29 @@ class SQAExtension(command.CommandExtension):
             for app_report in reports[2]:
                 app_report.app_syntax = app_syntax
                 app_report.exe_directory = exe_dir
-                app_report.exe_name = exe_name.split('-')[0] if exe_name else None
+                app_report.exe_name = exe_name.rsplit('-', maxsplit=1)[0] if exe_name else None
                 if app_syntax is None:
                     msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
                     LOG.warning(msg)
 
+        # Set default collection and add RunException tests to FAILURE_ANALYSIS collection
+        d_type = self['default_collection']
+        for req_category in self.__requirements.values():
+            for requirements in req_category.values():
+                for req in requirements:
+                    t_types = req.types
+                    if (req.collections is None) and (t_types is not None) and ('RunException' in t_types):
+                        req.collections = set([d_type, 'FAILURE_ANALYSIS'])
+                    elif (req.collections is None):
+                        req.collections = set([d_type])
+
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
+
+    def postTokenize(self, page, ast):
+        """Remove empty SQARequirementMatrix tokens"""
+        for node in moosetree.findall(ast.root, func=lambda n: n.name == 'SQARequirementMatrix'):
+            if not any(n.name == 'SQARequirementMatrixItem' for n in node.children):
+                node.parent = None
 
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
@@ -192,10 +217,10 @@ class SQAExtension(command.CommandExtension):
 
     def requirements(self, category):
         """Return the requirements dictionaries."""
-        req = self.__requirements.get(category, None)
-        if req is None:
+        r = self.__requirements.get(category, None)
+        if r is None:
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
-        return req
+        return r
 
     def dependencies(self, category):
         """Return the dependency list for given category."""
@@ -224,19 +249,19 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats)
+        self.requires(core, command, autolink, floats, table, modal)
 
         for ext in self.translator.extensions:
             if ext.name == 'civet':
                 self.__has_civet = True
 
         self.addCommand(reader, SQARequirementsCommand())
-        self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
         self.addCommand(reader, SQADependenciesCommand())
         self.addCommand(reader, SQADocumentCommand())
         self.addCommand(reader, SQAReportCommand())
+        self.addCommand(reader, SQARecordCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -245,8 +270,9 @@ class SQAExtension(command.CommandExtension):
         renderer.add('SQARequirementText', RenderSQARequirementText())
         renderer.add('SQARequirementDesign', RenderSQARequirementDesign())
         renderer.add('SQARequirementIssues', RenderSQARequirementIssues())
-        renderer.add('SQARequirementSpecification', RenderSQARequirementSpecification())
-        renderer.add('SQARequirementPrequisites', RenderSQARequirementPrequisites())
+        renderer.add('SQARequirementCollections', RenderSQARequirementCollections())
+        renderer.add('SQARequirementTypes', RenderSQARequirementTypes())
+        renderer.add('SQARequirementPrerequisites', RenderSQARequirementPrerequisites())
         renderer.add('SQARequirementDetails', RenderSQARequirementDetails())
         renderer.add('SQARequirementDetailItem', RenderSQARequirementDetailItem())
         renderer.add('SQADocumentReportToken', RenderSQADocumentReport())
@@ -269,7 +295,10 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config['category'] = (None, "Provide the category, as listed in the extension 'categories' configuration.")
+        config['collections'] = (None, "Limit the Requirement list to the specified collections (e.g., 'FUNCTIONAL FAILURE_ANALYSIS').")
+        config['types'] = (None, "Limit the Requirement list to the specified test types (e.g., 'RunException Exodiff').")
+
         config['link'] = (True, "Enable/disable the linking of test specifications and " \
                                  "test files.")
         config['link-spec'] = (True, "Enable/disable the link of the test specification only, " \
@@ -281,44 +310,50 @@ class SQARequirementsCommand(command.CommandComponent):
         config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
                                         "the 'link' setting must be true.")
         config['link-results'] = (True, "Enable/disable the link to the test results.")
-
+        config['link-collections'] = (True, "Enable/disable the collections badge(s).")
+        config['link-types'] = (True, "Enable/disable the types badge(s).")
+        config['link-verification'] = (True, "Enable/disable the verification file link.")
+        config['link-validation'] = (True, "Enable/disable the validation file link.")
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category', None)
+        category = self.settings['category']
         if category == '_empty_':
             return parent
 
-        group_map = self.extension.get('group_map', dict())
+        group_map = self.extension.get('requirement-groups', dict())
         for group, requirements in self.extension.requirements(category).items():
             group = group_map.get(group, group.replace('_', ' ').title())
-
             matrix = SQARequirementMatrix(parent)
             SQARequirementMatrixHeading(matrix, category=category, string=str(group))
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements, category)
-
         return parent
 
     def _addRequirement(self, parent, info, page, req, requirements, category):
-        # Do nothing if deprecated
+        collections = self.settings['collections']
+        types = self.settings['types']
+
+        # Skip add if ...
         if req.deprecated:
             return
+        if (collections is not None) and not any(c in collections for c in req.collections):
+            return
+        if (types is not None) and not any(t in types for t in req.types or set()):
+            return
 
-        reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
-        item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname,
-                                        satisfied=not (req.skip or req.deleted))
+        item = SQARequirementMatrixItem(parent, label=req.label, reqname=req.name, satisfied=req.testable)
         text = SQARequirementText(item)
         if req.requirement is not None:
             self.reader.tokenize(text, req.requirement, page, MarkdownReader.INLINE, info.line, report=False)
-            for token in moosetree.iterate(item):
-                if token.name == 'ErrorToken':
+            for t in moosetree.iterate(item):
+                if t.name == 'ErrorToken':
                     msg = common.report_error("Failed to tokenize SQA requirement.",
-                                          req.filename,
-                                          req.requirement_line,
-                                          req.requirement,
-                                          token['traceback'],
-                                          'SQA TOKENIZE ERROR')
+                                              req.filename,
+                                              req.requirement_line,
+                                              req.requirement,
+                                              token.get('traceback', None),
+                                              'SQA TOKENIZE ERROR')
                     LOG.critical(msg)
 
         if req.details:
@@ -326,70 +361,81 @@ class SQARequirementsCommand(command.CommandComponent):
             for detail in req.details:
                 ditem = SQARequirementDetailItem(details)
                 text = SQARequirementText(ditem)
-                self.reader.tokenize(text, detail.detail, page, MarkdownReader.INLINE, info.line, \
-                                     report=False)
+                self.reader.tokenize(text, detail.detail, page, MarkdownReader.INLINE,
+                                                info.line, report=False)
+                for t in moosetree.iterate(ditem):
+                    if t.name == 'ErrorToken':
+                        msg = common.report_error("Failed to tokenize SQA requirement detail.",
+                                                  detail.filename,
+                                                  detail.detail_line,
+                                                  detail.detail,
+                                                  token.get('traceback', None),
+                                                  'SQA TOKENIZE ERROR')
+                        LOG.critical(msg)
 
-        if self.settings['link']:
-            if self.settings['link-spec']:
-                p = SQARequirementSpecification(item, spec_path=req.path, spec_name=req.name)
+        if self.settings.get('link', False):
+            if self.settings.get('link-spec', False):
+                p = core.Paragraph(item)
+                tokens.String(p, content='Specification(s): ')
+                for spec in req.specifications:
+                    if p.count > 2:
+                        tokens.String(p, content=', ')
+                    s = modal.ModalLink(p, string=spec.name, content=core.Code(None, content=spec.text))
 
-                hit_root = pyhit.load(req.filename)
-                h = moosetree.find(hit_root, lambda n: n.name==req.name)
-                content = h.render()
+            if self.settings.get('link-design', False) and req.design:
+                SQARequirementDesign(item, filename=req.filename, design=req.design,
+                                     line=req.design_line)
 
-                floats.create_modal_link(p,
-                                         title=reqname, string=reqname,
-                                         content=core.Code(None, language='text', content=content))
+            if self.settings.get('link-issues', False) and req.issues:
+                SQARequirementIssues(item, filename=req.filename, issues=req.issues,
+                                     line=req.issues_line, url=self.extension.remote(category))
 
-            if self.settings['link-design'] and req.design:
-                p = SQARequirementDesign(item, filename=req.filename, design=req.design,
-                                         line=req.design_line)
+            if self.settings.get('link-collections', False) and req.collections:
+                SQARequirementCollections(item, collections=req.collections)
 
-            if self.settings['link-issues'] and req.issues:
-                p = SQARequirementIssues(item, filename=req.filename, issues=req.issues,
-                                         line=req.issues_line, url=self.extension.remote(category))
+            if self.settings.get('link-types', False) and req.types:
+                SQARequirementTypes(item, types=req.types)
 
             if self.settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
-                for prereq in req.prerequisites:
-                    for other in requirements:
-                        if (other.name == prereq) and (other.path == req.path):
-                            labels.append((other.path, other.name, other.label))
-                        for detail in other.details:
-                            if (detail.name == prereq) and (detail.path == req.path):
-                                labels.append((other.path, other.name, other.label))
+                for other in requirements:
+                    if (other is not req) and (req.prerequisites.intersection(other.names)):
+                        labels.append((other.name, other.label))
+                if labels:
+                    SQARequirementPrerequisites(item, specs=labels)
 
-                SQARequirementPrequisites(item, specs=labels)
+            if self.settings.get('link-results', False) and self.extension.hasCivetExtension():
+                civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names)
 
-            if self.settings.get('link-results', False):
-                keys = list()
+            if self.settings.get('link-verification', False) and req.verification:
+                p = core.Paragraph(item)
+                tokens.String(p, content='Verification: ')
+                for filename in req.verification:
+                    autolink.AutoLink(p, page=str(filename))
+                    core.Space(p)
 
-                for detail in req.details:
-                    keys.append('{}.{}/{}'.format(req.path, req.name, detail.name))
-
-                if not keys:
-                    keys.append('{}.{}'.format(req.path, req.name))
-
-                if self.extension.hasCivetExtension():
-                    civet.CivetTestBadges(item, tests=keys)
+            if self.settings.get('link-validation', False) and req.validation:
+                p = core.Paragraph(item)
+                tokens.String(p, content='Validation: ')
+                for filename in req.validation:
+                    autolink.AutoLink(p, page=str(filename))
+                    core.Space(p)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
-    COMMAND = 'sqa'
     SUBCOMMAND = 'cross-reference'
 
     @staticmethod
     def defaultSettings():
         config = SQARequirementsCommand.defaultSettings()
-        config['category'] = (None, "Provide the category.")
         config.pop('link-prerequisites')
         return config
 
     def createToken(self, parent, info, page):
-        design = collections.defaultdict(list)
-        category = self.settings.get('category')
+        category = self.settings['category']
         if category == '_empty_':
             return parent
 
+        design = collections.defaultdict(list)
         for requirements in self.extension.requirements(category).values():
             for req in requirements:
                 if req.design is None:
@@ -416,105 +462,32 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
 
         return parent
 
-class SQARequirementsMatrixCommand(command.CommandComponent):
-    COMMAND = 'sqa'
-    SUBCOMMAND = 'requirements-matrix'
-    COUNT = 1
-
-    @staticmethod
-    def defaultSettings():
-        config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
-        config['prefix'] = (None, "The letter prefix (e.g., 'P' for performance) for the type of "
-                                  "requirement.")
-        config['heading'] = (None, "Requirement matrix heading.")
-        return config
-
-    def createToken(self, parent, info, page):
-        content = info['block'] if 'block' in info else info['inline']
-
-        if self.settings['prefix'] is None:
-            msg = "The 'prefix' option is required."
-            raise exceptions.MooseDocsException(msg)
-
-        # Extract the unordered list
-        self.reader.tokenize(parent, content, page, MarkdownReader.BLOCK, info.line)
-        ul = parent.children[-1]
-        ul.parent = None
-
-        # Check the list type
-        if ul.name != 'UnorderedList':
-            msg = "The content is required to be an unordered list (i.e., use '-')."
-            raise exceptions.MooseDocsException(msg)
-
-        # Build the matrix
-        prefix = self.settings['prefix']
-        label = '{}{:d}'.format(prefix, self.extension.increment(prefix))
-        matrix = SQARequirementMatrix(parent)
-
-        heading = self.settings['heading']
-        if heading is not None:
-            head = SQARequirementMatrixHeading(matrix)
-            self.reader.tokenize(head, heading, page, MarkdownReader.INLINE, info.line)
-
-        for i, item in enumerate(ul.children):
-            matrix_item = SQARequirementMatrixListItem(matrix, label='{}.{:d}'.format(label, i))
-            for child in item:
-                child.parent = matrix_item
-
-        return parent
-
-class SQAVerificationCommand(command.CommandComponent):
-    COMMAND = 'sqa'
+class SQAVerificationCommand(SQARequirementsCommand):
     SUBCOMMAND = ('verification', 'validation')
 
     @staticmethod
     def defaultSettings():
-        config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
+        config = SQARequirementsCommand.defaultSettings()
+        config.pop('link-prerequisites')
+        config.pop('link-verification')
+        config.pop('link-validation')
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category')
+        category = self.settings['category']
         if category == '_empty_':
             return parent
 
+        subcommand = info['subcommand']
+        self.settings['link-{}'.format(subcommand)] = True
         matrix = SQARequirementMatrix(parent)
+        SQARequirementMatrixHeading(matrix, category=category, string=subcommand.title())
         for requirements in self.extension.requirements(category).values():
             for req in requirements:
-                if getattr(req, info['subcommand']) is not None:
-                    self._addRequirement(matrix, info, page, req)
+                if getattr(req, subcommand) is not None:
+                    self._addRequirement(matrix, info, page, req, requirements, category)
 
         return parent
-
-    def _addRequirement(self, parent, info, page, req):
-        reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
-        item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname)
-        self.reader.tokenize(item, req.requirement, page, MarkdownReader.INLINE, info.line, report=False)
-        for token in moosetree.iterate(item):
-            if token.name == 'ErrorToken':
-                msg = common.report_error("Failed to tokenize SQA requirement.",
-                                          req.filename,
-                                          req.requirement_line,
-                                          req.requirement,
-                                          token['traceback'],
-                                          'SQA TOKENIZE ERROR')
-                LOG.critical(msg)
-
-        p = core.Paragraph(item)
-        tokens.String(p, content='Specification: ')
-
-        content = common.read(req.filename)
-        floats.create_modal_link(p,
-                                 string=reqname,
-                                 content=core.Code(None, language='text', content=content),
-                                 title=str(req.filename))
-
-        p = core.Paragraph(item)
-        tokens.String(p, content='Documentation: ')
-        for filename in  getattr(req, info['subcommand']):
-            autolink.AutoLink(p, page=str(filename))
-            core.Space(p)
 
 class SQADependenciesCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -529,7 +502,7 @@ class SQADependenciesCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         suffix = self.settings['suffix']
-        category = self.settings['category']
+        category = self.settings['category'] or None
         if category == '_empty_':
             depends = self.extension.get('categories').keys()
         else:
@@ -556,7 +529,10 @@ class SQADocumentCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category')
+        category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
         suffix = self.settings.get('suffix')
         return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
@@ -568,12 +544,11 @@ class SQAReportCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['config_file'] = (None, "Provide the config YAML file for gathering reports to display on the dashboard.")
         config['category'] = (None, "Provide the category.")
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category') or  '__empty__'
+        category = self.settings.get('category') or '_empty_'
         doc_reports, req_reports, app_reports = self.extension.reports(category)
         core.Heading(parent, string='Software Quality Status Report(s)', level=2)
         SQADocumentReportToken(parent, reports=doc_reports)
@@ -581,8 +556,116 @@ class SQAReportCommand(command.CommandComponent):
         SQAMooseAppReportToken(parent, reports=app_reports)
         return parent
 
-class RenderSQARequirementMatrix(core.RenderUnorderedList):
 
+    def _createVandVMatrix(self, token, page, subcommand):
+        root = tokens.Token(None)
+        return root
+
+    def _addRequirement(self, parent, token, page, req, requirements, category):
+        item = SQARequirementMatrixItem(parent, label=req.label, reqname=req.name, satisfied=req.testable)
+        text = SQARequirementText(item)
+        if req.requirement is not None:
+            self.translator.reader.tokenize(text, req.requirement, page, MarkdownReader.INLINE, token.info.line, report=False)
+            for t in moosetree.iterate(item):
+                if t.name == 'ErrorToken':
+                    msg = common.report_error("Failed to tokenize SQA requirement.",
+                                              req.filename,
+                                              req.requirement_line,
+                                              req.requirement,
+                                              token.get('traceback', None),
+                                              'SQA TOKENIZE ERROR')
+                    LOG.critical(msg)
+
+        if req.details:
+            details = SQARequirementDetails(item)
+            for detail in req.details:
+                ditem = SQARequirementDetailItem(details)
+                text = SQARequirementText(ditem)
+                self.translator.reader.tokenize(text, detail.detail, page, MarkdownReader.INLINE,
+                                                token.info.line, report=False)
+                for t in moosetree.iterate(ditem):
+                    if t.name == 'ErrorToken':
+                        msg = common.report_error("Failed to tokenize SQA requirement detail.",
+                                                  detail.filename,
+                                                  detail.detail_line,
+                                                  detail.detail,
+                                                  token.get('traceback', None),
+                                                  'SQA TOKENIZE ERROR')
+                        LOG.critical(msg)
+
+        if token['link']:
+            if token['link_spec']:
+                p = core.Paragraph(item)
+                tokens.String(p, content='Specification(s): ')
+                for spec in req.specifications:
+                    p = SQARequirementSpecification(item, spec_name=req.name)
+                    s = modal.ModalSourceLink(p, string=spec.name, content=core.Code(None, content=content))
+
+            if token['link_design'] and req.design:
+                SQARequirementDesign(item, filename=req.filename, design=req.design,
+                                     line=req.design_line)
+
+            if token['link_issues'] and req.issues:
+                SQARequirementIssues(item, filename=req.filename, issues=req.issues,
+                                     line=req.issues_line, url=self.extension.remote(category))
+
+            if token['link_collections'] and req.collections:
+                SQARequirementCollections(item, collections=req.collections)
+
+            if token['link_prereq'] and req.prerequisites:
+                labels = []
+                for other in requirements:
+                    if (other is not req) and (req.prerequisites.intersection(other.names)):
+                        labels.append((other.name, other.label))
+                if labels:
+                    SQARequirementPrerequisites(item, specs=labels)
+
+            if token['link_results'] and self.extension.hasCivetExtension():
+                civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names)
+
+            if token['link_verification'] and req.verification:
+                p = core.Paragraph(item)
+                tokens.String(p, content='Verification: ')
+                for filename in req.verification:
+                    autolink.AutoLink(p, page=str(filename))
+                    core.Space(p)
+
+            if token['link_validation'] and req.validation:
+                p = core.Paragraph(item)
+                tokens.String(p, content='Validation: ')
+                for filename in req.validation:
+                    autolink.AutoLink(p, page=str(filename))
+                    core.Space(p)
+
+class SQARecordCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'records'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['category'] = (None, "Provide the category.")
+        return config
+
+    def createToken(self, parent, info, page):
+        category = self.settings.get('category') or '_empty_'
+        doc_reports, _, _ = self.extension.reports(category)
+        if doc_reports is not None:
+            core.Heading(parent, string='Software Quality Records', level=2)
+            ul = core.UnorderedList(parent)
+            for report in doc_reports:
+                for document in report.documents:
+                    li = core.ListItem(ul)
+                    if document.filename is not None:
+                        split_name = document.filename.split('#', maxsplit=1)
+                        fname = split_name[0]
+                        bookmark = split_name[1] if len(split_name) > 1 else None
+                        autolink.AutoLink(li, page=fname, bookmark=bookmark, string=document.title)
+                    else:
+                        tokens.String(li, content=document.title)
+        return parent
+
+class RenderSQARequirementMatrix(core.RenderUnorderedList):
     def createHTML(self, parent, token, page):
         return html.Tag(parent, 'ul', class_='moose-sqa-requirements')
 
@@ -678,10 +761,8 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
     def findDesign(self, filename, design, line):
         node = self.translator.findPage(design, throw_on_zero=False)
         if node is None:
-            msg = "Unable to locate the design page: {}\n    {}:{}" \
-                  .format(design, filename, line)
-            LOG.error(msg)
-            return None
+            msg = "Unable to locate the design page: {}\n    {}:{}"
+            raise exceptions.MooseDocsException(msg, design, filename, line)
         return node
 
     def createHTML(self, parent, token, page):
@@ -693,7 +774,7 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
                 link.info = token.info
                 self.createHTMLHelper(p, link, page, node)
             else:
-                html.Tag(p, 'a', string=str(design), class_='moose-sqa-error')
+                html.Tag(p, 'a', string=str(design), class_='moose-error')
 
     def createLatex(self, parent, token, page):
         prev = token.previous
@@ -717,8 +798,8 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
 
 class RenderSQARequirementIssues(components.RenderComponent):
 
-    ISSUE_RE = re.compile(r"(?P<key>\w+)?#(?P<issues>[0-9]+)")
-    COMMIT_RE = re.compile(r"(?:(?P<key>\w+):)?(?P<commit>[0-9a-f]{10,40})")
+    ISSUE_RE = re.compile(r"(?P<key>.+)?#(?P<issues>[0-9]+)")
+    COMMIT_RE = re.compile(r"(?:(?P<key>.+):)?(?P<commit>[0-9a-f]{10,40})")
 
     def __urlHelper(self, regex, name, issue, token):
         """Function for creating issue/commit links."""
@@ -777,37 +858,51 @@ class RenderSQARequirementIssues(components.RenderComponent):
             else:
                 latex.Command(parent, 'href', args=[latex.Brace(string=url)], string=str(issue))
 
-class RenderSQARequirementSpecification(components.RenderComponent):
-
-    def createMaterialize(self, parent, token, page):
-        return html.Tag(parent, 'p', string='Specification: ')
-
+class RenderSQARequirementCollections(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        spath = token['spec_path']
-        if spath == '.':
-            spec = 'Specification: {}'.format(token['spec_name'])
-        else:
-            spec = 'Specification: {}:{}'.format(token['spec_path'], token['spec_name'])
-        html.Tag(parent, 'p', string=spec)
+        p = html.Tag(parent, 'p', string='Collection(s): ', class_='moose-sqa-items')
+        for item in token['collections']:
+            html.Tag(p, 'span', string=str(item))
 
     def createLatex(self, parent, token, page):
         prev = token.previous
         if prev and prev.name != 'SQARequirementDetails':
             latex.Command(parent, 'newline', start='\n', end='\n')
-        spath = token['spec_path']
-        if spath == '.':
-            spec = 'Specification: {}'.format(token['spec_name'])
-        else:
-            spec = 'Specification: {}:{}'.format(token['spec_path'], token['spec_name'])
-        latex.String(parent, content=spec)
+        latex.String(parent, content='Collection(s):~', escape=False)
+        no_seperator = True
 
-class RenderSQARequirementPrequisites(components.RenderComponent):
+        for item in token['collections']:
+            if not no_seperator:
+                latex.String(parent, content='; ')
+                no_seperator = False
+            latex.Command(parent, 'textcolor', args=[latex.Brace(string='blue')], string=item)
+
+class RenderSQARequirementTypes(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        p = html.Tag(parent, 'p', string='Type(s): ', class_='moose-sqa-items')
+        for item in token['types']:
+            html.Tag(p, 'span', string=str(item))
+
+    def createLatex(self, parent, token, page):
+        prev = token.previous
+        if prev and prev.name != 'SQARequirementDetails':
+            latex.Command(parent, 'newline', start='\n', end='\n')
+        latex.String(parent, content='Type(s):~', escape=False)
+        no_seperator = True
+
+        for item in token['types']:
+            if not no_seperator:
+                latex.String(parent, content='; ')
+                no_seperator = False
+            latex.Command(parent, 'textcolor', args=[latex.Brace(string='blue')], string=item)
+
+class RenderSQARequirementPrerequisites(components.RenderComponent):
     def createHTML(self, parent, token, page):
         p = html.Tag(parent, 'p', string='Prerequisite(s): ', class_='moose-sqa-items')
 
-        for path, name, label in token['specs']:
-            url = '#{}:{}'.format(path, name)
-            html.Tag(p, 'a', href=url, string=label)
+        for label in token['specs']:
+            url = '#{}'.format(label[0])
+            html.Tag(p, 'a', href=url, string=label[1])
 
     def createLatex(self, parent, token, page):
         prev = token.previous
@@ -815,7 +910,7 @@ class RenderSQARequirementPrequisites(components.RenderComponent):
             latex.Command(parent, 'newline', start='\n', end='\n')
         latex.String(parent, content='Prerequisite(s):~', escape=False)
 
-        labels = [label for _, _, label in token['specs']]
+        labels = [label[1] for label in token['specs']]
         latex.String(parent, content='; '.join(labels))
 
 class RenderSQARequirementDetails(components.RenderComponent):

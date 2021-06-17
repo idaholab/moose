@@ -34,55 +34,55 @@
 []
 
 [Variables]
-  [./h+]
-  [../]
-  [./hco3-]
-  [../]
-  [./ca2+]
-  [../]
-  [./mg2+]
-  [../]
-  [./fe2+]
-  [../]
+  [h+]
+  []
+  [hco3-]
+  []
+  [ca2+]
+  []
+  [mg2+]
+  []
+  [fe2+]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k0]
+  [eqm_k0]
     initial_condition = 2.19E6
-  [../]
-  [./eqm_k1]
+  []
+  [eqm_k1]
     initial_condition = 4.73E-11
-  [../]
-  [./eqm_k2]
+  []
+  [eqm_k2]
     initial_condition = 0.222
-  [../]
-  [./eqm_k3]
+  []
+  [eqm_k3]
     initial_condition = 1E-2
-  [../]
-  [./eqm_k4]
+  []
+  [eqm_k4]
     initial_condition = 1E-3
-  [../]
-  [./kinetic_k]
+  []
+  [kinetic_k]
     initial_condition = 326.2
-  [../]
-  [./pressure]
-  [../]
-  [./dolomite]
+  []
+  [pressure]
+  []
+  [dolomite]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./dolomite_initial]
+  []
+  [dolomite_initial]
     initial_condition = 1E-7
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./dolomite]
+  [dolomite]
     type = PorousFlowPropertyAux
     property = mineral_concentration
     mineral_species = 0
     variable = dolomite
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -91,12 +91,12 @@
 []
 
 [ICs]
-  [./pressure_ic]
+  [pressure_ic]
     type = FunctionIC
     variable = pressure
     function = '(1 - x) * 1E6'
-  [../]
-  [./h+_ic]
+  []
+  [h+_ic]
     type = BoundingBoxIC
     variable = h+
     x1 = 0.0
@@ -105,8 +105,8 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
-  [./hco3_ic]
+  []
+  [hco3_ic]
     type = BoundingBoxIC
     variable = hco3-
     x1 = 0.0
@@ -115,8 +115,8 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
-  [./ca2_ic]
+  []
+  [ca2_ic]
     type = BoundingBoxIC
     variable = ca2+
     x1 = 0.0
@@ -125,8 +125,8 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
-  [./mg2_ic]
+  []
+  [mg2_ic]
     type = BoundingBoxIC
     variable = mg2+
     x1 = 0.0
@@ -135,8 +135,8 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
-  [./fe2_ic]
+  []
+  [fe2_ic]
     type = BoundingBoxIC
     variable = fe2+
     x1 = 0.0
@@ -145,185 +145,185 @@
     y2 = 0.25
     inside = 5.0e-2
     outside = 1.0e-6
-  [../]
+  []
 []
 
 [Kernels]
-  [./h+_ie]
+  [h+_ie]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = h+
-  [../]
-  [./h+_conv]
+  []
+  [h+_conv]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = h+
-  [../]
-  [./predis_h+]
+  []
+  [predis_h+]
     type = PorousFlowPreDis
     variable = h+
     mineral_density = 2875.0
     stoichiometry = -2
-  [../]
-  [./hco3-_ie]
+  []
+  [hco3-_ie]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = hco3-
-  [../]
-  [./hco3-_conv]
+  []
+  [hco3-_conv]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = hco3-
-  [../]
-  [./predis_hco3-]
+  []
+  [predis_hco3-]
     type = PorousFlowPreDis
     variable = hco3-
     mineral_density = 2875.0
     stoichiometry = 2
-  [../]
-  [./ca2+_ie]
+  []
+  [ca2+_ie]
     type = PorousFlowMassTimeDerivative
     fluid_component = 2
     variable = ca2+
-  [../]
-  [./ca2+_conv]
+  []
+  [ca2+_conv]
     type = PorousFlowAdvectiveFlux
     fluid_component = 2
     variable = ca2+
-  [../]
-  [./predis_ca2+]
+  []
+  [predis_ca2+]
     type = PorousFlowPreDis
     variable = ca2+
     mineral_density = 2875.0
     stoichiometry = 1
-  [../]
-  [./mg2+_ie]
+  []
+  [mg2+_ie]
     type = PorousFlowMassTimeDerivative
     fluid_component = 3
     variable = mg2+
-  [../]
-  [./mg2+_conv]
+  []
+  [mg2+_conv]
     type = PorousFlowAdvectiveFlux
     fluid_component = 3
     variable = mg2+
-  [../]
-  [./predis_mg2+]
+  []
+  [predis_mg2+]
     type = PorousFlowPreDis
     variable = mg2+
     mineral_density = 2875.0
     stoichiometry = 0.8
-  [../]
-  [./fe2+_ie]
+  []
+  [fe2+_ie]
     type = PorousFlowMassTimeDerivative
     fluid_component = 4
     variable = fe2+
-  [../]
-  [./fe2+_conv]
+  []
+  [fe2+_conv]
     type = PorousFlowAdvectiveFlux
     fluid_component = 4
     variable = fe2+
-  [../]
-  [./predis_fe2+]
+  []
+  [predis_fe2+]
     type = PorousFlowPreDis
     variable = fe2+
     mineral_density = 2875.0
     stoichiometry = 0.2
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'h+ hco3- ca2+ mg2+ fe2+'
     number_fluid_phases = 1
     number_fluid_components = 6
     number_aqueous_equilibrium = 5
     number_aqueous_kinetic = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       viscosity = 1E-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [BCs]
-  [./hco3-_left]
+  [hco3-_left]
     type = DirichletBC
     variable = hco3-
     boundary = left
     value = 5E-2
-  [../]
-  [./h+_left]
+  []
+  [h+_left]
     type = DirichletBC
     variable = h+
     boundary = left
     value = 5E-2
-  [../]
-  [./ca2+_left]
+  []
+  [ca2+_left]
     type = DirichletBC
     variable = ca2+
     boundary = left
     value = 5E-2
-  [../]
-  [./mg2+_left]
+  []
+  [mg2+_left]
     type = DirichletBC
     variable = mg2+
     boundary = left
     value = 5E-2
-  [../]
-  [./fe2+_left]
+  []
+  [fe2+_left]
     type = DirichletBC
     variable = fe2+
     boundary = left
     value = 5E-2
-  [../]
-  [./hco3-_right]
+  []
+  [hco3-_right]
     type = DirichletBC
     variable = hco3-
     boundary = right
     value = 1E-6
-  [../]
-  [./h+_right]
+  []
+  [h+_right]
     type = DirichletBC
     variable = h+
     boundary = right
     value = 1e-6
-  [../]
-  [./ca2+_right]
+  []
+  [ca2+_right]
     type = DirichletBC
     variable = ca2+
     boundary = right
     value = 1E-6
-  [../]
-  [./mg2+_right]
+  []
+  [mg2+_right]
     type = DirichletBC
     variable = mg2+
     boundary = right
     value = 1E-6
-  [../]
-  [./fe2+_right]
+  []
+  [fe2+_right]
     type = DirichletBC
     variable = fe2+
     boundary = right
     value = 1E-6
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 298.15
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./equilibrium_massfrac]
+  []
+  [equilibrium_massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'h+ hco3- ca2+ mg2+ fe2+'
     num_reactions = 5
@@ -335,8 +335,8 @@
                  0 1 1 0 0
                  0 1 0 1 0
                  0 1 0 0 1'
-  [../]
-  [./kinetic]
+  []
+  [kinetic]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'h+ hco3- ca2+ mg2+ fe2+'
     num_reactions = 1
@@ -349,55 +349,55 @@
     molar_volume = 64365.0
     gas_constant = 8.314
     reference_temperature = 298.15
-  [../]
-  [./dolomite_conc]
+  []
+  [dolomite_conc]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = dolomite_initial
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-10 0 0 0 1E-10 0 0 0 1E-10'
-  [../]
-  [./relp]
+  []
+  [relp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
   end_time = 1
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.1
-  [../]
+  []
 []
 
 [Preconditioning]
   active = basic
-  [./basic]
+  [basic]
     type = SMP
     full = true
     petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = ' asm      lu           NONZERO                   2'
-  [../]
-  [./preferred_but_might_not_be_installed]
+  []
+  [preferred_but_might_not_be_installed]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
+  []
 []
 
 [Outputs]

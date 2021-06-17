@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 #include <set>
 #include <map>
@@ -43,7 +44,7 @@ public:
    * @param elem Pointer to the geometric element in which the point is located
    * @param p The (x,y,z) location of the Dirac point
    */
-  void addPoint(const Elem * elem, Point p);
+  void addPoint(const Elem * elem, const Point & p);
 
   /**
    * Remove all of the current points and elements.
@@ -53,7 +54,7 @@ public:
   /**
    * Return true if we have Point 'p' in Element 'elem'
    */
-  bool hasPoint(const Elem * elem, Point p);
+  bool hasPoint(const Elem * elem, const Point & p);
 
   /**
    * Returns a writeable reference to the _elements container.
@@ -78,7 +79,8 @@ public:
    * Used by client DiracKernel classes to determine the Elem in which
    * the Point p resides.  Uses the PointLocator owned by this object.
    */
-  const Elem * findPoint(Point p, const MooseMesh & mesh);
+  const Elem *
+  findPoint(const Point & p, const MooseMesh & mesh, const std::set<SubdomainID> & blocks);
 
 protected:
   /**
@@ -101,4 +103,3 @@ protected:
   /// threshold distance squared below which two points are considered identical
   const Real _point_equal_distance_sq;
 };
-

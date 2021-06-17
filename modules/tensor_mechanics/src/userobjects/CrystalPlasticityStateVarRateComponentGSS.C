@@ -64,6 +64,7 @@ CrystalPlasticityStateVarRateComponentGSS::calcStateVariableEvolutionRateCompone
             std::copysign(1.0, 1.0 - _mat_prop_state_var[qp][i] / tau_sat);
 
   for (unsigned int i = 0; i < _variable_size; ++i)
+  {
     for (unsigned int j = 0; j < _variable_size; ++j)
     {
       unsigned int iplane, jplane;
@@ -77,6 +78,7 @@ CrystalPlasticityStateVarRateComponentGSS::calcStateVariableEvolutionRateCompone
 
       val[i] += std::abs(_mat_prop_slip_rate[qp][j]) * qab * hb(j);
     }
+  }
 
   return true;
 }

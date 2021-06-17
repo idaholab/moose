@@ -5,15 +5,15 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./u]
+  [u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -22,23 +22,23 @@
 []
 
 [UserObjects]
-  [./nodal_void_volume]
+  [nodal_void_volume]
     type = NodalVoidVolume
     porosity = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vol]
+  [vol]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./vol]
+  [vol]
     type = NodalVoidVolumeAux
     variable = vol
     nodal_void_volume_uo = nodal_void_volume
-  [../]
+  []
 []

@@ -19,6 +19,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
+#include "libmesh/boundary_info.h"
 
 defineLegacyParams(AuxKernel);
 defineLegacyParams(VectorAuxKernel);
@@ -53,6 +54,14 @@ AuxKernelTempl<ComputeValueType>::validParams()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParam<bool>("check_boundary_restricted",
+                        true,
+                        "Whether to check for multiple element sides on the boundary "
+                        "in the case of a boundary restricted, element aux variable. "
+                        "Setting this to false will allow contribution to a single element's "
+                        "elemental value(s) from multiple boundary sides on the same element "
+                        "(example: when the restricted boundary exists on two or more sides "
+                        "of an element, such as at a corner of a mesh");
 
   // This flag is set to true if the AuxKernelTempl is being used on a boundary
   params.addPrivateParam<bool>("_on_boundary", false);
@@ -102,6 +111,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
+    _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
@@ -111,8 +121,6 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
         _tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
     _u(_nodal ? _var.nodalValueArray() : _var.sln()),
-    _u_old(_nodal ? _var.nodalValueOldArray() : _var.slnOld()),
-    _u_older(_nodal ? _var.nodalValueOlderArray() : _var.slnOlder()),
 
     _test(_var.phi()),
     _assembly(_subproblem.assembly(_tid)),
@@ -131,7 +139,8 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _current_node(_assembly.node()),
     _current_boundary_id(_assembly.currentBoundaryID()),
-    _solution(_aux_sys.solution())
+    _solution(_aux_sys.solution()),
+    _boundary_restricted(boundaryRestricted())
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
@@ -140,6 +149,32 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
+
+  if (_boundary_restricted && !isNodal() && _check_boundary_restricted)
+  {
+    // when the variable is elemental and this aux kernel operates on boundaries,
+    // we need to check that no elements are visited more than once through visiting
+    // all the sides on the boundaries
+    auto boundaries = _mesh.getMesh().get_boundary_info().build_side_list();
+    std::set<dof_id_type> elements;
+    for (const auto & t : boundaries)
+    {
+      if (hasBoundary(std::get<2>(t)))
+      {
+        const auto eid = std::get<0>(t);
+        const auto stat = elements.insert(eid);
+        if (!stat.second) // already existed in the set
+          mooseError(
+              "Boundary restricted auxiliary kernel '",
+              name(),
+              "' has element (id=",
+              eid,
+              ") connected with more than one boundary sides.\nTo skip this error check, "
+              "set 'check_boundary_restricted = false'.\nRefer to the AuxKernel "
+              "documentation on boundary restricted aux kernels for understanding this error.");
+      }
+    }
+  }
 }
 
 template <typename ComputeValueType>
@@ -157,97 +192,28 @@ AuxKernelTempl<ComputeValueType>::getSuppliedItems()
 }
 
 template <typename ComputeValueType>
-const UserObject &
-AuxKernelTempl<ComputeValueType>::getUserObjectBase(const UserObjectName & name)
+void
+AuxKernelTempl<ComputeValueType>::addUserObjectDependencyHelper(const UserObject & uo) const
 {
-  return getUserObjectBaseByName(_pars.get<UserObjectName>(name));
-}
-
-template <typename ComputeValueType>
-const UserObject &
-AuxKernelTempl<ComputeValueType>::getUserObjectBaseByName(const UserObjectName & name)
-{
-  _depend_uo.insert(name);
-  auto & uo = UserObjectInterface::getUserObjectBaseByName(name);
-  auto indirect_dependents = uo.getDependObjects();
-  for (auto & indirect_dependent : indirect_dependents)
+  _depend_uo.insert(uo.name());
+  for (const auto & indirect_dependent : uo.getDependObjects())
     _depend_uo.insert(indirect_dependent);
-  return uo;
 }
 
 template <typename ComputeValueType>
-const PostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & name,
-                                                        unsigned int index)
+void
+AuxKernelTempl<ComputeValueType>::addPostprocessorDependencyHelper(
+    const PostprocessorName & name) const
 {
-  if (hasPostprocessor(name, index))
-    getUserObjectBaseByName(_pars.get<PostprocessorName>(name));
-  return PostprocessorInterface::getPostprocessorValue(name);
+  getUserObjectBaseByName(name); // getting the UO will call addUserObjectDependencyHelper()
 }
 
 template <typename ComputeValueType>
-const PostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getPostprocessorValueByName(const PostprocessorName & name)
+void
+AuxKernelTempl<ComputeValueType>::addVectorPostprocessorDependencyHelper(
+    const VectorPostprocessorName & name) const
 {
-  getUserObjectBaseByName(name);
-  return PostprocessorInterface::getPostprocessorValueByName(name);
-}
-
-template <typename ComputeValueType>
-const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
-                                                              const std::string & vector_name)
-{
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
-}
-
-template <typename ComputeValueType>
-const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name)
-{
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
-}
-
-template <typename ComputeValueType>
-const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
-                                                              const std::string & vector_name,
-                                                              bool needs_broadcast)
-{
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(
-      name, vector_name, needs_broadcast);
-}
-
-template <typename ComputeValueType>
-const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
-{
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
-      name, vector_name, needs_broadcast);
-}
-
-template <typename ComputeValueType>
-const ScatterVectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValue(
-    const std::string & name, const std::string & vector_name)
-{
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
-}
-
-template <typename ComputeValueType>
-const ScatterVectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
-    const std::string & name, const std::string & vector_name)
-{
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
+  getUserObjectBaseByName(name); // getting the UO will call addUserObjectDependencyHelper()
 }
 
 template <typename ComputeValueType>
@@ -355,9 +321,12 @@ AuxKernelTempl<ComputeValueType>::compute()
             _local_ke(i, j) += t * _test[j][_qp];
         }
 
-      // mass matrix is always SPD
+      // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);
-      _local_ke.cholesky_solve(_local_re, _local_sol);
+      if (_boundary_restricted)
+        _local_ke.svd_solve(_local_re, _local_sol);
+      else
+        _local_ke.cholesky_solve(_local_re, _local_sol);
 
       _var.setDofValues(_local_sol);
     }
@@ -422,7 +391,12 @@ AuxKernelTempl<RealEigenVector>::compute()
       {
         for (unsigned int j = 0; j < _n_local_dofs; ++j)
           re(j) = _local_re(j)(i);
-        _local_ke.cholesky_solve(re, sol);
+
+        if (_boundary_restricted)
+          _local_ke.svd_solve(re, sol);
+        else
+          _local_ke.cholesky_solve(re, sol);
+
         for (unsigned int j = 0; j < _n_local_dofs; ++j)
           _local_sol(j)(i) = sol(j);
       }
@@ -430,6 +404,32 @@ AuxKernelTempl<RealEigenVector>::compute()
       _var.setDofValues(_local_sol);
     }
   }
+}
+
+template <typename ComputeValueType>
+const typename OutputTools<ComputeValueType>::VariableValue &
+AuxKernelTempl<ComputeValueType>::uOld() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOld().\n\n",
+               "Make sure to call uOld() within the object constructor.");
+
+  return _nodal ? _var.nodalValueOldArray() : _var.slnOld();
+}
+
+template <typename ComputeValueType>
+const typename OutputTools<ComputeValueType>::VariableValue &
+AuxKernelTempl<ComputeValueType>::uOlder() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOlder().\n\n",
+               "Make sure to call uOlder() within the object constructor.");
+
+  return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
 }
 
 // Explicitly instantiates the two versions of the AuxKernelTempl class

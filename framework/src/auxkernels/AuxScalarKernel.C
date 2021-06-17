@@ -56,8 +56,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-    _u(_var.sln()),
-    _u_old(_var.slnOld())
+    _u(_var.sln())
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
@@ -104,4 +103,16 @@ bool
 AuxScalarKernel::isActive()
 {
   return true;
+}
+
+const VariableValue &
+AuxScalarKernel::uOld() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOld().\n\n",
+               "Make sure to call uOld() within the object constructor.");
+
+  return _var.slnOld();
 }

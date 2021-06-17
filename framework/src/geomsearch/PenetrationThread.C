@@ -1764,8 +1764,21 @@ PenetrationThread::getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides,
 {
   // For each tuple, the fields are (0=elem_id, 1=side_id, 2=bc_id)
   sides.clear();
-  for (const auto & t : _bc_tuples)
-    if (std::get<0>(t) == elem->id() &&
-        std::get<2>(t) == static_cast<boundary_id_type>(_primary_boundary))
-      sides.push_back(std::get<1>(t));
+  struct Comp
+  {
+    bool operator()(const libMesh::BoundaryInfo::BCTuple & tup, dof_id_type id) const
+    {
+      return std::get<0>(tup) < id;
+    }
+    bool operator()(dof_id_type id, const libMesh::BoundaryInfo::BCTuple & tup) const
+    {
+      return id < std::get<0>(tup);
+    }
+  };
+
+  auto range = std::equal_range(_bc_tuples.begin(), _bc_tuples.end(), elem->id(), Comp{});
+
+  for (auto & t = range.first; t != range.second; ++t)
+    if (std::get<2>(*t) == static_cast<boundary_id_type>(_primary_boundary))
+      sides.push_back(std::get<1>(*t));
 }

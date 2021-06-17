@@ -205,6 +205,7 @@ name = 'finite_noaction'
   dtmin = 0.1
   timestep_tolerance = 1e-6
   line_search = 'contact'
+  snesmf_reuse_base = false
 []
 
 [Postprocessors]

@@ -1,0 +1,27 @@
+Applications:
+    {{category}}:
+        app_types:
+            - {{app}}
+        content_directory: ${ROOT_DIR}/doc/content
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/{{category}}_srs.md
+    software_design_description: sqa/{{category}}_sdd.md
+    software_test_plan: sqa/{{category}}_stp.md
+    requirements_traceablity_matrix: sqa/{{category}}_rtm.md
+    verification_validation_report: sqa/{{category}}_vvr.md
+    failure_analysis_report: sqa/{{category}}_far.md
+    software_library_list: sqa/{{category}}_sll.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    {{category}}:
+        directories:
+            - ${ROOT_DIR}/test
+        log_default: WARNING
+        show_warning: false

@@ -1,0 +1,44 @@
+[Tests]
+  design = StatisticsReporter.md
+  issues = '#14409 #16584'
+
+  [errors]
+    requirement = "The system shall error when computing confidence level intervals when"
+
+    [no_ci_levels]
+      type = RunException
+      input = error.i
+      cli_args = "Reporters/stats/ci_levels=''"
+      expect_err = "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be supplied with values in \(0, 1\)"
+
+      detail = "the confidence level intervals are omitted;"
+    []
+
+    [ci_levels_zero]
+      type = RunException
+      input = error.i
+      cli_args = "Reporters/stats/ci_levels='0'"
+      expect_err = "The supplied levels must be greater than zero"
+
+      detail = "the confidence level intervals are less than or equal to zero;"
+    []
+
+    [ci_levels_one]
+      type = RunException
+      input = error.i
+      cli_args = "Reporters/stats/ci_levels='1'"
+      expect_err = "The supplied levels must be less than 1\.0"
+
+      detail = "the confidence level intervals are greater than or equal to one;"
+    []
+
+    [no_input]
+      type = RunException
+      input = error.i
+      cli_args = "Reporters/stats/vectorpostprocessors=''"
+      expect_err = "The 'vectorpostprocessors' and/or 'reporters' parameters must be defined and non-empty"
+
+      detail = "input is not provided."
+    []
+  []
+[]

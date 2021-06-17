@@ -55,6 +55,9 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
+  /// Cholesky decomposition Eigen object
+  const Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
+
   /// Type of covariance function used for this surrogate
   const std::string & _covar_type;
 

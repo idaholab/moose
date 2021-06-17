@@ -1,3 +1,5 @@
+# NSMomentumInviscidFlux
+
 !syntax description /Kernels/NSMomentumInviscidFlux
 
 !syntax parameters /Kernels/NSMomentumInviscidFlux

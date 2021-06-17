@@ -1,0 +1,11 @@
+[Tests]
+  design = 'AuxRayKernel.md'
+  issues = '#16028'
+
+  [const_monomial_only]
+    type = RunException
+    input = 'const_monomial_only.i'
+    expect_err = 'Only CONSTANT MONOMIAL variables are supported'
+    requirement = 'The system shall throw a reasonable error if a non-supported auxiliary variable is used with a ray aux kernel.'
+  []
+[]

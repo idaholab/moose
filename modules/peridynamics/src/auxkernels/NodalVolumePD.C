@@ -32,5 +32,5 @@ NodalVolumePD::NodalVolumePD(const InputParameters & parameters) : AuxKernelBase
 Real
 NodalVolumePD::computeValue()
 {
-  return _pdmesh.getPDNodeVolume(_current_node->id());
+  return _pdmesh.getNodeVolume(_current_node->id());
 }

@@ -1,3 +1,5 @@
+# NSEnergyWeakStagnationBC
+
 !syntax description /BCs/NSEnergyWeakStagnationBC
 
 !syntax parameters /BCs/NSEnergyWeakStagnationBC

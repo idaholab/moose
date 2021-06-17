@@ -32,161 +32,162 @@
 [Adaptivity]
   marker = marker
   max_h_level = 4
-  [./Indicators]
-    [./front]
+  [Indicators]
+    [front]
       type = GradientJumpIndicator
       variable = zi
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       indicator = front
       refine = 0.8
       coarsen = 0.2
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./saturation_gas]
+  [saturation_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x1]
+  []
+  [x1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./y0]
+  []
+  [y0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./saturation_gas]
+  [saturation_gas]
     type = PorousFlowPropertyAux
     variable = saturation_gas
     property = saturation
     phase = 1
     execute_on = timestep_end
-  [../]
-  [./x1]
+  []
+  [x1]
     type = PorousFlowPropertyAux
     variable = x1
     property = mass_fraction
     phase = 0
     fluid_component = 1
     execute_on = timestep_end
-  [../]
-  [./y0]
+  []
+  [y0]
     type = PorousFlowPropertyAux
     variable = y0
     property = mass_fraction
     phase = 1
     fluid_component = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Variables]
-  [./pgas]
+  [pgas]
     initial_condition = 20e6
-  [../]
-  [./zi]
+  []
+  [zi]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pgas
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pgas
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = zi
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = zi
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas zi'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowWaterNCG
     water_fp = water
     gas_fp = co2
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./water]
+    []
+    [water]
       type = Water97FluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./waterncg]
+    temperature = 20
+  []
+  [waterncg]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
     temperature_unit = Celsius
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./aquifer]
+  [aquifer]
     type = PorousFlowPiecewiseLinearSink
     variable = pgas
     boundary = right
@@ -194,23 +195,23 @@
     multipliers = '0 1e8'
     flux_function = 1e-6
     PT_shift = 20e6
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./source]
+  [source]
     type = PorousFlowSquarePulsePointSource
     point = '0 0 0'
     mass_flux = 2
     variable = zi
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -221,11 +222,11 @@
 []
 
 [VectorPostprocessors]
-  [./line]
+  [line]
     type = NodalValueSampler
     sort_by = x
     variable = 'pgas zi'
-  [../]
+  []
 []
 
 [Outputs]

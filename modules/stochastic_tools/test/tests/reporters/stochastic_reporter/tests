@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#16166'
+  design = 'StochasticReporter.md'
+
+  [sr]
+    requirement = "The system shall support the ability to use transferred reporter data to "
+    [stats]
+      type = JSONDiff
+      input = stats.i
+      jsondiff = stats_out.json
+
+      detail = "compute statistics."
+    []
+  []
+[]

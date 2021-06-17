@@ -25,12 +25,40 @@ GeochemistryReactorBase::sharedParams()
       "initial problem setup. If this list contains more than one species, the swapping is "
       "performed one-by-one, starting with the first pair (swap_out_of_basis[0] and "
       "swap_into_basis[0]), then the next pair, etc");
-  MultiMooseEnum constraint_meaning("moles_bulk_water kg_solvent_water moles_bulk_species "
-                                    "free_molality free_moles_mineral_species fugacity activity");
+  MultiMooseEnum constraint_user_meaning(
+      "kg_solvent_water bulk_composition bulk_composition_with_kinetic free_concentration "
+      "free_mineral activity log10activity fugacity log10fugacity");
   params.addRequiredParam<MultiMooseEnum>(
       "constraint_meaning",
-      constraint_meaning,
-      "Meanings of the numerical values given in constraint_value");
+      constraint_user_meaning,
+      "Meanings of the numerical values given in constraint_value.  kg_solvent_water: can only be "
+      "applied to H2O and units must be kg.  bulk_composition: can be applied to all non-gas "
+      "species, and represents the total amount of the basis species contained as free species as "
+      "well as the amount found in secondary species but not in kinetic species, and units must be "
+      "moles or mass (kg, g, etc).  bulk_composition_with_kinetic: can be applied to all non-gas "
+      "species, and represents the total amount of the basis species contained as free species as "
+      "well as the amount found in secondary species and in kinetic species, and units must be "
+      "moles or mass (kg, g, etc).  free_concentration: can be applied to all basis species that "
+      "are not gas and not H2O and not mineral, and represents the total amount of the basis "
+      "species existing freely (not as secondary species) within the solution, and units must be "
+      "molal or mass_per_kg_solvent.  free_mineral: can be applied to all mineral basis species, "
+      "and represents the total amount of the mineral existing freely (precipitated) within the "
+      "solution, and units must be moles, mass or cm3.  activity and log10activity: can be applied "
+      "to basis species that are not gas and not mineral and not sorbing sites, and represents the "
+      "activity of the basis species (recall pH = -log10activity), and units must be "
+      "dimensionless.  fugacity and log10fugacity: can be applied to gases, and units must be "
+      "dimensionless");
+  MultiMooseEnum constraint_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
+                                 "g_per_kg_solvent mg_per_kg_solvent ug_per_kg_solvent cm3");
+  params.addRequiredParam<MultiMooseEnum>(
+      "constraint_unit",
+      constraint_unit,
+      "Units of the numerical values given in constraint_value.  Dimensionless: should only be "
+      "used for activity or fugacity constraints.  Moles: mole number.  Molal: moles per kg "
+      "solvent water.  kg: kilograms.  g: grams.  mg: milligrams.  ug: micrograms.  "
+      "kg_per_kg_solvent: kilograms per kg solvent water.  g_per_kg_solvent: grams per kg solvent "
+      "water.  mg_per_kg_solvent: milligrams per kg solvent water.  ug_per_kg_solvent: micrograms "
+      "per kg solvent water.  cm3: cubic centimeters");
   params.addRequiredParam<std::vector<std::string>>(
       "constraint_species",
       "Names of the species that have their values fixed to constraint_value with meaning "
@@ -52,7 +80,7 @@ GeochemistryReactorBase::sharedParams()
       "Charge balance will be enforced on this basis species.  This means that its bulk mole "
       "number may be changed from the initial value you provide in order to ensure charge "
       "neutrality.  After the initial swaps have been performed, this must be in the basis, and it "
-      "must be provided with a moles_bulk_species constraint_meaning.");
+      "must be provided with a bulk_composition constraint_meaning.");
   params.addParam<std::vector<std::string>>(
       "prevent_precipitation",
       "Mineral species in this list will be prevented from precipitating, irrespective of their "

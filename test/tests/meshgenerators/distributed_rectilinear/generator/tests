@@ -1,0 +1,85 @@
+[Tests]
+   design = 'meshgenerators/DistributedRectilinearMeshGenerator.md'
+   issues = '#11485'
+
+  [./mesh_generator]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out.e'
+    cli_args = 'Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 2D Quad4 mesh in parallel'
+  [../]
+
+  [./check_nlayers]
+    type = 'RunException'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    cli_args = 'Mesh/gmg/num_side_layers=5'
+    requirement = 'MOOSE shall be able to check if or not users ask for too many layers of ghosting elements'
+    expect_err = 'Range\s+check\s+failed\s+for\s+parameter\s+Mesh\/gmg\/num\_side\_layers\s+Expression:\s+num\_side\_layers\>\=1\s+\&\s+num\_side\_layers\<5\s+Value:\s+5'
+  [../]
+
+  [./1D]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    cli_args = 'Mesh/gmg/dim=1 Outputs/file_base=distributed_rectilinear_mesh_generator_out_1d Outputs/hide="pid npid" '
+    exodiff = 'distributed_rectilinear_mesh_generator_out_1d.e'
+    requirement = 'MOOSE shall be able to generate 1D EDGE2 mesh in parallel.'
+  [../]
+
+  [./3D]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d.e'
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel.'
+    valgrind = 'NONE'
+  [../]
+
+  [./3D_ptscotch]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d_ptscotch.e'
+    ptscotch = true
+    petsc_version = '>=3.10.0'
+    valgrind = none
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Mesh/gmg/part_package=ptscotch Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d_ptscotch Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel using ptscotch partitioner'
+  [../]
+
+  [./3D_hierarch]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_out_3d_hierarch.e'
+    min_parallel = 4
+    max_parallel = 4
+    cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Mesh/gmg/part_package=hierarch Mesh/gmg/num_cores_per_compute_node=2 Outputs/file_base=distributed_rectilinear_mesh_generator_out_3d_hierarch Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel using hierarch partitioner'
+  [../]
+
+  [./3d_scomm_out]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'drmg_3d_scomm_out.e'
+    min_parallel = 3
+    issues = '#15464'
+    cli_args = 'Mesh/gmg/num_cores_for_partition=2 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/file_base=drmg_3d_scomm_out Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate a first-order hexahedral mesh in parallel using a small number of cores for the graph partitioner.'
+  [../]
+
+  [./3d_scomm_10_out]
+    type = 'RunException'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    expect_err = 'Number of cores for the graph partitioner is too large'
+    max_parallel = 8
+    issues = '#15464'
+    cli_args = 'Mesh/gmg/num_cores_for_partition=10 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall error out if the number of cores for partition is larger than the total number of cores.'
+  [../]
+
+  [./mesh_adaptivity]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator_adaptivity.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_adaptivity_out.e'
+    requirement = 'The system shall be able to adapt a mesh generated in parallel.'
+  [../]
+[]

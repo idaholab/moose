@@ -3,3 +3,4 @@ directories:
 specs:
     - tests
 repo: moose
+reports: !include ${MOOSE_DIR}/framework/doc/sqa_reports.yml

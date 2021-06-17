@@ -47,6 +47,7 @@
     custom_cmp = '8ElemTensionRelease.exodiff'
     min_parallel = 4
     max_parallel = 4
+    mesh_mode = REPLICATED
     # This test has substantial diffs in older versions of PETSc due to the changes
     # in the way residuals are computed in contact problems in 3061bbd5d.
     petsc_version = '>=3.5.0'

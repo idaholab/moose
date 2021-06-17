@@ -14,30 +14,30 @@ por = 2.0 # this is the porosity.  The result should not depend on por in this e
 []
 
 [Variables]
-  [./conc]
-  [../]
+  [conc]
+  []
 []
 
 [ICs]
-  [./spike]
+  [spike]
     type = FunctionIC
     variable = conc
     function = 'if(x<=0.0, -1.0, 1.0)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = GeochemistryTimeDerivative
     porosity = ${por}
     variable = conc
-  [../]
-  [./disp]
+  []
+  [disp]
     type = GeochemistryDispersion
     variable = conc
     porosity = ${por}
     tensor_coeff = '0.3 0 0  0 0 0  0 0 0'
-  [../]
+  []
 []
 
 [Executioner]
@@ -48,39 +48,39 @@ por = 2.0 # this is the porosity.  The result should not depend on por in this e
 []
 
 [AuxVariables]
-  [./expected]
-  [../]
-  [./should_be_zero]
-  [../]
+  [expected]
+  []
+  [should_be_zero]
+  []
 []
 
 [AuxKernels]
-  [./expected]
+  [expected]
     type = FunctionAux
     variable = expected
     function = erf
-  [../]
-  [./should_be_zero]
+  []
+  [should_be_zero]
     type = ParsedAux
     args = 'expected conc'
     function = 'expected - conc'
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Norm
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Functions]
-  [./erf]
+  [erf]
     type = ParsedFunction
     # series expansion for evaluating the error function
     value = 'xi := x / sqrt(4 * t * 0.3); expxi := exp(-xi * xi); if(x < 0.0, -1.0, if(x > 0.0, 1.0, 0.0)) * 2 / sqrt(pi) * sqrt(1 - expxi) * (sqrt(pi) / 2.0 + 31.0 * expxi / 200.0 - 341.0 * expxi * expxi / 8000.0)'
-  [../]
+  []
 []
 
 [Outputs]

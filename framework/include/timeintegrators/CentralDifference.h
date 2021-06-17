@@ -36,6 +36,8 @@ protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
 
+  /// The older solution
+  const NumericVector<Number> & _solution_older;
   const NumericVector<Number> & _solution_old_old_old;
 
   /**

@@ -6,5 +6,34 @@
     input = test_check.py
 
     requirement = "The system shall include a utility for reporting the status of software quality items."
+    collections = "FAILURE_ANALYSIS"
+  []
+  [generate]
+    type = PythonUnitTest
+    input = test_generate.py
+    issues = '#16155'
+
+    requirement = "The system shall include a utility for generating documentation stub pages."
+  []
+  [syntax]
+    type = PythonUnitTest
+    input = test_syntax.py
+    issues = '#16155'
+
+    requirement = "The system shall include a utility for displaying the application syntax tree."
+  []
+  [build]
+    type = PythonUnitTest
+    input = test_build.py
+    issues = '#16807'
+
+    requirement = "The system shall include a utility for converting markdown documentation to other formats."
+  []
+  [init]
+    type = PythonUnitTest
+    input = test_init.py
+    issues = '#16868'
+
+    requirement = "The system shall include a utility to initialize documentation items."
   []
 []

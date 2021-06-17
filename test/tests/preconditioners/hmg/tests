@@ -1,0 +1,43 @@
+[Tests]
+  design = 'HMGPreconditioner.md'
+  issues = '#16210'
+
+  [hmg]
+    type = 'Exodiff'
+    input = 'diffusion_hmg.i'
+    exodiff = 'diffusion_hmg_out.e'
+    min_parallel = 2
+    # HMG was introduced in 3.12.0
+    petsc_version = '>=3.12.0'
+    requirement = "The system shall support the use of HMG (high performance MG)"
+    # Check if PtAP algorithms are setup correctly
+    expect_out = "using\s+allatonce\s+MatPtAP\(\)\s+implementation"
+  []
+
+  [hmg_3D]
+    type = 'Exodiff'
+    input = 'diffusion_hmg.i'
+    exodiff = 'diffusion_hmg_3d_out.e'
+    min_parallel = 2
+    # HMG was introduced in 3.12.0
+    petsc_version = '>=3.12.0'
+    cli_args = 'Mesh/dmg/dim=3 Mesh/dmg/nz=10 Outputs/file_base=diffusion_hmg_3d_out -log_view'
+    requirement = "The system shall support the use of HMG (high performance MG) for 3D problems"
+    # Check if strong_threshold is setup correctly
+    expect_out = "PETSc\s+Preconditioner:\s+hmg\s+strong_threshold:\s+0.7"
+  []
+
+  [hmg_strumpack]
+    type = 'Exodiff'
+    input = 'diffusion_hmg.i'
+    exodiff = 'diffusion_strumpack_3d_out.e'
+    min_parallel = 2
+    petsc_version = '>=3.12.0'
+    strumpack = true
+    issues = '#16501'
+    cli_args = 'Mesh/dmg/dim=3 Mesh/dmg/nz=10 Outputs/file_base=diffusion_strumpack_3d_out -pc_type lu 	-pc_factor_mat_solver_type strumpack  -snes_view'
+    requirement = "The system shall support the use of strumpack (sparse direct solver) for 3D problems"
+    # Check if strumpack is used
+    expect_out = "package\s+used\s+to\s+perform\s+factorization:\s+strumpack"
+  []
+[]

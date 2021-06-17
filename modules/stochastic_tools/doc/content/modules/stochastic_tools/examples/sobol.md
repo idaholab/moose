@@ -44,25 +44,25 @@ the vectors supplied.
 
 If CSV output is enabled, the [SobolStatistics.md] object will write a file that contains
 columns of data. Each column comprises of the computed indices for the quantities of
-interest. For example, [#sobol_out] is the complete output from the [SobolStatistics.md] object
+interest. For example, [sobol_out] is the complete output from the [SobolStatistics.md] object
 for this example problem.
 
 !listing caption=Computed Sobol indices for the example heat conduction problem. id=sobol_out
 results_results:T_avg,results_results:q_left
-0.76299909295746,0.75702944587209
-0.2082919277966,0.21460975494102
-0.0027766033319889,0.0011025190137148
-0.00046341758946101,7.9704886906161e-06
-0.78907420429966,0.78609475770525
-0.23746323877556,0.24915733113826
-0.0026977118411734,0.0043825163810549
-0.0018918988236903,0.0042137986067606
-0.014088916836785,0.019175125735034
--0.0070190563079849,-0.0068080492999654
--0.0090633778449805,-0.0080820910718631
-3.9352099404089e-05,0.00012556131080121
-0.00062608629194155,0.00016114699247996
-0.00015344139391293,-5.0234930366023e-06
+0.78281576441957,0.77757846638372
+0.20244571666716,0.20835461645184
+0.0028971365514415,0.001249518487784
+0.00057637952893031,-7.7803918689059e-06
+0.7962125505073,0.79310223868474
+0.22205277595128,0.23142827171255
+0.0078278880010163,0.0074376466338467
+0.0057602099050202,0.0064422786852175
+0.0013657906960507,0.0023676473484507
+-0.026286609856123,-0.028546434327499
+-0.027093927368103,-0.0288934212785
+-0.0038658094816267,-0.0039973359755034
+-0.0034417727808675,-0.0036586486293979
+-2.439285675197e-05,2.2538777552327e-05
 
 This problem examines four uncertain parameters, thus the first four rows contain the first-order
 indices of each of the uncertain parameters as ordered in the input file ($\gamma$, $q_0$, $T_0$, and
@@ -70,7 +70,7 @@ $s$). The next four rows contain the total-effect indices. The final rows contai
 indices, see [SobolStatistics.md] for further information regarding the output.
 
 For the problem at hand, the first-order and second-order indices for the two quantities of interest
-are presented in [#S_T_avg] and [#S_q_left]. The diagonal entries are the first-order incides and
+are presented in [S_T_avg] and [S_q_left]. The diagonal entries are the first-order incides and
 the off-diagonal terms are the second-order indices. For example for $T_{avg}$ the first order-index
 for $\gamma$ is $S_1 = 0.763$ and the second-order index $S_{1,2} = 0.014$ for $\gamma$ interacting
 with $q_0$. The negative values are essentially zero, if more replicates were executed these
@@ -79,27 +79,27 @@ numbers would become closer to zero.
 !table id=S_T_avg caption=First-order and second-order Sobol indices for $T_{avg}$.
 | $S_{i,j}$ | 1 ($\gamma$) | 2 ($q_0$) | 3 ($T_0$) | 4 ($s$) |
 | -         | -            | -         | -         | -       |
-| 1         | 0.763        | -         | -         | -       |
-| 2         | 0.014        | 0.208     | -         | -       |
-| 3         | -0.007       | 0         | 0.003     | -       |
-| 4         | -0.009       | 0.001     | 0         | 0       |
+| 1         | 0.783        | -         | -         | -       |
+| 2         | 0.014        | 0.202     | -         | -       |
+| 3         | -0.026       | -0.004    | 0.003     | -       |
+| 4         | -0.027       | -0.003    | 0         | 0.001   |
 
 !table id=S_q_left caption=First-order and second-order Sobol indices for $q_{left}$.
 | $S_{i,j}$ | 1 ($\gamma$) | 2 ($q_0$) | 3 ($T_0$) | 4 ($s$) |
 | -         | -            | -         | -         | -       |
-| 1         | 0.757        | -         | -         | -       |
-| 2         | 0.019        | 0.215     | -         | -       |
-| 3         | -0.007       | 0         | 0.001     | -       |
-| 4         | -0.008       | 0         | 0         | 0       |
+| 1         | 0.778        | -         | -         | -       |
+| 2         | 0.002        | 0.215     | -         | -       |
+| 3         | -0.029       | -0.004    | 0.001     | -       |
+| 4         | -0.029       | -0.004    | 0         | 0       |
 
 The data in these two tables clearly indicates that a majority of the variance of both quantities of
 interest are due to the variance of $\gamma$ ($S_1$) and $q_0$ ($S_2$). Additionally, a small
 contribution of the variance is from a second-order interaction, $S_{1,2}$, between $\gamma$ and
 $q_0$. The importance of $\gamma$ and $q_0$ if further evident by the total-effect indices, as shown in
-[#total-effect].
+[total-effect].
 
 !table id=total-effect caption=Total-effect Sobol indices for $T_{avg}$ and $q_{left}$.
 | $S_T$      | 1 ($\gamma$) | 2 ($q_0$) | 3 ($T_0$) | 4 ($s$) |
-| -        | -            | -         | -         | -       |
-| $T_{avg}$  | 0.789        | 0.237     | 0.003     | 0.002   |
-| $q_{left}$ | 0.786        | 0.249     | 0.004     | 0.004   |
+| -          | -            | -         | -         | -       |
+| $T_{avg}$  | 0.796        | 0.222     | 0.008     | 0.006   |
+| $q_{left}$ | 0.793        | 0.231     | 0.007     | 0.006   |

@@ -6,6 +6,8 @@
 
 ## Introduction
 
+New users will probably find this page is full of gobbledygook, but the information may be useful as they gain experience with PorousFlow.
+
 Sometimes PorousFlow can be very frustrating to run because MOOSE keeps spitting back things like
 
 `Material property 'PorousFlow_matrix_internal_energy_nodal', requested by 'PorousFlowUnsaturated_EnergyTimeDerivative' is not defined on block caps`

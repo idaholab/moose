@@ -72,6 +72,7 @@ temp_print_trace.*
 *.pvtu
 .depend
 *.png
+*.svg
 *.gif
 *.tif
 *.jpg
@@ -85,6 +86,7 @@ temp_print_trace.*
 *.xyz
 *Revision.h
 *.json
+*.json.*
 *.bak
 *.processor.*
 .clang_complete
@@ -102,6 +104,7 @@ build
 !**/gold/*.vtu
 !**/gold/*.pvtu
 !**/gold/*.xml*
+!**/gold/*.json*
 
 peacock_run_tmp.i
 yaml_dump*
@@ -240,3 +243,4 @@ conf_vars.mk
 
 # GPerf performance
 *.prof
+*.heap

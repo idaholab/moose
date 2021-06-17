@@ -30,7 +30,6 @@
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'out_transient.e'
-    group = 'requirements'
     requirement = "MOOSE shall be capable of solving a transient diffusion problem."
     issues = '#1405'
   [../]

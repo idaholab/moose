@@ -32,7 +32,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes full Jacobian of jvar and the array variable this kernel operates on
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -40,13 +40,14 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual ArrayMooseVariable & variable() override { return _var; }
+  virtual const ArrayMooseVariable & variable() const override { return _var; }
 
 protected:
   /**
-   * Compute this Kernel's contribution to the residual at the current quadrature point
+   * Compute this Kernel's contribution to the residual at the current quadrature point,
+   * to be filled in \p residual.
    */
-  virtual RealEigenVector computeQpResidual() = 0;
+  virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
    * Compute this Kernel's contribution to the diagonal Jacobian at the current quadrature point
@@ -57,7 +58,7 @@ protected:
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
   {
     if (jvar.number() == _var.number())
     {
@@ -74,7 +75,7 @@ protected:
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobianScalar(MooseVariableScalar & jvar)
+  virtual RealEigenMatrix computeQpOffDiagJacobianScalar(const MooseVariableScalar & jvar)
   {
     return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
   }
@@ -93,7 +94,7 @@ protected:
    * Put necessary evaluations depending on qp but independent on test and shape functions here for
    * off-diagonal Jacobian assembly
    */
-  virtual void initQpOffDiagJacobian(MooseVariableFEBase & jvar)
+  virtual void initQpOffDiagJacobian(const MooseVariableFEBase & jvar)
   {
     if (jvar.number() == _var.number())
       initQpJacobian();
@@ -123,4 +124,11 @@ protected:
 
   /// Number of components of the array variable
   const unsigned int _count;
+
+private:
+  /// Work vector for residual and diag jacobian
+  RealEigenVector _work_vector;
+
+  /// Work vector for off diag jacobian
+  RealEigenMatrix _work_matrix;
 };

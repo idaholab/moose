@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=MomentumConvectiveFlux syntax=/Kernels/MomentumConvectiveFlux
+# MomentumConvectiveFlux
+
+!syntax description /Kernels/MomentumConvectiveFlux
+
+!syntax parameters /Kernels/MomentumConvectiveFlux
+
+!syntax inputs /Kernels/MomentumConvectiveFlux
+
+!syntax children /Kernels/MomentumConvectiveFlux

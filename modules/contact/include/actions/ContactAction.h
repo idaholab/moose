@@ -55,6 +55,11 @@ public:
    */
   static MooseEnum getModelEnum();
   /**
+   * Get mortar approach
+   * @return enum
+   */
+  static MooseEnum getMortarApproach();
+  /**
    * Get contact formulation
    * @return enum
    */
@@ -88,8 +93,15 @@ protected:
   const MooseEnum _system;
   /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
+  /// Mortar approach (weighted --variationally consistent-- or legacy)
+  enum class MortarApproach
+  {
+    Weighted,
+    Legacy
+  };
+  const MortarApproach _mortar_approach;
   /// Whether to use the dual Mortar approach
-  const bool _use_dual;
+  bool _use_dual;
 
 private:
   /**
@@ -100,8 +112,4 @@ private:
    * Generate constraints for node to face contact
    */
   void addNodeFaceContact();
-  /**
-   * Get displacement variable names
-   */
-  std::vector<VariableName> getDisplacementVarNames();
 };

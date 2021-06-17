@@ -1,5 +1,8 @@
 [Mesh]
-  file = transient_out_cp/LATEST
+  [fmg]
+    type = FileMeshGenerator
+    file = transient_out_cp/LATEST
+  []
   parallel_type = replicated
 []
 

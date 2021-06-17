@@ -1,0 +1,43 @@
+/conda @milljm
+/m4 @lindsayad
+
+/COPYING @permcody
+/COPYRIGHT @permcody
+/LICENSE @permcody
+/README.md @permcody
+
+/.gitmodules @permcody
+/aclocal.m4 @lindsayad
+/conf_vars.mk.in @lindsayad
+/configure @lindsayad
+/configure.ac @lindsayad
+/package_version @milljm
+
+/.github @permcody
+
+/framework/*/fv* @rwcarlsen @lindsayad
+/framework/*/interfacekernels @lindsayad
+/framework/*/materials @rwcarlsen
+/framework/*/parser @rwcarlsen
+/framework/*/preconditioners @fdkong
+/framework/*/problems/EigenProblem* @fdkong
+/framework/*/relationshipmanagers @lindsayad
+/framework/*/reporters @aeslaughter
+/framework/*/samplers @aeslaughter @zachmprince
+/framework/*/systems/NonlinearEigenSystem* @fdkong
+/framework/*/transfers @fdkong
+/framework/*/utils/PetscSupport* @fdkong
+/framework/*/utils/SlepcSupport* @fdkong
+/framework/*/variables @rwcarlsen
+
+/modules/electromagnetics @cticenhour
+/modules/external_petsc_solver @fdkong
+/modules/fluid_properties @rwcarlsen @andrsd
+/modules/fsi @fdkong
+/modules/navier_stokes @lindsayad
+/modules/ray_tracing @loganharbour
+/modules/stochastic_tools @aeslaughter @zachmprince
+
+/scripts/hpc_proxy.pac @loganharbour
+/scripts/update_and_rebuild_petsc.sh @fdkong
+/scripts/update_and_rebuild_petsc_alt.sh @fdkong

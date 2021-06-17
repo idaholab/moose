@@ -3,8 +3,17 @@
     type = 'CSVDiff'
     input = 'convective_ht_side_integral.i'
     csvdiff = 'convective_ht_side_integral_out.csv'
-    design = 'HomogenizedHeatConduction.md'
+    design = 'ConvectiveHeatTransferSideIntegral.md'
     requirement = 'The system shall compute total heat flux from heat transfer coefficient and temperature difference'
     issues = '#14390'
+  [../]
+
+  [./ad_convective_ht_side_integral]
+    type = 'CSVDiff'
+    input = 'ad_convective_ht_side_integral.i'
+    csvdiff = 'ad_convective_ht_side_integral_out.csv'
+    design = 'ConvectiveHeatTransferSideIntegral.md'
+    requirement = 'The system shall compute total heat flux from heat transfer coefficient and temperature difference for AD variables'
+    issues = '#14390 #17020'
   [../]
 []

@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'array_variable_test.i'
     exodiff = 'array_variable_test_out.e'
-    group = 'requirements'
     requirement = 'MOOSE shall provide an ability to add array variables with constant initial conditions.'
     issues = '#6881'
     design = 'ArrayMooseVariable.md'

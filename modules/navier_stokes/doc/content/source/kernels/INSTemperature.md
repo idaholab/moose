@@ -1,3 +1,5 @@
+# INSTemperature
+
 !syntax description /Kernels/INSTemperature
 
 !syntax parameters /Kernels/INSTemperature

@@ -1,44 +1,59 @@
 [Tests]
-  [./timestepmaterial]
+  [timestepmaterial]
     type = 'Exodiff'
     input = 'timestepmaterial.i'
     exodiff = 'timestepmaterial_out.e'
     issues = '#7621'
     design = 'TimeStepMaterial.md'
-    requirement = 'A material shall be implemented that provides dt, time, and time step number as material properties'
-  [../]
-  [./variablegradientmaterial]
+    requirement = 'A material shall be implemented that provides dt, time, and time step number as '
+                  'material properties'
+  []
+  [variablegradientmaterial]
     type = 'Exodiff'
     input = 'variablegradientmaterial.i'
     exodiff = 'variablegradientmaterial_out.e'
     issues = '#7621'
-    requirement = 'A material shall be implemented that computes the magnitude of the gradient of a given variable'
+    requirement = 'A material shall be implemented that computes the magnitude of the gradient of a '
+                  'given variable'
     design = 'VariableGradientMaterial.md'
-  [../]
+  []
 
-  [./interface_grad]
+  [interface_grad]
     type = 'Exodiff'
     input = 'interface_grad.i'
     exodiff = 'interface_grad_out.e'
     issues = '#8211'
-    requirement = 'An interface kernel shall be implemented to match gradients between two subdomains'
+    requirement = 'An interface kernel shall be implemented to match gradients between two '
+                  'subdomains'
     design = 'InterfaceDiffusionFluxMatch.md'
-  [../]
-  [./interface_flux]
+  []
+  [interface_flux]
     type = 'Exodiff'
     input = 'interface_flux.i'
     exodiff = 'interface_flux_out.e'
     issues = '#8211'
-    requirement = 'Demonstrate an InterfaceKernel (InterfaceDiffusionFlux) that can replace a pair of integrated DiffusionFluxBC boundary conditions.'
+    requirement = 'Demonstrate an InterfaceKernel (InterfaceDiffusionFlux) that can replace a pair '
+                  'of integrated DiffusionFluxBC boundary conditions.'
     design = 'InterfaceDiffusionBoundaryTerm.md'
-  [../]
+  []
 
-  [./equal_gradient_lagrange]
+  [equal_gradient_lagrange]
     type = 'Exodiff'
     input = 'equal_gradient_lagrange.i'
     exodiff = 'equal_gradient_lagrange_out.e'
     issues = '#8211'
-    requirement = 'An InterfaceKernel set shall be implemnted that can enforce the componentwise continuity of the gradient of a variable using the Lagrange multiplier method'
+    requirement = 'An InterfaceKernel set shall be implemented that can enforce the componentwise '
+                  'continuity of the gradient of a variable using the Lagrange multiplier method'
     design = 'EqualGradientLagrangeInterface.md'
-  [../]
+  []
+
+  [coupled_value_function_ic]
+    type = 'CSVDiff'
+    input = 'coupled_value_function_ic.i'
+    csvdiff = 'coupled_value_function_ic_out.csv'
+    issues = '#16405'
+    requirement = 'An initial condition shall be implemented that can set the value of a variable to '
+                  'the value of a function evaluated over a set of up to four coupled variables'
+    design = 'CoupledValueFunctionIC.md'
+  []
 []

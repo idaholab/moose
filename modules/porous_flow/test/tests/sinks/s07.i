@@ -18,248 +18,248 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp frac0 frac1'
     number_fluid_phases = 1
     number_fluid_components = 3
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1.1
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./frac0]
+  [pp]
+  []
+  [frac0]
     initial_condition = 0.1
-  [../]
-  [./frac1]
+  []
+  [frac1]
     initial_condition = 0.6
-  [../]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     function = y
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = frac0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = frac1
-  [../]
-  [./mass2]
+  []
+  [mass2]
     type = PorousFlowMassTimeDerivative
     fluid_component = 2
     variable = pp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.3
       density0 = 1.1
       thermal_expansion = 0
       viscosity = 1.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'frac0 frac1'
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0.2 0 0 0 0.1 0 0 0 0.1'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./flux_out]
-  [../]
+  [flux_out]
+  []
 []
 
 [Functions]
-  [./mass1_00]
+  [mass1_00]
     type = ParsedFunction
     value = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     vars = 'frac  vol  por dens0 pp bulk al m'
     vals = 'f1_00 0.25 0.1 1.1  p00 1.3 1.1 0.5'
-  [../]
-  [./expected_mass_change1_00]
+  []
+  [expected_mass_change1_00]
     type = ParsedFunction
     value = 'frac*fcn*area*dt'
     vars = 'frac fcn area dt'
     vals = 'f1_00 6  0.5  1E-3'
-  [../]
-  [./mass1_00_expect]
+  []
+  [mass1_00_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
     vars = 'mass_prev mass_change'
     vals = 'm1_00_prev  del_m1_00'
-  [../]
-  [./mass1_01]
+  []
+  [mass1_01]
     type = ParsedFunction
     value = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     vars = 'frac  vol  por dens0 pp bulk al m'
     vals = 'f1_01 0.25 0.1 1.1  p01 1.3 1.1 0.5'
-  [../]
-  [./expected_mass_change1_01]
+  []
+  [expected_mass_change1_01]
     type = ParsedFunction
     value = 'frac*fcn*area*dt'
     vars = 'frac fcn area dt'
     vals = 'f1_01 6  0.5  1E-3'
-  [../]
-  [./mass1_01_expect]
+  []
+  [mass1_01_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
     vars = 'mass_prev mass_change'
     vals = 'm1_01_prev  del_m1_01'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./f1_00]
+  [f1_00]
     type = PointValue
     point = '0 0 0'
     variable = frac1
     execute_on = 'initial timestep_end'
-  [../]
-  [./flux_00]
+  []
+  [flux_00]
     type = PointValue
     point = '0 0 0'
     variable = flux_out
     execute_on = 'initial timestep_end'
-  [../]
-  [./p00]
+  []
+  [p00]
     type = PointValue
     point = '0 0 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./m1_00]
+  []
+  [m1_00]
     type = FunctionValuePostprocessor
     function = mass1_00
     execute_on = 'initial timestep_end'
-  [../]
-  [./m1_00_prev]
+  []
+  [m1_00_prev]
     type = FunctionValuePostprocessor
     function = mass1_00
     execute_on = 'timestep_begin'
     outputs = 'console'
-  [../]
-  [./del_m1_00]
+  []
+  [del_m1_00]
     type = FunctionValuePostprocessor
     function = expected_mass_change1_00
     execute_on = 'timestep_end'
     outputs = 'console'
-  [../]
-  [./m1_00_expect]
+  []
+  [m1_00_expect]
     type = FunctionValuePostprocessor
     function = mass1_00_expect
     execute_on = 'timestep_end'
-  [../]
-  [./f1_01]
+  []
+  [f1_01]
     type = PointValue
     point = '0 1 0'
     variable = frac1
     execute_on = 'initial timestep_end'
-  [../]
-  [./flux_01]
+  []
+  [flux_01]
     type = PointValue
     point = '0 1 0'
     variable = flux_out
     execute_on = 'initial timestep_end'
-  [../]
-  [./p01]
+  []
+  [p01]
     type = PointValue
     point = '0 1 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./m1_01]
+  []
+  [m1_01]
     type = FunctionValuePostprocessor
     function = mass1_01
     execute_on = 'initial timestep_end'
-  [../]
-  [./m1_01_prev]
+  []
+  [m1_01_prev]
     type = FunctionValuePostprocessor
     function = mass1_01
     execute_on = 'timestep_begin'
     outputs = 'console'
-  [../]
-  [./del_m1_01]
+  []
+  [del_m1_01]
     type = FunctionValuePostprocessor
     function = expected_mass_change1_01
     execute_on = 'timestep_end'
     outputs = 'console'
-  [../]
-  [./m1_01_expect]
+  []
+  [m1_01_expect]
     type = FunctionValuePostprocessor
     function = mass1_01_expect
     execute_on = 'timestep_end'
-  [../]
-  [./f1_11]
+  []
+  [f1_11]
     type = PointValue
     point = '1 1 0'
     variable = frac1
     execute_on = 'initial timestep_end'
-  [../]
-  [./flux_11]
+  []
+  [flux_11]
     type = PointValue
     point = '1 1 0'
     variable = flux_out
     execute_on = 'initial timestep_end'
-  [../]
-  [./p11]
+  []
+  [p11]
     type = PointValue
     point = '1 1 0'
     variable = pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./flux]
+  [flux]
     type = PorousFlowSink
     boundary = 'left'
     variable = frac1
@@ -269,16 +269,16 @@
     fluid_phase = 0
     flux_function = 6
     save_in = flux_out
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_max_it -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = 'gmres asm lu 10 NONZERO 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -292,12 +292,12 @@
 
 [Outputs]
   file_base = s07
-  [./console]
+  [console]
     type = Console
     execute_on = 'nonlinear linear'
-  [../]
-  [./csv]
+  []
+  [csv]
     type = CSV
     execute_on = 'timestep_end'
-  [../]
+  []
 []

@@ -18,6 +18,7 @@ SpecificVolumeAux::validParams()
   params.addRequiredCoupledVar("rho", "Density of the phase");
   params.addCoupledVar("area", 1., "Cross-sectional area (if used)");
   params.addCoupledVar("alpha", 1., "Volume fraction (if used)");
+  params.addClassDescription("This auxkernel computes the specific volume $v$ of the fluid.");
 
   return params;
 }

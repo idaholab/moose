@@ -1,6 +1,6 @@
 Content:
-    - framework/doc/content
-    - test/doc/content
+    - ${ROOT_DIR}/framework/doc/content
+    - ${ROOT_DIR}/test/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
@@ -8,16 +8,16 @@ Extensions:
     MooseDocs.extensions.navigation:
         active: False
     MooseDocs.extensions.appsyntax:
-        executable: ${MOOSE_DIR}/test
+        executable: ${ROOT_DIR}/test
         remove:
-            framework: !include framework/doc/remove.yml
-            moose_test: !include test/doc/remove.yml
+            framework: !include ${ROOT_DIR}/framework/doc/remove.yml
+            moose_test: !include ${ROOT_DIR}/test/doc/remove.yml
         includes:
             - framework/include
     MooseDocs.extensions.common:
-        shortcuts: !include framework/doc/globals.yml
+        shortcuts: !include ${ROOT_DIR}/framework/doc/globals.yml
     MooseDocs.extensions.acronym:
-        acronyms: !include framework/doc/acronyms.yml
+        acronyms: !include ${ROOT_DIR}/framework/doc/acronyms.yml
     MooseDocs.extensions.civet:
         test_results_cache: '/tmp/civet/jobs'
         remotes:
@@ -28,8 +28,9 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include ${ROOT_DIR}/framework/doc/sqa_reports.yml
         categories:
-            framework: !include framework/doc/sqa_framework.yml
+            framework: !include ${ROOT_DIR}/framework/doc/sqa_framework.yml
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects

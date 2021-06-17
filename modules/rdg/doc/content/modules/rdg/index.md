@@ -241,7 +241,7 @@ side. In smooth regions this reduces to the centered slope of Fromm method and h
 artificially steepen smooth slopes to the extent that superbee does. The MC limiter appears to be a
 good default choice for a wide class of problems.
 
-## Example Problem
+## Example Problem id=example
 
 ### Problem Description
 

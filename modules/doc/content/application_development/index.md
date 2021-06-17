@@ -4,7 +4,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Syntax](syntax/index.md) - MOOSE syntax documentation
 
-[Source Code](source/index.md) - MOOSE source documentation
+[Source Code](source/index.md exact=True) - MOOSE source documentation
 
 [Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
@@ -24,11 +24,10 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Hypre/BoomerAMG Preconditioning](hypre.md) - In-depth discussion of using Hypre's algebraic multigrid preconditioner: BoomerAMG
 
-[Code Standards](code_standards.md) - How we expect code to be formatted
+[Code Standards](sqa/framework_scs.md) - How we expect code to be formatted
 
 [Debugging](/debugging.md) - Tips on how to debug MOOSE-based applications
 
 [RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geomatric or algebraic information needed in parallel
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
-

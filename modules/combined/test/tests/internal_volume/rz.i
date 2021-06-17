@@ -68,8 +68,6 @@
     [./fred]
       boundary = 3
       function = pressure
-      disp_x = disp_x
-      disp_y = disp_y
     [../]
   [../]
 []

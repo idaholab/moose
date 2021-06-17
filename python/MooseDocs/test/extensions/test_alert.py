@@ -20,6 +20,7 @@ class TestAlertBrands(MooseDocsTestCase):
 
     # test all subcommands simultaneously - each with a unique message
     BRANDS = ['error', 'warning', 'note', 'tip']
+    ICONS = ['report', 'warning', 'comment', 'school']
     MESSAGE = [
                 ['An', ' ', 'error', '.'],
                 ['A', ' ', 'warning', '.'],
@@ -33,8 +34,8 @@ class TestAlertBrands(MooseDocsTestCase):
             ast = self.tokenize(self.TEXT[i])
             self.assertSize(ast, 1)
             self.assertToken(ast(0), 'AlertToken', size=2, brand=b)
-            self.assertToken(ast(0)(0), 'AlertTitle', brand=b, prefix=True)
-            self.assertToken(ast(0)(1), 'AlertContent', size=1, brand=b, icon=True)
+            self.assertToken(ast(0)(0), 'AlertTitle', brand=b, prefix=True, icon=True, icon_name=self.ICONS[i])
+            self.assertToken(ast(0)(1), 'AlertContent', size=1, brand=b)
             self.assertToken(ast(0)(1)(0), 'Paragraph', size=len(self.MESSAGE))
 
     def testHTML(self):
@@ -57,9 +58,9 @@ class TestAlertBrands(MooseDocsTestCase):
             self.assertHTMLTag(res(0), 'div', size=2, class_=classref)
 
             title = res(0)(0)
-            self.assertHTMLTag(title, 'div', size=1, class_='card-title moose-alert-title')
-            self.assertHTMLTag(title(0), 'span', size=1, class_='moose-alert-title-brand')
-            self.assertHTMLString(title(0)(0), content=b)
+            self.assertHTMLTag(title, 'div', size=2, class_='card-title moose-alert-title')
+            self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string=self.ICONS[i])
+            self.assertHTMLTag(title(1), 'span', size=1, class_='moose-alert-title-brand', string=b)
 
             content = res(0)(1)
             self.assertHTMLTag(content, 'div', size=1, class_='card-content')
@@ -92,8 +93,8 @@ class TestAlertConstruction(MooseDocsTestCase):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='construction')
-        self.assertToken(ast(0)(0), 'AlertTitle', brand='construction', prefix=True)
-        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='construction', icon=True)
+        self.assertToken(ast(0)(0), 'AlertTitle', brand='construction', prefix=True, icon=True, icon_name='build')
+        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='construction')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=4)
 
     def testHTML(self):
@@ -112,17 +113,9 @@ class TestAlertConstruction(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=2, class_='card moose-alert moose-alert-construction')
 
         title = res(0)(0)
-        self.assertHTMLTag(title, 'div', size=1, class_='card-title moose-alert-title')
-        self.assertHTMLTag(title(0), 'span', size=1, class_='moose-alert-title-brand')
-        self.assertHTMLString(title(0)(0), content='under construction')
-
-        content = res(0)(1)
-        self.assertHTMLTag(content, 'div', size=1, class_='card-content')
-        self.assertHTMLTag(content(0), 'div', size=2, class_='moose-alert-content')
-        self.assertHTMLTag(content(0)(0), 'img',
-                           src='media/framework/under-construction.gif',
-                           class_='moose-alert-construction-img')
-        self._assertHTML(content(0)(1))
+        self.assertHTMLTag(title, 'div', size=2, class_='card-title moose-alert-title')
+        self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string='build')
+        self.assertHTMLTag(title(1), 'span', size=1, class_='moose-alert-title-brand', string='construction')
 
     def _assertHTML(self, res):
         self.assertHTMLTag(res, 'p', size=1)
@@ -134,30 +127,12 @@ class TestAlertConstruction(MooseDocsTestCase):
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
-        self.assertSize(res, 3)
+        self.assertSize(res, 1)
 
-        self.assertLatex(res(0), 'Command', 'tcbset', size=1, escape=False)
-        self.assertLatexString(res(0)(0), content='height from=1in to 200in', escape=False)
+        self.assertLatex(res(0), 'Environment', 'alert', size=5)
+        self.assertLatexArg(res(0), 0, 'Bracket', 'construction')
+        self.assertLatexArg(res(0), 1, 'Brace', 'construction')
 
-        self.assertLatex(res(1), 'Environment', 'alert', size=6)
-        self.assertLatexArg(res(1), 0, 'Bracket', 'construction')
-        self.assertLatexArg(res(1), 1, 'Brace', 'construction')
-
-        self.assertLatex(res(1)(0), 'Environment', 'wrapfigure', size=1)
-        self.assertLatexArg(res(1)(0), 0, 'Brace', 'l')
-        self.assertLatexArg(res(1)(0), 1, 'Brace', '1in')
-        self.assertLatex(res(1)(0)(0), 'Command', 'includegraphics', size=1)
-        self.assertLatexArg(res(1)(0)(0), 0, 'Bracket', 'height=0.6in')
-        self.assertLatexString(res(1)(0)(0)(0), content='media/framework/under-construction.png')
-
-        self.assertLatex(res(1)(1), 'Command', 'par')
-        self.assertLatexString(res(1)(2), content='Under')
-        self.assertLatexString(res(1)(3), content=' ')
-        self.assertLatexString(res(1)(4), content='construction')
-        self.assertLatexString(res(1)(5), content='.')
-
-        self.assertLatex(res(2), 'Command', 'tcbset', size=1, escape=False)
-        self.assertLatexString(res(2)(0), content='height from=0in to 200in', escape=False)
 
 class TestAlertConstructionNoIcon(MooseDocsTestCase):
     EXTENSIONS = [core, command, alert]
@@ -167,8 +142,8 @@ class TestAlertConstructionNoIcon(MooseDocsTestCase):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='construction')
-        self.assertToken(ast(0)(0), 'AlertTitle', brand='construction', prefix=True)
-        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='construction', icon=False)
+        self.assertToken(ast(0)(0), 'AlertTitle', brand='construction', prefix=True, icon=False, icon_name='build')
+        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='construction')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=4)
 
     def testHTML(self):
@@ -189,12 +164,7 @@ class TestAlertConstructionNoIcon(MooseDocsTestCase):
         title = res(0)(0)
         self.assertHTMLTag(title, 'div', size=1, class_='card-title moose-alert-title')
         self.assertHTMLTag(title(0), 'span', size=1, class_='moose-alert-title-brand')
-        self.assertHTMLString(title(0)(0), content='under construction')
-
-        content = res(0)(1)
-        self.assertHTMLTag(content, 'div', size=1, class_='card-content')
-        self.assertHTMLTag(content(0), 'div', size=1, class_='moose-alert-content')
-        self._assertHTML(content(0)(0))
+        self.assertHTMLString(title(0)(0), content='construction')
 
     def _assertHTML(self, res):
         self.assertHTMLTag(res, 'p', size=1)
@@ -226,12 +196,12 @@ class TestAlertTitle(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='note')
 
-        self.assertToken(ast(0)(0), 'AlertTitle', size=3, brand='note', prefix=True)
+        self.assertToken(ast(0)(0), 'AlertTitle', size=3, brand='note', prefix=True, icon=True, icon_name='comment')
         self.assertToken(ast(0)(0)(0), 'Word', content='A')
         self.assertToken(ast(0)(0)(1), 'Space')
         self.assertToken(ast(0)(0)(2), 'Word', content='Title')
 
-        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='note', icon=True)
+        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='note')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=8)
 
     def testHTML(self):
@@ -253,13 +223,14 @@ class TestAlertTitle(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=2, class_='card moose-alert moose-alert-note')
 
         title = res(0)(0)
-        self.assertHTMLTag(title, 'div', size=4, class_='card-title moose-alert-title')
-        self.assertHTMLTag(title(0), 'span', size=2, class_='moose-alert-title-brand')
-        self.assertHTMLString(title(0)(0), content='note')
-        self.assertHTMLString(title(0)(1), content=':')
-        self.assertHTMLString(title(1), content='A')
-        self.assertHTMLString(title(2), content=' ')
-        self.assertHTMLString(title(3), content='Title')
+        self.assertHTMLTag(title, 'div', size=5, class_='card-title moose-alert-title')
+        self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string='comment')
+        self.assertHTMLTag(title(1), 'span', size=2, class_='moose-alert-title-brand')
+        self.assertHTMLString(title(1)(0), content='note')
+        self.assertHTMLString(title(1)(1), content=':')
+        self.assertHTMLString(title(2), content='A')
+        self.assertHTMLString(title(3), content=' ')
+        self.assertHTMLString(title(4), content='Title')
 
         content = res(0)(1)
         self.assertHTMLTag(content, 'div', size=1, class_='card-content')
@@ -305,12 +276,12 @@ class TestAlertTitleNoPrefix(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='note')
 
-        self.assertToken(ast(0)(0), 'AlertTitle', size=3, brand='note', prefix=False)
+        self.assertToken(ast(0)(0), 'AlertTitle', size=3, brand='note', prefix=False, icon=True, icon_name='comment')
         self.assertToken(ast(0)(0)(0), 'Word', content='A')
         self.assertToken(ast(0)(0)(1), 'Space')
         self.assertToken(ast(0)(0)(2), 'Word', content='Title')
 
-        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='note', icon=True)
+        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='note')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=8)
 
     def testHTML(self):
@@ -332,10 +303,11 @@ class TestAlertTitleNoPrefix(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=2, class_='card moose-alert moose-alert-note')
 
         title = res(0)(0)
-        self.assertHTMLTag(title, 'div', size=3, class_='card-title moose-alert-title')
-        self.assertHTMLString(title(0), content='A')
-        self.assertHTMLString(title(1), content=' ')
-        self.assertHTMLString(title(2), content='Title')
+        self.assertHTMLTag(title, 'div', size=4, class_='card-title moose-alert-title')
+        self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string='comment')
+        self.assertHTMLString(title(1), content='A')
+        self.assertHTMLString(title(2), content=' ')
+        self.assertHTMLString(title(3), content='Title')
 
         content = res(0)(1)
         self.assertHTMLTag(content, 'div', size=1, class_='card-content')
@@ -381,11 +353,11 @@ class TestAlertTitleLink(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='tip')
 
-        self.assertToken(ast(0)(0), 'AlertTitle', size=1, brand='tip', prefix=True)
+        self.assertToken(ast(0)(0), 'AlertTitle', size=1, brand='tip', prefix=True, icon=True, icon_name='school')
         self.assertToken(ast(0)(0)(0), 'Link', size=1, url='https://google.com')
         self.assertToken(ast(0)(0)(0)(0), 'Word', content='Google')
 
-        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='tip', icon=True)
+        self.assertToken(ast(0)(1), 'AlertContent', size=1, brand='tip')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=6)
 
     def testHTML(self):
@@ -396,8 +368,7 @@ class TestAlertTitleLink(MooseDocsTestCase):
         content = res(0)(0)
         self.assertHTMLTag(content, 'div', size=2, class_='moose-alert-content')
         self.assertHTMLTag(content(0), 'p', size=1)
-        self.assertHTMLTag(content(0)(0), 'a', size=1, href='https://google.com')
-        self.assertHTMLString(content(0)(0)(0), content='Google')
+        self.assertHTMLTag(content(0)(0), 'a', size=1, href='https://google.com', string='Google')
         self._assertHTML(content(1))
 
     def testMaterialize(self):
@@ -406,12 +377,12 @@ class TestAlertTitleLink(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=2, class_='card moose-alert moose-alert-tip')
 
         title = res(0)(0)
-        self.assertHTMLTag(title, 'div', size=2, class_='card-title moose-alert-title')
-        self.assertHTMLTag(title(0), 'span', size=2, class_='moose-alert-title-brand')
-        self.assertHTMLString(title(0)(0), content='tip')
-        self.assertHTMLString(title(0)(1), content=':')
-        self.assertHTMLTag(title(1), 'a', size=1, href='https://google.com')
-        self.assertHTMLString(title(1)(0), content='Google')
+        self.assertHTMLTag(title, 'div', size=3, class_='card-title moose-alert-title')
+        self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string='school')
+        self.assertHTMLTag(title(1), 'span', size=2, class_='moose-alert-title-brand')
+        self.assertHTMLString(title(1)(0), content='tip')
+        self.assertHTMLString(title(1)(1), content=':')
+        self.assertHTMLTag(title(2), 'a', size=1, href='https://google.com', string='Google')
 
         content = res(0)(1)
         self.assertHTMLTag(content, 'div', size=1, class_='card-content')
@@ -457,8 +428,8 @@ class TestAlertWithCode(MooseDocsTestCase):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'AlertToken', size=2, brand='error')
-        self.assertToken(ast(0)(0), 'AlertTitle', brand='error', prefix=True)
-        self.assertToken(ast(0)(1), 'AlertContent', size=2, brand='error', icon=True)
+        self.assertToken(ast(0)(0), 'AlertTitle', brand='error', prefix=True, icon=True, icon_name='report')
+        self.assertToken(ast(0)(1), 'AlertContent', size=2, brand='error')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=6)
         self.assertToken(ast(0)(1)(1), 'Code', content='\nintx;\n', language='c++')
 
@@ -478,9 +449,9 @@ class TestAlertWithCode(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=2, class_='card moose-alert moose-alert-error')
 
         title = res(0)(0)
-        self.assertHTMLTag(title, 'div', size=1, class_='card-title moose-alert-title')
-        self.assertHTMLTag(title(0), 'span', size=1, class_='moose-alert-title-brand')
-        self.assertHTMLString(title(0)(0), content='error')
+        self.assertHTMLTag(title, 'div', size=2, class_='card-title moose-alert-title')
+        self.assertHTMLTag(title(0), 'i', size=1, class_='material-icons moose-inline-icon', string='report')
+        self.assertHTMLTag(title(1), 'span', size=1, class_='moose-alert-title-brand', string='error')
 
         content = res(0)(1)
         self.assertHTMLTag(content, 'div', size=1, class_='card-content')

@@ -1,12 +1,42 @@
 [Tests]
-  [./transform_generator_test]
+  design = 'meshgenerators/TransformGenerator.md'
+  issues = '#11640 #16927'
+
+  [rotate_and_scale]
     type = 'Exodiff'
     input = 'rotate_and_scale.i'
-    exodiff = 'rotate_and_scale_out.e'
+    exodiff = 'rotate_and_scale_in.e'
     requirement = "The system shall include the ability to rotate and scale a finite element mesh."
-    design = 'meshgenerators/TransformGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
+    cli_args = '--mesh-only'
     recover = false
-  [../]
+  []
+
+  [translate]
+    requirement = "The system shall include the ability to translate a finite element mesh in a manner that"
+
+    [user_set]
+      type = 'Exodiff'
+      input = 'translate.i'
+      exodiff = 'translate_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'is defined by the user,'
+    []
+    [center_origin]
+      type = 'Exodiff'
+      input = 'translate_center_origin.i'
+      exodiff = 'translate_center_origin_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'places the center of the mesh at the origin, or'
+    []
+    [min_origin]
+      type = 'Exodiff'
+      input = 'translate_min_origin.i'
+      exodiff = 'translate_min_origin_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'places the minimum of the mesh at the origin.'
+    []
+  []
 []

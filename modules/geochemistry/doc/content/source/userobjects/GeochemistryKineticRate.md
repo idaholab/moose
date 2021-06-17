@@ -2,16 +2,17 @@
 
 Defines a kinetic rate for a kinetic species.  The general form of this rate is
 \begin{equation}
-r = kA[M] \left( \prod_{j}m_{j}^{P_j} \right) \left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} \exp\left( \frac{E_{a}}{R} \left(\frac{1}{T_{0}} - \frac{1}{T}\right)\right) {\mathrm{sgn}}(1 - (Q/K)) \ .
+r = kA[M] \left( \prod_{\alpha}m_{\alpha}^{P_{\alpha}} \right) \left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} \exp\left( \frac{E_{a}}{R} \left(\frac{1}{T_{0}} - \frac{1}{T}\right)\right) {\mathrm{sgn}}(1 - (Q/K)) \ .
 \end{equation}
 This is a rather complicated equation, and simple examples are given below.  In this equation:
 
 - $r$ (units: mol.s$^{-1}$) is the rate of the kinetic reaction.  If it is positive then the kinetic species' mass will be decreasing (eg, dissolution).  If it is negative then the kinetic species' mass will be increasing (eg, precipitation).
-- $k$ is the intrinsic rate constant.  The product $kA[M]$ has units mol.s$^{-1}$ (assuming the simulation's time units are seconds).  Examples are given below.
+- $k$ is the intrinsic rate constant.  The product $kA[M]$ has units mol.s$^{-1}$ (assuming the simulation's time units are seconds).  Note that mole units are used, even if the initial amount of the kinetic species is given in mass or volume units.  Examples of $k$ are given below.
 - $A$ is either the surface area (units: m$^{2}$) for the kinetic species, or the specific surface area (units: m$^{2}$.g$^{-1}$)
 - $[M]$ (units: g) is the mass of the kinetic species.  It is optional.  Examples are given below.
-- $j$ is an index denoting a promoting species
-- $m_{j}$ is either: mass of solvent water (in kg) if the promoting species is H2O; fugacity of a gas if the promoting species is a gas; activity if the promoting species is either H+ or OH-; mobility, otherwise.
+- $\alpha$ is a label denoting a promoting species
+- $m_{\alpha}$ is either: mass of solvent water (in kg) if the promoting species is H$_{2}$O; fugacity of a gas if the promoting species is a gas; activity if the promoting species is either H$^{+}$ or OH$^{-}$; mobility, otherwise.
+- $P_{\alpha}$ is a dimensionless power
 - $Q$ is the [activity product](geochemistry_nomenclature.md) defined by the kinetic species' reaction in the database file
 - $K$ is the reaction's equilibrium constant defined in the database file
 - $\theta$ and $\eta$ are dimensionless exponents

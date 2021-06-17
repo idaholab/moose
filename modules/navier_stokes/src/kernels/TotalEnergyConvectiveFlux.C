@@ -14,15 +14,17 @@ registerMooseObject("NavierStokesApp", TotalEnergyConvectiveFlux);
 InputParameters
 TotalEnergyConvectiveFlux::validParams()
 {
-  InputParameters pars = Kernel::validParams();
+  InputParameters params = Kernel::validParams();
 
-  pars.addRequiredCoupledVar("rho", "density");
-  pars.addRequiredCoupledVar("rho_u", "rho*u");
-  pars.addCoupledVar("rho_v", "rho*v");
-  pars.addCoupledVar("rho_w", "rho*w");
-  pars.addRequiredCoupledVar("enthalpy", "Enthalpy");
+  params.addRequiredCoupledVar("rho", "density");
+  params.addRequiredCoupledVar("rho_u", "rho*u");
+  params.addCoupledVar("rho_v", "rho*v");
+  params.addCoupledVar("rho_w", "rho*w");
+  params.addRequiredCoupledVar("enthalpy", "Enthalpy");
+  params.addClassDescription(
+      "Implements the advection term for the Navier Stokes energy equation.");
 
-  return pars;
+  return params;
 }
 
 TotalEnergyConvectiveFlux::TotalEnergyConvectiveFlux(const InputParameters & parameters)

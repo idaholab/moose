@@ -13,13 +13,13 @@ import unittest
 import logging
 import collections
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, floats, heading, autolink
+from MooseDocs.extensions import core, floats, heading, autolink, modal
 from MooseDocs import base, common
 from MooseDocs.tree import pages, tokens
 logging.basicConfig()
 
 class TestShortcutLink(MooseDocsTestCase):
-    EXTENSIONS = [core, floats, heading, autolink]
+    EXTENSIONS = [core, floats, heading, autolink, modal]
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
@@ -64,16 +64,9 @@ class TestShortcutLink(MooseDocsTestCase):
 
     def testSourceLink(self):
         ast = self.tokenize('[framework/Makefile]')
-        self.assertSize(ast, 2)
+        self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'SourceLink', size=1)
-        self.assertToken(ast(0)(0)(0), 'Link', string='Makefile')
-
-        url = ast(0)(0)(0)['url']
-        self.assertToken(ast(1), 'ModalLink', size=2, bookmark=url[1:])
-        self.assertToken(ast(1)(0), 'ModalLinkTitle', string='/framework/Makefile')
-        self.assertToken(ast(1)(1), 'ModalLinkContent', size=1)
-        self.assertToken(ast(1)(1)(0), 'Code', size=0)
+        self.assertToken(ast(0)(0), 'ModalSourceLink', size=0, src='framework/Makefile')
 
         # If a file is not given, it should fall through to a regular link
         ast = self.tokenize('[not_a_file]')
@@ -81,12 +74,8 @@ class TestShortcutLink(MooseDocsTestCase):
         self.assertToken(ast(0), 'Paragraph', size=1)
         self.assertToken(ast(0)(0), 'ShortcutLink', size=0, key='not_a_file')
 
-        with self.assertLogs(None, level='ERROR') as cm:
-            ast = self.tokenize('[Makefile]')
-        self.assertIn('Multiple files match the supplied filename Makefile', cm.output[0])
-
 class TestLink(MooseDocsTestCase):
-    EXTENSIONS = [core, floats, heading, autolink]
+    EXTENSIONS = [core, floats, heading, autolink, modal]
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
@@ -138,17 +127,10 @@ class TestLink(MooseDocsTestCase):
 
     def testSourceLink(self):
         ast = self.tokenize('[make](framework/Makefile)')
-        self.assertSize(ast, 2)
+        self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'SourceLink', size=1)
-        self.assertToken(ast(0)(0)(0), 'Link', size=1)
-        self.assertToken(ast(0)(0)(0)(0), 'Word', size=0, content='make')
-
-        url = ast(0)(0)(0)['url']
-        self.assertToken(ast(1), 'ModalLink', size=2, bookmark=url[1:])
-        self.assertToken(ast(1)(0), 'ModalLinkTitle', string='/framework/Makefile')
-        self.assertToken(ast(1)(1), 'ModalLinkContent', size=1)
-        self.assertToken(ast(1)(1)(0), 'Code', size=0)
+        self.assertToken(ast(0,0), 'ModalSourceLink', size=1, src='framework/Makefile')
+        self.assertToken(ast(0,0,0), 'Word', size=0, content='make')
 
         # If a file is not given, it should fall through to a regular link
         ast = self.tokenize('[text](not_a_file)')
@@ -158,7 +140,7 @@ class TestLink(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(0), 'Word', size=0, content='text')
 
 class TestAutoLinkRender(MooseDocsTestCase):
-    EXTENSIONS = [core, floats, heading, autolink]
+    EXTENSIONS = [core, floats, heading, autolink, modal]
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
@@ -229,17 +211,17 @@ class TestAutoLinkRender(MooseDocsTestCase):
         link = autolink.AutoLink(None, page='not_a_file.md', optional=True)
 
         res = self.render(link, renderer=base.HTMLRenderer())
-        self.assertHTMLTag(res, 'body', string='_text_')
+        self.assertHTMLTag(res, 'body', string='not_a_file.md')
 
         res = self.render(link, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', string='_text_')
+        self.assertHTMLTag(res, 'div', string='not_a_file.md')
 
         res = self.render(link, renderer=base.RevealRenderer())
-        self.assertHTMLTag(res, 'div', string='_text_')
+        self.assertHTMLTag(res, 'div', string='not_a_file.md')
 
         res = self.render(link, renderer=base.LatexRenderer())
         self.assertSize(res, 1)
-        self.assertLatexString(res(0), '_text_')
+        self.assertLatexString(res(0), 'not_a_file.md')
 
     def testBookmark(self):
         link = autolink.AutoLink(None, page='core.md', bookmark='unordered-nested-lists')
@@ -297,7 +279,7 @@ class TestAutoLinkRender(MooseDocsTestCase):
         self.assertLatexString(res(0), '_text_')
 
 class TestLocalLinkRender(MooseDocsTestCase):
-    EXTENSIONS = [core, floats, heading, autolink]
+    EXTENSIONS = [core, floats, heading, autolink, modal]
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
@@ -335,32 +317,6 @@ class TestLocalLinkRender(MooseDocsTestCase):
         self.assertLatex(res(0), 'Command', 'hyperref')
         self.assertLatexArg(res(0), 0, 'Bracket', 'bookmark')
         self.assertLatexString(res(0)(0), 'heading')
-
-class TestSourceLinkRender(MooseDocsTestCase):
-    EXTENSIONS = [core, floats, heading, autolink]
-
-    def setupContent(self):
-        config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
-        return common.get_content(config, '.md')
-
-    def testMinimalHTML(self):
-        """SourceLink is just a container for other tokens; by itself it does nothing."""
-
-        link = autolink.SourceLink(None)
-        res = self.render(link, renderer=base.HTMLRenderer())
-        self.assertSize(res, 0)
-        res = self.render(link, renderer=base.MaterializeRenderer())
-        self.assertSize(res, 0)
-        res = self.render(link, renderer=base.RevealRenderer())
-        self.assertSize(res, 0)
-
-    def testMinimalLatex(self):
-        """The link and floats stuff is dropped by the LaTeX renderer"""
-        link = autolink.SourceLink(None)
-        core.Link(link, string='Content', url='something')
-        res = self.render(link, renderer=base.LatexRenderer())
-        self.assertSize(res, 1)
-        self.assertLatexString(res(0), 'Content')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=False)

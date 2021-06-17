@@ -54,13 +54,12 @@
   [./temp_fuel_avg]
     type = ElementAverageValue
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
   [./pwr_density]
     type = ElementIntegralVariablePostprocessor
     block = '0'
     variable = power_density
-    execute_on = 'transfer initial timestep_end'
+    execute_on = 'transfer'
   [../]
 []
 

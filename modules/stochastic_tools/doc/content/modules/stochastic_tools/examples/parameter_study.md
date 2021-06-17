@@ -72,10 +72,9 @@ for each of the uncertain parameters ($T_0$, $q_0$, $\gamma$, and $s$) to be def
 example, the diffusivity ($\gamma$) is defined by a uniform distribution, the flux ($q_0$) by
 a three-parameter Weibull, and $T_0$ and $s$ a normal distribution.
 
-The [Samplers](syntax/Samplers/index.md) block defines how the distributions shall be sampled for
-the parameter study. In this case a Latin hypercube sampling strategy is employed, where each
-distribution is sampled over the complete range with ten bins each. A total of 500 samples are
-being used.
+The [Samplers](syntax/Samplers/index.md) block defines how the distributions shall be sampled for the
+parameter study. In this case a Latin hypercube sampling strategy is employed. A total of 5000 samples
+are being used.
 
 !listing examples/parameter_study/master.i block=Samplers
 
@@ -160,7 +159,7 @@ using the comma separated files.
 
 ## Stochastic Results id=results
 
-### Quantity of Interest Distribtions
+### Quantity of Interest Distributions
 
 The resulting distributions are for the quantities of interest: $T_{avg}$ and $q_{left}$ are presented
 in [results_T_avg] and [results_q_left].
@@ -186,14 +185,14 @@ in [results_T_avg] and [results_q_left].
 by the VectorPostprocessor object for the example heat conduction problem with 5000 samples. The
 results of which can be written as:
 
-$\overline{T}_{avg} = -22.52,\,95\%\, CI[-22.76, -22.29]$
+$\overline{T}_{avg} = -22.69,\,95\%\, CI[-22.92, -22.46]$
 
-$\overline{q}_{left} = -66.65,\,95\%\, CI[-66.34, -65.97]$
+$\overline{q}_{left} = -67.11,\,95\%\, CI[-67.78, -66.44]$
 
 !listing id=stats
          caption=Resulting statistics and confidence level intervals for the computed quantities
                  of interest.
-stat_type,results_results:T_avg,results_results:q_left
-3,-22.524612297114,-66.65304703336
-3.05,-22.757770795825,-67.338628188985
-3.95,-22.294482681111,-65.972800237941
+results_results:T_avg,results_results:q_left,stat_type
+-22.689650670305,-67.109783446031,3
+-22.916544124128,-67.782251379634,3.05
+-22.461848597339,-66.436882255796,3.95

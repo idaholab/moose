@@ -408,8 +408,11 @@ class TestContentOutline(MooseDocsTestCase):
 class testContentPagination(MooseDocsTestCase):
     EXTENSIONS = [extensions.core, extensions.command, extensions.heading, extensions.content,
                   extensions.materialicon, extensions.config]
-    PREV = 'materialicon.md'; NEXT = 'config.md'
-    TEXT = ('!content pagination previous=' + PREV + ' next=' + NEXT + '\n\n'
+    PREV = 'materialicon.md'
+    NEXT = 'config.md'
+    MARGINS = [['10.2%', '-2pt'], ['24px', '24px']] # second test uses default '24px' margins
+    TEXT = ('!content pagination previous=' + PREV + ' next=' + NEXT
+            + ' margin-top=' + MARGINS[0][0] + ' margin-bottom=' + MARGINS[0][1] + '\n\n'
             '!content pagination previous=' + PREV + ' next=' + NEXT + ' use_title=True')
 
     def setupContent(self):
@@ -426,8 +429,10 @@ class testContentPagination(MooseDocsTestCase):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 2)
         tok = 'PaginationToken'
-        self.assertToken(ast(0), tok, previous=self.PREV, next=self.NEXT, use_title=False)
-        self.assertToken(ast(1), tok, previous=self.PREV, next=self.NEXT, use_title=True)
+        self.assertToken(ast(0), tok, previous=self.PREV, next=self.NEXT, use_title=False,
+                         margins=self.MARGINS[0])
+        self.assertToken(ast(1), tok, previous=self.PREV, next=self.NEXT, use_title=True,
+                         margins=self.MARGINS[1])
 
     def testHTML(self):
         _, res = self.execute(self.TEXT)
@@ -436,13 +441,15 @@ class testContentPagination(MooseDocsTestCase):
         prev = 'extensions/' + self.PREV[:-2] + 'html'
         next = 'extensions/' + self.NEXT[:-2] + 'html'
 
-        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination',
+                           style='margin-top:{};margin-bottom:{};'.format(*self.MARGINS[0]))
         self.assertHTMLTag(res(0)(0), 'a', size=1, class_='moose-content-previous', href=prev)
         self.assertHTMLString(res(0)(0)(0), content='Previous')
         self.assertHTMLTag(res(0)(1), 'a', size=1, class_='moose-content-next', href=next)
         self.assertHTMLString(res(0)(1)(0), content='Next')
 
-        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination',
+                           style='margin-top:{};margin-bottom:{};'.format(*self.MARGINS[1]))
         self.assertHTMLTag(res(1)(0), 'a', size=1, class_='moose-content-previous', href=prev)
         self.assertHTMLString(res(1)(0)(0), content='Material Icon')
         self.assertHTMLTag(res(1)(1), 'a', size=1, class_='moose-content-next', href=next)
@@ -455,7 +462,8 @@ class testContentPagination(MooseDocsTestCase):
         prev = 'extensions/' + self.PREV[:-2] + 'html'
         next = 'extensions/' + self.NEXT[:-2] + 'html'
 
-        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination',
+                           style='margin-top:{};margin-bottom:{};'.format(*self.MARGINS[0]))
         self.assertHTMLTag(res(0)(0), 'a', size=2, class_='moose-content-previous btn', href=prev)
         self.assertHTMLString(res(0)(0)(0), content='Previous')
         self.assertHTMLTag(res(0)(0)(1), 'i', size=1, class_='material-icons left')
@@ -465,7 +473,8 @@ class testContentPagination(MooseDocsTestCase):
         self.assertHTMLTag(res(0)(1)(1), 'i', size=1, class_='material-icons right')
         self.assertHTMLString(res(0)(1)(1)(0), content='arrow_forward')
 
-        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination',
+                           style='margin-top:{};margin-bottom:{};'.format(*self.MARGINS[1]))
         self.assertHTMLTag(res(1)(0), 'a', size=2, class_='moose-content-previous btn', href=prev)
         self.assertHTMLString(res(1)(0)(0), content='Material Icon')
         self.assertHTMLTag(res(1)(0)(1), 'i', size=1, class_='material-icons left')

@@ -14,6 +14,14 @@
       detail = "using a inverse distance algorithm,"
     []
 
+    [test_constant_monomial]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'constant_monomial.e'
+      cli_args = 'AuxVariables/from_sub/order=CONSTANT AuxVariables/from_sub/family=MONOMIAL Outputs/file_base=constant_monomial'
+      detail = "if the destination variable is CONSTANT MONOMIAL,"
+    []
+
     [radial_basis]
       type = 'Exodiff'
       input = 'radial_master.i'
@@ -53,11 +61,20 @@
   [test_error]
     type = 'RunException'
     input = 'master.i'
-    expect_err = 'Unable to find variable \w+ in any system'
+    expect_err = 'Unknown variable \w+'
     cli_args = 'Transfers/pp_transfer/variable=invalid Outputs/exodus=false Outputs/active='
     prereq = basis/test
 
     requirement = "The system shall report an error if a data transfer is requested for a data "
                   "variable that is not defined."
+  []
+
+  [fetype_error]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = 'Must be either CONSTANT MONOMIAL or FIRST LAGRANGE'
+    prereq = basis/test
+    cli_args = 'AuxVariables/from_sub/order=FIRST AuxVariables/from_sub/family=MONOMIAL Outputs/exodus=false'
+    requirement = "The system shall report an error if a variable is specified that is not LINEAR LAGRANGE or CONSTANT MONOMIAL"
   []
 []

@@ -1,0 +1,192 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "const": {
+                    "info": {
+                        "name": "const",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "int",
+                            "type": "std::vector<int>",
+                            "value": [
+                                100,
+                                200,
+                                300,
+                                400,
+                                500
+                            ]
+                        },
+                        {
+                            "name": "real",
+                            "type": "std::vector<double>",
+                            "value": [
+                                2.0,
+                                4.0,
+                                6.0,
+                                8.0,
+                                10.0
+                            ]
+                        }
+                    ]
+                },
+                "stats": {
+                    "info": {
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "const_int_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                500.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                300.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                100.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                741.6198487095663,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                5.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                158.11388300841898,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                70.71067811865476,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_int_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1500.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                10.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                2.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                14.832396974191326,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                5.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.1622776601683795,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.4142135623730951,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_real_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                30.0,
+                                []
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

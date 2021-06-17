@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#16842'
+  design = "Samplers/index.md SamplerFullSolveMultiApp.md"
+  [error]
+    type = RunException
+    input = main.i
+    allow_test_objects = true
+    expect_err = "The size of the sampler has changed; SamplerTransientMultiApp object do not support dynamic Sampler output."
+
+    requirement = "The system shall error when the size of a sampler is altered an sub-applications are progressing with time with the main application."
+  []
+[]

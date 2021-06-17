@@ -1,0 +1,99 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "sideset_elems",
+                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
+                            "value": null
+                        }
+                    ]
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "sideset_elems",
+                            "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >",
+                            "value": [
+                                {
+                                    "id": 0,
+                                    "name": "new_bottom",
+                                    "sides": [
+                                        {
+                                            "elem_id": 0,
+                                            "side": 0
+                                        },
+                                        {
+                                            "elem_id": 1,
+                                            "side": 0
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": 1,
+                                    "name": "new_right",
+                                    "sides": [
+                                        {
+                                            "elem_id": 1,
+                                            "side": 1
+                                        },
+                                        {
+                                            "elem_id": 3,
+                                            "side": 1
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": 2,
+                                    "name": "top",
+                                    "sides": [
+                                        {
+                                            "elem_id": 2,
+                                            "side": 2
+                                        },
+                                        {
+                                            "elem_id": 3,
+                                            "side": 2
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": 3,
+                                    "name": "left",
+                                    "sides": [
+                                        {
+                                            "elem_id": 0,
+                                            "side": 3
+                                        },
+                                        {
+                                            "elem_id": 2,
+                                            "side": 3
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

@@ -78,12 +78,6 @@
 
   end_time = 0.1
   dt = 0.02
-  # picard_max_its = 5
-  # accept_on_max_picard_iteration = true
-  # nl_rel_tol = 1e-8
-  # nl_abs_tol = 1e-9
-  # picard_rel_tol = 1e-3
-  # picard_abs_tol = 1e-7
 []
 
 

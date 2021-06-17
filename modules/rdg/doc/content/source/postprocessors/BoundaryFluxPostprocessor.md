@@ -1,3 +1,5 @@
+# BoundaryFluxPostprocessor
+
 !syntax description /Postprocessors/BoundaryFluxPostprocessor
 
 This post-processor is used to query flux vectors that are computed via

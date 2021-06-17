@@ -47,17 +47,17 @@
 
 [Transfers]
   [results]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = runner
     sampler = sample
-    to_vector_postprocessor = trainer_results
-    from_postprocessor = 'time_max time_min'
+    stochastic_reporter = trainer_results
+    from_reporter = 'time_max/value time_min/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [trainer_results]
-    type = StochasticResults
+    type = StochasticReporter
   []
 []
 
@@ -68,8 +68,7 @@
     order = 5
     distributions = 'C_dist f_dist init_dist'
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_max
+    response = trainer_results/results:time_max:value
   []
   [pc_min]
     type = PolynomialChaosTrainer
@@ -77,22 +76,19 @@
     order = 5
     distributions = 'C_dist f_dist init_dist'
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_min
+    response = trainer_results/results:time_min:value
   []
   [np_max]
     type = NearestPointTrainer
     execute_on = final
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_max
+    response = trainer_results/results:time_max:value
   []
   [np_min]
     type = NearestPointTrainer
     execute_on = final
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_min
+    response = trainer_results/results:time_min:value
   []
   [pr_max]
     type = PolynomialRegressionTrainer
@@ -100,8 +96,7 @@
     execute_on = final
     max_degree = 4
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_max
+    response = trainer_results/results:time_max:value
   []
   [pr_min]
     type = PolynomialRegressionTrainer
@@ -109,8 +104,7 @@
     execute_on = final
     max_degree = 4
     sampler = sample
-    results_vpp = trainer_results
-    results_vector = results:time_min
+    response = trainer_results/results:time_min:value
   []
 []
 

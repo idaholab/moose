@@ -1,4 +1,4 @@
-#In order to compare the solution generated using PresetBC, the penalty was set to 1e10.
+#In order to compare the solution generated using preset Dirichlet BC, the penalty was set to 1e10.
 #Large penalty number should be used with caution.
 
 [Mesh]

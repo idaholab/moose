@@ -144,4 +144,16 @@ getSubdomainIDs(const libMesh::MeshBase & mesh, const std::vector<SubdomainName>
 
   return ids;
 }
+
+BoundaryID
+getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
+{
+  BoundaryID id = Moose::INVALID_BOUNDARY_ID;
+  std::istringstream ss(boundary_name);
+
+  if (!(ss >> id))
+    id = mesh.get_boundary_info().get_id_by_name(boundary_name);
+
+  return id;
+}
 }

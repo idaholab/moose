@@ -181,7 +181,13 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
+        {
+#ifndef MOOSE_SPARSE_AD
+          mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                      "Out of bounds access in derivative vector.");
+#endif
           _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
+        }
 
       accumulateTaggedLocalMatrix();
     };
@@ -223,19 +229,20 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 }
 
 void
-ADDGKernel::computeOffDiagJacobian(unsigned int jvar)
+ADDGKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   // AD only needs to do one computation for one variable because it does the derivatives all at
   // once
-  if (!excludeBoundary() && jvar == _var.number())
+  if (!excludeBoundary() && jvar_num == _var.number())
   {
+    const auto & jvar = getVariable(jvar_num);
     computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
     computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
   }
 }
 
 void
-ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int)
+ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, const MooseVariableFEBase &)
 {
   mooseAssert(type == Moose::ElementElement || type == Moose::NeighborNeighbor,
               "With AD you should need one call per side");
@@ -285,7 +292,13 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned
 
         for (_i = 0; _i < test_space.size(); _i++)
           for (_j = 0; _j < loc_phi.size(); _j++)
+          {
+#ifndef MOOSE_SPARSE_AD
+            mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                        "Out of bounds access in derivative vector.");
+#endif
             _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
+          }
 
         accumulateTaggedLocalMatrix();
       };

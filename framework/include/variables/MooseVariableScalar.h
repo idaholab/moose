@@ -45,89 +45,24 @@ public:
    */
   void reinit(bool reinit_for_derivative_reordering = false);
 
-  //
-  VariableValue & sln() { return _u; }
+  const VariableValue & sln() const { return _u; }
 
   /**
    * Return the solution with derivative information
    */
   const ADVariableValue & adSln() const;
 
-  VariableValue & slnOld() { return _u_old; }
-  VariableValue & slnOlder() { return _u_older; }
-  VariableValue & vectorTagSln(TagID tag)
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
-  VariableValue & matrixTagSln(TagID tag)
-  {
-    _need_matrix_tag_u[tag] = true;
-    return _matrix_tag_u[tag];
-  }
+  const VariableValue & slnOld() const;
+  const VariableValue & slnOlder() const;
+  const VariableValue & vectorTagSln(TagID tag) const;
+  const VariableValue & matrixTagSln(TagID tag) const;
 
-  VariableValue & uDot()
-  {
-    if (_sys.solutionUDot())
-    {
-      _need_u_dot = true;
-      return _u_dot;
-    }
-    else
-      mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
-                 "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
-  }
-
-  VariableValue & uDotDot()
-  {
-    if (_sys.solutionUDotDot())
-    {
-      _need_u_dotdot = true;
-      return _u_dotdot;
-    }
-    else
-      mooseError("MooseVariableScalar: Second time derivative of solution (`u_dotdot`) is not "
-                 "stored. Please set uDotDotRequested() to true in FEProblemBase before requesting "
-                 "`u_dotdot`.");
-  }
-
-  VariableValue & uDotOld()
-  {
-    if (_sys.solutionUDotOld())
-    {
-      _need_u_dot_old = true;
-      return _u_dot_old;
-    }
-    else
-      mooseError("MooseVariableScalar: Old time derivative of solution (`u_dot_old`) is not "
-                 "stored. Please set uDotOldRequested() to true in FEProblemBase before requesting "
-                 "`u_dot_old`.");
-  }
-
-  VariableValue & uDotDotOld()
-  {
-    if (_sys.solutionUDotDotOld())
-    {
-      _need_u_dotdot_old = true;
-      return _u_dotdot_old;
-    }
-    else
-      mooseError("MooseVariableScalar: Old second time derivative of solution (`u_dotdot_old`) is "
-                 "not stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
-                 "requesting `u_dotdot_old`.");
-  }
-
-  VariableValue & duDotDu()
-  {
-    _need_du_dot_du = true;
-    return _du_dot_du;
-  }
-
-  VariableValue & duDotDotDu()
-  {
-    _need_du_dotdot_du = true;
-    return _du_dotdot_du;
-  }
+  const VariableValue & uDot() const;
+  const VariableValue & uDotDot() const;
+  const VariableValue & uDotOld() const;
+  const VariableValue & uDotDotOld() const;
+  const VariableValue & duDotDu() const;
+  const VariableValue & duDotDotDu() const;
 
   /**
    * Set the nodal value for this variable (to keep everything up to date
@@ -141,6 +76,12 @@ public:
 
   void insert(NumericVector<Number> & soln);
 
+  /**
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
+   */
+  unsigned int oldestSolutionStateRequested() const;
+
 protected:
   /// The value of scalar variable
   VariableValue _u;
@@ -151,11 +92,11 @@ protected:
   /// Tagged vectors
   std::vector<VariableValue> _vector_tag_u;
   /// Only cache data when need it
-  std::vector<bool> _need_vector_tag_u;
+  mutable std::vector<bool> _need_vector_tag_u;
   /// Tagged matrices
   std::vector<VariableValue> _matrix_tag_u;
   /// Only cache data when need it
-  std::vector<bool> _need_matrix_tag_u;
+  mutable std::vector<bool> _need_matrix_tag_u;
 
   VariableValue _u_dot;
   VariableValue _u_dotdot;
@@ -164,12 +105,17 @@ protected:
   VariableValue _du_dot_du;
   VariableValue _du_dotdot_du;
 
-  bool _need_u_dot;
-  bool _need_u_dotdot;
-  bool _need_u_dot_old;
-  bool _need_u_dotdot_old;
-  bool _need_du_dot_du;
-  bool _need_du_dotdot_du;
+  mutable bool _need_u_dot;
+  mutable bool _need_u_dotdot;
+  mutable bool _need_u_dot_old;
+  mutable bool _need_u_dotdot_old;
+  mutable bool _need_du_dot_du;
+  mutable bool _need_du_dotdot_du;
+
+  /// Whether or not the old solution is needed
+  mutable bool _need_u_old;
+  /// Whether or not the older solution is needed
+  mutable bool _need_u_older;
 
   /// Whether any dual number calculations are needed
   mutable bool _need_dual;

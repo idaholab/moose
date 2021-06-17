@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'hierarchical_grid_partitioner.i'
+    exodiff = 'hierarchical_grid_partitioner_out.e'
+
+    requirement = "MOOSE shall have the ability to do hierarchical partitioning based on a regular grid."
+    design = 'HierarchicalGridPartitioner.md'
+    issues = '#12531'
+
+    min_parallel = 16
+    max_parallel = 16
+  [../]
+[]

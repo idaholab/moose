@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#15232'
+  design = 'examples_and_tutorials/tutorial01_app_development/step08_test_harness.md'
+  [test]
+    type = Exodiff
+    input = darcy_pressure_test.i
+    exodiff = darcy_pressure_test_out.e
+    requirement = "The system shall include a tutorial that introduces the ability to compute residual contributions for the pressure term of Darcy's equation."
+  []
+  [zero_viscosity_error]
+    type = RunException
+    input = zero_viscosity_error.i
+    expect_err = "The viscosity must be a non-zero real number."
+    requirement = "The system shall include a tutorial that reports an error message when the viscosity term in Darcy's equation is zero."
+  []
+[]

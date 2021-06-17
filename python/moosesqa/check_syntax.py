@@ -16,20 +16,23 @@ from .LogHelper import LogHelper
 
 def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_prefix='', allow_test_objects=False, **kwargs):
 
-    kwargs.setdefault('log_stub_files', logging.ERROR)
-    kwargs.setdefault('log_duplicate_files', logging.ERROR)
-    kwargs.setdefault('log_missing_description', logging.ERROR)
-    kwargs.setdefault('log_missing_markdown', logging.ERROR)
-    kwargs.setdefault('log_duplicate_files', logging.ERROR)
+    log_default = kwargs.get('log_default', logging.ERROR)
+    kwargs.setdefault('log_stub_files', log_default)
+    kwargs.setdefault('log_duplicate_files', log_default)
+    kwargs.setdefault('log_missing_description', log_default)
+    kwargs.setdefault('log_missing_markdown', log_default)
+    kwargs.setdefault('log_duplicate_files', log_default)
     logger = LogHelper(__name__, **kwargs)
 
     for node in app_syntax.descendants:
         # SyntaxNode objects must registered to all the desired app types
-        # Action/MooseObjects and the syntax they are attached must be registered to the desired type
+        # ActionNode objects and the syntax they belong must be registered to the desired type
+        # MooseObjects must be registered to the desired type
         # Action/MoosdObjects must not be tests, unless allowed
-        if (isinstance(node, moosesyntax.SyntaxNode) and set(app_types) == node.groups()) \
-           or (isinstance(node, moosesyntax.ObjectNodeBase) and is_app_type(node, app_types) and is_app_type(node.parent, app_types)) \
-           and (allow_test_objects or not node.test):
+        if ((isinstance(node, moosesyntax.SyntaxNode) and set(app_types) == node.groups()) \
+            or (isinstance(node, moosesyntax.ActionNode) and is_app_type(node, app_types)) and is_app_type(node.parent, app_types) \
+            or (isinstance(node, moosesyntax.MooseObjectNode) and is_app_type(node, app_types))) \
+            and (allow_test_objects or not node.test):
             _check_node(node, file_cache, object_prefix, syntax_prefix, logger)
 
     return logger
@@ -52,7 +55,7 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     md_path = os.path.join(prefix, node.markdown)
     md_file = find_md_file(md_path, file_cache, logger)
     is_missing_description = is_object and (not node.description) and (not node.removed)
-    is_missing = (md_file is None) and (not node.removed)
+    is_missing = ((md_file is None) or (not os.path.isfile(md_file))) and (not node.removed)
     is_stub = file_is_stub(md_file) if (not is_missing) and (not node.removed) else False
 
     # ERROR: object is stub
@@ -114,5 +117,8 @@ def file_is_stub(filename):
         return True
     # Current alert method
     elif '!alert! construction title=Undocumented' in content:
+        return True
+    # Even more current alert method
+    elif '!alert construction title=Undocumented' in content:
         return True
     return False

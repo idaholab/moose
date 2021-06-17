@@ -22,8 +22,14 @@
 #ifdef FLUID_PROPERTIES_ENABLED
 #include "FluidPropertiesApp.h"
 #endif
+#ifdef FSI_ENABLED
+#include "FsiApp.h"
+#endif
 #ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
 #include "FunctionalExpansionToolsApp.h"
+#endif
+#ifdef GEOCHEMISTRY_ENABLED
+#include "GeochemistryApp.h"
 #endif
 #ifdef HEAT_CONDUCTION_ENABLED
 #include "HeatConductionApp.h"
@@ -45,6 +51,9 @@
 #endif
 #ifdef POROUS_FLOW_ENABLED
 #include "PorousFlowApp.h"
+#endif
+#ifdef RAY_TRACING_ENABLED
+#include "RayTracingApp.h"
 #endif
 #ifdef RDG_ENABLED
 #include "RdgApp.h"
@@ -148,6 +157,10 @@ ModulesApp::registerObjects(Factory & factory)
   PorousFlowApp::registerObjects(factory);
 #endif
 
+#ifdef RAY_TRACING_ENABLED
+  RayTracingApp::registerObjects(factory);
+#endif
+
 #ifdef RDG_ENABLED
   RdgApp::registerObjects(factory);
 #endif
@@ -219,6 +232,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   PorousFlowApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef RAY_TRACING_ENABLED
+  RayTracingApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef RDG_ENABLED
   RdgApp::associateSyntax(syntax, action_factory);
 #endif
@@ -286,6 +303,10 @@ ModulesApp::registerExecFlags(Factory & factory)
   PorousFlowApp::registerExecFlags(factory);
 #endif
 
+#ifdef RAY_TRACING_ENABLED
+  RayTracingApp::registerExecFlags(factory);
+#endif
+
 #ifdef RDG_ENABLED
   RdgApp::registerExecFlags(factory);
 #endif
@@ -324,6 +345,14 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   FluidPropertiesApp::registerAll(f, af, s);
 #endif
 
+#ifdef FSI_ENABLED
+  FsiApp::registerAll(f, af, s);
+#endif
+
+#ifdef GEOCHEMISTRY_ENABLED
+  GeochemistryApp::registerAll(f, af, s);
+#endif
+
 #ifdef HEAT_CONDUCTION_ENABLED
   HeatConductionApp::registerAll(f, af, s);
 #endif
@@ -350,6 +379,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef POROUS_FLOW_ENABLED
   PorousFlowApp::registerAll(f, af, s);
+#endif
+
+#ifdef RAY_TRACING_ENABLED
+  RayTracingApp::registerAll(f, af, s);
 #endif
 
 #ifdef RDG_ENABLED

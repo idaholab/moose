@@ -38,14 +38,14 @@
     [last_computed]
       type = CSVDiff
       input = cartesian_diverge.i
-      csvdiff = 'cartesian_diverge_out_storage_0001.csv'
+      csvdiff = 'cartesian_diverge_out_storage_0001.csv cartesian_diverge_out_storage_0002.csv'
 
       detail = "transfer last computed postprocessor value, "
     []
     [nan]
       type = CheckFiles
       input = cartesian_diverge.i
-      cli_args = 'Transfers/data/keep_solve_fail_value=false 
+      cli_args = 'Transfers/data/keep_solve_fail_value=false
                   Outputs/file_base=cartesian_diverge_nan'
       check_files = 'cartesian_diverge_nan_storage_0001.csv'
       file_expect_out = 'data:avg\nnan\n0\.269307.*\n0\.269307.*\n0\.269307.*\n0\.269307.*\n'

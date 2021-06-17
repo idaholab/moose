@@ -1,0 +1,30 @@
+[Tests]
+  [dim]
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+    requirement = 'The system shall support the use of side normals to cull potential exiting sides within ray tracing for '
+    [2d]
+      type = 'CSVDiff'
+      input = 'backface_culling.i'
+      csvdiff = 'backface_culling_2d_out.csv'
+      abs_zero = 1e-8
+      cli_args = 'Mesh/gmg/dim=2
+                  RayBCs/active=kill_2d
+                  Outputs/file_base=backface_culling_2d_out'
+      allow_test_objects = true
+      detail = 'two-dimensional meshes '
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'backface_culling.i'
+      csvdiff = 'backface_culling_3d_out.csv'
+      abs_zero = 1e-8
+      cli_args = 'Mesh/gmg/dim=3
+                  RayBCs/active=kill_3d
+                  Outputs/file_base=backface_culling_3d_out
+                  UserObjects/study/edge_to_edge=true'
+      allow_test_objects = true
+      detail = 'and for three-dimensional meshes.'
+    []
+  []
+[]

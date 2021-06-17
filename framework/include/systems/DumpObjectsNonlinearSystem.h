@@ -38,9 +38,6 @@ public:
   virtual void attachPreconditioner(Preconditioner<Number> * /* preconditioner */) override {}
 
 protected:
-  NumericVector<Number> & solutionOldInternal() const override { return *_dummy; }
-  NumericVector<Number> & solutionOlderInternal() const override { return *_dummy; }
-
   void computeScalingJacobian() override {}
   void computeScalingResidual() override {}
 

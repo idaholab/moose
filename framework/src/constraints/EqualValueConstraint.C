@@ -10,6 +10,7 @@
 #include "EqualValueConstraint.h"
 #include "SubProblem.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 registerMooseObject("MooseApp", EqualValueConstraint);
 
@@ -30,6 +31,8 @@ EqualValueConstraint::validParams()
 
 EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
   : ADMortarConstraint(parameters),
+    _lower_secondary_volume(_assembly.lowerDElemVolume()),
+    _lower_primary_volume(_assembly.neighborLowerDElemVolume()),
     _delta(getParam<Real>("delta")),
     _diff_secondary(getADMaterialProperty<Real>("diff_secondary")),
     _diff_primary(getADMaterialProperty<Real>("diff_primary")),

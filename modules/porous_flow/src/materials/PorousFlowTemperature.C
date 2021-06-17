@@ -15,7 +15,10 @@ InputParameters
 PorousFlowTemperature::validParams()
 {
   InputParameters params = PorousFlowMaterial::validParams();
-  params.addCoupledVar("temperature", 20.0, "Fluid temperature variable");
+  params.addCoupledVar("temperature",
+                       293.0,
+                       "Fluid temperature variable.  Note, the default is suitable if your "
+                       "simulation is using Kelvin units, but probably not for Celsius");
   params.addPrivateParam<std::string>("pf_material_type", "temperature");
   params.addClassDescription("Material to provide temperature at the quadpoints or nodes and "
                              "derivatives of it with respect to the PorousFlow variables");

@@ -42,9 +42,6 @@
   youngs_modulus = 206.8e+3 #MPa
   poissons_ratio = 0.3
   block = 1
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
   incremental = true
 []
 

@@ -39,17 +39,6 @@ SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params)
 {
 }
 
-bool
-SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
-{
-  bool prepared = mesh->prepared();
-
-  if (!prepared)
-    mesh->prepare();
-
-  return prepared;
-}
-
 void
 SetupMeshCompleteAction::act()
 {
@@ -82,6 +71,10 @@ SetupMeshCompleteAction::act()
 
       if (_mesh->uniformRefineLevel())
       {
+        if (_mesh->meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
+            _mesh->meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+          mooseError("HFEM does not support mesh uniform refinement currently.");
+
         Adaptivity::uniformRefine(_mesh.get());
         // After refinement we need to make sure that all of our MOOSE-specific containers are
         // up-to-date
@@ -116,9 +109,9 @@ SetupMeshCompleteAction::act()
   else
   {
     // Prepare the mesh (may occur multiple times)
-    completeSetup(_mesh.get());
+    _mesh->prepare();
 
     if (_displaced_mesh)
-      completeSetup(_displaced_mesh.get());
+      _displaced_mesh->prepare();
   }
 }

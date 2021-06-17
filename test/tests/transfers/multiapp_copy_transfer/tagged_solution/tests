@@ -1,0 +1,11 @@
+[Tests]
+  [transfer]
+    issues = '#17586'
+    design = 'MultiAppCopyTransfer.md'
+    requirement = "The system shall support the transfer of field variables with solution vectors indicated by tags."
+    type = Exodiff
+    input = main.i
+    exodiff = 'main_out_sub0.e'
+    recover = false
+  []
+[]

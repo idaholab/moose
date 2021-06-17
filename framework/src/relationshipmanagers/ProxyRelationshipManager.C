@@ -108,7 +108,7 @@ ProxyRelationshipManager::getInfo() const
 }
 
 bool
-ProxyRelationshipManager::operator==(const RelationshipManager & /*rhs*/) const
+ProxyRelationshipManager::operator>=(const RelationshipManager & /*rhs*/) const
 {
   // There isn't a need to determine these because only the correct ones will be added
   return false;

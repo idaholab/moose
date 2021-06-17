@@ -1,0 +1,41 @@
+# {{app}} Software Library List
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](SLL) provides a list of software libraries utilized by {{app}}.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](VVR) for {{app}} is dependent upon the following documents.
+
+!template! field key=dependencies required=False
+!sqa dependencies suffix=sll category={{category}}
+!template-end!
+
+!if! function=hasSubmodule('moose')
+## MOOSE
+
+{{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is
+summarized in the follwoing abstract [!cite](permann2020moose).
+
+> Harnessing modern parallel computing resources to achieve complex multiphysics simulations is a
+> daunting task. The Multiphysics Object Oriented Simulation Environment (MOOSE) aims to enable such
+> development by providing simplified interfaces for specification of partial differential equations,
+> boundary conditions, material properties, and all aspects of a simulation without the need to
+> consider the parallel, adaptive, nonlinear, finite element solve that is handled internally. Through
+> the use of interfaces and inheritance, each portion of a simulation becomes reusable and composable
+> in a manner that allows disparate research groups to share code and create an ecosystem of growing
+> capability that lowers the barrier for the creation of multiphysics simulation codes. Included within
+> the framework is a unique capability for building multiscale, multiphysics simulations through
+> simultaneous execution of multiple sub-applications with data transfers between the scales. Other
+> capabilities include automatic differentiation, scaling to a large number of processors, hybrid
+> parallelism, and mesh adaptivity. To date, MOOSE-based applications have been created in areas of
+> science and engineering such as nuclear physics, geothermal science, magneto-hydrodynamics, seismic
+> events, compressible and incompressible fluid flow, microstructure evolution, and advanced
+> manufacturing processes.
+
+Current Version of [!ac](MOOSE): [!git!submodule-hash url=https://github.com/idaholab/moose/commit](moose)
+!if-end!

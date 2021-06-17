@@ -44,15 +44,33 @@ public:
   ///@}
 
   /**
-   * Method for keeping track of the global MultiApp index when running in batch mode.
+   * Method for setting the app index when running in batch mode.
    *
    * See StochasticTools<FullSolve/Transient>MultiApp
    */
-  void setGlobalMultiAppIndex(dof_id_type index) { _global_index = index; }
+  void setGlobalMultiAppIndex(dof_id_type index) { _app_index = index; }
+
+  /**
+   * Method for keeping track of the global row index when running in batch mode.
+   *
+   * See StochasticTools<FullSolve/Transient>MultiApp
+   */
+  void setGlobalRowIndex(dof_id_type row) { _global_index = row; }
+
+  /**
+   * Method for keeping track of the row data when running in batch mode.
+   *
+   * See StochasticTools<FullSolve/Transient>MultiApp
+   */
+  void setCurrentRow(const std::vector<Real> & row) { _row_data = row; }
 
 protected:
-  /// Index for tracking the global index when using batch mode operation
+  /// Index for the sub-app that the batch-mode multiapp is working on
+  dof_id_type _app_index = 0;
+  /// Index for tracking the row index when using batch mode operation
   dof_id_type _global_index = 0;
+  /// The current row of data (comes from multiapp)
+  std::vector<Real> _row_data;
 
   /// Pointer to the Sampler object used by the SamplerTransientMultiApp or SamplerFullSolveMultiApp
   Sampler * _sampler_ptr;

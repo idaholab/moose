@@ -2,10 +2,6 @@
 
 ## Requirements
 
-!sqa requirements link-design=False category=MooseDocs
-
-!sqa requirements link-design=False category=chigger
-
 !sqa requirements link-design=False category=demo
 
 ## Verification and Validation
@@ -18,9 +14,14 @@
 
 !sqa cross-reference category=demo
 
+## Collections
 
-## Custom Matrix
+### Specific Collection
 
-!sqa requirements-matrix prefix=Z
-- Item One
-- Item Two
+!sqa requirements collections=Andrew category=demo
+
+## Types
+
+### Specific Type
+
+!sqa requirements category=demo types=TestType

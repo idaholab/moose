@@ -1,6 +1,6 @@
 # Kinetically-controlled dissolution of albite into an acidic solution
 
-Section 16.4 of [!cite](bethke_2007) describes the gradual dissolution of albite into an acide solution, as governed by a kinetic rate law.  The reaction is
+Section 16.4 of [!cite](bethke_2007) describes the gradual dissolution of albite into an acidic solution, as governed by a kinetic rate law.  The reaction is
 \begin{equation}
 \mathrm{Albite} \rightarrow 2\mathrm{H}_{2}\mathrm{O} + \mathrm{Na}^{+} + \mathrm{Al}^{3+} + 3\mathrm{SiO}_{2}\mathrm{(aq)} - 4\mathrm{H}^{+} \ ,
 \end{equation}
@@ -26,15 +26,15 @@ It is assumed that:
 
 The MOOSE input file defines the model using the [GeochemicalModelDefinition](GeochemicalModelDefinition.md).  This defines the basis species as well as defining that the dynamics of the mineral `Albite` will be controlled by a kinetic rate law.
 
-!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[./definition] end=[]
+!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[definition] end=[]
 
 The rate law for Albite is defined by a [GeochemistryKineticRate](GeochemistryKineticRate.md) UserObject (note the `promoting_species`):
 
-!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[./rate_albite] end=[./definition]
+!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[rate_albite] end=[definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines the following.
 
-- The initial concentration of the species (see warning below)
+- The initial concentration of the species (see note below)
 - The initial mole number for Albite
 - That the system is closed at time zero (by default) so the `free_molality` constraints becomes inactive (no SiO$_{2}$(aq) or Al$^{3+}$ are added or removed from the system by an external agent after this time)
 - The pH, via the `activity` constraint on H$^{+}$.  This constraint is not removed, so this effectively means HCl is continually added or removed from the system to maintain the pH (remember Cl$^{-}$ is the charge-balance species)
@@ -42,8 +42,8 @@ The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defin
 
 !listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i block=TimeDependentReactionSolver
 
-!alert warning
-The bulk composition for Na+ is 1.053387 moles: this contains 0.1 moles that are part of the aqueous-solution species as well as 0.953387 moles that are bound into the Albite.  This is different than GWB (in which the 0.1 moles only are defined and GWB automatically adds the amount in the Albite).  Key point: the geochemistry module always assumes the bulk composition includes all kinetic contributions.  The other species (H$_{2}$O, Al$^{3+}$, SiO$_{2}$(aq) and H$^{+}$) do not have bulk mole number constraints so they aren't impacted.
+!alert note
+The bulk composition for Na+ is 0.1 moles.  This means there are 0.1 moles in the aqueous solution (some will be free, others will be bound into secondary species such as NaCl).  In addition to this, there is Na+ bound inside the 250g (0.953387 moles) of Albite.  If you wish to define the entire bulk composition (aqueous plus kinetic) you should use the `bulk_composition_with_kinetic` keyword, which would be set to 1.053387 moles in this case.  The other species (H$_{2}$O, Al$^{3+}$, SiO$_{2}$(aq) and H$^{+}$) do not have bulk mole number constraints so they aren't impacted by the Albite.
 
 The `Executioner` defines the time-stepping (time is measured in days in this input file)
 

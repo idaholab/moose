@@ -10,12 +10,11 @@
 #pragma once
 
 #include "Material.h"
-#include "GeometricSearchInterface.h"
 
 // Forward Declarations
 class PenetrationLocator;
 
-class QuadratureLocatorTestMaterial : public Material, public GeometricSearchInterface
+class QuadratureLocatorTestMaterial : public Material
 {
 public:
   static InputParameters validParams();

@@ -133,10 +133,61 @@
     csvdiff = 'fully_saturated_grav01c.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    skip = "#12505"
+    max_parallel = 1
     requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero: for single-phase fully-saturated, single-phase partially-saturated, two-phase PP formulations, and two-phase PS formulations"
-    issues = '#6845 #7677 #8073 #8585 #8574 #9537'
+    issues = '#6845 #7677 #8073 #8585 #8574 #9537 #12505'
     design = 'porous_flow/governing_equations.md porous_flow/tests/gravity/gravity_tests.md'
+  [../]
+  [./fully_saturated_upwinded_grav01c]
+    type = 'CSVDiff'
+    input = 'fully_saturated_upwinded_grav01c.i'
+    cli_args = 'Outputs/file_base=fsupg'
+    csvdiff = 'fsupg.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    max_parallel = 1
+    requirement = "PorousFlow shall be able to find steady-state porepressure for single-phase, fully-saturated, multicomponent systems"
+    issues = '#16841'
+    design = 'PorousFlowFullySaturatedAdvectiveFlux.md porous_flow/tests/gravity/gravity_tests.md'
+  [../]
+  [./fully_saturated_upwinded_nodens_grav01c]
+    type = 'CSVDiff'
+    input = 'fully_saturated_upwinded_grav01c.i'
+    prereq = fully_saturated_upwinded_grav01c
+    cli_args = 'Outputs/file_base=fsupg Kernels/flux0/multiply_by_density=false Kernels/flux1/multiply_by_density=false'
+    csvdiff = 'fsupg.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    max_parallel = 1
+    requirement = "PorousFlow shall be able to find steady-state porepressure for single-phase, fully-saturated, multicomponent systems, if the Darcy flow is expressed in terms of fluid volumes"
+    issues = '#16841'
+    design = 'PorousFlowFullySaturatedAdvectiveFlux.md porous_flow/tests/gravity/gravity_tests.md'
+  [../]
+  [./fully_saturated_upwinded_grav01c_action]
+    type = 'CSVDiff'
+    input = 'fully_saturated_upwinded_grav01c_action.i'
+    prereq = fully_saturated_upwinded_nodens_grav01c
+    cli_args = 'Outputs/file_base=fsupg'
+    csvdiff = 'fsupg.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    max_parallel = 1
+    requirement = "PorousFlow shall be able to find steady-state porepressure for single-phase, fully-saturated, multicomponent systems, when using an action"
+    issues = '#16841'
+    design = 'PorousFlowFullySaturated.md porous_flow/tests/gravity/gravity_tests.md'
+  [../]
+  [./fully_saturated_upwinded_nodens_grav01c_action]
+    type = 'CSVDiff'
+    input = 'fully_saturated_upwinded_nodens_grav01c_action.i'
+    prereq = fully_saturated_upwinded_grav01c_action
+    cli_args = 'Outputs/file_base=fsupg'
+    csvdiff = 'fsupg.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    max_parallel = 1
+    requirement = "PorousFlow shall be able to find steady-state porepressure for single-phase, fully-saturated, multicomponent systems, when using an action and a fluid-volume calculation"
+    issues = '#16841'
+    design = 'PorousFlowFullySaturated.md porous_flow/tests/gravity/gravity_tests.md'
   [../]
   [./grav01d]
     type = 'CSVDiff'

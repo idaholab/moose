@@ -35,10 +35,6 @@ before the solve begins. With `preset = false`, the boundary condition is
 only enforced as the solve progresses. In most situations, presetting the boundary
 condition is better.
 
-The default behavior of the `preset` parameter is determined by the flag
-`use_legacy_dirichlet_bc` in the application. Change this flag to false to switch
-your application to the preferred behavior (setting `preset = true` as the default).
-
 ## Example Input Syntax
 
 !listing test/tests/bcs/ad_bc_preset_nodal/bc_preset_nodal.i block=BCs

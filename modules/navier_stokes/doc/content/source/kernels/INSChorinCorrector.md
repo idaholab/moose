@@ -1,3 +1,5 @@
+# INSChorinCorrector
+
 !syntax description /Kernels/INSChorinCorrector
 
 !syntax parameters /Kernels/INSChorinCorrector

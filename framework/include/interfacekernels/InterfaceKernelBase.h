@@ -11,18 +11,10 @@
 
 // local includes
 #include "MooseArray.h"
-#include "MooseObject.h"
+#include "NeighborResidualObject.h"
 #include "BoundaryRestrictable.h"
-#include "SetupInterface.h"
-#include "TransientInterface.h"
-#include "UserObjectInterface.h"
-#include "PostprocessorInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "TaggingInterface.h"
 #include "ElementIDInterface.h"
 
 // Forward Declarations
@@ -35,18 +27,10 @@ InputParameters validParams<InterfaceKernelBase>();
  * InterfaceKernelBase is the base class for all InterfaceKernel type classes.
  */
 
-class InterfaceKernelBase : public MooseObject,
+class InterfaceKernelBase : public NeighborResidualObject,
                             public BoundaryRestrictable,
-                            public SetupInterface,
-                            public TransientInterface,
-                            public FunctionInterface,
-                            public UserObjectInterface,
-                            public PostprocessorInterface,
                             public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                            public Restartable,
-                            public MeshChangedInterface,
                             public TwoMaterialPropertyInterface,
-                            public TaggingInterface,
                             public ElementIDInterface
 {
 public:
@@ -54,14 +38,8 @@ public:
 
   InterfaceKernelBase(const InputParameters & parameters);
 
-  /// The primary variable that this interface kernel operates on
-  virtual MooseVariableFEBase & variable() const = 0;
-
   /// The neighbor variable number that this interface kernel operates on
   virtual const MooseVariableFEBase & neighborVariable() const = 0;
-
-  /// Return a reference to the subproblem.
-  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Using the passed DGResidual type, selects the correct test function space and residual block,
@@ -89,11 +67,7 @@ public:
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
   virtual void computeNeighborOffDiagJacobian(unsigned int jvar) = 0;
 
-  /// Computes the residual for the current side.
-  virtual void computeResidual() = 0;
-
-  /// Computes the jacobian for the current side.
-  virtual void computeJacobian() = 0;
+  void prepareShapes(unsigned int var_num) override final;
 
 protected:
   /// Compute jacobians at quadrature points
@@ -107,21 +81,6 @@ protected:
 
   /// The volume of the current neighbor
   const Real & getNeighborElemVolume();
-
-  /// Reference to the controlling finite element problem
-  SubProblem & _subproblem;
-
-  /// Reference to the nonlinear system
-  SystemBase & _sys;
-
-  /// The thread ID
-  THREAD_ID _tid;
-
-  /// Problem assembly
-  Assembly & _assembly;
-
-  /// The problem mesh
-  MooseMesh & _mesh;
 
   /// Pointer reference to the current element
   const Elem * const & _current_elem;

@@ -49,8 +49,6 @@ protected:
   NumericVector<Number> & _tmp_previous_solution;
   NumericVector<Number> & _tmp_residual_old;
   NumericVector<Number> & _tmp_third_vector;
-  int & _t_step_old;
   Real & _dt_older;
   Real & _dtstorage;
 };
-

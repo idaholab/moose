@@ -79,6 +79,9 @@ private:
   const MaterialProperty<std::array<Real, PorousFlowConstants::MAX_HYSTERESIS_ORDER>> *
       _hys_sat_tps;
 
+  /// Hysteresis info: what this physically represents depends on the PorousFlowHystereticInfo Material
+  const MaterialProperty<Real> * _hys_info;
+
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
@@ -100,7 +103,8 @@ private:
     POROSITY,
     PERMEABILITY,
     HYSTERESIS_ORDER,
-    HYSTERESIS_SATURATION_TURNING_POINT
+    HYSTERESIS_SATURATION_TURNING_POINT,
+    HYSTERETIC_INFO
   } _property_enum;
 
   /// Phase index

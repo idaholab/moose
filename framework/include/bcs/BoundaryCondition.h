@@ -10,32 +10,13 @@
 #pragma once
 
 // MOOSE
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "ResidualObject.h"
 #include "ParallelUniqueId.h"
-#include "FunctionInterface.h"
 #include "DistributionInterface.h"
-#include "UserObjectInterface.h"
-#include "TransientInterface.h"
-#include "PostprocessorInterface.h"
-#include "VectorPostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
-#include "TaggingInterface.h"
 
-// Forward declerations
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-class MooseMesh;
-class Problem;
-class SubProblem;
-class SystemBase;
 class BoundaryCondition;
-class Assembly;
 
 template <>
 InputParameters validParams<BoundaryCondition>();
@@ -43,19 +24,10 @@ InputParameters validParams<BoundaryCondition>();
 /**
  * Base class for creating new types of boundary conditions.
  */
-class BoundaryCondition : public MooseObject,
+class BoundaryCondition : public ResidualObject,
                           public BoundaryRestrictableRequired,
-                          public SetupInterface,
-                          public FunctionInterface,
                           public DistributionInterface,
-                          public UserObjectInterface,
-                          public TransientInterface,
-                          public PostprocessorInterface,
-                          public VectorPostprocessorInterface,
-                          public GeometricSearchInterface,
-                          public Restartable,
-                          public MeshChangedInterface,
-                          public TaggingInterface
+                          public GeometricSearchInterface
 {
 public:
   /**
@@ -66,18 +38,6 @@ public:
   BoundaryCondition(const InputParameters & parameters, bool nodal);
 
   static InputParameters validParams();
-
-  /**
-   * Get a reference to the MooseVariableFE
-   * @return Reference to MooseVariableFE
-   */
-  virtual MooseVariableFEBase & variable() = 0;
-
-  /**
-   * Get a reference to the subproblem
-   * @return Reference to SubProblem
-   */
-  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Hook for turning the boundary condition on and off.
@@ -91,23 +51,4 @@ public:
    * @return true if the boundary condition should be applied, otherwise false
    */
   virtual bool shouldApply() { return true; }
-
-protected:
-  /// Reference to SubProblem
-  SubProblem & _subproblem;
-
-  /// Reference to FEProblemBase
-  FEProblemBase & _fe_problem;
-
-  /// Reference to SystemBase
-  SystemBase & _sys;
-
-  /// Thread id
-  THREAD_ID _tid;
-
-  /// Reference to assembly
-  Assembly & _assembly;
-
-  /// Mesh this BC is defined on
-  MooseMesh & _mesh;
 };

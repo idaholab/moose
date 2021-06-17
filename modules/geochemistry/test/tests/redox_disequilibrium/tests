@@ -39,7 +39,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
     match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems'
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md morro.md'
+    design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
   [../]
   [./morro_disequilibrium]
     type = 'RunApp'
@@ -83,7 +83,7 @@ e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3074V
     match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium'
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md morro.md'
+    design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md morro.md'
   [../]
   [./microbial]
     type = 'RunApp'
@@ -139,6 +139,6 @@ e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
     match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md microbial.md'
+    design = 'AddTimeIndependentReactionSolverAction.md GeochemistryConsoleOutput.md microbial_redox.md'
   [../]
 []

@@ -65,278 +65,278 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.8
     alpha = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./confinex]
+  [confinex]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./confiney]
+  []
+  [confiney]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top'
-  [../]
-  [./basefixed]
+  []
+  [basefixed]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = back
-  [../]
-  [./topdrained]
+  []
+  [topdrained]
     type = DirichletBC
     variable = porepressure
     value = 0
     boundary = front
-  [../]
-  [./topload]
+  []
+  [topload]
     type = NeumannBC
     variable = disp_z
     value = -1
     boundary = front
-  [../]
+  []
 []
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./poro_x]
+  []
+  [poro_x]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.6
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.6
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.6
     component = 2
     variable = disp_z
-  [../]
-  [./poro_vol_exp]
+  []
+  [poro_vol_exp]
     type = PorousFlowMassVolumetricExpansion
     variable = porepressure
     fluid_component = 0
-  [../]
-  [./mass0]
+  []
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = porepressure
-  [../]
-  [./flux]
+  []
+  [flux]
     type = PorousFlowAdvectiveFlux
     variable = porepressure
     gravity = '0 0 0'
     fluid_component = 0
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 8
       density0 = 1
       thermal_expansion = 0
       viscosity = 0.96
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '2 3'
     # bulk modulus is lambda + 2*mu/3 = 2 + 2*3/3 = 4
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityHMBiotModulus
     porosity_zero = 0.1
     biot_coefficient = 0.6
     solid_bulk = 4
     constant_fluid_bulk_modulus = 8
     constant_biot_modulus = 16
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.5 0 0   0 1.5 0   0 0 1.5'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p1]
+  []
+  [p1]
     type = PointValue
     outputs = csv
     point = '0 0 1'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p2]
+  []
+  [p2]
     type = PointValue
     outputs = csv
     point = '0 0 2'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p3]
+  []
+  [p3]
     type = PointValue
     outputs = csv
     point = '0 0 3'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p4]
+  []
+  [p4]
     type = PointValue
     outputs = csv
     point = '0 0 4'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p5]
+  []
+  [p5]
     type = PointValue
     outputs = csv
     point = '0 0 5'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p6]
+  []
+  [p6]
     type = PointValue
     outputs = csv
     point = '0 0 6'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p7]
+  []
+  [p7]
     type = PointValue
     outputs = csv
     point = '0 0 7'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p8]
+  []
+  [p8]
     type = PointValue
     outputs = csv
     point = '0 0 8'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p9]
+  []
+  [p9]
     type = PointValue
     outputs = csv
     point = '0 0 9'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./p99]
+  []
+  [p99]
     type = PointValue
     outputs = csv
     point = '0 0 10'
     variable = porepressure
     use_displaced_mesh = false
-  [../]
-  [./zdisp]
+  []
+  [zdisp]
     type = PointValue
     outputs = csv
     point = '0 0 10'
     variable = disp_z
     use_displaced_mesh = false
-  [../]
-  [./dt]
+  []
+  [dt]
     type = FunctionValuePostprocessor
     outputs = console
     function = if(0.5*t<0.1,0.5*t,0.1)
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -344,17 +344,17 @@
   solve_type = Newton
   start_time = 0
   end_time = 10
-  [./TimeStepper]
+  [TimeStepper]
     type = PostprocessorDT
     postprocessor = dt
     dt = 0.0001
-  [../]
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   file_base = terzaghi_constM
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

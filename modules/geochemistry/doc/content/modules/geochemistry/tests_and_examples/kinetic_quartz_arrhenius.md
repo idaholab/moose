@@ -32,7 +32,7 @@ The output of this simulation is that the molality of SiO2(aq) is 0.009723$\,$mo
 
 The second stage uses this molality and performs the time-dependent simulation, as the temperature is reduced.  The [GeochemistryKineticRate](GeochemistryKineticRate.md) is defined:
 
-!listing modules/geochemistry/test/tests/kinetics/quartz_deposition.i start=[./rate_quartz] end=[./definition]
+!listing modules/geochemistry/test/tests/kinetics/quartz_deposition.i start=[rate_quartz] end=[definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines the free molality of SiO2(aq) at the initial time, the initial mole number of quartz and that the temperature is controlled using the `temp_controller` `AuxVariable`:
 
@@ -40,7 +40,7 @@ The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defin
 
 The temperature controller is:
 
-!listing modules/geochemistry/test/tests/kinetics/quartz_deposition.i start=[./temp_controller_auxk] end=[./diss_rate]
+!listing modules/geochemistry/test/tests/kinetics/quartz_deposition.i start=[temp_controller_auxk] end=[diss_rate]
 
 with time defined through:
 

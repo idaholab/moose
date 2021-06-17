@@ -1,0 +1,79 @@
+[Tests]
+  issues = '#15702'
+  design = 'DistributedRectilinearMeshGenerator.md'
+
+  [adaptivity]
+    type = 'Exodiff'
+    input = 'adaptivity.i'
+    exodiff = 'adaptivity_out.e'
+    requirement = "The system shall support mesh adaptivity on a distributed generated displaced "
+                  "mesh."
+  []
+
+  [pbc_adaptivity]
+    type = 'Exodiff'
+    input = 'pbc_adaptivity.i'
+    exodiff = 'pbc_adaptivity_out.e'
+    cli_args = 'Outputs/hide="pid" Outputs/console/type=Console '
+               'Outputs/console/system_info="framework mesh aux nonlinear execution relationship"'
+    expect_out = '  Default:                 libMesh::DefaultCoupling x 2
+  Default:                 '
+                 'libMesh::GhostPointNeighbors
+  Default:                 libMesh::DefaultCoupling x '
+                 '2 for DisplacedMesh
+  Default:                 libMesh::GhostPointNeighbors for '
+                 'DisplacedMesh'
+    abs_zero = 1e-7
+    rel_err = 1e-4
+    requirement = "The system shall support mesh adaptivity with periodic boundary conditions on a "
+                  "distributed generated displaced mesh."
+    method = '!dbg' # periodic timeout
+    valgrind = 'NONE'
+  []
+
+  [pbc]
+    requirement = "The system shall support a scalable mesh adaptivity with periodic boundary "
+                  "conditions on a distributed generated displaced mesh"
+
+    [adaptivity_nemesis]
+      type = 'Exodiff'
+      input = 'pbc_adaptivity.i'
+      exodiff = 'pbc_adaptivity_out.e.4.0 pbc_adaptivity_out.e.4.1 pbc_adaptivity_out.e.4.2 '
+                'pbc_adaptivity_out.e.4.3 pbc_adaptivity_out.e-s0002.4.0 '
+                'pbc_adaptivity_out.e-s0002.4.1 pbc_adaptivity_out.e-s0002.4.2 '
+                'pbc_adaptivity_out.e-s0002.4.3 pbc_adaptivity_out.e-s0003.4.0 '
+                'pbc_adaptivity_out.e-s0003.4.1 pbc_adaptivity_out.e-s0003.4.2 '
+                'pbc_adaptivity_out.e-s0003.4.3 pbc_adaptivity_out.e-s0004.4.0 '
+                'pbc_adaptivity_out.e-s0004.4.1 pbc_adaptivity_out.e-s0004.4.2 '
+                'pbc_adaptivity_out.e-s0004.4.3 pbc_adaptivity_out.e-s0005.4.0 '
+                'pbc_adaptivity_out.e-s0005.4.1 pbc_adaptivity_out.e-s0005.4.2 '
+                'pbc_adaptivity_out.e-s0005.4.3'
+      # We use 'partition=linear' here, so that the tests are platform independent
+      cli_args = 'Outputs/hide="pid" Outputs/nemesis=true Outputs/exodus=false '
+                 'Mesh/dmg/partition="linear"'
+      allow_warnings = true
+      max_parallel = 4
+      min_parallel = 4
+      abs_zero = 1e-7
+      rel_err = 1e-4
+      recover = false # Do these things work together? Transient, recover, nemesis, distributed, adaptivity, periodic bcs?
+      # I'm getting an exodiff with recover. I would like to make this work, but I have other priorities right now
+
+      detail = "without and with"
+    []
+
+    [adaptivity_autoscaling]
+      type = 'Exodiff'
+      input = 'pbc_adaptivity.i'
+      exodiff = 'pbc_adaptivity_out.e'
+      cli_args = 'Outputs/hide="pid" Executioner/automatic_scaling=true '
+                 'Executioner/compute_scaling_once=false'
+      prereq = 'pbc_adaptivity'
+      abs_zero = 1e-7
+      rel_err = 1e-4
+      method = '!dbg' # periodic timeout
+
+      detail = "automatic scaling."
+    []
+  []
+[]

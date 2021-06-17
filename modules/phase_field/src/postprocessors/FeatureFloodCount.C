@@ -1434,7 +1434,7 @@ FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
     std::vector<Point> centroid(1, elem->centroid());
-    _subproblem.reinitElemPhys(elem, centroid, 0, /* suppress_displaced_init = */ true);
+    _subproblem.reinitElemPhys(elem, centroid, 0);
     entity_value = _vars[current_index]->sln()[0];
   }
   else
@@ -1602,9 +1602,16 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
      * of active neighbors
      */
     neighbor_ancestor = elem->neighbor_ptr(i);
+
     if (neighbor_ancestor)
     {
-      if (neighbor_ancestor == libMesh::remote_elem)
+      /**
+       * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}. That
+       * is, the number of evaluable elements does NOT necessarily equal to the number of local and
+       * algebraic ghosting elements. The neighbors of evaluable elements can be remote even though
+       * we have two layers of geometric ghosting elements.
+       */
+      if (neighbor_ancestor->is_remote())
         continue;
 
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
@@ -1622,6 +1629,15 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
        */
       if (neighbor_ancestor)
       {
+        /**
+         * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}.
+         * That is, the number of evaluable elements does NOT necessarily equal to the number of
+         * local and algebraic ghosting elements. The neighbors of evaluable elements can be remote
+         * even though we have two layers of geometric ghosting elements.
+         */
+        if (neighbor_ancestor->is_remote())
+          continue;
+
         neighbor_ancestor->active_family_tree_by_topological_neighbor(
             all_active_neighbors, elem, mesh, *_point_locator, _pbs, false);
 
@@ -1883,7 +1899,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
     _bboxes.resize(num_regions + 1);
 
     decltype(num_regions) region = 1;
-    for (const auto list_ref : disjoint_regions)
+    for (const auto & list_ref : disjoint_regions)
     {
       for (const auto elem_id : list_ref)
         updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));

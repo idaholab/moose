@@ -18,7 +18,7 @@
 
 #include <numeric>
 
-registerMooseObject("StochasticToolsApp", Statistics);
+registerADMooseObjectDeprecated("StochasticToolsApp", Statistics, "07/01/2021 12:00");
 
 InputParameters
 Statistics::validParams()
@@ -67,6 +67,8 @@ Statistics::Statistics(const InputParameters & parameters)
     _ci_method(getParam<MooseEnum>("ci_method")),
     _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
                                     : std::vector<Real>()),
+    _replicates(getParam<unsigned int>("ci_replicates")),
+    _seed(getParam<unsigned int>("ci_seed")),
     _stat_type_vector(declareVector("stat_type")),
     _perf_initial_setup(registerTimedSection("initialSetup", 2)),
     _perf_execute(registerTimedSection("execute", 1))
@@ -76,14 +78,6 @@ Statistics::Statistics(const InputParameters & parameters)
     _stat_type_vector.push_back(item.id());
     for (const auto & level : _ci_levels)
       _stat_type_vector.push_back(item.id() + level);
-  }
-
-  if (_ci_method.isValid())
-  {
-    unsigned int replicates = getParam<unsigned int>("ci_replicates");
-    unsigned int seed = getParam<unsigned int>("ci_seed");
-    _ci_calculator =
-        StochasticTools::makeBootstrapCalculator(_ci_method, *this, _ci_levels, replicates, seed);
   }
 }
 
@@ -127,13 +121,15 @@ Statistics::execute()
     {
       for (const auto & item : _compute_stats)
       {
-        std::unique_ptr<const StochasticTools::Calculator> calc_ptr =
+        std::unique_ptr<const StochasticTools::Calculator<std::vector<Real>, Real>> calc_ptr =
             StochasticTools::makeCalculator(item, *this);
         _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
 
-        if (_ci_calculator)
+        if (_ci_method.isValid())
         {
-          std::vector<Real> ci = _ci_calculator->compute(data, *calc_ptr, is_distributed);
+          auto ci_calc_ptr = StochasticTools::makeBootstrapCalculator<std::vector<Real>, Real>(
+              _ci_method, *this, _ci_levels, _replicates, _seed, *calc_ptr);
+          std::vector<Real> ci = ci_calc_ptr->compute(data, is_distributed);
           _stat_vectors[i]->insert(_stat_vectors[i]->end(), ci.begin(), ci.end());
         }
       }

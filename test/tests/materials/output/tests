@@ -83,4 +83,19 @@
     requirement = "The system shall error if the supplied output options for material data output "
                   "are not consistent with the list of available outputs."
   []
+  [warn_unsupported_types]
+    type = RunApp
+    input = output_warning.i
+    allow_warnings = true
+    expect_out = "The types for total 1 material properties:\n  vec\nare not supported for automatic output by MaterialOutputAction"
+    requirement = "The system shall issue warnings if material data added by materials cannot be outputted as field variables."
+  []
+  [show_added_aux_vars]
+    type = RunApp
+    input = output_warning.i
+    allow_warnings = true
+    expect_out = "The following total 103 aux variables:"
+    requirement = "The system shall show the field variable names for outputting material data added by materials."
+    prereq = warn_unsupported_types
+  []
 []

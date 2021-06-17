@@ -22,6 +22,9 @@
 void
 to_json(nlohmann::json & json, const MooseApp & app)
 {
+  if (!app.getSystemInfo())
+    return;
+
   json["app_name"] = app.name();
   json["current_time"] = app.getSystemInfo()->getTimeStamp();
   json["executable"] = app.getSystemInfo()->getExecutable();

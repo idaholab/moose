@@ -27,11 +27,11 @@
 [GlobalParams]
   volumetric_locking_correction = false
   displacements = 'disp_x disp_y disp_z'
-  order = SECOND
 []
 
 [Mesh]#Comment
   file = hertz_contact_hex27.e
+  allow_renumbering = false
 [] # Mesh
 
 [Functions]

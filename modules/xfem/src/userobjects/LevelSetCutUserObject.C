@@ -21,6 +21,10 @@ LevelSetCutUserObject::validParams()
   params.addRequiredParam<VariableName>(
       "level_set_var", "The name of level set variable used to represent the interface");
   params.addClassDescription("XFEM mesh cut by level set function");
+  params.addParam<CutSubdomainID>(
+      "negative_id", 0, "The CutSubdomainID corresponding to a non-positive signed distance");
+  params.addParam<CutSubdomainID>(
+      "positive_id", 1, "The CutSubdomainID corresponding to a positive signed distance");
   return params;
 }
 
@@ -33,15 +37,19 @@ LevelSetCutUserObject::LevelSetCutUserObject(const InputParameters & parameters)
                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
                               .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
-    _solution(*_system.current_local_solution.get())
+    _solution(*_system.current_local_solution.get()),
+    _negative_id(getParam<CutSubdomainID>("negative_id")),
+    _positive_id(getParam<CutSubdomainID>("positive_id"))
 {
+  mooseAssert(_negative_id != _positive_id,
+              "LevelSetCutUserObject expects different CutSubdomainIDs for the "
+              "negative_id and the positive_id.");
 }
 
 bool
 LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
                                             std::vector<Xfem::CutEdge> & cut_edges,
-                                            std::vector<Xfem::CutNode> & /*cut_nodes*/,
-                                            Real /*time*/) const
+                                            std::vector<Xfem::CutNode> & /*cut_nodes*/) const
 {
   bool cut_elem = false;
 
@@ -49,7 +57,7 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
   for (unsigned int i = 0; i < n_sides; ++i)
   {
-    UniquePtr<const Elem> curr_side = elem->side_ptr(i);
+    std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
 
     if (curr_side->type() != EDGE2)
       mooseError("In LevelSetCutUserObject element side must be EDGE2, but type is: ",
@@ -84,8 +92,7 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
-                                            std::vector<Xfem::CutFace> & cut_faces,
-                                            Real /*time*/) const
+                                            std::vector<Xfem::CutFace> & cut_faces) const
 {
   bool cut_elem = false;
 
@@ -144,16 +151,14 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 LevelSetCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
-                                             std::vector<Xfem::CutEdge> & /*cut_edges*/,
-                                             Real /*time*/) const
+                                             std::vector<Xfem::CutEdge> & /*cut_edges*/) const
 {
   return false;
 }
 
 bool
 LevelSetCutUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                             std::vector<Xfem::CutFace> & /*cut_faces*/,
-                                             Real /*time*/) const
+                                             std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("cutFragmentByGeometry not yet implemented for 3d level set cutting");
   return false;
@@ -163,4 +168,11 @@ const std::vector<Point>
 LevelSetCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
+}
+
+CutSubdomainID
+LevelSetCutUserObject::getCutSubdomainID(const Node * node) const
+{
+  dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
+  return _solution(ls_dof_id) > 0.0 ? _positive_id : _negative_id;
 }

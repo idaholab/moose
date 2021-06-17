@@ -31,6 +31,9 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  /// Fill the offset positions for each mesh
+  void fillPositions();
+
 protected:
   /**
    * Helper funciton for copying one mesh into another
@@ -41,7 +44,7 @@ protected:
   const std::vector<MeshGeneratorName> & _input_names;
 
   /// The (offsets) positions for each mesh
-  const std::vector<Point> & _positions;
+  std::vector<Point> _positions;
 
   // Holds pointers to the mesh smart pointers (to be populated later).
   std::vector<std::unique_ptr<MeshBase> *> _meshes;

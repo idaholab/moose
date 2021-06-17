@@ -21,6 +21,20 @@
   [../]
 []
 
+[DomainIntegral]
+  integrals = 'InteractionIntegralKI'
+  crack_direction_method = CurvedCrackFront
+  radius_inner = '0.1'
+  radius_outer = '0.2'
+  poissons_ratio = 0.3
+  youngs_modulus = 207000
+  block = 1
+  crack_front_points_provider = ellip_cut_uo
+  number_points_from_provider = 12
+  closed_loop = true
+  incremental = true
+[]
+
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE

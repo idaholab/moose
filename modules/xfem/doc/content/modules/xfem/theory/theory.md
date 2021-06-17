@@ -21,7 +21,7 @@ The phantom node technique has several features that make it more attractive tha
 - It simplifies the handling of crack branching and coalescence, which require additional degrees of freedom in elements containing multiple cracks in the original XFEM, but can be handled by recursively cutting elements in the phantom node method [!cite](JHSong2009,Richardson2009).
 - For multiphysics applications where the physics applications share a common mesh, the phantom node technique automatically enriches the degrees of freedom for all solution variables, whereas additional enrichment degrees of freedom would need to be explicitly added in the original XFEM.
 
-## Mesh Cutting Algorithm
+## Mesh Cutting Algorithm id=mesh_cutting_alg
 
 The bulk of the complexity in implementing the phantom node method lies in correctly resolving the connectivity of the partial elements that are created when elements are cut by a crack. Neighboring elements that share a common cracked edge should share physical and phantom nodes to ensure continuity of finite element solution fields in across neighboring elements in the material on a given side of a crack. Conversely, the elements on opposing sides of a crack should have no connectivity to ensure that the discontinuity is properly represented. [phantom_node_a] and [phantom_node_b] illustrate the desired connectivity for a representative crack geometry. An algorithm based partly on the work of Richardson et al. [!cite](Richardson2009) was developed for the present work, and is described here. Because this cutting algorithm relies on the use of data structures known as `fragments`,  it is termed here as the `element fragment algorithm` (EFA).
 

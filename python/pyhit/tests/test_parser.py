@@ -149,6 +149,19 @@ class TestHitLoad(unittest.TestCase):
         root(0,0).setComment('param', "inline comment")
         self.assertEqual(root(0,0).comment('param'), "inline comment")
 
+    def testRemoveComment(self):
+        root = pyhit.load(os.path.join('..', '..', 'test_files', 'test.hit'))
+        self.assertIn("type = test # param comment", root.render())
+        self.assertIn("# section comment", root.render())
+
+        root(1,0,0).setComment("type", None)
+        self.assertIsNone(root(1,0,0).comment())
+        self.assertNotIn("type = test # param comment", root.render())
+
+        root(1).setComment(None)
+        self.assertIsNone(root(1).comment())
+        self.assertNotIn("# section comment", root.render())
+
     def testCreate(self):
         root = pyhit.Node()
         bcs = root.append('BCs')

@@ -13,6 +13,7 @@
     input = 'frictional_mortar_FS.i'
     exodiff = 'frictional_mortar_FS_out.e'
     abs_zero = 1e-8
+    mesh_mode = REPLICATED
     requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
   [../]
 []

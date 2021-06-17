@@ -33,7 +33,7 @@ ScalarVarBC::computeQpResidual()
 }
 
 Real
-ScalarVarBC::computeQpOffDiagJacobian(unsigned int jvar)
+ScalarVarBC::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _alpha_var)
     return -_test[_i][_qp];

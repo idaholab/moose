@@ -1,15 +1,28 @@
 [Tests]
-  issues = '#13918'
+  issues = '#13918 #15843 #16954'
   design = 'RadiationTransferAction.md'
-  [./radiative_transfer_action]
+
+  [radiative_transfer_action_analytical]
     type = 'Exodiff'
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out.e'
-    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method for cavities with unobstructed, planar faces.'
     petsc_version = '>=3.9.4'
-  [../]
+    mesh_mode = REPLICATED
+    cli_args = 'GrayDiffuseRadiation/cavity/view_factor_calculator=analytical'
+  []
 
-  [./radiative_transfer_action_bnd_names]
+  [radiative_transfer_action_raytracing]
+    type = 'Exodiff'
+    input = 'radiative_transfer_action.i'
+    exodiff = 'radiative_transfer_action_raytracing_out.e'
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method and allow computing view factors using raytracing.'
+    petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
+    cli_args = 'Outputs/file_base=radiative_transfer_action_raytracing_out GrayDiffuseRadiation/cavity/view_factor_calculator=ray_tracing'
+  []
+
+  [bnd_names]
     type = 'Exodiff'
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out_bnd_names.e'
@@ -17,24 +30,35 @@
                 GrayDiffuseRadiation/cavity/adiabatic_boundary="inner_top"
                 GrayDiffuseRadiation/cavity/fixed_temperature_boundary="inner_bottom"
                 Outputs/file_base=radiative_transfer_action_out_bnd_names'
-    requirement = 'The system shall allow specifying boundary names and ids in the radiative heat transfer action'
-    issues = '#15843'
+    requirement = 'The system shall allow the specification of boundary names and ids in the modeling of radiative heat transfer.'
     petsc_version = '>=3.9.4'
-  [../]
+    mesh_mode = REPLICATED
+  []
 
-  [./radiative_transfer_no_action]
+  [no_action]
     type = 'Exodiff'
     input = 'radiative_transfer_no_action.i'
     exodiff = 'radiative_transfer_no_action_out.e'
-    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
+    requirement = 'The system shall ensure that results between manually created radiative transfer inputs and inputs that use the radiation transfer action are identical.'
     petsc_version = '>=3.9.4'
-  [../]
+    mesh_mode = REPLICATED
+  []
 
-  [./radiative_transfer_action_external_boundary]
+  [external_boundary_analytical]
     type = 'Exodiff'
     input = 'radiative_transfer_action_external_boundary.i'
     exodiff = 'radiative_transfer_action_external_boundary_out.e'
-    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
     petsc_version = '>=3.9.4'
-  [../]
+    mesh_mode = REPLICATED
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems where sidesets participating in the radiative exchange are external faces of the domain, with view factors computed by simple quadrature rules for cavities with unobstructed, planar faces.'
+  []
+
+  [external_boundary_ray_tracing]
+    type = 'Exodiff'
+    input = 'radiative_transfer_action_external_boundary_ray_tracing.i'
+    exodiff = 'radiative_transfer_action_external_boundary_ray_tracing_out.e'
+    petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems where sidesets participating in the radiative exchange are external faces of the domain, with view factors computed by ray tracing.'
+  []
 []

@@ -12,10 +12,6 @@
 #include "Conversion.h"
 #include "InputParameters.h"
 #include "Material.h"
-#include "RankFourTensor.h"
-#include "RankTwoTensor.h"
-
-// Forward declaration
 
 /**
  * TangentCalculationMethod is an enum that determines the calculation method for the tangent
@@ -45,12 +41,18 @@ enum class TangentCalculationMethod
  * All materials inheriting from this class must be called by a separate material,
  * such as ComputeMultipleInelasticStress
  */
-class StressUpdateBase : public Material
+template <bool is_ad>
+class StressUpdateBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  StressUpdateBase(const InputParameters & parameters);
+  StressUpdateBaseTempl(const InputParameters & parameters);
+
+  using Material::_current_elem;
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
 
   /**
    * Given a strain increment that results in a trial stress, perform some
@@ -78,28 +80,30 @@ public:
    * compute_full_tangent_operator=false, then tangent_operator=elasticity_tensor is an appropriate
    * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
    */
-  virtual void updateState(RankTwoTensor & strain_increment,
-                           RankTwoTensor & inelastic_strain_increment,
-                           const RankTwoTensor & rotation_increment,
-                           RankTwoTensor & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const RankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator,
-                           RankFourTensor & tangent_operator) = 0;
+  virtual void
+  updateState(GenericRankTwoTensor<is_ad> & strain_increment,
+              GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+              const GenericRankTwoTensor<is_ad> & rotation_increment,
+              GenericRankTwoTensor<is_ad> & stress_new,
+              const RankTwoTensor & stress_old,
+              const GenericRankFourTensor<is_ad> & elasticity_tensor,
+              const RankTwoTensor & elastic_strain_old,
+              bool compute_full_tangent_operator = false,
+              RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
 
   /**
    * Similar to the updateState function, this method updates the strain and stress for one substep
    */
-  virtual void updateStateSubstep(RankTwoTensor & strain_increment,
-                                  RankTwoTensor & inelastic_strain_increment,
-                                  const RankTwoTensor & rotation_increment,
-                                  RankTwoTensor & stress_new,
-                                  const RankTwoTensor & stress_old,
-                                  const RankFourTensor & elasticity_tensor,
-                                  const RankTwoTensor & elastic_strain_old,
-                                  bool compute_full_tangent_operator,
-                                  RankFourTensor & tangent_operator);
+  virtual void updateStateSubstep(
+      GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+      GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+      const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+      GenericRankTwoTensor<is_ad> & /*stress_new*/,
+      const RankTwoTensor & /*stress_old*/,
+      const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+      const RankTwoTensor & /*elastic_strain_old*/,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
 
   /// Sets the value of the global variable _qp for inheriting classes
   void setQp(unsigned int qp);
@@ -122,10 +126,7 @@ public:
 
   virtual Real computeTimeStepLimit();
 
-  virtual TangentCalculationMethod getTangentCalculationMethod()
-  {
-    return TangentCalculationMethod::ELASTIC;
-  }
+  virtual TangentCalculationMethod getTangentCalculationMethod();
 
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
@@ -145,7 +146,10 @@ public:
    * to bring a substepped trial stress guess distance from the yield surface
    * into the tolerance specified in the individual child class.
    */
-  virtual int calculateNumberSubsteps(const RankTwoTensor & /*strain_increment*/) { return 1; }
+  virtual int calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & /*strain_increment*/)
+  {
+    return 1;
+  }
 
   /**
    * Properly set up the incremental calculation storage of the stateful material
@@ -153,7 +157,30 @@ public:
    */
   virtual void storeIncrementalMaterialProperties(){};
 
+  /**
+   * Compute the strain energy rate density for this inelastic model for the current step.
+   * @param stress The stress tensor at the end of the step
+   * @param strain_rate The strain rate at the end of the step
+   * @return The computed strain energy rate density
+   */
+  virtual Real computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*stress*/,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*strain_rate*/)
+  {
+    mooseError(
+        "The computation of strain energy rate density needs to be implemented by a child class");
+    return 0.0;
+  }
+
 protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
+
+  static RankFourTensor _identityTensor;
 };
+typedef StressUpdateBaseTempl<false> StressUpdateBase;
+typedef StressUpdateBaseTempl<true> ADStressUpdateBase;
+
+template <bool is_ad>
+RankFourTensor StressUpdateBaseTempl<is_ad>::_identityTensor =
+    RankFourTensor(RankFourTensor::initIdentityFour);

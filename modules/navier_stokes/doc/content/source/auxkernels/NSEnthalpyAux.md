@@ -1,3 +1,5 @@
+# NSEnthalpyAux
+
 !syntax description /AuxKernels/NSEnthalpyAux
 
 !syntax parameters /AuxKernels/NSEnthalpyAux

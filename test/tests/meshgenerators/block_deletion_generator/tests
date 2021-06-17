@@ -1,12 +1,28 @@
 [Tests]
-  [./block_deletion_test]
-    type = 'Exodiff'
-    input = 'block_deletion_test1.i'
-    exodiff = 'block_deletion_test1_out.e'
-    recover = false
-
-    requirement = 'The system shall be capable of deleting all of the elements in a mesh based on subdomain ID.'
+  [block_deletion]
     design = 'meshgenerators/BlockDeletionGenerator.md'
-    issues = '#11640'
-  [../]
+    requirement = 'The system shall be capable of deleting '
+    issues = '#11640 #17052'
+    [all_by_block_ids]
+      type = 'Exodiff'
+      input = 'block_deletion_test1.i'
+      exodiff = 'block_deletion_test1_out.e'
+      recover = false
+      detail = 'all of the elements in a mesh based on subdomain ID, '
+    []
+    [all_by_block_names]
+      type = 'Exodiff'
+      input = 'block_deletion_test13.i'
+      exodiff = 'block_deletion_test13_out.e'
+      recover = false
+      detail = 'all of the elements in a mesh based on subdomain names and '
+    []
+    [multiple_blocks]
+      type = 'Exodiff'
+      input = 'block_deletion_test14.i'
+      exodiff = 'block_deletion_test14_out.e'
+      recover = false
+      detail = 'multiple blocks simultaneously in a mesh based on subdomain ID.'
+    []
+  []
 []

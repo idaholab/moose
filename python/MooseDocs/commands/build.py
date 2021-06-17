@@ -10,10 +10,12 @@
 """Defines the MooseDocs build command."""
 import os
 import sys
+import collections
 import multiprocessing
 import logging
 import subprocess
 import shutil
+import yaml
 import livereload
 import mooseutils
 from mooseutils.yaml_load import yaml_load
@@ -31,6 +33,8 @@ def command_line_options(subparser, parent):
 
     parser.add_argument('--config', default='config.yml',
                         help="The configuration file.")
+    parser.add_argument('--args', default=None, type=lambda a: yaml.load(a, yaml.Loader),
+                        help="YAML content to override configuration items supplied in file.")
     parser.add_argument('--disable', nargs='*', default=[],
                         help="A list of extensions to disable.")
     parser.add_argument('--fast', action='store_true',
@@ -47,8 +51,6 @@ def command_line_options(subparser, parent):
                         help="Create a local live server.")
     parser.add_argument('--dump', action='store_true',
                         help="Show page tree to the screen.")
-    parser.add_argument('--grammar', action='store_true',
-                        help='Show the lexer components in order.')
     parser.add_argument('--num-threads', '-j', type=int, default=int(multiprocessing.cpu_count()/2),
                         help="Specify the number of threads to build pages with.")
     parser.add_argument('--port', default='8000', type=str,
@@ -86,7 +88,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         # Determine the directories to watch
         roots = set()
         self._items = common.get_items(self._config.get('Content'))
-        for root, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
+        for root, _, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
             roots.add(root)
 
         for root in roots:
@@ -139,22 +141,26 @@ def main(options):
     Inputs:
         options[argparse options]: Complete options from argparse, see MooseDocs/main.py
     """
+    # Infinite nested dict
+    tree = lambda: collections.defaultdict(tree)
+    kwargs = tree()
 
     # Setup executioner
-    kwargs = dict()
     if options.executioner:
-        kwargs['Executioner'] = {'type':options.executioner}
+        kwargs['Executioner']['type'] = options.executioner
 
     # Disable extensions
     if options.fast:
         options.disable += ['MooseDocs.extensions.appsyntax', 'MooseDocs.extensions.navigation',
                             'MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet']
-
-    kwargs['Extensions'] = dict()
     for name in options.disable:
         kwargs['Extensions'][name] = dict(active=False)
 
-    # Create translator
+    # Apply '--args' and override anything already set
+    if options.args is not None:
+        mooseutils.recursive_update(kwargs, options.args)
+
+    # Create translator, provide kwargs to override content of file
     translator, _ = common.load_config(options.config, **kwargs)
     if options.destination:
         translator.update(destination=mooseutils.eval_path(options.destination))

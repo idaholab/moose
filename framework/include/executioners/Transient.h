@@ -99,6 +99,12 @@ public:
   virtual Real getTime() { return _time; };
 
   /**
+   * Get the current target time
+   * @return target time
+   */
+  virtual Real getTargetTime() { return _target_time; }
+
+  /**
    * Set the current time.
    */
   virtual void setTime(Real t) { _time = t; };
@@ -191,6 +197,12 @@ public:
    * The relative L2 norm of the difference between solution and old solution vector.
    */
   virtual Real relativeSolutionDifferenceNorm();
+
+  /**
+   * Set the number of time steps
+   * @param num_steps number of time steps
+   */
+  virtual void forceNumSteps(const unsigned int num_steps) { _num_steps = num_steps; }
 
 protected:
   /// Here for backward compatibility

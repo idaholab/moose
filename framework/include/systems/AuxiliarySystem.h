@@ -44,13 +44,11 @@ public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
-  virtual void addExtraVectors() override;
-
-  virtual void initialSetup();
-  virtual void timestepSetup();
-  virtual void subdomainSetup();
-  virtual void residualSetup();
-  virtual void jacobianSetup();
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override;
+  virtual void subdomainSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
   virtual void updateActive(THREAD_ID tid);
 
   virtual void addVariable(const std::string & var_type,
@@ -99,7 +97,6 @@ public:
 
   const NumericVector<Number> * const & currentSolution() const override
   {
-    _current_solution = _sys.current_local_solution.get();
     return _current_solution;
   }
 
@@ -145,13 +142,7 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
-  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
-  const NumericVector<Number> * solutionPreviousNewton() const override
-  {
-    return _solution_previous_nl;
-  }
-
-  virtual TransientExplicitSystem & sys() { return _sys; }
+  virtual ExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
@@ -183,14 +174,12 @@ protected:
 
   FEProblemBase & _fe_problem;
 
-  TransientExplicitSystem & _sys;
+  ExplicitSystem & _sys;
 
   /// solution vector from nonlinear solver
-  mutable const NumericVector<Number> * _current_solution;
+  const NumericVector<Number> * _current_solution;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
-  /// Solution vector of the previous nonlinear iterate
-  NumericVector<Number> * _solution_previous_nl;
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// solution vector for u^dotdot
@@ -256,9 +245,4 @@ protected:
   friend class ComputeNodalKernelBCJacobiansThread;
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
-  NumericVector<Number> & solutionOldInternal() const override { return *_sys.old_local_solution; }
-  NumericVector<Number> & solutionOlderInternal() const override
-  {
-    return *_sys.older_local_solution;
-  }
 };

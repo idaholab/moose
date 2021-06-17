@@ -37,6 +37,14 @@ protected:
    */
   virtual void computeThermalStrain(ADReal & thermal_strain) = 0;
 
+  /// Flag to optionally use the temperature from the previous time step
+  const bool _use_old_temperature;
+
+  ///@{Temperature variables
   const ADVariableValue & _temperature;
+  const VariableValue & _temperature_old;
+  ///@}
+
+  /// Stress free temperature
   const ADVariableValue & _stress_free_temperature;
 };

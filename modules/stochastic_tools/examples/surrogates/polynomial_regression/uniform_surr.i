@@ -29,7 +29,6 @@
     type = LatinHypercube
     num_rows = 100000
     distributions = 'k_dist q_dist L_dist Tinf_dist'
-    num_bins = 20
   []
 []
 

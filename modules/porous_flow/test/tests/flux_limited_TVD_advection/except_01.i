@@ -6,34 +6,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./flux]
+  [flux]
     type = FluxLimitedTVDAdvection
     variable = u
     advective_flux_calculator = fluo
-  [../]
+  []
 []
 
 [UserObjects]
-  [./fluo]
+  [fluo]
     type = AdvectiveFluxCalculatorConstantVelocity
     execute_on = 'nonlinear timestep_begin timestep_end final initial'
     u = u
     velocity = '0 0 0'
-  [../]
+  []
 []
 
 
 [Preconditioning]
   active = smp
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

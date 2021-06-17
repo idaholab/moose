@@ -14,6 +14,7 @@
     requirement = 'The system shall be able to solve mass, momentum, and energy incompressible Navier-Stokes equations with multiple threads.'
     min_threads = 2
     issues = '#15713'
+    recover = false # Already testing recover in 'exo' and if we do this we'll get errors about recovering with a different number of threads. Also unsure if we support threaded recovery
   []
   [jac]
     type = PetscJacobianTester
@@ -37,6 +38,7 @@
     requirement = 'The system shall be able to solve stablized mass, momentum, and energy incompressible Navier-Stokes equations with multiple threads.'
     min_threads = 2
     issues = '#15713'
+    recover = false # Already testing recover in 'exo_stab' and if we do this we'll get errors about recovering with a different number of threads. Also unsure if we support threaded recovery
   []
   [jac_stab]
     type = PetscJacobianTester
@@ -55,6 +57,7 @@
     prereq = 'exo_stab'
     issues = '#15159'
     requirement = 'The system shall be able to reproduce results of incompressible Navier-Stokes with Boussinesq approximation using a customized and condensed action syntax.'
+    recover = false # We use the same output as exo_stab
   []
   [threaded_exo_stab_action]
     type = 'Exodiff'
@@ -63,5 +66,6 @@
     requirement = 'The system shall be able to solve mass, momentum, and energy incompressible Navier-Stokes equations with a custom action syntax using multiple threads.'
     min_threads = 2
     issues = '#15713'
+    recover = false # We use the same output as exo_stab and also unsure if we support threaded recovery
   []
 []

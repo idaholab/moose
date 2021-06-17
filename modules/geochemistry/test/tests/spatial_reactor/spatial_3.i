@@ -1,10 +1,10 @@
 # demonstrating that adding sources of a fixed-activity species makes no difference before the system is closed
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl-"
-  [../]
+  []
 []
 
 [SpatialReactionSolver]
@@ -12,18 +12,19 @@
     charge_balance_species = "Cl-"
     constraint_species = "H2O H+ Cl-"
     constraint_value = "  55.5 1E-5 1E-5"
-    constraint_meaning = "moles_bulk_water free_molality moles_bulk_species"
+    constraint_meaning = "bulk_composition free_concentration bulk_composition"
+    constraint_unit = "moles molal moles"
     close_system_at_time = 3
     source_species_names = 'HCl'
     source_species_rates = '1.0'
 []
 
 [Postprocessors]
-  [./pH]
+  [pH]
     type = PointValue
     point = '0 0 0'
     variable = pH
-  [../]
+  []
 []
 
 [Mesh]

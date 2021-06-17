@@ -17,4 +17,12 @@
     exodiff = 'stagnation_temperature_aux_out.e'
     threading = '!pthreads'
   [../]
+  [./fluid_density_aux]
+    type = 'Exodiff'
+    input = 'fluid_density_aux.i'
+    exodiff = 'fluid_density_aux_out.e'
+    requirement = "The system shall compute fluid density from pressure and temperature."
+    issues = '#17546'
+    design = 'FluidDensityAux.md'
+  [../]
 []

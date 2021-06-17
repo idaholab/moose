@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
+#include "Shuffle.h"
 #include "DenseMatrix.h"
 #include "MooseObject.h"
 #include "MooseRandom.h"
@@ -47,14 +47,14 @@ class Sampler : public MooseObject,
                 public SamplerInterface
 {
 public:
+  enum class SampleMode
+  {
+    GLOBAL = 0,
+    LOCAL = 1
+  };
+
   static InputParameters validParams();
-
   Sampler(const InputParameters & parameters);
-
-  // DEPRECATED, DO NOT USE
-  virtual std::vector<DenseMatrix<Real>> sample();
-  std::vector<DenseMatrix<Real>> getSamples();
-  double rand(unsigned int index = 0);
 
   // The public members define the API that is exposed to application developers that are using
   // Sampler objects to perform calculations, so be very careful when adding items here since
@@ -152,14 +152,13 @@ protected:
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
-  // TODO: Restore this pure virtual after application are updated to new interface
   /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
 
   ///@{
   /**
@@ -168,8 +167,8 @@ protected:
    * These methods should not be called directly, each is automatically called by the public
    * getGlobalSamples() or getLocalSamples() methods.
    */
-  virtual void sampleSetUp(){};
-  virtual void sampleTearDown(){};
+  virtual void sampleSetUp(const SampleMode /*mode*/) {}
+  virtual void sampleTearDown(const SampleMode /*mode*/) {}
   ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
@@ -204,18 +203,44 @@ protected:
    * TODO: This should be updated if the If the random number generator is updated to type that
    * supports native advancing.
    */
-  virtual void advanceGenerators(dof_id_type count);
+  virtual void advanceGenerators(const dof_id_type count);
+  virtual void advanceGenerator(const unsigned int seed_index, const dof_id_type count);
+  void setAutoAdvanceGenerators(const bool state);
+
+  /**
+   * Helper for shuffling a vector of data in-place; the default assumes data is distributed
+   *
+   * NOTE: This will advance the generator by the size of the supplied vector.
+   */
+  template <typename T>
+  void shuffle(std::vector<T> & data, const std::size_t seed_index = 0, bool is_distributed = true);
+
+  //@{
+  /**
+   * Callbacks for before and after execute.
+   *
+   * These were added to support of dynamic sampler sizes. Recall that execute is simply to advance
+   * the state of the generator such that the next sample will be unique. These methods allow
+   * operations before and after the call to generator advancement.
+   */
+  virtual void executeSetUp() {}
+  virtual void executeTearDown() {}
+  ///@}
 
 private:
+  ///@{
   /**
-   * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
-   * the DenseMatrix rows for parallel distribution. A separate method is required so that the
+   * Functions called by MOOSE to setup the Sampler for use. The primary purpose is to partition
+   * the DenseMatrix rows for parallel distribution. A separate methods are required so that the
    * set methods can be called within the constructors of child objects, see
-   * FEProblemBase::addSampler method.
+   * FEProblemBase::addSampler method. The reinit was added to support re-partitioning to allow
+   * for dynamic changes in sampler size.
    *
    * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
    */
-  void init();
+  void init();   // sets up MooseRandom
+  void reinit(); // partitions sampler output
+  ///@}
   friend void FEProblemBase::addSampler(const std::string & type,
                                         const std::string & name,
                                         InputParameters & parameters);
@@ -229,6 +254,16 @@ private:
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
+
+  /**
+   * Helper function for reinit() errors.
+   **/
+  void checkReinitStatus() const;
+
+  /**
+   * Advance method for internal use that considers the auto advance flag.
+   */
+  void advanceGeneratorsInternal(const dof_id_type count);
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
@@ -260,6 +295,9 @@ private:
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
 
+  /// Flag to indicate if the reinit method should be called during execute
+  bool _needs_reinit;
+
   /// Flag for initial execute to allow the first set of random numbers to be always be the same
   bool _has_executed;
 
@@ -272,6 +310,13 @@ private:
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
 
+  /// The minimum number of processors that are associated with a set of rows
+  /// Must be consistent with MultiApp::_min_procs_per_app
+  const dof_id_type _min_procs_per_row;
+
+  /// Flag for disabling automatic generator advancing
+  bool _auto_advance_generators;
+
   ///@{
   /// PrefGraph timers
   const PerfID _perf_get_global_samples;
@@ -283,3 +328,10 @@ private:
   const PerfID _perf_advance_generator;
   ///@}
 };
+
+template <typename T>
+void
+Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, bool is_distributed)
+{
+  MooseUtils::shuffle<T>(data, _generator, seed_index, is_distributed ? &_communicator : nullptr);
+}

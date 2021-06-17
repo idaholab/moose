@@ -11,7 +11,16 @@
       csvdiff = 'element_value_sampler_element_value_sampler_0000.csv'
       mesh_mode = REPLICATED
 
-      detail = 'for elemental variables and'
+      detail = 'for elemental FE variables and'
+    []
+    [fv]
+      type = 'CSVDiff'
+      input = 'fv_element_value_sampler.i'
+      csvdiff = 'element_value_sampler_element_value_sampler_0000.csv'
+      mesh_mode = REPLICATED
+      prereq = 'element_value_sampler/monomial'
+
+      detail = 'for FV variables,'
     []
     [lagrange]
       type = 'RunException'
@@ -20,7 +29,7 @@
       expect_err = "The variable 'u' is not elemental"
       mesh_mode = REPLICATED
 
-      detail = 'nodal variables.'
+      detail = 'but not for nodal variables.'
     []
   []
 []

@@ -18,7 +18,7 @@ template <>
 InputParameters validParams<BlockDeletionGenerator>();
 
 /**
- * MeshGenerator for
+ * MeshGenerator for removing blocks from the mesh
  */
 class BlockDeletionGenerator : public ElementDeletionGeneratorBase
 {
@@ -28,10 +28,10 @@ public:
   BlockDeletionGenerator(const InputParameters & parameters);
 
 protected:
+  virtual std::unique_ptr<MeshBase> generate() override;
   virtual bool shouldDelete(const Elem * elem) override;
 
 private:
-  ///Defines the block to be removed
-  const SubdomainID _block_id;
+  /// Ids of the blocks to be removed
+  std::vector<SubdomainID> _block_ids;
 };
-

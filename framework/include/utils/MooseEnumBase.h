@@ -106,6 +106,15 @@ public:
    */
   int getNextValidID() const;
 
+  /**
+   * Adds an enumeration item from name
+   */
+  MooseEnumBase & operator+=(const std::string & name);
+  /**
+   * Adds enumeration items from a list of names
+   */
+  MooseEnumBase & operator+=(const std::initializer_list<std::string> & names);
+
 protected:
   MooseEnumBase();
 

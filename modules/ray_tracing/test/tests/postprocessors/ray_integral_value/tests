@@ -1,0 +1,51 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayIntegralValue.md'
+
+  [errors]
+    requirement = 'The system shall report an error when sampling the integrated value by a ray and'
+
+    [not_integral_ray_kernel]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'RayKernels/active=null Postprocessors/active=not_integral_ray_kernel'
+      expect_err = "NullRayKernel is not derived from an IntegralRayKernel."
+
+      detail = 'the provided IntegralRayKernel is not an IntegralRayKernel,'
+    []
+    [kernel_not_found]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'RayKernels/active=null Postprocessors/active=kernel_not_found'
+      expect_err = "The RayKernel by the name 'dummy' was not found."
+
+      detail = 'the provided IntegralRayKernel was not found,'
+    []
+    [ray_not_found]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'RayKernels/active=variable_integral Postprocessors/active=ray_not_found'
+      expect_err = "Could not find a Ray named 'dummy'"
+
+      detail = 'a Ray with the given name was not found,'
+    []
+    [no_registration]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'UserObjects/active=lots RayKernels/active=variable_integral Postprocessors/active=no_registration'
+      expect_err = "Cannot be used because the supplied LotsOfRaysRayStudy does not have Ray registration enabled."
+      allow_test_objects = true
+
+      detail = 'the provided study does not support Ray registration,'
+    []
+    [no_banking]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'UserObjects/active=no_banking_study RayKernels/active=variable_integral Postprocessors/active=no_banking'
+      expect_err = "Cannot be used because the supplied DisableRayBankingStudy does not bank Rays on completion."
+      allow_test_objects = true
+
+      detail = 'or the provided study does not support Ray banking.'
+    []
+  []
+[]

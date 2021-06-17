@@ -6,6 +6,7 @@
     cli_args = 'ThermalContact/left_to_right/min_gap_order=0 Outputs/file_base=min_gap_order_zero'
     issues = '#13221'
     design = 'GapConductance.md GapHeatTransfer.md'
+    mesh_mode = REPLICATED
     requirement = 'Optionally a constant attenuation shall be applied to compute the gap conductance below a gap length threshold.'
   [../]
   [./min_gap_order_one]
@@ -14,6 +15,7 @@
     input = min_gap.i
     cli_args = 'ThermalContact/left_to_right/min_gap_order=1 Outputs/file_base=min_gap_order_one'
     issues = '#13221'
+    mesh_mode = REPLICATED
     design = 'GapConductance.md GapHeatTransfer.md'
     requirement = 'Optionally a linear Taylor expansion of the inverse gap length shall be applied as the attenuation to compute the gap conductance below a gap length threshold.'
   [../]

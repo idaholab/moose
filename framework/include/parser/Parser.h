@@ -63,15 +63,15 @@ public:
   virtual ~Parser();
 
   /**
-   * Return the filename that was parsed
+   * Return the primary (first) filename that was parsed
    */
-  std::string getFileName(bool stripLeadingPath = true) const;
+  std::string getPrimaryFileName(bool stripLeadingPath = true) const;
 
   /**
    * Parse an input file consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void parse(const std::string & input_filename);
+  void parse(const std::vector<std::string> & input_filenames);
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -133,6 +133,14 @@ protected:
                           InputParameters::Parameter<std::vector<T>> * param,
                           bool in_global,
                           GlobalParamsAction * global_block);
+
+  /// Template method for setting any map type parameter read from the input file or command line
+  template <typename KeyType, typename MappedType>
+  void setMapParameter(const std::string & full_name,
+                       const std::string & short_name,
+                       InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
+                       bool in_global,
+                       GlobalParamsAction * global_block);
 
   /**
    * Sets an input parameter representing a file path using input file data.  The file path is
@@ -208,8 +216,8 @@ protected:
   /// Object for holding the syntax parse tree
   std::unique_ptr<SyntaxTree> _syntax_formatter;
 
-  /// The input file name that is used for parameter extraction
-  std::string _input_filename;
+  /// The input file names that are used for parameter extraction
+  std::vector<std::string> _input_filenames;
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;

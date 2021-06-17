@@ -142,7 +142,10 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlock(ivar, *vector_tag);
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+  }
 
   _local_re.resize(_re_blocks[0]->size());
 }
@@ -154,8 +157,10 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, *vector_tag);
-
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+  }
   _local_re.resize(_re_blocks[0]->size());
 }
 
@@ -166,7 +171,10 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &assembly.residualBlockLower(ivar, *vector_tag);
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _re_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+  }
 
   _local_re.resize(_re_blocks[0]->size());
 }

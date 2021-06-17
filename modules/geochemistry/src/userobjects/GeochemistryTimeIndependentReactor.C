@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "GeochemistryTimeIndependentReactor.h"
 
 registerMooseObject("GeochemistryApp", GeochemistryTimeIndependentReactor);
@@ -26,12 +35,14 @@ GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
          getParam<std::string>("charge_balance_species"),
          getParam<std::vector<std::string>>("constraint_species"),
          getParam<std::vector<Real>>("constraint_value"),
+         getParam<MultiMooseEnum>("constraint_unit"),
          getParam<MultiMooseEnum>("constraint_meaning"),
          _temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),
          getParam<Real>("min_initial_molality"),
          {},
-         {}),
+         {},
+         MultiMooseEnum("")),
     _solver(_mgd.basis_species_name.size(),
             _mgd.kin_species_name.size(),
             _is,

@@ -40,8 +40,13 @@ ComputeMortarFunctor::ComputeMortarFunctor(
   for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
 
-  _primary_boundary_id = _amg.primary_secondary_boundary_id_pairs[0].first;
-  _secondary_boundary_id = _amg.primary_secondary_boundary_id_pairs[0].second;
+  const auto & primary_secondary_boundary_id_pairs = _amg.primarySecondaryBoundaryIDPairs();
+  mooseAssert(primary_secondary_boundary_id_pairs.size() == 1,
+              "We currently only support a single primary-secondary ID pair per mortar segment "
+              "mesh. We can probably support this without too much trouble if you want to contact "
+              "a MOOSE developer.");
+  _primary_boundary_id = primary_secondary_boundary_id_pairs[0].first;
+  _secondary_boundary_id = primary_secondary_boundary_id_pairs[0].second;
 }
 
 void
@@ -62,8 +67,8 @@ ComputeMortarFunctor::operator()()
   unsigned int num_cached = 0;
 
   for (MeshBase::const_element_iterator
-           el = _amg.mortar_segment_mesh->active_local_elements_begin(),
-           end_el = _amg.mortar_segment_mesh->active_local_elements_end();
+           el = _amg.mortarSegmentMesh().active_local_elements_begin(),
+           end_el = _amg.mortarSegmentMesh().active_local_elements_end();
        el != end_el;
        ++el)
   {
@@ -86,7 +91,7 @@ ComputeMortarFunctor::operator()()
       continue;
 
     // Get a reference to the MortarSegmentInfo for this Elem.
-    const MortarSegmentInfo & msinfo = _amg.msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
     // There may be no contribution from the primary side if it is not "in contact".
     bool has_secondary = msinfo.secondary_elem ? true : false;
@@ -129,6 +134,9 @@ ComputeMortarFunctor::operator()()
       Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
       custom_xi1_pts[qp] = xi1_eta;
     }
+
+    const auto normals = _amg.getNormals(*msinfo.secondary_elem, custom_xi1_pts);
+    const auto nodal_normals = _amg.getNodalNormals(*msinfo.secondary_elem);
 
     const Elem * reinit_secondary_elem = secondary_ip;
 
@@ -196,38 +204,44 @@ ComputeMortarFunctor::operator()()
     _fe_problem.reinitMaterialsBoundary(
         _secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
 
+    num_cached++;
     if (!_fe_problem.currentlyComputingJacobian())
     {
-      for (auto && mc : _mortar_constraints)
+      for (auto * const mc : _mortar_constraints)
+      {
+        mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeResidual(_has_primary);
+      }
 
       _assembly.cacheResidual();
       _assembly.cacheResidualNeighbor();
       _assembly.cacheResidualLower();
-
-      num_cached++;
 
       if (num_cached % 20 == 0)
         _assembly.addCachedResiduals();
     }
     else
     {
-      for (auto && mc : _mortar_constraints)
+      for (auto * const mc : _mortar_constraints)
+      {
+        mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeJacobian(_has_primary);
+      }
 
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-      // No caching for local AD indexing currently. Add caching if this shows up in profiling
-      _assembly.addJacobianMortar();
-#endif
+      _assembly.cacheJacobianMortar();
+
+      if (num_cached % 20 == 0)
+        _assembly.addCachedJacobian();
     }
   } // end for loop over elements
 
-  // Make sure any remaining cached residuals get added
+  // Call any post operations for our mortar constraints
+  for (auto * const mc : _mortar_constraints)
+    mc->post();
+
+  // Make sure any remaining cached residuals/Jacobians get added
   if (!_fe_problem.currentlyComputingJacobian())
     _assembly.addCachedResiduals();
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  // We do cache Jacobians when doing global AD indexing
   else
     _assembly.addCachedJacobian();
-#endif
 }

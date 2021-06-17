@@ -98,7 +98,7 @@ username ALL= NOPASSWD: /opt/moose/llvm-5.0.1/bin/lldb
 
 Where `username` MUST be replaced with *your* username!  And the path to `lldb` needs to reflect what you got back from `which lldb` above.  Once that line is in place press `Esc` (to exit "insert mode") then type `:wq` (that's a `colon` then `w` then `q` - it's a command that says "write and quit") and press `Enter`.
 
-Once you've completed that you should be able to run `sudo lldb` on the command-line and not need to enter your password.  If you still need to enter your password, email `moose-users` so we can figure out what's wrong before you go further.
+Once you've completed that you should be able to run `sudo lldb` on the command-line and not need to enter your password.  If you still need to enter your password, create a new discussion on our [forum](https://github.com/idaholab/moose/discussions) so we can figure out what's wrong before you go further.
 
 ### Actually Parallel Debugging
 

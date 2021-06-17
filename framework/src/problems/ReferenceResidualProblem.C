@@ -139,7 +139,7 @@ ReferenceResidualProblem::initialSetup()
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
-  TransientExplicitSystem & as = aux_sys.sys();
+  auto & as = aux_sys.sys();
 
   if (_soln_var_names.size() == 0)
   {
@@ -356,7 +356,7 @@ ReferenceResidualProblem::updateReferenceResidual()
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
-  TransientExplicitSystem & as = aux_sys.sys();
+  auto & as = aux_sys.sys();
 
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
   {
@@ -405,7 +405,6 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
                                                     const Real abstol,
                                                     const PetscInt nfuncs,
                                                     const PetscInt max_funcs,
-                                                    const PetscBool force_iteration,
                                                     const Real initial_residual_before_preset_bcs,
                                                     const Real /*div_threshold*/)
 {
@@ -446,7 +445,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     oss << "Failed to converge, function norm is NaN\n";
     reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
-  else if (fnorm < abstol && !force_iteration)
+  else if ((it >= _nl_forced_its) && fnorm < abstol)
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
     reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;

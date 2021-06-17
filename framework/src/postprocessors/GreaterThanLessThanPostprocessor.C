@@ -66,7 +66,7 @@ GreaterThanLessThanPostprocessor::initialize()
 void
 GreaterThanLessThanPostprocessor::execute()
 {
-  AllLocalDofIndicesThread aldit(_fe_problem.getNonlinearSystemBase().system(), {_var.name()});
+  AllLocalDofIndicesThread aldit(_fe_problem, {_var.name()});
 
   if (_subdomain_restricted)
   {

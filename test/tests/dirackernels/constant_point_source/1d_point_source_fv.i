@@ -22,10 +22,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Materials]
   [diff]
     type = ADGenericConstantMaterial

@@ -24,7 +24,7 @@ are simple tests and are part of the automatic test suite.
 
 Two single-phase simulations with 100 1D elements are run: one with
 fully-saturated conditions, and the other with unsaturated conditions
-using the van-Genuchten capillary pressure (this should not, and does
+using the van Genuchten capillary pressure (this should not, and does
 not, make any difference to the results).  The porepressure is held
 fixed at one boundary ($x=0$).  The parameters are tabulated in [tab:grav_params].
 

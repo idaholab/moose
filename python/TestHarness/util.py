@@ -33,6 +33,10 @@ MOOSE_OPTIONS = {
                            }
     },
 
+    'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
+                           'default'   : '50'
+    },
+
     'libpng' :    { 're_option' : r'#define\s+MOOSE_HAVE_LIBPNG\s+(\d+)',
                     'default'   : 'FALSE',
                     'options'   :
@@ -142,6 +146,10 @@ LIBMESH_OPTIONS = {
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
   'mumps' :        { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_MUMPS\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
+  'strumpack' :        { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_STRUMPACK\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
@@ -554,7 +562,10 @@ def getConfigOption(config_files, option, options):
     return option_set
 
 def getMooseConfigOption(moose_dir, option):
-    filenames = [moose_dir + '/framework/include/base/MooseConfig.h']
+    filenames = [
+        moose_dir + '/framework/include/base/MooseConfig.h',
+        moose_dir + '/include/moose/MooseConfig.h',
+        ];
 
     return getConfigOption(filenames, option, MOOSE_OPTIONS)
 

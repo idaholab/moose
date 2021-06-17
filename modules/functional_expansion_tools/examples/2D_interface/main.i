@@ -99,13 +99,13 @@
     boundary = right
   [../]
   [./total_flux]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = m
     boundary = right
     diffusivity = thermal_conductivity
   [../]
   [./picard_iterations]
-    type = NumPicardIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -117,11 +117,11 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 30
+  fixed_point_max_its = 30
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-9
-  picard_rel_tol = 1e-8
-  picard_abs_tol = 1e-9
+  fixed_point_rel_tol = 1e-8
+  fixed_point_abs_tol = 1e-9
 []
 
 [Outputs]

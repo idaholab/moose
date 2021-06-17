@@ -8,7 +8,7 @@ reordering - reduce the number of necessary residual evaluations and enable the
 compiler to perform code vectorization. These base classes have restrictions on
 the mathematical form of the residuals they can be applied to.
 
-- [KernelValue](/KernelValue.md)]
+- [KernelValue](/KernelValue.md)
 - [ADKernelValue](/ADKernelValue.md)
 - [KernelGrad](/KernelGrad.md)
 - [ADKernelGrad](/ADKernelGrad.md)

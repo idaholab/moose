@@ -19,7 +19,7 @@
   [../]
   [./delete]
     type = BlockDeletionGenerator
-    block_id = 1
+    block = 1
     input = mark
     new_boundary = cut_surface
   [../]

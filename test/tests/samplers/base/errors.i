@@ -13,6 +13,7 @@
 [Samplers]
   [sample]
     type = TestSampler
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 

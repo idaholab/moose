@@ -27,21 +27,22 @@
   porepressure = pp
   temperature = temp
   mass_fraction_vars = "nacl"
-  use_brine = true
-  nacl_index = 0
+  fluid_properties_type = PorousFlowBrine
+  nacl_name = nacl
   dictator_name = dictator
+  stabilization = none
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 20E6
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 323.15
-  [../]
-  [./nacl]
+  []
+  [nacl]
     initial_condition = 0.1047
-  [../]
+  []
 []
 
 [Kernels]
@@ -49,90 +50,90 @@
 []
 
 [BCs]
-  [./t_bdy]
+  [t_bdy]
     type = DirichletBC
     variable = temp
     boundary = 'left right'
     value = 323.15
-  [../]
-  [./p_bdy]
+  []
+  [p_bdy]
     type = DirichletBC
     variable = pp
     boundary = 'left right'
     value = 20E6
-  [../]
-  [./nacl_bdy]
+  []
+  [nacl_bdy]
     type = DirichletBC
     variable = nacl
     boundary = 'left right'
     value = 0.1047
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pressure]
+  [pressure]
     type = ElementIntegralVariablePostprocessor
     variable = pp
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementIntegralVariablePostprocessor
     variable = temp
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     type = ElementIntegralVariablePostprocessor
     variable = nacl
-  [../]
-  [./density]
+  []
+  [density]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_density_qp0'
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity_qp0'
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
-  [../]
-  [./energy]
+  []
+  [energy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_internal_energy_nodal0'
-  [../]
+  []
 []
 
 [Materials]
   # Thermal conductivity
-  [./thermal_conductivity]
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
     wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-  [../]
+  []
 
   # Specific heat capacity
-  [./rock_heat]
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 850
     density = 2700
-  [../]
+  []
 
   # Permeability
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
-  [../]
+  []
 
   # Porosity
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

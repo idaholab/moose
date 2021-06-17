@@ -34,7 +34,7 @@ AC_ARG_WITH(derivative-type,
               user_set_derivative_type=yes
             ],
             [
-              derivative_type=nonsparse
+              derivative_type=sparse
               user_det_derivative_type=no
             ])
 
@@ -50,19 +50,15 @@ AC_MSG_RESULT([configuring with derivative backing array size of $derivative_siz
 AC_ARG_WITH(ad-indexing-type,
             AS_HELP_STRING([--with-ad-indexing-type=local,global],[Specify the indexing scheme for AD derivatives]),
             [ad_indexing_type="$withval"],
-            [ad_indexing_type=local])
+            [ad_indexing_type=global])
 
 AS_CASE("$ad_indexing_type",
         [global],
         [
           AS_IF([test "$derivative_type" = nonsparse],
                  [
-                   AS_IF([test "$user_set_derivative_type" = yes],
-                         dnl The user explicitly requested a nonsparse container which is incompatabile with global indexing
-                         [AC_MSG_ERROR(cannot request global AD indexing and a nonsparse derivative container)],
-                         dnl The user did not explicity request a container type so well set sparse for them
-                         [derivative_type=sparse]
-                        )
+                   dnl The user explicitly requested a non-sparse container which is incompatible with global indexing
+                   AC_MSG_ERROR(cannot use global AD indexing with a nonsparse derivative container)
                  ])
           AC_DEFINE(GLOBAL_AD_INDEXING, 1, [Whether to use a global indexing scheme for AD])
         ],

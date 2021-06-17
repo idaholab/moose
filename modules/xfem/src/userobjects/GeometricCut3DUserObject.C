@@ -20,12 +20,8 @@
 InputParameters
 GeometricCut3DUserObject::validParams()
 {
-  // Get input parameters from parent class
   InputParameters params = GeometricCutUserObject::validParams();
-
-  // Class description
   params.addClassDescription("Base class for 3D XFEM Geometric Cut UserObjects");
-  // Return the parameters
   return params;
 }
 
@@ -37,8 +33,7 @@ GeometricCut3DUserObject::GeometricCut3DUserObject(const InputParameters & param
 bool
 GeometricCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
                                                std::vector<Xfem::CutEdge> & /*cut_edges*/,
-                                               std::vector<Xfem::CutNode> & /*cut_nodes*/,
-                                               Real /*time*/) const
+                                               std::vector<Xfem::CutNode> & /*cut_nodes*/) const
 {
   mooseError("Invalid method: must use vector of element faces for 3D mesh cutting");
   return false;
@@ -46,8 +41,7 @@ GeometricCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
 
 bool
 GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
-                                               std::vector<Xfem::CutFace> & cut_faces,
-                                               Real /*time*/) const
+                                               std::vector<Xfem::CutFace> & cut_faces) const
 // TODO: Time evolving cuts not yet supported in 3D (hence the lack of use of the time variable)
 {
   bool cut_elem = false;
@@ -102,8 +96,7 @@ GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 GeometricCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
-                                                std::vector<Xfem::CutEdge> & /*cut_edges*/,
-                                                Real /*time*/) const
+                                                std::vector<Xfem::CutEdge> & /*cut_edges*/) const
 {
   mooseError("Invalid method: must use vector of element faces for 3D mesh cutting");
   return false;
@@ -111,8 +104,7 @@ GeometricCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> 
 
 bool
 GeometricCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                                std::vector<Xfem::CutFace> & /*cut_faces*/,
-                                                Real /*time*/) const
+                                                std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   // TODO: Need this for branching in 3D
   mooseError("cutFragmentByGeometry not yet implemented for 3D mesh cutting");

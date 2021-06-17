@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FullSolveMultiApp.h"
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 #include "Executioner.h"
 #include "Transient.h"
 
@@ -87,7 +87,7 @@ FullSolveMultiApp::initialSetup()
       {
         Transient * tex = dynamic_cast<Transient *>(ex);
         if (tex && tex->parameters().get<bool>("error_on_dtmin"))
-          paramError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
+          mooseError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
                      "true in sub-application. Set this parameter to false in sub-application to "
                      "avoid an error if Transient solve fails.");
       }

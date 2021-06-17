@@ -223,10 +223,10 @@ protected:
   const std::array<unsigned int, 5> _t3{{1, 0, 1, 3, 3}};
   const std::array<Real, 5> _alpha3{{25.0, 25.0, 25.0, 15.0, 20.0}};
   const std::array<Real, 5> _beta3{{325.0, 300.0, 300.0, 275.0, 275.0}};
-  const std::array<Real, 5> _gamma3{{1.16, 1.19, 1.19, 1.25, 1.25}};
+  const std::array<Real, 5> _gamma3{{1.16, 1.19, 1.19, 1.25, 1.22}};
   const std::array<Real, 5> _eps3{{1.0, 1.0, 1.0, 1.0, 1.0}};
   const std::array<Real, 3> _n4{{-0.66642276540751, 0.72608632349897, 0.055068668612842}};
-  const std::array<Real, 3> _a4{{3.5, 3.5, 3.5}};
+  const std::array<Real, 3> _a4{{3.5, 3.5, 3.0}};
   const std::array<Real, 3> _b4{{0.875, 0.925, 0.875}};
   const std::array<Real, 3> _beta4{{0.3, 0.3, 0.3}};
   const std::array<Real, 3> _A4{{0.7, 0.7, 0.7}};

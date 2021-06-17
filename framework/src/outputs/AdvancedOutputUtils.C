@@ -12,6 +12,15 @@
 #include "Output.h"
 #include "InputParameters.h"
 
+void
+OutputData::reset()
+{
+  available.clear();
+  show.clear();
+  hide.clear();
+  output.clear();
+}
+
 // Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
 OutputOnWarehouse::OutputOnWarehouse(const ExecFlagEnum & execute_on,
                                      const InputParameters & parameters)
@@ -57,4 +66,11 @@ OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>(), _ha
   _map["postprocessors"] = OutputData();
   _map["vector_postprocessors"] = OutputData();
   _map["reporters"] = OutputData();
+}
+
+void
+OutputDataWarehouse::reset()
+{
+  for (auto map_pair : _map)
+    map_pair.second.reset();
 }

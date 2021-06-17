@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADRadialReturnCreepStressUpdateBase.h"
+#include "RadialReturnCreepStressUpdateBase.h"
 
 /**
  * This class uses the stress update material in a radial return isotropic creep
@@ -28,7 +28,7 @@ public:
 
   ADPowerLawCreepStressUpdate(const InputParameters & parameters);
 
-  virtual ADReal
+  virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
                                  const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
 

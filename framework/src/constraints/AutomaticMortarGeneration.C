@@ -24,7 +24,7 @@
 #include "libmesh/edge_edge3.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
-#include "libmesh/quadrature_trap.h"
+#include "libmesh/quadrature_nodal.h"
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/replicated_mesh.h"
 
@@ -46,7 +46,6 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     bool periodic)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
-    h_max(0.),
     _debug(false),
     _on_displaced(on_displaced),
     _periodic(periodic),
@@ -117,6 +116,55 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 }
 
+std::vector<Point>
+AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
+{
+  std::vector<Point> nodal_normals(secondary_elem.n_nodes());
+  for (const auto n : make_range(secondary_elem.n_nodes()))
+    nodal_normals[n] = secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
+
+  return nodal_normals;
+}
+
+std::vector<Point>
+AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
+                                      const std::vector<Real> & oned_xi1_pts) const
+{
+  std::vector<Point> xi1_pts(oned_xi1_pts.size());
+  for (const auto qp : index_range(oned_xi1_pts))
+    xi1_pts[qp] = oned_xi1_pts[qp];
+
+  return getNormals(secondary_elem, xi1_pts);
+}
+
+std::vector<Point>
+AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
+                                      const std::vector<Point> & xi1_pts) const
+{
+  const auto num_qps = xi1_pts.size();
+  const auto nodal_normals = getNodalNormals(secondary_elem);
+  std::vector<Point> normals(num_qps);
+  for (const auto n : make_range(secondary_elem.n_nodes()))
+    for (const auto qp : make_range(num_qps))
+    {
+#ifndef NDEBUG
+      for (const auto d : make_range(1, LIBMESH_DIM))
+        mooseAssert(xi1_pts[qp](d) == 0,
+                    "We should only have non-zero entries in the first entry of the point because "
+                    "our mortar mesh currently only ever has 1D elements");
+#endif
+      const auto phi =
+          Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0));
+      normals[qp] += phi * nodal_normals[n];
+    }
+
+  if (_periodic)
+    for (auto & normal : normals)
+      normal *= -1;
+
+  return normals;
+}
+
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
@@ -141,6 +189,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::distance(mesh.bid_nodes_begin(primary_bnd_id), mesh.bid_nodes_end(primary_bnd_id));
     const auto num_secondary_nodes =
         std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
+    mooseAssert(num_primary_nodes,
+                "There are no primary nodes on boundary ID "
+                    << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+    mooseAssert(num_secondary_nodes,
+                "There are no secondary nodes on boundary ID "
+                    << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
 
     node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
   }
@@ -173,10 +227,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_elem = new Edge2;
 
     new_elem->processor_id() = secondary_elem->processor_id();
+    new_elem->subdomain_id() = secondary_elem->subdomain_id();
     new_elem->set_id(local_id_index++);
     new_elem->set_unique_id(new_elem->id());
-    new_elem->set_parent(const_cast<Elem *>(secondary_elem->parent()));
-    new_elem->set_interior_parent(const_cast<Elem *>(secondary_elem->interior_parent()));
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
@@ -242,7 +295,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Elem * secondary_elem = val.second;
 
     // If this is an aligned node, we don't need to do anything.
-    if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
+    if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
       continue;
 
     auto && order = secondary_elem->default_order();
@@ -285,96 +338,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         mortar_segment_mesh->add_point(new_pt, new_id, secondary_elem->processor_id());
     new_node->set_unique_id(new_id + node_unique_id_offset);
 
-    // Make an Elem on the left
-    Elem * new_elem_left;
-    if (order == SECOND)
-      new_elem_left = new Edge3;
-    else
-      new_elem_left = new Edge2;
-
-    new_elem_left->processor_id() = current_mortar_segment->processor_id();
-    new_elem_left->set_id(local_id_index++);
-    new_elem_left->set_unique_id(new_elem_left->id());
-    new_elem_left->set_interior_parent(current_mortar_segment->interior_parent());
-    new_elem_left->set_parent(current_mortar_segment->parent());
-    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
-    new_elem_left->set_node(1) = new_node;
-
-    if (order == SECOND)
-    {
-      Point left_interior_point(0);
-      Real left_interior_xi = (xi1 + info->xi1_a) / 2;
-
-      // This is eta for the current mortar segment that we're splitting
-      Real current_left_interior_eta =
-          (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
-
-      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
-           n < current_mortar_segment->n_nodes();
-           ++n)
-        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
-                               current_mortar_segment->point(n);
-
-      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
-                  "new_id must be the same on all processes");
-      Node * const new_interior_node = mortar_segment_mesh->add_point(
-          left_interior_point, new_interior_id, new_elem_left->processor_id());
-      new_elem_left->set_node(2) = new_interior_node;
-      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
-    }
-
-    mortar_segment_mesh->add_elem(new_elem_left);
-
-    // Make an Elem on the right
-    Elem * new_elem_right;
-    if (order == SECOND)
-      new_elem_right = new Edge3;
-    else
-      new_elem_right = new Edge2;
-
-    new_elem_right->processor_id() = current_mortar_segment->processor_id();
-    new_elem_right->set_id(local_id_index++);
-    new_elem_right->set_unique_id(new_elem_right->id());
-    new_elem_right->set_interior_parent(current_mortar_segment->interior_parent());
-    new_elem_right->set_parent(current_mortar_segment->parent());
-    new_elem_right->set_node(0) = new_node;
-    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
-
-    if (order == SECOND)
-    {
-      Point right_interior_point(0);
-      Real right_interior_xi = (xi1 + info->xi1_b) / 2;
-      // This is eta for the current mortar segment that we're splitting
-      Real current_right_interior_eta =
-          (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
-
-      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
-           n < current_mortar_segment->n_nodes();
-           ++n)
-        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
-                                current_mortar_segment->point(n);
-
-      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
-                  "new_id must be the same on all processes");
-      Node * const new_interior_node = mortar_segment_mesh->add_point(
-          right_interior_point, new_interior_id, new_elem_right->processor_id());
-      new_elem_right->set_node(2) = new_interior_node;
-      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
-    }
-
-    mortar_segment_mesh->add_elem(new_elem_right);
-
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the primary elems relative to the
     // new mortar segments.
-    Point dxyz_dxi(0);
-    for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
-      dxyz_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1) * secondary_elem->point(n);
-    auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
-    if (_periodic)
-      normal *= -1;
+    const Point normal = getNormals(*secondary_elem, std::vector<Real>({xi1}))[0];
 
     // Get the set of primary_node neighbors.
     if (this->nodes_to_primary_elem_map.find(primary_node->id()) ==
@@ -401,7 +368,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Storage for z-component of cross products for determining
     // orientation.
-    std::array<Real, 2> secondary_node_cps, primary_node_cps;
+    std::array<Real, 2> secondary_node_cps;
+    std::vector<Real> primary_node_cps(primary_node_neighbors.size());
 
     // Store z-component of left and right secondary node cross products with the nodal normal.
     for (unsigned int nid = 0; nid < 2; ++nid)
@@ -428,12 +396,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       orientation2_valid = (secondary_node_cps[0] * primary_node_cps[1] > 0.) &&
                            (secondary_node_cps[1] * primary_node_cps[0] > 0.);
     }
-    else
+    else if (primary_node_neighbors.size() == 1)
     {
       // 1 primary neighbor case
       orientation1_valid = (secondary_node_cps[0] * primary_node_cps[0] > 0.);
       orientation2_valid = (secondary_node_cps[1] * primary_node_cps[0] > 0.);
     }
+    else
+      mooseError("Invalid primary node neighbors size ", primary_node_neighbors.size());
 
     // Verify that both orientations are not simultaneously valid/invalid. If they are not, then we
     // are going to throw an exception instead of erroring out since we can easily reach this point
@@ -442,9 +412,99 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (orientation1_valid && orientation2_valid)
       throw MooseException(
           "AutomaticMortarGeneration: Both orientations cannot simultaneously be valid.");
+
+    // We are going to treat the case where both orientations are invalid as a case in which we
+    // should not be splitting the mortar mesh to incorporate primary mesh elements.
+    // In practice, this case has appeared for very oblique projections, so we assume these cases
+    // will not be considered in mortar thermomechanical contact.
     if (!orientation1_valid && !orientation2_valid)
-      throw MooseException(
-          "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid.");
+    {
+      mooseDoOnce(mooseWarning(
+          "AutomaticMortarGeneration: Unable to determine valid secondary-primary orientation. "
+          "Consequently we will consider projection of the primary node invalid and not split the "
+          "mortar segment. "
+          "This situation can indicate there are very oblique projections between primary (mortar) "
+          "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
+          "time step is too large. This message is only printed once."));
+      break;
+    }
+
+    // Make an Elem on the left
+    Elem * new_elem_left;
+    if (order == SECOND)
+      new_elem_left = new Edge3;
+    else
+      new_elem_left = new Edge2;
+
+    new_elem_left->processor_id() = current_mortar_segment->processor_id();
+    new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
+    new_elem_left->set_id(local_id_index++);
+    new_elem_left->set_unique_id(new_elem_left->id());
+    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
+    new_elem_left->set_node(1) = new_node;
+
+    // Make an Elem on the right
+    Elem * new_elem_right;
+    if (order == SECOND)
+      new_elem_right = new Edge3;
+    else
+      new_elem_right = new Edge2;
+
+    new_elem_right->processor_id() = current_mortar_segment->processor_id();
+    new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
+    new_elem_right->set_id(local_id_index++);
+    new_elem_right->set_unique_id(new_elem_right->id());
+    new_elem_right->set_node(0) = new_node;
+    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
+
+    if (order == SECOND)
+    {
+      // left
+      Point left_interior_point(0);
+      Real left_interior_xi = (xi1 + info->xi1_a) / 2;
+
+      // This is eta for the current mortar segment that we're splitting
+      Real current_left_interior_eta =
+          (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
+        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
+                               current_mortar_segment->point(n);
+
+      const auto new_interior_left_id = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_left_id),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node_left = mortar_segment_mesh->add_point(
+          left_interior_point, new_interior_left_id, new_elem_left->processor_id());
+      new_elem_left->set_node(2) = new_interior_node_left;
+      new_interior_node_left->set_unique_id(new_interior_left_id + node_unique_id_offset);
+
+      // right
+      Point right_interior_point(0);
+      Real right_interior_xi = (xi1 + info->xi1_b) / 2;
+      // This is eta for the current mortar segment that we're splitting
+      Real current_right_interior_eta =
+          (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
+      for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
+           n < current_mortar_segment->n_nodes();
+           ++n)
+        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
+                                current_mortar_segment->point(n);
+
+      const auto new_interior_id_right = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id_right),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node_right = mortar_segment_mesh->add_point(
+          right_interior_point, new_interior_id_right, new_elem_right->processor_id());
+      new_elem_right->set_node(2) = new_interior_node_right;
+      new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
+    }
+
+    mortar_segment_mesh->add_elem(new_elem_right);
+    mortar_segment_mesh->add_elem(new_elem_left);
 
     // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
@@ -511,9 +571,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh->allow_renumbering(true);
   mortar_segment_mesh->skip_partitioning(true);
-  mortar_segment_mesh->allow_find_neighbors(false);
-  mortar_segment_mesh->prepare_for_use();
   mortar_segment_mesh->allow_find_neighbors(true);
+  mortar_segment_mesh->prepare_for_use();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -566,25 +625,15 @@ AutomaticMortarGeneration::computeNodalNormals()
   // The dimension according to Mesh::mesh_dimension().
   const auto dim = mesh.mesh_dimension();
 
-  // Build FEType objects for the different variables. This order and
-  // family isn't that important because we are only using it for
-  // geometric information...
-  FEType nnx_fe_type(FIRST, LAGRANGE);
+  // A nodal lower-dimensional nodal quadrature rule to be used on faces.
+  QNodal qface(dim - 1);
 
-  // Build FE objects from those types.
-  std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
-
-  // A nodal lower-dimensional trapezoidal quadrature rule to be used on faces.
-  QTrap qface(dim - 1);
-
-  // Tell the FE objects about the quadrature rule.
-  nnx_fe_face->attach_quadrature_rule(&qface);
-
-  // Get a reference to the normals from the face FE.
-  const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
-
-  // A map from the node id to the attached elemental normals evaluated at the node
-  std::map<dof_id_type, std::vector<Point>> node_to_normals_map;
+  // A map from the node id to the attached elemental normals/weights evaluated at the node. Th
+  // length of the vector will correspond to the number of elements attached to the node. If it is a
+  // vertex node, for a 1D mortar mesh, the vector length will be two. If it is an interior node,
+  // the vector will be length 1. The first member of the pair is that element's normal at the node.
+  // The second member is that element's JxW at the node
+  std::map<dof_id_type, std::vector<std::pair<Point, Real>>> node_to_normals_map;
 
   /// The _periodic flag tells us whether we want to inward vs outward facing normals
   Real sign = _periodic ? -1 : 1;
@@ -603,6 +652,14 @@ AutomaticMortarGeneration::computeNodalNormals()
     if (!this->secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
+    // We will create an FE object and attach the nodal quadrature rule such that we can get out the
+    // normals at the element nodes
+    FEType nnx_fe_type(secondary_elem->default_order(), LAGRANGE);
+    std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
+    nnx_fe_face->attach_quadrature_rule(&qface);
+    const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
+    const auto & JxW = nnx_fe_face->get_JxW();
+
     // Which side of the parent are we? We need to know this to know
     // which side to reinit.
     const Elem * interior_parent = secondary_elem->interior_parent();
@@ -617,12 +674,10 @@ AutomaticMortarGeneration::computeNodalNormals()
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
 
-    // We loop over n_vertices not n_nodes because we're not interested in
-    // computing normals at interior nodes
-    for (MooseIndex(secondary_elem->n_vertices()) n = 0; n < secondary_elem->n_vertices(); ++n)
+    for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
-      auto & normals_vec = node_to_normals_map[secondary_elem->node_id(n)];
-      normals_vec.push_back(sign * face_normals[n]);
+      auto & normals_and_weights_vec = node_to_normals_map[secondary_elem->node_id(n)];
+      normals_and_weights_vec.push_back(std::make_pair(sign * face_normals[n], JxW[n]));
     }
   }
 
@@ -632,11 +687,11 @@ AutomaticMortarGeneration::computeNodalNormals()
   for (const auto & pr : node_to_normals_map)
   {
     const auto & node_id = pr.first;
-    const auto & normals_vec = pr.second;
+    const auto & normals_and_weights_vec = pr.second;
 
     Point nodal_normal;
-    for (const auto & normals : normals_vec)
-      nodal_normal += normals;
+    for (const auto & norm_and_weight : normals_and_weights_vec)
+      nodal_normal += norm_and_weight.first * norm_and_weight.second;
 
     secondary_node_to_nodal_normal[mesh.node_ptr(node_id)] = nodal_normal.unit();
   }
@@ -778,7 +833,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             auto u = x2 - (*secondary_node);
             auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-            if (std::abs(F) < TOLERANCE)
+            if (std::abs(F) < _newton_tolerance)
               break;
 
             Real dxi2 = -F.value() / F.derivatives();
@@ -789,14 +844,14 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
           Real xi2 = xi2_dn.value();
 
           // Check whether the projection worked.
-          if (std::abs(xi2) <= 1. + TOLERANCE)
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
             // surface. This isn't as unlikely as you might think, it will happen if the meshes
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-            if (std::abs(std::abs(xi2) - 1.) < TOLERANCE)
+            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
@@ -962,6 +1017,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
   // Construct the KD tree for lower-dimensional elements in the volume mesh.
   kd_tree.buildIndex();
 
+  std::unordered_set<dof_id_type> primary_nodes_visited;
+
   for (const auto & primary_side_elem : mesh.active_element_ptr_range())
   {
     // If this is not one of the lower-dimensional primary side elements, go on to the next one.
@@ -980,11 +1037,14 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       const std::vector<const Elem *> & primary_node_neighbors =
           this->nodes_to_primary_elem_map.at(primary_node->id());
 
-      // Check whether we have already successfully inverse mapped this primary node and skip if
-      // so.
+      // Check whether we have already successfully inverse mapped this primary node (whether during
+      // secondary node projection or now during primary node projection) or we have already failed
+      // to inverse map this primary node (now during primary node projection), and then skip if
+      // either of those things is true
       auto primary_key =
           std::make_tuple(primary_node->id(), primary_node, primary_node_neighbors[0]);
-      if (primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
+      if (!primary_nodes_visited.insert(primary_node->id()).second ||
+          primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
         continue;
 
       // Data structure for performing Nanoflann searches.
@@ -1034,6 +1094,11 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           if (rejected_secondary_elem_candidates.count(secondary_elem_candidate))
             continue;
 
+          std::vector<Point> nodal_normals(secondary_elem_candidate->n_nodes());
+          for (const auto n : make_range(secondary_elem_candidate->n_nodes()))
+            nodal_normals[n] =
+                secondary_node_to_nodal_normal.at(secondary_elem_candidate->node_ptr(n));
+
           // Use equation 2.4.6 from Bin Yang's dissertation to try and solve for
           // the position on the secondary element where this primary came from.  This
           // requires a Newton iteration in general.
@@ -1048,27 +1113,21 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           do
           {
             VectorValue<DualNumber<Real>> x1(0);
-            VectorValue<DualNumber<Real>> dx1_dxi(0);
+            VectorValue<DualNumber<Real>> normals(0);
             for (MooseIndex(secondary_elem_candidate->n_nodes()) n = 0;
                  n < secondary_elem_candidate->n_nodes();
                  ++n)
             {
-              x1 += Moose::fe_lagrange_1D_shape(order, n, xi1_dn) *
-                    secondary_elem_candidate->point(n);
-              dx1_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1_dn) *
-                         secondary_elem_candidate->point(n);
+              const auto phi = Moose::fe_lagrange_1D_shape(order, n, xi1_dn);
+              x1 += phi * secondary_elem_candidate->point(n);
+              normals += phi * nodal_normals[n];
             }
-
-            // We're assuming our mesh is in the xy plane here
-            auto normals = VectorValue<DualNumber<Real>>(dx1_dxi(1), -dx1_dxi(0), 0).unit();
-            if (_periodic)
-              normals *= -1;
 
             auto u = x1 - (*primary_node);
 
             auto F = u(0) * normals(1) - u(1) * normals(0);
 
-            if (std::abs(F) < TOLERANCE)
+            if (std::abs(F) < _newton_tolerance)
               break;
 
             Real dxi1 = -F.value() / F.derivatives();
@@ -1079,9 +1138,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           Real xi1 = xi1_dn.value();
 
           // Check for convergence to a valid solution...
-          if (std::abs(xi1) <= 1. + TOLERANCE)
+          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance))
           {
-            if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
+            if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
               // We shouldn't get here, because this primary node should already

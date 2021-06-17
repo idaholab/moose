@@ -30,9 +30,6 @@
 
 [DomainIntegral]
   integrals = 'Jintegral'
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
   crack_front_points = '-0.5 0.0 0.0
                         -0.25 -0.07 0
                         -0.15 -0.15 0

@@ -101,6 +101,18 @@ TEST(InputParameters, checkSuppressedError)
   }
 }
 
+TEST(InputParameters, checkSuppressingControllableParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<bool>("b", "Controllable boolean");
+  params.declareControllable("b");
+  // Instead of building another identical copy of `param`, we directly suppress the parameter. In a
+  // normal situation, suppressing would happen in a child class, but it makes no difference here
+  params.suppressParameter<bool>("b");
+  // After calling suppressParameter, the controllable parameter should no longer be controllable
+  ASSERT_TRUE(params.isControllable("b") == false);
+}
+
 TEST(InputParameters, checkSetDocString)
 {
   InputParameters params = emptyInputParameters();
@@ -268,7 +280,8 @@ TEST(InputParameters, setPPandVofPP)
   p1.set<std::vector<PostprocessorName>>("pp_name") = {"first", "second", "third"};
 
   // check if we have a vector of pps
-  EXPECT_TRUE(!p1.isSinglePostprocessor("pp_name")) << "Failed to detect vector of PPs";
+  EXPECT_TRUE(p1.isType<std::vector<PostprocessorName>>("pp_name"))
+      << "Failed to detect vector of PPs";
 
   // check what happens if default value is requested
   /*

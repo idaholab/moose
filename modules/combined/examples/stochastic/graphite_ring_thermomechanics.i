@@ -15,7 +15,7 @@
   [ring]
     type = BlockDeletionGenerator
     input = disk
-    block_id = 1
+    block = 1
     new_boundary = 'inner'
   []
   [cylinder]

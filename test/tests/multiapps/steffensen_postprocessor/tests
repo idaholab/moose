@@ -1,0 +1,114 @@
+[Tests]
+  [pp_steady]
+    requirement = "The system shall allow multiapp steady-state simulations coupled by a postprocessor transfer using Steffensen's method"
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#9038 #17479'
+    [steady]
+      type = 'CSVDiff'
+      input = 'steady_main.i'
+      csvdiff = 'steady_main_out.csv steady_main_out_sub0.csv'
+      recover = false
+      allow_unused = true
+      detail = 'with a steady-state sub-application,'
+    []
+    [steady_with_pseudo_transient_sub]
+      type = 'CSVDiff'
+      input = 'steady_main.i'
+      csvdiff = 'steady_with_pseudo_transient.csv'
+      recover = false
+      cli_args = "Outputs/file_base=steady_with_pseudo_transient MultiApps/sub/input_files='transient_sub.i'"
+      detail = 'and with pseudo-transient sub-applications.'
+    []
+  []
+
+  [pp_transient]
+    requirement = "The system shall allow transient multiapp simulations coupled by a postprocessor transfer using Steffensen's method"
+    issues = '#2116 #17479'
+    design = 'multiapps/TransientMultiApp.md'
+    [test_rerun]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'transient_main_out.csv transient_main_out_sub0_csv.csv'
+      cli_args = 'Executioner/fixed_point_max_its=5 Executioner/fixed_point_abs_tol=1e-10'
+      detail = 'with a failed timestep,'
+    []
+    [iteration_adaptive]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'adaptive_transient_main_out.csv adaptive_transient_main_out_sub0_csv.csv'
+      cli_args = 'Executioner/TimeStepper/type=IterationAdaptiveDT Executioner/TimeStepper/dt=0.1 Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4 Outputs/file_base=adaptive_transient_main_out'
+      detail = 'with adaptive timestepping,'
+    []
+    [sub_cycling]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'sub_cycling_out.csv sub_cycling_out_sub0_csv.csv'
+      cli_args = "MultiApps/sub/cli_args='Executioner/dt=0.05' Outputs/file_base=sub_cycling_out"
+      detail = 'with a subapp using a smaller timestep,'
+    []
+
+    [app_begin_transfers_begin]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_begin_transfer_begin.csv app_begin_transfer_begin_sub0_csv.csv'
+      cli_args = 'Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Outputs/file_base=app_begin_transfer_begin'
+      detail = 'with the sub-app and the postprocessor transfers executed at the beginning of each time step,'
+    []
+    [app_begin_transfers_end]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_begin_transfer_end.csv app_begin_transfer_end_sub0_csv.csv'
+      allow_warnings = true
+      recover = false
+      cli_args = 'Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Outputs/file_base=app_begin_transfer_end'
+      detail = 'with the sub-app executed at the beginning of each time step and postprocessor transfers executed at the end of each timestep,'
+    []
+    [app_end_transfers_begin]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_end_transfer_begin.csv app_end_transfer_begin_sub0_csv.csv'
+      allow_warnings = true
+      cli_args = 'MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Outputs/file_base=app_end_transfer_begin'
+      detail = 'with the sub-app executed at the end of each time step and postprocessor transfers executed at the beginning of each timestep,'
+    []
+    [app_end_transfers_end]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_end_transfer_end.csv app_end_transfer_end_sub0_csv.csv'
+      cli_args = 'MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Outputs/file_base=app_end_transfer_end'
+      detail = 'with the sub-app and the postprocessor transfers executed at the end of each time step.'
+    []
+
+    [app_begin_transfers_begin_steffensen_sub]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_begin_transfer_begin_steffensen_sub.csv app_begin_transfer_begin_steffensen_sub_sub0_csv.csv'
+      cli_args = "Outputs/file_base=app_begin_transfer_begin_steffensen_sub Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main'"
+      detail = 'for updating the subapp postprocessor with the sub-app and the variable transfers executed at the beginning of each time step,'
+    []
+    [app_begin_transfers_end_steffensen_sub]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_begin_transfer_end_steffensen_sub.csv app_begin_transfer_end_steffensen_sub_sub0_csv.csv'
+      allow_warnings = true
+      cli_args = "Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_begin_transfer_end_steffensen_sub"
+      detail = 'for updating the subapp postprocessor with the sub-app executed at the beginning of each time step and variable transfers executed at the end of each timestep,'
+    []
+    [app_end_transfers_begin_steffensen_sub]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_end_transfer_begin_steffensen_sub.csv'
+      allow_warnings = true
+      cli_args = "MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_end_transfer_begin_steffensen_sub"
+      detail = 'for updating the subapp postprocessor with the sub-app executed at the end of each time step and variable transfers executed at the beginning of each timestep,'
+    []
+    [app_end_transfers_end_steffensen_sub]
+      type = 'CSVDiff'
+      input = 'transient_main.i'
+      csvdiff = 'app_end_transfer_end_steffensen_sub.csv'
+      allow_warnings = true
+      cli_args = "MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_end_transfer_end_steffensen_sub"
+      detail = 'and for updating the subapp postprocessor with the sub-app and the variable transfers executed at the end of each time step.'
+    []
+  []
+[]

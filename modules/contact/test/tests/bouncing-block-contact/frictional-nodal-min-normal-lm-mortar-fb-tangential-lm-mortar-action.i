@@ -22,12 +22,12 @@ offset = 1e-2
   [./delete_3]
     type = BlockDeletionGenerator
     input = original_file_mesh
-    block_id = 3
+    block = 3
   [../]
   [./revised_file_mesh]
     type = BlockDeletionGenerator
     input = delete_3
-    block_id = 4
+    block = 4
   [../]
 []
 
@@ -50,6 +50,8 @@ offset = 1e-2
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.1
+    mortar_approach = legacy
+    c_normal = 1e0
   []
 []
 

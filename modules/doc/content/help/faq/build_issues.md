@@ -85,7 +85,7 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   mpicxx -fopenmp hello.C
   ```
 
-  If the above build fails, and you have the correct Conda environment loaded (`conda activate moose`), then something is failing beyond the scope of this document, and you should now contact us via the [mailing list](faq/mailing_list.md).
+  If the above build fails, and you have the correct Conda environment loaded (`conda activate moose`), then something is failing beyond the scope of this document, and you should now contact us via the [disussion forum](faq/discussion_forum.md).
 
   If the build was successfull, attempt to execute the hello word example:
 
@@ -102,4 +102,4 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   Hello world from processor my_hostname, rank 2 out of 4 processors
   ```
 
-- If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again. If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to ask us why on the [mailing list](faq/mailing_list.md).
+- If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again. If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to ask us why on the [discussion forum](faq/discussion_forum.md).

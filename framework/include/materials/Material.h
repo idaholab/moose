@@ -263,7 +263,7 @@ Material::getADMaterialPropertyByName(const std::string & prop_name)
   // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
   // the same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, Material::CURRENT);
+  registerPropName(prop_name, true, MaterialBase::CURRENT);
   return MaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name);
 }
 

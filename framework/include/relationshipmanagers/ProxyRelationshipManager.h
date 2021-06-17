@@ -44,7 +44,7 @@ public:
 
   virtual std::string getInfo() const override;
 
-  virtual bool operator==(const RelationshipManager & /*rhs*/) const override;
+  virtual bool operator>=(const RelationshipManager & /*rhs*/) const override;
 
   /**
    * A clone() is needed because GhostingFunctor can not be shared between

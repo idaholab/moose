@@ -1,5 +1,12 @@
 !gallery! large=6
 
+!card! gallery/streamlines_rock.mp4 title=Flow Streamlines in Digital Rock
+Flow streamlines computed with the [Navier-Stokes](modules/navier_stokes/index.md) module, through a digital rock reconstructed with the [Image Reader](source/functions/ImageFunction.md) from a stack of microCT scans (postprocessing done in [Paraview](https://www.paraview.org/)). The framework is described in [Lesueur et al. (2017)](http://doi.org/10.1016/j.gete.2017.08.001).
+
+!style fontsize=90% fontweight=100
+*Credit:*  Martin Lesueur, [Multiphysics Geomechanics Lab](https://mglab.pratt.duke.edu/)
+!card-end!
+
 !card! gallery/twist_gallery.mp4 title=Wire Twist
 Mechanical modeling of two copper wires being twisted together to create a twisted pair
 using the [Tensor Mechanics](modules/tensor_mechanics/index.md) and [Contact](modules/contact/index.md) modules.
@@ -87,6 +94,11 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 
 !card! contact/2d_indenter.mp4 title=Axisymmetric Spherical Indenter
 An elastic spherical indenter penetrates into a base material modeled with tensor-mechanics crystal plasticity.
+[contact/index.md].
+!card-end!
+
+!card! contact/ironing_gallery.mp4 title=Frictional Ironing Problem with Mortar Contact
+A deformable semi-circular tool pushes into highly deformable material generating tangential deformation.
 [contact/index.md].
 !card-end!
 !gallery-end!

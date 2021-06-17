@@ -9,8 +9,8 @@ StorkApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
+  // Do not use legacy material output, i.e., output properties on INITIAL as well as TIMESTEP_END
+  params.set<bool>("use_legacy_material_output") = false;
 
   return params;
 }
@@ -23,9 +23,9 @@ StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
 StorkApp::~StorkApp() {}
 
 void
-StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAll(f, af, s);
+  ModulesApp::registerAll(f, af, syntax);
   Registry::registerObjectsTo(f, {"StorkApp"});
   Registry::registerActionsTo(af, {"StorkApp"});
 

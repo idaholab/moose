@@ -11,27 +11,31 @@ applications on Mac systems.
 
 MOOSE has support for profiling with
 [gperftools](https://github.com/gperftools/gperftools) built-in.  To use it,
-you must compile MOOSE with profiling support enabled.  If compiling with the
-latest MOOSE environment package, your applications will already be compiled
-with profiling support automatically. To manually control profiling support
+you must compile MOOSE with profiling support enabled.  To add profiling support
 you set the GPERF_DIR environment variable to the location of a gperftools
-install (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  It is also
+installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  It is also
 recommended you compile MOOSE in `oprof` mode to get complete/accurate
 profiling results.  Then you compile MOOSE like normal - it should look
 something like this:
 
 ```
-export GPERF_DIR=/opt/moose/gperftools-2.7   # this should be unnecessary with the latest MOOSE package.
+export GPERF_DIR=$HOME/gperftools/installed
 export METHOD=oprof
 cd [your-moose-app-repository]
 make
 ```
 
 This will compile your application with gperftools profiling support enabled.
-You are welcome to set GPERF_DIR to the location of your own gperftools
-installation as well.
+Note that you will get an error if you attempt to link gperftools (e.g. have
+GPERF_DIR defined in your environment) when building
+in `dbg` or `devel` modes. This is because MOOSE and libmesh insert a number of
+assertions in these modes that may significantly slow down the code and mislead
+the profiler about where hot spots are. Moreover, because gperftools hijacks
+functions like `malloc`, executables that link gperftools cannot be run with
+valgrind and produce meaningful results. Hence it is useful to guarantee some
+methods are available for running valgrind.
 
-### Profiling
+### CPU Profiling
 
 To profile your application, you will need to run a simulation of suitable
 duration - generally at least a few seconds long - while setting the
@@ -45,7 +49,36 @@ MOOSE_PROFILE_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
 This will use the filename base you pass and append a suffix of the form
 `[proc#].prof` to generate an independent profiling data file for each MPI
 rank/process. The above example would generate files `run1_0.prof`,
-`run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`.
+`run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`. It is allowed to include
+a directory in the filename base. You can use a command-line
+argument `--gperf-profiler-on` with a comma-separated list of MPI ranks to generate
+the profiling files only on the selected ranks. For example `--gperf-profiler-on 0,2`
+with the above MOOSE_PROFILE_BASE will generate `run1_0.prof` and `run1_2.prof`.
+If this argument is not given, files of all ranks will be generated.
+
+### Heap Profiling
+
+Similarly, you can do a heap profiling like this:
+
+```
+HEAP_PROFILE_INUSE_INTERVAL=104857600 MOOSE_HEAP_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
+```
+
+`HEAP_PROFILE_INUSE_INTERVAL` represents that the code dump heap profiling
+information whenever the memory usage increases by the specified number of bytes.
+`104857600` is `100MB`. You could choose a small number as well if your simulation
+does not use much memory. This example should generate files `run1_0.xxxx.heap`,
+`run1_1.xxxx.heap`, `run1_2.xxxx.heap`, ..., `run1_31.xxxx.heap`.
+Here `xxxx` denotes a sequence number, e.g., `0001` is the first dumped heap file,
+`0002` is the second dumped heap file, etc. More instructions on heap profiling
+can be found at [here](https://gperftools.github.io/gperftools/heapprofile.html).
+It is allowed to inclue a directory in the filename base.
+You can use a command-line argument `--gperf-profiler-on` with a comma-separated
+list of MPI ranks to generate the profiling files only on the selected ranks.
+For example `--gperf-profiler-on 0,2` with the above MOOSE_HEAP_BASE will generate
+`run1_0.xxxx.heap` and `run1_2.xxxx.heap`. If this argument is not given, files of
+all ranks will be generated. This argument can be very useful for reducing the number
+of profiling files when profiling with a large number of processes.
 
 ### Analyzing Profile Data
 
@@ -67,7 +100,8 @@ to interrogate the profiling data. A few of these commands are described
 below, but there are others and several options you can see by entering `help`
 or `help <cmd|option>` in interactive mode or by running `pprof --help` on the
 command line.  The following sections assume you are running in pprof's
-interactive mode.
+interactive mode. We demonstrate the usage of `pprof` for CPU profiling as follows,
+and the exact same command lines can applied to heap files as well.
 
 ### top N
 
@@ -204,4 +238,3 @@ open mooseapp-oprof.dtps
 ```
 
 The Instruments application will open in a new window with the profile.
-

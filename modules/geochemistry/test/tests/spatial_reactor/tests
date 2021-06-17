@@ -65,6 +65,7 @@
   [./spatial_1_console]
     type = RunApp
     input = spatial_1_console.i
+    max_parallel = 1
     expect_out = 'pH = 4.2'
     match_literal = true
     requirement = 'It should be able output, to the console, detailed information from any node including molalities, bulk compositions, etc'
@@ -116,7 +117,6 @@
     requirement = 'Spatially-dependent reaction systems may be multi-threaded'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
-    skip = '#16100'
   [../]    
   [./spatial_4_mpi]
     type = CSVDiff
@@ -135,7 +135,6 @@
     min_threads = 2
     min_parallel = 2
     prereq = spatial_4_mpi
-    skip = '#16100'
     requirement = 'Spatially-dependent reaction systems may use MPI and threads'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
@@ -161,7 +160,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/adaptive_timestepping=false'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the solve fails and the time-step becomes too small.'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    
@@ -170,7 +169,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/dt_min=1'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the time-step becomes smaller than a user-defined quantity and the solve fails'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    
@@ -186,7 +185,7 @@
     type = CSVDiff
     input = spatial_8.i
     csvdiff = 'spatial_8_out_bulk_Cl_0001.csv'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, including the case where sources are spatially-dependent'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    

@@ -32,8 +32,8 @@ public:
 
 protected:
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-  virtual void sampleSetUp() override;
-  virtual void sampleTearDown() override;
+  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void sampleTearDown(const Sampler::SampleMode mode) override;
 
   ///@{
   /// Sobol Monte Carlo matrices, these are sized and cleared to avoid keeping large matrices around

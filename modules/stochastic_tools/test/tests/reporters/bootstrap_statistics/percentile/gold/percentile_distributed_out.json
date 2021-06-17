@@ -1,0 +1,53 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "stats": {
+                    "info": {
+                        "confidence_intervals": {
+                            "levels": [
+                                0.025,
+                                0.05,
+                                0.1,
+                                0.16,
+                                0.5,
+                                0.84,
+                                0.9,
+                                0.95,
+                                0.975
+                            ],
+                            "method": "percentile",
+                            "replicates": 10,
+                            "seed": 1
+                        },
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "data_data_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                204.5,
+                                [
+                                    180.5,
+                                    180.5,
+                                    193.63333333333333,
+                                    193.63333333333333,
+                                    204.56666666666666,
+                                    221.13333333333333,
+                                    221.13333333333333,
+                                    227.93333333333334,
+                                    227.93333333333334
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

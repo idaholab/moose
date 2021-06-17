@@ -84,7 +84,7 @@ Objects that require material properties consume them using one of two functions
 1. `getADMaterialProperty<TYPE>` retrieves a property with a name "property_name" to be
    consumed by the object that will include automatic differentiation.
 
-For on object to consume a property the same basic procedure is followed. First in the consuming
+For an object to consume a property the same basic procedure is followed. First in the consuming
 objects header file a `MaterialProperty` with the correct type (e.g., `Real` for the diffusivity
 example) is declared (in the C++ sense) as follows. Notice, that the member variable is a +const+
 reference. The const is important. Consuming objects cannot modify a property, it only uses the
@@ -147,7 +147,7 @@ fashion.
 
 ## Default Material Properties
 
-The [#material-name] input parameter also provides the ability to set default values for scalar
+The `MaterialPropertyName` input parameter also provides the ability to set default values for scalar
 (`Real`) properties. In the above example, the input file can use number or
 parsed function (see [MooseParsedFunction.md]) to define a the property value. For example, the input
 snippet above could set a constant value.
@@ -196,6 +196,14 @@ table lists the types of properties that are available for automatic output.
 | Real | `MaterialRealAux` | prop |
 | RealVectorValue | `MaterialRealVectorValueAux` | prop_1, prop_2, and prop_3 |
 | RealTensorValue | `MaterialRealTensorValueAux` | prop_11, prop_12, prop_13, prop_21, etc. |
+
+## Material sorting
+
+Materials are sorted such that one material may consume a property produced by
+another material and know that the consumed property will be up-to-date,
+e.g. the producer material will execute before the consumer material. If a
+cyclic dependency is detected between two materials, then MOOSE will produce an
+error.
 
 ## Advanced Topics
 

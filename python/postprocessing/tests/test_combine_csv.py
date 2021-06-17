@@ -11,6 +11,7 @@
 import os
 import unittest
 import pandas
+import numpy
 try:
     from postprocessing import combine_csv
 except ModuleNotFoundError:
@@ -81,8 +82,21 @@ class TestCombineCSV(unittest.TestCase):
         self.assertTrue(df_test._ended)
         gold_df = pandas.read_csv("{}/combine_bilinear.csv".format(
             self.__goldpath))
-        self.assertTrue(df_test._final_df.equals(gold_df),
-            msg="Pandas dataframe is different from gold CSV for bilinear usage.")
+
+        self.assertTrue(df_test._final_df.shape == gold_df.shape,
+            msg="Pandas dataframe size is different from gold CSV for bilinear usage.")
+
+        # We used to use DataFrame.equals for a comparison here, but because a
+        # newer version of Pandas resulted in a very small diff in the column
+        # data, we can't use it anymore. Therefore - we need to do a more fuzzy
+        # check on both the columns and th data.
+        data_difference = df_test._final_df.to_numpy() - gold_df.to_numpy()
+        column_difference = df_test._final_df.columns.to_numpy(dtype=numpy.double) \
+                            - gold_df.columns.to_numpy(dtype=numpy.double)
+        self.assertTrue(abs(data_difference.max()) < 1e-10,
+            msg="Pandas data is different from gold CSV for bilinear usage.")
+        self.assertTrue(abs(column_difference.max()) < 1e-10,
+            msg="Pandas column data is different from gold CSV for bilinear usage.")
 
     def testBasenameError(self):
         """

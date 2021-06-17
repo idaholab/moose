@@ -10,64 +10,64 @@
 []
 
 [Variables]
-  [./conc]
-  [../]
+  [conc]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = GeochemistryTimeDerivative
     porosity = porosity
     variable = conc
-  [../]
-  [./source]
+  []
+  [source]
     type = BodyForce
     function = 3.0
     variable = conc
-  [../]
+  []
 []
 
 [ICs]
-  [./conc]
+  [conc]
     type = FunctionIC
     function = 'z * z + 4 * x * x * x + y'
     variable = conc
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
-  [../]
-  [./expected]
-  [../]
-  [./should_be_zero]
-  [../]
+  [porosity]
+  []
+  [expected]
+  []
+  [should_be_zero]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = FunctionAux
     function = '6.0'
     variable = porosity
-  [../]
-  [./expected]
+  []
+  [expected]
     type = FunctionAux
     function = 'z * z + 4 * x * x * x + y + 2.0 * 3.0 / 6.0'
     variable = expected
-  [../]
-  [./should_be_zero]
+  []
+  [should_be_zero]
     type = ParsedAux
     args = 'expected conc'
     function = 'expected - conc'
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = NodalL2Norm
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Executioner]

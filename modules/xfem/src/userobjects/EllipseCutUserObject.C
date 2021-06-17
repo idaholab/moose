@@ -96,7 +96,14 @@ EllipseCutUserObject::isInsideCutPlane(Point p) const
 }
 
 const std::vector<Point>
-EllipseCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
+EllipseCutUserObject::getCrackFrontPoints(unsigned int number_crack_front_points) const
 {
-  mooseError("getCrackFrontPoints() is not implemented for this object.");
+  std::vector<Point> crack_front_points(number_crack_front_points);
+  for (unsigned int i = 0; i < number_crack_front_points; ++i)
+  {
+    Real theta = 2.0 * libMesh::pi / number_crack_front_points * i;
+    crack_front_points[i] = _center + _long_axis * std::sin(theta) * _unit_vec1 +
+                            _short_axis * std::cos(theta) * _unit_vec2;
+  }
+  return crack_front_points;
 }
