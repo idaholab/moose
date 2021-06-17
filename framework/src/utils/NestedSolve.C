@@ -8,10 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NestedSolve.h"
-#include "RankTwoTensor.h"
 
 #include "libmesh/utility.h"
-#include "libmesh/vector_value.h"
 
 InputParameters
 NestedSolve::validParams()

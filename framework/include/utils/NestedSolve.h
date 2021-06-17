@@ -10,11 +10,14 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "RankTwoTensorForward.h"
+#include "RankTwoTensor.h"
 #include "InputParameters.h"
+
+#include "libmesh/vector_value.h"
 
 #include "Eigen/Core"
 #include <Eigen/Dense>
+#include <unsupported/Eigen/NonLinearOptimization>
 
 class NestedSolve
 {
@@ -24,29 +27,39 @@ public:
   NestedSolve();
   NestedSolve(const InputParameters & params);
 
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> DynamicVector;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> DynamicMatrix;
+
   /// Resiudual and Solution type
   template <int N = 0>
   using Value =
       typename std::conditional<N == 1,
                                 Real,
                                 typename std::conditional<N == 0,
-                                                          Eigen::Matrix<Real, Eigen::Dynamic, 1>,
+                                                          NestedSolve::DynamicVector,
                                                           Eigen::Matrix<Real, N, 1>>::type>::type;
 
   /// Jacobian matrix type
   template <int N = 0>
-  using Jacobian = typename std::conditional<
-      N == 1,
-      Real,
-      typename std::conditional<N == 0,
-                                Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>,
-                                Eigen::Matrix<Real, N, N>>::type>::type;
+  using Jacobian =
+      typename std::conditional<N == 1,
+                                Real,
+                                typename std::conditional<N == 0,
+                                                          NestedSolve::DynamicMatrix,
+                                                          Eigen::Matrix<Real, N, N>>::type>::type;
 
   /**
    * Solve the N*N nonlinear equation system
    */
   template <typename V, typename T>
   void nonlinear(V & guess, T compute);
+
+  template <typename R, typename J>
+  void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
+  template <typename R, typename J>
+  void nonlinear(Real & guess, R computeResidual, J computeJacobian);
+  template <typename R, typename J>
+  void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -92,9 +105,9 @@ protected:
   /**
    * Size a dynamic Jacobian matrix correctly
    */
-  void sizeItems(const Eigen::Matrix<Real, Eigen::Dynamic, 1> & guess,
-                 Eigen::Matrix<Real, Eigen::Dynamic, 1> & residual,
-                 Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> & jacobian) const
+  void sizeItems(const NestedSolve::DynamicVector & guess,
+                 NestedSolve::DynamicVector & residual,
+                 NestedSolve::DynamicMatrix & jacobian) const
   {
     const auto N = guess.size();
     residual.resize(N, 1);
@@ -148,10 +161,128 @@ struct NestedSolve::CorrespondingJacobianTempl<RealVectorValue>
 };
 
 template <>
-struct NestedSolve::CorrespondingJacobianTempl<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
+struct NestedSolve::CorrespondingJacobianTempl<NestedSolve::DynamicVector>
 {
-  using type = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
+  using type = NestedSolve::DynamicMatrix;
 };
+
+template <typename R, typename J>
+void
+NestedSolve::nonlinear(NestedSolve::DynamicVector & guess, R computeResidual, J computeJacobian)
+{
+  typedef NestedSolve::DynamicVector V;
+
+  class EigenAdaptorFunctor
+  {
+  public:
+    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
+    int operator()(V & guess, V & residual)
+    {
+      _residual(guess, residual);
+      return 0;
+    }
+    int df(V & guess, NestedSolve::CorrespondingJacobian<V> & jacobian)
+    {
+      _jacobian(guess, jacobian);
+      return 0;
+    }
+
+  private:
+    R & _residual;
+    J & _jacobian;
+  };
+
+  _state = State::NONE;
+
+  // adaptor functor to utilize the Eigen non-linear solver
+  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
+  solver.solve(guess);
+}
+
+template <typename R, typename J>
+void
+NestedSolve::nonlinear(Real & guess, R computeResidual, J computeJacobian)
+{
+  typedef NestedSolve::DynamicVector V;
+
+  class EigenAdaptorFunctor
+  {
+  public:
+    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
+    int operator()(V & guess, V & residual)
+    {
+      _residual(guess(0), residual(0, 0));
+      return 0;
+    }
+    int df(V & guess, NestedSolve::CorrespondingJacobian<V> & jacobian)
+    {
+      _jacobian(guess(0), jacobian(0, 0));
+      return 0;
+    }
+
+  private:
+    R & _residual;
+    J & _jacobian;
+  };
+
+  _state = State::NONE;
+
+  // adaptor functor to utilize the Eigen non-linear solver
+  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
+  V guess_eigen(1);
+  guess_eigen << guess;
+  solver.solve(guess_eigen);
+  guess = guess_eigen(0);
+}
+
+template <typename R, typename J>
+void
+NestedSolve::nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian)
+{
+  typedef NestedSolve::DynamicVector V;
+
+  class EigenAdaptorFunctor
+  {
+  public:
+    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
+    int operator()(V & guess, V & residual)
+    {
+      RealVectorValue guess_moose(guess(0), guess(1), guess(2));
+      RealVectorValue residual_moose;
+      _residual(guess_moose, residual_moose);
+      residual(0) = residual_moose(0);
+      residual(1) = residual_moose(1);
+      residual(2) = residual_moose(2);
+      return 0;
+    }
+    int df(V & guess, NestedSolve::CorrespondingJacobian<V> & jacobian)
+    {
+      RealVectorValue guess_moose(guess(0), guess(1), guess(2));
+      RankTwoTensor jacobian_moose;
+      _jacobian(guess_moose, jacobian_moose);
+      jacobian = Eigen::Map<NestedSolve::DynamicMatrix>(&jacobian_moose(0, 0), 3, 3);
+      return 0;
+    }
+
+  private:
+    R & _residual;
+    J & _jacobian;
+  };
+
+  _state = State::NONE;
+
+  // adaptor functor to utilize the Eigen non-linear solver
+  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
+  V guess_eigen(3);
+  guess_eigen << guess(0), guess(1), guess(2);
+  solver.solve(guess_eigen);
+  guess(0) = guess_eigen(0);
+  guess(1) = guess_eigen(1);
+  guess(2) = guess_eigen(2);
+}
 
 template <typename V, typename T>
 void
