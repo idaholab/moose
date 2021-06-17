@@ -1,55 +1,17 @@
 {
-    "app_name": "main",
-    "current_time": "Thu Jun 17 09:59:20 2021",
-    "executable": "/Users/slauae/projects/moose/test/moose_test-devel",
-    "executable_time": "Thu Jun 17 09:59:10 2021",
-    "libmesh_version": "",
-    "moose_version": "git commit 9db85613d2 on 2021-06-16",
-    "petsc_version": "3.14.2",
-    "slepc_version": "3.14.0",
     "time_steps": [
         {
             "reporters": {
                 "test": {
                     "info": {
                         "name": "test",
-                        "type": "TestDeclareReporter"
+                        "type": "ConstantReporter"
                     },
                     "values": [
                         {
-                            "name": "broadcast",
-                            "type": "double",
-                            "value": 0.0
-                        },
-                        {
-                            "name": "gather",
-                            "type": "std::vector<unsigned long long>",
-                            "value": []
-                        },
-                        {
-                            "name": "int",
+                            "name": "year",
                             "type": "int",
                             "value": 1980
-                        },
-                        {
-                            "name": "real",
-                            "type": "double",
-                            "value": 0.0
-                        },
-                        {
-                            "name": "scatter",
-                            "type": "unsigned long long",
-                            "value": 0
-                        },
-                        {
-                            "name": "string",
-                            "type": "std::string",
-                            "value": ""
-                        },
-                        {
-                            "name": "vector",
-                            "type": "std::vector<double>",
-                            "value": []
                         }
                     ]
                 }

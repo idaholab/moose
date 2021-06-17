@@ -14,7 +14,10 @@
 
 [Reporters]
   [test]
-    type = TestDeclareReporter
+    type = ConstantReporter
+    integer_names = 'year'
+    integer_values = '1980'
+    execute_on = INITIAL
   []
 []
 
@@ -22,5 +25,6 @@
   [out]
     type = JSON
     one_file_per_timestep = true
+    execute_system_information_on = None
   []
 []

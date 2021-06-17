@@ -5,49 +5,13 @@
                 "test": {
                     "info": {
                         "name": "test",
-                        "type": "TestDeclareReporter"
+                        "type": "ConstantReporter"
                     },
                     "values": [
                         {
-                            "name": "broadcast",
-                            "type": "double",
-                            "value": 42.0
-                        },
-                        {
-                            "name": "gather",
-                            "type": "std::vector<unsigned long long>",
-                            "value": [
-                                0
-                            ]
-                        },
-                        {
-                            "name": "int",
+                            "name": "year",
                             "type": "int",
-                            "value": 1982
-                        },
-                        {
-                            "name": "real",
-                            "type": "double",
-                            "value": 1.2345
-                        },
-                        {
-                            "name": "scatter",
-                            "type": "unsigned long long",
-                            "value": 0
-                        },
-                        {
-                            "name": "string",
-                            "type": "std::string",
-                            "value": "string"
-                        },
-                        {
-                            "name": "vector",
-                            "type": "std::vector<double>",
-                            "value": [
-                                1.0,
-                                1.1,
-                                1.2
-                            ]
+                            "value": 1980
                         }
                     ]
                 }
