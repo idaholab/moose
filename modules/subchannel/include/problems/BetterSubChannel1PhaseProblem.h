@@ -45,15 +45,17 @@ protected:
   /// Computes Viscosity per channel for block iblock
   virtual void computeMu(int iblock);
   /// Computes Residual per gap for block iblock
-  virtual Eigen::VectorXd residualFunction(int iblock, Eigen::VectorXd solution);
+  virtual libMesh::DenseVector<Real> residualFunction(int iblock,
+                                                      libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes
-  virtual PetscErrorCode
-  petscSnesSolver(int iblock, const Eigen::VectorXd & solution, Eigen::VectorXd & root);
+  virtual PetscErrorCode petscSnesSolver(int iblock,
+                                         const libMesh::DenseVector<Real> & solution,
+                                         libMesh::DenseVector<Real> & root);
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
-  Eigen::MatrixXd _Wij;
-  Eigen::MatrixXd _Wij_old;
-  Eigen::MatrixXd _WijPrime;
+  libMesh::DenseMatrix<Real> _Wij;
+  libMesh::DenseMatrix<Real> _Wij_old;
+  libMesh::DenseMatrix<Real> _WijPrime;
   const Real _g_grav;
   unsigned int _n_cells;
   unsigned int _n_blocks;
