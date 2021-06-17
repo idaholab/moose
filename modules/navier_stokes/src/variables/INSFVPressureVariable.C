@@ -12,7 +12,10 @@
 registerMooseObject("NavierStokesApp", INSFVPressureVariable);
 
 InputParameters
-INSFVPressureVariable::validParams(){ return INSFVVariable::validParams(); }
+INSFVPressureVariable::validParams()
+{
+  return INSFVVariable::validParams();
+}
 
 INSFVPressureVariable::INSFVPressureVariable(const InputParameters & params) : INSFVVariable(params)
 {

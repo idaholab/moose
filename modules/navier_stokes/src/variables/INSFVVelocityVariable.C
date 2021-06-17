@@ -314,7 +314,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
           return in.second;
         });
         mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
-        const auto starting_index = static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+        const auto starting_index =
+            static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
         auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
         mooseAssert(pr.second, "We should have inserted a new face gradient");
         for (const auto lm_index : make_range(lm_dim))
