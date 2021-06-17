@@ -18,15 +18,15 @@ class GrainTrackerInterface;
 class PolycrystalVoronoi;
 
 /**
- * MyPolycrystalVoronoiMultiVoidIC initializes either grain or void values for a
+ * PolycrystalVoronoiMultiVoidIC initializes either grain or void values for a
  * voronoi tesselation with voids distributed randomly from MultiSmoothCircleIC
  */
-class MyPolycrystalVoronoiMultiVoidIC : public MultiSmoothCircleIC
+class PolycrystalVoronoiMultiVoidIC : public MultiSmoothCircleIC
 {
 public:
   static InputParameters validParams();
 
-  MyPolycrystalVoronoiMultiVoidIC(const InputParameters & parameters);
+  PolycrystalVoronoiMultiVoidIC(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 

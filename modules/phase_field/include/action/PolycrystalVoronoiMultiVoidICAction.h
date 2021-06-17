@@ -15,12 +15,12 @@
 /**
  * Sets up a polycrystal initial condition with voids randomly distributed
  */
-class MyPolycrystalVoronoiMultiVoidICAction : public Action
+class PolycrystalVoronoiMultiVoidICAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  MyPolycrystalVoronoiMultiVoidICAction(const InputParameters & params);
+  PolycrystalVoronoiMultiVoidICAction(const InputParameters & params);
 
   virtual void act();
 

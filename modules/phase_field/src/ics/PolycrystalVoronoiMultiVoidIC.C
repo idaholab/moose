@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MyPolycrystalVoronoiMultiVoidIC.h"
+#include "PolycrystalVoronoiMultiVoidIC.h"
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -17,7 +17,7 @@
 #include "PolycrystalVoronoi.h"
 
 InputParameters
-MyPolycrystalVoronoiMultiVoidIC::actionParameters()
+PolycrystalVoronoiMultiVoidIC::actionParameters()
 {
   InputParameters params = ::validParams<MultiSmoothCircleIC>();
 
@@ -29,12 +29,12 @@ MyPolycrystalVoronoiMultiVoidIC::actionParameters()
   return params;
 }
 
-registerMooseObject("PhaseFieldApp", MyPolycrystalVoronoiMultiVoidIC);
+registerMooseObject("PhaseFieldApp", PolycrystalVoronoiMultiVoidIC);
 
 InputParameters
-MyPolycrystalVoronoiMultiVoidIC::validParams()
+PolycrystalVoronoiMultiVoidIC::validParams()
 {
-  InputParameters params = MyPolycrystalVoronoiMultiVoidIC::actionParameters();
+  InputParameters params = PolycrystalVoronoiMultiVoidIC::actionParameters();
   MooseEnum structure_options("grains voids");
   params.addRequiredParam<MooseEnum>("structure_type",
                                      structure_options,
@@ -54,7 +54,7 @@ MyPolycrystalVoronoiMultiVoidIC::validParams()
   return params;
 }
 
-MyPolycrystalVoronoiMultiVoidIC::MyPolycrystalVoronoiMultiVoidIC(const InputParameters & parameters)
+PolycrystalVoronoiMultiVoidIC::PolycrystalVoronoiMultiVoidIC(const InputParameters & parameters)
   : MultiSmoothCircleIC(parameters),
     _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
@@ -64,10 +64,10 @@ MyPolycrystalVoronoiMultiVoidIC::MyPolycrystalVoronoiMultiVoidIC(const InputPara
     _file_name(getParam<FileName>("file_name"))
 {
   if (_invalue < _outvalue)
-    mooseError("MyPolycrystalVoronoiMultiVoidIC requires that the voids be "
+    mooseError("PolycrystalVoronoiMultiVoidIC requires that the voids be "
                "represented with invalue > outvalue");
   if (_numbub == 0)
-    mooseError("MyPolycrystalVoronoiMultiVoidIC requires numbub > 0. If you want no voids to "
+    mooseError("PolycrystalVoronoiMultiVoidIC requires numbub > 0. If you want no voids to "
                "be "
                "represented, use invalue = outvalue. In general, you should use "
                "PolycrystalVoronoi to represent Voronoi grain structures without "
@@ -75,7 +75,7 @@ MyPolycrystalVoronoiMultiVoidIC::MyPolycrystalVoronoiMultiVoidIC(const InputPara
 }
 
 void
-MyPolycrystalVoronoiMultiVoidIC::initialSetup()
+PolycrystalVoronoiMultiVoidIC::initialSetup()
 {
   if (_op_num <= _op_index)
     mooseError("op_index is too large in CircleGrainVoidIC");
@@ -90,7 +90,7 @@ MyPolycrystalVoronoiMultiVoidIC::initialSetup()
 }
 
 Real
-MyPolycrystalVoronoiMultiVoidIC::value(const Point & p)
+PolycrystalVoronoiMultiVoidIC::value(const Point & p)
 {
   Real value = 0.0;
 
@@ -123,7 +123,7 @@ MyPolycrystalVoronoiMultiVoidIC::value(const Point & p)
 }
 
 RealGradient
-MyPolycrystalVoronoiMultiVoidIC::gradient(const Point & p)
+PolycrystalVoronoiMultiVoidIC::gradient(const Point & p)
 {
   RealGradient gradient;
   RealGradient void_gradient = MultiSmoothCircleIC::gradient(p);

@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MyPolycrystalVoronoiMultiVoidICAction.h"
-#include "MyPolycrystalVoronoiMultiVoidIC.h"
+#include "PolycrystalVoronoiMultiVoidICAction.h"
+#include "PolycrystalVoronoiMultiVoidIC.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("PhaseFieldApp", MyPolycrystalVoronoiMultiVoidICAction, "add_ic");
+registerMooseAction("PhaseFieldApp", PolycrystalVoronoiMultiVoidICAction, "add_ic");
 
 InputParameters
-MyPolycrystalVoronoiMultiVoidICAction::validParams()
+PolycrystalVoronoiMultiVoidICAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params += MyPolycrystalVoronoiMultiVoidIC::actionParameters();
+  params += PolycrystalVoronoiMultiVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");
   params.addRequiredParam<UserObjectName>(
@@ -32,7 +32,7 @@ MyPolycrystalVoronoiMultiVoidICAction::validParams()
   return params;
 }
 
-MyPolycrystalVoronoiMultiVoidICAction::MyPolycrystalVoronoiMultiVoidICAction(const InputParameters & params)
+PolycrystalVoronoiMultiVoidICAction::PolycrystalVoronoiMultiVoidICAction(const InputParameters & params)
   : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
@@ -41,13 +41,13 @@ MyPolycrystalVoronoiMultiVoidICAction::MyPolycrystalVoronoiMultiVoidICAction(con
 }
 
 void
-MyPolycrystalVoronoiMultiVoidICAction::act()
+PolycrystalVoronoiMultiVoidICAction::act()
 {
   // Loop through the number of order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
     // Set parameters for BoundingBoxIC
-    InputParameters poly_params = _factory.getValidParams("MyPolycrystalVoronoiMultiVoidIC");
+    InputParameters poly_params = _factory.getValidParams("PolycrystalVoronoiMultiVoidIC");
     poly_params.applyParameters(parameters());
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
@@ -57,6 +57,6 @@ MyPolycrystalVoronoiMultiVoidICAction::act()
 
     // Add initial condition
     _problem->addInitialCondition(
-        "MyPolycrystalVoronoiMultiVoidIC", name() + "_" + Moose::stringify(op), poly_params);
+        "PolycrystalVoronoiMultiVoidIC", name() + "_" + Moose::stringify(op), poly_params);
   }
 }
