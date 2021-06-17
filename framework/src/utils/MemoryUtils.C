@@ -75,14 +75,10 @@ getTotalRAM()
   return 0;
 }
 
-std::mutex memory_stats_mutex;
-
 bool
 getMemoryStats(Stats & stats)
 {
   bool retval = true;
-
-  const std::lock_guard<std::mutex> lock(memory_stats_mutex);
 
   enum StatItem
   {
