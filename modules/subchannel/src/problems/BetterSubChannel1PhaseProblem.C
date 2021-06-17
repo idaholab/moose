@@ -1,6 +1,8 @@
 #include "BetterSubChannel1PhaseProblem.h"
 #include "SystemBase.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscksp.h>
@@ -8,7 +10,6 @@
 #include <petscvec.h>
 #include <petscsnes.h>
 #include <iostream>
-#include <Eigen/Dense>
 #include <cmath>
 #include "AuxiliarySystem.h"
 registerMooseObject("SubChannelApp", BetterSubChannel1PhaseProblem);
@@ -30,13 +31,14 @@ formFunction(SNES snes, Vec x, Vec f, void * ctx)
   ierr = VecGetSize(x, &size);
   CHKERRQ(ierr);
 
-  Eigen::VectorXd solution_seed(size);
+  libMesh::DenseVector<Real> solution_seed(size, 0.0);
   ierr = VecGetArrayRead(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < size; i++)
     solution_seed(i) = xx[i];
 
-  Eigen::VectorXd Wij_residual_vector = cc->schp->residualFunction(cc->iblock, solution_seed);
+  libMesh::DenseVector<Real> Wij_residual_vector =
+      cc->schp->residualFunction(cc->iblock, solution_seed);
 
   ierr = VecGetArray(f, &ff);
   CHKERRQ(ierr);
@@ -95,9 +97,9 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
   _Wij.resize(_n_gaps, _n_cells + 1);
   _Wij_old.resize(_n_gaps, _n_cells + 1);
   _WijPrime.resize(_n_gaps, _n_cells + 1);
-  _Wij.setZero();
-  _Wij_old.setZero();
-  _WijPrime.setZero();
+  _Wij.zero();
+  _Wij_old.zero();
+  _WijPrime.zero();
   _converged = true;
 }
 
@@ -197,22 +199,21 @@ BetterSubChannel1PhaseProblem::computeWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-  // Initial guess, port crossflow of block (iblock) into a vector that will act as my initial guess
-  Eigen::MatrixXd solution_seed_matrix = _Wij.block(0, first_node, _n_gaps, _block_size);
 
-  Eigen::VectorXd solution_seed(_n_gaps * _block_size);
-  for (unsigned int iz = 0; iz < _block_size; iz++)
+  // Initial guess, port crossflow of block (iblock) into a vector that will act as my initial guess
+  libMesh::DenseVector<Real> solution_seed(_n_gaps * _block_size, 0.0);
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
-      int i = _n_gaps * iz + i_gap; // column wise transfer
-      solution_seed(i) = solution_seed_matrix(i_gap, iz);
+      int i = _n_gaps * (iz - first_node) + i_gap; // column wise transfer
+      solution_seed(i) = _Wij(i_gap, iz);
     }
   }
 
   // Solving the combined lateral momentum equation for Wij using a PETSc solver and update vector
   // root
-  Eigen::VectorXd root(_n_gaps * _block_size);
+  libMesh::DenseVector<Real> root(_n_gaps * _block_size, 0.0);
   petscSnesSolver(iblock, solution_seed, root);
 
   // Assign the solution to the cross-flow matrix
@@ -554,16 +555,15 @@ BetterSubChannel1PhaseProblem::computeMu(int iblock)
   }
 }
 
-Eigen::VectorXd
-BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solution)
+libMesh::DenseVector<Real>
+BetterSubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
 
-  Eigen::MatrixXd Wij_residual_matrix(_n_gaps, _block_size);
-  Wij_residual_matrix.setZero();
-  Eigen::VectorXd Wij_residual_vector(_n_gaps * _block_size);
-  Wij_residual_vector.setZero();
+  libMesh::DenseMatrix<Real> Wij_residual_matrix(_n_gaps, _block_size);
+  Wij_residual_matrix.zero();
+  libMesh::DenseVector<Real> Wij_residual_vector(_n_gaps * _block_size, 0.0);
 
   // Assign the solution to the cross-flow matrix
   int i = 0;
@@ -662,8 +662,8 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, Eigen::VectorXd solu
 
 PetscErrorCode
 BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
-                                               const Eigen::VectorXd & solution,
-                                               Eigen::VectorXd & root)
+                                               const libMesh::DenseVector<Real> & solution,
+                                               libMesh::DenseVector<Real> & root)
 {
   SNES snes;
   KSP ksp;
