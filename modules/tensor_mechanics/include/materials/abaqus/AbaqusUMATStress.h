@@ -63,6 +63,9 @@ public:
   /// perform per-element computation/initialization
   void computeProperties() override;
 
+  /// perform quadrature point computation/initialization
+  void computeQpProperties() override;
+
 protected:
   // The plugin file name
   FileName _plugin;
@@ -205,4 +208,7 @@ protected:
 
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
+
+  const VariableValue & _temperature;
+  const VariableValue & _temperature_old;
 };

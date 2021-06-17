@@ -32,6 +32,8 @@ AbaqusUMATStress::validParams()
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
+  params.addCoupledVar("temperature", "Coupled temperature");
+
   return params;
 }
 
@@ -53,7 +55,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
-    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit"))
+    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
+    _temperature(isCoupled("temperature") ? coupledValue("temperature") : _zero),
+    _temperature_old(isCoupled("temperature") ? coupledValueOld("temperature") : _zero)
+
 {
 #ifndef METHOD
 #error "The METHOD preprocessor symbol must be supplied by the build system."
@@ -142,6 +147,12 @@ AbaqusUMATStress::computeProperties()
 }
 
 void
+AbaqusUMATStress::computeQpProperties()
+{
+  ComputeStressBase::computeQpProperties();
+}
+
+void
 AbaqusUMATStress::computeQpStress()
 {
   const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
@@ -180,6 +191,12 @@ AbaqusUMATStress::computeQpStress()
 
   // set PNEWDT to a large value
   _aqPNEWDT = std::numeric_limits<Real>::max();
+
+  // Temperature
+  _aqTEMP = _temperature[_qp];
+
+  // Temperature increment
+  _aqDTEMP = _temperature[_qp] - _temperature_old[_qp];
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
