@@ -209,7 +209,7 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  TIME_SECTION(_perf_command_line_args);
+  TIME_SECTION("getCommandLineArgsParamHelper", 3, "Parsing commandline parameters");
 
   std::string args;
 
