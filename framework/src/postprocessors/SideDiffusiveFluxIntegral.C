@@ -24,9 +24,9 @@ registerMooseObjectRenamed("MooseApp",
 
 defineLegacyParams(SideDiffusiveFluxIntegral);
 
-template <bool is_ad>
+template <bool is_ad, T material_type>
 InputParameters
-SideDiffusiveFluxIntegralTempl<is_ad>::validParams()
+SideDiffusiveFluxIntegralTempl<is_ad, material_type>::validParams()
 {
   InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>(
@@ -37,18 +37,18 @@ SideDiffusiveFluxIntegralTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-SideDiffusiveFluxIntegralTempl<is_ad>::SideDiffusiveFluxIntegralTempl(
+template <bool is_ad, T material_type>
+SideDiffusiveFluxIntegralTempl<is_ad, material_type>::SideDiffusiveFluxIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
     _diffusivity(getParam<MaterialPropertyName>("diffusivity")),
-    _diffusion_coef(getGenericMaterialProperty<Real, is_ad>(_diffusivity))
+    _diffusion_coef(getGenericMaterialProperty<material_type, is_ad>(_diffusivity))
 {
 }
 
-template <bool is_ad>
+template <bool is_ad, T material_type>
 Real
-SideDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
+SideDiffusiveFluxIntegralTempl<is_ad, material_type>::computeQpIntegral()
 {
   if (_fv)
   {
@@ -60,11 +60,25 @@ SideDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     const auto & grad_u = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
 
     // FIXME Get the diffusion coefficient on the face, see #16809
-    return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * grad_u * _normals[_qp];
+    return -diffusivity_gradient_product(
+        MetaPhysicL::raw_value(_diffusion_coef[_qp]), grad_u) * _normals[_qp];
   }
   else
-    return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * _grad_u[_qp] * _normals[_qp];
+    return -diffusivity_gradient_product(
+        MetaPhysicL::raw_value(_diffusion_coef[_qp]), _grad_u[_qp]) * _normals[_qp];
 }
 
-template class SideDiffusiveFluxIntegralTempl<false>;
-template class SideDiffusiveFluxIntegralTempl<true>;
+template <bool is_ad, T material_type>
+RealVectorValue
+SideDiffusiveFluxIntegralTempl<is_ad, material_type>::diffusivity_gradient_product(
+    RealVectorValue grad_u,
+    material_type diffusivity)
+{
+
+  return grad_u * diffusivity;
+}
+
+template class SideDiffusiveFluxIntegralTempl<false, Real>;
+template class SideDiffusiveFluxIntegralTempl<true, Real>;
+template class SideDiffusiveFluxIntegralTempl<false, RealVectorValue>;
+template class SideDiffusiveFluxIntegralTempl<true, RealVectorValue>;

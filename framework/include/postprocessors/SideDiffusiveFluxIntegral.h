@@ -13,10 +13,12 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-template <bool>
+template <bool, T>
 class SideDiffusiveFluxIntegralTempl;
-typedef SideDiffusiveFluxIntegralTempl<false> SideDiffusiveFluxIntegral;
-typedef SideDiffusiveFluxIntegralTempl<true> ADSideDiffusiveFluxIntegral;
+typedef SideDiffusiveFluxIntegralTempl<false, Real> SideDiffusiveFluxIntegral;
+typedef SideDiffusiveFluxIntegralTempl<true, Real> ADSideDiffusiveFluxIntegral;
+typedef SideDiffusiveFluxIntegralTempl<false, RealVectorValue> SideVectorDiffusivityFluxIntegral;
+typedef SideDiffusiveFluxIntegralTempl<true, RealVectorValue> ADVectorSideDiffusivityFluxIntegral;
 
 template <>
 InputParameters validParams<SideDiffusiveFluxIntegral>();
@@ -24,7 +26,7 @@ InputParameters validParams<SideDiffusiveFluxIntegral>();
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
-template <bool is_ad>
+template <bool is_ad, T material_type>
 class SideDiffusiveFluxIntegralTempl : public SideIntegralVariablePostprocessor
 {
 public:
@@ -35,6 +37,8 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
+  RealVectorValue diffusivity_gradient_product<material_type>(RealVectorValue grad_u, T diffusivity);
+
   MaterialPropertyName _diffusivity;
-  const GenericMaterialProperty<Real, is_ad> & _diffusion_coef;
+  const GenericMaterialProperty<material_type, is_ad> & _diffusion_coef;
 };
