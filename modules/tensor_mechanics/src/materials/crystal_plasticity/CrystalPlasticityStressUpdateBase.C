@@ -37,8 +37,10 @@ CrystalPlasticityStressUpdateBase::validParams()
       "unit_cell_dimension",
       std::vector<Real>{1.0, 1.0, 1.0},
       "unit_cell_dimension_size = 3",
-      "The dimension of the unit cell along three directions. This will be taken into account "
-      "while computing the slip systems. Default size is 1.0 along all three directions.");
+      "The dimension of the unit cell along three directions, where a cubic unit cell is assumed "
+      "for cubic crystals and a hexagonal unit cell (a, a, c) is assumed for HCP crystals. These "
+      "dimensions will be taken into account while computing the slip systems."
+      " Default size is 1.0 along all three directions.");
 
   params.addRequiredParam<unsigned int>(
       "number_slip_systems",
@@ -135,39 +137,117 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
         "number_slip_systems",
         "The number of rows in the slip system file should match the number of slip system.");
 
-  // parse the data and save the slip directions and plane normals
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     // initialize to zero
     _slip_direction[i].resize(LIBMESH_DIM);
     _slip_plane_normal[i].resize(LIBMESH_DIM);
+  }
 
-    // grab the raw data and scale it by the unit cell dimension
-    for (unsigned int j = 0; j < _reader.getData(i).size(); ++j)
+  if (_unit_cell_type == UnitCellType::HCP)
+    transformHexagonalMillerBravisSlipSystems(_reader);
+  else if (_unit_cell_type == UnitCellType::BCC || _unit_cell_type == UnitCellType::FCC)
+  {
+    for (unsigned int i = 0; i < _number_slip_systems; ++i)
     {
-      if (j < LIBMESH_DIM)
-        _slip_plane_normal[i](j) = _reader.getData(i)[j] / _unit_cell_dimension[j];
-      else
-        _slip_direction[i](j - LIBMESH_DIM) =
-            _reader.getData(i)[j] * _unit_cell_dimension[j - LIBMESH_DIM];
+      // directly grab the raw data and scale it by the unit cell dimension
+      for (unsigned int j = 0; j < _reader.getData(i).size(); ++j)
+      {
+        if (j < LIBMESH_DIM)
+          _slip_plane_normal[i](j) = _reader.getData(i)[j] / _unit_cell_dimension[j];
+        else
+          _slip_direction[i](j - LIBMESH_DIM) =
+              _reader.getData(i)[j] * _unit_cell_dimension[j - LIBMESH_DIM];
+      }
     }
+  }
+
+  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  {
     // normalize
     _slip_plane_normal[i].scale(1.0 / _slip_plane_normal[i].l2_norm());
     _slip_direction[i].scale(1.0 / _slip_direction[i].l2_norm());
 
-    // check if slip direction is normal to the slip plane normal
-    auto magnitude = _slip_plane_normal[i].dot(_slip_direction[i]);
-    if (std::abs(magnitude) > libMesh::TOLERANCE)
+    if (_unit_cell_type != UnitCellType::HCP)
     {
-      orthonormal_error = true;
-      break;
+      // check if slip direction is normal to the slip plane normal
+      auto magnitude = _slip_plane_normal[i].dot(_slip_direction[i]);
+      if (std::abs(magnitude) > libMesh::TOLERANCE)
+      {
+        orthonormal_error = true;
+        break;
+      }
     }
   }
 
   if (orthonormal_error)
     mooseError("CrystalPlasticityStressUpdateBase Error: The slip system file contains a slip "
-               "direction and "
-               "plane normal pair that are not orthonormal");
+               "direction and plane normal pair that are not orthonormal in the Cartesian "
+               "coordinate system.");
+}
+
+void
+CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(const MooseUtils::DelimitedFileReader & reader)
+{
+  const unsigned int miller_bravis_indices = 4;
+  std::vector<Real> miller_bravis_slip_direction, temporary_slip_direction, temporary_slip_plane;
+  miller_bravis_slip_direction.resize(miller_bravis_indices);
+  temporary_slip_plane.resize(LIBMESH_DIM);
+  temporary_slip_direction.resize(LIBMESH_DIM);
+
+  if (_unit_cell_dimension[0] != _unit_cell_dimension[1] ||
+      _unit_cell_dimension[0] == _unit_cell_dimension[2])
+    mooseError("CrystalPlasticityStressUpdateBase Error: The specified unit cell dimensions are "
+               "not consistent with expectations for "
+               "HCP crystal hexagonal lattices.");
+  else if (reader.getData(0).size() != miller_bravis_indices * 2)
+    mooseError("CrystalPlasticityStressUpdateBase Error: The number of entries in the first row of "
+               "the slip system file is not consistent with the expectations for the 4-index "
+               "Miller-Bravis assumption for HCP crystals. This file should represent both the "
+               "slip plane normal and the slip direction with 4-indices each.");
+
+  // set up the tranformation matrices
+  RankTwoTensor transform_planes, transform_directions;
+  transform_planes(0, 0) = 1.0 / _unit_cell_dimension[0];
+  transform_planes(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_planes(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_planes(2, 2) = 1.0 / (_unit_cell_dimension[2]);
+
+  transform_directions(0, 0) = _unit_cell_dimension[0];
+  transform_directions(0, 1) = -1.0 / (2 * _unit_cell_dimension[0]);
+  transform_directions(1, 1) = std::sqrt(3.0) * _unit_cell_dimension[0] / 2.0;
+  transform_directions(2, 2) = _unit_cell_dimension[2];
+
+  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  {
+    // read in raw data from file and store in the temporary vectors
+    for (unsigned int j = 0; j < reader.getData(i).size(); ++j)
+    {
+      if (j < miller_bravis_indices)
+      {
+        // Planes are directly copied over, per a_1 = convention used here
+        if (j < 2)
+          temporary_slip_plane[j] = reader.getData(i)[j];
+        else if (j == 3)
+          temporary_slip_plane[j-1] = reader.getData(i)[j];
+      }
+      else
+        miller_bravis_slip_direction[j - miller_bravis_indices] = reader.getData(i)[j];
+    }
+
+    // save the 3-index combinations, with the convention a_1 = x
+    temporary_slip_direction[0] = 2.0 * miller_bravis_slip_direction[0] + miller_bravis_slip_direction[1];
+    temporary_slip_direction[1] = miller_bravis_slip_direction[0] + 2.0 * miller_bravis_slip_direction[1];
+    temporary_slip_direction[2] = miller_bravis_slip_direction[3];
+
+    // perform transformation calculation
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      {
+        _slip_direction[i](j) += transform_directions(j, k) * temporary_slip_direction[k];
+        _slip_plane_normal[i](j) += transform_planes(j, k) * temporary_slip_plane[k];
+      }
+  }
 }
 
 void
