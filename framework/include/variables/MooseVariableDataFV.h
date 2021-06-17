@@ -171,8 +171,8 @@ public:
 
   const ADTemplateVariableValue<OutputType> & adUDotDot() const
   {
-    mooseError("An AD second derivative in time (_ad_u_dotdot) is not yet implemented for finite "
-               "volume variables!");
+    mooseError("An AD second derivative in time (`_ad_u_dotdot`) is not yet implemented for finite "
+               "volume variables.");
   }
 
   const FieldVariableValue & uDot() const;
