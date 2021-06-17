@@ -26,32 +26,53 @@ JSONOutput::validParams()
   params.set<ExecFlagEnum>("execute_system_information_on", /*quite_mode=*/true) = EXEC_INITIAL;
   params.addParam<bool>(
       "use_legacy_reporter_output", false, "Use reporter output that does not group by object.");
+  params.addParam<bool>("one_file_per_timestep",
+                        false,
+                        "Create a unique output file for each time step of the simulation.");
   return params;
 }
 
 JSONOutput::JSONOutput(const InputParameters & parameters)
-  : AdvancedOutput(parameters), _reporter_data(_problem_ptr->getReporterData())
+  : AdvancedOutput(parameters),
+    _reporter_data(_problem_ptr->getReporterData()),
+    _one_file_per_timestep(getParam<bool>("one_file_per_timestep"))
 {
 }
 
 std::string
 JSONOutput::filename()
 {
+  std::ostringstream file_name;
+  file_name << _file_base;
+
+  if (_one_file_per_timestep)
+    file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+              << std::right << timeStep();
+
   if (processor_id() > 0)
   {
-    std::ostringstream file_name;
     int digits = MooseUtils::numDigits(n_processors());
-    file_name << _file_base << ".json"
+    file_name << ".json"
               << "." << std::setw(digits) << std::setfill('0') << processor_id();
-    return file_name.str();
   }
-  return _file_base + ".json";
+  else
+    file_name << ".json";
+
+  return file_name.str();
 }
 
 void
 JSONOutput::outputSystemInformation()
 {
   storeHelper(_json, _app);
+}
+
+void
+JSONOutput::timestepSetup()
+{
+  AdvancedOutput::timestepSetup();
+  if (_one_file_per_timestep)
+    _json.clear();
 }
 
 void

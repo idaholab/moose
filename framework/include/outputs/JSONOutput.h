@@ -22,6 +22,7 @@ protected:
   virtual void output(const ExecFlagType & type) override;
   virtual void outputReporters() override;
   virtual void outputSystemInformation() override;
+  virtual void timestepSetup() override;
   virtual std::string filename() override;
   const ReporterData & _reporter_data;
 
@@ -31,4 +32,7 @@ private:
 
   /// True when distributed data exists for output
   bool _has_distributed = false;
+
+  /// Flag to create a file for each time step
+  const bool _one_file_per_timestep;
 };
