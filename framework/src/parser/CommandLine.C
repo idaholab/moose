@@ -132,46 +132,47 @@ CommandLine::populateInputParams(InputParameters & params)
 
     if (search(orig_name))
     {
+      auto * string_type = dynamic_cast<InputParameters::Parameter<std::string> *>(it.second);
+      if (string_type)
       {
-        InputParameters::Parameter<std::string> * string_type =
-            dynamic_cast<InputParameters::Parameter<std::string> *>(it.second);
-        if (string_type)
-        {
-          search(orig_name, params.set<std::string>(orig_name));
-          continue;
-        }
+        search(orig_name, params.set<std::string>(orig_name));
+        continue;
+      }
 
-        InputParameters::Parameter<Real> * real_type =
-            dynamic_cast<InputParameters::Parameter<Real> *>(it.second);
-        if (real_type)
-        {
-          search(orig_name, params.set<Real>(orig_name));
-          continue;
-        }
+      auto * string_vector_type =
+          dynamic_cast<InputParameters::Parameter<std::vector<std::string>> *>(it.second);
+      if (string_vector_type)
+      {
+        search(orig_name, params.set<std::vector<std::string>>(orig_name));
+        continue;
+      }
 
-        InputParameters::Parameter<unsigned int> * uint_type =
-            dynamic_cast<InputParameters::Parameter<unsigned int> *>(it.second);
-        if (uint_type)
-        {
-          search(orig_name, params.set<unsigned int>(orig_name));
-          continue;
-        }
+      auto * real_type = dynamic_cast<InputParameters::Parameter<Real> *>(it.second);
+      if (real_type)
+      {
+        search(orig_name, params.set<Real>(orig_name));
+        continue;
+      }
 
-        InputParameters::Parameter<int> * int_type =
-            dynamic_cast<InputParameters::Parameter<int> *>(it.second);
-        if (int_type)
-        {
-          search(orig_name, params.set<int>(orig_name));
-          continue;
-        }
+      auto * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int> *>(it.second);
+      if (uint_type)
+      {
+        search(orig_name, params.set<unsigned int>(orig_name));
+        continue;
+      }
 
-        InputParameters::Parameter<bool> * bool_type =
-            dynamic_cast<InputParameters::Parameter<bool> *>(it.second);
-        if (bool_type)
-        {
-          search(orig_name, params.set<bool>(orig_name));
-          continue;
-        }
+      auto * int_type = dynamic_cast<InputParameters::Parameter<int> *>(it.second);
+      if (int_type)
+      {
+        search(orig_name, params.set<int>(orig_name));
+        continue;
+      }
+
+      auto * bool_type = dynamic_cast<InputParameters::Parameter<bool> *>(it.second);
+      if (bool_type)
+      {
+        search(orig_name, params.set<bool>(orig_name));
+        continue;
       }
     }
     else if (params.isParamRequired(orig_name))
@@ -194,7 +195,7 @@ CommandLine::addOption(const std::string & name, Option cli_opt)
 bool
 CommandLine::search(const std::string & option_name)
 {
-  std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
+  auto pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
   {
     for (const auto & search_string : pos->second.cli_switch)

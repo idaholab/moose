@@ -187,7 +187,10 @@ public:
   /**
    * Returns the input file name that was set with setInputFileName
    */
-  std::string getInputFileName() const { return _input_filename; }
+  std::string getInputFileName() const
+  {
+    return _input_filenames.empty() ? "" : _input_filenames[0];
+  }
 
   /**
    * Override the selection of the output file base name.
@@ -271,7 +274,7 @@ public:
   Real getGlobalTimeOffset() const { return _global_time_offset; }
 
   /**
-   * Return the filename that was parsed
+   * Return the primary (first) filename that was parsed
    * Note: When stripLeadingPath is false, this function returns the same name as
    *       getInputFileName() method when the input file is not a link.
    */
@@ -885,8 +888,8 @@ protected:
   /// The RankMap is a useful object for determining how
   const RankMap _rank_map;
 
-  /// Input file name used
-  std::string _input_filename;
+  /// Input file names used
+  std::vector<std::string> _input_filenames;
 
   /// The output file basename
   std::string _output_file_base;

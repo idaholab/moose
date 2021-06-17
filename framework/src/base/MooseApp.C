@@ -43,7 +43,7 @@
 #include "ProxyRelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
-#include "PerfGraphInterface.h" // For TIME_SECTIOn
+#include "PerfGraphInterface.h" // For TIME_SECTION
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
@@ -83,7 +83,11 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
-  params.addCommandLineParam<std::string>("input_file", "-i <input_file>", "Specify an input file");
+  params.addCommandLineParam<std::vector<std::string>>(
+      "input_file",
+      "-i <input_files>",
+      "Specify one or multiple input files. Multiple files get merged into a single simulation "
+      "input.");
   params.addCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only [mesh_file_name]",
@@ -358,7 +362,7 @@ MooseApp::MooseApp(InputParameters parameters)
     bool has_heap_profiling = false;
     static std::string profile_file;
 
-    // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
+    // For CPU profiling, users need to have environment 'MOOSE_PROFILE_BASE'
     if (std::getenv("MOOSE_PROFILE_BASE"))
     {
       has_cpu_profiling = true;
@@ -868,11 +872,11 @@ MooseApp::setupOptions()
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (_input_filename != "" ||
+  else if (!_input_filenames.empty() ||
            isParamValid("input_file")) // They already specified an input filename
   {
-    if (_input_filename == "")
-      _input_filename = getParam<std::string>("input_file");
+    if (_input_filenames.empty())
+      _input_filenames = getParam<std::vector<std::string>>("input_file");
 
     if (isParamValid("recover"))
     {
@@ -897,7 +901,7 @@ MooseApp::setupOptions()
       _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
-    _parser.parse(_input_filename);
+    _parser.parse(_input_filenames);
 
     if (isParamValid("mesh_only"))
     {
@@ -929,12 +933,12 @@ MooseApp::setupOptions()
       }
       else if (isUltimateMaster())
       {
-        // if this app is a master, we use the input file name as the default file base
+        // if this app is a master, we use the first input file name as the default file base
         std::string base = getInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
-        //       have it in betwen the input file name and the object name for Output/*
+        //       have it in between the input file name and the object name for Output/*
         //       syntax.
       }
       // default file base for multiapps is set by MultiApp
@@ -956,7 +960,8 @@ MooseApp::setupOptions()
 void
 MooseApp::setInputFileName(const std::string & input_filename)
 {
-  _input_filename = input_filename;
+  // for now we only permit single input to be set for multiapps
+  _input_filenames = {input_filename};
 }
 
 std::string
@@ -1317,7 +1322,7 @@ MooseApp::setStartTime(Real time)
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  return _parser.getFileName(stripLeadingPath);
+  return _parser.getPrimaryFileName(stripLeadingPath);
 }
 
 OutputWarehouse &
