@@ -73,12 +73,12 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      : false),
-   _cache_face_gradients(this->isParamValid("cache_face_gradients")
-                         ? this->template getParam<bool>("cache_face_gradients")
-                         : false),
-   _cache_face_values(this->isParamValid("cache_face_values")
-                         ? this->template getParam<bool>("cache_face_values")
-                         : false),
+    _cache_face_gradients(this->isParamValid("cache_face_gradients")
+                              ? this->template getParam<bool>("cache_face_gradients")
+                              : false),
+    _cache_face_values(this->isParamValid("cache_face_values")
+                           ? this->template getParam<bool>("cache_face_values")
+                           : false),
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
     // these parameters available
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
