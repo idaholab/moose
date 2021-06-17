@@ -115,7 +115,7 @@ public:
    */
   virtual void computeADTimeDerivatives(DualReal & ad_u_dot,
                                         const dof_id_type & dof,
-                                        DualReal * ad_u_dot_dot) const = 0;
+                                        DualReal & ad_u_dot_dot) const = 0;
 
   /**
    * Gets the total number of nonlinear iterations over all stages of the time step.

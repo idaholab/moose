@@ -32,7 +32,7 @@ public:
   virtual void computeTimeDerivatives() override;
   void computeADTimeDerivatives(DualReal & ad_u_dot,
                                 const dof_id_type & dof,
-                                DualReal * ad_u_dotdot) const override;
+                                DualReal & ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:

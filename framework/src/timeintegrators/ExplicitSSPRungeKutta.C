@@ -77,7 +77,7 @@ ExplicitSSPRungeKutta::computeTimeDerivatives()
 void
 ExplicitSSPRungeKutta::computeADTimeDerivatives(ADReal & ad_u_dot,
                                                 const dof_id_type & dof,
-                                                DualReal * /*ad_u_dotdot*/) const
+                                                DualReal & /*ad_u_dotdot*/) const
 {
   if (_stage == _n_stages)
   {

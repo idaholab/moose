@@ -805,6 +805,9 @@ private:
 
   /// The current element side
   const unsigned int & _current_side;
+
+  /// A dummy ADReal variable
+  ADReal _ad_real_dummy = 0;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////

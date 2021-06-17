@@ -500,6 +500,9 @@ private:
 
   /// The quadrature rule
   const QBase * _qrule;
+
+  /// A dummy ADReal variable
+  ADReal _ad_real_dummy = 0;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////

@@ -1470,17 +1470,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
-      ADReal * ad_dofs_dotdot_ptr = nullptr;
-      if (_need_ad_u_dotdot)
-      {
-        _ad_dofs_dotdot[i].value() = std::numeric_limits<Real>::quiet_NaN();
-        ad_dofs_dotdot_ptr = &_ad_dofs_dotdot[i];
-      }
       _time_integrator->computeADTimeDerivatives(
-          _ad_dofs_dot[i], _dof_indices[i], ad_dofs_dotdot_ptr);
-      mooseAssert(!_need_ad_u_dotdot || !std::isnan(ad_dofs_dotdot_ptr->value()),
-                  "A second time derivative was requested but wasn't assigned in "
-                      << _time_integrator->type());
+        _ad_dofs_dot[i], _dof_indices[i], _need_ad_u_dotdot ? _ad_dofs_dotdot[i] : _ad_real_dummy);
     }
   }
 
