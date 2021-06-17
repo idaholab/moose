@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeochemicalDatabaseReader.h"
+#include "GeochemicalDatabaseValidator.h"
 
 #include "MooseUtils.h"
 #include "Conversion.h"
@@ -22,10 +23,14 @@ GeochemicalDatabaseReader::GeochemicalDatabaseReader(
   : _filename(filename)
 {
   read(_filename);
+  validate(_filename, _root);
+
   if (reexpress_free_electron)
     reexpressFreeElectron();
+
   if (use_piecewise_interpolation && _root["Header"].contains("logk model"))
     _root["Header"]["logk model"] = "piecewise-linear";
+
   if (remove_all_extrapolated_secondary_species)
     removeExtrapolatedSecondarySpecies();
 
@@ -35,7 +40,7 @@ GeochemicalDatabaseReader::GeochemicalDatabaseReader(
 }
 
 void
-GeochemicalDatabaseReader::read(FileName filename)
+GeochemicalDatabaseReader::read(const FileName filename)
 {
   MooseUtils::checkFileReadable(filename);
 
@@ -45,25 +50,25 @@ GeochemicalDatabaseReader::read(FileName filename)
 }
 
 void
+GeochemicalDatabaseReader::validate(const FileName filename, const nlohmann::json & db)
+{
+  // Validate the JSON database so that we don't have to check array sizes,
+  // check for conversion issues, etc when extracting data using get methods
+  GeochemicalDatabaseValidator dbv(filename, db);
+  dbv.validate();
+}
+
+void
 GeochemicalDatabaseReader::reexpressFreeElectron()
 {
-  if (!_root.contains("free electron"))
+  if (!_root.contains("free electron") || !_root["free electron"].contains("e-") ||
+      !_root["free electron"]["e-"]["species"].contains("O2(g)"))
     return;
-  if (!_root["free electron"].contains("e-"))
+  if (!_root.contains("basis species") || !_root["basis species"].contains("O2(aq)"))
     return;
-  if (!_root["free electron"]["e-"]["species"].contains("O2(g)"))
-    return;
-  if (!_root.contains("basis species"))
-    return;
-  if (!_root["basis species"].contains("O2(aq)"))
-    return;
-  if (!_root.contains("gas species"))
-    return;
-  if (!_root["gas species"].contains("O2(g)"))
-    return;
-  if (!_root["gas species"]["O2(g)"]["species"].contains("O2(aq)"))
-    return;
-  if (_root["gas species"]["O2(g)"]["species"].size() != 1)
+  if (!_root.contains("gas species") || !_root["gas species"].contains("O2(g)") ||
+      !_root["gas species"]["O2(g)"]["species"].contains("O2(aq)") ||
+      (_root["gas species"]["O2(g)"]["species"].size() != 1))
     return;
 
   // remove O2(g) in the "e-" and replace with O2(aq)
@@ -651,12 +656,9 @@ GeochemicalDatabaseReader::oxideReactions(const std::vector<std::string> & names
 
 std::vector<std::string>
 GeochemicalDatabaseReader::printReactions(
-    std::vector<std::string> names, std::vector<std::map<std::string, Real>> basis_species) const
+    const std::vector<std::string> & names,
+    const std::vector<std::map<std::string, Real>> & basis_species) const
 {
-  // Length of the input vectors must be equal
-  if (names.size() != basis_species.size())
-    mooseError("Input vectors for printReactions() must be equal size");
-
   std::vector<std::string> reactions;
 
   for (unsigned int i = 0; i < names.size(); ++i)

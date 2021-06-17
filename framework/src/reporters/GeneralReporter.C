@@ -18,6 +18,6 @@ GeneralReporter::validParams()
 }
 
 GeneralReporter::GeneralReporter(const InputParameters & parameters)
-  : GeneralUserObject(parameters), Reporter(parameters)
+  : GeneralUserObject(parameters), Reporter(this)
 {
 }

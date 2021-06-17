@@ -1,0 +1,66 @@
+[Tests]
+  [./3d_isotropic]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic.i'
+    exodiff = '3d_bar_orthotropic_out.e'
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   complex strain state simulation in 3D using an orhotropic filling with isotropic properties.'
+  [../]
+  [./3d_orthotropic_isotropic]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic.i'
+    exodiff = '3d_bar_orthotropic_out.e'
+    cli_args = "Materials/elasticity_tensor/fill_method=symmetric_isotropic_E_nu Materials/elasticity_tensor/C_ijkl='2.0e5 0.4'"
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+                   complex strain state simulation in 3D using an orhotropic filling with isotropic properties.'
+    custom_cmp = ortho.cmp
+  [../]
+  [./3d_bar_orthotropic_90deg_rotation]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic_90deg_rotation.i'
+    exodiff = '3d_bar_orthotropic_90deg_rotation_out.e'
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to rotate an orthotropic beam-like element 90 degrees and retrieve 
+                   the proper displacement after being solicited by a pressure boundary condition.'
+    custom_cmp = ortho.cmp
+  [../]
+  [./3d_bar_orthotropic_90deg_rotation_ad]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic_90deg_rotation_ad.i'
+    exodiff = '3d_bar_orthotropic_90deg_rotation_ad_out.e'
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to rotate an orthotropic beam-like element 90 degrees and retrieve 
+                   the proper displacement after being solicited by a pressure boundary condition when automatic differentiation is used.'
+    custom_cmp = ortho.cmp
+  [../]
+
+  [./3d_bar_orthotropic_full_rotation]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic_full_rotation.i'
+    exodiff = '3d_bar_orthotropic_full_rotation_out.e'
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to rotate an orthotropic beam-like element 360 degrees and retrieve 
+                   the proper displacement after being solicited by a pressure boundary condition.'
+    heavy = true
+    custom_cmp = ortho.cmp
+  [../]
+  [./3d_bar_orthotropic_full_rotation_ad]
+    type = 'Exodiff'
+    input = '3d_bar_orthotropic_full_rotation_ad.i'
+    exodiff = '3d_bar_orthotropic_full_rotation_ad_out.e'
+    issues = '#16016'
+    design = '/ComputeFiniteStrainElasticStress.md'
+    requirement = 'Finite strain methods in Tensor Mechanics should be able to rotate an orthotropic beam-like element 360 degrees and retrieve
+                   the proper displacement after being solicited by a pressure boundary condition when automatic differentiation is used.'
+    heavy = true
+    custom_cmp = ortho.cmp
+  [../]
+
+[]

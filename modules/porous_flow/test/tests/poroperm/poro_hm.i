@@ -1,13 +1,14 @@
 # Test that porosity is correctly calculated.
-# Porosity = biot + (phi0 - biot) * exp(-vol_strain + (biot - 1) / solid_bulk * (porepressure - ref_pressure))
+# Porosity = biot + (phi0 - biot) * exp(-vol_strain + (biot_prime - 1) / solid_bulk * (porepressure - ref_pressure))
 # The parameters used are:
 # biot = 0.7
+# biot_prime = 0.75
 # phi0 = 0.5
 # vol_strain = 0.5
 # solid_bulk = 0.3
 # porepressure = 2
 # ref_pressure = 3
-# which yield porosity = 0.370255745860
+# which yield porosity = 0.420877515
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -20,104 +21,104 @@
 []
 
 [Variables]
-  [./porepressure]
+  [porepressure]
     initial_condition = 2
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = FunctionIC
     function = '0.5 * x'
     variable = disp_x
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy_p]
+  [dummy_p]
     type = TimeDerivative
     variable = porepressure
-  [../]
-  [./dummy_x]
+  []
+  [dummy_x]
     type = TimeDerivative
     variable = disp_x
-  [../]
-  [./dummy_y]
+  []
+  [dummy_y]
     type = TimeDerivative
     variable = disp_y
-  [../]
-  [./dummy_z]
+  []
+  [dummy_z]
     type = TimeDerivative
     variable = disp_z
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
+  [porosity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./porosity]
+  [porosity]
     type = PointValue
     variable = porosity
     point = '0 0 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 3
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -125,7 +126,8 @@
     porosity_zero = 0.5
     solid_bulk = 0.3
     reference_porepressure = 3
-  [../]
+    biot_coefficient_prime = 0.75
+  []
 []
 
 [Executioner]

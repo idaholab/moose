@@ -60,7 +60,7 @@
     variable = T
   []
   [q_left]
-    type = ADSideFluxAverage
+    type = ADSideDiffusiveFluxAverage
     variable = T
     boundary = left
     diffusivity = diffusivity

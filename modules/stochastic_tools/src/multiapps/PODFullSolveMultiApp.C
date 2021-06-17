@@ -182,8 +182,8 @@ PODFullSolveMultiApp::computeResidualBatch(Real target_time)
       else
       {
         // The app is being reset for the next loop, thus the batch index must be indexed as such
-        _local_batch_app_index = i + 1;
-        resetApp(_local_batch_app_index, target_time);
+        _local_batch_app_index++;
+        resetApp(_local_batch_app_index + i, target_time);
         initialSetup();
       }
     }

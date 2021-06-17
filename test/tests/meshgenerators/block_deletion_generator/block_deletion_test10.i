@@ -40,7 +40,7 @@
   [../]
   [./ed0]
     type = BlockDeletionGenerator
-    block_id = 3
+    block = 3
     input = 'new_block_number'
   [../]
 []

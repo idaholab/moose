@@ -11,8 +11,6 @@
 
 #include "SmoothSuperellipsoidBaseIC.h"
 
-// Forward Declarations
-
 /**
  * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of
  * x_positions) that are positioned in the

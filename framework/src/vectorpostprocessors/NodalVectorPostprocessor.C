@@ -23,6 +23,6 @@ NodalVectorPostprocessor::validParams()
 }
 
 NodalVectorPostprocessor::NodalVectorPostprocessor(const InputParameters & parameters)
-  : NodalUserObject(parameters), VectorPostprocessor(parameters)
+  : NodalUserObject(parameters), VectorPostprocessor(this)
 {
 }

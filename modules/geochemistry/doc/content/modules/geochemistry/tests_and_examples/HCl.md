@@ -10,7 +10,7 @@ The database and basis species must be specified for all `geochemistry` simulati
 
 ## The MOOSE input file: step 2
 
-The next piece of the input file involves specifying the initial conditions and the simulation type.  This is a time-independent solve (just the equilibrium configuration is sought).  The charge-balance species is chosen to be Cl$^{-}$, there is 1$\,$kg of solvent water and the pH is fixed to 2 (via `activity = 1E-2`):
+The next piece of the input file involves specifying the initial conditions and the simulation type.  This is a time-independent solve (just the equilibrium configuration is sought).  The charge-balance species is chosen to be Cl$^{-}$, there is 1$\,$kg of solvent water and the pH is fixed to 2 (via `log10activity = -2`):
 
 !listing modules/geochemistry/test/tests/equilibrium_models/HCl.i block=TimeIndependentReactionSolver
 

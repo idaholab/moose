@@ -61,17 +61,22 @@
     type = StochasticResults
   []
   [samp_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = test_sample
     output_samples = true
     execute_on = final
   []
   [train_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = train_sample
     output_samples = true
+    execute_on = final
+  []
+  [hyperparams]
+    type = GaussianProcessData
+    gp_name = 'GP_avg'
     execute_on = final
   []
 []
@@ -83,10 +88,8 @@
     covariance_function = 'covar'   #Choose a Matern with half-integer argument for the kernel
     standardize_params = 'true'           #Center and scale the training params
     standardize_data = 'true'             #Center and scale the training data
-    distributions = 'k_dist q_dist'
     sampler = train_sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg
   []
 []
 

@@ -15,91 +15,75 @@ ReporterData::ReporterData(MooseApp & moose_app) : _app(moose_app) {}
 void
 ReporterData::copyValuesBack()
 {
-  for (const auto & context_ptr : _context_ptrs)
-    context_ptr->copyValuesBack();
+  for (const auto & name_context_pair : _context_ptrs)
+    name_context_pair.second->copyValuesBack();
 }
 
 void
 ReporterData::finalize(const std::string & object_name)
 {
-  // FYI, for the minimum compiler 'auto' doesn't work in argument of the lambda
-  // ReporterData.C:xx:xx: error: 'auto' not allowed in lambda parameter
-  auto func = [object_name, this](const std::unique_ptr<ReporterContextBase> & ptr) {
-    if (ptr->name().getObjectName() == object_name)
-    {
-      // Perform error checking for undeclared items
-      if (this->_declare_names.find(ptr->name()) == this->_declare_names.end())
-        mooseError("The Reporter value '", ptr->name(), "' was not declared.");
-
-      ptr->finalize();
-    }
-  };
-  std::for_each(_context_ptrs.begin(), _context_ptrs.end(), func);
-}
-
-void
-ReporterData::store(nlohmann::json & json) const
-{
-  // Write information to JSON object
-  for (const auto & context_ptr : _context_ptrs)
-  {
-    auto & node = json.emplace_back();
-    node["object_name"] = context_ptr->name().getObjectName();
-    node["value_name"] = context_ptr->name().getValueName();
-    node["type"] = context_ptr->type();
-    context_ptr->store(node["value"]);
-  }
+  for (auto & name_context_pair : _context_ptrs)
+    if (name_context_pair.first.getObjectName() == object_name)
+      name_context_pair.second->finalize();
 }
 
 bool
 ReporterData::hasReporterValue(const ReporterName & reporter_name) const
 {
-  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
-    return ptr->name() == reporter_name;
-  };
-  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  return ptr != _context_ptrs.end();
+  return _context_ptrs.count(reporter_name);
 }
 
 std::set<ReporterName>
 ReporterData::getReporterNames() const
 {
   std::set<ReporterName> output;
-  for (const auto & context_ptr : _context_ptrs)
-    output.insert(context_ptr->name());
+  for (const auto & name_context_pair : _context_ptrs)
+    output.insert(name_context_pair.second->name());
   return output;
 }
 
-const ReporterContextBase *
-ReporterData::getReporterContextBaseHelper(const ReporterName & reporter_name) const
+const ReporterContextBase &
+ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {
-  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
-    return ptr->name() == reporter_name;
-  };
-  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  return ptr != _context_ptrs.end() ? ptr->get() : nullptr;
+  if (!hasReporterValue(reporter_name))
+    mooseError("Unable to locate Reporter context with name: ", reporter_name);
+  return *_context_ptrs.at(reporter_name);
+}
+
+ReporterContextBase &
+ReporterData::getReporterContextBase(const ReporterName & reporter_name)
+{
+  if (!hasReporterValue(reporter_name))
+    mooseError("Unable to locate Reporter context with name: ", reporter_name);
+  return *_context_ptrs.at(reporter_name);
+}
+
+const ReporterStateBase &
+ReporterData::getReporterStateBase(const ReporterName & reporter_name) const
+{
+  if (!hasReporterState(reporter_name))
+    mooseError("Unable to locate Reporter state with name: ", reporter_name);
+  return *_states.at(reporter_name);
+}
+
+ReporterStateBase &
+ReporterData::getReporterStateBase(const ReporterName & reporter_name)
+{
+  if (!hasReporterState(reporter_name))
+    mooseError("Unable to locate Reporter state with name: ", reporter_name);
+  return *_states.at(reporter_name);
 }
 
 void
 ReporterData::check() const
 {
-  // Create a set of values requested but not declared
-  std::set<ReporterName> undeclared;
-  std::set_difference(_get_names.begin(),
-                      _get_names.end(),
-                      _declare_names.begin(),
-                      _declare_names.end(),
-                      std::inserter(undeclared, undeclared.begin()));
+  std::string missing;
+  for (const auto & name_state_pair : _states)
+    if (!hasReporterValue(name_state_pair.first))
+      missing += getReporterInfo(name_state_pair.first) + "\n";
 
-  // Perform error checking that all gets have a declare
-  if (!undeclared.empty())
-  {
-    std::ostringstream oss;
-    oss << "The following Reporter values were not declared:";
-    for (const auto & name : undeclared)
-      oss << "\n    " << name;
-    mooseError(oss.str());
-  }
+  if (missing.size())
+    mooseError("The following Reporter(s) were not declared:\n\n", missing);
 }
 
 RestartableDataValue &
@@ -107,17 +91,81 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
                                        bool declare) const
 {
   // get the name to avoid problems with arbitrary function argument evaluation
-  std::string name = data_ptr->name();
+  const auto name = data_ptr->name();
   return _app.registerRestartableData(name, std::move(data_ptr), 0, !declare);
 }
 
 bool
-ReporterData::hasReporterWithMode(const ReporterMode & mode) const
+ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
 {
-  for (auto & context_ptr : _context_ptrs)
-  {
-    if (context_ptr->getProducerModeEnum() == mode)
+  for (const auto & name_context_pair : _context_ptrs)
+    if (name_context_pair.first.getObjectName() == obj_name &&
+        name_context_pair.second->getProducerModeEnum() == mode)
       return true;
-  }
   return false;
+}
+
+const ReporterProducerEnum &
+ReporterData::getReporterMode(const ReporterName & reporter_name) const
+{
+  return getReporterContextBase(reporter_name).getProducerModeEnum();
+}
+
+bool
+ReporterData::hasReporterState(const ReporterName & reporter_name) const
+{
+  return _states.count(reporter_name);
+}
+
+std::string
+ReporterData::getReporterInfo(const ReporterStateBase & state, const ReporterContextBase * context)
+{
+  std::stringstream oss;
+
+  const auto & name = state.getReporterName();
+
+  if (name.isPostprocessor())
+    oss << "Postprocessor \"" << name.getObjectName() << "\":\n";
+  else
+  {
+    oss << name.specialTypeToName() << " \"" << name.getCombinedName() << "\":\n  Type:\n    "
+        << state.valueType() << "\n";
+  }
+  oss << "  Producer:\n    ";
+  if (context)
+  {
+    oss << context->getProducer().type() << " \"" << context->getProducer().name() << "\"";
+    oss << "\n  Context type:\n    " << context->contextType();
+  }
+  else
+    oss << "None";
+  oss << "\n  Consumer(s):\n";
+  if (state.getConsumers().empty())
+    oss << "    None\n";
+  else
+    for (const auto & mode_object_pair : state.getConsumers())
+    {
+      const ReporterMode mode = mode_object_pair.first;
+      const MooseObject * object = mode_object_pair.second;
+      oss << "    " << object->typeAndName() << " (mode: " << mode << ")\n";
+    }
+
+  return oss.str();
+}
+
+std::string
+ReporterData::getReporterInfo(const ReporterName & reporter_name) const
+{
+  return getReporterInfo(getReporterStateBase(reporter_name),
+                         hasReporterValue(reporter_name) ? &getReporterContextBase(reporter_name)
+                                                         : nullptr);
+}
+
+std::string
+ReporterData::getReporterInfo() const
+{
+  std::string out = _states.empty() ? "No reporters were requested or declared." : "";
+  for (const auto & name : getReporterNames())
+    out += getReporterInfo(name) + "\n";
+  return out;
 }

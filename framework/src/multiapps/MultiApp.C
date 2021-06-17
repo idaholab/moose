@@ -110,6 +110,10 @@ MultiApp::validParams()
                                 "Maximum number of processors to give to each App in this "
                                 "MultiApp.  Useful for restricting small solves to just a few "
                                 "procs so they don't get spread out");
+  params.addParam<unsigned int>("min_procs_per_app",
+                                1,
+                                "Minimum number of processors to give to each App in this "
+                                "MultiApp.  Useful for larger, distributed mesh solves.");
 
   params.addParam<bool>(
       "output_in_position",
@@ -158,19 +162,30 @@ MultiApp::validParams()
                                     "relaxation_factor>0 & relaxation_factor<2",
                                     "Fraction of newly computed value to keep."
                                     "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("relaxed_variables",
-                                            std::vector<std::string>(),
-                                            "List of variables to relax during Picard Iteration");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "relaxed_variables",
+      std::vector<std::string>(),
+      "Use transformed_variables.",
+      "List of subapp variables to relax during Multiapp coupling iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_variables",
+      std::vector<std::string>(),
+      "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
+  params.addParam<std::vector<PostprocessorName>>(
+      "transformed_postprocessors",
+      std::vector<PostprocessorName>(),
+      "List of subapp postprocessors to use coupling "
+      "algorithm on during Multiapp coupling iterations");
 
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
 
   params.addParam<bool>("keep_solution_during_restore",
                         false,
-                        "This is useful when doing Picard.  It takes the "
-                        "final solution from the previous Picard iteration"
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final solution from the previous coupling iteration"
                         "and re-uses it as the initial guess "
-                        "for the next picard iteration");
+                        "for the next coupling iteration");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -201,6 +216,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _inflation(getParam<Real>("bounding_box_inflation")),
     _bounding_box_padding(getParam<Point>("bounding_box_padding")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _min_procs_per_app(getParam<unsigned int>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
     _reset_time(getParam<Real>("reset_time")),
@@ -222,12 +238,12 @@ MultiApp::MultiApp(const InputParameters & parameters)
 }
 
 void
-MultiApp::init(unsigned int num)
+MultiApp::init(unsigned int num_apps, bool batch_mode)
 {
   TIME_SECTION(_perf_init);
 
-  _total_num_apps = num;
-  buildComm();
+  _total_num_apps = num_apps;
+  _rank_config = buildComm(batch_mode);
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
@@ -247,11 +263,12 @@ MultiApp::setupPositions()
   {
     fillPositions();
     init(_positions.size());
+    createApps();
   }
 }
 
 void
-MultiApp::initialSetup()
+MultiApp::createApps()
 {
   if (!_has_an_app)
     return;
@@ -270,6 +287,15 @@ MultiApp::initialSetup()
     createApp(i, _global_time_offset);
     _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
   }
+}
+
+void
+MultiApp::initialSetup()
+{
+  if (!_use_positions)
+    // if not using positions, we create the sub-apps in initialSetup instead of right after
+    // construction of MultiApp
+    createApps();
 }
 
 void
@@ -438,10 +464,10 @@ MultiApp::restore(bool force)
 
   if (force || needsRestoration())
   {
-    // Must be restarting / recovering so hold off on restoring
-    // Instead - the restore will happen in createApp()
-    // Note that _backups was already populated by dataLoad()
-    if (_apps.empty())
+    // Must be restarting / recovering from main app so hold off on restoring
+    // Instead - the restore will happen in sub-apps' initialSetup()
+    // Note that _backups was already populated by dataLoad() in the main app
+    if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
       return;
 
     // We temporarily copy and store solutions for all subapps
@@ -745,7 +771,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
   // will be cached by the MooseApp object so that it can be used
-  // during FEProblemBase::initialSetup() during runInputFile()
+  // during FEProblemBase::initialSetup() during initialSetup()
   if (_app.isRestarting() || _app.isRecovering())
     app->setBackupObject(_backups[i]);
 
@@ -763,16 +789,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
   preRunInputFile();
   app->runInputFile();
 
-  auto & picard_solve = _apps[i]->getExecutioner()->picardSolve();
-  picard_solve.setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  picard_solve.setMultiAppRelaxationVariables(
-      getParam<std::vector<std::string>>("relaxed_variables"));
-  if (getParam<Real>("relaxation_factor") != 1.0)
-  {
-    // Store a copy of the previous solution here
-    FEProblemBase & fe_problem_base = _apps[i]->getExecutioner()->feProblem();
-    fe_problem_base.getNonlinearSystemBase().addVector("self_relax_previous", false, PARALLEL);
-  }
+  // Transfer coupling relaxation information to the subapps
+  auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
+  fixed_point_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
+  fixed_point_solve->setMultiAppTransformedVariables(
+      getParam<std::vector<std::string>>("transformed_variables"));
+  // Handle deprecated parameter
+  if (!parameters().isParamSetByAddParam("relaxed_variables"))
+    fixed_point_solve->setMultiAppTransformedVariables(
+        getParam<std::vector<std::string>>("relaxed_variables"));
+  fixed_point_solve->setMultiAppTransformedPostprocessors(
+      getParam<std::vector<PostprocessorName>>("transformed_postprocessors"));
+  fixed_point_solve->allocateStorage(false);
 }
 
 std::string
@@ -788,8 +816,72 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     return _cli_args[local_app + _first_local_app];
 }
 
-void
-MultiApp::buildComm()
+LocalRankConfig
+rankConfig(dof_id_type rank,
+           dof_id_type nprocs,
+           dof_id_type napps,
+           dof_id_type min_app_procs,
+           dof_id_type max_app_procs,
+           bool batch_mode)
+{
+  if (min_app_procs > nprocs)
+    mooseError("minimum number of procs per app is higher than the available number of procs");
+  else if (min_app_procs > max_app_procs)
+    mooseError("minimum number of procs per app must be lower than the max procs per app");
+
+  mooseAssert(rank < nprocs, "rank must be smaller than the number of procs");
+
+  // A "slot" is a group of procs/ranks that are grouped together to run a
+  // single (sub)app/sim in parallel.
+
+  auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
+  dof_id_type nslots = std::min(nprocs / slot_size, napps);
+  auto leftover_procs = nprocs - nslots * slot_size;
+  auto apps_per_slot = napps / nslots;
+  auto leftover_apps = napps % nslots;
+
+  std::vector<int> slot_for_rank(nprocs);
+  dof_id_type slot = 0;
+  dof_id_type procs_in_slot = 0;
+  for (dof_id_type rankiter = 0; rankiter <= rank; rankiter++)
+  {
+    if (slot < nslots)
+      slot_for_rank[rankiter] = slot;
+    else
+      slot_for_rank[rankiter] = -1;
+    procs_in_slot++;
+    // this slot keeps growing until we reach slot size plus possibly an extra
+    // proc if there were any leftover from the slotization of nprocs - this
+    // must also make sure we don't go over max app procs.
+    if (procs_in_slot == slot_size + 1 * (slot < leftover_procs && slot_size < max_app_procs))
+    {
+      procs_in_slot = 0;
+      slot++;
+    }
+  }
+
+  if (slot_for_rank[rank] < 0)
+    // ranks assigned a negative slot don't have any apps running on them.
+    return {0, 0, 0, 0, false};
+  dof_id_type slot_num = slot_for_rank[rank];
+
+  bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
+  auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
+
+  dof_id_type app_index = 0;
+  for (dof_id_type slot = 0; slot < slot_num; slot++)
+  {
+    auto num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
+    app_index += num_slot_apps;
+  }
+
+  if (batch_mode)
+    return {n_local_apps, app_index, 1, slot_num, is_first_local_rank};
+  return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank};
+}
+
+LocalRankConfig
+MultiApp::buildComm(bool batch_mode)
 {
   int ierr;
 
@@ -806,100 +898,35 @@ MultiApp::buildComm()
   _node_name = "Unknown";
 #endif
 
-  // If we have more apps than processors then we're just going to divide up the work
-  if (_total_num_apps >= (unsigned)_orig_num_procs)
-  {
-    _my_comm = MPI_COMM_SELF;
-    _my_rank = 0;
-
-    _my_num_apps = _total_num_apps / _orig_num_procs;
-    unsigned int jobs_left = _total_num_apps - (_my_num_apps * _orig_num_procs);
-
-    if (jobs_left != 0)
-    {
-      // Spread the remaining jobs out over the first set of processors
-      if ((unsigned)_orig_rank < jobs_left) // (these are the "jobs_left_pids" ie the pids that are
-                                            // snatching up extra jobs)
-      {
-        _my_num_apps += 1;
-        _first_local_app = _my_num_apps * _orig_rank;
-      }
-      else
-      {
-        unsigned int num_apps_in_jobs_left_pids = (_my_num_apps + 1) * jobs_left;
-        unsigned int distance_to_jobs_left_pids = _orig_rank - jobs_left;
-
-        _first_local_app = num_apps_in_jobs_left_pids + (_my_num_apps * distance_to_jobs_left_pids);
-      }
-    }
-    else
-      _first_local_app = _my_num_apps * _orig_rank;
-
-    return;
-  }
-
-  // In this case we need to divide up the processors that are going to work on each app
   int rank;
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
-  // This will give the minimum processors per app
-  unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
-  // This will give the number of apps that have one additional processor
-  unsigned int extra_proc_apps = _orig_num_procs % _total_num_apps;
+  auto config = rankConfig(_orig_rank,
+                           _orig_num_procs,
+                           _total_num_apps,
+                           _min_procs_per_app,
+                           _max_procs_per_app,
+                           batch_mode);
+  _my_num_apps = config.num_local_apps;
+  _first_local_app = config.first_local_app_index;
 
-  // Index for the processor within a block of processors for an app
-  unsigned int block_ind = 0;
-  // Application index
-  unsigned int my_app = 0;
-  for (int i = 0; i < _orig_num_procs; ++i)
-  {
-    if (i == rank)
-    {
-      // Whether or not we have reached the requested maximum number of processors
-      if (block_ind < _max_procs_per_app)
-      {
-        _first_local_app = my_app;
-        _my_num_apps = 1;
-        _has_an_app = true;
-      }
-      else
-      {
-        _my_num_apps = 0;
-        _has_an_app = false;
-      }
-      break;
-    }
-    ++block_ind;
-
-    // Reset block index and increment app index
-    if (block_ind == procs_per_app)
-    {
-      block_ind = 0;
-      ++my_app;
-
-      // Increment the number of processors for every app after this point
-      if (my_app == (_total_num_apps - extra_proc_apps))
-        ++procs_per_app;
-    }
-  }
-
-  if (_first_local_app >= _total_num_apps)
+  _has_an_app = config.num_local_apps > 0;
+  if (config.first_local_app_index >= _total_num_apps)
     mooseError("Internal error, a processor has an undefined app.");
 
   if (_has_an_app)
   {
-    _communicator.split(_first_local_app, rank, _my_communicator);
-
+    _communicator.split(config.first_local_app_index, rank, _my_communicator);
     ierr = MPI_Comm_rank(_my_comm, &_my_rank);
     mooseCheckMPIErr(ierr);
   }
   else
   {
     _communicator.split(MPI_UNDEFINED, rank, _my_communicator);
-
     _my_rank = 0;
   }
+  return config;
 }
 
 unsigned int
@@ -908,8 +935,17 @@ MultiApp::globalAppToLocal(unsigned int global_app)
   if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps - 1))
     return global_app - _first_local_app;
 
-  _console << _first_local_app << " " << global_app << '\n';
-  mooseError("Invalid global_app!");
+  std::stringstream ss;
+  ss << "Requesting app " << global_app << ", but processor " << processor_id() << " ";
+  if (_my_num_apps == 0)
+    ss << "does not own any apps";
+  else if (_my_num_apps == 1)
+    ss << "owns app " << _first_local_app;
+  else
+    ss << "owns apps " << _first_local_app << "-" << _first_local_app + (_my_num_apps - 1);
+  ss << ".";
+  mooseError("Invalid global_app!\n", ss.str());
+  return 0;
 }
 
 void

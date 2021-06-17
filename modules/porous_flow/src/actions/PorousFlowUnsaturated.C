@@ -75,6 +75,8 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
     _s_res(getParam<Real>("residual_saturation")),
     _capillary_pressure_name("PorousFlowUnsaturated_CapillaryPressureVG")
 {
+  if (_stabilization == StabilizationEnum::None)
+    paramError("stabilization", "Some stabilization must be used in PorousFlowUnsaturated");
 }
 
 void
@@ -158,18 +160,24 @@ PorousFlowUnsaturated::addKernels()
     std::string kernel_type = "PorousFlowMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
       kernel_name = "PorousFlowUnsaturated_MassTimeDerivative" + Moose::stringify(i);
       params.set<unsigned int>("fluid_component") = i;
       params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+      if (_save_component_rate_in.size() != 0)
+        params.set<std::vector<AuxVariableName>>("save_in") = {_save_component_rate_in[i]};
       _problem->addKernel(kernel_type, kernel_name, params);
     }
     kernel_name =
         "PorousFlowUnsaturated_MassTimeDerivative" + Moose::stringify(_num_mass_fraction_vars);
     params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
     params.set<NonlinearVariableName>("variable") = _pp_var;
+    if (_save_component_rate_in.size() != 0)
+      params.set<std::vector<AuxVariableName>>("save_in") = {
+          _save_component_rate_in[_num_mass_fraction_vars]};
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
@@ -179,6 +187,7 @@ PorousFlowUnsaturated::addKernels()
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {

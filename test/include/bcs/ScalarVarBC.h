@@ -23,9 +23,9 @@ public:
   ScalarVarBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
-  unsigned int _alpha_var;
-  VariableValue & _alpha;
+  const unsigned int _alpha_var;
+  const VariableValue & _alpha;
 };

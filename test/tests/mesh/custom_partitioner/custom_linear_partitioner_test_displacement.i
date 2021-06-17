@@ -1,12 +1,14 @@
 [Mesh]
-  dim = 2
-  type = GeneratedMesh
-  nx = 3
-  ny = 3
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 10.0
+  [gen]
+    dim = 2
+    type = GeneratedMeshGenerator
+    nx = 3
+    ny = 3
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 10.0
+  []
   uniform_refine = 2
   displacements = 'u aux_v'
 

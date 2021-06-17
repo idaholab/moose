@@ -1,3 +1,5 @@
+# NSEnergyInviscidSpecifiedPressureBC
+
 !syntax description /BCs/NSEnergyInviscidSpecifiedPressureBC
 
 !syntax parameters /BCs/NSEnergyInviscidSpecifiedPressureBC

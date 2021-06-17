@@ -35,41 +35,56 @@ ArrayDGDiffusion::ArrayDGDiffusion(const InputParameters & parameters)
     _epsilon(getParam<Real>("epsilon")),
     _sigma(getParam<Real>("sigma")),
     _diff(getMaterialProperty<RealEigenVector>("diff")),
-    _diff_neighbor(getNeighborMaterialProperty<RealEigenVector>("diff"))
+    _diff_neighbor(getNeighborMaterialProperty<RealEigenVector>("diff")),
+    _res1(_count),
+    _res2(_count)
 {
 }
 
-RealEigenVector
-ArrayDGDiffusion::computeQpResidual(Moose::DGResidualType type)
+void
+ArrayDGDiffusion::initQpResidual(Moose::DGResidualType type)
 {
-  RealEigenVector r = RealEigenVector::Zero(_count);
+  mooseAssert(_diff[_qp].size() == _count && _diff_neighbor[_qp].size() == _count,
+              "'diff' size is inconsistent with the number of components of array "
+              "variable");
 
   const unsigned int elem_b_order = _var.order();
   const Real h_elem =
       _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
+  // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
+  _res1.noalias() = _diff[_qp].asDiagonal() * _grad_u[_qp] * _array_normals[_qp];
+  _res1.noalias() += _diff_neighbor[_qp].asDiagonal() * _grad_u_neighbor[_qp] * _array_normals[_qp];
+  _res1 *= 0.5;
+  _res1 -= (_u[_qp] - _u_neighbor[_qp]) * _sigma / h_elem;
+
   switch (type)
   {
     case Moose::Element:
-      r -= (_diff[_qp].cwiseProduct(_grad_u[_qp] * _array_normals[_qp]) +
-            _diff_neighbor[_qp].cwiseProduct(_grad_u_neighbor[_qp] * _array_normals[_qp])) *
-           (0.5 * _test[_i][_qp]);
-      r += _diff[_qp].cwiseProduct(_u[_qp] - _u_neighbor[_qp]) * (_epsilon * 0.5) *
-           (_grad_test[_i][_qp] * _normals[_qp]);
-      r += (_u[_qp] - _u_neighbor[_qp]) * (_sigma / h_elem * _test[_i][_qp]);
+      _res2.noalias() = _diff[_qp].asDiagonal() * (_u[_qp] - _u_neighbor[_qp]) * _epsilon * 0.5;
       break;
 
     case Moose::Neighbor:
-      r += (_diff[_qp].cwiseProduct(_grad_u[_qp] * _array_normals[_qp]) +
-            _diff_neighbor[_qp].cwiseProduct(_grad_u_neighbor[_qp] * _array_normals[_qp])) *
-           (0.5 * _test_neighbor[_i][_qp]);
-      r += _diff_neighbor[_qp].cwiseProduct(_u[_qp] - _u_neighbor[_qp]) * (_epsilon * 0.5) *
-           (_grad_test_neighbor[_i][_qp] * _normals[_qp]);
-      r -= (_u[_qp] - _u_neighbor[_qp]) * (_sigma / h_elem * _test_neighbor[_i][_qp]);
+      _res2.noalias() =
+          _diff_neighbor[_qp].asDiagonal() * (_u[_qp] - _u_neighbor[_qp]) * _epsilon * 0.5;
       break;
   }
+}
 
-  return r;
+void
+ArrayDGDiffusion::computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual)
+{
+  switch (type)
+  {
+    case Moose::Element:
+      residual = -_res1 * _test[_i][_qp] + _res2 * (_grad_test[_i][_qp] * _normals[_qp]);
+      break;
+
+    case Moose::Neighbor:
+      residual =
+          _res1 * _test_neighbor[_i][_qp] + _res2 * (_grad_test_neighbor[_i][_qp] * _normals[_qp]);
+      break;
+  }
 }
 
 RealEigenVector

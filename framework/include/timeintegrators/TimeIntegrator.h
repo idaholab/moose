@@ -67,7 +67,7 @@ public:
    */
   virtual void init() {}
   virtual void preSolve() {}
-  virtual void preStep();
+  virtual void preStep() {}
 
   /**
    * Solves the time step and sets the number of nonlinear and linear iterations.
@@ -175,22 +175,21 @@ protected:
   // NonlinearImplicitSystem * _nonlinear_implicit_system;
   NonlinearImplicitSystem * _nonlinear_implicit_system;
 
+  /// residual vector for time contributions
+  NumericVector<Number> & _Re_time;
+  /// residual vector for non-time contributions
+  NumericVector<Number> & _Re_non_time;
+
   /// Derivative of time derivative with respect to current solution: \f$ {du^dot}\over{du} \f$
   Real & _du_dot_du;
   /// solution vectors
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
-  const NumericVector<Number> & _solution_older;
   //
   int & _t_step;
   //
   Real & _dt;
   Real & _dt_old;
-
-  /// residual vector for time contributions
-  NumericVector<Number> & _Re_time;
-  /// residual vector for non-time contributions
-  NumericVector<Number> & _Re_non_time;
 
   /// Total number of nonlinear iterations over all stages of the time step
   unsigned int _n_nonlinear_iterations;

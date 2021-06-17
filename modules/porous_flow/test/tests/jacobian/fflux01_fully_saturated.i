@@ -16,107 +16,107 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./massfrac0]
-  [../]
-  [./massfrac1]
-  [../]
+  [pp]
+  []
+  [massfrac0]
+  []
+  [massfrac1]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     function = -0.7+x+y
-  [../]
-  [./massfrac0]
+  []
+  [massfrac0]
     type = RandomIC
     variable = massfrac0
     min = 0
     max = 0.3
-  [../]
-  [./massfrac1]
+  []
+  [massfrac1]
     type = RandomIC
     variable = massfrac1
     min = 0
     max = 0.4
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux0]
+  [flux0]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 0
     variable = pp
     gravity = '-1 -0.1 0'
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 1
     variable = massfrac0
     gravity = '-1 -0.1 0'
-  [../]
-  [./flux2]
+  []
+  [flux2]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 2
     variable = massfrac1
     gravity = '-1 -0.1 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp massfrac0 massfrac1'
     number_fluid_phases = 1
     number_fluid_components = 3
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       density0 = 1
       thermal_expansion = 0
       viscosity = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac0 massfrac1'
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

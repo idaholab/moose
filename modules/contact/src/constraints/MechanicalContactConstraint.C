@@ -36,19 +36,10 @@ MechanicalContactConstraint::validParams()
 
   params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addParam<BoundaryName>("secondary", "The secondary boundary");
-  params.addDeprecatedParam<BoundaryName>("slave",
-                                          "The secondary boundary",
-                                          "The 'slave' parameter is deprecated and will be removed "
-                                          "on September 1, 2020. Please use the "
-                                          "'secondary' parameter instead");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
                                         "1 for y, 2 for z)");
-
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
 
   params.addCoupledVar(
       "displacements",
@@ -165,28 +156,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
       _vars[i] = coupled("displacements", i);
       _var_objects[i] = getVar("displacements", i);
     }
-  }
-  else
-  {
-    // Legacy parameter scheme for displacements
-    if (isParamValid("disp_x"))
-    {
-      _vars[0] = coupled("disp_x");
-      _var_objects[0] = getVar("disp_x", 0);
-    }
-    if (isParamValid("disp_y"))
-    {
-      _vars[1] = coupled("disp_y");
-      _var_objects[1] = getVar("disp_y", 0);
-    }
-    if (isParamValid("disp_z"))
-    {
-      _vars[2] = coupled("disp_z");
-      _var_objects[2] = getVar("disp_z", 0);
-    }
-
-    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
-                    "will go away with the deprecation of the Solid Mechanics module).");
   }
 
   if (parameters.isParamValid("tangential_tolerance"))
@@ -1798,39 +1767,39 @@ MechanicalContactConstraint::computeJacobian()
 }
 
 void
-MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
+MechanicalContactConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  getConnectedDofIndices(jvar);
+  getConnectedDofIndices(jvar_num);
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
+      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 
   if (_primary_secondary_jacobian)
   {
     DenseMatrix<Number> & Ken =
-        _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+        _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
+        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
 
     _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     if (_Kne.m() && _Kne.n())
       for (_i = 0; _i < _test_primary.size(); _i++)
         // Loop over the connected dof indices so we can get all the jacobian contributions
         for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-          _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
+          _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar_num);
   }
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar);
+      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
 }
 
 void

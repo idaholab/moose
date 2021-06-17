@@ -29,7 +29,7 @@ public:
   /**
    * Additional convergence check to be honored by PicardSolve
    */
-  virtual bool augmentedPicardConvergenceCheck() const override;
+  virtual bool augmentedFixedPointConvergenceCheck() const override;
 
 private:
   /// Absolute step tolerance on a designated postprocessor

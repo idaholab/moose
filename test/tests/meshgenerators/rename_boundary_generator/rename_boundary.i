@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
@@ -7,12 +7,32 @@
   []
 
   # Rename parameters supplied through the "tests" specifications
-  [./rename]
+  [rename]
     type = RenameBoundaryGenerator
     input = gmg
   []
+
+  # We compare by element numbers, which are not consistent in parallel
+  # if this is true
+  allow_renumbering = false
+[]
+
+[Reporters/mesh_info]
+  type = MeshInfo
+  items = sideset_elems
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = JSON
+    execute_system_information_on = NONE
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Executioner]
+  type = Steady
 []

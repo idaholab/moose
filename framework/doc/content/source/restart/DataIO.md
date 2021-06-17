@@ -35,7 +35,7 @@ Here are a couple of examples to consider before defining a dataLoad/dataStore r
 The declareRestartableData method is used to tell MOOSE that you would like to save some part of your object in a [Backup](Backup.md)
 object. This method is templated and declared here:
 
-!listing moose/framework/include/restart/Restartable.h
+!listing framework/include/restart/Restartable.h
   re=([^\n]+\n)*[^\n]+declareRestartableData[^,\n]*;
 
 This method is templated, so MOOSE will return a reference to the type that you request and manage the data storage for you. For
@@ -50,10 +50,10 @@ need to be defined. These functions describe how to serialize a custom type.
 
 The declarations for the two methods that may need to be specialized for your application take on on a form similar to this:
 
-!listing moose/framework/include/restart/DataIO.h
+!listing framework/include/restart/DataIO.h
   re=^[^\n]*Global Load Declarations.*?\n\n
 
-!listing moose/framework/include/restart/DataIO.h
+!listing framework/include/restart/DataIO.h
   re=^[^\n]*Global Store Declarations.*?\n\n
 
 ### Example

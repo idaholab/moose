@@ -1,26 +1,40 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "mesh_info",
-                    "type": "unsigned int",
-                    "value": 0,
-                    "value_name": "num_dofs"
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "num_dofs",
+                            "type": "unsigned int",
+                            "value": 0
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": [
-                {
-                    "object_name": "mesh_info",
-                    "type": "unsigned int",
-                    "value": 221,
-                    "value_name": "num_dofs"
+            "reporters": {
+                "mesh_info": {
+                    "info": {
+                        "name": "mesh_info",
+                        "type": "MeshInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "num_dofs",
+                            "type": "unsigned int",
+                            "value": 221
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 1.0,
             "time_step": 1
         }

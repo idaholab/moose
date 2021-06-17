@@ -188,7 +188,7 @@ public:
   const std::set<SubdomainID> & meshBlockIDs() const;
 
   /**
-   * Returns true if this object has been restricted to a boundary
+   * Returns true if this object has been restricted to a block
    * @see MooseObject
    */
   virtual bool blockRestricted() const;

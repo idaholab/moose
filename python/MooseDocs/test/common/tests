@@ -56,4 +56,10 @@
     input = test_check_filenames.py
     requirement = "MooseDocs shall include a utility to locate a filename using a fuzzy search and error if none or multiple are located."
   []
+  [has_tokens]
+    type = PythonUnitTest
+    input = test_has_tokens.py
+    requirement = "The system shall include a utility to conditionally add dependencies to output of documentation based on the existence of certain content."
+    issues = '#16789'
+  []
 []

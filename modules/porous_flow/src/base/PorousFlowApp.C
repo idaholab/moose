@@ -21,10 +21,6 @@ PorousFlowApp::validParams()
   InputParameters params = MooseApp::validParams();
 
   params.set<bool>("automatic_automatic_scaling") = false;
-
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
-
   params.set<bool>("use_legacy_material_output") = false;
 
   return params;
@@ -65,6 +61,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_material");
   registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
   registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
+
+  syntax.registerActionSyntax("PorousFlowAddBCAction", "Modules/PorousFlow/BCs/*");
+
+  registerMooseObjectTask("add_porous_flow_bc", PorousFlowSinkBC, false);
+  addTaskDependency("add_porous_flow_bc", "add_bc");
 
   // Task dependency and syntax for action to automatically add PorousFlow materials
   registerSyntax("PorousFlowAddMaterialAction", "Materials");

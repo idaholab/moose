@@ -40,10 +40,11 @@ class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernel;
 class DiracKernel;
-class NodalKernel;
+class NodalKernelBase;
 class Split;
 class KernelBase;
 class BoundaryCondition;
+class ResidualObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -74,7 +75,6 @@ public:
    */
   virtual void turnOffJacobian();
 
-  virtual void addExtraVectors() override;
   virtual void solve() override = 0;
   virtual void restoreSolutions() override;
 
@@ -96,8 +96,10 @@ public:
   virtual bool computingInitialResidual() { return _computing_initial_residual; }
 
   // Setup Functions ////
-  virtual void initialSetup();
-  virtual void timestepSetup();
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
 
   virtual void setupFiniteDifferencedPreconditioner() = 0;
   void setupFieldDecomposition();
@@ -345,6 +347,7 @@ public:
    */
   void onTimestepBegin();
 
+  using SystemBase::subdomainSetup;
   /**
    * Called from assembling when we hit a new subdomain
    * @param subdomain ID of the new subdomain
@@ -618,12 +621,6 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
-  const NumericVector<Number> * solutionPreviousNewton() const override
-  {
-    return _solution_previous_nl;
-  }
-
   virtual void setSolutionUDotOld(const NumericVector<Number> & u_dot_old);
 
   virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
@@ -720,7 +717,7 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints(bool displaced);
+  void mortarConstraints();
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes
@@ -740,7 +737,12 @@ protected:
   void assembleScalingVector();
 #endif
 
-protected:
+  /**
+   * Called after any ResidualObject-derived objects are added
+   * to the system.
+   */
+  virtual void postAddResidualObject(ResidualObject &) {}
+
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
   /// solution vector from nonlinear solver
@@ -750,9 +752,6 @@ protected:
 
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
-
-  /// Solution vector of the previous nonlinear iterate
-  NumericVector<Number> * _solution_previous_nl;
 
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;
@@ -828,7 +827,7 @@ protected:
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
   /// NodalKernels for each thread
-  MooseObjectTagWarehouse<NodalKernel> _nodal_kernels;
+  MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

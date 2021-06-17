@@ -25,6 +25,7 @@ public:
 
 protected:
   RealVectorValue _Euler_angles;
+  const RealTensorValue _rotation_matrix;
 };
 
 typedef ComputeRotatedElasticityTensorBaseTempl<false> ComputeRotatedElasticityTensorBase;

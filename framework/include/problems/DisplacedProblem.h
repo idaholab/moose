@@ -64,6 +64,7 @@ public:
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   void bumpVolumeQRuleOrder(Order order, SubdomainID block);
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
   virtual void solve() override;
@@ -142,6 +143,8 @@ public:
               Moose::VarFieldType expected_var_field_type =
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+                                                          const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
   virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid,
@@ -185,8 +188,7 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid,
-                              bool = false) override;
+                              THREAD_ID tid) override;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
   virtual void reinitNode(const Node * node, THREAD_ID tid) override;
@@ -216,6 +218,8 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) override;
+  virtual void
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) override;
   virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
@@ -225,6 +229,7 @@ public:
 
   virtual void addResidual(THREAD_ID tid) override;
   virtual void addResidualNeighbor(THREAD_ID tid) override;
+  virtual void addResidualLower(THREAD_ID tid) override;
 
   virtual void cacheResidual(THREAD_ID tid) override;
   virtual void cacheResidualNeighbor(THREAD_ID tid) override;
@@ -238,6 +243,8 @@ public:
   virtual void addJacobian(THREAD_ID tid) override;
   virtual void addJacobianNonlocal(THREAD_ID tid);
   virtual void addJacobianNeighbor(THREAD_ID tid) override;
+  virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
+  virtual void addJacobianLowerD(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -325,6 +332,16 @@ public:
   const CouplingMatrix * couplingMatrix() const override;
 
   bool haveDisplaced() const override final { return true; }
+
+  bool computingScalingJacobian() const override final;
+
+  bool computingScalingResidual() const override final;
+
+  virtual void initialSetup();
+  virtual void timestepSetup();
+
+  using SubProblem::haveADObjects;
+  void haveADObjects(bool have_ad_objects) override;
 
 protected:
   FEProblemBase & _mproblem;

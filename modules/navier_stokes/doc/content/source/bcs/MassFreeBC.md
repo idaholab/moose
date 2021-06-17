@@ -1,1 +1,9 @@
-!template load file=stubs/moose_object.md.template name=MassFreeBC syntax=/BCs/MassFreeBC
+# MassFreeBC
+
+!syntax description /BCs/MassFreeBC
+
+!syntax parameters /BCs/MassFreeBC
+
+!syntax inputs /BCs/MassFreeBC
+
+!syntax children /BCs/MassFreeBC

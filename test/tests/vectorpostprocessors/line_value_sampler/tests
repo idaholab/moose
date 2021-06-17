@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
-    group = 'requirements'
     requirement = 'MOOSE shall allow to sample variables at equally spaced points for outputting.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'
     issues = '#3087'
@@ -14,7 +13,6 @@
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
     min_parallel = 3
-    group = 'requirements'
     prereq = test
     requirement = 'MOOSE shall allow to sample variables at equally spaced points in parallel.'
     design = 'source/vectorpostprocessors/LineValueSampler.md'

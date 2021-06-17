@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "CrackFrontPointsProvider.h"
+#include "XFEMAppTypes.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
@@ -121,47 +122,39 @@ public:
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_edges Data structure filled with information about edges to be cut
    * @param cut_nodes Data structure filled with information about nodes to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes,
-                                    Real time) const = 0;
+                                    std::vector<Xfem::CutNode> & cut_nodes) const = 0;
 
   /**
    * Check to see whether a specified 3D element should be cut based on geometric
    * conditions
    * @param elem      Pointer to the libMesh element to be considered for cutting
    * @param cut_faces Data structure filled with information about edges to be cut
-   * @param time      Current simulation time
    * @return bool     true if element is to be cut
    */
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces,
-                                    Real time) const = 0;
+                                    std::vector<Xfem::CutFace> & cut_faces) const = 0;
 
   /**
    * Check to see whether a fragment of a 2D element should be cut based on geometric conditions
    * @param frag_edges Data structure defining the current fragment to be considered
    * @param cut_edges  Data structure filled with information about fragment edges to be cut
-   * @param time       Current simulation time
    * @return bool      true if fragment is to be cut
    */
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges,
-                                     Real time) const = 0;
+                                     std::vector<Xfem::CutEdge> & cut_edges) const = 0;
 
   /**
    * Check to see whether a fragment of a 3D element should be cut based on geometric conditions
    * @param frag_faces Data structure defining the current fragment to be considered
    * @param cut_faces  Data structure filled with information about fragment faces to be cut
-   * @param time       Current simulation time
    * @return bool      true if fragment is to be cut
    */
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces,
-                                     Real time) const = 0;
+                                     std::vector<Xfem::CutFace> & cut_faces) const = 0;
 
   /**
    * Get the interface ID for this cutting object.
@@ -182,6 +175,27 @@ public:
    */
   bool shouldHealMesh() const { return _heal_always; };
 
+  /**
+   * Get CutSubdomainID telling which side the node belongs to relative to the cut.
+   * The returned ID contains no physical meaning, but should be consistent throughout the
+   * simulation.
+   * @param node   Pointer to the node
+   * @return       An unsigned int indicating the side
+   */
+  virtual CutSubdomainID getCutSubdomainID(const Node * /*node*/) const
+  {
+    mooseError("Objects that inherit from GeometricCutUserObject should override the "
+               "getCutSubdomainID method");
+    return 0;
+  }
+
+  /**
+   * Get the CutSubdomainID for the given element.
+   * @param node   Pointer to the element
+   * @return       The CutSubdomainID
+   */
+  CutSubdomainID getCutSubdomainID(const Elem * elem) const;
+
 protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
@@ -193,7 +207,7 @@ protected:
   bool _heal_always;
 
   /// Time step information needed to advance a 3D crack only at the real beginning of a time step
-  unsigned int _last_step_initialized;
+  int _last_step_initialized;
 
   ///@{Containers with information about all 2D and 3D elements marked for cutting by this object
   std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo2D>> _marked_elems_2d;

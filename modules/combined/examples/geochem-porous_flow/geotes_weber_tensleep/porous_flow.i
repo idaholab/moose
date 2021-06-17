@@ -24,42 +24,44 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     ny = 4
     nz = 5
   []
-  [./aquifer]
+  [aquifer]
     type = ParsedSubdomainMeshGenerator
     input = gen
     block_id = 1
     block_name = aquifer
     combinatorial_geometry = 'z >= -5 & z <= 5'
-  [../]
-  [./injection_nodes]
+  []
+  [injection_nodes]
     input = aquifer
     type = ExtraNodesetGenerator
     new_boundary = injection_nodes
     coord = '-25 0 -5; -25 0 5'
-  [../]
-  [./production_nodes]
+  []
+  [production_nodes]
     input = injection_nodes
     type = ExtraNodesetGenerator
     new_boundary = production_nodes
     coord = '25 0 -5; 25 0 5'
-  [../]
+  []
 []
 
 [GlobalParams]
   PorousFlowDictator = dictator
   gravity = '0 0 -10'
 []
+
 [BCs]
-  [./injection_temperature]
+  [injection_temperature]
     type = MatchedValueBC
     variable = temperature
     v = injection_temperature
     boundary = injection_nodes
-  [../]
+  []
 []
+
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0
       bulk_modulus = 2E9
@@ -67,163 +69,158 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
       density0 = 1000
       cv = 4000.0
       cp = 4000.0
-    [../]
-  [../]
+    []
+  []
+[]
+
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = porepressure
+  temperature = temperature
+  mass_fraction_vars = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
+  save_component_rate_in = 'rate_H rate_Cl rate_SO4 rate_HCO3 rate_SiO2aq rate_Al rate_Ca rate_Mg rate_Fe rate_K rate_Na rate_Sr rate_F rate_BOH rate_Br rate_Ba rate_Li rate_NO3 rate_O2aq rate_H2O' # change in kg at every node / dt
+  fp = the_simple_fluid
+  temperature_unit = Celsius
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temperature
-  [../]
-  [./fluid_props]
-    type = PorousFlowSingleComponentFluid
-    fp = the_simple_fluid
-    temperature_unit = Celsius
-    phase = 0
-  [../]
-  [./saturation]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-    capillary_pressure = capillary_pressure
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
-  [./porosity_caps]
+  [porosity_caps]
     type = PorousFlowPorosityConst # this simulation has no porosity changes from dissolution
     block = 0
     porosity = 0.01
-  [../]
-  [./porosity_aquifer]
+  []
+  [porosity_aquifer]
     type = PorousFlowPorosityConst # this simulation has no porosity changes from dissolution
     block = aquifer
     porosity = 0.063
-  [../]
-  [./permeability_caps]
+  []
+  [permeability_caps]
     type = PorousFlowPermeabilityConst
     block = 0
     permeability = '1E-18 0 0   0 1E-18 0   0 0 1E-18'
-  [../]
-  [./permeability_aquifer]
+  []
+  [permeability_aquifer]
     type = PorousFlowPermeabilityConst
     block = aquifer
     permeability = '1.7E-15 0 0   0 1.7E-15 0   0 0 4.1E-16'
-  [../]
-  [./rock_heat]
+  []
+  [thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     density = 2500.0
     specific_heat_capacity = 1200.0
-  [../]
-  [./mass_frac]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
-  [../]
+  []
 []
+
 [Preconditioning]
   active = typically_efficient
-  [./typically_efficient]
+  [typically_efficient]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_hypre_type'
     petsc_options_value = ' hypre    boomeramg'
-  [../]
-  [./strong]
+  []
+  [strong]
     type = SMP
     full = true
     petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = ' asm      ilu           NONZERO                   2'
-  [../]
-  [./probably_too_strong]
+  []
+  [probably_too_strong]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
+  []
 []
+
 [Executioner]
   type = Transient
   solve_type = Newton
   end_time = 7.76E6 # 90 days
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = 'min(3E4, max(1E4, 0.2 * t))'
-  [../]
+  []
 []
+
 [Outputs]
   exodus = true
 []
+
 [Variables]
-  [./f_H]
+  [f_H]
     initial_condition = -2.952985071156e-06
-  [../]
-  [./f_Cl]
+  []
+  [f_Cl]
     initial_condition = 0.04870664551708
-  [../]
-  [./f_SO4]
+  []
+  [f_SO4]
     initial_condition = 0.0060359986852517
-  [../]
-  [./f_HCO3]
+  []
+  [f_HCO3]
     initial_condition = 5.0897287594019e-05
-  [../]
-  [./f_SiO2aq]
+  []
+  [f_SiO2aq]
     initial_condition = 3.0246609868421e-05
-  [../]
-  [./f_Al]
+  []
+  [f_Al]
     initial_condition = 3.268028901929e-08
-  [../]
-  [./f_Ca]
+  []
+  [f_Ca]
     initial_condition = 0.00082159428184586
-  [../]
-  [./f_Mg]
+  []
+  [f_Mg]
     initial_condition = 1.8546347062146e-05
-  [../]
-  [./f_Fe]
+  []
+  [f_Fe]
     initial_condition = 4.3291908204093e-05
-  [../]
-  [./f_K]
+  []
+  [f_K]
     initial_condition = 6.8434768308898e-05
-  [../]
-  [./f_Na]
+  []
+  [f_Na]
     initial_condition = 0.033298053919671
-  [../]
-  [./f_Sr]
+  []
+  [f_Sr]
     initial_condition = 1.2771866652177e-05
-  [../]
-  [./f_F]
+  []
+  [f_F]
     initial_condition = 5.5648860174073e-06
-  [../]
-  [./f_BOH]
+  []
+  [f_BOH]
     initial_condition = 0.0003758574621917
-  [../]
-  [./f_Br]
+  []
+  [f_Br]
     initial_condition = 9.0315286107068e-05
-  [../]
-  [./f_Ba]
+  []
+  [f_Ba]
     initial_condition = 1.5637460875161e-07
-  [../]
-  [./f_Li]
+  []
+  [f_Li]
     initial_condition = 8.3017067912701e-05
-  [../]
-  [./f_NO3]
+  []
+  [f_NO3]
     initial_condition = 0.00010958455036169
-  [../]
-  [./f_O2aq]
+  []
+  [f_O2aq]
     initial_condition = -7.0806852373351e-05
-  [../]
-  [./porepressure]
+  []
+  [porepressure]
     initial_condition = 30E6
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 92
     scaling = 1E-6 # fluid enthalpy is roughly 1E6
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./inject_H]
+  [inject_H]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -231,8 +228,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_H
     point_file = injection.bh
     variable = f_H
-  [../]
-  [./inject_Cl]
+  []
+  [inject_Cl]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -240,8 +237,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Cl
     point_file = injection.bh
     variable = f_Cl
-  [../]
-  [./inject_SO4]
+  []
+  [inject_SO4]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -249,8 +246,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_SO4
     point_file = injection.bh
     variable = f_SO4
-  [../]
-  [./inject_HCO3]
+  []
+  [inject_HCO3]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -258,8 +255,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_HCO3
     point_file = injection.bh
     variable = f_HCO3
-  [../]
-  [./inject_SiO2aq]
+  []
+  [inject_SiO2aq]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -267,8 +264,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_SiO2aq
     point_file = injection.bh
     variable = f_SiO2aq
-  [../]
-  [./inject_Al]
+  []
+  [inject_Al]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -276,8 +273,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Al
     point_file = injection.bh
     variable = f_Al
-  [../]
-  [./inject_Ca]
+  []
+  [inject_Ca]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -285,8 +282,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Ca
     point_file = injection.bh
     variable = f_Ca
-  [../]
-  [./inject_Mg]
+  []
+  [inject_Mg]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -294,8 +291,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Mg
     point_file = injection.bh
     variable = f_Mg
-  [../]
-  [./inject_Fe]
+  []
+  [inject_Fe]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -303,8 +300,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Fe
     point_file = injection.bh
     variable = f_Fe
-  [../]
-  [./inject_K]
+  []
+  [inject_K]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -312,8 +309,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_K
     point_file = injection.bh
     variable = f_K
-  [../]
-  [./inject_Na]
+  []
+  [inject_Na]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -321,8 +318,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Na
     point_file = injection.bh
     variable = f_Na
-  [../]
-  [./inject_Sr]
+  []
+  [inject_Sr]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -330,8 +327,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Sr
     point_file = injection.bh
     variable = f_Sr
-  [../]
-  [./inject_F]
+  []
+  [inject_F]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -339,8 +336,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_F
     point_file = injection.bh
     variable = f_F
-  [../]
-  [./inject_BOH]
+  []
+  [inject_BOH]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -348,8 +345,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_BOH
     point_file = injection.bh
     variable = f_BOH
-  [../]
-  [./inject_Br]
+  []
+  [inject_Br]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -357,8 +354,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Br
     point_file = injection.bh
     variable = f_Br
-  [../]
-  [./inject_Ba]
+  []
+  [inject_Ba]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -366,8 +363,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Ba
     point_file = injection.bh
     variable = f_Ba
-  [../]
-  [./inject_Li]
+  []
+  [inject_Li]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -375,8 +372,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_Li
     point_file = injection.bh
     variable = f_Li
-  [../]
-  [./inject_NO3]
+  []
+  [inject_NO3]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -384,8 +381,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_NO3
     point_file = injection.bh
     variable = f_NO3
-  [../]
-  [./inject_O2aq]
+  []
+  [inject_O2aq]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -393,8 +390,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_O2aq
     point_file = injection.bh
     variable = f_O2aq
-  [../]
-  [./inject_H2O]
+  []
+  [inject_H2O]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -402,9 +399,9 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     multiplying_var = injection_rate_massfrac_H2O
     point_file = injection.bh
     variable = porepressure
-  [../]
+  []
 
-  [./produce_H]
+  [produce_H]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_H
     fluxes = ${production_rate}
@@ -412,8 +409,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 0
     point_file = production.bh
     variable = f_H
-  [../]
-  [./produce_Cl]
+  []
+  [produce_Cl]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Cl
     fluxes = ${production_rate}
@@ -421,8 +418,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 1
     point_file = production.bh
     variable = f_Cl
-  [../]
-  [./produce_SO4]
+  []
+  [produce_SO4]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_SO4
     fluxes = ${production_rate}
@@ -430,8 +427,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 2
     point_file = production.bh
     variable = f_SO4
-  [../]
-  [./produce_HCO3]
+  []
+  [produce_HCO3]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_HCO3
     fluxes = ${production_rate}
@@ -439,8 +436,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 3
     point_file = production.bh
     variable = f_HCO3
-  [../]
-  [./produce_SiO2aq]
+  []
+  [produce_SiO2aq]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_SiO2aq
     fluxes = ${production_rate}
@@ -448,8 +445,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 4
     point_file = production.bh
     variable = f_SiO2aq
-  [../]
-  [./produce_Al]
+  []
+  [produce_Al]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Al
     fluxes = ${production_rate}
@@ -457,8 +454,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 5
     point_file = production.bh
     variable = f_Al
-  [../]
-  [./produce_Ca]
+  []
+  [produce_Ca]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Ca
     fluxes = ${production_rate}
@@ -466,8 +463,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 6
     point_file = production.bh
     variable = f_Ca
-  [../]
-  [./produce_Mg]
+  []
+  [produce_Mg]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Mg
     fluxes = ${production_rate}
@@ -475,8 +472,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 7
     point_file = production.bh
     variable = f_Mg
-  [../]
-  [./produce_Fe]
+  []
+  [produce_Fe]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Fe
     fluxes = ${production_rate}
@@ -484,8 +481,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 8
     point_file = production.bh
     variable = f_Fe
-  [../]
-  [./produce_K]
+  []
+  [produce_K]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_K
     fluxes = ${production_rate}
@@ -493,8 +490,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 9
     point_file = production.bh
     variable = f_K
-  [../]
-  [./produce_Na]
+  []
+  [produce_Na]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Na
     fluxes = ${production_rate}
@@ -502,8 +499,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 10
     point_file = production.bh
     variable = f_Na
-  [../]
-  [./produce_Sr]
+  []
+  [produce_Sr]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Sr
     fluxes = ${production_rate}
@@ -511,8 +508,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 11
     point_file = production.bh
     variable = f_Sr
-  [../]
-  [./produce_F]
+  []
+  [produce_F]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_F
     fluxes = ${production_rate}
@@ -520,8 +517,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 12
     point_file = production.bh
     variable = f_F
-  [../]
-  [./produce_BOH]
+  []
+  [produce_BOH]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_BOH
     fluxes = ${production_rate}
@@ -529,8 +526,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 13
     point_file = production.bh
     variable = f_BOH
-  [../]
-  [./produce_Br]
+  []
+  [produce_Br]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Br
     fluxes = ${production_rate}
@@ -538,8 +535,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 14
     point_file = production.bh
     variable = f_Br
-  [../]
-  [./produce_Ba]
+  []
+  [produce_Ba]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Ba
     fluxes = ${production_rate}
@@ -547,8 +544,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 15
     point_file = production.bh
     variable = f_Ba
-  [../]
-  [./produce_Li]
+  []
+  [produce_Li]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Li
     fluxes = ${production_rate}
@@ -556,8 +553,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 16
     point_file = production.bh
     variable = f_Li
-  [../]
-  [./produce_NO3]
+  []
+  [produce_NO3]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_NO3
     fluxes = ${production_rate}
@@ -565,8 +562,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 17
     point_file = production.bh
     variable = f_NO3
-  [../]
-  [./produce_O2aq]
+  []
+  [produce_O2aq]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_O2aq
     fluxes = ${production_rate}
@@ -574,8 +571,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 18
     point_file = production.bh
     variable = f_O2aq
-  [../]
-  [./produce_H2O]
+  []
+  [produce_H2O]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_H2O
     fluxes = ${production_rate}
@@ -583,8 +580,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     mass_fraction_component = 19
     point_file = production.bh
     variable = porepressure
-  [../]
-  [./produce_heat]
+  []
+  [produce_heat]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_heat
     fluxes = ${production_rate}
@@ -592,749 +589,508 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     use_enthalpy = true
     point_file = production.bh
     variable = temperature
-  [../]
+  []
 []
 
 [UserObjects]
-  [./injected_mass]
+  [injected_mass]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_H]
+  []
+  [produced_mass_H]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Cl]
+  []
+  [produced_mass_Cl]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_SO4]
+  []
+  [produced_mass_SO4]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_HCO3]
+  []
+  [produced_mass_HCO3]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_SiO2aq]
+  []
+  [produced_mass_SiO2aq]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Al]
+  []
+  [produced_mass_Al]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Ca]
+  []
+  [produced_mass_Ca]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Mg]
+  []
+  [produced_mass_Mg]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Fe]
+  []
+  [produced_mass_Fe]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_K]
+  []
+  [produced_mass_K]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Na]
+  []
+  [produced_mass_Na]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Sr]
+  []
+  [produced_mass_Sr]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_F]
+  []
+  [produced_mass_F]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_BOH]
+  []
+  [produced_mass_BOH]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Br]
+  []
+  [produced_mass_Br]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Ba]
+  []
+  [produced_mass_Ba]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Li]
+  []
+  [produced_mass_Li]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_NO3]
+  []
+  [produced_mass_NO3]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_O2aq]
+  []
+  [produced_mass_O2aq]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_H2O]
+  []
+  [produced_mass_H2O]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_heat]
+  []
+  [produced_heat]
     type = PorousFlowSumQuantity
-  [../]
-
-  [./capillary_pressure]
-    type = PorousFlowCapillaryPressureConst
-  [../]
-
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure temperature f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq'
-    number_fluid_phases = 1
-    number_fluid_components = 20
-  [../]
+  []
 []
+
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
     execute_on = TIMESTEP_BEGIN
-  [../]
-  [./tot_kg_injected_this_timestep]
+  []
+  [tot_kg_injected_this_timestep]
     type = PorousFlowPlotQuantity
     uo = injected_mass
-  [../]
-  [./kg_H_produced_this_timestep]
+  []
+  [kg_H_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_H
-  [../]
-  [./kg_Cl_produced_this_timestep]
+  []
+  [kg_Cl_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Cl
-  [../]
-  [./kg_SO4_produced_this_timestep]
+  []
+  [kg_SO4_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_SO4
-  [../]
-  [./kg_HCO3_produced_this_timestep]
+  []
+  [kg_HCO3_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_HCO3
-  [../]
-  [./kg_SiO2aq_produced_this_timestep]
+  []
+  [kg_SiO2aq_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_SiO2aq
-  [../]
-  [./kg_Al_produced_this_timestep]
+  []
+  [kg_Al_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Al
-  [../]
-  [./kg_Ca_produced_this_timestep]
+  []
+  [kg_Ca_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Ca
-  [../]
-  [./kg_Mg_produced_this_timestep]
+  []
+  [kg_Mg_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Mg
-  [../]
-  [./kg_Fe_produced_this_timestep]
+  []
+  [kg_Fe_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Fe
-  [../]
-  [./kg_K_produced_this_timestep]
+  []
+  [kg_K_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_K
-  [../]
-  [./kg_Na_produced_this_timestep]
+  []
+  [kg_Na_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Na
-  [../]
-  [./kg_Sr_produced_this_timestep]
+  []
+  [kg_Sr_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Sr
-  [../]
-  [./kg_F_produced_this_timestep]
+  []
+  [kg_F_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_F
-  [../]
-  [./kg_BOH_produced_this_timestep]
+  []
+  [kg_BOH_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_BOH
-  [../]
-  [./kg_Br_produced_this_timestep]
+  []
+  [kg_Br_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Br
-  [../]
-  [./kg_Ba_produced_this_timestep]
+  []
+  [kg_Ba_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Ba
-  [../]
-  [./kg_Li_produced_this_timestep]
+  []
+  [kg_Li_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Li
-  [../]
-  [./kg_NO3_produced_this_timestep]
+  []
+  [kg_NO3_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_NO3
-  [../]
-  [./kg_O2aq_produced_this_timestep]
+  []
+  [kg_O2aq_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_O2aq
-  [../]
-  [./kg_H2O_produced_this_timestep]
+  []
+  [kg_H2O_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_H2O
-  [../]
-  [./mole_rate_H_produced]
+  []
+  [mole_rate_H_produced]
     type = FunctionValuePostprocessor
     function = moles_H
-  [../]
-  [./mole_rate_Cl_produced]
+  []
+  [mole_rate_Cl_produced]
     type = FunctionValuePostprocessor
     function = moles_Cl
-  [../]
-  [./mole_rate_SO4_produced]
+  []
+  [mole_rate_SO4_produced]
     type = FunctionValuePostprocessor
     function = moles_SO4
-  [../]
-  [./mole_rate_HCO3_produced]
+  []
+  [mole_rate_HCO3_produced]
     type = FunctionValuePostprocessor
     function = moles_HCO3
-  [../]
-  [./mole_rate_SiO2aq_produced]
+  []
+  [mole_rate_SiO2aq_produced]
     type = FunctionValuePostprocessor
     function = moles_SiO2aq
-  [../]
-  [./mole_rate_Al_produced]
+  []
+  [mole_rate_Al_produced]
     type = FunctionValuePostprocessor
     function = moles_Al
-  [../]
-  [./mole_rate_Ca_produced]
+  []
+  [mole_rate_Ca_produced]
     type = FunctionValuePostprocessor
     function = moles_Ca
-  [../]
-  [./mole_rate_Mg_produced]
+  []
+  [mole_rate_Mg_produced]
     type = FunctionValuePostprocessor
     function = moles_Mg
-  [../]
-  [./mole_rate_Fe_produced]
+  []
+  [mole_rate_Fe_produced]
     type = FunctionValuePostprocessor
     function = moles_Fe
-  [../]
-  [./mole_rate_K_produced]
+  []
+  [mole_rate_K_produced]
     type = FunctionValuePostprocessor
     function = moles_K
-  [../]
-  [./mole_rate_Na_produced]
+  []
+  [mole_rate_Na_produced]
     type = FunctionValuePostprocessor
     function = moles_Na
-  [../]
-  [./mole_rate_Sr_produced]
+  []
+  [mole_rate_Sr_produced]
     type = FunctionValuePostprocessor
     function = moles_Sr
-  [../]
-  [./mole_rate_F_produced]
+  []
+  [mole_rate_F_produced]
     type = FunctionValuePostprocessor
     function = moles_F
-  [../]
-  [./mole_rate_BOH_produced]
+  []
+  [mole_rate_BOH_produced]
     type = FunctionValuePostprocessor
     function = moles_BOH
-  [../]
-  [./mole_rate_Br_produced]
+  []
+  [mole_rate_Br_produced]
     type = FunctionValuePostprocessor
     function = moles_Br
-  [../]
-  [./mole_rate_Ba_produced]
+  []
+  [mole_rate_Ba_produced]
     type = FunctionValuePostprocessor
     function = moles_Ba
-  [../]
-  [./mole_rate_Li_produced]
+  []
+  [mole_rate_Li_produced]
     type = FunctionValuePostprocessor
     function = moles_Li
-  [../]
-  [./mole_rate_NO3_produced]
+  []
+  [mole_rate_NO3_produced]
     type = FunctionValuePostprocessor
     function = moles_NO3
-  [../]
-  [./mole_rate_O2aq_produced]
+  []
+  [mole_rate_O2aq_produced]
     type = FunctionValuePostprocessor
     function = moles_O2aq
-  [../]
-  [./mole_rate_H2O_produced]
+  []
+  [mole_rate_H2O_produced]
     type = FunctionValuePostprocessor
     function = moles_H2O
-  [../]
-  [./heat_joules_extracted_this_timestep]
+  []
+  [heat_joules_extracted_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_heat
-  [../]
-  [./production_temperature]
+  []
+  [production_temperature]
     type = AverageNodalVariableValue
     boundary = production_nodes
     variable = temperature
-  [../]
+  []
 []
 
 [Functions]
-  [./moles_H]
+  [moles_H]
     type = ParsedFunction
     vars = 'kg_H dt'
     vals = 'kg_H_produced_this_timestep dt'
     value = 'kg_H * 1000 / 1.0079 / dt'
-  [../]
-  [./moles_Cl]
+  []
+  [moles_Cl]
     type = ParsedFunction
     vars = 'kg_Cl dt'
     vals = 'kg_Cl_produced_this_timestep dt'
     value = 'kg_Cl * 1000 / 35.453 / dt'
-  [../]
-  [./moles_SO4]
+  []
+  [moles_SO4]
     type = ParsedFunction
     vars = 'kg_SO4 dt'
     vals = 'kg_SO4_produced_this_timestep dt'
     value = 'kg_SO4 * 1000 / 96.0576 / dt'
-  [../]
-  [./moles_HCO3]
+  []
+  [moles_HCO3]
     type = ParsedFunction
     vars = 'kg_HCO3 dt'
     vals = 'kg_HCO3_produced_this_timestep dt'
     value = 'kg_HCO3 * 1000 / 61.0171 / dt'
-  [../]
-  [./moles_SiO2aq]
+  []
+  [moles_SiO2aq]
     type = ParsedFunction
     vars = 'kg_SiO2aq dt'
     vals = 'kg_SiO2aq_produced_this_timestep dt'
     value = 'kg_SiO2aq * 1000 / 60.0843 / dt'
-  [../]
-  [./moles_Al]
+  []
+  [moles_Al]
     type = ParsedFunction
     vars = 'kg_Al dt'
     vals = 'kg_Al_produced_this_timestep dt'
     value = 'kg_Al * 1000 / 26.9815 / dt'
-  [../]
-  [./moles_Ca]
+  []
+  [moles_Ca]
     type = ParsedFunction
     vars = 'kg_Ca dt'
     vals = 'kg_Ca_produced_this_timestep dt'
     value = 'kg_Ca * 1000 / 40.08 / dt'
-  [../]
-  [./moles_Mg]
+  []
+  [moles_Mg]
     type = ParsedFunction
     vars = 'kg_Mg dt'
     vals = 'kg_Mg_produced_this_timestep dt'
     value = 'kg_Mg * 1000 / 24.305 / dt'
-  [../]
-  [./moles_Fe]
+  []
+  [moles_Fe]
     type = ParsedFunction
     vars = 'kg_Fe dt'
     vals = 'kg_Fe_produced_this_timestep dt'
     value = 'kg_Fe * 1000 / 55.847 / dt'
-  [../]
-  [./moles_K]
+  []
+  [moles_K]
     type = ParsedFunction
     vars = 'kg_K dt'
     vals = 'kg_K_produced_this_timestep dt'
     value = 'kg_K * 1000 / 39.0983 / dt'
-  [../]
-  [./moles_Na]
+  []
+  [moles_Na]
     type = ParsedFunction
     vars = 'kg_Na dt'
     vals = 'kg_Na_produced_this_timestep dt'
     value = 'kg_Na * 1000 / 22.9898 / dt'
-  [../]
-  [./moles_Sr]
+  []
+  [moles_Sr]
     type = ParsedFunction
     vars = 'kg_Sr dt'
     vals = 'kg_Sr_produced_this_timestep dt'
     value = 'kg_Sr * 1000 / 87.62 / dt'
-  [../]
-  [./moles_F]
+  []
+  [moles_F]
     type = ParsedFunction
     vars = 'kg_F dt'
     vals = 'kg_F_produced_this_timestep dt'
     value = 'kg_F * 1000 / 18.9984 / dt'
-  [../]
-  [./moles_BOH]
+  []
+  [moles_BOH]
     type = ParsedFunction
     vars = 'kg_BOH dt'
     vals = 'kg_BOH_produced_this_timestep dt'
     value = 'kg_BOH * 1000 / 61.8329 / dt'
-  [../]
-  [./moles_Br]
+  []
+  [moles_Br]
     type = ParsedFunction
     vars = 'kg_Br dt'
     vals = 'kg_Br_produced_this_timestep dt'
     value = 'kg_Br * 1000 / 79.904 / dt'
-  [../]
-  [./moles_Ba]
+  []
+  [moles_Ba]
     type = ParsedFunction
     vars = 'kg_Ba dt'
     vals = 'kg_Ba_produced_this_timestep dt'
     value = 'kg_Ba * 1000 / 137.33 / dt'
-  [../]
-  [./moles_Li]
+  []
+  [moles_Li]
     type = ParsedFunction
     vars = 'kg_Li dt'
     vals = 'kg_Li_produced_this_timestep dt'
     value = 'kg_Li * 1000 / 6.941 / dt'
-  [../]
-  [./moles_NO3]
+  []
+  [moles_NO3]
     type = ParsedFunction
     vars = 'kg_NO3 dt'
     vals = 'kg_NO3_produced_this_timestep dt'
     value = 'kg_NO3 * 1000 / 62.0049 / dt'
-  [../]
-  [./moles_O2aq]
+  []
+  [moles_O2aq]
     type = ParsedFunction
     vars = 'kg_O2aq dt'
     vals = 'kg_O2aq_produced_this_timestep dt'
     value = 'kg_O2aq * 1000 / 31.9988 / dt'
-  [../]
-  [./moles_H2O]
+  []
+  [moles_H2O]
     type = ParsedFunction
     vars = 'kg_H2O dt'
     vals = 'kg_H2O_produced_this_timestep dt'
     value = 'kg_H2O * 1000 / 18.01801802 / dt'
-  [../]
-[]
-
-[Kernels]
-  [./advective_flux_H]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = f_H
-  [../]
-  [./advective_flux_Cl]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = f_Cl
-  [../]
-  [./advective_flux_SO4]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 2
-    variable = f_SO4
-  [../]
-  [./advective_flux_HCO3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 3
-    variable = f_HCO3
-  [../]
-  [./advective_flux_SiO2aq]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 4
-    variable = f_SiO2aq
-  [../]
-  [./advective_flux_Al]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 5
-    variable = f_Al
-  [../]
-  [./advective_flux_Ca]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 6
-    variable = f_Ca
-  [../]
-  [./advective_flux_Mg]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 7
-    variable = f_Mg
-  [../]
-  [./advective_flux_Fe]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 8
-    variable = f_Fe
-  [../]
-  [./advective_flux_K]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 9
-    variable = f_K
-  [../]
-  [./advective_flux_Na]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 10
-    variable = f_Na
-  [../]
-  [./advective_flux_Sr]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 11
-    variable = f_Sr
-  [../]
-  [./advective_flux_F]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 12
-    variable = f_F
-  [../]
-  [./advective_flux_BOH]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 13
-    variable = f_BOH
-  [../]
-  [./advective_flux_Br]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 14
-    variable = f_Br
-  [../]
-  [./advective_flux_Ba]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 15
-    variable = f_Ba
-  [../]
-  [./advective_flux_Li]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 16
-    variable = f_Li
-  [../]
-  [./advective_flux_NO3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 17
-    variable = f_NO3
-  [../]
-  [./advective_flux_O2aq]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 18
-    variable = f_O2aq
-  [../]
-  [./advective_flux_H2O]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 19
-    variable = porepressure
-  [../]
-  [./time_deriv_H]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    save_in = rate_H # change in kg at every node / dt
-    variable = f_H
-  [../]
-  [./time_deriv_Cl]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    save_in = rate_Cl # change in kg at every node / dt
-    variable = f_Cl
-  [../]
-  [./time_deriv_SO4]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 2
-    save_in = rate_SO4 # change in kg at every node / dt
-    variable = f_SO4
-  [../]
-  [./time_deriv_HCO3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 3
-    save_in = rate_HCO3 # change in kg at every node / dt
-    variable = f_HCO3
-  [../]
-  [./time_deriv_SiO2aq]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 4
-    save_in = rate_SiO2aq # change in kg at every node / dt
-    variable = f_SiO2aq
-  [../]
-  [./time_deriv_Al]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 5
-    save_in = rate_Al # change in kg at every node / dt
-    variable = f_Al
-  [../]
-  [./time_deriv_Ca]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 6
-    save_in = rate_Ca # change in kg at every node / dt
-    variable = f_Ca
-  [../]
-  [./time_deriv_Mg]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 7
-    save_in = rate_Mg # change in kg at every node / dt
-    variable = f_Mg
-  [../]
-  [./time_deriv_Fe]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 8
-    save_in = rate_Fe # change in kg at every node / dt
-    variable = f_Fe
-  [../]
-  [./time_deriv_K]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 9
-    save_in = rate_K # change in kg at every node / dt
-    variable = f_K
-  [../]
-  [./time_deriv_Na]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 10
-    save_in = rate_Na # change in kg at every node / dt
-    variable = f_Na
-  [../]
-  [./time_deriv_Sr]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 11
-    save_in = rate_Sr # change in kg at every node / dt
-    variable = f_Sr
-  [../]
-  [./time_deriv_F]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 12
-    save_in = rate_F # change in kg at every node / dt
-    variable = f_F
-  [../]
-  [./time_deriv_BOH]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 13
-    save_in = rate_BOH # change in kg at every node / dt
-    variable = f_BOH
-  [../]
-  [./time_deriv_Br]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 14
-    save_in = rate_Br # change in kg at every node / dt
-    variable = f_Br
-  [../]
-  [./time_deriv_Ba]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 15
-    save_in = rate_Ba # change in kg at every node / dt
-    variable = f_Ba
-  [../]
-  [./time_deriv_Li]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 16
-    save_in = rate_Li # change in kg at every node / dt
-    variable = f_Li
-  [../]
-  [./time_deriv_NO3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 17
-    save_in = rate_NO3 # change in kg at every node / dt
-    variable = f_NO3
-  [../]
-  [./time_deriv_O2aq]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 18
-    save_in = rate_O2aq # change in kg at every node / dt
-    variable = f_O2aq
-  [../]
-  [./time_deriv_H2O]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 19
-    save_in = rate_H2O # change in kg at every node / dt
-    variable = porepressure
-  [../]
-  [./temperature_advection]
-    type = PorousFlowHeatAdvection
-    variable = temperature
-  [../]
-  [./temperature_time_deriv]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temperature
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./injection_temperature]
+  [injection_temperature]
     initial_condition = 92
-  [../]
-  [./injection_rate_massfrac_H]
+  []
+  [injection_rate_massfrac_H]
     initial_condition = -2.952985071156e-06
-  [../]
-  [./injection_rate_massfrac_Cl]
+  []
+  [injection_rate_massfrac_Cl]
     initial_condition = 0.04870664551708
-  [../]
-  [./injection_rate_massfrac_SO4]
+  []
+  [injection_rate_massfrac_SO4]
     initial_condition = 0.0060359986852517
-  [../]
-  [./injection_rate_massfrac_HCO3]
+  []
+  [injection_rate_massfrac_HCO3]
     initial_condition = 5.0897287594019e-05
-  [../]
-  [./injection_rate_massfrac_SiO2aq]
+  []
+  [injection_rate_massfrac_SiO2aq]
     initial_condition = 3.0246609868421e-05
-  [../]
-  [./injection_rate_massfrac_Al]
+  []
+  [injection_rate_massfrac_Al]
     initial_condition = 3.268028901929e-08
-  [../]
-  [./injection_rate_massfrac_Ca]
+  []
+  [injection_rate_massfrac_Ca]
     initial_condition = 0.00082159428184586
-  [../]
-  [./injection_rate_massfrac_Mg]
+  []
+  [injection_rate_massfrac_Mg]
     initial_condition = 1.8546347062146e-05
-  [../]
-  [./injection_rate_massfrac_Fe]
+  []
+  [injection_rate_massfrac_Fe]
     initial_condition = 4.3291908204093e-05
-  [../]
-  [./injection_rate_massfrac_K]
+  []
+  [injection_rate_massfrac_K]
     initial_condition = 6.8434768308898e-05
-  [../]
-  [./injection_rate_massfrac_Na]
+  []
+  [injection_rate_massfrac_Na]
     initial_condition = 0.033298053919671
-  [../]
-  [./injection_rate_massfrac_Sr]
+  []
+  [injection_rate_massfrac_Sr]
     initial_condition = 1.2771866652177e-05
-  [../]
-  [./injection_rate_massfrac_F]
+  []
+  [injection_rate_massfrac_F]
     initial_condition = 5.5648860174073e-06
-  [../]
-  [./injection_rate_massfrac_BOH]
+  []
+  [injection_rate_massfrac_BOH]
     initial_condition = 0.0003758574621917
-  [../]
-  [./injection_rate_massfrac_Br]
+  []
+  [injection_rate_massfrac_Br]
     initial_condition = 9.0315286107068e-05
-  [../]
-  [./injection_rate_massfrac_Ba]
+  []
+  [injection_rate_massfrac_Ba]
     initial_condition = 1.5637460875161e-07
-  [../]
-  [./injection_rate_massfrac_Li]
+  []
+  [injection_rate_massfrac_Li]
     initial_condition = 8.3017067912701e-05
-  [../]
-  [./injection_rate_massfrac_NO3]
+  []
+  [injection_rate_massfrac_NO3]
     initial_condition = 0.00010958455036169
-  [../]
-  [./injection_rate_massfrac_O2aq]
+  []
+  [injection_rate_massfrac_O2aq]
     initial_condition = -7.0806852373351e-05
-  [../]
-  [./injection_rate_massfrac_H2O]
+  []
+  [injection_rate_massfrac_H2O]
     initial_condition = 0.91032275033842
-  [../]
-  [./rate_H]
-  [../]
-  [./rate_Cl]
-  [../]
-  [./rate_SO4]
-  [../]
-  [./rate_HCO3]
-  [../]
-  [./rate_SiO2aq]
-  [../]
-  [./rate_Al]
-  [../]
-  [./rate_Ca]
-  [../]
-  [./rate_Mg]
-  [../]
-  [./rate_Fe]
-  [../]
-  [./rate_K]
-  [../]
-  [./rate_Na]
-  [../]
-  [./rate_Sr]
-  [../]
-  [./rate_F]
-  [../]
-  [./rate_BOH]
-  [../]
-  [./rate_Br]
-  [../]
-  [./rate_Ba]
-  [../]
-  [./rate_Li]
-  [../]
-  [./rate_NO3]
-  [../]
-  [./rate_O2aq]
-  [../]
-  [./rate_H2O]
-  [../]
+  []
+  [rate_H]
+  []
+  [rate_Cl]
+  []
+  [rate_SO4]
+  []
+  [rate_HCO3]
+  []
+  [rate_SiO2aq]
+  []
+  [rate_Al]
+  []
+  [rate_Ca]
+  []
+  [rate_Mg]
+  []
+  [rate_Fe]
+  []
+  [rate_K]
+  []
+  [rate_Na]
+  []
+  [rate_Sr]
+  []
+  [rate_F]
+  []
+  [rate_BOH]
+  []
+  [rate_Br]
+  []
+  [rate_Ba]
+  []
+  [rate_Li]
+  []
+  [rate_NO3]
+  []
+  [rate_O2aq]
+  []
+  [rate_H2O]
+  []
 []
 
 [MultiApps]
-  [./react]
+  [react]
     type = TransientMultiApp
     input_files = aquifer_geochemistry.i
     clone_master_mesh = true
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 [Transfers]
-  [./changes_due_to_flow]
+  [changes_due_to_flow]
     type = MultiAppCopyTransfer
     direction = to_multiapp
     source_variable = 'rate_H rate_Cl rate_SO4 rate_HCO3 rate_SiO2aq rate_Al rate_Ca rate_Mg rate_Fe rate_K rate_Na rate_Sr rate_F rate_BOH rate_Br rate_Ba rate_Li rate_NO3 rate_O2aq rate_H2O temperature'
     variable = 'pf_rate_H pf_rate_Cl pf_rate_SO4 pf_rate_HCO3 pf_rate_SiO2aq pf_rate_Al pf_rate_Ca pf_rate_Mg pf_rate_Fe pf_rate_K pf_rate_Na pf_rate_Sr pf_rate_F pf_rate_BOH pf_rate_Br pf_rate_Ba pf_rate_Li pf_rate_NO3 pf_rate_O2aq pf_rate_H2O temperature'
     multi_app = react
-  [../]
-  [./massfrac_from_geochem]
+  []
+  [massfrac_from_geochem]
     type = MultiAppCopyTransfer
     direction = from_multiapp
     source_variable = 'massfrac_H massfrac_Cl massfrac_SO4 massfrac_HCO3 massfrac_SiO2aq massfrac_Al massfrac_Ca massfrac_Mg massfrac_Fe massfrac_K massfrac_Na massfrac_Sr massfrac_F massfrac_BOH massfrac_Br massfrac_Ba massfrac_Li massfrac_NO3 massfrac_O2aq '
     variable = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
     multi_app = react
-  [../]
+  []
 []

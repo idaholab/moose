@@ -31,7 +31,6 @@
       csvdiff = 'face_info_two_region_quads_out_face_info_1_0001.csv '
                 'face_info_two_region_quads_out_face_info_2_0001.csv '
                 'face_info_two_region_quads_out_face_info_3_0001.csv'
-      recover = false
 
       detail = "quadrilateral elements in multiple regions."
     []

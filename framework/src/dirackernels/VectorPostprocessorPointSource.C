@@ -29,47 +29,34 @@ VectorPostprocessorPointSource::validParams()
   params.addParam<std::string>("y_coord_name", "y", "name of column containing y coordinates.");
   params.addParam<std::string>("z_coord_name", "z", "name of column containing z coordinates.");
   params.addParam<std::string>("value_name", "value", "name of column containing values.");
-
-  params.addParam<bool>(
-      "use_broadcast",
-      false,
-      "Causes this diracKernel to use a broadcasted version of the vector instead "
-      "of a scattered version of the vector (the default).  This is slower - but "
-      "is useful for debugging and testing");
-
   return params;
 }
 
 VectorPostprocessorPointSource::VectorPostprocessorPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
-    VectorPostprocessorInterface(this),
-    _use_broadcast(getParam<bool>("use_broadcast")),
     _vpp_values(getVectorPostprocessorValue(
-        "vector_postprocessor", getParam<std::string>("value_name"), _use_broadcast)),
-    _x_coord_name(getParam<std::string>("x_coord_name"), _use_broadcast),
-    _y_coord_name(getParam<std::string>("y_coord_name"), _use_broadcast),
-    _z_coord_name(getParam<std::string>("z_coord_name"), _use_broadcast)
+        "vector_postprocessor", getParam<std::string>("value_name"), true)),
+    _x_coord(getVectorPostprocessorValue(
+        "vector_postprocessor", getParam<std::string>("x_coord_name"), true)),
+    _y_coord(getVectorPostprocessorValue(
+        "vector_postprocessor", getParam<std::string>("y_coord_name"), true)),
+    _z_coord(getVectorPostprocessorValue(
+        "vector_postprocessor", getParam<std::string>("z_coord_name"), true))
 {
 }
 
 void
 VectorPostprocessorPointSource::addPoints()
 {
-  const auto xcoord =
-      getVectorPostprocessorValue("vector_postprocessor", _x_coord_name, _use_broadcast);
-  const auto ycoord =
-      getVectorPostprocessorValue("vector_postprocessor", _y_coord_name, _use_broadcast);
-  const auto zcoord =
-      getVectorPostprocessorValue("vector_postprocessor", _z_coord_name, _use_broadcast);
-
-  mooseAssert(_vpp_values.size() * xcoord.size() * ycoord.size() * zcoord.size() != 0,
+  mooseAssert(_vpp_values.size() * _x_coord.size() * _y_coord.size() * _z_coord.size() != 0,
               "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp, \n"
               "vpp must have data before the Dirac Kernel is called.\n"
               "Try setting \"execute_on = timestep_begin\" in the vpp being read. ");
 
-  for (std::size_t i = 0; i < xcoord.size(); ++i)
+  _point_to_index.clear();
+  for (std::size_t i = 0; i < _x_coord.size(); ++i)
   {
-    Point pt(Point(xcoord[i], ycoord[i], zcoord[i]));
+    Point pt(_x_coord[i], _y_coord[i], _z_coord[i]);
     _point_to_index[pt] = i;
     addPoint(pt, i);
   }

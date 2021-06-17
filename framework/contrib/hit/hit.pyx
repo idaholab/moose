@@ -136,6 +136,9 @@ cdef class Node:
     def line(self):
         return int(self._cnode.line())
 
+    def filename(self):
+        return self._cnode.filename().decode('utf-8')
+
     def path(self):
         return self._cnode.path().decode('utf-8')
 
@@ -301,8 +304,9 @@ class Token(object):
         offset: byte offset where the token was found (see lex.h)
         line: line number
     """
-    def __init__(self, ttype, value, offset, line):
+    def __init__(self, ttype, value, name, offset, line):
         self.__token_type = ttype
+        self.__name = name
         self.__value = value
         self.__offset = offset
         self.__line = line
@@ -320,15 +324,19 @@ class Token(object):
         return self.__offset
 
     @property
+    def name(self):
+        return self.__name
+
+    @property
     def line(self):
         return self.__line
 
     def __str__(self):
-        return '{}:{}:{}:{}'.format(self.__token_type, self.__value, self.__offset, self.__line)
+        return '{}:{}:{}:{}'.format(self.__token_type, self.__value, self.__name, self.__offset, self.__line)
 
     def __eq__(self, other):
         if isinstance(other, Token):
-            return all([self.type == other.type, self.value == other.value,
+            return all([self.type == other.type, self.value == other.value, self.name == other.name,
                         self.offset == other.offset, self.line == other.line])
         elif isinstance(other, TokenType):
             return self.type == other
@@ -371,5 +379,5 @@ def tokenize(fname, text):
             ttype = TokenType.INLINECOMMENT
         elif <int>ctokens[i].type == <int>chit.TokenBlankLine:
             ttype = TokenType.BLANKLINE
-        tokens.append(Token(ttype, ctokens[i].val, ctokens[i].offset, ctokens[i].line))
+        tokens.append(Token(ttype, ctokens[i].val, ctokens[i].name, ctokens[i].offset, ctokens[i].line))
     return tokens

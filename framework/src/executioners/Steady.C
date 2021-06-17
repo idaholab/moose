@@ -37,7 +37,7 @@ Steady::Steady(const InputParameters & parameters)
     _time(_problem.time()),
     _final_timer(registerTimedSection("final", 1))
 {
-  _picard_solve.setInnerSolve(_feproblem_solve);
+  _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
   _time = _system_time;
 }
@@ -85,7 +85,7 @@ Steady::execute()
 
     for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
     {
-      _last_solve_converged = _picard_solve.solve();
+      _last_solve_converged = _fixed_point_solve->solve();
 
       if (!lastSolveConverged())
       {

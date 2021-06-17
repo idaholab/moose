@@ -26,8 +26,6 @@ NodalConstraint::validParams()
   params.addParam<MooseEnum>("formulation",
                              formulationtype,
                              "Formulation used to calculate constraint - penalty or kinematic.");
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
   return params;
 }
 

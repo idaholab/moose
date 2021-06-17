@@ -9,6 +9,7 @@
     rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     petsc_version = '>=3.7.6'
     compiler = '!INTEL'
@@ -25,6 +26,7 @@
     rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, penalty contact
@@ -38,6 +40,7 @@
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, kinematic contact
@@ -51,6 +54,7 @@
     rel_err = 1e-4
     abs_zero = 1e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, penalty contact
@@ -63,6 +67,7 @@
     allow_warnings = true
     abs_zero = 1e-8
     rel_err = 5e-4
+    mesh_mode = REPLICATED
     # The linesearch used by this test requires PETSc >= 3.6.0.
     petsc_version = '>=3.6.0'
     requirement = "The Contact system shall enforce frictionless, penalty contact
@@ -78,6 +83,7 @@
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
@@ -91,6 +97,7 @@
     rel_err = 1e-4
     abs_zero = 1e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
@@ -104,6 +111,7 @@
     rel_err = 1e-4
     abs_zero = 4e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
@@ -119,6 +127,7 @@
     rel_err = 1e-4
     abs_zero = 3e-5
     max_parallel = 1
+    mesh_mode = REPLICATED
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact

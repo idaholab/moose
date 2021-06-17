@@ -10,11 +10,13 @@
 #include "ScalarMaterialDamage.h"
 
 registerMooseObject("TensorMechanicsApp", ScalarMaterialDamage);
+registerMooseObject("TensorMechanicsApp", ADScalarMaterialDamage);
 
+template <bool is_ad>
 InputParameters
-ScalarMaterialDamage::validParams()
+ScalarMaterialDamageTempl<is_ad>::validParams()
 {
-  InputParameters params = ScalarDamageBase::validParams();
+  InputParameters params = ScalarDamageBaseTempl<is_ad>::validParams();
   params.addClassDescription(
       "Scalar damage model for which the damage is prescribed by another material");
   params.addRequiredParam<MaterialPropertyName>("damage_index",
@@ -24,13 +26,16 @@ ScalarMaterialDamage::validParams()
   return params;
 }
 
-ScalarMaterialDamage::ScalarMaterialDamage(const InputParameters & parameters)
-  : ScalarDamageBase(parameters), _damage_property(getMaterialProperty<Real>("damage_index"))
+template <bool is_ad>
+ScalarMaterialDamageTempl<is_ad>::ScalarMaterialDamageTempl(const InputParameters & parameters)
+  : ScalarDamageBaseTempl<is_ad>(parameters),
+    _damage_property(this->template getGenericMaterialProperty<Real, is_ad>("damage_index"))
 {
 }
 
+template <bool is_ad>
 void
-ScalarMaterialDamage::updateQpDamageIndex()
+ScalarMaterialDamageTempl<is_ad>::updateQpDamageIndex()
 {
   _damage_index[_qp] = _damage_property[_qp];
 
@@ -40,3 +45,6 @@ ScalarMaterialDamage::updateQpDamageIndex()
                "must be between 0 and 1. Current value is: ",
                _damage_index[_qp]);
 }
+
+template class ScalarMaterialDamageTempl<false>;
+template class ScalarMaterialDamageTempl<true>;

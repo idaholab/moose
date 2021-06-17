@@ -1,0 +1,159 @@
+[Tests]
+  issues = "#16410"
+  design = "sqa/non_functional.md"
+  collections = SYSTEM
+  [mpi]
+    type = RunApp
+    input = input.i
+    expect_out = "Num Processors:\s+2\s+Num Threads:\s+1"
+    min_parallel = 2
+    max_parallel = 2
+    min_threads = 1
+    max_threads = 1
+
+    requirement = "The system shall support the use of message passing interface (MPI)."
+  []
+  [thread]
+    requirement = "The system shall support the use of shared memory threads using"
+
+    [pthread]
+      type = RunApp
+      input = input.i
+      expect_out = "Num Processors:\s+1\s+Num Threads:\s+2"
+      min_parallel = 1
+      max_parallel = 1
+      min_threads = 2
+      max_threads = 2
+      threading = PTHREADS
+
+      detail = "'pthreads' or"
+    []
+    [openmp]
+      type = RunApp
+      input = input.i
+      expect_out = "Num Processors:\s+1\s+Num Threads:\s+2"
+      min_parallel = 1
+      max_parallel = 1
+      min_threads = 2
+      max_threads = 2
+      threading = OPENMP
+
+      detail = "OpenMP."
+    []
+  []
+
+  [partitioner]
+    requirement = "The system shall support the use of the following parallel mesh partitioners:"
+    [chaco]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       chaco = true
+
+       detail = "Chaco,"
+    []
+    [parmetis]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       parmetis = true
+
+       detail = "ParMETIS,"
+    []
+    [party]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       party = true
+
+       detail = "Party, and"
+    []
+    [ptscotch]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       ptscotch = true
+
+       detail = "PTScotch."
+    []
+  []
+
+  [solver]
+    requirement = "The system shall support the use of the following solver packages:"
+    [superlu]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       superlu = true
+
+       detail = "SuperLU,"
+    []
+    [mumps]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       mumps = true
+
+       detail = "MUMPS, and"
+    []
+    [slepc]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       slepc = true
+
+       detail = "SLEPc."
+    []
+  []
+
+  [libraries]
+    requirement = "The system shall support the use of the following C++ libraries:"
+    [vtk]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       vtk = true
+
+       detail = "Visualization ToolKit (VTK) and"
+    []
+    [boost]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       boost = true
+
+       detail = "BOOST."
+    []
+  []
+
+  [compiler]
+    requirement = "The system shall interface operate with the following C++ compilers:"
+    [clang]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       compiler = CLANG
+
+       detail = "Clang and"
+    []
+    [gcc]
+       type = RunApp
+       input = input.i
+       min_parallel = 2
+       max_parallel = 2
+       compiler = GCC
+
+       detail = "GCC."
+    []
+  []
+[]

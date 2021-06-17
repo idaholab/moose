@@ -2,7 +2,7 @@
 
 ## Description
 
-`UnobstructedPlanarViewFactor.md` computes the view factors between `n` planar sides in radiative heat exchange.
+`UnobstructedPlanarViewFactor` computes the view factors between `n` planar sides in radiative heat exchange.
 These sides need to be such that they do not obstruct each other. This is in particular true if the sides fully enclose
 a convex volume. This is the intended purpose of this UserObject.
 
@@ -16,7 +16,7 @@ defined on them. View factors are computed by numerically evaluating:
 where $r$ is the distance between two points on the surfaces $A_1$ and $A_2$ and $\beta_1$ and $\beta_2$ are the angles that the line connecting these two points make with the normals at surface one and two, respectively.
 
 In two-dimensional geometries, a different formula is evaluated. It is derived from the original
-formula by considering a geometry that is extruded from $-\infinity$ to $\infinity$ along the $z$-axis.
+formula by considering a geometry that is extruded from $-\infty$ to $\infty$ along the $z$-axis.
 We denote by $r_0$ the distance between two points on surface one and two projected onto the plane orthogonal to the $z$-axis. The line projected on this plane makes angles $\beta_{1,0}$ and $\beta_{2,0}$ with the normals at surfaces one and two, respectively. Note that the normals have no component into the $z$-direction. The following relationships hold:
 
 \begin{equation}
@@ -67,7 +67,7 @@ It is stressed that this UserObject may give wrong results if obstruction is pre
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/view_factors/view_factor_cube.i
+!listing modules/heat_conduction/test/tests/view_factors/view_factor_2d.i
 block=UserObjects
 
 !syntax parameters /UserObjects/UnobstructedPlanarViewFactor

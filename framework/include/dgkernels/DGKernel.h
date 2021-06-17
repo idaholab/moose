@@ -37,7 +37,7 @@ public:
   /**
    * The variable that this kernel operates on.
    */
-  virtual MooseVariableFEBase & variable() override { return _var; }
+  virtual const MooseVariableFEBase & variable() const override { return _var; }
 
   /**
    * Computes the residual for this element or the neighbor
@@ -53,7 +53,7 @@ public:
    * Computes the element-element off-diagonal Jacobian
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               unsigned int jvar) override;
+                                               const MooseVariableFEBase & jvar) override;
 
 protected:
   /**
@@ -72,6 +72,26 @@ protected:
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
+
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test functions.
+   */
+  virtual void precalculateQpResidual(Moose::DGResidualType /*type*/) {}
+
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions.
+   */
+  virtual void precalculateQpJacobian(Moose::DGJacobianType /*type*/) {}
+
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions for off-diagonal Jacobian assembly.
+   */
+  virtual void precalculateQpOffDiagJacobian(Moose::DGJacobianType /*type*/,
+                                             const MooseVariableFEBase & /*jvar*/)
+  {
+  }
 
   /// Variable this kernel operates on
   MooseVariable & _var;

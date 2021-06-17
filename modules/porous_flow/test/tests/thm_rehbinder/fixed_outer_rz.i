@@ -22,96 +22,96 @@
 []
 
 [Variables]
-  [./disp_r]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
-  [./temperature]
-  [../]
+  [disp_r]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
+  [temperature]
+  []
 []
 
 [BCs]
-  [./plane_strain]
+  [plane_strain]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'
-  [../]
+  []
 
-  [./cavity_temperature]
+  [cavity_temperature]
     type = DirichletBC
     variable = temperature
     value = 1000
     boundary = left
-  [../]
-  [./cavity_porepressure]
+  []
+  [cavity_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1E6
     boundary = left
-  [../]
-  [./cavity_zero_effective_stress_x]
+  []
+  [cavity_zero_effective_stress_x]
     type = Pressure
     component = 0
     variable = disp_r
     function = 1E6
     boundary = left
     use_displaced_mesh = false
-  [../]
+  []
 
-  [./outer_temperature]
+  [outer_temperature]
     type = DirichletBC
     variable = temperature
     value = 0
     boundary = right
-  [../]
-  [./outer_pressure]
+  []
+  [outer_pressure]
     type = DirichletBC
     variable = porepressure
     value = 0
     boundary = right
-  [../]
-  [./fixed_outer_disp]
+  []
+  [fixed_outer_disp]
     type = DirichletBC
     variable = disp_r
     value = 0
     boundary = right
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_rr]
+  [stress_rr]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress_pp]
+  []
+  [stress_pp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_rr]
+  [stress_rr]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_rr
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_pp] # hoop stress
+  []
+  [stress_pp] # hoop stress
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_pp
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0.0
       bulk_modulus = 1E12
@@ -120,8 +120,8 @@
       cv = 1000.0
       cp = 1000.0
       porepressure_coefficient = 0.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -136,83 +136,83 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1E10
     poissons_ratio = 0.2
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeAxisymmetricRZSmallStrain
     eigenstrain_names = thermal_contribution
-  [../]
-  [./thermal_contribution]
+  []
+  [thermal_contribution]
     type = ComputeThermalExpansionEigenstrain
     temperature = temperature
     thermal_expansion_coeff = 1E-6
     eigenstrain_name = thermal_contribution
     stress_free_temperature = 0.0
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
     porosity = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     solid_bulk_compliance = 1E-10
     fluid_bulk_modulus = 1E12
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12' # note this is ordered: rr, zz, angle-angle
-  [../]
-  [./thermal_expansion]
+  []
+  [thermal_expansion]
     type = PorousFlowConstantThermalExpansionCoefficient
     fluid_coefficient = 1E-6
     drained_coefficient = 1E-6
-  [../]
-  [./thermal_conductivity]
+  []
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '1E6 0 0  0 1E6 0  0 0 1E6' # note this is ordered: rr, zz, angle-angle
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./P]
+  [P]
     type = LineValueSampler
     start_point = '0.1 0 0'
     end_point = '1.0 0 0'
     num_points = 10
     sort_by = x
     variable = porepressure
-  [../]
-  [./T]
+  []
+  [T]
     type = LineValueSampler
     start_point = '0.1 0 0'
     end_point = '1.0 0 0'
     num_points = 10
     sort_by = x
     variable = temperature
-  [../]
-  [./U]
+  []
+  [U]
     type = LineValueSampler
     start_point = '0.1 0 0'
     end_point = '1.0 0 0'
     num_points = 10
     sort_by = x
     variable = disp_r
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_rtol'
     petsc_options_value = 'gmres      asm      lu           1E-8'
-  [../]
+  []
 []
 
 [Executioner]

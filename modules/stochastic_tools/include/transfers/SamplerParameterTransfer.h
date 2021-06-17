@@ -29,14 +29,10 @@ public:
    */
   virtual void execute() override;
 
-  ///@{
   /**
    * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
    */
-  virtual void initializeToMultiapp() override;
   virtual void executeToMultiapp() override;
-  virtual void finalizeToMultiapp() override;
-  ///@}
 
 protected:
   /**

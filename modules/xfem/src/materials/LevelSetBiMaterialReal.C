@@ -9,8 +9,14 @@
 
 #include "LevelSetBiMaterialReal.h"
 
-registerMooseObject("XFEMApp", LevelSetBiMaterialReal);
-registerMooseObject("XFEMApp", ADLevelSetBiMaterialReal);
+registerMooseObjectReplaced("XFEMApp",
+                            LevelSetBiMaterialReal,
+                            "01/01/2022 00:00",
+                            XFEMCutSwitchingMaterialReal);
+registerMooseObjectReplaced("XFEMApp",
+                            ADLevelSetBiMaterialReal,
+                            "01/01/2022 00:00",
+                            ADXFEMCutSwitchingMaterialReal);
 
 template <bool is_ad>
 InputParameters

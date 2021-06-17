@@ -26,7 +26,7 @@
   [../]
   [./ed0]
     type = BlockDeletionGenerator
-    block_id = 1
+    block = 1
     input = SubdomainBoundingBox2
   [../]
 []
@@ -71,4 +71,3 @@
 [Outputs]
   exodus = true
 []
-

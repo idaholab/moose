@@ -328,8 +328,20 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
          * of active neighbors
          */
         neighbor_ancestor = elem->neighbor_ptr(i);
+
         if (neighbor_ancestor)
+        {
+          /**
+           * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}.
+           * That is, the number of evaluable elements does NOT necessarily equal to the number of
+           * local and algebraic ghosting elements. The neighbors of evaluable elements can be
+           * remote even though we have two layers of geometric ghosting elements.
+           */
+          if (neighbor_ancestor->is_remote())
+            continue;
+
           neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+        }
         else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)
         {
           neighbor_ancestor = elem->topological_neighbor(i, mesh, *_point_locator, _pbs);
@@ -342,8 +354,19 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
            * they are not present, this is a new region.
            */
           if (neighbor_ancestor)
+          {
+            /**
+             * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}.
+             * That is, the number of evaluable elements does NOT necessarily equal to the number of
+             * local and algebraic ghosting elements. The neighbors of evaluable elements can be
+             * remote even though we have two layers of geometric ghosting elements.
+             */
+            if (neighbor_ancestor->is_remote())
+              continue;
+
             neighbor_ancestor->active_family_tree_by_topological_neighbor(
                 all_active_neighbors, elem, mesh, *_point_locator, _pbs, false);
+          }
         }
       }
 

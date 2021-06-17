@@ -138,8 +138,6 @@
   incremental = true
 
   # interaction integral parameters
-  disp_x = disp_x
-  disp_y = disp_y
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3

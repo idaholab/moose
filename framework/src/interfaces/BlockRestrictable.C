@@ -309,6 +309,11 @@ BlockRestrictable::getBlockCoordSystem()
 void
 BlockRestrictable::checkVariable(const MooseVariableFieldBase & variable) const
 {
+  // a variable defined on all internal sides does not need this check because
+  // it can be coupled with other variables in DG kernels
+  if (variable.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) > 0)
+    return;
+
   if (!isBlockSubset(variable.activeSubdomains()))
   {
     std::string var_ids = Moose::stringify(variable.activeSubdomains(), ", ");

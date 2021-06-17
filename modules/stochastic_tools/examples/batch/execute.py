@@ -21,9 +21,9 @@ def runner(infile, outfile, n_start, n_stop, mode, mpi):
     data = dict(n_samples=[], total=[], per_proc=[], max_proc=[], time=[])
 
     exe = mooseutils.find_moose_executable_recursive()
-    for n in xrange(n_start, n_stop+1):
+    for n in range(n_start, n_stop+1):
         n_samples = 2**n
-        exe_args = ['-i', infile, 'Samplers/mc/n_samples={}'.format(n_samples),
+        exe_args = ['-i', infile, 'Samplers/mc/num_rows={}'.format(n_samples),
                     'MultiApps/runner/mode={}'.format(mode),
                     'Outputs/file_base={}'.format(mode)]
 
@@ -61,10 +61,12 @@ def execute(infile, outfile, n_start, n_stop, modes, mpi=None):
 
 if __name__ == '__main__':
 
-    # These are the runs that were performed for the documentation, they were run using "cone" and
-    # it took several hours for the jobs to complete.
+    # This took about 8 hours on:
+    #   Mac Pro (2019)
+    #   2.5 GHz 28-Core Intel Xeon W
+    #   240 GB 2933 MHz DDR4
     execute('full_solve.i', 'full_solve_memory_serial', 0, 10, ['normal', 'batch-reset', 'batch-restore'])
-    execute('full_solve.i', 'full_solve_memory_mpi', 5, 14, ['normal', 'batch-reset', 'batch-restore'], 32)
+    execute('full_solve.i', 'full_solve_memory_mpi', 5, 16, ['normal', 'batch-reset', 'batch-restore'], 28)
 
     execute('transient.i', 'transient_memory_serial', 0, 10, ['normal', 'batch-restore'])
-    execute('transient.i', 'transient_memory_mpi', 5, 14, ['normal', 'batch-restore'], 32)
+    execute('transient.i', 'transient_memory_mpi', 5, 16, ['normal', 'batch-restore'], 28)

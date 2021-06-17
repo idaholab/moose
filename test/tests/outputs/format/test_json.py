@@ -14,24 +14,7 @@ import json
 import unittest
 from FactorySystem import Parser
 import pyhit
-
-def find_app():
-    """
-    Find the executable to use, respecting MOOSE_DIR and METHOD
-    """
-    moose_dir = os.environ.get("MOOSE_DIR")
-    if not moose_dir:
-        p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        p.wait()
-        if p.returncode == 0:
-            git_dir = p.communicate()[0]
-            moose_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
-        else:
-            print("Could not find top level moose directory. Please set the MOOSE_DIR environment variable.")
-            sys.exit(1)
-
-    app_name = os.path.join(moose_dir, "test", "moose_test-%s" % os.environ.get("METHOD", "opt"))
-    return app_name
+import mooseutils
 
 def run_app(args=[]):
     """
@@ -39,7 +22,7 @@ def run_app(args=[]):
     Exits if the app failed to run for any reason.
     """
     proc = None
-    app_name = find_app()
+    app_name = mooseutils.find_moose_executable_recursive()
     args.insert(0, app_name)
     #  "-options_left 0" is used to stop the debug version of PETSc from printing
     # out WARNING messages that sometime confuse the json parser

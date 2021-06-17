@@ -23,21 +23,25 @@ registerMooseObject("TensorMechanicsApp", StressDivergenceTensors);
 InputParameters
 StressDivergenceTensors::validParams()
 {
-  InputParameters params = ALEKernel::validParams();
+  InputParameters params = JvarMapKernelInterface<ALEKernel>::validParams();
   params.addClassDescription("Stress divergence kernel for the Cartesian coordinate system");
-  params.addRequiredParam<unsigned int>("component",
-                                        "An integer corresponding to the direction "
-                                        "the variable this kernel acts in. (0 for x, "
-                                        "1 for y, 2 for z)");
+  params.addRequiredRangeCheckedParam<unsigned int>("component",
+                                                    "component < 3",
+                                                    "An integer corresponding to the direction "
+                                                    "the variable this kernel acts in. (0 for x, "
+                                                    "1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
+
+  // maybe this should be deprecated in favor of args
   params.addCoupledVar("temperature",
                        "The name of the temperature variable used in the "
                        "ComputeThermalExpansionEigenstrain.  (Not required for "
                        "simulations without temperature coupling.)");
+
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
-      "List of eigenstrains used in the strain calculation. Used for computing their derivaties "
+      "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
       "for off-diagonal Jacobian terms.");
   params.addCoupledVar("out_of_plane_strain",
                        "The name of the out_of_plane_strain variable used in the "
@@ -58,7 +62,7 @@ StressDivergenceTensors::validParams()
 }
 
 StressDivergenceTensors::StressDivergenceTensors(const InputParameters & parameters)
-  : ALEKernel(parameters),
+  : JvarMapKernelInterface<ALEKernel>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _use_finite_deform_jacobian(getParam<bool>("use_finite_deform_jacobian")),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
@@ -66,8 +70,6 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
-    _temp_coupled(isCoupled("temperature")),
-    _temp_var(_temp_coupled ? coupled("temperature") : 0),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain(_out_of_plane_strain_coupled ? &coupledValue("out_of_plane_strain")
                                                       : nullptr),
@@ -78,15 +80,17 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
+  // get coupled displacements
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var[i] = coupled("displacements", i);
 
-  if (_temp_coupled)
-  {
+  // fetch eigenstrain derivatives
+  const auto nvar = _coupled_moose_vars.size();
+  _deigenstrain_dargs.resize(nvar);
+  for (std::size_t i = 0; i < nvar; ++i)
     for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
-      _deigenstrain_dT.push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
-          eigenstrain_name, getVar("temperature", 0)->name()));
-  }
+      _deigenstrain_dargs[i].push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
+          eigenstrain_name, _coupled_moose_vars[i]->name()));
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_out_of_plane_direction != 2 && _ndisp != 3)
@@ -118,9 +122,14 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
 void
 StressDivergenceTensors::initialSetup()
 {
+  // check if any of the eigenstrains provide derivatives wrt variables that are not coupled
+  for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
+    validateNonlinearCoupling<RankTwoTensor>(eigenstrain_name);
+
+  // make sure the coordinate system is cartesioan
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
-    mooseError(
-        "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
+    mooseError("The coordinate system in the Problem block must be set to XYZ for cartesian "
+               "geometries.");
 }
 
 void
@@ -149,7 +158,6 @@ StressDivergenceTensors::computeResidual()
 Real
 StressDivergenceTensors::computeQpResidual()
 {
-
   Real residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
   // volumetric locking correction
   if (_volumetric_locking_correction)
@@ -188,7 +196,7 @@ StressDivergenceTensors::computeJacobian()
 }
 
 void
-StressDivergenceTensors::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
 {
   if (_volumetric_locking_correction)
   {
@@ -230,7 +238,8 @@ StressDivergenceTensors::computeQpJacobian()
   if (_volumetric_locking_correction)
   {
     // jacobian = Bbar^T_i * C * Bbar_j where Bbar = B + Bvol
-    // jacobian = B^T_i * C * B_j + Bvol^T_i * C * Bvol_j +  Bvol^T_i * C * B_j + B^T_i * C * Bvol_j
+    // jacobian = B^T_i * C * B_j + Bvol^T_i * C * Bvol_j +  Bvol^T_i * C * B_j + B^T_i * C *
+    // Bvol_j
 
     // Bvol^T_i * C * Bvol_j
     jacobian += sum_C3x3 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) *
@@ -242,23 +251,25 @@ StressDivergenceTensors::computeQpJacobian()
 
     // Bvol^T_i * C * B_j
     RankTwoTensor phi;
-    if (_component == 0)
+    switch (_component)
     {
-      phi(0, 0) = _grad_phi[_j][_qp](0);
-      phi(0, 1) = phi(1, 0) = _grad_phi[_j][_qp](1);
-      phi(0, 2) = phi(2, 0) = _grad_phi[_j][_qp](2);
-    }
-    else if (_component == 1)
-    {
-      phi(1, 1) = _grad_phi[_j][_qp](1);
-      phi(0, 1) = phi(1, 0) = _grad_phi[_j][_qp](0);
-      phi(1, 2) = phi(2, 1) = _grad_phi[_j][_qp](2);
-    }
-    else if (_component == 2)
-    {
-      phi(2, 2) = _grad_phi[_j][_qp](2);
-      phi(0, 2) = phi(2, 0) = _grad_phi[_j][_qp](0);
-      phi(1, 2) = phi(2, 1) = _grad_phi[_j][_qp](1);
+      case 0:
+        phi(0, 0) = _grad_phi[_j][_qp](0);
+        phi(0, 1) = phi(1, 0) = _grad_phi[_j][_qp](1);
+        phi(0, 2) = phi(2, 0) = _grad_phi[_j][_qp](2);
+        break;
+
+      case 1:
+        phi(1, 1) = _grad_phi[_j][_qp](1);
+        phi(0, 1) = phi(1, 0) = _grad_phi[_j][_qp](0);
+        phi(1, 2) = phi(2, 1) = _grad_phi[_j][_qp](2);
+        break;
+
+      case 2:
+        phi(2, 2) = _grad_phi[_j][_qp](2);
+        phi(0, 2) = phi(2, 0) = _grad_phi[_j][_qp](0);
+        phi(1, 2) = phi(2, 1) = _grad_phi[_j][_qp](1);
+        break;
     }
 
     jacobian += (_Jacobian_mult[_qp] * phi).trace() *
@@ -339,18 +350,18 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
                _component, _component, _out_of_plane_direction, _out_of_plane_direction) *
            _grad_test[_i][_qp](_component) * _phi[_j][_qp];
 
-  // off-diagonal Jacobian with respect to a coupled temperature variable
-  if (_temp_coupled && jvar == _temp_var)
-  {
-    RankTwoTensor total_deigenstrain_dT;
-    for (const auto deigenstrain_dT : _deigenstrain_dT)
-      total_deigenstrain_dT += (*deigenstrain_dT)[_qp];
+  // bail out if jvar is not coupled
+  if (getJvarMap()[jvar] < 0)
+    return 0.0;
 
-    return -((_Jacobian_mult[_qp] * total_deigenstrain_dT) *
-             _grad_test[_i][_qp])(_component)*_phi[_j][_qp];
-  }
+  // off-diagonal Jacobian with respect to any other coupled variable
+  const unsigned int cvar = mapJvarToCvar(jvar);
+  RankTwoTensor total_deigenstrain;
+  for (const auto deigenstrain_darg : _deigenstrain_dargs[cvar])
+    total_deigenstrain += (*deigenstrain_darg)[_qp];
 
-  return 0.0;
+  return -((_Jacobian_mult[_qp] * total_deigenstrain) *
+           _grad_test[_i][_qp])(_component)*_phi[_j][_qp];
 }
 
 void

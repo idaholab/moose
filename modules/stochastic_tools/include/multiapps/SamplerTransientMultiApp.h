@@ -42,11 +42,28 @@ protected:
   /// The Sup-application solve mode
   const StochasticTools::MultiAppMode _mode;
 
+  /// Counter for extracting command line arguments in batch mode
+  dof_id_type _local_batch_app_index;
+
+  /// Override to allow to get correct cli_args
+  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
+
 private:
   /**
    * Helper method for running in mode='batch'
    * */
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
+
+  /**
+   * Checks whether the MultiApp partitioning is consistent with the sampler
+   */
+  void checkRankConfig();
+
+  /**
+   * Helper function for updating _row_data and _local_row_index.
+   * This allows multiple calls to the same row index
+   */
+  void updateRowData(dof_id_type local_index);
 
   /**
    * Helper for getting StochasticToolsTransfer objects.
@@ -58,15 +75,24 @@ private:
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
   getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
 
-  /// Storage for batch-restore mode; the outer vector if for the local stochastic data and the
-  /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included
-  /// in case that changes in the future or in child classes
-  std::vector<std::vector<std::shared_ptr<Backup>>> _batch_backup;
+  /// Store the number of rows initialized, if this changes error because it doesn't make sense
+  const dof_id_type _number_of_sampler_rows;
 
   ///@{
   /// PrefGraph timers
   const PerfID _perf_solve_step;
   const PerfID _perf_solve_batch_step;
   const PerfID _perf_initial_setup;
+  const PerfID _perf_command_line_args;
   ///@}
+
+  /// Storage for batch-restore mode; the outer vector if for the local stochastic data and the
+  /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included
+  /// in case that changes in the future or in child classes
+  std::vector<std::vector<std::shared_ptr<Backup>>> _batch_backup;
+
+  /// Current row of data updated by updateRowData. Used by transfers and setting command line args
+  std::vector<Real> _row_data;
+  /// Current local index representing _row_data
+  dof_id_type _local_row_index = std::numeric_limits<dof_id_type>::max();
 };

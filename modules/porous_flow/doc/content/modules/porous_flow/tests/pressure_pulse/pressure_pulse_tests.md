@@ -58,15 +58,15 @@ The tests include:
 
 - Steady state 1-phase analysis to demonstrate that the steady-state of $\rho = \rho_{\infty}$ is achieved.
 
-!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_steady.i
+!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_steady_action.i
 
 - Transient 1-phase analysis.
 
-!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d.i
+!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_action.i
 
 - Transient 1-phase, 3 component analysis to check that the components diffuse at the same rate.
 
-!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_3comp.i
+!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_3comp_action.i
 
 - Transient 2-phase analysis, with the "water" state fully saturated.
 
@@ -76,15 +76,15 @@ The tests include:
 
 - 2-phase using the "PS" formulation and [Kuzmin-Turek](kt.md) stabilisation
 
-- 2 phase using the PS formulation and a van-Genuchten capillary pressure
+- 2 phase using the PS formulation and a van Genuchten capillary pressure
 
-- 2 phase using the PS formulation and a van-Genuchten capillary pressure with a logarithmic extension;
+- 2 phase using the PS formulation and a van Genuchten capillary pressure with a logarithmic extension;
 
 - 1 phase when the primary variable is $\mathrm{log}\,\rho$
 
-- 1 phase using the [fully-saturated](PorousFlowFullySaturatedDarcyFlow.md) [version](PorousFlowFullySaturatedMassTimeDerivative.md) of PorousFlow
+- 1 phase using the [fully-saturated](PorousFlowFullySaturatedDarcyFlow.md) [version](PorousFlowFullySaturatedMassTimeDerivative.md) of PorousFlow (no upwinding and no mass lumping)
 
-- 1 phase with 3 fluid components using the [fully-saturated](PorousFlowFullySaturatedDarcyFlow.md) [version](PorousFlowFullySaturatedMassTimeDerivative.md) of PorousFlow.
+- 1 phase with 3 fluid components using the [fully-saturated](PorousFlowFullySaturatedDarcyFlow.md) [version](PorousFlowFullySaturatedMassTimeDerivative.md) of PorousFlow (no upwinding and no mass lumping)
 
 An example verification is shown in [pressure_pulse.fig].
 

@@ -35,10 +35,9 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  /// ID location (inside of outside of box)
+  /// ID location (inside or outside of the bounding box)
   const MooseEnum _location;
 
   /// Block ID to assign to the region
   const subdomain_id_type _block_id;
 };
-

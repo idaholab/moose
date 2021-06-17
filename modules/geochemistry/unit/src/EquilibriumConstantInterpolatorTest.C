@@ -101,6 +101,11 @@ TEST(EquilibriumConstantInterpolatorTest, linear)
 
   EXPECT_NEAR(logk.sampleDerivative(50.0), 0.048, tol);
 
+  // Check sampleDerivative() with the AD version
+  DualReal Tad = 50.0;
+  Moose::derivInsert(Tad.derivatives(), 0, 1.0);
+  EXPECT_NEAR(logk.sampleDerivative(50.0), logk.sample(Tad).derivatives()[0], tol);
+
   // Should get identical results specifying a maier-kelly fit as only a linear
   // fit can be used (note: shift both temperature points to keep linear fit the same
   // as above)
@@ -115,6 +120,11 @@ TEST(EquilibriumConstantInterpolatorTest, linear)
   EXPECT_NEAR(logk2.sample(50.01), 3.6, tol);
 
   EXPECT_NEAR(logk2.sampleDerivative(50.0), 0.048, tol);
+
+  // Check sampleDerivative() with the AD version
+  DualReal Tad2 = 50.01;
+  Moose::derivInsert(Tad2.derivatives(), 0, 1.0);
+  EXPECT_NEAR(logk.sampleDerivative(50.01), logk.sample(Tad2).derivatives()[0], tol);
 }
 
 TEST(EquilibriumConstantInterpolatorTest, fourthOrder)
@@ -210,7 +220,7 @@ TEST(EquilibriumConstantInterpolatorTest, linearNullValues)
   logk.generate();
 
   // Should only be two samples in this case (ignoring values of 500)
-  EXPECT_EQ(logk.getSampleSize(), 2);
+  EXPECT_EQ(logk.getSampleSize(), (std::size_t)2);
 
   // Compare with values calculated using linear fit and extrapolating
   EXPECT_NEAR(logk.sample(T[0]), 17.866, tol);
@@ -230,7 +240,7 @@ TEST(EquilibriumConstantInterpolatorTest, fourthOrderNullValues)
   logk.generate();
 
   // Should only be six samples in this case (ignoring values of 500)
-  EXPECT_EQ(logk.getSampleSize(), 6);
+  EXPECT_EQ(logk.getSampleSize(), (std::size_t)6);
 
   // Compare with values calculated using fourth order polynomial (python code above)
   EXPECT_NEAR(logk.sample(T[0]), -0.016418224486741174, tol);
@@ -257,7 +267,7 @@ TEST(EquilibriumConstantInterpolatorTest, fourthOrderUserDefinedNullValues)
   logk.generate();
 
   // Should only be six samples in this case (ignoring values of 500)
-  EXPECT_EQ(logk.getSampleSize(), 6);
+  EXPECT_EQ(logk.getSampleSize(), (std::size_t)6);
 
   // Compare with values calculated using fourth order polynomial (python code above)
   EXPECT_NEAR(logk.sample(T[0]), -0.016418224486741174, tol);
@@ -294,6 +304,23 @@ TEST(EquilibriumConstantInterpolatorTest, piecewiselinear)
   EXPECT_NEAR(logk.sampleDerivative(1.0), -5.0, tol);
   EXPECT_NEAR(logk.sampleDerivative(3.0), 10.0, tol);
   EXPECT_EQ(logk.sampleDerivative(600.0), 0.0);
+
+  // Check sampleDerivative() with the AD version produces the correct error
+  DualReal T2 = 5.0;
+  Moose::derivInsert(T2.derivatives(), 0, 1.0);
+  try
+  {
+    EXPECT_NEAR(logk.sampleDerivative(5.0), logk.sample(T2).derivatives()[0], tol);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Dual cannot be used for specified fit type in EquilibriumConstantInterpolator") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 /// Piecewise-linear with just one value
@@ -319,7 +346,7 @@ TEST(EquilibriumConstantInterpolatorTest, piecewiselinear_500)
   const std::vector<double> k = {10.0, 0.0, 500.0, 40.0, 500.0};
 
   EquilibriumConstantInterpolator logk(T, k, "piecewise-linear");
-  EXPECT_EQ(logk.getSampleSize(), 3);
+  EXPECT_EQ(logk.getSampleSize(), (std::size_t)3);
 
   logk.generate(); // does nothing relevant because type = piecewise-linear
 

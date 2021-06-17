@@ -109,6 +109,7 @@ void
 RinglebMesh::buildMesh()
 {
   MeshBase & mesh = getMesh();
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   /// Data structure that holds pointers to the Nodes of each streamline.
   std::vector<std::vector<Node *>> stream_nodes(_num_k_pts);
@@ -185,13 +186,13 @@ RinglebMesh::buildMesh()
         elem->set_node(3) = stream_nodes[i + 1][j];
 
         if (i == 0)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);
         if (j == 0)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/3, _inflow_bid);
+          boundary_info.add_side(elem->id(), /*side=*/3, _inflow_bid);
         if (j == 2 * (_num_q_pts + _n_extra_q_pts) - 2)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/1, _outflow_bid);
+          boundary_info.add_side(elem->id(), /*side=*/1, _outflow_bid);
         if (i == _num_k_pts - 2)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/2, _inner_wall_bid);
       }
       else if (j == _num_q_pts + _n_extra_q_pts - 2)
       {
@@ -202,9 +203,9 @@ RinglebMesh::buildMesh()
         elem->set_node(3) = stream_nodes[i + 1][j];
 
         if (i == 0)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/0, _outer_wall_bid);
         if (i == _num_k_pts - 2)
-          mesh.boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+          boundary_info.add_side(elem->id(), /*side=*/2, _inner_wall_bid);
       }
     }
   }
@@ -217,8 +218,8 @@ RinglebMesh::buildMesh()
     MeshTools::Modification::all_tri(mesh);
 
   /// Create sideset names.
-  mesh.boundary_info->sideset_name(_inflow_bid) = "inflow";
-  mesh.boundary_info->sideset_name(_outflow_bid) = "outflow";
-  mesh.boundary_info->sideset_name(_inner_wall_bid) = "inner_wall";
-  mesh.boundary_info->sideset_name(_outer_wall_bid) = "outer_wall";
+  boundary_info.sideset_name(_inflow_bid) = "inflow";
+  boundary_info.sideset_name(_outflow_bid) = "outflow";
+  boundary_info.sideset_name(_inner_wall_bid) = "inner_wall";
+  boundary_info.sideset_name(_outer_wall_bid) = "outer_wall";
 }

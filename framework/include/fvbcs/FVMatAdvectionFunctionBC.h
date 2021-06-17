@@ -28,7 +28,7 @@ protected:
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 
-  const Function & _flux_variable_exact_solution;
+  const Function * const _flux_variable_exact_solution;
   const Function & _vel_x_exact_solution;
   const Function * const _vel_y_exact_solution;
   const Function * const _vel_z_exact_solution;

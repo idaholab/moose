@@ -47,7 +47,12 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.navigation',
                       'MooseDocs.extensions.template',
                       'MooseDocs.extensions.comment',
-                      'MooseDocs.extensions.special']
+                      'MooseDocs.extensions.special',
+                      'MooseDocs.extensions.ifelse',
+                      'MooseDocs.extensions.pysyntax',
+                      'MooseDocs.extensions.modal',
+                      'MooseDocs.extensions.datetime',
+                      'MooseDocs.extensions.gitutils']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
@@ -59,6 +64,13 @@ def load_config(filename, **kwargs):
     Read the config.yml file and create the Translator object.
     """
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
+
+    # Replace 'default' key in Extensions to allow for recursive_update to accept command line
+    for key in config.get('Extensions', dict()).keys():
+        if config['Extensions'][key] == 'default':
+            config['Extensions'][key] = dict()
+
+    # Apply command-line key value pairs
     recursive_update(config, kwargs)
 
     extensions = _yaml_load_extensions(config)
@@ -144,9 +156,6 @@ def _yaml_load_extensions(config):
 
         elif isinstance(settings, str) and (settings == 'disable'):
             ext_configs[ext_type]['active'] = False
-
-        elif isinstance(settings, str) and (settings == 'default'):
-            continue
 
         else:
             msg = "The supplied settings for the '%s' extension must be dict() or the 'default' " \

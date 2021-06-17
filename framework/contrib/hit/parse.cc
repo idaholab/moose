@@ -1,12 +1,12 @@
 
-#include <string>
-#include <vector>
 #include <algorithm>
-#include <sstream>
-#include <set>
 #include <iterator>
 #include <memory>
 #include <regex>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "parse.h"
 
@@ -186,6 +186,15 @@ void
 Node::remove()
 {
   delete this;
+}
+
+const std::string &
+Node::filename()
+{
+  if (_toks.size() > 0)
+    return _toks[0].name;
+  static std::string unknown_name = "[unknown]";
+  return unknown_name;
 }
 
 int
@@ -690,7 +699,7 @@ public:
     if (_pos >= _tokens.size())
     {
       _pos++;
-      return Token{TokType::EOF, "", _input.size()};
+      return Token{TokType::EOF, "", _name, _input.size()};
     }
     auto tok = _tokens[_pos];
     _pos++;

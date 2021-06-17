@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gap_heat_transfer_radiation_test.i'
+    exodiff = 'gap_heat_transfer_radiation_test_out.e'
+    abs_zero = 1e-06
+    requirement = 'The system shall be able to compute heat flux across a gap using the ThermalContact methods'
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#1609'
+  [../]
+[]

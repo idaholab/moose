@@ -15,108 +15,108 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pressure temp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.8
     alpha = 1e-5
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
-  [../]
-  [./temp]
-  [../]
+  [pressure]
+  []
+  [temp]
+  []
 []
 
 [ICs]
   # have to start these reasonably close to their steady-state values
-  [./pressure]
+  [pressure]
     type = FunctionIC
     variable = pressure
     function = '200-0.5*x'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = FunctionIC
     variable = temp
     function = 180+0.1*x
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux]
+  [flux]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     gravity = '0 0 0'
     variable = pressure
-  [../]
-  [./heat_advection]
+  []
+  [heat_advection]
     type = PorousFlowHeatAdvection
     gravity = '0 0 0'
     variable = temp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./idealgas]
+  [FluidProperties]
+    [idealgas]
       type = IdealGasFluidProperties
       molar_mass = 1.4
       gamma = 1.2
       mu = 1.2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pressure
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./dens0]
+  []
+  [dens0]
     type = PorousFlowSingleComponentFluid
     fp = idealgas
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.1 0 0 0 1.1 0 0 0 1.1'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey # irrelevant in this fully-saturated situation
     n = 2
     phase = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./leftp]
+  [leftp]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 200
-  [../]
-  [./leftt]
+  []
+  [leftt]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 180
-  [../]
-  [./newtonp]
+  []
+  [newtonp]
     type = PorousFlowPiecewiseLinearSink
     variable = pressure
     boundary = right
@@ -126,8 +126,8 @@
     use_relperm = true
     fluid_phase = 0
     flux_function = 0.005 # 1/2/L
-  [../]
-  [./newtont]
+  []
+  [newtont]
     type = PorousFlowPiecewiseLinearSink
     variable = temp
     boundary = right
@@ -138,11 +138,11 @@
     use_enthalpy = true
     fluid_phase = 0
     flux_function = 0.005 # 1/2/L
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./porepressure]
+  [porepressure]
     type = LineValueSampler
     variable = pressure
     start_point = '0 0.5 0'
@@ -150,8 +150,8 @@
     sort_by = x
     num_points = 11
     execute_on = timestep_end
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = LineValueSampler
     variable = temp
     start_point = '0 0.5 0'
@@ -159,14 +159,14 @@
     sort_by = x
     num_points = 11
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -180,8 +180,8 @@
   file_base = nc08
   execute_on = timestep_end
   exodus = true
-  [./along_line]
+  [along_line]
     type = CSV
     execute_vector_postprocessors_on = timestep_end
-  [../]
+  []
 []

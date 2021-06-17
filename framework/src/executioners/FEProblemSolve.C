@@ -68,12 +68,25 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
   params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>("nl_div_tol", 1.0e10, "Nonlinear Divergence Tolerance");
+  params.addParam<Real>(
+      "nl_div_tol",
+      1.0e10,
+      "Nonlinear Relative Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>(
+      "nl_abs_div_tol",
+      1.0e50,
+      "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
   params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
+  params.addParam<unsigned int>(
+      "n_max_nonlinear_pingpong",
+      100,
+      "The maximum number of times the non linear residual can ping pong "
+      "before requesting halting the current evaluation and requesting timestep cut");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -102,7 +115,7 @@ FEProblemSolve::validParams()
       "0 indicates pure Jacobian-based scaling");
   params.addParam<std::vector<std::vector<std::string>>>(
       "scaling_group_variables",
-      "Name of variables that are grouped together to for determing scale factors. (Multiple "
+      "Name of variables that are grouped together for determining scale factors. (Multiple "
       "groups can be provided, separated by semicolon)");
   params.addRangeCheckedParam<unsigned int>(
       "num_grids",
@@ -119,7 +132,7 @@ FEProblemSolve::validParams()
   return params;
 }
 
-FEProblemSolve::FEProblemSolve(Executioner * ex)
+FEProblemSolve::FEProblemSolve(Executioner & ex)
   : SolveObject(ex), _splitting(getParam<std::vector<std::string>>("splitting"))
 {
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
@@ -168,6 +181,12 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
                               _pars.isParamSetByUser("snesmf_reuse_base"));
 
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
+
+  _problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
+
+  _problem.setNonlinearForcedIterations(getParam<unsigned int>("nl_forced_its"));
+
+  _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   _nl.setDecomposition(_splitting);
 }

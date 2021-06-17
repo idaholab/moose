@@ -69,4 +69,49 @@
   [dep]
     deprecated = True
   []
+
+  [collections_default]
+  []
+
+  [collections_override]
+    collections = A
+  []
+
+  [collections_group]
+    collections = 'A B'
+    [default]
+    []
+  []
+
+  [types]
+    type = A
+  []
+  [types_group]
+    [a]
+      type = A
+    []
+    [b]
+      type = B
+    []
+  []
+
+  [names][]
+  [names_group]
+    [a][]
+    [b][]
+  []
+
+  [prereq_first]
+  []
+  [prereq_second]
+    prereq = prereq_first
+  []
+  [prereq_group]
+    [a]
+      prereq = prereq_first
+    []
+    [b]
+      prereq = prereq_group/a
+    []
+  []
 []

@@ -69,6 +69,7 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _portion(getParam<MooseEnum>("portion"))
 {
+  declareMeshProperty("use_distributed_mesh", false);
 
   if (_num_sectors % 2 != 0)
     paramError("num_sectors", "must be an even number.");
@@ -315,6 +316,7 @@ ConcentricCircleMeshGenerator::generate()
   // adding elements in the square
   while (index <= limit)
   {
+    // inner circle area (polygonal core)
     Elem * elem = mesh->add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
@@ -340,6 +342,7 @@ ConcentricCircleMeshGenerator::generate()
   // adding elements in one outer layer of the square (right side)
   while (index < limit)
   {
+    // inner circle elements touching B
     Elem * elem = mesh->add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
@@ -357,6 +360,7 @@ ConcentricCircleMeshGenerator::generate()
   int counter = 0;
   while (index != standard / 2)
   {
+    // inner circle elements touching C
     Elem * elem = mesh->add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
     elem->set_node(1) = nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2)];
@@ -415,6 +419,12 @@ ConcentricCircleMeshGenerator::generate()
     }
   }
 
+  // Enclosing square sections
+  //  ABCA
+  //  C  B
+  //  B  C
+  //  ACBA
+
   // adding elements for the enclosing square. (top left)
   int initial =
       Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
@@ -432,6 +442,7 @@ ConcentricCircleMeshGenerator::generate()
               _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
       while (index <= limit)
       {
+        // outer square sector C
         Elem * elem = mesh->add_elem(new Quad4);
         elem->set_node(0) = nodes[index];
         elem->set_node(1) = nodes[index + 1];
@@ -467,18 +478,19 @@ ConcentricCircleMeshGenerator::generate()
 
       while (index <= limit)
       {
+        // outer square sector A
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index];
-        elem->set_node(1) = nodes[index + _rings.back() + 2];
-        elem->set_node(2) = nodes[index + _rings.back() + 3];
-        elem->set_node(3) = nodes[index + 1];
+        elem->set_node(3) = nodes[index];
+        elem->set_node(2) = nodes[index + _rings.back() + 2];
+        elem->set_node(1) = nodes[index + _rings.back() + 3];
+        elem->set_node(0) = nodes[index + 1];
         elem->subdomain_id() = subdomainIDs.back() + 1;
 
         if (index >= static_cast<int>(limit - (_rings.back() + 1)))
           boundary_info.add_side(elem, 1, 3);
 
         if ((index - initial) % static_cast<int>(_rings.back() + 2) == 0)
-          boundary_info.add_side(elem, 0, 4);
+          boundary_info.add_side(elem, 2, 4);
 
         ++index;
 
@@ -498,11 +510,12 @@ ConcentricCircleMeshGenerator::generate()
                    (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
                    _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
 
+      // pointy tips of the A sectors, touching the inner circle
       Elem * elem = mesh->add_elem(new Quad4);
-      elem->set_node(0) = nodes[index1];
-      elem->set_node(1) = nodes[index2];
-      elem->set_node(2) = nodes[index2 + _rings.back() + 1];
-      elem->set_node(3) = nodes[index2 + _rings.back() + 2];
+      elem->set_node(3) = nodes[index1];
+      elem->set_node(2) = nodes[index2];
+      elem->set_node(1) = nodes[index2 + _rings.back() + 1];
+      elem->set_node(0) = nodes[index2 + _rings.back() + 2];
       elem->subdomain_id() = subdomainIDs.back() + 1;
 
       // adding elements for the left mid part.
@@ -512,11 +525,12 @@ ConcentricCircleMeshGenerator::generate()
 
       while (index <= limit)
       {
+        // outer square elements in sector C touching the inner circle
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index];
-        elem->set_node(1) = nodes[index + 1];
-        elem->set_node(2) = nodes[index2 - _rings.back() - 1];
-        elem->set_node(3) = nodes[index2];
+        elem->set_node(3) = nodes[index];
+        elem->set_node(2) = nodes[index + 1];
+        elem->set_node(1) = nodes[index2 - _rings.back() - 1];
+        elem->set_node(0) = nodes[index2];
         elem->subdomain_id() = subdomainIDs.back() + 1;
 
         if (index == limit)
@@ -539,26 +553,16 @@ ConcentricCircleMeshGenerator::generate()
           Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
           (_rings.back() + 1) * (standard / 2) - 1 + (_rings.back() + 1) + (_rings.back() + 2);
 
-      if (standard == 2)
-      {
-        Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index1];
-        elem->set_node(1) = nodes[index1 - 1];
-        elem->set_node(2) = nodes[index2];
-        elem->set_node(3) = nodes[index3];
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+      // elements clockwise from the A sector tips
+      elem = mesh->add_elem(new Quad4);
+      elem->set_node(0) = nodes[index1];
+      elem->set_node(1) = nodes[index1 - 1];
+      elem->set_node(2) = nodes[index2];
+      elem->set_node(3) = nodes[index3];
+      elem->subdomain_id() = subdomainIDs.back() + 1;
 
+      if (standard == 2)
         boundary_info.add_side(elem, 1, 2);
-      }
-      else
-      {
-        Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index1];
-        elem->set_node(1) = nodes[index1 - 1];
-        elem->set_node(2) = nodes[index2];
-        elem->set_node(3) = nodes[index3];
-        elem->subdomain_id() = subdomainIDs.back() + 1;
-      }
 
       // adding elements for the right mid bottom part.
 
@@ -576,6 +580,7 @@ ConcentricCircleMeshGenerator::generate()
       {
         while (index >= limit)
         {
+          // outer square elements in sector B touching the inner circle
           Elem * elem = mesh->add_elem(new Quad4);
           elem->set_node(0) = nodes[index];
           elem->set_node(1) = nodes[index1];
@@ -598,14 +603,15 @@ ConcentricCircleMeshGenerator::generate()
       // dummy condition for elem definition
       if (standard >= 2)
       {
+        // single elements between A and B on the outside of the square
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index];
-        elem->set_node(1) = nodes[index + 1];
-        elem->set_node(2) = nodes[index + 2];
-        elem->set_node(3) = nodes[index1];
+        elem->set_node(3) = nodes[index];
+        elem->set_node(2) = nodes[index + 1];
+        elem->set_node(1) = nodes[index + 2];
+        elem->set_node(0) = nodes[index1];
         elem->subdomain_id() = subdomainIDs.back() + 1;
 
-        boundary_info.add_side(elem, 0, 3);
+        boundary_info.add_side(elem, 2, 3);
 
         if (standard == 2)
           boundary_info.add_side(elem, 1, 2);
@@ -622,10 +628,10 @@ ConcentricCircleMeshGenerator::generate()
       while (index > limit)
       {
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[index];
-        elem->set_node(1) = nodes[index + (_rings.back() + 2) * k + k + 1];
-        elem->set_node(2) = nodes[index + (_rings.back() + 2) * k + k + 2];
-        elem->set_node(3) = nodes[index - _rings.back() - 2];
+        elem->set_node(3) = nodes[index];
+        elem->set_node(2) = nodes[index + (_rings.back() + 2) * k + k + 1];
+        elem->set_node(1) = nodes[index + (_rings.back() + 2) * k + k + 2];
+        elem->set_node(0) = nodes[index - _rings.back() - 2];
         elem->subdomain_id() = subdomainIDs.back() + 1;
         index = index - (_rings.back() + 2);
         ++k;

@@ -14,7 +14,7 @@ There are three main ways to use the `CombinerGenerator`:
 
 The most straightforward thing to do is simply to combine the output of multiple `MeshGenerator`s together into a single mesh.  For example:
 
-!listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input.i
+!listing test/tests/meshgenerators/combiner_generator/combiner_multi_input.i
          block=Mesh
 
 Will generate a mesh that looks like:
@@ -29,23 +29,36 @@ It is also possible to translate (move) the input `MeshGenerator`s as they are c
 !alert note
 If you specify `positions` then the number of `positions` must match the number of `inputs`, unless only one input is specified (more on that in a moment).
 
-!listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate.i
+!listing test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate.i
          block=Mesh
 
 Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner_multi_translate.png style=width:75%;
 
+Alternatively, the same displacement vectors can be supplied in a file with the `positions_file` option. The above mesh can equivalently be generated with the following.
+
+!listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate_from_file.i
+         block=Mesh
+
+where the `positions.txt` file contains the floating point triplets.
+
+!listing moose/test/tests/meshgenerators/combiner_generator/positions.txt
+
+The same restrictions on `positions` also apply to the number of entries in `position_file`.
+
 ### 3. Copy a Single Input Multiple Times With Translations
 
 The final option is to provide exactly one `inputs` but specify multiple `positions`.  This will cause the single input to be copied multiple times with the position of each copy specified by the `positions` parameter.  For example
 
-!listing moose/test/tests/meshgenerators/combiner_generator/combiner_generator.i
+!listing test/tests/meshgenerators/combiner_generator/combiner_generator.i
          block=Mesh
 
 Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner.png style=width:75%;
+
+Again, the same capability can be achieved with the `positions_file` option.
 
 !syntax parameters /Mesh/CombinerGenerator
 

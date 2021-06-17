@@ -12,8 +12,6 @@
       exodiff = 'custom_linear_partitioner_test_out.e'
       min_parallel = 2
       max_parallel = 2
-      group = 'requirements'
-
       detail = "a linear partitioner that"
     []
     [custom_linear_partitioner_displacement]
@@ -22,8 +20,6 @@
       exodiff = 'custom_linear_partitioner_test_displacement.e'
       min_parallel = 2
       max_parallel = 2
-      group = 'requirements'
-
       detail = "operates with a displaced configuration and"
     []
     [custom_linear_partitioner_restart]
@@ -32,8 +28,6 @@
       exodiff = 'custom_linear_partitioner_restart_test_out.e'
       min_parallel = 2
       max_parallel = 2
-      group = 'requirements'
-
       detail = "is capable of restarting."
     []
   []

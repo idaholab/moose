@@ -68,10 +68,10 @@ GeochemicalDatabaseValidator::validate()
         if (coeffs.key() == "note")
           continue;
 
-        // Check that all temperature values are real numbers
+        // Check that there are a correct number of values and that they are real numbers
         auto values = coeffs.value();
-        checkArraySize(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
-        checkArrayValues(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
+        checkArraySize(values, "Header:neutral species:" + ns.key() + ":" + coeffs.key());
+        checkArrayValues(values, "Header:neutral species:" + ns.key() + ":" + coeffs.key());
       }
 
   // Check the element data

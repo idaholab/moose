@@ -17,6 +17,8 @@
 #include "MooseArray.h"
 #include "SystemBase.h"
 #include "Assembly.h"
+#include "MooseObjectName.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -49,6 +51,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _rz_coord_axis(1), // default to RZ rotation around y-axis
     _currently_computing_jacobian(false),
     _computing_nonlinear_residual(false),
+    _currently_computing_residual(false),
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
@@ -164,7 +167,12 @@ SubProblem::getVectorTagID(const TagName & tag_name) const
   if (search != _vector_tags_name_map.end())
     return search->second;
 
-  mooseError("Vector tag '", tag_name_upper, "' does not exist");
+  std::string message =
+      tag_name_upper == "TIME"
+          ? ".\n\nThis may occur if "
+            "you have a TimeKernel in your problem but did not specify a transient executioner."
+          : "";
+  mooseError("Vector tag '", tag_name_upper, "' does not exist", message);
 }
 
 TagName
@@ -681,6 +689,18 @@ SubProblem::isMatPropRequested(const std::string & prop_name) const
   return _material_property_requested.find(prop_name) != _material_property_requested.end();
 }
 
+void
+SubProblem::addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name)
+{
+  _consumed_material_properties[obj_name].insert(prop_name);
+}
+
+const std::map<MooseObjectName, std::set<std::string>> &
+SubProblem::getConsumedPropertyMap() const
+{
+  return _consumed_material_properties;
+}
+
 DiracKernelInfo &
 SubProblem::diracKernelInfo()
 {
@@ -899,23 +919,84 @@ SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
+SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+{
+  EquationSystems & eq = es();
+  const auto n_sys = eq.n_systems();
+
+  auto pr = _root_alg_gf_to_sys_clones.emplace(
+      &algebraic_gf, std::vector<std::shared_ptr<GhostingFunctor>>(n_sys - 1));
+  mooseAssert(pr.second, "We are adding a duplicate algebraic ghosting functor");
+  auto & clones_vec = pr.first->second;
+
+  for (MooseIndex(n_sys) i = 1; i < n_sys; ++i)
+  {
+    DofMap & dof_map = eq.get_system(i).get_dof_map();
+    std::shared_ptr<GhostingFunctor> clone_alg_gf = algebraic_gf.clone();
+    std::dynamic_pointer_cast<RelationshipManager>(clone_alg_gf)
+        ->init(*algebraic_gf.get_mesh(), &dof_map);
+    dof_map.add_algebraic_ghosting_functor(clone_alg_gf, to_mesh);
+    clones_vec[i - 1] = clone_alg_gf;
+  }
+}
+
+void
 SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
-  auto n_sys = eq.n_systems();
+  const auto n_sys = eq.n_systems();
+  if (!n_sys)
+    return;
 
-  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
-    eq.get_system(i).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  cloneAlgebraicGhostingFunctor(algebraic_gf, to_mesh);
 }
 
 void
 SubProblem::addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
-  auto n_sys = eq.n_systems();
+  const auto n_sys = eq.n_systems();
+  if (!n_sys)
+    return;
 
-  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
-    eq.get_system(i).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  cloneAlgebraicGhostingFunctor(*algebraic_gf, to_mesh);
+}
+
+void
+SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
+{
+  EquationSystems & eq = es();
+  const auto n_sys = eq.n_systems();
+
+#ifndef NDEBUG
+  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
+  const bool found_in_root_sys =
+      std::find(nl_dof_map.algebraic_ghosting_functors_begin(),
+                nl_dof_map.algebraic_ghosting_functors_end(),
+                &algebraic_gf) != nl_dof_map.algebraic_ghosting_functors_end();
+  const bool found_in_our_map =
+      _root_alg_gf_to_sys_clones.find(&algebraic_gf) != _root_alg_gf_to_sys_clones.end();
+  mooseAssert(found_in_root_sys == found_in_our_map,
+              "If the ghosting functor exists in the root DofMap, then we need to have a key for "
+              "it in our gf to clones map");
+#endif
+
+  eq.get_system(0).get_dof_map().remove_algebraic_ghosting_functor(algebraic_gf);
+
+  auto it = _root_alg_gf_to_sys_clones.find(&algebraic_gf);
+  if (it == _root_alg_gf_to_sys_clones.end())
+    return;
+
+  auto & clones_vec = it->second;
+  mooseAssert((n_sys - 1) == clones_vec.size(),
+              "The size of the gf clones vector doesn't match the number of systems minus one");
+
+  for (const auto i : make_range(n_sys))
+    eq.get_system(i + 1).get_dof_map().remove_algebraic_ghosting_functor(*clones_vec[i]);
+
+  _root_alg_gf_to_sys_clones.erase(it->first);
 }
 
 void
@@ -938,3 +1019,10 @@ SubProblem::hasScalingVector()
     assembly(tid).hasScalingVector();
 }
 #endif
+
+void
+SubProblem::clearAllDofIndices()
+{
+  systemBaseNonlinear().clearAllDofIndices();
+  systemBaseAuxiliary().clearAllDofIndices();
+}

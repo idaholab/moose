@@ -47,7 +47,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
 
   // coupled field variables
   for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getVar("args", i)->name();
+    variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
@@ -58,7 +58,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   // base function object
   _func_F = std::make_shared<SymFunction>();
 
-  // set FParser interneal feature flags
+  // set FParser internal feature flags
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
@@ -79,7 +79,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   if (_enable_jit)
     _func_F->JITCompile();
 
-  // reserve storage for parameter passing bufefr
+  // reserve storage for parameter passing buffer
   _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
 }
 

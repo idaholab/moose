@@ -12,6 +12,7 @@ import time
 import mooseutils
 import collections
 import uuid
+import MooseDocs
 from ..base import components, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from ..common import exceptions
@@ -23,8 +24,8 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return CivetExtension(**kwargs)
 
-CivetTestBadges = tokens.newToken('CivetTestBadges', tests=list())
-CivetTestReport = tokens.newToken('CivetTestReport', tests=list(), source=None)
+CivetTestBadges = tokens.newToken('CivetTestBadges', prefix=None, tests=list())
+CivetTestReport = tokens.newToken('CivetTestReport', prefix=None, tests=list(), source=None)
 
 class CivetExtension(command.CommandExtension):
     "Adds ability to include CIVET links."""
@@ -33,6 +34,8 @@ class CivetExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['remotes'] = (dict(), "Remote CIVET repositories to pull result; each item in the dict should have another dict with a 'url' and 'repo' key.")
+        config['branch'] = ('master', "The main stable branch for extracting test results.")
+        config['author'] = ('moosetest', "The 'author' of the merge commit into the stable main branch.")
 
         config['download_test_results'] = (True, "Automatically download and aggregate test results for the current merge commits.")
         config['generate_test_reports'] = (True, "Generate test report pages, if results exist from download or local file(s).")
@@ -79,25 +82,35 @@ class CivetExtension(command.CommandExtension):
         """(override) Generate test reports."""
 
         # Test result database
-        if self.get('download_test_results', True):
+        self.__database = dict()
+
+        # Only populate the database if the specified branch and author match current repository
+        if mooseutils.git_is_branch(self.get('branch')) and \
+           mooseutils.git_is_config('user.name', self.get('author')):
+
             start = time.time()
             LOG.info("Collecting CIVET results...")
+            for name, category in self.get('remotes').items():
+                working_dir = mooseutils.eval_path(category.get('location', MooseDocs.ROOT_DIR))
+                LOG.info("Gathering CIVET results for '%s' category in %s", name, working_dir)
+                hashes = None
+                if category.get('download_test_results', self.get('download_test_results', True)):
+                    hashes = mooseutils.git_civet_hashes(start=self.get('branch'), author=self.get('author'), working_dir=working_dir)
+                    LOG.info("Downloading CIVET results for '%s' category in %s", name, working_dir)
 
-            sites = list()
-            hashes = mooseutils.git_merge_commits()
-            for category in self.get('remotes').values():
-                sites.append((category['url'], category['repo']))
-
-            self.__database = mooseutils.get_civet_results(hashes=hashes,
-                                                           sites=sites,
-                                                           cache=self.get('test_results_cache'),
-                                                           possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
-                                                           logger=LOG)
-
+                local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
+                site = (category['url'], category['repo'])
+                local_db = mooseutils.get_civet_results(local=local,
+                                                        hashes=hashes,
+                                                        site=site,
+                                                        cache=local,
+                                                        possible=['OK', 'FAIL', 'DIFF', 'TIMEOUT'],
+                                                        logger=LOG)
+                self.__database.update(local_db)
             LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
-            LOG.warning("'generate_test_reports' is being disabled, it requires results to exist but none were located.")
+            LOG.info("CIVET test result reports are being disabled, it requires results to exist and the specified branch ('%s') and author ('%s') to match the current repository.", self.get('branch'), self.get('author'))
             self.update(generate_test_reports=False)
 
         if self.get('generate_test_reports', True):
@@ -184,7 +197,8 @@ class CivetMergeResultsCommand(CivetCommandBase):
         site, repo = self.getCivetInfo()
 
         rows = []
-        for sha in mooseutils.git_merge_commits():
+        for sha in mooseutils.git_civet_hashes(start=self.extension.get('branch'),
+                                               author=self.extension.get('author')):
             url = '{}/sha_events/{}/{}'.format(site, repo, sha)
             link = core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
@@ -242,15 +256,17 @@ class RenderCivetTestBadges(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         div = html.Tag(parent, 'div', class_='moose-civet-badges')
+        prefix = token['prefix']
         for test in token['tests']:
+            tname = '{}.{}'.format(prefix, test) if (prefix is not None) else test
             counts = collections.defaultdict(int)
-            results = self.extension.results(test)
+            results = self.extension.results(tname)
             if results:
                 for job, recipes in results.items():
                     for recipe in recipes:
                         counts[recipe.status] += 1
 
-            base = self.extension.testBaseFileName(test)
+            base = self.extension.testBaseFileName(tname)
             if self.extension.hasTestReports() and (base is not None):
                 report_root = self.extension.get('test_reports_location')
                 fname = os.path.join(self.translator.get("destination"), report_root, base + '.html')
@@ -277,8 +293,10 @@ class RenderCivetTestReport(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
 
+        prefix = token['prefix']
         for key in token['tests']:
-            results = self.extension.results(key)
+            tname = '{}.{}'.format(prefix, key) if (prefix is not None) else key
+            results = self.extension.results(tname)
 
             div = html.Tag(parent, 'div', class_='moose-civet-test-report')
 

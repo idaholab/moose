@@ -87,12 +87,6 @@
     boundary = '0 1 2 3'
     value = 0
   [../]
-
-  [./eigenT]
-    type = EigenDirichletBC
-    variable = T
-    boundary = '0 1 2 3'
-  [../]
 []
 
 [Materials]
@@ -107,9 +101,7 @@
 
 [Executioner]
   type = Eigenvalue
-  solve_type = NEWTON
-  matrix_free = true
-  eigen_problem_type = GEN_NON_HERMITIAN
+  solve_type = PJFNK
 
   # Postprocessor value to normalize
   normalization = unorm

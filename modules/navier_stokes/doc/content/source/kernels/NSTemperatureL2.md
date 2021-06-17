@@ -1,3 +1,5 @@
+# NSTemperatureL2
+
 !syntax description /Kernels/NSTemperatureL2
 
 !syntax parameters /Kernels/NSTemperatureL2

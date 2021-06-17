@@ -124,7 +124,7 @@ public:
    * properties are
    * reused for computing current properties. This is called when solve succeeded.
    */
-  void shift(const FEProblemBase & fe_problem);
+  void shift();
 
   /**
    * Copy material properties from elem_from to elem_to. Thread safe.
@@ -138,10 +138,27 @@ public:
    * @param elem_to Element to copy data to
    * @param elem_from Element to copy data from
    * @param side Side number (elemental material properties have this equal to zero)
+   * @param n_qpoints number of quadrature points to work with
    */
   void copy(MaterialData & material_data,
             const Elem & elem_to,
             const Elem & elem_from,
+            unsigned int side,
+            unsigned int n_qpoints);
+
+  /**
+   * Copy material properties from elem_from to elem_to.
+   * Similar to the other method but using pointers to elements instead of references.
+   *
+   * @param material_data MaterialData object to work with
+   * @param elem_to Pointer to the element to copy data to
+   * @param elem_from Pointer to the element to copy data from
+   * @param side Side number (elemental material properties have this equal to zero)
+   * @param n_qpoints number of quadrature points to work with
+   */
+  void copy(MaterialData & material_data,
+            const Elem * elem_to,
+            const Elem * elem_from,
             unsigned int side,
             unsigned int n_qpoints);
 
@@ -238,12 +255,18 @@ public:
     return _prop_names.count(retrievePropertyId(prop_name)) > 0;
   }
 
+  /**
+   * Remove the property storage and element pointer from internal data structures
+   * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
+   * stateful properties) hanging around in our data structures
+   */
+  void eraseProperty(const Elem * elem);
+
+  static const std::map<std::string, unsigned int> & propIDs() { return _prop_ids; }
+
 protected:
   /// Release all internal data structures
   void releaseProperties();
-
-  /// Remove the property storage and element pointer from internal data structures
-  void eraseProperty(const Elem * elem);
 
   /// Internal property storage release helper
   void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);
@@ -282,7 +305,7 @@ private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
   void initProps(MaterialData & material_data,
-                 const Elem & elem,
+                 const Elem * elem,
                  unsigned int side,
                  unsigned int n_qpoints);
 

@@ -188,6 +188,15 @@ typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElem
 namespace Moose
 {
 
+/// This is used for places where we initialize some qp-sized data structures
+/// that would end up being sized too small after the quadrature order gets
+/// bumped (dynamically in-sim).  So for these cases, we just use this constant
+/// to size those data structures overly large to accomodate rather than come
+/// up with some overkill complex mechanism for dynamically resizing them.
+/// Eventually, we may need or implement that more sophisticated mechanism and
+/// will no longer need this.
+const size_t constMaxQpsPerElem = 216;
+
 // These are used by MooseVariableData and MooseVariableDataFV
 enum SolutionState
 {
@@ -495,6 +504,8 @@ namespace Moose
 {
 extern const processor_id_type INVALID_PROCESSOR_ID;
 extern const SubdomainID ANY_BLOCK_ID;
+extern const SubdomainID INTERNAL_SIDE_LOWERD_ID;
+extern const SubdomainID BOUNDARY_SIDE_LOWERD_ID;
 extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
 extern const BoundaryID INVALID_BOUNDARY_ID;
@@ -923,3 +934,11 @@ DerivativeStringClass(ExtraElementIDName);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
+
+namespace Moose
+{
+extern const TagName SOLUTION_TAG;
+extern const TagName OLD_SOLUTION_TAG;
+extern const TagName OLDER_SOLUTION_TAG;
+extern const TagName PREVIOUS_NL_SOLUTION_TAG;
+}

@@ -45,111 +45,111 @@
 []
 
 [Variables]
-  [./pp_liq]
-  [../]
-  [./sat_gas]
+  [pp_liq]
+  []
+  [sat_gas]
     initial_condition = 0
-  [../]
+  []
 []
 
 [ICs]
-  [./ppliq_ic]
+  [ppliq_ic]
     type = FunctionIC
     variable = pp_liq
     function = ppliq_ic
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = 50
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     initial_condition = 0.1
-  [../]
-  [./brine_density]
+  []
+  [brine_density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./methane_density]
+  []
+  [methane_density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./massfrac_ph0_sp0]
+  []
+  [massfrac_ph0_sp0]
     initial_condition = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     initial_condition = 0
-  [../]
-  [./pp_gas]
+  []
+  [pp_gas]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sat_liq]
+  []
+  [sat_liq]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = pp_liq
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     variable = pp_liq
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     variable = sat_gas
     fluid_component = 1
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     variable = sat_gas
     fluid_component = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./brine_density]
+  [brine_density]
     type = PorousFlowPropertyAux
     property = density
     variable = brine_density
     execute_on = 'initial timestep_end'
-  [../]
-  [./methane_density]
+  []
+  [methane_density]
     type = PorousFlowPropertyAux
     property = density
     variable = methane_density
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./pp_gas]
+  []
+  [pp_gas]
     type = PorousFlowPropertyAux
     property = pressure
     phase = 1
     variable = pp_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./sat_liq]
+  []
+  [sat_liq]
     type = PorousFlowPropertyAux
     property = saturation
     variable = sat_liq
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [BCs]
-  [./gas_injection]
+  [gas_injection]
     type = PorousFlowSink
     boundary = left
     variable = sat_gas
     flux_function = injection_rate
     fluid_phase = 1
-  [../]
-  [./brine_out]
+  []
+  [brine_out]
     type = PorousFlowPiecewiseLinearSink
     boundary = right
     variable = pp_liq
@@ -160,119 +160,119 @@
     use_mobility = true
     use_relperm = true
     mass_fraction_component = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./injection_rate]
+  [injection_rate]
     type = ParsedFunction
     vals = injection_area
     vars = area
     value = '-1/area'
-  [../]
-  [./ppliq_ic]
+  []
+  [ppliq_ic]
     type = SolutionFunction
     solution = soln
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp_liq sat_gas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     alpha = 1e-5
     m = 0.5
     sat_lr = 0.2
     pc_max = 1e7
-  [../]
-  [./soln]
+  []
+  [soln]
     type = SolutionUserObject
     mesh = gravityeq_out.e
     system_variables = porepressure
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./brine]
+  [FluidProperties]
+    [brine]
       type = BrineFluidProperties
-    [../]
-    [./methane]
+    []
+    [methane]
       type = MethaneFluidProperties
-    [../]
-    [./methane_tab]
+    []
+    [methane_tab]
       type = TabulatedFluidProperties
       fp = methane
       save_file = false
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./ps]
+  []
+  [ps]
     type = PorousFlow2PhasePS
     phase0_porepressure = pp_liq
     phase1_saturation = sat_gas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
-  [../]
-  [./brine]
+  []
+  [brine]
     type = PorousFlowBrine
     compute_enthalpy = false
     compute_internal_energy = false
     xnacl = xnacl
     phase = 0
-  [../]
-  [./methane]
+  []
+  [methane]
     type = PorousFlowSingleComponentFluid
     compute_enthalpy = false
     compute_internal_energy = false
     fp = methane_tab
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-13 0 0 0 5e-14 0  0 0 1e-13'
-  [../]
-  [./relperm_liq]
+  []
+  [relperm_liq]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.2
     sum_s_res = 0.3
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
     s_res = 0.1
     sum_s_res = 0.3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
     petsc_options_value = ' asm      lu           NONZERO'
-  [../]
+  []
 []
 
 [Executioner]
@@ -283,29 +283,29 @@
   nl_rel_tol = 1e-06
   nl_max_its = 20
   dtmax = 1e6
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e1
     growth_factor = 1.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mass_ph0]
+  [mass_ph0]
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_ph1]
+  []
+  [mass_ph1]
     type = PorousFlowFluidMass
     fluid_component = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./injection_area]
+  []
+  [injection_area]
     type = AreaPostprocessor
     boundary = left
     execute_on = initial
-  [../]
+  []
 []
 
 [Outputs]

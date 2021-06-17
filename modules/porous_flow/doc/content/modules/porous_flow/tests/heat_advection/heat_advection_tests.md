@@ -38,33 +38,40 @@ At $t=0$ this creates a front at $x=0$.  Choose the parameters $C=2$,
 $C_{R}=1$, $\rho=1000$, $\rho_{R}=125$, $\phi=0.2$, $k=1.1$, $\mu=4.4$
 (all in consistent units), so that $v_{T}=1$ is the front's velocity.
 
-The input file:
+The input file used in this page is:
 
-!listing modules/porous_flow/test/tests/heat_advection/heat_advection_1d.i
+!listing modules/porous_flow/test/tests/heat_advection/heat_advection_1d_fully_saturated_action.i
 
 The sharp front is *not* maintained by
-MOOSE.  This is due to numerical diffusion, which is particularly strong when full upwinding is used.  This is explained in great detail in the pages on [numerical stabilization](stabilization.md).  Nevertheless, MOOSE advects the smooth front with the correct
+MOOSE.  This is due to numerical diffusion, whose magnitude depends on the stabilization scheme used.  This is explained in great detail in the pages on [numerical stabilization](stabilization.md).  Nevertheless, MOOSE advects the smooth front with the correct
 velocity, as shown in [heat_advection_1d.fig].
 
-The sharp front is not maintained by MOOSE even when no
-upwinding is used.  In the case at hand, which uses a fully-saturated
-single-phase fluid, the [FullySaturatedHeatAdvection](PorousFlowFullySaturatedHeatAdvection.md) Kernel
-may be used in order to compare with the standard fully-upwinded
-Kernels.  The input file using the fully-saturated approach:
+[heat_advection_1d.fig] shows three versions of the advection, which are activated by setting the `stabilization` parameter in the [PorousFlowFullySaturated](PorousFlowFullySaturated.md) Action:
 
-!listing modules/porous_flow/test/tests/heat_advection/heat_advection_1d_fully_saturated.i
+- with no stabilization
 
-The FullySaturated Kernels do not employ any upwinding
-whatsoever, so less numerical diffusion is expected.  This is demonstrated in
-[heat_advection_1d.fig].  Two additional points may also be
-nocied: (1) the lack of upwinding has produced a "bump" in the
+```
+  stabilization = none
+```
+
+- with full upwinding
+
+```
+  stabilization = Full
+```
+
+- with KT stabilization
+
+```
+  stabilization = KT
+```
+
+With no numerical stabilization, two additional points may also be
+noticed: (1) the lack of upwinding has produced a "bump" in the
 temperature profile near the hotter side; (2) the lack of upwinding
 means the temperature profile moves slightly slower than it should.
 These two affects reduce as the mesh density is increased, however.
 
-Finally, the same simulation may be run using [Kuzmin-Turek](kt.md) stabilization, with input file (that employs the [PorousFlowFullySaturated](PorousFlowFullySaturated.md) Action):
-
-!listing modules/porous_flow/test/tests/heat_advection/heat_advection_1d_fully_saturated_action.i
 
 !media porous_flow/tests/heat_advection/heat_advection.png style=width:90%;margin-left:10px caption=Results of heat advection via a fluid in 1D.  The fluid flows with constant Darcy velocity of 0.25m/s to the right, and this advects a temperature front at velocity 1m/s to the right.  The pictures above that the numerical implementation of PorousFlow (including upwinding) diffuses sharp fronts, but advects them at the correct velocity (notice the centre of the upwinded front is at the correct position in each picture).  Less diffusion is experienced without upwinding or with KT stabilization.  Left: temperature 0.1s.  Right: temperature at 0.6s. id=heat_advection_1d.fig
 

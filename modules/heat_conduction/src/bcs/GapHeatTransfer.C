@@ -70,10 +70,6 @@ GapHeatTransfer::validParams()
   params.addParam<bool>(
       "warnings", false, "Whether to output warning messages concerning nodes not being found");
 
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-
   params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -124,18 +120,6 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     // modern parameter scheme for displacements
     for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
       _disp_vars[i] = coupled("displacements", i);
-  }
-  else
-  {
-    // Legacy parameter scheme for displacements
-    if (isParamValid("disp_x"))
-      _disp_vars[0] = coupled("disp_x");
-    if (isParamValid("disp_y"))
-      _disp_vars[1] = coupled("disp_y");
-    if (isParamValid("disp_z"))
-      _disp_vars[2] = coupled("disp_z");
-
-    // TODO: these are only used in one Bison test. Deprecate soon!
   }
 
   if (_quadrature)
@@ -246,19 +230,19 @@ GapHeatTransfer::computeJacobian()
 }
 
 void
-GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
+GapHeatTransfer::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (jvar == _var.number())
+  if (jvar_num == _var.number())
   {
     computeJacobian();
     return;
   }
 
-  prepareMatrixTag(_assembly, _var.number(), jvar);
+  const auto & jvar = getVariable(jvar_num);
 
-  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
-  // on the displaced mesh
-  auto phi_size = _sys.getVariable(_tid, jvar).dofIndices().size();
+  prepareMatrixTag(_assembly, _var.number(), jvar_num);
+
+  auto phi_size = jvar.dofIndices().size();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -267,14 +251,14 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
 
     // Ok now do the contribution from the secondary side
     if (_quadrature && _has_info)
     {
       std::vector<dof_id_type> secondary_side_dof_indices;
 
-      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, jvar);
+      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, jvar_num);
 
       DenseMatrix<Number> K_secondary(_var.dofIndices().size(), secondary_side_dof_indices.size());
 
@@ -287,7 +271,7 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
              _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) +=
-              _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar);
+              _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar_num);
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
           K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());

@@ -9,8 +9,14 @@
 
 #include "LevelSetBiMaterialRankTwo.h"
 
-registerMooseObject("XFEMApp", LevelSetBiMaterialRankTwo);
-registerMooseObject("XFEMApp", ADLevelSetBiMaterialRankTwo);
+registerMooseObjectReplaced("XFEMApp",
+                            LevelSetBiMaterialRankTwo,
+                            "01/01/2022 00:00",
+                            XFEMCutSwitchingMaterialRankTwoTensor);
+registerMooseObjectReplaced("XFEMApp",
+                            ADLevelSetBiMaterialRankTwo,
+                            "01/01/2022 00:00",
+                            ADXFEMCutSwitchingMaterialRankTwoTensor);
 
 template <bool is_ad>
 InputParameters

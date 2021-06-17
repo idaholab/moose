@@ -17,6 +17,9 @@ PressureGradient::validParams()
   InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("pressure", "pressure");
   params.addRequiredParam<unsigned int>("component", "number of component (0 = x, 1 = y, 2 = z)");
+  params.addClassDescription(
+      "Implements the pressure gradient term for one of the Navier Stokes momentum equations.");
+
   return params;
 }
 

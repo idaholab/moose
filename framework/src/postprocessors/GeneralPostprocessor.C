@@ -20,6 +20,6 @@ GeneralPostprocessor::validParams()
 }
 
 GeneralPostprocessor::GeneralPostprocessor(const InputParameters & parameters)
-  : GeneralUserObject(parameters), Postprocessor(parameters)
+  : GeneralUserObject(parameters), Postprocessor(this)
 {
 }

@@ -50,7 +50,7 @@ public:
    * Gets the value of the variable at a point p.
    * Returns zero if p does not lie along the line segment.
    **/
-  Real getValue(Point p) const;
+  Real getValue(const Point & p) const;
 
 protected:
   const Point _start_point;
@@ -66,5 +66,7 @@ protected:
 
   /// Length of line segment
   const Real _line_vector_norm;
-};
 
+private:
+  const VectorPostprocessorValue & _vpp_value;
+};

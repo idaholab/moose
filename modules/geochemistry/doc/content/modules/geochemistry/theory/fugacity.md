@@ -12,11 +12,11 @@ Here
 
 - $\mu$ \[J.mol$^{-1}$\] is the chemical potential
 - $\mu^{0}$ \[J.mol$^{-1}$\] is a constant
-- $f^{0}$ \[Pa\] is the gas fugacity at 1$\,$atm (or it might be $1\,\mathrm{bar}=10^{5}\,\mathrm{Pa}$ but I think the fugacity is not so precisely known that this small difference matters) and the temperature of interest
+- $f^{0}$ \[bar\] is the gas fugacity at 1$\,$atm (or it might be $1\,\mathrm{bar}=10^{5}\,\mathrm{Pa}$ but I think the fugacity is not so precisely known that this small difference matters) and the temperature of interest
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature
 - $\log$ is the natural logarithm
-- $f$ \[Pa\] is the gas-species fugacity.
+- $f$ \[bar\] is the gas-species fugacity.
 
 The gas-species fugacity is
 \begin{equation}
@@ -25,9 +25,9 @@ f = \chi P_{\mathrm{partial}} = \chi x P
 Here
 
 - $\chi$ \[dimensionless\] is the fugacity coefficient for the gas species
-- $P_{\mathrm{partial}}$ \[Pa\] is the gas-species partial pressure
+- $P_{\mathrm{partial}}$ \[bar\] is the gas-species partial pressure
 - $x$ \[dimensionless\] is the mole fraction of the gas species within the gas mixture
-- $P$ \[Pa\] is the total gas-mixture pressure
+- $P$ \[bar\] is the total gas-mixture pressure
 
 For ideal gases with ideal mixing, $\chi=1$.  Hence, for a pure gas (that is, $x=1$), $f=P$, so $\mu = \mu^{0} + RT\log P/P_{0}$, where $P_{0}$ is 1$\,$atm and $\mu^{0}$ is the chemical potential at 1$\,$atm.
 
@@ -35,7 +35,7 @@ For non-ideal gases, with ideal mixing (apparently a good approximation)
 \begin{equation}
 \log\chi = \left(\frac{a}{T^{2}} + \frac{b}{T} + c\right)P + \left(\frac{d}{T^{2}} + \frac{e}{T} + f\right)\frac{P^{2}}{2} \ .
 \end{equation}
-This is the Spycher-Reed formula.  $P$ \[bars\] is the total gas-mixture pressure, $T$ \[K\] is temperature, and $\log$ is the natural logarithm.  The quantities, $a$, $b$, $\ldots$, $f$ are given in the [database](database.md).
+This is the Spycher-Reed formula.  $P$ \[bars\] is the total gas-mixture pressure, $T$ \[K\] is temperature, and $\log$ is the natural logarithm.  The quantities, $a$, $b$, $\ldots$, $f$ are given in the [database](geochemistry/database/index.md).
 
 !alert note
 Only the Spycher-Reed fugacity formula is used in the `geochemistry` module.
@@ -51,7 +51,7 @@ mass-action equilibrium is
 \begin{equation}
 K_{j} = \frac{\prod_{m}f_{m}^{\nu_{m}}}{\gamma_{j}m_{j}} \ .
 \end{equation}
-Here $K_{j}(T)$ is given in the [database](database.md) and $f_{m}$ is the fugacity of the $m^{\mathrm{th}}$ gas species in the mixture, computed using the above formulae.  Athough there is a dimensional mismatch between the left and right sides of this equation, I believe it is ignored, as $f^{0}_{m}$ and $\mu^{0}_{m}$ have been lumped into $K_{j}$.  All that is required is to consistently measure $P$ in bars and $T$ in Kelvin.
+Here $K_{j}(T)$ is given in the [database](geochemistry/database/index.md) and $f_{m}$ is the fugacity of the $m^{\mathrm{th}}$ gas species in the mixture, computed using the above formulae.  Athough there is a dimensional mismatch between the left and right sides of this equation, I believe it is ignored, as $f^{0}_{m}$ and $\mu^{0}_{m}$ have been lumped into $K_{j}$.  All that is required is to consistently measure $P$ in bars and $T$ in Kelvin.
 
 
 !bibtex bibliography

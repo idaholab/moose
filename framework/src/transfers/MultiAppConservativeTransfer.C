@@ -35,6 +35,11 @@ MultiAppConservativeTransfer::validParams()
   params.addParam<std::vector<PostprocessorName>>(
       "to_postprocessors_to_be_preserved",
       "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
+  params.addParam<bool>("allow_skipped_adjustment",
+                        false,
+                        "If set to true, the transfer skips adjustment when from or to "
+                        "postprocessor values are either zero or have different signs. If set to "
+                        "false, an error is thrown when encountering these conditions.");
   return params;
 }
 
@@ -47,7 +52,8 @@ MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters
         getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
     _to_postprocessors_to_be_preserved(
         getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
-    _use_nearestpoint_pps(false)
+    _use_nearestpoint_pps(false),
+    _allow_skipped_adjustment(getParam<bool>("allow_skipped_adjustment"))
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
@@ -141,6 +147,51 @@ MultiAppConservativeTransfer::initialSetup()
               " regular to-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
+
+    // Let us check execute_on here. Users need to specify execute_on='transfer' in their input
+    // files for the postprocessors that are used to compute conversative qualities Master app
+    FEProblemBase & master_problem = _multi_app->problemBase();
+    std::vector<PostprocessorName> pps_empty;
+    // PPs for master app
+    auto & master_pps =
+        _current_direction == TO_MULTIAPP ? pps_empty : _to_postprocessors_to_be_preserved;
+    for (auto & master_pp : master_pps)
+    {
+      // Get out all execute_on options for master pp
+      auto & execute_on = master_problem.getUserObjectBase(master_pp).getExecuteOnEnum();
+      // Check if master app has transfer execute_on
+      if (!execute_on.contains(EXEC_TRANSFER))
+        mooseError("execute_on='transfer' is required in the conversative transfer for ",
+                   master_pp,
+                   ".\n"
+                   "Please add execute_on='transfer' into input file, and also \n"
+                   "make sure that execute_on options are not hardcoded in the code \n");
+    }
+
+    // Sub apps
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    {
+      // If we dot not have this app, we skip
+      if (!_multi_app->hasLocalApp(i))
+        continue;
+      // Sub problem for
+      FEProblemBase & sub_problem = _multi_app->appProblemBase(i);
+      // PPs for this subapp
+      auto & sub_pps =
+          _current_direction == TO_MULTIAPP ? _to_postprocessors_to_be_preserved : pps_empty;
+      for (auto & sub_pp : sub_pps)
+      {
+        // Get out of all execute_on options for sub pp
+        auto & execute_on = sub_problem.getUserObjectBase(sub_pp).getExecuteOnEnum();
+        // Check if sub pp has transfer execute_on
+        if (!execute_on.contains(EXEC_TRANSFER))
+          mooseError("execute_on='transfer' is required in the conversative transfer for ",
+                     sub_pp,
+                     ". \n"
+                     "Please add execute_on='transfer' into input file, and also \n"
+                     "make sure that execute_on options are not hardcoded in the code \n");
+      }
+    }
   }
 }
 
@@ -155,8 +206,8 @@ MultiAppConservativeTransfer::postExecute()
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
-        from_problem.computeUserObjectByName(EXEC_TRANSFER,
-                                             _from_postprocessors_to_be_preserved[0]);
+        from_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _from_postprocessors_to_be_preserved[0]);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
@@ -179,7 +230,8 @@ MultiAppConservativeTransfer::postExecute()
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
-        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessors_to_be_preserved[0]);
+        to_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
@@ -198,9 +250,10 @@ MultiAppConservativeTransfer::postExecute()
                                    _to_postprocessors_to_be_preserved[i]);
       }
 
-      // Compute the to-postproessor again so that it has the right value with the updated solution
+      // Compute the to-postprocessor again so that it has the right value with the updated solution
       if (_use_nearestpoint_pps)
-        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessors_to_be_preserved[0]);
+        to_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
     }
 
     _console << "Finished Conservative transfers " << name() << std::endl;
@@ -236,17 +289,13 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       comm().min(from_adjuster_tmp);
       from_adjuster = from_adjuster_tmp;
     }
-
-    /* We should not have a zero value */
-    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
-      mooseError("from_adjuster must be nonzero");
   }
 
   PostprocessorValue to_adjuster = 0;
-  // Compute to-postproessor to have the adjuster
+  // Compute to-postprocessor to have the adjuster
   if (_current_direction == TO_MULTIAPP)
   {
-    to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+    to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
     to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
   }
 
@@ -273,17 +322,15 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       if (_current_direction == FROM_MULTIAPP)
       {
         auto ii = pps.nearestPointIndex(*node);
-        if (ii != i)
+        if (ii != i || !performAdjustment(from_adjuster, pps.userObjectValue(i)))
           continue;
-        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
-          mooseError("to_adjuster must be nonzero");
 
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
-        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-          mooseError("to_adjuster must be nonzero");
+        if (!performAdjustment(pps.userObjectValue(i), to_adjuster))
+          continue;
 
         scale = pps.userObjectValue(i) / to_adjuster;
       }
@@ -305,18 +352,15 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       if (_current_direction == FROM_MULTIAPP)
       {
         unsigned int ii = pps.nearestPointIndex(elem->centroid());
-        if (ii != i)
+        if (ii != i || !performAdjustment(from_adjuster, pps.userObjectValue(i)))
           continue;
-
-        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
-          mooseError("to_adjuster must be nonzero");
 
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
-        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-          mooseError("to_adjuster must be nonzero");
+        if (!performAdjustment(pps.userObjectValue(i), to_adjuster))
+          continue;
 
         scale = pps.userObjectValue(i) / to_adjuster;
       }
@@ -328,6 +372,10 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
 
   to_solution.close();
   to_sys.update();
+
+  // Compute the to-postprocessor again so that it has the right value with the updated solution
+  if (_current_direction == TO_MULTIAPP)
+    to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 }
 
 void
@@ -357,19 +405,17 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
       comm().min(from_adjuster_tmp);
       from_adjuster = from_adjuster_tmp;
     }
-
-    /* We should not have a zero value */
-    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
-      mooseError("from_adjuster must be nonzero");
   }
 
-  // Compute to-postproessor to have the adjuster
-  to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+  // Compute to-postprocessor to have the adjuster
+  to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 
   // Now we should have the right adjuster based on the transfered solution
-  const PostprocessorValue & to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
-  if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-    mooseError("To postprocessor has a zero value ");
+  const auto to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
+
+  // decide if the adjustment should be performed
+  if (!performAdjustment(from_adjuster, to_adjuster))
+    return;
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
@@ -459,5 +505,25 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   to_sys.update();
 
   // Compute again so that the post-processor has the value with the updated solution
-  to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+  to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
+}
+
+bool
+MultiAppConservativeTransfer::performAdjustment(const PostprocessorValue & from,
+                                                const PostprocessorValue & to) const
+{
+  if (from * to > 0)
+    return true;
+  else if (_allow_skipped_adjustment)
+  {
+    _console << COLOR_CYAN << "MultiApp '" << name()
+             << ", skipping adjustment in conservative transfer " << std::endl;
+    return false;
+  }
+  else
+    mooseError("Adjustment postprocessors from: ",
+               from,
+               " to: ",
+               to,
+               " must both have the same sign and be different from 0");
 }

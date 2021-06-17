@@ -1,0 +1,48 @@
+[Tests]
+  design = 'AddRayBCAction.md'
+  issues = '#16028'
+
+  [provided]
+    requirement = 'The system shall throw an error when adding a RayBC and the provided RayTracingStudy'
+    [missing]
+      type = RunException
+      input = 'add_raybc_action.i'
+      cli_args = 'RayBCs/active=missing_study_by_name'
+      expect_err = "NullRayBC 'missing_study_by_name': Could not find the requested study 'dummy'."
+      allow_test_objects = true
+
+      detail = 'could not be found '
+    []
+    [not_a_study]
+      type = RunException
+      input = 'add_raybc_action.i'
+      cli_args = 'RayBCs/active=not_a_study UserObjects/active=not_a_study'
+      expect_err = "NullRayBC 'not_a_study' requested the study not_a_study but the provided study is not a RayTracingStudy-derived object."
+      allow_test_objects = true
+
+      detail = 'or is not a RayTracingStudy.'
+    []
+  []
+  [not_provided]
+    requirement = 'The system shall throw an error when adding a RayBC and RayTracingStudy was not provided'
+
+    [multiple]
+      type = RunException
+      input = 'add_raybc_action.i'
+      cli_args = 'RayBCs/active=multiple_studies "UserObjects/active=\'study another_study\'"'
+      expect_err = "While constructing the NullRayBC 'multiple_studies', multiple RayTracingStudy objects were found."
+      allow_test_objects = true
+
+      detail = 'and multiple studies were found '
+    []
+    [missing]
+      type = RunException
+      input = 'add_raybc_action.i'
+      cli_args = 'RayBCs/active=missing_study'
+      expect_err = "NullRayBC 'missing_study' did not provide a RayTracingStudy to associate with via the 'study' parameter and a study was not found."
+      allow_test_objects = true
+
+      detail = 'or when no studies were found.'
+    []
+  []
+[]

@@ -202,7 +202,7 @@ The `pwater` Variable is associated with the water component, while the `pgas` V
 
 A van Genuchten capillary pressure is used
 
-!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[./pc] end=[]
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[pc] end=[]
 
 The remainder of the input file is pretty standard, save for the important `BCs` block:
 

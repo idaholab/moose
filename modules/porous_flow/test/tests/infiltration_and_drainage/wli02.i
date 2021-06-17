@@ -14,51 +14,51 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = pressure
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureBW
     Sn = 0.0
     Ss = 1.0
     C = 1.5
     las = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       viscosity = 4
       density0 = 10
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./massfrac]
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pressure
     capillary_pressure = pc
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityBW
     Sn = 0.0
     Ss = 1.0
@@ -66,74 +66,74 @@
     Ks = 1
     C = 1.5
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.25
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0  0 1 0  0 0 1'
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
+  [pressure]
     initial_condition = -1E-4
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pressure
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pressure
     gravity = '-0.1 0 0'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./SWater]
+  [SWater]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./SWater]
+  [SWater]
     type = MaterialStdVectorAux
     property = PorousFlow_saturation_qp
     index = 0
     variable = SWater
-  [../]
+  []
 []
 
 [BCs]
-  [./base]
+  [base]
     type = DirichletBC
     boundary = 'left'
     value = -1E-4
     variable = pressure
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-10      1E-10      10000'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./swater]
+  [swater]
     type = LineValueSampler
     variable = SWater
     start_point = '-1000 0 0'
@@ -141,7 +141,7 @@
     sort_by = x
     num_points = 71
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Executioner]
@@ -155,12 +155,12 @@
 [Outputs]
   file_base = wli02
   sync_times = '100 500 1000'
-  [./exodus]
+  [exodus]
     type = Exodus
     sync_only = true
-  [../]
-  [./along_line]
+  []
+  [along_line]
     type = CSV
     sync_only = true
-  [../]
+  []
 []

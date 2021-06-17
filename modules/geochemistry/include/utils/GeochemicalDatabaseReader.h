@@ -232,8 +232,16 @@ public:
 
   /**
    * Parse the thermodynamic database
+   * @param filename Name of thermodynamic database file
    */
-  void read(FileName filename);
+  void read(const FileName filename);
+
+  /**
+   * Validate the thermodynamic database
+   * @param filename Name of thermodynamic database file
+   * @param db JSON database read from filename
+   */
+  void validate(const FileName filename, const nlohmann::json & db);
 
   /**
    * Sometimes the free electron's equilibrium reaction is defined in terms of O2(g) which is not a
@@ -244,19 +252,19 @@ public:
 
   /**
    * Get the activity model type
-   * @retrun activity model
+   * @return activity model
    */
   std::string getActivityModel() const;
 
   /**
    * Get the fugacity model type
-   * @retrun fugacity model
+   * @return fugacity model
    */
   std::string getFugacityModel() const;
 
   /**
    * Get the equilibrium constant model type
-   * @retrun equilibrium constant model
+   * @return equilibrium constant model
    */
   std::string getLogKModel() const;
 
@@ -453,16 +461,6 @@ protected:
   void removeExtrapolatedSecondarySpecies();
 
   /**
-   * Generates a formatted vector of strings representing all reactions
-   * @param names list of reaction species
-   * @param basis species list of basis species for each reaction species
-   * @return formatted reaction equations
-   */
-  std::vector<std::string>
-  printReactions(std::vector<std::string> names,
-                 std::vector<std::map<std::string, Real>> basis_species) const;
-
-  /**
    * Copy the temperature points (if any) found in the database into _temperature_points.  This
    * method is called in the constructor
    */
@@ -514,6 +512,18 @@ protected:
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients
   std::map<std::string, GeochemistryNeutralSpeciesActivity> _neutral_species_activity;
-  // Helper for converting json node to Real from string, if needed
+  // Helper for converting json node to Real from string
   static Real getReal(const nlohmann::json & node);
+
+private:
+  /**
+   * Generates a formatted vector of strings representing all reactions
+   * @param names list of reaction species
+   * @param basis species list of basis species for each reaction species (this vector must be of
+   * same size as names)
+   * @return formatted reaction equations
+   */
+  std::vector<std::string>
+  printReactions(const std::vector<std::string> & names,
+                 const std::vector<std::map<std::string, Real>> & basis_species) const;
 };

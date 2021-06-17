@@ -37,5 +37,9 @@ protected:
   Real _coef;
   unsigned int _order;
   std::vector<Real> _integration_coef;
-};
 
+  /// The old variable value (zero if order == 3)
+  const VariableValue & _u_old;
+  /// The older variable value (zero if order != 3)
+  const VariableValue & _u_older;
+};

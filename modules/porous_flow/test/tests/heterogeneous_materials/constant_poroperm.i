@@ -18,286 +18,286 @@
 []
 
 [Variables]
-  [./ppwater]
+  [ppwater]
     initial_condition = 1.5e6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./poro]
+  [poro]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxx]
+  []
+  [permxx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxy]
+  []
+  [permxy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxz]
+  []
+  [permxz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyx]
+  []
+  [permyx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyy]
+  []
+  [permyy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyz]
+  []
+  [permyz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzx]
+  []
+  [permzx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzy]
+  []
+  [permzy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzz]
+  []
+  [permzz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./poromat]
+  []
+  [poromat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxxmat]
+  []
+  [permxxmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxymat]
+  []
+  [permxymat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permxzmat]
+  []
+  [permxzmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyxmat]
+  []
+  [permyxmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyymat]
+  []
+  [permyymat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permyzmat]
+  []
+  [permyzmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzxmat]
+  []
+  [permzxmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzymat]
+  []
+  [permzymat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./permzzmat]
+  []
+  [permzzmat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./poromat]
+  [poromat]
     type = PorousFlowPropertyAux
     property = porosity
     variable = poromat
-  [../]
-  [./permxxmat]
+  []
+  [permxxmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permxxmat
     column = 0
     row = 0
-  [../]
-  [./permxymat]
+  []
+  [permxymat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permxymat
     column = 1
     row = 0
-  [../]
-  [./permxzmat]
+  []
+  [permxzmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permxzmat
     column = 2
     row = 0
-  [../]
-  [./permyxmat]
+  []
+  [permyxmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permyxmat
     column = 0
     row = 1
-  [../]
-  [./permyymat]
+  []
+  [permyymat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permyymat
     column = 1
     row = 1
-  [../]
-  [./permyzmat]
+  []
+  [permyzmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permyzmat
     column = 2
     row = 1
-  [../]
-  [./permzxmat]
+  []
+  [permzxmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permzxmat
     column = 0
     row = 2
-  [../]
-  [./permzymat]
+  []
+  [permzymat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permzymat
     column = 1
     row = 2
-  [../]
-  [./permzzmat]
+  []
+  [permzzmat]
     type = PorousFlowPropertyAux
     property = permeability
     variable = permzzmat
     column = 2
     row = 2
-  [../]
+  []
 []
 
 [ICs]
-  [./poro]
+  [poro]
     type = RandomIC
     seed = 0
     variable = poro
     max = 0.5
     min = 0.1
-  [../]
-  [./permx]
+  []
+  [permx]
     type = FunctionIC
     function = permx
     variable = permxx
-  [../]
-  [./permy]
+  []
+  [permy]
     type = FunctionIC
     function = permy
     variable = permyy
-  [../]
-  [./permz]
+  []
+  [permz]
     type = FunctionIC
     function = permz
     variable = permzz
-  [../]
+  []
 []
 
 [Functions]
-  [./permx]
+  [permx]
     type = ParsedFunction
     value = '(1+x)*1e-11'
-  [../]
-  [./permy]
+  []
+  [permy]
     type = ParsedFunction
     value = '(1+y)*1e-11'
-  [../]
-  [./permz]
+  []
+  [permz]
     type = ParsedFunction
     value = '(1+z)*1e-11'
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = ppwater
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     variable = ppwater
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       viscosity = 1e-3
       thermal_expansion = 0
       cv = 2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = ppwater
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = poro
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConstFromVar
     perm_xx = permxx
     perm_yy = permyy
     perm_zz = permzz
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mass_ph0]
+  [mass_ph0]
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol'
     petsc_options_value = 'bcgs bjacobi 1E-12 1E-10'
-  [../]
+  []
 []
 
 [Executioner]

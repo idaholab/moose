@@ -1,30 +1,24 @@
 Applications:
-    RDG:
-        exe_directory: ${MOOSE_DIR}/modules/combined
-        content_directory: ${MOOSE_DIR}/modules/rdg/doc/content
+    rdg:
+        exe_directory: ${MOOSE_DIR}/modules/rdg
         app_types:
             - RdgApp
+        content_directory: ${MOOSE_DIR}/modules/rdg/doc/content
 
 Documents:
-    log_software_requirements_specification: WARNING
-    log_software_design_description: WARNING
-    log_software_test_plan: WARNING
-    log_requirements_traceablity_matrix: WARNING
-    log_verification_validation_plan: WARNING
-    log_safety_software_determination: WARNING
-    log_quality_level_determination: WARNING
-    log_enterprise_architecture_entry: WARNING
-    log_project_management_plan: WARNING
-    log_software_quality_plan: WARNING
-    log_configuration_management_plan: WARNING
-    log_asset_management_plan: WARNING
-    log_verification_validation_plan: WARNING
-    log_user_manual: WARNING
-    log_theory_manual: WARNING
+    software_requirements_specification: sqa/rdg_srs.md
+    software_design_description: sqa/rdg_sdd.md
+    software_test_plan: sqa/rdg_stp.md
+    requirements_traceablity_matrix: sqa/rdg_rtm.md
+    verification_validation_plan: sqa/rdg_vvr.md
+    failure_analysis_report: sqa/rdg_far.md
+    software_library_list: sqa/rdg_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
 
 Requirements:
     rdg:
         directories:
             - ${MOOSE_DIR}/modules/rdg
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING

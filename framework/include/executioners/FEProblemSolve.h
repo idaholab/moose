@@ -19,7 +19,7 @@ InputParameters validParams<FEProblemSolve>();
 class FEProblemSolve : public SolveObject
 {
 public:
-  FEProblemSolve(Executioner * ex);
+  FEProblemSolve(Executioner & ex);
 
   static InputParameters validParams();
 

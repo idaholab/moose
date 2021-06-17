@@ -11,8 +11,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-
 /**
  * MultiBoundingBoxIC allows setting the initial condition of a value of a field inside and outside
  * multiple bounding boxes. Each box is axis-aligned and is specified by passing in the x,y,z

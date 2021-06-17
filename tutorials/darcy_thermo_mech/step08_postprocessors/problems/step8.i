@@ -93,7 +93,7 @@
     variable = temperature
   []
   [outlet_heat_flux]
-    type = ADSideFluxIntegral
+    type = ADSideDiffusiveFluxIntegral
     variable = temperature
     boundary = right
     diffusivity = thermal_conductivity

@@ -23,6 +23,8 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const RealVectorValue _velocity;
+  const ADMaterialProperty<Real> * const _prop;
+  const ADMaterialProperty<RealVectorValue> * const _grad_prop;
 };
 
 #endif

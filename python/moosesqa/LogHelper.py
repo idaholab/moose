@@ -21,7 +21,7 @@ class LogHelper(object):
 
     @property
     def modes(self):
-        """Return the counts for each key"""
+        """Return the dict of logger keys and associated mode"""
         return self.__modes
 
     @property

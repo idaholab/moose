@@ -15,13 +15,21 @@
     allow_test_objects = true
     csvdiff = 'evaluate_out_results_0002.csv'
     prereq = train # Creates data files that this test uses
-    detail = 'evaluating and '
+    detail = 'evaluating, '
   []
   [train_and_load]
     type = CSVDiff
     input = cartesian.i
     allow_test_objects = true
     csvdiff = 'cartesian_out_results_0002.csv'
-    detail = 'training and loading.'
+    detail = 'training and loading, and '
+  []
+  [predictors]
+    type = CSVDiff
+    input = predictor_response.i
+    allow_test_objects = true
+    cli_args = 'Outputs/file_base=evaluate_out'
+    csvdiff = 'evaluate_out_results_0002.csv'
+    detail = 'using explictly specified predictors.'
   []
 []

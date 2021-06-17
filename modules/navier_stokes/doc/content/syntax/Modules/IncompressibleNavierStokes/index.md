@@ -4,6 +4,9 @@
 
 !! Replace this line with information regarding the IncompressibleNavierStokes system.
 
+!alert note
+For the finite volume implementation of the incompressible Navier Stokes equations, see [insfv](navier_stokes/fv.md).
+
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the IncompressibleNavierStokes system.

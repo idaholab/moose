@@ -43,8 +43,15 @@ protected:
   const bool _thermal;
   const bool _mechanical;
 
+  /// Determines the fluid-properties type
+  const enum class FluidPropertiesTypeEnum {
+    PorousFlowSingleComponentFluid,
+    PorousFlowBrine,
+    Custom
+  } _fluid_properties_type;
+
   /// Name of the fluid-properties UserObject
-  const UserObjectName & _fp;
+  UserObjectName _fp;
 
   /// Fluid specific heat capacity at constant volume
   const Real _biot_coefficient;
@@ -55,9 +62,18 @@ protected:
   /// Add AuxVariables for stress
   const bool _add_stress_aux;
 
-  /// Use PorousFlowBrine material
-  const bool _use_brine;
+  /// Name of the NaCl variable
+  VariableName _nacl_name;
 
-  /// Index of NaCl in list of fluid components
-  const unsigned _nacl_index;
+  /// Name of the variables (if any) that will record the fluid-components' rate of change
+  const std::vector<AuxVariableName> _save_component_rate_in;
+
+  /// Unit used for temperature
+  const MooseEnum _temperature_unit;
+
+  /// Unit used for porepressure
+  const MooseEnum _pressure_unit;
+
+  /// Unit used for time
+  const MooseEnum _time_unit;
 };

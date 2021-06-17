@@ -12,8 +12,8 @@
 #include "ADComputeFiniteStrainElasticStress.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
-
-class ADStressUpdateBase;
+#include "StressUpdateBase.h"
+#include "DamageBase.h"
 
 /**
  * ADComputeMultipleInelasticStress computes the stress and a decomposition of the strain
@@ -124,7 +124,7 @@ protected:
   /// whether to cycle through the models, using only one model per timestep
   const bool _cycle_models;
 
-  MaterialProperty<Real> & _matl_timestep_limit;
+  MaterialProperty<Real> & _material_timestep_limit;
 
   /**
    * The user supplied list of inelastic models to use in the simulation
@@ -137,4 +137,9 @@ protected:
 
   /// is the elasticity tensor guaranteed to be isotropic?
   bool _is_elasticity_tensor_guaranteed_isotropic;
+
+  /// Pointer to the damage model
+  DamageBaseTempl<true> * _damage_model;
+
+  RankTwoTensor _undamaged_stress_old;
 };

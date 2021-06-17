@@ -27,5 +27,7 @@ public:
 protected:
   virtual Real computeValue();
 
+  const VariableValue & _u_old;
+
   Real _lambda;
 };

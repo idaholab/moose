@@ -44,7 +44,8 @@
       input = 'ad_construction_order.i'
       exodiff = 'ad_construction_order_out.e'
 
-      detail = 'so that construction order does not influence the outcome of the tests when using automatic differentiation, and'
+      detail = 'so that construction order does not influence the outcome of the tests when using '
+               'automatic differentiation, and'
     []
 
     [execution]
@@ -120,6 +121,37 @@
     []
   []
 
+  [postprocessor_coupling]
+    requirement = 'The system shall be capable of couplimng postprocessor values in'
+    [parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      detail = 'ParsedMaterial'
+    []
+    [derivative_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=DerivativeParsedMaterial'
+      detail = 'DerivativeParsedMaterialParsedMaterial'
+    []
+    [ad_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=ADParsedMaterial'
+      detail = 'ADParsedMaterial'
+    []
+    [ad_derivative_parsed_material]
+      type = 'Exodiff'
+      input = postprocessors.i
+      exodiff = 'postprocessors_out.e'
+      cli_args = 'Materials/pp/type=ADDerivativeParsedMaterial'
+      detail = 'ADDerivativeParsedMaterial'
+    []
+  []
+
   [ad_analytic_derivatives]
     requirement = 'The system shall be capable of producing analytic derivatives of material '
                   'properties using dual numbers:'
@@ -158,6 +190,13 @@
 
       detail = 'involving chain rules of material properties defined by function expressions, and'
     []
+  []
+
+  [ad_zero_derivatives]
+    type = Exodiff
+    input = 'ad_derivative_parsed_material_zero.i'
+    exodiff = 'ad_derivative_parsed_material_zero_out.e'
+    requirement = 'The system shall create AD material properties even if the derivatives are zero'
   []
 
   [ad_ordering]

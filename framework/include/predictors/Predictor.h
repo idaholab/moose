@@ -56,6 +56,8 @@ protected:
   NumericVector<Number> & _solution_old;
   NumericVector<Number> & _solution_older;
   NumericVector<Number> & _solution_predictor;
+  int & _t_step_old;
+  bool & _is_repeated_timestep;
 
   /// Amount by which to scale the predicted value.  Must be in [0,1].
   Real _scale;
@@ -65,5 +67,7 @@ protected:
 
   /// Old times for which the predictor should not be applied
   std::vector<Real> _skip_times_old;
-};
 
+  /// Option to skip prediction after a failed timestep
+  const bool & _skip_after_failed_timetep;
+};

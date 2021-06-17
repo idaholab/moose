@@ -36,7 +36,7 @@ MeshOnlyAction::act()
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
-  mesh_ptr->getMesh().print_info();
+  _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2);
 
   bool should_generate = false;
   // If no argument specified or if the argument following --mesh-only starts
@@ -54,7 +54,7 @@ MeshOnlyAction::act()
 
   if (should_generate)
   {
-    mesh_file = _app.parser().getFileName();
+    mesh_file = _app.parser().getPrimaryFileName();
     size_t pos = mesh_file.find_last_of('.');
 
     // Default to writing out an ExodusII mesh base on the input filename.

@@ -32,5 +32,6 @@ public:
   virtual void finalize() override final;
   virtual void threadJoin(const UserObject &) override final;
   /// @}
-};
 
+  bool needThreadedCopy() const override final { return true; }
+};

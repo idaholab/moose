@@ -95,6 +95,7 @@ AddTimeDependentReactionSolverAction::act()
         getParam<std::vector<std::string>>("constraint_species");
     params.set<std::vector<Real>>("constraint_value") =
         getParam<std::vector<Real>>("constraint_value");
+    params.set<MultiMooseEnum>("constraint_unit") = getParam<MultiMooseEnum>("constraint_unit");
     params.set<Real>("max_ionic_strength") = getParam<Real>("max_ionic_strength");
     params.set<unsigned>("extra_iterations_to_make_consistent") =
         getParam<unsigned>("extra_iterations_to_make_consistent");
@@ -145,9 +146,12 @@ AddTimeDependentReactionSolverAction::act()
     if (isParamValid("kinetic_species_name"))
       params.set<std::vector<std::string>>("kinetic_species_name") =
           getParam<std::vector<std::string>>("kinetic_species_name");
-    if (isParamValid("kinetic_species_initial_moles"))
-      params.set<std::vector<Real>>("kinetic_species_initial_moles") =
-          getParam<std::vector<Real>>("kinetic_species_initial_moles");
+    if (isParamValid("kinetic_species_initial_value"))
+      params.set<std::vector<Real>>("kinetic_species_initial_value") =
+          getParam<std::vector<Real>>("kinetic_species_initial_value");
+    if (isParamValid("kinetic_species_unit"))
+      params.set<MultiMooseEnum>("kinetic_species_unit") =
+          getParam<MultiMooseEnum>("kinetic_species_unit");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
     _problem->addUserObject(
         class_name, getParam<UserObjectName>("geochemistry_reactor_name"), params);

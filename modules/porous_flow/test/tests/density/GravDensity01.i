@@ -33,118 +33,118 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0
       bulk_modulus = 4
       density0 = 2
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = pp
-  [../]
+  []
 []
 
 [BCs]
-  [./p]
+  [p]
     type = DirichletBC
     variable = pp
     boundary = 'front back'
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./density]
+  [density]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ddensity_dpp]
+  []
+  [ddensity_dpp]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./density]
+  [density]
     type = MaterialRealAux
     property = density
     variable = density
-  [../]
-  [./ddensity_dpp]
+  []
+  [ddensity_dpp]
     type = MaterialStdVectorAux
     property = ddensity_dvar
     variable = ddensity_dpp
     index = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./density]
+  [density]
     type = ElementalVariableValue
     elementid = 0
     variable = density
     execute_on = 'timestep_end'
-  [../]
-  [./ddensity_dpp]
+  []
+  [ddensity_dpp]
     type = ElementalVariableValue
     elementid = 0
     variable = ddensity_dpp
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss_qp]
+  []
+  [ppss_qp]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./density]
+  []
+  [density]
     type = PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity
     rho_s = 3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -2,15 +2,17 @@
 # We should only see the variable that is in show list in the output.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
-  nx = 2
-  ny = 2
-  elem_type = QUAD4
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1
+    nx = 2
+    ny = 2
+    elem_type = QUAD4
+  []
   # This should be the same as passing --distributed-mesh on the
   # command line. You can verify this by looking at what MOOSE prints
   # out for the "Mesh" information.

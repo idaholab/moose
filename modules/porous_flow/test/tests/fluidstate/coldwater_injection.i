@@ -17,32 +17,32 @@
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./temperature]
+  [temperature]
     type = PorousFlowPropertyAux
     variable = temperature
     property = temperature
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Variables]
-  [./pliquid]
+  [pliquid]
     initial_condition = 5e6
-  [../]
-  [./h]
+  []
+  [h]
     scaling = 1e-6
-  [../]
+  []
 []
 
 [ICs]
-  [./hic]
+  [hic]
     type = PorousFlowFluidPropertyIC
     variable = h
     porepressure = pliquid
@@ -50,134 +50,134 @@
     temperature = 170
     temperature_unit = Celsius
     fp = water
-  [../]
+  []
 []
 
 [BCs]
-  [./pleft]
+  [pleft]
     type = DirichletBC
     variable = pliquid
     value = 5.05e6
     boundary = left
-  [../]
-  [./pright]
+  []
+  [pright]
     type = DirichletBC
     variable = pliquid
     value = 5e6
     boundary = right
-  [../]
-  [./hleft]
+  []
+  [hleft]
     type = DirichletBC
     variable = h
     value = 678.52e3
     boundary = left
-  [../]
-  [./hright]
+  []
+  [hright]
     type = DirichletBC
     variable = h
     value = 721.4e3
     boundary = right
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = PorousFlowMassTimeDerivative
     variable = pliquid
-  [../]
-  [./massflux]
+  []
+  [massflux]
     type = PorousFlowAdvectiveFlux
     variable = pliquid
-  [../]
-  [./heat]
+  []
+  [heat]
     type = PorousFlowEnergyTimeDerivative
     variable = h
-  [../]
-  [./heatflux]
+  []
+  [heatflux]
     type = PorousFlowHeatAdvection
     variable = h
-  [../]
-  [./heatcond]
+  []
+  [heatcond]
     type = PorousFlowHeatConduction
     variable = h
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pliquid h'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     pc_max = 1e6
     sat_lr = 0.1
     m = 0.5
     alpha = 1e-5
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowWaterVapor
     water_fp = water
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./water]
+  [FluidProperties]
+    [water]
       type = Water97FluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./watervapor]
+  [watervapor]
     type = PorousFlowFluidStateSingleComponent
     porepressure = pliquid
     enthalpy = h
     temperature_unit = Celsius
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.8e-11 0 0 0 1.8e-11 0 0 0 1.8e-11'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
     sum_s_res = 0.1
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = PorousFlowMatrixInternalEnergy
     density = 2900
     specific_heat_capacity = 740
-  [../]
-  [./rock_thermal_conductivity]
+  []
+  [rock_thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '20 0 0  0 20 0  0 0 20'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -185,25 +185,25 @@
   solve_type = NEWTON
   end_time = 5e3
   nl_abs_tol = 1e-10
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 100
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./line]
+  [line]
     type = ElementValueSampler
     sort_by = x
     variable = temperature
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
   perf_graph = true
-  [./csv]
+  [csv]
     type = CSV
     execute_on = final
-  [../]
+  []
 []

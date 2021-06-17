@@ -29,17 +29,17 @@ protected:
   virtual void computeBondStretch() override;
 
   /**
-   * Function to compute deformation gradients
+   * Function to compute deformation gradient for peridynamic correspondence model
    */
   virtual void computeQpDeformationGradient();
 
   /**
-   * Function to compute deformation gradient for force stabilized correspondence model
+   * Function to compute conventional nonlocal deformation gradient
    */
   virtual void computeConventionalQpDeformationGradient();
 
   /**
-   * Function to compute deformation gradient for horizon stabilized correspondence model
+   * Function to compute bond-associated horizon based deformation gradient
    */
   virtual void computeBondHorizonQpDeformationGradient();
 
@@ -48,7 +48,8 @@ protected:
    */
   virtual void computeQpStrain() = 0;
 
-  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or BOND_HORIZON
+  /// Option of stabilization scheme for correspondence material model:
+  /// FORCE, BOND_HORIZON_I or BOND_HORIZON_II
   const MooseEnum _stabilization;
 
   /// Plane strain problem or not, this is only used for mechanical stretch calculation

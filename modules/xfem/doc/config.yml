@@ -27,6 +27,7 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include modules/xfem/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml

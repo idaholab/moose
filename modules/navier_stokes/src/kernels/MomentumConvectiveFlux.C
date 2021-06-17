@@ -18,6 +18,9 @@ MomentumConvectiveFlux::validParams()
   params.addRequiredCoupledVar("vel_x", "");
   params.addCoupledVar("vel_y", "");
   params.addCoupledVar("vel_z", "");
+  params.addClassDescription(
+      "Implements the advective term of the Navier Stokes momentum equation.");
+
   return params;
 }
 

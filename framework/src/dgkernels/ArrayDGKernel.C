@@ -60,7 +60,9 @@ ArrayDGKernel::ArrayDGKernel(const InputParameters & parameters)
     _grad_u_neighbor(_is_implicit ? _var.gradSlnNeighbor() : _var.gradSlnOldNeighbor()),
 
     _array_normals(_assembly.mappedNormals()),
-    _count(_var.count())
+    _count(_var.count()),
+
+    _work_vector(_count)
 {
   addMooseVariableDependency(mooseVariable());
 
@@ -137,10 +139,12 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     initQpResidual(type);
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
-      mooseAssert(residual.size() == _count,
+      _work_vector.setZero();
+      computeQpResidual(type, _work_vector);
+      mooseAssert(_work_vector.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
-      _assembly.saveLocalArrayResidual(_local_re, _i, test_space.size(), residual);
+      _work_vector *= _JxW[_qp] * _coord[_qp];
+      _assembly.saveLocalArrayResidual(_local_re, _i, test_space.size(), _work_vector);
     }
   }
 
@@ -209,68 +213,64 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 }
 
 void
-ArrayDGKernel::computeOffDiagJacobian(unsigned int jvar)
+ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                               const MooseVariableFEBase & jvar)
 {
-  // Compute element-element Jacobian
-  computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
-
-  // Compute element-neighbor Jacobian
-  computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
-
-  // Compute neighbor-element Jacobian
-  computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
-
-  // Compute neighbor-neighbor Jacobian
-  computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
-}
-
-void
-ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
-{
-  MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar);
   const ArrayVariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
 
   if (type == Moose::ElementElement)
-    prepareMatrixTag(_assembly, _var.number(), jvar);
+    prepareMatrixTag(_assembly, _var.number(), jvar.number());
   else
-    prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, type);
+    prepareMatrixTagNeighbor(_assembly, _var.number(), jvar.number(), type);
 
-  if (jv.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
+  if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    auto & jv0 = static_cast<MooseVariable &>(jv);
+    const auto & jv0 = static_cast<const MooseVariable &>(jvar);
     const VariableTestValue & loc_phi =
         (type == Moose::ElementElement || type == Moose::NeighborElement) ? jv0.phiFace()
                                                                           : jv0.phiFaceNeighbor();
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      initQpOffDiagJacobian(type, jv);
+      initQpOffDiagJacobian(type, jvar);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
-          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
-          _assembly.saveFullLocalArrayJacobian(
-              _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
+          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar);
+          _assembly.saveFullLocalArrayJacobian(_local_ke,
+                                               _i,
+                                               test_space.size(),
+                                               _j,
+                                               loc_phi.size(),
+                                               _var.number(),
+                                               jvar.number(),
+                                               v);
         }
     }
   }
-  else if (jv.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
+  else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    auto & jv1 = static_cast<ArrayMooseVariable &>(jv);
+    const auto & jv1 = static_cast<const ArrayMooseVariable &>(jvar);
     const ArrayVariableTestValue & loc_phi =
         (type == Moose::ElementElement || type == Moose::NeighborElement) ? jv1.phiFace()
                                                                           : jv1.phiFaceNeighbor();
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      initQpOffDiagJacobian(type, jv);
+      initQpOffDiagJacobian(type, jvar);
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
         {
-          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jv);
-          _assembly.saveFullLocalArrayJacobian(
-              _local_ke, _i, test_space.size(), _j, loc_phi.size(), _var.number(), jvar, v);
+          RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar);
+          _assembly.saveFullLocalArrayJacobian(_local_ke,
+                                               _i,
+                                               test_space.size(),
+                                               _j,
+                                               loc_phi.size(),
+                                               _var.number(),
+                                               jvar.number(),
+                                               v);
         }
     }
   }
@@ -280,7 +280,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsig
   accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor) &&
-      _var.number() == jvar)
+      _var.number() == jvar.number())
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);

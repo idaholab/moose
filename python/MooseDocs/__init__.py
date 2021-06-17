@@ -22,7 +22,7 @@ import mooseutils
 LOG_LEVEL = logging.NOTSET
 
 # The repository root location
-is_git_repo = mooseutils.is_git_repo()
+is_git_repo = mooseutils.git_is_repo()
 if is_git_repo:
     os.environ.setdefault('ROOT_DIR',  mooseutils.git_root_dir())
 elif 'ROOT_DIR' not in os.environ:

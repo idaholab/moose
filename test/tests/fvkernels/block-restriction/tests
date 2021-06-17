@@ -11,8 +11,8 @@
     type = RunException
     method = 'devel dbg'
     input = 'fv-and-fe-block-restriction.i'
-    expect_err = 'Multiple objects supply property ID'
-    requirement = 'The system shall error in non-optimized modes if a user supplies a material property with the same name from different block-restricted materials on neighboring subdomains when there are different sets of finite volume flux kernels on those same neighboring subdomains. This is because we have to support ghosting of material properties for block restricted finite volume flux kernels.'
+    expect_err = 'Multiple objects supply properties of name'
+    requirement = 'The system shall return a warning in non-optimized modes if a user supplies a material property with the same name from different block-restricted materials on neighboring subdomains when there are different sets of finite volume flux kernels on those same neighboring subdomains. This is because we have to support ghosting of material properties for block restricted finite volume flux kernels.'
   []
   [distinct-mats]
     type = Exodiff

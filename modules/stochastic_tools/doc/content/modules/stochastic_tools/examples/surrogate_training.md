@@ -105,19 +105,20 @@ The [!param](/Samplers/CartesianProduct/linear_space_items) parameter defines a 
 
 ### Transferring Results
 
-After each perturbed simulation of the sub app is finished, the results are transferred to the master app. [SamplerPostprocessorTransfer.md] is used to transfer postprocessors from the sub app to a [StochasticResults.md] vector postprocessor in the master app.
+After each perturbed simulation of the sub app is finished, the results are transferred to the master app. [SamplerReporterTransfer.md] is used to transfer postprocessors, vectorpostprocessors, or reporter values from the sub app to a [StochasticReporter.md] in the master app.
 
-!listing examples/surrogates/nearest_point_training.i block=Transfers VectorPostprocessors
+!listing examples/surrogates/nearest_point_training.i block=Transfers Reporters
 
-Here, there are two transfers that transfer the sub app postprocessors computing $\bar{T}$ and $T_{\infty}$ to two different master app vector postprocessors. The [!param](/VectorPostprocessors/StochasticResults/outputs) parameter is set to `none` so it doesn't output the unnecessary results to a CSV file. The trainer will directly grab the data from the vector postprocessors.
+Here, there are two transfers that transfer the sub app postprocessors computing $\bar{T}$ and $T_{\infty}$ to two different master app reporters. The [!param](/Reporters/StochasticReporter/outputs) parameter is set to `none` so it doesn't output the unnecessary results to a CSV file. The trainer will directly grab the data from the reporters.
 
 ### Training Object
 
-Training objects typically take in sampler and results data to train the surrogate model. The sampler points are taken directly from the sampler by defining [!param](/Trainers/NearestPointTrainer/sampler). The results are taken directly from a vector postprocessor, the object is defined by [!param](/Trainers/NearestPointTrainer/results_vpp) and the specific vector in the object is defined by [!param](/Trainers/NearestPointTrainer/results_vector).
+Training objects take in sampler and results data to train the surrogate model. The sampler points are taken directly from the sampler by defining [!param](/Trainers/NearestPointTrainer/sampler). The results are taken directly from a reporter or vector postprocessor, the object is defined by [!param](/Trainers/NearestPointTrainer/response) and [!param](/Trainers/NearestPointTrainer/predictors).
 
 !listing examples/surrogates/nearest_point_training.i block=Trainers
 
-[StochasticResults.md] defines the vector name by the name of sampler that was given, which is why we know that the vector names are `grid` in this example.
+In the `nearest_point_avg` trainer, we see that the predictor values are from a VPP and sampler columns. In the `nearest_point_max` trainer, the predictor names were not specified, which indicates that all the sampler columns are used as predictors.
+[StochasticReporter.md] defines the reporter name by the name of the transfer executing the transfer, which is why we know that the values names are `data` in this example.
 
 ### Outputting Training Data
 

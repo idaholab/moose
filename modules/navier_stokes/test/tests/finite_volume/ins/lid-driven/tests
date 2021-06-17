@@ -1,0 +1,48 @@
+[Tests]
+  design = 'navier_stokes/index.md'
+  issues = '#15640'
+  [exo]
+    type = 'Exodiff'
+    input = 'lid-driven.i'
+    exodiff = 'lid-driven_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume method.'
+    ad_indexing_type = 'global'
+  []
+  [nonsingular]
+    type = 'RunApp'
+    input = 'lid-driven.i'
+    cli_args = 'Mesh/gen/nx=4 Mesh/gen/ny=4 Outputs/exodus=false -pc_type svd -pc_svd_monitor'
+    expect_out = '0 of 49 singular values'
+    absent_out = '\s+[1-9]+[0-9]* of 49 singular values'
+    requirement = 'The system shall be able to solve an incompressible Navier-Stokes problem with dirichlet boundary conditions for all the normal components of velocity, using the finite volume method, and have a nonsingular system matrix.'
+    ad_indexing_type = 'global'
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'lid-driven.i'
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
+    requirement = 'The system shall be able to compute a perfect Jacobian when solving a lid-driven incompressible Navier-Stokes problem with the finite volume method.'
+    run_sim = True
+    ad_indexing_type = 'global'
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  []
+  [with-temp]
+    type = 'Exodiff'
+    input = 'lid-driven-with-energy.i'
+    exodiff = 'lid-driven-with-energy_out.e'
+    requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+  [transient-with-temp]
+    type = 'Exodiff'
+    input = 'transient-lid-driven-with-energy.i'
+    exodiff = 'transient-lid-driven-with-energy_out.e'
+    requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+[]

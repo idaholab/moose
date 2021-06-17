@@ -203,10 +203,8 @@
     [./Side1]
       boundary = bottom
       function = pressure
-      disp_x = disp_x
-      disp_y = disp_y
-      disp_z = disp_z
       factor = 1
+      displacements = 'disp_x disp_y disp_z'
     [../]
   [../]
 []

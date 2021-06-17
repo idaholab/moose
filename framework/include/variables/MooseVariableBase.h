@@ -154,6 +154,10 @@ public:
    */
   void eigen(bool eigen) { _is_eigen = eigen; }
 
+  void initialSetup() override;
+
+  virtual void clearAllDofIndices() { _dof_indices.clear(); }
+
 protected:
   /// System this variable is part of
   SystemBase & _sys;

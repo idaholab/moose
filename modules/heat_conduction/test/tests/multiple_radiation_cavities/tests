@@ -1,0 +1,11 @@
+[Tests]
+  [multiple_radiation_cavities]
+    type = 'Exodiff'
+    issues = '#16954'
+    design = 'RadiationTransferAction.md'
+    requirement = 'The system shall support the the modeling of radiative heat transfer with multiple radiation cavities.'
+    input = 'multiple_radiation_cavities.i'
+    exodiff = 'multiple_radiation_cavities_out.e'
+    mesh_mode = REPLICATED
+  []
+[]

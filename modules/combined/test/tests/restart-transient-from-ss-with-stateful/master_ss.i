@@ -79,7 +79,7 @@
   petsc_options_value = 'hypre boomeramg 300'
   line_search = 'none'
 
-  l_tol = 1e-02
+  l_tol = 1e-05
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-9
 

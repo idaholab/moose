@@ -56,8 +56,8 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-12
-  picard_max_its = 10
-  picard_rel_tol = 1e-7
+  fixed_point_max_its = 10
+  fixed_point_rel_tol = 1e-7
 []
 
 [Outputs]

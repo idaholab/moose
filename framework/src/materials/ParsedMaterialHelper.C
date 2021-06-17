@@ -37,7 +37,7 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expression)
 {
-  std::vector<std::string> empty_string_vector;
+  const std::vector<std::string> empty_string_vector;
   functionParse(function_expression, empty_string_vector, empty_string_vector);
 }
 
@@ -47,8 +47,8 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
                                            const std::vector<std::string> & constant_names,
                                            const std::vector<std::string> & constant_expressions)
 {
-  std::vector<std::string> empty_string_vector;
-  std::vector<Real> empty_real_vector;
+  const std::vector<std::string> empty_string_vector;
+  const std::vector<Real> empty_real_vector;
   functionParse(function_expression,
                 constant_names,
                 constant_expressions,
@@ -65,6 +65,27 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
                                            const std::vector<std::string> & mat_prop_expressions,
                                            const std::vector<std::string> & tol_names,
                                            const std::vector<Real> & tol_values)
+{
+  const std::vector<PostprocessorName> empty_pp_name_vector;
+  functionParse(function_expression,
+                constant_names,
+                constant_expressions,
+                mat_prop_expressions,
+                empty_pp_name_vector,
+                tol_names,
+                tol_values);
+}
+
+template <bool is_ad>
+void
+ParsedMaterialHelper<is_ad>::functionParse(
+    const std::string & function_expression,
+    const std::vector<std::string> & constant_names,
+    const std::vector<std::string> & constant_expressions,
+    const std::vector<std::string> & mat_prop_expressions,
+    const std::vector<PostprocessorName> & postprocessor_names,
+    const std::vector<std::string> & tol_names,
+    const std::vector<Real> & tol_values)
 {
   // build base function object
   _func_F = std::make_shared<SymFunction>();
@@ -140,6 +161,13 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
     variables += "," + _mat_prop_descriptors[i].getSymbolName();
   }
 
+  // get all coupled postprocessors
+  for (const auto & pp : postprocessor_names)
+  {
+    _postprocessor_values.push_back(&this->getPostprocessorValueByName(pp));
+    variables += "," + pp;
+  }
+
   // erase leading comma
   variables.erase(0, 1);
 
@@ -153,7 +181,7 @@ ParsedMaterialHelper<is_ad>::functionParse(const std::string & function_expressi
                _func_F->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params.resize(_nargs + nmat_props);
+  _func_params.resize(_nargs + nmat_props + _postprocessor_values.size());
 
   // perform next steps (either optimize or take derivatives and then optimize)
   functionsPostParse();
@@ -196,8 +224,7 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::initQpStatefulProperties()
 {
-  if (_prop_F)
-    (*_prop_F)[_qp] = 0.0;
+  computeQpProperties();
 }
 
 template <bool is_ad>
@@ -221,9 +248,14 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
   for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
     _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
+  // insert material property values
+  auto npps = _postprocessor_values.size();
+  for (MooseIndex(_postprocessor_values) i = 0; i < npps; ++i)
+    _func_params[i + _nargs + nmat_props] = *_postprocessor_values[i];
+
   // set function value
   if (_prop_F)
-    (*_prop_F)[_qp] = evaluate(_func_F);
+    (*_prop_F)[_qp] = evaluate(_func_F, _name);
 }
 
 // explicit instantiation

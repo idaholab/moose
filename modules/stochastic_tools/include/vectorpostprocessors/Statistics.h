@@ -42,11 +42,14 @@ protected:
   /// Confidence levels to compute (see computeLevels)
   const std::vector<Real> _ci_levels;
 
+  /// Confidence level replicates
+  const unsigned int _replicates;
+
+  /// Confidence level seed
+  const unsigned int _seed;
+
   /// The VPP vector that will hold the statistics identifiers
   VectorPostprocessorValue & _stat_type_vector;
-
-  /// Confidence level calculator
-  std::unique_ptr<const StochasticTools::BootstrapCalculator> _ci_calculator = nullptr;
 
   // The following vectors are sized to the number of statistics to be computed
 

@@ -8,7 +8,6 @@
     type = CSVDiff
     input = trans_diff_main.i
     cli_args = "Samplers/hypercube/num_rows=3
-                Samplers/hypercube/num_bins=1
                 runner:Mesh/msh/nx=10
                 runner:Mesh/msh/ny=10
                 runner:Executioner/num_steps=2"
@@ -36,8 +35,7 @@
   [evaluate]
     type = CSVDiff
     input = trans_diff_surr.i
-    cli_args = "Samplers/sample/num_rows=10
-                Samplers/sample/num_bins=1"
+    cli_args = "Samplers/sample/num_rows=10"
     csvdiff = 'trans_diff_surr_out_eval_surr_stats_0001.csv trans_diff_surr_out_eval_surr_0001.csv'
     prereq = train
 

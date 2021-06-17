@@ -56,14 +56,14 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
 }
 
 void
-VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariableFEBase * var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, const MooseVariableFEBase * var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
 VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids,
-                                  MooseVariableFEBase * var)
+                                  const MooseVariableFEBase * var)
 {
   for (const auto & bid : boundary_ids)
     addBoundaryVar(bid, var);
@@ -118,7 +118,7 @@ VariableWarehouse::scalars() const
   return _scalar_vars;
 }
 
-const std::set<MooseVariableFEBase *> &
+const std::set<const MooseVariableFEBase *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd) const
 {
   return _boundary_vars.find(bnd)->second;
@@ -235,6 +235,27 @@ VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_numb
 }
 
 void
+VariableWarehouse::initialSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->initialSetup();
+}
+
+void
+VariableWarehouse::timestepSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->timestepSetup();
+}
+
+void
+VariableWarehouse::subdomainSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->subdomainSetup();
+}
+
+void
 VariableWarehouse::jacobianSetup()
 {
   for (auto & pair : _all_objects)
@@ -246,6 +267,13 @@ VariableWarehouse::residualSetup()
 {
   for (auto & pair : _all_objects)
     pair.second->residualSetup();
+}
+
+void
+VariableWarehouse::clearAllDofIndices()
+{
+  for (auto * var : _vars)
+    var->clearAllDofIndices();
 }
 
 template MooseVariableField<Real> *

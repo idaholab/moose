@@ -1,0 +1,19 @@
+[Tests]
+  [checkpoint]
+    type = 'CheckFiles'
+    input = checkpoint.i
+    max_parallel = 1
+    max_threads = 1
+    check_files ='checkpoint_out_cp/0001.xdr
+                  checkpoint_out_cp/0001.xdr.0000
+                  checkpoint_out_cp/0001.rd-0
+                  checkpoint_out_cp/0001_mesh.cpr/1/header.cpr
+                  checkpoint_out_cp/0002.xdr
+                  checkpoint_out_cp/0002.xdr.0000
+                  checkpoint_out_cp/0002.rd-0
+                  checkpoint_out_cp/0002_mesh.cpr/1/header.cpr'
+   requirement = 'The XFEM module shall support outputting of checkpoint files.'
+   design = 'outputs/Checkpoint.md'
+   issues = '#17063'
+  []
+[]

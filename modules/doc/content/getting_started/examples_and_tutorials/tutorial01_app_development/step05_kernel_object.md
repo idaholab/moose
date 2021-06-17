@@ -1,10 +1,14 @@
-# Step 5: Creating a Kernel Object
+!content pagination previous=tutorial01_app_development/step04_weak_form.md
+                    next=tutorial01_app_development/step06_input_params.md
+                    margin-bottom=0px
+
+# Step 5: Develop a Kernel Object
 
 In this step, the basic components of [#kernels] will be presented. To demonstrate their use, a new `Kernel` will be created to solve Darcy's Pressure equation, whose weak form was derived in the [previous step](tutorial01_app_development/step04_weak_form.md#demo). The concept of class *inheritance* shall also be demonstrated, as the object to solve Darcy's equation will inherit from the `ADKernel` class.
 
 ## Kernel Objects id=kernels
 
-The [syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function, $\nabla \psi$, or to check those which represent an integral over the whole domain, $\Omega$.
+The [syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function $\nabla \psi$, or to check those which represent an integral over the whole domain $\Omega$.
 
 In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one that *inherits* from the `ADKernelGrad` base class, which, in turn, inherits from the `ADKernel` base class. This means that `ADDiffusion` is a unique object that builds upon what the MOOSE Kernels system is designed to do.
 
@@ -33,7 +37,7 @@ Now, one might inspect the files that provide the base class, i.e., [`ADKernel.h
 - `_qp`\\
   Current quadrature point index.
 
-There are are several methods that `ADKernel` (and `Kernel`) objects may override. The most important ones are those which work to evaluate the kernel term in the weak form and they are explained in [kernel-methods].
+There are several methods that `ADKernel` (and `Kernel`) objects may override. The most important ones are those which work to evaluate the kernel term in the weak form and they are explained in [kernel-methods].
 
 !table id=kernel-methods caption=Methods used by different types of Kernel objects that compute the residual term.
 | Base | Override | Use |
@@ -54,20 +58,18 @@ In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it 
 [darcy-weak] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$ on the remaining boundaries. Therefore, it is possible to drop the second term in [darcy-weak] and express it, more simply, as
 
 !equation id=darcy-weak-kernel
-(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity, $\mu$, of the fluid (water) is $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the permeability tensor, $\mathbf{K}$, takes on an isotropic, scalar value of $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ to represent the 1 mm steel sphere medium inside the pipe<!--This should also be given in the problem statement, so long as it remains constant throughout the tutorial-->.
+where $K$ is a scalar and was substituted under the assertion that the permeability be isotropic, such that the full tensor $\mathbf{K}$ may be consolidated into a single value. It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity of the fluid (water) is $\mu = \mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the isotropic permeability $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ represents the 1 mm steel sphere medium inside the pipe.
 
 ### Source Code id=source-demo
 
 To evaluate [darcy-weak-kernel], a new `ADKernelGrad` object can be created and it shall be called `DarcyPressure`. Start by making the directories to store files for objects that are part of the Kernels System:
 
-```bash
-cd ~/projects/babbler
-mkdir include/kernels src/kernels
-```
+!include commands/mkdir.md
+         replace=['<d>', 'include/kernels src/kernels']
 
-In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu_{f}$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
+In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file `ADKernelGrad.h` was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/include/kernels/DarcyPressure.h
          link=False
@@ -84,10 +86,7 @@ Here, the header file for this object was included. Next, the `registerMooseObje
 
 Since the source code has been modified, the executable must be recompiled:
 
-```bash
-cd ~/projects/babbler
-make -j4
-```
+!include commands/make.md
 
 ### Input File id=input-demo
 
@@ -99,26 +98,25 @@ Instead of the `ADDiffusion` class, the problem model should now use `DarcyPress
 
 Now, execute the input file:
 
-```bash
+!listing language=bash
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
-```
 
 ### Results id=result-demo
 
-Visualize the solution with PEACOCK and verify that it resembles that which is shown in [results]:
+Visualize the solution with PEACOCK and confirm that it resembles that which is shown in [results]:
 
-```bash
-cd ~/projects/babbler/problems
-~/projects/moose/python/peacock/peacock -r pressure_diffusion_out.e
-```
+!include commands/peacock_r.md
+         replace=['<d>', 'problems',
+                  'peacock', '~/projects/moose/python/peacock/peacock',
+                  '<e>', 'pressure_diffusion_out']
 
 !media tutorial01_app_development/step05_result.png
        style=width:100%;margin-left:auto;margin-right:auto;
        id=results
        caption=Rendering of the [!ac](FEM) solution of Darcy's pressure equation subject to the given [!ac](BVP).
 
-One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu_{f}$, is constant and since the foregoing [!ac](BVP) is a simple one that involves only essential boundary conditions,
+One should be convinced that, because this is a steady-state problem, where the coefficient $K / \mu_{f}$ is constant and since the foregoing [!ac](BVP) is a simple one that involves only essential boundary conditions,
 the solution produced by the new `DarcyPressure` object, shown in [results],
 is identical to the [previous one](tutorial01_app_development/step02_input_file.md#results) produced by the `ADDiffusion` object.
 
@@ -126,17 +124,14 @@ is identical to the [previous one](tutorial01_app_development/step02_input_file.
 
 Add the two new files, `DarcyPressure.h` and `DarcyPressure.C`, to the git tracker and update the `pressure_diffusion.i` file:
 
-```bash
-cd ~/projects/babbler
-git add include/kernels/ src/kernels/ problems/pressure_diffusion.i
-```
+!include commands/git_add.md
+         replace=['*', 'include/kernels src/kernels problems/pressure_diffusion.i']
 
 Now, commit and push the changes to the remote repository:
 
-```bash
-git commit -m "Created kernel to solve Darcy pressure and updated the problem input file"
+!listing language=bash
+git commit -m "developed kernel to solve Darcy pressure and updated the problem input file"
 git push
-```
 
 !content pagination previous=tutorial01_app_development/step04_weak_form.md
                     next=tutorial01_app_development/step06_input_params.md

@@ -408,8 +408,6 @@
   [./interface]
     primary = 2
     secondary = 3
-    disp_x = disp_x
-    disp_y = disp_y
     model = coulomb
     friction_coefficient = 0.0
     formulation = penalty

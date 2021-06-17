@@ -22,7 +22,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const VariableGradient & _grad_v_dot;
   const VariableValue & _d_grad_v_dot_dv;

@@ -5,14 +5,14 @@
 # to form a gas phase, in which case the system becomes two phase.
 
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 40
     xmin = 0.1
     xmax = 200
     bias_x = 1.05
-  [../]
+  []
 []
 
 [Problem]
@@ -27,129 +27,130 @@
 []
 
 [AuxVariables]
-  [./saturation_gas]
+  [saturation_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x1]
+  []
+  [x1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./y0]
+  []
+  [y0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./saturation_gas]
+  [saturation_gas]
     type = PorousFlowPropertyAux
     variable = saturation_gas
     property = saturation
     phase = 1
     execute_on = timestep_end
-  [../]
-  [./x1]
+  []
+  [x1]
     type = PorousFlowPropertyAux
     variable = x1
     property = mass_fraction
     phase = 0
     fluid_component = 1
     execute_on = timestep_end
-  [../]
-  [./y0]
+  []
+  [y0]
     type = PorousFlowPropertyAux
     variable = y0
     property = mass_fraction
     phase = 1
     fluid_component = 0
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Variables]
-  [./pgas]
+  [pgas]
     initial_condition = 20e6
-  [../]
-  [./zi]
+  []
+  [zi]
     initial_condition = 0
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 70
-  [../]
+    scaling = 1e-4
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pgas
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pgas
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = zi
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = zi
-  [../]
-  [./energy]
+  []
+  [energy]
     type = PorousFlowEnergyTimeDerivative
     variable = temperature
-  [../]
-  [./heatadv]
+  []
+  [heatadv]
     type = PorousFlowHeatAdvection
     variable = temperature
-  [../]
-  [./conduction]
+  []
+  [conduction]
     type = PorousFlowHeatConduction
     variable = temperature
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas zi temperature'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowWaterNCG
     water_fp = water
     gas_fp = methane
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./methane]
+  [FluidProperties]
+    [methane]
       type = MethaneFluidProperties
-    [../]
-    [./water]
+    []
+    [water]
       type = Water97FluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./waterncg]
+  []
+  [waterncg]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
@@ -157,123 +158,122 @@
     temperature_unit = Celsius
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 1
-  [../]
-  [./rockheat]
+  []
+  [rockheat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1000
     density = 2500
-  [../]
-  [./rock_thermal_conductivity]
+  []
+  [rock_thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '50 0 0  0 50 0  0 0 50'
-  [../]
+  []
 []
 
 [BCs]
-  [./cold_gas]
+  [cold_gas]
     type = DirichletBC
     boundary = left
     variable = temperature
     value = 20
-  [../]
-  [./gas_injecton]
+  []
+  [gas_injecton]
     type = PorousFlowSink
     boundary = left
     variable = zi
     flux_function = -0.159155
-  [../]
-  [./rightwater]
+  []
+  [rightwater]
     type = DirichletBC
     boundary = right
     value = 20e6
     variable = pgas
-  [../]
-  [./righttemp]
+  []
+  [righttemp]
     type = DirichletBC
     boundary = right
     value = 70
     variable = temperature
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = 'gmres      asm      lu           NONZERO                   2'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
   end_time = 1e4
-  automatic_scaling = true
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-5
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     growth_factor = 1.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pgas]
+  [pgas]
     type = PointValue
     point =  '2 0 0'
     variable = pgas
-  [../]
-  [./sgas]
+  []
+  [sgas]
     type = PointValue
     point =  '2 0 0'
     variable = saturation_gas
-  [../]
-  [./zi]
+  []
+  [zi]
     type = PointValue
     point = '2 0 0'
     variable = zi
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PointValue
     point = '2 0 0'
     variable = temperature
-  [../]
-  [./massgas]
+  []
+  [massgas]
     type = PorousFlowFluidMass
     fluid_component = 1
-  [../]
-  [./x1]
+  []
+  [x1]
     type = PointValue
     point =  '2 0 0'
     variable = x1
-  [../]
-  [./y0]
+  []
+  [y0]
     type = PointValue
     point =  '2 0 0'
     variable = y0
-  [../]
+  []
 []
 
 [Outputs]

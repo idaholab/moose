@@ -36,6 +36,7 @@ protected:
 
   const std::vector<VariableName> _vname;
   std::vector<const MaterialProperty<Real> *> _d2mudvardeta;
+  const JvarMap & _vmap;
 
 private:
   Real calculateF0(); /// calculates the free energy function

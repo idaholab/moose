@@ -1,3 +1,5 @@
+# INSSplitMomentum
+
 !syntax description /Kernels/INSSplitMomentum
 
 !syntax parameters /Kernels/INSSplitMomentum

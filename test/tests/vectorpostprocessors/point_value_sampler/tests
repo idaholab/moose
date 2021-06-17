@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#3087'
+  issues = '#3087 #16099'
   design = 'PointValueSampler.md'
 
   [./test]
@@ -8,6 +8,14 @@
     csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
 
     requirement = 'The system shall support the ability to sample field variables at user specified points.'
+  [../]
+
+  [./test_fv]
+    type = 'CSVDiff'
+    input = 'point_value_sampler_fv.i'
+    csvdiff = 'point_value_sampler_fv_out_point_sample_0001.csv'
+
+    requirement = 'The system shall support the ability to sample field FV variables at user specified points.'
   [../]
 
   [./error]

@@ -29,5 +29,6 @@ protected:
   const VariableValue & _disp_old;
   const VariableValue & _disp;
   const VariableValue & _vel_old;
+  const VariableValue & _u_old;
   Real _beta;
 };

@@ -1,9 +1,10 @@
 # MOOSE Python Tools
 
 The MOOSE code itself is written in C++, but everything around it that supports it is written in
-Python.  Here we detail some of the tools/scripts developed in Python that are distributed with
-MOOSE.  Click on each one for further information
+Python.  [python-packages] is a list of the tools/scripts developed in Python that are distributed
+with MOOSE and [python/source/index.md] links to the source code documentation.
 
+!table id=python-packages
 | Tool | Description |
 | :- | :- |
 | [TestHarness.md] | Tool testing that applications work correctly as code is developed. |
@@ -11,8 +12,10 @@ MOOSE.  Click on each one for further information
 | [CSVDiff.md] | Tool for computing differences between comma separated value (CSV) files. |
 | [mms.md] | Utilities for verifying solves with the method of manufactured solutions. |
 | [free_energy.py](/CALPHAD_free_energies.md) | Tool for extracting MOOSE parsed function expressions from thermodynamic database files. |
-| [moosetree/index.md] | Tool for building and searching tree structures. |
+| [moosetree](moosetree/index.md) | Tool for building and searching tree structures. |
+| [pyhit](pyhit/index.md) | Tool for reading, writing, and manipulating MOOSE input files. |
 | [combine_csv.md] | Tool for combining CSV files together. |
+| [moosesqa/index.md] | Tools for managing SQA documentation. |
 
 ## Setup
 

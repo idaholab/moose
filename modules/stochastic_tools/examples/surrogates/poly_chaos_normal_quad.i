@@ -52,17 +52,17 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = sample
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg max'
+    stochastic_reporter = results
+    from_reporter = 'avg/value max/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [results]
-    type = StochasticResults
+    type = StochasticReporter
   []
 []
 
@@ -73,8 +73,7 @@
     order = 10
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg:value
   []
   [poly_chaos_max]
     type = PolynomialChaosTrainer
@@ -82,8 +81,7 @@
     order = 10
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
-    results_vpp = results
-    results_vector = data:max
+    response = results/data:max:value
   []
 []
 

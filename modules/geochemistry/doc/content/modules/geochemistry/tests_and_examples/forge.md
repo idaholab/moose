@@ -4,6 +4,8 @@ This page describes a reactive-transport simulation of a hypothetical geothermal
 
 The simulation involves pumping cold fluid into a thin, hot subsurface confined aquifer, and recording the resulting geochemical changes.  Before getting to the reactive-transport simulation, however, a lot of exploratory geochemical modelling is needed.
 
+Although the geochemistry module can accept input in the form of various convenient units such as mg/kg, $\mu$g, etc, this page uses mole-based units exclusively.
+
 ## Representative water composition
 
 Water composition has been measured at Roosevelt Hot Springs, which is close to the FORGE site, and this may be representative of the type of water found in the FORGE fractured granite.  The other type of water used in this presentation is a low TDS potable water, which is the injectate.  The composition of both waters is shown in [table:forge_waters] (after [!cite](vivek)).  Note that there is no iron composition in either of the waters, so no iron-bearing minerals will be considered in this presentation.
@@ -122,7 +124,7 @@ The analysis of the previous section produced a water that is in equilibrium wit
 - The analysis revealed that [table:model_mineralogy] may not be in equilibrium because Illite dissolves.  Perhaps this does not matter greatly as Illite's mass fraction is only about 2%.
 - The model did not include Laumontite and Zoisite since they are more stable than Anorthite, which appears in appreciable fractions in the X-ray analysis.
 
-Presumably all these minerals are controlled by [kinetic reactions](kinetics.md), and using kinetics may result in quite different results.  Therefore, this section performs an analysis of the in-situ reservoir kinetics to act as a baseline for the reactive-transport simulations.
+Presumably all these minerals are controlled by [kinetic reactions](theory/index.md), and using kinetics may result in quite different results.  Therefore, this section performs an analysis of the in-situ reservoir kinetics to act as a baseline for the reactive-transport simulations.
 
 In this presentation, kinetic rates are modelled using the formula
 \begin{equation}
@@ -324,12 +326,12 @@ The PorousFlow simulation (listed in the previous section) controls the flow of 
 2. The PorousFlow simulation also provides an AuxVariable `temperature` that specifies the temperature at each node.
 3. Since the `pf_rate_*` variables have units kg.s$^{-1}$ but the Geochemistry module expects rates-of-changes of moles, a conversion must take place.  Secondly, the aquifer-geochemistry simulation considers just 1 litre of aqueous solution at every node, so the `nodal_void_volume` (amount of fluid at each node) is used in the conversion:
 
-!listing modules/combined/examples/geochem-porous_flow/forge/aquifer_geochemistry.i start=[./rate_H_per_1l_auxk] end=[./rate_Na_per_1l_auxk]
+!listing modules/combined/examples/geochem-porous_flow/forge/aquifer_geochemistry.i start=[rate_H_per_1l_auxk] end=[rate_Na_per_1l_auxk]
 
 4. The `geochemistry` code solves the geochemical system at each node, which depends on the rates of source species (`rate_*_per_1l`) and the kinetics.
 5. The mass-fraction of each species at each node is computed from the transported mole numbers, and sent back to the `porous_flow.i` simulation in order for the next step of transport:
 
-!listing modules/combined/examples/geochem-porous_flow/forge/aquifer_geochemistry.i start=[./transported_mass_auxk] end=[./massfrac_Na_auxk]
+!listing modules/combined/examples/geochem-porous_flow/forge/aquifer_geochemistry.i start=[transported_mass_auxk] end=[massfrac_Na_auxk]
 
 Some results are shown in [forge_rt_1year_temperature.fig] to [forge_rt_1year_so4.fig].  The following may be surmised from these figures.
 

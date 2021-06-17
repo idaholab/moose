@@ -355,6 +355,9 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
   Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+  // Only one outer iteration in EPS is allowed when Newton/PJFNK/JFNK
+  // is used as the eigen solver
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
   if (initial_power)
   {
     Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
@@ -458,10 +461,12 @@ void
 slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 {
   Moose::PetscSupport::petscSetOptions(eigen_problem);
+  // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
+  // can be overriden
+  setSlepcEigenSolverTolerances(eigen_problem, params);
   setEigenSolverOptions(eigen_problem.solverParams(), params);
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
-  setSlepcEigenSolverTolerances(eigen_problem, params);
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
@@ -715,9 +720,6 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 
   PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
-
   PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
 
   // Use the system's update() to get a good local version of the
@@ -779,8 +781,15 @@ mooseMatMult(EigenProblem & eigen_problem, Vec x, Vec r, TagID tag)
 
   PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  This operation does not modify the incoming
+  // "x" vector, it only localizes information from "x" into
+  // sys.current_local_solution.
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
 
   R.zero();
 
@@ -1107,7 +1116,7 @@ mooseSlepcEPSMonitor(EPS eps,
   auto eigenvalue = inverse ? 1.0 / eigenr : eigenr;
 
   // The term "k-eigenvalue" is adopted from the neutronics community.
-  console << " Iteration " << its << std::setprecision(10)
+  console << " Iteration " << its << std::setprecision(10) << std::fixed
           << (inverse ? " k-eigenvalue = " : " eigenvalue = ") << eigenvalue << std::endl;
 
   return 0;

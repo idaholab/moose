@@ -11,8 +11,6 @@
       input = 'hier-1-1d.i'
       exodiff = 'hier-1-1d_out.e'
       max_parallel = 1
-      group = 'requirements'
-
       detail = "first-order on 1D elements,"
     []
 
@@ -21,7 +19,6 @@
       input = 'hier-2-1d.i'
       exodiff = 'hier-2-1d_out.e'
       abs_zero = 1e-9
-
       detail = "second-order on 1D elements,"
     []
 
@@ -30,7 +27,6 @@
       input = 'hier-3-1d.i'
       exodiff = 'hier-3-1d_out.e'
       max_parallel = 4
-
       detail = "third-order on 1D elements,"
     []
 
@@ -39,7 +35,6 @@
       input = 'hier-1-2d.i'
       exodiff = 'hier-1-2d_out.e'
       max_parallel = 1
-
       detail = "first-order on 2D elements,"
     []
 
@@ -48,7 +43,6 @@
       input = 'hier-2-2d.i'
       exodiff = 'hier-2-2d_out.e'
       abs_zero = 1e-09
-
       detail = "second-order on 2D elements,"
     []
 
@@ -57,7 +51,6 @@
       input = 'hier-3-2d.i'
       exodiff = 'hier-3-2d_out.e'
       abs_zero = 1e-08
-
       detail = "third-order on 2D elements,"
     []
 
@@ -66,7 +59,6 @@
       input = 'hier-1-3d.i'
       exodiff = 'hier-1-3d_out.e'
       abs_zero = 1e-09
-
       detail = "first-order on 3D elements,"
     []
 
@@ -75,7 +67,6 @@
       input = 'hier-3-3d.i'
       exodiff = 'hier-3-3d_out.e'
       abs_zero = 1e-08
-
       detail = "second-order on 3D elements, and"
     []
 
@@ -84,7 +75,6 @@
       input = 'hier-2-3d.i'
       exodiff = 'hier-2-3d_out.e'
       abs_zero = 1e-09
-
       detail = "third-order on 3D elements."
     []
   []

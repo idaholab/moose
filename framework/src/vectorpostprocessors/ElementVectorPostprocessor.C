@@ -20,6 +20,6 @@ ElementVectorPostprocessor::validParams()
 }
 
 ElementVectorPostprocessor::ElementVectorPostprocessor(const InputParameters & parameters)
-  : ElementUserObject(parameters), VectorPostprocessor(parameters)
+  : ElementUserObject(parameters), VectorPostprocessor(this)
 {
 }

@@ -27,15 +27,10 @@ defineLegacyParams(DGKernelBase);
 InputParameters
 DGKernelBase::validParams()
 {
-  InputParameters params = MooseObject::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
   params += TwoMaterialPropertyInterface::validParams();
-  params += TransientInterface::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
-  params += MeshChangedInterface::validParams();
-  params += TaggingInterface::validParams();
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -46,7 +41,6 @@ DGKernelBase::validParams()
   params.addPrivateParam<bool>("_use_undisplaced_reference_points", false);
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.declareControllable("enable");
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
       "The name of auxiliary variables to save this Kernel's residual contributions to. "
@@ -76,25 +70,12 @@ Threads::spin_mutex DGKernelBase::_resid_vars_mutex;
 Threads::spin_mutex DGKernelBase::_jacoby_vars_mutex;
 
 DGKernelBase::DGKernelBase(const InputParameters & parameters)
-  : MooseObject(parameters),
+  : NeighborResidualObject(parameters),
     BlockRestrictable(this),
     BoundaryRestrictable(this, false), // false for _not_ nodal
-    SetupInterface(this),
-    TransientInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
-    Restartable(this, "DGKernels"),
-    MeshChangedInterface(parameters),
-    TaggingInterface(this),
     ElementIDInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _mesh(_subproblem.mesh()),
-
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
 
@@ -138,13 +119,13 @@ DGKernelBase::DGKernelBase(const InputParameters & parameters)
   _excluded_boundaries.insert(bnd_ids.begin(), bnd_ids.end());
 }
 
-DGKernelBase::~DGKernelBase() {}
-
 void
 DGKernelBase::computeResidual()
 {
   if (!excludeBoundary())
   {
+    precalculateResidual();
+
     // Compute the residual for this element
     computeElemNeighResidual(Moose::Element);
 
@@ -158,6 +139,8 @@ DGKernelBase::computeJacobian()
 {
   if (!excludeBoundary())
   {
+    precalculateJacobian();
+
     // Compute element-element Jacobian
     computeElemNeighJacobian(Moose::ElementElement);
 
@@ -173,14 +156,18 @@ DGKernelBase::computeJacobian()
 }
 
 void
-DGKernelBase::computeOffDiagJacobian(unsigned int jvar)
+DGKernelBase::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   if (!excludeBoundary())
   {
-    if (jvar == variable().number())
+    const auto & jvar = getVariable(jvar_num);
+
+    if (jvar_num == variable().number())
       computeJacobian();
     else
     {
+      precalculateOffDiagJacobian(jvar_num);
+
       // Compute element-element Jacobian
       computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
@@ -215,4 +202,10 @@ DGKernelBase::excludeBoundary() const
       return true;
 
   return false;
+}
+
+void
+DGKernelBase::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareFaceShapes(var_num, _tid);
 }

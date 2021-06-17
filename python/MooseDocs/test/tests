@@ -60,7 +60,6 @@
 
   [latex]
     requirement = "MooseDocs shall be able to translate markdown syntax to latex:"
-
     [serial]
       type = RunCommand
       command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'

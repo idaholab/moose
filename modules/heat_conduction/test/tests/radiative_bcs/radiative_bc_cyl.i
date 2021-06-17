@@ -19,7 +19,7 @@
 
   [./remove_1]
     type = BlockDeletionGenerator
-    block_id = 1
+    block = 1
     input = cartesian
   [../]
 
@@ -93,7 +93,7 @@
 
 [Postprocessors]
   [./right]
-    type = SideFluxAverage
+    type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right
     diffusivity = thermal_conductivity

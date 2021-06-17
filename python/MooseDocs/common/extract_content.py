@@ -11,13 +11,14 @@ import copy
 import re
 from .regex import regex
 from .exceptions import MooseDocsException
+from .parse_settings import get_settings_as_dict
 
 
 def extractContentSettings():
     """Settings for extractContent function"""
     settings = dict()
-    settings['prefix'] = (None, "Text to include prior to each line of the included text.")
-    settings['suffix'] = ('', "Text to include after each line of the included text.")
+    settings['prepend'] = (None, "Text to include prior to each line of the included text.")
+    settings['append'] = ('', "Text to include after each line of the included text.")
     settings['header'] = (None, "Text to include prior to the included text.")
     settings['header-newlines'] = (1, "The number of newlines after the header.")
     settings['footer'] = ('', "Text to include after the included text.")
@@ -41,9 +42,9 @@ def extractContentSettings():
     settings['end'] = (None, "A portion of text that unique identifies the ending location "
                        "for including text, if not provided the end of the file is "
                        "used. By default this line is not included in the display.")
-    settings['include-start'] = (True, "When False the texted captured by the 'start' setting "
+    settings['include-start'] = (True, "When False the text captured by the 'start' setting "
                                  "is excluded in the displayed text.")
-    settings['include-end'] = (False, "When True the texted captured by the 'end' setting is "
+    settings['include-end'] = (False, "When True the text captured by the 'end' setting is "
                                "included in the displayed text.")
     settings['replace'] = (None, "List of replacement string pairs: ['foo','bar', 'boom','baam'] " \
                                  "replaces 'foo' with 'bar' and 'boom' with 'baam'.")
@@ -114,13 +115,13 @@ def prepareContent(content, settings):
         replace = r'{}\1'.format(' '*int(settings['indent']))
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
-    # Prefix/suffix
-    if settings['prefix'] is not None:
-        replace = r'{}\1'.format(settings['prefix'])
+    # prepend/append
+    if settings['prepend'] is not None:
+        replace = r'{}\1'.format(settings['prepend'])
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
-    if settings['suffix'] is not None:
-        replace = r'\1{}'.format(settings['suffix'])
+    if settings['append'] is not None:
+        replace = r'\1{}'.format(settings['append'])
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
     if settings['header'] is not None:

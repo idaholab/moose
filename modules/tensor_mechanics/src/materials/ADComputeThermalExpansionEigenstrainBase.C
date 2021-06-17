@@ -19,13 +19,18 @@ ADComputeThermalExpansionEigenstrainBase::validParams()
                                "Reference temperature at which there is no "
                                "thermal expansion for thermal eigenstrain "
                                "calculation");
+  params.addParam<bool>("use_old_temperature",
+                        false,
+                        "Flag to optionally use the temperature value from the previous timestep.");
   return params;
 }
 
 ADComputeThermalExpansionEigenstrainBase::ADComputeThermalExpansionEigenstrainBase(
     const InputParameters & parameters)
   : ADComputeEigenstrainBase(parameters),
-    _temperature(adCoupledValue("temperature")),
+    _use_old_temperature(getParam<bool>("use_old_temperature")),
+    _temperature(_use_old_temperature ? _ad_zero : adCoupledValue("temperature")),
+    _temperature_old(_use_old_temperature ? coupledValueOld("temperature") : _zero),
     _stress_free_temperature(adCoupledValue("stress_free_temperature"))
 {
 }

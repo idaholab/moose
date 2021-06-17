@@ -32,6 +32,7 @@
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
+#include "libmesh/partitioner.h"
 
 // forward declaration
 class MooseMesh;
@@ -188,6 +189,11 @@ public:
   const Elem * getLowerDElem(const Elem *, unsigned short int) const;
 
   /**
+   * Returns the local side ID of the interior parent aligned with the lower dimensional element.
+   */
+  unsigned int getHigherDSide(const Elem * elem) const;
+
+  /**
    * Returns a const reference to a set of all user-specified
    * boundary IDs.  On a distributed mesh this will *only* include
    * boundary IDs which exist on local or ghosted elements; a copy and
@@ -265,7 +271,8 @@ public:
    * Calls BoundaryInfo::build_active_side_list
    * @return A container of active (element, side, id) tuples.
    */
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildActiveSideList();
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+  buildActiveSideList() const;
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
@@ -327,7 +334,7 @@ public:
   virtual const Elem * queryElemPtr(const dof_id_type i) const;
 
   /**
-   * Setter/getter for the _is_prepared flag.
+   * Setter/getter for whether the mesh is prepared
    */
   bool prepared() const;
   virtual void prepared(bool state);
@@ -460,10 +467,11 @@ public:
   const RealVectorValue & getNormalByBoundaryID(BoundaryID id) const;
 
   /**
-   * Calls prepare_for_use() if force=true on the underlying Mesh object, then communicates various
-   * boundary information on parallel meshes. Also calls update() internally.
+   * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
+   * various boundary information on parallel meshes. Also calls update() internally. We maintain
+   * the boolean parameter in order to maintain backwards compatability but it doesn't do anything
    */
-  void prepare(bool force = false);
+  void prepare(bool = false);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
@@ -559,7 +567,7 @@ public:
   /**
    * Calls print_info() on the underlying Mesh.
    */
-  void printInfo(std::ostream & os = libMesh::out) const;
+  void printInfo(std::ostream & os = libMesh::out, const unsigned int verbosity = 0) const;
 
   /**
    * Return list of blocks to which the given node belongs.
@@ -663,7 +671,7 @@ public:
   const std::string & getSubdomainName(SubdomainID subdomain_id);
 
   /**
-   * This method returns a writable reference to a boundary name based on the id parameter
+   * This method sets the boundary name of the boundary based on the id parameter
    */
   void setBoundaryName(BoundaryID boundary_id, BoundaryName name);
 
@@ -1028,14 +1036,14 @@ public:
 
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
-  /// Accessor for local \p FaceInfo objects
-  const std::vector<const FaceInfo *> & faceInfo()
+  /// Accessor for all local \p FaceInfo objects.
+  const std::vector<const FaceInfo *> & faceInfo() const
   {
     buildFaceInfo();
     return _face_info;
   }
+  /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
-  // const
   ///@}
 
   /**
@@ -1121,10 +1129,7 @@ protected:
   bool _is_nemesis;
 
   /// True if prepare has been called on the mesh
-  bool _is_prepared;
-
-  /// True if prepare_for_use should be called when Mesh is prepared
-  bool _needs_prepare_for_use;
+  bool _moose_mesh_prepared = false;
 
   /// The elements that were just refined.
   std::unique_ptr<ConstElemPointerRange> _refined_elements;
@@ -1236,26 +1241,37 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
-  /// FaceInfo object storing information for face based loops. This container holds all the \p FaceInfo objects accessible from this process
-  std::vector<FaceInfo> _all_face_info;
-  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id, e.g. the local \p FaceInfo objects
-  std::vector<const FaceInfo *> _face_info;
-
-  /// Map from elem-side pair to FaceInfo
-  std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *> _elem_side_to_face_info;
-
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
-  void setPartitionerHelper();
+  void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
-  // true if the _face_info member needs to be rebuilt/updated.
-  bool _face_info_dirty = true;
+  /// FaceInfo object storing information for face based loops. This container holds all the \p
+  /// FaceInfo objects accessible from this process
+  mutable std::vector<FaceInfo> _all_face_info;
 
-  /// Builds the face info vector that stores meta-data needed for looping
-  /// over and doing calculations based on mesh faces.
-  void buildFaceInfo();
+  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
+  /// e.g. the local \p FaceInfo objects
+  mutable std::vector<const FaceInfo *> _face_info;
+
+  /// Map from elem-side pair to FaceInfo
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *>
+      _elem_side_to_face_info;
+
+  // true if the _face_info member needs to be rebuilt/updated.
+  mutable bool _face_info_dirty = true;
+
+  /**
+   * Builds the face info vector that stores meta-data needed for looping over and doing
+   * calculations based on mesh faces. We build face information only upon request and only if the
+   * \p _face_info_dirty flag is false, either because this method has yet to be called or
+   * because someone called \p update() indicating the mesh has changed. Face information is only
+   * requested by getters that should appear semantically const. Consequently this method must
+   * also be marked const and so we make it and all associated face information data private to
+   * prevent misuse
+   */
+  void buildFaceInfo() const;
 
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
@@ -1373,6 +1389,7 @@ private:
   /// Holds a map from a high-order element side to its corresponding lower-d element
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;
+  std::unordered_map<const Elem *, unsigned short int> _lower_d_elem_to_higher_d_elem_side;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
@@ -1438,6 +1455,9 @@ private:
 
   /// Build extra data for faster access to the information of extra element integers
   void buildElemIDInfo();
+
+  /// Build lower-d mesh for all sides
+  void buildLowerDMesh();
 
   template <typename T>
   struct MeshType;
@@ -1568,6 +1588,19 @@ MooseMesh::buildTypedMesh(unsigned int dim)
 
   mesh->allow_remote_element_removal(_allow_remote_element_removal);
   _app.attachRelationshipManagers(*mesh, *this);
+
+  if (_custom_partitioner_requested)
+  {
+    // Check of partitioner is supplied (not allowed if custom partitioner is used)
+    if (!parameters().isParamSetByAddParam("partitioner"))
+      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
+    // Set custom partitioner
+    if (!_custom_partitioner.get())
+      mooseError("Custom partitioner requested but not set!");
+    mesh->partitioner().reset(_custom_partitioner.release());
+  }
+  else
+    setPartitionerHelper(mesh.get());
 
   return mesh;
 }

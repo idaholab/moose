@@ -38,4 +38,50 @@
 
     requirement = 'The system shall be able to populate elemental initial conditions from a previous solution file in ExodusII format.'
   []
+
+  [array_elem_var_1]
+    type = 'Exodiff'
+    input = 'array.i'
+    exodiff = 'array_elem_1_out.e'
+    cli_args = 'Outputs/file_base=array_elem_1_out'
+
+    requirement = 'The system shall write output files containing elemental array variable solutions in ExodusII format suitable for restart.'
+  []
+  [array_elem_var_2]
+    type = 'Exodiff'
+    input = 'array.i'
+    exodiff = 'array_elem_2_out.e'
+    prereq = 'array_elem_var_1'
+    cli_args = 'Mesh/active=
+                Mesh/file=array_elem_1_out.e
+                Variables/v/initial_from_file_var=v
+                Outputs/file_base=array_elem_2_out'
+
+    requirement = 'The system shall be able to populate elemental array variable initial conditions from a previous solution file in ExodusII format.'
+  []
+
+  [array_nodal_var_1]
+    type = 'Exodiff'
+    input = 'array.i'
+    exodiff = 'array_nodal_1_out.e'
+    cli_args = 'Variables/v/order=FIRST
+                Variables/v/family=LAGRANGE
+                Outputs/file_base=array_nodal_1_out'
+
+    requirement = 'The system shall write output files containing nodal array variable solutions in ExodusII format suitable for restart.'
+  []
+  [array_nodal_var_2]
+    type = 'Exodiff'
+    input = 'array.i'
+    exodiff = 'array_nodal_2_out.e'
+    prereq = 'array_nodal_var_1'
+    cli_args = 'Mesh/active=
+                Mesh/file=array_nodal_1_out.e
+                Variables/v/order=FIRST
+                Variables/v/family=LAGRANGE
+                Variables/v/initial_from_file_var=v
+                Outputs/file_base=array_nodal_2_out'
+
+    requirement = 'The system shall be able to populate nodal array variable initial conditions from a previous solution file in ExodusII format.'
+  []
 []

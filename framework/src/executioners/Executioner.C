@@ -15,6 +15,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "SlepcSupport.h"
+#include "SecantSolve.h"
+#include "SteffensenSolve.h"
 
 // C++ includes
 #include <vector>
@@ -31,6 +33,12 @@ Executioner::validParams()
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
 
+  MooseEnum IterationMethod("picard secant steffensen", "picard");
+
+  params.addParam<MooseEnum>("fixed_point_algorithm",
+                             IterationMethod,
+                             "The fixed point algorithm to converge the sequence of problems.");
+
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",
       "",
@@ -46,7 +54,7 @@ Executioner::validParams()
 
 Executioner::Executioner(const InputParameters & parameters)
   : MooseObject(parameters),
-    Reporter(parameters),
+    Reporter(this),
     ReporterInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
@@ -54,8 +62,8 @@ Executioner::Executioner(const InputParameters & parameters)
     PerfGraphInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _feproblem_solve(this),
-    _picard_solve(this),
+    _feproblem_solve(*this),
+    _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
@@ -90,6 +98,14 @@ Executioner::Executioner(const InputParameters & parameters)
         getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
 
   _fe_problem.numGridSteps(_num_grid_steps);
+
+  // Instantiate the SolveObject for the fixed point iteration algorithm
+  if (_iteration_method == "picard")
+    _fixed_point_solve = libmesh_make_unique<PicardSolve>(*this);
+  else if (_iteration_method == "secant")
+    _fixed_point_solve = libmesh_make_unique<SecantSolve>(*this);
+  else if (_iteration_method == "steffensen")
+    _fixed_point_solve = libmesh_make_unique<SteffensenSolve>(*this);
 }
 
 Problem &

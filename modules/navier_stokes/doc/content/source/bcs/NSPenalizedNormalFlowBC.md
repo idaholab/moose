@@ -1,3 +1,5 @@
+# NSPenalizedNormalFlowBC
+
 !syntax description /BCs/NSPenalizedNormalFlowBC
 
 !syntax parameters /BCs/NSPenalizedNormalFlowBC

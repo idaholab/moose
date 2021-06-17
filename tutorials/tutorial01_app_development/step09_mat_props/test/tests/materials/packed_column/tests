@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15232'
+  design = 'examples_and_tutorials/tutorial01_app_development/step09_mat_props.md'
+  [test]
+    type = Exodiff
+    input = packed_column_test.i
+    exodiff = packed_column_test_out.e
+    requirement = "The system shall include a tutorial that introduces the ability to set the material property values for the permeability and viscosity terms of Darcy's equation."
+  []
+[]

@@ -1,0 +1,23 @@
+[Tests]
+  design = 'RayKernel.md'
+  issues = '#16028'
+
+  [errors]
+    requirement = 'The system shall throw a reasonable error if a RayKernel'
+
+    [xyz_only]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'Problem/coord_type=RZ'
+      expect_err = 'Not valid on coordinate systems other than XYZ'
+      detail = 'is utilized with a coordinate system other than xyz or'
+    []
+    [bad_execute_on]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/execute_on=initial'
+      expect_err = 'In this case, the study must use the execute_on = PRE_KERNELS'
+      detail = 'if the execute flag for the associated ray study is not set correctly to use the RayKernel.'
+    []
+  []
+[]

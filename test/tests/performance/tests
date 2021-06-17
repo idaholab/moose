@@ -1,0 +1,60 @@
+[Tests]
+  issues = "#16410"
+  design = "sqa/non_functional.md"
+  collections = PERFORMANCE
+  [multiprocess]
+    requirement = "The system shall support the use of multiple processors using"
+    [mpi]
+      type = RunApp
+      input = input.i
+      expect_out = "Num Processors:\s+2\s+Num Threads:\s+1"
+      min_parallel = 2
+      max_parallel = 2
+      min_threads = 1
+      max_threads = 1
+
+      detail = "distributed memory,"
+    []
+    [thread]
+      type = RunApp
+      input = input.i
+      expect_out = "Num Processors:\s+1\s+Num Threads:\s+2"
+      min_parallel = 1
+      max_parallel = 1
+      min_threads = 2
+      max_threads = 2
+
+      detail = "shared memory, and"
+    []
+    [both]
+      type = RunApp
+      input = input.i
+
+      expect_out = "Num Processors:\s+2\s+Num Threads:\s+2"
+      min_parallel = 2
+      max_parallel = 2
+      min_threads = 2
+      max_threads = 2
+
+      detail = "both distributed and shared memory."
+    []
+  []
+
+  [os]
+    requirement = "The system shall support execution on"
+    [macOS]
+       type = RunApp
+       input = input.i
+       platform = DARWIN
+
+       detail = "macOS and"
+    []
+    [linux]
+       type = RunApp
+       input = input.i
+       platform = DARWIN
+
+       detail = "Linux operating systems."
+    []
+  []
+[]

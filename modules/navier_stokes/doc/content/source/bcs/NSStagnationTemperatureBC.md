@@ -1,3 +1,5 @@
+# NSStagnationTemperatureBC
+
 !syntax description /BCs/NSStagnationTemperatureBC
 
 !syntax parameters /BCs/NSStagnationTemperatureBC

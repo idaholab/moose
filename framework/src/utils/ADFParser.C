@@ -25,7 +25,14 @@ bool
 ADFParser::JITCompile()
 {
 #if LIBMESH_HAVE_FPARSER_JIT
-  auto result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+  std::string includes;
+  bool result;
+
+  auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
+  if (include_path_env)
+    result = JITCompileHelper("ADReal", "", "#include \"" + std::string(include_path_env) + "\"\n");
+  else
+    result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
 
   if (!result)
 #endif

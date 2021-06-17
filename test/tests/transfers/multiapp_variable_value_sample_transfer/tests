@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1737'
+  issues = '#1737 #16099'
   design = 'MultiAppVariableValueSampleTransfer.md'
 
   [test]
@@ -28,7 +28,15 @@
       exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e '
                 'master_quad_out_quad2.e master_quad_out_quad3.e'
 
-      detail = "from a constant monomial source variable."
+      detail = "from a constant monomial source variable and"
+    []
+    [finite_volume]
+      type = 'Exodiff'
+      input = 'master_fv.i'
+      exodiff = 'master_fv_out_sub0.e master_fv_out_sub1.e '
+                'master_fv_out_pp_sub0.e master_fv_out_pp_sub1.e'
+
+      detail = "from a finite volume constant monomial source variable."
     []
   []
   [silence_barriers]

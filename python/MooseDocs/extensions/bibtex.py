@@ -227,8 +227,10 @@ class RenderBibtexCite(components.RenderComponent):
             author = LatexNodes2Text().latex_to_text(author)
 
             form = '{}, {}' if citep else '{} ({})'
-            html.Tag(parent, 'a', href='#{}'.format(key),
-                     string=form.format(author, entry.fields['year']))
+            year = entry.fields.get('year', None)
+            if year is None:
+                raise exceptions.MooseDocsException("Unable to locate year for bibtex entry '{}'", entry.key)
+            html.Tag(parent, 'a', href='#{}'.format(key), string=form.format(author, year))
 
             if citep:
                 if num_keys > 1 and i != num_keys - 1:

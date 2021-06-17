@@ -11,8 +11,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-
 /**
  * ThumbIC creates a rectangle with a half circle on top
  */

@@ -19,6 +19,6 @@ public:
   PowerLawCreepExceptionTest(const InputParameters & parameters);
 
 protected:
-  virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) override;
-  virtual Real computeDerivative(const Real effective_trial_stress, const Real scalar) override;
+  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override;
+  virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) override;
 };

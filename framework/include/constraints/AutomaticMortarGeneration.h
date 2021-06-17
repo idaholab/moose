@@ -152,7 +152,64 @@ public:
    */
   bool onDisplaced() const { return _on_displaced; }
 
-public:
+  /**
+   * @return The nodal normals associated with the provided \p secondary_elem
+   */
+  std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
+
+  /**
+   * Compute the normals at given reference points on a secondary element
+   * @param secondary_elem The secondary element used to query for associated nodal normals
+   * @param xi1_pts The reference points on the secondary element to evaluate the normals at. The
+   * points should only be non-zero in the zeroth entry  because right now our mortar mesh elements
+   * are always 1D
+   * @return The normals
+   */
+  std::vector<Point> getNormals(const Elem & secondary_elem,
+                                const std::vector<Point> & xi1_pts) const;
+
+  /**
+   * Compute the normals at given reference points on a secondary element
+   * @param secondary_elem The secondary element used to query for associated nodal normals
+   * @param 1d_xi1_pts The reference points on the secondary element to evaluate the normals at. The
+   * "points" are single reals corresponding to xi because right now our mortar mesh elements are
+   * always 1D
+   * @return The normals
+   */
+  std::vector<Point> getNormals(const Elem & secondary_elem,
+                                const std::vector<Real> & oned_xi1_pts) const;
+
+  /**
+   * @return The mortar interface coupling
+   */
+  const std::unordered_multimap<dof_id_type, dof_id_type> & mortarInterfaceCoupling() const
+  {
+    return mortar_interface_coupling;
+  }
+
+  /**
+   * @return The primary-secondary boundary ID pairs
+   */
+  const std::vector<std::pair<boundary_id_type, boundary_id_type>> &
+  primarySecondaryBoundaryIDPairs() const
+  {
+    return primary_secondary_boundary_id_pairs;
+  }
+
+  /**
+   * @return The mortar segment mesh
+   */
+  const MeshBase & mortarSegmentMesh() const { return *mortar_segment_mesh; }
+
+  /**
+   * @return The mortar segment element to corresponding information
+   */
+  const std::unordered_map<const Elem *, MortarSegmentInfo> & mortarSegmentMeshElemToInfo() const
+  {
+    return msm_elem_to_info;
+  }
+
+private:
   // Reference to the mesh stored in equation_systems.
   MeshBase & mesh;
 
@@ -211,10 +268,6 @@ public:
   // the side_id of the interior_parent which they are.
   std::unordered_map<const Elem *, unsigned int> lower_elem_to_side_id;
 
-  // The amount by which elements in the boundary subdomains
-  // are offset from their respective interior parent's subdomain ids.
-  const subdomain_id_type boundary_subdomain_id_offset = 1000;
-
   // A list of primary/secondary subdomain id pairs corresponding to each
   // side of the mortar interface.
   std::vector<std::pair<subdomain_id_type, subdomain_id_type>> primary_secondary_subdomain_id_pairs;
@@ -223,10 +276,6 @@ public:
   // secondary/primary *boundary* ids offset by the value above.
   std::set<subdomain_id_type> secondary_boundary_subdomain_ids;
   std::set<subdomain_id_type> primary_boundary_subdomain_ids;
-
-  // Size of the largest secondary side lower-dimensional element added to
-  // the mesh. Used in plotting convergence data.
-  Real h_max;
 
   // Used by the AugmentSparsityOnInterface functor to determine
   // whether a given Elem is coupled to any others across the gap, and
@@ -241,7 +290,6 @@ public:
   // Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> secondary_node_to_nodal_normal;
 
-private:
   /**
    * Helper function responsible for projecting secondary nodes
    * onto primary elements for a single primary/secondary pair. Called by the class member
@@ -256,7 +304,6 @@ private:
   void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                      subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
-private:
   /// Whether to print debug output
   bool _debug;
 
@@ -268,4 +315,12 @@ private:
 
   /// Whether the mortar segment mesh is distributed
   const bool _distributed;
+
+  /// Newton solve tolerance for node projections
+  Real _newton_tolerance = 1e-12;
+
+  /// Tolerance for checking projection xi values. Usually we are checking whether we projected onto
+  /// a certain element (in which case -1 <= xi <= 1) or whether we should have *already* projected
+  /// a primary node (in which case we error if abs(xi) is sufficiently close to 1)
+  Real _xi_tolerance = 1e-6;
 };

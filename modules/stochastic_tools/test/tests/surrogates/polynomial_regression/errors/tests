@@ -9,7 +9,7 @@
       type = RunException
       input = error.i
       allow_test_objects = true
-      expect_err = "The number of elements in 'values/g_values' is not equal to the number of samples in 'sample'!"
+      expect_err = "Reporter value values/g_values of size 1000 does not match sampler size \(100\)."
       detail = "the number of samples does not match the number of results."
     []
   []

@@ -20,6 +20,6 @@ SidePostprocessor::validParams()
 }
 
 SidePostprocessor::SidePostprocessor(const InputParameters & parameters)
-  : SideUserObject(parameters), Postprocessor(parameters)
+  : SideUserObject(parameters), Postprocessor(this)
 {
 }

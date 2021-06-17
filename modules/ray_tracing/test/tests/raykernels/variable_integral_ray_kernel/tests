@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#16028'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'variable_integral_ray_kernel.i'
+    csvdiff = 'variable_integral_ray_kernel_out.csv'
+    design = 'VariableIntegralRayKernel.md'
+    requirement = 'The system shall provide the ability to compute the integral of a variable along a line.'
+  []
+  [simple_diffusion_rays]
+    type = 'Exodiff'
+    input = 'simple_diffusion_line_integral.i'
+    exodiff = 'simple_diffusion_line_integral_rays.e'
+    design = 'VariableIntegralRayKernel.md RayTracingMeshOutput.md'
+    cli_args = 'UserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/output_data=true Outputs/rays/execute_on=TIMESTEP_END'
+    requirement = 'The system shall provide the ability to output the segment wise accumulated integral of a variable along a line with a 2D, finite-element diffusion problem.'
+  []
+  [simple_diffusion_rays_nodal]
+    type = 'Exodiff'
+    input = 'simple_diffusion_line_integral.i'
+    exodiff = 'simple_diffusion_line_integral_rays_nodal.e'
+    design = 'VariableIntegralRayKernel.md RayTracingMeshOutput.md'
+    cli_args = 'UserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/execute_on=TIMESTEP_END Outputs/rays/output_data_nodal=true Outputs/rays/file_base=simple_diffusion_line_integral_rays_nodal'
+    requirement = 'The system shall provide the ability to output the segment wise, linearly approximated, accumulated integral of a variable along a line with a 2D, finite-element diffusion problem.'
+  []
+  [simple_diffusion]
+    requirement = 'The system shall provide the ability to compute the line integral of a variable for a 2D diffusion problem, with '
+    design = 'VariableIntegralRayKernel.md'
+    [fe]
+      type = 'CSVDiff'
+      input = 'simple_diffusion_line_integral.i'
+      csvdiff = 'simple_diffusion_line_integral_out.csv'
+      detail = 'finite elements '
+    []
+    [fv]
+      type = 'CSVDiff'
+      input = 'fv_simple_diffusion_line_integral.i'
+      csvdiff = 'fv_simple_diffusion_line_integral_out.csv'
+      detail = 'and finite volumes.'
+    []
+  []
+[]

@@ -30,9 +30,9 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Mesh to add the sidesets to
   std::unique_ptr<MeshBase> & _input;
 
   /// Block ID to assign to the region
   const subdomain_id_type _block_id;
 };
-

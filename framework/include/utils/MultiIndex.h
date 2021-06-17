@@ -150,6 +150,9 @@ public:
     return *this;
   }
 
+  // Compiler generated copy constructor
+  const_noconst_iterator(const const_noconst_iterator &) = default;
+
   // prefix ++
   const_noconst_iterator & operator++()
   {

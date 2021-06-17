@@ -13,6 +13,7 @@
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
+#include "PostprocessorInterface.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
@@ -43,6 +44,7 @@ class InitialConditionBase : public MooseObject,
                              public Coupleable,
                              public FunctionInterface,
                              public UserObjectInterface,
+                             public PostprocessorInterface,
                              public BoundaryRestrictable,
                              public DependencyResolverInterface,
                              public Restartable,
@@ -68,7 +70,7 @@ public:
   /**
    * getter method for dependent user objects
    */
-  const std::set<std::string> & getDependObjects() const { return _depend_uo; }
+  const std::set<UserObjectName> & getDependObjects() const { return _depend_uo; }
 
   /**
    * Workhorse method for projecting the initial conditions for block initial conditions
@@ -92,52 +94,22 @@ public:
 
   virtual const std::set<std::string> & getSuppliedItems() override;
 
-  /**
-   * reimplements the getUserObject method from UserObjectInterface
-   */
-  template <typename T2>
-  const T2 & getUserObject(const std::string & name);
-  /**
-   * reimplements the getUserObjectByName method from UserObjectInterface
-   */
-  template <typename T2>
-  const T2 & getUserObjectByName(const UserObjectName & name);
-
-  /**
-   * reimplements the getUserObjectBase method from UserObjectInterface
-   */
-  const UserObject & getUserObjectBase(const std::string & name);
-
 protected:
   /// The system object
   SystemBase & _sys;
+
+  /// If set, UOs retrieved by this IC will not be executed before this IC
+  const bool _ignore_uo_dependency;
+
+private:
+  void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
 
   /// Dependent variables
   std::set<std::string> _depend_vars;
   /// Supplied variables
   std::set<std::string> _supplied_vars;
 
-  /// Depend UserObjects
-  std::set<std::string> _depend_uo;
-
-  /// If set, UOs retrieved by this IC will not be executed before this IC
-  const bool _ignore_uo_dependency;
+  /// Depend UserObjects. Mutable so that the getters can be const and still add dependencies
+  mutable std::set<UserObjectName> _depend_uo;
 };
-
-template <typename T>
-const T &
-InitialConditionBase::getUserObject(const std::string & name)
-{
-  if (!_ignore_uo_dependency)
-    _depend_uo.insert(_pars.get<UserObjectName>(name));
-  return UserObjectInterface::getUserObject<T>(name);
-}
-
-template <typename T>
-const T &
-InitialConditionBase::getUserObjectByName(const UserObjectName & name)
-{
-  if (!_ignore_uo_dependency)
-    _depend_uo.insert(name);
-  return UserObjectInterface::getUserObjectByName<T>(name);
-}

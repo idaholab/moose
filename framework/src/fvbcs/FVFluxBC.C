@@ -17,7 +17,7 @@ InputParameters
 FVFluxBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
-  params += MaterialPropertyInterface::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
   params.registerSystemAttributeName("FVFluxBC");
 
   // FVFluxBCs always rely on Boundary MaterialData
@@ -28,9 +28,11 @@ FVFluxBC::validParams()
 
 FVFluxBC::FVFluxBC(const InputParameters & parameters)
   : FVBoundaryCondition(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, /*nodal=*/false, /*is_fv=*/true),
-    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    _u(_var.adSln())
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(
+        this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+    _u(_var.adSln()),
+    _u_neighbor(_var.adSlnNeighbor())
 {
 }
 
@@ -51,6 +53,14 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
+  if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+               fi.faceCentroid());
+  else if (ft == FaceInfo::VarFaceNeighbors::NEITHER)
+    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+               "with the relevant finite volume variable. Its centroid: ",
+               fi.faceCentroid());
+
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   // This could be an "internal" boundary - one created by variable block
@@ -61,8 +71,6 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
     prepareVectorTag(_assembly, _var.number());
   else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     prepareVectorTagNeighbor(_assembly, _var.number());
-  else
-    mooseError("should never get here");
 
   _local_re(0) = r;
   accumulateTaggedLocalResidual();
@@ -113,6 +121,10 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
                 "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                 "for a number of dof indices equal to  1");
 
+#ifndef MOOSE_SPARSE_AD
+    mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                "Out of bounds access in derivative vector.");
+#endif
     _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
     accumulateTaggedLocalMatrix();
@@ -138,7 +150,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  mooseAssert(_var.dofIndices().size() <= 1, "We're currently built to use CONSTANT MONOMIALS");
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
     // Even though the elem element is always the non-null pointer on mesh
@@ -154,9 +166,62 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
       computeJacobian(Moose::ElementElement, residual);
     else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
       computeJacobian(Moose::NeighborNeighbor, residual);
+    else if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+      mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+                 fi.faceCentroid());
     else
-      mooseError("should never get here");
+      mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+                 "with the relevant finite volume variable. Its centroid: ",
+                 fi.faceCentroid());
   };
 
-  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  if (_var.dofIndices().size() > 0)
+    _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  else if (_var.dofIndicesNeighbor().size() > 0)
+    _assembly.processDerivatives(r, _var.dofIndicesNeighbor()[0], _matrix_tags, local_functor);
+  else
+    mooseError("Variable has no dofs on local and neighbor element for this FluxBC at ",
+               _face_info->faceCentroid());
+}
+
+const ADReal &
+FVFluxBC::uOnUSub() const
+{
+  mooseAssert(_face_info, "The face info has not been set");
+  const auto ft = _face_info->faceType(_var.name());
+  mooseAssert(
+      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+      "The variable " << _var.name()
+                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
+                      << this->name());
+  mooseAssert(_qp == 0,
+              "At the time of writing, we only support one quadrature point, which should "
+              "correspond to the location of the cell centroid. If that changes, we should "
+              "probably change the body of FVFluxBC::uOnUSub");
+
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+    return _u[_qp];
+  else
+    return _u_neighbor[_qp];
+}
+
+const ADReal &
+FVFluxBC::uOnGhost() const
+{
+  mooseAssert(_face_info, "The face info has not been set");
+  const auto ft = _face_info->faceType(_var.name());
+  mooseAssert(
+      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+      "The variable " << _var.name()
+                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
+                      << this->name());
+  mooseAssert(_qp == 0,
+              "At the time of writing, we only support one quadrature point, which should "
+              "correspond to the location of the cell centroid. If that changes, we should "
+              "probably change the body of FVFluxBC::uOnGhost");
+
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+    return _u_neighbor[_qp];
+  else
+    return _u[_qp];
 }

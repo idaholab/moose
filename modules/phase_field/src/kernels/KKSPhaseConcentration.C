@@ -16,8 +16,8 @@ KKSPhaseConcentration::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("KKS model kernel to enforce the decomposition of concentration into "
-                             "phase concentration  (1-h(eta))*ca + h(eta)*cb - c = 0. The "
-                             "non-linear variable of this kernel is cb.");
+                             "phase concentration  $(1-h(\\eta))c_a + h(\\eta)c_b - c = 0$. The "
+                             "non-linear variable of this kernel is $c_b$.");
   params.addRequiredCoupledVar("ca", "Phase a concentration");
   params.addRequiredCoupledVar("c", "Real concentration");
   params.addRequiredCoupledVar("eta", "Phase a/b order parameter");

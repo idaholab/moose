@@ -113,24 +113,31 @@ TableOutput::outputPostprocessors()
 void
 TableOutput::outputReporters()
 {
+  // List of VPP objects with output
+  const std::set<std::string> & vpps = getVectorPostprocessorOutput();
+
   for (const auto & combined_name : getReporterOutput())
   {
     ReporterName r_name(combined_name);
-    if (_reporter_data.hasReporterValue<Real>(r_name) &&
-        !hasPostprocessorByName(r_name.getObjectName()))
-    {
-      if (_reporter_table.empty() ||
-          !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
-        _reporter_table.addRow(time());
 
-      if (_all_data_table.empty() ||
-          !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
-        _all_data_table.addRow(time());
+    outputReporter<bool>(r_name);
+    outputReporter<unsigned short int>(r_name);
+    outputReporter<unsigned int>(r_name);
+    outputReporter<unsigned long int>(r_name);
+    outputReporter<unsigned long long int>(r_name);
+    outputReporter<short int>(r_name);
+    outputReporter<int>(r_name);
+    outputReporter<long int>(r_name);
+    outputReporter<long long int>(r_name);
+    outputReporter<float>(r_name);
+    outputReporter<long double>(r_name);
+    outputReporter<char>(r_name);
+    outputReporter<std::string>(r_name);
 
-      const Real & value = _reporter_data.getReporterValue<Real>(r_name);
-      _reporter_table.addData(combined_name, value);
-      _all_data_table.addData(combined_name, value);
-    }
+    // Need to check for reals because PPs and VPPs might have already been outputted
+    if (!hasPostprocessorByName(r_name.getObjectName()) &&
+        vpps.find(r_name.getObjectName()) == vpps.end())
+      outputReporter<Real>(r_name);
   }
 }
 

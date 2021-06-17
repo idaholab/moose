@@ -1,0 +1,12 @@
+[Tests]
+  design = 'MaterialIntegralRayKernel.md'
+  issues = '#16028'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'material_integral_ray_kernel.i'
+    csvdiff = 'material_integral_ray_kernel_out.csv'
+
+    requirement = 'The system shall provide the ability to compute the integral of a material property along a line.'
+  []
+[]

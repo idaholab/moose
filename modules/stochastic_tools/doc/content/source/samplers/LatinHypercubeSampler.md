@@ -14,9 +14,8 @@ This sampler implements the Latin hypercube strategy presented in [!cite](mckay1
 
 ## Example Input File Syntax
 
-The following input file creates a Latin hypercube sample for two distributions, where the
-supplied uniform distribution is sampled with six bins with probabilities between 0 and 1. The
-normal distribution is sampled with seven bins with probabilities between 0.001 and 0.999.
+The following input file creates a Latin hypercube sample from two uniform distributions with
+10 samples of each distribution.
 
 !listing latin_hypercube.i block=Distributions Samplers
 
@@ -26,8 +25,8 @@ the grid lines are defined with the associated probability based bins.
 !plot scatter filename=gold/latin_hypercube_out_data_0001.csv id=hypercube
       caption=Latin hypercube sampled data with tick marks defined at the probability intervals.
       data=[{'x':'sample_0', 'y':'sample_1', 'mode':'markers'}]
-      layout={'xaxis':{'title':'Uniform', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[2004,2005,2006,2007,2008,2009,2010]},
-              'yaxis':{'title':'Normal', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[1970.7,1976.8,1978.3,1979.5,1980.5,1981.7,1983.2,1989.3]},
+      layout={'xaxis':{'title':'Uniform "a" (100,200)', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[100,110,120,130,140,150,160,170,180,190,200]},
+              'yaxis':{'title':'Uniform "b" (10,20)', 'linewidth':1, 'showline':1, 'tickmode':'array', 'tickvals':[10,11,12,13,14,15,16,17,18,19,20]},
               'width':775, 'height':800, 'font':{'size':16}, 'margin':{'l':100}}
 
 

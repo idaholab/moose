@@ -1,0 +1,20 @@
+[Tests]
+  design = 'ConeRayStudy.md'
+  issues = '#16028'
+
+  [tests]
+    requirement = 'The system shall be able to generate rays emitting from a point in a cone using angular quadrature in '
+    [2d]
+      type = 'Exodiff'
+      input = 'cone_ray_study.i'
+      exodiff = 'cone_ray_study_out.e cone_ray_study_rays.e'
+      detail = 'two-dimensional meshes '
+    []
+    [3d]
+      type = 'Exodiff'
+      input = 'cone_ray_study_3d.i'
+      exodiff = 'cone_ray_study_3d_out.e cone_ray_study_3d_rays.e'
+      detail = 'and in three-dimensional meshes.'
+    []
+  []
+[]

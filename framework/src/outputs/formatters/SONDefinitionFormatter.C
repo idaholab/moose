@@ -10,13 +10,14 @@
 #include "SONDefinitionFormatter.h"
 #include "MooseUtils.h"
 #include "pcrecpp.h"
+#include <algorithm>
 
 SONDefinitionFormatter::SONDefinitionFormatter() : _spaces(2), _level(0) {}
 
 // ******************************** toString ************************************ //
 // traverse the associated types array of cpp_types and absolute lookup paths and //
 // transform the paths to work with our parsed hierarchy and store pairs in a map //
-// of types to paths for use by the ExistsIn rule and store the global/parameters //
+// of types to paths for use by InputChoices rule and store the global/parameters //
 // object then add root blocks recursively and return constructed stream's string //
 // ****************************************************************************** //
 std::string
@@ -244,8 +245,8 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 // - parameter's value :: add MaxOccurs
 // - parameter's value :: add ValType
 // - parameter's value :: add ValEnums
-// - parameter's value :: add InputChoices
-// - parameter's value :: add ExistsIn
+// - parameter's value :: add InputChoices (options)
+// - parameter's value :: add InputChoices (lookups)
 // - parameter's value :: add MinValInc
 // - parameter's value :: add InputDefault
 // ****************************************************************************** //
@@ -253,10 +254,28 @@ void
 SONDefinitionFormatter::addParameters(const nlohmann::json & params)
 {
 
+  // build list of any '_object_params_set_by_action' that are not required in input
+  std::vector<std::string> action_set_params;
+  if (params.contains("_object_params_set_by_action") &&
+      params["_object_params_set_by_action"].contains("default"))
+  {
+    std::string opsba = nlohmann::to_string(params["_object_params_set_by_action"]["default"]);
+    if (opsba.front() == '"' && opsba.back() == '"')
+    {
+      opsba.erase(opsba.begin());
+      opsba.pop_back();
+    }
+    action_set_params = MooseUtils::split(MooseUtils::trim(opsba), " ");
+  }
+
   for (const auto & el : params.items())
   {
     auto & name = el.key();
     auto & param = el.value();
+
+    // skip '_object_params_set_by_action' parameters because they will not be input
+    if (name == "_object_params_set_by_action")
+      continue;
 
     // lambda to calculate relative path from the current level to the document root
     auto backtrack = [](int level) {
@@ -277,14 +296,16 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
 
     // *** ChildAtLeastOne of parameter
-    // if parameter is required and no default exists then outside its level specify
+    // if parameter is required, not action set, and no default exists, then specify
     //   ChildAtLeastOne = [ "backtrack/GlobalParams/name/value" "name/value" ]
     auto def_ptr = param.find("default");
     std::string def;
     if (def_ptr != param.end())
       def = def_ptr->is_string() ? def_ptr->get<std::string>() : nlohmann::to_string(*def_ptr);
     def = MooseUtils::trim(def);
-    if (param.contains("required"))
+    if (param.contains("required") &&
+        std::find(action_set_params.begin(), action_set_params.end(), name) ==
+            action_set_params.end())
     {
       bool required = param["required"];
       if (required && def.empty())
@@ -354,24 +375,21 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
       }
     }
 
-    // *** ExistsIn of parameter's value
-    // add any reserved_values and if this parameter's above transformed cpp_type is
-    // "FunctionName" then add an ExpressionsAreOkay flag and check if there are any
-    // paths associated with the cpp_type in the map that was built before traversal
-    // then add those paths relative to this node here as well
-    std::string paths;
+    // *** InputChoices (lookups) of parameter's value
+    // add any reserved_values then check if there are any paths associated with the
+    // cpp_type in the assoc_types_map that was built before traversal and add those
+    // paths relative to this node here as well
+    std::string choices;
     if (param.contains("reserved_values"))
     {
       for (const auto & reserved : param["reserved_values"])
-        paths += "EXTRA:" + nlohmann::to_string(reserved) + " ";
+        choices += nlohmann::to_string(reserved) + " ";
     }
 
-    if (cpp_type == "FunctionName")
-      paths += "EXTRA:\"ExpressionsAreOkay\" ";
     for (const auto & path : _assoc_types_map[cpp_type])
-      paths += "\"" + backtrack(_level) + path + "/decl\" ";
-    if (!paths.empty())
-      addLine("ExistsIn=[ " + paths + "]");
+      choices += "PATH:\"" + backtrack(_level) + path + "/decl\" ";
+    if (!choices.empty())
+      addLine("InputChoices=[ " + choices + "]");
 
     // *** MinValInc of parameter's value
     if (cpp_type.compare(0, 8, "unsigned") == 0 && basic_type == "Integer")

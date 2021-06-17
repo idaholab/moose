@@ -1,0 +1,11 @@
+[Tests]
+  design = 'fsi_acoustics.md'
+  issues = '#15712'
+  [./wave_height_bc_test]
+    type = 'CSVDiff'
+    input = 'wave_height_bc.i'
+    csvdiff = 'wave_height_bc_out.csv'
+    abs_zero = 1e-08
+    requirement = 'The system shall reproduce wave heights that are consistent with the ones provided.'
+  [../]
+[]

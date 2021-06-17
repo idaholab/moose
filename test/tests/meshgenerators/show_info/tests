@@ -1,0 +1,12 @@
+[Tests]
+  [test]
+    type = RunApp
+    input = 'show_info.i'
+    cli_args = '--mesh-only'
+    design = 'MeshGenerator.md'
+    requirement = 'The system shall be able to output detailed mesh information about generated meshes.'
+    issues = '#16783'
+    recover = false
+    mesh_mode = REPLICATED
+  []
+[]

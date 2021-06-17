@@ -19,6 +19,25 @@ TEST(GeochemicalDatabaseReaderTest, filename)
   EXPECT_EQ(database.filename(), "database/moose_testdb.json");
 }
 
+TEST(GeochemicalDatabaseReaderTest, faultyDB)
+{
+  // Test that the database validator throws an error when a faulty
+  // database is read (the full range of validation errors are tested
+  // in GeochemicalDatabaseValidatorTest.C)
+  try
+  {
+    GeochemicalDatabaseReader database("database/faultydbs/missing_header.json");
+  }
+  catch (const std::exception & err)
+  {
+    const std::string msg = "The MOOSE database database/faultydbs/missing_header.json does not "
+                            "have a required \"Header\" field";
+
+    std::size_t pos = std::string(err.what()).find(msg);
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
 TEST(GeochemicalDatabaseReaderTest, getActivityModel)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
@@ -95,7 +114,7 @@ TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // Get the neutral species activity coefficients from the database
-  // and compare with the expected valules
+  // and compare with the expected values
   auto nsa = database.getNeutralSpeciesActivity();
 
   auto ns = nsa["co2"];
@@ -120,6 +139,21 @@ TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
   EXPECT_EQ(ns.b, b_gold);
   EXPECT_EQ(ns.c, c_gold);
   EXPECT_EQ(ns.d, d_gold);
+
+  // check error is thrown if database has no neutral species
+  GeochemicalDatabaseReader database_non("database/faultydbs/no_neutral_species.json");
+  try
+  {
+    auto nsa = database_non.getNeutralSpeciesActivity();
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("No neutral species activity coefficients in database") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getElements)
@@ -183,6 +217,20 @@ TEST(GeochemicalDatabaseReaderTest, getBasisSpecies)
   EXPECT_EQ(species.charge, 1);
   EXPECT_EQ(species.molecular_weight, 1.0079);
   EXPECT_EQ(species.elements, els_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getBasisSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
@@ -255,6 +303,20 @@ TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
   EXPECT_EQ(sspecies.molecular_weight, 17.0073);
   EXPECT_EQ(sspecies.basis_species, bs_gold);
   EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getEquilibriumSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
@@ -297,6 +359,20 @@ TEST(GeochemicalDatabaseReaderTest, getMineralSpecies)
   EXPECT_EQ(mspecies.surface_area, 600.0);
   bs_gold = {{">(s)FeOH", 0.005}, {">(w)FeOH", 0.2}};
   EXPECT_EQ(mspecies.sorption_sites, bs_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getMineralSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
@@ -343,6 +419,20 @@ TEST(GeochemicalDatabaseReaderTest, getGasSpecies)
   EXPECT_EQ(gspecies.Pcrit, 46.0);
   EXPECT_EQ(gspecies.Tcrit, 190.4);
   EXPECT_EQ(gspecies.omega, .011);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getGasSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getRedoxSpecies)
@@ -374,6 +464,20 @@ TEST(GeochemicalDatabaseReaderTest, getRedoxSpecies)
   EXPECT_EQ(rspecies.molecular_weight, 241.0600);
   EXPECT_EQ(rspecies.basis_species, bs_gold);
   EXPECT_EQ(rspecies.equilibrium_const, logk_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getRedoxSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
@@ -398,6 +502,20 @@ TEST(GeochemicalDatabaseReaderTest, getOxideSpecies)
 
   EXPECT_EQ(ospecies.molecular_weight, 143.0929);
   EXPECT_EQ(ospecies.basis_species, bs_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getOxideSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
@@ -419,6 +537,20 @@ TEST(GeochemicalDatabaseReaderTest, getSurfaceSpecies)
   std::map<std::string, Real> ss_gold = {{">(s)FeOH", 1}, {"H+", -1}};
 
   EXPECT_EQ(sspecies.basis_species, ss_gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto bs_not = database.getSurfaceSpecies({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
@@ -435,6 +567,20 @@ TEST(GeochemicalDatabaseReaderTest, equilibriumReactions)
   EXPECT_EQ(reactions[2], "CaCO3 = Ca++ - H+ + HCO3-");
   EXPECT_EQ(reactions[3], "CaOH+ = Ca++ - H+ + H2O");
   EXPECT_EQ(reactions[4], "OH- = - H+ + H2O");
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.equilibriumReactions({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, mineralReactions)
@@ -447,6 +593,20 @@ TEST(GeochemicalDatabaseReaderTest, mineralReactions)
   auto reactions = database.mineralReactions(names);
 
   EXPECT_EQ(reactions[0], "Calcite = Ca++ - H+ + HCO3-");
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.mineralReactions({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, gasReactions)
@@ -460,6 +620,20 @@ TEST(GeochemicalDatabaseReaderTest, gasReactions)
 
   EXPECT_EQ(reactions[0], "CH4(g) = CH4(aq)");
   EXPECT_EQ(reactions[1], "N2(g) = N2(aq)");
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.gasReactions({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, redoxReactions)
@@ -473,6 +647,20 @@ TEST(GeochemicalDatabaseReaderTest, redoxReactions)
 
   EXPECT_EQ(reactions[0], "(O-phth)-- = 6H+ -5H2O + 8HCO3- -7.5O2(aq)");
   EXPECT_EQ(reactions[1], "Am++++ = Am+++ + H+ -0.5H2O + 0.25O2(aq)");
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.redoxReactions({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, oxideReactions)
@@ -485,6 +673,20 @@ TEST(GeochemicalDatabaseReaderTest, oxideReactions)
   auto reactions = database.oxideReactions(names);
 
   EXPECT_EQ(reactions[0], "Cu2O = 2Cu+ -2H+ + H2O");
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.oxideReactions({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist does not exist in database database/moose_testdb.json") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST(GeochemicalDatabaseReaderTest, isBasisSpecies)
@@ -653,7 +855,7 @@ TEST(GeochemicalDatabaseReaderTest, mineralSpeciesNames)
                          "Something",
                          "problematic_sorber"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 7);
+  EXPECT_EQ(names.size(), (std::size_t)7);
 }
 
 TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
@@ -661,9 +863,9 @@ TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::vector<std::string> names = database.secondarySpeciesNames();
-  for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "e-"})
+  for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "e-", "seq_radius_neg1"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 7);
+  EXPECT_EQ(names.size(), (std::size_t)8);
 }
 
 TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
@@ -673,7 +875,7 @@ TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
   std::vector<std::string> names = database.redoxCoupleNames();
   for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++", "StoiCheckRedox"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 5);
+  EXPECT_EQ(names.size(), (std::size_t)5);
 }
 
 TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
@@ -683,7 +885,7 @@ TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
   std::vector<std::string> names = database.surfaceSpeciesNames();
   for (const auto & n : {">(s)FeO-", ">(s)FeOCa+"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 2);
+  EXPECT_EQ(names.size(), (std::size_t)2);
 }
 
 TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
@@ -694,6 +896,19 @@ TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
   std::string gold = "Ca++:\n{\n    \"charge\": 2,\n    \"elements\": {\n        \"Ca\": 1.0\n    "
                      "},\n    \"molecular weight\": 40.08,\n    \"radius\": 6.0\n}";
   EXPECT_EQ(data, gold);
+
+  // check that an error is thrown if the species does not exist
+  try
+  {
+    auto reactions_not = database.getSpeciesData({"does_not_exist"});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("does_not_exist is not a species in the database") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 /// Test the reexpression of the free electron in terms of O2(aq)

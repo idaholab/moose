@@ -1,0 +1,26 @@
+Applications:
+    ray_tracing:
+        exe_directory: ${MOOSE_DIR}/modules/ray_tracing
+        content_directory: ${MOOSE_DIR}/modules/ray_tracing/doc/content
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+
+Documents:
+    software_requirements_specification: sqa/ray_tracing_srs.md
+    software_design_description: sqa/ray_tracing_sdd.md
+    software_test_plan: sqa/ray_tracing_stp.md
+    requirements_traceablity_matrix: sqa/ray_tracing_rtm.md
+    verification_validation_plan: sqa/ray_tracing_vvr.md
+    failure_analysis_report: sqa/ray_tracing_far.md
+    software_library_list: sqa/ray_tracing_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    ray_tracing:
+        directories:
+            - ${ROOT_DIR}/test
+        log_default: WARNING
+        show_warning: false

@@ -1,0 +1,1 @@
+!template load file=sqa/app_vvr.md.template app=RayTracingApp category=ray_tracing

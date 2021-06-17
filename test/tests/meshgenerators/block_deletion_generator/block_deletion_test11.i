@@ -13,7 +13,7 @@
   [../]
   [./swiss_cheese2]
     type = BlockDeletionGenerator
-    block_id = 2
+    block = 2
     input = 'sbb2'
   [../]
   [./sbb3]
@@ -25,7 +25,7 @@
   [../]
   [./swiss_cheese3]
     type = BlockDeletionGenerator
-    block_id = 3
+    block = 3
     input = 'sbb3'
   [../]
   [./sbb4]
@@ -37,7 +37,7 @@
   [../]
   [./swiss_cheese4]
     type = BlockDeletionGenerator
-    block_id = 4
+    block = 4
     input = 'sbb4'
   [../]
   [./sbb5]
@@ -53,7 +53,7 @@
   [../]
   [./swiss_cheese5]
     type = BlockDeletionGenerator
-    block_id = 5
+    block = 5
     input = 'sbb5'
   [../]
   [./sbb6]
@@ -69,7 +69,7 @@
   [../]
   [./swiss_cheese6]
     type = BlockDeletionGenerator
-    block_id = 6
+    block = 6
     input = 'sbb6'
   [../]
 []

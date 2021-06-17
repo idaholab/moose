@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "JsonIO.h"
+#include "Reporter.h"
+#include "TheWarehouse.h"
 
 registerMooseObjectAliased("MooseApp", JSONOutput, "JSON");
 
@@ -22,6 +24,8 @@ JSONOutput::validParams()
   params += AdvancedOutput::enableOutputTypes("system_information reporter");
   params.addClassDescription("Output for Reporter values using JSON format.");
   params.set<ExecFlagEnum>("execute_system_information_on", /*quite_mode=*/true) = EXEC_INITIAL;
+  params.addParam<bool>(
+      "use_legacy_reporter_output", false, "Use reporter output that does not group by object.");
   return params;
 }
 
@@ -53,7 +57,16 @@ JSONOutput::outputSystemInformation()
 void
 JSONOutput::outputReporters()
 {
-  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  // Set of ReporterNames for output
+  std::set<ReporterName> r_names;
+  for (const std::string & c_name : getReporterOutput())
+    r_names.emplace(c_name);
+
+  // Is there ANY distributed data
+  _has_distributed = std::any_of(r_names.begin(), r_names.end(), [this](const ReporterName & n) {
+    return _reporter_data.hasReporterWithMode(n.getObjectName(), REPORTER_MODE_DISTRIBUTED);
+  });
+  if (processor_id() == 0 || _has_distributed)
   {
     // Create the current output node
     auto & current_node = _json["time_steps"].emplace_back();
@@ -67,23 +80,63 @@ JSONOutput::outputReporters()
       current_node["nonlinear_iteration"] = _nonlinear_iter;
 
     // Inject processor info
-    if (n_processors() > 1)
+    if (n_processors() > 1 && _has_distributed)
     {
       _json["part"] = processor_id();
       _json["number_of_parts"] = n_processors();
     }
 
     // Add Reporter values to the current node
-    _reporter_data.store(current_node["reporters"]);
+    auto & r_node = current_node["reporters"]; // non-accidental insert
+    for (const auto & r_name : r_names)
+    {
+      // Create/get object node
+      auto obj_node_pair = r_node.emplace(r_name.getObjectName(), nlohmann::json());
+      auto & obj_node = *(obj_node_pair.first);
+      const auto & context = _reporter_data.getReporterContextBase(r_name);
+
+      // If this value is produced in root mode and we're not on root, don't report this value
+      if (context.getProducerModeEnum() == REPORTER_MODE_ROOT && processor_id() != 0)
+        continue;
+
+      // If the object node was created insert the class level information
+      if (obj_node_pair.second)
+      {
+        // Query the TheWarehouse for all Reporter objects with the given name. The attributes and
+        // QueryID are used to allow the TheWarehouse::queryInto method be called with the
+        // "show_all" option set to true. This returns all objects, regardless of "enabled" state,
+        // which is what is needed to ensure that output always happens, even if an object is
+        // disabled.
+        std::vector<Reporter *> objs;
+        auto attr = _problem_ptr->theWarehouse()
+                        .query()
+                        .condition<AttribInterfaces>(Interfaces::Reporter)
+                        .condition<AttribName>(r_name.getObjectName())
+                        .attributes();
+        auto qid = _problem_ptr->theWarehouse().queryID(attr);
+        _problem_ptr->theWarehouse().queryInto(qid, objs, true);
+        mooseAssert(objs.size() <= 1,
+                    "Multiple Reporter objects with the same name located, how did you do that?");
+
+        // It is possible to have a Reporter value without a reporter objects (i.e., VPPs, PPs),
+        // which is why objs can be empty.
+        if (!objs.empty())
+          objs.front()->store(obj_node["info"]);
+      }
+
+      // Insert reporter value
+      auto & node = obj_node["values"].emplace_back();
+      context.store(node);
+    }
   }
 }
 
 void
 JSONOutput::output(const ExecFlagType & type)
 {
+  _has_distributed = false;
   AdvancedOutput::output(type);
-
-  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  if (processor_id() == 0 || _has_distributed)
   {
     std::ofstream out(filename().c_str());
     out << std::setw(4) << _json << std::endl;

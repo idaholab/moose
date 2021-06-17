@@ -19,37 +19,37 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_derivative]
+  [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
-  [./exp_decay]
+  []
+  [exp_decay]
     type = PorousFlowExponentialDecay
     variable = u
     rate = 1.5
     reference = 1.0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u]
+  [u]
     type = PointValue
     variable = u
     point = '0 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

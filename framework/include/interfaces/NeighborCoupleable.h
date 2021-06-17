@@ -45,6 +45,13 @@ public:
   virtual const ADVariableValue & adCoupledNeighborValue(const std::string & var_name,
                                                          unsigned int comp = 0) const;
 
+  /**
+   * Get the time derivative of the coupled neighbor variable value for \p var_name with derivative
+   * information for automatic differentiation objects
+   */
+  virtual const ADVariableValue & adCoupledNeighborValueDot(const std::string & var_name,
+                                                            unsigned int comp = 0) const;
+
   std::vector<const ADVariableValue *> adCoupledNeighborValues(const std::string & var_name) const;
 
   /**

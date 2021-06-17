@@ -31,12 +31,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-
-  /**
-   * Deprecated method
-   */
-  virtual void computeOffDiagJacobian(unsigned jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -44,7 +39,7 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual MooseVariable & variable() override { return _var; }
+  virtual const MooseVariable & variable() const override { return _var; }
 
 protected:
   /**
@@ -58,15 +53,19 @@ protected:
   virtual Real computeQpJacobian() { return 0; }
 
   /**
-   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
-   * component.
+   * For coupling standard variables
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
   /**
+   * For coupling scalar variables
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
+
+  /**
    * For coupling array variables
    */
-  virtual RealEigenVector computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
+  virtual RealEigenVector computeQpOffDiagJacobianArray(const ArrayMooseVariable & jvar)
   {
     return RealEigenVector::Zero(jvar.count());
   }

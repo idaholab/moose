@@ -11,6 +11,9 @@
 
 registerMooseObject("MooseTestApp", TestDeclareReporter);
 registerMooseObject("MooseTestApp", TestGetReporter);
+registerMooseObject("MooseTestApp", TestDeclareInitialSetupReporter);
+registerMooseObject("MooseTestApp", TestGetReporterDeclaredInInitialSetupReporter);
+registerMooseObject("MooseTestApp", TestDeclareErrorsReporter);
 
 InputParameters
 TestDeclareReporter::validParams()
@@ -18,6 +21,8 @@ TestDeclareReporter::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addParam<ReporterValueName>(
       "int_name", "int", "The name of the interger data"); // MooseDocs:data
+  params.addParam<ReporterValueName>("distributed_vector_name",
+                                     "Distributed vector reporter to produce.");
   return params;
 }
 
@@ -31,7 +36,11 @@ TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
     _scatter_value(
         declareValueByName<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
     _gather_value(declareValueByName<std::vector<dof_id_type>, ReporterGatherContext>(
-        "gather")) // MooseDocs:gather
+        "gather")), // MooseDocs:gather
+    _distributed_vector(isParamValid("distributed_vector_name")
+                            ? &declareValue<std::vector<dof_id_type>>("distributed_vector_name",
+                                                                      REPORTER_MODE_DISTRIBUTED)
+                            : nullptr)
 {
   if (processor_id() == 0)
     for (dof_id_type rank = 0; rank < n_processors(); ++rank)
@@ -51,6 +60,14 @@ TestDeclareReporter::execute()
     _bcast_value = 42;
 
   _gather_value.resize(1, processor_id());
+
+  if (_distributed_vector)
+  {
+    _distributed_vector->resize(_vector.size());
+    (*_distributed_vector)[0] = processor_id();
+    for (unsigned int i = 1; i < _distributed_vector->size(); ++i)
+      (*_distributed_vector)[i] = (*_distributed_vector)[i - 1] * 10;
+  }
 }
 // MooseDocs:execute_end
 
@@ -112,5 +129,83 @@ TestGetReporter::execute()
       gold.push_back(id);
     if (_gather_value != gold)
       mooseError("Gather reporter test failed!");
+  }
+}
+
+InputParameters
+TestDeclareInitialSetupReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<Real>("value", "The value to report.");
+  return params;
+}
+
+TestDeclareInitialSetupReporter::TestDeclareInitialSetupReporter(const InputParameters & parameters)
+  : GeneralReporter(parameters)
+{
+}
+
+void
+TestDeclareInitialSetupReporter::initialSetup()
+{
+  Real & value = declareValueByName<Real>("value");
+  value = getParam<Real>("value");
+}
+
+InputParameters
+TestGetReporterDeclaredInInitialSetupReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<ReporterName>("other_reporter",
+                                        "The reporter name that was declared in initialSetup");
+  return params;
+}
+
+TestGetReporterDeclaredInInitialSetupReporter::TestGetReporterDeclaredInInitialSetupReporter(
+    const InputParameters & parameters)
+  : GeneralReporter(parameters),
+    _value_declared_in_initial_setup(getReporterValue<Real>("other_reporter")),
+    _the_value_of_the_reporter(declareValueByName<Real>("other_value"))
+{
+}
+
+void
+TestGetReporterDeclaredInInitialSetupReporter::execute()
+{
+  _the_value_of_the_reporter = _value_declared_in_initial_setup;
+}
+
+InputParameters
+TestDeclareErrorsReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<ReporterValueName>("value", "A reporter value name");
+
+  params.addParam<bool>("missing_param", false, "True to test the error for a missing parameter");
+  params.addParam<bool>("bad_param", false, "True to test the error for a bad parameter type");
+  params.addParam<bool>("already_declared", false, "Test declaring a value multiple times");
+  params.addParam<bool>("requested_different_type",
+                        false,
+                        "Test declaring a value that has been requested with a differentt type");
+
+  return params;
+}
+
+TestDeclareErrorsReporter::TestDeclareErrorsReporter(const InputParameters & parameters)
+  : GeneralReporter(parameters)
+{
+  if (getParam<bool>("missing_param"))
+    declareValue<int>("some_missing_parm");
+  if (getParam<bool>("bad_param"))
+    declareValue<int>("bad_param");
+  if (getParam<bool>("already_declared"))
+  {
+    declareValueByName<int>("value_name");
+    declareValueByName<Real>("value_name");
+  }
+  if (getParam<bool>("requested_different_type"))
+  {
+    getReporterValueByName<int>(name() + "/value_name");
+    declareValueByName<Real>("value_name");
   }
 }

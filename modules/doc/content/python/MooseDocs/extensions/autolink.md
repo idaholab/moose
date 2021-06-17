@@ -26,6 +26,13 @@ The markdown filename link also supports html bookmark style links, as shown in 
                        bookmark.
 [Core](core.md#shortcut-link)
 
+Optional key-value pairs used to define the settings for automatic links can be specified like `[text](link key=value)`. A complete list of the available settings is given in [link-settings].
+
+!devel settings module=MooseDocs.extensions.autolink
+       object=PageLinkComponent
+       id=link-settings
+       caption=Available settings for automatic links. Note that the `language` setting has no effect unless the link is a [source file](#source).
+
 ## Automatic Link Shortcuts
 
 Markdown syntax includes syntax for creating shortcuts (see [core.md#shortcut-link]), within MooseDocs
@@ -42,11 +49,18 @@ It is also possible to include html style bookmarks with the filename, depending
 optionally the page heading, see [example-shortcut-bookmark-link].
 
 !devel example id=example-shortcut-bookmark-link
-               caption=Example of a shortcut linke that contains a markdown file including an html
+               caption=Example of a shortcut link that contains a markdown file including an html
                        style bookmark.
 [core.md#shortcut-link]
 
-## Automatic Source Content
+A complete list of the available settings for automatic link shortcuts is given in [shortcut-link-settings].
+
+!devel settings module=MooseDocs.extensions.autolink
+       object=PageShortcutLinkComponent
+       id=shortcut-link-settings
+       caption=Available settings for automatic link shortcuts. Note that the `language` setting has no effect unless the link is a [source file](#source).
+
+## Automatic Source Content id=source
 
 If a filename is used within a link or shortcut link and the file is contained in the git repository
 a bottom extending modal window will be created that displays the complete text, as shown in
@@ -57,4 +71,11 @@ a bottom extending modal window will be created that displays the complete text,
 [/Diffusion.C]
 
 [Diffusion Kernel](/Diffusion.C)
+!devel-end!
+
+Similar to the [python/MooseDocs/extensions/listing.md], the optional `language` setting can be used to specify the coding language to use for syntax highlighting as demonstrated in [example-file-link-language].
+
+!devel! example id=example-file-link-language
+                caption=Example showing source code link that sets the language to use for syntax highlighting.
+[/test/run_tests language=python]
 !devel-end!

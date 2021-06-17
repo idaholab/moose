@@ -90,7 +90,7 @@ chosen to be:
 \begin{equation}
 \kappa_{\mathrm{rel}} = S^{2} \ ,
 \end{equation}
-with $S$ being the fluid saturation.  A van-Genuchten capillary
+with $S$ being the fluid saturation.  A van Genuchten capillary
 relationship is used:
 \begin{equation}
 S = \left( 1 + (-\alpha p)^{1/(1-m)} \right)^{-m} \ ,
@@ -136,7 +136,7 @@ y$ and $p_{\mathrm{gas}} = y + 3$.  The mass fractions are initialised
 to $(0.3, 0.35, 0.35)$ in the water phase, and $(0.1, 0.8, 0.1)$ in
 the gas phase.  The water phase is assumed to have density
 $\rho_{\mathrm{water}} = 1.5 \exp(p_{\mathrm{water}}/2.3)$, and the gas phase
-$\rho_{\mathrm{gas}} = 1.1 \exp(p_{\mathrm{gas}}/1.3)$.  A van-Genuchten capillary
+$\rho_{\mathrm{gas}} = 1.1 \exp(p_{\mathrm{gas}}/1.3)$.  A van Genuchten capillary
 relationship is used:
 \begin{equation}
 S_{\mathrm{water}} = \left( 1 + (\alpha (p_{\mathrm{gas}} - p_{\mathrm{water}})^{1/(1-m)} \right)^{-m} \ ,
@@ -224,7 +224,7 @@ single-component fluid is used, and the porepressure is initialised to
 $p=y+1.4$ (for $0\leq y \leq 1$).  No fluid flow within the element is
 used, so the masses of fluid at the finite-element nodes behave
 independently.  The fluid is assumed to have density $\rho = 1.1
-\exp(p/1.3)\,$kg.m$^{-3}$.  The porosity is 0.1.  A van-Genuchten capillary
+\exp(p/1.3)\,$kg.m$^{-3}$.  The porosity is 0.1.  A van Genuchten capillary
 relationship is used:
 \begin{equation}
 S = \left( 1 + (-\alpha p)^{1/(1-m)} \right)^{-m} \ ,

@@ -107,7 +107,7 @@ A [TimeIndependentReactionSolver](AddTimeIndependentReactionSolverAction.md) def
 
 - the swaps mentioned above (so the measured concentrations of NH3 and HS- can be used instead of NO3- and O2(aq))
 - the charge-balance species, which is assumed to be Cl-
-- the bulk mole numbers of species from [table:eqm_25deg] and the pH
+- the bulk mole numbers of species from [table:eqm_25deg] and the pH (instead of mole numbers, the geochemistry module can accept other units such as mg, if more convenient)
 - the temperature
 - that no minerals are allowed to precipitate in this exploratory simulation.
 
@@ -283,7 +283,7 @@ The total mineral volume is reported to be 9005.244392233$\,$cm$^{3}$.  To ensur
 
 This completes the definition of the geochemical system used in this presentation.  In summary:
 
-- the bulk composition is determined by [table:model_bulk] in the basis of that table, amending Quartz to have a bulk composition of $322.177447\,$mol;
+- the bulk composition is determined by [table:model_bulk] in the basis of that table, amending Quartz to have a bulk composition of $322.177447\,$mol (the geochemistry module can use other units such as g, mg, etc, but this page uses mole-based units exclusively);
 - all minerals in the basis of [table:model_bulk] are assumed to be at equilibrium with the aqueous system (the `geochemistry` module can easily handle kinetic reactions --- a simple GeoTES example may be found [here](geotes_2D.md) --- but no kinetics are used in this presentation);
 - the minerals Goethite, Albite, and Flourite are assumed to never precipitate
 
@@ -300,7 +300,7 @@ This technique is studying the "worst case" scenario for scaling in a heat excha
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines:
 
 - the swaps needed to bring the minerals into the basis, so it is as described in [table:model_bulk];
-- the bulk composition of the resulting basis (from [table:model_bulk], amending Quartz to have a bulk composition of $322.177447\,$mol);
+- the bulk composition of the resulting basis (from [table:model_bulk], amending Quartz to have a bulk composition of $322.177447\,$mol, recall that the geochemistry module can use other units such as grams or mg if convenient, but this page uses mole-based units exclusively);
 - that the Fluorite, Albite and Goethite minerals will not precipitate;
 - the initial temperature;
 - that `mode = 1` is used, which means all precipitates are removed at the start of each time step;
@@ -314,11 +314,11 @@ The Executioner gives meaning to time:
 
 The `temp_controller` is a simple `FunctionAux`:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/scaling.i start=[./temp_controller_auxk] end=[./Anhydrite_mol_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/scaling.i start=[temp_controller_auxk] end=[Anhydrite_mol_auxk]
 
 and the moles dumped to the heat exchanger (scaling) are recorded by a sequence of [GeochemistryQuantityAux](GeochemistryQuantityAux.md):
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/scaling.i start=[./Anhydrite_mol_auxk] end=[./Dolomite_mol_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/scaling.i start=[Anhydrite_mol_auxk] end=[Dolomite_mol_auxk]
 
 Recording the results into Postprocessors yields the results shown in [geotes_weber_tensleep_scaling.fig].  It is interesting to compare this with Nic Spycher's model of the Weber-Tensleep formation which predicts:
 
@@ -346,19 +346,19 @@ The [SpatialReactionSolver](SpatialReactionSolver/index.md) defines:
 
 The remainder of the input file is mostly concerned with translating between `porous-flow` information (mass fractions and source rates at each node) and geochemistry information (moles in each litre of fluid).  This block translates the `porous_flow` rate, which is the rate of change of a species mass at each node (in kg.s$^{-1}$) into a rate of change per 1 litre of aqueous solution at each node:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[./rate_H_per_1l_auxk] end=[./rate_Cl_per_1l_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[rate_H_per_1l_auxk] end=[rate_Cl_per_1l_auxk]
 
 Here 1.0079 is the molar mass (g.mol$^{-1}$) of the species H$^{+}$, and `nodal_void_volume` is the volume of aqueous solution held at each node.  This block translates the `geochemistry` moles of transported H$^{+}$ into a mass fraction of H$^{+}$:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[./massfrac_H_auxk] end=[./massfrac_Cl_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[massfrac_H_auxk] end=[massfrac_Cl_auxk]
 
 using the `transported_mass`, which is
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[./transported_mass_auxk] end=[./massfrac_H_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[transported_mass_auxk] end=[massfrac_H_auxk]
 
 The porosity is calculated using the free mineral volumes:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[./porosity_auxk] end=[./nodal_void_volume_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/aquifer_geochemistry.i start=[porosity_auxk] end=[nodal_void_volume_auxk]
 
 
 
@@ -422,9 +422,9 @@ The variables are the mass-fractions of each transported species (which are thos
 | NO3- | 0.001937 | 62.0049 | 0.120103491 | 0.000109569 |
 | O2(aq) | -0.002426 | 31.9988 | -0.077629089 | -7.082E-05 |
 
-To interface with the child `geochemistry` simulation (detailed above), the rates of change of each transported species must be recorded.  This is performed via the `save_in` feature of Kernels:
+To interface with the child `geochemistry` simulation (detailed above), the rates of change of each transported species must be recorded.  This is performed via the `save_component_rate_in` feature of the PorousFlowFullySaturated Action:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[./time_deriv_H] end=[./time_deriv_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[time_deriv_H] end=[time_deriv_Cl]
 
 The interface with the child `geochemistry` simulation is created using a MultiApp and Transfers, which
 
@@ -438,19 +438,19 @@ The interface with the child `geochemistry` simulation is created using a MultiA
 
 The injection and production is performed by PorousFlowPolyLinkSinks, for instance
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[./inject_H] end=[./inject_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[inject_H] end=[inject_Cl]
 
 In this block, the `injection_rate_massfrac_H` is set to the initial mass fraction, representing pumping unadulterated reservoir water into the system
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[./injection_rate_massfrac_H] end=[./injection_rate_massfrac_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[injection_rate_massfrac_H] end=[injection_rate_massfrac_Cl]
 
 but will eventually be sourced from the parent simulation `exchanger.i` (see below).  The production DiracKernels record the produced mass of each species into Postprocessors for interface with `exchanger.i`:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[./produce_H] end=[./produce_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[produce_H] end=[produce_Cl]
 
 and this is converted to a mole rate using Functions such as:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[./moles_H] end=[./moles_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/porous_flow.i start=[moles_H] end=[moles_Cl]
 
 ## The heat exchanger
 
@@ -464,25 +464,25 @@ The heat exchanger simulation accepts produced water from the `porous_flow` simu
 
 The `source_species_rates` are provided by the `porous_flow` simulation using a Transfer:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[./production_H] end=[./production_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[production_H] end=[production_Cl]
 
 The composition of fluid injected from the exchanger to the `porous_flow` simulation depends on the transported composition:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[./transported_H_auxk] end=[./transported_Cl_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[transported_H_auxk] end=[transported_Cl_auxk]
 
 which is converted to a mass fraction:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[./massfrac_H_auxk] end=[./massfrac_Cl_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[massfrac_H_auxk] end=[massfrac_Cl_auxk]
 
 before passing to the `porous_flow` simulation:
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[./injection_H] end=[./injection_Cl]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[injection_H] end=[injection_Cl]
 
 A similar Transfer is used for the temperature of the injected fluid.
 
 The amount of precipitate of each mineral is recorded using a [GeochemstryQuantityAux](GeochemistryQuantityAux.md):
 
-!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[./dumped_Siderite_auxk] end=[./dumped_Pyrrhotite_auxk]
+!listing modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep/exchanger.i start=[dumped_Siderite_auxk] end=[dumped_Pyrrhotite_auxk]
 
 ## Writing the input files
 

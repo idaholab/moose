@@ -10,6 +10,7 @@
     order = FIRST
     family = LAGRANGE
     components = 2
+    scaling = '.9 .9'
   []
 []
 

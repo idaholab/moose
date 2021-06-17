@@ -1,0 +1,115 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "receiver": {
+                    "info": {
+                        "name": "receiver",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "multi_rep:from_sub_pp:value",
+                            "type": "std::vector<double>",
+                            "value": [
+                                3.1415926,
+                                1.5707963,
+                                1.0471975,
+                                0.7853981
+                            ]
+                        },
+                        {
+                            "name": "multi_rep:from_sub_rep:int",
+                            "type": "std::vector<int>",
+                            "value": [
+                                10,
+                                11,
+                                12,
+                                13
+                            ]
+                        },
+                        {
+                            "name": "multi_rep:from_sub_rep:str",
+                            "type": "std::vector<std::string>",
+                            "value": [
+                                "ten",
+                                "twenty",
+                                "thirty",
+                                "forty"
+                            ]
+                        },
+                        {
+                            "name": "multi_vpp:from_sub_vpp:a",
+                            "type": "std::vector<std::vector<double>>",
+                            "value": [
+                                [
+                                    30.0,
+                                    30.0,
+                                    30.0
+                                ],
+                                [
+                                    30.0,
+                                    30.0,
+                                    30.0
+                                ],
+                                [
+                                    31.0,
+                                    31.0,
+                                    31.0
+                                ],
+                                [
+                                    31.0,
+                                    31.0,
+                                    31.0
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "multi_vpp:from_sub_vpp:b",
+                            "type": "std::vector<std::vector<double>>",
+                            "value": [
+                                [
+                                    40.0,
+                                    40.0,
+                                    40.0
+                                ],
+                                [
+                                    40.0,
+                                    40.0,
+                                    40.0
+                                ],
+                                [
+                                    41.0,
+                                    41.0,
+                                    41.0
+                                ],
+                                [
+                                    41.0,
+                                    41.0,
+                                    41.0
+                                ]
+                            ]
+                        },
+                        {
+                            "name": "single:from_sub_pp:value",
+                            "type": "double",
+                            "value": 3.1415926
+                        },
+                        {
+                            "name": "single:from_sub_rep:int",
+                            "type": "int",
+                            "value": 10
+                        },
+                        {
+                            "name": "single:from_sub_rep:str",
+                            "type": "std::string",
+                            "value": "twenty"
+                        }
+                    ]
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

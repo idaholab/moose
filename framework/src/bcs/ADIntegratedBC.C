@@ -150,8 +150,13 @@ ADIntegratedBCTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jvariable.phiSize(); _j++)
+    {
+#ifndef MOOSE_SPARSE_AD
+      mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                  "Out of bounds access in derivative vector.");
+#endif
       _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
-
+    }
   accumulateTaggedLocalMatrix();
 }
 
@@ -201,7 +206,8 @@ ADIntegratedBCTempl<T>::computeADJacobian(
           if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
             continue;
 
-          addJacobian(jvariable);
+          // Make sure to get the correct undisplaced/displaced variable
+          addJacobian(getVariable(jvariable.number()));
         }
       };
 
@@ -210,16 +216,16 @@ ADIntegratedBCTempl<T>::computeADJacobian(
 
 template <typename T>
 void
-ADIntegratedBCTempl<T>::computeJacobianBlock(MooseVariableFieldBase & jvar)
+ADIntegratedBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar)
 {
   // Only need to do this once because AD does all the derivatives at once
-  if (jvar.number() == _var.number())
+  if (jvar == _var.number())
     computeADJacobian(_assembly.couplingEntries());
 }
 
 template <typename T>
 void
-ADIntegratedBCTempl<T>::computeJacobianBlockScalar(unsigned int /*jvar*/)
+ADIntegratedBCTempl<T>::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
 }
 

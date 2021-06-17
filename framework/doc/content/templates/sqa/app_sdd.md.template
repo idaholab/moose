@@ -12,12 +12,15 @@ describes the architecture of the system and all of its parts.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SDD) for {{app}} is dependent upon the following documents.
 
+!template! field key=dependencies required=False
 !sqa dependencies suffix=sdd category={{category}}
+!template-end!
 
 ## Requirements Cross Reference
 
 !template field key=cross-reference-intro required=False
 The following is a list of all design documents and the associated requirements for {{app}}.
 
-!template field key=cross-reference required=False
+!template! field key=cross-reference required=False
 !sqa cross-reference category={{category}}
+!template-end!

@@ -7,12 +7,12 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Ca++ Al+++ SiO2(aq) H+ K+"
     equilibrium_minerals = "Clinoptil-Ca Muscovite Quartz"
     piecewise_linear_interpolation = true # to get exact logK at 25degC with no best-fit interpolation
-  [../]
+  []
 []
 

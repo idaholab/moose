@@ -21,42 +21,42 @@ TEST(StochasticTools, Calculators)
   ParallelObject po(comm);
 
   {
-    Mean calc(po);
+    Mean<std::vector<Real>, Real> calc(po, "mean");
     EXPECT_EQ(calc.compute(x, false), 4);
   }
 
   {
-    Min calc(po);
+    Min<std::vector<Real>, Real> calc(po, "min");
     EXPECT_EQ(calc.compute(x, false), 1);
   }
 
   {
-    Max calc(po);
+    Max<std::vector<Real>, Real> calc(po, "max");
     EXPECT_EQ(calc.compute(x, false), 7);
   }
 
   {
-    Sum calc(po);
+    Sum<std::vector<Real>, Real> calc(po, "sum");
     EXPECT_EQ(calc.compute(x, false), 28);
   }
 
   {
-    StdDev calc(po);
+    StdDev<std::vector<Real>, Real> calc(po, "stddev");
     EXPECT_EQ(calc.compute(x, false), 2.1602468994692869408);
   }
 
   {
-    StdErr calc(po);
+    StdErr<std::vector<Real>, Real> calc(po, "stderr");
     EXPECT_EQ(calc.compute(x, false), 0.81649658092772603446);
   }
 
   {
-    Ratio calc(po);
+    Ratio<std::vector<Real>, Real> calc(po, "ratio");
     EXPECT_EQ(calc.compute(x, false), 7);
   }
 
   {
-    L2Norm calc(po);
+    L2Norm<std::vector<Real>, Real> calc(po, "l2norm");
     EXPECT_EQ(calc.compute(x, false), 11.832159566199232259);
   }
 }

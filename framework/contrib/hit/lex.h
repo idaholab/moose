@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace hit
 {
@@ -32,7 +33,11 @@ enum class TokType
 /// Token represents an (atomic) token/quantum of input text.
 struct Token
 {
-  Token(TokType t, const std::string & val, size_t offset = 0, int line = 0);
+  Token(TokType t,
+        const std::string & val,
+        const std::string & name,
+        size_t offset = 0,
+        int line = 0);
   /// str returns a human-friendly string representation of the token.
   std::string str();
 
@@ -40,6 +45,8 @@ struct Token
   TokType type;
   /// val is the actual text from the input that makes this token.
   std::string val;
+  /// name of the original input file
+  std::string name;
   /// offset is the byte offset into the original input identifying the start position where this
   /// token was found.  This can be used to determine line numbers, column offsets, etc. useful for
   /// error messages among other things.

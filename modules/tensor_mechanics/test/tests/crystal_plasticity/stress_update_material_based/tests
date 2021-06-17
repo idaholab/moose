@@ -1,0 +1,120 @@
+[Tests]
+  [update_model_test]
+    type = 'Exodiff'
+    input = 'update_method_test.i'
+    exodiff = 'update_method_test_out.e'
+    issues = '#16064'
+    requirement = 'MOOSE shall provide a StressUpdate material-based extensible crystal plasticity '
+                  'system'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  []
+  [update_model_011orientation]
+    type = 'CSVDiff'
+    input = 'update_method_011orientation.i'
+    csvdiff = 'update_method_011orientation_out.csv'
+    issues = '#16064'
+    requirement = 'The material-based crystal plasticity model shall compute the lagrangian stress, '
+                  'PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate '
+                  'system.'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  []
+  [exception]
+    type = 'Exodiff'
+    input = 'exception.i'
+    exodiff = 'exception_out.e'
+    allow_warnings = true
+    issues = '#16064'
+    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step '
+                  'rather than a failed solve'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  []
+  [substep]
+    type = 'Exodiff'
+    input = 'substep.i'
+    exodiff = 'substep_out.e'
+    allow_warnings = true
+    issues = '#6097'
+    requirement = 'The crystal plasticity system shall provide a substepping capability for improved '
+                  'convergence'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  []
+  [linesearch]
+    type = 'Exodiff'
+    input = 'linesearch.i'
+    exodiff = 'linesearch_out.e'
+    issues = '#16064'
+    requirement = 'The crystal plasticity system shall implement a line search capability for '
+                  'accellerated internal Newton solves'
+    design = '/CrystalPlasticityKalidindiUpdate.md'
+  []
+  [orthotropic_rotation_Cijkl]
+    type = 'CSVDiff'
+    input = 'orthotropic_rotation_Cijkl.i'
+    csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
+    issues = '#10629'
+    requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at '
+                  'each material point'
+    design = '/ComputeElasticityTensorConstantRotationCP.md'
+  []
+  [patch_recovery]
+    type = 'Exodiff'
+    input = 'patch_recovery.i'
+    exodiff = 'patch_recovery_out.e'
+    abs_zero = 1e-8
+    mesh_mode = replicated
+    max_parallel = 1 #This restriction will be removed once #12036 is resolved.
+    requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, "
+                  "with equivalent results in both serial and parallel simulations, in a crystal "
+                  "plasticity finite strain application."
+    design = 'auxkernels/RankTwoAux.md'
+    issues = '#12036'
+  []
+  [use_substep_dt]
+    type = 'CSVDiff'
+    input = 'use_substep_dt.i'
+    csvdiff = 'use_substep_dt_out.csv'
+    allow_warnings = true
+    issues = '#17340'
+    requirement = 'The system shall apply correct boundary condition after timestep being cut during '
+                  'substepping'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [multiple_eigenstrains]
+    type = 'CSVDiff'
+    input = 'multiple_eigenstrains_test.i'
+    csvdiff = 'multiple_eigenstrains_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct deformation gradient values for the total and '
+                  'individual eigenstrains'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [thermal_eigenstrain_011orientation]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_011orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=120.0 '
+               'Materials/elasticity_tensor/euler_angle_2=125.264 '
+               'Materials/elasticity_tensor/euler_angle_3=45.0 '
+               'Outputs/file_base=thermal_eigenstrain_test_011orientation_out '
+               'Outputs/execute_on=FINAL'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+[]

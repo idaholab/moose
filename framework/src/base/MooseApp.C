@@ -9,6 +9,7 @@
 
 #ifdef HAVE_GPERFTOOLS
 #include "gperftools/profiler.h"
+#include "gperftools/heap-profiler.h"
 #endif
 
 // MOOSE includes
@@ -39,11 +40,13 @@
 #include "JsonInputFileFormatter.h"
 #include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
+#include "ProxyRelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
-#include "PerfGraphInterface.h" // For TIME_SECTIOn
+#include "PerfGraphInterface.h" // For TIME_SECTION
 #include "Attributes.h"
 #include "MooseApp.h"
+#include "CommonOutputAction.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -80,7 +83,11 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
-  params.addCommandLineParam<std::string>("input_file", "-i <input_file>", "Specify an input file");
+  params.addCommandLineParam<std::vector<std::string>>(
+      "input_file",
+      "-i <input_files>",
+      "Specify one or multiple input files. Multiple files get merged into a single simulation "
+      "input.");
   params.addCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only [mesh_file_name]",
@@ -126,6 +133,11 @@ MooseApp::validParams()
       "json", "--json", "Dumps input file syntax in JSON format.");
   params.addCommandLineParam<bool>(
       "syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
+  params.addCommandLineParam<bool>("run_tests", "--tests", false, "run all tests");
+  params.addCommandLineParam<bool>(
+      "copy_tests", "--copy-tests", false, "copy installed tests to an [appname]_tests dir");
+  params.addCommandLineParam<bool>(
+      "show_docs", "--docs", false, "print url/path to the documentation website");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    false,
@@ -252,6 +264,13 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
+#ifdef HAVE_GPERFTOOLS
+  params.addCommandLineParam<std::string>(
+      "gperf_profiler_on",
+      "--gperf-profiler-on [ranks]",
+      "To generate profiling report only on comma-separated list of MPI ranks.");
+#endif
+
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
@@ -263,13 +282,6 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
 
-  params.addParam<bool>(
-      "use_legacy_dirichlet_bc",
-      true,
-      "Set false to have MOOSE utilize the new and preferred method of setting preset = true as "
-      "default for all DirichletBC and derived objects, which is ideal for the majority of solves "
-      "utilizing this boundary condition type.\nThe old behavior (which is utilized if this is set "
-      "to true) is to set preset = false as the default for DirichletBC and derived objects.");
   params.addParam<bool>(
       "use_legacy_material_output",
       true,
@@ -340,16 +352,87 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
-  if (std::getenv("MOOSE_PROFILE_BASE"))
+  if (isUltimateMaster())
   {
-    static std::string profile_file =
-        std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
-    _profiling = true;
-    ProfilerStart(profile_file.c_str());
+    bool has_cpu_profiling = false;
+    bool has_heap_profiling = false;
+    static std::string profile_file;
+
+    // For CPU profiling, users need to have environment 'MOOSE_PROFILE_BASE'
+    if (std::getenv("MOOSE_PROFILE_BASE"))
+    {
+      has_cpu_profiling = true;
+      profile_file = std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+    }
+
+    // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
+    if (std::getenv("MOOSE_HEAP_BASE"))
+    {
+      has_heap_profiling = true;
+      profile_file = std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
+    }
+
+    if (has_cpu_profiling && has_heap_profiling)
+      mooseError("Can not do CPU and heap profiling together");
+
+    if (has_cpu_profiling || has_heap_profiling)
+    {
+      // create directory if needed
+      auto name = MooseUtils::splitFileName(profile_file);
+      if (!name.first.empty())
+      {
+        if (processor_id() == 0)
+          MooseUtils::makedirs(name.first.c_str());
+        _comm->barrier();
+      }
+    }
+
+    // turn on profiling only on selected ranks
+    if (isParamValid("gperf_profiler_on"))
+    {
+      auto rankstr = getParam<std::string>("gperf_profiler_on");
+      std::vector<processor_id_type> ranks;
+      bool success = MooseUtils::tokenizeAndConvert(rankstr, ranks, ", ");
+      if (!success)
+        mooseError("Invalid argument for --gperf-profiler-on: '", rankstr, "'");
+      for (auto & rank : ranks)
+      {
+        if (rank >= _comm->size())
+          mooseError("Invalid argument for --gperf-profiler-on: ",
+                     rank,
+                     " is greater than or equal to ",
+                     _comm->size());
+        if (rank == _comm->rank())
+        {
+          _cpu_profiling = has_cpu_profiling;
+          _heap_profiling = has_heap_profiling;
+        }
+      }
+    }
+    else
+    {
+      _cpu_profiling = has_cpu_profiling;
+      _heap_profiling = has_heap_profiling;
+    }
+
+    if (_cpu_profiling)
+      if (!ProfilerStart(profile_file.c_str()))
+        mooseError("CPU profiler is not started properly");
+
+    if (_heap_profiling)
+    {
+      HeapProfilerStart(profile_file.c_str());
+      if (!IsHeapProfilerRunning())
+        mooseError("Heap profiler is not started properly");
+    }
   }
+#else
+  if (std::getenv("MOOSE_PROFILE_BASE") || std::getenv("MOOSE_HEAP_BASE"))
+    mooseError("gperftool is not available for CPU or heap profiling");
 #endif
 
   Registry::addKnownLabel(_type);
@@ -456,6 +539,13 @@ MooseApp::MooseApp(InputParameters parameters)
   // that need them during the setup process. Most of the restartable data isn't made available
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
   registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
+
+  if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
+    mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
+                    "All Dirichlet boundary conditions are preset by default.\n\n",
+                    "Remove said parameter in ",
+                    name(),
+                    " to remove this deprecation warning.");
 }
 
 void
@@ -467,8 +557,12 @@ MooseApp::checkRegistryLabels()
 MooseApp::~MooseApp()
 {
 #ifdef HAVE_GPERFTOOLS
-  if (_profiling)
+  // CPU profiling stop
+  if (_cpu_profiling)
     ProfilerStop();
+  // Heap profiling stop
+  if (_heap_profiling)
+    HeapProfilerStop();
 #endif
   _action_warehouse.clear();
   _executioner.reset();
@@ -778,11 +872,11 @@ MooseApp::setupOptions()
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (_input_filename != "" ||
+  else if (!_input_filenames.empty() ||
            isParamValid("input_file")) // They already specified an input filename
   {
-    if (_input_filename == "")
-      _input_filename = getParam<std::string>("input_file");
+    if (_input_filenames.empty())
+      _input_filenames = getParam<std::vector<std::string>>("input_file");
 
     if (isParamValid("recover"))
     {
@@ -807,7 +901,7 @@ MooseApp::setupOptions()
       _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
-    _parser.parse(_input_filename);
+    _parser.parse(_input_filenames);
 
     if (isParamValid("mesh_only"))
     {
@@ -827,25 +921,24 @@ MooseApp::setupOptions()
     // Setup the AppFileBase for use by the Outputs or other systems that need output file info
     {
       // Extract the CommonOutputAction
-      const auto & common_actions = _action_warehouse.getActionListByName("common_output");
-      mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
-
-      const Action * common = *common_actions.begin();
+      const auto common_actions = _action_warehouse.getActions<CommonOutputAction>();
+      mooseAssert(common_actions.size() <= 1, "Should not be more than one CommonOutputAction");
+      const Action * common = common_actions.empty() ? nullptr : *common_actions.begin();
 
       // If file_base is set in CommonOutputAction through parsing input, obtain the file_base
-      if (common->isParamValid("file_base"))
+      if (common && common->isParamValid("file_base"))
       {
         _output_file_base = common->getParam<std::string>("file_base");
         _file_base_set_by_user = true;
       }
       else if (isUltimateMaster())
       {
-        // if this app is a master, we use the input file name as the default file base
+        // if this app is a master, we use the first input file name as the default file base
         std::string base = getInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
-        //       have it in betwen the input file name and the object name for Output/*
+        //       have it in between the input file name and the object name for Output/*
         //       syntax.
       }
       // default file base for multiapps is set by MultiApp
@@ -867,7 +960,8 @@ MooseApp::setupOptions()
 void
 MooseApp::setInputFileName(const std::string & input_filename)
 {
-  _input_filename = input_filename;
+  // for now we only permit single input to be set for multiapps
+  _input_filenames = {input_filename};
 }
 
 std::string
@@ -1048,6 +1142,107 @@ void
 MooseApp::run()
 {
   TIME_SECTION(_run_timer);
+  if (isParamValid("show_docs") && getParam<bool>("show_docs"))
+  {
+    auto binname = appBinaryName();
+    if (binname == "")
+      mooseError("could not locate installed tests to run (unresolved binary/app name)");
+    auto docspath = MooseUtils::docsDir(binname);
+    if (docspath == "")
+      mooseError("no installed documentation found");
+
+    auto docmsgfile = MooseUtils::pathjoin(docspath, "docmsg.txt");
+    std::string docmsg = "file://" + MooseUtils::realpath(docspath) + "/index.html";
+    if (MooseUtils::pathExists(docmsgfile) && MooseUtils::checkFileReadable(docmsgfile))
+    {
+      std::ifstream ifs(docmsgfile);
+      std::string content((std::istreambuf_iterator<char>(ifs)),
+                          (std::istreambuf_iterator<char>()));
+      content.replace(content.find("$LOCAL_SITE_HOME"), content.length(), docmsg);
+      docmsg = content;
+    }
+
+    Moose::out << docmsg << "\n";
+    _ready_to_exit = true;
+    return;
+  }
+
+  if (getParam<bool>("copy_tests"))
+  {
+    auto binname = appBinaryName();
+    if (binname == "")
+      mooseError("could not locate installed tests to run (unresolved binary/app name)");
+    auto src_dir = MooseUtils::installedTestsDir(binname);
+    if (src_dir == "")
+      mooseError("couldn't locate any installed tests to copy");
+    if (!MooseUtils::checkFileReadable(src_dir, false, false))
+      mooseError(
+          "You don't have permissions to read/copy tests from their current installed location: \"",
+          src_dir,
+          "\"");
+    auto dst_dir = binname + "_tests";
+    auto cmdname = Moose::getExecutableName();
+    if (cmdname.find_first_of("/") != std::string::npos)
+      cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
+    if (MooseUtils::pathExists(dst_dir))
+      mooseError("The tests directory \"./",
+                 dst_dir,
+                 "\" already exists.\nTo update/recopy tests, rename (\"mv ",
+                 dst_dir,
+                 " new_dir_name\") or remove (\"rm -r ",
+                 dst_dir,
+                 "\") the existing directory.\nThen re-run \"",
+                 cmdname,
+                 " --copy-tests\".");
+
+    std::string cmd = "cp -R " + src_dir + " " + dst_dir;
+    int ret = system(cmd.c_str());
+    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
+      mooseError("Failed to copy the tests.");
+    Moose::out << "Tests successfully copied into ./" << dst_dir << "\n";
+    _ready_to_exit = true;
+    return;
+  }
+
+  if (isParamValid("run_tests") && getParam<bool>("run_tests"))
+  {
+    std::string args;
+    for (int i = 2; i < _sys_info->argc(); i++)
+      args += " " + std::string(*(_sys_info->argv() + i));
+    auto cmd = MooseUtils::runTestsExecutable() + args;
+    if (MooseUtils::findTestRoot() == "")
+    {
+      // run installed tests instead of cwd tests
+      auto binname = appBinaryName();
+      if (binname == "")
+        mooseError("could not locate installed tests to run (unresolved binary/app name)");
+      auto dir = MooseUtils::installedTestsDir(binname);
+      if (dir == "")
+        mooseError("no could not find any tests to run");
+
+      auto cmdname = Moose::getExecutableName();
+      if (cmdname.find_first_of("/") != std::string::npos)
+        cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
+      if (!MooseUtils::checkFileWriteable(MooseUtils::pathjoin(dir, "testroot"), false))
+        mooseError(
+            "You don't have permissions to run tests at their current installed location.\nRun \"",
+            cmdname,
+            " --copy-tests\" to copy the tests to a \"./",
+            binname,
+            "_tests\" directory.\nChange into that directory and try \"",
+            cmdname,
+            " --tests\" again.");
+
+      int ret = chdir(dir.c_str());
+      if (ret != 0)
+        mooseError("Failed to change to testing directory ", dir);
+    }
+    int ret = system(cmd.c_str());
+    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
+      mooseError("Tests failed");
+    _ready_to_exit = true;
+    return;
+  }
 
   try
   {
@@ -1127,7 +1322,7 @@ MooseApp::setStartTime(Real time)
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  return _parser.getFileName(stripLeadingPath);
+  return _parser.getPrimaryFileName(stripLeadingPath);
 }
 
 OutputWarehouse &
@@ -1625,6 +1820,7 @@ MooseApp::appendMeshGenerator(const std::string & generator_name,
       _factory.create<MeshGenerator>(generator_name, name, parameters);
 
   final_generators.push_back(mesh_generator);
+  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
 }
 
 void
@@ -1633,6 +1829,8 @@ MooseApp::executeMeshGenerators()
   // we do not need to do this when there are no mesh generators
   if (_mesh_generators.empty())
     return;
+
+  _executing_mesh_generators = true;
 
   createMeshGeneratorOrder();
 
@@ -1655,7 +1853,7 @@ MooseApp::executeMeshGenerators()
     {
       auto name = generator->name();
 
-      auto current_mesh = generator->generate();
+      auto current_mesh = generator->generateInternal();
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];
@@ -1678,9 +1876,14 @@ MooseApp::executeMeshGenerators()
       // Once we hit the generator we want, we'll terminate the loops (this might be the last
       // iteration anyway)
       if (_final_generator_name == name)
+      {
+        _executing_mesh_generators = false;
         return;
+      }
     }
   }
+
+  _executing_mesh_generators = false;
 }
 
 void
@@ -1856,44 +2059,107 @@ MooseApp::hasRelationshipManager(const std::string & name) const
                       }) != _relationship_managers.end();
 }
 
-bool
-MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager)
+namespace
 {
-  // We don't need Geometric-only RelationshipManagers when we run with
-  // ReplicatedMesh unless we are splitting the mesh.
-  if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
-      (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
-       !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
-         relationship_manager->isType(Moose::RelationshipManagerType::COUPLING))))
-    return false;
+void
+donateForWhom(const RelationshipManager & donor, RelationshipManager & acceptor)
+{
+  auto & existing_for_whom = acceptor.forWhom();
+
+  // Take all the for_whoms from the donor, and give them to the acceptor
+  for (auto & fw : donor.forWhom())
+  {
+    if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
+        existing_for_whom.end())
+      acceptor.addForWhom(fw);
+  }
+}
+}
+
+bool
+MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
+{
+  // We prefer to always add geometric RMs. There is no hurt to add RMs for replicated mesh
+  // since MeshBase::delete_remote_elements{} is a no-op (empty) for replicated mesh.
+  // The motivation here is that MooseMesh::_use_distributed_mesh may not be properly set
+  // at the time we are adding geometric relationship managers. We deleted the following
+  // old logic to add all geometric RMs regardless of there is a distributed mesh or not.
+  // Otherwise, all geometric RMs will be improperly ignored for a distributed mesh generator.
+
+  // if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
+  //    (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
+  //     !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
+  //       relationship_manager->isType(Moose::RelationshipManagerType::COUPLING))))
+  //  return false;
 
   bool add = true;
-  for (const auto & rm : _relationship_managers)
+
+  std::set<std::shared_ptr<RelationshipManager>> rms_to_erase;
+
+  for (const auto & existing_rm : _relationship_managers)
   {
-    if (*rm == *relationship_manager)
+    if (*existing_rm >= *new_rm)
     {
       add = false;
-
-      auto & existing_for_whom = rm->forWhom();
-
-      // Since the existing object is going to cover this one
-      // Pass along who is needing it
-      for (auto & fw : relationship_manager->forWhom())
-      {
-        if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
-            existing_for_whom.end())
-          rm->addForWhom(fw);
-      }
-
+      donateForWhom(*new_rm, *existing_rm);
       break;
     }
+    // The new rm did not provide less or the same amount/type of ghosting as the existing rm, but
+    // what about the other way around?
+    else if (*new_rm >= *existing_rm)
+      rms_to_erase.emplace(existing_rm);
   }
 
   if (add)
-    _relationship_managers.emplace_back(relationship_manager);
+  {
+    _relationship_managers.emplace(new_rm);
+    for (const auto & rm_to_erase : rms_to_erase)
+    {
+      donateForWhom(*rm_to_erase, *new_rm);
+      removeRelationshipManager(rm_to_erase);
+    }
+  }
 
   // Inform the caller whether the object was added or not
   return add;
+}
+
+void
+MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
+{
+  auto * mesh = _action_warehouse.mesh().get();
+  if (mesh->getMeshPtr())
+    mesh->getMesh().remove_ghosting_functor(*rm);
+
+  auto & displaced_mesh = _action_warehouse.displacedMesh();
+  if (displaced_mesh)
+  {
+    mooseAssert(displaced_mesh->getMeshPtr(),
+                "The displaced mesh gets added late in the game. It should definitely have a mesh "
+                "base attached to it");
+    auto it = _undisp_to_disp_rms.find(rm.get());
+    if (it != _undisp_to_disp_rms.end())
+      displaced_mesh->getMesh().remove_ghosting_functor(*it->second);
+  }
+
+  if (_executioner)
+  {
+    auto & problem = _executioner->feProblem();
+    problem.removeAlgebraicGhostingFunctor(*rm);
+
+    if (auto * dp = problem.getDisplacedProblem().get())
+    {
+      auto it = _undisp_to_disp_rms.find(rm.get());
+      if (it != _undisp_to_disp_rms.end())
+        dp->removeAlgebraicGhostingFunctor(*it->second);
+    }
+
+    auto & dof_map = problem.getNonlinearSystemBase().dofMap();
+    dof_map.remove_coupling_functor(*rm);
+  }
+
+  _factory.releaseSharedObjects(*rm);
+  _relationship_managers.erase(rm);
 }
 
 void
@@ -1930,102 +2196,110 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
 }
 
 void
-MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
+MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
+                                     bool attach_geometric_rm_final)
 {
   for (auto & rm : _relationship_managers)
   {
-    if (rm->isType(rm_type))
+    if (!rm->isType(rm_type))
+      continue;
+
+    // RM is already attached, and we do not need to handle this on the final stage
+    if (rm->attachGeometricEarly() && attach_geometric_rm_final)
+      continue;
+
+    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
     {
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      // The problem is not built yet - so the ActionWarehouse currently owns the mesh
+      MooseMesh * const mesh = _action_warehouse.mesh().get();
+
+      // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
+      // geometric RMs. Therefore, we need to attach them.
+      if (!rm->attachGeometricEarly() && !attach_geometric_rm_final)
       {
-        // The problem is not built yet - so the ActionWarehouse currently owns the mesh
-        MooseMesh * const mesh = _action_warehouse.mesh().get();
+        // Will attach them later (during algebraic). But also, we need to tell the mesh that we
+        // shouldn't be deleting remote elements yet
+        if (!mesh->getMeshPtr())
+          mooseError("We should have attached a MeshBase object to the mesh by now");
 
-        if (!rm->attachGeometricEarly())
+        mesh->allowRemoteElementRemoval(false);
+      }
+      else
+      {
+        MeshBase & undisp_mesh_base = mesh->getMesh();
+        const DofMap * const undisp_nl_dof_map =
+            _executioner ? &_executioner->feProblem().systemBaseNonlinear().dofMap() : nullptr;
+        rm->init(undisp_mesh_base, undisp_nl_dof_map);
+        undisp_mesh_base.add_ghosting_functor(*rm);
+
+        // In the final stage, if there is a displaced mesh, we need to
+        // clone ghosting functors for displacedMesh
+        if (attach_geometric_rm_final && _action_warehouse.displacedMesh())
         {
-          // Will attach them later (during algebraic). But also, we need to tell the mesh that we
-          // shouldn't be deleting remote elements yet
-          if (!mesh->getMeshPtr())
-            mooseError("We should have attached a MeshBase object to the mesh by now");
-
-          mesh->allowRemoteElementRemoval(false);
+          std::shared_ptr<GhostingFunctor> clone_gf = rm->clone();
+          auto clone_rm = std::static_pointer_cast<RelationshipManager>(clone_gf);
+          MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
+          const DofMap * disp_nl_dof_map = nullptr;
+          if (_executioner && _executioner->feProblem().getDisplacedProblem())
+            disp_nl_dof_map =
+                &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
+          clone_rm->init(disp_mesh_base, disp_nl_dof_map);
+          disp_mesh_base.add_ghosting_functor(clone_gf);
+          _undisp_to_disp_rms.emplace(rm.get(), clone_gf);
         }
-        else
-        {
-          MeshBase & mesh_base = mesh->getMesh();
-          rm->init(mesh_base);
-          mesh_base.add_ghosting_functor(*rm);
+        else if (_action_warehouse.displacedMesh())
+          mooseError("The displaced mesh should not yet exist at the time that we are attaching "
+                     "early geometric relationship managers.");
+      }
+    }
+    else // rm_type is algebraic or coupling
+    {
+      if (!_executioner)
+        mooseError("We must have an executioner by now or else we do not have to data to add "
+                   "algebraic or coupling functors to in MooseApp::attachRelationshipManagers");
 
-          if (_action_warehouse.displacedMesh())
-            mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
-                       "geometric relationship managers.");
-        }
+      // Now we've built the problem, so we can use it
+      auto & problem = _executioner->feProblem();
+      auto & undisp_nl = problem.systemBaseNonlinear();
+      auto & undisp_nl_dof_map = undisp_nl.dofMap();
+
+      // Ensure that the relationship manager is initialized
+      rm->init(problem.mesh().getMesh(), &undisp_nl_dof_map);
+
+      std::shared_ptr<GhostingFunctor> clone_gf = nullptr;
+      if (_action_warehouse.displacedMesh())
+      {
+        clone_gf = rm->clone();
+        const DofMap * const disp_nl_dof_map =
+            problem.getDisplacedProblem()
+                ? &problem.getDisplacedProblem()->systemBaseNonlinear().dofMap()
+                : nullptr;
+        static_cast<RelationshipManager *>(clone_gf.get())
+            ->init(_action_warehouse.displacedMesh()->getMesh(), disp_nl_dof_map);
       }
 
-      if (rm_type != Moose::RelationshipManagerType::GEOMETRIC)
+      if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
       {
-        // Now we've built the problem, so we can use it
-        auto & problem = _executioner->feProblem();
+        if (rm_type == Moose::RelationshipManagerType::COUPLING)
+          // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
+          // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
+          // for which to do coupling
+          undisp_nl_dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
 
-        // Ensure that the relationship manager is initialized
-        rm->init(problem.mesh().getMesh());
-
-        std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
-        if (_action_warehouse.displacedMesh())
+        else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
         {
-          clone_rm = rm->clone();
-          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+          problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_gf,
+                                                                     /*to_mesh = */ false);
+          _undisp_to_disp_rms.emplace(rm.get(), clone_gf);
         }
+      }
+      else // undisplaced
+      {
+        if (rm_type == Moose::RelationshipManagerType::COUPLING)
+          undisp_nl_dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
 
-        // If it's also Geometric but didn't get attached early - then let's attach it now
-        if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
-        {
-          // The reference and displaced meshes should have the same geometric RMs.
-          // It is necessary for keeping both meshes consistent.
-          if (_action_warehouse.displacedMesh())
-            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
-
-          problem.mesh().getMesh().add_ghosting_functor(*rm);
-        }
-
-        if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
-        {
-          if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          {
-            // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
-            // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
-            // for which to do coupling
-            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
-            rm->setDofMap(dof_map);
-          }
-          // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of any other system, it
-          // actually would be disastrous to add this rm because it's going to set a coupling matrix
-          // based on the non-linear system. So we don't add this rm at all here if its also
-          // a coupling functor
-          else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
-                   !rm->isType(Moose::RelationshipManagerType::COUPLING))
-            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
-                                                                       /*to_mesh = */ false);
-        }
-        else // undisplaced
-        {
-          if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          {
-            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
-            rm->setDofMap(dof_map);
-          }
-          // If this rm is algebraic AND coupling, then in the case of the non-linear system there
-          // is no reason to add it to the DofMap twice. In the case of any other system, it
-          // actually would be disastrous to add this rm because it's going to set a coupling matrix
-          // based on the non-linear system. So we don't add this rm at all here if its also
-          // a coupling functor
-          else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
-                   !rm->isType(Moose::RelationshipManagerType::COUPLING))
-            problem.addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
-        }
+        else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
+          problem.addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
       }
     }
   }
@@ -2073,7 +2347,7 @@ MooseApp::getRelationshipManagerInfo() const
         counts[demangle(typeid(*gf).name())]++;
     }
 
-    for (const auto pair : counts)
+    for (const auto & pair : counts)
       info_strings.emplace_back(std::make_pair(
           "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
   }
@@ -2097,7 +2371,7 @@ MooseApp::getRelationshipManagerInfo() const
         counts[demangle(typeid(*gf).name())]++;
     }
 
-    for (const auto pair : counts)
+    for (const auto & pair : counts)
       info_strings.emplace_back(
           std::make_pair("Default",
                          pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "") +
@@ -2105,20 +2379,6 @@ MooseApp::getRelationshipManagerInfo() const
   }
 
   return info_strings;
-}
-
-void
-MooseApp::dofMapReinitForRMs()
-{
-  for (auto & rm : _relationship_managers)
-    rm->dofmap_reinit();
-}
-
-void
-MooseApp::meshReinitForRMs()
-{
-  for (auto & rm : _relationship_managers)
-    rm->mesh_reinit();
 }
 
 void
@@ -2166,7 +2426,7 @@ MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
 void
 MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix)
 {
-  if (suffix.empty())
+  if (!suffix.empty())
     std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
   suffix.insert(0, "_");
   _restartable_meta_data.emplace(

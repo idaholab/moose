@@ -49,7 +49,7 @@ class Test:
             self.getpot_options.append('UserObjects/perflog/type=PerflogDumper')
 
     def _buildcmd(self):
-        cmdpath = os.path.abspath(os.path.join(self.rootdir, self.executable))
+        cmdpath = self.executable
         infilepath = os.path.abspath(os.path.join(self.rootdir, self.infile))
         cmd = [cmdpath, '-i', infilepath]
         if self.args is not None:

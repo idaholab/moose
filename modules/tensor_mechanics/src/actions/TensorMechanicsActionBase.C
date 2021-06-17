@@ -10,11 +10,13 @@
 #include "TensorMechanicsActionBase.h"
 #include "CommonTensorMechanicsAction.h"
 #include "ActionWarehouse.h"
+#include "AddAuxVariableAction.h"
 #include "ComputeFiniteStrain.h"
 
 // map tensor name shortcuts to tensor material property names
 std::map<std::string, std::string> TensorMechanicsActionBase::_rank_two_cartesian_component_table =
     {{"strain", "total_strain"},
+     {"mechanical_strain", "mechanical_strain"},
      {"stress", "stress"},
      {"elastic_strain", "elastic_strain"},
      {"plastic_strain", "plastic_strain"},
@@ -30,17 +32,23 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic", {"Hydrostatic", {"stress"}}},
         {"l2norm",
-         {"L2norm", {"stress", "strain", "elastic_strain", "plastic_strain", "creep_strain"}}},
-        {"volumetric", {"VolumetricStrain", {"strain"}}},
+         {"L2norm",
+          {"mechanical_strain",
+           "stress",
+           "strain",
+           "elastic_strain",
+           "plastic_strain",
+           "creep_strain"}}},
+        {"volumetric", {"VolumetricStrain", {"mechanical_strain", "strain"}}},
         {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
         {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}},
         {"triaxiality", {"TriaxialityStress", {"stress"}}},
         {"maxshear", {"MaxShear", {"stress"}}},
         {"intensity", {"StressIntensity", {"stress"}}},
-        {"max_principal", {"MaxPrincipal", {"stress", "strain"}}},
-        {"mid_principal", {"MidPrincipal", {"stress", "strain"}}},
-        {"min_principal", {"MinPrincipal", {"stress", "strain"}}}};
+        {"max_principal", {"MaxPrincipal", {"mechanical_strain", "stress", "strain"}}},
+        {"mid_principal", {"MidPrincipal", {"mechanical_strain", "stress", "strain"}}},
+        {"min_principal", {"MinPrincipal", {"mechanical_strain", "stress", "strain"}}}};
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
     TensorMechanicsActionBase::_rank_two_directional_component_table = {
@@ -108,12 +116,24 @@ TensorMechanicsActionBase::validParams()
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
-  params.addParam<FunctionName>("out_of_plane_pressure",
-                                "0",
-                                "Function used to prescribe pressure in the out-of-plane direction "
-                                "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
-  params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");
+  params.addDeprecatedParam<FunctionName>(
+      "out_of_plane_pressure",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)",
+      "This has been replaced by 'out_of_plane_pressure_function'");
+  params.addParam<FunctionName>(
+      "out_of_plane_pressure_function",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
+  params.addParam<Real>(
+      "pressure_factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
+  params.addParam<MaterialPropertyName>("out_of_plane_pressure_material",
+                                        "0",
+                                        "Material used to prescribe pressure (applied toward the "
+                                        "body) in the out-of-plane direction");
   params.addParamNamesToGroup("planar_formulation scalar_out_of_plane_strain out_of_plane_pressure "
+                              "out_of_plane_pressure_material out_of_plane_pressure_function "
                               "pressure_factor out_of_plane_direction out_of_plane_strain",
                               "Out-of-plane stress/strain");
 
@@ -121,7 +141,19 @@ TensorMechanicsActionBase::validParams()
   params.addParam<MultiMooseEnum>("generate_output",
                                   TensorMechanicsActionBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain");
-  params.addParamNamesToGroup("generate_output", "Output");
+
+  params.addParam<MultiMooseEnum>(
+      "material_output_order",
+      TensorMechanicsActionBase::materialOutputOrders(),
+      "Specifies the order of the FE shape function to use for this variable.");
+
+  params.addParam<MultiMooseEnum>(
+      "material_output_family",
+      TensorMechanicsActionBase::materialOutputFamilies(),
+      "Specifies the family of FE shape functions to use for this variable.");
+  params.addParamNamesToGroup("generate_output material_output_order material_output_family",
+                              "Output");
+  params.addParam<bool>("verbose", false, "Display extra information.");
 
   return params;
 }
@@ -140,11 +172,40 @@ TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & par
     MultiMooseEnum generate_output = getParam<MultiMooseEnum>("generate_output");
     MultiMooseEnum additional_generate_output =
         getParam<MultiMooseEnum>("additional_generate_output");
+
+    MultiMooseEnum material_output_order = getParam<MultiMooseEnum>("material_output_order");
+    MultiMooseEnum additional_material_output_order =
+        getParam<MultiMooseEnum>("additional_material_output_order");
+
+    MultiMooseEnum material_output_family = getParam<MultiMooseEnum>("material_output_family");
+    MultiMooseEnum additional_material_output_family =
+        getParam<MultiMooseEnum>("additional_material_output_family");
+
     for (auto & output : additional_generate_output)
       generate_output.push_back(output);
+    for (auto & order : additional_material_output_order)
+      material_output_order.push_back(order);
+    for (auto & family : additional_material_output_family)
+      material_output_family.push_back(family);
 
     _pars.set<MultiMooseEnum>("generate_output") = generate_output;
+    _pars.set<MultiMooseEnum>("material_output_order") = material_output_order;
+    _pars.set<MultiMooseEnum>("material_output_family") = material_output_family;
   }
+}
+
+MultiMooseEnum
+TensorMechanicsActionBase::materialOutputOrders()
+{
+  auto orders = AddAuxVariableAction::getAuxVariableOrders().getRawNames();
+
+  return MultiMooseEnum(orders);
+}
+
+MultiMooseEnum
+TensorMechanicsActionBase::materialOutputFamilies()
+{
+  return MultiMooseEnum("MONOMIAL LAGRANGE");
 }
 
 MultiMooseEnum

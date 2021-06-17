@@ -1,10 +1,23 @@
 [Tests]
-  issues = '#2848'
+  issues = '#2848 #16354'
   design = 'syntax/AuxKernels/index.md syntax/Postprocessors/index.md'
   [./test]
     type = 'Exodiff'
     input = 'pp_depend.i'
     exodiff = 'pp_depend_out.e'
     requirement = "Execution of a UserObject shall occur after the execution of the AuxKernel objects if the former depends on the latter."
+  [../]
+
+  [./pp_depend_indirect_wrong]
+    type = 'CSVDiff'
+    input = 'pp_depend_indirect_wrong.i'
+    csvdiff = 'pp_depend_indirect_wrong_out.csv'
+    requirement = "Execution of a FunctionValuePostprocessor that depends on a Function which depends on a second PostProcessor is construction order dependent."
+  [../]
+  [./pp_depend_indirect_correct]
+    type = 'CSVDiff'
+    input = 'pp_depend_indirect_correct.i'
+    csvdiff = 'pp_depend_indirect_correct_out.csv'
+    requirement = "Implicit dependencies of FunctionValuePostprocessors may be declared to resolve execution order independently of construction order."
   [../]
 []

@@ -29,6 +29,30 @@
     issues = '#11013'
     design = 'porous_flow/numerical_diffusion.md'
   [../]
+  [./fully_saturated_upwinded]
+    type = 'CSVDiff'
+    input = 'fully_saturated_action.i'
+    cli_args = 'Outputs/file_base=no_action_out PorousFlowFullySaturated/stabilization=Full'
+    prereq = no_action
+    csvdiff = 'no_action_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    requirement = "PorousFlow shall be able to solve the advection of fluid species in a fully-saturated single-phase situation, using mass lumping and full upwinding, via employing an action"
+    issues = '#16841'
+    design = 'porous_flow/numerical_diffusion.md'
+  [../]
+  [./fully_saturated_KT]
+    type = 'CSVDiff'
+    input = 'fully_saturated_action.i'
+    cli_args = 'Outputs/file_base=fully_saturated_action_KT PorousFlowFullySaturated/stabilization=KT'
+    csvdiff = 'fully_saturated_action_KT_tracer_0011.csv'
+    heavy = true
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    requirement = "PorousFlow shall be able to solve the advection of fluid species in a fully-saturated single-phase situation, using mass lumping and KT upwinding, via employing an action"
+    issues = '#16841'
+    design = 'porous_flow/numerical_diffusion.md'
+  [../]
   [./fltvd_no_antidiffusion]
     type = 'CSVDiff'
     input = 'fltvd_no_antidiffusion.i'

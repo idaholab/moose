@@ -1,0 +1,26 @@
+[Tests]
+  design = 'RayTracingViewFactor.md'
+  issues = '#16954'
+
+  [test]
+    requirement = 'The system shall support the modeling of radiative heat transfer with symmetry boundary conditions by'
+    [unfolded]
+      type = 'Exodiff'
+      input = 'cavity_with_pillars.i'
+      exodiff = 'cavity_with_pillars_out.e'
+      mesh_mode = REPLICATED
+      petsc_version = '>=3.9.4'
+
+      detail = 'unfolding the problem at the symmetry boundary and'
+    []
+    [symmetry_bc]
+      type = 'Exodiff'
+      input = 'cavity_with_pillars_symmetry_bc.i'
+      exodiff = 'cavity_with_pillars_symmetry_bc_out.e'
+      mesh_mode = REPLICATED
+      petsc_version = '>=3.9.4'
+
+      detail = 'by using a symmetry boundary condition.'
+    []
+  []
+[]

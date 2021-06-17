@@ -16,7 +16,7 @@ independently.
 
 ## Example Syntax
 
-!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
+!listing test/tests/kernels/ad_mat_diffusion/ad_2d_steady_state.i
          block=Mesh
 
 !syntax parameters /Mesh/GeneratedMesh

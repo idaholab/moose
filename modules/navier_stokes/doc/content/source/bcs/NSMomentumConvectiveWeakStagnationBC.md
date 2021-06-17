@@ -1,3 +1,5 @@
+# NSMomentumConvectiveWeakStagnationBC
+
 !syntax description /BCs/NSMomentumConvectiveWeakStagnationBC
 
 !syntax parameters /BCs/NSMomentumConvectiveWeakStagnationBC

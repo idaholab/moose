@@ -15,6 +15,8 @@
 #include "BlockRestrictable.h"
 #include "TransientInterface.h"
 #include "Coupleable.h"
+#include "MaterialPropertyInterface.h"
+#include "MooseVariableDependencyInterface.h"
 #include "SubProblem.h"
 
 // Forward declarations
@@ -618,8 +620,12 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
 {
   for (const auto & object : objects)
   {
-    const auto & mv_deps = object->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    auto c = dynamic_cast<const MooseVariableDependencyInterface *>(object.get());
+    if (c)
+    {
+      const auto & mv_deps = c->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
   }
 }
 
@@ -650,8 +656,12 @@ MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependencyHelper(
 {
   for (const auto & object : objects)
   {
-    const auto & tag_deps = object->getFEVariableCoupleableVectorTags();
-    needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
+    auto c = dynamic_cast<const Coupleable *>(object.get());
+    if (c)
+    {
+      const auto & tag_deps = c->getFEVariableCoupleableVectorTags();
+      needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
+    }
   }
 }
 
@@ -700,8 +710,12 @@ MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(
 {
   for (auto & object : objects)
   {
-    auto & mp_deps = object->getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    auto c = dynamic_cast<const MaterialPropertyInterface *>(object.get());
+    if (c)
+    {
+      auto & mp_deps = c->getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    }
   }
 }
 

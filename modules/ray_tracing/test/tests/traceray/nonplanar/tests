@@ -1,0 +1,22 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028 #16170'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'nonplanar.i'
+    csvdiff = 'nonplanar_out.csv'
+    allow_test_objects = true
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to trace rays on 3D meshes that have nonplanar faces.'
+  []
+
+  [warning]
+    type = RunException
+    input = 'nonplanar.i'
+    cli_args = 'UserObjects/lots/warn_non_planar=true'
+    expect_err = 'Ray tracing on non-planar faces is an approximation and may fail.'
+    allow_test_objects = true
+    requirement = 'The system shall by default warn that tracing on non-planar faces is an approximation.'
+  []
+[]

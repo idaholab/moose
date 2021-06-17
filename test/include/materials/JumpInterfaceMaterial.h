@@ -27,5 +27,8 @@ protected:
 
   const VariableValue & _value;
   const VariableValue & _neighbor_value;
+  const ADVariableValue & _ad_value;
+  const ADVariableValue & _ad_neighbor_value;
   MaterialProperty<Real> & _jump;
+  ADMaterialProperty<Real> & _ad_jump;
 };

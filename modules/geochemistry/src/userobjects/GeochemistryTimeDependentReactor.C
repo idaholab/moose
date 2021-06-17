@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "GeochemistryTimeDependentReactor.h"
 
 registerMooseObject("GeochemistryApp", GeochemistryTimeDependentReactor);
@@ -96,10 +105,18 @@ GeochemistryTimeDependentReactor::sharedParams()
       "of the current time step (ie, implement an explicit solve)");
   params.addParam<std::vector<std::string>>(
       "kinetic_species_name",
-      "Names of the kinetic species given initial values in kinetic_species_initial_moles");
+      "Names of the kinetic species given initial values in kinetic_species_initial_value");
   params.addParam<std::vector<Real>>(
-      "kinetic_species_initial_moles",
-      "Initial number of moles for each of the species named in kinetic_species_name");
+      "kinetic_species_initial_value",
+      "Initial number of moles, mass or volume (depending on kinetic_species_unit) for each of the "
+      "species named in kinetic_species_name");
+  MultiMooseEnum kin_species_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
+                                  "g_per_kg_solvent mg_per_kg_solvent ug_per_kg_solvent cm3");
+  params.addParam<MultiMooseEnum>(
+      "kinetic_species_unit",
+      kin_species_unit,
+      "Units of the numerical values given in kinetic_species_initial_value.  Moles: mole number.  "
+      "kg: kilograms.  g: grams.  mg: milligrams.  ug: micrograms.  cm3: cubic centimeters");
   return params;
 }
 
@@ -130,12 +147,14 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
          getParam<std::string>("charge_balance_species"),
          getParam<std::vector<std::string>>("constraint_species"),
          getParam<std::vector<Real>>("constraint_value"),
+         getParam<MultiMooseEnum>("constraint_unit"),
          getParam<MultiMooseEnum>("constraint_meaning"),
          _previous_temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),
          getParam<Real>("min_initial_molality"),
          getParam<std::vector<std::string>>("kinetic_species_name"),
-         getParam<std::vector<Real>>("kinetic_species_initial_moles")),
+         getParam<std::vector<Real>>("kinetic_species_initial_value"),
+         getParam<MultiMooseEnum>("kinetic_species_unit")),
     _solver(_mgd.basis_species_name.size(),
             _mgd.kin_species_name.size(),
             _is,

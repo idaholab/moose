@@ -39,4 +39,3 @@ private:
   const VariableValue & _v;
   Real _coef;
 };
-

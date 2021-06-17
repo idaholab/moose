@@ -26,7 +26,7 @@
     type = PolynomialChaosSobolStatistics
     pc_name = poly_chaos
     sensitivity_order = 'all total'
-    execute_on = final
+    execute_on = timestep_end
   []
 []
 
@@ -40,12 +40,11 @@
 [Trainers]
   [poly_chaos]
     type = PolynomialChaosTrainer
-    execute_on = final
+    execute_on = timestep_end
     order = 4
     distributions = 'uniform uniform uniform uniform uniform uniform'
     sampler = sample
-    results_vpp = results
-    results_vector = g_values
+    response = results/g_values
   []
 []
 

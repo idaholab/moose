@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15232'
+  design = 'examples_and_tutorials/tutorial01_app_development/step08_test_harness.md'
+  [test]
+    type = Exodiff
+    input = darcy_pressure_test.i
+    exodiff = darcy_pressure_test_out.e
+    requirement = "The system shall include a tutorial that introduces the ability to compute residual contributions for the pressure term of Darcy's equation."
+  []
+[]

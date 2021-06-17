@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "SmoothCircleBaseIC.h"
 
-// Forward declarations
-
 /**
  * An InitialCondition for initializing phase variable in close packed circles/spheres pattern
  */

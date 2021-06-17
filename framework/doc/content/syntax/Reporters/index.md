@@ -139,6 +139,9 @@ Automatically performs an MPI scatter of a vector of data on the root processor 
 `ReporterGatherContext`\\
 Automatically performs an MPI gather to a vector of data on the root processor from all processors.
 
+## Reporter Debug Output
+
+The [ReporterDebugOutput.md] output can be added to output to screen all of the Reporter values that were declared and requested, along with their types, producers, contexts, consumers, and consumer modes. This debug output can also be enabled with the `Debug/show_reporters` parameter.
 
 !syntax list /Reporters objects=True actions=False subsystems=False
 

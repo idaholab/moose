@@ -11,55 +11,55 @@
 []
 
 [Variables]
-  [./p0]
-  [../]
-  [./p1]
-  [../]
+  [p0]
+  []
+  [p1]
+  []
 []
 
 [Kernels]
-  [./p0]
+  [p0]
     type = Diffusion
     variable = p0
-  [../]
-  [./p1]
+  []
+  [p1]
     type = Diffusion
     variable = p1
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     at_nodes = true
-  [../]
-  [./temperature_qp]
+  []
+  [temperature_qp]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePP
     at_nodes = true
     phase0_porepressure = p0
     phase1_porepressure = p1
     capillary_pressure = pc
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityConst
     at_nodes = true
     kr = 0.5
     phase = 0
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityConst
     at_nodes = true
     kr = 0.8
     phase = 1
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_relative_permeability_nodal
-  [../]
+  []
 []
 
 [Executioner]
@@ -67,14 +67,14 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'p0 p1'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
+  []
 []

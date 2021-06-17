@@ -1,0 +1,53 @@
+[Tests]
+  issues = '#16166'
+  design = 'SamplerReporterTransfer.md'
+
+  [transfer]
+    requirement = "The system shall support the ability to transfer reporter data from each sub-application for a set of stochastic data "
+    [serial]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      max_parallel = 1
+
+      detail = "in serial, "
+    []
+    [parallel]
+      type = JSONDiff
+      input = main.i
+      cli_args = 'Outputs/file_base=main_parallel'
+      jsondiff = 'main_parallel.json main_parallel.json.1 main_parallel.json.2 main_parallel.json.3'
+      min_parallel = 4
+      max_parallel = 4
+
+      detail = 'in parallel, '
+    []
+    [batch_serial]
+      type = JSONDiff
+      input = main_batch.i
+      jsondiff = main_batch_out.json
+      max_parallel = 1
+
+      detail = "in serial with batch mode, "
+    []
+    [batch_parallel]
+      type = JSONDiff
+      input = main_batch.i
+      cli_args = 'Outputs/file_base=batch_parallel'
+      jsondiff = 'batch_parallel.json batch_parallel.json.1'
+      min_parallel = 2
+      max_parallel = 2
+
+      detail = 'in parallel with batch mode, '
+    []
+    [more_cpus]
+      type = JSONDiff
+      input = main_small.i
+      jsondiff = 'main_small_out.json main_small_out.json.1 main_small_out.json.2 main_small_out.json.3'
+      min_parallel = 4
+      max_parallel = 4
+
+      detail = 'and with more processors than samples.'
+    []
+  []
+[]

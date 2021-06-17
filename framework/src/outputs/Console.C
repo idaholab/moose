@@ -19,6 +19,7 @@
 #include "Moose.h"
 #include "FormattedTable.h"
 #include "NonlinearSystem.h"
+#include "CommonOutputAction.h"
 
 // libMesh includes
 #include "libmesh/enum_norm_type.h"
@@ -187,20 +188,20 @@ Console::Console(const InputParameters & parameters)
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
-  const auto & actions = awh.getActionListByName("common_output");
-  mooseAssert(actions.size() == 1, "Should be only one common_output Action");
-  Action * common_action = *actions.begin();
+  const auto actions = awh.getActions<CommonOutputAction>();
+  mooseAssert(actions.size() <= 1, "Should not be more than one CommonOutputAction");
+  const Action * common = actions.empty() ? nullptr : *actions.begin();
 
   // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
   if (!parameters.isParamSetByUser("execute_on"))
   {
-    if (common_action->getParam<bool>("print_linear_residuals"))
+    if (common && common->getParam<bool>("print_linear_residuals"))
       _execute_on.push_back("linear");
     else
       _execute_on.erase("linear");
   }
 
-  if (!_pars.isParamSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
+  if (!_pars.isParamSetByUser("perf_log") && common && common->getParam<bool>("print_perf_log"))
   {
     _perf_log = true;
     _solve_log = true;
@@ -208,9 +209,12 @@ Console::Console(const InputParameters & parameters)
 
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
-  const ExecFlagEnum & common_execute_on = common_action->getParam<ExecFlagEnum>("execute_on");
-  for (auto & mme : common_execute_on)
-    _execute_on.push_back(mme);
+  if (common)
+  {
+    const ExecFlagEnum & common_execute_on = common->getParam<ExecFlagEnum>("execute_on");
+    for (auto & mme : common_execute_on)
+      _execute_on.push_back(mme);
+  }
 
   // If --show-outputs is used, enable it
   if (_app.getParam<bool>("show_outputs"))
@@ -301,7 +305,7 @@ Console::output(const ExecFlagType & type)
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the
   // user
-  if (wantOutput("system_information", type) && !(type == EXEC_INITIAL && _initialized))
+  if (wantOutput("system_information", type) && !(type == EXEC_INITIAL))
     outputSystemInformation();
 
   // Write the input
@@ -528,7 +532,7 @@ Console::writeVariableNorms()
 
 // Quick helper to output the norm in color
 std::string
-Console::outputNorm(const Real & old_norm, const Real & norm)
+Console::outputNorm(const Real & old_norm, const Real & norm, const unsigned int precision)
 {
   std::string color = COLOR_GREEN;
 
@@ -540,7 +544,7 @@ Console::outputNorm(const Real & old_norm, const Real & norm)
     color = COLOR_YELLOW;
 
   std::stringstream oss;
-  oss << std::scientific << color << norm << COLOR_DEFAULT;
+  oss << std::scientific << std::setprecision(precision) << color << norm << COLOR_DEFAULT;
 
   return oss.str();
 }

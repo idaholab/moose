@@ -22,198 +22,198 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./massfrac0]
-  [../]
+  [pp]
+  []
+  [massfrac0]
+  []
 []
 
 [AuxVariables]
-  [./velocity_x]
+  [velocity_x]
     family = MONOMIAL
     order = CONSTANT
     block = 'fracture'
-  [../]
-  [./velocity_y]
+  []
+  [velocity_y]
     family = MONOMIAL
     order = CONSTANT
     block = 'fracture'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./velocity_x]
+  [velocity_x]
     type = PorousFlowDarcyVelocityComponentLowerDimensional
     variable = velocity_x
     component = x
     aperture = 6E-4
-  [../]
-  [./velocity_y]
+  []
+  [velocity_y]
     type = PorousFlowDarcyVelocityComponentLowerDimensional
     variable = velocity_y
     component = y
     aperture = 6E-4
-  [../]
+  []
 []
 
 [ICs]
-  [./massfrac0]
+  [massfrac0]
     type = ConstantIC
     variable = massfrac0
     value = 0
-  [../]
-  [./pp_matrix]
+  []
+  [pp_matrix]
     type = ConstantIC
     variable = pp
     value = 1E6
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     value = 0
     variable = massfrac0
     boundary = top
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     value = 1
     variable = massfrac0
     boundary = bottom
-  [../]
-  [./ptop]
+  []
+  [ptop]
     type = DirichletBC
     variable = pp
     boundary =  top
     value = 1e6
-  [../]
-  [./pbottom]
+  []
+  [pbottom]
     type = DirichletBC
     variable = pp
     boundary = bottom
     value = 1.002e6
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = pp
-  [../]
-  [./adv0]
+  []
+  [adv0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = pp
-  [../]
-  [./diff0]
+  []
+  [diff0]
     type = PorousFlowDispersiveFlux
     fluid_component = 1
     variable = pp
     disp_trans = 0
     disp_long = 0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = massfrac0
-  [../]
-  [./adv1]
+  []
+  [adv1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = massfrac0
-  [../]
-  [./diff1]
+  []
+  [diff1]
     type = PorousFlowDispersiveFlux
     fluid_component = 0
     variable = massfrac0
     disp_trans = 0
     disp_long = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp massfrac0'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = massfrac0
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./poro_fracture]
+  []
+  [poro_fracture]
     type = PorousFlowPorosityConst
     porosity = 6e-4   # = a * phif
     block = 'fracture'
-  [../]
-  [./poro_matrix]
+  []
+  [poro_matrix]
     type = PorousFlowPorosityConst
     porosity = 0.1
     block = 'matrix1 matrix2'
-  [../]
-  [./diff1]
+  []
+  [diff1]
     type = PorousFlowDiffusivityConst
     diffusion_coeff = '1e-9 1e-9'
     tortuosity = 1.0
     block = 'fracture'
-  [../]
-  [./diff2]
+  []
+  [diff2]
     type = PorousFlowDiffusivityConst
     diffusion_coeff = '1e-9 1e-9'
     tortuosity = 0.1
     block = 'matrix1 matrix2'
-  [../]
-  [./permeability_fracture]
+  []
+  [permeability_fracture]
     type = PorousFlowPermeabilityConst
     permeability = '1.8e-11 0 0 0 1.8e-11 0 0 0 1.8e-11'   # 1.8e-11 = a * kf
     block = 'fracture'
-  [../]
-  [./permeability_matrix]
+  []
+  [permeability_matrix]
     type = PorousFlowPermeabilityConst
     permeability = '1e-20 0 0 0 1e-20 0 0 0 1e-20'
     block = 'matrix1 matrix2'
-  [../]
-  [./relp]
+  []
+  [relp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./basic]
+  [basic]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -230,7 +230,7 @@
 []
 
 [VectorPostprocessors]
-  [./xmass]
+  [xmass]
     type = LineValueSampler
     start_point = '-0.5 0 0'
     end_point = '0.5 0 0'
@@ -238,12 +238,12 @@
     num_points = 41
     variable = massfrac0
     outputs = csv
-  [../]
+  []
 []
 
 [Outputs]
-  [./csv]
+  [csv]
     type = CSV
     execute_on = 'final'
-  [../]
+  []
 []

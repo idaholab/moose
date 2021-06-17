@@ -25,100 +25,100 @@
 []
 
 [Variables]
-  [./temperature]
-  [../]
+  [temperature]
+  []
 []
 
 [Kernels]
-  [./energy_dot]
+  [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temperature
-  [../]
-  [./phe]
+  []
+  [phe]
     type = PorousFlowPlasticHeatEnergy
     variable = temperature
     coeff = 8
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxKernels]
-  [./disp_x]
+  [disp_x]
     type = FunctionAux
     variable = disp_x
     function = 'z*t'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = temperature
     number_fluid_phases = 0
     number_fluid_components = 0
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = TensorMechanicsHardeningConstant
     value = 1.0
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = TensorMechanicsHardeningConstant
     value = 0.0
-  [../]
-  [./t_strength]
+  []
+  [t_strength]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
-  [./c_strength]
+  []
+  [c_strength]
     type = TensorMechanicsHardeningConstant
     value = 10
-  [../]
+  []
 []
 
 [Materials]
-  [./rock_internal_energy]
+  [rock_internal_energy]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 2
     density = 2
-  [../]
-  [./temp]
+  []
+  [temp]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.7
-  [../]
-  [./phe]
+  []
+  [phe]
     type = ComputePlasticHeatEnergy
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0.5 0.25'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     perform_finite_strain_rotations = false
-  [../]
-  [./mc]
+  []
+  [mc]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -129,24 +129,24 @@
     smoothing_tol = 1
     yield_function_tol = 1E-10
     perfect_guess = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./temp]
+  [temp]
     type = PointValue
     point = '0 0 0'
     variable = temperature
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

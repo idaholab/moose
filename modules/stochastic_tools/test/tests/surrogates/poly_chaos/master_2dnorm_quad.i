@@ -88,8 +88,7 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = quadrature
-    results_vpp = storage
-    results_vector = data:avg
+    response = storage/data:avg
   []
 []
 

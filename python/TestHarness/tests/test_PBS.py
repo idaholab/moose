@@ -46,7 +46,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('--pbs-queue', 'does-not-exist', '--pbs', '_testPBS', '-i', 'always_ok')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output.decode('utf-8'), r'ERROR: qsub: Unknown queue')
+        self.assertRegex(e.output.decode('utf-8'), r'ERROR: qsub: Unknown queue')
 
     def testPBSLaunch(self):
         """

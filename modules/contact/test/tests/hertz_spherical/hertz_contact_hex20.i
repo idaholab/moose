@@ -32,6 +32,7 @@
 
 [Mesh]#Comment
   file = hertz_contact_hex20.e
+  allow_renumbering = false
 [] # Mesh
 
 [Problem]

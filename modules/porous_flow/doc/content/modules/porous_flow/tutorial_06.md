@@ -21,9 +21,9 @@ To encourage flow, rather than a rapid convergence to a more-or-less steady-stat
 
 !listing modules/porous_flow/examples/tutorial/06.i start=[BCs] end=[Modules]
 
-The only other changes are that the `PorousFlowConstantBiotModulus` `Material` is now not needed, and that now a nodal porosity is needed in addition to the one evaluated at the quadpoints, since [eq:full_sat] is lumped to the nodes:
+The only other changes are that the `PorousFlowPorosity` `Material` is needed, not the `PorousFlowConstantBiotModulus` `Material`:
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[Materials] end=[./permeability_aquifer]
+!listing modules/porous_flow/examples/tutorial/06.i start=[Materials] end=[permeability_aquifer]
 
 If `multiply_by_density = true` then the arguments in [Page 02](porous_flow/tutorial_02.md) concerning the magnitude of the residual, and hence the size of the nonlinear absolute-tolerance must be modified.  Specifically, the fluid residuals now get multiplied by the density (which is the default and most common use-case in PorousFlow).  So in this problem, the fluid residual is approximately
 \begin{equation}
@@ -43,13 +43,13 @@ As you gain experience with PorousFlow, you will realise that this simulation co
 
 The most important (potential) problem lies with the boundary conditions.  Physically they are saying "add or remove fluid to keep the porepressure or tracer concentration fixed".  In more complex simulations this can be completely disasterous.  There may not be the correct fluid component and fluid phase present to remove, and this causes extremely poor nonlinear convergence.  It is really important to understand this fully.
 
-`PorousFlowFullySaturated` associates the variable $\chi^{\kappa}$ with the mass-balance equation for $\chi^{\kappa}$, and the variable $P$ with the mass-balance equation for the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$).  (This is not obvious unless you read the code.  In simulations that don't use `Actions` it will be obvious because you will have to write the input-file `Kernels` block yourself.)  Hence the BCs that have `variable = porepressure`:
+[PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) associates the variable $\chi^{\kappa}$ with the mass-balance equation for $\chi^{\kappa}$, and the variable $P$ with the mass-balance equation for the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$).  (This is not obvious unless you read the documentation or the code.  In simulations that don't use `Actions` it will be obvious because you will have to write the input-file `Kernels` block yourself.)  Hence the BCs that have `variable = porepressure`:
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[./constant_injection_porepressure] end=[./injected_tracer]
+!listing modules/porous_flow/examples/tutorial/06.i start=[constant_injection_porepressure] end=[injected_tracer]
 
-are saying "add or remove the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$) to keep the porepressure fixed"; while the BCs that have `variable = tracer_concentration`:
+are saying "add or remove the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$) to keep the porepressure fixed" (physically this mass fraction is probably the water mass fraction); while the BCs that have `variable = tracer_concentration`:
 
-!listing modules/porous_flow/examples/tutorial/06.i start=[./injected_tracer] end=[]
+!listing modules/porous_flow/examples/tutorial/06.i start=[injected_tracer] end=[]
 
 are saying "add or remove the tracer so that its concentration remains fixed".  In complex multi-phase, multi-component models this can be a real "gotcha" and a [PorousFlowSink](PorousFlowSink.md) is recommended.
 
@@ -59,7 +59,7 @@ Broadly speaking, the animation shows the expected behaviour, but what are those
 
 The "stripes" are removed by numerical stabilization, but this comes at a cost.  PorousFlow offers two types of [numerical stabilization](stabilization.md).  [Full-upwinding](upwinding.md) is excellent at eliminating overshoots and undershoots, and the convergence speed is also excellent, but it introduces extra diffusion, so that sharp fronts are not maintained!  On the other hand, [KT stabilization](kt.md) also eliminates overshoots and undershoots and introduces very little or zero extra diffusion so that sharp fronts are maintained as well as without any numerical stabilization, but its convergence speed and runtime are always greater.  Further details regarding the diffusion of fronts may be found in the [numerical diffusion](numerical_diffusion.md) page.
 
-It is not possible to use full-upwinding with the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action, but KT stabilization may be easily introduced:
+Numerical stabilization can be easily included using the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action.  For instance, KT stabilization may be easily introduced:
 
 !listing modules/porous_flow/examples/tutorial/06_KT.i start=[PorousFlowFullySaturated] end=[]
 

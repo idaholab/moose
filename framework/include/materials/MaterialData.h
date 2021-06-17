@@ -79,6 +79,9 @@ public:
   /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
 
+  /// copy material properties from one element to another
+  void copy(const Elem * elem_to, const Elem * elem_from, unsigned int side);
+
   /// material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
 
@@ -187,6 +190,13 @@ public:
    * Check value of _resize_only_if_smaller
    */
   bool isOnlyResizeIfSmaller() const { return _resize_only_if_smaller; };
+
+  /**
+   * Remove the property storage and element pointer from MaterialPropertyStorage data structures
+   * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
+   * stateful properties) hanging around in our data structures
+   */
+  void eraseProperty(const Elem * elem) { _storage.eraseProperty(elem); };
 
 protected:
   /// Reference to the MaterialStorage class

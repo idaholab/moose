@@ -1725,7 +1725,7 @@ if test "${with_derivative_type+set}" = set; then :
 
 else
 
-              derivative_type=nonsparse
+              derivative_type=sparse
               user_det_derivative_type=no
 
 fi
@@ -1754,7 +1754,7 @@ $as_echo "configuring with derivative backing array size of $derivative_size" >&
 if test "${with_ad_indexing_type+set}" = set; then :
   withval=$with_ad_indexing_type; ad_indexing_type="$withval"
 else
-  ad_indexing_type=local
+  ad_indexing_type=global
 fi
 
 
@@ -1763,12 +1763,7 @@ case "$ad_indexing_type" in #(
 
           if test "$derivative_type" = nonsparse; then :
 
-                   if test "$user_set_derivative_type" = yes; then :
-                           as_fn_error $? "cannot request global AD indexing and a nonsparse derivative container" "$LINENO" 5
-else
-                           derivative_type=sparse
-
-fi
+                                      as_fn_error $? "cannot use global AD indexing with a nonsparse derivative container" "$LINENO" 5
 
 fi
 

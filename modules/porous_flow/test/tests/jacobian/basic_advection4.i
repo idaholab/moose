@@ -11,112 +11,112 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./T]
-  [../]
-  [./P]
-  [../]
+  [u]
+  []
+  [T]
+  []
+  [P]
+  []
 []
 
 [ICs]
-  [./P]
+  [P]
     type = RandomIC
     variable = P
     min = 2E5
     max = 4E5
-  [../]
-  [./T]
+  []
+  [T]
     type = RandomIC
     variable = T
     min = 300
     max = 900
-  [../]
-  [./u]
+  []
+  [u]
     type = RandomIC
     variable = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy_T]
+  [dummy_T]
     type = NullKernel
     variable = T
-  [../]
-  [./dummy_P]
+  []
+  [dummy_P]
     type = NullKernel
     variable = P
-  [../]
-  [./u_advection]
+  []
+  [u_advection]
     type = PorousFlowBasicAdvection
     variable = u
     phase = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'P T'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     alpha = 1E-5
     m = 0.6
     sat_lr = 0.1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./methane]
+  [FluidProperties]
+    [methane]
       type = MethaneFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature_qp]
+  [temperature_qp]
     type = PorousFlowTemperature
     temperature = T
-  [../]
-  [./ppss_qp]
+  []
+  [ppss_qp]
     type = PorousFlow1PhaseP
     porepressure = P
     capillary_pressure = pc
-  [../]
-  [./fluid_qp]
+  []
+  [fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = methane
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '5 0 0 0 5 0 0 0 5'
-  [../]
-  [./relperm_qp]
+  []
+  [relperm_qp]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
     s_res = 0.1
     sum_s_res = 0.1
-  [../]
-  [./darcy_velocity_qp]
+  []
+  [darcy_velocity_qp]
     type = PorousFlowDarcyVelocityMaterial
     gravity = '0.25 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-snes_type'
     petsc_options_value = ' test'
-  [../]
+  []
 []
 
 [Executioner]

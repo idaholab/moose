@@ -1,31 +1,15 @@
 # FVDirichletBC
 
-!alert! construction title=Undocumented Class
-The FVDirichletBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FVDirichletBC
-
 !syntax description /FVBCs/FVDirichletBC
 
 ## Overview
 
-!! Replace these lines with information regarding the FVDirichletBC object.
+Dirichlet boundary conditions impose the boundary condition $u=g$, where $g$ is a constant. This boundary condition is imposed weakly, through the value of the
+flux.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the FVDirichletBC object.
-
-!syntax parameters /FVBCs/FVDirichletBC
-
-!syntax inputs /FVBCs/FVDirichletBC
-
-!syntax children /FVBCs/FVDirichletBC
-```
-!alert-end!
+Note that an upwinding scheme that may be used by flux kernels will affect how the Dirichlet value is applied to the interface. Upwinding schemes can result in the boundary solution being different than the specified Dirichlet value. In order to
+obtain the desired boundary value, it is necessary to use a FVNeummannBC to specify
+the flux.
 
 !syntax description /FVBCs/FVDirichletBC
 

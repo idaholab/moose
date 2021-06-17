@@ -2,21 +2,21 @@
 
 ## Description
 
-The `ComputeSmallStrainNOSPD` Material calculates the strain tensors based on [deformation gradient](peridynamics/DeformationGradients.md) for the peridynamic correspondence model under small strain assumptions.
+The `ComputeSmallStrainNOSPD` Material calculates the strain tensors based on [deformation gradient](peridynamics/DeformationGradients.md) for the peridynamic correspondence models under small strain assumptions.
 
-Given the bond-associated deformation gradient $\mathbf{F}_{\mathbf{\xi}}$, the bond-associated total strain tensor can be obtained as
+Given the deformation gradient $\mathbf{F}$, the total strain tensor can be obtained as
 
 \begin{equation}
-  \boldsymbol{\epsilon}_{\mathbf{\xi}, \text{total}} = \frac{1}{2} \left( \mathbf{F}_{\mathbf{\xi}}^{T} \mathbf{F}_{\mathbf{\xi}} - \mathbf{I} \right)
+  \boldsymbol{\epsilon}_{\text{total}} = \frac{1}{2} \left( \mathbf{F}^{T} + \mathbf{F} \right) - \mathbf{I}
 \end{equation}
 
 and the elastic strain tensor can be obtained by subtracting the eigen strain tensor from the total strain tensor as
 
 \begin{equation}
-  \boldsymbol{\epsilon}_{\mathbf{\xi}, \text{elastic}} = \boldsymbol{\epsilon}_{\mathbf{\xi}, \text{total}} - \boldsymbol{\epsilon}_{\mathbf{\xi}, \text{eigen}}
+  \boldsymbol{\epsilon}_{\text{elastic}} = \boldsymbol{\epsilon}_{\text{total}} - \boldsymbol{\epsilon}_{\text{eigen}}
 \end{equation}
 
-The computed bond-associated elastic strain tensor is then used in stress calculator to calculate bond-associated stress tensor.
+The computed elastic strain tensor is then used in stress calculator to calculate the stress tensor.
 
 Note that Material `ComputeSmallStrainNOSPD` can be used in general 3D and plane strain modeling and simulation.
 

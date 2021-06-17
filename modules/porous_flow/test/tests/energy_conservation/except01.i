@@ -12,114 +12,114 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./temp]
-  [../]
+  [pp]
+  []
+  [temp]
+  []
 []
 
 [ICs]
-  [./tinit]
+  [tinit]
     type = FunctionIC
     function = '100*x'
     variable = temp
-  [../]
-  [./pinit]
+  []
+  [pinit]
     type = FunctionIC
     function = x
     variable = pp
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummyt]
+  [dummyt]
     type = TimeDerivative
     variable = temp
-  [../]
-  [./dummyp]
+  []
+  [dummyp]
     type = TimeDerivative
     variable = pp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'temp pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1
       density0 = 1
       viscosity = 0.001
       thermal_expansion = 0
       cv = 1.3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 2.2
     density = 0.5
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_heat]
+  [total_heat]
     type = PorousFlowHeatEnergy
     phase = 1
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowHeatEnergy
-  [../]
-  [./fluid_heat]
+  []
+  [fluid_heat]
     type = PorousFlowHeatEnergy
     include_porous_skeleton = false
     phase = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1 1 10000'
-  [../]
+  []
 []
 
 [Executioner]

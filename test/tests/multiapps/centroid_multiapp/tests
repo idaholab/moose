@@ -5,7 +5,7 @@
   [./test]
     type = 'Exodiff'
     input = 'centroid_multiapp.i'
-    exodiff = 'centroid_multiapp_out.e centroid_multiapp_out_sub1.e centroid_multiapp_out_sub3.e centroid_multiapp_out_sub5.e centroid_multiapp_out_sub7.e centroid_multiapp_out_sub0.e	centroid_multiapp_out_sub2.e centroid_multiapp_out_sub4.e centroid_multiapp_out_sub6.e centroid_multiapp_out_sub8.e'
+    exodiff = 'centroid_multiapp_out.e centroid_multiapp_out_sub1.e centroid_multiapp_out_sub3.e centroid_multiapp_out_sub5.e centroid_multiapp_out_sub7.e centroid_multiapp_out_sub0.e centroid_multiapp_out_sub2.e centroid_multiapp_out_sub4.e centroid_multiapp_out_sub6.e centroid_multiapp_out_sub8.e'
 
     requirement = "The system shall include the ability to execute a sub-application at the centroid of every element within the finite element mesh."
   [../]

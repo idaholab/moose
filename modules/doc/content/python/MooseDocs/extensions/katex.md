@@ -19,45 +19,51 @@ as shown in [katex-numbered].
 
 !devel! example id=katex-numbered
                 caption=Example of syntax for creating numbered equations with [KaTeX].
-\begin{equation}
+!equation id=line-eq
 y = a\cdot x + b
-\end{equation}
 !devel-end!
 
-To include a non-numbered equation, simply use the `*` version of the environment, as shown in
+To include a non-numbered equation, simply exclude the "id" in the command, as shown in
 [katex-no-number].
 
 !devel! example id=katex-no-number
                 caption=Example of syntax for creating non-numbered equations with Katex.
-\begin{equation*}
+!equation
 c^2 = a^2 + b^2
-\end{equation*}
 !devel-end!
 
-It is possible to reference numbered block equations. First, the equation must contain a label. A
-label is added using traditional `\label{my-eq}` command. Then within the text this label can be used
-within a shortcut link, e.g. `[my-eq]` (see [/core.md#shortcut-link]).
+It is possible to reference numbered block equations. First, the equation must contain an "id".  Then
+within the text this label can be used within a shortcut link, e.g. `[my-eq]` (see [/core.md#shortcut-link]).
+
+## Equation References
 
 [eq-label-example] provides a complete example of creating and referencing an equation. The prefix
 is dictated by the extension prefix configuration option (see [katex-extension-config]).
 
 !devel! example id=eq-label-example
                 caption=Example that references a labeled, numbered block equation.
-[eq-label] is a famous equation.
+[!eqref](eq-label) is a famous equation.
 
-\begin{equation}
-\label{eq-label}
+!equation id=eq-label
 E = mc^2
-\end{equation}
+!devel-end!
+
+It is possible to reference equations on other pages. If the page containing the referenced
+equation has a top-level heading then that will be used. The filename of the page is used when
+no heading exists.
+
+!devel! example id=eq-external-label-example
+                caption=Example that references a labeled, numbered block equation from another page.
+[!eqref](katex.md#eq-label) is a famous equation.
 !devel-end!
 
 ## Inline Equations
 
-Inline equations also use traditional LaTeX syntax, i.e., the content is wrapped in single `$` as
-shown below.
+Inline equations can use traditional LaTeX syntax, i.e., the content is wrapped in single `$` or
+the inline `!eq` command, as shown in [katex-inline].
 
 !devel example id=katex-inline caption=Example of an inline LaTeX equation.
-This $y=2\phi$ is inline.
+This $y=2\phi$ is inline and so it this: [!eq](\phi=\beta^2).
 
 ## Macros
 

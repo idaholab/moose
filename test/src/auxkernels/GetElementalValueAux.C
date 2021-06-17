@@ -34,6 +34,14 @@ GetElementalValueAux::GetElementalValueAux(const InputParameters & params)
 {
   if (isNodal())
     mooseError("GetElementalValueAux cannot be used to compute a nodal variable");
+
+  // These values may not be available by default, and if we ask for them within
+  // an elemental loop, it will be far too late. Therefore - request them here.
+  // This is not ideal... welcome to better suggestions!
+  if (_time_level == "old")
+    _copied_var.slnOld();
+  else if (_time_level == "older")
+    _copied_var.slnOlder();
 }
 
 Real

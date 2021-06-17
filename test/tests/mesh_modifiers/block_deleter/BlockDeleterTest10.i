@@ -42,7 +42,7 @@
   [ed0]
     type = BlockDeletionGenerator
     input = new_block_number
-    block_id = 3
+    block = 3
   []
 []
 

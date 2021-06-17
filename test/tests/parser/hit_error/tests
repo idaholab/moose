@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16410'
+  design = 'InputParameters.md'
+  [error]
+    type = RunException
+    input = hit_error.i
+    expect_err = "hit_error.i:5: missing closing '\[\]' for section"
+
+    requirement = "The system shall report an error if the supplied input file is not formatted correctly."
+  []
+[]

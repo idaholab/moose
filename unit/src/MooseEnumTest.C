@@ -364,6 +364,14 @@ TEST(MooseEnum, operatorPlus)
   MooseEnum b("a=1 b=2 c=3 d=4 e=5");
 
   EXPECT_TRUE(a.items() == b.items());
+
+  MultiMooseEnum c("a=1 b=2", "a");
+  c += "c=3";
+  c += {"d=4", "e=5"};
+
+  MultiMooseEnum d("a=1 b=2 c=3 d=4 e=5");
+
+  EXPECT_TRUE(c.items() == d.items());
 }
 
 TEST(MooseEnum, getIDs)

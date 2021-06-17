@@ -160,7 +160,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = _executioner.picardSolve().solve();
+  _converged = _executioner.fixedPointSolve().solve();
 }
 
 void
@@ -202,4 +202,10 @@ void
 TimeStepper::forceTimeStep(Real dt)
 {
   _current_dt = dt;
+}
+
+void
+TimeStepper::forceNumSteps(const unsigned int num_steps)
+{
+  _executioner.forceNumSteps(num_steps);
 }

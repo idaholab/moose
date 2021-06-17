@@ -1,9 +1,9 @@
 # {{app}} Software Quality Assurance
 
-- [!sqa!document category={{category}} suffix=srs](Software Requirement Specification (SRS))
-- [!sqa!document category={{category}} suffix=sdd](Software Design Document (SDD))
-- [!sqa!document category={{category}} suffix=rtm](Requirement Traceability Matrix (RTM))
-- [!sqa!document category={{category}} suffix=vvr](Verification and Validation Report (VVR))
-- [!sqa!document category={{category}} suffix=stp](Software Test Plan (STP))
+!template! field key=sqa-records required=False
+!sqa records category=_empty_
+!template-end!
 
-!sqa report category={{category}}
+!template! field key=sqa-report required=False
+!sqa report category=_empty_
+!template-end!

@@ -1,0 +1,27 @@
+Applications:
+    fsi:
+        exe_directory: ${MOOSE_DIR}/modules/fsi
+        app_types:
+            - FsiApp
+        content_directory: ${MOOSE_DIR}/modules/fsi/doc/content
+
+Documents:
+    software_requirements_specification: sqa/fsi_srs.md
+    software_design_description: sqa/fsi_sdd.md
+    software_test_plan: sqa/fsi_stp.md
+    requirements_traceablity_matrix: sqa/fsi_rtm.md
+    verification_validation_plan: sqa/fsi_vvr.md
+    log_safety_software_determination: WARNING
+    log_quality_level_determination: WARNING
+    log_enterprise_architecture_entry: WARNING
+    log_project_management_plan: WARNING
+    log_software_quality_plan: WARNING
+    log_configuration_management_plan: WARNING
+    log_asset_management_plan: WARNING
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+
+Requirements:
+    fsi:
+        directories:
+            - ${MOOSE_DIR}/modules/fsi

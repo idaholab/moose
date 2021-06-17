@@ -51,7 +51,6 @@
   [./from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = 'Nonlinear TIMESTEP_END'
   [../]
 []
 

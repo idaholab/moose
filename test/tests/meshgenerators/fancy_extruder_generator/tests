@@ -10,4 +10,22 @@
     design = 'FancyExtruderGenerator.md'
     issues = '#13276 #3554 #5634'
   [../]
+  [prepare_mesh]
+    type = 'RunApp'
+    input = need-neighbors.i
+    requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
+    issues = '#15944 #15936 #15823'
+    design = 'FancyExtruderGenerator.md'
+  []
+  [extruder_then_parsed_gen_sideset]
+    type = 'Exodiff'
+    input = fancy_extruder_then_parsed_gen_sideset.i
+    cli_args = '--mesh-only'
+    exodiff = 'fancy_extruder_then_parsed_gen_sideset_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to use the result from FancyExtruderGenerator in subsequent mesh generators'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#16902'
+  []
 []

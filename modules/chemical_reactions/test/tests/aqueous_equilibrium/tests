@@ -31,6 +31,8 @@
     type = 'Exodiff'
     input = '2species_with_density.i'
     exodiff = '2species_with_density_out.e'
+    # Diffs with parallel that aren't worth customizing tolerances over
+    max_parallel = 1
   [../]
   [./water_dissociation]
     type = CSVDiff

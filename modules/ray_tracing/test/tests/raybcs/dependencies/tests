@@ -1,0 +1,23 @@
+[Tests]
+  design = 'RayBCs/index.md'
+  issues = '#16028'
+
+  [test]
+    type = CSVDiff
+    input = 'ray_bc_dependencies.i'
+    csvdiff = 'ray_bc_dependencies_out.csv'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the dependency resolution of RayBCs.'
+  []
+
+  [missing]
+    type = RunException
+    input = 'ray_bc_dependencies.i'
+    cli_args = 'RayBCs/add_1/depends_on=dummy'
+    allow_test_objects = true
+    expect_err = 'The RayBoundaryCondition \'dummy\' does not exist'
+
+    requirement = 'The system shall throw a reasonable error when adding a dependency for a RayBC that does not exist.'
+  []
+[]

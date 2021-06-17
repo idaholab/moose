@@ -1,0 +1,43 @@
+Applications:
+    framework:
+        exe_directory: test
+        exe_name: moose_test
+        app_types:
+            - MooseApp
+        content_directory: framework/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+            - test/doc/remove.yml
+        log_stub_files: WARNING
+        show_warning: false
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/framework_srs.md
+    software_design_description: sqa/framework_sdd.md
+    software_test_plan: sqa/framework_stp.md
+    requirements_traceablity_matrix: sqa/framework_rtm.md
+    verification_validation_report: sqa/framework_vvr.md
+    failure_analysis_report: sqa/framework_far.md
+    software_library_list: sqa/framework_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+    show_warning: false
+
+Requirements:
+    moose_test:
+        directories:
+            - test/tests
+        show_warning: false
+        include_non_testable: true
+        log_testable: WARNING

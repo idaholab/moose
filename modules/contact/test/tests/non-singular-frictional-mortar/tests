@@ -3,10 +3,12 @@
     type = Exodiff
     input = frictional-mortar.i
     exodiff = frictional-mortar_exodus.e
-    design = 'TangentialMortarLMMechanicalContact.md'
-    issues = '#10950'
-    requirement = 'The system shall assign a value of 1 for the derivative of abs(0) in order to avoid singular Jacobians in frictional mortar contact.'
-    expect_out = '0 of 41 singular values'
-    absent_out = '[1-9]+[0-9]* of 41 singular values'
+    design = 'ComputeFrictionalForceLMMechanicalContact.md'
+    issues = '#17495'
+    requirement = 'The system shall not generate singular Jacobians in frictional mortar contact.'
+    expect_out = '0 of 42 singular values'
+    absent_out = '[1-9]+[0-9]* of 42 singular values'
+    ad_indexing_type = 'global'
+    mesh_mode = 'REPLICATED'
   []
 []

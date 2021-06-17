@@ -64,7 +64,7 @@ to develop as each piece of end-user (developer) code that goes into the system 
 interface for the underlying systems that those object plug into. These descriptions are provided
 through developer-supplied "markdown" files that are required for all new objects that are developed
 as part of the framework, modules and derivative applications. More information about the design
-documentation can be found in [MooseDocs](MooseDocs/generate.md optional=True).
+documentation can be found in [framework/documenting.md].
 !template-end!
 
 !template! item key=system-scope

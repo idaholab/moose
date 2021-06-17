@@ -33,6 +33,7 @@
 #include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
 #include "MooseUtils.h"
+#include "Conversion.h"
 #include "Units.h"
 
 #include "libmesh/parallel.h"
@@ -64,7 +65,7 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
   if (ret != -1)
   {
-    exp.errors.push_back(hit::errormsg(exp.fname, n, "fparse error: ", fp.ErrorMsg()));
+    exp.errors.push_back(hit::errormsg(n, "fparse error: ", fp.ErrorMsg()));
     return n->val();
   }
 
@@ -86,11 +87,8 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
     }
 
     if (curr == nullptr)
-      exp.errors.push_back(hit::errormsg(exp.fname,
-                                         n,
-                                         "\n    no variable '",
-                                         var,
-                                         "' found for use in function parser expression"));
+      exp.errors.push_back(hit::errormsg(
+          n, "\n    no variable '", var, "' found for use in function parser expression"));
   }
 
   if (exp.errors.size() != n_errs)
@@ -123,8 +121,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
   if (argv.size() != 4 || (argv.size() >= 3 && argv[2] != "->"))
   {
     exp.errors.push_back(
-        hit::errormsg(exp.fname,
-                      n,
+        hit::errormsg(n,
                       "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
                       "2 arguments  ${units number unit}"));
     return n->val();
@@ -135,8 +132,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
   auto to_unit = MooseUnits(argv[3]);
   if (!from_unit.conformsTo(to_unit))
   {
-    exp.errors.push_back(hit::errormsg(exp.fname,
-                                       n,
+    exp.errors.push_back(hit::errormsg(n,
                                        "units error: ",
                                        argv[1],
                                        " (",
@@ -217,7 +213,7 @@ isSectionActive(std::string path, hit::Node * root)
 class DupParamWalker : public hit::Walker
 {
 public:
-  DupParamWalker(std::string fname) : _fname(fname) {}
+  DupParamWalker() {}
   void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
   {
     std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
@@ -228,21 +224,57 @@ public:
       if (_duplicates.count(fullpath) == 0)
       {
         errors.push_back(
-            hit::errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
+            hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
         _duplicates.insert(fullpath);
       }
-      errors.push_back(
-          hit::errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
     }
-    _have[n->fullpath()] = n;
+    _have[fullpath] = n;
   }
 
   std::vector<std::string> errors;
 
 private:
-  std::string _fname;
   std::set<std::string> _duplicates;
   std::map<std::string, hit::Node *> _have;
+};
+
+class CompileParamWalker : public hit::Walker
+{
+public:
+  typedef std::map<std::string, hit::Node *> ParamMap;
+  CompileParamWalker(ParamMap & map) : _map(map) {}
+  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    if (n->type() == hit::NodeType::Field)
+      _map[fullpath] = n;
+  }
+
+private:
+  ParamMap & _map;
+};
+
+class OverrideParamWalker : public hit::Walker
+{
+public:
+  OverrideParamWalker(const CompileParamWalker::ParamMap & map) : _map(map) {}
+  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    const auto it = _map.find(fullpath);
+    if (it != _map.end())
+      warnings.push_back(hit::errormsg(n,
+                                       " Parameter '",
+                                       fullpath,
+                                       "' overrides the same parameter in ",
+                                       it->second->filename(),
+                                       ":",
+                                       it->second->line()));
+  }
+
+  std::vector<std::string> warnings;
+
+private:
+  const CompileParamWalker::ParamMap & _map;
 };
 
 std::vector<std::string>
@@ -291,10 +323,7 @@ Parser::listValidParams(std::string & section_name)
 class UnusedWalker : public hit::Walker
 {
 public:
-  UnusedWalker(std::string fname, std::set<std::string> used, Parser & p)
-    : _fname(fname), _used(used), _parser(p)
-  {
-  }
+  UnusedWalker(std::set<std::string> used, Parser & p) : _used(used), _parser(p) {}
 
   void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override
   {
@@ -308,23 +337,16 @@ public:
       auto paramlist = _parser.listValidParams(section_name);
       auto candidates = findSimilar(nodename, paramlist);
       if (candidates.size() > 0)
-        errors.push_back(hit::errormsg(_fname,
-                                       n,
-                                       "unused parameter '",
-                                       fullpath,
-                                       "'\n",
-                                       "      Did you mean '",
-                                       candidates[0],
-                                       "'?"));
+        errors.push_back(hit::errormsg(
+            n, "unused parameter '", fullpath, "'\n", "      Did you mean '", candidates[0], "'?"));
       else
-        errors.push_back(hit::errormsg(_fname, n, "unused parameter '", fullpath, "'"));
+        errors.push_back(hit::errormsg(n, "unused parameter '", fullpath, "'"));
     }
   }
 
   std::vector<std::string> errors;
 
 private:
-  std::string _fname;
   std::set<std::string> _used;
   Parser & _parser;
 };
@@ -332,7 +354,7 @@ private:
 class BadActiveWalker : public hit::Walker
 {
 public:
-  BadActiveWalker(std::string fname) : _fname(fname) {}
+  BadActiveWalker() {}
   void walk(const std::string & /*fullpath*/,
             const std::string & /*nodepath*/,
             hit::Node * section) override
@@ -343,8 +365,8 @@ public:
     if (actives && inactives && actives->type() == hit::NodeType::Field &&
         inactives->type() == hit::NodeType::Field && actives->parent() == inactives->parent())
     {
-      errors.push_back(hit::errormsg(
-          _fname, section, "'active' and 'inactive' parameters both provided in section"));
+      errors.push_back(
+          hit::errormsg(section, "'active' and 'inactive' parameters both provided in section"));
       return;
     }
 
@@ -361,8 +383,7 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(hit::errormsg(_fname,
-                                       section,
+        errors.push_back(hit::errormsg(section,
                                        "variables listed as active (",
                                        msg,
                                        ") in section '",
@@ -383,8 +404,7 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(hit::errormsg(_fname,
-                                       section,
+        errors.push_back(hit::errormsg(section,
                                        "variables listed as inactive (",
                                        msg,
                                        ") in section '",
@@ -394,23 +414,20 @@ public:
     }
   }
   std::vector<std::string> errors;
-
-private:
-  std::string _fname;
 };
 
 std::string
-Parser::getFileName(bool stripLeadingPath) const
+Parser::getPrimaryFileName(bool stripLeadingPath) const
 {
   if (!stripLeadingPath)
-    return _input_filename;
+    return _input_filenames[0];
 
   std::string filename;
-  size_t pos = _input_filename.find_last_of('/');
+  size_t pos = _input_filenames[0].find_last_of('/');
   if (pos != std::string::npos)
-    filename = _input_filename.substr(pos + 1);
+    filename = _input_filenames[0].substr(pos + 1);
   else
-    filename = _input_filename;
+    filename = _input_filenames[0];
 
   return filename;
 }
@@ -439,8 +456,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   auto iters = _syntax.getActions(registered_identifier);
   if (iters.first == iters.second)
   {
-    _errmsg += hit::errormsg(getFileName(),
-                             n,
+    _errmsg += hit::errormsg(n,
                              "section '",
                              curr_identifier,
                              "' does not have an associated \"Action\".\nDid you misspell it?") +
@@ -453,8 +469,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     if (is_parent)
       continue;
     if (_syntax.isDeprecatedSyntax(registered_identifier))
-      mooseDeprecated(hit::errormsg(
-          getFileName(), n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
+      mooseDeprecated(
+          hit::errormsg(n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
 
     params = _action_factory.getValidParams(it->second._action);
 
@@ -465,7 +481,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     // Add the parsed syntax to the parameters object for consumption by the Action
     params.set<std::string>("task") = it->second._task;
     params.set<std::string>("registered_identifier") = registered_identifier;
-    params.blockLocation() = _input_filename + ":" + std::to_string(n->line());
+    params.blockLocation() = n->filename() + ":" + std::to_string(n->line());
     params.blockFullpath() = n->fullpath();
 
     // Create the Action
@@ -592,31 +608,61 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 }
 
 void
-Parser::parse(const std::string & input_filename)
+Parser::parse(const std::vector<std::string> & input_filenames)
 {
   // Save the filename
-  _input_filename = input_filename;
+  _input_filenames = input_filenames;
+  if (_input_filenames.size() > 1)
+    mooseInfo("Merging inputs ", Moose::stringify(_input_filenames));
+
   std::string use_rel_paths_str =
       std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
-    _input_filename = MooseUtils::realpath(_input_filename);
+    for (auto & input_filename : _input_filenames)
+      input_filename = MooseUtils::realpath(input_filename);
 
-  // vector for initializing active blocks
-  std::vector<std::string> all = {"__all__"};
+  CompileParamWalker::ParamMap override_map;
+  CompileParamWalker cpw(override_map);
+  OverrideParamWalker opw(override_map);
 
-  MooseUtils::checkFileReadable(_input_filename, true);
+  for (auto & input_filename : _input_filenames)
+  {
+    MooseUtils::checkFileReadable(input_filename, true);
 
-  std::ifstream f(_input_filename);
-  std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    std::ifstream f(input_filename);
+    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
+    try
+    {
+      std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
+      hit::explode(root.get());
+
+      if (!_root)
+        _root = std::move(root);
+      else
+      {
+        root->walk(&opw, hit::NodeType::Field);
+        hit::merge(root.get(), _root.get());
+      }
+
+      _root->walk(&cpw, hit::NodeType::Field);
+    }
+    catch (hit::ParseError & err)
+    {
+      mooseError(err.what());
+    }
+  }
+
+  // warn about overridden parameters in multiple inputs
+  if (!opw.warnings.empty())
+    mooseInfo(Moose::stringify(opw.warnings), "\n");
+
+  // add in command line arguments
   try
   {
-    _root.reset(hit::parse(_input_filename, input));
     auto cli_input = hitCLIFilter(_app.name(), _app.commandLine()->getArguments());
-
     _cli_root.reset(hit::parse("CLI_ARGS", cli_input));
     hit::explode(_cli_root.get());
-    hit::explode(_root.get());
     hit::merge(_cli_root.get(), _root.get());
   }
   catch (hit::ParseError & err)
@@ -631,7 +677,7 @@ Parser::parse(const std::string & input_filename)
   hit::ReplaceEvaler repl;
   FuncParseEvaler fparse_ev;
   UnitsConversionEvaler units_ev;
-  hit::BraceExpander exw(_input_filename);
+  hit::BraceExpander exw;
   exw.registerEvaler("raw", raw);
   exw.registerEvaler("env", env);
   exw.registerEvaler("fparse", fparse_ev);
@@ -645,8 +691,8 @@ Parser::parse(const std::string & input_filename)
 
   // do as much error checking as early as possible so that errors are more useful instead
   // of surprising and disconnected from what caused them.
-  DupParamWalker dw(_input_filename);
-  BadActiveWalker bw(_input_filename);
+  DupParamWalker dw;
+  BadActiveWalker bw;
   _root->walk(&dw, hit::NodeType::Field);
   _root->walk(&bw, hit::NodeType::Section);
   for (auto & msg : dw.errors)
@@ -703,8 +749,8 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   if (!_root || !_cli_root)
     return;
 
-  UnusedWalker uw(_input_filename, _extracted_vars, *this);
-  UnusedWalker uwcli("CLI_ARG", _extracted_vars, *this);
+  UnusedWalker uw(_extracted_vars, *this);
+  UnusedWalker uwcli(_extracted_vars, *this);
 
   _root->walk(&uw);
   _cli_root->walk(&uwcli);
@@ -1105,6 +1151,14 @@ void Parser::setVectorParameter<VariableName, VariableName>(
     bool in_global,
     GlobalParamsAction * global_block);
 
+template <>
+void Parser::setVectorParameter<ReporterName, std::string>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<ReporterName>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
 void
 Parser::extractParams(const std::string & prefix, InputParameters & p)
 {
@@ -1136,29 +1190,29 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
     std::string full_name = orig_name;
 
     // Mark parameters appearing in the input file or command line
-    if (_root->find(full_name) && _root->find(full_name)->type() == hit::NodeType::Field)
+    auto node = _root->find(full_name);
+    if (node && node->type() == hit::NodeType::Field)
     {
       p.set_attributes(it.first, false);
       _extracted_vars.insert(
           full_name); // Keep track of all variables extracted from the input file
       found = true;
-      p.inputLocation(it.first) =
-          _input_filename + ":" + std::to_string(_root->find(full_name)->line());
+      p.inputLocation(it.first) = node->filename() + ":" + std::to_string(node->line());
       p.paramFullpath(it.first) = full_name;
     }
     // Wait! Check the GlobalParams section
     else if (global_params_block)
     {
       full_name = global_params_block_name + "/" + it.first;
-      if (_root->find(full_name))
+      node = _root->find(full_name);
+      if (node)
       {
         p.set_attributes(it.first, false);
         _extracted_vars.insert(
             full_name); // Keep track of all variables extracted from the input file
         found = true;
         in_global = true;
-        p.inputLocation(it.first) =
-            _input_filename + ":" + std::to_string(_root->find(full_name)->line());
+        p.inputLocation(it.first) = node->filename() + ":" + std::to_string(node->line());
         p.paramFullpath(it.first) = full_name;
       }
     }
@@ -1179,7 +1233,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           dynamic_cast<InputParameters::Parameter<OutFileBase> *>(it.second);
       if (scalar_p)
       {
-        std::string input_file_name = getFileName();
+        std::string input_file_name = getPrimaryFileName();
         mooseAssert(input_file_name != "", "Input Filename is nullptr");
         size_t pos = input_file_name.find_last_of('.');
         mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
@@ -1226,6 +1280,14 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           full_name,                                                                               \
           short_name,                                                                              \
           dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
+          in_global,                                                                               \
+          global_params_block)
+#define setmap(key_type, mapped_type)                                                              \
+  else if (par->type() == demangle(typeid(std::map<key_type, mapped_type>).name()))                \
+      setMapParameter(                                                                             \
+          full_name,                                                                               \
+          short_name,                                                                              \
+          dynamic_cast<InputParameters::Parameter<std::map<key_type, mapped_type>> *>(par),        \
           in_global,                                                                               \
           global_params_block)
 #define setvectorfpath(ptype)                                                                      \
@@ -1303,6 +1365,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(RealTensorValue, RealTensorValue);
       setscalar(ExecFlagEnum, ExecFlagEnum);
       setscalar(ReporterName, string);
+      setscalar(ReporterValueName, string);
 
       // vector types
       setvector(Real, double);
@@ -1351,6 +1414,12 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(VariableName, VariableName);
       setvector(MeshGeneratorName, string);
       setvector(ExtraElementIDName, string);
+      setvector(ReporterName, string);
+      setvector(ReporterValueName, string);
+
+      // map types
+      setmap(string, Real);
+      setmap(string, string);
 
       // Double indexed types
       setvectorvector(Real);
@@ -1397,6 +1466,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 #undef setscalar
 #undef setvector
 #undef setvectorvector
+#undef setmap
     }
   }
 
@@ -1476,8 +1546,7 @@ Parser::setScalarParameter(const std::string & full_name,
       catch (std::invalid_argument & /*e*/)
       {
         const std::string format_type = (t == typeid(double)) ? "float" : "integer";
-        _errmsg += hit::errormsg(_input_filename,
-                                 _root->find(full_name),
+        _errmsg += hit::errormsg(_root->find(full_name),
                                  "invalid ",
                                  format_type,
                                  " syntax for parameter: ",
@@ -1491,8 +1560,7 @@ Parser::setScalarParameter(const std::string & full_name,
     {
       bool isbool = toBool(strval, param->set());
       if (!isbool)
-        _errmsg += hit::errormsg(_input_filename,
-                                 _root->find(full_name),
+        _errmsg += hit::errormsg(_root->find(full_name),
                                  "invalid boolean syntax for parameter: ",
                                  full_name,
                                  "=",
@@ -1521,9 +1589,10 @@ Parser::setFilePathParam(const std::string & full_name,
 {
   std::string prefix;
   std::string postfix = _root->param<std::string>(full_name);
-  size_t pos = _input_filename.find_last_of('/');
+  auto input_filename = getPrimaryFileName(false);
+  size_t pos = input_filename.find_last_of('/');
   if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
-    prefix = _input_filename.substr(0, pos + 1);
+    prefix = input_filename.substr(0, pos + 1);
 
   params.rawParamVal(short_name) = postfix;
   param->set() = prefix + postfix;
@@ -1571,7 +1640,7 @@ Parser::setVectorParameter(const std::string & full_name,
     }
     catch (hit::Error & err)
     {
-      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+      _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
       return;
     }
   }
@@ -1587,6 +1656,107 @@ Parser::setVectorParameter(const std::string & full_name,
   }
 }
 
+template <typename KeyType, typename MappedType>
+void
+Parser::setMapParameter(const std::string & full_name,
+                        const std::string & short_name,
+                        InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
+                        bool in_global,
+                        GlobalParamsAction * global_block)
+{
+  std::map<KeyType, MappedType> the_map;
+  if (_root->find(full_name))
+  {
+    try
+    {
+      const auto & string_vec = _root->param<std::vector<std::string>>(full_name);
+      auto it = string_vec.begin();
+      while (it != string_vec.end())
+      {
+        const auto & string_key = *it;
+        ++it;
+        if (it == string_vec.end())
+        {
+          _errmsg +=
+              hit::errormsg(_root->find(full_name),
+                            "odd number of entries in string vector for map parameter: ",
+                            full_name,
+                            ". There must be "
+                            "an even number or else you will end up with a key without a value!") +
+              "\n";
+          return;
+        }
+        const auto & string_value = *it;
+        ++it;
+
+        std::pair<KeyType, MappedType> pr;
+        // key
+        try
+        {
+          pr.first = MooseUtils::convert<KeyType>(string_key, true);
+        }
+        catch (std::invalid_argument & /*e*/)
+        {
+          _errmsg += hit::errormsg(_root->find(full_name),
+                                   "invalid ",
+                                   demangle(typeid(KeyType).name()),
+                                   " syntax for map parameter ",
+                                   full_name,
+                                   " key: ",
+                                   string_key) +
+                     "\n";
+          return;
+        }
+        // value
+        try
+        {
+          pr.second = MooseUtils::convert<MappedType>(string_value, true);
+        }
+        catch (std::invalid_argument & /*e*/)
+        {
+          _errmsg += hit::errormsg(_root->find(full_name),
+                                   "invalid ",
+                                   demangle(typeid(MappedType).name()),
+                                   " syntax for map parameter ",
+                                   full_name,
+                                   " value: ",
+                                   string_value) +
+                     "\n";
+          return;
+        }
+
+        auto insert_pr = the_map.insert(std::move(pr));
+        if (!insert_pr.second)
+        {
+          _errmsg += hit::errormsg(_root->find(full_name),
+                                   "Duplicate map entry for map parameter: ",
+                                   full_name,
+                                   ". The key ",
+                                   string_key,
+                                   " appears multiple times.") +
+                     "\n";
+          return;
+        }
+      }
+    }
+    catch (hit::Error & err)
+    {
+      _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+      return;
+    }
+  }
+
+  param->set() = the_map;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    auto & global_map = global_block->setParam<std::map<KeyType, MappedType>>(short_name);
+    for (const auto & pair : the_map)
+      global_map.insert(pair);
+  }
+}
+
 template <typename T>
 void
 Parser::setVectorFilePathParam(const std::string & full_name,
@@ -1598,6 +1768,7 @@ Parser::setVectorFilePathParam(const std::string & full_name,
 {
   std::vector<T> vec;
   std::vector<std::string> rawvec;
+  auto input_filename = getPrimaryFileName(false);
   if (_root->find(full_name))
   {
     auto tmp = _root->param<std::vector<std::string>>(full_name);
@@ -1606,9 +1777,9 @@ Parser::setVectorFilePathParam(const std::string & full_name,
     {
       std::string prefix;
       std::string postfix = val;
-      size_t pos = _input_filename.find_last_of('/');
+      size_t pos = input_filename.find_last_of('/');
       if (pos != std::string::npos && postfix[0] != '/')
-        prefix = _input_filename.substr(0, pos + 1);
+        prefix = input_filename.substr(0, pos + 1);
       rawvec.push_back(postfix);
       vec.push_back(prefix + postfix);
     }
@@ -1646,9 +1817,7 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
     {
       _errmsg +=
-          hit::errormsg(
-              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
-          "\n";
+          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
       return;
     }
 
@@ -1680,14 +1849,13 @@ Parser::setScalarComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
   if (vec.size() != LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_input_filename,
-                             _root->find(full_name),
+    _errmsg += hit::errormsg(_root->find(full_name),
                              "wrong number of values in scalar component parameter ",
                              full_name,
                              ": size ",
@@ -1725,14 +1893,13 @@ Parser::setVectorComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
   if (vec.size() % LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_input_filename,
-                             _root->find(full_name),
+    _errmsg += hit::errormsg(_root->find(full_name),
                              "wrong number of values in vector component parameter ",
                              full_name,
                              ": size ",
@@ -1802,7 +1969,7 @@ Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
   }
   catch (hit::Error & err)
   {
-    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
@@ -1842,17 +2009,13 @@ Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]))
     {
       _errmsg +=
-          hit::errormsg(
-              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
-          "\n";
+          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
       return;
     }
     if (j != 0 && values[j].size() != values[0].size())
     {
       _errmsg +=
-          hit::errormsg(
-              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
-          "\n";
+          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
       return;
     }
   }
@@ -1953,8 +2116,7 @@ Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
   auto vec = _root->param<std::vector<double>>(full_name);
   if (vec.size() != LIBMESH_DIM * LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_input_filename,
-                             _root->find(full_name),
+    _errmsg += hit::errormsg(_root->find(full_name),
                              "invalid RealTensorValue parameter ",
                              full_name,
                              ": size is ",
@@ -1991,12 +2153,6 @@ Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
   PostprocessorName pps_name = _root->param<std::string>(full_name);
   param->set() = pps_name;
 
-  Real real_value = -std::numeric_limits<Real>::max();
-  std::istringstream ss(pps_name);
-
-  if (ss >> real_value && ss.eof())
-    _current_params->setDefaultPostprocessorValue(short_name, real_value);
-
   if (in_global)
   {
     global_block->remove(short_name);
@@ -2015,8 +2171,12 @@ Parser::setScalarParameter<ReporterName, std::string>(
 {
   std::vector<std::string> names = MooseUtils::rsplit(_root->param<std::string>(full_name), "/", 2);
   if (names.size() != 2)
-    mooseError("The supplied name ReporterName '", full_name, "' must contain the '/' delimiter.");
-  param->set() = ReporterName(names[0], names[1]);
+    _errmsg += hit::errormsg(_root->find(full_name),
+                             "The supplied name ReporterName '",
+                             full_name,
+                             "' must contain the '/' delimiter.");
+  else
+    param->set() = ReporterName(names[0], names[1]);
 }
 
 template <>
@@ -2091,17 +2251,9 @@ Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
   std::vector<std::string> pps_names = _root->param<std::vector<std::string>>(full_name);
   unsigned int n = pps_names.size();
   param->set().resize(n);
-  _current_params->setVectorOfPostprocessors(short_name, true);
-  _current_params->reserveDefaultPostprocessorValueStorage(short_name, n);
 
   for (unsigned int j = 0; j < n; ++j)
-  {
     param->set()[j] = pps_names[j];
-    Real real_value = -std::numeric_limits<Real>::max();
-    std::istringstream ss(pps_names[j]);
-    if (ss >> real_value && ss.eof())
-      _current_params->setDefaultPostprocessorValue(short_name, real_value, j);
-  }
 
   if (in_global)
   {
@@ -2157,7 +2309,6 @@ Parser::setVectorParameter<VariableName, VariableName>(
       {
         _errmsg +=
             hit::errormsg(
-                _input_filename,
                 _root->find(full_name),
                 "invalid value for ",
                 full_name,
@@ -2169,5 +2320,30 @@ Parser::setVectorParameter<VariableName, VariableName>(
       }
       else
         param->set()[i] = var_names[i];
+  }
+}
+
+template <>
+void
+Parser::setVectorParameter<ReporterName, std::string>(
+    const std::string & full_name,
+    const std::string & /*short_name*/,
+    InputParameters::Parameter<std::vector<ReporterName>> * param,
+    bool /*in_global*/,
+    GlobalParamsAction * /*global_block*/)
+{
+  auto rnames = _root->param<std::vector<std::string>>(full_name);
+  param->set().resize(rnames.size());
+
+  for (unsigned int i = 0; i < rnames.size(); ++i)
+  {
+    std::vector<std::string> names = MooseUtils::rsplit(rnames[i], "/", 2);
+    if (names.size() != 2)
+      _errmsg += hit::errormsg(_root->find(full_name),
+                               "The supplied name ReporterName '",
+                               rnames[i],
+                               "' must contain the '/' delimiter.");
+    else
+      param->set()[i] = ReporterName(names[0], names[1]);
   }
 }

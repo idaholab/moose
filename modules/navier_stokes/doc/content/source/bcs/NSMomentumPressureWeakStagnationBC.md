@@ -1,3 +1,5 @@
+# NSMomentumPressureWeakStagnationBC
+
 !syntax description /BCs/NSMomentumPressureWeakStagnationBC
 
 !syntax parameters /BCs/NSMomentumPressureWeakStagnationBC

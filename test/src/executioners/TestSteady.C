@@ -9,6 +9,8 @@
 
 #include "TestSteady.h"
 #include "MooseTestAppTypes.h"
+#include "MooseApp.h"
+#include "ActionWarehouse.h"
 
 registerMooseObject("MooseTestApp", TestSteady);
 
@@ -32,6 +34,13 @@ TestSteady::TestSteady(const InputParameters & parameters)
 }
 
 TestSteady::~TestSteady() {}
+
+void
+TestSteady::preProblemInit()
+{
+  _console << "TestSteady::preProblemInit() is called while executing "
+           << _app.actionWarehouse().getCurrentTaskName() << " task." << std::endl;
+}
 
 void
 TestSteady::preExecute()

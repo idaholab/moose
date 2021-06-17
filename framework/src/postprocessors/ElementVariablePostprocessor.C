@@ -36,7 +36,7 @@ ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters
     _grad_u(coupledGradient("variable")),
     _qp(0)
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 void

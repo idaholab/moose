@@ -30,18 +30,18 @@ ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(
     _subblock_id_provider(isParamValid("subblock_index_provider")
                               ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
                               : nullptr),
-    _has_out_of_plane_strain(isParamValid("out_of_plane_strain")),
+    _has_out_of_plane_strain(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain(_has_out_of_plane_strain ? coupledValue("out_of_plane_strain") : _zero),
-    _has_scalar_out_of_plane_strain(isParamValid("scalar_out_of_plane_strain")),
-    _nscalar_strains(coupledScalarComponents("scalar_out_of_plane_strain"))
+    _has_scalar_out_of_plane_strain(isCoupledScalar("scalar_out_of_plane_strain"))
 {
   if (_has_out_of_plane_strain && _has_scalar_out_of_plane_strain)
     mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
 
   if (_has_scalar_out_of_plane_strain)
   {
-    _scalar_out_of_plane_strain.resize(_nscalar_strains);
-    for (unsigned int i = 0; i < _nscalar_strains; ++i)
+    const auto nscalar_strains = coupledScalarComponents("scalar_out_of_plane_strain");
+    _scalar_out_of_plane_strain.resize(nscalar_strains);
+    for (unsigned int i = 0; i < nscalar_strains; ++i)
       _scalar_out_of_plane_strain[i] = &coupledScalarValue("scalar_out_of_plane_strain", i);
   }
 }

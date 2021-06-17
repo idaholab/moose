@@ -1,0 +1,89 @@
+[Tests]
+  design = 'TensorMechanicsPlasticOrthotropic.md'
+  issues = '#16016'
+  [anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test]
+    type = 'Exodiff'
+    input = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test.i'
+    exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test_out.e'
+    min_parallel = 2
+    custom_cmp = 'generalized.exodiff'
+    requirement = 'Moose shall avoid regression on material time step and combined anisotropic creep computations'
+  []
+  [ad_aniso_creep_x_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_x_3d.i'
+    csvdiff = ad_aniso_creep_x_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the X direction.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-7
+  []
+  [ad_aniso_creep_y_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_y_3d.i'
+    csvdiff = ad_aniso_creep_y_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the Y direction.'
+    min_parallel = 2
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-7
+  []
+  [ad_aniso_creep_z_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_z_3d.i'
+    csvdiff = ad_aniso_creep_z_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the Z direction.'
+    min_parallel = 2
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-7
+  []
+  [ad_aniso_iso_iso]
+    type = 'CSVDiff'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    csvdiff = ad_aniso_iso_creep_x_3d_out.csv
+    cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
+               "Materials/inactive='trial_creep_aniso_iso' Outputs/file_base=ad_aniso_iso_creep_x_3d_out"
+    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+                  'creep parameters: Baseline'
+    min_parallel = 2
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
+  []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    run_sim = 'True'
+    cli_args = "Executioner/num_steps=2 Outputs/active='' -snes_test_err 1e-12 "
+               "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
+               "Materials/inactive='trial_creep_aniso_iso' Materials/elasticity_tensor/poissons_ratio=0.25"
+    petsc_version = '>=3.9'
+    ratio_tol = 0.0054
+    difference_tol = 0.1
+    only_final_jacobian = 'True'
+    issues = '#17456'
+    requirement = 'The system shall provide a perfect Jacobian while calculating large deformation creep.'
+  []
+  [ad_aniso_iso_aniso]
+    type = 'CSVDiff'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    csvdiff = ad_aniso_iso_aniso_creep_x_3d_out.csv
+    cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_aniso_iso' "
+               "Materials/inactive='trial_creep_iso' "
+               "Outputs/file_base=ad_aniso_iso_aniso_creep_x_3d_out"
+    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+                  'creep parameters.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-8
+  []
+  [ad_aniso_creep_integration_error]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_integration_error.i'
+    csvdiff = ad_aniso_creep_integration_error_out.csv
+    requirement = 'Moose shall be capable of enforcing a time step such that the creep rate integration error is controled by the user with the aid of a soft terminator.'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-8
+  []
+[]

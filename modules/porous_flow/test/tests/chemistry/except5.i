@@ -7,10 +7,10 @@
 []
 
 [Variables]
-  [./a]
-  [../]
-  [./b]
-  [../]
+  [a]
+  []
+  [b]
+  []
 []
 
 [GlobalParams]
@@ -18,51 +18,51 @@
 []
 
 [Kernels]
-  [./a]
+  [a]
     type = Diffusion
     variable = a
-  [../]
-  [./b]
+  []
+  [b]
     type = Diffusion
     variable = b
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 1
     number_fluid_components = 3
     number_aqueous_equilibrium = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./eqm_k]
+  [eqm_k]
     initial_condition = 1E2
-  [../]
-  [./pressure]
-  [../]
+  []
+  [pressure]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a b'
     num_reactions = 2
@@ -71,12 +71,12 @@
     secondary_activity_coefficients = '1 1'
     reactions = '2 0
                  1 1'
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
+  []
 []
 
 [Executioner]

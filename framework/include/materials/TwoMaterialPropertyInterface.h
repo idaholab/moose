@@ -51,6 +51,20 @@ public:
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
 
+  /**
+   * Retrieve the neighbor material property whether AD or not
+   */
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
+  {
+    return getNeighborADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
+  {
+    return getNeighborMaterialProperty<T>(name);
+  }
+
 protected:
   std::shared_ptr<MaterialData> _neighbor_material_data;
 };

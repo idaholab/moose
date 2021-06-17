@@ -11,14 +11,12 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "RayTracingApp.h"
 
 InputParameters
 HeatConductionApp::validParams()
 {
   InputParameters params = ::validParams<MooseApp>();
-
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
 
   params.set<bool>("use_legacy_material_output") = false;
 
@@ -47,6 +45,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("add_secondary_flux_vector", false);
   addTaskDependency("add_secondary_flux_vector", "ready_to_init");
   addTaskDependency("init_problem", "add_secondary_flux_vector");
+
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_bc");
@@ -54,15 +53,32 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_material");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_secondary_flux_vector");
 
-  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_mesh_generator");
+  registerSyntaxTask(
+      "ThermalContactAction", "Modules/HeatConduction/ThermalContact/BC/*", "add_aux_kernel");
+  registerSyntaxTask(
+      "ThermalContactAction", "Modules/HeatConduction/ThermalContact/BC/*", "add_aux_variable");
+  registerSyntaxTask(
+      "ThermalContactAction", "Modules/HeatConduction/ThermalContact/BC/*", "add_bc");
+  registerSyntaxTask(
+      "ThermalContactAction", "Modules/HeatConduction/ThermalContact/BC/*", "add_dirac_kernel");
+  registerSyntaxTask(
+      "ThermalContactAction", "Modules/HeatConduction/ThermalContact/BC/*", "add_material");
+  registerSyntaxTask("ThermalContactAction",
+                     "Modules/HeatConduction/ThermalContact/BC/*",
+                     "add_secondary_flux_vector");
+
+  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "append_mesh_generator");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "setup_mesh_complete");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_user_object");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_bc");
+  registerSyntaxTask(
+      "RadiationTransferAction", "GrayDiffuseRadiation/*", "add_ray_boundary_condition");
 }
 
 void
 HeatConductionApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  RayTracingApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"HeatConductionApp"});
   Registry::registerActionsTo(af, {"HeatConductionApp"});
   associateSyntaxInner(s, af);
@@ -72,6 +88,7 @@ void
 HeatConductionApp::registerObjects(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjects");
+  RayTracingApp::registerObjects(factory);
   Registry::registerObjectsTo(factory, {"HeatConductionApp"});
 }
 
@@ -79,6 +96,7 @@ void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of associateSyntax");
+  RayTracingApp::associateSyntax(syntax, action_factory);
   Registry::registerActionsTo(action_factory, {"HeatConductionApp"});
   associateSyntaxInner(syntax, action_factory);
 }

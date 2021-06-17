@@ -17,6 +17,11 @@ interpolating between the pairs of values provided in the vectors.
 The same procedure that is used with
 [ConstantDT](/ConstantDT.md) is used to reduce
 the time step from the user-specified value if a failed solution occurs.
+If a `growth_factor` is given, it will be applied to every time step until the
+current time step predicted by the function is smaller than the current time step multiplied by the
+`growth_factor`.
+In this sense, the `growth_factor` is the upper limit that any function can increase by.
+If no `growth_factor` is provided by the user, the time step will only be governed by the function.
 
 ## Example Input Syntax
 

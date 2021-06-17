@@ -1,0 +1,22 @@
+[Tests]
+  design = 'ADRayKernel.md'
+  issues = '#16028'
+
+  [errors]
+    requirement = 'The system shall throw a reasonable error if an ADRayKernel'
+    [xyz_only]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'Problem/coord_type=RZ'
+      expect_err = 'Not valid on coordinate systems other than XYZ'
+      detail = 'is used with a coordinate system other than xyz or'
+    []
+    [implicit_only]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'RayKernels/line_source/implicit=false'
+      expect_err = 'ADRayKernels do not currently support explicit solves.'
+      detail = 'is used in an explicit manner.'
+    []
+  []
+[]

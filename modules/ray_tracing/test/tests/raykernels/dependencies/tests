@@ -1,0 +1,23 @@
+[Tests]
+  design = 'RayKernels/index.md'
+  issues = '#16028'
+
+  [test]
+    type = CSVDiff
+    input = 'ray_kernel_dependencies.i'
+    csvdiff = 'ray_kernel_dependencies_out.csv'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the dependency resolution of RayKernels.'
+  []
+
+  [missing]
+    type = RunException
+    input = 'ray_kernel_dependencies.i'
+    cli_args = 'RayKernels/add_1/depends_on=dummy'
+    allow_test_objects = true
+    expect_err = 'The RayKernel \'dummy\' does not exist'
+
+    requirement = 'The system shall throw a reasonable error when adding a dependency for a RayKernel that does not exist.'
+  []
+[]

@@ -51,11 +51,11 @@ and some extra properties need to be added to the [`SimpleFluidProperties`](Simp
 
 The boundary conditions used are the same as in [Page 01](porous_flow/tutorial_01.md) in addition to specifying a constant injection temperature of 313$\,$K:
 
-!listing modules/porous_flow/examples/tutorial/03.i start=[./constant_injection_temperature] end=[]
+!listing modules/porous_flow/examples/tutorial/03.i start=[constant_injection_temperature] end=[]
 
 Finally, some temperature-related `Materials` need to be defined
 
-!listing modules/porous_flow/examples/tutorial/03.i start=[./thermal_expansion] end=[]
+!listing modules/porous_flow/examples/tutorial/03.i start=[thermal_expansion] end=[Preconditioning]
 
 An animation of the results is shown in [tut03_gif_fig].  Readers are encouraged pause and explore the effect of changing parameters such as the rock thermal conductivity.
 

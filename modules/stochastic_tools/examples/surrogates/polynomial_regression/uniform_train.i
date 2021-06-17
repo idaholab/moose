@@ -35,7 +35,6 @@
     type = LatinHypercube
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     num_rows = 6560
-    num_bins = 10
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -70,27 +69,24 @@
 
 [Transfers]
   [pc_data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = pc_sub
     sampler = pc_sampler
-    to_vector_postprocessor = pc_results
-    from_postprocessor = 'max'
+    stochastic_reporter = results
+    from_reporter = 'max/value'
   []
   [pr_data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = pr_sub
     sampler = pr_sampler
-    to_vector_postprocessor = pr_results
-    from_postprocessor = 'max'
+    stochastic_reporter = results
+    from_reporter = 'max/value'
   []
 []
 
-[VectorPostprocessors]
-  [pc_results]
-    type = StochasticResults
-  []
-  [pr_results]
-    type = StochasticResults
+[Reporters]
+  [results]
+    type = StochasticReporter
   []
 []
 
@@ -101,8 +97,7 @@
     order = 8
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = pc_sampler
-    results_vpp = pc_results
-    results_vector = pc_data:max
+    response = results/pc_data:max:value
   []
   [pr_max]
     type = PolynomialRegressionTrainer
@@ -110,9 +105,8 @@
     execute_on = timestep_end
     max_degree = 4
     sampler = pr_sampler
-    results_vpp = pr_results
-    results_vector = pr_data:max
-    []
+    response = results/pr_data:max:value
+  []
 []
 
 [Outputs]

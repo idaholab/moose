@@ -1,0 +1,1 @@
+!syntax complete groups=FsiApp

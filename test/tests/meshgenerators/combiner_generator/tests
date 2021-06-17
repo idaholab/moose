@@ -15,6 +15,16 @@
       detail = 'using a single input mesh at multiple positions,'
     []
 
+    [single_from_file]
+      type = 'Exodiff'
+      input = 'combiner_generator_from_file.i'
+      exodiff = 'combiner_generator_from_file_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+
+      detail = 'using a single input mesh at multiple positions obtained from a file,'
+    []
+
     [multi]
       type = 'Exodiff'
       input = 'combiner_multi_input_translate.i'
@@ -23,6 +33,16 @@
       recover = false
 
       detail = 'using multiple meshes at multiple positions, and'
+    []
+
+    [multi_from_file]
+      type = 'Exodiff'
+      input = 'combiner_multi_input_translate_from_file.i'
+      exodiff = 'combiner_multi_input_translate_from_file_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+
+      detail = 'using multiple meshes at multiple positions obtained from a file, and'
     []
 
     [none]
@@ -46,12 +66,28 @@
       detail = 'but only one input is supplied with no positions, or'
     []
 
+    [missing_pos_file]
+      type = 'RunException'
+      input = 'combiner_generator_from_file.i'
+      cli_args = 'Mesh/cmbn/positions_file=""'
+      expect_err = 'If only one input mesh is given'
+      detail = 'but only one input is supplied with no positions file, or'
+    []
+
     [mismatch_pos]
       type = 'RunException'
       input = 'combiner_multi_input.i'
       cli_args = 'Mesh/cmbn/positions="0 0 0"'
       expect_err = 'If more than one input mesh'
-      detail = 'the number of meshes and the number of positions is mismatched.'
+      detail = 'the number of meshes and the number of positions is mismatched, or'
+    []
+
+    [mismatch_pos_from_file]
+      type = 'RunException'
+      input = 'combiner_multi_input.i'
+      cli_args = 'Mesh/cmbn/positions_file="mismatch_positions.txt"'
+      expect_err = 'If more than one input mesh'
+      detail = 'the number of meshes and the number of positions in the file is mismatched.'
     []
   []
 []

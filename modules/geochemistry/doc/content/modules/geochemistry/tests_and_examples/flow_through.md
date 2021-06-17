@@ -58,12 +58,12 @@ Note that a smaller time-step size (`y = '1 0.1 0.001'`) was used to generate th
 
 The `mode` is defined by the `AuxKernel`
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/seawater_evaporation_flow_through.i start=[./mode_auxk] end=[./dolomite_mol_auxk]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/seawater_evaporation_flow_through.i start=[mode_auxk] end=[dolomite_mol_auxk]
 
 
 A set of `AuxVariables` and `AuxKernels` such as
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/seawater_evaporation_flow_through.i start=[./dolomite_mol_auxk] end=[./gypsum_mol_auxk]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/seawater_evaporation_flow_through.i start=[dolomite_mol_auxk] end=[gypsum_mol_auxk]
 
 record the desired quantities.
 

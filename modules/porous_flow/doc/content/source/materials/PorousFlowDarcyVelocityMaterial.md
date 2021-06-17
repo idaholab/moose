@@ -11,7 +11,7 @@ Hence, this `Material` requires many other `Materials`: permeability, relative p
 
 An example of the syntax is:
 
-!listing modules/porous_flow/test/tests/basic_advection/1phase.i start=[./darcy_velocity_qp] end=[]
+!listing modules/porous_flow/test/tests/basic_advection/1phase.i start=[darcy_velocity] end=[]
 
 The declaration of the Material name is:
 

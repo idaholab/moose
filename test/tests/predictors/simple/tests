@@ -1,6 +1,6 @@
 [Tests]
   design = 'SimplePredictor.md'
-  issues = '#2282 #6506'
+  issues = '#2282 #6506 #16796'
 
   [test]
     type = 'CSVDiff'
@@ -35,5 +35,12 @@
 
       detail = "previous solution times."
     []
+  []
+
+  [skip_after_failed_timestep]
+    requirement = "The system shall support the ability to skip a prediction after a failed time step"
+    input = 'predictor_test_skip_after_failed_tstep.i'
+    type = 'CSVDiff'
+    csvdiff = 'predictor_test_skip_after_failed_tstep_out.csv'
   []
 []

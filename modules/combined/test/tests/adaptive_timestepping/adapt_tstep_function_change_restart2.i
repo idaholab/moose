@@ -47,6 +47,7 @@
     decomposition_method = EigenSolution
     add_variables  = true
     generate_output = 'vonmises_stress'
+    temperature = temp
   [../]
 []
 

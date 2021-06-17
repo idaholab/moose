@@ -156,7 +156,13 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
         prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_types[type_index]);
         for (_i = 0; _i < test_space_size; _i++)
           for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
+          {
+#ifndef MOOSE_SPARSE_AD
+            mooseAssert(ad_offsets[type_index] + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                        "Out of bounds access in derivative vector.");
+#endif
             _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offsets[type_index] + _j];
+          }
         accumulateTaggedLocalMatrix();
       }
     }

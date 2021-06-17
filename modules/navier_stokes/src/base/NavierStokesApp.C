@@ -22,9 +22,6 @@ NavierStokesApp::validParams()
 
   params.set<bool>("automatic_automatic_scaling") = false;
 
-  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
-  params.set<bool>("use_legacy_dirichlet_bc") = false;
-
   params.set<bool>("use_legacy_material_output") = false;
 
   return params;
@@ -67,6 +64,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add BCs actions
   registerTask("add_navier_stokes_bcs", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_bcs", "add_bc");
+
+  // register attributes
+  registerTask("ns_meta_action", /*is_required=*/true);
+  addTaskDependency("ns_meta_action", "meta_action");
 }
 
 void

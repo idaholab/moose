@@ -213,28 +213,28 @@ cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
 In the following subsection a short analysis is provided for the results obtained
 using the example input files. As already mentioned, the problem has 8 uncertain parameters and
 altogether 100 parameter samples are generated using [LatinHypercubeSampler.md]
-to obtain snapshots for the training. The first three snapshots are presented in
+to obtain snapshots for the training. Three examples of the snapshots are presented in
 [snap_1], [snap_2] and [snap_3]. It is visible that depending on the actual parameter combination,
 the profile of the solution can change considerably.
 
 !row!
 
 !media 2d_multiregion_sol0.png style=width:33%;float:left
-       id=snap_1 caption=Snapshot #1.
+       id=snap_1 caption=Snap. example #1.
 
 !media 2d_multiregion_sol1.png style=width:33%;float:left
-       id=snap_2 caption=Snapshot #2.
+       id=snap_2 caption=Snap. example #2.
 
 !media 2d_multiregion_sol2.png style=width:33%;float:left
-       id=snap_3 caption=Snapshot #3.
+       id=snap_3 caption=Snap. example #3.
 
 !row-end!
 
 After all of the snapshots are obtained, the basis functions of the reduced subspaces are extracted.
 In this scenario, an energy retention limit of 0.999 999 999 is used in the trainer
-which will keep 53 basis functions for the reduced subspace. The decay of the
+which will keep 55 basis functions for the reduced subspace. The decay of the
 eigenvalues of the snapshot correlation matrix is shown in [ev_decay].
-The reduced operators are then computed using these 53 basis functions.
+The reduced operators are then computed using these 55 basis functions.
 
 !plot scatter id=ev_decay caption=Scree plot of the eigenvalues of the correlation matrix.
   filename=examples/surrogates/pod_rb/2d_multireg/gold/eigenvalues_psi.csv

@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#15640'
+  design = 'navier_stokes/fv.md'
+  [2d-rc-diri]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DRC
+    method = '!dbg'
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 2D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and pressure.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    heavy = true
+  []
+[]

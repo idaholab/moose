@@ -30,6 +30,9 @@ enum class Interfaces
   Postprocessor = 1 << 10,
   VectorPostprocessor = 1 << 11,
   InterfaceUserObject = 1 << 12,
+  BlockRestrictable = 1 << 13,
+  BoundaryRestrictable = 1 << 14,
+  Reporter = 1 << 15
 };
 
 template <>
@@ -197,6 +200,15 @@ public:
                    bool must_be_restricted = false)
     : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
   {
+    for (auto id : ids)
+      _vals.push_back(id);
+  }
+  AttribBoundaries(TheWarehouse & w,
+                   const std::vector<BoundaryID> & ids,
+                   bool must_be_restricted = false)
+    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+  {
+    _vals.reserve(ids.size());
     for (auto id : ids)
       _vals.push_back(id);
   }

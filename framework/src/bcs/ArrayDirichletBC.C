@@ -29,10 +29,13 @@ ArrayDirichletBC::validParams()
 ArrayDirichletBC::ArrayDirichletBC(const InputParameters & parameters)
   : ArrayNodalBC(parameters), _values(getParam<RealEigenVector>("values"))
 {
+  if (_values.size() != _count)
+    paramError(
+        "values", "Number of 'values' must equal number of variable components (", _count, ").");
 }
 
-RealEigenVector
-ArrayDirichletBC::computeQpResidual()
+void
+ArrayDirichletBC::computeQpResidual(RealEigenVector & residual)
 {
-  return _u - _values;
+  residual = _u - _values;
 }

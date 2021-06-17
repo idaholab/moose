@@ -59,6 +59,12 @@ public:
    */
   void read();
 
+  /**
+   * Get the total number of entries in the file
+   * @returns number of entries in file
+   */
+  std::size_t numEntries() const;
+
   ///@{
   /**
    * Set/Get methods for file format controls.

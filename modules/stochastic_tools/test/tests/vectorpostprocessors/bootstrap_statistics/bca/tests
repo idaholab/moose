@@ -1,41 +1,25 @@
 [Tests]
-  design = Statistics.md
-  issues = '#14409'
+  [basic]
+    type = CSVDiff
+    input = bca.i
+    csvdiff = bca_out_stats_0001.csv
 
-  [bca]
-    requirement = "The system shall support computing bias corrected and accelerated confidence level intervals of statics"
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
+  []
 
-    [basic]
-      type = CSVDiff
-      input = bca.i
-      csvdiff = bca_out_stats_0001.csv
+  [replicated]
+    type = CSVDiff
+    input = bca_distributed.i
+    csvdiff = bca_distributed_out_stats_0001.csv
+    cli_args = "VectorPostprocessors/data/parallel_type=replicated"
+    min_parallel = 3
+    max_parallel = 3
+    allow_test_objects = true
 
-      detail = "of a vector of data"
-    []
-
-    [replicated]
-      type = CSVDiff
-      input = bca_distributed.i
-      csvdiff = bca_distributed_out_stats_0001.csv
-      cli_args = "VectorPostprocessors/data/parallel_type=replicated"
-      min_parallel = 3
-      max_parallel = 3
-      allow_test_objects = true
-
-      detail = "using data that is replicated or"
-    []
-
-    [distributed]
-      type = CSVDiff
-      input = bca_distributed.i
-      csvdiff = bca_distributed_out_stats_0001.csv
-      prereq = bca/replicated
-      min_parallel = 3
-      max_parallel = 3
-      allow_test_objects = true
-
-      skip = "WIP #14409"
-      detail = "distributed across processors."
-    []
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
   []
 []

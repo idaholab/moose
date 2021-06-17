@@ -121,7 +121,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseDerivative(unsigned int var,
     current._F->Optimize();
 
   // proceed only if the derivative is not zero
-  if (!current._F->isZero())
+  if (!current._F->isZero() || is_ad)
   {
     // compile
     if (_enable_jit && !current._F->JITCompile())
@@ -214,44 +214,21 @@ DerivativeParsedMaterialHelperTempl<is_ad>::assembleDerivatives()
     recurseDerivative(i, 1, root);
 
   // increase the parameter buffer to provide storage for the material property derivatives
-  _func_params.resize(_nargs + _mat_prop_descriptors.size());
+  _func_params.resize(_nargs + _mat_prop_descriptors.size() + _postprocessor_values.size());
 }
 
 template <bool is_ad>
 void
 DerivativeParsedMaterialHelperTempl<is_ad>::initQpStatefulProperties()
 {
-  if (_prop_F)
-    (*_prop_F)[_qp] = 0.0;
-
-  for (auto & D : _derivatives)
-    (*D._mat_prop)[_qp] = 0.0;
+  computeQpProperties();
 }
 
 template <bool is_ad>
 void
 DerivativeParsedMaterialHelperTempl<is_ad>::computeQpProperties()
 {
-  // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
-  {
-    if (_tol[i] < 0.0)
-      _func_params[i] = (*_args[i])[_qp];
-    else
-    {
-      auto a = (*_args[i])[_qp];
-      _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
-    }
-  }
-
-  // insert material property values
-  auto nmat_props = _mat_prop_descriptors.size();
-  for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-    _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
-
-  // set function value
-  if (_prop_F)
-    (*_prop_F)[_qp] = evaluate(_func_F, _name);
+  ParsedMaterialHelper<is_ad>::computeQpProperties();
 
   // set derivatives
   for (auto & D : _derivatives)

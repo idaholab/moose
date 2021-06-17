@@ -41,6 +41,7 @@ protected:
   MaterialProperty<RealTensorValue> & _tensor_property;
   MaterialProperty<RankTwoTensor> & _ranktwotensor_property;
   MaterialProperty<RankFourTensor> & _rankfourtensor_property;
+  MaterialProperty<std::vector<Real>> * _stdvector_property;
   Real _factor;
   const VariableValue & _variable;
 };

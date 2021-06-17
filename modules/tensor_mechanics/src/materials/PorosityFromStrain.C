@@ -26,6 +26,9 @@ PorosityFromStrainTempl<is_ad>::validParams()
       "initial_porosity", "initial_porosity>=0.0 & initial_porosity<1.0", "Initial porosity");
   params.addRequiredParam<MaterialPropertyName>("inelastic_strain",
                                                 "Name of the combined inelastic strain");
+  MooseEnum negative_behavior("ZERO INITIAL_CONDITION EXCEPTION", "INITIAL_CONDITION");
+  params.addParam<MooseEnum>(
+      "negative_behavior", negative_behavior, "Enum how to handle negative porosities");
 
   return params;
 }
@@ -37,7 +40,9 @@ PorosityFromStrainTempl<is_ad>::PorosityFromStrainTempl(const InputParameters & 
     _porosity_old(getMaterialPropertyOld<Real>("porosity_name")),
     _initial_porosity(getParam<Real>("initial_porosity")),
     _inelastic_strain(getGenericMaterialProperty<RankTwoTensor, is_ad>("inelastic_strain")),
-    _inelastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("inelastic_strain"))
+    _inelastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("inelastic_strain")),
+    _negative_behavior(this->template getParam<MooseEnum>("negative_behavior")
+                           .template getEnum<NegativeBehavior>())
 {
 }
 
@@ -57,5 +62,15 @@ PorosityFromStrainTempl<is_ad>::computeQpProperties()
       _porosity_old[_qp];
 
   if (_porosity[_qp] < 0.0)
-    _porosity[_qp] = 0.0;
+  {
+    if (_negative_behavior == NegativeBehavior::ZERO)
+      _porosity[_qp] = 0.0;
+    if (_negative_behavior == NegativeBehavior::INITIAL_CONDITION)
+      _porosity[_qp] = _initial_porosity;
+    if (_negative_behavior == NegativeBehavior::EXCEPTION)
+      mooseException("In ", _name, ": porosity is negative.");
+  }
+
+  if (std::isnan(_porosity[_qp]))
+    mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }

@@ -6,45 +6,45 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     initial_condition = 0.05
-  [../]
-  [./b]
+  []
+  [b]
     initial_condition = 0.1
-  [../]
-  [./c]
+  []
+  [c]
     initial_condition = 0.15
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 0.5
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k0]
+  [eqm_k0]
     initial_condition = 0.1
-  [../]
-  [./eqm_k1]
+  []
+  [eqm_k1]
     initial_condition = 0.2
-  [../]
-  [./eqm_k2]
+  []
+  [eqm_k2]
     initial_condition = -0.2
-  [../]
-  [./eqm_k3]
+  []
+  [eqm_k3]
     initial_condition = 0.0
-  [../]
-  [./ini_sec_conc0]
+  []
+  [ini_sec_conc0]
     initial_condition = 0.02
-  [../]
-  [./ini_sec_conc1]
+  []
+  [ini_sec_conc1]
     initial_condition = 0.04
-  [../]
-  [./ini_sec_conc2]
+  []
+  [ini_sec_conc2]
     initial_condition = 0.06
-  [../]
-  [./ini_sec_conc3]
+  []
+  [ini_sec_conc3]
     initial_condition = 0.08
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -52,63 +52,63 @@
 []
 
 [Kernels]
-  [./a]
+  [a]
     type = PorousFlowPreDis
     variable = a
     mineral_density = '1E10 2E10 3E10 4E10'
     stoichiometry = '1 1 2 0.1'
-  [../]
-  [./b]
+  []
+  [b]
     type = PorousFlowPreDis
     variable = b
     mineral_density = '1.1E10 2.2E10 3.3E10 4.4E10'
     stoichiometry = '2 2 0.1 0.5'
-  [../]
-  [./c]
+  []
+  [c]
     type = PorousFlowPreDis
     variable = c
     mineral_density = '0.1E10 0.2E10 0.3E10 0.4E10'
     stoichiometry = '3 3 0.1 1'
-  [../]
-  [./temp]
+  []
+  [temp]
     type = Diffusion
     variable = temp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b c temp'
     number_fluid_phases = 1
     number_fluid_components = 4
     number_aqueous_kinetic = 4
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
-  [../]
+  [pressure]
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.9
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b c'
-  [../]
-  [./predis]
+  []
+  [predis]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b c'
     num_reactions = 4
@@ -127,11 +127,11 @@
     gas_constant = 7.4
     theta_exponent = '1.0 1.1 1.2 0.9'
     eta_exponent = '1.2 1.01 1.1 1.2'
-  [../]
-  [./mineral]
+  []
+  [mineral]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = 'ini_sec_conc0 ini_sec_conc1 ini_sec_conc2 ini_sec_conc3'
-  [../]
+  []
 []
 
 [Executioner]
@@ -142,11 +142,11 @@
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []

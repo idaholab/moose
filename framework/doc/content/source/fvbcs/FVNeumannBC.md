@@ -1,33 +1,50 @@
 # FVNeumannBC
 
-!alert! construction title=Undocumented Class
-The FVNeumannBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FVNeumannBC
-
 !syntax description /FVBCs/FVNeumannBC
 
 ## Overview
 
-!! Replace these lines with information regarding the FVNeumannBC object.
+A `FVNeumannBC` may be used to specify a diffusive or an advective flux. For example,
+to specify a flux boundary condition in the following diffusion problem,
+a `FVNeumannBC` with a constant value of $g$ may be used.
 
-## Example Input File Syntax
+\begin{equation}
+\begin{aligned}
+  -\nabla^2 u(\mathbf{M}) &= f(\mathbf{M}) && \forall \mathbf{M} \in \Omega & (1)\\
+  \frac{\partial u}{\partial n}(\mathbf{M}) &= g && \forall \mathbf{M} \in \partial \Omega_N & (2) \\
+  u(\mathbf{M}) &= 1 && \forall \mathbf{M} \in \partial \Omega_D & (3)
+\end{aligned}
+\end{equation}
 
-!! Describe and include an example of how to use the FVNeumannBC object.
+where $\Omega \subset \mathbb{R}^n$ is the domain, $\partial
+\Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary, and $\mathbf{M}$ is
+a point on the domain or its boundary. In this case, a `FVNeumannBC` object is used to impose
+the condition (2) on the subset of the boundary denoted by $\partial \Omega_D$. In this case, the
+`value` field corresponds to the constant $g$, and the user must define one
+or more sidesets corresponding to the boundary $\partial \Omega_D$ to pass to the `boundary` argument.
+For this particular problem, an additional boundary condition, for example a
+`FVDirichletBC` as in (3) would also be necessary to remove the nullspace.
 
-!syntax parameters /FVBCs/FVNeumannBC
+Likewise, to specify an advective flux of constant value $g$ in a 1D advection
+problem with an advective velocity $v$:
 
-!syntax inputs /FVBCs/FVNeumannBC
+\begin{equation}
+\begin{aligned}
+  \frac{\partial u}{\partial t}(\mathbf{M}) + v \frac{\partial u}{\partial x}(\mathbf{M}) &= 0 && \forall \mathbf{M} \in \Omega & (1)\\
+  v u(\mathbf{M}) &= g v && \forall \mathbf{M} \in \partial \Omega & (2)
+\end{aligned}
+\end{equation}
 
-!syntax children /FVBCs/FVNeumannBC
-```
-!alert-end!
+The advective flux, the `value` to specify to the boundary condition (2), is $g v$.
 
-!syntax description /FVBCs/FVNeumannBC
+
+Modeling a multi-dimensional problem will require a `FVNeumannBC` per component.
+
+!alert note
+When using the Navier Stokes module, `FVNeumannBC` may not be available for use with velocity
+and pressure, as additional information is required on either the gradient or direction of
+these variables to model fully developed flow for example. Specific boundary conditions are
+provided, see for example `INSFVOutletPressureBC`.
 
 !syntax parameters /FVBCs/FVNeumannBC
 

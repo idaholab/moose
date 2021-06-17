@@ -9,10 +9,11 @@
 - [How do I build my own libMesh with VTK?](faq/faq_build_libmesh-vtk.md)
 - [How do I build my own PETSc?](faq/faq_build_petsc.md)
 - [Where is the stiffness matrix?](help/faq/what_is_fem.md)
+- [How do I execute MOOSE in parallel?](getting_started/examples_and_tutorials/tutorial01_app_development/step07_parallel.md)
 
 
 ### Mailing lists:
 
-- moose-users@googlegroups.com - Technical Q&A (moderate traffic)
-- moose-announce@googlegroups.com - Announcements (very light traffic)
-- You can also browse our [mailing list](https://groups.google.com/forum/#!forum/moose-users).
+- [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) - Technical Q&A (moderate traffic)
+- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
+- You can also browse our [old technical Q&A mailing list](https://groups.google.com/forum/#!forum/moose-users).

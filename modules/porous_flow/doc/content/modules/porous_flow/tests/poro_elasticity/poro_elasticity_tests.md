@@ -102,7 +102,7 @@ Denoting the strength of the source by $s$ (units are s$^{-1}$), the expected re
 \begin{array}{rcl}
 \mathrm{fluid mass} & = & \mathrm{fluid\ mass}_{0} + st \ , \\
 \sigma_{ij}^{\mathrm{eff}} & = & 0 \ ,  \\
-P_{\mathrm{f}} & = & K_{\mathrm{f}}\log(\rho\phi/\rho_{0}) \ , \\
+P_{\mathrm{f}} & = & K_{\mathrm{f}}\log(M/(\phi\rho_{0})) \ , \\
 \rho & = & \rho_{0}\exp(P_{\mathrm{f}}/K_{f}) \ ,\\
 \phi & = & \alpha + (\phi_{0}-\alpha)\exp\left(
 P_{\mathrm{f}}(\alpha - 1)/K\right) \ . \\
@@ -150,7 +150,7 @@ P & = & M(st - \alpha\epsilon_{zz}) \ , \\
 \end{equation}
 The input file for this is:
 
-!listing modules/porous_flow/test/tests/poro_elasticity/pp_generation_unconfined_constM.i
+!listing modules/porous_flow/test/tests/poro_elasticity/pp_generation_unconfined_constM_action.i
 
 MOOSE produces these results correctly.
 

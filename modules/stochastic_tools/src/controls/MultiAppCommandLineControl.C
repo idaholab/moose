@@ -28,10 +28,10 @@ MultiAppCommandLineControl::validParams()
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to control.");
-  params.addParam<SamplerName>(
+  params.addRequiredParam<SamplerName>(
       "sampler",
       "The Sampler object to utilize for altering the command line options of the MultiApp.");
-  params.addParam<std::vector<std::string>>(
+  params.addRequiredParam<std::vector<std::string>>(
       "param_names", "The names of the command line parameters to set via the sampled data.");
 
   return params;
@@ -52,6 +52,15 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
         "', is being used by the '",
         name(),
         "' object, thus the 'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'.");
+
+  if (_multi_app->usingPositions())
+    paramError("multi_app",
+               "The MultiApp must construct its sub-apps in initial setup but not during its "
+               "creation for '",
+               type(),
+               "'.\nTypically only sampler MultiApps work with '",
+               type(),
+               "' objects.");
 
   bool batch_reset = _multi_app->isParamValid("mode") &&
                      (_multi_app->getParam<MooseEnum>("mode") == "batch-reset");
@@ -94,7 +103,20 @@ MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
 
-  if (_sampler.getNumberOfCols() != _param_names.size())
+  // To avoid storing duplicated param_names for each sampler, we store only param_names once in
+  // "cli_args".
+
+  // Handle a couple errors up front regarding bracket expressions
+  bool has_brackets = false;
+  if (_param_names.size())
+  {
+    has_brackets = _param_names[0].find("[") != std::string::npos;
+    for (unsigned int i = 1; i < _param_names.size(); ++i)
+      if (has_brackets != (_param_names[i].find("[") != std::string::npos))
+        paramError("param_names",
+                   "If the bracket is used, it must be provided to every parameter.");
+  }
+  if (!has_brackets && _sampler.getNumberOfCols() != _param_names.size())
     paramError("param_names",
                "The number of columns (",
                _sampler.getNumberOfCols(),
@@ -102,38 +124,15 @@ MultiAppCommandLineControl::execute()
                _param_names.size(),
                ").");
 
-  // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
-  // store only param_names once in "cli_args". For other MultApp, we store the full information
-  // of params_names and values for each sampler.
-
-  if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
+  std::ostringstream oss;
+  for (dof_id_type col = 0; col < _param_names.size(); ++col)
   {
-    for (dof_id_type row = _sampler.getLocalRowBegin(); row < _sampler.getLocalRowEnd(); ++row)
-    {
-      std::vector<Real> data = _sampler.getNextLocalRow();
-      std::ostringstream oss;
-      for (std::size_t col = 0; col < data.size(); ++col)
-      {
-        if (col > 0)
-          oss << ";";
-        oss << _param_names[col] << "=" << Moose::stringify(data[col]);
-      }
-
-      cli_args.push_back(oss.str());
-    }
+    if (col > 0)
+      oss << ";";
+    oss << _param_names[col];
   }
-  else
-  {
-    std::ostringstream oss;
-    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
-    {
-      if (col > 0)
-        oss << ";";
-      oss << _param_names[col];
-    }
 
-    cli_args.push_back(oss.str());
-  }
+  cli_args.push_back(oss.str());
 
   setControllableValueByName<std::vector<std::string>>(
       "MultiApp", _multi_app->name(), "cli_args", cli_args);

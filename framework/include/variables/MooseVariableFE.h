@@ -46,7 +46,7 @@ InputParameters validParams<ArrayMooseVariable>();
  * ----------------------------------------------------
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
- * RealEigenVector      Real                  RealEigenVector
+ * RealEigenVector     Real                  RealEigenVector
  *
  */
 template <typename OutputType>
@@ -139,6 +139,11 @@ public:
    */
   bool computingCurl() const override final;
 
+  /**
+   * Get the variable name of a component in libMesh
+   */
+  std::string componentName(const unsigned int comp) const;
+
   const std::set<SubdomainID> & activeSubdomains() const override;
   bool activeOnSubdomain(SubdomainID subdomain) const override;
 
@@ -180,6 +185,8 @@ public:
   {
     return _lower_data->dofIndices();
   }
+
+  void clearAllDofIndices() final;
 
   unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
 
@@ -259,6 +266,10 @@ public:
   {
     return _element_data->vectorTagValue(tag);
   }
+  const FieldVariableGradient & vectorTagGradient(TagID tag) const
+  {
+    return _element_data->vectorTagGradient(tag);
+  }
   const DoFValue & vectorTagDofValue(TagID tag) const
   {
     return _element_data->vectorTagDofValue(tag);
@@ -318,6 +329,7 @@ public:
   {
     return _element_data->adSln();
   }
+
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
@@ -636,6 +648,8 @@ public:
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
+
+  unsigned int oldestSolutionStateRequested() const override final;
 
 protected:
   usingMooseVariableBaseMembers;
