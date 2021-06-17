@@ -12,7 +12,7 @@
       valgrind = NONE
       detail = "that distributes samples in parallel and"
       python = 3
-      required_python_packages = 'pandas matplotlib tornado'
+      required_python_packages = 'pandas matplotlib'
     []
     [plot]
       type = CheckFiles
