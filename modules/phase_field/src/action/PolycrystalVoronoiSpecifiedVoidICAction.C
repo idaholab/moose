@@ -34,7 +34,8 @@ PolycrystalVoronoiSpecifiedVoidICAction::validParams()
   return params;
 }
 
-PolycrystalVoronoiSpecifiedVoidICAction::PolycrystalVoronoiSpecifiedVoidICAction(const InputParameters & params)
+PolycrystalVoronoiSpecifiedVoidICAction::PolycrystalVoronoiSpecifiedVoidICAction(
+    const InputParameters & params)
   : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),

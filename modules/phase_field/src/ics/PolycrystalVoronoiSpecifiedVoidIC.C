@@ -56,7 +56,8 @@ PolycrystalVoronoiSpecifiedVoidIC::validParams()
   return params;
 }
 
-PolycrystalVoronoiSpecifiedVoidIC::PolycrystalVoronoiSpecifiedVoidIC(const InputParameters & parameters)
+PolycrystalVoronoiSpecifiedVoidIC::PolycrystalVoronoiSpecifiedVoidIC(
+    const InputParameters & parameters)
   : SpecifiedSmoothCircleIC(parameters),
     _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
