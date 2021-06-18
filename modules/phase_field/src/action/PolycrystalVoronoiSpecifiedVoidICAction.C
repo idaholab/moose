@@ -19,8 +19,6 @@ InputParameters
 PolycrystalVoronoiSpecifiedVoidICAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Setup initial condition with smooth circle voids at "
-                             "specified locations within polycrystal vorinoi structure");
   params += PolycrystalVoronoiSpecifiedVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");

@@ -35,8 +35,6 @@ InputParameters
 PolycrystalVoronoiSpecifiedVoidIC::validParams()
 {
   InputParameters params = PolycrystalVoronoiSpecifiedVoidIC::actionParameters();
-  params.addClassDescription("Creates smooth circles at specified locations within
-                              polycrystal voronoi structure");
   MooseEnum structure_options("grains voids");
   params.addRequiredParam<MooseEnum>("structure_type",
                                      structure_options,

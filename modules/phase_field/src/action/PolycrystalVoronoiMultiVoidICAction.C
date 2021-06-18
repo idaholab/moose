@@ -19,8 +19,6 @@ InputParameters
 PolycrystalVoronoiMultiVoidICAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Setup initial condition with random distribution of "
-                             "smooth circles within polycrystal vorinoi structure");
   params += PolycrystalVoronoiMultiVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");

@@ -35,8 +35,6 @@ InputParameters
 PolycrystalVoronoiMultiVoidIC::validParams()
 {
   InputParameters params = PolycrystalVoronoiMultiVoidIC::actionParameters();
-  params.addClassDescription("Random distribution of smooth circles of given minimum "
-                             "generated within polycrystal voronoi structure");
   MooseEnum structure_options("grains voids");
   params.addRequiredParam<MooseEnum>("structure_type",
                                      structure_options,
