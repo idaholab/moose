@@ -17,6 +17,7 @@ endif
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS          := yes
         CONTACT                     := yes
+        ELECTROMAGNETICS            := yes
         EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
         FSI                         := yes
@@ -76,7 +77,7 @@ ifeq ($(FSI),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg richards stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg richards stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -91,6 +92,13 @@ ifeq ($(CHEMICAL_REACTIONS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
   APPLICATION_NAME   := chemical_reactions
   SUFFIX             := cr
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(ELECTROMAGNETICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/electromagnetics
+  APPLICATION_NAME   := electromagnetics
+  SUFFIX             := em
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

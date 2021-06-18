@@ -15,6 +15,7 @@
 
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
+#include "ElectromagneticsApp.h"
 #include "FluidPropertiesApp.h"
 #include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
@@ -68,6 +69,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   ChemicalReactionsApp::registerAll(f, af, s);
   ContactApp::registerAll(f, af, s);
+  ElectromagneticsApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   FsiApp::registerAll(f, af, s);
   FunctionalExpansionToolsApp::registerAll(f, af, s);
@@ -94,6 +96,7 @@ CombinedApp::registerObjects(Factory & factory)
   mooseDeprecated("use registerAll instead of registerObjects");
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
+  ElectromagneticsApp::registerObjects(factory);
   FluidPropertiesApp::registerObjects(factory);
   FunctionalExpansionToolsApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
@@ -117,6 +120,7 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   mooseDeprecated("use registerAll instead of associateSyntax");
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
+  ElectromagneticsApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
   FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
@@ -140,6 +144,7 @@ CombinedApp::registerExecFlags(Factory & factory)
   mooseDeprecated("use registerAll instead of registerExecFlags");
   ChemicalReactionsApp::registerExecFlags(factory);
   ContactApp::registerExecFlags(factory);
+  ElectromagneticsApp::registerExecFlags(factory);
   FluidPropertiesApp::registerExecFlags(factory);
   HeatConductionApp::registerExecFlags(factory);
   MiscApp::registerExecFlags(factory);
