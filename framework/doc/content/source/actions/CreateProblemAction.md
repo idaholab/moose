@@ -1,13 +1,10 @@
 # CreateProblemAction
 
-!alert! construction title=Undocumented Action Class
+!alert construction title=Undocumented Action Class
 The CreateProblemAction has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with an Action;
 however, what is contained is ultimately determined by what is necessary to make the documentation
 clear for users.
-
-```markdown
-# CreateProblemAction
 
 !syntax description /Problem/CreateProblemAction
 
@@ -18,10 +15,6 @@ clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the CreateProblemAction action.
-
-!syntax parameters /Problem/CreateProblemAction
-```
-!alert-end!
 
 !syntax description /Problem/CreateProblemAction
 

@@ -1,1 +1,23 @@
-!template load file=stubs/moose_object.md.template name=EulerAngleProvider2RGBAux syntax=/AuxKernels/EulerAngleProvider2RGBAux
+# EulerAngleProvider2RGBAux
+
+!alert construction title=Undocumented Class
+The EulerAngleProvider2RGBAux has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+!syntax description /Bounds/EulerAngleProvider2RGBAux
+
+## Overview
+
+!! Replace these lines with information regarding the EulerAngleProvider2RGBAux object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the EulerAngleProvider2RGBAux object.
+
+!syntax parameters /Bounds/EulerAngleProvider2RGBAux
+
+!syntax inputs /Bounds/EulerAngleProvider2RGBAux
+
+!syntax children /Bounds/EulerAngleProvider2RGBAux

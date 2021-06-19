@@ -1,13 +1,10 @@
 # BoundingValueElementDamper
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The BoundingValueElementDamper has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# BoundingValueElementDamper
 
 !syntax description /Dampers/BoundingValueElementDamper
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the BoundingValueElementDamper object.
-
-!syntax parameters /Dampers/BoundingValueElementDamper
-
-!syntax inputs /Dampers/BoundingValueElementDamper
-
-!syntax children /Dampers/BoundingValueElementDamper
-```
-!alert-end!
-
-!syntax description /Dampers/BoundingValueElementDamper
 
 !syntax parameters /Dampers/BoundingValueElementDamper
 

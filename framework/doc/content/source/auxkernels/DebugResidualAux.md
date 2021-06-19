@@ -1,13 +1,10 @@
 # DebugResidualAux
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The DebugResidualAux has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# DebugResidualAux
 
 !syntax description /AuxKernels/DebugResidualAux
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the DebugResidualAux object.
-
-!syntax parameters /AuxKernels/DebugResidualAux
-
-!syntax inputs /AuxKernels/DebugResidualAux
-
-!syntax children /AuxKernels/DebugResidualAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/DebugResidualAux
 
 !syntax parameters /AuxKernels/DebugResidualAux
 

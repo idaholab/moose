@@ -1,13 +1,10 @@
 # ExplicitEuler
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The ExplicitEuler has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# ExplicitEuler
 
 !syntax description /Executioner/TimeIntegrator/ExplicitEuler
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the ExplicitEuler object.
-
-!syntax parameters /Executioner/TimeIntegrator/ExplicitEuler
-
-!syntax inputs /Executioner/TimeIntegrator/ExplicitEuler
-
-!syntax children /Executioner/TimeIntegrator/ExplicitEuler
-```
-!alert-end!
-
-!syntax description /Executioner/TimeIntegrator/ExplicitEuler
 
 !syntax parameters /Executioner/TimeIntegrator/ExplicitEuler
 

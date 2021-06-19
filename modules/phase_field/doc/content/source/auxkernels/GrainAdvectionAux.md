@@ -1,1 +1,23 @@
-!template load file=stubs/moose_object.md.template name=GrainAdvectionAux syntax=/AuxKernels/GrainAdvectionAux
+# GrainAdvectionAux
+
+!alert construction title=Undocumented Class
+The GrainAdvectionAux has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+!syntax description /Bounds/GrainAdvectionAux
+
+## Overview
+
+!! Replace these lines with information regarding the GrainAdvectionAux object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the GrainAdvectionAux object.
+
+!syntax parameters /Bounds/GrainAdvectionAux
+
+!syntax inputs /Bounds/GrainAdvectionAux
+
+!syntax children /Bounds/GrainAdvectionAux

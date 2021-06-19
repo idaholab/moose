@@ -1,13 +1,10 @@
 # VolumeHistogram
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The VolumeHistogram has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# VolumeHistogram
 
 !syntax description /VectorPostprocessors/VolumeHistogram
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the VolumeHistogram object.
-
-!syntax parameters /VectorPostprocessors/VolumeHistogram
-
-!syntax inputs /VectorPostprocessors/VolumeHistogram
-
-!syntax children /VectorPostprocessors/VolumeHistogram
-```
-!alert-end!
-
-!syntax description /VectorPostprocessors/VolumeHistogram
 
 !syntax parameters /VectorPostprocessors/VolumeHistogram
 

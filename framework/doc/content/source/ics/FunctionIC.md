@@ -1,13 +1,10 @@
 # FunctionIC
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The FunctionIC has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# FunctionIC
 
 !syntax description /ICs/FunctionIC
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the FunctionIC object.
-
-!syntax parameters /ICs/FunctionIC
-
-!syntax inputs /ICs/FunctionIC
-
-!syntax children /ICs/FunctionIC
-```
-!alert-end!
-
-!syntax description /ICs/FunctionIC
 
 !syntax parameters /ICs/FunctionIC
 

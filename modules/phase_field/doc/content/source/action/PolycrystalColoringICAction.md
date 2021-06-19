@@ -1,1 +1,21 @@
-!template load file=stubs/moose_action.md.template name=PolycrystalColoringICAction syntax=/ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction
+# PolycrystalColoringICAction
+
+!alert construction title=Undocumented Action Class
+The PolycrystalColoringICAction has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with an Action;
+however, what is contained is ultimately determined by what is necessary to make the documentation
+clear for users.
+
+!syntax description /ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction
+
+## Overview
+
+!! Replace these lines with information regarding the PolycrystalColoringICAction action.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the PolycrystalColoringICAction action.
+
+!syntax description /ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction
+
+!syntax parameters /ICs/PolycrystalICs/PolycrystalColoringIC/PolycrystalColoringICAction

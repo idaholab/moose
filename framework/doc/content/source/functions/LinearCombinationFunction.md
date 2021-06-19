@@ -1,13 +1,10 @@
 # LinearCombinationFunction
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The LinearCombinationFunction has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# LinearCombinationFunction
 
 !syntax description /Functions/LinearCombinationFunction
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the LinearCombinationFunction object.
-
-!syntax parameters /Functions/LinearCombinationFunction
-
-!syntax inputs /Functions/LinearCombinationFunction
-
-!syntax children /Functions/LinearCombinationFunction
-```
-!alert-end!
-
-!syntax description /Functions/LinearCombinationFunction
 
 !syntax parameters /Functions/LinearCombinationFunction
 

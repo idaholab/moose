@@ -1,1 +1,23 @@
-!template load file=stubs/moose_object.md.template name=ThirdPhaseSuppressionMaterial syntax=/Materials/ThirdPhaseSuppressionMaterial
+# ThirdPhaseSuppressionMaterial
+
+!alert construction title=Undocumented Class
+The ThirdPhaseSuppressionMaterial has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+!syntax description /Materials/ThirdPhaseSuppressionMaterial
+
+## Overview
+
+!! Replace these lines with information regarding the ThirdPhaseSuppressionMaterial object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the ThirdPhaseSuppressionMaterial object.
+
+!syntax parameters /Materials/ThirdPhaseSuppressionMaterial
+
+!syntax inputs /Materials/ThirdPhaseSuppressionMaterial
+
+!syntax children /Materials/ThirdPhaseSuppressionMaterial

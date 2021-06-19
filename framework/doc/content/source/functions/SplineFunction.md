@@ -1,13 +1,10 @@
 # SplineFunction
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The SplineFunction has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# SplineFunction
 
 !syntax description /Functions/SplineFunction
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the SplineFunction object.
-
-!syntax parameters /Functions/SplineFunction
-
-!syntax inputs /Functions/SplineFunction
-
-!syntax children /Functions/SplineFunction
-```
-!alert-end!
-
-!syntax description /Functions/SplineFunction
 
 !syntax parameters /Functions/SplineFunction
 

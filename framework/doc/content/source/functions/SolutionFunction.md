@@ -1,13 +1,10 @@
 # SolutionFunction
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The SolutionFunction has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# SolutionFunction
 
 !syntax description /Functions/SolutionFunction
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the SolutionFunction object.
-
-!syntax parameters /Functions/SolutionFunction
-
-!syntax inputs /Functions/SolutionFunction
-
-!syntax children /Functions/SolutionFunction
-```
-!alert-end!
-
-!syntax description /Functions/SolutionFunction
 
 !syntax parameters /Functions/SolutionFunction
 

@@ -1,13 +1,10 @@
 # FunctionAux
 
-!alert! construction title=Undocumented Class
+!alert construction title=Undocumented Class
 The FunctionAux has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
-
-```markdown
-# FunctionAux
 
 !syntax description /AuxKernels/FunctionAux
 
@@ -18,16 +15,6 @@ documentation clear for users.
 ## Example Input File Syntax
 
 !! Describe and include an example of how to use the FunctionAux object.
-
-!syntax parameters /AuxKernels/FunctionAux
-
-!syntax inputs /AuxKernels/FunctionAux
-
-!syntax children /AuxKernels/FunctionAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/FunctionAux
 
 !syntax parameters /AuxKernels/FunctionAux
 
