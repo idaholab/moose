@@ -42,6 +42,7 @@ protected:
   void jacobianSetup() override final { //clearRCCoeffs();
    }
 
+  /// Advection kernels need to be executed on flow boundaries
   bool skipForBoundary(const FaceInfo & fi) const override;
 
   /// pressure variable
@@ -62,8 +63,9 @@ protected:
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
 
-private:
-
   /// User object for computing velocity on element faces
   const NSFVRhieChowInterpolator * _velocity_interpolator;
+
+  /// Flow Boundary IDs
+  std::set<BoundaryID> _flow_boundaries;
 };

@@ -221,7 +221,8 @@ NSFVRhieChowInterpolator::setupBoundaries(const BoundaryID bnd_id,
 void
 NSFVRhieChowInterpolator::execute()
 {
-  // Compute all Rhie Chow coefficients
+  // Compute all Rhie Chow coefficients, see if it brings better performance
+  // Could be another memory saving feature
   std::cout << "EXECUTING INTERPOLATOR every nL step ?? \n\n\n" << std::endl;
 }
 

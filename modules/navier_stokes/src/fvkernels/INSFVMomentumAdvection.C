@@ -31,10 +31,6 @@
 
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 
-std::unordered_map<const MooseApp *,
-                   std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
-    INSFVMomentumAdvection::_rc_a_coeffs;
-
 InputParameters
 INSFVMomentumAdvection::validParams()
 {
@@ -114,11 +110,6 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(velocity_interp_method));
 
-  if (_tid == 0)
-  {
-    auto & vec_of_coeffs_map = _rc_a_coeffs[&_app];
-    vec_of_coeffs_map.resize(libMesh::n_threads());
-  }
 
   if (getParam<bool>("force_boundary_execution"))
     paramError("force_boundary_execution",
@@ -133,6 +124,33 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   // Add necessary object dependencies when
   if (_velocity_interpolator)
     _velocity_interpolator->addDependencies(this);
+}
+
+void
+INSFVMomentumAdvection::initialSetup()
+{
+  std::set<BoundaryID> all_connected_boundaries;
+  const auto & blk_ids = blockRestricted() ? blockIDs() : _mesh.meshSubdomains();
+  for (const auto blk_id : blk_ids)
+  {
+    const auto & connected_boundaries = _mesh.getSubdomainBoundaryIds(blk_id);
+    for (const auto bnd_id : connected_boundaries)
+      all_connected_boundaries.insert(bnd_id);
+  }
+
+  for (const auto bnd_id : all_connected_boundaries)
+  {
+    std::vector<INSFVFlowBC *> flow_bcs;
+    this->_subproblem.getMooseApp()
+        .theWarehouse()
+        .query()
+        .template condition<AttribBoundaries>(bnd_id)
+        .template condition<AttribINSFVBCs>(INSFVBCs::INSFVFlowBC)
+        .queryInto(flow_bcs);
+
+    if (!flow_bcs.empty())
+      _flow_boundaries.insert(bnd_id);
+  }
 }
 
 bool
@@ -165,7 +183,8 @@ INSFVMomentumAdvection::computeQpResidual()
 
   // Interpolate velocity on the face
   if (_velocity_interpolator)
-    _velocity_interpolator->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+    _velocity_interpolator->interpolate(
+        _velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp], _face_info);
   else
     Moose::FV::interpolate(_velocity_interp_method,
                            v,
@@ -183,17 +202,4 @@ INSFVMomentumAdvection::computeQpResidual()
                          *_face_info,
                          true);
   return _normal * v * adv_quant_interface;
-}
-
-void
-INSFVMomentumAdvection::clearRCCoeffs()
-{
-  auto it = _rc_a_coeffs.find(&_app);
-  mooseAssert(it != _rc_a_coeffs.end(),
-              "No RC coeffs structure exists for the given MooseApp pointer");
-  mooseAssert(_tid < it->second.size(),
-              "The RC coeffs structure size "
-                  << it->second.size() << " is greater than or equal to the provided thread ID "
-                  << _tid);
-  it->second[_tid].clear();
 }
