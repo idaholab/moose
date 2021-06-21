@@ -21,4 +21,25 @@
     requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
                   'material models for finite strain elasticity and temperature dependence'
   []
+
+  [elastic_dtemperature]
+    type = 'Exodiff'
+    input = 'elastic_dtemperature.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'elastic_dtemperature_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for finite strain elastic material models and '
+                  'temperature dependence, include the temperature step increment'
+  []
+  [elastic_dtemperature_reference]
+    type = 'Exodiff'
+    input = 'elastic_dtemperature.i'
+    cli_args = "Materials/active='elastic stress'"
+    exodiff = 'elastic_dtemperature_out.e'
+    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+                  'material models for finite strain elasticity and temperature dependence, '
+                  'including the temperature step increment'
+  []
 []
