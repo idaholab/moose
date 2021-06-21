@@ -748,7 +748,6 @@ enum LineSearchType
   LS_DEFAULT,
   LS_NONE,
   LS_BASIC,
-#ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
   LS_CUBIC,
   LS_QUADRATIC,
@@ -760,7 +759,6 @@ enum LineSearchType
   LS_L2,
   LS_BT,
   LS_CP
-#endif
 #endif
 };
 

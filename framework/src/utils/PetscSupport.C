@@ -9,8 +9,6 @@
 
 #include "PetscSupport.h"
 
-#ifdef LIBMESH_HAVE_PETSC
-
 // MOOSE includes
 #include "MooseApp.h"
 #include "FEProblem.h"
@@ -1088,5 +1086,3 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
 
 } // Namespace PetscSupport
 } // Namespace MOOSE
-
-#endif // LIBMESH_HAVE_PETSC

@@ -36,10 +36,8 @@ FEProblemSolve::validParams()
 
   std::set<std::string> alias_line_searches = {"default", "none", "basic"};
   line_searches.insert(alias_line_searches.begin(), alias_line_searches.end());
-#ifdef LIBMESH_HAVE_PETSC
   std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
   line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
-#endif // LIBMESH_HAVE_PETSC
   std::string line_search_string = Moose::stringify(line_searches, " ");
   MooseEnum line_search(line_search_string, "default");
   std::string addtl_doc_str(" (Note: none = basic)");
@@ -60,10 +58,7 @@ FEProblemSolve::validParams()
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
 
-  // Default Solver Behavior
-#ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();
-#endif // LIBMESH_HAVE_PETSC
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
@@ -140,9 +135,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     _problem.addLineSearch(_pars);
 
 // Extract and store PETSc related settings on FEProblemBase
-#ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::storePetscOptions(_problem, _pars);
-#endif // LIBMESH_HAVE_PETSC
 
   EquationSystems & es = _problem.es();
   es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");

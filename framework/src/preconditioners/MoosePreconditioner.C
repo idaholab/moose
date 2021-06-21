@@ -30,9 +30,7 @@ MoosePreconditioner::validParams()
       "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
   params.registerBase("MoosePreconditioner");
 
-#ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();
-#endif // LIBMESH_HAVE_PETSC
 
   return params;
 }

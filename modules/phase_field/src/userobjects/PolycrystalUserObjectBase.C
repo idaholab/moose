@@ -453,7 +453,6 @@ PolycrystalUserObjectBase::assignOpsToGrains()
   }
   else // PETSc Coloring algorithms
   {
-#ifdef LIBMESH_HAVE_PETSC
     const std::string & ca_str = _coloring_algorithm;
     Real * am_data = _adjacency_matrix->get_values().data();
 
@@ -469,9 +468,6 @@ PolycrystalUserObjectBase::assignOpsToGrains()
                  "variables to hold a\nvalid polycrystal initial condition (no grains represented "
                  "by the same variable should be allowed to\ntouch, ~8 for 2D, ~25 for 3D)?");
     }
-#else
-    mooseError("Selected coloring algorithm requires PETSc");
-#endif
   }
 
   Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
