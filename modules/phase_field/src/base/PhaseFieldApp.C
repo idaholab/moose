@@ -61,6 +61,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
   registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   registerSyntax("PolycrystalVoronoiVoidICAction", "ICs/PolycrystalICs/PolycrystalVoronoiVoidIC");
+  registerSyntax("PolycrystalVoronoiMultiVoidICAction",
+                 "ICs/PolycrystalICs/PolycrystalVoronoiMultiVoidIC");
+  registerSyntax("PolycrystalVoronoiSpecifiedVoidICAction",
+                 "ICs/PolycrystalICs/PolycrystalVoronoiSpecifiedVoidIC");
   registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
   registerSyntax("GrandPotentialKernelAction", "Modules/PhaseField/GrandPotential");
