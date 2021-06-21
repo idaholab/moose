@@ -22,10 +22,10 @@ CNSFVHLLC::computeQpResidual()
 {
   _normal_speed_elem = _normal * _vel_elem[_qp];
   _normal_speed_neighbor = _normal * _vel_neighbor[_qp];
-  const auto & wave_speeds = waveSpeed(_tid, *_face_info, hllcData(), _normal);
-  _SL = wave_speeds[0];
-  _SM = wave_speeds[1];
-  _SR = wave_speeds[2];
+  auto wave_speeds = waveSpeed(hllcData(), _normal);
+  _SL = std::move(wave_speeds[0]);
+  _SM = std::move(wave_speeds[1]);
+  _SR = std::move(wave_speeds[2]);
   if (_SL >= 0)
     return fluxElem();
   else if (_SR <= 0)

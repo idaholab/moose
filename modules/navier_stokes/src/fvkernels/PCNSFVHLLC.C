@@ -43,7 +43,7 @@ PCNSFVHLLC::PCNSFVHLLC(const InputParameters & params)
 {
 }
 
-std::vector<ADReal>
+std::array<ADReal, 3>
 PCNSFVHLLC::waveSpeed(const ADReal & rho_elem,
                       const ADRealVectorValue & vel_elem,
                       const ADReal & e_elem,
@@ -89,14 +89,12 @@ PCNSFVHLLC::waveSpeed(const ADReal & rho_elem,
 
   // compute wave speeds
   // I may want to change the estimate of these wave speeds!
-  const auto SL = std::min(q1 - c1, q_roe - c_roe);
-  const auto SR = std::max(q2 + c2, q_roe + c_roe);
-  const auto SM =
-      (eps2 * rho2 * q2 * (SR - q2) - eps1 * rho1 * q1 * (SL - q1) + eps1 * p1 - eps2 * p2) /
-      (eps2 * rho2 * (SR - q2) - eps1 * rho1 * (SL - q1));
+  auto SL = std::min(q1 - c1, q_roe - c_roe);
+  auto SR = std::max(q2 + c2, q_roe + c_roe);
+  auto SM = (eps2 * rho2 * q2 * (SR - q2) - eps1 * rho1 * q1 * (SL - q1) + eps1 * p1 - eps2 * p2) /
+            (eps2 * rho2 * (SR - q2) - eps1 * rho1 * (SL - q1));
 
-  // store these results in _wave_speed
-  return {SL, SM, SR};
+  return {{std::move(SL), std::move(SM), std::move(SR)}};
 }
 
 ADReal

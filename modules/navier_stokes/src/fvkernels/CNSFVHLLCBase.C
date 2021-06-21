@@ -15,14 +15,11 @@
 namespace nms = NS;
 using MetaPhysicL::raw_value;
 
-std::vector<std::unordered_map<const FaceInfo *, std::array<ADReal, 3>>>
-    CNSFVHLLCBase::_fi_to_wave_speeds;
-
 InputParameters
 CNSFVHLLCBase::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addRequiredParam<UserObjectName>(nms::fluid, "Fluid userobject");
+  params.addRequiredParam<UserObjectName>(nms::fluid, "Fluid properties userobject");
   return params;
 }
 
@@ -44,8 +41,6 @@ CNSFVHLLCBase::CNSFVHLLCBase(const InputParameters & params)
     _pressure_elem(getADMaterialProperty<Real>(nms::pressure)),
     _pressure_neighbor(getNeighborADMaterialProperty<Real>(nms::pressure))
 {
-  if (_tid == 0)
-    _fi_to_wave_speeds.resize(libMesh::n_threads());
 }
 
 HLLCData
@@ -60,18 +55,9 @@ CNSFVHLLCBase::hllcData() const
           _specific_internal_energy_neighbor[_qp]};
 }
 
-const std::array<ADReal, 3> &
-CNSFVHLLCBase::waveSpeed(const THREAD_ID tid,
-                         const FaceInfo & fi,
-                         const HLLCData & hllc_data,
-                         const ADRealVectorValue & normal)
+std::array<ADReal, 3>
+CNSFVHLLCBase::waveSpeed(const HLLCData & hllc_data, const ADRealVectorValue & normal)
 {
-  mooseAssert(tid < libMesh::n_threads(), tid << " must be less than " << libMesh::n_threads());
-
-  auto it = _fi_to_wave_speeds[tid].find(&fi);
-  if (it != _fi_to_wave_speeds[tid].end())
-    return it->second;
-
   const ADReal & rho1 = hllc_data.rho_elem;
   const ADReal u1 = hllc_data.vel_elem.norm();
   const ADReal q1 = normal * hllc_data.vel_elem;
@@ -110,10 +96,5 @@ CNSFVHLLCBase::waveSpeed(const THREAD_ID tid,
   ADReal SM = (rho2 * q2 * (SR - q2) - rho1 * q1 * (SL - q1) + p1 - p2) /
               (rho2 * (SR - q2) - rho1 * (SL - q1));
 
-  std::array<ADReal, 3> wave_speeds = {{std::move(SL), std::move(SM), std::move(SR)}};
-
-  // store these results in _wave_speed
-  auto pr = _fi_to_wave_speeds[tid].emplace(&fi, std::move(wave_speeds));
-
-  return pr.first->second;
+  return {{std::move(SL), std::move(SM), std::move(SR)}};
 }

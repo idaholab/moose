@@ -48,17 +48,15 @@ CNSFVHLLCMomentumStagnationInletBC::fluxBoundary()
 ADReal
 CNSFVHLLCMomentumStagnationInletBC::hllcElem()
 {
-  Real f = std::sqrt(1 - MetaPhysicL::raw_value(_normal(_index)) *
-                             MetaPhysicL::raw_value(_normal(_index)));
-  return _normal(_index) * _SM + f * _vel_elem[_qp](_index);
+  const auto vel_nonnormal = _vel_elem[_qp] - _normal_speed_elem * _normal;
+  return _normal(_index) * _SM + vel_nonnormal(_index);
 }
 
 ADReal
 CNSFVHLLCMomentumStagnationInletBC::hllcBoundary()
 {
-  Real f = std::sqrt(1 - MetaPhysicL::raw_value(_normal(_index)) *
-                             MetaPhysicL::raw_value(_normal(_index)));
-  return _normal(_index) * _SM + f * _vel_boundary(_index);
+  const auto vel_nonnormal = _vel_boundary - _normal_speed_boundary * _normal;
+  return _normal(_index) * _SM + vel_nonnormal(_index);
 }
 
 ADReal

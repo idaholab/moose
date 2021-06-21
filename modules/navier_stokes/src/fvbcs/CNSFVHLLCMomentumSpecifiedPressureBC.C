@@ -11,12 +11,14 @@
 #include "Function.h"
 
 // Full specialization of the validParams function for this object
-registerADMooseObject("NavierStokesApp", CNSFVHLLCMomentumSpecifiedPressureBC);
+registerMooseObject("NavierStokesApp", CNSFVHLLCMomentumSpecifiedPressureBC);
 
 InputParameters
 CNSFVHLLCMomentumSpecifiedPressureBC::validParams()
 {
   InputParameters params = CNSFVHLLCMomentumImplicitBC::validParams();
+  params.addClassDescription("Implements an HLLC boundary condition for the momentum conservation "
+                             "equation in which the pressure is specified.");
   params.addRequiredParam<FunctionName>("specified_pressure_function",
                                         "Specified pressure function");
   return params;
@@ -33,7 +35,7 @@ ADReal
 CNSFVHLLCMomentumSpecifiedPressureBC::fluxElem()
 {
   return _normal_speed_elem * _rho_elem[_qp] * _vel_elem[_qp](_index) +
-         _normal(_index) * _pressure_function.value(_t, _face_info->faceCentroid());
+         _normal(_index) * _pressure_elem[_qp];
 }
 
 ADReal

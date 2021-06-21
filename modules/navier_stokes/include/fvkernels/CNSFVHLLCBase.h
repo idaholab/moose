@@ -54,13 +54,8 @@ public:
   CNSFVHLLCBase(const InputParameters & params);
 
   /// helper function for computing wave speed
-  static const std::array<ADReal, 3> & waveSpeed(THREAD_ID tid,
-                                                 const FaceInfo & fi,
-                                                 const HLLCData & hllc_data,
-                                                 const ADRealVectorValue & normal);
-
-  void residualSetup() override final { _fi_to_wave_speeds[_tid].clear(); }
-  void jacobianSetup() override final { _fi_to_wave_speeds[_tid].clear(); }
+  static std::array<ADReal, 3> waveSpeed(const HLLCData & hllc_data,
+                                         const ADRealVectorValue & normal);
 
 protected:
   HLLCData hllcData() const;
@@ -106,8 +101,4 @@ protected:
   const ADMaterialProperty<Real> & _pressure_elem;
   const ADMaterialProperty<Real> & _pressure_neighbor;
   ///@}
-
-private:
-  static std::vector<std::unordered_map<const FaceInfo *, std::array<ADReal, 3>>>
-      _fi_to_wave_speeds;
 };

@@ -23,17 +23,14 @@ CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters) : CNSFVHLLCBCBase(p
 ADReal
 CNSFVHLLCBC::computeQpResidual()
 {
-  // mooseAssert(_var.hasBlocks(_face_info->elem().subdomain_id()), "checking subdomain
-  // restriction");
-
   _normal_speed_elem = _normal * _vel_elem[_qp];
   preComputeWaveSpeed();
 
-  const auto & wave_speeds = CNSFVHLLCBase::waveSpeed(_tid, *_face_info, hllcData(), _normal);
+  auto wave_speeds = CNSFVHLLCBase::waveSpeed(hllcData(), _normal);
 
-  _SL = wave_speeds[0];
-  _SM = wave_speeds[1];
-  _SR = wave_speeds[2];
+  _SL = std::move(wave_speeds[0]);
+  _SM = std::move(wave_speeds[1]);
+  _SR = std::move(wave_speeds[2]);
 
   if (_SL >= 0)
     return fluxElem();

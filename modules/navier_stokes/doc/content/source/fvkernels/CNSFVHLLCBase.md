@@ -84,7 +84,7 @@ a_{n,K}\right)\left[S_* + \frac{p_K}{\rho_K\left(S_K - a_{n,K}\right)}\right]
 The final piece to finish the definition of the HLLC flux is to specify the
 evaluation of the left and right wave speeds, $S_L$ and $S_R$. These can be
 evaluated in a variety of ways, but the current `CNSFVHLLCBase` implementation
-evaluates them as follows:
+evaluates them as follows, following [!citep](batten1997average):
 
 \begin{equation}
 S_L = \text{min}\lparen a_{n,L} - c_L, a_{n,\text{Roe}} - c_{\text{Roe}}\rparen\\

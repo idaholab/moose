@@ -17,7 +17,7 @@ PCNSFVImplicitMomentumPressureBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription(
-      "Specifies a implicit pressure at a boundary for the momentum equations.");
+      "Specifies an implicit pressure at a boundary for the momentum equations.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -37,7 +37,6 @@ PCNSFVImplicitMomentumPressureBC::PCNSFVImplicitMomentumPressureBC(const InputPa
 ADReal
 PCNSFVImplicitMomentumPressureBC::computeQpResidual()
 {
-  // mooseAssert(_var.hasBlocks(_face_info->elem().subdomain_id()), "Checking block restriction");
 
   return _normal(_index) * _eps[_qp] * _pressure[_qp];
 }

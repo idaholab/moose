@@ -27,16 +27,16 @@ public:
   PCNSFVHLLC(const InputParameters & params);
 
   /// helper function for computing wave speed
-  static std::vector<ADReal> waveSpeed(const ADReal & rho_elem,
-                                       const ADRealVectorValue & vel_elem,
-                                       const ADReal & e_elem,
-                                       Real eps_elem,
-                                       const ADReal & rho_neighbor,
-                                       const ADRealVectorValue & vel_neighbor,
-                                       const ADReal & e_neighbor,
-                                       Real eps_neighbor,
-                                       const SinglePhaseFluidProperties & fluid,
-                                       const ADRealVectorValue & normal);
+  static std::array<ADReal, 3> waveSpeed(const ADReal & rho_elem,
+                                         const ADRealVectorValue & vel_elem,
+                                         const ADReal & e_elem,
+                                         Real eps_elem,
+                                         const ADReal & rho_neighbor,
+                                         const ADRealVectorValue & vel_neighbor,
+                                         const ADReal & e_neighbor,
+                                         Real eps_neighbor,
+                                         const SinglePhaseFluidProperties & fluid,
+                                         const ADRealVectorValue & normal);
 
 protected:
   virtual ADReal computeQpResidual() override;

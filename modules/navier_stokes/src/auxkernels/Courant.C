@@ -17,7 +17,7 @@ Courant::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addClassDescription("Computes h_min / |u|.");
+  params.addClassDescription("Computes |u| dt / h_min.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D

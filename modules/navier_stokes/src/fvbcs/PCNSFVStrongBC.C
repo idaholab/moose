@@ -20,7 +20,7 @@ PCNSFVStrongBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   MooseEnum eqn("mass momentum energy scalar");
   params.addRequiredParam<MooseEnum>("eqn", eqn, "The equation you're solving.");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -109,6 +109,9 @@ PCNSFVStrongBC::PCNSFVStrongBC(const InputParameters & params)
     paramError("eqn",
                "If 'momentum' is specified for 'eqn', then you must provide a parameter "
                "value for 'momentum_component'");
+  if ((_eqn != "momentum") && isParamValid("momentum_component"))
+    paramError("momentum_component",
+               "'momentum_component' should not be specified when the 'eqn' is not 'momentum'");
 }
 
 ADReal
@@ -220,5 +223,5 @@ PCNSFVStrongBC::computeQpResidual()
     return rho_boundary * scalar_boundary * sup_vel_boundary * normal;
   }
   else
-    mooseError("Unrecognized enum type ", _eqn);
+    mooseError("Unrecognized equation type ", _eqn);
 }

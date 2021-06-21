@@ -16,7 +16,7 @@ InputParameters
 CNSFVHLLCBCBase::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   return params;
 }
 
