@@ -1,6 +1,6 @@
 [Tests]
   issues = '#15640'
-  design = 'navier_stokes/fv.md'
+  design = 'navier_stokes/insfv.md'
   [1d-rc]
     type = 'Exodiff'
     input = 1d-rc.i

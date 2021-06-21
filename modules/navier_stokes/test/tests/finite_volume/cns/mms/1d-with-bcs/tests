@@ -1,6 +1,5 @@
 [Tests]
   issues = '#16758'
-  design = 'navier_stokes/fv.md'
   [1d-free-flow-hllc]
     type = PythonUnitTest
     input = test.py
@@ -8,9 +7,11 @@
     requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
     method = "!dbg"
+    design = 'CNSFVHLLCBase.md'
   []
   [1d-porous-hllc]
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum/velocity at one boundary and specified pressure at another boundary with'
+    design = 'PCNSFVHLLC.md'
     [constant]
       type = PythonUnitTest
       input = test.py
@@ -30,6 +31,7 @@
   []
   [primitive_basic_kurganov_tadmor]
     requirement = 'The system shall be able to use a primitive variable set and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    design = 'PCNSFVKT.md'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -60,6 +62,7 @@
   []
   [conserved_basic_kurganov_tadmor]
     requirement = 'The system shall be able to use a conserved variable set and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    design = 'PCNSFVKT.md'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -90,6 +93,7 @@
   []
   [primitive_basic_kurganov_tadmor_varying_porosity_function]
     requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor (KT) scheme with the KT Method for computing omega'
+    design = 'PCNSFVKT.md'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -120,6 +124,7 @@
   []
   [primitive_basic_knp_varying_porosity_function]
     requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a primitive variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme with the Kurganov-Noelle-Petrova method for computing omega'
+    design = 'PCNSFVKT.md'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -150,6 +155,7 @@
   []
   [mixed_basic_kurganov_tadmor_varying_porosity_function]
     requirement = 'The system shall be able to solve a problem with continuously varying porosity provided through a function object, using a mixed variable set, and compute intercell fluxes using a Kurganov-Tadmor scheme'
+    design = 'PCNSFVKT.md'
     [central_difference]
       type = PythonUnitTest
       input = test.py
@@ -171,6 +177,7 @@
   []
   [sources_give_hllc_problems_irregular]
     requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
+    design = 'CNSFVHLLCBase.md'
     [hllc_with_volume_source]
       type = Exodiff
       input = 'straight-channel-hllc.i'
@@ -181,6 +188,7 @@
   []
   [sources_give_hllc_problems_regular]
     requirement = 'On a regular grid, using a HLLC scheme to calculate inter-cell fluxes, the system shall show, via the momentum variable'
+    design = 'CNSFVHLLCBase.md'
     [conserved]
       type = Exodiff
       input = 'regular-straight-channel.i'

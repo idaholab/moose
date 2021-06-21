@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16758'
-  design = 'navier_stokes/fv.md'
+  design = 'CNSFVHLLCBase.md'
   [1d-hllc]
     type = PythonUnitTest
     input = test.py
