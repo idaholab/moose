@@ -10,6 +10,8 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 
 [Peacock](peacock.md) - Graphical user interface and results visualization
 
+[OnDemand](ondemand.md) - Web based user interface to submit jobs to INL HPC
+
 [Tracked Apps](tracked_apps.md) - A list of applications being developped
 
 [Troubleshooting Failed Solves](failed_solves.md)
