@@ -66,8 +66,6 @@ SobolSampler::sampleSetUp(const Sampler::SampleMode)
 Real
 SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  TIME_SECTION("computeSample", 3, "Sampling Sobol");
-
   dof_id_type matrix_index = row_index / _num_rows_per_matrix;
   dof_id_type r = row_index - matrix_index * _num_rows_per_matrix;
 

@@ -95,12 +95,7 @@ PerfGraph::getNumCalls(const std::string & section_name)
 {
   updateTiming();
 
-  std::string real_section_name = section_name;
-
-  if (section_name == "Root")
-    real_section_name = _root_name;
-
-  auto section_it = _section_time.find(real_section_name);
+  auto section_it = _section_time.find(section_name == "Root" ? _root_name : section_name);
 
   if (section_it == _section_time.end())
   {
@@ -122,12 +117,7 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
 {
   updateTiming();
 
-  std::string real_section_name = section_name;
-
-  if (section_name == "Root")
-    real_section_name = _root_name;
-
-  auto section_it = _section_time.find(real_section_name);
+  auto section_it = _section_time.find(section_name == "Root" ? _root_name : section_name);
 
   if (section_it == _section_time.end())
   {
@@ -249,9 +239,7 @@ PerfGraph::push(const PerfID id)
   // Add this to the execution list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
       (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
-  {
     addToExecutionList(id, IncrementState::started, current_time, start_memory);
-  }
 }
 
 void

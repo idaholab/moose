@@ -84,7 +84,5 @@ CSVSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
   mooseAssert(row_index < _data[0].size(), "row_index cannot be out of bounds of the data.");
   mooseAssert(col_index < _data.size(), "col_index cannot be out of bounds of the data.");
 
-  TIME_SECTION("computeSample", 3, "Sampling CSV");
-
   return _data[col_index][row_index]; // entering samples into the matrix
 }

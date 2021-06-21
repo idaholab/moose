@@ -294,8 +294,18 @@ protected:
    * Use to hold an increment of time and memory for a section
    * This is used in the LivePrint capability.
    */
-  struct SectionIncrement
+  class SectionIncrement
   {
+  public:
+    SectionIncrement()
+      : _state(IncrementState::finished),
+        _print_stack_level(0),
+        _num_dots(0),
+        _time(std::chrono::seconds(0)),
+        _memory(0)
+    {
+    }
+
     PerfID _id;
 
     /// Whether or not this increment is the start of an increment or

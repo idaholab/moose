@@ -33,9 +33,9 @@ void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
   // If the live_message is empty - just print the name
-  auto message = !_id_to_section_info[section_increment._id]._live_message.empty()
-                     ? _id_to_section_info[section_increment._id]._live_message
-                     : _id_to_section_info[section_increment._id]._name;
+  const auto message = !_id_to_section_info[section_increment._id]._live_message.empty()
+                           ? _id_to_section_info[section_increment._id]._live_message
+                           : _id_to_section_info[section_increment._id]._name;
 
   // This line is different - need to finish the last line
   if (_last_printed_increment && _last_printed_increment != &section_increment &&
@@ -90,20 +90,19 @@ void
 PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_start,
                                PerfGraph::SectionIncrement & section_increment_finish)
 {
+  if (_stack_level < 1)
+    return;
+
   // If the live_message is empty - just print the name
   auto message = !_id_to_section_info[section_increment_start._id]._live_message.empty()
                      ? _id_to_section_info[section_increment_start._id]._live_message
                      : _id_to_section_info[section_increment_start._id]._name;
 
-  /*
   auto time_increment =
-      std::chrono::duration<double>(section_increment_finish._time -
-      section_increment_start._time)
+      std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
           .count();
-  */
 
-  // auto memory_increment = section_increment_finish._memory
-  // - section_increment_start._memory;
+  auto memory_increment = section_increment_finish._memory - section_increment_start._memory;
 
   auto num_horizontal_chars = message.size() + (2 * section_increment_start._print_stack_level);
 
@@ -116,24 +115,21 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
          _last_printed_increment->_state == PerfGraph::IncrementState::printed &&
          _id_to_section_info[_last_printed_increment->_id]._print_dots))
       _console << '\n';
-
-    _console << std::string(2 * section_increment_start._print_stack_level, ' ') << "Finished "
+    const std::string finished("Finished ");
+    _console << std::string(2 * section_increment_start._print_stack_level, ' ') << finished
              << message;
 
-    num_horizontal_chars += std::string("Finished ").size();
+    num_horizontal_chars += finished.size();
   }
   else
     num_horizontal_chars += section_increment_start._num_dots;
 
   // Actually do the printing
-  //  _console << std::setw(WRAP_LENGTH - num_horizontal_chars);
-  _console << ' ';
+  _console << std::setw(WRAP_LENGTH - num_horizontal_chars);
 
-  /*
   _console << " [";
   _console << COLOR_YELLOW;
-  _console << std::setw(6) << std::fixed
-  << std::setprecision(2) << time_increment << " s";
+  _console << std::setw(6) << std::fixed << std::setprecision(2) << time_increment << " s";
   _console << COLOR_DEFAULT;
   _console << ']' << " [";
   _console << COLOR_YELLOW << std::setw(5) << std::fixed;
@@ -141,7 +137,6 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   _console << " MB";
   _console << COLOR_DEFAULT;
   _console << ']';
-  */
 
   // If we're not printing dots - just finish the line
   _console << std::endl;

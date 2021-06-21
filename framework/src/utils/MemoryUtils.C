@@ -100,7 +100,7 @@ getMemoryStats(Stats & stats)
 
     unsigned int i = 0;
 
-    while (!stat_stream.eof() && i < 21)
+    while (!stat_stream.eof() && i < val.size())
     {
       stat_stream >> val[i];
       i++;
@@ -108,7 +108,7 @@ getMemoryStats(Stats & stats)
 
     // Handle the case where we didn't get enough values by just zeroing everything
     // since we probably got junk
-    if (i != 22)
+    if (i != val.size())
     {
       retval = false; // Set an error return value
       val.fill(0);
@@ -116,7 +116,7 @@ getMemoryStats(Stats & stats)
 
     // resident size is reported as number of pages in /proc
 #ifndef __WIN32__
-    val[index_resident_size] *= 2; // sysconf(_SC_PAGE_SIZE);
+    val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
 #endif
   }
   else
@@ -160,10 +160,10 @@ getMemoryStats(Stats & stats)
   stats._physical_memory = val[index_resident_size];
 
   // virtual mem
-  stats._virtual_memory = 100; // val[index_virtual_size];
+  stats._virtual_memory = val[index_virtual_size];
 
   // page faults
-  stats._page_faults = 100; // val[index_page_faults];
+  stats._page_faults = val[index_page_faults];
 
   return retval;
 }

@@ -209,8 +209,6 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  TIME_SECTION("getCommandLineArgsParamHelper", 3, "Parsing commandline parameters");
-
   std::string args;
 
   // With multiple processors per app, there are no local rows for non-root processors
