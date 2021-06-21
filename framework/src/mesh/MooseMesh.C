@@ -837,7 +837,14 @@ MooseMesh::nodeToElemMap()
 
     if (!_node_to_elem_map_built)
     {
+      // This is allowing the timing to be run even with threads
+      // This is safe because all threads will be waiting on this section when it runs
+      // NOTE: Do not copy this construction to other places without thinking REALLY hard about it
+      // The PerfGraph is NOT threadsafe and will cause all kinds of havok if care isn't taken
+      auto in_threads = Threads::in_threads;
+      Threads::in_threads = false;
       TIME_SECTION("nodeToElemMap", 5, "Building Node To Elem Map");
+      Threads::in_threads = in_threads;
 
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
@@ -857,7 +864,14 @@ MooseMesh::nodeToActiveSemilocalElemMap()
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
+    // This is allowing the timing to be run even with threads
+    // This is safe because all threads will be waiting on this section when it runs
+    // NOTE: Do not copy this construction to other places without thinking REALLY hard about it
+    // The PerfGraph is NOT threadsafe and will cause all kinds of havok if care isn't taken
+    auto in_threads = Threads::in_threads;
+    Threads::in_threads = false;
     TIME_SECTION("nodeToActiveSemilocalElemMap", 5, "Building SemiLocalElemMap");
+    Threads::in_threads = in_threads;
 
     if (!_node_to_active_semilocal_elem_map_built)
     {
