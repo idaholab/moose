@@ -21,7 +21,7 @@ struct Ctx
 };
 
 PetscErrorCode
-formFunction(SNES snes, Vec x, Vec f, void * ctx)
+formFunction(SNES, Vec x, Vec f, void * ctx)
 {
   PetscErrorCode ierr;
   const PetscScalar * xx;
@@ -759,11 +759,7 @@ BetterSubChannel1PhaseProblem::externalSolve()
       _converged = false;
     }
     _console << "Solving Outer Iteration : " << P_it << std::endl;
-    auto mdot_L2norm_old_axial = _mdot_soln->L2norm();
     auto P_L2norm_old_axial = _P_soln->L2norm();
-    auto DP_L2norm_old_axial = _DP_soln->L2norm();
-    auto T_L2norm_old_axial = _T_soln->L2norm();
-
     for (unsigned int iblock = 0; iblock < _n_blocks; iblock++)
     {
       int last_node = (iblock + 1) * _block_size;
@@ -806,26 +802,13 @@ BetterSubChannel1PhaseProblem::externalSolve()
         _console << "T_block_error : " << T_block_error << std::endl;
       }
     }
-    auto T_L2norm_new_axial = _T_soln->L2norm();
     auto P_L2norm_new_axial = _P_soln->L2norm();
-    auto DP_L2norm_new_axial = _DP_soln->L2norm();
-    auto mdot_L2norm_new_axial = _mdot_soln->L2norm();
-
-    auto T_error =
-        std::abs((T_L2norm_new_axial - T_L2norm_old_axial) / (T_L2norm_old_axial + 1E-14));
     P_error =
         std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
-    auto DP_error =
-        std::abs((DP_L2norm_new_axial - DP_L2norm_old_axial) / (DP_L2norm_old_axial + 1E-14));
-    auto mdot_error =
-        std::abs((mdot_L2norm_new_axial - mdot_L2norm_old_axial) / (mdot_L2norm_old_axial + 1E-14));
-
     _console << "P_error :" << P_error << std::endl;
   }
-
   // update old crossflow matrix
   _Wij_old = _Wij;
-
   _console << "Finished executing subchannel solver\n";
   _aux->solution().close();
 }
