@@ -1,4 +1,3 @@
-
 [Mesh]
   type = BetterDetailedSubChannelMesh
   nx = 6

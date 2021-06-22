@@ -1,7 +1,7 @@
 [Tests]
-  [check_syntax]
+  [ss_check_syntax]
     type = 'RunApp'
-    input = 'psbt_01-1237.i'
+    input = 'psbt_ss.i'
     check_input = true
   []
 []
