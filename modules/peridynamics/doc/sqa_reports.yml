@@ -4,6 +4,10 @@ Applications:
         app_types:
             - PeridynamicsApp
         content_directory: ${MOOSE_DIR}/modules/peridynamics/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan

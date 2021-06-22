@@ -17,7 +17,10 @@ Extensions:
         home: /modules/external_petsc_solver
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/external_petsc_solver
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - ${MOOSE_DIR}/modules/external_petsc_solver/include

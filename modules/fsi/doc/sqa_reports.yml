@@ -4,6 +4,10 @@ Applications:
         app_types:
             - FsiApp
         content_directory: ${MOOSE_DIR}/modules/fsi/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
 
 Documents:
     software_requirements_specification: sqa/fsi_srs.md

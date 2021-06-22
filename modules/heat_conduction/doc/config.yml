@@ -13,7 +13,10 @@ Extensions:
         home: /modules/heat_conduction
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/heat_conduction
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/heat_conduction/include

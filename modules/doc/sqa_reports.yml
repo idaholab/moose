@@ -17,6 +17,10 @@ Applications:
         app_types:
             - ChemicalReactionsApp
         content_directory: modules/chemical_reactions/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         log_stub_files: WARNING
         show_warning: false
 
@@ -25,6 +29,10 @@ Applications:
         app_types:
             - ContactApp
         content_directory: modules/contact/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         log_missing_description: WARNING
         log_missing_markdown: WARNING
         show_warning: false
@@ -34,20 +42,31 @@ Applications:
         app_types:
             - ExternalPetscApp
         content_directory: modules/external_petsc_solver/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     geochemistry:
         exe_directory: modules/combined
         app_types:
             - GeochemistryApp
         content_directory: modules/geochemistry/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     fluid_properties:
         exe_directory: modules/combined
         app_types:
             - FluidPropertiesApp
         content_directory: modules/fluid_properties/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         log_stub_files: WARNING
-        log_missing_description: WARNING
         show_warning: false
 
     functional_expansion_tools:
@@ -55,13 +74,20 @@ Applications:
         app_types:
             - FunctionalExpansionToolsApp
         content_directory: modules/functional_expansion_tools/doc/content
-        show_warning: false
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     heat_conduction:
         exe_directory: modules/combined
         app_types:
             - HeatConductionApp
         content_directory: modules/heat_conduction/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         log_stub_files: WARNING
         log_missing_description: WARNING
         show_warning: false
@@ -71,6 +97,10 @@ Applications:
         app_types:
             - LevelSetApp
         content_directory: modules/level_set/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     misc:
         exe_directory: modules/combined
@@ -90,15 +120,16 @@ Applications:
             - framework/doc/remove.yml
         unregister:
             - framework/doc/unregister.yml
-        log_stub_files: WARNING
-        log_missing_description: WARNING
-        show_warning: false
 
     peridynamics:
         exe_directory: modules/combined
         app_types:
             - PeridynamicsApp
         content_directory: modules/peridynamics/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         log_stub_files: WARNING
         show_warning: false
 
@@ -107,6 +138,8 @@ Applications:
         app_types:
             - PhaseFieldApp
         content_directory: modules/phase_field/doc/content
+        unregister:
+            - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
@@ -118,6 +151,8 @@ Applications:
         app_types:
             - PorousFlowApp
         content_directory: modules/porous_flow/doc/content
+        unregister:
+            - framework/doc/unregister.yml
         remove:
             - framework/doc/remove.yml
         log_stub_files: WARNING
@@ -128,11 +163,18 @@ Applications:
         app_types:
             - RayTracingApp
         content_directory: modules/ray_tracing/doc/content
-        show_warning: false
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     RDG:
         exe_directory: modules/combined
         content_directory: modules/rdg/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
         app_types:
             - RdgApp
 
@@ -141,7 +183,10 @@ Applications:
         app_types:
             - StochasticToolsApp
         content_directory: modules/stochastic_tools/doc/content
+        unregister:
+            - framework/doc/unregister.yml
         remove:
+            - framework/doc/remove.yml
             - modules/stochastic_tools/doc/remove.yml
         log_stub_files: WARNING
         show_warning: false
@@ -153,6 +198,8 @@ Applications:
         content_directory: modules/tensor_mechanics/doc/content
         remove:
             - framework/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
         log_stub_files: WARNING
         log_missing_description: WARNING
         show_warning: false
@@ -162,14 +209,20 @@ Applications:
         app_types:
             - XFEMApp
         content_directory: modules/xfem/doc/content
-        log_stub_files: WARNING
-        show_warning: false
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
     fsi:
         exe_directory: modules/combined
         app_types:
             - FsiApp
         content_directory: modules/fsi/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -197,32 +250,24 @@ Requirements:
     moose_test:
         directories:
             - test/tests
-        log_testable: WARNING
-        show_warning: false
 
     stork:
         directories:
             - stork
-        log_missing: WARNING
-        show_warning: false
 
     tutorials:
         directories:
             - tutorials
         log_duplicate_requirement: NONE # since the steps contain the same test this is expected
-        show_warning: false
 
     scripts:
         directories:
             - scripts
-        log_testable: WARNING
-        show_warning: false
 
     python:
         directories:
             - python
         log_missing: WARNING
-        log_testable: WARNING
         show_warning: false
 
     combined:
@@ -230,11 +275,9 @@ Requirements:
             - modules/combined
         log_missing: WARNING
         log_missing_requirement: WARNING
-        log_missing_design: WARNING
         log_top_level_detail: WARNING
         log_issue_format: WARNING
         log_design_files: WARNING
-        log_testable: WARNING
         log_duplicate_requirement: WARNING
         show_warning: false
 
@@ -250,14 +293,11 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_missing_requirement: WARNING
-        log_testable: WARNING
         show_warning: false
 
     external_petsc_solver:
         directories:
             - modules/external_petsc_solver
-        log_duplicate_requirement: WARNING
-        show_warning: false
 
     fluid_properties:
         directories:
@@ -268,24 +308,14 @@ Requirements:
     functional_expansion_tools:
         directories:
             - modules/functional_expansion_tools
-        log_missing: WARNING
-        show_warning: false
 
     heat_conduction:
         directories:
             - modules/heat_conduction
-        log_duplicate_requirement: WARNING
-        log_testable: WARNING
-        show_warning: false
 
     geochemistry:
         directories:
             - modules/geochemistry
-        log_missing_issues: WARNING
-        log_duplicate_requirement: WARNING
-        log_design_files: WARNING
-        log_testable: WARNING
-        show_warning: false
 
     level_set:
         directories:
@@ -303,8 +333,6 @@ Requirements:
     navier_stokes:
         directories:
             - modules/navier_stokes
-        log_missing: WARNING
-        show_warning: false
 
     phase_field:
         directories:
@@ -322,44 +350,33 @@ Requirements:
         log_missing: WARNING
         log_issue_format: WARNING
         log_design_files: WARNING
-        log_testable: WARNING
         show_warning: false
 
     peridynamics:
         directories:
             - modules/peridynamics
         log_duplicate_requirement: WARNING
-        log_missing: WARNING
         log_design_files: WARNING
-        log_testable: WARNING
         show_warning: false
 
     ray_tracing:
         directories:
             - modules/ray_tracing
-        show_warning: false
 
     rdg:
         directories:
             - modules/rdg
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
-        show_warning: false
 
     richards:
         directories:
             - modules/richards
-        log_missing: WARNING
-        log_testable: WARNING
-        show_warning: false
+        log_missing: NONE # deprcated module
 
     stochastic_tools:
         directories:
             - modules/stochastic_tools
-        log_missing: WARNING
         log_missing_requirement: WARNING
         log_top_level_detail: WARNING
-        log_testable: WARNING
         show_warning: false
 
     tensor_mechanics:
@@ -368,7 +385,6 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING
-        log_testable: WARNING
         show_warning: false
 
     xfem:
@@ -378,5 +394,3 @@ Requirements:
     fsi:
         directories:
             - modules/fsi
-        log_missing: WARNING
-        show_warning: false

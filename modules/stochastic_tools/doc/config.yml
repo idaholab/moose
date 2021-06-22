@@ -15,6 +15,8 @@ Extensions:
         remove:
             framework: !include framework/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/stochastic_tools/include

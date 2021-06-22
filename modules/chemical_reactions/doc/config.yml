@@ -12,7 +12,10 @@ Extensions:
         home: /modules/chemical_reactions
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/chemical_reactions
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/chemical_reactions/include

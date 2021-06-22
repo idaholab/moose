@@ -12,7 +12,10 @@ Extensions:
         home: /modules/tensor_mechanics
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/tensor_mechanics
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/tensor_mechanics/include

@@ -16,7 +16,10 @@ Extensions:
         home: /modules/fsi
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fsi
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/fsi/include

@@ -12,7 +12,10 @@ Extensions:
         home: /modules/phase_field
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/phase_field
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/phase_field/include
