@@ -2,23 +2,28 @@
   design = 'XFEMMaterialManager.md'
   issues = '#7291'
   [manager]
-    type = RunApp
+    type = Exodiff
+    exodiff = manager_out.e
     input = manager.i
     unique_id = true
     allow_test_objects = true
     requirement = 'The XFEM module shall provide a means of managing stateful materials on added XFEM quadrature points'
   []
   [manager_constraint]
-    type = RunApp
+    type = Exodiff
+    exodiff = manager_constraint_out.e-s002
     input = manager_constraint.i
     unique_id = true
+    map = false
     allow_test_objects = true
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem with stateful materials'
   []
   [manager_constraint_two_materials]
-    type = RunApp
+    type = Exodiff
+    exodiff = manager_constraint_two_materials_out.e-s002
     input = manager_constraint_two_materials.i
     unique_id = true
+    map = false
     allow_test_objects = true
     requirement = 'The XFEM module shall support multiple stateful materials on XFEM phantom element pairs'
   []
