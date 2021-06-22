@@ -124,7 +124,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         filenames = common.get_files(self._items, self._translator.reader.EXTENSIONS, False)
 
         # Build a page object if the filename shows up in the list of available files
-        for root, filename in filenames:
+        for root, filename, _ in filenames:
             if filename == source:
                 key = filename.replace(root, '').strip('/')
                 page = common.create_file_page(key, filename, self._translator.reader.EXTENSIONS)
