@@ -119,7 +119,7 @@ TriPowerIC::initialSetup()
   {
     _pin_power_correction[i_pin] = _ref_power[i_pin] / _estimate_power[i_pin];
   }
-};
+}
 
 Real
 TriPowerIC::value(const Point & p)
