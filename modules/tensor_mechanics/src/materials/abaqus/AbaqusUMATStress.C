@@ -32,7 +32,7 @@ AbaqusUMATStress::validParams()
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
-  params.addCoupledVar("temperature", "Coupled temperature");
+  params.addCoupledVar("temperature", 0.0, "Coupled temperature");
 
   return params;
 }
@@ -56,8 +56,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _temperature(isCoupled("temperature") ? coupledValue("temperature") : _zero),
-    _temperature_old(isCoupled("temperature") ? coupledValueOld("temperature") : _zero)
+    _temperature(coupledValue("temperature")),
+    _temperature_old(coupledValueOld("temperature"))
 
 {
 #ifndef METHOD
@@ -144,12 +144,6 @@ AbaqusUMATStress::computeProperties()
   _aqDTIME = _dt;
 
   ComputeStressBase::computeProperties();
-}
-
-void
-AbaqusUMATStress::computeQpProperties()
-{
-  ComputeStressBase::computeQpProperties();
 }
 
 void

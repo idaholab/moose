@@ -63,9 +63,6 @@ public:
   /// perform per-element computation/initialization
   void computeProperties() override;
 
-  /// perform quadrature point computation/initialization
-  void computeQpProperties() override;
-
 protected:
   // The plugin file name
   FileName _plugin;
