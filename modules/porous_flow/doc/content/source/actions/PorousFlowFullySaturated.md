@@ -128,7 +128,7 @@ Even though there is only one fluid phase in this fully saturated action, some o
 
 Various important `Materials` are not added by this Action, so must be added by the user in the `[Materials]` block.  The reason these are not added by default is that they are usually subdomain-dependent.
 
-- One of the [PorousFlowPorosity](porosity.md) options
+- One of the [PorousFlowPorosity](/porous_flow/porosity.md) options
 - One of the [PorousFlowPermeability](permeability.md) options
 - [PorousFlowMatrixInternalEnergy](PorousFlowMatrixInternalEnergy.md)
 - Thermal conductivity, such as [PorousFlowThermalConductivityIdeal](PorousFlowThermalConductivityIdeal.md)
