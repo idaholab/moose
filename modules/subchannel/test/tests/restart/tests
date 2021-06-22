@@ -1,0 +1,13 @@
+[Tests]
+  [steady]
+    type = Exodiff
+    input = steady.i
+    exodiff = steady_out.e
+  []
+  [transient]
+    type = Exodiff
+    input = transient.i
+    exodiff = transient_out.e
+    prereq = 'steady'
+  []
+[]

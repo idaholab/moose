@@ -53,7 +53,7 @@ protected:
                                          libMesh::DenseVector<Real> & root);
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
-  libMesh::DenseMatrix<Real> _Wij;
+  libMesh::DenseMatrix<Real> & _Wij;
   libMesh::DenseMatrix<Real> _Wij_old;
   libMesh::DenseMatrix<Real> _WijPrime;
   const Real _g_grav;
