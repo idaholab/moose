@@ -3,6 +3,7 @@
     type = Exodiff
     input = steady.i
     exodiff = steady_out.e
+    recover = false
   []
   [transient]
     type = Exodiff
