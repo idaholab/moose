@@ -5,5 +5,6 @@
     exodiff = test_out.e
     method = '!DBG'
     valgrind = NONE
+    recover = false
   []
 []
