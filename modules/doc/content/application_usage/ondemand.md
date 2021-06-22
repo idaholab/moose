@@ -1,10 +1,12 @@
 # Open OnDemand
 
-[Open OnDemand]() is a web based HPC access portal. OnDemand allows users to access HPC files, open shells, access Linux desktops, use other interactive apps, and build job submissions to submit to a cluster, all from the web browser.  
+[Open OnDemand](https://openondemand.org) is a web based HPC access portal. OnDemand allows users to access HPC files, open shells, access Linux desktops, use other interactive apps, and build job submissions to submit to a cluster, all from the web browser.  From the OnDemand web portal, users who have been given permission, are able to use level 1 code access.
 
-### Access
+## Access
 
 Idaho National Lab's Open OnDemand instance can be accessed externally via https://hpcondemand.inl.gov/ with your INL HPC username and pin + token or internally at https://ondemand.hpc.inl.gov with your INL HPC username and password.
+
+Once authenticated in the OnDemand system, the top navigation bar has a menu item "NCRC". Clicking on this will show a dropdown menu that is populated with the NCRC apps that you have been granted level 1 access to. The following documentation is applicable for each level 1 NCRC application.
 
 ## Submission and Job Information
 
@@ -18,14 +20,14 @@ This is the full path to your input file that will be submitted to the applicabl
 app-opt **-i input.i**
 ```
 
-You do not need the `app-opt -i` and you need the full path to your equivalent of `input.i`. The "Select File" button should open a dialog that will allow you to browse your INL HPC folder structure and manually selet your input file to prevent typos in the full path to the input file.
+You do not need the `app-opt -i` and you need the full path to your equivalent of `input.i`. The "Select File" button should open a dialog that will allow you to browse your INL HPC folder structure and manually select your input file to prevent typos in the full path to the input file.
 
 ## Advanced Code and Input Settings
 
 ### Specific Version Hash
 This option allows you to run a specific build of the herd code. To get a list of the different version hashes that are allowed here, you can open a terminal on the appropriate cluster and run `module spider APP` and you will be presented with multiple versions of each herd application. 
 
-To get more information about each build... **TODO IDK**
+To get more information about each build, put `--help` or `-h` in the advanced parameters field below. Using the `--help` or `-h` flag will print the command help information to your output file and return.
 
 ### Advanced Parameters
 By default, your submission of this forms creates a basic submission command that gets submitted to the requested 
