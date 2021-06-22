@@ -140,3 +140,15 @@ class SQAReport(mooseutils.AutoPropertyMixin):
         else:
             text = mooseutils.colorText('OK', 'LIGHT_GREEN', colored=self.color_text)
         return text
+
+    @staticmethod
+    def _getFiles(locations):
+        """Get complete list of files for the given *locations*."""
+        file_list = list()
+        for working_dir in locations:
+            path = mooseutils.eval_path(working_dir)
+            if mooseutils.git_is_repo(path):
+                file_list += mooseutils.git_ls_files(path)
+            else:
+                file_list += glob.glob(os.path.join(path,'**', '*.*'), recursive=True)
+        return file_list

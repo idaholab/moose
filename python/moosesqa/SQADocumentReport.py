@@ -40,13 +40,6 @@ class SQADocumentReport(SQAReport):
 
     def execute(self, **kwargs):
         """Determine the status"""
-        file_list = list()
-        for working_dir in self.working_dirs:
-            path = mooseutils.eval_path(working_dir)
-            if mooseutils.git_is_repo(path):
-                file_list += mooseutils.git_ls_files(path)
-            else:
-                file_list += glob.glob(os.path.join(path,'**', '*.*'), recursive=True)
-
+        file_list = SQAReport._getFiles(self.working_dirs)
         logger = check_documents(self.documents, file_list, **kwargs)
         return logger
