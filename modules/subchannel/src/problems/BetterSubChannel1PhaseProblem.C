@@ -72,6 +72,7 @@ BetterSubChannel1PhaseProblem::validParams()
 
 BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
+    _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
     _one(1.0),
     _TR(isTransient() ? 1. : 0.),
@@ -91,10 +92,13 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
   _n_channels = _subchannel_mesh.getNumOfChannels();
   _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
-  _Wij.resize(_n_gaps, _n_cells + 1);
+  if (!_app.isRestarting() && !_app.isRecovering())
+  {
+    _Wij.resize(_n_gaps, _n_cells + 1);
+    _Wij.zero();
+  }
   _Wij_old.resize(_n_gaps, _n_cells + 1);
   _WijPrime.resize(_n_gaps, _n_cells + 1);
-  _Wij.zero();
   _Wij_old.zero();
   _WijPrime.zero();
   _converged = true;
@@ -104,31 +108,6 @@ void
 BetterSubChannel1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
-  // Read in Wij for null transient only at the first run of externalSolve
-  if (isTransient())
-  {
-    std::ifstream file("Wij_SS");
-    std::string line_str;
-    int row_index = 0;
-
-    while (std::getline(file, line_str))
-    {
-      int column_index = 0;
-      std::stringstream str_strm(line_str);
-      std::string tmp;
-      char delim = ' ';
-      while (std::getline(str_strm, tmp, delim))
-      {
-        if (tmp.size() != 0)
-        {
-          _Wij(row_index, column_index) = std::stof(tmp);
-          _Wij_old(row_index, column_index) = std::stof(tmp);
-          column_index += 1;
-        }
-      }
-      row_index += 1;
-    }
-  }
 
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   _mdot_soln = new SolutionHandle(getVariable(0, "mdot"));
