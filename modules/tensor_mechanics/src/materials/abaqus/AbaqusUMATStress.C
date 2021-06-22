@@ -15,10 +15,6 @@
 #include <string.h>
 #include <algorithm>
 
-#ifdef LIBMESH_HAVE_DLOPEN
-#include <dlfcn.h>
-#endif
-
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
@@ -42,9 +38,15 @@ AbaqusUMATStress::validParams()
   return params;
 }
 
+#ifndef METHOD
+#error "The METHOD preprocessor symbol must be supplied by the build system."
+#endif
+
 AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
+    _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
+    _umat(_library.getFunction<umat_t>("umat_")),
     _aqNSTATV(getParam<unsigned int>("num_state_vars")),
     _aqSTATEV(_aqNSTATV),
     _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
@@ -67,13 +69,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_fields(coupledValues("external_fields")),
     _external_fields_old(coupledValuesOld("external_fields")),
     _number_external_fields(_external_fields.size())
-
 {
-#ifndef METHOD
-#error "The METHOD preprocessor symbol must be supplied by the build system."
-#endif
-  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
-
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
   _aqNTENS = 6; // Size of the stress or strain component array (NDI+NSHR)
   _aqNSHR = 3;  // Number of engineering shear stress components
@@ -88,46 +84,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
-
-  // Coupling of external variable fields
   _aqPREDEF.resize(_number_external_fields);
   _aqDPRED.resize(_number_external_fields);
-
-  // Open the library
-#ifdef LIBMESH_HAVE_DLOPEN
-  _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
-
-  if (!_handle)
-    paramError("plugin", "Cannot open library: ", dlerror());
-
-  // Reset errors
-  dlerror();
-
-  // Snag the function pointer from the library
-  {
-    void * pointer = dlsym(_handle, "umat_");
-    _umat = *reinterpret_cast<umat_t *>(&pointer);
-  }
-
-  // Catch errors
-  const char * dlsym_error = dlerror();
-  if (dlsym_error)
-  {
-    dlclose(_handle);
-    paramError("plugin", "Cannot load symbol 'umat_': ", dlsym_error);
-  }
-#else
-  paramError("plugin",
-             "AbaqusUMATStress requires an operating system with support for the POSIX function "
-             "'dlopen' to dynamically load UMAT plugins.");
-#endif
-}
-
-AbaqusUMATStress::~AbaqusUMATStress()
-{
-#ifdef LIBMESH_HAVE_DLOPEN
-  dlclose(_handle);
-#endif
 }
 
 void

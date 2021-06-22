@@ -10,44 +10,7 @@
 #pragma once
 
 #include "ComputeStressBase.h"
-
-typedef void (*umat_t)(Real STRESS[],
-                       Real STATEV[],
-                       Real DDSDDE[],
-                       Real * SSE,
-                       Real * SPD,
-                       Real * SCD,
-                       Real * RPL,
-                       Real DDSDDT[],
-                       Real DRPLDE[],
-                       Real * DRPLDT,
-                       Real STRAN[],
-                       Real DSTRAN[],
-                       Real TIME[],
-                       Real * DTIME,
-                       Real * TEMP,
-                       Real * DTEMP,
-                       Real PREDEF[],
-                       Real DPRED[],
-                       char * CMNAME,
-                       int * NDI,
-                       int * NSHR,
-                       int * NTENS,
-                       int * NSTATV,
-                       Real PROPS[],
-                       int * NPROPS,
-                       Real COORDS[],
-                       Real DROT[],
-                       Real * PNEWDT,
-                       Real * CELENT,
-                       Real DFGRD0[],
-                       Real DFGRD1[],
-                       int * NOEL,
-                       unsigned int * NPT,
-                       int * LAYER,
-                       int * KSPT,
-                       int * KSTEP,
-                       int * KINC);
+#include "DynamicLibraryLoader.h"
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
@@ -58,17 +21,55 @@ public:
   static InputParameters validParams();
 
   AbaqusUMATStress(const InputParameters & parameters);
-  virtual ~AbaqusUMATStress();
 
   /// perform per-element computation/initialization
   void computeProperties() override;
 
 protected:
+  /// function type for the external UMAT function
+  typedef void (*umat_t)(Real STRESS[],
+                         Real STATEV[],
+                         Real DDSDDE[],
+                         Real * SSE,
+                         Real * SPD,
+                         Real * SCD,
+                         Real * RPL,
+                         Real DDSDDT[],
+                         Real DRPLDE[],
+                         Real * DRPLDT,
+                         Real STRAN[],
+                         Real DSTRAN[],
+                         Real TIME[],
+                         Real * DTIME,
+                         Real * TEMP,
+                         Real * DTEMP,
+                         Real PREDEF[],
+                         Real DPRED[],
+                         char * CMNAME,
+                         int * NDI,
+                         int * NSHR,
+                         int * NTENS,
+                         int * NSTATV,
+                         Real PROPS[],
+                         int * NPROPS,
+                         Real COORDS[],
+                         Real DROT[],
+                         Real * PNEWDT,
+                         Real * CELENT,
+                         Real DFGRD0[],
+                         Real DFGRD1[],
+                         int * NOEL,
+                         unsigned int * NPT,
+                         int * LAYER,
+                         int * KSPT,
+                         int * KSTEP,
+                         int * KINC);
+
   // The plugin file name
   FileName _plugin;
 
-  // The plugin library handle
-  void * _handle;
+  // The plugin library wrapper
+  DynamicLibraryLoader _library;
 
   // Function pointer to the dynamically loaded function
   umat_t _umat;
@@ -182,7 +183,7 @@ protected:
   std::vector<Real> _aqPREDEF;
 
   /// Array of increments of predefined field variables
-  std::vector<Real>  _aqDPRED;
+  std::vector<Real> _aqDPRED;
 
   void initQpStatefulProperties() override;
   void computeQpStress() override;

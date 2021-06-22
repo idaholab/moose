@@ -10,6 +10,7 @@
 C
 C      INCLUDE 'ABA_PARAM.INC'
 C
+      DIMENSION TIME(2)
 
 C ----------------------------------------------------------------
 C     UEXTERNALDB FOR TESTING THE ABAQUS UTILITY FUNCTION INTERFACE
