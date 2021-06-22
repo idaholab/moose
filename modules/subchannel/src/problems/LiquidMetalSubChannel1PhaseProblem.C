@@ -504,8 +504,8 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
       unsigned int stencil_size = 5;
       int max_axial_cycles = 200;
       int axial_cycles = 0;
-      int max_level_cycles = 200;
-      int bottom_limiter;
+      unsigned int max_level_cycles = 200;
+      unsigned int bottom_limiter;
       while (P_error > P_tol && axial_cycles <= max_axial_cycles)
       {
         if (axial_level < stencil_size)

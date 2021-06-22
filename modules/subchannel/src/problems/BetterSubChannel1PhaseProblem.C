@@ -34,7 +34,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
   libMesh::DenseVector<Real> solution_seed(size, 0.0);
   ierr = VecGetArrayRead(x, &xx);
   CHKERRQ(ierr);
-  for (unsigned int i = 0; i < size; i++)
+  for (PetscInt i = 0; i < size; i++)
     solution_seed(i) = xx[i];
 
   libMesh::DenseVector<Real> Wij_residual_vector =
@@ -42,7 +42,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 
   ierr = VecGetArray(f, &ff);
   CHKERRQ(ierr);
-  for (unsigned int i = 0; i < size; i++)
+  for (PetscInt i = 0; i < size; i++)
     ff[i] = Wij_residual_vector(i);
 
   ierr = VecRestoreArrayRead(x, &xx);
