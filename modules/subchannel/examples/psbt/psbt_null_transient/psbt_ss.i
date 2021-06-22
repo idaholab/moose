@@ -17,15 +17,6 @@ P_out = 4.923e6 # Pa
   spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
 []
 
-[UserObjects]
-  [steady_sln]
-    type = SolutionUserObject
-    mesh = psbt_01-1237_out_SS.e
-    timestep = LATEST
-    system_variables = 'mdot SumWij P DP h T rho mu S w_perim q_prime'
-  []
-[]
-
 [AuxVariables]
   [mdot]
   []
@@ -70,51 +61,6 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
 []
 
-[Functions]
-  [mdot_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = mdot
-  []
-
-  [P_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = P
-  []
-
-  [DP_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = DP
-  []
-
-  [h_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = h
-  []
-
-  [T_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = T
-  []
-
-  [rho_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = rho
-  []
-
-  [Mu_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = mu
-  []
-[]
-
-
 [ICs]
   [S_IC]
     type = BetterQuadFlowAreaIC
@@ -134,45 +80,51 @@ P_out = 4.923e6 # Pa
   []
 
   [T_ic]
-    type = FunctionIC
+    type = ConstantIC
     variable = T
-    function = T_ic_fn
+    value = ${T_in}
   []
 
   [P_ic]
-    type = FunctionIC
+    type = ConstantIC
     variable = P
-    function = P_ic_fn
+    value = 0.0
   []
 
   [DP_ic]
-    type = FunctionIC
+    type = ConstantIC
     variable = DP
-    function = DP_ic_fn
+    value = 0.0
   []
 
   [Viscosity_ic]
-    type = FunctionIC
+    type = ViscosityIC
     variable = mu
-    function = Mu_ic_fn
+    p = ${P_out}
+    T = T
+    fp = water
   []
 
   [rho_ic]
-    type = FunctionIC
+    type = RhoFromPressureTemperatureIC
     variable = rho
-    function = rho_ic_fn
+    p = ${P_out}
+    T = T
+    fp = water
   []
 
   [h_ic]
-    type = FunctionIC
+    type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    function = h_ic_fn
+    p = ${P_out}
+    T = T
+    fp = water
   []
 
   [mdot_ic]
-    type = FunctionIC
+    type = ConstantIC
     variable = mdot
-    function = mdot_ic_fn
+    value = 0.0
   []
 []
 
@@ -196,36 +148,34 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+  checkpoint = true
   [Temp_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = T
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "Temp_Out.txt"
     height = 3.658
   []
   [mdot_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "mdot_Out.txt"
     height = 3.658
   []
   [mdot_In_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "mdot_In.txt"
     height = 0.0
   []
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
-  start_time = 0.0
-  end_time = 0.2
-  dt = 0.1
 []
 
 ################################################################################
@@ -233,9 +183,9 @@ P_out = 4.923e6 # Pa
 ################################################################################
 
 [MultiApps]
-  [prettyMesh]
+  [pretty_mesh]
     type = FullSolveMultiApp
-    input_files = "prettyMesh.i"
+    input_files = "pretty_mesh.i"
     execute_on = "timestep_end"
   []
 []
@@ -243,63 +193,63 @@ P_out = 4.923e6 # Pa
 [Transfers]
   [xfer_mdot]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = mdot
     variable = mdot
   []
   [xfer_SumWij]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = SumWij
     variable = SumWij
   []
   [xfer_P]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = P
     variable = P
   []
   [xfer_DP]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = DP
     variable = DP
   []
   [xfer_h]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = h
     variable = h
   []
   [xfer_T]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = T
     variable = T
   []
   [xfer_rho]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = rho
     variable = rho
   []
-  [xfer_Mu]
+  [xfer_mu]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = mu
     variable = mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = q_prime
     variable = q_prime

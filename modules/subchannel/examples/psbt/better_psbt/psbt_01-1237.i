@@ -148,6 +148,7 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+  checkpoint = true
   [Temp_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = T
@@ -182,9 +183,9 @@ P_out = 4.923e6 # Pa
 ################################################################################
 
 [MultiApps]
-  [prettyMesh]
+  [pretty_mesh]
     type = FullSolveMultiApp
-    input_files = "prettyMesh.i"
+    input_files = "pretty_mesh.i"
     execute_on = "timestep_end"
   []
 []
@@ -192,63 +193,63 @@ P_out = 4.923e6 # Pa
 [Transfers]
   [xfer_mdot]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = mdot
     variable = mdot
   []
   [xfer_SumWij]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = SumWij
     variable = SumWij
   []
   [xfer_P]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = P
     variable = P
   []
   [xfer_DP]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = DP
     variable = DP
   []
   [xfer_h]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = h
     variable = h
   []
   [xfer_T]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = T
     variable = T
   []
   [xfer_rho]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = rho
     variable = rho
   []
   [xfer_mu]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = mu
     variable = mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
+    multi_app = pretty_mesh
     direction = to_multiapp
     source_variable = q_prime
     variable = q_prime

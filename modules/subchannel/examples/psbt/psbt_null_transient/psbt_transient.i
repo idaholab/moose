@@ -1,24 +1,28 @@
-mass_flux_in = 3500 # kg /sec m2
-P_out = 155e+5 # Pa
+T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
 
 [Mesh]
   type = BetterQuadSubChannelMesh
-  nx = 2
-  ny = 1
-  n_cells = 100
+  nx = 6
+  ny = 6
+  n_cells = 50
   n_blocks = 1
   pitch = 0.0126
   rod_diameter = 0.00950
   gap = 0.00095 # the half gap between sub-channel assemblies
-  heated_length = 10.0
+  heated_length = 3.658
   spacer_z = '0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
   spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
 []
 
-[Functions]
-  [T_fn]
-    type = ParsedFunction
-    value = if(x>0.0,483.10,473.10)
+[UserObjects]
+  [steady_sln]
+    type = SolutionUserObject
+    mesh = psbt_ss_out.e
+    timestep = LATEST
+    system_variables = 'mdot SumWij P DP h T rho mu S w_perim q_prime'
   []
 []
 
@@ -64,77 +68,124 @@ P_out = 155e+5 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+
+  restart_file_base = psbt_SS_out_cp/LATEST
+  skip_additional_restart_data = true
+[]
+
+[Functions]
+  [mdot_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = mdot
+  []
+
+  [P_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = P
+  []
+
+  [DP_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = DP
+  []
+
+  [h_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = h
+  []
+
+  [T_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = T
+  []
+
+  [rho_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = rho
+  []
+
+  [Mu_ic_fn]
+    type = SolutionFunction
+    solution = steady_sln
+    from_variable = mu
+  []
 []
 
 [ICs]
-  [S_ic]
-    type = ConstantIC
+  [S_IC]
+    type = BetterQuadFlowAreaIC
     variable = S
-    value = 8.78778158e-05
+  []
+
+  [w_perim_IC]
+    type = BetterQuadWettedPerimIC
+    variable = w_perim
+  []
+
+  [q_prime_IC]
+    type = BetterQuadPowerIC
+    variable = q_prime
+    power = 3.44e6 # W
+    filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
   [T_ic]
     type = FunctionIC
     variable = T
-    function = T_fn
-  []
-
-  [w_perim_IC]
-    type = ConstantIC
-    variable = w_perim
-    value = 0.34188034
-  []
-
-  [q_prime_IC]
-    type = ConstantIC
-    variable = q_prime
-    value = 0.0
+    function = T_ic_fn
   []
 
   [P_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = P
-    value = 0.0
+    function = P_ic_fn
   []
 
   [DP_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = DP
-    value = 0.0
+    function = DP_ic_fn
   []
 
   [Viscosity_ic]
-    type = ViscosityIC
+    type = FunctionIC
     variable = mu
-    p = ${P_out}
-    T = T
-    fp = water
+    function = Mu_ic_fn
   []
 
   [rho_ic]
-    type = RhoFromPressureTemperatureIC
+    type = FunctionIC
     variable = rho
-    p = ${P_out}
-    T = T
-    fp = water
+    function = rho_ic_fn
   []
 
   [h_ic]
-    type = SpecificEnthalpyFromPressureTemperatureIC
+    type = FunctionIC
     variable = h
-    p = ${P_out}
-    T = T
-    fp = water
+    function = h_ic_fn
   []
 
   [mdot_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = mdot
-    value = 0.0
+    function = mdot_ic_fn
   []
 []
 
 [AuxKernels]
+  [T_in_bc]
+    type = ConstantAux
+    variable = T
+    boundary = inlet
+    value = ${T_in}
+    execute_on = 'timestep_begin'
+  []
   [mdot_in_bc]
     type = MassFlowRateAux
     variable = mdot
@@ -150,30 +201,33 @@ P_out = 155e+5 # Pa
   [Temp_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = T
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "Temp_Out.txt"
-    height = 10.0
+    height = 3.658
   []
   [mdot_Out_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_Out.txt"
-    height = 10.0
+    height = 3.658
   []
   [mdot_In_MATRIX]
     type = BetterNormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_In.txt"
     height = 0.0
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   nl_rel_tol = 0.9
   l_tol = 0.9
+  start_time = 0.0
+  end_time = 0.2
+  dt = 0.1
 []
 
 ################################################################################
@@ -238,7 +292,7 @@ P_out = 155e+5 # Pa
     source_variable = rho
     variable = rho
   []
-  [xfer_mu]
+  [xfer_Mu]
     type = MultiAppNearestNodeTransfer
     multi_app = pretty_mesh
     direction = to_multiapp
