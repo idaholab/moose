@@ -10,7 +10,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Peridynamics Module
         repo: https://github.com/idaholab/moose
-        home: /modules/peridynamics
+        home: /modules/peridynamics/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/peridynamics
         remove:

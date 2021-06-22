@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Phase Field Module
         repo: https://github.com/idaholab/moose
-        home: /modules/phase_field
+        home: /modules/phase_field/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/phase_field
         remove:

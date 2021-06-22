@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Ray Tracing Module
         repo: https://github.com/idaholab/moose
-        home: /modules/ray_tracing
+        home: /modules/ray_tracing/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/ray_tracing
         remove:

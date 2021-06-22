@@ -10,7 +10,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Contact Module
         repo: https://github.com/idaholab/moose
-        home: /modules/contact
+        home: /modules/contact/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/contact
         remove:

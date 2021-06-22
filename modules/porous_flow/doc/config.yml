@@ -12,7 +12,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE PorousFlow Module
         repo: https://github.com/idaholab/moose
-        home: /modules/porous_flow
+        home: /modules/porous_flow/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/porous_flow
         remove:

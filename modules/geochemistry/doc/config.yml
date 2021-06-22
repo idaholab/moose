@@ -8,7 +8,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Geochemistry Module
         repo: https://github.com/idaholab/moose
-        home: /modules/geochemistry
+        home: /modules/geochemistry/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/geochemistry
         remove:

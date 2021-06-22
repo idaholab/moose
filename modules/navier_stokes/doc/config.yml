@@ -12,7 +12,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Navier Stokes Module
         repo: https://github.com/idaholab/moose
-        home: /modules/navier_stokes
+        home: /modules/navier_stokes/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/navier_stokes
         remove:

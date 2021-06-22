@@ -10,7 +10,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Heat Conduction Module
         repo: https://github.com/idaholab/moose
-        home: /modules/heat_conduction
+        home: /modules/heat_conduction/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/heat_conduction
         remove:

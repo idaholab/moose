@@ -14,7 +14,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: ExternalPetscSolver
         repo: https://github.com/idaholab/moose
-        home: /modules/external_petsc_solver
+        home: /modules/external_petsc_solver/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/external_petsc_solver
         remove:

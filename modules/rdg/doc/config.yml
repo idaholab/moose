@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE rDG Module
         repo: https://github.com/idaholab/moose
-        home: /modules/rdg
+        home: /modules/rdg/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/rdg
         remove:

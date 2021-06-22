@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Fluid Properties Module
         repo: https://github.com/idaholab/moose
-        home: /modules/fluid_properties
+        home: /modules/fluid_properties/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fluid_properties
         remove:

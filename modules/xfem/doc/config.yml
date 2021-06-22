@@ -10,7 +10,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE XFEM Module
         repo: https://github.com/idaholab/moose
-        home: /modules/xfem
+        home: /modules/xfem/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/xfem
         remove:

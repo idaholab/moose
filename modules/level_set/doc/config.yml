@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Level Set Module
         repo: https://github.com/idaholab/moose
-        home: /modules/level_set
+        home: /modules/level_set/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/level_set
         remove:

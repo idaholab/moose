@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Chemical Reactions Module
         repo: https://github.com/idaholab/moose
-        home: /modules/chemical_reactions
+        home: /modules/chemical_reactions/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/chemical_reactions
         remove:

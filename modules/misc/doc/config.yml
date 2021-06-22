@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Misc Module
         repo: https://github.com/idaholab/moose
-        home: /modules/misc
+        home: /modules/misc/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/misc
         remove:
