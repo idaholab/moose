@@ -59,7 +59,7 @@ HeatConductionModel::addMaterials()
 
   for (std::size_t i = 0; i < names.size(); i++)
   {
-    std::string class_name = "SolidMaterial";
+    std::string class_name = "ADSolidMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = {blocks[i]};
     params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
@@ -75,7 +75,7 @@ HeatConductionModel::addHeatEquationXYZ()
 
   // add transient term
   {
-    std::string class_name = "HeatConductionTimeDerivative";
+    std::string class_name = "ADHeatConductionTimeDerivative";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = blocks;
@@ -86,11 +86,11 @@ HeatConductionModel::addHeatEquationXYZ()
   }
   // add diffusion term
   {
-    std::string class_name = "HeatConduction";
+    std::string class_name = "ADHeatConduction";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = blocks;
-    pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
+    pars.set<MaterialPropertyName>("thermal_conductivity") = THERMAL_CONDUCTIVITY;
     pars.set<bool>("use_displaced_mesh") = false;
     _sim.addKernel(class_name, genName(_comp_name, "hc"), pars);
   }
@@ -109,7 +109,7 @@ HeatConductionModel::addHeatEquationRZ()
 
   // add transient term
   {
-    std::string class_name = "HeatConductionTimeDerivativeRZ";
+    std::string class_name = "ADHeatConductionTimeDerivativeRZ";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = blocks;
@@ -123,11 +123,11 @@ HeatConductionModel::addHeatEquationRZ()
   }
   // add diffusion term
   {
-    std::string class_name = "HeatConductionRZ";
+    std::string class_name = "ADHeatConductionRZ";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = blocks;
-    pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
+    pars.set<MaterialPropertyName>("thermal_conductivity") = THERMAL_CONDUCTIVITY;
     pars.set<bool>("use_displaced_mesh") = false;
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
