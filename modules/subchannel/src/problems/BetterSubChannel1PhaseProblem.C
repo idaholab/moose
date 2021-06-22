@@ -59,8 +59,6 @@ BetterSubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
-  params.addRequiredParam<bool>("enforce_uniform_pressure",
-                                "Flag that enables uniform inlet pressure");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -85,7 +83,6 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
     _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
     _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
-    _enforce_uniform_pressure(getParam<bool>("enforce_uniform_pressure")),
     _fp(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();

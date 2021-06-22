@@ -82,8 +82,6 @@ protected:
   const Real & _beta;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
-  /// Flag that indicates if uniform pressure should be applied at the subchannel inlet
-  const bool & _enforce_uniform_pressure;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * _mdot_soln;
   SolutionHandle * _SumWij_soln;
