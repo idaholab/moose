@@ -135,6 +135,14 @@ class TestSyntaxTree(unittest.TestCase):
         node = moosetree.find(root, lambda n: n.fullpath() == '/Bounds/ConstantAux')
         self.assertTrue(node.removed)
 
+        # With dict of dict unregister
+        unregister={'framework':{'Postprocessor':'UserObjects/*', 'AuxKernel':'Bounds/*'}}
+        root = moosesyntax.get_moose_syntax_tree(self.json, unregister=unregister)
+        node = moosetree.find(root, lambda n: n.fullpath() == '/UserObjects/AreaPostprocessor')
+        self.assertTrue(node.removed)
+        node = moosetree.find(root, lambda n: n.fullpath() == '/Bounds/ConstantAux')
+        self.assertTrue(node.removed)
+
     def testTestApp(self):
         root = moosesyntax.get_moose_syntax_tree(self.json)
         node = moosetree.find(root, lambda n: n.fullpath() == '/Testing')

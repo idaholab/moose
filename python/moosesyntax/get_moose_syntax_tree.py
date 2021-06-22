@@ -25,9 +25,9 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
                          a dict of lists.
       alias[dict]: A dict of alias information; the key is the actual syntax and the value is the
                    alias to be applied (e.g., {'/Kernels/Diffusion':'/Physics/Diffusion'}).
-      unregister[dict]: A dict of classes with duplicate registration information; the key is the
-                        "moose_base" name and the value is the syntax from which the object should be
-                        removed (e.g., {"Postprocessor":"UserObject/*"}).
+      unregister[dict]: A dict (or dict of dict) of classes with duplicate registration information;
+                        the key is the "moose_base" name and the value is the syntax from which the
+                        object should be removed (e.g., {"Postprocessor":"UserObject/*"}).
     """
     # Create the JSON tree, unless it is provided directly
     if isinstance(exe, dict):
@@ -44,15 +44,10 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
         node = SyntaxNode(root, key)
         __syntax_tree_helper(node, value)
 
-    # Build remove sets
+    # Build/initialize inputs for use
     removed = __build_set_from_yaml(remove)
-
-    # Initialize dict if not provided
+    unregister = __build_dict_from_yaml(unregister or dict())
     alias = alias or dict()
-    unregister = unregister or dict()
-    for key in list(unregister.keys()):
-        if isinstance(unregister[key], dict):
-            unregister.update(unregister.pop(key))
 
     # Apply remove/alias/unregister restrictions
     for node in moosetree.iterate(root):
@@ -88,6 +83,16 @@ def __build_set_from_yaml(item):
             out.update(value)
     elif isinstance(item, (list, set)):
         out.update(item)
+    return out
+
+def __build_dict_from_yaml(item):
+    """Helper for converting dict of dict structure from YAML file to single dict."""
+    out = dict()
+    for key, value in item.items():
+        if isinstance(value, dict):
+            out.update(value)
+        else:
+            out[key] = value
     return out
 
 def __syntax_tree_helper(parent, item):
