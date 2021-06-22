@@ -55,7 +55,6 @@ P_out = 4.923e6 # Pa
   fp = water
   beta = 0.006
   CT = 1.8
-  enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
