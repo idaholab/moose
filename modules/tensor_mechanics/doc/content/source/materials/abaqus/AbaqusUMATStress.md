@@ -45,11 +45,29 @@ A description of the input and output parameters of the UMAT user subroutines
 can be found in the Abaqus user manual.
 
 !alert note
-Temperature coupling and `PREDEF` support are not yet implemented.
+`PREDEF` support are not yet implemented.
 
-## Example Input File
 
-!listing modules/tensor_mechanics/test/tests/umat/linear_strain_hardening.i block=Materials/constant
+## UMAT Time step control
+
+Time step control within the UMAT subroutine is enriched with MOOSE's general capabilities. `PNEWDT` denotes a factor that can be modified in the UMAT routine to be less than one, to signal a cut in the time step, or more than one, to signal a local increment in the time step. Since these time step controls are local to the quadrature point, MOOSE provides a layer of objects to handle the information provided by UMAT's `PNEWDT`. First, we select a soft `Terminator` which will invalidate a time step if the time step increment used turns out to be larger than a computed maximum time step increment anywhere in the system:
+
+!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=UserObjects
+
+As a second step, we select the time stepper controls for the entire finite element system. These controls will apply to UMAT stepping as well as any other kernel or object in the system:
+
+!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Executioner/TimeStepper
+
+The time step increment will be reduced as prescribed in the UMAT routine. However, the maximum increment will be limited by the selection of `growth_factor`. This avoids increasing the time step too much from one time step to the next. To further rely on UMAT's `PNEWDT`, one can choose to select a larger `growth_factor`.
+
+A subroutine that acts on `PNEWDT` is chosen in the regression test:
+
+!listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Materials/umat
+
+
+## Example input file
+
+!listing modules/tensor_mechanics/test/tests/umat/elastic_hardening/linear_strain_hardening.i block=Materials/constant
 
 !syntax parameters /Materials/AbaqusUMATStress
 
