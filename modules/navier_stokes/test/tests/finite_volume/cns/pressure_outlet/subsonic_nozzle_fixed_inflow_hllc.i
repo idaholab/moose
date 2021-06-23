@@ -11,10 +11,6 @@ outlet_pressure = 0.9e5
   fp = fp
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Debug]
    show_material_props = true
 []
@@ -30,7 +26,6 @@ outlet_pressure = 0.9e5
   [FluidProperties]
     [fp]
       type = IdealGasFluidProperties
-      allow_imperfect_jacobians = true
     []
   []
 []
@@ -76,7 +71,6 @@ outlet_pressure = 0.9e5
   [mass_advection]
     type = CNSFVMassHLLC
     variable = rho
-    fp = fp
   []
 
   # Momentum x conservation
@@ -89,7 +83,6 @@ outlet_pressure = 0.9e5
     type = CNSFVMomentumHLLC
     variable = rho_u
     momentum_component = x
-    fp = fp
   []
 
   # Momentum y conservation
@@ -113,7 +106,6 @@ outlet_pressure = 0.9e5
   [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
     variable = rho_E
-    fp = fp
   []
 []
 
@@ -130,7 +122,6 @@ outlet_pressure = 0.9e5
     type = CNSFVHLLCMomentumImplicitBC
     variable = rho_u
     momentum_component = x
-    fp = fp
     boundary = left
   []
 
@@ -138,7 +129,6 @@ outlet_pressure = 0.9e5
     type = CNSFVHLLCMomentumImplicitBC
     variable = rho_v
     momentum_component = y
-    fp = fp
     boundary = left
   []
 
@@ -153,16 +143,15 @@ outlet_pressure = 0.9e5
   [mass_outflow]
     type = CNSFVHLLCMassImplicitBC
     variable = rho
-    fp = fp
     boundary = right
   []
 
+  # outflow explicit pressure boundary condition
   [momentum_x_outflow]
     type = CNSFVHLLCMomentumSpecifiedPressureBC
     variable = rho_u
     momentum_component = x
     specified_pressure_function = ${outlet_pressure}
-    fp = fp
     boundary = right
   []
 
@@ -171,14 +160,12 @@ outlet_pressure = 0.9e5
     variable = rho_v
     momentum_component = y
     specified_pressure_function = ${outlet_pressure}
-    fp = fp
     boundary = right
   []
 
   [fluid_energy_outflow]
     type = CNSFVHLLCFluidEnergyImplicitBC
     variable = rho_E
-    fp = fp
     boundary = right
   []
 
@@ -262,7 +249,6 @@ outlet_pressure = 0.9e5
 
   [sound_speed]
     type = SoundspeedMat
-    fp = fp
   []
 []
 

@@ -18,8 +18,8 @@ InputParameters
 FVLimitedAdvection::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addClassDescription(
-      "Residual contribution from advection operator for finite volume method.");
+  params.addClassDescription("Residual contribution from advection operator for the finite volume "
+                             "method with a flux limiter.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
 
   params.addParam<MooseEnum>(
@@ -39,12 +39,12 @@ FVLimitedAdvection::FVLimitedAdvection(const InputParameters & params)
 ADReal
 FVLimitedAdvection::computeQpResidual()
 {
-  const bool elem_is_up = _velocity * _normal >= 0;
-  const auto & phi_C = elem_is_up ? _u_elem[_qp] : _u_neighbor[_qp];
-  const auto & phi_D = elem_is_up ? _u_neighbor[_qp] : _u_elem[_qp];
-  const auto & grad_C = elem_is_up ? _grad_u_elem[_qp] : _grad_u_neighbor[_qp];
+  const bool elem_is_upwind = _velocity * _normal >= 0;
+  const auto & phi_C = elem_is_upwind ? _u_elem[_qp] : _u_neighbor[_qp];
+  const auto & phi_D = elem_is_upwind ? _u_neighbor[_qp] : _u_elem[_qp];
+  const auto & grad_C = elem_is_upwind ? _grad_u_elem[_qp] : _grad_u_neighbor[_qp];
 
-  const auto phi_f = interpolate(*_limiter, phi_C, phi_D, grad_C, *_face_info, elem_is_up);
+  const auto phi_f = interpolate(*_limiter, phi_C, phi_D, grad_C, *_face_info, elem_is_upwind);
 
   return _normal * _velocity * phi_f;
 }

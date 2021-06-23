@@ -5,10 +5,6 @@ stagnation_temperature = 1
   fp = fp
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Debug]
    show_material_props = true
 []
@@ -24,7 +20,6 @@ stagnation_temperature = 1
   [FluidProperties]
     [fp]
       type = IdealGasFluidProperties
-      allow_imperfect_jacobians = true
     []
   []
 []
@@ -70,7 +65,6 @@ stagnation_temperature = 1
   [mass_advection]
     type = CNSFVMassHLLC
     variable = rho
-    fp = fp
   []
 
   # Momentum x conservation
@@ -83,7 +77,6 @@ stagnation_temperature = 1
     type = CNSFVMomentumHLLC
     variable = rho_u
     momentum_component = x
-    fp = fp
   []
 
   # Momentum y conservation
@@ -107,7 +100,6 @@ stagnation_temperature = 1
   [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
     variable = rho_E
-    fp = fp
   []
 []
 
@@ -116,7 +108,6 @@ stagnation_temperature = 1
   [mass_stagnation_inflow]
     type = CNSFVHLLCMassStagnationInletBC
     variable = rho
-    fp = fp
     stagnation_pressure = ${stagnation_pressure}
     stagnation_temperature = ${stagnation_temperature}
     boundary = left
@@ -126,7 +117,6 @@ stagnation_temperature = 1
     type = CNSFVHLLCMomentumStagnationInletBC
     variable = rho_u
     momentum_component = x
-    fp = fp
     stagnation_pressure = ${stagnation_pressure}
     stagnation_temperature = ${stagnation_temperature}
     boundary = left
@@ -136,7 +126,6 @@ stagnation_temperature = 1
     type = CNSFVHLLCMomentumStagnationInletBC
     variable = rho_v
     momentum_component = y
-    fp = fp
     stagnation_pressure = ${stagnation_pressure}
     stagnation_temperature = ${stagnation_temperature}
     boundary = left
@@ -145,7 +134,6 @@ stagnation_temperature = 1
   [fluid_energy_stagnation_inflow]
     type = CNSFVHLLCFluidEnergyStagnationInletBC
     variable = rho_E
-    fp = fp
     stagnation_pressure = ${stagnation_pressure}
     stagnation_temperature = ${stagnation_temperature}
     boundary = left
@@ -155,7 +143,6 @@ stagnation_temperature = 1
   [mass_outflow]
     type = CNSFVHLLCMassImplicitBC
     variable = rho
-    fp = fp
     boundary = right
   []
 
@@ -163,7 +150,6 @@ stagnation_temperature = 1
     type = CNSFVHLLCMomentumImplicitBC
     variable = rho_u
     momentum_component = x
-    fp = fp
     boundary = right
   []
 
@@ -171,14 +157,12 @@ stagnation_temperature = 1
     type = CNSFVHLLCMomentumImplicitBC
     variable = rho_v
     momentum_component = y
-    fp = fp
     boundary = right
   []
 
   [fluid_energy_outflow]
     type = CNSFVHLLCFluidEnergyImplicitBC
     variable = rho_E
-    fp = fp
     boundary = right
   []
 
@@ -308,8 +292,4 @@ stagnation_temperature = 1
 
 [Outputs]
   exodus = true
-  #[csv]
-  #  type = CSV
-  #  execute_on = 'FINAL'
-  #[]
 []

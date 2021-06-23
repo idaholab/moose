@@ -21,6 +21,10 @@ class Limiter;
 }
 }
 
+/**
+ * Implements an advection term in which a slope limiter is applied when interpolating the advected
+ * quantity to the face
+ */
 class FVLimitedAdvection : public FVFluxKernel
 {
 public:

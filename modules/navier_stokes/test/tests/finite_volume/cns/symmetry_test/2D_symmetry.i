@@ -11,10 +11,6 @@ angle = 45
   fp = fp
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Debug]
    show_material_props = true
 []

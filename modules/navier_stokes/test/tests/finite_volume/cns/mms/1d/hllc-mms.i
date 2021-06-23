@@ -12,10 +12,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [rho]
     type = MooseVariableFVReal
@@ -162,19 +158,12 @@
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  # petsc_options = '-pc_svd_monitor'
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value = 'svd'
   nl_rel_tol = 1e-12
 []
 
 [Outputs]
   exodus = true
   csv = true
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []
 
 [Postprocessors]

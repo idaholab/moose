@@ -121,7 +121,6 @@ class QUICKLimiter(unittest.TestCase):
             self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
 
 class KTLimitedCD(unittest.TestCase):
-# class KTLimitedCD():
     def test(self):
         df1 = mms.run_spatial('kt-limited-advection.i', 11, "FVKernels/advection_u/limiter='central_difference'", y_pp=['L2u'])
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
@@ -137,7 +136,6 @@ class KTLimitedCD(unittest.TestCase):
             print("%s slope, %f" % (key, value))
 
 class KTLimitedUpwind(unittest.TestCase):
-# class KTLimitedUpwind():
     def test(self):
         df1 = mms.run_spatial('kt-limited-advection.i', 13, "FVKernels/advection_u/limiter='upwind'", y_pp=['L2u'])
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
@@ -153,7 +151,6 @@ class KTLimitedUpwind(unittest.TestCase):
             print("%s slope, %f" % (key, value))
 
 class KTLimitedVanLeer(unittest.TestCase):
-# class KTLimitedVanLeer():
     def test(self):
         df1 = mms.run_spatial('kt-limited-advection.i', 11, "FVKernels/advection_u/limiter='vanLeer'", y_pp=['L2u'])
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
@@ -167,7 +164,3 @@ class KTLimitedVanLeer(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             self.assertTrue(fuzzyAbsoluteEqual(value, 2.5, .05))
             print("%s slope, %f" % (key, value))
-
-# KTLimitedCD().test()
-# KTLimitedUpwind().test()
-# KTLimitedVanLeer().test()

@@ -35,7 +35,6 @@ friction_coeff=10
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
 []
 
@@ -308,7 +307,6 @@ friction_coeff=10
     T_fluid = T_fluid
     superficial_rhou = sup_mom_x
     superficial_rhov = sup_mom_y
-    fp = fp
     porosity = porosity
   []
   [porosity]

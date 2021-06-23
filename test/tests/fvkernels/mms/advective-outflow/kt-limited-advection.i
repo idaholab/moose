@@ -13,7 +13,6 @@ max_abs_eig=${fparse c + a}
 []
 
 [Problem]
-  kernel_coverage_check = off
   fv_bcs_integrity_check = false
 []
 

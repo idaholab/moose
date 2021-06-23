@@ -83,7 +83,6 @@ u_in=1
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
 []
 
@@ -274,7 +273,6 @@ u_in=1
     p = pressure
     T_fluid = T_fluid
     superficial_vel_x = sup_vel_x
-    fp = fp
     porosity = porosity
   []
   [porosity]

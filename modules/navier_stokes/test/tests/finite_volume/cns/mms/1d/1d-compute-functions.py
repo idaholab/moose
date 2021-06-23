@@ -10,13 +10,9 @@ p = 'rho'
 vel = 'rho_u / rho * e_i'
 rho_ht = 'rho_et + p'
 
-# f_rho, e_rho = mms.evaluate('-div(grad(rho))', rho, variable='rho', rho=rho)
 f_rho, e_rho = mms.evaluate('div(vel*rho) - div(grad(rho))', rho, variable='rho', rho=rho, rho_u=rho_u, vel=vel)
-# f_rho, e_rho = mms.evaluate('div(vel*rho)', rho, variable='rho', rho=rho, rho_u=rho_u, vel=vel)
-# f_rho_u, e_rho_u = mms.evaluate('div(vel*rho_u) - div(grad(rho_u))', rho_u, variable='rho_u', rho=rho, rho_u=rho_u, vel=vel)
 f_rho_u, e_rho_u = mms.evaluate('div(vel*rho_u) - div(grad(rho_u)) + grad(p).dot(e_i)', rho_u, variable='rho_u', rho=rho, rho_u=rho_u, vel=vel, p=p)
 f_rho_et, e_rho_et = mms.evaluate('div(vel*rho_ht) - div(grad(rho_et))', rho_et, variable='rho_et', rho_et=rho_et, rho=rho, rho_u=rho_u,  vel=vel, p=p, rho_ht=rho_ht)
-# f_rho_et, e_rho_et = mms.evaluate('div(vel*rho_et)', rho_et, variable='rho_et', rho_et=rho_et, rho=rho, rho_u=rho_u,  vel=vel, p=p, rho_ht=rho_ht)
 
 mms.print_hit(e_rho, 'exact_rho')
 mms.print_hit(f_rho, 'forcing_rho')

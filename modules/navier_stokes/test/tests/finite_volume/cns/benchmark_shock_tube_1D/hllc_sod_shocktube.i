@@ -26,13 +26,8 @@ middle = 50
   [FluidProperties]
     [fp]
       type = IdealGasFluidProperties
-      allow_imperfect_jacobians = true
     []
   []
-[]
-
-[Problem]
-  kernel_coverage_check = false
 []
 
 [Variables]
@@ -94,13 +89,6 @@ middle = 50
 []
 
 [FVBCs]
-  #[./mom_pressure]
-  #  type = FVMomImplicitPressureBC
-  #  variable = rho_u
-  #  momentum_component = x
-  #  boundary = 'left right'
-  #[../]
-
   [mass_implicit]
     type = CNSFVHLLCMassImplicitBC
     variable = rho
@@ -179,7 +167,6 @@ middle = 50
   []
   l_tol = 1e-8
 
-  # run to t = 0.15
   start_time = 0.0
   dt = 1e-2
   end_time = 20

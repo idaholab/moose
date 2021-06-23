@@ -51,10 +51,6 @@ x_sep = 35
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [./rho]
     order = CONSTANT
@@ -172,13 +168,6 @@ x_sep = 35
 []
 
 [FVBCs]
-  #[./zero_vel]
-  #  type = FVDirichletBC
-  #  variable = 'rho_u'
-  #  value = 0
-  #  boundary = 'left right'
-  #[../]
-
   [./mom_x_pressure]
     type = CNSFVMomImplicitPressureBC
     variable = rho_u
@@ -245,20 +234,6 @@ x_sep = 35
     petsc_options_value = 'lu'
   [../]
 []
-
-#[Adaptivity]
-#  initial_steps = 0
-#  max_h_level = 2
-#  marker = mach
-#  [./Markers]
-#    [./mach]
-#      type = ValueThresholdMarker
-#      coarsen = 0.3
-#      variable = Ma
-#      refine = 0.85
-#    [../]
-#  [../]
-#[]
 
 [Postprocessors]
   [./cfl_dt]
