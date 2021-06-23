@@ -37,6 +37,13 @@
   []
 []
 
+[Postprocessors]
+  [average]
+    type = ElementAverageValue
+    variable = u
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 5
@@ -46,6 +53,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Controls]
+  [stochastic]
+    type = SamplerReceiver
+  []
+[]
+
 [Outputs]
+  # perf_graph = false
   exodus = true
 []

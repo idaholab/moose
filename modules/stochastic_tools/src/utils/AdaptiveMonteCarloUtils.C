@@ -12,36 +12,34 @@
 /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
  Carlo set of algorithms.*/
 
-namespace StochasticTools
+namespace AdaptiveMonteCarloUtils
 {
-// Compute standard deviation of a data vector by ignoring some values in the vector at the
-// beginning
+
 Real
-AdaptiveMonteCarloUtils::computeSTD(const std::vector<Real> & data,
-                                    const unsigned int & start_index)
+computeSTD(const std::vector<Real> & data, const unsigned int & start_index)
 {
-  Real sum1 = 0.0, sq_diff1 = 0.0;
-  for (unsigned int i = start_index; i < data.size(); ++i)
+  if (data.size() < start_index)
+    return 0.0;
+  else
   {
-    sum1 += data[i];
+    const Real mean = computeMean(data, start_index);
+    const Real sq_diff =
+        std::accumulate(data.begin() + start_index, data.end(), 0.0, [&mean](Real x, Real y) {
+          return x + (y - mean) * (y - mean);
+        });
+    return std::sqrt(sq_diff / (data.size() - start_index));
   }
-  for (unsigned int i = start_index; i < data.size(); ++i)
-  {
-    sq_diff1 += std::pow((data[i] - sum1 / (data.size() - start_index)), 2);
-  }
-  return std::pow(sq_diff1 / (data.size() - start_index), 0.5);
 }
 
 // Compute mean of a data vector by ignoring some values in the vector at the beginning
 Real
-AdaptiveMonteCarloUtils::computeMEAN(const std::vector<Real> & data,
-                                     const unsigned int & start_index)
+computeMean(const std::vector<Real> & data, const unsigned int & start_index)
 {
-  Real sum1 = 0.0;
-  for (unsigned int i = start_index; i < data.size(); ++i)
-  {
-    sum1 += (data[i]);
-  }
-  return (sum1 / (data.size() - start_index));
+  if (data.size() < start_index)
+    return 0.0;
+  else
+    return std::accumulate(data.begin() + start_index, data.end(), 0.0) /
+           (data.size() - start_index);
 }
-} // StochasticTools namespace
+
+} // namespace AdaptiveMonteCarloUtils

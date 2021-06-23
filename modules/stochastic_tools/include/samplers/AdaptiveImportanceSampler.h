@@ -11,32 +11,35 @@
 
 #include "Sampler.h"
 #include "ReporterInterface.h"
-#include "AdaptiveMonteCarloUtils.h"
 
 /**
  * A class used to perform Adaptive Importance Sampling using a Markov Chain Monte Carlo algorithm
  */
-class AIS : public Sampler, public ReporterInterface
+class AdaptiveImportanceSampler : public Sampler, public ReporterInterface
 {
 public:
   static InputParameters validParams();
 
-  AIS(const InputParameters & parameters);
+  AdaptiveImportanceSampler(const InputParameters & parameters);
 
-  std::vector<std::vector<Real>> _inputs_sto;
+  /// Access the initial values vector
+  const std::vector<Real> & getInitialValues() const;
+
+  /// Access the number of training samples
+  const int & getNumSamplesTrain() const;
+
+  /// Access use absolute value bool
+  const bool & getUseAbsoluteValue() const;
+
+  /// Access the output limit
+  const Real & getOutputLimit() const;
 
 protected:
   /// Return the sample for the given row (the sample index) and column (the parameter index)
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /// Storage for distribution objects to be utilized
-  std::vector<Distribution const *> _distributions;
-
-  /// Storage for the input names reporter
-  const std::vector<ReporterName> & _inputs_names;
-
-  /// Distribution names
-  const std::vector<DistributionName> & _distribution_names;
+  std::vector<const Distribution *> _distributions;
 
   /// The proposal distribution standard deviations
   const std::vector<Real> & _proposal_std;
@@ -60,11 +63,11 @@ protected:
   const unsigned int & _num_random_seeds;
 
 private:
-  /// Acceptance ratio variable for the MCMC sampler.
-  Real _acceptance_ratio;
-
   /// Track the current step of the main App
   const int & _step;
+
+  /// Storage for the inputs vector obtained from the reporter
+  const std::vector<Real> & _inputs;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
@@ -78,6 +81,6 @@ private:
   /// Storage for standard deviations of input values for proposing the next sample
   std::vector<Real> _std_sto;
 
-  /// PerfGraph timer
-  const PerfID _perf_compute_sample;
+  /// Storage for previously accepted samples by the decision reporter system
+  std::vector<std::vector<Real>> _inputs_sto;
 };

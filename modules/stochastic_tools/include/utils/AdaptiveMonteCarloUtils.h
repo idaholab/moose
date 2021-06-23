@@ -12,21 +12,27 @@
 #include "libmesh/utility.h"
 #include "DataIO.h"
 
-namespace StochasticTools
+namespace AdaptiveMonteCarloUtils
 {
 /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
  Carlo set of algorithms.*/
 
-class AdaptiveMonteCarloUtils
-{
-public:
-  AdaptiveMonteCarloUtils(){};
+/**
+ * compute the standard deviation of a data vector by only considering values from
+ * a specific index.
+ *
+ * @param the data vector
+ * @param the starting index
+ */
+Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
 
-  ~AdaptiveMonteCarloUtils() = default;
+/**
+ * compute the mean of a data vector by only considering values from
+ * a specific index.
+ *
+ * @param the data vector
+ * @param the starting index
+ */
+Real computeMean(const std::vector<Real> & data, const unsigned int & start_index);
 
-  static Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
-  static Real computeMEAN(const std::vector<Real> & data, const unsigned int & start_index);
-
-  // private:
-};
-} // namespace
+} // namespace AdaptiveMonteCarloUtils

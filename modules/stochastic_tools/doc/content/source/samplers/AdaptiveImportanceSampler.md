@@ -1,6 +1,6 @@
 # Adaptive Importance Sampling (AIS)
 
-!syntax description /Samplers/AIS
+!syntax description /Samplers/AdaptiveImportance
 
 ## Description
 
@@ -12,7 +12,7 @@ to the model to estimate $P_f$ with a coefficient of variation (COV) of 10 perce
 require only about 1e4 calls to the model for the same COV. AIS has two phases:
  (1) a learning phase where the AIS algorithm learns the importance distribution of
  input parameters likely to cause model failure; and (2) a sampling phase to sample
-from the learned importance distribution. The version of AIS proposed by [!cite](Au1999) is
+from the learned importance distribution. The version of AIS proposed by [!cite](au1999new) is
 implemented in MOOSE with a slight modification. Instead of using kernel density to
  characterize the importance distribution, a Normal density is used due to its simplicity
  and robustness.
@@ -40,10 +40,10 @@ failure region.
 Once enough samples that result in model failure have been simulated, an imporatance
  distribution is fit to these samples. A Normal distribution is fit to each
 input parameter independently and sampling from this importance distribution is made.
-The use of an independent Normal distribution is different from the work by [!cite](Au1999),
+The use of an independent Normal distribution is different from the work by [!cite](au1999new),
 who use a multi-dimensional kernel density distribution. However, experience suggests that
 a Normal distribution is more robust under a wide variety of cases. Once the samples from the
-importance distribution are obtained, equation (2) and equation (19) in [!cite](Au1999)
+importance distribution are obtained, equation (2) and equation (19) in [!cite](au1999new)
 can be used for estimating the $P_f$ and COV, respectively.
 
 ## Interaction with the `AdaptiveMonteCarloDecision` class
@@ -58,7 +58,7 @@ for more details.
 The input file for using the AIS algorithm is somewhat similar to the other sampler
  classes except for three differences. First, the `Samplers` block is presented below:
 
-!listing modules/stochastic_tools/test/tests/samplers/AIS/ais.i block=Samplers
+!listing modules/stochastic_tools/test/tests/samplers/AdaptiveImportanceSampler/ais.i block=Samplers
 
 where, `proposal_std` are proposal standard deviations (in Standard Normal space) used during the learning phase,
  `output_limit` is the limiting value greater than which is characterized as model failure
@@ -70,13 +70,13 @@ reporter values which transfer information between the `AIS` sampler and the
 
 Second, the `Reporters` block is presented below with the `AdaptiveMonteCarloDecision` reporter:
 
-!listing modules/stochastic_tools/test/tests/samplers/AIS/ais.i block=Reporters
+!listing modules/stochastic_tools/test/tests/samplers/AdaptiveImportanceSampler/ais.i block=Reporters
 
 where, output reporter and the inputs reporter are both initialized.
 
 Third, the `Executioner` block is presented below:
 
-!listing modules/stochastic_tools/test/tests/samplers/AIS/ais.i block=Executioner
+!listing modules/stochastic_tools/test/tests/samplers/AdaptiveImportanceSampler/ais.i block=Executioner
 
 where, it is noticed that unlike some other sampler classes, the `type` is transient.
  `num_steps` in the above code block are the total number of samples required; that is
@@ -84,14 +84,17 @@ where, it is noticed that unlike some other sampler classes, the `type` is trans
 
 ## Output format
 
-The `AIS` sampler can output a csv or a json file. Such a file will contain fields
-for all the input parameters and an additional field containing zeros or ones which indicate
-model failure. The first `num_samples_train` rows are the samples during the learning
-phase and should not be used for estimating the $P_f$ or COV. The next `num_steps - num_samples_train`
-are the required importance samples used for estimating $P_f$ or COV.
+The `AIS` sampler can output a csv or a json file. However, a json output is a preferred output format
+for post-processing sampler data from adaptive Monte Carlo algorithms. The json file
+consists of "inputs" and "output_required" corresponding to each "time_step". "inputs" are
+the uncertain input parameters to the model, "output_required" is an indicator function
+on whether or not the model output exceeded `output_limit`, and "time_step" is the
+sample index. The first `num_samples_train` time steps are the samples during the
+learning phase and should not be used for estimating the $P_f$ or COV. The next
+`num_steps - num_samples_train` are the required importance samples used for estimating $P_f$ or COV.
 
-!syntax parameters /Samplers/AIS
+!syntax parameters /Samplers/AdaptiveImportance
 
-!syntax inputs /Samplers/AIS
+!syntax inputs /Samplers/AdaptiveImportance
 
-!syntax children /Samplers/AIS
+!syntax children /Samplers/AdaptiveImportance
