@@ -82,3 +82,75 @@ getoutdir_(char * dir, unsigned int * len)
   for (unsigned int i = 0; i < 256; ++i)
     dir[i] = i < *len ? output_dir[i] : ' ';
 }
+
+// error/warning/info message output
+
+void
+stdb_abqerr_(int * lop, char * format, int * intv, double * realv, char * charv, int format_len)
+{
+  std::string message;
+  unsigned int int_index = 0;
+  unsigned int real_index = 0;
+  unsigned int char_index = 0;
+
+  for (unsigned int i = 0; i < format_len; ++i)
+  {
+    // interpret %I, %R, and %S
+    if (format[i] == '%' && i < format_len - 1)
+    {
+      auto next = format[i + 1];
+
+      // integer output
+      if (next == 'I' || next == 'i')
+      {
+        message += std::to_string(intv[int_index++]);
+        i++;
+        continue;
+      }
+
+      // Real output
+      if (next == 'R' || next == 'r')
+      {
+        message += std::to_string(realv[real_index++]);
+        i++;
+        continue;
+      }
+
+      // char[8] output
+      if (next == 'S' || next == 's')
+      {
+        for (unsigned int j = 0; j < 8; ++j)
+          message += charv[char_index++];
+        i++;
+        continue;
+      }
+    }
+
+    // append character to string
+    message += format[i];
+  }
+
+  // output at the selected error level
+  switch (*lop)
+  {
+    case 1:
+      mooseInfo(message);
+      break;
+
+    case -1:
+      mooseWarning(message);
+      break;
+
+    case -2:
+      mooseWarning("Non fatal Abaqus subroutine error: ", message);
+      break;
+
+    case -3:
+      mooseError(message);
+      break;
+
+    default:
+      mooseError("Invalid LOP code passed to STDB_ABQERR: ", *lop);
+      break;
+  }
+}

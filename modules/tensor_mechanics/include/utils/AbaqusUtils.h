@@ -26,6 +26,9 @@ extern "C" int get_thread_id_();
 
 extern "C" int getoutdir_();
 
+extern "C" void
+stdb_abqerr_(int * lop, char * format, int * intv, double * realv, char * charv, int format_len);
+
 class AbaqusUtils
 {
 public:
