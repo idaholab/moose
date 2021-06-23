@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+  [predef]
+    type = 'Exodiff'
+    input = 'predef.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'predef_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+                  'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
+                  'an external field (not temperature) affecting material behavior '
+  []
+  [predef_reference]
+    type = 'Exodiff'
+    input = 'predef.i'
+    cli_args = "Materials/active='elasticity_tensor strain_dependent_elasticity_tensor stress "
+               "prefactor_material_block'"
+    exodiff = 'predef_out.e'
+    requirement = 'MOOSE shall avoid regression in a simple mechanical problem where a strain field '
+                  'modifies the stiffness of the material through CompositeElasticityTensor. This '
+                  'test also serves as a reference for UMAT external field verification'
+  []
+  [dpredef]
+    type = 'Exodiff'
+    input = 'dpredef.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'dpredef_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+                  'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
+                  'an external field (not temperature) step increment affecting material behavior '
+    rel_err = 5.0e-5
+  []
+  [dpredef_reference]
+    type = 'Exodiff'
+    input = 'dpredef.i'
+    cli_args = "Materials/active='elasticity_tensor strain_dependent_elasticity_tensor stress "
+               "prefactor_material_block'"
+    exodiff = 'dpredef_out.e'
+    requirement = 'MOOSE shall avoid regression in a simple mechanical problem where a real number '
+                  'representing the strain increment modifies the stiffness of the material through '
+                  'CompositeElasticityTensor. This test also serves as a reference for UMAT external '
+                  'field increment verification'
+  []
+[]

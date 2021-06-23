@@ -33,6 +33,7 @@ AbaqusUMATStress::validParams()
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+  params.addCoupledVar("external_field", 0.0, "Coupled field for use in UMAT routine");
 
   return params;
 }
@@ -57,7 +58,9 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _temperature(coupledValue("temperature")),
-    _temperature_old(coupledValueOld("temperature"))
+    _temperature_old(coupledValueOld("temperature")),
+    _external_field(coupledValue("external_field")),
+    _external_field_old(coupledValueOld("external_field"))
 
 {
 #ifndef METHOD
@@ -182,7 +185,7 @@ AbaqusUMATStress::computeQpStress()
   for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
     _aqDDSDDE[i] = 0.0;
 
-  // set PNEWDT to a large value
+  // Set PNEWDT initially to a large value
   _aqPNEWDT = std::numeric_limits<Real>::max();
 
   // Temperature
@@ -190,6 +193,12 @@ AbaqusUMATStress::computeQpStress()
 
   // Temperature increment
   _aqDTEMP = _temperature[_qp] - _temperature_old[_qp];
+
+  // External field at this step
+  _aqPREDEF = _external_field[_qp];
+
+  // External field at the old step
+  _aqDPRED = _external_field[_qp] - _external_field_old[_qp];
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),

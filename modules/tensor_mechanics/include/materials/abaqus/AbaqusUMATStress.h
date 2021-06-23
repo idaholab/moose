@@ -206,6 +206,11 @@ protected:
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
 
+  // Coupled temperature field
   const VariableValue & _temperature;
   const VariableValue & _temperature_old;
+
+  // Coupled user-defined field
+  const VariableValue & _external_field;
+  const VariableValue & _external_field_old;
 };
