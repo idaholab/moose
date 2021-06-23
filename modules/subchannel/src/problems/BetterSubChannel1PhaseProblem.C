@@ -666,7 +666,11 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
   ierr = VecDuplicate(x, &r);
   CHKERRQ(ierr);
 
+#if PETSC_VERSION_LESS_THAN(3, 12, 0)
+  PetscOptionsSetValue(PETSC_NULL, "-snes_mf", PETSC_NULL);
+#else
   ierr = SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE);
+#endif
   CHKERRQ(ierr);
   Ctx ctx;
   ctx.iblock = iblock;
