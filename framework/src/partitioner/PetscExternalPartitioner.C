@@ -191,8 +191,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                                          const std::string & part_package,
                                          std::vector<dof_id_type> & partition)
 {
-#ifdef LIBMESH_HAVE_PETSC
-
   PetscErrorCode ierr;
   Mat dual;
   PetscInt num_local_elems, num_elems, *xadj = nullptr, *adjncy = nullptr, i, *values = nullptr,
@@ -317,10 +315,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   CHKERRABORT(comm.get(), ierr);
   ierr = ISDestroy(&is);
   CHKERRABORT(comm.get(), ierr);
-
-#else
-  mooseError("Petsc is required for this partitioner");
-#endif
 }
 
 dof_id_type

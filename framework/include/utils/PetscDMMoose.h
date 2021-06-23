@@ -12,7 +12,7 @@
 // This only works with petsc-3.3 and above.
 #include "libmesh/petsc_macro.h"
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 
 // PETSc includes
 #include <petscdm.h>
@@ -59,4 +59,4 @@ extern PetscErrorCode DMMooseSetSplitSides(DM, const std::string &, const std::s
 extern PetscErrorCode DMMooseGetSplitSides(DM, const std::string &, std::set<std::string> &);
 extern PetscErrorCode SNESUpdateDMMoose(SNES snes, PetscInt iteration);
 
-#endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#endif // #if !PETSC_VERSION_LESS_THAN(3,3,0)

@@ -9,7 +9,6 @@
 
 #include "PetscContactLineSearch.h"
 
-#ifdef LIBMESH_HAVE_PETSC
 #if !PETSC_VERSION_LESS_THAN(3, 6, 0)
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
@@ -189,4 +188,3 @@ PetscContactLineSearch::lineSearch()
 }
 
 #endif // !PETSC_VERSION_LESS_THAN(3, 3, 0)
-#endif // LIBMESH_HAVE_PETSC

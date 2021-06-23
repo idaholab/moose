@@ -548,20 +548,16 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 setSolverDefaults(FEProblemBase & problem)
 {
-#ifdef LIBMESH_HAVE_PETSC
   // May be a touch expensive to create a new DM every time, but probably safer to do it this way
   Moose::PetscSupport::petscSetDefaults(problem);
-#endif // LIBMESH_HAVE_PETSC
 }
 
 MPI_Comm
 swapLibMeshComm(MPI_Comm new_comm)
 {
-#ifdef LIBMESH_HAVE_PETSC
   MPI_Comm old_comm = PETSC_COMM_WORLD;
   PETSC_COMM_WORLD = new_comm;
   return old_comm;
-#endif // LIBMESH_HAVE_PETSC
 }
 
 static bool _color_console = isatty(fileno(stdout));

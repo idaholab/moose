@@ -334,14 +334,10 @@ PolycrystalICTools::assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,
   }
   else // PETSc Coloring algorithms
   {
-#ifdef LIBMESH_HAVE_PETSC
     const std::string & ca_str = coloring_algorithm;
     Real * am_data = adjacency_matrix.rawDataPtr();
     Moose::PetscSupport::colorAdjacencyMatrix(
         am_data, n_grains, n_ops, grain_to_op, ca_str.c_str());
-#else
-    mooseError("Selected coloring algorithm requires PETSc");
-#endif
   }
 
   Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");

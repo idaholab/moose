@@ -50,8 +50,6 @@ SetupPreconditionerAction::act()
  * Go ahead and set common precondition options here.  The child classes will still be called
  * through the action warehouse
  */
-#if LIBMESH_HAVE_PETSC
     Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
-#endif
   }
 }

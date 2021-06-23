@@ -9,8 +9,6 @@
 
 #include "ComputeLineSearchObjectWrapper.h"
 
-#ifdef LIBMESH_HAVE_PETSC
-
 #include "FEProblemBase.h"
 
 ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
@@ -22,5 +20,3 @@ void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_obj
 {
   _fe_problem.lineSearch();
 }
-
-#endif

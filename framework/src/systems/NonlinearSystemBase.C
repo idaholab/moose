@@ -95,15 +95,12 @@
 
 #include <ios>
 
-// PETSc
-#ifdef LIBMESH_HAVE_PETSC
 #include "petscsnes.h"
 #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include <PetscDMMoose.h>
 EXTERN_C_BEGIN
 extern PetscErrorCode DMCreate_Moose(DM);
 EXTERN_C_END
-#endif
 #endif
 
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
@@ -2037,8 +2034,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
       if (constraints_applied)
       {
-#ifdef LIBMESH_HAVE_PETSC
-// Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
         MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
@@ -2050,7 +2045,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
         MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                      MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                      PETSC_TRUE);
-#endif
 #endif
 
         jacobian.close();
@@ -2068,7 +2062,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
     if (constraints_applied)
     {
-#ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
@@ -2081,7 +2074,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                    PETSC_TRUE);
-#endif
 #endif
 
       jacobian.close();
@@ -2273,7 +2265,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   if (constraints_applied)
   {
-#ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
@@ -2286,7 +2277,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                  MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                  PETSC_TRUE);
-#endif
 #endif
 
     jacobian.close();
@@ -2378,7 +2368,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       continue;
 
     auto & jacobian = getMatrix(tag);
-#ifdef LIBMESH_HAVE_PETSC
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
     {
@@ -2398,7 +2387,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     }
 #endif // PETSC_VERSION
-#endif // LIBMESH_HAVE_PETSC
   }
 
   jacobianSetup();
@@ -2763,7 +2751,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
   {
     SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
 
-#ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
@@ -2783,8 +2770,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
         MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                      MAT_NEW_NONZERO_ALLOCATION_ERR,
                      PETSC_TRUE);
-#endif
-
 #endif
 
     jacobian.zero();

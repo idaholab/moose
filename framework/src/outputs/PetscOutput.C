@@ -23,7 +23,6 @@ PetscOutput::validParams()
   InputParameters params = Output::validParams();
 
 // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
-#ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>(
       "output_linear", false, "Specifies whether output occurs on each linear residual evaluation");
   params.addParam<bool>("output_nonlinear",
@@ -73,8 +72,6 @@ PetscOutput::validParams()
                               "nonlinear_residual_end_time  nonlinear_residual_dt_divisor "
                               "linear_residual_dt_divisor",
                               "PETSc");
-#endif
-
   return params;
 }
 
@@ -129,9 +126,6 @@ PetscOutput::PetscOutput(const InputParameters & parameters)
 void
 PetscOutput::solveSetup()
 {
-// Only execute if PETSc exists
-#ifdef LIBMESH_HAVE_PETSC
-
   // Extract the non-linear and linear solvers from PETSc
   NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase();
   SNES snes = nl.getSNES();
@@ -163,11 +157,8 @@ PetscOutput::solveSetup()
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
     CHKERRABORT(_communicator.get(), ierr);
   }
-#endif
 }
 
-// Only define the monitor functions if PETSc exists
-#ifdef LIBMESH_HAVE_PETSC
 PetscErrorCode
 PetscOutput::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * void_ptr)
 {
@@ -246,7 +237,6 @@ PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_pt
   // Done
   return 0;
 }
-#endif
 
 Real
 PetscOutput::time()

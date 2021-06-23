@@ -35,9 +35,7 @@
 #include <numeric>
 #include <unistd.h>
 
-#ifdef LIBMESH_HAVE_PETSC
 #include "petscsys.h"
-#endif
 
 #ifdef __WIN32__
 #include <windows.h>
@@ -1078,7 +1076,6 @@ fileSize(const std::string & filename)
 std::string
 realpath(const std::string & path)
 {
-#ifdef LIBMESH_HAVE_PETSC
   char dummy[PETSC_MAX_PATH_LEN];
 #if defined(PETSC_HAVE_REALPATH)
   // If "realpath" is adopted by PETSc and
@@ -1095,17 +1092,6 @@ realpath(const std::string & path)
     mooseError("Failed to get real path for ", path);
 
   return dummy;
-#else
-#ifndef __WIN32__
-  char dummy[PATH_MAX];
-  if (!realpath(path.c_str(), dummy))
-    mooseError("Failed to get real path for ", path);
-  return dummy;
-#else
-  // on windows, but without PETSc: just return original path
-  return path;
-#endif
-#endif
 }
 
 std::string

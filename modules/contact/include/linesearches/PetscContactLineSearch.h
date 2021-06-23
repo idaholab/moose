@@ -12,7 +12,6 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_macro.h"
 
-#ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 #else
 
@@ -43,4 +42,3 @@ protected:
 };
 
 #endif // PETSC_VERSION_LESS_THAN(3, 3, 0)
-#endif // LIBMESH_HAVE_PETSC
