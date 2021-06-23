@@ -19,8 +19,8 @@ InputParameters
 GeneralFluidProps::validParams()
 {
   auto params = Material::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
-  params.addClassDescription("Computes fluid properties using (P, T) formulation");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addClassDescription("Computes fluid properties using a (P, T) formulation");
 
   params.addRequiredCoupledVar(NS::porosity, "porosity");
   params.addRangeCheckedParam<Real>(

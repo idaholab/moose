@@ -17,7 +17,7 @@ InputParameters
 PCNSFVHLLC::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }

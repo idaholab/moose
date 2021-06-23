@@ -11,7 +11,6 @@
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 
-namespace nms = NS;
 using MetaPhysicL::raw_value;
 
 registerMooseObject("NavierStokesApp", HLLCUserObject);
@@ -20,7 +19,11 @@ InputParameters
 HLLCUserObject::validParams()
 {
   InputParameters params = InternalSideUserObject::validParams();
-  params.addRequiredParam<UserObjectName>(nms::fluid, "Fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addParam<MaterialPropertyName>(
+      NS::porosity,
+      "An optional parameter for specifying a porosity material property. If not specified "
+      "free-flow conditions will be assumed.");
   params.addClassDescription(
       "Computes free-flow wave speeds on internal sides, useful in HLLC contexts");
   return params;
@@ -28,19 +31,22 @@ HLLCUserObject::validParams()
 
 HLLCUserObject::HLLCUserObject(const InputParameters & parameters)
   : InternalSideUserObject(parameters),
-    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
+    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _face_info(_mesh.faceInfo()),
-    _vel_elem(getADMaterialProperty<RealVectorValue>(nms::velocity)),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(nms::velocity)),
-    _speed_elem(getADMaterialProperty<Real>(nms::speed)),
-    _speed_neighbor(getNeighborADMaterialProperty<Real>(nms::speed)),
-    _pressure_elem(getADMaterialProperty<Real>(nms::pressure)),
-    _pressure_neighbor(getNeighborADMaterialProperty<Real>(nms::pressure)),
-    _rho_elem(getADMaterialProperty<Real>(nms::density)),
-    _rho_neighbor(getNeighborADMaterialProperty<Real>(nms::density)),
-    _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
+    _vel_elem(getADMaterialProperty<RealVectorValue>(NS::velocity)),
+    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::velocity)),
+    _speed_elem(getADMaterialProperty<Real>(NS::speed)),
+    _speed_neighbor(getNeighborADMaterialProperty<Real>(NS::speed)),
+    _pressure_elem(getADMaterialProperty<Real>(NS::pressure)),
+    _pressure_neighbor(getNeighborADMaterialProperty<Real>(NS::pressure)),
+    _rho_elem(getADMaterialProperty<Real>(NS::density)),
+    _rho_neighbor(getNeighborADMaterialProperty<Real>(NS::density)),
+    _specific_internal_energy_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
     _specific_internal_energy_neighbor(
-        getNeighborADMaterialProperty<Real>(nms::specific_internal_energy))
+        getNeighborADMaterialProperty<Real>(NS::specific_internal_energy)),
+    _eps_elem(isParamValid(NS::porosity) ? &getMaterialProperty<Real>(NS::porosity) : nullptr),
+    _eps_neighbor(isParamValid(NS::porosity) ? &getNeighborMaterialProperty<Real>(NS::porosity)
+                                             : nullptr)
 {
 }
 
@@ -61,25 +67,27 @@ HLLCUserObject::execute()
 {
   const FaceInfo & fi = faceInfoHelper(_current_elem, _current_side);
 
-  const ADReal rho1 = _rho_elem[_qp];
-  const ADReal u1 = _speed_elem[_qp];
+  const ADReal & rho1 = _rho_elem[_qp];
+  const ADReal & u1 = _speed_elem[_qp];
   const ADReal q1 = fi.normal() * _vel_elem[_qp];
   const ADReal v1 = 1.0 / rho1;
-  const ADReal e1 = _specific_internal_energy_elem[_qp];
+  const ADReal & e1 = _specific_internal_energy_elem[_qp];
   const ADReal E1 = e1 + 0.5 * u1 * u1;
-  const ADReal p1 = _pressure_elem[_qp];
+  const ADReal & p1 = _pressure_elem[_qp];
   const ADReal H1 = E1 + p1 / rho1;
   const ADReal c1 = _fluid.c_from_v_e(v1, e1);
+  const Real eps1 = _eps_elem ? (*_eps_elem)[_qp] : 1.;
 
-  const ADReal rho2 = _rho_neighbor[_qp];
-  const ADReal u2 = _speed_neighbor[_qp];
+  const ADReal & rho2 = _rho_neighbor[_qp];
+  const ADReal & u2 = _speed_neighbor[_qp];
   const ADReal q2 = fi.normal() * _vel_neighbor[_qp];
   const ADReal v2 = 1.0 / rho2;
-  const ADReal e2 = _specific_internal_energy_neighbor[_qp];
+  const ADReal & e2 = _specific_internal_energy_neighbor[_qp];
   const ADReal E2 = e2 + 0.5 * u2 * u2;
-  const ADReal p2 = _pressure_neighbor[_qp];
+  const ADReal & p2 = _pressure_neighbor[_qp];
   const ADReal H2 = E2 + p2 / rho2;
   const ADReal c2 = _fluid.c_from_v_e(v2, e2);
+  const Real eps2 = _eps_neighbor ? (*_eps_neighbor)[_qp] : 1.;
 
   // compute Roe-averaged variables
   const ADReal sqrt_rho1 = std::sqrt(rho1);
@@ -96,8 +104,9 @@ HLLCUserObject::execute()
   // compute wave speeds
   const ADReal SL = std::min(q1 - c1, q_roe - c_roe);
   const ADReal SR = std::max(q2 + c2, q_roe + c_roe);
-  const ADReal SM = (rho2 * q2 * (SR - q2) - rho1 * q1 * (SL - q1) + p1 - p2) /
-                    (rho2 * (SR - q2) - rho1 * (SL - q1));
+  const ADReal SM =
+      (eps2 * rho2 * q2 * (SR - q2) - eps1 * rho1 * q1 * (SL - q1) + eps1 * p1 - eps2 * p2) /
+      (eps2 * rho2 * (SR - q2) - eps1 * rho1 * (SL - q1));
 
   // store these results in _wave_speed
   side_type elem_side(_current_elem, _current_side);

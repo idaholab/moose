@@ -37,7 +37,7 @@ CFLTimeStepSizeTempl<is_ad>::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
-  params.addClassDescription("Computes a time step size based on user-specified CFL number");
+  params.addClassDescription("Computes a time step size based on a user-specified CFL number");
 
   return params;
 }

@@ -67,5 +67,7 @@ protected:
   const ADMaterialProperty<Real> & _rho_neighbor;
   const ADMaterialProperty<Real> & _specific_internal_energy_elem;
   const ADMaterialProperty<Real> & _specific_internal_energy_neighbor;
+  const MaterialProperty<Real> * const _eps_elem;
+  const MaterialProperty<Real> * const _eps_neighbor;
   ///@}
 };

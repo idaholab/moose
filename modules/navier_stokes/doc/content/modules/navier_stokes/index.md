@@ -39,7 +39,7 @@ Table definitions:
 - SUPG: Streamline-Upwind Petrov-Galerkin
 - RC: Rhie-Chow interpolation
 - CD: central differencing interpolation; equivalent to average interpolation
-- HLLC: Harten Lax van Leer
+- HLLC: Harten Lax van Leer Contact
 - data: includes both the advector, velocity, and the advected quantities
 - limited: different limiters can be applied when interpolating cell-centered
   data to faces. A summary of limiter options can be found in
