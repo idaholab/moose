@@ -132,8 +132,7 @@ AbaqusUMATStress::computeProperties()
   _aqNOEL = _current_elem->id();
 
   // characteristic element length
-  // TODO: check what Abaqus actually passes in here (likely ~ element_volume^(1/element_dim))
-  _aqCELENT = std::numeric_limits<Real>::signaling_NaN();
+  _aqCELENT = std::pow(_current_elem->volume(), _current_elem->dim());
 
   // Value of step time at the beginning of the current increment - Check
   _aqTIME[0] = _t;
@@ -235,8 +234,10 @@ AbaqusUMATStress::computeQpStress()
   for (int i = 0; i < _aqNSTATV; ++i)
     _state_var[_qp][i] = _aqSTATEV[i];
 
-  // determine the material timestep
-  _material_timestep[_qp] = _aqPNEWDT < 1.0 ? _aqPNEWDT * _dt : std::numeric_limits<Real>::max();
+  // Here, we apply UMAT convention: Always multiply _dt by PNEWDT to determine the material time
+  // step MOOSE time stepper will choose the most limiting of all material time step increments
+  // provided
+  _material_timestep[_qp] = _aqPNEWDT * _dt;
 
   // Get new stress tensor - UMAT should update stress
   _stress[_qp] = RankTwoTensor(

@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+  [elastic_timestep]
+    type = 'Exodiff'
+    input = 'elastic_timestep.i'
+    exodiff = 'elastic_timestep_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials that allows '
+                  'the user to control the time step increment within the UMAT routine and combine '
+                  'it with MOOSE native time step controls, including cutback and growth factors, '
+                  'and soft terminations.'
+  []
+[]
