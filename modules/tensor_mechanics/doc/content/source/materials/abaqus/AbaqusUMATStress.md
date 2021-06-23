@@ -44,10 +44,6 @@ C
 A description of the input and output parameters of the UMAT user subroutines
 can be found in the Abaqus user manual.
 
-!alert note
-`PREDEF` support are not yet implemented.
-
-
 ## UMAT Time step control
 
 Time step control within the UMAT subroutine is enriched with MOOSE's general capabilities. `PNEWDT` denotes a factor that can be modified in the UMAT routine to be less than one, to signal a cut in the time step, or more than one, to signal a local increment in the time step. Since these time step controls are local to the quadrature point, MOOSE provides a layer of objects to handle the information provided by UMAT's `PNEWDT`. First, we select a soft `Terminator` which will invalidate a time step if the time step increment used turns out to be larger than a computed maximum time step increment anywhere in the system:
