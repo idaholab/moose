@@ -14,7 +14,7 @@ from .mooseutils import generate_filebase, recursive_update, fuzzyEqual, fuzzyAb
 from .gitutils import git_is_repo, git_commit, git_commit_message, git_merge_commits, git_ls_files
 from .gitutils import git_root_dir, git_init_submodule, git_submodule_info, git_version
 from .gitutils import git_authors, git_lines, git_committers, git_localpath, git_repo
-from .gitutils import git_civet_hashes, git_is_branch, git_is_config
+from .gitutils import git_is_branch, git_is_config
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path
@@ -22,7 +22,7 @@ from .AutoPropertyMixin import AutoPropertyMixinBase, AutoPropertyMixin, Propert
 from .levenshtein import levenshtein, levenshteinDistance
 from .json_load import json_load, json_parse
 from .jsondiff import JSONDiffer
-from .civet_results import get_civet_results
+from .civet_results import get_civet_results, get_civet_hashes
 from .template import apply_template_arguments
 
 try:

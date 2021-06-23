@@ -64,6 +64,10 @@ def command_line_options(subparser, parent):
                         help="A list of file to build, this is useful for testing. The paths " \
                              "should be as complete as necessary to make the name unique, just " \
                              "as done within the markdown itself.")
+    parser.add_argument('--stable', action='store_true',
+                        help="By default the CIVET and SQA related extensions are disabled " \
+                        "because they are slow and intended for use on the stable website only. " \
+                        "This flag will enable those extensions. This will override use of --fast.")
     parser.add_argument('--home', default=None, help="The 'home' URL for the hosted website. " \
                                                      "This is mainly used by CIVET to allow " \
                                                      "temporary sites to be functional.")
@@ -150,9 +154,14 @@ def main(options):
         kwargs['Executioner']['type'] = options.executioner
 
     # Disable extensions
-    if options.fast:
+    if options.stable:
+        pass
+    elif options.fast:
         options.disable += ['MooseDocs.extensions.appsyntax', 'MooseDocs.extensions.navigation',
                             'MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet']
+    else:
+        options.disable += ['MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet']
+
     for name in options.disable:
         kwargs['Extensions'][name] = dict(active=False)
 
