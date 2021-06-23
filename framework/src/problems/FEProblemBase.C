@@ -4994,7 +4994,6 @@ FEProblemBase::solve()
   if (_displaced_problem)
     _displaced_problem->clearAllDofIndices();
 
-#ifdef LIBMESH_HAVE_PETSC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
 #else
@@ -5014,7 +5013,6 @@ FEProblemBase::solve()
   // Do not worry, DM setup is very cheap
   if (_nl->haveFieldSplitPreconditioner())
     Moose::PetscSupport::petscSetupDM(*_nl);
-#endif
 
   Moose::setSolverDefaults(*this);
 
@@ -5585,7 +5583,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       {
         auto & matrix = _nl->getMatrix(tag);
         matrix.zero();
-#ifdef LIBMESH_HAVE_PETSC
 #ifdef MOOSE_GLOBAL_AD_INDEXING
         if (haveADObjects())
           // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
@@ -5593,7 +5590,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           // dependence, so PETSc will scream at us unless we artificially add the diagonals.
           for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
             matrix.add(index, index, 0);
-#endif
 #endif
       }
 

@@ -548,12 +548,10 @@ public:
    */
   virtual void initPetscOutput();
 
-#ifdef LIBMESH_HAVE_PETSC
   /**
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
    */
   Moose::PetscSupport::PetscOptions & getPetscOptions() { return _petsc_options; }
-#endif // LIBMESH_HAVE_PETSC
 
   // Function /////
   virtual void
@@ -2205,13 +2203,12 @@ protected:
   /// The control logic warehouse
   ExecuteMooseObjectWarehouse<Control> _control_warehouse;
 
-#ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions _petsc_option_data_base;
 #endif
-#endif // LIBMESH_HAVE_PETSC
+
   /// If or not petsc options have been added to database
   bool _is_petsc_options_inserted;
 

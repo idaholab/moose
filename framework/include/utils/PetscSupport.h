@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "libmesh/libmesh.h" // Real, LIBMESH_HAVE_PETSC
-
-#ifdef LIBMESH_HAVE_PETSC
+#include "libmesh/libmesh.h"
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
@@ -172,5 +170,3 @@ void disableLinearConvergedReason(FEProblemBase & fe_problem);
 #endif
 }
 }
-
-#endif // LIBMESH_HAVE_PETSC

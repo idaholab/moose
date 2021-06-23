@@ -846,9 +846,9 @@ protected:
 
   /// Whether or not to use a finite differenced preconditioner
   bool _use_finite_differenced_preconditioner;
-#ifdef LIBMESH_HAVE_PETSC
+
   MatFDColoring _fdcoloring;
-#endif
+
   /// Whether or not the system can be decomposed into splits
   bool _have_decomposition;
   /// Name of the top-level split of the decomposition

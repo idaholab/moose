@@ -11,7 +11,6 @@
 
 #include "libmesh/libmesh_common.h"
 
-#ifdef LIBMESH_HAVE_PETSC
 
 #include "libmesh/petsc_nonlinear_solver.h"
 #include <petscsnes.h>
@@ -35,5 +34,3 @@ public:
 protected:
   FEProblemBase & _fe_problem;
 };
-
-#endif

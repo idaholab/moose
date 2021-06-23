@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "libmesh/petsc_macro.h"
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include "FieldSplitPreconditioner.h"
 
 // MOOSE includes

@@ -64,7 +64,6 @@ private:
    */
   void solveSetup() override;
 
-#ifdef LIBMESH_HAVE_PETSC
   /**
    * Performs the output on non-linear iterations
    *
@@ -78,7 +77,6 @@ private:
    * This is the monitor method that PETSc will call on linear iterations
    */
   static PetscErrorCode petscLinearOutput(KSP, PetscInt its, PetscReal fnorm, void * void_ptr);
-#endif
 
   /// The psuedo non-linear time
   Real _nonlinear_time;

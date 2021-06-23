@@ -10,7 +10,7 @@
 // This only works with petsc-3.3 and above.
 #include "libmesh/petsc_macro.h"
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 // Inside these guards we can use PETSC_VERSION_LT, which need not be
 // modified upon transition from dev to a release.
 
@@ -2643,4 +2643,4 @@ DMMooseRegisterAll()
   }
   PetscFunctionReturn(0);
 }
-#endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#endif // #if !PETSC_VERSION_LESS_THAN(3,3,0)

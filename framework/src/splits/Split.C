@@ -57,7 +57,6 @@ Split::validParams()
       SchurAInvEnum,
       "Type of approximation to inv(A) used when forming S = D - C inv(A) B");
 
-#if LIBMESH_HAVE_PETSC
   params.addParam<MultiMooseEnum>("petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "PETSc flags for the FieldSplit solver");
@@ -65,7 +64,6 @@ Split::validParams()
                                             "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string>>("petsc_options_value",
                                             "PETSc option values for the FieldSplit solver");
-#endif
 
   params.registerBase("Split");
   return params;
@@ -94,7 +92,7 @@ void
 Split::setup(const std::string & prefix)
 {
 // petsc 3.3.0 or later needed
-#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3, 3, 0)
+#if PETSC_VERSION_LESS_THAN(3, 3, 0)
   mooseError("The Splits functionality requires PETSc 3.3.0 or later.");
 #endif
 

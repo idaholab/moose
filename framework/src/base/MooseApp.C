@@ -1024,9 +1024,7 @@ MooseApp::executeExecutioner()
   // run the simulation
   if (_executioner)
   {
-#ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
-#endif
 
     _executioner->init();
     errorCheck();

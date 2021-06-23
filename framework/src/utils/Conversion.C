@@ -130,7 +130,7 @@ initLineSearchType()
     line_search_type_to_enum["DEFAULT"] = LS_DEFAULT;
     line_search_type_to_enum["NONE"] = LS_NONE;
     line_search_type_to_enum["BASIC"] = LS_BASIC;
-#ifdef LIBMESH_HAVE_PETSC
+
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
     line_search_type_to_enum["CUBIC"] = LS_CUBIC;
     line_search_type_to_enum["QUADRATIC"] = LS_QUADRATIC;
@@ -142,7 +142,6 @@ initLineSearchType()
     line_search_type_to_enum["CP"] = LS_CP;
     line_search_type_to_enum["CONTACT"] = LS_CONTACT;
     line_search_type_to_enum["PROJECT"] = LS_PROJECT;
-#endif
 #endif
   }
 }

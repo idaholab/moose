@@ -11,7 +11,7 @@
 #include "InputParameters.h"
 #include "FEProblem.h"
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 registerMooseObject("ContactApp", ContactSplit);
 
 InputParameters
@@ -197,4 +197,4 @@ ContactSplit::setup(const std::string & prefix)
   po.values.push_back(val);
   Split::setup(prefix);
 }
-#endif
+#endif // #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
