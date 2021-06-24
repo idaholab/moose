@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include <string.h>
+#include <algorithm>
 
 #ifdef LIBMESH_HAVE_DLOPEN
 #include <dlfcn.h>
@@ -57,6 +59,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
+    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
     _external_field(coupledValue("external_field")),
@@ -78,6 +81,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRAN.resize(_aqNTENS);
   _aqDFGRD0.resize(9);
   _aqDFGRD1.resize(9);
+  _aqDROT.resize(9);
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
@@ -135,15 +139,20 @@ AbaqusUMATStress::computeProperties()
   _aqNOEL = _current_elem->id();
 
   // characteristic element length
-  _aqCELENT = std::pow(_current_elem->volume(), _current_elem->dim());
+  _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
 
-  // Value of step time at the beginning of the current increment - Check
+  // For now, total time and step time mean the exact same thing
+  // Value of step time at the beginning of the current increment
   _aqTIME[0] = _t;
-  // Value of total time at the beginning of the current increment - Check
-  _aqTIME[1] = _t - _dt;
+  // Value of total time at the beginning of the current increment
+  _aqTIME[1] = _t;
 
   // Time increment
   _aqDTIME = _dt;
+
+  // Fill unused characters with spaces (Fortran)
+  std::fill (_aqCMNAME, _aqCMNAME + 80, ' ');
+  std::memcpy(_aqCMNAME, name().c_str(), name().size());
 
   ComputeStressBase::computeProperties();
 }
@@ -153,11 +162,14 @@ AbaqusUMATStress::computeQpStress()
 {
   const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
   const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
+  const Real * myDROT = &(_rotation_increment[_qp](0, 0));
+
   // copy because UMAT does not guarantee constness
   for (unsigned int i = 0; i < 9; ++i)
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
+    _aqDROT[i] = myDROT[i];
   }
 
   // Recover "old" state variables
@@ -168,6 +180,7 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}}};
+
   for (int i = 0; i < _aqNTENS; ++i)
   {
     _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
@@ -197,8 +210,17 @@ AbaqusUMATStress::computeQpStress()
   // External field at this step
   _aqPREDEF = _external_field[_qp];
 
-  // External field at the old step
+  // External field increments
   _aqDPRED = _external_field[_qp] - _external_field_old[_qp];
+
+  // Layer number (not supported)
+  _aqLAYER = -1;
+
+  // Section point number within the layer (not supported)
+  _aqKSPT = -1;
+
+  // Increment number
+  _aqKINC = _t_step;
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),

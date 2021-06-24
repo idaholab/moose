@@ -104,7 +104,7 @@ protected:
   /// Characteristic element length, which is a typical length of a line across an element for a first-order element (unused, set to 1)
   Real _aqCELENT;
 
-  /// model name buffer
+  /// Model name buffer
   char _aqCMNAME[80];
 
   /// Number of direct stress components at this point
@@ -122,13 +122,14 @@ protected:
   /// Element number
   int _aqNOEL;
 
-  /// Layer number (for composite shells and layered solids). (unused)
+  /// Layer number (for composite shells and layered solids). (not supported)
   int _aqLAYER;
 
-  /// Section point number within the current layer. (unused)
+  /// Section point number within the current layer. (not supported)
   int _aqKSPT;
 
-  /// Increment number (unused)
+  /// Increment number (_t_step). This can be supported. The step number (as per Abaqus definition)
+  /// is not supported by MOOSE.
   int _aqKINC;
 
   // An array containing the solution-dependent state variables
@@ -172,7 +173,7 @@ protected:
   std::array<Real, 3> _aqCOORDS;
 
   /// Rotation increment matrix
-  std::array<Real, 3 * 3> _aqDROT;
+  std::vector<Real> _aqDROT;
 
   /// User-defined number of material constants associated with this user material.
   int _aqNPROPS;
@@ -205,6 +206,9 @@ protected:
 
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
+
+  // Time step rotation increment
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
 
   // Coupled temperature field
   const VariableValue & _temperature;
