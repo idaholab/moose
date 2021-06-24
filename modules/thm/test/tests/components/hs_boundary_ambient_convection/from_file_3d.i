@@ -70,7 +70,7 @@ E_change = ${fparse scale * heat_flux_integral * t}
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [E_hs]
-    type = HeatStructureEnergy3D
+    type = ADHeatStructureEnergy3D
     block = 'hs:brick'
     execute_on = 'INITIAL TIMESTEP_END'
   []
