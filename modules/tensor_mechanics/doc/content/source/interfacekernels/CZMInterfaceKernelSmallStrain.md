@@ -5,7 +5,7 @@
 ## Description
 
 This class assembles the integrated traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelSmallStrain` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
-The `CZMInterfaceKernelSmallStrain` uses the traction and its derivatives provided by the [CZM Equilibrium Traction Calculator Small Strain](CZMComputeGlobalTractionSmallStrain.md) to compute the appropriate residual and Jacobian.
+The `CZMInterfaceKernelSmallStrain` uses the traction and its derivatives provided by the [CZM Compute Global Traction Small Strain](CZMComputeGlobalTractionSmallStrain.md) to compute the appropriate residual and Jacobian.
 This kernel does not account for interface area chagnes and rotations.
 ### Residual
 

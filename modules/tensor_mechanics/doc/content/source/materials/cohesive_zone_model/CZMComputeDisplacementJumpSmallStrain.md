@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `CZMComputeDisplacementJumpSmallStrain` calculate the total displacement jump across a cohesive zone in the interface natural coordinate system. This object assumes small strain and does not account for the itnerface rotation caused by deformations or rigid body motion.
+The `CZMComputeDisplacementJumpSmallStrain` calculate the total displacement jump across a cohesive zone in the interface natural coordinate system. This object assumes small strain and does not account for the interface rotation caused by deformations or rigid body motion.
 The displacement jump in global coordinates is defined as:
 \begin{equation}
 \llbracket u \rrbracket = u^+ - u^-

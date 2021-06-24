@@ -28,7 +28,7 @@ protected:
   void initQpStatefulProperties() override;
 
   /// computes the PK1 traction and its derivatives
-  void computeEquilibriumTracionAndDerivatives() override final;
+  void computeEquilibriumTracionAndDerivatives() override;
 
   /// computes the PK1 traction derivatives w.r.t. the global displacement jump
   void computedTPK1dJumpGlobal();
@@ -37,7 +37,7 @@ protected:
   void computeAreaRatioAndIncrementRateDerivatives();
 
   /// computes the PK1 traction derivatives w.r.t. F
-  void assembledTPK1dF();
+  void computedTPK1dF();
 
   /// the displacement jump, its increment, and its old value in global coordinates
   ///@{
@@ -54,8 +54,8 @@ protected:
 
   /// the interface total and incremental rotation
   ///@{
-  const MaterialProperty<RankTwoTensor> & _Q;
-  const MaterialProperty<RankTwoTensor> & _DQ;
+  const MaterialProperty<RankTwoTensor> & _czm_total_rotation;
+  const MaterialProperty<RankTwoTensor> & _czm_total_rotation_inc;
   ///@}
 
   /// the rotation associated to F
@@ -64,7 +64,7 @@ protected:
   /// the rotation derivatives w.r.t. F
   ///@{
   RankFourTensor _dR_dF;
-  RankFourTensor _dQ_dF;
+  RankFourTensor _dczm_total_rotation_dF;
   ///@}
 
   /// the current, and old interface deformation gradient values
@@ -91,13 +91,13 @@ protected:
 
   MaterialProperty<RankThreeTensor> & _dPK1traction_dF;
 
-  /// the area raio and the area increment rate
+  /// the area ratio and the area increment rate
   ///@{
   Real _area_ratio;
   Real _area_increment_rate;
   ///@}
 
-  /// the area raio and the area increment rate derivatives w.r.t. F
+  /// the area ratio and the area increment rate derivatives w.r.t. F
   ///@{
   RankTwoTensor _d_area_ratio_dF;
   RankTwoTensor _d_area_increment_rate_dF;

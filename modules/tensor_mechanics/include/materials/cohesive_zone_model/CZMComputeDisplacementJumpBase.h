@@ -24,10 +24,14 @@ public:
 protected:
   void initialSetup() override;
   void computeQpProperties() override;
+  void initQpStatefulProperties() override;
 
   /// method used to compute the disaplcement jump in interface coordinates according to a
   ///  specific kinematic formulation
   virtual void computeLocalDisplacementJump() = 0;
+
+  /// Base name of the material system
+  const std::string _base_name;
 
   /// the interface normal in the undeformed configuration
   const MooseArray<Point> & _normals;
@@ -48,5 +52,5 @@ protected:
   ///@}
 
   /// the rotation matrix transforming from the interface to the global coordinate systems in the undeformed configuration
-  MaterialProperty<RealTensorValue> & _Q0;
+  MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
 };

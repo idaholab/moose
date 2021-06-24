@@ -9,46 +9,25 @@
 
 #pragma once
 
-#include "InterfaceKernel.h"
+#include "CZMInterfaceKernelBase.h"
 
-/// DG kernel implementing cohesive zone models (CZM) for a 1D/2D/3D traction
-/// separation laws based on the displacement jump. This kernel operates only on
-/// a single displacement compenent.
-/// One kernel is required for each mesh dimension.
-class CZMInterfaceKernelTotalLagrangian : public InterfaceKernel
+/// DG cohesive zone model kernel for the Total Lagrangian formulation.
+/// This kernel assummes teh traction sepration law only depends from the
+/// displacement jump. One kernel is required for each displacement component
+class CZMInterfaceKernelTotalLagrangian : public CZMInterfaceKernelBase
 {
 public:
   static InputParameters validParams();
   CZMInterfaceKernelTotalLagrangian(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(Moose::DGResidualType type);
-  virtual Real computeQpJacobian(Moose::DGJacobianType type);
-  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
+  Real computeDResidualDDisplacement(const unsigned int & component_j,
+                                     const Moose::DGJacobianType & type) const override;
 
   /// method computing the jacobian contribution due to rotations and area
   /// changes
   Real JacLD(const unsigned int cc, const bool neighbor) const;
 
-  /// the displacement component this kernel is operating on (0=x, 1=y, 2 =z)
-  const unsigned int _component;
-
-  /// number of displacement components
-  const unsigned int _ndisp;
-
-  /// Coupled displacement component variable IDs
-  ///@{
-  std::vector<unsigned int> _disp_var;
-  std::vector<unsigned int> _disp_neighbor_var;
-  ///@}
-
-  // pointer to displacement variables
-  std::vector<MooseVariable *> _vars;
-
-  // values of the traction and traction derivatives used by the kernel
-  ///@{
-  const MaterialProperty<RealVectorValue> & _PK1traction;
-  const MaterialProperty<RankTwoTensor> & _dPK1traction_djumpglobal;
+  // derivative of the traction w.r.t. the interface deformation gradient
   const MaterialProperty<RankThreeTensor> & _dPK1traction_dF;
-  ///@}
 };

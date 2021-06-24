@@ -11,7 +11,7 @@
 
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
-#include "AdditionalTensorTools.h"
+#include "Assembly.h"
 
 namespace CohesiveZoneModelTools
 {

@@ -13,7 +13,7 @@ and is related to the the displacement jump in interface coordinates, $\llbracke
 \begin{equation}
 \llbracket \hat{u}  \rrbracket = Q^T_0 R^T \llbracket u \rrbracket
 \end{equation}
-In the above expression $Q_0$ is the rotation matrix transforming from global to local coordinates in the initial configuration, and $R$ is rotation matrix associated to the interface midplane deformation gradient, $\hat{F}$.
+In the above expression $Q_0$ is the rotation matrix transforming from global to local coordinates in the initial configuration, and $R$ is rotation matrix associated to the interface deformation gradient, $\hat{F}$.
 The interface displacement jump increment is computed as the difference between the current and the old values:
 \begin{equation}
  \Delta \llbracket \hat{u} \rrbracket = Q^T_0 \left( \Delta R^{T} \llbracket u \rrbracket + R^{T} \Delta\llbracket u \rrbracket  \right)

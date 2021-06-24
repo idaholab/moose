@@ -5,7 +5,7 @@
 ## Overview
 
 The `CZMComputeGlobalTractionTotalLagrangian` uses the local traction, $\hat{t}$, its old value ,$\hat{t}_{old}$, and the derivatives w.r.t. to interface displacement jump, $\partial \hat{t} / \partial \llbracket \hat{u} \rrbracket$, calculated from any cohesive zone constitutive model, to computes the first Piola-Kirchoff traction in global coordinates, $T$, and its derivatives.
-The partial derivatives this object computes are: $\partial T / \partial \llbracket \hat{u} \rrbracket$ and $\partial T / \partial F$ , assuming the two are independent.
+This object computes the following partial derivatives: $\partial T / \partial \llbracket \hat{u} \rrbracket$ and $\partial T / \partial F$ , assuming the two are independent.
 This object assumes finite strain and does account for the interface rotation and area changes caused by deformations and/or rigid body motion.
 
 ## Theory
@@ -13,7 +13,7 @@ This object assumes finite strain and does account for the interface rotation an
 ### Kinematic and geometric variables
 
 The total Lagrangian approach always assumes as reference configuration the initial configuration.
-The interface midplane deformation gradient $F$ is defined as
+The interface midplane deformation gradient $F$ is assumed to be:
 \begin{equation} \label{eq:F}
 F = \frac{1}{2}\left(F^+ + F^-\right)
 \end{equation}
@@ -27,7 +27,7 @@ The two normals are related by the rotation $R$ as follows:
 \begin{equation} \label{eq:nN}
 n = R N
 \end{equation}
-Let's now introduce the rotation matrix $Q_0$ transforming from interface coordinate system in teh undeformed configuration to the global coordinate  also in the undeformed configuration.
+Let's now introduce the rotation matrix $Q_0$ transforming from the interface coordinate system in the undeformed configuration to the global coordinate  also in the undeformed configuration.
 Hence, one can define the total rotation matrix which transform from the interface coordinate system in the undeformed configuration to the global coordinate system in the deformed configuration as:
 \begin{equation} \label{eq:Q}
 Q = R Q_0
@@ -44,7 +44,7 @@ and the velocity gradient increment as:
 \begin{equation} \label{eq:deltaL}
 \Delta L = \Delta F F^{-1}=\left(F-F_{old} \right) F^{-1} = I - F_{old} F^{-1}
 \end{equation}
-Furthermore, The manipulation of Nanson's formula also provides two useful quantities:
+Furthermore, Nanson's formula also provides two useful quantities:
 the area ratio between the deformed and undeformed configuration:
 \begin{equation} \label{eq:area_ratio}
   \frac{da}{dA} = \textrm{det}\left(F\right) \vert\vert F^T N \vert\vert = J \vert\vert F^T N \vert\vert
@@ -88,7 +88,7 @@ Substituting [eq:t_inc] in [eq:Tinc2] leads to the implemented PK1 traction incr
 
 The reader can refer to [!cite](Rovinelli2020) for more details about the models.
 
-The [CZM Interface Kernel Total Lagrangian](CZMInterfaceKernelTotalLagrangian.md) uses the total PK1 traction computed using.
+The [CZM Interface Kernel Total Lagrangian](CZMInterfaceKernelTotalLagrangian.md) uses the total PK1 traction computed using equation [eq:Tinc_implemented].
 
 ### First Piola-Kirchoff Traction derivatives
 

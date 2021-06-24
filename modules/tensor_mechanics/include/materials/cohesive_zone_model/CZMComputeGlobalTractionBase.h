@@ -27,6 +27,9 @@ protected:
   /// method computing the equilibrium traction and its derivatives
   virtual void computeEquilibriumTracionAndDerivatives() = 0;
 
+  /// Base name of the material system
+  const std::string _base_name;
+
   /// the value of the traction in global and interface coordinates
   ///@{
   MaterialProperty<RealVectorValue> & _traction_global;
@@ -40,5 +43,5 @@ protected:
   ///@}
 
   /// the rotation matrix trnasforming from interface to global coordinates in the undeformed configuration
-  const MaterialProperty<RealTensorValue> & _Q0;
+  const MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
 };

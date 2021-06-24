@@ -61,9 +61,9 @@ SalehaniIrani3DCTractionIncremental::computeTraction()
   for (unsigned int i = 0; i < 3; i++)
   {
     Real alpha = (i == 0) ? 1. : 2.;
-    A -= std::pow(_interface_displacement_jump[_qp](i) / _delta_u0[i], alpha);
-    B -= alpha * _interface_displacement_jump_inc[_qp](i) / _delta_u0[i] *
-         std::pow(_interface_displacement_jump[_qp](i) / _delta_u0[i], alpha - 1.);
+    A -= std::pow(_interface_displacement_jump[_qp](i) / _delta_u0(i), alpha);
+    B -= alpha * _interface_displacement_jump_inc[_qp](i) / _delta_u0(i) *
+         std::pow(_interface_displacement_jump[_qp](i) / _delta_u0(i), alpha - 1.);
     ;
   }
   A = std::exp(A);
@@ -73,7 +73,7 @@ SalehaniIrani3DCTractionIncremental::computeTraction()
     Real lambda = (i == 0) ? std::exp(1.) : std::sqrt(2. * std::exp(1.));
 
     traction_inc(i) =
-        _max_allowable_traction[i] * lambda / _delta_u0[i] * A *
+        _max_allowable_traction(i) * lambda / _delta_u0(i) * A *
         (_interface_displacement_jump_inc[_qp](i) + _interface_displacement_jump[_qp](i) * B);
   }
 
@@ -90,9 +90,9 @@ SalehaniIrani3DCTractionIncremental::computeTractionDerivatives()
   for (unsigned int i = 0; i < 3; i++)
   {
     Real alpha = (i == 0) ? 1. : 2.;
-    A -= std::pow(_interface_displacement_jump[_qp](i) / _delta_u0[i], alpha);
-    B -= alpha * _interface_displacement_jump_inc[_qp](i) / _delta_u0[i] *
-         std::pow(_interface_displacement_jump[_qp](i) / _delta_u0[i], alpha - 1.);
+    A -= std::pow(_interface_displacement_jump[_qp](i) / _delta_u0(i), alpha);
+    B -= alpha * _interface_displacement_jump_inc[_qp](i) / _delta_u0(i) *
+         std::pow(_interface_displacement_jump[_qp](i) / _delta_u0(i), alpha - 1.);
   }
   A = std::exp(A);
 
@@ -103,22 +103,22 @@ SalehaniIrani3DCTractionIncremental::computeTractionDerivatives()
     {
       Real alpha = (j == 0) ? 1. : 2.;
       Real dA_djump =
-          A * (-alpha / _delta_u0[j] *
-               std::pow(_interface_displacement_jump[_qp](j) / _delta_u0[j], alpha - 1.));
-      Real dB_djump = -alpha / _delta_u0[j] *
-                      std::pow(_interface_displacement_jump[_qp](j) / _delta_u0[j], alpha - 1.);
+          A * (-alpha / _delta_u0(j) *
+               std::pow(_interface_displacement_jump[_qp](j) / _delta_u0(j), alpha - 1.));
+      Real dB_djump = -alpha / _delta_u0(j) *
+                      std::pow(_interface_displacement_jump[_qp](j) / _delta_u0(j), alpha - 1.);
 
       if (_interface_displacement_jump_inc[_qp](j) != 0)
-        dB_djump -= (alpha * alpha - alpha) / (_delta_u0[j] * _delta_u0[j]) *
+        dB_djump -= (alpha * alpha - alpha) / (_delta_u0(j) * _delta_u0(j)) *
                     _interface_displacement_jump_inc[_qp](j) *
-                    std::pow(_interface_displacement_jump[_qp](j) / _delta_u0[j], alpha - 2.);
+                    std::pow(_interface_displacement_jump[_qp](j) / _delta_u0(j), alpha - 2.);
 
       Real c = (i == j) ? 1. + B : 0;
       dtraction_djumpinc(i, j) = dA_djump * (_interface_displacement_jump_inc[_qp](i) +
                                              _interface_displacement_jump[_qp](i) * B) +
                                  A * (c + _interface_displacement_jump[_qp](i) * dB_djump);
 
-      dtraction_djumpinc(i, j) *= _max_allowable_traction[i] * lambda / _delta_u0[i];
+      dtraction_djumpinc(i, j) *= _max_allowable_traction(i) * lambda / _delta_u0(i);
     }
   }
   return dtraction_djumpinc;

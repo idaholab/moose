@@ -25,5 +25,5 @@ public:
 
 protected:
   /// method used to compute the traction and it's derivatives in global coordinates.
-  void computeEquilibriumTracionAndDerivatives() override final;
+  void computeEquilibriumTracionAndDerivatives() override;
 };

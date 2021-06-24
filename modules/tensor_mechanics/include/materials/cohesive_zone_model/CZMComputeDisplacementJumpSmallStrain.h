@@ -21,8 +21,6 @@ public:
   CZMComputeDisplacementJumpSmallStrain(const InputParameters & parameters);
 
 protected:
-  void initQpStatefulProperties() override;
-
   /// compute the total displacement jump in interface coordinates
   void computeLocalDisplacementJump() override;
 };

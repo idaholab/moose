@@ -241,7 +241,6 @@
     tangential_gap_at_maximum_shear_traction = 0.005
     maximum_normal_traction = 1000
     maximum_shear_traction = 700
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

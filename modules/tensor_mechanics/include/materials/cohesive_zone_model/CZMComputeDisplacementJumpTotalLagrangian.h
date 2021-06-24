@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "CZMComputeDisplacementJumpSmallStrain.h"
+#include "CZMComputeDisplacementJumpBase.h"
 /**
  * Compute the displacement jump in interface coordinates accross a cohesive zone for the total
  * Lagrangian formulation.
  */
-class CZMComputeDisplacementJumpTotalLagrangian : public CZMComputeDisplacementJumpSmallStrain
+class CZMComputeDisplacementJumpTotalLagrangian : public CZMComputeDisplacementJumpBase
 {
 public:
   static InputParameters validParams();
@@ -26,7 +26,7 @@ protected:
 
   /// compute the interface displacement increment using an incremental
   /// total Lagrangian approach
-  void computeLocalDisplacementJump() override final;
+  void computeLocalDisplacementJump() override;
 
   /// method computing F and the associated rotation
   void computeFandR();
@@ -63,7 +63,7 @@ protected:
 
   /// the total interface rotation and its increment (Q=R*Q0)
   ///@{
-  MaterialProperty<RankTwoTensor> & _Q;
-  MaterialProperty<RankTwoTensor> & _DQ;
+  MaterialProperty<RankTwoTensor> & _czm_total_rotation;
+  MaterialProperty<RankTwoTensor> & _czm_total_rotation_inc;
   ///@}
 };

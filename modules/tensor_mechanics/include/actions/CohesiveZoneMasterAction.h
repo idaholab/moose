@@ -17,13 +17,6 @@ public:
   static InputParameters validParams();
   CohesiveZoneMasterAction(const InputParameters & params);
 
-  /// strain formulation
-  enum class Kinematic
-  {
-    SmallStrain,
-    TotalLagrangian
-  } _kinematic;
-
   /// Method adding the proper relationship manager
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
@@ -31,7 +24,26 @@ public:
   void act() override;
 
 protected:
+  /// the disaplcements varaible names
+  std::vector<VariableName> _displacements;
+
+  /// number of displacement components
+  const unsigned int _ndisp;
+
+  /// Base name of the material system
+  const std::string _base_name;
+
+  /// strain formulation
+  enum class Kinematic
+  {
+    SmallStrain,
+    TotalLagrangian
+  } _kinematic;
+
+  /// kernel's and materials's names
+  ///@{
   std::string _czm_kernel_name;
   std::string _disp_jump_provider_name;
   std::string _equilibrium_traction_calculator_name;
+  ///@}
 };

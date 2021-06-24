@@ -58,7 +58,7 @@ computeVelocityGradientLinearApprox(const RankTwoTensor & F, const RankTwoTensor
 RankFourTensor
 computeDL_DF(const RankFourTensor & DFinv_DF, const RankTwoTensor & F_old)
 {
-  return -AdditionalTensorTools::R2ijR4jklm(F_old, DFinv_DF);
+  return -F_old.mixedProductIjJklm(DFinv_DF);
 }
 
 RankTwoTensor

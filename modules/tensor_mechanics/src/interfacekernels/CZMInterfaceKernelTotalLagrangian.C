@@ -14,135 +14,45 @@ registerMooseObject("TensorMechanicsApp", CZMInterfaceKernelTotalLagrangian);
 InputParameters
 CZMInterfaceKernelTotalLagrangian::validParams()
 {
-  InputParameters params = InterfaceKernel::validParams();
-  params.addRequiredParam<unsigned int>("component",
-                                        "The component of the "
-                                        "displacement vector this kernel is working on:"
-                                        " component == 0, ==> X"
-                                        " component == 1, ==> Y"
-                                        " component == 2, ==> Z");
-  params.set<bool>("_use_undisplaced_reference_points") = true;
-
-  params.addRequiredCoupledVar("displacements", "The string containing displacement variables");
-
-  params.addClassDescription(
-      "CZM Interface kernel to use when using the Total Lagrangin kinematic formulation.");
-  params.suppressParameter<bool>("use_displaced_mesh");
+  InputParameters params = CZMInterfaceKernelBase::validParams();
+  params.set<std::string>("traction_global_name") = "PK1traction";
   return params;
 }
 
 CZMInterfaceKernelTotalLagrangian::CZMInterfaceKernelTotalLagrangian(
     const InputParameters & parameters)
-  : InterfaceKernel(parameters),
-    _component(getParam<unsigned int>("component")),
-    _ndisp(coupledComponents("displacements")),
-    _disp_var(_ndisp),
-    _disp_neighbor_var(_ndisp),
-    _vars(_ndisp),
-    _PK1traction(getMaterialPropertyByName<RealVectorValue>("PK1traction")),
-    _dPK1traction_djumpglobal(getMaterialPropertyByName<RankTwoTensor>("dtraction_djump_global")),
-    _dPK1traction_dF(getMaterialPropertyByName<RankThreeTensor>("dPK1traction_dF"))
+  : CZMInterfaceKernelBase(parameters),
+    _dPK1traction_dF(getMaterialPropertyByName<RankThreeTensor>(_base_name + "dPK1traction_dF"))
 {
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp_var[i] = coupled("displacements", i);
-    _disp_neighbor_var[i] = coupled("displacements", i);
-    _vars[i] = getVar("displacements", i);
-  }
 }
 
 Real
-CZMInterfaceKernelTotalLagrangian::computeQpResidual(Moose::DGResidualType type)
+CZMInterfaceKernelTotalLagrangian::computeDResidualDDisplacement(
+    const unsigned int & component_j, const Moose::DGJacobianType & type) const
 {
-
-  Real r = _PK1traction[_qp](_component);
-
-  switch (type)
-  {
-    // [test_slave-test_master]*T where T represents the traction.
-    case Moose::Element:
-      r *= -_test[_i][_qp];
-      break;
-    case Moose::Neighbor:
-      r *= _test_neighbor[_i][_qp];
-      break;
-  }
-
-  mooseAssert(std::isfinite(r), "CZMInterfaceKernelTotalLagrangian r is not finite");
-  return r;
-}
-
-Real
-CZMInterfaceKernelTotalLagrangian::computeQpJacobian(Moose::DGJacobianType type)
-{
-  // Retrieve the diagonal jacobian coefficient depennding on the displacement
-  // component (_component) this kernel is working on
-  Real jacsd = _dPK1traction_djumpglobal[_qp](_component, _component);
-  Real jac = 0;
-  switch (type)
-  {
-    case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
-      jac += _test[_i][_qp] * jacsd * _vars[_component]->phiFace()[_j][_qp];
-      jac -= _test[_i][_qp] * JacLD(_component, /*neighbor=*/false);
-      break;
-    case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
-      jac -= _test[_i][_qp] * jacsd * _vars[_component]->phiFaceNeighbor()[_j][_qp];
-      jac -= _test[_i][_qp] * JacLD(_component, /*neighbor=*/true);
-      break;
-    case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
-      jac -= _test_neighbor[_i][_qp] * jacsd * _vars[_component]->phiFace()[_j][_qp];
-      jac += _test_neighbor[_i][_qp] * JacLD(_component, /*neighbor=*/false);
-      break;
-    case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
-      jac += _test_neighbor[_i][_qp] * jacsd * _vars[_component]->phiFaceNeighbor()[_j][_qp];
-      jac += _test_neighbor[_i][_qp] * JacLD(_component, /*neighbor=*/true);
-      break;
-  }
-  mooseAssert(std::isfinite(jac), "CZMInterfaceKernelTotalLagrangian diag jacobian is not finite");
-  return jac;
-}
-
-Real
-CZMInterfaceKernelTotalLagrangian::computeQpOffDiagJacobian(Moose::DGJacobianType type,
-                                                            unsigned int jvar)
-{
-
-  // find the displacement component associated to jvar
-  unsigned int off_diag_component;
-  for (off_diag_component = 0; off_diag_component < _ndisp; off_diag_component++)
-    if (_disp_var[off_diag_component] == jvar)
-      break;
-
-  mooseAssert(off_diag_component < _ndisp,
-              "CZMInterfaceKernelTotalLagrangian::computeQpOffDiagJacobian wrong "
-              "offdiagonal variable");
-
-  Real jacsd = _dPK1traction_djumpglobal[_qp](_component, off_diag_component);
+  Real jacsd = _dtraction_djump_global[_qp](_component, component_j);
   Real jac = 0;
 
   switch (type)
   {
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
-      jac += _test[_i][_qp] * jacsd * _vars[off_diag_component]->phiFace()[_j][_qp];
-      jac -= _test[_i][_qp] * JacLD(off_diag_component, /*neighbor=*/false);
+      jac += _test[_i][_qp] * jacsd * _vars[component_j]->phiFace()[_j][_qp];
+      jac -= _test[_i][_qp] * JacLD(component_j, /*neighbor=*/false);
       break;
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
-      jac -= _test[_i][_qp] * jacsd * _vars[off_diag_component]->phiFaceNeighbor()[_j][_qp];
-      jac -= _test[_i][_qp] * JacLD(off_diag_component, /*neighbor=*/true);
+      jac -= _test[_i][_qp] * jacsd * _vars[component_j]->phiFaceNeighbor()[_j][_qp];
+      jac -= _test[_i][_qp] * JacLD(component_j, /*neighbor=*/true);
       break;
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
-      jac -= _test_neighbor[_i][_qp] * jacsd * _vars[off_diag_component]->phiFace()[_j][_qp];
-      jac += _test_neighbor[_i][_qp] * JacLD(off_diag_component, /*neighbor=*/false);
+      jac -= _test_neighbor[_i][_qp] * jacsd * _vars[component_j]->phiFace()[_j][_qp];
+      jac += _test_neighbor[_i][_qp] * JacLD(component_j, /*neighbor=*/false);
       break;
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
-      jac +=
-          _test_neighbor[_i][_qp] * jacsd * _vars[off_diag_component]->phiFaceNeighbor()[_j][_qp];
-      jac += _test_neighbor[_i][_qp] * JacLD(off_diag_component, /*neighbor=*/true);
+      jac += _test_neighbor[_i][_qp] * jacsd * _vars[component_j]->phiFaceNeighbor()[_j][_qp];
+      jac += _test_neighbor[_i][_qp] * JacLD(component_j, /*neighbor=*/true);
       break;
   }
-  mooseAssert(std::isfinite(jac),
-              "CZMInterfaceKernelTotalLagrangian off diag jacobian is not finite");
+
   return jac;
 }
 

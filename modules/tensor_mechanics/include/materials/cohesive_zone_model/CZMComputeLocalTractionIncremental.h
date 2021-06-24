@@ -29,8 +29,6 @@ public:
   CZMComputeLocalTractionIncremental(const InputParameters & parameters);
 
 protected:
-  void initQpStatefulProperties() override;
-
   /// method used to compute the total traction
   void computeInterfaceTractionAndDerivatives() override;
 

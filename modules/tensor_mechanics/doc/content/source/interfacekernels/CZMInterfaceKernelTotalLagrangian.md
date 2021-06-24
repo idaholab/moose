@@ -5,7 +5,7 @@
 ## Description
 
 This class assembles the integrated first Piola-Kirchoff traction computed by a cohesive zone model (CZM) to the system residual vector, which ensures traction equilibrium across an interface. A `CZMInterfaceKernelTotalLagrangian` acts only on one displacement component and therefore the user must set up a separate instance of this kernel for for each dimension of the problem.
-The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Equilibrium Traction Calculator Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
+The `CZMInterfaceKernelTotalLagrangian` uses the PK1 traction and its derivatives provided by a [CZM Compute Global Traction Total Lagrangian](CZMComputeGlobalTractionTotalLagrangian.md)  to impose the appropriate residual and to provide the appropriate Jacobian.
 This kernel accounts for both interface area changes and rotations.
 
 ### Residual

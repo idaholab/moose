@@ -25,74 +25,92 @@ CohesiveZoneMasterAction::validParams()
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the cohesive zone will be applied");
   params.addRequiredParam<std::vector<VariableName>>(
-      "displacements",
-      "The displacements appropriate for the simulation geometry and coordinate system");
+      "displacements", "The nonlinear displacement variables for the problem");
   MooseEnum kinematicType("SmallStrain TotalLagrangian", "SmallStrain");
   params.addParam<MooseEnum>("kinematic", kinematicType, "Kinematic formulation");
-
+  params.addParam<std::string>("base_name", "Material property base name");
   return params;
 }
 
 CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & params)
-  : Action(params), _kinematic(getParam<MooseEnum>("kinematic").getEnum<Kinematic>())
+  : Action(params),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
+    _ndisp(_displacements.size()),
+    _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
+                   ? getParam<std::string>("base_name") + "_"
+                   : ""),
+    _kinematic(getParam<MooseEnum>("kinematic").getEnum<Kinematic>())
 {
-  if (_kinematic == Kinematic::SmallStrain)
+  // We can't enforce conssintency between the number of displacement varaiables and the mesh
+  // dimension. Hence we only check we have a reasonable number of displacement variables
+  if (_ndisp > 3 || _ndisp < 1)
+    mooseError("the CZM Action requires 1, 2 or 3 displacement variables.");
+
+  switch (_kinematic)
   {
-    _czm_kernel_name = "CZMInterfaceKernelSmallStrain";
-    _disp_jump_provider_name = "CZMComputeDisplacementJumpSmallStrain";
-    _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionSmallStrain";
+    case Kinematic::SmallStrain:
+    {
+      _czm_kernel_name = "CZMInterfaceKernelSmallStrain";
+      _disp_jump_provider_name = "CZMComputeDisplacementJumpSmallStrain";
+      _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionSmallStrain";
+      break;
+    }
+    case Kinematic::TotalLagrangian:
+    {
+      _czm_kernel_name = "CZMInterfaceKernelTotalLagrangian";
+      _disp_jump_provider_name = "CZMComputeDisplacementJumpTotalLagrangian";
+      _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionTotalLagrangian";
+      break;
+    }
+    default:
+      mooseError("CohesiveZoneMasterAction Error: Invalid kinematic parameter. Allowed values are: "
+                 "SmallStrain or TotalLagrangian");
   }
-  else if (_kinematic == Kinematic::TotalLagrangian)
-  {
-    _czm_kernel_name = "CZMInterfaceKernelTotalLagrangian";
-    _disp_jump_provider_name = "CZMComputeDisplacementJumpTotalLagrangian";
-    _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionTotalLagrangian";
-  }
-  else
-    mooseError("Internal error");
 }
 
 void
 CohesiveZoneMasterAction::act()
 {
-  std::vector<VariableName> displacements;
-  if (isParamValid("displacements"))
-    displacements = getParam<std::vector<VariableName>>("displacements");
+  // Enforce consistency
+  if (_ndisp != _mesh->dimension())
+    paramError("displacements", "Number of displacements must match problem dimension.");
 
   if (_current_task == "add_interface_kernel")
   {
-    for (unsigned int i = 0; i < displacements.size(); ++i)
+    for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      // Create unique kernel name for each of the components
+      // Create unique kernel name for each displacement component
       std::string unique_kernel_name = _czm_kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
       InputParameters paramsk = _factory.getValidParams(_czm_kernel_name);
 
       paramsk.set<unsigned int>("component") = i;
-      paramsk.set<NonlinearVariableName>("variable") = displacements[i];
-      paramsk.set<std::vector<VariableName>>("neighbor_var") = {displacements[i]};
-      paramsk.set<std::vector<VariableName>>("displacements") = displacements;
+      paramsk.set<NonlinearVariableName>("variable") = _displacements[i];
+      paramsk.set<std::vector<VariableName>>("neighbor_var") = {_displacements[i]};
+      paramsk.set<std::vector<VariableName>>("displacements") = _displacements;
       paramsk.set<std::vector<BoundaryName>>("boundary") =
           getParam<std::vector<BoundaryName>>("boundary");
-
+      paramsk.set<std::string>("base_name") = _base_name;
       _problem->addInterfaceKernel(_czm_kernel_name, unique_kernel_name, paramsk);
     }
   }
   else if (_current_task == "add_material")
   {
-    // Create unique material name for the displacement jump provider
+    // Create unique material name for the "CZMComputeDisplacementJump" object
     std::string unique_material_name = _disp_jump_provider_name + "_" + _name;
     InputParameters paramsm = _factory.getValidParams(_disp_jump_provider_name);
     paramsm.set<std::vector<BoundaryName>>("boundary") =
         getParam<std::vector<BoundaryName>>("boundary");
-    paramsm.set<std::vector<VariableName>>("displacements") = displacements;
+    paramsm.set<std::vector<VariableName>>("displacements") = _displacements;
+    paramsm.set<std::string>("base_name") = _base_name;
     _problem->addInterfaceMaterial(_disp_jump_provider_name, unique_material_name, paramsm);
 
-    // Create unique material name for the equilibrium traction calculator
+    // Create unique material name for the "CZMComputeGlobalTraction" object
     unique_material_name = _equilibrium_traction_calculator_name + "_" + _name;
     paramsm = _factory.getValidParams(_equilibrium_traction_calculator_name);
     paramsm.set<std::vector<BoundaryName>>("boundary") =
         getParam<std::vector<BoundaryName>>("boundary");
+    paramsm.set<std::string>("base_name") = _base_name;
     _problem->addInterfaceMaterial(
         _equilibrium_traction_calculator_name, unique_material_name, paramsm);
   }

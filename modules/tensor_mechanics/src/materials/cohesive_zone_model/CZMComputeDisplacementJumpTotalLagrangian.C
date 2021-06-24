@@ -14,7 +14,7 @@ registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpTotalLagrang
 InputParameters
 CZMComputeDisplacementJumpTotalLagrangian::validParams()
 {
-  InputParameters params = CZMComputeDisplacementJumpSmallStrain::validParams();
+  InputParameters params = CZMComputeDisplacementJumpBase::validParams();
   params.addClassDescription(
       "Compute the displacement jump increment accross a czm interface in local "
       "coordinates for the Total Lagrangian kinematic formulation");
@@ -24,34 +24,29 @@ CZMComputeDisplacementJumpTotalLagrangian::validParams()
 
 CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagrangian(
     const InputParameters & parameters)
-  : CZMComputeDisplacementJumpSmallStrain(parameters),
+  : CZMComputeDisplacementJumpBase(parameters),
     _displacement_jump_global_old(
-        getMaterialPropertyOld<RealVectorValue>("displacement_jump_global")),
+        getMaterialPropertyOld<RealVectorValue>(_base_name + "displacement_jump_global")),
     _interface_displacement_jump_old(
-        getMaterialPropertyOld<RealVectorValue>("interface_displacement_jump")),
-    _displacement_jump_global_inc(declareProperty<RealVectorValue>("displacement_jump_global_inc")),
+        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_displacement_jump")),
+    _displacement_jump_global_inc(
+        declareProperty<RealVectorValue>(_base_name + "displacement_jump_global_inc")),
     _interface_displacement_jump_inc(
-        declareProperty<RealVectorValue>("interface_displacement_jump_inc")),
-    _F(declareProperty<RankTwoTensor>("F_czm")),
-    _F_old(getMaterialPropertyOld<RankTwoTensor>("F_czm")),
-    _R(declareProperty<RankTwoTensor>("czm_rotation")),
-    _R_old(getMaterialPropertyOld<RankTwoTensor>("czm_rotation")),
-    _Q(declareProperty<RankTwoTensor>("czm_total_rotation")),
-    _DQ(declareProperty<RankTwoTensor>("czm_total_rotation_inc"))
+        declareProperty<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
+    _F(declareProperty<RankTwoTensor>(_base_name + "F_czm")),
+    _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "F_czm")),
+    _R(declareProperty<RankTwoTensor>(_base_name + "czm_rotation")),
+    _R_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "czm_rotation")),
+    _czm_total_rotation(declareProperty<RankTwoTensor>(_base_name + "czm_total_rotation")),
+    _czm_total_rotation_inc(declareProperty<RankTwoTensor>(_base_name + "czm_total_rotation_inc"))
 {
-  // Enforce consistency
-  if (_ndisp != _mesh.dimension())
-    paramError("displacements", "Number of displacements must match problem dimension.");
-
-  if (_ndisp > 3 || _ndisp < 1)
-    mooseError("the CZM material requires 1, 2 or 3 displacement variables");
 }
 
 void
 CZMComputeDisplacementJumpTotalLagrangian::initialSetup()
 {
-  ///intialize displacementes vectors
-  CZMComputeDisplacementJumpSmallStrain::initialSetup();
+  // intialize displacementes vectors
+  CZMComputeDisplacementJumpBase::initialSetup();
 
   // initializing the displacement gradeint vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -71,7 +66,7 @@ CZMComputeDisplacementJumpTotalLagrangian::initialSetup()
 void
 CZMComputeDisplacementJumpTotalLagrangian::initQpStatefulProperties()
 {
-  CZMComputeDisplacementJumpSmallStrain::initQpStatefulProperties();
+  CZMComputeDisplacementJumpBase::initQpStatefulProperties();
   _displacement_jump_global[_qp] = 0;
   _F[_qp] = RankTwoTensor::Identity();
   _R[_qp] = RankTwoTensor::Identity();
@@ -81,13 +76,14 @@ void
 CZMComputeDisplacementJumpTotalLagrangian::computeLocalDisplacementJump()
 {
   computeFandR();
-  _DQ[_qp] = (_R[_qp] - _R_old[_qp]) * _Q0[_qp];
-  _Q[_qp] = _R[_qp] * _Q0[_qp];
+  _czm_total_rotation_inc[_qp] = (_R[_qp] - _R_old[_qp]) * _czm_reference_rotation[_qp];
+  _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
   _displacement_jump_global_inc[_qp] =
       _displacement_jump_global[_qp] - _displacement_jump_global_old[_qp];
 
-  _interface_displacement_jump_inc[_qp] = _DQ[_qp].transpose() * _displacement_jump_global[_qp] +
-                                          _Q[_qp].transpose() * _displacement_jump_global_inc[_qp];
+  _interface_displacement_jump_inc[_qp] =
+      _czm_total_rotation_inc[_qp].transpose() * _displacement_jump_global[_qp] +
+      _czm_total_rotation[_qp].transpose() * _displacement_jump_global_inc[_qp];
   _interface_displacement_jump[_qp] =
       _interface_displacement_jump_old[_qp] + _interface_displacement_jump_inc[_qp];
 }

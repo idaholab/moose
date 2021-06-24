@@ -33,8 +33,8 @@ protected:
   RankTwoTensor computeTractionDerivatives();
 
   /// the displacement jump associated to the maximum traction
-  const std::vector<Real> _delta_u0;
+  const RealVectorValue _delta_u0;
 
   /// the vector representing the maximum allowed traction in each direction
-  const std::vector<Real> _max_allowable_traction;
+  const RealVectorValue _max_allowable_traction;
 };

@@ -25,19 +25,11 @@ CZMComputeDisplacementJumpSmallStrain::CZMComputeDisplacementJumpSmallStrain(
     const InputParameters & parameters)
   : CZMComputeDisplacementJumpBase(parameters)
 {
-  if (_ndisp > 3 || _ndisp < 1)
-    mooseError("the CZM material requires 1, 2 or 3 displacement variables");
-}
-
-void
-CZMComputeDisplacementJumpSmallStrain::initQpStatefulProperties()
-{
-  // requried to promote _interface_displacement_jump to stateful in case someone needs it
-  _interface_displacement_jump[_qp] = 0;
 }
 
 void
 CZMComputeDisplacementJumpSmallStrain::computeLocalDisplacementJump()
 {
-  _interface_displacement_jump[_qp] = _Q0[_qp].transpose() * _displacement_jump_global[_qp];
+  _interface_displacement_jump[_qp] =
+      _czm_reference_rotation[_qp].transpose() * _displacement_jump_global[_qp];
 }

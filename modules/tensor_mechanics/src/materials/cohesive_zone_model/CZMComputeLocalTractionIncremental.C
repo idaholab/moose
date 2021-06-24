@@ -25,19 +25,15 @@ CZMComputeLocalTractionIncremental::validParams()
 CZMComputeLocalTractionIncremental::CZMComputeLocalTractionIncremental(
     const InputParameters & parameters)
   : CZMComputeLocalTractionBase(parameters),
-    _interface_traction_inc(declareProperty<RealVectorValue>("interface_traction_inc")),
-    _interface_traction_old(getMaterialPropertyOld<RealVectorValue>("interface_traction")),
+    _interface_traction_inc(
+        declareProperty<RealVectorValue>(_base_name + "interface_traction_inc")),
+    _interface_traction_old(
+        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_traction")),
     _interface_displacement_jump_inc(
-        declareProperty<RealVectorValue>("interface_displacement_jump_inc")),
+        declareProperty<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
     _interface_displacement_jump_old(
-        getMaterialPropertyOld<RealVectorValue>("interface_displacement_jump"))
+        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_displacement_jump"))
 {
-}
-
-void
-CZMComputeLocalTractionIncremental::initQpStatefulProperties()
-{
-  _interface_traction[_qp] = 0;
 }
 
 void

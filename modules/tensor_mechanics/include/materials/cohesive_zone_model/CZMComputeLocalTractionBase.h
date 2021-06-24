@@ -27,10 +27,14 @@ public:
   CZMComputeLocalTractionBase(const InputParameters & parameters);
 
 protected:
+  void initQpStatefulProperties() override;
   void computeQpProperties() override;
 
   /// Compute the local traction and derivatives. This method should fill the _interface_traction and _dinterface_traction_djump varaibles
   virtual void computeInterfaceTractionAndDerivatives() = 0;
+
+  /// Base name of the material system
+  const std::string _base_name;
 
   /// the value of the traction in local coordinates
   MaterialProperty<RealVectorValue> & _interface_traction;

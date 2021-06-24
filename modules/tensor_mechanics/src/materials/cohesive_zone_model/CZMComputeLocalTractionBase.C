@@ -20,16 +20,27 @@ CZMComputeLocalTractionBase::validParams()
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
   params.suppressParameter<bool>("use_displaced_mesh");
+  params.addParam<std::string>("base_name", "Material property base name");
   return params;
 }
 
 CZMComputeLocalTractionBase::CZMComputeLocalTractionBase(const InputParameters & parameters)
   : InterfaceMaterial(parameters),
-    _interface_traction(declareProperty<RealVectorValue>("interface_traction")),
-    _dinterface_traction_djump(declareProperty<RankTwoTensor>("dinterface_traction_djump")),
+    _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
+                   ? getParam<std::string>("base_name") + "_"
+                   : ""),
+    _interface_traction(declareProperty<RealVectorValue>(_base_name + "interface_traction")),
+    _dinterface_traction_djump(
+        declareProperty<RankTwoTensor>(_base_name + "dinterface_traction_djump")),
     _interface_displacement_jump(
-        getMaterialProperty<RealVectorValue>("interface_displacement_jump"))
+        getMaterialProperty<RealVectorValue>(_base_name + "interface_displacement_jump"))
 {
+}
+
+void
+CZMComputeLocalTractionBase::initQpStatefulProperties()
+{
+  _interface_traction[_qp] = 0;
 }
 
 void
