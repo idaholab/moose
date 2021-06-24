@@ -32,10 +32,6 @@ v_in=1
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [rho]
     type = MooseVariableFVReal

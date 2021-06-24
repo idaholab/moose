@@ -29,7 +29,6 @@ superficial_vel_in=${fparse u_in * eps}
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
 []
 

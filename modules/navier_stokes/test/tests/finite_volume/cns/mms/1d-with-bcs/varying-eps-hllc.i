@@ -21,7 +21,6 @@
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
 []
 
@@ -212,9 +211,7 @@
 
 [Executioner]
   solve_type = NEWTON
-  type = Transient
-  num_steps = 1
-  dtmin = 1
+  type = Steady
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   nl_max_its = 50

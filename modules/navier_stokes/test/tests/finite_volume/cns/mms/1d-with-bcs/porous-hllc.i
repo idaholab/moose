@@ -22,10 +22,6 @@ eps=0.9
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [rho]
     type = MooseVariableFVReal

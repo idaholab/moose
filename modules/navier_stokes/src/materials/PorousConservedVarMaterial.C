@@ -20,7 +20,7 @@ InputParameters
 PorousConservedVarMaterial::validParams()
 {
   auto params = Material::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::total_energy_density, "total fluid energy");
   params.addRequiredCoupledVar(NS::superficial_momentum_x, "The x-momentum times the porosity");

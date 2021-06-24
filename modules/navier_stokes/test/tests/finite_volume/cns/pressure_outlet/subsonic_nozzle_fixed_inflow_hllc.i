@@ -1,9 +1,15 @@
-inlet_vel = 1.2
+inlet_vel = 120
 rho_in = 0.8719748696
 H_in = 4.0138771448e+05
+gamma = 1.4
+R = 8.3145
+molar_mass = 29e-3
+R_specific = ${fparse R / molar_mass}
+cp = ${fparse gamma * R_specific / (gamma - 1)}
+cv = ${fparse cp / gamma}
+T_in = ${fparse H_in / gamma / cv}
 
 mass_flux = ${fparse inlet_vel * rho_in}
-enthalpy_flux = ${fparse inlet_vel * rho_in * H_in}
 
 outlet_pressure = 0.9e5
 
@@ -43,14 +49,12 @@ outlet_pressure = 0.9e5
     order = CONSTANT
     fv = true
     initial_condition = 1e-4
-    outputs = none
   []
 
   [rho_v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    outputs = none
   []
 
   [rho_E]
@@ -110,64 +114,75 @@ outlet_pressure = 0.9e5
 []
 
 [FVBCs]
-  ## inflow stagnation boundaries
-  [mass_stagnation_inflow]
-    type = FVNeumannBC
+  ## inflow boundaries
+  [mass_inflow]
+    type = CNSFVHLLCSpecifiedMassFluxAndTemperatureMassBC
     variable = rho
-    value = ${mass_flux}
     boundary = left
+    rhou = ${mass_flux}
+    rhov = 0
+    temperature = ${T_in}
   []
 
-  [momentum_x_stagnation_inflow]
-    type = CNSFVHLLCMomentumImplicitBC
+  [momentum_x_inflow]
+    type = CNSFVHLLCSpecifiedMassFluxAndTemperatureMomentumBC
     variable = rho_u
-    momentum_component = x
     boundary = left
+    rhou = ${mass_flux}
+    rhov = 0
+    temperature = ${T_in}
+    momentum_component = x
   []
 
-  [momentum_y_stagnation_inflow]
-    type = CNSFVHLLCMomentumImplicitBC
+  [momentum_y_inflow]
+    type = CNSFVHLLCSpecifiedMassFluxAndTemperatureMomentumBC
     variable = rho_v
+    boundary = left
+    rhou = ${mass_flux}
+    rhov = 0
+    temperature = ${T_in}
     momentum_component = y
-    boundary = left
   []
 
-  [fluid_energy_stagnation_inflow]
-    type = FVNeumannBC
+  [fluid_energy_inflow]
+    type = CNSFVHLLCSpecifiedMassFluxAndTemperatureFluidEnergyBC
     variable = rho_E
-    value = ${enthalpy_flux}
     boundary = left
+    rhou = ${mass_flux}
+    rhov = 0
+    temperature = ${T_in}
   []
 
-  ## outflow implicit conditions
+  ## outflow conditions
   [mass_outflow]
-    type = CNSFVHLLCMassImplicitBC
+    type = CNSFVHLLCSpecifiedPressureMassBC
     variable = rho
     boundary = right
+    p = ${outlet_pressure}
   []
 
-  # outflow explicit pressure boundary condition
   [momentum_x_outflow]
-    type = CNSFVHLLCMomentumSpecifiedPressureBC
+    type = CNSFVHLLCSpecifiedPressureMomentumBC
     variable = rho_u
-    momentum_component = x
-    specified_pressure_function = ${outlet_pressure}
     boundary = right
+    momentum_component = x
+    p = ${outlet_pressure}
   []
 
   [momentum_y_outflow]
-    type = CNSFVHLLCMomentumSpecifiedPressureBC
+    type = CNSFVHLLCSpecifiedPressureMomentumBC
     variable = rho_v
-    momentum_component = y
-    specified_pressure_function = ${outlet_pressure}
     boundary = right
+    momentum_component = y
+    p = ${outlet_pressure}
   []
 
   [fluid_energy_outflow]
-    type = CNSFVHLLCFluidEnergyImplicitBC
+    type = CNSFVHLLCSpecifiedPressureFluidEnergyBC
     variable = rho_E
     boundary = right
-  []
+    p = ${outlet_pressure}
+    []
 
   # wall conditions
   [momentum_x_pressure_wall]
@@ -206,7 +221,7 @@ outlet_pressure = 0.9e5
   [layered_Ma_UO]
     type = LayeredAverage
     variable = Ma
-    num_layers = 100
+    num_layers = 10
     direction = x
   []
 []
@@ -277,11 +292,18 @@ outlet_pressure = 0.9e5
 
 [Executioner]
   type = Transient
-  #end_time = 100
-  num_steps = 10
-  dt = 1e-2
+  end_time = 10
+  solve_type = NEWTON
+  nl_abs_tol = 1e-7
   [TimeIntegrator]
     type = ImplicitEuler
+  []
+
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 5e-3
+    optimal_iterations = 6
+    growth_factor = 1.5
   []
 []
 
@@ -297,5 +319,8 @@ outlet_pressure = 0.9e5
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    execute_on = 'final'
+  []
 []

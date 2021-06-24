@@ -30,7 +30,7 @@ x_sep = 35
   [./wall]
     type = SideSetsBetweenSubdomainsGenerator
     input = cartesian
-    master_block = 1
+    primary_block = 1
     paired_block = 0
     new_boundary = 'wall'
   [../]

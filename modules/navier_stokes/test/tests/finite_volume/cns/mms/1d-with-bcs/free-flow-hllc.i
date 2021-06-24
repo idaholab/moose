@@ -20,10 +20,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [rho]
     type = MooseVariableFVReal
@@ -58,7 +54,6 @@
   [mass_advection]
     type = CNSFVMassHLLC
     variable = rho
-    fp = fp
   []
   [mass_fn]
     type = FVBodyForce
@@ -70,7 +65,6 @@
     type = CNSFVMomentumHLLC
     variable = rho_u
     momentum_component = x
-    fp = fp
   []
   [momentum_fn]
     type = FVBodyForce
@@ -81,7 +75,6 @@
   [fluid_energy_advection]
     type = CNSFVFluidEnergyHLLC
     variable = rho_et
-    fp = fp
   []
   [energy_fn]
     type = FVBodyForce
@@ -145,38 +138,38 @@
 []
 
 [Functions]
-[exact_rho]
-  type = ParsedFunction
-  value = '3.48788261470924*cos(x)'
-[]
-[forcing_rho]
-  type = ParsedFunction
-  value = '-3.83667087618017*sin(1.1*x)'
-[]
-[exact_rho_u]
-  type = ParsedFunction
-  value = '3.48788261470924*cos(1.1*x)'
-[]
-[forcing_rho_u]
-  type = ParsedFunction
-  value = '-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) + 3.48788261470924*sin(x)*cos(1.1*x)^2/cos(x)^2 - 7.67334175236034*sin(1.1*x)*cos(1.1*x)/cos(x)'
-[]
-[exact_rho_et]
-  type = ParsedFunction
-  value = '26.7439413073546*cos(1.2*x)'
-[]
-[forcing_rho_et]
-  type = ParsedFunction
-  value = '1.0*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(x)*cos(1.1*x)/cos(x)^2 - 1.1*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(1.1*x)/cos(x) + 1.0*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) - 32.0927295688256*sin(1.2*x))*cos(1.1*x)/cos(x)'
-[]
-[exact_T]
-  type = ParsedFunction
-  value = '0.0106975765229418*cos(1.2*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
-[]
-[exact_p]
-  type = ParsedFunction
-  value = '3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
-[]
+  [exact_rho]
+    type = ParsedFunction
+    value = '3.48788261470924*cos(x)'
+  []
+  [forcing_rho]
+    type = ParsedFunction
+    value = '-3.83667087618017*sin(1.1*x)'
+  []
+  [exact_rho_u]
+    type = ParsedFunction
+    value = '3.48788261470924*cos(1.1*x)'
+  []
+  [forcing_rho_u]
+    type = ParsedFunction
+    value = '-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) + 3.48788261470924*sin(x)*cos(1.1*x)^2/cos(x)^2 - 7.67334175236034*sin(1.1*x)*cos(1.1*x)/cos(x)'
+  []
+  [exact_rho_et]
+    type = ParsedFunction
+    value = '26.7439413073546*cos(1.2*x)'
+  []
+  [forcing_rho_et]
+    type = ParsedFunction
+    value = '1.0*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(x)*cos(1.1*x)/cos(x)^2 - 1.1*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(1.1*x)/cos(x) + 1.0*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) - 32.0927295688256*sin(1.2*x))*cos(1.1*x)/cos(x)'
+  []
+  [exact_T]
+    type = ParsedFunction
+    value = '0.0106975765229418*cos(1.2*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = '3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
+  []
 []
 
 [Executioner]

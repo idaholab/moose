@@ -35,7 +35,6 @@ friction_coeff=10
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
 []
 

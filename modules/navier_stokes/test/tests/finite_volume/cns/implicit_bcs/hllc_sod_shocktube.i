@@ -34,10 +34,6 @@ middle = 0.5
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [rho]
     order = CONSTANT
