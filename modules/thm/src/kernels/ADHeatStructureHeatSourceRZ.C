@@ -21,10 +21,3 @@ ADHeatStructureHeatSourceRZ::computeQpResidual()
   const ADReal circumference = computeCircumference(_q_point[_qp]);
   return circumference * ADHeatStructureHeatSource::computeQpResidual();
 }
-
-Real
-ADHeatStructureHeatSourceRZ::computeQpJacobian()
-{
-  const Real circumference = computeCircumference(_q_point[_qp]);
-  return circumference * ADHeatStructureHeatSource::computeQpJacobian();
-}

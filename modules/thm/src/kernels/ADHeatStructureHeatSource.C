@@ -5,7 +5,7 @@ registerMooseObject("THMApp", ADHeatStructureHeatSource);
 InputParameters
 ADHeatStructureHeatSource::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addRequiredParam<Real>("num_units", "The number of units");

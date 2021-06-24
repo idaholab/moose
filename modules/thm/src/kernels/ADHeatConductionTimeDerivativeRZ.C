@@ -20,5 +20,5 @@ ADReal
 ADHeatConductionTimeDerivativeRZ::precomputeQpResidual()
 {
   const ADReal circumference = computeCircumference(_q_point[_qp]);
-  return circumference * ADHeatConductionTimeDerivative::computeQpResidual();
+  return circumference * ADHeatConductionTimeDerivative::precomputeQpResidual();
 }

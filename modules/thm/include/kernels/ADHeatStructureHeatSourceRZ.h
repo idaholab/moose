@@ -13,7 +13,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual();
-  virtual Real computeQpJacobian();
 
 public:
   static InputParameters validParams();

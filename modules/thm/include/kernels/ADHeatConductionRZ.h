@@ -1,18 +1,18 @@
 #pragma once
 
-#include "HeatConduction.h"
+#include "ADHeatConduction.h"
 #include "RZSymmetry.h"
 
 /**
  * Heat conduction kernel in arbitrary RZ symmetry
  */
-class ADHeatConductionRZ : public HeatConductionKernel, public RZSymmetry
+class ADHeatConductionRZ : public ADHeatConduction, public RZSymmetry
 {
 public:
   ADHeatConductionRZ(const InputParameters & parameters);
 
 protected:
-  virtual ADReal precomputeQpResidual();
+  virtual ADRealVectorValue precomputeQpResidual();
 
 public:
   static InputParameters validParams();
