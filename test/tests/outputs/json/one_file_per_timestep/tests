@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#18133'
+  design = 'JSONOutput.md'
+  [basic]
+    type = JSONDiff
+    input = json.i
+    jsondiff = 'json_out_0000.json json_out_0001.json json_out_0002.json json_out_0003.json'
+
+    requirement = "The system shall support creating unique JSON output files per timestep."
+  []
+[]
