@@ -1,0 +1,23 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "test": {
+                    "info": {
+                        "name": "test",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "year",
+                            "type": "int",
+                            "value": 1980
+                        }
+                    ]
+                }
+            },
+            "time": 3.0,
+            "time_step": 3
+        }
+    ]
+}
