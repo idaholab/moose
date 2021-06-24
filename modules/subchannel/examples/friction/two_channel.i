@@ -4,8 +4,8 @@ P_out = 155e+5 # Pa
 
 [Mesh]
   type = BetterQuadSubChannelMesh
-  nx = 2
-  ny = 1
+  nx = 1
+  ny = 2
   n_cells = 100
   n_blocks = 1
   pitch = 0.0126
@@ -19,7 +19,7 @@ P_out = 155e+5 # Pa
 [Functions]
   [S_fn]
     type = ParsedFunction
-    value = if(x>0.0,0.002,0.001)
+    value = if(y>0.0,0.002,0.001)
   []
 []
 
@@ -259,5 +259,12 @@ P_out = 155e+5 # Pa
     direction = to_multiapp
     source_variable = q_prime
     variable = q_prime
+  []
+  [xfer_S]
+    type = MultiAppNearestNodeTransfer
+    multi_app = pretty_mesh
+    direction = to_multiapp
+    source_variable = S
+    variable = S
   []
 []

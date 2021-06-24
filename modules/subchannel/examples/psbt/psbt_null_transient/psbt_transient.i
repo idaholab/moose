@@ -306,4 +306,11 @@ P_out = 4.923e6 # Pa
     source_variable = q_prime
     variable = q_prime
   []
+  [xfer_S]
+    type = MultiAppNearestNodeTransfer
+    multi_app = pretty_mesh
+    direction = to_multiapp
+    source_variable = S
+    variable = S
+  []
 []
