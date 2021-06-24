@@ -1,13 +1,11 @@
-# Finite Volume Navier Stokes
-
-## Incompressible
+# Incompressible Finite Volume Navier Stokes
 
 MOOSE's Incompressible Navier Stokes Finite Volume (INSFV) implementation uses a
 colocated grid. To suppress the checkerboard pattern in the pressure field,
 `INSFV` objects support a Rhie-Chow interpolation for the velocity. Users can get
 a feel for INSFV by looking at some tests.
 
-### Lid Driven Cavity Flow
+## Lid Driven Cavity Flow
 
 This example solves the INS equations for mass, momentum, and energy in a closed
 cavity. Because there are no inlet or outlet boundaries, one pressure degree of
@@ -21,7 +19,7 @@ test functions.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/lid-driven-with-energy.i
 
-### Channel Flow
+## Channel Flow
 
 There are examples of both no-slip and free-slip channel flow. The only
 difference between the two inputs is in the boundary condition block. For the
@@ -63,7 +61,7 @@ more appropriate outflow conditions.
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc.i
 
 
-### Axisymmetric Channel Flow
+## Axisymmetric Channel Flow
 
 Channel flow in axisymmetric coordinates is also implemented. Below is an
 example of solving the no-slip problem using an `average` interpolation for the
