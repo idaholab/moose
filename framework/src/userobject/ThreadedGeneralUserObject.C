@@ -9,6 +9,12 @@
 
 #include "ThreadedGeneralUserObject.h"
 
+InputParameters
+ThreadedGeneralUserObject::validParams()
+{
+  return GeneralUserObject::validParams();
+}
+
 ThreadedGeneralUserObject::ThreadedGeneralUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters)
 {
