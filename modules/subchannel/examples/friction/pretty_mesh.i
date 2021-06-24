@@ -1,7 +1,7 @@
 [Mesh]
-  type = BetterDetailedSubChannelMesh
-  nx = 2
-  ny = 1
+  type = BetterDetailedQuadSubChannelMesh
+  nx = 1
+  ny = 2
   n_cells = 50
   n_blocks = 1
   pitch = 0.0126

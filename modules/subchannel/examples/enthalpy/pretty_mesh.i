@@ -1,5 +1,5 @@
 [Mesh]
-  type = BetterDetailedSubChannelMesh
+  type = BetterDetailedQuadSubChannelMesh
   nx = 2
   ny = 1
   n_cells = 50
