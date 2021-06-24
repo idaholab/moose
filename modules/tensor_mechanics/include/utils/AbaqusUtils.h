@@ -11,24 +11,6 @@
 
 #include "ParallelUniqueId.h"
 
-extern "C" void getnumcpus_(int * num);
-extern "C" void getrank_(int * rank);
-
-extern "C" int
-getcommunicator_()
-{
-  mooseWarning("GETCOMMUNICATOR() is not implemented");
-  return 0;
-}
-
-extern "C" int getnumthreads_();
-extern "C" int get_thread_id_();
-
-extern "C" int getoutdir_();
-
-extern "C" void
-stdb_abqerr_(int * lop, char * format, int * intv, double * realv, char * charv, int format_len);
-
 class AbaqusUtils
 {
 public:

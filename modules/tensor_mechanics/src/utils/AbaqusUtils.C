@@ -23,7 +23,7 @@ AbaqusUtils::setCommunicator(const libMesh::Parallel::Communicator * communicato
   _communicator = communicator;
 }
 
-void
+__attribute__((visibility("default"))) extern "C" void
 getnumcpus_(int * num)
 {
   auto communicator = AbaqusUtils::getCommunicator();
@@ -32,14 +32,14 @@ getnumcpus_(int * num)
 
 // Threads
 
-void
+__attribute__((visibility("default"))) extern "C" void
 getrank_(int * rank)
 {
   auto communicator = AbaqusUtils::getCommunicator();
   *rank = communicator->rank();
 }
 
-int
+__attribute__((visibility("default"))) extern "C" int
 getnumthreads_()
 {
 #if defined(LIBMESH_HAVE_TBB_API) ||                                                               \
@@ -50,7 +50,7 @@ getnumthreads_()
 #endif
 }
 
-int
+__attribute__((visibility("default"))) extern "C" int
 get_thread_id_()
 {
   ParallelUniqueId puid;
@@ -74,7 +74,7 @@ AbaqusUtils::setOutputDir(const std::string & output_dir)
   _output_dir = output_dir;
 }
 
-void
+__attribute__((visibility("default"))) extern "C" void
 getoutdir_(char * dir, unsigned int * len)
 {
   auto output_dir = AbaqusUtils::getOutputDir();
@@ -85,8 +85,9 @@ getoutdir_(char * dir, unsigned int * len)
 
 // error/warning/info message output
 
-void
-stdb_abqerr_(int * lop, char * format, int * intv, double * realv, char * charv, int format_len)
+__attribute__((visibility("default"))) extern "C" void
+stdb_abqerr_(
+    int * lop, char * format, int * intv, double * realv, char * charv, std::size_t format_len)
 {
   std::string message;
   unsigned int int_index = 0;

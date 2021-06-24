@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusUExternalDB.h"
+#include "AbaqusUtils.h"
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -30,23 +31,29 @@ AbaqusUExternalDB::validParams()
 AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
     _plugin(getParam<FileName>("plugin")),
-    _library(std::string("-") + QUOTE(METHOD) + ".plugin"),
+    _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _uexternaldb(_library.getFunction<uexternaldb_t>("uexternaldb_")),
     _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag())
 {
+  AbaqusUtils::setOutputDir(_app.getOutputFileBase(true));
 }
 
 void
 AbaqusUExternalDB::execute()
 {
+  if (_current_execute_on_flag == EXEC_INITAL)
+    callPlugin(0);
+
+  // TODO support 2 -> trigger saving for restart
+
   if (_current_execute_on_flag == EXEC_FINAL)
     callPlugin(3);
 
   if (_current_execute_on_flag == EXEC_TIMESTEP_BEGIN)
-    callPlugin(5);
+    callPlugin(1);
 
   if (_current_execute_on_flag == EXEC_TIMESTEP_END)
-    callPlugin(6);
+    callPlugin(2);
 }
 
 void
