@@ -420,14 +420,14 @@ std::string
 Parser::getPrimaryFileName(bool stripLeadingPath) const
 {
   if (!stripLeadingPath)
-    return _input_filenames[0];
+    return _input_filenames.back();
 
   std::string filename;
-  size_t pos = _input_filenames[0].find_last_of('/');
+  size_t pos = _input_filenames.back().find_last_of('/');
   if (pos != std::string::npos)
-    filename = _input_filenames[0].substr(pos + 1);
+    filename = _input_filenames.back().substr(pos + 1);
   else
-    filename = _input_filenames[0];
+    filename = _input_filenames.back();
 
   return filename;
 }
