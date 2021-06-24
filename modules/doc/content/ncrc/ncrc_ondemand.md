@@ -1,99 +1,88 @@
-# HPC OnDemand
+## Submission and Job Information
 
-[HPC OnDemand](https://hpcondemand.inl.gov/pun/sys/dashboard), is a service provided by the INL, which allows a user direct access to the resources contained within the HPC enclave via their web browser. In order to utilize this service, you must first [request an account](https://modsimcode.inl.gov/SitePages/Home.aspx).
 
-Once your request has been accepted, and you have been given the necessary credentials provided by the HPC team, head on over to [HPC OnDemand](https://hpcondemand.inl.gov/pun/sys/dashboard).
+The recommended way for Level 1 users to submit jobs to INL HPC is through an OnDemand form prepared for this purpose.  The sections on this page provide details on how to properly fill in a submission form and submit a job. Figure 1 below provides a preview of the OnDemand interface with the NCRC menu item selected. Users will only have options to select codes for which they have a license.
 
-## Dashboard
+!media large_media/ncrc/landing_w_ncrc_menu.png style=width:80%;margin-left:10px caption=NCRC OnDemand Landing Page id=NCRC_land
 
-The Dashboard is your homepage when using HPC OnDemand. It will be the first page you see, after you log in.
 
-## Home Directory
+### Specifying a Project
 
-You can view your home directory by clicking File, Home Directory. This will launch a 'File Explorer' web browser tab.
 
-File Explorer is your access to the files contained within your home directory. From here, you can perform just about any file operation normally achieved as if browsing your files using a native file explorer. File Explorer will also allow you to download and upload files to and from your machine.
+Every job submission is required to have a project specified. This is normally entered with the PBS "-P" option. However, you do not need to enter "-P" here, just the project name. Project names must be selected from the list on [HPC Web](http://hpcweb.hpc.inl.gov/home/pbs#specifying-a-project). If more than one project name is appropriate, use your best judgment to choose the most applicable project name. If no project name is available that is applicable to your job, use one of the general-purpose technical area job names, e.g., “ne_gen” for nuclear energy applications (see Figure 2).
 
-## Jobs
 
-The Jobs menu allows you to create simple bash scripts to be executed on a selected HPC Cluster.
+!media large_media/ncrc/app_sub_1.png style=width:80%;margin-left:10px caption=Top part of the NCRC job submission form. id=NCRC_job_1
 
-!alert note
-This is not to be confused with Portable Batch System (PBS) jobs.
+### Input File
 
-## Clusters
 
-Clicking any item in this menu will launch an interactive shell terminal for that HPC machine. From here, you will be able to do anything you normally would with a native shell.
+This is the full path to your input file that will be submitted to the applicable executable. If your input file were to be submitted via the command line, it may look like:
 
-- #### Interactive Shell
+ ```bash
+ app-opt **-i input.i**
+ ```
 
-  One of the more exciting features of HPC OnDemand, is having a terminal-like window using a web browser:
+ You do not need the `app-opt -i` and you need the full path to your equivalent of `input.i`. The "Select File" button should open a dialog that will allow you to browse your INL HPC folder structure and manually select your input file to prevent typos in the full path to the input file (see Figure 2).
 
-  !media large_media/hpc/hpcondemand_terminal.png style=filter:drop-shadow(0 0 0.25rem black);
+## Advanced Code and Input Settings
 
-  With this prompt, you can launch jobs, build MOOSE, obtain a Civet-like testing environment (see below) and more.
 
-## Civet-like Environment on Rod id=rod-civet
+### Advanced Parameters
 
-Often times your code works on your machine, but fails continuous integration tests on Civet... If this happens to you, you may be surprised how easy it is to interactively simulate the same environment you see on our [build page](https://civet.inl.gov).
 
-Launch an Interactive Shell, to any of the Cluster machines as seen above, and then SSH into rod:
+By default, your submission of this form creates a basic submission command that gets submitted to the requested cluster.
 
-```bash
-ssh rod
-```
+ ```bash
+ app-opt -i /home/user/input.i
+ ```
 
-Next, launch `moosebuild`, to enter an interactive civet-like environment:
+ This form field allows you to add additional parameters. For example, if you wish to run performance logging, you can add a `-t` or `--timing` in this box and your application would then be executed as:
 
-```bash
-moosebuild
-```
+ ```bash
+ app-opt -t -i /home/user/input.i
+ app-opt --timing -i /home/user/input.i
+ ```
 
-You may notice some similarities (Civet uses moosebuild as well). The first thing you will want to do, is create the same environment Civet was operating with. To do this, visually scan the log from a build of interest on Civet, and look for a 'Loaded modules' line. It should be located within the first 20 lines or so. Example:
+ You are allowed to put more than one in this box. Everything that you put in this box will be entered between  `app-opt` and your input file `-i /home/user/input.i`.
 
-```language=yaml
-//: cp /home/moosetest/singularity/start_moosebuild.sh /home/moosetest/singularity/.civet_buildq5_start_moosebuild.3kI7O
-//: source /home/moosetest/singularity/.civet_buildq5_start_moosebuild.3kI7O
-//: Instructing Singularity to use default set forth by moosebuild: configs/release_build_Ubuntu-16
-//: mkdir -p /tmp/Ubuntu-16
-//: chmod o-rwx /tmp/Ubuntu-16
-//: mapping /tmp/Ubuntu-16 as /tmp within container
-//: mkdir /home/moosetest/singularity/civet_map_path/Ubuntu-16_15518_24741cf63767b610aeec7e69dcc51e8ff05b5ada
-//: Using moose-environment release: 6f3c438e838564d48bf591191986ef747f50c8e1
-//: ARCH=Ubuntu-16.04
-//: BUILD_DATE=20191104
-//: PR_VERSION=https://github.com/idaholab/package_builder/pull/213
-//: rm /home/moosetest/singularity/.civet_buildq5_start_moosebuild.3kI7O
-//: cp /tmp/tmpUn4yTG /tmp/Ubuntu-16/
-/tmp/: /opt/singularity/bin/singularity exec --no-home /home/moosetest/singularity/containers/Ubuntu-16.simg /tmp/tmpUn4yTG
-Loaded modules 'civet/.civet mpich-gcc-petsc_default-vtk advanced_modules autotools cmake'
-```
+ To get a full list and more explanation on these command line options, please see the [command line usage documentation](https://mooseframework.inl.gov/application_usage/command_line_usage.html).
 
-The information immediately following 'Loaded modules' is what you are looking for. Copy & Paste the contents of that line to load an identical environment to that of Civet's (without the quotes):
+### Specific Version Hash
 
-```bash
-module load civet/.civet mpich-gcc-petsc_default-vtk advanced_modules autotools cmake
-```
 
-You are now ready to clone, build, and troubleshoot your application just as Civet did. If all goes well (eh, poorly?), you should encounter the same error as Civet.
+This option allows you to run a specific build of the herd code. To get a list of the different version hashes that are allowed here, you can open a terminal on the appropriate cluster and run `module spider APP` and you will be presented with multiple versions of each herd application.
 
-!alert note title=Be courteous to other users on Rod
-Rod is a single standing workstation used by multiple people. Please only use for quick troubleshooting, or other light duty work. If you are wishing to run your app using moosebuild extensively, please see [Civet-like Environment on Cluster Nodes](hpc_ondemand.md#cluster-civet) below.
+## Working Directory Information
 
-## Civet-like Environment on Cluster Nodes id=cluster-civet
 
-If you need more compute power (perhaps a failure only occurs after many hours), know that moosebuild is also available on Sawtooth, Lemhi, and Falcon. A quick rundown on starting `moosebuild` on these machines is as follows, and once running, the above instructions detailing how to run on rod applies here (the following example is while running on Sawtooth):
+By default, your working directory is set to the same directory where your input file is located. You can change this if you would prefer a different directory by checking the checkbox and entering the new directory. You can also use the "Select Directory" button to get a file dialog box to select the directory instead of typing it out by hand.
 
-```bash
-module load pbs
-qsub -I -lselect=1:ncpus=48 -lwalltime=1:00:00 -P moose
-module load use.moose moosebuild
-moosebuild
-```
+!media large_media/ncrc/app_sub_2.png style=width:80%;margin-left:10px caption=Center part of the NCRC job submission form. id=NCRC_job_2
 
-!alert note
-Using moosebuild (or rather Singularity) in this fashion, limits you to only having the resources available on that one physical node. We are looking into how we might allow PBS to launch Singularity containers (wouldn't that be cool), but this feature is some ways out.
+## HPC Information
 
-# Command Line Access
 
-If you are more comforatable using the command line than the on demand interface, you may follow the instructions [here](ncrc/ncrc_binary.md)
+The HPC information section is an interactive form to create your scheduler submission.
+
+- Select the cluster you wish to run on. The amount of resources and the time you may request for your submission for will depend on the cluster.
+- Enter the number of hours for your request. If your submission finishes before the number of hours has passed, your job will end.
+- Enter the number of nodes for your job.
+- Select the number of cores for your job.
+- The following table shows the limitations of each system
+
+| Cluster  | Max Cores per Node | Max Hours |
+|----------|--------------------|--------------|
+| Falcon   | 36                 | 336          |
+| Lemhi    | 40                 | 72           |
+| Sawtooth | 48                 | 168          |
+
+
+### Advanced HPC Submission Settings
+
+
+By default, the scheduler decides how much memory to assign to the job if the amount of memory is not explicity provided. You can change this default behavior by clicking the "Show advanced HPC submission settings" checkbox and entering the amount of memory.
+
+You can also select the max amount of memory for a node if you would like to use all of a node. Selecting all of the cores for a node also provides the max amount of memory.
+
+!media large_media/ncrc/app_sub_3.png style=width:80%;margin-left:10px caption=Bottom part of the NCRC job submission form. id=NCRC_job_3

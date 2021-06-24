@@ -31,7 +31,7 @@ a browser setup with the correct settings, see [hpc_remote.md#socks-proxy].
 2. Login into INL-HPC.
 
    ```bash  style=background-color:#151B54
-   ssh <your hpc user id>@hpclogin
+   ssh <your hpc user id>@hpclogin.inl.gov
    ```
 
 ## Connect to an INL-HPC Machine
@@ -99,7 +99,7 @@ it to the remote, by running the following from your local machine, assuming you
 file "input.i" with the aforementioned content.
 
 ```bash  style=background-color:#151B54;
-scp /path/to/the/local/input.i <your hpc user id>@hpclogin:~/testing/input.i
+scp /path/to/the/local/input.i <your hpc user id>@hpclogin.inl.gov:~/testing/input.i
 ```
 
 ## Running Test Simulation
@@ -163,7 +163,7 @@ by copying the content from the remote machine to your local machine using `scp`
 to copy the output of this test run use the following command on your local machine.
 
 ```bash  style=background-color:#151B54;
-scp <your hpc user id>@hpclogin:~/testing/input_out.e /path/to/the/local/destination
+scp <your hpc user id>@hpclogin.inl.gov:~/testing/input_out.e /path/to/the/local/destination
 ```
 
 ## Scheduling Jobs with PBS
@@ -195,18 +195,18 @@ cd $PBS_O_WORKDIR
 source /etc/profile.d/modules.sh
 module load use.moose moose-apps PETSc BISON
 
-mpirun /apps/herd/bison/bison-opt -i input.i Mesh/uniform_refine=7
+mpirun /apps/herd/bison/bison-opt -i input.i Mesh/uniform_refine=2
 ```
 
-It is recommend that this script be created in the same location with the input file(s) it will be
-executed. This will ensure that the associated output from the simulation ends up in the same
+It is recommended that this script be created in the same location as input file(s) it will
+execute. This will ensure that the associated output from the simulation ends up in the same
 location. For this example the script is located in the testing folder: `~/testing/test.sh`.
 
 The [!ac](PBS) directives for this script include:
 
 1. `-N test_run` to set the job name;
-1. `-l select=1:ncpus=48:mpiprocs=48` indicates to utilize one compute (`select=1`), utilizing all
-   48 cores and run with 48 mpi processes;
+1. `-l select=1:ncpus=48:mpiprocs=48` indicates to utilize one compute node (`select=1`), utilizing all
+   48 cores and running with 48 mpi processes;
 1. `-l walltime=5:00` allocates 5 minutes of time for the simulation; and
 1. `-P moose` dictates that the job should part of the MOOSE queue. For a complete list
    of queues available see [HPC PBS page](https://hpcweb.hpc.inl.gov/home/pbs).
@@ -226,7 +226,7 @@ the problem a bit more suited for 48 cores.
 ### (2) Submit Script
 
 Submitting the job to the scheduler is trivial. First, be sure to log in to one the desired machines
-login nodes (e.g., `ssh sawtooth2). Change directories to the location of the script
+login nodes (e.g., `ssh sawtooth2`). Change directory to the location of the script
 and associated input files and then use the "qsub" command.
 
 ```bash
