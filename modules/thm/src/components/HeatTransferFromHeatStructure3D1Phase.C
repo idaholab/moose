@@ -108,9 +108,9 @@ HeatTransferFromHeatStructure3D1Phase::getFlowChannelAxisAlignment(
 {
   const FlowChannel1Phase & flow_channel = getComponentByName<FlowChannel1Phase>(flow_channel_name);
   RealVectorValue direction = flow_channel.getDirection().unit();
-  Real x_dir_norm = direction * RealVectorValue(1, 0, 0);
-  Real y_dir_norm = direction * RealVectorValue(0, 1, 0);
-  Real z_dir_norm = direction * RealVectorValue(0, 0, 1);
+  Real x_dir_norm = std::abs(direction * RealVectorValue(1, 0, 0));
+  Real y_dir_norm = std::abs(direction * RealVectorValue(0, 1, 0));
+  Real z_dir_norm = std::abs(direction * RealVectorValue(0, 0, 1));
   if (x_dir_norm == 1 && y_dir_norm == 0 && z_dir_norm == 0)
     return EAxisAlignment::X;
   else if (x_dir_norm == 0 && y_dir_norm == 1 && z_dir_norm == 0)

@@ -22,6 +22,15 @@
     max_time = 6000
     prereq = mesh
   []
+  [phy:conservation_ss_inv]
+    type = CSVDiff
+    input = 'phy.conservation_ss.i'
+    csvdiff = 'phy.conservation_ss.csv'
+    cli_args = "Components/fch/position='0 0 1' Components/fch/orientation='0 0 -1'"
+    abs_zero = 1e-6
+    max_time = 6000
+    prereq = mesh
+  []
   # Error checking
   [err:not_a_pipe]
     type = 'RunException'
