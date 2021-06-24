@@ -23,10 +23,13 @@ defineLegacyParams(Eigenvalue);
 InputParameters
 Eigenvalue::validParams()
 {
-  InputParameters params = Steady::validParams();
+  InputParameters params = Executioner::validParams();
 
   params.addClassDescription(
       "Eigenvalue solves a standard/generalized linear or nonlinear eigenvalue problem");
+
+  params += FEProblemSolve::validParams();
+  params.addParam<Real>("time", 0.0, "System time");
 
   // matrix_free will be an invalid for griffin once the integration is done.
   // In this PR, we can not change it. It will still be a valid option when users
@@ -79,6 +82,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Executioner(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh")),
+    _feproblem_solve(*this),
     _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
                                                  : nullptr),
     _system_time(getParam<Real>("time")),
@@ -103,7 +107,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
 
-  // _feproblem_solve calls FEProblemBase
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
   _time = _system_time;
 
@@ -238,19 +241,11 @@ Eigenvalue::execute()
 #endif // LIBMESH_ENABLE_AMR
     _eigen_problem.timestepSetup();
 
-    // This loop is for nonlinear multigrids (developed by Alex)
-    for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
+    _last_solve_converged = _fixed_point_solve->solve();
+    if (!lastSolveConverged())
     {
-      _last_solve_converged = _fixed_point_solve->solve();
-
-      if (!lastSolveConverged())
-      {
-        _console << "Aborting as solve did not converge\n";
-        break;
-      }
-
-      if (grid_step != _num_grid_steps)
-        _eigen_problem.uniformRefine();
+      _console << "Aborting as solve did not converge\n";
+      break;
     }
 
     // Compute markers and indicators only when we do have at least one adaptivity step

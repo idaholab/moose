@@ -25,6 +25,8 @@ EigenExecutionerBase::validParams()
   InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for eigenvalue problems.");
 
+  params += FEProblemSolve::validParams();
+
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");
   params.addParam<PostprocessorName>("normalization", "To evaluate |x| for normalization");
   params.addParam<Real>("normal_factor", "Normalize x to make |x| equal to this factor");
@@ -56,6 +58,7 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase())),
+    _feproblem_solve(*this),
     _eigenvalue(addAttributeReporter("eigenvalue", getParam<Real>("k0"))),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),
