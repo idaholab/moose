@@ -30,7 +30,7 @@ def bh02():
     f = open("gold/bh02.csv")
     data = [line.strip().split(",") for line in f.readlines()[1:]]
     f.close()
-    data = [map(float, line) for line in data if len(line) > 5]
+    data = [list(map(float, line)) for line in data if len(line) > 5]
     pfe = [(data[i][4], data[i][1] / (data[i][0] - data[i - 1][0]), data[i][5]) for i in range(1, len(data))]
     return pfe
 
@@ -50,7 +50,7 @@ def bh03():
     f = open("gold/bh03.csv")
     data = [line.strip().split(",") for line in f.readlines()[1:]]
     f.close()
-    data = [map(float, line) for line in data if len(line) > 5]
+    data = [list(map(float, line)) for line in data if len(line) > 5]
     pfe = [(data[i][4], data[i][1] / (data[i][0] - data[i - 1][0]), data[i][5]) for i in range(1, len(data))]
     return pfe
 
@@ -78,7 +78,7 @@ def bh04():
     f = open("gold/bh04.csv")
     data = [line.strip().split(",") for line in f.readlines()[1:]]
     f.close()
-    data = [map(float, line) for line in data if len(line) > 5]
+    data = [list(map(float, line)) for line in data if len(line) > 5]
     pfe = [(data[i][4], data[i][1] / (data[i][0] - data[i - 1][0]), data[i][5]) for i in range(1, len(data))]
     return pfe
 
@@ -106,7 +106,7 @@ def bh05():
     f = open("gold/bh05.csv")
     data = [line.strip().split(",") for line in f.readlines()[1:]]
     f.close()
-    data = [map(float, line) for line in data if len(line) > 5]
+    data = [list(map(float, line)) for line in data if len(line) > 5]
     pfe = [(data[i][4], data[i][1] / (data[i][0] - data[i - 1][0]), data[i][5]) for i in range(1, len(data))]
     return pfe
 
@@ -126,7 +126,7 @@ def bh07():
     f = open("gold/bh07_csv_pp_0003.csv")
     data = [line.strip().split(",") for line in f.readlines()[1:]]
     f.close()
-    data = [map(float, line) for line in data if len(line) > 3]
+    data = [list(map(float, line)) for line in data if len(line) > 3]
     xp = [(data[i][2], data[i][1]) for i in range(0, len(data), 10)]
     return xp
 
