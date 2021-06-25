@@ -78,7 +78,7 @@ getTotalRAM()
 bool
 getMemoryStats(Stats & stats)
 {
-  bool retval = true;
+  bool retval = false;
 
   enum StatItem
   {
@@ -91,6 +91,7 @@ getMemoryStats(Stats & stats)
   // inspect /proc
   std::ifstream stat_stream("/proc/self/stat", std::ios_base::in);
   std::array<std::size_t, 21> val;
+  val.fill(0);
 
   if (stat_stream)
   {
@@ -109,12 +110,11 @@ getMemoryStats(Stats & stats)
     // Handle the case where we didn't get enough values by just zeroing everything
     // since we probably got junk
     if (i != val.size())
-    {
-      retval = false; // Set an error return value
       val.fill(0);
-    }
+    else
+      retval = true;
 
-    // resident size is reported as number of pages in /proc
+      // resident size is reported as number of pages in /proc
 #ifndef __WIN32__
     val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
 #endif
@@ -130,6 +130,7 @@ getMemoryStats(Stats & stats)
       val.fill(0);
     else
     {
+      retval = true;
       val[index_page_faults] = pmc.PageFaultCount;
       val[index_virtual_size] = pmc.WorkingSetSize + pmc.PagefileUsage;
       val[index_resident_size] = pmc.WorkingSetSize;
@@ -148,6 +149,7 @@ getMemoryStats(Stats & stats)
                                   reinterpret_cast<task_info_t>(&t_info),
                                   &t_info_count))
     {
+      retval = true;
       val[index_virtual_size] = t_info.virtual_size;   // in bytes
       val[index_resident_size] = t_info.resident_size; // in bytes
     }

@@ -43,6 +43,7 @@ MooseEnum getMemUnitsEnum();
 std::size_t getTotalRAM();
 
 /// get all memory stats for the current process
+/// stats The Stats object to fill with the data
 /// @return true for success, false for failure
 bool getMemoryStats(Stats & stats);
 
