@@ -163,7 +163,7 @@ A Corey type of [relative permeability](porous_flow/relative_permeability.md) is
 
 !listing modules/porous_flow/examples/tutorial/11.i start=[relperm_water] end=[porosity]
 
-[Porosity](porous_flow/porosity.md) is chosen to depend on porepressures, saturations (actually just the effective porepressure), temperature and mechanical strain using:
+[Porosity](/porous_flow/porosity.md) is chosen to depend on porepressures, saturations (actually just the effective porepressure), temperature and mechanical strain using:
 
 !listing modules/porous_flow/examples/tutorial/11.i start=[porosity_mat] end=[permeability_aquifer]
 

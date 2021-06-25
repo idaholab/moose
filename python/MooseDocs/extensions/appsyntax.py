@@ -103,8 +103,8 @@ class AppSyntaxExtension(command.CommandExtension):
         config['visible'] = (['required', 'optional'],
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "Dictionary of syntax aliases.")
-        config['unregister'] = ({"Postprocessor":"UserObject/*", "AuxKernel":"Bounds/*"},
-                                "Dictionary of syntax to unregister (key='moose_base', value='parent_syntax')")
+        config['unregister'] = (None,
+                                "A `dict` or `dict` of `dict` including syntax to unregister (key='moose_base', value='parent_syntax')")
         config['external_icon'] = ('feedback', "Icon name for the alert title when unavailable syntax is located on an external page.")
         config['external_alert'] = ('warning', "Alert name when unavailable syntax is located on an external page.")
         return config

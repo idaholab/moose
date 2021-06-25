@@ -13,10 +13,13 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: fsi
         repo: https://github.com/idaholab/moose
-        home: /modules/fsi
+        home: /modules/fsi/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fsi
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/fsi/include

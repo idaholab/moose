@@ -4,6 +4,10 @@ Applications:
         app_types:
             - ContactApp
         content_directory: ${MOOSE_DIR}/modules/contact/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_missing_markdown: WARNING
 
 Documents:

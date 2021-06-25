@@ -2,7 +2,10 @@ Applications:
     stochastic_tools:
         exe_directory: ${MOOSE_DIR}/modules/stochastic_tools
         content_directory: ${MOOSE_DIR}/modules/stochastic_tools/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
             - ${MOOSE_DIR}/modules/stochastic_tools/doc/remove.yml
         log_stub_files: WARNING
 

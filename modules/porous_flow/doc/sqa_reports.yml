@@ -4,6 +4,8 @@ Applications:
         app_types:
             - PorousFlowApp
         content_directory: ${MOOSE_DIR}/modules/porous_flow/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
         log_stub_files: WARNING

@@ -30,7 +30,6 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: 'MOOSE'
         repo: https://github.com/idaholab/moose
-        home: https://www.mooseframework.org
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
             Getting Started: getting_started.menu.md
