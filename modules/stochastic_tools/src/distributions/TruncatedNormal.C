@@ -78,20 +78,17 @@ TruncatedNormal::quantile(const Real & p,
 Real
 TruncatedNormal::pdf(const Real & x) const
 {
-  TIME_SECTION(_perf_pdf);
   return pdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }
 
 Real
 TruncatedNormal::cdf(const Real & x) const
 {
-  TIME_SECTION(_perf_cdf);
   return cdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }
 
 Real
 TruncatedNormal::quantile(const Real & p) const
 {
-  TIME_SECTION(_perf_quantile);
   return quantile(p, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }

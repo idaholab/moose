@@ -161,20 +161,17 @@ KernelDensity1D::quantile(const Real & p,
 Real
 KernelDensity1D::pdf(const Real & x) const
 {
-  TIME_SECTION(_perf_pdf);
   return pdf(x, _bandwidth, _data, _kernel_function);
 }
 
 Real
 KernelDensity1D::cdf(const Real & x) const
 {
-  TIME_SECTION(_perf_cdf);
   return cdf(x, _bandwidth, _data, _kernel_function);
 }
 
 Real
 KernelDensity1D::quantile(const Real & p) const
 {
-  TIME_SECTION(_perf_quantile);
   return quantile(p, _bandwidth, _data, _kernel_function);
 }

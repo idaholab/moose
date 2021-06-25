@@ -51,20 +51,17 @@ Lognormal::quantile(const Real & p, const Real & location, const Real & scale)
 Real
 Lognormal::pdf(const Real & x) const
 {
-  TIME_SECTION(_perf_pdf);
   return pdf(x, _location, _scale);
 }
 
 Real
 Lognormal::cdf(const Real & x) const
 {
-  TIME_SECTION(_perf_cdf);
   return cdf(x, _location, _scale);
 }
 
 Real
 Lognormal::quantile(const Real & p) const
 {
-  TIME_SECTION(_perf_quantile);
   return quantile(p, _location, _scale);
 }
