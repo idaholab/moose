@@ -210,8 +210,9 @@ def get_civet_hashes(remote, start='HEAD', branch='master', author='moosetest', 
     merge_cmd = ['git', 'log', '--merges', '--author', author, '-n', '1', start]
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        subprocess.run(clone_cmd, capture_output=True, cwd=tmp_dir)
-        out = subprocess.run(merge_cmd, capture_output=True, text=True, cwd=os.path.join(tmp_dir, 'tmp'))
+        subprocess.run(clone_cmd, capture_output=True, text=True, check=True, cwd=tmp_dir)
+        out = subprocess.run(merge_cmd, capture_output=True, text=True, check=True,
+                             cwd=os.path.join(tmp_dir, 'tmp'))
 
         regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
         match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
