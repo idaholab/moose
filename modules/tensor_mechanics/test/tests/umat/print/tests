@@ -24,9 +24,10 @@
                  '10.0000000\n TIME_ 2   10.0000000\n CELENT 1.0000000\n CMNAME: umat_face           '
                  '                                                            \n NDI_ 3\n NSHR_ 3\n '
                  'NTENS_ 6\n NOEL_ 0\n NPT_ 2\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ 1\n'
-    requirement = 'The Abaqus UMAT interface shall be able to print out correct values for STRAN, '
-                  'DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, '
-                  'NOEL, NPT, KINC. Values are checked against verified references '
+    requirement = 'The Abaqus UMAT interface shall pass correct values for STRAN, DSTRAN, TIME, CMNAME, '
+                  'NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and KINC, when '
+                  'a single element is subjected to axial loading. Values are checked against '
+                  'verified references '
   []
 
   [print_shear]
@@ -77,8 +78,8 @@
                  '                                                            \n NDI_ 3\n NSHR_ 3\n '
                  'NTENS_ 6\n NOEL_ 0\n NPT_ 7\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ 1\n '
                  'FIELD1_-0.0043326\n FIELD2_ 0.0030091\n '
-    requirement = 'The Abaqus UMAT interface shall be able to print out correct values for STRAN, '
-                  'DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, '
-                  'NOEL, NPT, KINC. Values are checked against verified references '
+    requirement = 'The Abaqus UMAT interface shall pass the correct values for STRAN, DSTRAN, TIME, '
+                  'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
+                  'KINC, when shear deformation (causing nontrivial rotation kinematics) is present. '
   []
 []
