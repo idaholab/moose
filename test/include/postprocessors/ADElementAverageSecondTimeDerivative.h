@@ -12,7 +12,8 @@
 #include "ElementAverageValue.h"
 
 /**
- * This postprocessor computes a volume integral of the second time derivative of a given AD variable.
+ * This postprocessor computes a volume integral of the second time derivative of a given AD
+ * variable.
  */
 class ADElementAverageSecondTimeDerivative : public ElementAverageValue
 {

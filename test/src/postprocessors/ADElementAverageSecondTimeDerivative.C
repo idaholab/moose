@@ -21,7 +21,8 @@ ADElementAverageSecondTimeDerivative::validParams()
 
 ADElementAverageSecondTimeDerivative::ADElementAverageSecondTimeDerivative(
     const InputParameters & parameters)
-  : ElementAverageValue(parameters), _u_dotdot(_is_transient ? adCoupledDotDot("variable") : _ad_zero)
+  : ElementAverageValue(parameters),
+    _u_dotdot(_is_transient ? adCoupledDotDot("variable") : _ad_zero)
 {
 }
 
