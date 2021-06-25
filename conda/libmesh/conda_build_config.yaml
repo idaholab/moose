@@ -20,8 +20,8 @@ netcdf:
  - 4.6.2
 
 libpng:
-  - 1.6.37 h2573ce8_0 # [osx]
-  - 1.6.37 hed695b0_0 # [linux]
+  - 1.6.37 h7cec526_2 # [osx]
+  - 1.6.37 hed695b0_2 # [linux]
 
 moose_petsc:
  - 3.15.1 build_0
