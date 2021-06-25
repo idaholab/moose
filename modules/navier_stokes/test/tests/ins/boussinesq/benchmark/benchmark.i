@@ -118,7 +118,7 @@ temp_ref=${fparse hot_temp / 2.}
   [momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
     integrate_p_by_parts = true
   []
   [./buoyancy]

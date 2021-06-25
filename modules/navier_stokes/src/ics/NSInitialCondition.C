@@ -24,6 +24,8 @@ NSInitialCondition::validParams()
 {
   InputParameters params = InitialCondition::validParams();
   params.addClassDescription("NSInitialCondition sets intial constant values for all variables.");
+  params.addParam<std::string>(
+      "pressure_variable_name", NS::pressure, "The name of the pressure variable");
   params.addRequiredParam<Real>("initial_pressure",
                                 "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature",
@@ -41,7 +43,8 @@ NSInitialCondition::NSInitialCondition(const InputParameters & parameters)
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _initial_velocity(getParam<RealVectorValue>("initial_velocity")),
-    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties")),
+    _pressure_variable_name(getParam<std::string>("pressure_variable_name"))
 {
 }
 
@@ -64,7 +67,7 @@ NSInitialCondition::value(const Point & /*p*/)
   if (_var.name() == NS::mach_number)
     return _initial_velocity.norm() / _fp.c_from_v_e(v_initial, e_initial);
 
-  if (_var.name() == NS::pressure)
+  if (_var.name() == _pressure_variable_name)
     return _initial_pressure;
 
   if (_var.name() == NS::density)

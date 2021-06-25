@@ -241,7 +241,7 @@ mu=18.23e-6
 [Materials]
   [var_mat]
     type = PorousMixedVarMaterial
-    p = pressure
+    pressure = pressure
     T_fluid = T_fluid
     superficial_rhou = sup_rho_u
     superficial_rhov = sup_rho_v

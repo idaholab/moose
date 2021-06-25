@@ -107,7 +107,7 @@ x_sep = 35
   [./p_aux]
     type = ADMaterialRealAux
     variable = p
-    property = p
+    property = pressure
   [../]
 
   [./v_norm_aux]

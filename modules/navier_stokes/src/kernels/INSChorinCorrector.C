@@ -9,6 +9,7 @@
 
 #include "INSChorinCorrector.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSChorinCorrector);
 
@@ -23,7 +24,8 @@ INSChorinCorrector::validParams()
   params.addRequiredCoupledVar("u_star", "star x-velocity");
   params.addCoupledVar("v_star", "star y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w_star", "star z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   // Required parameters
   params.addRequiredParam<unsigned>(
@@ -45,13 +47,13 @@ INSChorinCorrector::INSChorinCorrector(const InputParameters & parameters)
     _w_vel_star(_mesh.dimension() == 3 ? coupledValue("w_star") : _zero),
 
     // Pressure gradient
-    _grad_p(coupledGradient("p")),
+    _grad_p(coupledGradient(NS::pressure)),
 
     // Variable numberings
     _u_vel_star_var_number(coupled("u_star")),
     _v_vel_star_var_number(_mesh.dimension() >= 2 ? coupled("v_star") : libMesh::invalid_uint),
     _w_vel_star_var_number(_mesh.dimension() == 3 ? coupled("w_star") : libMesh::invalid_uint),
-    _p_var_number(coupled("p")),
+    _p_var_number(coupled(NS::pressure)),
 
     // Required parameters
     _component(getParam<unsigned>("component")),

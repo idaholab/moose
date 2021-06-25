@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "INSADObjectTracker.h"
 #include "FEProblemBase.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumPressure);
 
@@ -19,7 +20,8 @@ INSADMomentumPressure::validParams()
 {
   InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription("Adds the pressure term to the INS momentum equation");
-  params.addRequiredCoupledVar("p", "The pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addParam<bool>(
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts");
   return params;
@@ -28,8 +30,8 @@ INSADMomentumPressure::validParams()
 INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
-    _p(adCoupledValue("p")),
-    _grad_p(adCoupledGradient("p")),
+    _p(adCoupledValue(NS::pressure)),
+    _grad_p(adCoupledGradient(NS::pressure)),
     _coord_sys(_assembly.coordSystem())
 {
   // Bypass the UserObjectInterface method because it requires a UserObjectName param which we

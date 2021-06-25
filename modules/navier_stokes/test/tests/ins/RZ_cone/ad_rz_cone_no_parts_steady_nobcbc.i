@@ -60,7 +60,7 @@
   [./momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
   [../]
 []
 
@@ -95,7 +95,7 @@
   [outlet]
     type = INSADMomentumNoBCBC
     variable = velocity
-    p = p
+    pressure = p
     boundary = 'top'
   []
 []

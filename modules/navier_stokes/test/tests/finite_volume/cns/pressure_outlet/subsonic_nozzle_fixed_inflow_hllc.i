@@ -158,7 +158,7 @@ outlet_pressure = 0.9e5
     type = CNSFVHLLCSpecifiedPressureMassBC
     variable = rho
     boundary = right
-    p = ${outlet_pressure}
+    pressure = ${outlet_pressure}
   []
 
   [momentum_x_outflow]
@@ -166,7 +166,7 @@ outlet_pressure = 0.9e5
     variable = rho_u
     boundary = right
     momentum_component = x
-    p = ${outlet_pressure}
+    pressure = ${outlet_pressure}
   []
 
   [momentum_y_outflow]
@@ -174,14 +174,14 @@ outlet_pressure = 0.9e5
     variable = rho_v
     boundary = right
     momentum_component = y
-    p = ${outlet_pressure}
+    pressure = ${outlet_pressure}
   []
 
   [fluid_energy_outflow]
     type = CNSFVHLLCSpecifiedPressureFluidEnergyBC
     variable = rho_E
     boundary = right
-    p = ${outlet_pressure}
+    pressure = ${outlet_pressure}
     []
 
   # wall conditions
@@ -237,7 +237,7 @@ outlet_pressure = 0.9e5
   [p_aux]
     type = ADMaterialRealAux
     variable = p
-    property = p
+    property = pressure
   []
 
   [Ma_layered_aux]

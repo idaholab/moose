@@ -123,7 +123,7 @@
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'mass'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [momentum_right]
     variable = sup_vel_x
@@ -131,14 +131,14 @@
     boundary = right
     eqn = 'momentum'
     momentum_component = 'x'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [energy_right]
     variable = T_fluid
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'energy'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
 
   # help gradient reconstruction
@@ -165,7 +165,7 @@
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    p = pressure
+    pressure = pressure
     superficial_vel_x = sup_vel_x
     T_fluid = T_fluid
     porosity = porosity

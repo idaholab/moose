@@ -208,14 +208,14 @@ u_in=1
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = pressure
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = sup_vel_x
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -223,7 +223,7 @@ u_in=1
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = T_fluid
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'energy'
   []
 
@@ -270,7 +270,7 @@ u_in=1
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    p = pressure
+    pressure = pressure
     T_fluid = T_fluid
     superficial_vel_x = sup_vel_x
     porosity = porosity

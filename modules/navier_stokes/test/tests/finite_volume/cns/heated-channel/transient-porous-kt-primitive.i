@@ -142,14 +142,14 @@ superficial_vel_in=${fparse u_in * eps}
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = pressure
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'mass'
   []
   [rhou_right]
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = superficial_vel_x
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -157,7 +157,7 @@ superficial_vel_in=${fparse u_in * eps}
     type = PCNSFVStrongBC
     boundary = 'right'
     variable = temperature
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'energy'
   []
 
@@ -192,7 +192,7 @@ superficial_vel_in=${fparse u_in * eps}
 [Materials]
   [var_mat]
     type = PorousPrimitiveVarMaterial
-    p = pressure
+    pressure = pressure
     T_fluid = temperature
     superficial_vel_x = superficial_vel_x
     fp = fp

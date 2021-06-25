@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMomentumPressure.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumPressure);
 
@@ -17,7 +18,8 @@ INSFVMomentumPressure::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
-  params.addRequiredCoupledVar("p", "The pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -28,7 +30,7 @@ INSFVMomentumPressure::validParams()
 
 INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
   : FVElementalKernel(params),
-    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("p", 0))),
+    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -38,7 +40,7 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
 #endif
 
   if (!_p_var)
-    paramError("p", "p must be a finite volume variable");
+    paramError(NS::pressure, "p must be a finite volume variable");
 }
 
 ADReal

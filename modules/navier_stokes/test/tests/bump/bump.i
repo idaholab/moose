@@ -66,6 +66,7 @@
     initial_pressure = 101325.
     initial_temperature = 300.
     initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+    pressure_variable_name = "p"
   []
 []
 

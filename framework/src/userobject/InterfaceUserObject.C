@@ -12,6 +12,8 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
+#include "libmesh/remote_elem.h"
+
 InputParameters
 InterfaceUserObject::validParams()
 {

@@ -90,7 +90,7 @@ v_in=1
   [pressure]
     type = ADMaterialRealAux
     variable = pressure
-    property = p
+    property = pressure
     execute_on = 'timestep_end'
   []
   [temperature]
@@ -220,14 +220,14 @@ v_in=1
     type = PCNSFVStrongBC
     boundary = 'top'
     variable = rho
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'mass'
   []
   [rho_u_top]
     type = PCNSFVStrongBC
     boundary = 'top'
     variable = rho_u
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'x'
   []
@@ -235,7 +235,7 @@ v_in=1
     type = PCNSFVStrongBC
     boundary = 'top'
     variable = rho_v
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'momentum'
     momentum_component = 'y'
   []
@@ -243,14 +243,14 @@ v_in=1
     type = PCNSFVStrongBC
     boundary = 'top'
     variable = rho_et
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'energy'
   []
   [mass_frac_top]
     type = PCNSFVStrongBC
     boundary = 'top'
     variable = mass_frac
-    p = ${p_initial}
+    pressure = ${p_initial}
     eqn = 'scalar'
   []
 

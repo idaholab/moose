@@ -123,7 +123,7 @@
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'mass'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [momentum_right]
     variable = rho_ud
@@ -131,14 +131,14 @@
     boundary = right
     eqn = 'momentum'
     momentum_component = 'x'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [energy_right]
     variable = rho_et
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'energy'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
 
   # help gradient reconstruction

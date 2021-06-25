@@ -92,7 +92,7 @@
     type = INSADMomentumNoBCBC
     boundary = top
     variable = velocity
-    p = p
+    pressure = p
   [../]
   [./velocity_in]
     type = VectorFunctionDirichletBC
@@ -142,7 +142,7 @@
   [./momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
   [../]
 []
 

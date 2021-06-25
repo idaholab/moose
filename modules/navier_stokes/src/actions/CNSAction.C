@@ -86,6 +86,9 @@ CNSAction::validParams()
       "BoundaryCondition");
   params.addParamNamesToGroup(
       "family order density_scaling momentum_scaling total_energy_density_scaling", "Variable");
+  params.addParam<std::string>("pressure_variable_name",
+                               "A name for the pressure variable. If this is not provided, a "
+                               "sensible default will be used.");
   return params;
 }
 
@@ -105,7 +108,10 @@ CNSAction::CNSAction(InputParameters parameters)
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
-    _initial_velocity(getParam<RealVectorValue>("initial_velocity"))
+    _initial_velocity(getParam<RealVectorValue>("initial_velocity")),
+    _pressure_variable_name(isParamValid("pressure_variable_name")
+                                ? getParam<std::string>("pressure_variable_name")
+                                : "p")
 {
   if (_stagnation_pressure.size() != _stagnation_boundary.size())
     paramError("stagnation_pressure",
@@ -173,7 +179,7 @@ CNSAction::act()
       _problem->addAuxVariable(var_type, NS::velocity_y, base_params);
     if (_dim >= 3)
       _problem->addAuxVariable(var_type, NS::velocity_z, base_params);
-    _problem->addAuxVariable(var_type, NS::pressure, base_params);
+    _problem->addAuxVariable(var_type, _pressure_variable_name, base_params);
     _problem->addAuxVariable(var_type, NS::temperature, base_params);
     _problem->addAuxVariable(var_type, NS::specific_total_enthalpy, base_params);
     _problem->addAuxVariable(var_type, NS::mach_number, base_params);
@@ -266,7 +272,7 @@ CNSAction::act()
     if (_dim >= 3)
       auxs.push_back(NS::velocity_z);
 
-    auxs.push_back(NS::pressure);
+    auxs.push_back(_pressure_variable_name);
     auxs.push_back(NS::temperature);
     auxs.push_back(NS::specific_total_enthalpy);
     auxs.push_back(NS::mach_number);
@@ -282,6 +288,7 @@ CNSAction::act()
       params.set<Real>("initial_temperature") = _initial_temperature;
       params.set<RealVectorValue>("initial_velocity") = _initial_velocity;
       params.set<UserObjectName>("fluid_properties") = _fp_name;
+      params.set<std::string>("pressure_variable_name") = _pressure_variable_name;
       _problem->addInitialCondition("NSInitialCondition", name + std::string("_ic"), params);
     }
   }
@@ -431,7 +438,7 @@ CNSAction::addSpecificTotalEnthalpyAux()
   // coupled variables
   params.set<CoupledName>(NS::density) = {NS::density};
   params.set<CoupledName>(NS::total_energy_density) = {NS::total_energy_density};
-  params.set<CoupledName>(NS::pressure) = {NS::pressure};
+  params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
 
   _problem->addAuxKernel(kernel_type, "specific_total_enthalpy_auxkernel", params);
 }
@@ -458,7 +465,7 @@ void
 CNSAction::addPressureOrTemperatureAux(const std::string & kernel_type)
 {
   InputParameters params = _factory.getValidParams(kernel_type);
-  std::string var_name = (kernel_type == "PressureAux" ? NS::pressure : NS::temperature);
+  std::string var_name = (kernel_type == "PressureAux" ? _pressure_variable_name : NS::temperature);
   params.set<AuxVariableName>("variable") = var_name;
 
   // coupled variables
@@ -489,7 +496,7 @@ CNSAction::addNSMomentumInviscidFlux(unsigned int component)
   setKernelCommonParams(params);
 
   // Extra stuff needed by momentum Kernels
-  params.set<CoupledName>("pressure") = {NS::pressure};
+  params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
   params.set<unsigned int>("component") = component;
 
   // Add the Kernel
@@ -597,7 +604,7 @@ CNSAction::addNoPenetrationBC(unsigned int component)
 
   // These BCs also need the component and couping to the pressure.
   params.set<unsigned int>("component") = component;
-  params.set<CoupledName>("pressure") = {NS::pressure};
+  params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
 
   params.set<std::vector<BoundaryName>>("boundary") = _no_penetration_boundary;
   _problem->addBoundaryCondition(

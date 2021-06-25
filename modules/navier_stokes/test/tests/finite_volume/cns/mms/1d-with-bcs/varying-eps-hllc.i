@@ -124,7 +124,7 @@
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'mass'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [momentum_right]
     variable = sup_mom_x
@@ -132,21 +132,21 @@
     boundary = right
     eqn = 'momentum'
     momentum_component = 'x'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
   [energy_right]
     variable = T_fluid
     type = PCNSFVStrongBC
     boundary = right
     eqn = 'energy'
-    p = 'exact_p'
+    pressure = 'exact_p'
   []
 []
 
 [Materials]
   [var_mat]
     type = PorousMixedVarMaterial
-    p = pressure
+    pressure = pressure
     superficial_rhou = sup_mom_x
     T_fluid = T_fluid
     porosity = porosity
