@@ -1774,6 +1774,23 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
   return var->adUDotNeighbor();
 }
 
+const ADVariableValue &
+Coupleable::adCoupledDotDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDotDot();
+  return var->adUDotDotNeighbor();
+}
+
 const ADVectorVariableValue &
 Coupleable::adCoupledVectorDot(const std::string & var_name, unsigned int comp) const
 {
