@@ -477,7 +477,8 @@ struct RawType<RankFourTensorTempl<T>>
 }
 
 template <typename T1, typename T2>
-inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
+inline auto
+operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
     typename std::enable_if<ScalarTraits<T1>::value,
                             RankFourTensorTempl<decltype(T1() * T2())>>::type
 {
@@ -494,7 +495,8 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy
 
 template <typename T>
 template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const T2 & b) const ->
+auto
+RankFourTensorTempl<T>::operator*(const T2 & b) const ->
     typename std::enable_if<ScalarTraits<T2>::value,
                             RankFourTensorTempl<decltype(T() * T2())>>::type
 {

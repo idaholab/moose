@@ -114,7 +114,8 @@ RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
 
 template <typename T>
 template <template <typename> class Tensor, typename T2>
-auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
+auto
+RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
     typename std::enable_if<TwoTensorMultTraits<Tensor, T2>::value,
                             RankTwoTensorTempl<decltype(T() * T2())>>::type
 {
@@ -205,7 +206,8 @@ RankFourTensorTempl<T>::operator-() const
 
 template <typename T>
 template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
+auto
+RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
     -> RankFourTensorTempl<decltype(T() * T2())>
 {
   typedef decltype(T() * T2()) ValueType;
