@@ -64,7 +64,7 @@ std::string AbaqusUtils::_output_dir = "";
 void
 AbaqusUtils::setOutputDir(const std::string & output_dir)
 {
-  if (!output_dir.empty() && output_dir != _output_dir)
+  if (!_output_dir.empty() && output_dir != _output_dir)
     mooseWarning("Conflicting output directories specified in Abaqus compatibility objects: ",
                  output_dir,
                  " != ",
@@ -135,15 +135,18 @@ stdb_abqerr_(
   switch (*lop)
   {
     case 1:
-      mooseInfo(message);
+      Moose::out << moose::internal::mooseMsgFmt(message, "** Abaqus Info **", COLOR_CYAN)
+                 << std::flush;
       break;
 
     case -1:
-      mooseWarning(message);
+      Moose::out << moose::internal::mooseMsgFmt(message, "** Abaqus Warning **", COLOR_YELLOW)
+                 << std::flush;
       break;
 
     case -2:
-      mooseWarning("Non fatal Abaqus subroutine error: ", message);
+      Moose::out << moose::internal::mooseMsgFmt(message, "** Abaqus Non-fatal Error **", COLOR_RED)
+                 << std::flush;
       break;
 
     case -3:

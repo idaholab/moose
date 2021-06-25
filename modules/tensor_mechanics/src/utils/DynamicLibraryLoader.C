@@ -8,13 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DynamicLibraryLoader.h"
+#include "MooseUtils.h"
 
 DynamicLibraryLoader::DynamicLibraryLoader(const std::string & library_file)
+  : _library_file(library_file)
 {
+  MooseUtils::checkFileReadable(_library_file, false, /*throw_on_unreadable=*/true);
 #ifdef LIBMESH_HAVE_DLOPEN
-  _handle = dlopen(library_file.c_str(), RTLD_LAZY);
+  _handle = dlopen(_library_file.c_str(), RTLD_LAZY);
   if (!_handle)
-    mooseError("Failed to load libary '", library_file, "' in DynamicLibraryLoader: ", dlerror());
+    mooseError("Failed to load library '", _library_file, "' in DynamicLibraryLoader: ", dlerror());
 
   dlerror();
 #else

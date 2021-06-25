@@ -12,9 +12,6 @@
 #include "ThreadedGeneralUserObject.h"
 #include "DynamicLibraryLoader.h"
 
-typedef void (*uexternaldb_t)(
-    int * LOP, int * LRESTART, Real TIME[], Real * DTIME, int * KSTEP, int * KINC);
-
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
@@ -32,6 +29,10 @@ public:
   virtual void finalize() override {}
 
 protected:
+  /// function type for the external UEXTERNALDB function
+  typedef void (*uexternaldb_t)(
+      int * LOP, int * LRESTART, Real TIME[], Real * DTIME, int * KSTEP, int * KINC);
+
   // call the plugin with the supplied LOP code
   void callPlugin(int lop);
 
@@ -43,6 +44,9 @@ protected:
 
   // Function pointer to the dynamically loaded function
   uexternaldb_t _uexternaldb;
+
+  // Abaqus simulation step number to pass in
+  int _aqSTEP;
 
   const ExecFlagType & _current_execute_on_flag;
 };

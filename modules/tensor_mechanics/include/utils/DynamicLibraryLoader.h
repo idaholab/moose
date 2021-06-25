@@ -23,33 +23,46 @@ public:
   DynamicLibraryLoader(const std::string & library_file);
   ~DynamicLibraryLoader();
 
-  /// get a function pointer of type T to a function exported from the loaded library
+  /**
+   * Get a function/data pointer of type T to a function exported from the loaded library.
+   * @param hard_fail Set this to false to return a nullptr if a symbol was not found.
+   */
   template <typename T>
-  T getFunction(std::string func);
+  T getFunction(std::string func, bool hard_fail = true);
 
 private:
   /// Library handle returned by dlopen
   void * _handle;
+
+  /// Library file name
+  const std::string _library_file;
 };
 
 template <typename T>
 T
-DynamicLibraryLoader::getFunction(std::string func)
+DynamicLibraryLoader::getFunction(std::string func, bool hard_fail)
 {
 #ifdef LIBMESH_HAVE_DLOPEN
+  // clear error
+  dlerror();
+
   // Snag the function pointers from the library
-  void * pointer;
-  pointer = dlsym(_handle, func.c_str());
-  T func_ptr = *reinterpret_cast<T *>(&pointer);
+  void * pointer = dlsym(_handle, func.c_str());
 
   // Catch errors
   const char * dlsym_error = dlerror();
-  if (dlsym_error)
+  if (dlsym_error && hard_fail)
   {
     dlclose(_handle);
-    mooseError("In DynamicLibraryLoader: ", dlsym_error);
+    mooseError("DynamicLibraryLoader error: Unable to find symbol '",
+               func,
+               "' in library '",
+               _library_file,
+               "'. ",
+               std::string(dlsym_error));
   }
-  return func_ptr;
+
+  return *reinterpret_cast<T *>(&pointer);
 #else
   // this can never be reached as the object instantiation would have already failed
   return nullptr;

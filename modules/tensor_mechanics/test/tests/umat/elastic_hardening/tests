@@ -19,8 +19,20 @@
     exodiff = 'elastic_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for finite strain elastic material models'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
+                  'Fortran77 as constitutive models, with support for finite strain elastic material '
+                  'models'
+  []
+  [elastic_C]
+    type = 'Exodiff'
+    input = 'elastic.i'
+    cli_args = "Materials/active='umat' Materials/umat/plugin=../../../plugins/elastic2"
+    exodiff = 'elastic_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
+                  'C/C++ as constitutive models, with support for finite strain elastic material '
+                  'models'
   []
   [elastic_reference]
     type = 'Exodiff'

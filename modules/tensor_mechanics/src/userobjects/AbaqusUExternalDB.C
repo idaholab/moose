@@ -21,6 +21,10 @@ AbaqusUExternalDB::validParams()
   params.addClassDescription("Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
+  params.addParam<int>("abaqus_step",
+                       0,
+                       "Abaqus step number. This is not the same as the increment number, which "
+                       "corresponds to the MOOSE time step and is computed automatically.");
   return params;
 }
 
@@ -33,15 +37,17 @@ AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
     _plugin(getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _uexternaldb(_library.getFunction<uexternaldb_t>("uexternaldb_")),
+    _aqSTEP(getParam<int>("abaqus_step")),
     _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag())
 {
   AbaqusUtils::setOutputDir(_app.getOutputFileBase(true));
+  AbaqusUtils::setCommunicator(&_communicator);
 }
 
 void
 AbaqusUExternalDB::execute()
 {
-  if (_current_execute_on_flag == EXEC_INITAL)
+  if (_current_execute_on_flag == EXEC_INITIAL)
     callPlugin(0);
 
   // TODO support 2 -> trigger saving for restart
@@ -61,8 +67,7 @@ AbaqusUExternalDB::callPlugin(int lop)
 {
   Real time[2] = {_t, _t - _dt};
   int lrestart = 0;
-  int kinc = 0; // ?
 
   // call plugin function
-  _uexternaldb(&lop, &lrestart, time, &_dt, &_t_step, &kinc);
+  _uexternaldb(&lop, &lrestart, time, &_dt, &_aqSTEP, &_t_step);
 }
