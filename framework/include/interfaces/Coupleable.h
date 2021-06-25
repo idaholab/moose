@@ -477,6 +477,17 @@ protected:
    */
   const ADVariableGradient & adCoupledGradient(const std::string & var_name,
                                                unsigned int comp = 0) const;
+
+  /**
+   * Returns gradient of a coupled variable's time derivative for use in Automatic Differentation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVariableGradient containing the gradient of the coupled variable's
+   * time derivative
+   */
+  const ADVariableGradient & adCoupledGradientDot(const std::string & var_name,
+                                                  unsigned int comp = 0) const;
+
   /**
    * Returns the gradients for all of a coupled variable's components for use in Automatic
    * Differentiation

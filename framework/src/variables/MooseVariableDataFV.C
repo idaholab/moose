@@ -76,6 +76,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_ad_u(true),
     _need_ad_u_dot(false),
     _need_ad_grad_u(false),
+    _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
     _need_dof_values(false),
     _need_dof_values_old(false),
