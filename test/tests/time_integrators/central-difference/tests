@@ -1,7 +1,6 @@
 [Tests]
   design = "CentralDifference.md"
-  issues = '#13964 #9726'
-  
+  issues = '#13964 #9726 #18178'
   [./central_difference]
     type = 'CSVDiff'
     input = 'central_difference.i'
@@ -9,5 +8,13 @@
 
     requirement = "The CentralDifference time integrator shall correctly compute the first"
                   " and second time derivatives."
+  [../]
+  [./ad_central_difference_dotdot]
+    type = 'CSVDiff'
+    input = 'ad_central_difference_dotdot.i'
+    csvdiff = 'ad_central_difference_dotdot_out.csv'
+
+    requirement = "The CentralDifference time integrator shall correctly compute the second"
+                  " time derivative of an AD variable."
   [../]
 []
