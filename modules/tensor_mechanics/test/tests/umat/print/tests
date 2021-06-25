@@ -29,4 +29,56 @@
                   'NOEL, NPT, KINC. Values are checked against verified references '
   []
 
+  [print_shear]
+    type = 'Exodiff'
+    input = 'print_shear.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'print_shear_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+                  'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
+                  'two external fields (not temperature) step increment affecting material behavior '
+                  'and shear deformation '
+  []
+  [print_shear_reference]
+    type = 'Exodiff'
+    input = 'print_shear.i'
+    cli_args = "Materials/active='elasticity_tensor strain_dependent_elasticity_tensor stress "
+               "prefactor_material_block'"
+    exodiff = 'print_shear_out.e'
+    requirement = 'MOOSE shall avoid regression in a simple mechanical problem where two strain '
+                  'increments modify the stiffness of the material through '
+                  'CompositeElasticityTensor. This test also serves as a reference for UMAT behavior '
+                  'in the presence of shear deformation. '
+  []
+
+  [print_shear_print]
+    type = 'RunApp'
+    input = 'print_shear.i'
+    cli_args = "Materials/active='umat'"
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    expect_out = 'STRAIN_ 1    0.0000490\n DSTRAIN_ 1   -0.0000408\n STRAIN_ 2   -0.0043325\n '
+                 'DSTRAIN_ 2   -0.0042411\n STRAIN_ 3    0.0015994\n DSTRAIN_ 3    0.0015979\n '
+                 'STRAIN_ 4    0.0005602\n DSTRAIN_ 4    0.0005831\n STRAIN_ 5    0.0016391\n '
+                 'DSTRAIN_ 5    0.0016314\n STRAIN_ 6    0.0059990\n DSTRAIN_ 6    0.0061290\n '
+                 'COORDS_ 1    0.2886751\n COORDS_ 2    0.2886751\n COORDS_ 3    0.2886751\n DFGRD0_ '
+                 '1 1    1.0000000\n DFGRD0_ 1 2    0.0000000\n DFGRD0_ 1 3    0.0000000\n DFGRD0_ 2 '
+                 '1    0.0000000\n DFGRD0_ 2 2    1.0000000\n DFGRD0_ 2 3    0.0000000\n DFGRD0_ 3 1 '
+                 '   0.0000000\n DFGRD0_ 3 2    0.0000000\n DFGRD0_ 3 3    1.0000000\n DFGRD1_ 1 1   '
+                 ' 0.9998964\n DFGRD1_ 1 2   -0.0119519\n DFGRD1_ 1 3    0.0016331\n DFGRD1_ 2 1    '
+                 '0.0180040\n DFGRD1_ 2 2    0.9956142\n DFGRD1_ 2 3    0.0005856\n DFGRD1_ 3 1   '
+                 '-0.0000000\n DFGRD1_ 3 2    0.0000000\n DFGRD1_ 3 3    1.0016000\n DROT_ 1 1    '
+                 '0.9998865\n DROT_ 1 2   -0.0150423\n DROT_ 1 3    0.0008166\n DROT_ 2 1    '
+                 '0.0150421\n DROT_ 2 2    0.9998868\n DROT_ 2 3    0.0002850\n DROT_ 3 1   '
+                 '-0.0008208\n DROT_ 3 2   -0.0002727\n DROT_ 3 3    0.9999996\n TIME_ 1   '
+                 '10.0000000\n TIME_ 2   10.0000000\n CELENT 1.0000000\n CMNAME: umat                '
+                 '                                                            \n NDI_ 3\n NSHR_ 3\n '
+                 'NTENS_ 6\n NOEL_ 0\n NPT_ 7\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ 1\n '
+                 'FIELD1_-0.0043326\n FIELD2_ 0.0030091\n '
+    requirement = 'The Abaqus UMAT interface shall be able to print out correct values for STRAN, '
+                  'DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, '
+                  'NOEL, NPT, KINC. Values are checked against verified references '
+  []
 []
