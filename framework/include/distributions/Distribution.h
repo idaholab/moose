@@ -45,13 +45,4 @@ public:
    * Compute the median of the distribution
    */
   virtual Real median() const;
-
-protected:
-  ///@{
-  /// PerfGraph entries
-  const PerfID _perf_pdf;
-  const PerfID _perf_cdf;
-  const PerfID _perf_quantile;
-  const PerfID _perf_median;
-  ///@}
 };
