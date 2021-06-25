@@ -80,7 +80,7 @@
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic_predef'
     num_state_vars = 0
-    external_field = 'strain_yy'
+    external_fields = 'strain_yy'
   []
 
   #  2. Active for reference MOOSE computations

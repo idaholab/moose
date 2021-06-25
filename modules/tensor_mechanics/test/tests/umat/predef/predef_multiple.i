@@ -22,14 +22,27 @@
     type = ParsedFunction
     value = -t*10
   []
+  [right_pull]
+    type = ParsedFunction
+    value = -t*0.5
+  []
 []
 
 [AuxVariables]
   [strain_yy]
   []
+  [strain_xx]
+  []
 []
 
 [AuxKernels]
+  [strain_xx]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xx
+    index_i = 0
+    index_j = 0
+  []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
@@ -48,15 +61,21 @@
 
 [BCs]
   [Pressure]
-    [bc_presssure]
+    [bc_presssure_top]
       boundary = top
       function = top_pull
+    []
+  []
+  [Pressure]
+    [bc_presssure_right]
+      boundary = right
+      function = right_pull
     []
   []
   [x_bot]
     type = DirichletBC
     variable = disp_x
-    boundary = left
+    boundary = bottom
     value = 0.0
   []
   [y_bot]
@@ -68,22 +87,22 @@
   [z_bot]
     type = DirichletBC
     variable = disp_z
-    boundary = front
+    boundary = bottom
     value = 0.0
   []
 []
 
 [Materials]
-  # 1. Active for UMAT run
+  # 1. Active for UMAT
   [umat]
     type = AbaqusUMATStress
     constant_properties = '1000 0.3'
-    plugin = '../../../plugins/elastic_dpredef'
+    plugin = '../../../plugins/elastic_multiple_predef'
     num_state_vars = 0
-    external_fields = 'strain_yy'
+    external_fields = 'strain_xx strain_yy'
   []
 
-   # 2. Active for reference MOOSE computations
+  # 2. Active for reference MOOSE computations
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     base_name = 'base'
@@ -92,15 +111,15 @@
   []
   [strain_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
-    args = strain_yy
+    args = 'strain_yy strain_xx'
     tensors = 'base'
     weights = 'prefactor_material'
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
     f_name = prefactor_material
-    args = strain_yy
-    function = '1.0/(1.0 + 0.11112)'
+    args = 'strain_yy strain_xx'
+    function = '1.0/(1.0 + strain_yy + strain_xx)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
@@ -123,9 +142,9 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-9
   start_time = 0.0
-  end_time = 10
+  end_time = 30
 
-  dt = 10.0
+  dt = 1.0
 []
 
 [Preconditioning]

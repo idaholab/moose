@@ -79,7 +79,7 @@
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic_print'
     num_state_vars = 0
-    external_field = 'strain_yy'
+    external_fields = 'strain_yy'
   []
 []
 

@@ -179,10 +179,10 @@ protected:
   int _aqNPROPS;
 
   /// Array of interpolated values of predefined field variables at this point at the start of the increment, based on the values read in at the nodes.
-  Real _aqPREDEF;
+  std::vector<Real> _aqPREDEF;
 
   /// Array of increments of predefined field variables
-  Real _aqDPRED;
+  std::vector<Real>  _aqDPRED;
 
   void initQpStatefulProperties() override;
   void computeQpStress() override;
@@ -215,6 +215,12 @@ protected:
   const VariableValue & _temperature_old;
 
   // Coupled user-defined field
-  const VariableValue & _external_field;
-  const VariableValue & _external_field_old;
+  const std::vector<const VariableValue *> _external_fields;
+  const std::vector<const VariableValue *> _external_fields_old;
+
+  // External field names
+  std::vector<VariableName> _external_field_names;
+
+  // Number of external fields provided by the user
+  const unsigned int _number_external_fields;
 };

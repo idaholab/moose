@@ -35,7 +35,9 @@ AbaqusUMATStress::validParams()
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
-  params.addCoupledVar("external_field", 0.0, "Coupled field for use in UMAT routine");
+
+  params.addCoupledVar("external_fields",
+                       "The external fields that can be used in the UMAT subroutine");
 
   return params;
 }
@@ -62,8 +64,9 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
-    _external_field(coupledValue("external_field")),
-    _external_field_old(coupledValueOld("external_field"))
+    _external_fields(coupledValues("external_fields")),
+    _external_fields_old(coupledValuesOld("external_fields")),
+    _number_external_fields(_external_fields.size())
 
 {
 #ifndef METHOD
@@ -85,6 +88,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
+
+  // Coupling of external variable fields
+  _aqPREDEF.resize(_number_external_fields);
+  _aqDPRED.resize(_number_external_fields);
 
   // Open the library
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -151,7 +158,7 @@ AbaqusUMATStress::computeProperties()
   _aqDTIME = _dt;
 
   // Fill unused characters with spaces (Fortran)
-  std::fill (_aqCMNAME, _aqCMNAME + 80, ' ');
+  std::fill(_aqCMNAME, _aqCMNAME + 80, ' ');
   std::memcpy(_aqCMNAME, name().c_str(), name().size());
 
   ComputeStressBase::computeProperties();
@@ -207,11 +214,14 @@ AbaqusUMATStress::computeQpStress()
   // Temperature increment
   _aqDTEMP = _temperature[_qp] - _temperature_old[_qp];
 
-  // External field at this step
-  _aqPREDEF = _external_field[_qp];
+  for (unsigned int i = 0; i < _number_external_fields; i++)
+  {
+    // External field at this step
+    _aqPREDEF[i] = (*_external_fields[i])[_qp];
 
-  // External field increments
-  _aqDPRED = _external_field[_qp] - _external_field_old[_qp];
+    // External field increments
+    _aqDPRED[i] = (*_external_fields[i])[_qp] - (*_external_fields_old[i])[_qp];
+  }
 
   // Layer number (not supported)
   _aqLAYER = -1;
@@ -239,8 +249,8 @@ AbaqusUMATStress::computeQpStress()
         &_aqDTIME,
         &_aqTEMP,
         &_aqDTEMP,
-        &_aqPREDEF,
-        &_aqDPRED,
+        _aqPREDEF.data(),
+        _aqDPRED.data(),
         _aqCMNAME,
         &_aqNDI,
         &_aqNSHR,

@@ -45,4 +45,25 @@
                   'CompositeElasticityTensor. This test also serves as a reference for UMAT external '
                   'field increment verification'
   []
+  [predef_multiple]
+    type = 'Exodiff'
+    input = 'predef_multiple.i'
+    cli_args = "Materials/active='umat'"
+    exodiff = 'predef_multiple_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+                  'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
+                  'two external fields (not temperature) affecting material behavior '
+  []
+  [predef_multiple_reference]
+    type = 'Exodiff'
+    input = 'predef_multiple.i'
+    cli_args = "Materials/active='elasticity_tensor strain_dependent_elasticity_tensor stress "
+               "prefactor_material_block'"
+    exodiff = 'predef_multiple_out.e'
+    requirement = 'MOOSE shall avoid regression in a simple mechanical problem where two strain fields '
+                  'modifies the stiffness of the material through CompositeElasticityTensor. This '
+                  'test also serves as a reference for UMAT external field verification'
+  []
 []
