@@ -162,6 +162,7 @@ def main(options):
     else:
         options.disable += ['MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet']
 
+    print(options.disable)
     for name in options.disable:
         kwargs['Extensions'][name] = dict(active=False)
 

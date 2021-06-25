@@ -65,10 +65,12 @@ def load_config(filename, **kwargs):
     """
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
 
-    # Replace 'default' key in Extensions to allow for recursive_update to accept command line
+    # Replace 'default' and 'disable' key in Extensions to allow for recursive_update to accept command line
     for key in config.get('Extensions', dict()).keys():
         if config['Extensions'][key] == 'default':
             config['Extensions'][key] = dict()
+        if config['Extensions'][key] == 'disable':
+            config['Extensions'][key] = dict(active=False)
 
     # Apply command-line key value pairs
     recursive_update(config, kwargs)
@@ -153,9 +155,6 @@ def _yaml_load_extensions(config):
 
         if isinstance(settings, dict):
             ext_configs[ext_type].update(settings)
-
-        elif isinstance(settings, str) and (settings == 'disable'):
-            ext_configs[ext_type]['active'] = False
 
         else:
             msg = "The supplied settings for the '%s' extension must be dict() or the 'default' " \
