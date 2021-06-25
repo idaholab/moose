@@ -209,7 +209,7 @@ def get_civet_hashes(remote, start='HEAD', branch='master', author='moosetest', 
     # Merge information command
     merge_cmd = ['git', 'log', '--merges', '--author', author, '-n', '1', start]
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    with tempfile.TemporaryDirectory(dir='/tmp') as tmp_dir:
         subprocess.run(clone_cmd, capture_output=True, text=True, check=True, cwd=tmp_dir)
         out = subprocess.run(merge_cmd, capture_output=True, text=True, check=True,
                              cwd=os.path.join(tmp_dir, 'tmp'))
