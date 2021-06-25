@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ADRankThreeTensorForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
@@ -277,6 +278,18 @@ public:
 
   /// returns C_ijkl = a_il * b_jk
   RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & a) const;
+
+  /// returns C_iklm = a_ij * b_jklm
+  RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & a) const;
+
+  /// returns C_iklm = a_jm * b_ijkl
+  RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const;
+
+  /// returns C_ikl = a_ij * b_jkl
+  RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
+
+  /// returns C_ijk = a_jk * b_i
+  RankThreeTensorTempl<T> mixedProductJkI(const VectorValue<T> & b) const;
 
   /// return positive projection tensor of eigen-decomposition
   template <typename T2 = T>

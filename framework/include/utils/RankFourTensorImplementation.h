@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
 #include "MooseEnum.h"
 #include "MooseException.h"
 #include "MooseUtils.h"
@@ -113,8 +114,7 @@ RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
 
 template <typename T>
 template <template <typename> class Tensor, typename T2>
-auto
-RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
+auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
     typename std::enable_if<TwoTensorMultTraits<Tensor, T2>::value,
                             RankTwoTensorTempl<decltype(T() * T2())>>::type
 {
@@ -205,8 +205,7 @@ RankFourTensorTempl<T>::operator-() const
 
 template <typename T>
 template <typename T2>
-auto
-RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
+auto RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
     -> RankFourTensorTempl<decltype(T() * T2())>
 {
   typedef decltype(T() * T2()) ValueType;
@@ -451,6 +450,51 @@ RankFourTensorTempl<T>::transposeMajor() const
       }
     i1 += N;
   }
+
+  return result;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::transposeIJ() const
+{
+  RankFourTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i, j, k, l) = (*this)(j, i, k, l);
+
+  return result;
+}
+
+template <typename T>
+RankThreeTensorTempl<T>
+RankFourTensorTempl<T>::mixedProductIjklJ(const VectorValue<T> & b) const
+{
+  RankThreeTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i, k, l) += (*this)(i, j, k, l) * b(j);
+
+  return result;
+}
+
+template <typename T>
+RankThreeTensorTempl<T>
+RankFourTensorTempl<T>::mixedProductIjklI(const VectorValue<T> & b) const
+{
+  RankThreeTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(j, k, l) += (*this)(i, j, k, l) * b(i);
 
   return result;
 }

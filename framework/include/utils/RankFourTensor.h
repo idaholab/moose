@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ADRankThreeTensorForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
@@ -246,6 +247,24 @@ public:
   RankFourTensorTempl<T> transposeMajor() const;
 
   /**
+   * Transpose the tensor by swapping the first two indeces
+   * @return C_jikl
+   */
+  RankFourTensorTempl<T> transposeIJ() const;
+
+  /**
+   * multiply a RankFourTensor with a vector
+   * @return C_ikl = a_ijkl*b_j
+   */
+  RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const;
+
+  /**
+   * multiply a RankFourTensor with a vector
+   * @return C_jkl = a_ijkl*b_i
+   */
+  RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const;
+
+  /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
    * 3).
    * Fill method depends on size of input
@@ -458,8 +477,7 @@ struct RawType<RankFourTensorTempl<T>>
 }
 
 template <typename T1, typename T2>
-inline auto
-operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
+inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
     typename std::enable_if<ScalarTraits<T1>::value,
                             RankFourTensorTempl<decltype(T1() * T2())>>::type
 {
@@ -476,8 +494,7 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy
 
 template <typename T>
 template <typename T2>
-auto
-RankFourTensorTempl<T>::operator*(const T2 & b) const ->
+auto RankFourTensorTempl<T>::operator*(const T2 & b) const ->
     typename std::enable_if<ScalarTraits<T2>::value,
                             RankFourTensorTempl<decltype(T() * T2())>>::type
 {
