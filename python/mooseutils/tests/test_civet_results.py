@@ -53,11 +53,11 @@ class Test(unittest.TestCase):
 
         # Release 2021-05-18
         gold = ('90123e7b6bd52f1bc36e68aac5d1fa95e76aeb91', 'd72a8d0d69e21b4945eedf2e78a7de80b1bd3e6f')
-        hashes = mooseutils.get_civet_hashes('git@github.com:idaholab/moose.git', branch='2021-05-18')
+        hashes = mooseutils.get_civet_hashes('https://github.com/idaholab/moose.git', branch='2021-05-18')
         self.assertEqual(hashes, gold)
 
         gold = ('df827bfaf6ea29394ce609bdf032bd40a9818cfc', 'c4ec8d4669166086da10470cc99c4b40813eeee9')
-        hashes = mooseutils.get_civet_hashes('git@github.com:idaholab/moose.git', branch='master',
+        hashes = mooseutils.get_civet_hashes('https://github.com/idaholab/moose.git', branch='master',
                                              start='df827bfaf6ea29394ce609bdf032bd40a9818cfc')
         self.assertEqual(hashes, gold)
 
