@@ -43,6 +43,11 @@ public:
    */
   void operator()();
 
+  /**
+   * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
+   */
+  void projectQPoints3d(const Elem * msm_elem, const Elem * primal_elem, std::vector<Point> & q_pts);
+
 private:
   /// The mortar constraints to loop over when on each element. These must be
   /// pointers to the base class otherwise the compiler will fail to compile
