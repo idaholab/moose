@@ -145,14 +145,26 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // (Optional) Write nodal normals to file.
   // amg.writeNodalNormalsToFile();
 
-  // Project secondary nodes (find xi^(2) values).
-  amg.projectSecondaryNodes();
+  const auto dim = amg.dim();
+  if (dim == 2)
+  {
+    // Project secondary nodes (find xi^(2) values).
+    amg.projectSecondaryNodes();
 
-  // Project primary nodes (find xi^(1) values).
-  amg.projectPrimaryNodes();
+    // Project primary nodes (find xi^(1) values).
+    amg.projectPrimaryNodes();
 
-  // Build the mortar segment mesh on the secondary boundary.
-  amg.buildMortarSegmentMesh();
+    // Build the mortar segment mesh on the secondary boundary.
+    amg.buildMortarSegmentMesh();
+  }
+  else if (dim == 3)
+  {
+    amg.buildMortarSegmentMesh3d();
+  }
+  else
+  {
+    mooseError("Invalid mesh dimension for mortar constraint");
+  }
 }
 
 const std::set<SubdomainID> &

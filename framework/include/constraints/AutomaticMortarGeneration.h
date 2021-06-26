@@ -142,6 +142,9 @@ public:
    */
   void buildMortarSegmentMesh();
 
+// TODO: function info
+  void buildMortarSegmentMesh3d();
+
   /**
    * Clears the mortar segment mesh and accompanying data structures
    */
@@ -208,6 +211,8 @@ public:
   {
     return msm_elem_to_info;
   }
+
+  int dim() { return mesh.mesh_dimension(); }
 
 private:
   // Reference to the mesh stored in equation_systems.
