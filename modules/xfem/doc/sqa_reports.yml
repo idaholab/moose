@@ -4,6 +4,10 @@ Applications:
         app_types:
             - XFEMApp
         content_directory: ${MOOSE_DIR}/modules/xfem/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_stub_files: WARNING
 
 Documents:

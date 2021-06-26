@@ -6,6 +6,8 @@ Applications:
         content_directory: ${MOOSE_DIR}/modules/phase_field/doc/content
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         log_stub_files: WARNING
 
 Documents:

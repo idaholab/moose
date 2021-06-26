@@ -69,7 +69,6 @@ private:
   /// PrefGraph timers
   const PerfID _perf_solve_step;
   const PerfID _perf_solve_batch_step;
-  const PerfID _perf_command_line_args;
   ///@}
 
   // Sampler size, to test if the MultiApp object needs to be re-initialize

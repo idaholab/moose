@@ -81,20 +81,17 @@ JohnsonSB::quantile(
 Real
 JohnsonSB::pdf(const Real & x) const
 {
-  TIME_SECTION(_perf_pdf);
   return pdf(x, _lower, _upper, _alpha_1, _alpha_2);
 }
 
 Real
 JohnsonSB::cdf(const Real & x) const
 {
-  TIME_SECTION(_perf_cdf);
   return cdf(x, _lower, _upper, _alpha_1, _alpha_2);
 }
 
 Real
 JohnsonSB::quantile(const Real & p) const
 {
-  TIME_SECTION(_perf_quantile);
   return quantile(p, _lower, _upper, _alpha_1, _alpha_2);
 }

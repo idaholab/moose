@@ -37,8 +37,13 @@ ifeq ($(ALL_MODULES),yes)
         XFEM                        := yes
 endif
 
-ifeq ($(HEAT_CONDUCTION),yes)
-        RAY_TRACING                 := yes
+ifeq ($(CONTACT),yes)
+        TENSOR_MECHANICS            := yes
+endif
+
+ifeq ($(FSI),yes)
+			  NAVIER_STOKES               := yes
+        TENSOR_MECHANICS            := yes
 endif
 
 ifeq ($(PERIDYNAMICS),yes)
@@ -46,23 +51,8 @@ ifeq ($(PERIDYNAMICS),yes)
 endif
 
 ifeq ($(POROUS_FLOW),yes)
-        TENSOR_MECHANICS            := yes
-        FLUID_PROPERTIES            := yes
         CHEMICAL_REACTIONS          := yes
-endif
-
-ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES            := yes
-				RAY_TRACING                 := yes
-        RDG                         := yes
-        HEAT_CONDUCTION             := yes
-endif
-
-ifeq ($(PHASE_FIELD),yes)
-        TENSOR_MECHANICS            := yes
-endif
-
-ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
 
@@ -70,9 +60,21 @@ ifeq ($(XFEM),yes)
         TENSOR_MECHANICS            := yes
 endif
 
-ifeq ($(FSI),yes)
+# Modules that follow have one or more dependencies
+# on the modules defined above them.
+
+ifeq ($(PHASE_FIELD),yes)
         TENSOR_MECHANICS            := yes
-        NAVIER_STOKES               := yes
+endif
+
+ifeq ($(NAVIER_STOKES),yes)
+        FLUID_PROPERTIES            := yes
+				HEAT_CONDUCTION             := yes
+        RDG                         := yes
+endif
+
+ifeq ($(HEAT_CONDUCTION),yes)
+        RAY_TRACING                 := yes
 endif
 
 # The master list of all moose modules
@@ -87,10 +89,20 @@ GEN_REVISION  := no
 # therefore any modules with dependencies must have their dependent module's
 # application(s) defined first.
 
+# The modules that follow do not have any dependencies, so they're just
+# ordered alphabetically.
+
 ifeq ($(CHEMICAL_REACTIONS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
   APPLICATION_NAME   := chemical_reactions
   SUFFIX             := cr
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(EXTERNAL_PETSC_SOLVER),yes)
+  APPLICATION_NAME   := external_petsc_solver
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/${APPLICATION_NAME}
+  SUFFIX             := eps
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -115,22 +127,6 @@ ifeq ($(GEOCHEMISTRY),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(RAY_TRACING),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/ray_tracing
-  APPLICATION_NAME   := ray_tracing
-  SUFFIX             := ray
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(HEAT_CONDUCTION),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
-  APPLICATION_NAME   := heat_conduction
-
-	DEPEND_MODULES     := ray_tracing
-  SUFFIX             := hc
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
 ifeq ($(LEVEL_SET),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/level_set
   APPLICATION_NAME   := level_set
@@ -138,10 +134,10 @@ ifeq ($(LEVEL_SET),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(MISC),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/misc
-  APPLICATION_NAME   := misc
-  SUFFIX             := misc
+ifeq ($(RAY_TRACING),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/ray_tracing
+  APPLICATION_NAME   := ray_tracing
+  SUFFIX             := ray
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -149,54 +145,6 @@ ifeq ($(RDG),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
   APPLICATION_NAME   := rdg
   SUFFIX             := rdg
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(NAVIER_STOKES),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
-  APPLICATION_NAME   := navier_stokes
-
-  # Dependency on fluid properties and rdg
-  DEPEND_MODULES     := fluid_properties rdg heat_conduction ray_tracing
-  SUFFIX             := ns
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(TENSOR_MECHANICS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
-  APPLICATION_NAME   := tensor_mechanics
-  SUFFIX             := tm
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(PERIDYNAMICS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/peridynamics
-  APPLICATION_NAME   := peridynamics
-
-  # Dependency on tensor mechanics
-  DEPEND_MODULES     := tensor_mechanics
-
-  SUFFIX             := pd
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(PHASE_FIELD),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/phase_field
-  APPLICATION_NAME   := phase_field
-
-  # Dependency on tensor mechanics
-  DEPEND_MODULES     := tensor_mechanics
-
-  SUFFIX             := pf
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(POROUS_FLOW),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_flow
-  APPLICATION_NAME   := porous_flow
-
-  DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions
-  SUFFIX             := pflow
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -214,28 +162,41 @@ ifeq ($(STOCHASTIC_TOOLS),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(XFEM),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/xfem
-  APPLICATION_NAME   := xfem
+# The modules that follow are purposefully ordered such that all of their
+# dependencies are defined first
 
-  DEPEND_MODULES     := tensor_mechanics
-  SUFFIX             := xfem
+# Depended on by navier_stokes and fsi (through navier_stokes)
+ifeq ($(HEAT_CONDUCTION),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
+  APPLICATION_NAME   := heat_conduction
+	DEPEND_MODULES     := ray_tracing
+  SUFFIX             := hc
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(EXTERNAL_PETSC_SOLVER),yes)
-  APPLICATION_NAME   := external_petsc_solver
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/${APPLICATION_NAME}
-
-  SUFFIX             := eps
+# Dependend on by contact, fsi, misc, peridynamics, phase_field, porous_flow, xfem
+ifeq ($(TENSOR_MECHANICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
+  APPLICATION_NAME   := tensor_mechanics
+  SUFFIX             := tm
   include $(FRAMEWORK_DIR)/app.mk
 endif
+
+# Depended on by fsi
+ifeq ($(NAVIER_STOKES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
+  APPLICATION_NAME   := navier_stokes
+  DEPEND_MODULES     := fluid_properties rdg heat_conduction
+  SUFFIX             := ns
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+# The following have their dependencies defined above and do not have any
+# dependers, so we're back to alphabetical.
 
 ifeq ($(CONTACT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
   APPLICATION_NAME   := contact
-
-	# Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := con
   include $(FRAMEWORK_DIR)/app.mk
@@ -244,9 +205,47 @@ endif
 ifeq ($(FSI),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/fsi
   APPLICATION_NAME   := fsi
-
-  DEPEND_MODULES     := tensor_mechanics navier_stokes
+  DEPEND_MODULES     := navier_stokes tensor_mechanics
   SUFFIX             := fsi
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(MISC),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/misc
+  APPLICATION_NAME   := misc
+  SUFFIX             := misc
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(PERIDYNAMICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/peridynamics
+  APPLICATION_NAME   := peridynamics
+  DEPEND_MODULES     := tensor_mechanics
+  SUFFIX             := pd
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(PHASE_FIELD),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/phase_field
+  APPLICATION_NAME   := phase_field
+  DEPEND_MODULES     := tensor_mechanics
+  SUFFIX             := pf
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(POROUS_FLOW),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_flow
+  APPLICATION_NAME   := porous_flow
+  DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions
+  SUFFIX             := pflow
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(XFEM),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/xfem
+  APPLICATION_NAME   := xfem
+  DEPEND_MODULES     := tensor_mechanics
+  SUFFIX             := xfem
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

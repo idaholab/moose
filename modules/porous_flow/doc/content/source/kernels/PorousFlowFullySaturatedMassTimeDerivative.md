@@ -8,7 +8,7 @@ THM simulation.  The time-derivatve terms from the [fluid governing equation](go
 \frac{\partial}{\partial t} \phi \rho + \phi\rho\dot{\epsilon}_{v} \ ,
 \end{equation}
 where $\dot{\epsilon}_{v} = \nabla\cdot {\mathbf v}_{s}$ and all other nomenclature is described [here](nomenclature.md).  Using the
-[THM evolution of porosity](porosity.md), along with the
+[THM evolution of porosity](/porous_flow/porosity.md), along with the
 assumption that the fluid bulk modulus, $K_{f}$, and its volumetric
 thermal expansion coefficient, $\alpha_{f}$, are constant, and the fluid density is given by
 \begin{equation}

@@ -8,10 +8,13 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Functional Expansion Tools Module
         repo: https://github.com/idaholab/moose
-        home: /modules/functional_expansion_tools
+        home: /modules/functional_expansion_tools/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/functional_expansion_tools
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/functional_expansion_tools/include

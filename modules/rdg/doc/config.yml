@@ -9,10 +9,13 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE rDG Module
         repo: https://github.com/idaholab/moose
-        home: /modules/rdg
+        home: /modules/rdg/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/rdg
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/rdg/include

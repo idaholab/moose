@@ -9,10 +9,13 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Level Set Module
         repo: https://github.com/idaholab/moose
-        home: /modules/level_set
+        home: /modules/level_set/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/level_set
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/level_set/include

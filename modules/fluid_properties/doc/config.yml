@@ -9,12 +9,14 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Fluid Properties Module
         repo: https://github.com/idaholab/moose
-        home: /modules/fluid_properties
+        home: /modules/fluid_properties/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fluid_properties
         remove:
             framework: !include framework/doc/remove.yml
             fluid_properties: !include modules/fluid_properties/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/fluid_properties/include

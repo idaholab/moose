@@ -48,8 +48,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _local_batch_app_index(0),
     _solved_once(false),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
-    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
-    _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
+    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1))
 {
   init(_sampler.getNumberOfRows(),
        _mode == StochasticTools::MultiAppMode::BATCH_RESET ||
@@ -212,8 +211,6 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  TIME_SECTION(_perf_command_line_args);
-
   std::string args;
 
   // With multiple processors per app, there are no local rows for non-root processors

@@ -4,8 +4,11 @@ Applications:
         app_types:
             - FluidPropertiesApp
         content_directory: ${MOOSE_DIR}/modules/fluid_properties/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
-            - modules/fluid_properties/doc/remove.yml
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+            - ${MOOSE_DIR}/modules/fluid_properties/doc/remove.yml
         log_stub_files: WARNING
         log_missing_markdown: WARNING
 

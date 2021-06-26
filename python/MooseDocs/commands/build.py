@@ -124,7 +124,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         filenames = common.get_files(self._items, self._translator.reader.EXTENSIONS, False)
 
         # Build a page object if the filename shows up in the list of available files
-        for root, filename in filenames:
+        for root, filename, _ in filenames:
             if filename == source:
                 key = filename.replace(root, '').strip('/')
                 page = common.create_file_page(key, filename, self._translator.reader.EXTENSIONS)
@@ -168,9 +168,11 @@ def main(options):
         translator.executioner.update(profile=True)
     translator.init()
 
-    # Replace "home" with local server
+    # TODO: See `navigation.postExecute`
+    #       The navigation "home" should be a markdown file, when all the apps update to this we
+    #       can remove this as well as the use of it by CIVET
     home = options.home
-    if options.serve:
+    if options.serve and (home is not None) and (not home.endswith('.md')):
         home = 'http://127.0.0.1:{}'.format(options.port)
 
     if home is not None:

@@ -101,7 +101,7 @@ permeability = 'horizontal_x 0 0  0 horizontal_y 0  0 0 vertical'
 
 A porous material like rock is conceptualised as consisting of solid rock grains and void space.  Groundwater flows through the void space.  Both [storativity](https://en.wikipedia.org/wiki/Specific_storage) and porosity parameterise the amount of groundwater present in a volume of porous material.
 
-[Porosity](porous_flow/porosity.md) is defined as:
+[Porosity](/porous_flow/porosity.md) is defined as:
 \begin{equation}
 \phi = \frac{V_{\mathrm{void}}}{V_{\mathrm{porous\ material}}} = \frac{V_{\mathrm{void}}}{V_{\mathrm{void}} + V_{\mathrm{solid\ grains}}}
 \end{equation}
@@ -731,6 +731,3 @@ In this case, the water extracted by the borehole is around 640$\,$litre/day, an
 ## Final words
 
 This page has presented some very simple groundwater models that you can use as a framework to build your realistic models.  [PorousFlow](porous_flow/index.md) is highly functional and has been used to solve very complicated groundwater models, but if you require extra functionality not already included, please ask on the MOOSE discussion list.
-
-
-

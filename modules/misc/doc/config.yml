@@ -9,10 +9,13 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Misc Module
         repo: https://github.com/idaholab/moose
-        home: /modules/misc
+        home: /modules/misc/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/misc
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        unregister:
+            framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
             - modules/misc/include

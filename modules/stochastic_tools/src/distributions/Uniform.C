@@ -62,20 +62,17 @@ Uniform::quantile(const Real & y, const Real & lower_bound, const Real & upper_b
 Real
 Uniform::pdf(const Real & x) const
 {
-  TIME_SECTION(_perf_pdf);
   return pdf(x, _lower_bound, _upper_bound);
 }
 
 Real
 Uniform::cdf(const Real & x) const
 {
-  TIME_SECTION(_perf_cdf);
   return cdf(x, _lower_bound, _upper_bound);
 }
 
 Real
 Uniform::quantile(const Real & y) const
 {
-  TIME_SECTION(_perf_quantile);
   return quantile(y, _lower_bound, _upper_bound);
 }

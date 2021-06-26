@@ -38,7 +38,7 @@ This `Material` feeds its rate into the `PorousFlowPreDis` `Kernel` (to alter th
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[mineral_concentration] end=[]
 
-The reason for this `Material` is that we can build an `AuxVariable` (below) to record the concentration of the precipitated mineral, but also because the mineral concentration enters into the [porosity](porous_flow/porosity.md) calculation.  The porosity material is
+The reason for this `Material` is that we can build an `AuxVariable` (below) to record the concentration of the precipitated mineral, but also because the mineral concentration enters into the [porosity](/porous_flow/porosity.md) calculation.  The porosity material is
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[porosity_mat] end=[permeability_aquifer]
 
@@ -58,7 +58,7 @@ An animation of the results is shown in [tut07_gif_fig].
 
 !media porous_flow/tut07.gif style=width:80%;margin-left:10px caption=Tracer concentration, porepressure, mineral concentration and permeability evolution in the borehole-aquifer-caprock system.  id=tut07_gif_fig
 
-The simulation may be promoted to a full THMC simulation using the approach used in [Page 03](porous_flow/tutorial_03.md) and [Page 04](porous_flow/tutorial_04.md).  The arguments made about scaling the variables must be modified to take into account the fluid density appearing in the fluid equation (see [Page 06](porous_flow/tutorial_06.md)) so the scaling will be approximately $10^{-5}$ for the temperature and $10^{-7}$ for the displacement variables.  The [porosity](porous_flow/porosity.md) may depend on porepressure, temperature, volumetric strain and chemistry.
+The simulation may be promoted to a full THMC simulation using the approach used in [Page 03](porous_flow/tutorial_03.md) and [Page 04](porous_flow/tutorial_04.md).  The arguments made about scaling the variables must be modified to take into account the fluid density appearing in the fluid equation (see [Page 06](porous_flow/tutorial_06.md)) so the scaling will be approximately $10^{-5}$ for the temperature and $10^{-7}$ for the displacement variables.  The [porosity](/porous_flow/porosity.md) may depend on porepressure, temperature, volumetric strain and chemistry.
 
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_06.md) |

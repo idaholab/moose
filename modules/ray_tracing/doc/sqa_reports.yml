@@ -2,6 +2,8 @@ Applications:
     ray_tracing:
         exe_directory: ${MOOSE_DIR}/modules/ray_tracing
         content_directory: ${MOOSE_DIR}/modules/ray_tracing/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
 

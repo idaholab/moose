@@ -44,6 +44,5 @@ MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
 Real
 MonteCarloSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 {
-  TIME_SECTION(_perf_compute_sample);
   return _distributions[col_index]->quantile(getRand());
 }
