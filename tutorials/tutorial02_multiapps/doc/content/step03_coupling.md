@@ -46,7 +46,7 @@ The Master app can be thought of as computing a "source" term - that is then use
 
 The sub-apps then compute a "material property"... which is then "upscaled" to the Master app via a PostprocessorInterpolationTransfer.
 
-What we end up with is then a smooth field over the whole Master domain that represents "Diffusvity" - which is then fed as the "Diffusivity" into the diffusion equation being solved by the Master app.
+What we end up with is then a smooth field over the whole Master domain that represents "Diffusivity" - which is then fed as the "Diffusivity" into the diffusion equation being solved by the Master app.
 
 !---
 
@@ -59,7 +59,7 @@ What we end up with is then a smooth field over the whole Master domain that rep
 
 ## Picard
 
-Loose coupling, though easy and stable, has problems with accuracy.  Since data is only exchanged once per timestep there is the very real possibility that the solutions in both apps are not at an equilibrium with eachother.  This is especially true as timesteps grow larger.
+Loose coupling, though easy and stable, may not be accurate.  Since data is only exchanged once per timestep there is the very real possibility that the solutions in both apps are not at an equilibrium with each other.  This is especially true as timesteps grow larger.
 
 To fix this, you can iterate back and forth between the apps until you reach a "stationary point".  In MOOSE we call this Picard iteration, though it has many other names including "Tight Coupling".
 

@@ -66,7 +66,7 @@
 
 !row!
 !col! width=50%
-- MOOSE-based solves can be nested to achieve Multiscale-Multiphysics simulations
+- MOOSE-based solves can be nested to achieve multiscale Multiphysics simulations
 
   - Macroscale simulations can be coupled to embedded microstructure simulations
 
