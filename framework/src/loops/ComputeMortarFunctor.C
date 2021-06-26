@@ -16,12 +16,17 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "SwapBackSentinel.h"
+#include "MooseLagrangeHelpers.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
+
+#include "metaphysicl/dualnumberarray.h"
+
+#include "Eigen/Dense"
 
 ComputeMortarFunctor::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
@@ -128,11 +133,84 @@ ComputeMortarFunctor::operator()()
     // Compute custom integration points for the secondary side
     custom_xi1_pts.resize(_qrule_msm->n_points());
 
-    for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+    if (msm_elem->dim() == 1)
     {
-      Real eta = _qrule_msm->qp(qp)(0);
-      Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
-      custom_xi1_pts[qp] = xi1_eta;
+      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+      {
+        Real eta = _qrule_msm->qp(qp)(0);
+        Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
+        custom_xi1_pts[qp] = xi1_eta;
+      }
+    }
+    else
+    {
+      typedef DualNumber<Real, NumberArray<2, Real>> dual2;
+
+      auto && msm_order = msm_elem->default_order();
+      auto && msm_type = msm_elem->type();
+
+      // Hack for now, will need to fix later
+      Point e1 = msm_elem->point(0) - msm_elem->point(1);
+      Point e2 = msm_elem->point(2) - msm_elem->point(1);
+      const Point normal = e2.cross(e1).unit();
+      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+      {
+        // Get physical point on msm_elem to project
+        VectorValue<dual2> x0;
+        for (MooseIndex(msm_elem->n_nodes()) n = 0;
+             n < msm_elem->n_nodes();
+             ++n)
+          x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) * msm_elem->point(n);
+
+        dual2 xi1;
+        xi1.value() = _qrule_msm->qp(qp)(0);
+        xi1.derivatives()[0] = 1.0;
+        dual2 xi2;
+        xi2.value() = _qrule_msm->qp(qp)(1);
+        xi2.derivatives()[1] = 1.0;
+        VectorValue<dual2> xi(xi1, xi2, 0);
+        auto && secondary_order = msinfo.secondary_elem->default_order();
+        auto && secondary_type = msinfo.secondary_elem->type();
+        unsigned int current_iterate = 0, max_iterates = 10;
+
+        do
+        {
+          VectorValue<dual2> x1;
+          for (MooseIndex(msinfo.secondary_elem->n_nodes()) n = 0;
+               n < msinfo.secondary_elem->n_nodes();
+               ++n)
+            x1 += Moose::fe_lagrange_2D_shape(secondary_type, secondary_order, n, xi) * msinfo.secondary_elem->point(n);
+
+          auto u = x1 - x0;
+          VectorValue<dual2> F(u(1) * normal(2) - u(2) * normal(1),
+                               u(2) * normal(0) - u(0) * normal(2),
+                               u(0) * normal(1) - u(1) * normal(0));
+
+// TODO: change newton tolerance
+          if (F.norm() < 1e-10)
+            break;
+
+          RealEigenMatrix J(3,2);
+          J << F(0).derivatives()[0], F(0).derivatives()[1],
+               F(1).derivatives()[0], F(1).derivatives()[1],
+               F(2).derivatives()[0], F(2).derivatives()[1];
+          RealEigenVector f(3);
+          f << F(0).value(), F(1).value(), F(2).value();
+          RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
+
+          xi(0) += dxi(0); xi(1) += dxi(1);
+        } while (++current_iterate < max_iterates);
+
+// TODO: Check that inside elem
+        if (current_iterate < max_iterates)
+        {
+          custom_xi1_pts[qp](0) = xi(0).value();
+          custom_xi1_pts[qp](1) = xi(1).value();
+          custom_xi1_pts[qp](2) = xi(2).value();
+        }
+        else
+          mooseError("Newton iteration for secondary mortar quadrature didn't converge");
+      }
     }
 
     const auto normals = _amg.getNormals(*msinfo.secondary_elem, custom_xi1_pts);
@@ -156,11 +234,88 @@ ComputeMortarFunctor::operator()()
     {
       //  Compute custom integration points for the primary side
       custom_xi2_pts.resize(_qrule_msm->n_points());
-      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+
+      if (msm_elem->dim() == 1)
       {
-        Real eta = _qrule_msm->qp(qp)(0);
-        Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
-        custom_xi2_pts[qp] = xi2_eta;
+        for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+        {
+          Real eta = _qrule_msm->qp(qp)(0);
+          Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
+          custom_xi2_pts[qp] = xi2_eta;
+        }
+      }
+      else
+      {
+        typedef DualNumber<Real, NumberArray<2, Real>> dual2;
+
+        auto && msm_order = msm_elem->default_order();
+        auto && msm_type = msm_elem->type();
+
+        // Hack for now, will need to fix later
+        Point e1 = msm_elem->point(0) - msm_elem->point(1);
+        Point e2 = msm_elem->point(2) - msm_elem->point(1);
+        const Point normal = e2.cross(e1).unit();
+        for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+        {
+          // Get physical point on msm_elem to project
+          VectorValue<dual2> x0;
+          for (MooseIndex(msm_elem->n_nodes()) n = 0;
+               n < msm_elem->n_nodes();
+               ++n)
+            x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) * msm_elem->point(n);
+
+          dual2 xi1;
+          xi1.value() = 0;
+          xi1.derivatives()[0] = 1.0;
+          dual2 xi2;
+          xi2.value() = 0;
+          xi2.derivatives()[1] = 1.0;
+          VectorValue<dual2> xi(xi1, xi2, 0);
+          auto && primary_order = msinfo.primary_elem->default_order();
+          auto && primary_type = msinfo.primary_elem->type();
+          unsigned int current_iterate = 0, max_iterates = 10;
+
+          do
+          {
+            VectorValue<dual2> x1;
+            for (MooseIndex(msinfo.primary_elem->n_nodes()) n = 0;
+                 n < msinfo.primary_elem->n_nodes();
+                 ++n)
+              x1 += Moose::fe_lagrange_2D_shape(primary_type, primary_order, n, xi) * msinfo.primary_elem->point(n);
+
+            auto u = x1 - x0;
+            VectorValue<dual2> F(u(1) * normal(2) - u(2) * normal(1),
+                                 u(2) * normal(0) - u(0) * normal(2),
+                                 u(0) * normal(1) - u(1) * normal(0));
+
+  // TODO: change newton tolerance
+            if (F.norm() < 1e-10)
+              break;
+
+            RealEigenMatrix J(3,2);
+            J << F(0).derivatives()[0], F(0).derivatives()[1],
+                 F(1).derivatives()[0], F(1).derivatives()[1],
+                 F(2).derivatives()[0], F(2).derivatives()[1];
+            RealEigenVector f(3);
+            f << F(0).value(), F(1).value(), F(2).value();
+            RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
+
+            xi(0) += dxi(0); xi(1) += dxi(1);
+          } while (++current_iterate < max_iterates);
+
+  // TODO: Check that inside elem
+
+          if (current_iterate < max_iterates)
+          {
+            custom_xi2_pts[qp](0) = xi(0).value();
+            custom_xi2_pts[qp](1) = xi(1).value();
+            custom_xi2_pts[qp](2) = xi(2).value();
+          }
+          else
+          // Add iterations and norm in error message
+            mooseError("Newton iteration for secondary mortar quadrature didn't converge");
+
+        }
       }
 
       const Elem * reinit_primary_elem = primary_ip;
