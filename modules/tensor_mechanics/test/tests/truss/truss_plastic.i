@@ -17,7 +17,7 @@
 []
 
 [AuxVariables]
- [./axial_stress]
+  [./axial_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
