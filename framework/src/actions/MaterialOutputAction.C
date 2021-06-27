@@ -165,7 +165,7 @@ MaterialOutputAction::act()
           material_names.insert(curr_material_names.begin(), curr_material_names.end());
         }
 
-        // If the material object as limited outputs, store the variables associated with the output
+        // If the material object has limited outputs, store the variables associated with the output
         // objects
         if (!outputs.empty())
           for (const auto & output_name : outputs)
@@ -200,6 +200,10 @@ MaterialOutputAction::act()
     for (const auto & var_name : material_names)
     {
       oss << "\n  " << var_name;
+      // Warn if adding material properties auxiliary variables with the same name as a variable
+      if (_problem->hasVariable(var_name))
+        mooseWarning("The material property output " + var_name + " has the same name as an existing"
+                     " variable, use the material declare_suffix parameter to disambiguate");
       _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
     }
     if (material_names.size() > 0)
