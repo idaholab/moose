@@ -458,7 +458,7 @@ RankFourTensorTempl<T>::transposeMajor() const
 
 template <typename T>
 RankFourTensorTempl<T>
-RankFourTensorTempl<T>::transposeIJ() const
+RankFourTensorTempl<T>::transposeIj() const
 {
   RankFourTensorTempl<T> result;
 

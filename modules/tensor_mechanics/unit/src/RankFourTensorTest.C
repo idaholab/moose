@@ -299,9 +299,9 @@ TEST_F(RankFourTensorTest, rotation)
   EXPECT_NEAR(0, (axy1 - axy2).L2norm(), 1E-8);
 }
 
-TEST_F(RankFourTensorTest, transposeIJ)
+TEST_F(RankFourTensorTest, transposeIj)
 {
-  const RankFourTensor computed_val = _r4.transposeIJ();
+  const RankFourTensor computed_val = _r4.transposeIj();
   for (unsigned int l = 0; l < 3; ++l)
     for (unsigned int k = 0; k < 3; ++k)
       for (unsigned int j = 0; j < 3; ++j)

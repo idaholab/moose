@@ -250,7 +250,7 @@ public:
    * Transpose the tensor by swapping the first two indeces
    * @return C_jikl
    */
-  RankFourTensorTempl<T> transposeIJ() const;
+  RankFourTensorTempl<T> transposeIj() const;
 
   /**
    * multiply a RankFourTensor with a vector
