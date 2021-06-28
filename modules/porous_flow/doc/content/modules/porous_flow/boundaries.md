@@ -1,13 +1,15 @@
 # Boundary conditions
 
 MOOSE's Dirichlet and Neumann boundary conditions enable simulation of simple scenarios.
-The Porous Flow module includes a very flexible boundary condition that allows many different
-scenarios to be modelled. The boundary condition is built by adding various options to a basic
-sink in the following way.
+The Porous Flow module includes flexible boundary conditions that allow many different
+scenarios to be modelled. There are two classes of boundary conditions:
+
+1. Those based on [PorousFlowSink](PorousFlowSink.md).  These are typically used to add or remove fluid or heat-energy through the boundary.  The basic sink adds/removes a fixed flux, but more elaborate sources/sinks add time-dependent fluxes, or fluxes dependent on fluid pressure or temperature, fluid mobility, enthalpy, etc.  These boundary conditions may also be used to control porepressure, temperature, or mass fractions on the boundary by adding/removing fluid or heat through interaction with an external environment.  It is often physically more correct and numerically advantageous to use these boundary conditions instead of [DirichletBC](DirichletBC.md).
+2. Those based on [PorousFlowOutflowBC](PorousFlowOutflowBC.md), which is an "outflow" boundary condition that removes fluid components or heat energy as they flow to the boundary.  This models a "free" boundary that is "invisible" to the simulation.  Please see below for more description and warnings.
 
 This page may be read in conjuction with the [description of some of the tests of the PorousFlow sinks](tests/sinks/sinks_tests.md).
 
-## Basic sink formulation
+## Class 1: Basic sink formulation
 
 The basic sink is
 \begin{equation}
@@ -35,7 +37,7 @@ Postprocessor.
 
 This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFlowSink.md).
 
-## More elaborate options
+## Class 1: More elaborate options
 
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
@@ -64,7 +66,7 @@ quantities
 - Fluid internal energy
 - Thermal conductivity
 
-## Fixing fluid porepressures using the PorousFlowSink
+## Class 1: Fixing fluid porepressures using the PorousFlowSink
 
 Frequently in PorousFlow simulations fixing fluid porepressures using
 Dirichlet conditions is inappropriate.
@@ -159,14 +161,14 @@ The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = tru
 
 !listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
 
-## Injection of fluid at a fixed temperature
+## Class 1: Injection of fluid at a fixed temperature
 
 A boundary condition corresponding to injection of fluid at a fixed temperature
 could involve: (1) using a Dirichlet condition for temperature; (2) using $f=-1$ without any
 multiplicative factors. More complicated examples with heat and fluid injection and production
 are detailed in the test suite documentation.
 
-## Fluids that both enter and exit the boundary
+## Class 1: Fluids that both enter and exit the boundary
 
 Commonly, if fluid or heat is exiting the porous material, multiplication by relative permeability,
 mobility, mass fraction, enthalpy or thermal conductivity is necessary, while if fluid or heat is
@@ -176,9 +178,9 @@ Piecewise-linear sink (here $P_{\mathrm{e}}$ is the environmental pressure); and
 *injection*, which is only active for $P<P_{\mathrm{e}}$ using a piecewise-linear sink multiplied
 by the appropriate factors.
 
-## A 2-phase example
+## Class 1: A 2-phase example
 
-To illustrate that the "sink" part of the `PorousFlowSink` boundary condition works as planned, consider 2-phase flow along a line.  The simulation is initially saturated with water, and CO$_{2}$ is injected at the left-side.  The CO$_{2}$ front moves towards the right, but what boundary conditions should be placed on the right so that they don't interfere with the flow?
+To illustrate that the "sink" part of the `PorousFlowSink` boundary condition works as planned, consider 2-phase flow along a line.  (A similar problem using the [PorousFlowOutflowBCs](PorousFlowOutflowBC.md) is described below.)  The simulation is initially saturated with water, and CO$_{2}$ is injected at the left-side.  The CO$_{2}$ front moves towards the right, but what boundary conditions should be placed on the right so that they don't interfere with the flow?
 
 The answer is that two [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md) are needed.  One pulls out water and the other pulls out CO$_{2}$.  They extract the fluids in proportion to their mass fractions, mobilities and relative permeabilities, in the way described above.  Let us explore the input file a little.
 
@@ -220,10 +222,10 @@ Below are shown some outputs.  Evidently the boundary condition satisfies the re
 
 !media injection_production_eg.gif style=width:50%;margin-left:10px caption=Evolution of gas saturation (the jaggedness of the line is because gas saturation is an elemental variable).  id=injection_production_eg
 
-## Boundary terms for the advection-diffusion equation
+## Class 2: Boundary terms for advection-diffusion equations
 
 The theoretical background concerning boundary fluxes is developed in
-this section.  The presentation is general and not specific to Porous
+this section.  The initial part of the presentation is general and not specific to Porous
 Flow.  The variable $u$ may represent temperature, fluid mass,
 mass-densty of a species, number-density of a species, etc.  The flux
 quantified below has units depending on the physical meaning of $u$:
@@ -261,9 +263,9 @@ imagine $\partial\Omega$ being an outside boundary of the MOOSE numerical model.
 
 - If $\mathbf{n}\cdot\mathbf{V}>0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Outflow` BC is exactly the final term in [eq:adv_eqn_weak].  This removes fluid through $\partial\Omega$ at exactly the rate specified by the advection equation, so this is a "free" boundary that is "invisible" to the simulation.
 
-- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  If no BC is used then no fluid enters the domain through $\partial\Omega$ (and $u$ will reduce).
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from outside the model through the boundary and into the model.  However, if no BC is used then no fluid enters the domain through $\partial\Omega$ (and $u$ will reduce).
 
-- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Inflow` `BC`, which is exactly the last term in [eq:adv_eqn_weak] with $u=u_{B}$ fixed, may be used to specify an injection rate through this boundary ($u_{B}$ has units kg.s$^{-1}$.m$^{-2}$).
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from outside the model through the boundary and into the model.  An `Inflow` `BC`, which is exactly the last term in [eq:adv_eqn_weak] with $u=u_{B}$ fixed, may be used to specify an injection rate through this boundary ($u_{B}$ has units kg.s$^{-1}$.m$^{-2}$).
 
 
 ### The diffusion equation
@@ -326,3 +328,112 @@ Inclusion of a BC for $u$ in a MOOSE input file will specify something about the
 - A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot (D\nabla u - \mathbf{V}u) = h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
 
 - Using an `OutflowBC` together with a [`DiffusionFluxBC`](DiffusionFluxBC.md) removes fluid through $\partial\Omega$ at exactly the rate specified by the advection-diffusion equation, so this is a "free" boundary that is "invisible" to the simulation.
+
+### The PorousFlow mass flux
+
+The [governing equation](governing_equations.md) for mass conservation of fluid species $\kappa$ is
+\begin{equation}
+0 = \frac{\partial M^{\kappa}}{\partial t} + M^{\kappa}\nabla\cdot{\mathbf
+  v}_{s} + \nabla\cdot \mathbf{F}^{\kappa} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \ .
+\end{equation}
+The standard [PorousFlow nomenclature](/porous_flow/nomenclature.md) as been used here.  The weak form is
+\begin{equation}
+\label{eqn.pf.mass.flux.weak}
+0 = \int_{\Omega}\psi \dot{M}^{\kappa} + \int_{\Omega}\psi \left( M^{\kappa}\nabla\cdot{\mathbf v}_{s} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \right) - \int_{\Omega}\nabla\psi\cdot \mathbf{F}^{\kappa} + \int_{\partial\Omega}\psi {\mathbf n}\cdot \mathbf{F}^{\kappa} 
+\end{equation}
+The flux of species $\kappa$ out through an arbitrary area $A$ is
+\begin{equation}
+\mathrm{flux}_{\mathrm{out}} = \int_{A} \mathbf{n}\cdot\mathbf{F}^{\kappa} \ .
+\end{equation}
+This has SI units kg.s$^{-1}$.
+
+Inclusion of a BC for porepressure or mass fraction in a MOOSE input file will specify something about the flux from the boundary.
+
+- Using no BCs means the final term [eqn.pf.mass.flux.weak] is missing from the system of equations that MOOSE solves, in other words, it is zero.  Hence, no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable", and MOOSE will find the solution $\mathbf{n}\cdot\mathbf{F}^{\kappa} = 0$.
+
+- A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value, $h$, (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid species, and MOOSE will find the solution that has ${\mathbf{n}}\cdot \mathbf{F}^{\kappa} = -h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
+
+- Any of the [PorousFlowSink](PorousFlowSink.md) variants mentioned above act in the same way as the [NeumannBC](NeumannBC.md) by adding a value to the Residual and integrating it over the boundary, thereby allowing flux through the boundary to be specified.  However, the [PorousflowSink](PorousFlowSink.md) variants are much more flexible than any of the NeumannBC variants that are coded into the MOOSE framework, so should be preferred in PorousFlow simulations.
+
+- Fixing the porepressure or mass fraction with a [DirichletBC](DirichletBC.md) is also possible.  This corresponds to adding/removing fluid species to keep the porepressure or mass fraction fixed, which can lead to severe numerical problems (for instance, trying to remove a fluid species that has zero mass fraction) so DirichletBC should be used with caution in PorousFlow simulations.  Instead, one of the PorousFlowSink variants should usually be used, as described in detail above.
+
+- Using a [PorousFlowOutflowBC](PorousFlowOutflowBC.md) removes fluid species through $\partial\Omega$ at exactly the rate specified by the Darcy equation [eqn.pf.mass.flux.weak], so this is a "free" boundary that is "invisible" to the simulation.   More details are given below.
+
+
+### The PorousFlow heat flux
+
+The [governing equation](governing_equations.md) for heat-energy conservation is
+\begin{equation}
+0 = \frac{\partial\mathcal{E}}{\partial t} + \mathcal{E}\nabla\cdot{\mathbf
+  v}_{s} + \nabla\cdot \mathbf{F}^{T} -
+\nu
+  (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial
+    t}\epsilon_{ij}^{\mathrm{plastic}}
+ - q^{T}
+\end{equation}
+The standard [PorousFlow nomenclature](/porous_flow/nomenclature.md) as been used here.  The weak form is
+\begin{equation}
+\label{eqn.pf.heat.flux.weak}
+0 = \int_{\Omega}\psi \dot{\mathcal{E}}^{\kappa} + \int_{\Omega}\psi \left( \mathcal{E}\nabla\cdot{\mathbf v}_{s} -
+\nu
+  (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial
+    t}\epsilon_{ij}^{\mathrm{plastic}}
+ - q^{T} \right) - \int_{\Omega}\nabla\psi\cdot \mathbf{F}^{T} + \int_{\partial\Omega}\psi {\mathbf n}\cdot \mathbf{F}^{T}
+\end{equation}
+The flux of heat energy out through an arbitrary area $A$ is
+\begin{equation}
+\mathrm{flux}_{\mathrm{out}} = \int_{A} \mathbf{n}\cdot\mathbf{F}^{T} \ .
+\end{equation}
+This has SI units J.s$^{-1}$.  Analogous remarks to the mass-flow case can be made concerning possible different types of BC.
+
+## Class 2: The PorousFlowOutflowBC
+
+The [PorousFlowOutflowBC](PorousFlowOutflowBC.md) adds the following term to the residual
+\begin{equation}
+\int_{\partial\Omega}\psi {\mathbf n}\cdot \mathbf{F}
+\end{equation}
+Various forms of $\mathbf{F}$ may be chosen, as discussed in the [PorousFlowOutflowBC documentation](PorousFlowOutflowBC.md), so that this BC removes fluid species or heat energy through $\partial\Omega$ at exactly the rate specified by the Darcy equation [eqn.pf.mass.flux.weak] or the heat equation [eqn.pf.heat.flux.weak].  Therefore, this BC can be used to represent a "free" boundary through which fluid or heat can freely flow: the boundary is "invisible" to the simulation.
+
+!alert note
+Ensure your normal vector points *out* of the model, otherwise your fluxes will have the wrong sign.
+
+!alert warning
+`PorousFlowOutflowBC` does not model the interface of the model with "empty space".  Imagine a model of a porous-media pipe containing water.  `PorousFlowOutflowBC` does *not* model the situation where the pipe has an end through which the water flows into empty space.  Instead, `PorousFlowOutflowBC` allows only part of the pipe to be modelled: when water exits the model it continues freely into the unmodelled section of the pipe.  In this sense, the model's boundary is "invisible" to the simulation.  This has a further consequence: if there is a sink in the modelled section, `PorousFlowOutflowBC` will allow water to flow from the unmodelled section into the modelled section.
+
+!alert note
+The rate of outflow is limited by the permeability, the viscosity of the fluid, etc, in exactly the same way that the Darcy velocity is limited by these quantities.  This means, for instance, if you inject a lot of fluid or heat into the model, it will take the `PorousFlowOutflowBC` some time to "suck" it all out.
+
+
+### Example: a 2-phase model
+
+This example is similar to the 2-phase model employing a set of [PorousFlowPiecewiseLinearSinks](PorousFlowPiecewiseLinearSink.md) described above.  Consider 2-phase flow along a line.  This time, both water and CO$_{2}$ are injected from the left boundary, while the right boundary has two [PorousFlowOutflowBCs](PorousFlowOutflowBC.md).
+
+In this example there are two fluid components:
+
+- fluid component 0 is water
+- fluid component 1 is CO$_{2}$
+
+and two phases:
+
+- phase 0 is liquid
+- phase 1 is gas
+
+The water component only exists in the liquid phase and the CO$_{2}$ component only exists in the gaseous phase (the fluids are immiscible).  The Variables are the water and gas porepressures:
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg_outflowBC.i start=[Variables] end=[Kernels]
+
+The `pwater` Variable is associated with the water component, while the `pgas` Variable is associated with the CO$_{2}$ component:
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg_outflowBC.i start=[Kernels] end=[UserObjects]
+
+The remainder of the input file is pretty standard, save for the important `BCs` block, where it is seen that water is injected with a rate of $0.01\,$g.s$^{-1}$ and CO$_{2}$ at a rate of $0.02\,$g.s$^{-1}$, and water and CO$_{2}$ are allowed to freely exit from the model using the [PorousFlowOutflowBCs](PorousFlowOutflowBC.md):
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg_outflowBC.i block=BCs
+
+The outflow rates are plotted in [ip_outflowBC], where it can be seen that the asymptotic values are correct.
+
+!media sinks/ip_outflowBC.png
+	style=width:60%;margin:auto;padding-top:2.5%;
+	id=ip_outflowBC
+	caption=Mass flow rates from the two-phase model that contains a 0.01g/s source of water and a 0.02g/s source of gas, as well as PorousFlowOutflowBC boundary conditions that allow the fluids to freely exit the model.
+
