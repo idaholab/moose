@@ -38,6 +38,7 @@ THMCreateMeshAction::act()
     if (!_mesh->hasMeshBase())
       _mesh->setMeshBase(_mesh->buildMeshBaseObject());
 
+    if (!_problem)
     {
       const std::string class_name = "THMProblem";
       InputParameters params = _factory.getValidParams(class_name);
