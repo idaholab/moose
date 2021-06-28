@@ -66,6 +66,8 @@ Sampler::Sampler(const InputParameters & parameters)
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),
+    _next_local_row(0),
+    _previous_next_local_row(0),
     _next_local_row_requires_state_restore(true),
     _initialized(false),
     _needs_reinit(true),
@@ -122,9 +124,6 @@ Sampler::reinit()
   _n_local_rows = rc.is_first_local_rank ? rc.num_local_apps : 0;
   _local_row_begin = rc.first_local_app_index;
   _local_row_end = _local_row_begin + _n_local_rows;
-
-  // Set the next row iterator index
-  _next_local_row = _local_row_begin;
 
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
@@ -248,10 +247,16 @@ Sampler::getNextLocalRow()
                  ".");
   }
 
+  if ((_next_local_row - _previous_next_local_row) != 1)
+  {
+    mooseError("The 'Sampler::getNextLocalRow' method must be called once, and only once per "
+               "iteration. To operate correctly the `Sampler::getLocalRowBegin()` and "
+               "`Sampler::getLocalRowEnd()` methods should be utilzed.");
+  }
+
   std::vector<Real> output(_n_cols);
   computeSampleRow(_next_local_row, output);
   mooseAssert(output.size() == _n_cols, "The row of sample data is not sized correctly.");
-  _next_local_row++;
 
   if (_next_local_row == _local_row_end)
   {
@@ -261,6 +266,7 @@ Sampler::getNextLocalRow()
     _next_local_row_requires_state_restore = true;
   }
 
+  _previous_next_local_row = _next_local_row;
   return output;
 }
 
@@ -374,15 +380,34 @@ Sampler::getNumberOfLocalRows() const
 dof_id_type
 Sampler::getLocalRowBegin() const
 {
-  checkReinitStatus();
-  return _local_row_begin;
+  return getLocalRowBegin(0);
 }
 
 dof_id_type
 Sampler::getLocalRowEnd() const
 {
+  return getLocalRowEnd(0);
+}
+
+dof_id_type
+Sampler::getLocalRowBegin(const dof_id_type positive_offset) const
+{
+  mooseAssert(positive_offset < _n_local_rows,
+              "The supplied positive offset must be less then the number of local rows");
   checkReinitStatus();
-  return _local_row_end;
+  _next_local_row = _local_row_begin + positive_offset;
+  _previous_next_local_row = _next_local_row;
+  return _local_row_begin;
+}
+
+dof_id_type
+Sampler::getLocalRowEnd(const dof_id_type negative_offset) const
+{
+  mooseAssert(negative_offset < _n_local_rows,
+              "The supplied negative offset must be less then the number of local rows");
+  checkReinitStatus();
+  _next_local_row++;
+  return _local_row_end - negative_offset;
 }
 
 void

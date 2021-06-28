@@ -21,7 +21,7 @@ SamplerTester::validParams()
 
   MooseEnum test_type(
       "mpi thread base_global_vs_local rand_global_vs_local rand_global_vs_next getGlobalSamples "
-      "getLocalSamples getNextLocalRow");
+      "getLocalSamples getNextLocalRow getNextLocalRow_call_twice getNextLocalRow_call_zero");
   params.addParam<MooseEnum>("test_type", test_type, "The type of test to perform.");
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.suppressParameter<std::vector<OutputName>>("outputs");
@@ -54,6 +54,24 @@ SamplerTester::execute()
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
       std::vector<Real> row = _sampler.getNextLocalRow();
 
+  if (_test_type == "getNextLocalRow_call_twice")
+  {
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+    {
+      _sampler.getNextLocalRow();
+      _sampler.getNextLocalRow();
+    }
+  }
+
+  if (_test_type == "getNextLocalRow_call_zero")
+  {
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+    {
+      if (i != 10)
+        _sampler.getNextLocalRow();
+    }
+  }
+
   if (_test_type == "rand_global_vs_next")
   {
     mooseAssert(n_processors() == 1, "This test only works on one processor.");
@@ -62,7 +80,7 @@ SamplerTester::execute()
     DenseMatrix<Real> global = _sampler.getGlobalSamples();
 
     // Iterate through some
-    for (dof_id_type i = _sampler.getLocalRowBegin(); i < 7; ++i)
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(7); ++i)
     {
       std::vector<Real> row = _sampler.getNextLocalRow();
       for (unsigned int j = 0; j < 8; j++)
@@ -75,7 +93,7 @@ SamplerTester::execute()
     DenseMatrix<Real> local = _sampler.getLocalSamples();
 
     // Continue iteration
-    for (dof_id_type i = 7; i < _sampler.getLocalRowEnd(); ++i)
+    for (dof_id_type i = _sampler.getLocalRowBegin(7); i < _sampler.getLocalRowEnd(); ++i)
     {
       std::vector<Real> row = _sampler.getNextLocalRow();
       for (unsigned int j = 0; j < 8; j++)

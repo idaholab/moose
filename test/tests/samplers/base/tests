@@ -169,7 +169,7 @@
       expect_err = "The number of entries in the DenseMatrix \([0-9]+\) exceeds the allowed limit of [0-9]+."
       cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getLocalSamples"
 
-      detail = "if the number of entries in the local sample matrix exceeds the maximum allowed, and"
+      detail = "if the number of entries in the local sample matrix exceeds the maximum allowed,"
     []
     [getNextLocalRow_max]
       type = RunException
@@ -177,7 +177,23 @@
       expect_err = "The number of entries in the std::vector \([0-9]+\) exceeds the allowed limit of [0-9]+."
       cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getNextLocalRow"
 
-      detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed."
+      detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed,"
+    []
+    [getNextLocalRow_call_twice]
+      type = RunException
+      input = errors.i
+      expect_err = "The 'Sampler::getNextLocalRow' method must be called once, and only once per iteration."
+      cli_args = "Postprocessors/test/test_type=getNextLocalRow_call_twice"
+
+      detail = "if the access to a local row of the sampler is called more than once per iteration, and"
+    []
+    [getNextLocalRow_call_zero]
+      type = RunException
+      input = errors.i
+      expect_err = "The 'Sampler::getNextLocalRow' method must be called once, and only once per iteration."
+      cli_args = "Postprocessors/test/test_type=getNextLocalRow_call_zero"
+
+      detail = "if the access to a local row of the sampler is not called during iteration."
     []
   []
 
