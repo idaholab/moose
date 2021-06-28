@@ -1,91 +1,184 @@
 [Tests]
-  [./PermFromPoro01]
+  [PermFromPoro01]
     type = 'CSVDiff'
     input = 'PermFromPoro01.i'
     csvdiff = 'PermFromPoro01_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermFromPoro02]
+    requirement = 'PorousFlow shall be able to calculate permeability as an Kozeny-Carman function of porosity, where an permeability is defined via setting a grain size'
+    issues = '#7632'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
+  []
+  [PermFromPoro02]
     type = 'CSVDiff'
     input = 'PermFromPoro02.i'
     csvdiff = 'PermFromPoro02_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermFromPoro03]
+    requirement = 'PorousFlow shall be able to calculate permeability as an Kozeny-Carman function of porosity, where an permeability is defined via setting a reference value of porosity'
+    issues = '#7632'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
+  []
+  [PermFromPoro03]
     type = 'CSVDiff'
     input = 'PermFromPoro03.i'
     csvdiff = 'PermFromPoro03_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermFromPoro04]
+    requirement = 'PorousFlow shall be able to calculate permeability as an exponential function of porosity, where an anisotropy is specified, and k is defined through an exponential function'
+    issues = '#7632'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityExponential.md'
+  []
+  [PermFromPoro04]
     type = 'CSVDiff'
     input = 'PermFromPoro04.i'
     csvdiff = 'PermFromPoro04_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermFromPoro05]
+    requirement = 'PorousFlow shall be able to calculate permeability as an exponential function of porosity, where an anisotropy is specified, and log(k) is defined through a linear function'
+    issues = '#7632'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityExponential.md'
+  []
+  [PermFromPoro05]
     type = 'CSVDiff'
     input = 'PermFromPoro05.i'
     csvdiff = 'PermFromPoro05_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
+    requirement = 'PorousFlow shall be able to calculate permeability as an exponential function of porosity, where an anisotropy is specified, and ln(k) is defined through a linear function'
+    issues = '#7632'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityExponential.md'
+  []
 
-  [./poro_thm]
+  [poro_thm]
     type = CSVDiff
     input = poro_thm.i
     csvdiff = poro_thm_out.csv
     threading = '!pthreads'
-  [../]
-  [./poro_tm]
+    requirement = 'PorousFlow shall be able to calculate porosity for thermo-hydro-mechanical coupled models'
+    issues = '#10847'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [poro_tm]
     type = CSVDiff
     input = poro_tm.i
     csvdiff = poro_tm_out.csv
     threading = '!pthreads'
-  [../]
-  [./poro_hm]
+    requirement = 'PorousFlow shall be able to calculate porosity for thermo-mechanical coupled models'
+    issues = '#10847'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [poro_hm]
     type = CSVDiff
     input = poro_hm.i
     csvdiff = poro_hm_out.csv
     threading = '!pthreads'
-  [../]
+    requirement = 'PorousFlow shall be able to calculate porosity for hydro-mechanical coupled models'
+    issues = '#10847'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
 
-  [./except1]
+  [except1]
     type = RunException
     input = except1.i
     expect_err = 'PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff'
     threading = '!pthreads'
-  [../]
-  [./except2]
+    requirement = 'PorousFlow shall produce an error if the porosity depends on temperature by no thermal expansion coefficient is provided'
+    issues = '#10847'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
+  [except2]
     type = RunException
     input = except2.i
     expect_err = 'PorousFlowPorosity: When fluid=true you must provide a solid_bulk'
     threading = '!pthreads'
-  [../]
+    requirement = 'PorousFlow shall produce an error if the porosity depends on porepressure but no solid bulk modulus is provided'
+    issues = '#10847'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
 
-  [./PermTensorFromVar01]
+  [PermTensorFromVar01]
     type = 'CSVDiff'
     input = 'PermTensorFromVar01.i'
     csvdiff = 'PermTensorFromVar01_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermTensorFromVar02]
+    requirement = 'PorousFlow shall be able to calculate permeability as a product of an anisotropic tensor and a constant term'
+    issues = '#8061'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityConstFromVar.md'
+  []
+  [PermTensorFromVar02]
     type = 'CSVDiff'
     input = 'PermTensorFromVar02.i'
     csvdiff = 'PermTensorFromVar02_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
-  [./PermTensorFromVar03]
+    requirement = 'PorousFlow shall be able to calculate permeability as a product of an anisotropic tensor and a spatially-varying variable'
+    issues = '#8061'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityConstFromVar.md'
+  []
+  [PermTensorFromVar03]
     type = 'CSVDiff'
     input = 'PermTensorFromVar03.i'
     csvdiff = 'PermTensorFromVar03_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-  [../]
+    requirement = 'PorousFlow shall be able to calculate isotropic, spatially-varying permeability'
+    issues = '#8061'
+    design = 'porous_flow/permeability.md PorousFlowPermeabilityConstFromVar.md'
+  []
+
+  [linear_except1]
+    type = RunException
+    input = linear_except1.i
+    cli_args = 'Materials/inactive=pf Materials/porosity/P_coeff=1'
+    expect_err = 'PorousFlowPorosityLinear: When P_coeff is given you must have an effective fluid pressure Material'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall produce an error if a linear porosity relationship that depends on effective fluid pressure is used if there is no effective fluid pressure material'
+    issues = '#18079'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
+  [linear_except2]
+    type = RunException
+    input = linear_except1.i
+    cli_args = 'Materials/inactive=temperature Materials/porosity/T_coeff=1'
+    expect_err = 'PorousFlowPorosityLinear: When T_coeff is given you must have a temperature Material'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall produce an error if a linear porosity relationship that depends on temperature is used if there is no temperature material'
+    issues = '#18079'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
+  [linear_except3]
+    type = RunException
+    input = linear_except1.i
+    cli_args = 'Materials/inactive=volstrain Materials/porosity/epv_coeff=1'
+    expect_err = 'PorousFlowPorosityLinear: When epv_coeff is given you must have a volumetric-strain Material'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall produce an error if a linear porosity relationship that depends on volumetric strain is used if there is no volumetric-strain material'
+    issues = '#18079'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
+  [linear_test_vals1]
+    type = CSVDiff
+    input = linear_test_vals.i
+    csvdiff = linear_test_vals_out.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate porosity as a linear function of effective porepressure, temperature and volumetric strain'
+    issues = '#18079'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
+  [linear_test_vals2]
+    type = CSVDiff
+    input = linear_test_vals.i
+    prereq = linear_test_vals1
+    cli_args = 'Materials/porosity/porosity_min=12 Outputs/file_base=linear_test_vals_min'
+    csvdiff = linear_test_vals_min.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate porosity as a linear function of effective porepressure, temperature and volumetric strain and place a lower bound on the resulting porosity'
+    issues = '#18079'
+    design = 'porous_flow/porosity.md PorousFlowPorosityLinear.md'
+  []
 []
