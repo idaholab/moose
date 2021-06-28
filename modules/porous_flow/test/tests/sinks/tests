@@ -257,4 +257,119 @@
     issues = '#12769'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
+
+  [./outflow_except1]
+    type = RunException
+    input = outflow_except1.i
+    threading = '!pthreads'
+    expect_err = "The Dictator declares that the maximum fluid component index is 0, but you have set mass_fraction_component to 1. Remember that indexing starts at 0"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error for an incorrect mass-fraction specification in PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_dens]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'Materials/fluid_props/at_nodes=false'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: You requested to multiply_by_density, but you have no nodal fluid density Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no nodal density Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_relperm]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'Materials/inactive=relperm'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: You requested to include the relative permeability, but you have no nodal relative permeability Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no nodal relative-permeability Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_massfrac]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'Materials/inactive=massfrac'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: For flux_type = fluid, you need a nodal mass-fraction Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no nodal mass-fraction Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_thermal_cond]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=thermal_conductivity'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a thermal conductivity Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no thermal conductivity Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_enthalpy]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'BCs/outflow/flux_type=heat Materials/fluid_props/compute_enthalpy=false'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a nodal fluid enthalpy Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no enthalpy Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./outflow_except2_T]
+    type = RunException
+    input = outflow_except2.i
+    cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=temperature'
+    threading = '!pthreads'
+    expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a temperature Material"
+    match_literal = true
+    requirement = 'PorousFlow shall report an error if there is no temperature Material when using PorousFlowOutflowBC'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./s13]
+    type = CSVDiff
+    input = s13.i
+    csvdiff = 's13_csv_mf_0100.csv s13_csv_mf_0050.csv s13_csv_mf_0010.csv'
+    abs_zero = 1E-7
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, multi-component cases'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./s14]
+    type = CSVDiff
+    input = s14.i
+    csvdiff = s14_out.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, single-component case and record the total mass outflow'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./s15]
+    type = CSVDiff
+    input = s15.i
+    csvdiff = s15_out.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model a heat-energy outflow boundary condition in single-phase, fully-saturated, single-component case and record the total heat-energy outflow'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
+  [./injection_production_eg_outflowBC]
+    type = CSVDiff
+    input = injection_production_eg_outflowBC.i
+    csvdiff = injection_production_eg_outflowBC_out_pps_0002.csv
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to model a free, outflow boundary condition for multi-phase, multi-component fluids'
+    issues = '#18037'
+    design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
+  [../]
 []

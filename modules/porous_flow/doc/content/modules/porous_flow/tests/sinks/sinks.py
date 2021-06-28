@@ -75,55 +75,55 @@ def expected_s08(pc):
 
 def s01():
     f = open("../../../../../../test/tests/sinks/gold/s01.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     m00 = [d[2] for d in data]
     t = [d[0] for d in data]
     return (t, m00)
 
 def s02():
     f = open("../../../../../../test/tests/sinks/gold/s02.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     m00 = [d[1] for d in data]
     t = [d[0] for d in data]
     return (t, m00)
 
 def s03():
     f = open("../../../../../../test/tests/sinks/gold/s03.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     rate00 = [d[5] for d in data]
     s = [d[10] for d in data]
     return (s, rate00)
 
 def s04():
     f = open("../../../../../../test/tests/sinks/gold/s04.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     rate10 = [d[3] for d in data]
     p = [d[9] for d in data]
     return (p, rate10)
 
 def s05():
     f = open("../../../../../../test/tests/sinks/gold/s05.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     rate10 = [2*d[1] for d in data]
     p = [d[10] for d in data]
     return (p, rate10)
 
 def s06():
     f = open("../../../../../../test/tests/sinks/gold/s06.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     prate = sorted(list(set([(d[11], d[1]) for d in data] + [(d[12], d[2]) for d in data] + [(d[13], d[3]) for d in data] + [(d[14], d[4]) for d in data])), key = lambda x: x[0])
-    return zip(*prate)
+    return list(zip(*prate))
 
 def s07():
     f = open("../../../../../../test/tests/sinks/gold/s07.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     massfrac = [d[1] for d in data]
     flux = [d[4] for d in data]
     return (massfrac, flux)
 
 def s08():
     f = open("../../../../../../test/tests/sinks/gold/s08.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     rate00 = [d[1] for d in data]
     pc = [(d[6] - d[7]) for d in data]
     return (pc, rate00)
@@ -247,32 +247,32 @@ plt.savefig("s08.png")
 
 def s09_01():
     f = open("../../../../../../test/tests/sinks/gold/s09_mf_0010.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 def s09_05():
     f = open("../../../../../../test/tests/sinks/gold/s09_mf_0050.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 def s09_10():
     f = open("../../../../../../test/tests/sinks/gold/s09_mf_0100.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 def s09_fully_saturated_01():
     f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0010.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 def s09_fully_saturated_05():
     f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0050.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 def s09_fully_saturated_10():
     f = open("../../../../../../test/tests/sinks/gold/s09_fully_saturated_mf_0100.csv")
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     return ([d[0] for d in data], [d[4] for d in data])
 
 plt.figure()
@@ -287,6 +287,77 @@ plt.xlabel("Mass fraction")
 plt.ylabel("x (m)")
 plt.title("Advected mass-fraction along line")
 plt.savefig("s09.png")
+
+
+def s13_01():
+    f = open("../../../../../../test/tests/sinks/gold/s13_csv_mf_0010.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[2] for d in data], [d[0] for d in data])
+
+def s13_05():
+    f = open("../../../../../../test/tests/sinks/gold/s13_csv_mf_0050.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[2] for d in data], [d[0] for d in data])
+
+def s13_10():
+    f = open("../../../../../../test/tests/sinks/gold/s13_csv_mf_0100.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[2] for d in data], [d[0] for d in data])
+
+plt.figure()
+plt.plot(s13_01()[0], s13_01()[1], label = 't=0.1')
+plt.plot(s13_05()[0], s13_05()[1], label = 't=0.5')
+plt.plot(s13_10()[0], s13_10()[1], label = 't=1.0')
+plt.legend()
+plt.grid()
+plt.ylabel("Mass fraction")
+plt.xlabel("x (m)")
+plt.title("Advected mass-fraction along line using PorousFlowOutflowBC")
+plt.savefig("s13.png")
+
+
+def s14():
+    f = open("../../../../../../test/tests/sinks/gold/s14_out.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[1] for d in data])
+
+plt.figure()
+plt.plot(s14()[0], s14()[1])
+plt.grid()
+plt.ylabel("Outflow (kg/s)")
+plt.xlabel("time (s)")
+plt.title("Flow from a model containing a 1kg/s point source")
+plt.savefig("s14.png")
+
+
+def s15():
+    f = open("../../../../../../test/tests/sinks/gold/s15_out.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [d[1] for d in data])
+
+plt.figure()
+plt.plot(s15()[0], s15()[1])
+plt.grid()
+plt.ylabel("Outflow (J/s)")
+plt.xlabel("time (s)")
+plt.title("Heat flow from a model containing a 1J/s point source")
+plt.savefig("s15.png")
+
+
+def ip_outflowBC():
+    f = open("../../../../../../test/tests/sinks/gold/injection_production_eg_outflowBC_out.csv")
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
+    return ([d[0] for d in data], [1000 * d[1] for d in data], [1000 * d[2] for d in data])
+
+plt.figure()
+plt.plot(ip_outflowBC()[0], ip_outflowBC()[1], label="CO2")
+plt.plot(ip_outflowBC()[0], ip_outflowBC()[2], label="water")
+plt.legend()
+plt.grid()
+plt.ylabel("Outflow (g/s)")
+plt.xlabel("time (s)")
+plt.title("Mass flow from a 2-phase model containing sources")
+plt.savefig("ip_outflowBC.png")
 
 
 sys.exit(0)

@@ -1,0 +1,4 @@
+app_name = multi_app_tut
+allow_warnings = false
+allow_unused = false
+allow_override = false

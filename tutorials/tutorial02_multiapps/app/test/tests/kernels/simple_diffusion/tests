@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16660'
+  design = 'tutorial02_multiapps/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+
+    requirement = "The system shall include a tutorial that demonstrates the ability of the system to solve equations across differing time and length scales."
+  []
+[]
