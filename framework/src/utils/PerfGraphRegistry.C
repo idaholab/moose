@@ -17,25 +17,7 @@ getPerfGraphRegistry()
 unsigned int
 PerfGraphRegistry::registerSection(const std::string & section_name, unsigned int level)
 {
-  auto it = _section_name_to_id.find(section_name);
-
-  // Is it already registered?
-  if (it != _section_name_to_id.end() && it->first == section_name)
-    return it->second;
-
-  // It's not...
-  auto id = _section_name_to_id.size();
-  _section_name_to_id.emplace(section_name, id);
-
-  auto & section_info = _id_to_section_info[id];
-
-  section_info._id = id;
-  section_info._name = section_name;
-  section_info._level = level;
-  section_info._live_message = "";
-  section_info._print_dots = false;
-
-  return id;
+  return actuallyRegisterSection(section_name, level, "", false);
 }
 
 PerfID
@@ -50,6 +32,15 @@ PerfGraphRegistry::registerSection(const std::string & section_name,
   if (live_message == "")
     mooseError("Live message not provided when registering timed section!");
 
+  return actuallyRegisterSection(section_name, level, live_message, print_dots);
+}
+
+PerfID
+PerfGraphRegistry::actuallyRegisterSection(const std::string & section_name,
+                                           unsigned int level,
+                                           const std::string & live_message,
+                                           const bool print_dots)
+{
   auto it = _section_name_to_id.find(section_name);
 
   // Is it already registered?
@@ -59,6 +50,9 @@ PerfGraphRegistry::registerSection(const std::string & section_name,
   // It's not...
   auto id = _section_name_to_id.size();
   _section_name_to_id.emplace(section_name, id);
+
+  if (id == 4)
+    libMesh::out << "ID4: " << section_name << std::endl;
 
   auto & section_info = _id_to_section_info[id];
 

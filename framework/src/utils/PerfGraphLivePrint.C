@@ -32,6 +32,8 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
 void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
+  mooseAssert(_id_to_section_info.count(section_increment._id), "Not found in map");
+
   // If the live_message is empty - just print the name
   const auto message = !_id_to_section_info[section_increment._id]._live_message.empty()
                            ? _id_to_section_info[section_increment._id]._live_message
@@ -39,16 +41,16 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
 
   // This line is different - need to finish the last line
   if (_last_printed_increment && _last_printed_increment != &section_increment &&
-      (_last_printed_increment->_state == PerfGraph::IncrementState::printed ||
-       _last_printed_increment->_state == PerfGraph::IncrementState::continued) &&
+      (_last_printed_increment->_state == PerfGraph::IncrementState::PRINTED ||
+       _last_printed_increment->_state == PerfGraph::IncrementState::CONTINUED) &&
       _id_to_section_info[_last_printed_increment->_id]._print_dots)
     _console << '\n';
 
   // Do we need to print dots?
   if (_last_printed_increment && _last_printed_increment == &section_increment &&
-      (section_increment._state != PerfGraph::IncrementState::finished &&
-       (section_increment._state == PerfGraph::IncrementState::printed ||
-        section_increment._state == PerfGraph::IncrementState::continued)))
+      (section_increment._state != PerfGraph::IncrementState::FINISHED &&
+       (section_increment._state == PerfGraph::IncrementState::PRINTED ||
+        section_increment._state == PerfGraph::IncrementState::CONTINUED)))
   {
     if (_id_to_section_info[section_increment._id]._print_dots)
     {
@@ -56,9 +58,9 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       section_increment._num_dots++;
     }
   }
-  else if (section_increment._state == PerfGraph::IncrementState::printed ||
+  else if (section_increment._state == PerfGraph::IncrementState::PRINTED ||
            section_increment._state ==
-               PerfGraph::IncrementState::continued) // Printed before so print "Still"
+               PerfGraph::IncrementState::CONTINUED) // Printed before so print "Still"
   {
     _console << std::string(2 * section_increment._print_stack_level, ' ') << "Still " << message;
 
@@ -79,7 +81,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     section_increment._num_dots = 0;
   }
 
-  section_increment._state = PerfGraph::IncrementState::printed;
+  section_increment._state = PerfGraph::IncrementState::PRINTED;
 
   _last_printed_increment = &section_increment;
 
@@ -92,6 +94,9 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
 {
   if (_stack_level < 1)
     return;
+
+  mooseAssert(_id_to_section_info.count(section_increment_start._id),
+              "Not found in map: " << section_increment_start._id);
 
   // If the live_message is empty - just print the name
   auto message = !_id_to_section_info[section_increment_start._id]._live_message.empty()
@@ -112,7 +117,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
       (_last_printed_increment && _last_printed_increment != &section_increment_start))
   {
     if ((_last_printed_increment &&
-         _last_printed_increment->_state == PerfGraph::IncrementState::printed &&
+         _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
          _id_to_section_info[_last_printed_increment->_id]._print_dots))
       _console << '\n';
     const std::string finished("Finished ");
@@ -180,12 +185,12 @@ PerfGraphLivePrint::printStackUpToLast()
   {
     auto & section = *_print_thread_stack[s];
 
-    if (section._state == PerfGraph::IncrementState::started) // Hasn't been printed at all
+    if (section._state == PerfGraph::IncrementState::STARTED) // Hasn't been printed at all
       printLiveMessage(section);
 
     // Note: this will reset the state of a "continued" section to "printed" - so that it can be
     // continued again
-    section._state = PerfGraph::IncrementState::printed;
+    section._state = PerfGraph::IncrementState::PRINTED;
   }
 }
 
@@ -218,7 +223,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
     auto & section_increment = _execution_list[p];
 
     // New section, add to the stack
-    if (section_increment._state == PerfGraph::IncrementState::started)
+    if (section_increment._state == PerfGraph::IncrementState::STARTED)
     {
       section_increment._print_stack_level = _stack_level;
 
@@ -240,8 +245,8 @@ PerfGraphLivePrint::iterateThroughExecutionList()
 
       // If it has already been printed or meets our criteria then print it and finish it
       if (_perf_graph._live_print_all ||
-          section_increment_start._state == PerfGraph::IncrementState::printed ||
-          section_increment_start._state == PerfGraph::IncrementState::continued ||
+          section_increment_start._state == PerfGraph::IncrementState::PRINTED ||
+          section_increment_start._state == PerfGraph::IncrementState::CONTINUED ||
           time_increment > _time_limit || memory_increment > _mem_limit)
       {
         printStackUpToLast();

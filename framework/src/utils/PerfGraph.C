@@ -239,7 +239,7 @@ PerfGraph::push(const PerfID id)
   // Add this to the execution list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
       (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
-    addToExecutionList(id, IncrementState::started, current_time, start_memory);
+    addToExecutionList(id, IncrementState::STARTED, current_time, start_memory);
 }
 
 void
@@ -272,7 +272,7 @@ PerfGraph::pop()
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
       (!_id_to_section_info[current_node->id()]._live_message.empty() || _live_print_all))
   {
-    addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);
+    addToExecutionList(current_node->id(), IncrementState::FINISHED, current_time, current_memory);
 
     // Tell the printing thread that a section has finished
     //
@@ -371,11 +371,10 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
   mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
               "Unable to find section name!");
 
-  auto & name = _id_to_section_info[current_node->id()]._name;
+  auto & current_section_info = _id_to_section_info[current_node->id()];
 
-  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
-              "Unable to find level!");
-  auto & node_level = _id_to_section_info[current_node->id()]._level;
+  auto & name = current_section_info._name;
+  auto & node_level = current_section_info._level;
 
   if (node_level <= level)
   {
@@ -424,6 +423,8 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
 {
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
+
+  mooseAssert(_id_to_section_info.count(current_node->id()), "Could not find section info!");
 
   auto & name = _id_to_section_info[current_node->id()]._name;
 

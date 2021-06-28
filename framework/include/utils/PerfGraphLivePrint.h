@@ -11,6 +11,11 @@
 
 #include "PerfGraph.h"
 
+/**
+ * This is effectively a functor that runs on a separate thread and
+ * watches the state of the call stack to see if things need to be
+ * printed about what the application is doing.
+ */
 class PerfGraphLivePrint : protected ConsoleStreamInterface
 {
 public:
@@ -20,23 +25,35 @@ public:
   void start();
 
 protected:
-  /// Print the live message
+  /**
+   * Print the live message
+   */
   void printLiveMessage(PerfGraph::SectionIncrement & section_increment);
 
-  /// Print the stats
+  /**
+   * Print the stats
+   */
   void printStats(PerfGraph::SectionIncrement & section_increment_start,
                   PerfGraph::SectionIncrement & section_increment_finish);
 
-  /// Print everything in the stack
+  /**
+   * Print everything in the stack
+   */
   void printStack();
 
-  /// Print everything underneath the current top of the stack
+  /**
+   * Print everything underneath the current top of the stack
+   */
   void printStackUpToLast();
 
-  /// What to do if we're still in the same spot
+  /**
+   * What to do if we're still in the same spot
+   */
   void inSamePlace();
 
-  /// What to do if there are new things in the execution list
+  /**
+   * What to do if there are new things in the execution list
+   */
   void iterateThroughExecutionList();
 
   /// Number of columns before wrapping
@@ -75,7 +92,7 @@ protected:
   std::array<PerfGraph::SectionIncrement *, MAX_STACK_SIZE> _print_thread_stack;
 
   /// The end of the execution list
-  /// This is (safely) copied from PerfGraph so that it is conistent for an
+  /// This is (safely) copied from PerfGraph so that it is consistent for an
   /// entire iteration
   unsigned int _current_execution_list_end;
 

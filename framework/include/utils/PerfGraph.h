@@ -265,7 +265,7 @@ protected:
     /// Amount of memory gained within this section (without children)
     long int _self_memory = 0;
 
-    /// Amanout of memory gained by children
+    /// Amount of memory gained by children
     long int _children_memory = 0;
 
     /// Total memory gain for this section
@@ -278,16 +278,16 @@ protected:
   enum IncrementState
   {
     /// Section just started running
-    started,
+    STARTED,
 
     /// This section has already started printing
-    printed,
+    PRINTED,
 
     /// Something else printed, but now this printed again
-    continued,
+    CONTINUED,
 
     /// The section is complete
-    finished
+    FINISHED
   };
 
   /**
@@ -298,7 +298,7 @@ protected:
   {
   public:
     SectionIncrement()
-      : _state(IncrementState::finished),
+      : _state(IncrementState::FINISHED),
         _print_stack_level(0),
         _num_dots(0),
         _time(std::chrono::seconds(0)),
