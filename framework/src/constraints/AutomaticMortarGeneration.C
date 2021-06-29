@@ -152,9 +152,11 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
   for (const auto n : make_range(secondary_elem.n_nodes()))
     for (const auto qp : make_range(num_qps))
     {
-      const auto phi = (mortar_dim == 1) ?
-          Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0)) :
-          Moose::fe_lagrange_2D_shape(secondary_elem.type(), secondary_elem.default_order(), n, xi1_pts[qp]);
+      const auto phi =
+          (mortar_dim == 1)
+              ? Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0))
+              : Moose::fe_lagrange_2D_shape(
+                    secondary_elem.type(), secondary_elem.default_order(), n, xi1_pts[qp]);
       normals[qp] += phi * nodal_normals[n];
     }
 
@@ -818,26 +820,26 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Associate this MSM elem with the MortarSegmentInfo.
             msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
 
-            // Maintain the mapping between secondary elems and mortar segment elems contained within them.
+            // Maintain the mapping between secondary elems and mortar segment elems contained
+            // within them.
             secondary_elems_to_mortar_segments[secondary_side_elem].insert(new_elem);
           }
         }
-      // End loop through primary element candidates
+        // End loop through primary element candidates
       }
       // If secondary element has significant remaining area after being projected, add to msm
       // with weight equal to remaining area fraction. This is an approximation, should really add
-      // remaining mortar segment elements in correct place but I think it will be good enough for most
-      // cases.
+      // remaining mortar segment elements in correct place but I think it will be good enough for
+      // most cases.
       Real remainder = msh.getRemainder();
       if (remainder > 1e-8)
       {
         std::vector<Node *> new_nodes;
         for (auto n : make_range(secondary_side_elem->n_vertices()))
         {
-          new_nodes.push_back(mortar_segment_mesh->add_point(
-                                  secondary_side_elem->point(n),
-                                  mortar_segment_mesh->max_node_id(),
-                                  secondary_side_elem->processor_id()));
+          new_nodes.push_back(mortar_segment_mesh->add_point(secondary_side_elem->point(n),
+                                                             mortar_segment_mesh->max_node_id(),
+                                                             secondary_side_elem->processor_id()));
           Node * const new_node = new_nodes.back();
           new_node->set_unique_id(new_node->id() + node_unique_id_offset);
         }
@@ -873,13 +875,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // Associate this MSM elem with the MortarSegmentInfo.
         msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
 
-        // Maintain the mapping between secondary elems and mortar segment elems contained within them.
+        // Maintain the mapping between secondary elems and mortar segment elems contained within
+        // them.
         secondary_elems_to_mortar_segments[secondary_side_elem].insert(new_elem);
       }
 
-    // End loop through secondary elements
+      // End loop through secondary elements
     }
-  // End loop through mortar constraint pairs
+    // End loop through mortar constraint pairs
   }
 
   // Set up the the mortar segment neighbor information.

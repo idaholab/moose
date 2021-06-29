@@ -463,7 +463,10 @@ public:
   /**
    * Reinit a mortar element with custom points and weights to obtain a valid JxW
    */
-  void reinitMortarElem(const Elem * elem, const std::vector<Point> * const pts, const std::vector<Real> * const wts, THREAD_ID tid = 0);
+  void reinitMortarElem(const Elem * elem,
+                        const std::vector<Point> * const pts,
+                        const std::vector<Real> * const wts,
+                        THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.

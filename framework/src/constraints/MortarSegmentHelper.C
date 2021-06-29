@@ -10,11 +10,10 @@
 #include "MortarSegmentHelper.h"
 #include <vector>
 
-MortarSegmentHelper::MortarSegmentHelper(const Elem * secondary_elem_ptr, Point & center, Point & normal) :
-  _secondary_elem_ptr(secondary_elem_ptr),
-  _center(center),
-  _normal(normal),
-  _debug(false)
+MortarSegmentHelper::MortarSegmentHelper(const Elem * secondary_elem_ptr,
+                                         Point & center,
+                                         Point & normal)
+  : _secondary_elem_ptr(secondary_elem_ptr), _center(center), _normal(normal), _debug(false)
 {
   _secondary_poly.clear();
   _secondary_poly.reserve(secondary_elem_ptr->n_vertices());
@@ -43,7 +42,6 @@ MortarSegmentHelper::MortarSegmentHelper(const Elem * secondary_elem_ptr, Point 
   _scaled_tol = _tolerance * _secondary_area;
 }
 
-
 Point
 MortarSegmentHelper::getIntersection(Point & p1, Point & p2, Point & q1, Point & q2, Real & s)
 {
@@ -61,7 +59,6 @@ MortarSegmentHelper::getIntersection(Point & p1, Point & p2, Point & q1, Point &
 
   return alpha * (cq1q2 * dp - cp1p2 * dq);
 }
-
 
 bool
 MortarSegmentHelper::isInsideSecondary(Point & pt)
@@ -85,7 +82,6 @@ MortarSegmentHelper::isInsideSecondary(Point & pt)
   return true;
 }
 
-
 bool
 MortarSegmentHelper::isDisjoint(std::vector<Point> & poly)
 {
@@ -93,8 +89,8 @@ MortarSegmentHelper::isDisjoint(std::vector<Point> & poly)
   {
     // Get edge to check
     const Point edg = poly[(i + 1) % poly.size()] - poly[i];
-    const Real cp = poly[(i + 1) % poly.size()](0) * poly[i](1)
-                  - poly[(i + 1) % poly.size()](1) * poly[i](0);
+    const Real cp =
+        poly[(i + 1) % poly.size()](0) * poly[i](1) - poly[(i + 1) % poly.size()](1) * poly[i](0);
 
     // If more optimization needed, could store these values for later
     // Check if point is to the left of (or on) clip_edge
@@ -105,7 +101,7 @@ MortarSegmentHelper::isDisjoint(std::vector<Point> & poly)
     bool all_outside = true;
     for (auto pt : _secondary_poly)
     {
-      if(is_inside(pt, _scaled_tol))
+      if (is_inside(pt, _scaled_tol))
         all_outside = false;
     }
 
@@ -114,7 +110,6 @@ MortarSegmentHelper::isDisjoint(std::vector<Point> & poly)
   }
   return false;
 }
-
 
 void
 MortarSegmentHelper::clipPoly(const Elem * primary_elem_ptr, std::vector<Point> & clipped_poly)
@@ -129,8 +124,8 @@ MortarSegmentHelper::clipPoly(const Elem * primary_elem_ptr, std::vector<Point> 
   const int n_verts = primary_elem_ptr->n_vertices();
   for (auto n : make_range(n_verts))
   {
-    Point pt = (orient > 0) ? primary_elem_ptr->point(n) - _center :
-                              primary_elem_ptr->point(n_verts - 1 - n) - _center;
+    Point pt = (orient > 0) ? primary_elem_ptr->point(n) - _center
+                            : primary_elem_ptr->point(n_verts - 1 - n) - _center;
     primary_poly.emplace_back(pt * _u, pt * _v, 0.);
   }
 
@@ -209,18 +204,16 @@ MortarSegmentHelper::clipPoly(const Elem * primary_elem_ptr, std::vector<Point> 
         }
         clipped_poly.push_back(curr_pt);
       }
-      else
-        if (is_previous_inside)
-        {
-          Real s;
-          Point intersect = getIntersection(prev_pt, curr_pt, clip_pt1, clip_pt2, s);
-          if (s > _tolerance)
-            clipped_poly.push_back(intersect);
-        }
+      else if (is_previous_inside)
+      {
+        Real s;
+        Point intersect = getIntersection(prev_pt, curr_pt, clip_pt1, clip_pt2, s);
+        if (s > _tolerance)
+          clipped_poly.push_back(intersect);
+      }
     }
   }
 }
-
 
 void
 MortarSegmentHelper::plotPoly(std::vector<Point> & poly)
@@ -237,9 +230,9 @@ MortarSegmentHelper::plotPoly(std::vector<Point> & poly)
   MOOSE::out << poly[0](1) << "])" << std::endl;
 }
 
-
 void
-MortarSegmentHelper::plotTriangulation(std::vector<Point> & nodes, std::vector<std::array<int, 3>> & elem_to_nodes)
+MortarSegmentHelper::plotTriangulation(std::vector<Point> & nodes,
+                                       std::vector<std::array<int, 3>> & elem_to_nodes)
 {
   for (auto el : elem_to_nodes)
   {
@@ -251,9 +244,9 @@ MortarSegmentHelper::plotTriangulation(std::vector<Point> & nodes, std::vector<s
   }
 }
 
-
 void
-MortarSegmentHelper::triangulatePoly(std::vector<Point> & nodes, std::vector<std::array<int, 3>> & tri_map)
+MortarSegmentHelper::triangulatePoly(std::vector<Point> & nodes,
+                                     std::vector<std::array<int, 3>> & tri_map)
 {
   // Initialize output map
   tri_map.clear();
@@ -266,7 +259,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & nodes, std::vector<std
   // If three nodes, already a triangle, simply pass back map
   else if (nodes.size() == 3)
   {
-    tri_map.push_back({{0,1,2}});
+    tri_map.push_back({{0, 1, 2}});
     return;
   }
   // Otherwise add center point node and make simple triangulation
@@ -290,9 +283,10 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & nodes, std::vector<std
   }
 }
 
-
 void
-MortarSegmentHelper::getMortarSegments(const Elem * primary_elem_ptr, std::vector<Point> & nodes, std::vector<std::array<int, 3>> & elem_to_nodes)
+MortarSegmentHelper::getMortarSegments(const Elem * primary_elem_ptr,
+                                       std::vector<Point> & nodes,
+                                       std::vector<std::array<int, 3>> & elem_to_nodes)
 {
   nodes.clear();
 
@@ -305,9 +299,9 @@ MortarSegmentHelper::getMortarSegments(const Elem * primary_elem_ptr, std::vecto
     return;
   }
 
-  if(_debug)
+  if (_debug)
   {
-    for(auto pt : clipped_poly)
+    for (auto pt : clipped_poly)
     {
       if (!isInsideSecondary(pt))
         mooseError("Clipped polygon not inside linearized secondary element");
@@ -326,14 +320,13 @@ MortarSegmentHelper::getMortarSegments(const Elem * primary_elem_ptr, std::vecto
     nodes.emplace_back((pt(0) * _u) + (pt(1) * _v) + _center);
 }
 
-
 Real
 MortarSegmentHelper::polyArea(std::vector<Point> & nodes)
 {
   Real poly_area = 0;
   for (auto i : make_range(nodes.size()))
-    poly_area += nodes[i](0) * nodes[(i + 1) % nodes.size()](1)
-               - nodes[i](1) * nodes[(i + 1) % nodes.size()](0);
+    poly_area += nodes[i](0) * nodes[(i + 1) % nodes.size()](1) -
+                 nodes[i](1) * nodes[(i + 1) % nodes.size()](0);
   poly_area *= 0.5;
   return poly_area;
 }

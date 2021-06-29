@@ -142,7 +142,7 @@ public:
    */
   void buildMortarSegmentMesh();
 
-// TODO: function info
+  // TODO: function info
   void buildMortarSegmentMesh3d();
 
   /**
