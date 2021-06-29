@@ -4,6 +4,7 @@ Content:
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
+            - large_media/tutorials/darcy_thermo_mech/*
             - large_media/testing/*
             - contrib/**
             - css/**
@@ -18,7 +19,6 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/functional_expansion_tools/doc/content
         content:
             - bib/**
-
 
 Renderer:
     type: MooseDocs.base.RevealRenderer
@@ -50,4 +50,6 @@ Extensions:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.listing:
         modal-link: False
-    MooseDocs.extensions.reveal: default
+    MooseDocs.extensions.reveal:
+        translate: workshop/index.md
+    MooseDocs.extensions.datetime: default
