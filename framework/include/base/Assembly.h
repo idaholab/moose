@@ -601,7 +601,9 @@ public:
   /**
    * reinitialize a mortar segment mesh element in order to get a proper JxW
    */
-  void reinitMortarElem(const Elem * elem, const std::vector<Point> * const pts, const std::vector<Real> * const wts);
+  void reinitMortarElem(const Elem * elem,
+                        const std::vector<Point> * const pts,
+                        const std::vector<Real> * const wts);
 
   /**
    * Returns a reference to JxW for mortar segment elements
