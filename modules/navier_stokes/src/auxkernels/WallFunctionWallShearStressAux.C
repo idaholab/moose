@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WallYPlusAux.h"
+#include "WallFunctionWallShearStressAux.h"
 
-registerMooseObject("NavierStokesApp", WallYPlusAux);
+registerMooseObject("NavierStokesApp", WallFunctionWallShearStressAux);
 
 ADReal
-find_u_star2(Real mu, Real rho, ADReal u, Real dist)
+find_u_star3(Real mu, Real rho, ADReal u, Real dist)
 {
   constexpr int MAX_ITERS {50};
   constexpr Real REL_TOLERANCE {1e-6};
@@ -34,11 +34,11 @@ find_u_star2(Real mu, Real rho, ADReal u, Real dist)
     if (rel_err < REL_TOLERANCE) return u_star;
   }
 
-  mooseError("Could not find the friction velocity for WallYPlusAux");
+  mooseError("Could not find the friction velocity for WallFunctionWallShearStressAux");
 }
 
 InputParameters
-WallYPlusAux::validParams()
+WallFunctionWallShearStressAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
@@ -50,7 +50,7 @@ WallYPlusAux::validParams()
   return params;
 }
 
-WallYPlusAux::WallYPlusAux(const InputParameters & params)
+WallFunctionWallShearStressAux::WallFunctionWallShearStressAux(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
@@ -67,7 +67,7 @@ WallYPlusAux::WallYPlusAux(const InputParameters & params)
 }
 
 Real
-WallYPlusAux::computeValue()
+WallFunctionWallShearStressAux::computeValue()
 {
   const Elem & elem = *_current_elem;
 
@@ -111,8 +111,9 @@ WallYPlusAux::computeValue()
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   Real dist = wall_vec.norm();
-  ADReal perpendicular_speed = velocity * wall_vec;
-  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec;
+  Point wall_vec_unitary = wall_vec/dist; //added normalization
+  ADReal perpendicular_speed = velocity * wall_vec_unitary;
+  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec_unitary;
   ADReal parallel_speed = parallel_velocity.norm();
   ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
 
@@ -123,8 +124,8 @@ WallYPlusAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = find_u_star2(_mu[_qp].value(), _rho, parallel_speed, dist);
+  ADReal u_star = find_u_star3(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
 
-  return (dist * u_star * _rho / _mu[_qp]).value();
+  return tau.value();
 }
