@@ -130,7 +130,23 @@ ComputeMortarFunctor::operator()()
 
     // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
     // the secondary face!)
-    _subproblem.reinitMortarElem(msm_elem);
+    // fudge_factor is a convenient way of handling seconary elements with only partial overlapping
+    // primary element. Instead of adding fractional mortar segment elements we add the full element
+    // and fractionally weight the quadrature points
+    if (!_has_primary && msinfo.fudge_factor < 1.0)
+    {
+      // Get quadrature points and weights
+      const std::vector<Point> pts = _qrule_msm->get_points();
+      const std::vector<Real> wts = _qrule_msm->get_weights();
+
+      // Modify weights by fudge factor
+      std::vector<Real> new_wts(_qrule_msm->n_points());
+      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
+        new_wts[qp] = msinfo.fudge_factor * wts[qp];
+      _subproblem.reinitMortarElem(msm_elem, &pts, &new_wts);
+    }
+    else
+      _subproblem.reinitMortarElem(msm_elem);
 
     // Compute custom integration points for the secondary side
     custom_xi1_pts.resize(_qrule_msm->n_points());
@@ -330,7 +346,19 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem, const Elem * prima
     {
       q_pts[qp](0) = xi(0).value();
       q_pts[qp](1) = xi(1).value();
-      q_pts[qp](2) = xi(2).value();
+      q_pts[qp](2) = 0;
+      if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
+      {
+        if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 ||
+            q_pts[qp](0) + q_pts[qp](1) > 1)
+          mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
+      }
+      else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
+      {
+        if (q_pts[qp](0) < -1 || q_pts[qp](0) > 1 ||
+            q_pts[qp](1) < -1 || q_pts[qp](1) > 1)
+          mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
+      }
     }
     else
       mooseError("Newton iteration for mortar quadrature mapping msm_elem: ",

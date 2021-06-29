@@ -921,6 +921,12 @@ SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
+SubProblem::reinitMortarElem(const Elem * elem, const std::vector<Point> * const pts, const std::vector<Real> * const wts, THREAD_ID tid)
+{
+  assembly(tid).reinitMortarElem(elem, pts, wts);
+}
+
+void
 SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
