@@ -15,7 +15,6 @@
  * projections, and triangulating the resulting nodes.
  */
 
-// TODO: fix tolerancing issue better
 class MortarSegmentHelper
 {
 public:
@@ -79,6 +78,19 @@ public:
   void
   getMortarSegments(const Elem * primary_elem_ptr, std::vector<Point> & nodes, std::vector<std::array<int, 3>> & elem_to_nodes);
 
+  /**
+   * Compute area of polygon
+   */
+  Real
+  polyArea(std::vector<Point> & nodes);
+
+  /**
+   * Get area fraction remaining after clipping against primary elements
+   */
+  Real
+  getRemainder(){ return _remaining_area_fraction; }
+
+
 private:
   /**
    * Pointer to secondary element this object will operate on
@@ -101,7 +113,28 @@ private:
    * they are defined so the nodes of the projected polygon are listed with positive orientation
    */
   Point _u, _v;
+
+  /**
+   * Area of projected secondary element
+   */
+  Real _secondary_area;
+
+  /**
+   * Fraction of area remaining after overlapping primary polygons clipped
+   */
+  Real _remaining_area_fraction;
+
   bool _debug;
+
+  /**
+   * Tolerance for intersection and clipping
+   */
+  Real _tolerance = 1e-7;
+
+  /**
+   * Tolerance times secondary area for dimensional consistency
+   */
+  Real _scaled_tol;
 
   /**
    * List of projected points on the linearized secondary element

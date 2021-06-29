@@ -2396,6 +2396,19 @@ Assembly::reinitMortarElem(const Elem * elem)
 }
 
 void
+Assembly::reinitMortarElem(const Elem * elem, const std::vector<Point> * const pts, const std::vector<Real> * const wts)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitMortarElem on a lower dimensional element");
+
+  _fe_msm->reinit(elem, pts, wts);
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
+  setCoordinateTransformation(_qrule_msm, array_q_points, _coord_msm, elem->subdomain_id());
+}
+
+void
 Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    unsigned int neighbor_side,
                                    const std::vector<Point> & physical_points)
