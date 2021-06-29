@@ -1,0 +1,3 @@
+# File for testing primary content overwrite
+
+A page by the same local name as this one is also built by the [MooseDocs Test Pages site](python/MooseDocs/test/config.yml language=yaml). This page exists to test that the primary translator "wins" (i.e., that the content of the first `.yml` file passed to [`load_config.py`](python/MooseDocs/common/load_config.py) always overwrites pages from subtranslators) when [this website](subsite/index.md) is built as a subconfiguration. If the content exchange routine is working properly, this page should not exist when it is listed as a subconfiguration of the test site.

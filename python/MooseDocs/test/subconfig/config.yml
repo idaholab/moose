@@ -1,0 +1,28 @@
+Content:
+    - python/MooseDocs/test/subconfig/content
+    - framework:
+          root_dir: framework/doc/content
+          content:
+              - contrib/**
+              - css/*
+              - js/*
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.navigation:
+        name: MooseDocs Subsite
+        home: /subsite/index.md
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.modal: default
