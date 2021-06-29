@@ -7,9 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DevelopedWallShearBC.h"
+#include "INSFVWallFunctionBC.h"
 
-registerMooseObject("NavierStokesApp", DevelopedWallShearBC);
+registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
 ADReal
 find_u_star(Real mu, Real rho, ADReal u, Real dist)
@@ -34,28 +34,11 @@ find_u_star(Real mu, Real rho, ADReal u, Real dist)
     if (rel_err < REL_TOLERANCE) return u_star;
   }
 
-
-  /*
-  u_star = std::sqrt(nu * u / dist);
-
-  for (int i = 0; i < MAX_ITERS; ++i)
-  {
-    Real residual = u_star / von_karman * std::log(u_star * dist / (0.135 * nu)) - u;
-    Real deriv = (1 + std::log(u_star * dist / (0.135 * nu))) / von_karman;
-    Real new_u_star = u_star - residual / deriv;
-
-    Real rel_err = std::abs(new_u_star - u_star) / new_u_star;
-    std::cout << u_star << " " << new_u_star << " " << rel_err << "\n";
-    u_star = new_u_star;
-    if (rel_err < REL_TOLERANCE) return u_star;
-  }
-  */
-
-  mooseError("Could not find the friction velocity for DevelopedWallShearBC");
+  mooseError("Could not find the friction velocity for INSFVWallFunctionBC");
 }
 
 InputParameters
-DevelopedWallShearBC::validParams()
+INSFVWallFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
@@ -72,7 +55,7 @@ DevelopedWallShearBC::validParams()
   return params;
 }
 
-DevelopedWallShearBC::DevelopedWallShearBC(const InputParameters & params)
+INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
   : FVFluxBC(params),
     _dim(_subproblem.mesh().dimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
@@ -93,7 +76,7 @@ DevelopedWallShearBC::DevelopedWallShearBC(const InputParameters & params)
 }
 
 ADReal
-DevelopedWallShearBC::computeQpResidual()
+INSFVWallFunctionBC::computeQpResidual()
 {
   // Get the velocity vector
   const FaceInfo & fi = *_face_info;
@@ -104,31 +87,22 @@ DevelopedWallShearBC::computeQpResidual()
   if (_w_var)
     velocity(2) = _w_var->getElemValue(&elem);
 
-    //std::cout <<"X-Velocity at the boundary:" << _u_var->getBoundaryFaceValue(fi) << std::endl;
-    //std::cout <<"Y-Velocity at the boundary:" << _v_var->getBoundaryFaceValue(fi) << std::endl;
-
-  // Compute the velocity and direction of the velocity component that is parallel to the wall
-  Point wall_vec = fi.elemCentroid() - fi.faceCentroid();
+  // Compute the velocity magnitude (parallel_speed) and
+  //direction of the tangential velocity component (parallel_dir)
+  Point wall_vec = fi.elemCentroid() - fi.faceCentroid(); //distance calculation may not be true for irregular elements
   Real dist = wall_vec.norm();
-  ADReal perpendicular_speed = velocity * wall_vec;
-  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec;
+  Point wall_vec_unitary = wall_vec/dist; //added normalization
+  ADReal perpendicular_speed = velocity * wall_vec_unitary;
+  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec_unitary;
   ADReal parallel_speed = parallel_velocity.norm();
   ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
+
 
   if (parallel_speed.value() < 1e-6)
     return 0;
 
   if (!std::isfinite(parallel_speed.value()))
     return parallel_speed;
-
-  //if (std::isnan(parallel_speed)) {
-  //  std::cout << "wall vec " << wall_vec << "\n";
-  //  std::cout << "velocity " << velocity << "\n";
-  //  std::cout << "perp speed " << perpendicular_speed << "\n";
-  //  std::cout << "para vel " << parallel_velocity << "\n";
-  //  std::cout << "para speed " << parallel_speed << "\n";
-  //  mooseError("Could not find the friction velocity for DevelopedWallShearBC");
-  //}
 
   // Compute the friction velocity and the wall shear stress
   ADReal u_star = find_u_star(_mu[_qp].value(), _rho, parallel_speed, dist);

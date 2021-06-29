@@ -9,24 +9,22 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "AuxKernel.h"
 
 #include "INSFVVelocityVariable.h"
 
-class DevelopedWallShearBC : public FVFluxBC
+class WallFunctionWallShearStressAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
-  DevelopedWallShearBC(const InputParameters & params);
+
+  WallFunctionWallShearStressAux(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual Real computeValue() override;
 
   /// the dimension of the simulation
   const unsigned int _dim;
-
-  /// index x|y|z
-  const unsigned int _axis_index;
 
   /// x-velocity
   const INSFVVelocityVariable * const _u_var;
@@ -41,5 +39,5 @@ protected:
   /// Dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
 
-  //std::vector<BoundaryName> _wall_boundary_names;
+  std::vector<BoundaryName> _wall_boundary_names;
 };
