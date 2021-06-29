@@ -52,9 +52,6 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
     _primary_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain")))
 {
-  if (_moi_mesh.dimension() == 3)
-    mooseWarning("3D mortar in the works!");
-
   // Create the mortar interface if it hasn't already been created
   _moi_problem.createMortarInterface(std::make_pair(_primary_id, _secondary_id),
                                      std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),

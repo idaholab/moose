@@ -24,6 +24,7 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/face_quad4.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/quadrature_nodal.h"
@@ -151,7 +152,6 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
   for (const auto n : make_range(secondary_elem.n_nodes()))
     for (const auto qp : make_range(num_qps))
     {
-      // If mesh is 1D or 2D
       const auto phi = (mortar_dim == 1) ?
           Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0)) :
           Moose::fe_lagrange_2D_shape(secondary_elem.type(), secondary_elem.default_order(), n, xi1_pts[qp]);
@@ -824,6 +824,59 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         }
       // End loop through primary element candidates
       }
+      // If secondary element has significant remaining area after being projected, add to msm
+      // with weight equal to remaining area fraction. This is an approximation, should really add
+      // remaining mortar segment elements in correct place but I think it will be good enough for most
+      // cases.
+      Real remainder = msh.getRemainder();
+      if (remainder > 1e-8)
+      {
+        std::vector<Node *> new_nodes;
+        for (auto n : make_range(secondary_side_elem->n_vertices()))
+        {
+          new_nodes.push_back(mortar_segment_mesh->add_point(
+                                  secondary_side_elem->point(n),
+                                  mortar_segment_mesh->max_node_id(),
+                                  secondary_side_elem->processor_id()));
+          Node * const new_node = new_nodes.back();
+          new_node->set_unique_id(new_node->id() + node_unique_id_offset);
+        }
+
+        Elem * new_elem;
+
+        if (secondary_side_elem->type() == TRI3 || secondary_side_elem->type() == TRI6)
+          new_elem = new Tri3;
+        else if (secondary_side_elem->type() == QUAD4 || secondary_side_elem->type() == QUAD9)
+          new_elem = new Quad4;
+        else
+          mooseError("Unsupported face element type:", secondary_side_elem->type());
+
+        new_elem->processor_id() = secondary_side_elem->processor_id();
+        new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
+        new_elem->set_id(local_id_index++);
+        new_elem->set_unique_id(new_elem->id());
+
+        // Attach newly created nodes
+        for (auto i : make_range(new_elem->n_vertices()))
+          new_elem->set_node(i) = new_nodes[i];
+
+        // Add elements to mortar segment mesh
+        mortar_segment_mesh->add_elem(new_elem);
+
+        // Fill out mortar segment info
+        MortarSegmentInfo msinfo;
+        msinfo.secondary_elem = secondary_side_elem;
+        msinfo.primary_elem = nullptr;
+        msinfo.fudge_factor = remainder;
+        msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
+
+        // Associate this MSM elem with the MortarSegmentInfo.
+        msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
+
+        // Maintain the mapping between secondary elems and mortar segment elems contained within them.
+        secondary_elems_to_mortar_segments[secondary_side_elem].insert(new_elem);
+      }
+
     // End loop through secondary elements
     }
   // End loop through mortar constraint pairs
