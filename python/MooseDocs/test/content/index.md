@@ -35,3 +35,10 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/pysyntax.md]
 1. [extensions/datetime.md]
 1. [extensions/gitutils.md]
+
+## Subsite Link Test
+
+If the [subconfiguration](python/MooseDocs/test/subconfig/config.yml language=yaml) test was also loaded during
+this build job, then a hyperlink to its home page should be rendered below.
+
+[MooseDocs Subsite](subsite/index.md optional=True)
