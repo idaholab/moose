@@ -228,13 +228,13 @@ MortarSegmentHelper::plotPoly(std::vector<Point> & poly)
   if (poly.size() < 2)
     return;
 
-  std::cout << "plt.plot([";
+  MOOSE::out << "plt.plot([";
   for (auto pt : poly)
-    std::cout << pt(0) << ", ";
-  std::cout << poly[0](0) << "], [";
+    MOOSE::out << pt(0) << ", ";
+  MOOSE::out << poly[0](0) << "], [";
   for (auto pt : poly)
-    std::cout << pt(1) << ", ";
-  std::cout << poly[0](1) << "])" << std::endl;
+    MOOSE::out << pt(1) << ", ";
+  MOOSE::out << poly[0](1) << "])" << std::endl;
 }
 
 
