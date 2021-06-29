@@ -12,14 +12,13 @@ import sys
 import re
 import glob
 import tarfile
-if sys.version_info[0] == 3:
-    import enum
-    import urllib.request
-    import urllib.error
-else:
-    import urllib2
+import tempfile
+import enum
+import urllib.request
+import urllib.error
 import collections
 import logging
+import subprocess
 
 DEFAULT_JOBS_CACHE = os.path.join(os.getenv('HOME'), '.local', 'share', 'civet', 'jobs')
 DEFAULT_CIVET_SITE = 'https://civet.inl.gov'
@@ -42,21 +41,12 @@ RESULT_FILENAME_RE = re.compile(r'results_(?P<number>[0-9]+)_(?P<recipe>.*)\.tar
 Test = collections.namedtuple('Test', 'recipe status caveats reason time url')
 Job = collections.namedtuple('Job', 'number filename status url')
 
-if sys.version_info[0] == 3:
-    class JobFileStatus(enum.Enum):
-        """Status flag for Job file downloads"""
-        CACHE = 0
-        LOCAL = 1
-        DOWNLOAD = 2
-        FAIL = 3
-else:
-    class JobFileStatus(object):
-        """Status flag for Job file downloads"""
-        CACHE = 0
-        LOCAL = 1
-        DOWNLOAD = 2
-        FAIL = 3
-
+class JobFileStatus(enum.Enum):
+    """Status flag for Job file downloads"""
+    CACHE = 0
+    LOCAL = 1
+    DOWNLOAD = 2
+    FAIL = 3
 
 def _get_local_civet_jobs(location, url=None, logger=None):
     """
@@ -78,11 +68,7 @@ def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=
     jobs = set()
     for sha1 in hashes:
         url = '{}/sha_events/{}/{}'.format(site, repo, sha1)
-
-        if sys.version_info[0] == 3:
-            pid = urllib.request.urlopen(url)
-        else:
-            pid = urllib2.urlopen(url)
+        pid = urllib.request.urlopen(url)
 
         page = pid.read().decode('utf8')
         for match in JOB_RE.finditer(page):
@@ -109,11 +95,7 @@ def _download_job(job, site, cache, logger):
 
     else:
         try:
-            if sys.version_info[0] == 3:
-                response = urllib.request.urlopen(url)
-            else:
-                response = urllib2.urlopen(url)
-
+            response = urllib.request.urlopen(url)
             if response.code == 200:
                 if logger:
                     logger.debug('Downloading results for job %s', job)
@@ -189,3 +171,49 @@ def get_civet_results(local=DEFAULT_JOBS_CACHE,
         for job in jobs:
             _update_database_from_job(job, database, possible)
     return database
+
+
+def get_civet_hashes(remote, start='HEAD', branch='master', author='moosetest', logger=None):
+    """
+    Helper function for returning the hashes associated with testing using CIVET.
+
+    In general, this function should be run from the "master" branch or a release tag that
+    stems from a release branch. In this scenario, the script performs the following tasks.
+
+    $ git log --merges --author moosetest -n 1 HEAD
+
+    commit 90123e7b6bd52f1bc36e68aac5d1fa95e76aeb91
+    Merge: 20330877ed d72a8d0d69
+    Author: moosetest <bounces@inl.gov>
+    Date:   Tue May 18 04:24:26 2021 -0600
+
+    Merge commit 'd72a8d0d69e21b4945eedf2e78a7de80b1bd3e6f'
+
+    The first commit that is returned is the commit for the merge: 90123..., which is the
+    merge commit performed by CIVET (i.e., moosetest).
+
+    The second commit this is returned is the commit that contains the merge into the "next" branch
+    for MOOSE or "devel" for applications, in this case 972a8d.... For MOOSE, on CIVET this hash will
+    contain the testing that occurred for the merge into "next" as well as the "devel" testing. For
+    applications this will contain the merge into "devel" testing.
+
+    If this function is run on a differing branch where a merge commit doesn't exist, then None is
+    returned.
+    """
+
+    # Create "git clone" command
+    clone_cmd = ['git', 'clone', '--single-branch', '--branch', branch, remote, 'tmp']
+    if logger is not None:
+        logger.info("Cloning repository to gather commit information, this can take several minutes.")
+
+    # Merge information command
+    merge_cmd = ['git', 'log', '--merges', '--author', author, '-n', '1', start]
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        subprocess.run(clone_cmd, capture_output=True, text=True, check=True, cwd=tmp_dir)
+        out = subprocess.run(merge_cmd, capture_output=True, text=True, check=True,
+                             cwd=os.path.join(tmp_dir, 'tmp'))
+
+        regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
+        match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
+        return (match.group('master'), match.group('devel')) if match else None

@@ -33,39 +33,6 @@ def git_is_branch(name, working_dir=os.getcwd()):
         return out == name
     return False
 
-def git_civet_hashes(start='HEAD', author='moosetest', working_dir=os.getcwd()):
-    """
-    Helper function for returning the hashes associated with testing using CIVET.
-
-    In general, this function should be run from the "master" branch or a release tag that
-    stems from a release branch. In this scenario, the script performs the following tasks.
-
-    $ git log --merges --author moosetest -n 1 HEAD
-
-    commit 90123e7b6bd52f1bc36e68aac5d1fa95e76aeb91
-    Merge: 20330877ed d72a8d0d69
-    Author: moosetest <bounces@inl.gov>
-    Date:   Tue May 18 04:24:26 2021 -0600
-
-    Merge commit 'd72a8d0d69e21b4945eedf2e78a7de80b1bd3e6f'
-
-    The first commit that is returned is the commit for the merge: 90123..., which is the
-    merge commit performed by CIVET (i.e., moosetest).
-
-    The second commit this is returned is the commit that contains the merge into the "next" branch
-    for MOOSE or "devel" for applications, in this case 972a8d.... For MOOSE, on CIVET this hash will
-    contain the testing that occurred for the merge into "next" as well as the "devel" testing. For
-    applications this will contain the merge into "devel" testing.
-
-    If this function is run on a differing branch where a merge commit doesn't exist, then None is
-    returned.
-    """
-    cmd = ['git', 'log', '--merges', '--author', author, '-n', '1', start]
-    out = subprocess.run(cmd, capture_output=True, text=True, cwd=working_dir)
-    regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
-    match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
-    return (match.group('master'), match.group('devel')) if match else None
-
 def git_is_repo(working_dir=os.getcwd()):
     """
     Return true if the repository is a git repo.
