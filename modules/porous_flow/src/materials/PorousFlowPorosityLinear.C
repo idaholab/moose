@@ -42,10 +42,12 @@ PorousFlowPorosityLinear::validParams()
   params.addParam<Real>("P_coeff", 0.0, "Effective porepressure coefficient");
   params.addParam<Real>("T_coeff", 0.0, "Temperature coefficient");
   params.addParam<Real>("epv_coeff", 0.0, "Volumetric-strain coefficient");
-  params.addParam<Real>("porosity_min",
-                        0.0,
-                        "Minimum allowed value of the porosity: if the linear relationship gives "
-                        "values less than this value, then porosity is set to this value instead");
+  params.addRangeCheckedParam<Real>(
+      "porosity_min",
+      0.0,
+      "porosity_min >= 0",
+      "Minimum allowed value of the porosity: if the linear relationship gives "
+      "values less than this value, then porosity is set to this value instead");
   params.addParam<Real>(
       "zero_modifier",
       1E-3,

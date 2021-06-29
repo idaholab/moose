@@ -5,7 +5,7 @@
     csvdiff = 'PermFromPoro01_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate permeability as an Kozeny-Carman function of porosity, where an permeability is defined via setting a grain size'
+    requirement = 'PorousFlow shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a grain size'
     issues = '#7632'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
   []
@@ -15,7 +15,7 @@
     csvdiff = 'PermFromPoro02_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate permeability as an Kozeny-Carman function of porosity, where an permeability is defined via setting a reference value of porosity'
+    requirement = 'PorousFlow shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a reference value of porosity'
     issues = '#7632'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
   []
@@ -83,7 +83,7 @@
     input = except1.i
     expect_err = 'PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff'
     threading = '!pthreads'
-    requirement = 'PorousFlow shall produce an error if the porosity depends on temperature by no thermal expansion coefficient is provided'
+    requirement = 'PorousFlow shall produce an error if the porosity depends on temperature but no thermal expansion coefficient is provided'
     issues = '#10847'
     design = 'porous_flow/porosity.md PorousFlowPorosity.md'
   []

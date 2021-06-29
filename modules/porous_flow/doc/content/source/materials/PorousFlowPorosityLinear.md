@@ -18,7 +18,7 @@ Here:
 - $\epsilon^{\mathrm{total}}_{ii}$ is the [total volumetric strain](PorousFlowVolumetricStrain.md)
 - $\epsilon^{\mathrm{total}}_{ii\ \mathrm{ref}}$ is the reference total volumetric strain, which is a constant monomial coupled variable or a real number.
 
-In addition, it is possible to place a lower bound on porosity: $\phi \geq \phi_{\mathrm{min}}$.  This can be physically useful, but can also be numerically impnortant because during Newton-Raphson iterations, the linear relationship can sometimes yield small, or even negative, values of $\phi$.
+In addition, it is possible to place a lower bound on porosity: $\phi \geq \phi_{\mathrm{min}}$.  This can be physically useful, but can also be numerically important because during Newton-Raphson iterations, the linear relationship can sometimes yield small, or even negative, values of $\phi$.
 
 Descriptions of other porosity classes can be found in the [porosity documentation](/porous_flow/porosity.md)
 
