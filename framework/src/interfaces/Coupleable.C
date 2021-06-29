@@ -237,9 +237,7 @@ Coupleable::getFEVar(const std::string & var_name, unsigned int comp) const
 const MooseVariableFieldBase *
 Coupleable::getFieldVar(const std::string & var_name, unsigned int comp) const
 {
-  if (!checkVar(var_name, comp, 0))
-    return nullptr;
-  return _coupled_vars.at(var_name)[comp];
+  return getVarHelper<MooseVariableFieldBase>(var_name, comp);
 }
 
 MooseVariable *

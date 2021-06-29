@@ -51,7 +51,7 @@ ADInterfaceKernelTempl<T>::ADInterfaceKernelTempl(const InputParameters & parame
     _phi(_assembly.phiFace(_var)),
     _test(_var.phiFace()),
     _grad_test(_var.adGradPhiFace()),
-    _neighbor_var(*getVarHelper<T>("neighbor_var", 0)),
+    _neighbor_var(*getVarHelper<MooseVariableFE<T>>("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.adSlnNeighbor()),
     _grad_neighbor_value(_neighbor_var.adGradSlnNeighbor()),
     _phi_neighbor(_assembly.phiFaceNeighbor(_neighbor_var)),
