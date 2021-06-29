@@ -13,12 +13,12 @@
 
 #include "INSFVVelocityVariable.h"
 
-class WallYPlusAux : public AuxKernel
+class WallFunctionYPlusAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  WallYPlusAux(const InputParameters & parameters);
+  WallFunctionYPlusAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
