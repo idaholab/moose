@@ -1,7 +1,7 @@
 # Manual Installation LLVM/MPICH
 
 !alert! note title=Are you sure?
-Getting a proper LLVM/MPICH compiler built is substantially more difficult than our [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) combination. We need to build LLVM using a *modern* GCC compiler (not just a minimal C++11 compliant GCC compiler). Also, the higher the version of GCC, does not always guarantee success.
+Getting a proper LLVM/MPICH compiler built is substantially more difficult than our [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) combination. We need to build LLVM using a *modern* GCC compiler (not just a minimal C++14 compliant GCC compiler). Also, the higher the version of GCC, does not always guarantee success.
 
 Furthermore, your millage will vary depending on the operating system. Building LLVM is a finicky process. If you are unsure as to why you are building an LLVM compiler, it might be best to build the [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) compiler stack instead.
 !alert-end!

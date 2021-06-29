@@ -458,9 +458,13 @@ $(binlink): all install_$(APPLICATION_NAME)_tests
 	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
 
 install_$(APPLICATION_NAME)_docs:
+ifeq ($(MOOSE_SKIP_DOCS),)
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
 	@if [ -f "$(docs_dir)/moosedocs.py" ]; then cd $(docs_dir) && ./moosedocs.py build --destination $(docs_install_dir); fi
+else
+	@echo "Skipping docs installation."
+endif
 
 $(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing $<"
