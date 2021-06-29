@@ -281,7 +281,9 @@ ComputeMortarFunctor::operator()()
 }
 
 void
-ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem, const Elem * primal_elem, std::vector<Point> & q_pts)
+ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
+                                       const Elem * primal_elem,
+                                       std::vector<Point> & q_pts)
 {
   auto && msm_order = msm_elem->default_order();
   auto && msm_type = msm_elem->type();
@@ -296,10 +298,9 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem, const Elem * prima
   {
     // Get physical point on msm_elem to project
     VectorValue<Dual2> x0;
-    for (MooseIndex(msm_elem->n_nodes()) n = 0;
-         n < msm_elem->n_nodes();
-         ++n)
-      x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) * msm_elem->point(n);
+    for (MooseIndex(msm_elem->n_nodes()) n = 0; n < msm_elem->n_nodes(); ++n)
+      x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) *
+            msm_elem->point(n);
 
     // Use msm_elem quadrature point as initial guess
     // (will be correct for aligned meshes)
@@ -326,22 +327,22 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem, const Elem * prima
                            u(2) * normal(0) - u(0) * normal(2),
                            u(0) * normal(1) - u(1) * normal(0));
 
-  // TODO: change newton tolerance
+      // TODO: change newton tolerance
       if (F.norm() < 1e-10)
         break;
 
-      RealEigenMatrix J(3,2);
-      J << F(0).derivatives()[0], F(0).derivatives()[1],
-           F(1).derivatives()[0], F(1).derivatives()[1],
-           F(2).derivatives()[0], F(2).derivatives()[1];
+      RealEigenMatrix J(3, 2);
+      J << F(0).derivatives()[0], F(0).derivatives()[1], F(1).derivatives()[0],
+          F(1).derivatives()[1], F(2).derivatives()[0], F(2).derivatives()[1];
       RealEigenVector f(3);
       f << F(0).value(), F(1).value(), F(2).value();
       RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
 
-      xi(0) += dxi(0); xi(1) += dxi(1);
+      xi(0) += dxi(0);
+      xi(1) += dxi(1);
     } while (++current_iterate < max_iterates);
 
-  // TODO: Check that inside elem
+    // TODO: Check that inside elem
     if (current_iterate < max_iterates)
     {
       q_pts[qp](0) = xi(0).value();
@@ -349,19 +350,20 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem, const Elem * prima
       q_pts[qp](2) = 0;
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
-        if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 ||
-            q_pts[qp](0) + q_pts[qp](1) > 1)
+        if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 || q_pts[qp](0) + q_pts[qp](1) > 1)
           mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
       {
-        if (q_pts[qp](0) < -1 || q_pts[qp](0) > 1 ||
-            q_pts[qp](1) < -1 || q_pts[qp](1) > 1)
+        if (q_pts[qp](0) < -1 || q_pts[qp](0) > 1 || q_pts[qp](1) < -1 || q_pts[qp](1) > 1)
           mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
       }
     }
     else
       mooseError("Newton iteration for mortar quadrature mapping msm_elem: ",
-                  msm_elem->id(), " to elem: ", primal_elem->id(), " didn't converge");
+                 msm_elem->id(),
+                 " to elem: ",
+                 primal_elem->id(),
+                 " didn't converge");
   }
 }

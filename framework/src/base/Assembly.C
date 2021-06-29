@@ -2396,7 +2396,9 @@ Assembly::reinitMortarElem(const Elem * elem)
 }
 
 void
-Assembly::reinitMortarElem(const Elem * elem, const std::vector<Point> * const pts, const std::vector<Real> * const wts)
+Assembly::reinitMortarElem(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const wts)
 {
   mooseAssert(elem->dim() == _mesh_dimension - 1,
               "You should be calling reinitMortarElem on a lower dimensional element");
