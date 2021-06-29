@@ -612,7 +612,7 @@ TEST_F(RankTwoTensorTest, mixedProductIjJklm)
         for (unsigned int i = 0; i < 3; ++i)
           EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
 }
-//
+
 TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
 {
   const RankFourTensor computed_val = _unsymmetric1.mixedProductJmIjkl(_r4);
@@ -632,6 +632,27 @@ TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
         for (unsigned int i = 0; i < 3; ++i)
           EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
 }
+
+TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
+{
+  const RankFourTensor computed_val = _unsymmetric1.mixedProductJkIjlm(_r4);
+  RankFourTensor expected_val;
+  expected_val.fillFromInputVector(
+      {78,    84,    90,   96,   102,  108,  114,  120,  126,  -168,  -183,  -198,  -213,  -228,
+       -243,  -258,  -273, -288, 277,  302,  327,  352,  377,  402,   427,   452,   477,   240,
+       246,   252,   258,  264,  270,  276,  282,  288,  -573, -588,  -603,  -618,  -633,  -648,
+       -663,  -678,  -693, 952,  977,  1002, 1027, 1052, 1077, 1102,  1127,  1152,  402,   408,
+       414,   420,   426,  432,  438,  444,  450,  -978, -993, -1008, -1023, -1038, -1053, -1068,
+       -1083, -1098, 1627, 1652, 1677, 1702, 1727, 1752, 1777, 1802,  1827},
+      RankFourTensor::general);
+
+  for (unsigned int l = 0; l < 3; ++l)
+    for (unsigned int k = 0; k < 3; ++k)
+      for (unsigned int j = 0; j < 3; ++j)
+        for (unsigned int i = 0; i < 3; ++i)
+          EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
+}
+
 TEST_F(RankTwoTensorTest, mixedProductIjJkl)
 {
   const RankThreeTensor computed_val = _unsymmetric1.mixedProductIjJkl(_r3);

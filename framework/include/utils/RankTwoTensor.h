@@ -285,6 +285,9 @@ public:
   /// returns C_iklm = a_jm * b_ijkl
   RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const;
 
+  /// returns C_iklm = a_jk * b_ijlm
+  RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const;
+
   /// returns C_ikl = a_ij * b_jkl
   RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
 

@@ -496,6 +496,22 @@ RankTwoTensorTempl<T>::mixedProductJmIjkl(const RankFourTensorTempl<T> & b) cons
 }
 
 template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          for (unsigned int m = 0; m < N; ++m)
+            result(i, k, l, m) += (*this)(j, k) * b(i, j, l, m);
+
+  return result;
+}
+
+template <typename T>
 RankThreeTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const
 {
