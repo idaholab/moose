@@ -1,6 +1,6 @@
 [Tests]
   design = 'Parser.md'
-  issues = '#17989'
+  issues = '#17989 #18221'
 
   [merging]
     requirement = 'The system shall support for multiple input files, which are merged into one '
@@ -31,8 +31,16 @@
     [three_inputs_override_message]
       type = 'RunApp'
       input = 'diffusion1a.i diffusion1b.i diffusion1c.i'
-      expect_out = '/diffusion1c.i:18:  Parameter \'BCs/right/value\' overrides the same parameter in .*/diffusion1b.i:3'
+      expect_out = '/diffusion1c.i:18:  Parameter \'BCs/right/value\' overrides the same parameter '
+                   'in .*/diffusion1b.i:3'
       detail = 'and inform the user of parameters from earlier files being overidden by later files'
     []
+  []
+
+  [no_file]
+    type = 'RunException'
+    input = ''
+    expect_err = 'No input files specified.'
+    requirement = 'The system shall raise an error if no input files were specified after the -i option'
   []
 []

@@ -612,6 +612,8 @@ Parser::parse(const std::vector<std::string> & input_filenames)
 {
   // Save the filename
   _input_filenames = input_filenames;
+  if (_input_filenames.empty())
+    mooseError("No input files specified.");
   if (_input_filenames.size() > 1)
     mooseInfo("Merging inputs ", Moose::stringify(_input_filenames));
 
