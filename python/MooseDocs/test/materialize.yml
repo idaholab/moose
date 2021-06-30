@@ -87,7 +87,7 @@ Extensions:
         active: True
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
-        home: https://www.mooseframework.org
+        home: /index.md
         search: False
         menu:
             Direct: core.md
