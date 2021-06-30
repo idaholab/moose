@@ -5,17 +5,26 @@ effective porepressure, the volumetric strain, the temperature and/or chemical p
 
 Available porosity formulations include:
 
-## Constant
-
-[`PorousFlowPorosityConst`](/PorousFlowPorosityConst.md)
+## Constant: [PorousFlowPorosityConst](/PorousFlowPorosityConst.md)
 
 The simplest case where porosity does not change during the simulation. A single value of porosity
 can be used, or a spatially varying porosity `AuxVariable` can be used to define a heterogeneous
 porosity distribution.
 
-## Porosity dependent on total strain, effective porepressure, temperature and/or mineralisation
+## Linear: [PorousFlowPorosityLinear](/PorousFlowPorosityLinear.md)
 
-Using [`PorousFlowPorosity`](/PorousFlowPorosity.md) with appropriately set flags,
+In this case
+
+\begin{equation}
+\label{eq:poro_evolve_linear}
+\phi = \phi_{\mathrm{ref}} + A(P_{f} - P_{f\ \mathrm{ref}}) + B(T - T_{\mathrm{ref}}) + C(\epsilon^{\mathrm{total}}_{ii} - \epsilon^{\mathrm{total}}_{ii\ \mathrm{ref}}) \ .
+\end{equation}
+
+Here the "ref" values are reference values, $P_{f}$ is the [effective fluid pressure](PorousFlowEffectiveFluidPressure.md), $T$ is the [temperature](PorousFlowTemperature.md) and $\epsilon^{\mathrm{total}}_{ii}$ is the [total volumetric strain](PorousFlowVolumetricStrain.md).  These may be spatially-varying `AuxVariables` to define a heterogeneous porosity distribution.  $A$, $B$ and $C$ are real-valued coefficients.  A lower-bound on porosity, $\phi \geq \phi_{\mathrm{min}}$, may also be defined.
+
+## Exponential: [PorousFlowPorosity](/PorousFlowPorosity.md)
+
+Using [PorousFlowPorosity](/PorousFlowPorosity.md) with appropriately set flags,
 porosity can depend on:
 
 - total strain, with `mechanical = true`
@@ -25,7 +34,7 @@ porosity can depend on:
 
 A combination of these may be used, to simulate, for instance, THM or HM coupling.
 
-## Evolution of porosity
+## Theoretical evolution of porosity leading to the exponential form
 
 The evolution of the porosity is governed by [!citep](detournayET93, chen2009)
 \begin{equation}
