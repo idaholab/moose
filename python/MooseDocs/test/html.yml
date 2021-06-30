@@ -80,7 +80,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
-        home: https://www.mooseframework.org
+        home: /index.md
         menu:
             Direct: core.md
             Mega: mega.menu.md
