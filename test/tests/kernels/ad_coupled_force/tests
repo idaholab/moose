@@ -1,0 +1,21 @@
+[Tests]
+  issues = "#18214"
+  design = "ADCoupledForce.md"
+  [jacobians]
+    requirement = "MOOSE shall provide a source term proportional to the value of"
+    [aux]
+      type = 'PetscJacobianTester'
+      input = 'aux_test.i'
+      ratio_tol = 1e-8
+      difference_tol = 1e-7
+      detail = 'an aux variable and shall be able to produce the exact Jacobian'
+    []
+    [fe]
+      type = 'PetscJacobianTester'
+      input = 'fe_test.i'
+      ratio_tol = 1e-8
+      difference_tol = 1e-7
+      detail = 'an finite element primary variable and shall be able to produce the exact Jacobian'
+    []
+  []
+[]
