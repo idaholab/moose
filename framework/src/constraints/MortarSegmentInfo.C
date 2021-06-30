@@ -122,8 +122,8 @@ bool
 MortarSegmentInfo::hasPrimary() const
 {
   // For 3D mortar we don't use xi values stored here
-  bool xi2_set = secondary_elem->dim() == 3 ||
-      ((std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE));
+  bool xi2_set = secondary_elem->dim() == 3 || ((std::abs(xi2_a - invalid_xi) >= TOLERANCE) &&
+                                                (std::abs(xi2_b - invalid_xi) >= TOLERANCE));
 
   if (xi2_set && primary_elem)
     return true;
