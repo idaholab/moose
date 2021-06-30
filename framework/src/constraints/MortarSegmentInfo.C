@@ -121,11 +121,11 @@ MortarSegmentInfo::isValid() const
 bool
 MortarSegmentInfo::hasPrimary() const
 {
-  // TODO: only for 1D
-  // bool xi2_set =
-  //     (std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE);
+  // For 3D mortar we don't use xi values stored here
+  bool xi2_set = secondary_elem->dim() == 3 ||
+      ((std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE));
 
-  if (primary_elem) //(xi2_set && primary_elem)
+  if (xi2_set && primary_elem)
     return true;
 
   return false;
