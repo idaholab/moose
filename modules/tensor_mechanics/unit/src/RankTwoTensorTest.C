@@ -593,3 +593,90 @@ TEST_F(RankTwoTensorTest, ADConversion)
   generic_ad = generic_reg;
   generic_reg = MetaPhysicL::raw_value(generic_ad);
 }
+
+TEST_F(RankTwoTensorTest, mixedProductIjJklm)
+{
+  const RankFourTensor computed_val = _unsymmetric1.mixedProductIjJklm(_r4);
+  RankFourTensor expected_val;
+  expected_val.fillFromInputVector(
+      {274, 278, 282, 286, 290, 294, 298, 302, 306, 310, 314, 318, 322, 326, 330, 334, 338,
+       342, 346, 350, 354, 358, 362, 366, 370, 374, 378, 302, 307, 312, 317, 322, 327, 332,
+       337, 342, 347, 352, 357, 362, 367, 372, 377, 382, 387, 392, 397, 402, 407, 412, 417,
+       422, 427, 432, 385, 392, 399, 406, 413, 420, 427, 434, 441, 448, 455, 462, 469, 476,
+       483, 490, 497, 504, 511, 518, 525, 532, 539, 546, 553, 560, 567},
+      RankFourTensor::general);
+
+  for (unsigned int l = 0; l < 3; ++l)
+    for (unsigned int k = 0; k < 3; ++k)
+      for (unsigned int j = 0; j < 3; ++j)
+        for (unsigned int i = 0; i < 3; ++i)
+          EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
+}
+
+TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
+{
+  const RankFourTensor computed_val = _unsymmetric1.mixedProductJmIjkl(_r4);
+  RankFourTensor expected_val;
+  expected_val.fillFromInputVector(
+      {78,    -168, 277,  84,    -183, 302,   90,    -198, 327,   96,    -213, 352,   102,  -228,
+       377,   108,  -243, 402,   114,  -258,  427,   120,  -273,  452,   126,  -288,  477,  240,
+       -573,  952,  246,  -588,  977,  252,   -603,  1002, 258,   -618,  1027, 264,   -633, 1052,
+       270,   -648, 1077, 276,   -663, 1102,  282,   -678, 1127,  288,   -693, 1152,  402,  -978,
+       1627,  408,  -993, 1652,  414,  -1008, 1677,  420,  -1023, 1702,  426,  -1038, 1727, 432,
+       -1053, 1752, 438,  -1068, 1777, 444,   -1083, 1802, 450,   -1098, 1827},
+      RankFourTensor::general);
+
+  for (unsigned int l = 0; l < 3; ++l)
+    for (unsigned int k = 0; k < 3; ++k)
+      for (unsigned int j = 0; j < 3; ++j)
+        for (unsigned int i = 0; i < 3; ++i)
+          EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
+}
+
+TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
+{
+  const RankFourTensor computed_val = _unsymmetric1.mixedProductJkIjlm(_r4);
+  RankFourTensor expected_val;
+  expected_val.fillFromInputVector(
+      {78,    84,    90,   96,   102,  108,  114,  120,  126,  -168,  -183,  -198,  -213,  -228,
+       -243,  -258,  -273, -288, 277,  302,  327,  352,  377,  402,   427,   452,   477,   240,
+       246,   252,   258,  264,  270,  276,  282,  288,  -573, -588,  -603,  -618,  -633,  -648,
+       -663,  -678,  -693, 952,  977,  1002, 1027, 1052, 1077, 1102,  1127,  1152,  402,   408,
+       414,   420,   426,  432,  438,  444,  450,  -978, -993, -1008, -1023, -1038, -1053, -1068,
+       -1083, -1098, 1627, 1652, 1677, 1702, 1727, 1752, 1777, 1802,  1827},
+      RankFourTensor::general);
+
+  for (unsigned int l = 0; l < 3; ++l)
+    for (unsigned int k = 0; k < 3; ++k)
+      for (unsigned int j = 0; j < 3; ++j)
+        for (unsigned int i = 0; i < 3; ++i)
+          EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
+}
+
+TEST_F(RankTwoTensorTest, mixedProductIjJkl)
+{
+  const RankThreeTensor computed_val = _unsymmetric1.mixedProductIjJkl(_r3);
+  RankThreeTensor expected_val;
+  expected_val.fillFromInputVector({94,  98,  102, 106, 110, 114, 118, 122, 126,
+                                    104, 109, 114, 119, 124, 129, 134, 139, 144,
+                                    133, 140, 147, 154, 161, 168, 175, 182, 189},
+                                   RankThreeTensor::general);
+  for (unsigned int k = 0; k < 3; ++k)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
+}
+
+TEST_F(RankTwoTensorTest, mixedProductJkI)
+{
+  const RankThreeTensor computed_val = _unsymmetric1.mixedProductJkI(_v);
+  RankThreeTensor expected_val;
+  expected_val.fillFromInputVector({1,  -4, 7,   2,  -5, 8,   3,  -6, 10,  2,  -8, 14,  4, -10,
+                                    16, 6,  -12, 20, 3,  -12, 21, 6,  -15, 24, 9,  -18, 30},
+                                   RankThreeTensor::general);
+
+  for (unsigned int k = 0; k < 3; ++k)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
+}

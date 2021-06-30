@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ADRankThreeTensorForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
@@ -244,6 +245,24 @@ public:
    * @return C_klji
    */
   RankFourTensorTempl<T> transposeMajor() const;
+
+  /**
+   * Transpose the tensor by swapping the first two indeces
+   * @return C_jikl
+   */
+  RankFourTensorTempl<T> transposeIj() const;
+
+  /**
+   * multiply a RankFourTensor with a vector
+   * @return C_ikl = a_ijkl*b_j
+   */
+  RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const;
+
+  /**
+   * multiply a RankFourTensor with a vector
+   * @return C_jkl = a_ijkl*b_i
+   */
+  RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const;
 
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
