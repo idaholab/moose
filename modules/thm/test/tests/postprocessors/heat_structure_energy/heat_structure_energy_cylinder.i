@@ -70,7 +70,7 @@
 
 [Postprocessors]
   [E_tot]
-    type = HeatStructureEnergyRZ
+    type = ADHeatStructureEnergyRZ
     block = 'heat_structure:region2'
     n_units = 5
     axis_point = '0 2 0'
