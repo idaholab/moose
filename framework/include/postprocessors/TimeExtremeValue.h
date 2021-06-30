@@ -25,12 +25,19 @@ public:
   static InputParameters validParams();
 
   /// What type of extreme value we are going to compute
-  enum ExtremeType
+  enum class ExtremeType
   {
     MAX,
     MIN,
     ABS_MAX,
     ABS_MIN
+  };
+
+  /// What output to return, the extreme value, or the time it occurred
+  enum class OutputType
+  {
+    EXTREME_VALUE,
+    TIME
   };
 
   /**
@@ -48,7 +55,12 @@ protected:
   /// The extreme value type ("max", "min", etc.)
   ExtremeType _type;
 
+  // The output type ("extreme_value", "time")
+  OutputType _output_type;
+
   /// The extreme value
   Real & _value;
-};
 
+  /// The time the extreme value occurred
+  Real & _time;
+};
