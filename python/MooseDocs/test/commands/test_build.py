@@ -47,6 +47,7 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('clean', '0')
         kwargs.setdefault('files', [])
         kwargs.setdefault('home', None)
+        kwargs.setdefault('stable', False)
         return types.SimpleNamespace(**kwargs)
 
     @mock.patch.object(base.Translator, 'execute')
