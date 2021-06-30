@@ -130,9 +130,9 @@ ComputeMortarFunctor::operator()()
 
     // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
     // the secondary face!)
-    // fudge_factor is a convenient way of handling seconary elements with only partial overlapping
-    // primary element. Instead of adding fractional mortar segment elements we add the full element
-    // and fractionally weight the quadrature points
+    // fudge_factor is a convenient way of handling secondary elements with only partial overlap
+    // Instead of adding fractional mortar segment elements we add the full element and fractionally
+    // weight the quadrature points
     if (!_has_primary && msinfo.fudge_factor < 1.0)
     {
       // Get quadrature points and weights
