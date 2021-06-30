@@ -21,7 +21,7 @@ ADHeatStructureHeatSource::validParams()
 ADHeatStructureHeatSource::ADHeatStructureHeatSource(const InputParameters & parameters)
   : ADKernel(parameters),
     _power_fraction(getParam<Real>("power_fraction")),
-    _total_power(adCoupledScalarValue("total_power")),
+    _total_power(coupledScalarValue("total_power")),
     _power_shape_function(getFunction("power_shape_function")),
     _power_shape_integral(getPostprocessorValue("power_shape_integral_pp")),
     _scale(getParam<Real>("scale")),

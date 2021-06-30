@@ -15,7 +15,7 @@ protected:
   virtual ADReal computeQpResidual();
 
   const Real & _power_fraction;
-  const ADVariableValue & _total_power;
+  const VariableValue & _total_power;
   const Function & _power_shape_function;
   const PostprocessorValue & _power_shape_integral;
   const Real & _scale;

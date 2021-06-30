@@ -100,7 +100,7 @@ HeatSourceFromTotalPower::addMooseObjects()
 
   {
     const std::string class_name =
-        is_cylindrical ? "HeatStructureHeatSourceRZ" : "HeatStructureHeatSource";
+        is_cylindrical ? "ADHeatStructureHeatSourceRZ" : "ADHeatStructureHeatSource";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
