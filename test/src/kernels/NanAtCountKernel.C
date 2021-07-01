@@ -62,5 +62,5 @@ NanAtCountKernel::computeJacobian()
   _count++;
 
   if (_print_count)
-    _console << "NanAtCountKernel " << name() << " count: " << _count << "\n";
+    _console << "NanAtCountKernel " << name() << " count: " << _count << std::endl;
 }

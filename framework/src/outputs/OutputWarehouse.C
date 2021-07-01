@@ -23,12 +23,16 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse(MooseApp & app)
-  : _app(app),
+  : PerfGraphInterface(app.perfGraph(), "OutputWarehouse"),
+    _app(app),
     _buffer_action_console_outputs(false),
+    _common_params_ptr(NULL),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
     _logging_requested(false),
-    _last_message_ended_in_newline(true)
+    _last_message_ended_in_newline(true),
+    _last_buffer(NULL),
+    _num_printed(0)
 {
   // Set the reserved names
   _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -45,6 +49,8 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
+  TIME_SECTION("initialSetup", 5, "Setting Up Outputs");
+
   for (const auto & obj : _all_objects)
     obj->initialSetup();
 }
@@ -172,19 +178,35 @@ OutputWarehouse::meshChanged()
     obj->meshChanged();
 }
 
+static std::mutex moose_console_mutex;
+
 void
 OutputWarehouse::mooseConsole()
 {
+  mooseConsole(_console_buffer);
+}
+
+void
+OutputWarehouse::mooseConsole(std::ostringstream & buffer)
+{
+  std::lock_guard<std::mutex> lock(moose_console_mutex);
+
+  std::string message = buffer.str();
+
+  // If someone else is writing - then we may need a newline
+  if (&buffer != _last_buffer && !_last_message_ended_in_newline)
+    message = '\n' + message;
+
   // Loop through all Console Output objects and pass the current output buffer
   std::vector<Console *> objects = getOutputs<Console>();
   if (!objects.empty())
   {
     for (const auto & obj : objects)
-      obj->mooseConsole(_console_buffer.str());
+      obj->mooseConsole(message);
 
     // Reset
-    _console_buffer.clear();
-    _console_buffer.str("");
+    buffer.clear();
+    buffer.str("");
   }
   else
   {
@@ -192,22 +214,25 @@ OutputWarehouse::mooseConsole()
     {
       // this will cause messages to console before its construction immediately flushed and
       // cleared.
-      std::string message = _console_buffer.str();
-
       bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
 
       // If that last message ended in newline then this one may need
       // to start with indenting
-      if (_last_message_ended_in_newline && _app.multiAppLevel() > 0)
-        MooseUtils::indentMessage(_app.name(), message);
+      // Note that we only indent the first line if the last message ended in new line
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
 
       Moose::out << message << std::flush;
-      _console_buffer.clear();
-      _console_buffer.str("");
+      buffer.clear();
+      buffer.str("");
 
       _last_message_ended_in_newline = this_message_ends_in_newline;
     }
   }
+
+  _last_buffer = &buffer;
+
+  _num_printed++;
 }
 
 void

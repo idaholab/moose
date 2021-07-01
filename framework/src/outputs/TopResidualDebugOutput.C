@@ -154,4 +154,6 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
                  << vec[i]._id << ": " << vec[i]._point << '\n';
     }
   }
+
+  Moose::err << std::flush;
 }

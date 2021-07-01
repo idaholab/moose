@@ -280,7 +280,7 @@ operator<<(std::ostream & stream, const FunctionSeries & me)
          << "FunctionSeries: " << me.name() << "\n"
          << "         Terms: " << me.getNumberOfTerms() << "\n";
   me._series_type->formatCoefficients(stream, me._coefficients);
-  stream << "\n\n";
+  stream << "\n\n" << std::flush;
 
   return stream;
 }

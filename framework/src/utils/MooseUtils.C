@@ -630,6 +630,8 @@ MaterialPropertyStorageDump(
       }
     }
   }
+
+  Moose::out << std::flush;
 }
 
 std::string &
@@ -643,7 +645,8 @@ removeColor(std::string & msg)
 void
 indentMessage(const std::string & prefix,
               std::string & message,
-              const char * color /*= COLOR_CYAN*/)
+              const char * color /*= COLOR_CYAN*/,
+              bool indent_first_line)
 {
   // First we need to see if the message we need to indent (with color) also contains color codes
   // that span lines.
@@ -656,13 +659,19 @@ indentMessage(const std::string & prefix,
 
   bool ends_in_newline = message.empty() ? true : message.back() == '\n';
 
+  bool first = true;
+
   std::istringstream iss(message);
   for (std::string line; std::getline(iss, line);) // loop over each line
   {
     const static pcrecpp::RE match_color(".*(\\33\\[3\\dm)((?!\\33\\[3\\d)[^\n])*");
     pcrecpp::StringPiece line_piece(line);
     match_color.FindAndConsume(&line_piece, &color_code);
-    colored_message += color + prefix + ": " + curr_color + line;
+
+    if (!first || indent_first_line)
+      colored_message += color + prefix + ": " + curr_color;
+
+    colored_message += line;
 
     // Only add a newline to the last line if it had one to begin with!
     if (!iss.eof() || ends_in_newline)
@@ -670,6 +679,8 @@ indentMessage(const std::string & prefix,
 
     if (!color_code.empty())
       curr_color = color_code; // remember last color of this line
+
+    first = false;
   }
   message = colored_message;
 }

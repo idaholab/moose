@@ -74,11 +74,4 @@ private:
 
   /// Whether or not we should call claimRays() on the next generateRays() (restartable)
   bool & _should_claim_rays;
-
-  /// Timing for claiming rays
-  PerfID _claim_rays_timer;
-  /// Timing for defining rays
-  PerfID _define_rays_timer;
-  /// Timing for verifying rays
-  PerfID _verify_replicated_rays;
 };

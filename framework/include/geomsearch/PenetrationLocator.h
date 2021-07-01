@@ -99,10 +99,6 @@ protected:
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
 
   const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
-
-  /// Timers
-  PerfID _detect_penetration_timer;
-  PerfID _reinit_timer;
 };
 
 /**
@@ -132,4 +128,3 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
     loadHelper(stream, m[key], context);
   }
 }
-

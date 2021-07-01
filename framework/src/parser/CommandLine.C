@@ -240,7 +240,7 @@ CommandLine::printUsage() const
   }
 
   Moose::out << "\nSolver Options:\n"
-             << "  See solver manual for details (Petsc or Trilinos)\n";
+             << "  See solver manual for details (Petsc or Trilinos)" << std::endl;
 }
 
 template <>

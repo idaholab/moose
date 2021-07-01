@@ -136,10 +136,6 @@ private:
   /// A vector of file handles, one per thread
   std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;
 
-  /// Timers
-  const PerfID _restart_es_timer;
-  const PerfID _restart_data_timer;
-
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
   static constexpr auto ES_BINARY_EXT = ".xdr";
   static constexpr auto ES_ASCII_EXT = ".xda";

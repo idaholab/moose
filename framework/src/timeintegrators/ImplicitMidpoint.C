@@ -69,7 +69,7 @@ ImplicitMidpoint::solve()
 
   // Compute first stage
   _fe_problem.initPetscOutput();
-  _console << "1st stage\n";
+  _console << "1st stage" << std::endl;
   _stage = 1;
   _fe_problem.time() = time_half;
   _fe_problem.getNonlinearSystemBase().system().solve();
@@ -82,7 +82,7 @@ ImplicitMidpoint::solve()
 
   // Compute second stage
   _fe_problem.initPetscOutput();
-  _console << "2nd stage\n";
+  _console << "2nd stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time_new;
   _fe_problem.getNonlinearSystemBase().system().solve();

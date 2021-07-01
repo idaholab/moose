@@ -590,7 +590,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
     {
       Moose::out << "After reducing the stepsize to " << step_size
                  << " with original strain increment with L2norm " << this_strain_increment.L2norm()
-                 << " the returnMap algorithm failed\n";
+                 << " the returnMap algorithm failed" << std::endl;
 
       _fspb_debug_stress = stress_good + E_ijkl * dep;
       _fspb_debug_pm.assign(

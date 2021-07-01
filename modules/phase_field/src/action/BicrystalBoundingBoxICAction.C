@@ -44,7 +44,7 @@ void
 BicrystalBoundingBoxICAction::act()
 {
 #ifdef DEBUG
-  Moose::err << "Inside the BicrystalBoundingBoxICAction Object\n";
+  Moose::err << "Inside the BicrystalBoundingBoxICAction Object" << std::endl;
 #endif
 
   // Loop through the number of order parameters

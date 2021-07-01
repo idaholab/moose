@@ -41,25 +41,25 @@
     type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
     data_type = CALLS
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [self]
     type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
     data_type = SELF
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [children]
     type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
     data_type = CHILDREN
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
   [total]
     type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
     data_type = TOTAL
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
 []
 

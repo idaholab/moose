@@ -14,7 +14,6 @@
 #include "NonlinearSystemBase.h"
 #include "InputParameters.h"
 #include "RelationshipManager.h"
-#include "TimedPrint.h"
 
 #include "libmesh/system.h"
 #include "libmesh/communicator.h"

@@ -766,16 +766,6 @@ private:
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;
-
-  /// Timers
-  const PerfID _execute_timer;
-  const PerfID _merge_timer;
-  const PerfID _finalize_timer;
-  const PerfID _comm_and_merge;
-  const PerfID _expand_halos;
-  const PerfID _update_field_info;
-  const PerfID _prepare_for_transfer;
-  const PerfID _consolidate_merged_features;
 };
 
 template <>

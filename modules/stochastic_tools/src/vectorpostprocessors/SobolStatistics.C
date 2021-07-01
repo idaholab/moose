@@ -35,9 +35,7 @@ SobolStatistics::validParams()
 }
 
 SobolStatistics::SobolStatistics(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters),
-    _sobol_sampler(getSampler<SobolSampler>("sampler")),
-    _perf_execute(registerTimedSection("execute", 1))
+  : GeneralVectorPostprocessor(parameters), _sobol_sampler(getSampler<SobolSampler>("sampler"))
 {
 }
 
@@ -58,7 +56,7 @@ SobolStatistics::initialSetup()
 void
 SobolStatistics::execute()
 {
-  TIME_SECTION(_perf_execute);
+  TIME_SECTION("execute", 3, "Executing Sobol Statistics");
 
   StochasticTools::SobolCalculator calc(
       *this, _sobol_sampler.getNumberOfCols(), _sobol_sampler.resample());

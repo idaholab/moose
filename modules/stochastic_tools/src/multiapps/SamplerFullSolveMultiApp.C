@@ -46,9 +46,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _sampler(getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
-    _solved_once(false),
-    _perf_solve_step(registerTimedSection("solveStep", 1)),
-    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1))
+    _solved_once(false)
 {
   init(_sampler.getNumberOfRows(),
        _mode == StochasticTools::MultiAppMode::BATCH_RESET ||
@@ -79,7 +77,7 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
-  TIME_SECTION(_perf_solve_step);
+  TIME_SECTION("solveStep", 3, "Solving SamplerFullSolveMultiApp");
 
   mooseAssert(_my_num_apps, _sampler.getNumberOfLocalRows());
 
@@ -99,7 +97,7 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
-  TIME_SECTION(_perf_solve_batch_step);
+  TIME_SECTION("solveStepBatch", 3, "Solving Step Batch For SamplerFullSolveMultiApp");
 
   // Value to return
   bool last_solve_converged = true;

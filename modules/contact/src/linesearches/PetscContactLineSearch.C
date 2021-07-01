@@ -105,7 +105,7 @@ PetscContactLineSearch::lineSearch()
     if (contact_state_stored != _old_contact_state)
     {
       KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
-      _console << "Contact set changed since previous non-linear iteration!\n";
+      _console << "Contact set changed since previous non-linear iteration!" << std::endl;
     }
     else
       KSPSetTolerances(ksp, _user_ksp_rtol, ksp_abstol, ksp_dtol, ksp_maxits);

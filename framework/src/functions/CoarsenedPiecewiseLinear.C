@@ -9,7 +9,6 @@
 
 #include "CoarsenedPiecewiseLinear.h"
 #include "PointReduction.h"
-#include "TimedPrint.h"
 
 registerMooseObject("MooseApp", CoarsenedPiecewiseLinear);
 
@@ -53,7 +52,7 @@ CoarsenedPiecewiseLinear::CoarsenedPiecewiseLinear(const InputParameters & param
   // point reduction
   _console << "Reduced size for function '" << name() << "' from " << list.size();
   list = PointReduction::douglasPeucker(list, epsilon);
-  _console << " to " << list.size() << " points.\n";
+  _console << " to " << list.size() << " points." << std::endl;
 
   // unpack vector of pairs
   _raw_x.resize(list.size());

@@ -120,7 +120,7 @@ YAMLFormatter::printParams(const std::string & prefix,
         oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();
     }
 
-    oss << "\n" << indent << "    description: |\n      " << indent << doc << "\n";
+    oss << "\n" << indent << "    description: |\n      " << indent << doc << std::endl;
   }
 
   return oss.str();

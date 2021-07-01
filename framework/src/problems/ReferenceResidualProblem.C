@@ -434,6 +434,8 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
                << _group_resid[i] << "  " << std::setw(maxwrv + 2) << ref_var_name + ":"
                << _group_ref_resid[i] << '\n';
     }
+
+    _console << std::flush;
   }
 
   NonlinearSystemBase & system = getNonlinearSystemBase();

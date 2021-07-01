@@ -46,7 +46,7 @@ PolycrystalElasticDrivingForceAction::act()
 {
 #ifdef DEBUG
   Moose::err << "Inside the PolycrystalElasticDrivingForceAction Object\n";
-  Moose::err << "var name base:" << _var_name_base;
+  Moose::err << "var name base:" << _var_name_base << std::flush;
 #endif
 
   for (unsigned int op = 0; op < _op_num; ++op)

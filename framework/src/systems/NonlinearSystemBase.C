@@ -68,7 +68,6 @@
 #include "ADKernel.h"
 #include "ADDirichletBCBase.h"
 #include "Moose.h"
-#include "TimedPrint.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
 #include "FVElementalKernel.h"
@@ -155,18 +154,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_diag_save_in(false),
     _has_nodalbc_save_in(false),
     _has_nodalbc_diag_save_in(false),
-    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 5)),
-    _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 3)),
-    _kernels_timer(registerTimedSection("Kernels", 3)),
-    _scalar_kernels_timer(registerTimedSection("ScalarKernels", 3)),
-    _nodal_kernels_timer(registerTimedSection("NodalKernels", 3)),
-    _nodal_kernel_bcs_timer(registerTimedSection("NodalKernelBCs", 3)),
-    _nodal_bcs_timer(registerTimedSection("NodalBCs", 3)),
-    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
-    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
-    _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
-    _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
-    _compute_scaling_timer(registerTimedSection("computeScaling", 2)),
     _computed_scaling(false),
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0),
@@ -249,10 +236,12 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  TIME_SECTION("nlInitialSetup", 2, "Setting Up Nonlinear System");
+
   SystemBase::initialSetup();
 
   {
-    CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
+    TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
@@ -298,7 +287,7 @@ NonlinearSystemBase::initialSetup()
   }
 
   {
-    CONSOLE_TIMED_PRINT("Initializing mortar interfaces");
+    TIME_SECTION("mortarSetup", 2, "Initializing Mortar Interfaces");
 
     // go over mortar interfaces and construct functors
     const auto & undisplaced_mortar_interfaces =
@@ -681,7 +670,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 void
 NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
-  TIME_SECTION(_compute_residual_tags_timer);
+  TIME_SECTION("nl::computeResidualTags", 5);
 
   _fe_problem.setCurrentlyComputingResidual(true);
 
@@ -754,10 +743,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     if (_has_nodalbc_save_in)
       _fe_problem.getAuxiliarySystem().solution().close();
     if (hasSaveIn())
-    {
-      CONSOLE_TIMED_PRINT("Updating auxiliary system for save_in")
       _fe_problem.getAuxiliarySystem().update();
-    }
   }
   catch (MooseException & e)
   {
@@ -789,7 +775,7 @@ NonlinearSystemBase::setInitialSolution()
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
-    CONSOLE_TIMED_PRINT("Applying predictor")
+    TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);
@@ -797,7 +783,7 @@ NonlinearSystemBase::setInitialSolution()
 
   // do nodal BC
   {
-    CONSOLE_TIMED_PRINT("Applying BCs to initial condition");
+    TIME_SECTION("initialBCs", 2, "Applying BCs To Initial Condition");
 
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
@@ -827,10 +813,7 @@ NonlinearSystemBase::setInitialSolution()
   }
 
   _sys.solution->close();
-  {
-    CONSOLE_TIMED_PRINT("Updating ", name(), " after setting initial condition");
-    update();
-  }
+  update();
 
   // Set constraint secondary values
   setConstraintSecondaryValues(initial_solution, false);
@@ -1409,6 +1392,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 void
 NonlinearSystemBase::residualSetup()
 {
+  TIME_SECTION("computeResidualInternal", 3);
+
   SystemBase::residualSetup();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1432,7 +1417,7 @@ NonlinearSystemBase::residualSetup()
 void
 NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 {
-  TIME_SECTION(_compute_residual_internal_timer);
+  TIME_SECTION("computeResidualInternal", 3);
 
   residualSetup();
 
@@ -1443,7 +1428,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   // residual contributions from the domain
   PARALLEL_TRY
   {
-    TIME_SECTION(_kernels_timer);
+    TIME_SECTION("Kernels", 3 /*, "Computing Kernels"*/);
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
@@ -1471,7 +1456,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     // do scalar kernels (not sure how to thread this)
     if (_scalar_kernels.hasActiveObjects())
     {
-      TIME_SECTION(_scalar_kernels_timer);
+      TIME_SECTION("ScalarKernels", 3 /*, "Computing ScalarKernels"*/);
 
       MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
@@ -1516,7 +1501,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBlockObjects())
     {
-      TIME_SECTION(_nodal_kernels_timer);
+      TIME_SECTION("NodalKernels", 3 /*, "Computing NodalKernels"*/);
 
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
@@ -1548,7 +1533,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBoundaryObjects())
     {
-      TIME_SECTION(_nodal_kernel_bcs_timer);
+      TIME_SECTION("NodalKernelBCs", 3 /*, "Computing NodalKernelBCs"*/);
 
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
@@ -1647,7 +1632,7 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 
     if (!bnd_nodes.empty())
     {
-      TIME_SECTION(_nodal_bcs_timer);
+      TIME_SECTION("NodalBCs", 3 /*, "Computing NodalBCs"*/);
 
       MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
 
@@ -2696,7 +2681,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, const std:
 void
 NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
-  TIME_SECTION(_compute_jacobian_tags_timer);
+  TIME_SECTION("computeJacobianTags", 5);
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -2744,7 +2729,7 @@ void
 NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
                                            const std::set<TagID> & tags)
 {
-  TIME_SECTION(_compute_jacobian_blocks_timer);
+  TIME_SECTION("computeJacobianBlocks", 3);
   FloatingPointExceptionGuard fpe_guard(_app);
 
   for (unsigned int i = 0; i < blocks.size(); i++)
@@ -2876,7 +2861,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     {
       PARALLEL_TRY
       {
-        TIME_SECTION(_compute_dampers_timer);
+        TIME_SECTION("computeDampers", 3, "Computing Dampers");
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeElemDampingThread cid(_fe_problem);
@@ -2890,7 +2875,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     {
       PARALLEL_TRY
       {
-        TIME_SECTION(_compute_dampers_timer);
+        TIME_SECTION("computeDamping::element", 3, "Computing Element Damping");
 
         has_active_dampers = true;
         *_increment_vec = update;
@@ -2905,7 +2890,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     {
       PARALLEL_TRY
       {
-        TIME_SECTION(_compute_dampers_timer);
+        TIME_SECTION("computeDamping::general", 3, "Computing General Damping");
 
         has_active_dampers = true;
         const auto & gdampers = _general_dampers.getActiveObjects();
@@ -2936,7 +2921,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   _communicator.min(damping);
 
   if (has_active_dampers && damping < 1.0)
-    _console << " Damping factor: " << damping << "\n";
+    _console << " Damping factor: " << damping << std::endl;
 
   return damping;
 }
@@ -2950,7 +2935,7 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, boo
 
   if (_dirac_kernels.hasActiveObjects())
   {
-    TIME_SECTION(_compute_dirac_timer);
+    TIME_SECTION("computeDirac", 3, "Computing DiracKernels");
 
     // TODO: Need a threading fix... but it's complicated!
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -3419,9 +3404,9 @@ NonlinearSystemBase::setupScalingGrouping()
 void
 NonlinearSystemBase::computeScaling()
 {
-  _console << "\nPerforming automatic scaling calculation\n\n";
+  _console << "\nPerforming automatic scaling calculation\n" << std::endl;
 
-  TIME_SECTION(_compute_scaling_timer);
+  TIME_SECTION("computeScaling", 3, "Computing Automatic Scaling");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   // It's funny but we need to assemble our vector of scaling factors here otherwise we will be

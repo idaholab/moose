@@ -41,7 +41,8 @@ TimeSequenceStepperFailTest::step()
   if (_t_step == 1 && MooseUtils::absoluteFuzzyEqual(_time, _original_time_sequence[1]))
   {
     mooseDoOnce(
-        Moose::out << "TimeSequenceStepperFailTest: Simulating failed solve of first timestep.\n");
+        Moose::out << "TimeSequenceStepperFailTest: Simulating failed solve of first timestep."
+                   << std::endl);
     _converged = false;
   }
 

@@ -64,6 +64,8 @@ JsonInputFileFormatter::addLine(const std::string & line,
   std::string cindent(max_line_len + indent.size() + extra, ' ');
   for (size_t i = 1; i < elements.size(); ++i)
     _stream << cindent << "# " << elements[i] << "\n";
+
+  _stream << std::flush;
 }
 
 void

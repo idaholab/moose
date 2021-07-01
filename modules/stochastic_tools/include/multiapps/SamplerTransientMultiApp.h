@@ -77,15 +77,6 @@ private:
 
   /// Store the number of rows initialized, if this changes error because it doesn't make sense
   const dof_id_type _number_of_sampler_rows;
-
-  ///@{
-  /// PrefGraph timers
-  const PerfID _perf_solve_step;
-  const PerfID _perf_solve_batch_step;
-  const PerfID _perf_initial_setup;
-  const PerfID _perf_command_line_args;
-  ///@}
-
   /// Storage for batch-restore mode; the outer vector if for the local stochastic data and the
   /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included
   /// in case that changes in the future or in child classes

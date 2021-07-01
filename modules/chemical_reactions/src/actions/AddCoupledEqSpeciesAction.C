@@ -189,7 +189,7 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
   for (unsigned int i = 0; i < _num_reactions; ++i)
     _console << "  Reaction " << i + 1 << ": " << _reactions[i] << ", log10(Keq) = " << _eq_const[i]
              << "\n";
-  _console << "\n";
+  _console << std::endl;
 }
 
 void

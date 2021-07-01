@@ -31,8 +31,7 @@ MonteCarloSampler::validParams()
 
 MonteCarloSampler::MonteCarloSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
-    _perf_compute_sample(registerTimedSection("computeSample", 4))
+    _distribution_names(getParam<std::vector<DistributionName>>("distributions"))
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));

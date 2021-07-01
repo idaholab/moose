@@ -255,9 +255,6 @@ private:
   /// Controls whether xfem should update the mesh at the beginning of the time step
   const bool _update_xfem_at_timestep_begin;
 
-  /// Timer for fixed point iteration
-  const PerfID _fixed_point_timer;
-
   /// Counter for number of xfem updates that have been performed in the current step
   unsigned int _xfem_update_count;
   /// Whether step should be repeated due to xfem modifying the mesh

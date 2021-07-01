@@ -44,9 +44,9 @@ void
 ContactLineSearchBase::printContactInfo(const std::set<dof_id_type> & contact_set)
 {
   if (!contact_set.empty())
-    _console << contact_set.size() << " nodes in contact\n";
+    _console << contact_set.size() << " nodes in contact" << std::endl;
   else
-    _console << "No nodes in contact\n";
+    _console << "No nodes in contact" << std::endl;
 }
 
 void

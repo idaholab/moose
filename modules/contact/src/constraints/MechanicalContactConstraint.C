@@ -401,13 +401,14 @@ MechanicalContactConstraint::AugmentedLagrangianContactConverged()
   _communicator.max(converged);
 
   if (converged == 1)
-    _console
-        << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied \n";
+    _console << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied "
+             << std::endl;
   else if (converged == 2)
-    _console
-        << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied \n";
+    _console << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied "
+             << std::endl;
   else if (converged == 3)
-    _console << "The Augmented Lagrangian contact frictional force enforcement is NOT satisfied \n";
+    _console << "The Augmented Lagrangian contact frictional force enforcement is NOT satisfied "
+             << std::endl;
   else
     return true;
 

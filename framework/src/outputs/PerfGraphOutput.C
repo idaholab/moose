@@ -71,6 +71,8 @@ PerfGraphOutput::output(const ExecFlagType & /*type*/)
 {
   if (!_app.getParam<bool>("no_timing"))
   {
+    _console << '\n';
+
     _app.perfGraph().print(_console, _level);
 
     if (_heaviest_branch)
@@ -78,5 +80,7 @@ PerfGraphOutput::output(const ExecFlagType & /*type*/)
 
     if (_heaviest_sections)
       _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
+
+    _console << std::flush;
   }
 }

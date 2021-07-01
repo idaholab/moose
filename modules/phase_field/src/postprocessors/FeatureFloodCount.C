@@ -17,7 +17,6 @@
 #include "Assembly.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
-#include "TimedPrint.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_tools.h"
@@ -228,15 +227,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_primary(processor_id() == 0),
-    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1),
-    _execute_timer(registerTimedSection("execute", 1)),
-    _merge_timer(registerTimedSection("mergeFeatures", 2)),
-    _finalize_timer(registerTimedSection("finalize", 1)),
-    _comm_and_merge(registerTimedSection("communicateAndMerge", 2)),
-    _expand_halos(registerTimedSection("expandEdgeHalos", 2)),
-    _update_field_info(registerTimedSection("updateFieldInfo", 2)),
-    _prepare_for_transfer(registerTimedSection("prepareDataForTransfer", 2)),
-    _consolidate_merged_features(registerTimedSection("consolidateMergedFeatures", 2))
+    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -356,8 +347,7 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
-  TIME_SECTION(_execute_timer);
-  CONSOLE_TIMED_PRINT("Flooding Features");
+  TIME_SECTION("execute", 3, "Flooding Features");
 
   // Iterate only over boundaries if restricted
   if (_is_boundary_restricted)
@@ -410,7 +400,7 @@ FeatureFloodCount::execute()
 void
 FeatureFloodCount::communicateAndMerge()
 {
-  TIME_SECTION(_comm_and_merge);
+  TIME_SECTION("communicateAndMerge", 3, "Communicating and Merging");
 
   // First we need to transform the raw data into a usable data structure
   prepareDataForTransfer();
@@ -679,8 +669,7 @@ FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
 void
 FeatureFloodCount::finalize()
 {
-  TIME_SECTION(_finalize_timer);
-  CONSOLE_TIMED_PRINT("Finalizing Feature Identification");
+  TIME_SECTION("finalize", 3, "Finalizing Feature Identification");
 
   // Gather all information on processor zero and merge
   communicateAndMerge();
@@ -1015,7 +1004,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id,
 void
 FeatureFloodCount::prepareDataForTransfer()
 {
-  TIME_SECTION(_prepare_for_transfer);
+  TIME_SECTION("prepareDataForTransfer", 3, "Preparing Data For Transfer");
 
   MeshBase & mesh = _mesh.getMesh();
 
@@ -1119,7 +1108,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 void
 FeatureFloodCount::mergeSets()
 {
-  TIME_SECTION(_merge_timer);
+  TIME_SECTION("mergeSets", 3, "Merging Sets");
 
   // When working with _distribute_merge_work all of the maps will be empty except for one
   for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
@@ -1174,7 +1163,7 @@ FeatureFloodCount::mergeSets()
 void
 FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data)
 {
-  TIME_SECTION(_consolidate_merged_features);
+  TIME_SECTION("consilidateMergedFeatures", 3, "Consolidating Merged Features");
 
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
@@ -1529,7 +1518,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
   if (num_layers_to_expand == 0)
     return;
 
-  TIME_SECTION(_expand_halos);
+  TIME_SECTION("expandEdgeHalos", 3, "Expanding Edge Halos");
 
   for (auto & list_ref : _partial_feature_sets)
   {
@@ -2209,7 +2198,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
     out << "\nVar_index: " << feature._var_index;
     out << "\nMin Entity ID: " << feature._min_entity_id;
   }
-  out << "\n\n";
+  out << "\n" << std::endl;
 
   return out;
 }

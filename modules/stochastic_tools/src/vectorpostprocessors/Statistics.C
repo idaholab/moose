@@ -69,9 +69,7 @@ Statistics::Statistics(const InputParameters & parameters)
                                     : std::vector<Real>()),
     _replicates(getParam<unsigned int>("ci_replicates")),
     _seed(getParam<unsigned int>("ci_seed")),
-    _stat_type_vector(declareVector("stat_type")),
-    _perf_initial_setup(registerTimedSection("initialSetup", 2)),
-    _perf_execute(registerTimedSection("execute", 1))
+    _stat_type_vector(declareVector("stat_type"))
 {
   for (const auto & item : _compute_stats)
   {
@@ -84,7 +82,7 @@ Statistics::Statistics(const InputParameters & parameters)
 void
 Statistics::initialSetup()
 {
-  TIME_SECTION(_perf_initial_setup);
+  TIME_SECTION("initialSetup", 3, "Setting Up Statistics");
 
   const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
   for (const auto & vpp_name : vpp_names)
@@ -107,7 +105,7 @@ Statistics::initialSetup()
 void
 Statistics::execute()
 {
-  TIME_SECTION(_perf_execute);
+  TIME_SECTION("execute", 3, "Executing Statistics");
 
   for (std::size_t i = 0; i < _compute_from_names.size(); ++i)
   {

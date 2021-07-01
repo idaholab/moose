@@ -31,10 +31,7 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
     _m2_matrix(0, 0),
     _sampler_a(getSampler("sampler_a")),
     _sampler_b(getSampler("sampler_b")),
-    _resample(getParam<bool>("resample")),
-    _perf_sample_setup(registerTimedSection("sampleSetup", 3)),
-    _perf_sample_teardown(registerTimedSection("computeTearDown", 3)),
-    _perf_compute_sample(registerTimedSection("computeSample", 4))
+    _resample(getParam<bool>("resample"))
 {
   if (_sampler_a.getNumberOfCols() != _sampler_b.getNumberOfCols())
     paramError("sampler_a", "The supplied Sampler objects must have the same number of columns.");
@@ -55,7 +52,7 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
 void
 SobolSampler::sampleSetUp(const Sampler::SampleMode)
 {
-  TIME_SECTION(_perf_sample_setup);
+  TIME_SECTION("sampleSetup", 3, "Setting Up Sobol Sampler");
 
   // These must call getGlobalSamples because the matrix partition between the supplied objects
   // and this object differ.
@@ -69,8 +66,6 @@ SobolSampler::sampleSetUp(const Sampler::SampleMode)
 Real
 SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  TIME_SECTION(_perf_compute_sample);
-
   dof_id_type matrix_index = row_index / _num_rows_per_matrix;
   dof_id_type r = row_index - matrix_index * _num_rows_per_matrix;
 
@@ -107,7 +102,7 @@ SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 void
 SobolSampler::sampleTearDown(const Sampler::SampleMode)
 {
-  TIME_SECTION(_perf_sample_teardown);
+  TIME_SECTION("sampleTearDown", 3, "Tearing Down Sobol Sampler");
 
   _m1_matrix.resize(0, 0);
   _m2_matrix.resize(0, 0);

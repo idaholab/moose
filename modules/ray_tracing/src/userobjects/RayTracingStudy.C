@@ -20,7 +20,6 @@
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
-#include "TimedPrint.h"
 
 // libMesh Includes
 #include "libmesh/enum_to_string.h"
@@ -138,10 +137,6 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 #ifndef NDEBUG
     _verify_trace_intersections(getParam<bool>("verify_trace_intersections")),
 #endif
-
-    _execute_study_timer(registerTimedSection("executeStudy", 1)),
-    _generate_timer(registerTimedSection("generate", 1)),
-    _propagate_timer(registerTimedSection("propagate", 1)),
 
     _threaded_cached_traces(libMesh::n_threads()),
 
@@ -746,7 +741,7 @@ RayTracingStudy::postOnSegment(const THREAD_ID tid, const std::shared_ptr<Ray> &
 void
 RayTracingStudy::executeStudy()
 {
-  TIME_SECTION(_execute_study_timer);
+  TIME_SECTION("executeStudy", 2, "Executing Study");
 
   mooseAssert(_called_initial_setup, "Initial setup not called");
 
@@ -793,7 +788,7 @@ RayTracingStudy::executeStudy()
     {
       auto generation_start_time = std::chrono::steady_clock::now();
 
-      TIME_SECTION(_generate_timer);
+      TIME_SECTION("generateRays", 2, "Generating Rays");
 
       generateRays();
 
@@ -817,11 +812,9 @@ RayTracingStudy::executeStudy()
     registeredRaySetup();
 
     {
-      CONSOLE_TIMED_PRINT("Propagating rays");
+      TIME_SECTION("propagateRays", 2, "Propagating Rays");
 
       const auto propagation_start_time = std::chrono::steady_clock::now();
-
-      TIME_SECTION(_propagate_timer);
 
       _parallel_ray_study->execute();
 

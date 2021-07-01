@@ -135,7 +135,7 @@ public:
     }
 
     // Print out the line below the header
-    stream << std::string(total_width, '-') << "\n";
+    stream << std::string(total_width, '-') << std::endl;
   }
 
   /**

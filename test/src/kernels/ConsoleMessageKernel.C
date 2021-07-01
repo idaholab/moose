@@ -21,7 +21,7 @@ ConsoleMessageKernel::validParams()
 ConsoleMessageKernel::ConsoleMessageKernel(const InputParameters & parameters)
   : CoefDiffusion(parameters)
 {
-  _console << "ConsoleMessageKernel - Constructing object.\n";
+  _console << "ConsoleMessageKernel - Constructing object." << std::endl;
 }
 
 ConsoleMessageKernel::~ConsoleMessageKernel() {}
@@ -30,7 +30,7 @@ void
 ConsoleMessageKernel::initialSetup()
 {
   _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step
-           << '\n';
+           << std::endl;
   constMethod();
 }
 
@@ -38,11 +38,11 @@ void
 ConsoleMessageKernel::timestepSetup()
 {
   _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step
-           << '\n';
+           << std::endl;
 }
 
 void
 ConsoleMessageKernel::constMethod() const
 {
-  _console << "I am writing from a const method\n";
+  _console << "I am writing from a const method" << std::endl;
 }

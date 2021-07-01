@@ -1484,7 +1484,7 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
       for (const auto & scalar_variable : scalar_variables)
         _console << "  " << scalar_variable->name() << ": " << scalar_variable->scalingFactor()
                  << "\n";
-      _console << "\n\n";
+      _console << "\n" << std::endl;
 
       // restore state
       _console.flags(original_flags);

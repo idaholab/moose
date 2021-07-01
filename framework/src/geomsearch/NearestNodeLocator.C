@@ -40,11 +40,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
-    _patch_update_strategy(_mesh.getPatchUpdateStrategy()),
-    _find_nodes_timer(registerTimedSection("findNodes", 3)),
-    _update_patch_timer(registerTimedSection("updatePatch", 3)),
-    _reinit_timer(registerTimedSection("reinit", 3)),
-    _update_ghosted_elems_timer(registerTimedSection("updateGhostedElems", 5))
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   /*
   //sanity check on boundary ids
@@ -66,7 +62,7 @@ NearestNodeLocator::~NearestNodeLocator() { delete _secondary_node_range; }
 void
 NearestNodeLocator::findNodes()
 {
-  TIME_SECTION(_find_nodes_timer);
+  TIME_SECTION("findNodes", 3, "Finding Nearest Nodes");
 
   /**
    * If this is the first time through we're going to build up a "neighborhood" of nodes
@@ -209,7 +205,7 @@ NearestNodeLocator::findNodes()
 void
 NearestNodeLocator::reinit()
 {
-  TIME_SECTION(_reinit_timer);
+  TIME_SECTION("reinit", 3, "Reinitializing Nearest Node Search");
 
   // Reset all data
   delete _secondary_node_range;
@@ -242,7 +238,7 @@ NearestNodeLocator::nearestNode(dof_id_type node_id)
 void
 NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
 {
-  TIME_SECTION(_update_patch_timer);
+  TIME_SECTION("updatePatch", 3, "Updating Nearest Node Search Patch");
 
   std::vector<dof_id_type> trial_primary_nodes;
 
@@ -355,7 +351,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
 void
 NearestNodeLocator::updateGhostedElems()
 {
-  TIME_SECTION(_update_ghosted_elems_timer);
+  TIME_SECTION("updateGhostedElems", 5, "Updating Nearest Node Search Because of Ghosting");
 
   // When 'iteration' patch update strategy is used, add the elements in
   // _new_ghosted_elems, which were accumulated in the nonlinear iterations

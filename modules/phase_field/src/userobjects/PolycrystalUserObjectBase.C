@@ -12,7 +12,6 @@
 #include "NonlinearSystemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
-#include "TimedPrint.h"
 
 #include <vector>
 #include <map>
@@ -70,9 +69,7 @@ PolycrystalUserObjectBase::PolycrystalUserObjectBase(const InputParameters & par
     _op_num(_vars.size()),
     _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm")),
     _colors_assigned(false),
-    _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix")),
-    _execute_timer(registerTimedSection("execute", 1)),
-    _finalize_timer(registerTimedSection("finalize", 1))
+    _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix"))
 {
   mooseAssert(_single_map_mode, "Do not turn off single_map_mode with this class");
 }
@@ -119,8 +116,7 @@ PolycrystalUserObjectBase::execute()
   else if (!_fe_problem.hasInitialAdaptivity())
     return;
 
-  TIME_SECTION(_execute_timer);
-  CONSOLE_TIMED_PRINT("Computing Polycrystal Initial Condition");
+  TIME_SECTION("execute", 2, "Computing Polycrystal Initial Condition");
 
   /**
    * We need one map per grain when creating the initial condition to support overlapping features.
@@ -166,8 +162,7 @@ PolycrystalUserObjectBase::finalize()
   if (_colors_assigned && !_fe_problem.hasInitialAdaptivity())
     return;
 
-  TIME_SECTION(_finalize_timer);
-  CONSOLE_TIMED_PRINT("Finalizing Polycrystal Initial Condition");
+  TIME_SECTION("finalize", 2, "Finalizing Polycrystal Initial Condition");
 
   // TODO: Possibly retrieve the halo thickness from the active GrainTracker object?
   constexpr unsigned int halo_thickness = 2;

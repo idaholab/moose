@@ -149,7 +149,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _pp_scaling(1),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
-    _fixed_point_timer(registerTimedSection("FixedPointSolve", 1)),
     _xfem_update_count(0),
     _xfem_repeat_step(false),
     _old_entering_time(_problem.time() - 1),
@@ -175,7 +174,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
 bool
 FixedPointSolve::solve()
 {
-  TIME_SECTION(_fixed_point_timer);
+  TIME_SECTION("PicardSolve", 1);
 
   Real current_dt = _problem.dt();
 
@@ -245,7 +244,7 @@ FixedPointSolve::solve()
             _console << " MAX ";
           else
             _console << std::scientific << _fixed_point_initial_norm;
-          _console << COLOR_DEFAULT << "\n\n";
+          _console << COLOR_DEFAULT << "\n" << std::endl;
         }
       }
       else
@@ -256,7 +255,7 @@ FixedPointSolve::solve()
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
-               << COLOR_DEFAULT << '\n';
+               << COLOR_DEFAULT << std::endl;
     }
 
     // Save last postprocessor value as value before solve
@@ -369,7 +368,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
       begin_norm = _problem.computeResidualL2Norm();
 
       _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_BEGIN MultiApps: "
-               << Console::outputNorm(begin_norm_old, begin_norm) << '\n';
+               << Console::outputNorm(begin_norm_old, begin_norm) << std::endl;
     }
 
   // Perform output for timestep begin
@@ -382,7 +381,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
   saveAllValues(true);
 
   if (_has_fixed_point_its)
-    _console << COLOR_MAGENTA << "\nMain app solve:\n" << COLOR_DEFAULT;
+    _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
   if (!_inner_solve->solve())
   {
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
@@ -441,7 +440,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
       end_norm = _problem.computeResidualL2Norm();
 
       _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_END MultiApps: "
-               << Console::outputNorm(end_norm_old, end_norm) << '\n';
+               << Console::outputNorm(end_norm_old, end_norm) << std::endl;
     }
 
   return true;
@@ -457,7 +456,7 @@ FixedPointSolve::computeCustomConvergencePostprocessor()
 
   auto ppname = getParam<PostprocessorName>("custom_pp");
   _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << "\n";
+              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
   _console << _pp_history.str();
 }
 

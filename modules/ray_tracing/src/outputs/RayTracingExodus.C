@@ -35,7 +35,7 @@ RayTracingExodus::RayTracingExodus(const InputParameters & params)
 void
 RayTracingExodus::outputMesh()
 {
-  TIME_SECTION(_output_mesh_timer);
+  TIME_SECTION("outputMesh", 3, "Writing Ray Mesh");
 
   // Build the Exodus IO object if it hasn't been built yet
   if (!_exodus_io)

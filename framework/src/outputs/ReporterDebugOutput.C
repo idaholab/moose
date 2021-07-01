@@ -31,5 +31,5 @@ ReporterDebugOutput::output(const ExecFlagType & /*type*/)
   _console << "\nDeclared/requested Reporter Information:\n\n  "
            << MooseUtils::replaceAll(
                   _problem_ptr->getReporterData().getReporterInfo(), "\n", "\n  ")
-           << "\n";
+           << std::endl;
 }

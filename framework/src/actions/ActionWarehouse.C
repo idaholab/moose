@@ -95,7 +95,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
                << COLOR_DEFAULT << "Registered Identifier: " << COLOR_GREEN << registered_identifier
                << '\n'
                << COLOR_DEFAULT << "Specific Task:         " << COLOR_CYAN
-               << action->specificTaskName() << '\n';
+               << action->specificTaskName() << std::endl;
 
   /**
    * We need to see if the current Action satisfies multiple tasks. There are a few cases to
@@ -159,7 +159,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
 
     if (_show_parser)
       Moose::err << COLOR_YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type()
-                 << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")\n";
+                 << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")" << std::endl;
 
     // Add it to the warehouse
     _action_blocks[task].push_back(action.get());

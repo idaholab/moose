@@ -275,6 +275,8 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   for (unsigned i = 0; i < num_basis; ++i)
     _console << original_basis_names[i] << ";  total_bulk_moles = " << bulk_in_original_basis(i)
              << ";  transported_bulk_moles = " << transported_bulk_in_original_basis(i) << "\n";
+
+  _console << std::flush;
 }
 
 void
@@ -336,6 +338,8 @@ GeochemistryConsoleOutput::outputNernstInfo(const GeochemicalSystem & egs_ref) c
                                                         _precision)
                << ";  Eh = " << eh[red] << "V\n";
   }
+
+  _console << std::flush;
 
   // restore the original mgd by copying the data in copy_of_mgd into the memory referenced by
   // egs.getModelGeochemicalDatabase()

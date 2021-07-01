@@ -273,4 +273,6 @@ PicardSolve::printFixedPointConvergenceHistory()
              << " Picard |R| = " << Console::outputNorm(_fixed_point_initial_norm, max_norm)
              << '\n';
   }
+
+  _console << std::flush;
 }

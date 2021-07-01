@@ -431,6 +431,8 @@ RankFourTensorTempl<T>::print(std::ostream & stm) const
         stm << '\n';
       }
     }
+
+  stm << std::flush;
 }
 
 template <typename T>

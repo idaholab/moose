@@ -37,7 +37,7 @@ RayTracingNemesis::RayTracingNemesis(const InputParameters & params) : RayTracin
 void
 RayTracingNemesis::outputMesh()
 {
-  TIME_SECTION(_output_mesh_timer);
+  TIME_SECTION("outputMesh", 3, "Outputting Nemesis RayTracing Mesh");
 
   // We write a new file every time for nemesis because the mesh changes
   _file_num++;

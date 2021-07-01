@@ -205,7 +205,7 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
                          << " prev iter slip: " << info._incremental_slip_prev_iter
                          << " curr iter slip: " << info._incremental_slip
                          << " slip_tol: " << info._slip_tol
-                         << " damping factor: " << node_damping_factor << "\n";
+                         << " damping factor: " << node_damping_factor << std::endl;
 
               if (node_damping_factor < damping)
                 damping = node_damping_factor;

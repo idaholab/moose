@@ -97,7 +97,7 @@ FluidPropertiesInterrogator::execute()
 
       Moose::out << "**START JSON DATA**\n";
       Moose::out << json << "\n";
-      Moose::out << "**END JSON DATA**\n";
+      Moose::out << "**END JSON DATA**" << std::endl;
     }
     else
     {
@@ -131,7 +131,7 @@ FluidPropertiesInterrogator::execute()
 
       Moose::out << "**START JSON DATA**\n";
       Moose::out << json << "\n";
-      Moose::out << "**END JSON DATA**\n";
+      Moose::out << "**END JSON DATA**" << std::endl;
     }
     else
     {
@@ -152,7 +152,7 @@ FluidPropertiesInterrogator::execute()
 
       Moose::out << "**START JSON DATA**\n";
       Moose::out << json << "\n";
-      Moose::out << "**END JSON DATA**\n";
+      Moose::out << "**END JSON DATA**" << std::endl;
     }
     else
       outputASCIIVaporMixture(pars_mixture);
@@ -169,7 +169,7 @@ FluidPropertiesInterrogator::execute()
 
       Moose::out << "**START JSON DATA**\n";
       Moose::out << json << "\n";
-      Moose::out << "**END JSON DATA**\n";
+      Moose::out << "**END JSON DATA**" << std::endl;
     }
     else
       outputASCII1Phase("Single-phase", pars_1phase);
