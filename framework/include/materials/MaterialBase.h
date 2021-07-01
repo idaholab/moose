@@ -39,6 +39,8 @@ class MaterialBase;
 class MooseMesh;
 class SubProblem;
 class FaceInfo;
+template <typename>
+class FunctorMaterialProperty;
 
 template <>
 InputParameters validParams<MaterialBase>();
@@ -107,6 +109,8 @@ public:
   MaterialProperty<T> & declarePropertyByName(const std::string & prop_name);
   template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & name);
+  template <typename T>
+  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
   template <typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
@@ -341,6 +345,18 @@ MaterialBase::declareProperty(const std::string & name)
     prop_name = _pars.get<MaterialPropertyName>(name);
 
   return declarePropertyByName<T>(prop_name);
+}
+
+template <typename T>
+FunctorMaterialProperty<T> &
+MaterialBase::declareFunctorProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
+
+  return _subproblem.declareFunctorProperty<T>(prop_name);
 }
 
 template <typename T>

@@ -14,8 +14,15 @@
 #include "GeometricSearchData.h"
 #include "MooseTypes.h"
 #include "VectorTag.h"
+#include "MooseError.h"
+#include "FunctorMaterialProperty.h"
 
 #include "libmesh/coupling_matrix.h"
+
+#include <memory>
+#include <unordered_map>
+#include <map>
+#include <vector>
 
 namespace libMesh
 {
@@ -41,6 +48,7 @@ class SystemBase;
 class LineSearch;
 class FaceInfo;
 class MooseObjectName;
+class FunctorPropertyValue;
 
 // libMesh forward declarations
 namespace libMesh
@@ -790,6 +798,12 @@ public:
    */
   void clearAllDofIndices();
 
+  template <typename T>
+  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
+
+  template <typename T>
+  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name) const;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -894,6 +908,10 @@ protected:
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
 
+  /// Functor material properties for this problem
+  std::unordered_map<std::string, std::unique_ptr<FunctorPropertyValue>>
+      _functor_material_properties;
+
 private:
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
@@ -926,6 +944,33 @@ private:
 
   friend class Restartable;
 };
+
+template <typename T>
+FunctorMaterialProperty<T> &
+SubProblem::declareFunctorProperty(const std::string & name)
+{
+  auto pr = _functor_material_properties.emplace(
+      name, std::make_unique<FunctorMaterialProperty<T>>(name));
+  auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(pr.first->second.get());
+  if (!property)
+    mooseError("Inconsistent material property types");
+  return *property;
+}
+
+template <typename T>
+const FunctorMaterialProperty<T> &
+SubProblem::getFunctorProperty(const std::string & name) const
+{
+  auto it = _functor_material_properties.find(name);
+  if (it == _functor_material_properties.end())
+    mooseError("Requested functor material property ",
+               name,
+               " not found. Make sure a material provides it");
+  auto * const property = dynamic_cast<FunctorMaterialProperty<T> * const>(it->second.get());
+  if (!property)
+    mooseError("Inconsistent material property types");
+  return *property;
+}
 
 namespace Moose
 {

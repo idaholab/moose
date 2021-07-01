@@ -452,6 +452,8 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
+  ADReal operator()(const Elem * elem) const { return getElemValue(elem); }
+
   /**
    * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
    * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
