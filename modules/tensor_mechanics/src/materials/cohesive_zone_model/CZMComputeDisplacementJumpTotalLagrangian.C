@@ -26,19 +26,20 @@ CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagran
     const InputParameters & parameters)
   : CZMComputeDisplacementJumpBase(parameters),
     _displacement_jump_global_old(
-        getMaterialPropertyOld<RealVectorValue>(_base_name + "displacement_jump_global")),
+        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "displacement_jump_global")),
     _interface_displacement_jump_old(
-        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_displacement_jump")),
+        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "interface_displacement_jump")),
     _displacement_jump_global_inc(
-        declareProperty<RealVectorValue>(_base_name + "displacement_jump_global_inc")),
+        declarePropertyByName<RealVectorValue>(_base_name + "displacement_jump_global_inc")),
     _interface_displacement_jump_inc(
-        declareProperty<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
-    _F(declareProperty<RankTwoTensor>(_base_name + "F_czm")),
-    _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "F_czm")),
-    _R(declareProperty<RankTwoTensor>(_base_name + "czm_rotation")),
-    _R_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "czm_rotation")),
-    _czm_total_rotation(declareProperty<RankTwoTensor>(_base_name + "czm_total_rotation")),
-    _czm_total_rotation_inc(declareProperty<RankTwoTensor>(_base_name + "czm_total_rotation_inc"))
+        declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
+    _F(declarePropertyByName<RankTwoTensor>(_base_name + "F_czm")),
+    _F_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "F_czm")),
+    _R(declarePropertyByName<RankTwoTensor>(_base_name + "czm_rotation")),
+    _R_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "czm_rotation")),
+    _czm_total_rotation(declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation")),
+    _czm_total_rotation_inc(
+        declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation_inc"))
 {
 }
 

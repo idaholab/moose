@@ -26,13 +26,13 @@ CZMComputeLocalTractionIncremental::CZMComputeLocalTractionIncremental(
     const InputParameters & parameters)
   : CZMComputeLocalTractionBase(parameters),
     _interface_traction_inc(
-        declareProperty<RealVectorValue>(_base_name + "interface_traction_inc")),
+        declarePropertyByName<RealVectorValue>(_base_name + "interface_traction_inc")),
     _interface_traction_old(
-        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_traction")),
+        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "interface_traction")),
     _interface_displacement_jump_inc(
-        declareProperty<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
+        declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
     _interface_displacement_jump_old(
-        getMaterialPropertyOld<RealVectorValue>(_base_name + "interface_displacement_jump"))
+        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "interface_displacement_jump"))
 {
 }
 

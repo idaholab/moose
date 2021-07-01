@@ -37,7 +37,7 @@ CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & param
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
-                   ? getParam<std::string>("base_name") + "_"
+                   ? getParam<std::string>("base_name")
                    : ""),
     _kinematic(getParam<MooseEnum>("kinematic").getEnum<Kinematic>())
 {

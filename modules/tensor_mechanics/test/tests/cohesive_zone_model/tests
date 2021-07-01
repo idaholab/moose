@@ -141,4 +141,14 @@
     design = 'source/materials/cohesive_zone_model/SalehaniIrani3DCTraction.md source/materials/cohesive_zone_model/CZMComputeDisplacementJumpTotalLagrangian.md    source/materials/cohesive_zone_model/CZMComputeGlobalTractionTotalLagrangian.md source/interfacekernels/CZMInterfaceKernelTotalLagrangian.md'
     recover = false
   [../]
+  [./czm_multiple_action_and_materials]
+    type = Exodiff
+    input = 'czm_multiple_action_and_materials.i'
+    csvdiff = 'czm_multiple_action_and_materials_out.e'
+    requirement = "The shall allow using multiple CohesiveZoneMasterAction and different cohesive materials for different boundaries"
+    issues = '#17156'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/cohesive_zone_model/SalehaniIrani3DCTraction.md source/materials/cohesive_zone_model/SalehaniIrani3SalehaniIrani3DCTractionIncremental.md source/actions/CohesiveZoneMasterAction.md'
+    recover = false
+  [../]
 []

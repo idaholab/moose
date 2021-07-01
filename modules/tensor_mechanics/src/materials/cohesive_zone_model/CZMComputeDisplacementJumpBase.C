@@ -34,10 +34,11 @@ CZMComputeDisplacementJumpBase::CZMComputeDisplacementJumpBase(const InputParame
     _disp(3),
     _disp_neighbor(3),
     _displacement_jump_global(
-        declareProperty<RealVectorValue>(_base_name + "displacement_jump_global")),
+        declarePropertyByName<RealVectorValue>(_base_name + "displacement_jump_global")),
     _interface_displacement_jump(
-        declareProperty<RealVectorValue>(_base_name + "interface_displacement_jump")),
-    _czm_reference_rotation(declareProperty<RankTwoTensor>("czm_reference_rotation"))
+        declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump")),
+    _czm_reference_rotation(
+        declarePropertyByName<RankTwoTensor>(_base_name + "czm_reference_rotation"))
 {
   // Enforce consistency
   if (_ndisp != _mesh.dimension())

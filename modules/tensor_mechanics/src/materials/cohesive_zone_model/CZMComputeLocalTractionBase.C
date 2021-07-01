@@ -29,11 +29,11 @@ CZMComputeLocalTractionBase::CZMComputeLocalTractionBase(const InputParameters &
     _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
                    ? getParam<std::string>("base_name") + "_"
                    : ""),
-    _interface_traction(declareProperty<RealVectorValue>(_base_name + "interface_traction")),
+    _interface_traction(declarePropertyByName<RealVectorValue>(_base_name + "interface_traction")),
     _dinterface_traction_djump(
-        declareProperty<RankTwoTensor>(_base_name + "dinterface_traction_djump")),
+        declarePropertyByName<RankTwoTensor>(_base_name + "dinterface_traction_djump")),
     _interface_displacement_jump(
-        getMaterialProperty<RealVectorValue>(_base_name + "interface_displacement_jump"))
+        getMaterialPropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump"))
 {
 }
 
