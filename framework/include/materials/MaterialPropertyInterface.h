@@ -16,11 +16,14 @@
 #include "MathUtils.h"
 #include "MooseObjectName.h"
 #include "InputParameters.h"
+#include "SubProblem.h"
 
 // Forward declarations
 class MaterialPropertyInterface;
 class MooseObject;
 class FEProblemBase;
+template <typename>
+class FunctorMaterialProperty;
 
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
@@ -55,6 +58,8 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template <typename T>
+  const FunctorMaterialProperty<T> & getFunctorMaterialProperty(const std::string & name) const;
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
@@ -266,6 +271,9 @@ protected:
   /// Reference to the FEProblemBase class
   FEProblemBase & _mi_feproblem;
 
+  /// Reference to the subproblem
+  const SubProblem & _mi_subproblem;
+
   /// Current threaded it
   const THREAD_ID _mi_tid;
 
@@ -284,7 +292,7 @@ protected:
   /**
    * Small helper to look up a material property name through the input parameter keys
    */
-  std::string deducePropertyName(const std::string & name);
+  std::string deducePropertyName(const std::string & name) const;
 
   /**
    * Helper function to parse default material property values. This is implemented
@@ -380,6 +388,16 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
     return *default_property;
 
   return getMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
+const FunctorMaterialProperty<T> &
+MaterialPropertyInterface::getFunctorMaterialProperty(const std::string & name) const
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  return _mi_subproblem.getFunctorProperty<T>(prop_name);
 }
 
 template <typename T>
