@@ -16,4 +16,25 @@
     issues = "#13053"
     mesh_mode = REPLICATED
   [../]
+  [ad_function_radiative_bc]
+    type = Exodiff
+    input = 'ad_function_radiative_bc.i'
+    exodiff = 'function_radiative_bc_out.e'
+    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation."
+    design = 'source/bcs/ADFunctionRadiativeBC.md'
+    issues = "#13053"
+    mesh_mode = REPLICATED
+    cli_args = "Outputs/file_base=function_radiative_bc_out"
+  []
+  [ad_function_radiative_bc_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_function_radiative_bc.i'
+    ratio_tol = 1e-7
+    difference_tol = 5e-5
+    cli_args = "Executioner/num_steps=1"
+    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation and provide exact Jacobian."
+    design = 'source/bcs/ADFunctionRadiativeBC.md'
+    issues = "#13053"
+    mesh_mode = REPLICATED
+  []
 []
