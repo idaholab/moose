@@ -144,4 +144,15 @@
     issues = '#17171'
     design = 'Materials/index.md'
   []
+
+  [no_failed_point_inversions]
+    type = Exodiff
+    input = no-failed-point-inversions.i
+    exodiff = no-failed-point-inversions_out.e
+    requirement = 'The system shall not try to reinit a displaced interface, leading to failed point inversions, if a displaced interface kernel has not been added to the simulation.'
+    design = 'InterfaceKernels/index.md'
+    issues = '#18175'
+    mesh_mode = 'replicated' # BreakMeshByBlock doesn't work with distributed mesh
+    absent_out = 'inverse_map of physical point.*is not on element'
+  []
 []
