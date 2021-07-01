@@ -189,7 +189,7 @@ public:
    */
   std::string getInputFileName() const
   {
-    return _input_filenames.empty() ? "" : _input_filenames[0];
+    return _input_filenames.empty() ? "" : _input_filenames.back();
   }
 
   /**

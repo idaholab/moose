@@ -9,14 +9,14 @@
     [two_inputs]
       type = 'Exodiff'
       input = 'diffusion1a.i diffusion1c.i'
-      exodiff = 'diffusion1a_out.e'
+      exodiff = 'diffusion1c_out.e'
       detail = 'where no parameters overlap'
     []
 
     [three_inputs_override]
       type = 'Exodiff'
       input = 'diffusion1a.i diffusion1b.i diffusion1c.i'
-      exodiff = 'diffusion1a_out.e'
+      exodiff = 'diffusion1c_out.e'
       detail = 'where input files may override parameters in previous inputs'
     []
 
