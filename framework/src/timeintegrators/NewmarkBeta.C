@@ -23,7 +23,8 @@ NewmarkBeta::validParams()
       "Computes the first and second time derivative of variable using Newmark-Beta method.");
   params.addRangeCheckedParam<Real>("beta", 0.25, "beta > 0.0", "beta value");
   params.addRangeCheckedParam<Real>("gamma", 0.5, "gamma >= 0.5", "gamma value");
-  params.addParam<Real>("active_time", -1.0e100, "If t is less than this time, the time derivatives will be zero.");
+  params.addParam<Real>(
+      "active_time", -1.0e100, "If t is less than this time, the time derivatives will be zero.");
   return params;
 }
 
