@@ -28,4 +28,14 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.sqa:
+        active: True
+        reports: !include modules/stochastic_tools/doc/sqa_reports.yml
+        categories:
+            framework: !include framework/doc/sqa_framework.yml
+            fsi: !include modules/fsi/doc/sqa_fsi.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+            fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+            navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
+            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
