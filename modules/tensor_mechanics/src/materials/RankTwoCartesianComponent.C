@@ -23,8 +23,8 @@ RankTwoCartesianComponentTempl<is_ad>::validParams()
   params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
-  params.addRequiredParam<std::string>("property_name",
-                                       "Name of the material property computed by this model");
+  params.addRequiredParam<MaterialPropertyName>(
+      "property_name", "Name of the material property computed by this model");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "index_i",
       "index_i >= 0 & index_i <= 2",
@@ -41,9 +41,7 @@ RankTwoCartesianComponentTempl<is_ad>::RankTwoCartesianComponentTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
-    _property(declareGenericProperty<Real, is_ad>(_property_name)),
+    _property(declareGenericProperty<Real, is_ad>("property_name")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))
 {
