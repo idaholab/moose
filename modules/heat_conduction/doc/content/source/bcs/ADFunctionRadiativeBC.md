@@ -1,6 +1,6 @@
-# FunctionRadiativeBC
+# ADFunctionRadiativeBC
 
-!syntax description /BCs/FunctionRadiativeBC
+!syntax description /BCs/ADFunctionRadiativeBC
 
 This boundary condition computes the radiative heat flux from a boundary where the
 emissivity function is provided through a Function.
@@ -12,10 +12,10 @@ where $\sigma$ is the Stephan-Boltzmann constant, $F_e$ is the emissivity functi
 $T_\infty$ is the temperature far from the surface, and $T_s$ is the temperature of
 the surface.
 
-!listing radiative_bcs/function_radiative_bc.i block=BCs/bot_right
+!listing radiative_bcs/ad_function_radiative_bc.i block=BCs/bot_right
 
-!syntax parameters /BCs/FunctionRadiativeBC
+!syntax parameters /BCs/ADFunctionRadiativeBC
 
-!syntax inputs /BCs/FunctionRadiativeBC
+!syntax inputs /BCs/ADFunctionRadiativeBC
 
-!syntax children /BCs/FunctionRadiativeBC
+!syntax children /BCs/ADFunctionRadiativeBC
