@@ -37,6 +37,7 @@ struct cast_impl<ADReal, int>
 // typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
 
 typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
+typedef Eigen::Matrix<Real, 3, 3, Eigen::DontAlign> AnisotropyMatrixRealBlock;
 
 /**
  * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
