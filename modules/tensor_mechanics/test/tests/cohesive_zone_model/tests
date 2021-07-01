@@ -144,7 +144,7 @@
   [./czm_multiple_action_and_materials]
     type = Exodiff
     input = 'czm_multiple_action_and_materials.i'
-    csvdiff = 'czm_multiple_action_and_materials_out.e'
+    exodiff = 'czm_multiple_action_and_materials_out.e'
     requirement = "The shall allow using multiple CohesiveZoneMasterAction and different cohesive materials for different boundaries"
     issues = '#17156'
     mesh_mode = 'REPLICATED'
