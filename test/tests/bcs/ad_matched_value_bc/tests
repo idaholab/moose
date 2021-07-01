@@ -1,0 +1,17 @@
+[Tests]
+  design = 'ADMatchedValueBC.md'
+  issues = "#18212"
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'out.e'
+    requirement = "MOOSE shall support matching variable values on a boundary using automatic differentiation"
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'test.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-7
+    requirement = "MOOSE shall produce the exact Jacobian for BC matching variable values on a boundary using automatic differentiation"
+  []
+[]
