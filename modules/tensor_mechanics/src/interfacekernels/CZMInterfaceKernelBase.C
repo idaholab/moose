@@ -49,11 +49,7 @@ CZMInterfaceKernelBase::CZMInterfaceKernelBase(const InputParameters & parameter
 
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 displacement variables");
-}
 
-void
-CZMInterfaceKernelBase::initialSetup()
-{
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _disp_var[i] = coupled("displacements", i);
@@ -92,17 +88,17 @@ CZMInterfaceKernelBase::computeQpJacobian(Moose::DGJacobianType type)
 Real
 CZMInterfaceKernelBase::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
-  Real jac = 0.0;
   // bail out if jvar is not coupled
   if (getJvarMap()[jvar] < 0)
-    return jac;
+    return 0.0;
 
-  // off-diagonal Jacobian with respect to a coupled displacement component
+  // Jacobian of the residul[_component] w.r.t to the coupled displacement
+  // component[off_diag_component]
   for (unsigned int off_diag_component = 0; off_diag_component < _ndisp; ++off_diag_component)
   {
     if (jvar == _disp_var[off_diag_component])
       return computeDResidualDDisplacement(off_diag_component, type);
   }
   // this is the place where one should implement derivatives of the residual w.r.t. other variables
-  return jac;
+  return 0.0;
 }

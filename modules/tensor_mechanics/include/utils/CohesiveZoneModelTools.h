@@ -11,7 +11,7 @@
 
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
-#include "Assembly.h"
+#include "libmesh/vector_value.h"
 
 namespace CohesiveZoneModelTools
 {

@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CZMComputeLocalTractionIncremental.h"
+#include "CZMComputeLocalTractionIncrementalBase.h"
 
 InputParameters
-CZMComputeLocalTractionIncremental::validParams()
+CZMComputeLocalTractionIncrementalBase::validParams()
 {
   InputParameters params = CZMComputeLocalTractionBase::validParams();
 
@@ -22,7 +22,7 @@ CZMComputeLocalTractionIncremental::validParams()
   return params;
 }
 
-CZMComputeLocalTractionIncremental::CZMComputeLocalTractionIncremental(
+CZMComputeLocalTractionIncrementalBase::CZMComputeLocalTractionIncrementalBase(
     const InputParameters & parameters)
   : CZMComputeLocalTractionBase(parameters),
     _interface_traction_inc(
@@ -37,7 +37,7 @@ CZMComputeLocalTractionIncremental::CZMComputeLocalTractionIncremental(
 }
 
 void
-CZMComputeLocalTractionIncremental::computeInterfaceTractionAndDerivatives()
+CZMComputeLocalTractionIncrementalBase::computeInterfaceTractionAndDerivatives()
 {
   _interface_displacement_jump_inc[_qp] =
       _interface_displacement_jump[_qp] - _interface_displacement_jump_old[_qp];

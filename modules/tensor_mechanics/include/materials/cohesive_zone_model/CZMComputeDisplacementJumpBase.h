@@ -22,7 +22,6 @@ public:
   CZMComputeDisplacementJumpBase(const InputParameters & parameters);
 
 protected:
-  void initialSetup() override;
   void computeQpProperties() override;
   void initQpStatefulProperties() override;
 

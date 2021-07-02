@@ -22,11 +22,11 @@
  *isotropic behavior in the tangential directions.
  */
 
-class CZMComputeLocalTractionIncremental : public CZMComputeLocalTractionBase
+class CZMComputeLocalTractionIncrementalBase : public CZMComputeLocalTractionBase
 {
 public:
   static InputParameters validParams();
-  CZMComputeLocalTractionIncremental(const InputParameters & parameters);
+  CZMComputeLocalTractionIncrementalBase(const InputParameters & parameters);
 
 protected:
   /// method used to compute the total traction

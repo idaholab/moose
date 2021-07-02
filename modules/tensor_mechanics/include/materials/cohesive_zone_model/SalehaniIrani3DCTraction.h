@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "CZMComputeLocalTractionTotal.h"
+#include "CZMComputeLocalTractionTotalBase.h"
 
 /**
  * Implementation of the non-stateful exponential traction separation law
  * proposed by Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
  **/
-class SalehaniIrani3DCTraction : public CZMComputeLocalTractionTotal
+class SalehaniIrani3DCTraction : public CZMComputeLocalTractionTotalBase
 {
 public:
   static InputParameters validParams();

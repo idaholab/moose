@@ -14,7 +14,7 @@ registerMooseObject("TensorMechanicsApp", SalehaniIrani3DCTraction);
 InputParameters
 SalehaniIrani3DCTraction::validParams()
 {
-  InputParameters params = CZMComputeLocalTractionTotal::validParams();
+  InputParameters params = CZMComputeLocalTractionTotalBase::validParams();
   params.addClassDescription("3D Coupled (3DC) cohesive law of Salehani and Irani with no damage");
   params.addRequiredParam<Real>(
       "normal_gap_at_maximum_normal_traction",
@@ -30,7 +30,7 @@ SalehaniIrani3DCTraction::validParams()
 }
 
 SalehaniIrani3DCTraction::SalehaniIrani3DCTraction(const InputParameters & parameters)
-  : CZMComputeLocalTractionTotal(parameters),
+  : CZMComputeLocalTractionTotalBase(parameters),
     _delta_u0({getParam<Real>("normal_gap_at_maximum_normal_traction"),
                std::sqrt(2) * getParam<Real>("tangential_gap_at_maximum_shear_traction"),
                std::sqrt(2) * getParam<Real>("tangential_gap_at_maximum_shear_traction")}),

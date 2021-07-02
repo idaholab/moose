@@ -23,7 +23,6 @@ public:
   CZMInterfaceKernelBase(const InputParameters & parameters);
 
 protected:
-  void initialSetup() override;
   Real computeQpResidual(Moose::DGResidualType type) override;
   Real computeQpJacobian(Moose::DGJacobianType type) override;
   Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar) override;

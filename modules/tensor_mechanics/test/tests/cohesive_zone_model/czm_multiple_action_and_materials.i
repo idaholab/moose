@@ -85,30 +85,8 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
-        strain = FINITE
-        add_variables = true
-        use_finite_deform_jacobian = true
-        use_automatic_differentiation = true
-        generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
-      [../]
-    [../]
-  [../]
-[]
-
-
 [Materials]
-  [./stress]
-    type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 200e4
-    poissons_ratio = 0.3
-  [../]
+  # cohesive materials
   [./czm_3dc1]
     type = SalehaniIrani3DCTractionIncremental
     boundary = 'Block0_Block1 Block1_Block2'
@@ -126,6 +104,29 @@
     maximum_normal_traction = 500
     maximum_shear_traction = 300
     base_name = 'czm_b23'
+  [../]
+  # bulk materials
+  [./stress]
+    type = ADComputeFiniteStrainElasticStress
+  [../]
+  [./elasticity_tensor]
+    type = ADComputeIsotropicElasticityTensor
+    youngs_modulus = 200e4
+    poissons_ratio = 0.3
+  [../]
+[]
+
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./all]
+        strain = FINITE
+        add_variables = true
+        use_finite_deform_jacobian = true
+        use_automatic_differentiation = true
+        generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
+      [../]
+    [../]
   [../]
 []
 

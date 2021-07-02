@@ -14,7 +14,7 @@ InputParameters
 CZMComputeDisplacementJumpBase::validParams()
 {
   InputParameters params = InterfaceMaterial::validParams();
-  params.addClassDescription("Base class used to compute the displacement jump accross a czm "
+  params.addClassDescription("Base class used to compute the displacement jump across a czm "
                              "interface in local coordinates");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
@@ -46,11 +46,7 @@ CZMComputeDisplacementJumpBase::CZMComputeDisplacementJumpBase(const InputParame
 
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM material requires 1, 2 or 3 displacement variables");
-}
 
-void
-CZMComputeDisplacementJumpBase::initialSetup()
-{
   // initializing the displacement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -76,7 +72,6 @@ CZMComputeDisplacementJumpBase::initQpStatefulProperties()
 void
 CZMComputeDisplacementJumpBase::computeQpProperties()
 {
-
   _czm_reference_rotation[_qp] =
       RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
 

@@ -11,7 +11,7 @@
 
 #include "CZMComputeDisplacementJumpBase.h"
 /**
- * Compute the displacement jump in interface coordinates accross a cohesive zone for the total
+ * Compute the displacement jump in interface coordinates across a cohesive zone for the total
  * Lagrangian formulation.
  */
 class CZMComputeDisplacementJumpTotalLagrangian : public CZMComputeDisplacementJumpBase
@@ -21,7 +21,6 @@ public:
   CZMComputeDisplacementJumpTotalLagrangian(const InputParameters & parameters);
 
 protected:
-  void initialSetup() override;
   void initQpStatefulProperties() override;
 
   /// compute the interface displacement increment using an incremental

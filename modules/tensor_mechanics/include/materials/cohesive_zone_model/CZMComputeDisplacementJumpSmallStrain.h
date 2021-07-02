@@ -11,7 +11,7 @@
 
 #include "CZMComputeDisplacementJumpBase.h"
 /**
- * Compute the interface displacement jump accross a cohesive zone under the small strain
+ * Compute the interface displacement jump across a cohesive zone under the small strain
  * assumption
  */
 class CZMComputeDisplacementJumpSmallStrain : public CZMComputeDisplacementJumpBase

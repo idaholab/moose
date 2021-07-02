@@ -41,7 +41,7 @@ CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & param
                    : ""),
     _kinematic(getParam<MooseEnum>("kinematic").getEnum<Kinematic>())
 {
-  // We can't enforce conssintency between the number of displacement varaiables and the mesh
+  // We can't enforce consistency between the number of displacement variables and the mesh
   // dimension. Hence we only check we have a reasonable number of displacement variables
   if (_ndisp > 3 || _ndisp < 1)
     mooseError("the CZM Action requires 1, 2 or 3 displacement variables.");

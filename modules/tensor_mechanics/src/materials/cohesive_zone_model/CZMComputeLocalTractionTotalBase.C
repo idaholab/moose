@@ -8,10 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Assembly.h"
-#include "CZMComputeLocalTractionTotal.h"
+#include "CZMComputeLocalTractionTotalBase.h"
 
 InputParameters
-CZMComputeLocalTractionTotal::validParams()
+CZMComputeLocalTractionTotalBase::validParams()
 {
   InputParameters params = CZMComputeLocalTractionBase::validParams();
 
@@ -20,7 +20,8 @@ CZMComputeLocalTractionTotal::validParams()
   return params;
 }
 
-CZMComputeLocalTractionTotal::CZMComputeLocalTractionTotal(const InputParameters & parameters)
+CZMComputeLocalTractionTotalBase::CZMComputeLocalTractionTotalBase(
+    const InputParameters & parameters)
   : CZMComputeLocalTractionBase(parameters)
 {
 }

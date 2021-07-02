@@ -86,7 +86,6 @@ CZMComputeGlobalTractionTotalLagrangian::computeEquilibriumTracionAndDerivatives
 void
 CZMComputeGlobalTractionTotalLagrangian::computedTPK1dJumpGlobal()
 {
-
   // compute the PK1 traction derivatives w.r.t the displacment jump in global
   // coordinates
   const RankTwoTensor djump_djumpglobal =

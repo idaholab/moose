@@ -12,7 +12,7 @@
 #include "CZMInterfaceKernelBase.h"
 
 /// DG cohesive zone model kernel for the Total Lagrangian formulation.
-/// This kernel assummes teh traction sepration law only depends from the
+/// This kernel assummes the traction sepration law only depends from the
 /// displacement jump. One kernel is required for each displacement component
 class CZMInterfaceKernelTotalLagrangian : public CZMInterfaceKernelBase
 {

@@ -16,7 +16,7 @@ CZMComputeDisplacementJumpTotalLagrangian::validParams()
 {
   InputParameters params = CZMComputeDisplacementJumpBase::validParams();
   params.addClassDescription(
-      "Compute the displacement jump increment accross a czm interface in local "
+      "Compute the displacement jump increment across a czm interface in local "
       "coordinates for the Total Lagrangian kinematic formulation");
 
   return params;
@@ -41,14 +41,6 @@ CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagran
     _czm_total_rotation_inc(
         declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation_inc"))
 {
-}
-
-void
-CZMComputeDisplacementJumpTotalLagrangian::initialSetup()
-{
-  // intialize displacementes vectors
-  CZMComputeDisplacementJumpBase::initialSetup();
-
   // initializing the displacement gradeint vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -106,8 +98,8 @@ CZMComputeDisplacementJumpTotalLagrangian::computeFandR()
   // unwanted overflow (I tried and it happens). So checking component by
   // component remains the only reasonable strategy. If someone finds a  better
   // way this could be changed in the future
-  for (uint i = 0; i < 3; i++)
-    for (uint j = 0; j < 3; j++)
+  for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int j = 0; j < 3; j++)
       if (!std::isfinite(_F[_qp](i, j)))
         throw MooseException("CZMMaterialBaseIncremental _F is not finite, reducing time step");
   _F[_qp].getRUDecompositionRotation(_R[_qp]);
