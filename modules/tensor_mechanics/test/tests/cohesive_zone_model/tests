@@ -148,7 +148,7 @@
     requirement = "The shall allow using multiple CohesiveZoneMasterAction and different cohesive materials for different boundaries"
     issues = '#17156'
     mesh_mode = 'REPLICATED'
-    design = 'source/materials/cohesive_zone_model/SalehaniIrani3DCTraction.md source/materials/cohesive_zone_model/SalehaniIrani3SalehaniIrani3DCTractionIncremental.md source/actions/CohesiveZoneMasterAction.md'
+    design = 'source/materials/cohesive_zone_model/SalehaniIrani3DCTraction.md source/materials/cohesive_zone_model/SalehaniIrani3DCTractionIncremental.md source/actions/CohesiveZoneMasterAction.md'
     recover = false
   [../]
 []
