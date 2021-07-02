@@ -11,11 +11,13 @@
 #include "MathUtils.h"
 
 registerMooseObject("HeatConductionApp", InfiniteCylinderRadiativeBC);
+registerMooseObject("HeatConductionApp", ADInfiniteCylinderRadiativeBC);
 
+template <bool is_ad>
 InputParameters
-InfiniteCylinderRadiativeBC::validParams()
+InfiniteCylinderRadiativeBCTempl<is_ad>::validParams()
 {
-  InputParameters params = RadiativeHeatFluxBCBase::validParams();
+  InputParameters params = RadiativeHeatFluxBCBaseTempl<is_ad>::validParams();
   params.addParam<Real>("cylinder_emissivity",
                         1,
                         "Emissivity of the cylinder in radiative heat transfer with the boundary.");
@@ -28,19 +30,25 @@ InfiniteCylinderRadiativeBC::validParams()
   return params;
 }
 
-InfiniteCylinderRadiativeBC::InfiniteCylinderRadiativeBC(const InputParameters & parameters)
-  : RadiativeHeatFluxBCBase(parameters),
-    _eps_cylinder(getParam<Real>("cylinder_emissivity")),
-    _boundary_radius(getParam<Real>("boundary_radius")),
-    _cylinder_radius(getParam<Real>("cylinder_radius"))
+template <bool is_ad>
+InfiniteCylinderRadiativeBCTempl<is_ad>::InfiniteCylinderRadiativeBCTempl(
+    const InputParameters & parameters)
+  : RadiativeHeatFluxBCBaseTempl<is_ad>(parameters),
+    _eps_cylinder(this->template getParam<Real>("cylinder_emissivity")),
+    _boundary_radius(this->template getParam<Real>("boundary_radius")),
+    _cylinder_radius(this->template getParam<Real>("cylinder_radius"))
 {
-  _coefficient =
-      _eps_boundary * _eps_cylinder * _cylinder_radius /
-      (_eps_cylinder * _cylinder_radius + _eps_boundary * _boundary_radius * (1 - _eps_cylinder));
+  _coefficient = this->_eps_boundary * _eps_cylinder * _cylinder_radius /
+                 (_eps_cylinder * _cylinder_radius +
+                  this->_eps_boundary * _boundary_radius * (1 - _eps_cylinder));
 }
 
-Real
-InfiniteCylinderRadiativeBC::coefficient() const
+template <bool is_ad>
+GenericReal<is_ad>
+InfiniteCylinderRadiativeBCTempl<is_ad>::coefficient() const
 {
   return _coefficient;
 }
+
+template class InfiniteCylinderRadiativeBCTempl<false>;
+template class InfiniteCylinderRadiativeBCTempl<true>;
