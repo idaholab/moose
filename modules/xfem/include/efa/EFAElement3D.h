@@ -155,6 +155,7 @@ public:
                           bool add_to_neighbor,
                           bool add_to_adjacent);
   std::vector<EFANode *> getCommonNodes(const EFAElement3D * other_elem) const;
+  unsigned int getNewCutPlaneIdx();
 
 private:
   // EFAelement3D specific methods

@@ -382,7 +382,6 @@ XFEM::markCutEdgesByGeometry()
 {
   bool marked_edges = false;
   bool marked_nodes = false;
-
   for (const auto & gme : _geom_marked_elems_2d)
   {
     for (const auto & gmei : gme.second)
@@ -418,11 +417,13 @@ XFEM::markCutEdgesByGeometry()
                                                 gmei._frag_cut_edges[i]._distance))
           {
             marked_edges = true;
-            if (!isElemAtCrackTip(gme.first))
-              _has_secondary_cut = true;
+            //            if (!isElemAtCrackTip(gme.first))
+            //              _has_secondary_cut = true;
           }
         }
       }
+
+      EFAElem->getNewCutPlaneIdx();
     }
   }
 
@@ -579,6 +580,7 @@ XFEM::markCutEdgesByState(Real time)
        ++pmeit)
   {
     const Elem * elem = pmeit->first;
+
     RealVectorValue normal = pmeit->second;
     EFAElement2D * CEMElem = getEFAElem2D(elem);
 
@@ -828,6 +830,7 @@ XFEM::markCutEdgesByState(Real time)
     }
 
     marked_edges = true;
+    CEMElem->getNewCutPlaneIdx();
 
   } // loop over all state_marked_elems
 

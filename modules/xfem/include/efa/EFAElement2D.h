@@ -33,6 +33,10 @@ private:
   std::vector<std::vector<EFAElement2D *>> _edge_neighbors;
   std::vector<EFAFragment2D *> _fragments;
   std::vector<EFAPoint> _local_node_coor;
+  unsigned int _current_cut_plane_idx = 0;
+  std::vector<unsigned int> _cut_plane_idx;
+  std::vector<std::vector<EFANode *>> _cut_plane_nodes;
+  //  std::vector<EFANode *> _unknown_plane_nodes;
 
 public:
   // override virtual methods in base class
@@ -126,6 +130,26 @@ public:
   std::vector<EFAFragment2D *> branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes);
 
   std::vector<EFANode *> getCommonNodes(const EFAElement2D * other_elem) const;
+
+  void addInteriorNode(EFAFaceNode * faceNode);
+  bool isInteriorNode(EFANode * node) const;
+  EFAFaceNode * getFaceNode(EFANode * node) const;
+  bool getNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const;
+  void getNewCutPlaneIdx();
+  unsigned int getCurrentCutPlaneIdx();
+  void addNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  //  void addForceNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  void reassignNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  //  void addNodeToUnknownCutPlaneIdx(EFANode * node);
+  std::vector<std::vector<EFANode *>> getCutPlaneNodes();
+  std::vector<unsigned int> getCutPlaneIndices();
+  void removeCutPlaneNode(EFANode * node, unsigned int cut);
+  void removeCutPlane(unsigned int cut);
+  bool hasSameCut(EFANode * otherNode, unsigned int cut);
+  unsigned int numSoloNodes();
+  void pairSoloNodes();
+
+  void addNodeCutToNeighbors(EFANode * cut_node);
 
 private:
   // given the 1D parent coord of a point in an 2D element edge, translate it to 2D parametric

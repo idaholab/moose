@@ -30,6 +30,8 @@ public:
 private:
   EFAElement2D * _host_elem;
   std::vector<EFAEdge *> _boundary_edges;
+  std::vector<unsigned int> _frag_cut_plane_idx;
+  std::vector<std::vector<EFANode *>> _frag_cut_plane_nodes;
 
 public:
   // override pure virtual methods
@@ -51,5 +53,18 @@ public:
   void addEdge(EFAEdge * new_edge);
   std::set<EFANode *> getEdgeNodes(unsigned int edge_id) const;
   EFAElement2D * getHostElement() const;
+  std::vector<EFAFragment2D *> split(std::map<unsigned int, EFANode *> & EmbeddedNodes);
+  std::vector<EFAFragment2D *> split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                     std::vector<unsigned int> frag_cut_plane_idx,
+                                     std::vector<std::vector<EFANode *>> frag_cut_plane_nodes);
+  bool IntersectSegmentWithCutLine(const std::vector<double> & segment_point1,
+                                   const std::vector<double> & segment_point2,
+                                   const std::vector<double> & cutting_line_point1,
+                                   const std::vector<double> & cutting_line_point2,
+                                   std::vector<double> & intersect_Point);
+  double crossProduct2D(const std::vector<double> & point_a,
+                        const std::vector<double> & point_b) const;
+  double distanceBetweenPoints(const std::vector<double> & point_a,
+                               const std::vector<double> & point_b) const;
   std::vector<EFAFragment2D *> split();
 };
