@@ -22,12 +22,11 @@ namespace RankTwoScalarTools
  * Return the scalar_type MooseEnum
  */
 MooseEnum scalarOptions();
-MooseEnum cylindricalOptions();
-MooseEnum invariantOptions();
-MooseEnum principalComponentOptions();
-MooseEnum mixedInvariantComponentOptions();
 
-enum class INVARIANT_TYPE
+MooseEnum invariantOptions();
+MooseEnum cylindricalOptions();
+
+enum class InvariantType
 {
   VonMisesStress,
   EffectiveStrain,
@@ -45,7 +44,7 @@ enum class INVARIANT_TYPE
   MinPrincipal
 };
 
-enum class CYLINDRICAL_COMPONENT
+enum class CylindricalComponent
 {
   AxialStress,
   HoopStress,
@@ -98,7 +97,7 @@ vonMisesStress(const RankTwoTensorTempl<T> & stress)
 }
 
 /*
- * The effective strain is calculated as
+ * The effective strain increment (or equivalent von Mises strain) is calculated as
  * \epsilon_{eff} = \sqrt{\frac{2}{3}\epsilon_{ij} \epsilon_{ij}}
  */
 template <typename T>
@@ -458,7 +457,8 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
     case 0:
       return vonMisesStress(tensor);
     case 1:
-      return effectiveStrain(tensor);
+      mooseError("To compute an effective inelastic strain use "
+                 "RankTwoScalarTools::effectiveStrain()");
     case 2:
       return hydrostatic(tensor);
     case 3:
@@ -492,15 +492,14 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
     case 17:
       return stressIntensity(tensor);
     default:
-      mooseError("RankTwoScalarAux Error: Pass valid scalar type - " +
-                 scalarOptions().getRawNames());
+      mooseError("RankTwoScalarTools Error: invalid scalar type");
   }
 }
 
 template <typename T>
 T
 getCylindricalComponent(const RankTwoTensorTempl<T> & tensor,
-                        const CYLINDRICAL_COMPONENT & scalar_type,
+                        const CylindricalComponent & scalar_type,
                         const Point & point1,
                         const Point & point2,
                         const Point & curr_point,
@@ -508,35 +507,33 @@ getCylindricalComponent(const RankTwoTensorTempl<T> & tensor,
 {
   switch (scalar_type)
   {
-    case CYLINDRICAL_COMPONENT::AxialStress:
+    case CylindricalComponent::AxialStress:
       return axialStress(tensor, point1, point2, direction);
-    case CYLINDRICAL_COMPONENT::HoopStress:
+    case CylindricalComponent::HoopStress:
       return hoopStress(tensor, point1, point2, curr_point, direction);
-    case CYLINDRICAL_COMPONENT::RadialStress:
+    case CylindricalComponent::RadialStress:
       return radialStress(tensor, point1, point2, curr_point, direction);
     default:
-      mooseError("RankTwoCylindricalComponent Error: Pass valid scalar type - " +
-                 cylindricalOptions().getRawNames());
+      mooseError("RankTwoCylindricalComponent Error: scalar type invalid");
   }
 }
 
 template <typename T>
 T
 getPrincipalComponent(const RankTwoTensorTempl<T> & tensor,
-                      const INVARIANT_TYPE & scalar_type,
+                      const InvariantType & scalar_type,
                       Point & direction)
 {
   switch (scalar_type)
   {
-    case INVARIANT_TYPE::MaxPrincipal:
+    case InvariantType::MaxPrincipal:
       return maxPrincipal(tensor, direction);
-    case INVARIANT_TYPE::MidPrincipal:
+    case InvariantType::MidPrincipal:
       return midPrincipal(tensor, direction);
-    case INVARIANT_TYPE::MinPrincipal:
+    case InvariantType::MinPrincipal:
       return minPrincipal(tensor, direction);
     default:
-      mooseError("RankTwoInvariant Error: Pass valid invariant - " +
-                 principalComponentOptions().getRawNames());
+      mooseError("RankTwoInvariant Error: valid invariant");
   }
 }
 
@@ -549,31 +546,32 @@ getDirectionalComponent(const RankTwoTensorTempl<T> & tensor, const Point & dire
 
 template <typename T>
 T
-getInvariant(const RankTwoTensorTempl<T> & tensor, const INVARIANT_TYPE & scalar_type)
+getInvariant(const RankTwoTensorTempl<T> & tensor, const InvariantType & scalar_type)
 {
   switch (scalar_type)
   {
-    case INVARIANT_TYPE::VonMisesStress:
+    case InvariantType::VonMisesStress:
       return vonMisesStress(tensor);
-    case INVARIANT_TYPE::EffectiveStrain:
-      return effectiveStrain(tensor);
-    case INVARIANT_TYPE::Hydrostatic:
+    case InvariantType::EffectiveStrain:
+      mooseError("To compute an effective inelastic strain use "
+                 "RankTwoScalarTools::effectiveStrain()");
+    case InvariantType::Hydrostatic:
       return hydrostatic(tensor);
-    case INVARIANT_TYPE::L2norm:
+    case InvariantType::L2norm:
       return L2norm(tensor);
-    case INVARIANT_TYPE::VolumetricStrain:
+    case InvariantType::VolumetricStrain:
       return volumetricStrain(tensor);
-    case INVARIANT_TYPE::FirstInvariant:
+    case InvariantType::FirstInvariant:
       return firstInvariant(tensor);
-    case INVARIANT_TYPE::SecondInvariant:
+    case InvariantType::SecondInvariant:
       return secondInvariant(tensor);
-    case INVARIANT_TYPE::ThirdInvariant:
+    case InvariantType::ThirdInvariant:
       return thirdInvariant(tensor);
-    case INVARIANT_TYPE::TriaxialityStress:
+    case InvariantType::TriaxialityStress:
       return triaxialityStress(tensor);
-    case INVARIANT_TYPE::MaxShear:
+    case InvariantType::MaxShear:
       return maxShear(tensor);
-    case INVARIANT_TYPE::StressIntensity:
+    case InvariantType::StressIntensity:
       return stressIntensity(tensor);
     default:
       mooseError("RankTwoCartesianComponent Error: Pass valid invariant - " +

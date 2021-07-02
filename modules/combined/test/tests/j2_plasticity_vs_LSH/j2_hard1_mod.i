@@ -8,6 +8,10 @@
 # Original test located at:
 # tensor_mechanics/tests/j2_plasticity/hard1.i
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -20,145 +24,90 @@
   ymax = 0.5
   zmin = -0.5
   zmax = 0.5
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = true
+    strain = FINITE
+    generate_output = 'stress_zz vonmises_stress effective_plastic_strain'
+  []
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [intnl]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./intnl]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vm_stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./eq_pl_strain]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-  [./intnl]
+  [intnl]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = intnl
-  [../]
-  [./eq_pl_strain]
-    type = RankTwoScalarAux
-    rank_two_tensor = plastic_strain
-    scalar_type = EffectiveStrain
-    variable = eq_pl_strain
-  [../]
-  [./vm_stress]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = VonMisesStress
-    variable = vm_stress
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
-  [./z]
+  []
+  [z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = 't/60'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./str]
+  [str]
     type = TensorMechanicsHardeningConstant
     value = 2.4e2
-  [../]
-  [./j2]
+  []
+  [j2]
     type = TensorMechanicsPlasticJ2
     yield_strength = str
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     #with E = 2.1e5 and nu = 0.3
     #Hooke's law: E-nu to Lambda-G
     C_ijkl = '121154 80769.2'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
-    block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = j2
     tangent_operator = elastic
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -178,24 +127,24 @@
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./intnl]
+  []
+  [intnl]
     type = ElementAverageValue
     variable = intnl
-  [../]
-  [./eq_pl_strain]
+  []
+  [eq_pl_strain]
     type = PointValue
     point = '0 0 0'
-    variable = eq_pl_strain
-  [../]
-  [./vm_stress]
+    variable = effective_plastic_strain
+  []
+  [vm_stress]
     type = PointValue
     point = '0 0 0'
-    variable = vm_stress
-  [../]
+    variable = vonmises_stress
+  []
 []
 
 [Outputs]

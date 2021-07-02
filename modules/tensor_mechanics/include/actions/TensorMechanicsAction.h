@@ -32,6 +32,14 @@ protected:
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
+  /**
+   * Helper function to decode `generate_outputs` options using a "table" of
+   * scalar output quantities and a "setup" lambda that performs the input parameter
+   * setup for the output material object.
+   */
+  template <typename T, typename T2>
+  bool setupOutput(std::string out, T table, T2 setup);
+
   ///@{ displacement variables
   std::vector<VariableName> _displacements;
 
@@ -119,3 +127,36 @@ protected:
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
 };
+
+template <typename T, typename T2>
+bool
+TensorMechanicsAction::setupOutput(std::string out, T table, T2 setup)
+{
+  for (const auto & t1 : table)
+  {
+    // find the officially supported properties
+    for (const auto & t2 : t1.second.second)
+      if (t1.first + '_' + t2 == out)
+      {
+        const auto it = _rank_two_cartesian_component_table.find(t2);
+        if (it != _rank_two_cartesian_component_table.end())
+        {
+          setup(it->second, t1.second.first);
+          return true;
+        }
+        else
+          mooseError("Internal error. The permitted tensor shortcuts must be keys in the "
+                     "'_rank_two_cartesian_component_table'.");
+      }
+
+    // check for custom properties
+    auto prefix = t1.first + '_';
+    if (out.substr(0, prefix.length()) == prefix)
+    {
+      setup(out.substr(prefix.length()), t1.second.first);
+      return true;
+    }
+  }
+
+  return false;
+}

@@ -22,6 +22,9 @@ TimeExtremeValue::validParams()
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1 abs_max=2 abs_min=3", "max");
 
+  // Define the extreme value/time enumeration
+  MooseEnum output_type_options("extreme_value=0 time=1", "extreme_value");
+
   // Define the parameters
   InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<MooseEnum>("value_type",
@@ -31,6 +34,10 @@ TimeExtremeValue::validParams()
                              "'min' returns the minimum value."
                              "'abs_max' returns the maximum absolute value."
                              "'abs_min' returns the minimum absolute value.");
+  params.addParam<MooseEnum>("output_type",
+                             output_type_options,
+                             "Output to return. 'extreme_value' returns the extreme_value. 'time' "
+                             "returns the time at which the extreme_value occurred.");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "The name of the postprocessor used for reporting time extreme values");
   params.addClassDescription(
@@ -42,33 +49,37 @@ TimeExtremeValue::validParams()
 TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
-    _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-    _value(declareRestartableData<Real>("value"))
+    _type(getParam<MooseEnum>("value_type").getEnum<ExtremeType>()),
+    _output_type(getParam<MooseEnum>("output_type").getEnum<OutputType>()),
+    _value(declareRestartableData<Real>("value")),
+    _time(declareRestartableData<Real>("time"))
 {
   if (!_app.isRecovering())
   {
     switch (_type)
     {
-      case MAX:
+      case ExtremeType::MAX:
         _value = -std::numeric_limits<Real>::max();
         break;
 
-      case MIN:
+      case ExtremeType::MIN:
         _value = std::numeric_limits<Real>::max();
         break;
 
-      case ABS_MAX:
+      case ExtremeType::ABS_MAX:
         // the max absolute value of anything is greater than or equal to 0
         _value = 0;
         break;
 
-      case ABS_MIN:
+      case ExtremeType::ABS_MIN:
         // the min absolute value of anything is less than this
         _value = std::numeric_limits<Real>::max();
         break;
 
       default:
-        mooseError("Unrecognzed _type == ", _type);
+        mooseError("Unrecognzed ExtremeType");
+
+        _time = 0; // Time has to be greater than or equal to zero.
     }
   }
 }
@@ -78,29 +89,36 @@ TimeExtremeValue::execute()
 {
   switch (_type)
   {
-    case MAX:
+    case ExtremeType::MAX:
       _value = std::max(_value, _postprocessor);
+      _time = (_value == _postprocessor) ? _t : _time;
       break;
 
-    case MIN:
+    case ExtremeType::MIN:
       _value = std::min(_value, _postprocessor);
+      _time = (_value == _postprocessor) ? _t : _time;
       break;
 
-    case ABS_MAX:
+    case ExtremeType::ABS_MAX:
       _value = std::max(_value, std::abs(_postprocessor));
+      _time = (_value == std::abs(_postprocessor)) ? _t : _time;
       break;
 
-    case ABS_MIN:
+    case ExtremeType::ABS_MIN:
       _value = std::min(_value, std::abs(_postprocessor));
+      _time = (_value == std::abs(_postprocessor)) ? _t : _time;
       break;
 
     default:
-      mooseError("Unrecognzed _type == ", _type);
+      mooseError("Unrecognzed ExtremeType");
   }
 }
 
 Real
 TimeExtremeValue::getValue()
 {
-  return _value;
+  if (_output_type == OutputType::EXTREME_VALUE)
+    return _value;
+  else
+    return _time;
 }

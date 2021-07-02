@@ -33,25 +33,23 @@
                   'subblocks requesting different strain formulations.'
   []
 
-  [error_unrestricted]
+  [two_block.error_unrestricted]
     type = RunException
     input = 'two_block.i'
     expect_err = 'No TensorMechanics/Master action can be block unrestricted if more than one '
                  'TensorMechanics/Master action is specified.'
-    prereq = 'two_block'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file does not specify '
                   'block restrictions for the MasterAction in input files with more than one '
                   'instance of the MasterAction block.'
   []
 
-  [error_overlapping]
+  [two_block.error_overlapping]
     type = RunException
     input = 'two_block.i'
     cli_args = 'Modules/TensorMechanics/Master/block1/block=2'
     expect_err = 'The block restrictions in the TensorMechanics/Master actions must be '
                  'non-overlapping.'
-    prereq = 'error_unrestricted'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file specifies '
                   'overlapping block restrictions for the MasterAction in input files with more than '
@@ -78,20 +76,19 @@
                   'subblocks using different coordinate systems.'
   []
 
-  [error_coord]
+  [two_coord.error_different_coords]
     type = RunException
     input = 'two_coord.i'
     cli_args = 'Modules/TensorMechanics/Master/active=error'
     expect_err = 'The TensorMechanics action requires all subdomains to have the same coordinate '
                  'system.'
-    prereq = 'two_coord'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file assigns the same '
                   'TensorMechanics MasterAction block to mesh blocks with different coordinate '
                   'systems.'
   []
 
-  [eigenstrain_no_defined_block_names]
+  [action_eigenstrain]
     type = RunApp
     input = 'action_eigenstrain.i'
     expect_out = 'solid: eigenstrain1,eigenstrain2'
@@ -101,7 +98,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [eigenstrain_two_blocks_names]
+  [action_multi_eigenstrain]
     type = RunApp
     input = 'action_multi_eigenstrain.i'
     expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
@@ -110,7 +107,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [eigenstrain_two_blocks_one_eigenstrain]
+  [action_multi_eigenstrain_same_conditions]
     type = RunApp
     input = 'action_multi_eigenstrain_same_conditions.i'
     expect_out = 'block1: eigenstrain\n.*\nblock2: eigenstrain\n'
@@ -119,7 +116,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [ad_converter_eigenstrain_two_blocks_names]
+  [ad_converter_action_multi_eigenstrain]
     type = RunApp
     input = 'ad_converter_action_multi_eigenstrain.i'
     expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
@@ -128,7 +125,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [reduced_eigenstrain_actions_names]
+  [reduced_eigenstrain_action]
     type = RunApp
     input = 'reduced_eigenstrain_action.i'
     expect_out = 'all: reduced_eigenstrain'
@@ -138,7 +135,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [composite_eigenstrain_actions_names]
+  [composite_eigenstrain]
     type = RunApp
     input = 'composite_eigenstrain.i'
     expect_out = 'solid: eigenstrain'
@@ -148,7 +145,7 @@
                   'classes and correctly output these names to the console.'
   []
 
-  [material_output_order_empty]
+  [material_output_order.empty]
     type = RunApp
     input = 'material_output_order.i'
     expect_out = 'all: CONSTANT CONSTANT CONSTANT\n.*\nall: MONOMIAL MONOMIAL MONOMIAL\n'
@@ -157,7 +154,7 @@
     requirement = 'The TensorMechanics MasterAction shall determine the necessary orders and '
                   'families to apply to material outputs.'
   []
-  [material_output_order_single]
+  [material_output_order.single]
     type = RunApp
     input = 'material_output_order.i'
     expect_out = 'all: FIRST FIRST FIRST\n.*\nall: MONOMIAL MONOMIAL MONOMIAL\n'
@@ -167,7 +164,7 @@
     requirement = 'The TensorMechanics MasterAction shall apply a single given output order to all '
                   'output variables.'
   []
-  [material_output_family_single]
+  [material_output_order.family_single]
     type = RunApp
     input = 'material_output_order.i'
     expect_out = 'all: FIRST FIRST FIRST\n.*\nall: LAGRANGE LAGRANGE LAGRANGE\n'
@@ -178,14 +175,13 @@
     requirement = 'The TensorMechanics MasterAction shall apply a single given output family to all '
                   'output variables.'
   []
-  [material_output_order_error1]
+  [material_output_order.error1]
     type = RunException
     input = 'material_output_order.i'
     cli_args = "Modules/TensorMechanics/Master/material_output_family='LAGRANGE MONOMIAL'"
     expect_err = 'The number of families assigned to material outputs must be: 0 to be assigned '
                  'MONOMIAL; 1 to assign all outputs the same value, or the same size as the number '
                  'of generate outputs listed.'
-    prereq = 'material_output_order_empty'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an the material outputs and or '
                   'families do not match the number of material outputs.'
@@ -200,12 +196,21 @@
     requirement = 'The TensorMechanics MasterAction shall determine the necessary orders and '
                   'families to apply to material outputs.'
   []
-  [material_output_first_lagrange_auto]
+  [material_output_first_lagrange_automatic]
     type = Exodiff
     input = 'material_output_first_lagrange_automatic.i'
     exodiff = 'material_output_first_lagrange_automatic_out.e'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall determine the necessary orders and '
                   'families to apply to material outputs.'
+  []
+
+  [custom_output]
+    type = Exodiff
+    input = 'custom_output.i'
+    exodiff = 'custom_output_out.e'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall permit scalar quantity output from '
+                  'arbitrary tensors.'
   []
 []

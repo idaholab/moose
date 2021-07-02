@@ -38,26 +38,16 @@ s = D_i T_{ij} D_j
 where $D$ is the direction vector specified in the input file.
 
 
-## Effective Strain
+## Effective Strain Increment
 
-`EffectiveStrain` calculates an effective scalar measure of a Rank-2 tensor, often
-strain ($\epsilon_{ij}$) according to [eq:effective_strain_scalar_type].
-\begin{equation}
-\label{eq:effective_strain_scalar_type}
-s = \sqrt{\frac{2}{3} \epsilon_{ij} \epsilon_{ij}}
-\end{equation}
-
-!alert warning title=This Strain Measure is not for Inelastic Strains
-This effective strain measure, `EffectiveStrain`, should not be confused with
-the effective plastic strain or effective creep strain, which are computed as
-integrals over the history of the inelastic strain; these effective inelastic
-strain measures are computed as scalar material properties (named
-`effective_plastic_strain` and `effective_creep_strain`) for applicable $J_2$
-models. The effective inelastic strains are computed as:
+Effective plastic strain or effective creep strain, which are computed as
+integrals over the history of the inelastic strain as
 \begin{equation}
 s = \int_t\sqrt{\frac{2}{3} \dot{\epsilon}^p_{ij} \dot{\epsilon}^p_{ij}} \mathrm{d}t
 \end{equation}
-where $t$ is time and $\dot{\epsilon}^p_{ij}$ is the inelastic strain increment.
+can be computed with the help of the `effectiveStrain` method.
+The integration of the effective increment is performed in [RankTwoInvariant.md],
+yielding the effective strain.
 
 ##Hoop Stress
 

@@ -127,10 +127,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./peeq]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./vonmises]
     order = CONSTANT
     family = MONOMIAL
@@ -171,39 +167,24 @@
     variable = L2norm
     scalar_type = L2norm
   [../]
-  [./peeq]
-    type = RankTwoScalarAux
-    rank_two_tensor = plastic_strain
-    variable = peeq
-    scalar_type = EffectiveStrain
-  [../]
 []
 
 [Postprocessors]
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-    block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./peeq]
-    type = ElementAverageValue
-    variable = peeq
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./vonmises]
     type = ElementAverageValue
     variable = vonmises
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./hydrostatic]
     type = ElementAverageValue
     variable = hydrostatic
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./L2norm]
     type = ElementAverageValue
     variable = L2norm
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 

@@ -29,9 +29,6 @@ protected:
 private:
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
-  /// Name of the stress/strain to be calculated
-  const std::string _property_name;
-
   /// Stress/strain value returned from calculation
   GenericMaterialProperty<Real, is_ad> & _property;
 
