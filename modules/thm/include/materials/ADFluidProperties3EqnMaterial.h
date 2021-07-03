@@ -16,10 +16,10 @@ protected:
   virtual void computeQpProperties();
 
   /// Cross-sectional area
-  const VariableValue & _area;
-  const VariableValue & _rhoA;
-  const VariableValue & _rhouA;
-  const VariableValue & _rhoEA;
+  const ADVariableValue & _area;
+  const ADVariableValue & _rhoA;
+  const ADVariableValue & _rhouA;
+  const ADVariableValue & _rhoEA;
 
   /// Density
   ADMaterialProperty<Real> & _rho;

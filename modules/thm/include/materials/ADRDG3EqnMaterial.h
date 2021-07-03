@@ -22,14 +22,14 @@ protected:
   virtual std::vector<Real> computeElementPrimitiveVariables(const Elem * elem) const override;
 
   /// Cross-sectional area, piecewise constant
-  const VariableValue & _A_avg;
+  const ADVariableValue & _A_avg;
   /// Cross-sectional area, linear
-  const VariableValue & _A_linear;
+  const ADVariableValue & _A_linear;
 
   // piecewise constant conserved variable values
-  const VariableValue & _rhoA_avg;
-  const VariableValue & _rhouA_avg;
-  const VariableValue & _rhoEA_avg;
+  const ADVariableValue & _rhoA_avg;
+  const ADVariableValue & _rhouA_avg;
+  const ADVariableValue & _rhoEA_avg;
 
   // piecewise constant conserved variables
   MooseVariable * _A_var;

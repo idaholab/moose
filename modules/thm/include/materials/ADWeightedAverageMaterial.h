@@ -26,7 +26,7 @@ protected:
   /// Values to average
   std::vector<const ADMaterialProperty<Real> *> _values;
   /// Weights of the values
-  std::vector<const VariableValue *> _weights;
+  std::vector<const ADVariableValue *> _weights;
 
 public:
   static InputParameters validParams();

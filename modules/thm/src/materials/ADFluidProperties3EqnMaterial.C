@@ -21,10 +21,10 @@ ADFluidProperties3EqnMaterial::validParams()
 
 ADFluidProperties3EqnMaterial::ADFluidProperties3EqnMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _area(coupledValue("A")),
-    _rhoA(coupledValue("rhoA")),
-    _rhouA(coupledValue("rhouA")),
-    _rhoEA(coupledValue("rhoEA")),
+    _area(adCoupledValue("A")),
+    _rhoA(adCoupledValue("rhoA")),
+    _rhouA(adCoupledValue("rhouA")),
+    _rhoEA(adCoupledValue("rhoEA")),
 
     _rho(declareADProperty<Real>("rho")),
 
