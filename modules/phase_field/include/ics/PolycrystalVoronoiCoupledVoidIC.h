@@ -32,7 +32,6 @@ public:
   static InputParameters actionParameters();
 
 protected:
-
   const unsigned int _op_num;
   const unsigned int _op_index;
 

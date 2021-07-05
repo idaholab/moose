@@ -24,8 +24,8 @@ PolycrystalVoronoiCoupledVoidIC::actionParameters()
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
   params.addCoupledVar("v", "Coupled variable associated with the void");
-  params.addRequiredParam<Real>("invalue","Variable value inside the coupled void");
-  params.addRequiredParam<Real>("outvalue","Variable value outside the coupled void");
+  params.addRequiredParam<Real>("invalue", "Variable value inside the coupled void");
+  params.addRequiredParam<Real>("outvalue", "Variable value outside the coupled void");
   return params;
 }
 
@@ -36,9 +36,8 @@ PolycrystalVoronoiCoupledVoidIC::validParams()
 {
   InputParameters params = PolycrystalVoronoiCoupledVoidIC::actionParameters();
   params.addClassDescription("Creates polycrystal voronoi grain structure aroud"
-                              "void positions obtained from the coupled variable");
-  params.addParam<unsigned int>("op_index", 0,
-                                "The index for the current order parameter");
+                             "void positions obtained from the coupled variable");
+  params.addParam<unsigned int>("op_index", 0, "The index for the current order parameter");
   params.addRequiredParam<UserObjectName>(
       "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
   params.addParam<FileName>(
@@ -49,8 +48,7 @@ PolycrystalVoronoiCoupledVoidIC::validParams()
   return params;
 }
 
-PolycrystalVoronoiCoupledVoidIC::PolycrystalVoronoiCoupledVoidIC(
-    const InputParameters & parameters)
+PolycrystalVoronoiCoupledVoidIC::PolycrystalVoronoiCoupledVoidIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),

@@ -21,7 +21,7 @@ PolycrystalVoronoiCoupledVoidICAction::validParams()
   InputParameters params = Action::validParams();
   params += PolycrystalVoronoiCoupledVoidIC::actionParameters();
   params.addClassDescription("Automatically creates initial conditions for each grain"
-                              "order parameter of the polycrystal voronoi coupled with voids");
+                             "order parameter of the polycrystal voronoi coupled with voids");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");
   params.addRequiredParam<UserObjectName>(
