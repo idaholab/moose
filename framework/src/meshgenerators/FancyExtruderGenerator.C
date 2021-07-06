@@ -141,8 +141,7 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
       (_elem_integers_swaps.size() != num_elevations * _elem_integer_names_to_swap.size()))
     paramError("elem_integers_swaps",
                "If specified, 'elem_integers_swaps' must be the same length as the product of the "
-               "length of 'heights' and the length of 'elem_integer_names_to_swap' in ",
-               name());
+               "length of 'heights' and the length of 'elem_integer_names_to_swap'.");
 
   _elem_integers_swap_pairs.resize(_elem_integers_swaps.size());
   // Reprocess the elem_integers_swaps to make pairs out of them so they are easier to use
@@ -186,21 +185,24 @@ FancyExtruderGenerator::generate()
       paramError("elem_integer_names_to_swap",
                  "Element ",
                  i + 1,
-                 " of elem_integer_names_to_swap in ",
-                 name(),
-                 " is not a valid extra element integer of the input mesh.");
+                 " of 'elem_integer_names_to_swap' in is not a valid extra element integer of the "
+                 "input mesh.");
 
   // prepare for transferring extra element integers from orignal mesh to the extruded mesh.
   const unsigned int num_extra_elem_integers = _input->n_elem_integers();
   std::vector<std::string> id_names;
 
   for (unsigned int i = 0; i < num_extra_elem_integers; i++)
+  {
     id_names.push_back(_input->get_elem_integer_name(i));
+    if (!mesh->has_elem_integer(id_names[i]))
+      mesh->add_elem_integer(id_names[i]);
+  }
 
   // retreive subdomain/sideset/nodeset name maps
-  auto input_subdomain_map = _input->get_subdomain_name_map();
-  auto input_sideset_map = _input->boundary_info->get_sideset_name_map();
-  auto input_nodeset_map = _input->boundary_info->get_nodeset_name_map();
+  const auto & input_subdomain_map = _input->get_subdomain_name_map();
+  const auto & input_sideset_map = _input->get_boundary_info().get_sideset_name_map();
+  const auto & input_nodeset_map = _input->get_boundary_info().get_nodeset_name_map();
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
@@ -578,16 +580,8 @@ FancyExtruderGenerator::generate()
         new_elem = mesh->add_elem(new_elem);
 
         // maintain extra integers
-        if (num_extra_elem_integers > 0)
-        {
-          for (unsigned int i = 0; i < num_extra_elem_integers; i++)
-          {
-            // declare the "control_drum_id" when the first elem is added
-            if (!mesh->has_elem_integer(id_names[i]))
-              mesh->add_elem_integer(id_names[i]);
-            new_elem->set_extra_integer(i, elem->get_extra_integer(i));
-          }
-        }
+        for (unsigned int i = 0; i < num_extra_elem_integers; i++)
+          new_elem->set_extra_integer(i, elem->get_extra_integer(i));
 
         if (_elem_integers_swap_pairs.size())
         {
@@ -659,20 +653,13 @@ FancyExtruderGenerator::generate()
 
   // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
   if (!input_subdomain_map.empty())
-  {
-    auto & new_subdomain_map = mesh->set_subdomain_name_map();
-    new_subdomain_map.insert(input_subdomain_map.begin(), input_subdomain_map.end());
-  }
+    mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
   if (!input_sideset_map.empty())
-  {
-    auto & new_sideset_map = mesh->boundary_info->set_sideset_name_map();
-    new_sideset_map.insert(input_sideset_map.begin(), input_sideset_map.end());
-  }
+    mesh->get_boundary_info().set_sideset_name_map().insert(input_sideset_map.begin(),
+                                                            input_sideset_map.end());
   if (!input_nodeset_map.empty())
-  {
-    auto & new_nodeset_map = mesh->boundary_info->set_nodeset_name_map();
-    new_nodeset_map.insert(input_nodeset_map.begin(), input_nodeset_map.end());
-  }
+    mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
+                                                            input_nodeset_map.end());
 
   mesh->set_isnt_prepared();
 
