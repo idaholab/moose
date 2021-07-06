@@ -12,12 +12,12 @@
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
 ADReal
-find_u_star(Real mu, Real rho, ADReal u, Real dist)
+find_u_star(Real mu, Real rho, ADReal u, ADReal dist)
 {
   constexpr int MAX_ITERS {50};
   constexpr Real REL_TOLERANCE {1e-7};
 
-  constexpr Real von_karman {0.41};
+  constexpr Real von_karman {0.4187};
 
   Real nu = mu / rho;
 
@@ -25,8 +25,8 @@ find_u_star(Real mu, Real rho, ADReal u, Real dist)
 
   for (int i = 0; i < MAX_ITERS; ++i)
   {
-    ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.135 * nu)) - u;
-    ADReal deriv = (1 + std::log(u_star * dist / (0.135 * nu))) / von_karman;
+    ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;
+    ADReal deriv = (1 + std::log(u_star * dist / (0.111 * nu))) / von_karman;
     ADReal new_u_star = u_star - residual / deriv;
 
     ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
@@ -56,7 +56,7 @@ INSFVWallFunctionBC::validParams()
 }
 
 INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
-  : FVFluxBC(params),
+  : INSFVNaturalFreeSlipBC(params),
     _dim(_subproblem.mesh().dimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
@@ -68,11 +68,7 @@ INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
                : nullptr),
     _rho(getParam<Real>("rho")),
     _mu(getADMaterialProperty<Real>("mu"))
-    //_wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  //const MeshBase & mesh = _subproblem.mesh().getMesh();
-  //if (!mesh.is_replicated())
-  //  mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
 }
 
 ADReal
@@ -89,16 +85,13 @@ INSFVWallFunctionBC::computeQpResidual()
 
   // Compute the velocity magnitude (parallel_speed) and
   //direction of the tangential velocity component (parallel_dir)
-  Point wall_vec = fi.elemCentroid() - fi.faceCentroid(); //distance calculation may not be true for irregular elements
-  Real dist = wall_vec.norm();
-  Point wall_vec_unitary = wall_vec/dist; //added normalization
-  ADReal perpendicular_speed = velocity * wall_vec_unitary;
-  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec_unitary;
+  ADReal dist = std::abs((fi.elemCentroid() - fi.faceCentroid())*_normal);
+  ADReal perpendicular_speed = velocity * _normal;
+  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * _normal;
   ADReal parallel_speed = parallel_velocity.norm();
   ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
 
-
-  if (parallel_speed.value() < 1e-6)
+  if (parallel_speed.value() < 1e-7)
     return 0;
 
   if (!std::isfinite(parallel_speed.value()))
@@ -107,7 +100,6 @@ INSFVWallFunctionBC::computeQpResidual()
   // Compute the friction velocity and the wall shear stress
   ADReal u_star = find_u_star(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
-  //std::cout << dist * u_star * _rho / _mu[_qp].value() << "\n";
 
   // Compute the shear stress component for this momentum equation
   if (_axis_index == 0) {

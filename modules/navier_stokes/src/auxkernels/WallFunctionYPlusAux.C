@@ -17,7 +17,7 @@ find_u_star2(Real mu, Real rho, ADReal u, Real dist)
   constexpr int MAX_ITERS {50};
   constexpr Real REL_TOLERANCE {1e-6};
 
-  constexpr Real von_karman {0.4};
+  constexpr Real von_karman {0.4187};
 
   Real nu = mu / rho;
 
@@ -25,8 +25,8 @@ find_u_star2(Real mu, Real rho, ADReal u, Real dist)
 
   for (int i = 0; i < MAX_ITERS; ++i)
   {
-    ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.135 * nu)) - u;
-    ADReal deriv = (1 + std::log(u_star * dist / (0.135 * nu))) / von_karman;
+    ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;
+    ADReal deriv = (1 + std::log(u_star * dist / (0.111 * nu))) / von_karman;
     ADReal new_u_star = u_star - residual / deriv;
 
     ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
@@ -74,6 +74,7 @@ WallFunctionYPlusAux::computeValue()
   bool wall_bounded = false;
   Real min_wall_dist = 1e10;
   Point wall_vec;
+  Point normal;
   for (unsigned int i_side = 0; i_side < elem.n_sides(); ++i_side)
   {
     const std::vector<BoundaryID> side_bnds
@@ -86,12 +87,15 @@ WallFunctionYPlusAux::computeValue()
         if (side_id == wall_id)
         {
           const auto side_elem_ptr = elem.side_ptr(i_side);
-          Point this_wall_vec = elem.centroid() - side_elem_ptr->centroid();
-          Real dist = this_wall_vec.norm();
+          const FaceInfo * const fi = _mesh.faceInfo(&elem, i_side);
+          const Point & this_normal = fi->normal();
+          Point this_wall_vec = (elem.centroid() - side_elem_ptr->centroid());
+          Real dist = std::abs(this_wall_vec * normal);
           if (dist < min_wall_dist)
           {
             min_wall_dist = dist;
             wall_vec = this_wall_vec;
+            normal = this_normal;
           }
           wall_bounded = true;
         }
@@ -110,10 +114,9 @@ WallFunctionYPlusAux::computeValue()
     velocity(2) = _w_var->getElemValue(&elem);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  Real dist = wall_vec.norm();
-  Point wall_vec_unitary = wall_vec/dist; //added normalization
-  ADReal perpendicular_speed = velocity * wall_vec_unitary;
-  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * wall_vec_unitary;
+  Real dist = std::abs(wall_vec * normal);
+  ADReal perpendicular_speed = velocity * normal;
+  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * normal;
   ADReal parallel_speed = parallel_velocity.norm();
   ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
 

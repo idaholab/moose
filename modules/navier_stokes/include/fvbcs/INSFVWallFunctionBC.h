@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "INSFVNaturalFreeSlipBC.h"
 
 #include "INSFVVelocityVariable.h"
 
-class INSFVWallFunctionBC : public FVFluxBC
+class INSFVWallFunctionBC : public INSFVNaturalFreeSlipBC
 {
 public:
   static InputParameters validParams();
