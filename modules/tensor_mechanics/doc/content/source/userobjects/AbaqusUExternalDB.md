@@ -6,7 +6,8 @@
 
 The `AbaqusUExternalDB` user object  is used to execute an _Abaqus UEXTERNALDB_
 user function at various stages of the simulation. The functions can be coded in
-Fortran or C/C++ and must be located in the `plugins` directory of the app.
+Fortran (`.f` and `.f90` file extensions) or C/C++  (`.c` and `.C` file
+extensions) and must be located in the `plugins` directory of the app.
 
 Data exchange between UEXTERNALDB and UMAT may require to put both functions in
 the same translation unit (source file).
