@@ -25,6 +25,10 @@ BetterQuadSubChannelMesh::BetterQuadSubChannelMesh(const InputParameters & param
     _n_gaps((_nx - 1) * _ny + (_ny - 1) * _nx),
     _gap(getParam<Real>("gap"))
 {
+  if (_nx < 2 && _ny < 2)
+    mooseError(name(),
+               ": The number of subchannels cannot be less than 2 in both directions (x and y). "
+               "Smallest assembly allowed is either 2X1 or 1X2. ");
   // Resize the gap-to-channel and channel-to-gap maps.
   _gap_to_chan_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);

@@ -6,4 +6,9 @@
     cli_args = "--mesh-only"
     recover = false
   []
+  [subchannel_number]
+    type = 'RunException'
+    input = 'subchannel_number.i'
+    expect_err = "The number of subchannels cannot be less than 2 in both directions \(x and y\)\. Smallest assembly allowed is either 2X1 or 1X2\."
+  []
 []
