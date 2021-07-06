@@ -74,6 +74,9 @@ protected:
   /// The AD version of coord
   const MooseArray<ADReal> & _ad_coord;
 
+  /// The current shape functions
+  const ADTemplateVariablePhiValue<T> & _phi;
+
   /// Whether this object is acting on the displaced mesh
   const bool _use_displaced_mesh;
 
