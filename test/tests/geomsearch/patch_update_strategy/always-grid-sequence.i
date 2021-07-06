@@ -56,7 +56,7 @@
     variable = receiver
     paired_variable = linear_field
     paired_boundary = rightleft
-    execute_on = timestep_end
+    execute_on = 'nonlinear timestep_end'
     boundary = leftright
   [../]
   [./y_displacement]

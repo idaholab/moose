@@ -63,6 +63,7 @@
   fixed_point_algorithm = 'steffensen'
   fixed_point_max_its = 30
   transformed_variables = 'u'
+  accept_on_max_fixed_point_iteration = true
 []
 
 [Outputs]

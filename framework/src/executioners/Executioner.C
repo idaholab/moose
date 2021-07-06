@@ -28,16 +28,15 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += FEProblemSolve::validParams();
   params += PicardSolve::validParams();
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
 
-  MooseEnum IterationMethod("picard secant steffensen", "picard");
-
   params.addParam<MooseEnum>("fixed_point_algorithm",
-                             IterationMethod,
+                             iterationMethods(),
                              "The fixed point algorithm to converge the sequence of problems.");
+
+  params.addParam<bool>("verbose", false, "Set to true to print additional information");
 
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",
@@ -62,42 +61,12 @@ Executioner::Executioner(const InputParameters & parameters)
     PerfGraphInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _feproblem_solve(*this),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
-    _verbose(getParam<bool>("verbose")),
-    _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
+    _verbose(getParam<bool>("verbose"))
 {
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
-
-  auto & nl = _fe_problem.getNonlinearSystemBase();
-
-  // Check whether the user has explicitly requested automatic scaling and is using a solve type
-  // without a matrix. If so, then we warn them
-  if ((_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling")) &&
-      _fe_problem.solverParams()._type == Moose::ST_JFNK)
-  {
-    paramWarning("automatic_scaling",
-                 "Automatic scaling isn't implemented for the case where you do not have a "
-                 "preconditioning matrix. No scaling will be applied");
-    _fe_problem.automaticScaling(false);
-  }
-  else
-    // Check to see whether automatic_scaling has been specified anywhere, including at the
-    // application level. No matter what: if we don't have a matrix, we don't do scaling
-    _fe_problem.automaticScaling((isParamValid("automatic_scaling")
-                                      ? getParam<bool>("automatic_scaling")
-                                      : getMooseApp().defaultAutomaticScaling()) &&
-                                 (_fe_problem.solverParams()._type != Moose::ST_JFNK));
-
-  nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
-  nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
-  if (isParamValid("scaling_group_variables"))
-    nl.scalingGroupVariables(
-        getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
-
-  _fe_problem.numGridSteps(_num_grid_steps);
 
   // Instantiate the SolveObject for the fixed point iteration algorithm
   if (_iteration_method == "picard")

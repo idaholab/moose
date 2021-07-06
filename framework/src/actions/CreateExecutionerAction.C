@@ -56,7 +56,8 @@ CreateExecutionerAction::act()
                "EigenProblem, and Steady and Transient need a FEProblem");
 
   // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
-  if (_auto_preconditioning && !_awh.hasActions("add_preconditioning"))
+  if (_auto_preconditioning && !_awh.hasActions("add_preconditioning") &&
+      _moose_object_pars.isParamValid("solve_type"))
     setupAutoPreconditioning();
 
   _app.setExecutioner(std::move(executioner));

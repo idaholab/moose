@@ -100,7 +100,6 @@ FEProblemSolve::validParams()
       "Whether the scaling factors should only be computed once at the beginning of the simulation "
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
-  params.addParam<bool>("verbose", false, "Set to true to print additional information");
   params.addRangeCheckedParam<Real>(
       "resid_vs_jac_scaling_param",
       0,
@@ -128,7 +127,9 @@ FEProblemSolve::validParams()
 }
 
 FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : SolveObject(ex), _splitting(getParam<std::vector<std::string>>("splitting"))
+  : SolveObject(ex),
+    _splitting(getParam<std::vector<std::string>>("splitting")),
+    _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
       _moose_line_searches.end())
@@ -182,11 +183,47 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   _nl.setDecomposition(_splitting);
+
+  // Check whether the user has explicitly requested automatic scaling and is using a solve type
+  // without a matrix. If so, then we warn them
+  if ((_pars.isParamSetByUser("automatic_scaling") && getParam<bool>("automatic_scaling")) &&
+      _problem.solverParams()._type == Moose::ST_JFNK)
+  {
+    paramWarning("automatic_scaling",
+                 "Automatic scaling isn't implemented for the case where you do not have a "
+                 "preconditioning matrix. No scaling will be applied");
+    _problem.automaticScaling(false);
+  }
+  else
+    // Check to see whether automatic_scaling has been specified anywhere, including at the
+    // application level. No matter what: if we don't have a matrix, we don't do scaling
+    _problem.automaticScaling((isParamValid("automatic_scaling")
+                                   ? getParam<bool>("automatic_scaling")
+                                   : getMooseApp().defaultAutomaticScaling()) &&
+                              (_problem.solverParams()._type != Moose::ST_JFNK));
+
+  _nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
+  _nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
+  if (isParamValid("scaling_group_variables"))
+    _nl.scalingGroupVariables(
+        getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
+
+  _problem.numGridSteps(_num_grid_steps);
 }
 
 bool
 FEProblemSolve::solve()
 {
-  _problem.solve();
+  // This loop is for nonlinear multigrids (developed by Alex)
+  for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
+  {
+    _problem.solve();
+
+    if (!_problem.converged())
+      return false;
+
+    if (grid_step != _num_grid_steps)
+      _problem.uniformRefine();
+  }
   return _problem.converged();
 }

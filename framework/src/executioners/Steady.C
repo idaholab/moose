@@ -25,6 +25,7 @@ Steady::validParams()
 {
   InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for steady-state simulations.");
+  params += FEProblemSolve::validParams();
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }
@@ -32,6 +33,7 @@ Steady::validParams()
 Steady::Steady(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
+    _feproblem_solve(*this),
     _system_time(getParam<Real>("time")),
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
@@ -83,18 +85,12 @@ Steady::execute()
 #endif // LIBMESH_ENABLE_AMR
     _problem.timestepSetup();
 
-    for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
+    _last_solve_converged = _fixed_point_solve->solve();
+
+    if (!lastSolveConverged())
     {
-      _last_solve_converged = _fixed_point_solve->solve();
-
-      if (!lastSolveConverged())
-      {
-        _console << "Aborting as solve did not converge\n";
-        break;
-      }
-
-      if (grid_step != _num_grid_steps)
-        _problem.uniformRefine();
+      _console << "Aborting as solve did not converge\n";
+      break;
     }
 
     _problem.computeIndicators();

@@ -11,7 +11,7 @@
 
 #include "libmesh/libmesh_config.h"
 
-#include "Steady.h"
+#include "Executioner.h"
 
 class InputParameters;
 class Eigenvalue;
@@ -56,6 +56,11 @@ public:
    */
   virtual void checkIntegrity();
 
+  /**
+   * Get the number of grid sequencing steps
+   */
+  unsigned int numGridSteps() const { return _feproblem_solve.numGridSteps(); }
+
 private:
   /**
    * Prepare right petsc options
@@ -65,6 +70,10 @@ private:
 
 protected:
   EigenProblem & _eigen_problem;
+
+  /// inner-most solve object to perform Newton solve with SLEPc
+  FEProblemSolve _feproblem_solve;
+
   /// Postprocessor value that scales solution when eigensolve is finished
   const PostprocessorValue * const _normalization;
 

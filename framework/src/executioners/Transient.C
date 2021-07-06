@@ -45,6 +45,8 @@ Transient::validParams()
   InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for time varying simulations.");
 
+  params += FEProblemSolve::validParams();
+
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
 
@@ -134,6 +136,7 @@ Transient::validParams()
 Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
+    _feproblem_solve(*this),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _t_step(_problem.timeStep()),
@@ -425,21 +428,15 @@ Transient::takeStep(Real input_dt)
 
   _problem.onTimestepBegin();
 
-  for (MooseIndex(_num_grid_steps) step = 0; step <= _num_grid_steps; ++step)
+  _time_stepper->step();
+  _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
+
+  _last_solve_converged = _time_stepper->converged();
+
+  if (!lastSolveConverged())
   {
-    _time_stepper->step();
-    _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
-
-    _last_solve_converged = _time_stepper->converged();
-
-    if (!lastSolveConverged())
-    {
-      _console << "Aborting as solve did not converge\n";
-      break;
-    }
-
-    if (step != _num_grid_steps)
-      _problem.uniformRefine();
+    _console << "Aborting as solve did not converge\n";
+    return;
   }
 
   if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
