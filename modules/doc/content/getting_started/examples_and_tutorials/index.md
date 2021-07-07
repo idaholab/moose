@@ -71,35 +71,21 @@ The following example combines the Heat Conduction, Tensor Mechanics, and Stocha
 
 ## Tutorials
 
-!col! small=1 medium=1 large=1
-!style halign=center
-[!icon!school]
-!col-end!
-
-!col! small=11 medium=11 large=11
+!alert tip prefix=False title=[tutorial01_app_development/index.md]
 [tutorial01_app_development/index.md]\\
 Learn how to develop a MOOSE-based application to solve coupled systems of differential equations in a multiphysics setting. This tutorial teaches you how to create custom MOOSE objects, setup input files to invoke these objects, and how to process and visualize the results of your simulations.
-!col-end!
 
-!col! small=1 medium=1 large=1
-!style halign=center
-[!icon!school]
-!col-end!
-
-!col! small=11 medium=11 large=11
+!alert tip prefix=False title=[tutorial02_multiapps/index.md]
 [tutorial02_multiapps/index.md]\\
 Learn how to use the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems to couple many multiphysics applications together across differing time or length scales.
-!col-end!
 
-!col! small=1 medium=1 large=1
-!style halign=center
-[!icon!school]
-!col-end!
+!alert tip prefix=False title=[tutorial03_verification/index.md]
+[tutorial03_verification/index.md]\\
+Demonstrate the use of analytical solutions and the [!ac](MMS) for code verification.
 
-!col! small=11 medium=11 large=11
+!alert tip prefix=False title=Porous Flow Tutorial
 [Porous Flow Tutorial](modules/porous_flow/tutorial_00.md)\\
 This tutorial guides the user through some commonly-used aspects of the [Porous Flow](modules/porous_flow/index.md) module. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
-!col-end!
 
 ## Workshop id=workshop
 
