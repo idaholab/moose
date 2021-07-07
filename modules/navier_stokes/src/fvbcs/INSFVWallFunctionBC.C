@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+Find_U_Star//* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -12,7 +12,7 @@
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
 ADReal
-find_u_star(Real mu, Real rho, ADReal u, ADReal dist)
+Find_U_Star(Real mu, Real rho, ADReal u, ADReal dist)
 {
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-7};

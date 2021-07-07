@@ -12,7 +12,7 @@
 registerMooseObject("NavierStokesApp", WallFunctionYPlusAux);
 
 ADReal
-find_u_star2(Real mu, Real rho, ADReal u, Real dist)
+Find_U_Star2(Real mu, Real rho, ADReal u, Real dist)
 {
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-6};
@@ -128,7 +128,7 @@ WallFunctionYPlusAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = find_u_star2(_mu[_qp].value(), _rho, parallel_speed, dist);
+  ADReal u_star = Find_U_Star2(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
 
   return (dist * u_star * _rho / _mu[_qp]).value();
