@@ -48,8 +48,10 @@ ThermalContactAction::validParams()
       "GapValueAux",
       "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
-  params.addParam<std::vector<BoundaryName>>("primary", "The primary surface");
-  params.addRequiredParam<std::vector<BoundaryName>>("secondary", "The secondary surface");
+  params.addParam<std::vector<BoundaryName>>(
+      "primary", "The list of boundary IDs referring to primary sidesets");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "secondary", "The list of boundary IDs referring to secondary sidesets");
   params.addRangeCheckedParam<Real>("tangential_tolerance",
                                     "tangential_tolerance>=0",
                                     "Tangential distance to extend edges of contact surfaces");

@@ -2,8 +2,7 @@
 
 ## Description
 
-The `ThermalContactAction` action sets up the set of models used to enforce thermal contact across two surfaces. See the description,
-example use, and parameters on the [ThermalContact](syntax/ThermalContact/index.md) system documentation page.
+The `ThermalContactAction` action sets up the set of models used to enforce thermal contact across two surfaces using a node on face approach. See the description, example use, and parameters on the [ThermalContact](syntax/ThermalContact/index.md) system documentation page.
 
 ### Gap offset parameters
 
