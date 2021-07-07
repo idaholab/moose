@@ -92,9 +92,12 @@ The `system` parameter is deprecated and currently defaults to `Constraint`.
 
 Gap offset can be provided to the current contact formulation enforced using the [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md). It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). Use of these gap offset parameters treats the surfaces as if they were virtually extended (positive offset value) or narrowed (negative offset value) by the specified amount, so that the surfaces are treated as if they are closer or further away than they actually are. There is no deformation within the material in this gap offset region.
 
-## Multiple contact pairs (node/face)
+## Multiple contact pairs
 
 Users may need to set up mechanical contact between multiple contact pairs. For that application, users can provide arrays of primary and secondary boundary names which will match consecutively to define mechanical contact pairs. The same contact-related input parameters will be applied to all contact pairs defined in the action input. 
+
+!alert note
+The multiple contact pairs feature is not yet available for mortar contact.
 
 !listing test/tests/multiple_contact_pairs/multiple_pairs.i block=Contact
 
