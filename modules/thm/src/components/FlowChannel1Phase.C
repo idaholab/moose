@@ -11,15 +11,6 @@ InputParameters
 FlowChannel1Phase::validParams()
 {
   InputParameters params = FlowChannelBase::validParams();
-  params.addRequiredParam<FunctionName>(
-      "A", "Area of the flow channel, can be a constant or a function [m^2]");
-  params.addParam<Real>("roughness", 0.0, "Roughness [m]");
-  params.addParam<FunctionName>("f", "Wall friction factor [-]");
-
-  params.addParam<MooseEnum>("heat_transfer_geom",
-                             FlowChannel1Phase::getConvHeatTransGeometry("PIPE"),
-                             "Convective heat transfer geometry");
-  params.addParam<Real>("PoD", 1, "Pitch to diameter ratio for parallel bundle heat transfer [-]");
 
   params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel [Pa]");
   params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel [m/s]");
