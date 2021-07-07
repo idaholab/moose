@@ -21,17 +21,17 @@ protected:
   /// Number of values to average
   const unsigned int _n_values;
   /// Wall temperature values from the individual sources to average
-  std::vector<const VariableValue *> _T_wall_sources;
+  std::vector<const ADVariableValue *> _T_wall_sources;
   /// Wall heat transfer coefficient values from the individual sources to average
   std::vector<const ADMaterialProperty<Real> *> _Hw_sources;
   /// Heated perimeter values from the individual sources to average
-  std::vector<const VariableValue *> _P_hf_sources;
+  std::vector<const ADVariableValue *> _P_hf_sources;
   /// Average wall heat transfer coefficient
   const ADMaterialProperty<Real> & _Hw_average;
   /// Fluid temperature
-  const VariableValue & _T_fluid;
+  const ADVariableValue & _T_fluid;
   /// Total heated perimeter
-  const VariableValue & _P_hf_total;
+  const ADVariableValue & _P_hf_total;
 
 public:
   static InputParameters validParams();

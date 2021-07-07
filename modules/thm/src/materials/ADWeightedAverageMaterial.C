@@ -34,7 +34,7 @@ ADWeightedAverageMaterial::ADWeightedAverageMaterial(const InputParameters & par
   for (unsigned int i = 0; i < _n_values; i++)
   {
     _values.push_back(&getADMaterialPropertyByName<Real>(prop_names[i]));
-    _weights.push_back(&coupledValue("weights", i));
+    _weights.push_back(&adCoupledValue("weights", i));
   }
 }
 

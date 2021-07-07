@@ -15,7 +15,7 @@ ADHydraulicDiameterCircularMaterial::ADHydraulicDiameterCircularMaterial(
     const InputParameters & parameters)
   : Material(parameters),
     _D_h(declareADProperty<Real>(FlowModel::HYDRAULIC_DIAMETER)),
-    _area(coupledValue("A"))
+    _area(adCoupledValue("A"))
 {
 }
 

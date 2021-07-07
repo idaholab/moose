@@ -20,7 +20,7 @@ ADSolidMaterial::ADSolidMaterial(const InputParameters & parameters)
     _thermal_conductivity(declareADProperty<Real>(HeatConductionModel::THERMAL_CONDUCTIVITY)),
     _specific_heat(declareADProperty<Real>(HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE)),
     _density(declareADProperty<Real>(HeatConductionModel::DENSITY)),
-    _temp(coupledValue("T")),
+    _temp(adCoupledValue("T")),
     _props(getUserObject<SolidMaterialProperties>("properties"))
 {
 }
@@ -28,7 +28,7 @@ ADSolidMaterial::ADSolidMaterial(const InputParameters & parameters)
 void
 ADSolidMaterial::computeQpProperties()
 {
-  _thermal_conductivity[_qp] = _props.k(_temp[_qp]);
-  _specific_heat[_qp] = _props.cp(_temp[_qp]);
-  _density[_qp] = _props.rho(_temp[_qp]);
+  _thermal_conductivity[_qp] = _props.k(MetaPhysicL::raw_value(_temp[_qp]));
+  _specific_heat[_qp] = _props.cp(MetaPhysicL::raw_value(_temp[_qp]));
+  _density[_qp] = _props.rho(MetaPhysicL::raw_value(_temp[_qp]));
 }
