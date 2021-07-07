@@ -134,7 +134,7 @@ Concerns from many of the stakeholders are similar. These concerns include corre
 and performance. The mitigation plan for each of these can be addressed. For correctness, [!ac](MOOSE)
 development requires either regression or unit testing for all new code added to the repository.
 The project contains several comparisons against analytical solutions where possible and also
-other verification methods such as [MMS](/mms.md optional=True). For stability, [!ac](MOOSE) maintains
+other verification methods such as [MMS](python/mms.md optional=True). For stability, [!ac](MOOSE) maintains
 multiple branches to incorporate several layers of testing both internally and for dependent
 applications. Finally, performance tests are also performed as part of the the normal testing suite
 to monitor code change impacts to performance.
