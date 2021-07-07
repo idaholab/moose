@@ -12,7 +12,7 @@
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
 ADReal
-Find_U_Star(Real mu, Real rho, ADReal u, ADReal dist)
+findUStar(Real mu, Real rho, ADReal u, ADReal dist)
 {
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-7};
@@ -42,6 +42,8 @@ InputParameters
 INSFVWallFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription(
+      "Implements a wall shear BC for the momentum equation based on algebraic standard velocity wall functions.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -100,7 +102,7 @@ INSFVWallFunctionBC::computeQpResidual()
     return parallel_speed;
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = Find_U_Star(_mu[_qp].value(), _rho, parallel_speed, dist);
+  ADReal u_star = findUStar(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
 
   // Compute the shear stress component for this momentum equation
