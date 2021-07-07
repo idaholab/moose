@@ -2,6 +2,8 @@
 
 ## MortarConstraints
 
+The mortar system in MOOSE uses a segment-based approach for evaluation of mortar integrals; for information on the automatic generation of mortar segment meshes see [AutomaticMortarGeneration](https://github.com/idaholab/moose/framework/doc/content/source/constraints/AutomaticMortarGeneration.md)
+
 ### Overview
 
 An excellent overview of the conservative mortar constraint implementation in MOOSE is given in
@@ -81,12 +83,6 @@ There are also some optional parameters that can be supplied to
   projection, from outward to inward facing.
 
 At present, either the `secondary_variable` or `primary_variable` parameter must be supplied.
-
-### Limitations
-
-Unfortunately the mortar system does not currently work in three dimensions. It
-is on the to-do list, but it will require a significant amount of work to get
-all the projections correct.
 
 !syntax list /Constraints objects=True actions=False subsystems=False
 
