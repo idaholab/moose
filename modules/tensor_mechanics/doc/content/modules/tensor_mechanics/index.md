@@ -84,6 +84,7 @@ introductory theory pages on the various models:
 
 - [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
 - [Smeared Cracking](/ComputeSmearedCrackingStress.md)
+- [Phase-Field Model for Fracture](/PhaseFieldFracture.md)
 - [Multiple Inelastic Stresses](/ComputeMultipleInelasticStress.md)
 - [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 - [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
