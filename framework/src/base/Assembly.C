@@ -162,7 +162,9 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_lower_helper[dim])->get_JxW();
   }
 
-  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
+  _fe_msm = (_mesh_dimension == 2)
+                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
+                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
   _JxW_msm = &_fe_msm->get_JxW();
   // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
   // _coord_msm
