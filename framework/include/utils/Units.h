@@ -54,8 +54,10 @@ public:
   /// checks if the units are dimensionally conforming (i.e. the describe the same physical quanitity)
   bool conformsTo(const MooseUnits &) const;
 
-  /// Converts `from_value` in units of `from_units` to value this units
+  // @{ Converts `from_value` in units of `from_units` to value this units
   Real convert(Real from_value, const MooseUnits & from_unit) const;
+  ADReal convert(ADReal from_value, const MooseUnits & from_unit) const;
+  // @}
 
   /// parse a unit string into a MooseUnits object
   void parse(const std::string & unit_string);
