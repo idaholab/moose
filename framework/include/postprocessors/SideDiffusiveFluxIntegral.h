@@ -42,8 +42,8 @@ protected:
 
 private:
   /// Routine to get the diffusive flux with a Real diffusivity
-  RealVectorValue diffusivity_gradient_product(RealVectorValue grad_u, Real diffusivity);
+  RealVectorValue DiffusivityGradientProduct(RealVectorValue grad_u, Real diffusivity);
 
   /// Routine to get the diffusive flux with a RealVectorValue diffusivity
-  RealVectorValue diffusivity_gradient_product(RealVectorValue grad_u, RealVectorValue diffusivity);
+  RealVectorValue DiffusivityGradientProduct(RealVectorValue grad_u, RealVectorValue diffusivity);
 };

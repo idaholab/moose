@@ -57,19 +57,26 @@
 
   [./mat_props_vector]
     type = GenericConstantVectorMaterial
-    boundary = right
+    boundary = 'right top'
     prop_names = diffusivity_vec
-    prop_values = '1 1 1'
+    prop_values = '1 1.5 1'
   [../]
 []
 
 [Postprocessors]
+  inactive = 'avg_flux_top'
   [./avg_flux_right]
     # Computes -\int(exp(y)+1) from 0 to 1 which is -2.718281828
     type = SideDiffusiveFluxIntegral
     variable = u
     boundary = right
     diffusivity = diffusivity
+  [../]
+  [./avg_flux_top]
+    type = SideVectorDiffusivityFluxIntegral
+    variable = u
+    boundary = top
+    diffusivity = diffusivity_vec
   [../]
 []
 
