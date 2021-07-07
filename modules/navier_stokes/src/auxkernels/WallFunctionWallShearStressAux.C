@@ -14,10 +14,10 @@ registerMooseObject("NavierStokesApp", WallFunctionWallShearStressAux);
 ADReal
 find_u_star3(Real mu, Real rho, ADReal u, Real dist)
 {
-  constexpr int MAX_ITERS {50};
-  constexpr Real REL_TOLERANCE {1e-6};
+  constexpr int MAX_ITERS{50};
+  constexpr Real REL_TOLERANCE{1e-6};
 
-  constexpr Real von_karman {0.4187};
+  constexpr Real von_karman{0.4187};
 
   Real nu = mu / rho;
 
@@ -31,7 +31,8 @@ find_u_star3(Real mu, Real rho, ADReal u, Real dist)
 
     ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
     u_star = new_u_star;
-    if (rel_err < REL_TOLERANCE) return u_star;
+    if (rel_err < REL_TOLERANCE)
+      return u_star;
   }
 
   mooseError("Could not find the friction velocity for WallFunctionWallShearStressAux");
@@ -77,8 +78,8 @@ WallFunctionWallShearStressAux::computeValue()
   Point normal;
   for (unsigned int i_side = 0; i_side < elem.n_sides(); ++i_side)
   {
-    const std::vector<BoundaryID> side_bnds
-      = _subproblem.mesh().getBoundaryIDs(_current_elem, i_side);
+    const std::vector<BoundaryID> side_bnds =
+        _subproblem.mesh().getBoundaryIDs(_current_elem, i_side);
     for (const BoundaryName & name : _wall_boundary_names)
     {
       BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
