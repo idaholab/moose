@@ -166,8 +166,9 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
      * since finding intersection is ill-conditioned in this case. Dividing by
      * secondary_area is to non-dimensionalize before tolerancing
      */
-    auto is_inside = [&edg, cp](const Point & pt, Real tol)
-    { return pt(0) * edg(1) - pt(1) * edg(0) + cp < tol; };
+    auto is_inside = [&edg, cp](const Point & pt, Real tol) {
+      return pt(0) * edg(1) - pt(1) * edg(0) + cp < tol;
+    };
 
     // Loop through edges of target polygon (with previous clippings already included)
     for (auto j : make_range(input_poly.size()))
