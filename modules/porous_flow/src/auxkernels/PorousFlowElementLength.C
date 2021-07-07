@@ -17,7 +17,8 @@ PorousFlowElementLength::validParams()
   InputParameters params = AuxKernel::validParams();
 
   params.addCoupledVar("direction",
-                       "Direction (3-component vector) along which to compute the length");
+                       "Direction (3-component vector) along which to compute the length.  This "
+                       "may be 3 real numbers, or 3 variables.");
 
   params.addClassDescription(
       "AuxKernel to compute the 'length' of elements along a given direction.  A plane is "
@@ -49,8 +50,8 @@ PorousFlowElementLength::computeValue()
       RealVectorValue(_direction_x[_qp], _direction_y[_qp], _direction_z[_qp]).unit();
   const auto centroid = _current_elem->centroid();
   Real length = 0.0;
-  for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
-    length += std::abs((_current_elem->point(i) - centroid) * direction);
+  for (const auto & node : _current_elem->node_ref_range())
+    length += std::abs((node - centroid) * direction);
   length /= _current_elem->n_nodes();
   return length;
 }
