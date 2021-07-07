@@ -20,7 +20,7 @@ protected:
   ADMaterialProperty<Real> & _density;
 
   /// Temperature in the solid structure
-  const VariableValue & _temp;
+  const ADVariableValue & _temp;
   /// User object with material properties
   const SolidMaterialProperties & _props;
 

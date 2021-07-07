@@ -31,11 +31,11 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
   : Material(parameters),
     SlopeReconstruction1DInterface(this),
 
-    _A_avg(coupledValue("A_elem")),
-    _A_linear(coupledValue("A_linear")),
-    _rhoA_avg(coupledValue("rhoA")),
-    _rhouA_avg(coupledValue("rhouA")),
-    _rhoEA_avg(coupledValue("rhoEA")),
+    _A_avg(adCoupledValue("A_elem")),
+    _A_linear(adCoupledValue("A_linear")),
+    _rhoA_avg(adCoupledValue("rhoA")),
+    _rhouA_avg(adCoupledValue("rhouA")),
+    _rhoEA_avg(adCoupledValue("rhoEA")),
 
     _A_var(getVar("A_elem", 0)),
     _rhoA_var(getVar("rhoA", 0)),

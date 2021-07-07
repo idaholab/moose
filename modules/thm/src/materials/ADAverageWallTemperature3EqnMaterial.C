@@ -30,8 +30,8 @@ ADAverageWallTemperature3EqnMaterial::ADAverageWallTemperature3EqnMaterial(
     _T_wall(declareADProperty<Real>("T_wall")),
     _n_values(coupledComponents("T_wall_sources")),
     _Hw_average(getADMaterialProperty<Real>("Hw_average")),
-    _T_fluid(coupledValue("T_fluid")),
-    _P_hf_total(coupledValue("P_hf_total"))
+    _T_fluid(adCoupledValue("T_fluid")),
+    _P_hf_total(adCoupledValue("P_hf_total"))
 {
   // make sure that numbers of values are consistent
   if (getParam<std::vector<MaterialPropertyName>>("Hw_sources").size() != _n_values)
@@ -48,9 +48,9 @@ ADAverageWallTemperature3EqnMaterial::ADAverageWallTemperature3EqnMaterial(
       getParam<std::vector<MaterialPropertyName>>("Hw_sources");
   for (unsigned int i = 0; i < _n_values; i++)
   {
-    _T_wall_sources.push_back(&coupledValue("T_wall_sources", i));
+    _T_wall_sources.push_back(&adCoupledValue("T_wall_sources", i));
     _Hw_sources.push_back(&getADMaterialProperty<Real>(Hw_prop_names[i]));
-    _P_hf_sources.push_back(&coupledValue("P_hf_sources", i));
+    _P_hf_sources.push_back(&adCoupledValue("P_hf_sources", i));
   }
 }
 

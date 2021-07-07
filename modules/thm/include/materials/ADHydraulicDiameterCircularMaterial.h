@@ -15,7 +15,7 @@ protected:
 
   ADMaterialProperty<Real> & _D_h;
 
-  const VariableValue & _area;
+  const ADVariableValue & _area;
 
 public:
   static InputParameters validParams();
