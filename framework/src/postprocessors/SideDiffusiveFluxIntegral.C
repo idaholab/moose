@@ -62,26 +62,26 @@ SideDiffusiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
     const auto & grad_u = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
 
     // FIXME Get the diffusion coefficient on the face, see #16809
-    return -DiffusivityGradientProduct(grad_u, MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
+    return -diffusivityGradientProduct(grad_u, MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
            _normals[_qp];
   }
   else
-    return -DiffusivityGradientProduct(_grad_u[_qp], MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
+    return -diffusivityGradientProduct(_grad_u[_qp], MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
            _normals[_qp];
 }
 
 template <bool is_ad, typename T>
 RealVectorValue
-SideDiffusiveFluxIntegralTempl<is_ad, T>::DiffusivityGradientProduct(RealVectorValue grad_u,
-                                                                     Real diffusivity)
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivityGradientProduct(const RealVectorValue & grad_u,
+                                                                     const Real diffusivity)
 {
   return grad_u * diffusivity;
 }
 
 template <bool is_ad, typename T>
 RealVectorValue
-SideDiffusiveFluxIntegralTempl<is_ad, T>::DiffusivityGradientProduct(RealVectorValue grad_u,
-                                                                     RealVectorValue diffusivity)
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivityGradientProduct(
+    const RealVectorValue & grad_u, const RealVectorValue & diffusivity)
 {
   RealVectorValue d_grad_u = grad_u;
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
