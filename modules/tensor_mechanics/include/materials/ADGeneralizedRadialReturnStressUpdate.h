@@ -113,6 +113,11 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  /**
+   * Check if an anisotropic matrix is block diagonal
+   */
+  bool isBlockDiagonal(const AnisotropyMatrixReal & A);
+
 protected:
   virtual void initQpStatefulProperties() override;
 
