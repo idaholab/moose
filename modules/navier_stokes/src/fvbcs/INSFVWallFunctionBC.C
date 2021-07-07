@@ -1,4 +1,4 @@
-Find_U_Star//* This file is part of the MOOSE framework
+//* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -100,7 +100,7 @@ INSFVWallFunctionBC::computeQpResidual()
     return parallel_speed;
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = find_u_star(_mu[_qp].value(), _rho, parallel_speed, dist);
+  ADReal u_star = Find_U_Star(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
 
   // Compute the shear stress component for this momentum equation
