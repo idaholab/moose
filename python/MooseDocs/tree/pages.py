@@ -13,7 +13,8 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
-@mooseutils.addProperty('base', ptype=str)                  # set by Translator::init
+@mooseutils.addProperty('translator_uid', ptype=uuid.UUID)  # set by Translator.__init__()
+@mooseutils.addProperty('base', ptype=str)                  # set by Translator.init()
 @mooseutils.addProperty('source', ptype=str, required=True) # supplied source file/directory
 @mooseutils.addProperty('external', ptype=bool, default=False) # set by get_content.py used by appsyntax.py
 class Page(mooseutils.AutoPropertyMixin):

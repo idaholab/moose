@@ -95,7 +95,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # in ParallelBarrier it is a multiprocessing Manger.dict() object.
         self._global_attributes = dict()
 
-    def init(self, destination):
+    def init(self, destination, nodes):
         """Initialize the Page objects."""
 
         # Call Extension init() method
@@ -107,8 +107,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # Initialize Page objects
         LOG.info('Executing extension initPage() methods...')
         t = time.time()
-        for node in self._page_objects:
-
+        for node in nodes or self.getPages():
             # Setup destination and output extension
             node.base = destination
             if isinstance(node, pages.Source):
@@ -123,10 +122,18 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
         LOG.info('Executing extension initPage() methods complete [%s sec.]', time.time() - t)
 
-    def addPage(self, page):
+    def addPage(self, page, set_uid):
         """Add a Page object to be Translated."""
-        page._Page__unique_id = len(self._page_objects)
+        if set_uid:
+            page._Page__unique_id = len(self._page_objects)
         self._page_objects.append(page)
+
+    def removePage(self, page):
+        """Remove a Page object from the current list."""
+        for node in self._page_objects:
+            if node._Page__unique_id > page._Page__unique_id:
+                node._Page__unique_id -= 1
+        self._page_objects.remove(page)
 
     def getPages(self):
         """Return a list of Page objects."""
