@@ -98,12 +98,12 @@ The following table lists the additional arguments that may be passed to the "ev
 | Keyword | Type | Default | Description |
 | :- | :- | :- | :- |
 | `variable` | `str` | `u` | The primary variable to be solved for within the PDE |
-| `scalars` | `list` | | A list of constant +scalar+ variables included in the solution or PDE |
-| `vectors` | `list` | | A list of constant +vector+ variables included in the solution or PDE |
-| `functions` | `list` | | A list of arbitrary functions of 'x', 'y', 'z', and 't' in the solution or PDE |
-| `vectorfunctions` | `list` | | A list of arbitrary vector functions of 'x', 'y', 'z', and 't' in the solution or PDE |
+| `scalars` | `list` | A list of constant +scalar+ variables included in the solution or PDE |
+| `vectors` | `list` | A list of constant +vector+ variables included in the solution or PDE |
+| `functions` | `list` | A list of arbitrary functions of 'x', 'y', 'z', and 't' in the solution or PDE |
+| `vectorfunctions` | `list` | A list of arbitrary vector functions of 'x', 'y', 'z', and 't' in the solution or PDE |
 | `negative` | `bool` | `False` | Flag for returning the negative of the evaluated function, by default this is false thus the function returned is correct for placing in the [BodyForce](BodyForce.md) Kernel object. |
-| `**kwargs` | `dict` | | All additional key, value pairs supplied are evaluated as additional functions that may include the 'x', 'y', 'z', and 't' or any other variables defined in the previous arguments. If 'e_i', 'e_j', 'e_k' are supplied the supplied function components (e.g., '_x', '_y', and '_z') are automatically defined. |
+| `**kwargs` | `dict` | All additional key, value pairs supplied are evaluated as additional functions that may include the 'x', 'y', 'z', and 't' or any other variables defined in the previous arguments. If 'e_i', 'e_j', 'e_k' are supplied the supplied function components (e.g., '_x', '_y', and '_z') are automatically defined. |
 
 When arbitrary vectors are supplied, the output will include the components named using the
 vector name with "_x", "_y", or "_z". For example, the following example executed in

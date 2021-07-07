@@ -136,7 +136,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 page.base = self._translator.get('destination')
                 if isinstance(page, pages.Source):
                     page.output_extension = self._translator.renderer.EXTENSION
-                self._translator.addContent(page)
+                self._translator.addPage(page)
                 return page
 
 def main(options):
