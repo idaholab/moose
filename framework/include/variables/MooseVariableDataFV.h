@@ -171,8 +171,16 @@ public:
 
   const ADTemplateVariableValue<OutputType> & adUDotDot() const
   {
-    mooseError("An AD second derivative in time (`_ad_u_dotdot`) is not yet implemented for finite "
-               "volume variables.");
+    _need_ad = _need_ad_u_dotdot = true;
+
+    if (!_time_integrator)
+      // If we don't have a time integrator (this will be the case for variables that are a part of
+      // the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just going to
+      // copy the values from _u_dotdot. Of course in order to be able to do that we need to
+      // calculate _u_dotdot
+      _need_u_dotdot = true;
+
+    return _ad_u_dotdot;
   }
 
   const FieldVariableValue & uDot() const;
@@ -383,6 +391,7 @@ private:
   mutable bool _need_ad;
   mutable bool _need_ad_u;
   mutable bool _need_ad_u_dot;
+  mutable bool _need_ad_u_dotdot;
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_second_u;
 
@@ -450,7 +459,9 @@ private:
   ADTemplateVariableSecond<OutputShape> _ad_second_u;
   MooseArray<DualReal> _ad_dof_values;
   MooseArray<DualReal> _ad_dofs_dot;
+  MooseArray<DualReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputShape> _ad_u_dot;
+  ADTemplateVariableValue<OutputShape> _ad_u_dotdot;
 
   // time derivatives
 
