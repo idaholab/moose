@@ -8,75 +8,75 @@ www.mooseframework.org
 
 !---
 
-!include intro/inl_background.md
+!include workshop/intro/inl_background.md
 
 !---
 
-!include intro/moose_introduction.md
+!include workshop/intro/moose_introduction.md
 
 !---
 
-!include intro/moose_multiphysics.md
+!include workshop/intro/moose_multiphysics.md
 
 !---
 
-!include problem/overview.md
+!include workshop/problem/overview.md
 
 !---
 
-!include problem/summary.md
+!include workshop/problem/summary.md
 
 !---
 
-!include problem/step01.md
+!include workshop/problem/step01.md
 
 !---
 
-!include numerical/fem_overview.md
+!include workshop/numerical/fem_overview.md
 
 !---
 
-!include numerical/fem_shape.md
+!include workshop/numerical/fem_shape.md
 
 !---
 
-!include numerical/fem_solve.md
+!include workshop/numerical/fem_solve.md
 
 !---
 
-!include cpp/01_basics.md
+!include workshop/cpp/01_basics.md
 
 !---
 
-!include cpp/02_scope.md
+!include workshop/cpp/02_scope.md
 
 !---
 
-!include cpp/03_types.md
+!include workshop/cpp/03_types.md
 
 !---
 
-!include cpp/04_classes.md
+!include workshop/cpp/04_classes.md
 
 !---
 
-!include cpp/standards.md
+!include workshop/cpp/standards.md
 
 !---
 
-!include problem/step02.md end=end-intro
+!include workshop/problem/step02.md end=end-intro
 
 !---
 
-!include systems/mooseobject.md
+!include workshop/systems/mooseobject.md
 
 !---
 
-!include systems/inputparameters.md
+!include workshop/systems/inputparameters.md
 
 !---
 
-!include systems/kernels.md
+!include workshop/systems/kernels.md
 
 !---
 
@@ -84,31 +84,31 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step02.md start=end-intro
+!include workshop/problem/step02.md start=end-intro
 
 !---
 
-!include problem/laplace_young.md
+!include workshop/problem/laplace_young.md
 
 !---
 
-!include systems/mesh.md
+!include workshop/systems/mesh.md
 
 !---
 
-!include systems/outputs.md
+!include workshop/systems/outputs.md
 
 !---
 
-!include problem/step03.md end=end-intro
+!include workshop/problem/step03.md end=end-intro
 
 !---
 
-!include systems/materials.md
+!include workshop/systems/materials.md
 
 !---
 
-!include systems/functions.md
+!include workshop/systems/functions.md
 
 !---
 
@@ -116,19 +116,19 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step03.md start=end-intro
+!include workshop/problem/step03.md start=end-intro
 
 !---
 
-!include infrastructure/testing.md
+!include workshop/infrastructure/testing.md
 
 !---
 
-!include problem/step04.md end=end-intro
+!include workshop/problem/step04.md end=end-intro
 
 !---
 
-!include systems/auxkernels.md
+!include workshop/systems/auxkernels.md
 
 !---
 
@@ -136,23 +136,23 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step04.md start=end-intro
+!include workshop/problem/step04.md start=end-intro
 
 !---
 
-!include problem/step05.md end=end-steady
+!include workshop/problem/step05.md end=end-steady
 
 !---
 
-!include systems/executioners.md
+!include workshop/systems/executioners.md
 
 !---
 
-!include systems/timeintegrators.md
+!include workshop/systems/timeintegrators.md
 
 !---
 
-!include systems/timesteppers.md
+!include workshop/systems/timesteppers.md
 
 !---
 
@@ -160,11 +160,11 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step05.md start=start-transient end=end-transient
+!include workshop/problem/step05.md start=start-transient end=end-transient
 
 !---
 
-!include systems/boundaryconditions.md
+!include workshop/systems/boundaryconditions.md
 
 !---
 
@@ -172,19 +172,19 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step05.md start=start-bc
+!include workshop/problem/step05.md start=start-bc
 
 !---
 
-!include problem/step06.md
+!include workshop/problem/step06.md
 
 !---
 
-!include problem/step07.md end=end-intro
+!include workshop/problem/step07.md end=end-intro
 
 !---
 
-!include systems/adaptivity.md end=end-intro
+!include workshop/systems/adaptivity.md end=end-intro
 
 !---
 
@@ -192,23 +192,23 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step07.md start=end-intro
+!include workshop/problem/step07.md start=end-intro
 
 !---
 
-!include problem/step08.md end=end-intro
+!include workshop/problem/step08.md end=end-intro
 
 !---
 
-!include systems/userobjects.md
+!include workshop/systems/userobjects.md
 
 !---
 
-!include systems/postprocessors.md
+!include workshop/systems/postprocessors.md
 
 !---
 
-!include systems/vectorpostprocessors.md
+!include workshop/systems/vectorpostprocessors.md
 
 !---
 
@@ -216,15 +216,15 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step08.md start=end-intro
+!include workshop/problem/step08.md start=end-intro
 
 !---
 
-!include problem/step09.md end=end-intro
+!include workshop/problem/step09.md end=end-intro
 
 !---
 
-!include modules/index.md
+!include workshop/modules/modules.md
 
 !---
 
@@ -232,19 +232,19 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step09.md start=end-intro
+!include workshop/problem/step09.md start=end-intro
 
 !---
 
-!include problem/step10.md end=end-intro
+!include workshop/problem/step10.md end=end-intro
 
 !---
 
-!include systems/multiapps.md
+!include workshop/systems/multiapps.md
 
 !---
 
-!include systems/transfers.md
+!include workshop/systems/transfers.md
 
 !---
 
@@ -252,15 +252,15 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step10.md start=end-intro
+!include workshop/problem/step10.md start=end-intro
 
 !---
 
-!include problem/step11.md end=end-intro
+!include workshop/problem/step11.md end=end-intro
 
 !---
 
-!include systems/actions.md
+!include workshop/systems/actions.md
 
 !---
 
@@ -268,23 +268,23 @@ www.mooseframework.org
 
 ## (continued)
 
-!include problem/step11.md start=end-intro
+!include workshop/problem/step11.md start=end-intro
 
 !---
 
-!include infrastructure/mms.md
+!include workshop/infrastructure/mms.md
 
 !---
 
-!include infrastructure/debugging.md
+!include workshop/infrastructure/debugging.md
 
 !---
 
-!include infrastructure/restart.md
+!include workshop/infrastructure/restart.md
 
 !---
 
-!include systems/index.md
+!include workshop/systems/index.md
 
 !---
 

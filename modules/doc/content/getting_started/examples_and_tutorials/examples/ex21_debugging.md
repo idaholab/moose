@@ -1,6 +1,6 @@
 # Example 21: Debugging
 
-For a more in-depth discussion of debugging with MOOSE [see the Debugging Documentation](/debugging.md)
+For a more in-depth discussion of debugging with MOOSE [see the Debugging Documentation](application_development/debugging.md)
 
 - It's inevitable: at some point in your MOOSE application development career, you will create a bug.
 - Sometimes, print statements are sufficient to help you determine the cause of the error.

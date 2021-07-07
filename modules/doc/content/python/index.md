@@ -10,7 +10,7 @@ with MOOSE and [python/source/index.md] links to the source code documentation.
 | [TestHarness.md] | Tool testing that applications work correctly as code is developed. |
 | [memory_logger.md] | Tool for gathering memory usage of a running process. |
 | [CSVDiff.md] | Tool for computing differences between comma separated value (CSV) files. |
-| [mms.md] | Utilities for verifying solves with the method of manufactured solutions. |
+| [python/mms.md] | Utilities for verifying solves with the method of manufactured solutions. |
 | [free_energy.py](/CALPHAD_free_energies.md) | Tool for extracting MOOSE parsed function expressions from thermodynamic database files. |
 | [moosetree](moosetree/index.md) | Tool for building and searching tree structures. |
 | [pyhit](pyhit/index.md) | Tool for reading, writing, and manipulating MOOSE input files. |

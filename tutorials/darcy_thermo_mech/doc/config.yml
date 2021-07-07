@@ -33,7 +33,8 @@ Extensions:
     MooseDocs.extensions.media: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.include: default
-    MooseDocs.extensions.bibtex: default
+    MooseDocs.extensions.bibtex:
+        duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
     MooseDocs.extensions.katex:
         macros:
             \vec: "\\bar" # TODO: \vec doesn't render

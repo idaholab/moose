@@ -1,0 +1,8 @@
+Content:
+    workshop:
+        root_dir: !include tutorials/darcy_thermo_mech/doc/config.yml Content workshop root_dir
+        content:
+            - workshop/**
+
+Renderer: !include tutorials/darcy_thermo_mech/doc/config.yml Renderer
+Extensions: !include tutorials/darcy_thermo_mech/doc/config.yml Extensions
