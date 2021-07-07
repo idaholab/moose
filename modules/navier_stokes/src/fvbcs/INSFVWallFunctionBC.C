@@ -14,10 +14,10 @@ registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 ADReal
 find_u_star(Real mu, Real rho, ADReal u, ADReal dist)
 {
-  constexpr int MAX_ITERS {50};
-  constexpr Real REL_TOLERANCE {1e-7};
+  constexpr int MAX_ITERS{50};
+  constexpr Real REL_TOLERANCE{1e-7};
 
-  constexpr Real von_karman {0.4187};
+  constexpr Real von_karman{0.4187};
 
   Real nu = mu / rho;
 
@@ -31,7 +31,8 @@ find_u_star(Real mu, Real rho, ADReal u, ADReal dist)
 
     ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
     u_star = new_u_star;
-    if (rel_err < REL_TOLERANCE) return u_star;
+    if (rel_err < REL_TOLERANCE)
+      return u_star;
   }
 
   mooseError("Could not find the friction velocity for INSFVWallFunctionBC");
@@ -46,7 +47,8 @@ INSFVWallFunctionBC::validParams()
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addParam<Real>("rho", "fluid density");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
-  //params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
+  // params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid
+  // walls");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -84,8 +86,8 @@ INSFVWallFunctionBC::computeQpResidual()
     velocity(2) = _w_var->getElemValue(&elem);
 
   // Compute the velocity magnitude (parallel_speed) and
-  //direction of the tangential velocity component (parallel_dir)
-  ADReal dist = std::abs((fi.elemCentroid() - fi.faceCentroid())*_normal);
+  // direction of the tangential velocity component (parallel_dir)
+  ADReal dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * _normal);
   ADReal perpendicular_speed = velocity * _normal;
   ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * _normal;
   ADReal parallel_speed = parallel_velocity.norm();
@@ -102,11 +104,16 @@ INSFVWallFunctionBC::computeQpResidual()
   ADReal tau = u_star * u_star * _rho;
 
   // Compute the shear stress component for this momentum equation
-  if (_axis_index == 0) {
+  if (_axis_index == 0)
+  {
     return tau * parallel_dir(0);
-  } else if (_axis_index == 1) {
+  }
+  else if (_axis_index == 1)
+  {
     return tau * parallel_dir(1);
-  } else {
+  }
+  else
+  {
     return tau * parallel_dir(2);
   }
 }
