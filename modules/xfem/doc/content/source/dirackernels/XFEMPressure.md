@@ -15,6 +15,9 @@ the direction in which to apply the traction.
 The magnitude of the `Pressure` boundary condition can be specified as either a
 scalar (use the input parameter `factor`) or a `function` parameter.
 
+!alert note
+An XFEM interface can either be a material interface or a crack surface. This object works in both scenarios.
+
 ## Example Input Syntax
 
 !listing test/tests/pressure_bc/edge_2d_pressure.i block=DiracKernels
