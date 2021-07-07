@@ -40,7 +40,7 @@ AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
     _aqSTEP(getParam<int>("abaqus_step")),
     _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag())
 {
-  AbaqusUtils::setOutputDir(_app.getOutputFileBase(true));
+  AbaqusUtils::setInputFile(_app.getInputFileName());
   AbaqusUtils::setCommunicator(&_communicator);
 }
 

@@ -55,6 +55,26 @@
                   'number.'
   []
 
+  [getoutdir]
+    type = 'RunApp'
+    input = 'utility_functions.i'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
+    expect_out = 'getoutdir           1 \. '
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the simulation output directory.'
+  []
+
+  [getjobname]
+    type = 'RunApp'
+    input = 'utility_functions.i'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
+    expect_out = 'getjobname          17 utility_functions '
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the simulation job name.'
+  []
+
   [messages]
     requirement = 'The Abaqus UEXTERNALDB interface shall provide Abaqus compatible message routine '
                   'supporting the '
@@ -64,8 +84,8 @@
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
       cli_args = 'UserObjects/uexternaldb/abaqus_step=1 UserObjects/uexternaldb/execute_on=INITIAL'
-      expect_out = '\*\* Abaqus Info \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO    '
-                   ' !'
+      expect_out = '\*\* Abaqus Info \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
+                   'TWO     !'
       detail = 'info level.'
     []
     [warning]
@@ -74,7 +94,8 @@
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
       cli_args = 'UserObjects/uexternaldb/abaqus_step=2 UserObjects/uexternaldb/execute_on=INITIAL'
-      expect_out = '\*\* Abaqus Warning \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO     !'
+      expect_out = '\*\* Abaqus Warning \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
+                   'TWO     !'
       detail = 'warning level.'
     []
     [non_fatal]
@@ -83,7 +104,8 @@
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
       cli_args = 'UserObjects/uexternaldb/abaqus_step=3 UserObjects/uexternaldb/execute_on=INITIAL'
-      expect_out = '\*\* Abaqus Non-fatal Error \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO     !'
+      expect_out = '\*\* Abaqus Non-fatal Error \*\*\nInline message 1 2 0.100000 0.200000 0.300000 '
+                   'ONE      TWO     !'
       detail = 'non-fatal error level.'
     []
     [error]
@@ -92,7 +114,8 @@
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
       cli_args = 'UserObjects/uexternaldb/abaqus_step=4 UserObjects/uexternaldb/execute_on=INITIAL'
-      expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO     !'
+      expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
+                   '   !'
       detail = 'non-fatal error level.'
     []
   []
