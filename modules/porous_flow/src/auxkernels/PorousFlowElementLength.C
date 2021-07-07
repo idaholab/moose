@@ -32,6 +32,7 @@ PorousFlowElementLength::PorousFlowElementLength(const InputParameters & paramet
   : AuxKernel(parameters),
     _num_direction(coupledComponents("direction")),
     _direction_x(coupledValue("direction", 0)),
+    // if _num_direction!=3,an informative error message is produced below
     _direction_y(coupledValue("direction", std::min(_num_direction - 1, (unsigned)1))),
     _direction_z(coupledValue("direction", std::min(_num_direction - 1, (unsigned)2)))
 {

@@ -26,7 +26,7 @@ protected:
   virtual Real computeValue() override;
 
   /// Desired component
-  const int _component;
+  const unsigned _component;
   /// For 1D elements, the value computed will be perpendicular to this vector
   const RealVectorValue _1D_perp;
   /// Value used for 3D elements
