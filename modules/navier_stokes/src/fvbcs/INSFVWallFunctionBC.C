@@ -42,8 +42,8 @@ InputParameters
 INSFVWallFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
-  params.addClassDescription(
-      "Implements a wall shear BC for the momentum equation based on algebraic standard velocity wall functions.");
+  params.addClassDescription("Implements a wall shear BC for the momentum equation based on "
+                             "algebraic standard velocity wall functions.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
