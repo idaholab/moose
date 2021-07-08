@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#18022'
+  design = 'ThermalContactAction.md'
+  [multiple_contact_pairs]
+    type = CSVDiff
+    input = 'multiple_contact_pairs.i'
+    csvdiff = 'multiple_contact_pairs_out.csv'
+    abs_zero = 1.0e-6
+    rel_err = 1.0e-5
+    requirement = 'Heat transfer module action shall allow for providing multiple contact pairs.'
+  []
+[]
