@@ -218,16 +218,30 @@ ADHillPlasticityStressUpdate::computeHillTensorEigenDecomposition(const ADDenseM
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       A(index_i, index_j) = MetaPhysicL::raw_value(hill_tensor(index_i, index_j));
 
-  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es(A);
+  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixRealBlock> es(A.block<3, 3>(0, 0));
 
   auto lambda = es.eigenvalues();
   auto v = es.eigenvectors();
-  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-    _eigenvalues_hill(index_i) = lambda(index_i);
 
-  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-    for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      _eigenvectors_hill(index_i, index_j) = v(index_i, index_j);
+  _eigenvalues_hill(0) = lambda(0);
+  _eigenvalues_hill(1) = lambda(1);
+  _eigenvalues_hill(2) = lambda(2);
+  _eigenvalues_hill(3) = A(3, 3);
+  _eigenvalues_hill(4) = A(4, 4);
+  _eigenvalues_hill(5) = A(5, 5);
+
+  _eigenvectors_hill(0, 0) = v(0, 0);
+  _eigenvectors_hill(0, 1) = v(0, 1);
+  _eigenvectors_hill(0, 2) = v(0, 2);
+  _eigenvectors_hill(1, 0) = v(1, 0);
+  _eigenvectors_hill(1, 1) = v(1, 1);
+  _eigenvectors_hill(1, 2) = v(1, 2);
+  _eigenvectors_hill(2, 0) = v(2, 0);
+  _eigenvectors_hill(2, 1) = v(2, 1);
+  _eigenvectors_hill(2, 2) = v(2, 2);
+  _eigenvectors_hill(3, 3) = 1.0;
+  _eigenvectors_hill(4, 4) = 1.0;
+  _eigenvectors_hill(5, 5) = 1.0;
 }
 
 ADReal
