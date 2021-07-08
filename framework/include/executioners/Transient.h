@@ -204,9 +204,15 @@ public:
    */
   virtual void forceNumSteps(const unsigned int num_steps) { _num_steps = num_steps; }
 
+  /// Return the solve object wrapped by time stepper
+  virtual SolveObject * timeStepSolveObject() { return _fixed_point_solve.get(); }
+
 protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
+
+  /// inner-most solve object to perform Newton solve with PETSc on every time step
+  FEProblemSolve _feproblem_solve;
 
   /// Reference to nonlinear system base for faster access
   NonlinearSystemBase & _nl;

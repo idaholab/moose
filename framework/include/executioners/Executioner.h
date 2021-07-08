@@ -116,9 +116,6 @@ public:
    */
   virtual bool lastSolveConverged() const = 0;
 
-  /// Return the underlining FEProblemSolve object.
-  FEProblemSolve & feProblemSolve() { return _feproblem_solve; }
-
   /// Return underlying PicardSolve object.
   PicardSolve & picardSolve()
   {
@@ -149,9 +146,10 @@ public:
   const bool & verbose() const { return _verbose; }
 
   /**
-   * Get the number of grid sequencing steps
+   * Return supported iteration methods that can work with MultiApps on timestep_begin and
+   * timestep_end
    */
-  unsigned int numGridSteps() const { return _num_grid_steps; }
+  static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
 protected:
   /**
@@ -165,8 +163,6 @@ protected:
 
   FEProblemBase & _fe_problem;
 
-  FEProblemSolve _feproblem_solve;
-
   MooseEnum _iteration_method;
   std::unique_ptr<FixedPointSolve> _fixed_point_solve;
 
@@ -175,12 +171,4 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
-
-  /// The number of steps to perform in a grid sequencing algorithm. This is one
-  /// less than the number of grids requested by the user in their input,
-  /// e.g. if they requested num_grids = 1, then there won't be any steps
-  /// because we only need to perform one solve per time-step. Storing this
-  /// member in this way allows for easy boolean operations, e.g. if (_num_grid_steps)
-  /// as opposed to if (_num_grids)
-  const unsigned int _num_grid_steps;
 };

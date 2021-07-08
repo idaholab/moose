@@ -69,6 +69,7 @@
   fixed_point_rel_tol = 1E-3
   fixed_point_abs_tol = 1.0e-05
   fixed_point_max_its = 2
+  accept_on_max_fixed_point_iteration = true
 []
 
 [MultiApps]
