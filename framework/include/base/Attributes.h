@@ -285,19 +285,30 @@ private:
 class AttribPreAux : public Attribute
 {
 public:
-  typedef bool Key;
-  void setFrom(Key k) { _val = k; }
+  typedef unsigned int Key;
+  void setFrom(Key k)
+  {
+    _vals.clear();
+    _vals.push_back(k);
+  }
 
   AttribPreAux(TheWarehouse & w) : Attribute(w, "pre_aux") {}
-  AttribPreAux(TheWarehouse & w, bool pre_aux) : Attribute(w, "pre_aux"), _val(pre_aux) {}
+  AttribPreAux(TheWarehouse & w, unsigned int val) : Attribute(w, "pre_aux")
+  {
+    _vals.push_back(val);
+  }
+  AttribPreAux(TheWarehouse & w, const std::vector<unsigned int> & vals)
+    : Attribute(w, "pre_aux"), _vals(vals)
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
+  hashfunc(_vals);
   clonefunc(AttribPreAux);
 
 private:
-  bool _val = false;
+  std::vector<unsigned int> _vals;
 };
 
 /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
@@ -306,28 +317,33 @@ private:
 /// prevent multiple executions when it is queried in FEProblemBase::computeUserObjectsInternal()
 /// for a given exec flag time.
 ///
-/// By default, this attribute is set to true for all UOs by computeUserObjectsThread::groupUserObjects(),
-/// and thus all UOs would be executed with the Moose::POST_AUX group.
-///
-/// However, if either AttribPreIC or AttribPreAux is set to true, then this attribute is set
-/// to false, which prevents a UO from being, unnecesarily, executed along with more than one AuxGroup.
-///
 class AttribPostAux : public Attribute
 {
 public:
-  typedef bool Key;
-  void setFrom(Key k) { _val = k; }
+  typedef unsigned int Key;
+  void setFrom(Key k)
+  {
+    _vals.clear();
+    _vals.push_back(k);
+  }
 
   AttribPostAux(TheWarehouse & w) : Attribute(w, "post_aux") {}
-  AttribPostAux(TheWarehouse & w, bool post_aux) : Attribute(w, "post_aux"), _val(post_aux) {}
+  AttribPostAux(TheWarehouse & w, unsigned int val) : Attribute(w, "post_aux")
+  {
+    _vals.push_back(val);
+  }
+  AttribPostAux(TheWarehouse & w, const std::vector<unsigned int> & vals)
+    : Attribute(w, "post_aux"), _vals(vals)
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_val);
+  hashfunc(_vals);
   clonefunc(AttribPostAux);
 
 private:
-  bool _val = false;
+  std::vector<unsigned int> _vals;
 };
 
 class AttribName : public Attribute
