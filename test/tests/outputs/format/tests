@@ -233,7 +233,7 @@
   [./definition_childatleastone_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside/value"\s*?\]'
+    expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside"\s*?\]'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -366,6 +366,34 @@
     max_buffer_size = -1
     issues = '#14277'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_declarator_minoccurs_zero_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'Variables\'{.*?InputDefault="Variables".*?decl{.*?MinOccurs=0.*?ValEnums=\[ "Variables" \].*?}.*?\'active\'{.*?} % end parameter active.*?} % end block Variables'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#17324'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check declarator MinOccurs zero'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_eigen_matrix_type_maxoccurs_nolimit_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'prop_value\'{.*?InputTmpl=MooseParam.*?InputType=key_array.*?\'value\'{.*?MinOccurs=0.*?MaxOccurs=NoLimit.*?}.*?} % end parameter prop_value'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#17324'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Eigen::Matrix type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
