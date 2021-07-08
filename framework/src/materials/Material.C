@@ -33,7 +33,7 @@ Material::validParams()
 
 Material::Material(const InputParameters & parameters)
   : MaterialBase(parameters),
-    Coupleable(this, false),
+    NeighborCoupleable(this, false, false),
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),

@@ -1,0 +1,247 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "XFEMMaterialManager.h"
+
+#include "MooseMesh.h"
+#include "Material.h"
+#include "ExtraQPProvider.h"
+
+#include "libmesh/mesh_base.h"
+
+registerMooseObject("XFEMApp", XFEMMaterialManager);
+
+InputParameters
+XFEMMaterialManager::validParams()
+{
+  InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Manage the execution of stateful materials on extra QPs");
+  params.addRequiredParam<std::vector<std::string>>("material_names",
+                                                    "List of recompute material objects manage");
+  params.addRequiredParam<UserObjectName>("extra_qps", "Object that provides the extra QPs");
+  params.set<ExecFlagEnum>("execute_on") = "initial linear";
+  return params;
+}
+
+XFEMMaterialManager::XFEMMaterialManager(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
+    _mesh(_fe_problem.mesh().getMesh()),
+    _extra_qp_map(getUserObject<ExtraQPProvider>("extra_qps").getExtraQPMap())
+{
+}
+
+void
+XFEMMaterialManager::initialSetup()
+{
+  // get MaterialData entries for all listed material properties
+  for (auto name : getParam<std::vector<std::string>>("material_names"))
+  {
+    auto & material = getMaterialByName(name, /* no_warn = */ true);
+
+    // get the material properties
+    auto prop_list = material.getSuppliedItems();
+    for (auto & prop : prop_list)
+    {
+      // register managed property
+      _managed_properties.insert(std::make_pair(prop, _props.size()));
+
+      // get the property ID
+      unsigned int prop_id = _material_data->getPropertyId(prop);
+
+      // set up convenience links
+      _props.push_back(_material_data->props()[prop_id]);
+      _props_old.push_back(_material_data->propsOld()[prop_id]);
+      _props_older.push_back(_material_data->propsOlder()[prop_id]);
+    }
+
+    // add to list of materials we need to execute (mind the order!)
+    _materials.push_back(&material);
+  }
+
+  // allocate the history storage
+  _map = std::unique_ptr<HistoryStorage>(new HistoryStorage);
+  _map_old = std::unique_ptr<HistoryStorage>(new HistoryStorage);
+  _map_older = std::unique_ptr<HistoryStorage>(new HistoryStorage);
+}
+
+void
+XFEMMaterialManager::timestepSetup()
+{
+  // roll the history forward
+  if (_fe_problem.converged())
+  {
+    _map.swap(_map_old);
+    _map.swap(_map_older);
+  }
+}
+
+XFEMMaterialManager::~XFEMMaterialManager()
+{
+  // destroy extra QP stateful property storage
+  for (auto & item : *_map)
+    item.second.destroy();
+  for (auto & item : *_map_old)
+    item.second.destroy();
+  for (auto & item : *_map_older)
+    item.second.destroy();
+}
+
+void
+XFEMMaterialManager::rewind()
+{
+  // got back a time step (note: use of older is unreliable)
+  _map.swap(_map_older);
+  _map.swap(_map_old);
+}
+
+void
+XFEMMaterialManager::initialize()
+{
+}
+
+void
+XFEMMaterialManager::execute()
+{
+  // fetch all variable dependencies
+  std::set<MooseVariableFEBase *> var_dependencies;
+  for (auto & material : _materials)
+  {
+    auto & material_var_dependencies = material->getMooseVariableDependencies();
+    var_dependencies.insert(material_var_dependencies.begin(), material_var_dependencies.end());
+  }
+  _fe_problem.setActiveElementalMooseVariables(var_dependencies, 0);
+
+  // loop over all elements that have extra QPs
+  for (auto extra_qps : _extra_qp_map)
+  {
+    // number of extra QPs in this timestep
+    const auto n_extra_qps = extra_qps.second.size();
+
+    // fetch property history for this element
+    auto & item = (*_map)[extra_qps.first];
+    auto & item_old = (*_map_old)[extra_qps.first];
+    auto & item_older = (*_map_older)[extra_qps.first];
+
+    // number of extra QPs in the previous timestep (might have added QPs)
+    const auto n_old_extra_qps = item.size();
+    mooseAssert(n_old_extra_qps == item_old.size(), "Inconsistent history item sizes");
+    mooseAssert(n_old_extra_qps == item_older.size(), "Inconsistent history item sizes");
+
+    // make sure the items have room for the correct number of properties
+    while (item.size() < _props.size())
+      item.push_back(_props[item.size()]->init(n_extra_qps));
+    while (item_old.size() < _props_old.size())
+      item_old.push_back(_props_old[item_old.size()]->init(n_extra_qps));
+    while (item_older.size() < _props_older.size())
+      item_older.push_back(_props_older[item_older.size()]->init(n_extra_qps));
+
+    // make sure it has the number of quadrature points
+    item.resizeItems(n_extra_qps);
+    item_old.resizeItems(n_extra_qps);
+    item_older.resizeItems(n_extra_qps);
+
+    // reinit the element
+    const Elem * elem = _mesh.elem_ptr(extra_qps.first);
+    _fe_problem.setCurrentSubdomainID(elem, 0 /* tid */);
+    _fe_problem.reinitElemPhys(_mesh.elem_ptr(extra_qps.first), extra_qps.second, 0 /* tid */);
+
+    // if we added new QPs we need to initialize the history by calling initQpStatefulProperties
+    if (n_extra_qps > n_old_extra_qps)
+    {
+      for (auto & material : _materials)
+        material->initStatefulProperties(n_extra_qps);
+
+      // copy into history old position
+      for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+        for (unsigned int qp = n_old_extra_qps; qp < n_extra_qps; ++qp)
+          _props[i]->swap(item_old[i]);
+    }
+
+    // swap the history in for all properties
+    for (auto i = beginIndex(_props); i < _props.size(); ++i)
+      _props[i]->swap(item[i]);
+    for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+      _props_old[i]->swap(item_old[i]);
+    for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+      _props_older[i]->swap(item_older[i]);
+
+    // loop over QPs
+    for (unsigned int qp = 0; qp < extra_qps.second.size(); ++qp)
+      // loop over materials (may have to handle exceptions to swap properties back!)
+      for (auto & material : _materials)
+        material->computePropertiesAtQp(qp);
+
+    // swap the history in for all properties
+    for (auto i = beginIndex(_props); i < _props.size(); ++i)
+      _props[i]->swap(item[i]);
+    for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+      _props_old[i]->swap(item_old[i]);
+    for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+      _props_older[i]->swap(item_older[i]);
+  }
+}
+
+void
+XFEMMaterialManager::finalize()
+{
+}
+
+void
+XFEMMaterialManager::swapInProperties(dof_id_type elem_id)
+{
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
+
+  // swap the history in for all properties
+  for (auto i = beginIndex(_props); i < _props.size(); ++i)
+    _props[i]->swap(item[i]);
+  for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+    _props_old[i]->swap(item_old[i]);
+  for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+    _props_older[i]->swap(item_older[i]);
+}
+
+void
+XFEMMaterialManager::swapOutProperties(dof_id_type elem_id)
+{
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
+
+  // swap the history in for all properties
+  for (auto i = beginIndex(_props); i < _props.size(); ++i)
+    _props[i]->swap(item[i]);
+  for (auto i = beginIndex(_props_old); i < _props_old.size(); ++i)
+    _props_old[i]->swap(item_old[i]);
+  for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
+    _props_older[i]->swap(item_older[i]);
+}
+
+void
+XFEMMaterialManager::swapInProperties(dof_id_type elem_id) const
+{
+  const_cast<XFEMMaterialManager *>(this)->swapInProperties(elem_id);
+}
+
+void
+XFEMMaterialManager::swapOutProperties(dof_id_type elem_id) const
+{
+  const_cast<XFEMMaterialManager *>(this)->swapOutProperties(elem_id);
+}
+
+unsigned int
+XFEMMaterialManager::materialPropertyIndex(const std::string & name) const
+{
+  auto it = _managed_properties.find(name);
+  if (it == _managed_properties.end())
+    mooseError("Property '", name, "' is not managed by this object");
+
+  return it->second;
+}

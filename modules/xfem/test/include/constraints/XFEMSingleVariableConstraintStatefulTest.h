@@ -1,0 +1,53 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#pragma once
+
+#include "XFEMMaterialManagerConstraint.h"
+#include "MooseMesh.h"
+
+class XFEMSingleVariableConstraintStatefulTest : public XFEMMaterialManagerConstraint
+{
+public:
+  static InputParameters validParams();
+
+  XFEMSingleVariableConstraintStatefulTest(const InputParameters & parameters);
+
+  virtual void initialSetup() override;
+
+protected:
+  /**
+   * Set information needed for constraint integration
+   */
+  virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info) override;
+
+  /**
+   *  Compute the residual for one of the constraint quadrature points.
+   */
+  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+
+  /**
+   *  Compute the Jacobian for one of the constraint quadrature points.
+   */
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+
+  /// Vector normal to the internal interface
+  Point _interface_normal;
+
+  /// Stabilization parameter in Nitsche's formulation
+  Real _alpha;
+
+  /// Vector normal to the internal interface
+  Real _jump;
+
+  /// Vector normal to the internal interface
+  Real _jump_flux;
+
+  const std::string _base_name;
+  const MaterialProperty<Real> * _prop_jump;
+  const MaterialProperty<Real> * _prop_jump_old;
+};
