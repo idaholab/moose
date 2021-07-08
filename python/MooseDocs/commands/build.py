@@ -33,10 +33,9 @@ def command_line_options(subparser, parent):
     parser = subparser.add_parser('build', parents=[parent],
                                   help='Convert markdown into HTML or LaTeX.')
 
-    parser.add_argument('--config', default='config.yml',
-                        help="The primary configuration file.")
-    parser.add_argument('--subconfigs', default=[], nargs='*',
-                        help="A list of additional configuration files to build pages from.")
+    parser.add_argument('--config', nargs='+',
+                        default=[file for file in os.listdir() if file.endswith('config.yml')],
+                        help="The list of configuration files.")
     parser.add_argument('--args', default=None, type=lambda a: yaml.load(a, yaml.Loader),
                         help="YAML content to override configuration items supplied in file.")
     parser.add_argument('--disable', nargs='*', default=[],
@@ -91,7 +90,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         self._options = options
         self._translator = translator
 
-        self._config = yaml_load(options.config, root=MooseDocs.ROOT_DIR)
+        self._config = yaml_load(options.config[0], root=MooseDocs.ROOT_DIR)
 
         # Determine the directories to watch
         roots = set()
@@ -173,23 +172,27 @@ def main(options):
     if options.args is not None:
         mooseutils.recursive_update(kwargs, options.args)
 
-    # Create translators for the primary and sub configs, provide kwargs to override the configs
-    configs = [options.config] + options.subconfigs
+    # Create translators for the specified configuration files, provide kwargs to override them
+    configs = options.config if isinstance(options.config, list) else [options.config]
+    subconfigs = len(configs) > 1
+    LOG.info("Loading configuration file{}".format('s' if subconfigs else ''))
     translators, contents, _ = common.load_configs(configs, **kwargs)
 
-    # Initialize the primary (first) translator, including content from any subconfigs
+    # Initialize the primary (first) translator, including content designated for any subtranslators
     primary = translators[0]
+    if subconfigs:
+        LOG.info('Initializing translator object loaded from %s', configs[0])
     if options.destination:
         primary.update(destination=mooseutils.eval_path(options.destination))
     if options.profile:
         primary.executioner.update(profile=True)
-    primary.init()
+    primary.init(primary.getPages())
 
-    # For all translators loaded from subconfigs, initialize only content they're responsible for
-    for idx, translator in enumerate(translators[1:], 1):
-        LOG.info('Initializing translator object from {}'.format(configs[idx]))
+    # Initialize all subtranslators with only their designated content
+    for index, translator in enumerate(translators[1:], 1):
+        LOG.info('Initializing translator object loaded from %s', configs[index])
         translator.update(destination=primary['destination'], profile=primary['profile'])
-        translator.init(contents[idx])
+        translator.init(contents[index])
 
     # TODO: See `navigation.postExecute`
     #       The navigation "home" should be a markdown file, when all the apps update to this we
@@ -203,14 +206,18 @@ def main(options):
             if 'home' in ext:
                 ext.update(home=home)
 
-    # Dump page tree from primary translator
+    # Dump page tree from primary translator and syntax list from all translators with AppSyntax
     if options.dump:
-        for page in primary.getPages():
+        for page in sorted(primary.getPages(), key=(lambda p: p.local)):
             print('{}: {}'.format(page.local, page.source))
-        for ext in primary.extensions:
-            if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
-                ext.preExecute()
-                print(ext.syntax)
+        for index, translator in enumerate(translators):
+            for extension in translator.extensions:
+                if isinstance(extension, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
+                    if subconfigs:
+                        LOG.info('Building syntax list specified by %s', configs[index])
+                    extension.preExecute()
+                    print(extension.syntax)
+                    break
         return 0
 
     # Set default for --clean: clean when --files is NOT used.
@@ -224,15 +231,14 @@ def main(options):
         shutil.rmtree(primary['destination'])
 
     # Execute all translators to build the content each is responsible for
-    for idx, translator in enumerate(translators):
-        if options.subconfigs:
-            LOG.info('Building content from {}'.format(configs[idx]))
-
+    for index, translator in enumerate(translators):
+        if subconfigs:
+            LOG.info('Building content specified by %s', configs[index])
         if options.files:
-            func = lambda p: any([file.endswith(p) for file in options.files])
+            func = lambda p: any([f.endswith(p) for f in options.files if f in contents[index]])
             translator.execute(translator.findPages(func), options.num_threads)
         else:
-            translator.execute(contents[idx], options.num_threads)
+            translator.execute(contents[index], options.num_threads)
 
     # Run live server and watch for content changes
     #
