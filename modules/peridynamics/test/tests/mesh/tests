@@ -77,15 +77,28 @@
     issues = '#11561'
   [../]
 
-  [./2D_3D_generate_sidesets_partial_boundary]
+  [./2D_generate_sidesets_partial_boundary]
     type = 'Exodiff'
-    input = '2D_3D_sidesets_partial_boundary.i'
+    input = '2D_sidesets_partial_boundary.i'
     cli_args = '--mesh-only'
-    exodiff = '2D_3D_sidesets_partial_boundary_in.e'
+    exodiff = '2D_sidesets_partial_boundary_in.e'
     recover = false
     map = false
     requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
-                   based on sidesets of mixed 2D and 3D FE meshes with partial boundary for sidesets.'
+                   based on sidesets of 2D FE mesh with partial boundary for sidesets.'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#17723'
+  [../]
+
+  [./3D_generate_sidesets_partial_boundary]
+    type = 'Exodiff'
+    input = '3D_sidesets_partial_boundary.i'
+    cli_args = '--mesh-only'
+    exodiff = '3D_sidesets_partial_boundary_in.e'
+    recover = false
+    map = false
+    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+                   based on sidesets of 3D FE mesh with partial boundary for sidesets.'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#17723'
   [../]
@@ -103,5 +116,38 @@
                    both converted blocks and interface blocks'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#11561'
+  [../]
+
+  [./Error_nonexisting_blockID]
+    type = 'RunException'
+    input = 'Error_nonexisting_blockID.i'
+    cli_args = '--mesh-only'
+    expect_err = "Block ID 3 in the 'blocks_to_pd' does not exist in the FE mesh!"
+    requirement = 'MeshGeneratorPD shall generate related error message when
+                   the exception is caught during runtime'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#17723'
+  [../]
+
+  [./Error_wrong_bonding_blockID]
+    type = 'RunException'
+    input = 'Error_wrong_bonding_blockID.i'
+    cli_args = '--mesh-only'
+    expect_err = "Block ID 3 in the 'bonding_block_pairs' does not exist in the FE mesh!"
+    requirement = 'MeshGeneratorPD shall generate related error message when
+                   the exception is caught during runtime'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#17723'
+  [../]
+
+  [./Error_nonexisting_sideset]
+    type = 'RunException'
+    input = 'Error_nonexisting_sideset.i'
+    cli_args = '--mesh-only'
+    expect_err = "Sideset ID 3 in the 'sidesets_to_pd' does not exist in the finite element mesh!"
+    requirement = 'MeshGeneratorPD shall generate related error message when
+                   the exception is caught during runtime'
+    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    issues = '#17723'
   [../]
 []

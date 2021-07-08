@@ -30,7 +30,7 @@ MeshGeneratorPD::validParams()
   params.addParam<std::vector<SubdomainID>>(
       "blocks_as_fe",
       "IDs of the FE mesh blocks to not be converted to PD mesh. This should only be used when the "
-      "number of to-be-converted FE blocks is considerablely large.");
+      "number of to-be-converted FE blocks is considerably large.");
   params.addRequiredParam<bool>(
       "retain_fe_mesh", "Whether to retain the FE mesh or not after conversion into PD mesh");
   params.addParam<bool>(
@@ -41,12 +41,12 @@ MeshGeneratorPD::validParams()
       "sidesets_to_pd", "IDs of the FE sidesets to be reconstructed based on converted PD mesh");
   params.addParam<std::vector<std::vector<SubdomainID>>>(
       "bonding_block_pairs",
-      "List of FE block pairs between which inter-block bonds will be created after converted into "
-      "PD mesh");
+      "List of FE block pairs between which inter-block bonds will be created after being "
+      "converted into PD mesh");
   params.addParam<std::vector<std::vector<SubdomainID>>>(
       "non_bonding_block_pairs",
-      "List of FE block pairs between which inter-block bonds will NOT be created after converted "
-      "into PD mesh");
+      "List of FE block pairs between which inter-block bonds will NOT be created after being "
+      "converted into PD mesh");
   params.addParam<bool>(
       "merge_pd_blocks",
       false,
@@ -113,7 +113,8 @@ MeshGeneratorPD::MeshGeneratorPD(const InputParameters & parameters)
         getParam<std::vector<std::vector<SubdomainID>>>("bonding_block_pairs");
 
     for (unsigned int i = 0; i < id_pairs.size(); ++i)
-      _pd_bonding_blk_pairs.insert(std::make_pair(id_pairs[i][0] + 1000, id_pairs[i][1] + 1000));
+      _pd_bonding_blk_pairs.insert(std::make_pair(id_pairs[i][0] + _pd_blk_offset_number,
+                                                  id_pairs[i][1] + _pd_blk_offset_number));
   } // considered the renumbering of IDs of converted blocks
 
   _pd_non_bonding_blk_pairs.clear();
@@ -123,8 +124,8 @@ MeshGeneratorPD::MeshGeneratorPD(const InputParameters & parameters)
         getParam<std::vector<std::vector<SubdomainID>>>("non_bonding_block_pairs");
 
     for (unsigned int i = 0; i < id_pairs.size(); ++i)
-      _pd_non_bonding_blk_pairs.insert(
-          std::make_pair(id_pairs[i][0] + 1000, id_pairs[i][1] + 1000));
+      _pd_non_bonding_blk_pairs.insert(std::make_pair(id_pairs[i][0] + _pd_blk_offset_number,
+                                                      id_pairs[i][1] + _pd_blk_offset_number));
   } // considered the renumbering of IDs of converted blocks
 }
 
@@ -145,12 +146,12 @@ MeshGeneratorPD::generate()
   if (_has_blks_to_pd)
     for (const auto & blkit : _blks_to_pd)
       if (!all_fe_blks.count(blkit))
-        mooseError("Block ID ", blkit, " in the 'blocks_to_pd' doesnot exist in the FE mesh!");
+        mooseError("Block ID ", blkit, " in the 'blocks_to_pd' does not exist in the FE mesh!");
 
   if (_has_blks_as_fe)
     for (const auto & blkit : _blks_as_fe)
       if (!all_fe_blks.count(blkit))
-        mooseError("Block ID ", blkit, " in the 'blocks_as_fe' doesnot exist in the FE mesh!");
+        mooseError("Block ID ", blkit, " in the 'blocks_as_fe' does not exist in the FE mesh!");
 
   // the maximum FE block ID, which will be used in determine the block ID for interfacial bond in
   // the case of single interface block
@@ -176,21 +177,21 @@ MeshGeneratorPD::generate()
   {
     for (const auto & blk_pair : _pd_bonding_blk_pairs)
     {
-      if (!all_fe_blks.count(blk_pair.first - 1000))
+      if (!all_fe_blks.count(blk_pair.first - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.first - 1000,
-                   " in the 'bonding_block_pairs' doesnot exist in the FE mesh!");
-      if (!all_fe_blks.count(blk_pair.second - 1000))
+                   blk_pair.first - _pd_blk_offset_number,
+                   " in the 'bonding_block_pairs' does not exist in the FE mesh!");
+      if (!all_fe_blks.count(blk_pair.second - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.second - 1000,
-                   " in the 'bonding_block_pairs' doesnot exist in the FE mesh!");
-      if (!_blks_to_pd.count(blk_pair.first - 1000))
+                   blk_pair.second - _pd_blk_offset_number,
+                   " in the 'bonding_block_pairs' does not exist in the FE mesh!");
+      if (!_blks_to_pd.count(blk_pair.first - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.first - 1000,
+                   blk_pair.first - _pd_blk_offset_number,
                    " in the 'bonding_block_pairs' is a FE mesh block!");
-      if (!_blks_to_pd.count(blk_pair.second - 1000))
+      if (!_blks_to_pd.count(blk_pair.second - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.second - 1000,
+                   blk_pair.second - _pd_blk_offset_number,
                    " in the 'bonding_block_pairs' is a FE mesh block!");
     }
   }
@@ -198,21 +199,21 @@ MeshGeneratorPD::generate()
   if (_has_non_bonding_blk_pairs)
     for (const auto & blk_pair : _pd_non_bonding_blk_pairs)
     {
-      if (!all_fe_blks.count(blk_pair.first - 1000))
+      if (!all_fe_blks.count(blk_pair.first - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.first - 1000,
-                   " in the 'non_bonding_block_pairs' doesnot exist in the FE mesh!");
-      if (!all_fe_blks.count(blk_pair.second - 1000))
+                   blk_pair.first - _pd_blk_offset_number,
+                   " in the 'non_bonding_block_pairs' does not exist in the FE mesh!");
+      if (!all_fe_blks.count(blk_pair.second - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.second - 1000,
-                   " in the 'non_bonding_block_pairs' doesnot exist in the FE mesh!");
-      if (!_blks_as_fe.count(blk_pair.first - 1000))
+                   blk_pair.second - _pd_blk_offset_number,
+                   " in the 'non_bonding_block_pairs' does not exist in the FE mesh!");
+      if (!_blks_as_fe.count(blk_pair.first - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.first - 1000,
+                   blk_pair.first - _pd_blk_offset_number,
                    " in the 'non_bonding_block_pairs' is a FE mesh block!");
-      if (!_blks_as_fe.count(blk_pair.second - 1000))
+      if (!_blks_as_fe.count(blk_pair.second - _pd_blk_offset_number))
         mooseError("Block ID ",
-                   blk_pair.second - 1000,
+                   blk_pair.second - _pd_blk_offset_number,
                    " in the 'non_bonding_block_pairs' is a FE mesh block!");
     }
 
@@ -260,7 +261,7 @@ MeshGeneratorPD::generate()
       if (!all_fe_sidesets.count(sideset))
         mooseError("Sideset ID ",
                    sideset,
-                   " in the 'sidesets_to_pd' doesnot exist in the finite "
+                   " in the 'sidesets_to_pd' does not exist in the finite "
                    "element mesh!");
   }
   else // save the IDs of all FE sidesets, this will be updated to the converted FE block later
@@ -343,12 +344,12 @@ MeshGeneratorPD::generate()
         new_elem->set_id(new_elem_id);
         if (bid_i == bid_j) // assign block ID to PD non-inter-block bonds
           if (_merge_pd_blks)
-            new_elem->subdomain_id() = min_converted_fe_blk_id + 1000;
+            new_elem->subdomain_id() = min_converted_fe_blk_id + _pd_blk_offset_number;
           else
             new_elem->subdomain_id() = bid_i;
-        else if (_merge_pd_interfacial_blks) // assign block ID (max_fe_blk_id + 1 + 1000) to all PD
-                                             // inter-block bonds
-          new_elem->subdomain_id() = max_fe_blk_id + 1 + 1000;
+        else if (_merge_pd_interfacial_blks) // assign block ID (max_fe_blk_id + 1 +
+                                             // _pd_blk_offset_number) to all PD inter-block bonds
+          new_elem->subdomain_id() = max_fe_blk_id + 1 + _pd_blk_offset_number;
         else // assign a new block ID (node i blk ID + node j blk ID) to this PD inter-block bonds
           new_elem->subdomain_id() = bid_i + bid_j;
 
@@ -361,7 +362,7 @@ MeshGeneratorPD::generate()
   }
 
   if (_merge_pd_blks) // update PD node block ID if use single block ID for all PD blocks
-    pd_mesh.setNodeBlockID(min_converted_fe_blk_id + 1000);
+    pd_mesh.setNodeBlockID(min_converted_fe_blk_id + _pd_blk_offset_number);
 
   // then generate phantom elements for sidesets in PD mesh, this is optional
   std::map<std::pair<dof_id_type, dof_id_type>, std::set<dof_id_type>> elem_edge_nodes;
@@ -537,9 +538,9 @@ MeshGeneratorPD::generate()
               Elem * new_elem = new Tri3;
               new_elem->set_id(new_elem_id);
               if (_merge_pd_blks)
-                new_elem->subdomain_id() = min_converted_fe_blk_id + 10000;
+                new_elem->subdomain_id() = min_converted_fe_blk_id + _phantom_blk_offset_number;
               else
-                new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+                new_elem->subdomain_id() = old_elem->subdomain_id() + _phantom_blk_offset_number;
               new_elem = new_mesh->add_elem(new_elem);
               new_elem->set_node(0) = new_mesh->node_ptr(pd_nodes[0]);
               new_elem->set_node(1) = new_mesh->node_ptr(pd_nodes[1]);
@@ -547,9 +548,9 @@ MeshGeneratorPD::generate()
 
               ++new_elem_id;
 
-              new_boundary_info.add_side(new_elem, 0, 1000 + bidit);
+              new_boundary_info.add_side(new_elem, 0, _pd_blk_offset_number + bidit);
               if (old_boundary_info.get_sideset_name(bidit) != "")
-                new_boundary_info.sideset_name(1000 + bidit) =
+                new_boundary_info.sideset_name(_pd_blk_offset_number + bidit) =
                     "pd_side_" + old_boundary_info.get_sideset_name(bidit);
             }
           }
@@ -563,7 +564,7 @@ MeshGeneratorPD::generate()
                 old_elem->n_nodes() == 10) // original tetrahedral FE elements: 4-node or 10-node
             {
               // construct phantom element based on original tet mesh
-              mooseError("Peridynamics sideset generation doesn't accept tetrahedral elements!");
+              mooseError("Peridynamics sideset generation does not accept tetrahedral elements!");
             }
             else if (old_elem->n_nodes() == 8 || old_elem->n_nodes() == 20 ||
                      old_elem->n_nodes() ==
@@ -649,9 +650,11 @@ MeshGeneratorPD::generate()
                       new_elem->set_id(new_elem_id);
 
                       if (_merge_pd_blks)
-                        new_elem->subdomain_id() = min_converted_fe_blk_id + 10000;
+                        new_elem->subdomain_id() =
+                            min_converted_fe_blk_id + _phantom_blk_offset_number;
                       else
-                        new_elem->subdomain_id() = old_elem->subdomain_id() + 10000;
+                        new_elem->subdomain_id() =
+                            old_elem->subdomain_id() + _phantom_blk_offset_number;
 
                       new_elem = new_mesh->add_elem(new_elem);
                       new_elem->set_node(0) = new_mesh->node_ptr(pd_nodes[0]);
@@ -666,10 +669,10 @@ MeshGeneratorPD::generate()
 
                       ++new_elem_id;
 
-                      new_boundary_info.add_side(new_elem, 0, 1000 + bidit);
+                      new_boundary_info.add_side(new_elem, 0, _pd_blk_offset_number + bidit);
                       if (old_boundary_info.get_sideset_name(bidit) != "")
                       {
-                        new_boundary_info.sideset_name(1000 + bidit) =
+                        new_boundary_info.sideset_name(_pd_blk_offset_number + bidit) =
                             "pd_side_" + old_boundary_info.get_sideset_name(bidit);
                       }
                     }
@@ -709,7 +712,7 @@ MeshGeneratorPD::generate()
   // peridynamics ONLY accept nodesets and sidesets
   // nodeset consisting single node in the converted FE block will no longer be available
   if (old_boundary_info.n_edge_conds())
-    mooseError("PeridynamicsMesh doesn't support edgesets!");
+    mooseError("PeridynamicsMesh does not support edgesets!");
 
   // check the existence of nodesets, if exist, build sidesets in case this hasn't been done yet
   if (old_boundary_info.n_nodeset_conds())
@@ -739,9 +742,10 @@ MeshGeneratorPD::generate()
       if (elems_to_pd.count(beid)) // for converted FE mesh
       {
         // save corresponding boundaries on converted FE mesh to PD nodes
-        new_boundary_info.add_node(new_mesh->node_ptr(fe_elem_pd_node_map.at(beid)), sbid + 1000);
+        new_boundary_info.add_node(new_mesh->node_ptr(fe_elem_pd_node_map.at(beid)),
+                                   sbid + _pd_blk_offset_number);
         if (old_boundary_info.get_sideset_name(sbid) != "")
-          new_boundary_info.nodeset_name(sbid + 1000) =
+          new_boundary_info.nodeset_name(sbid + _pd_blk_offset_number) =
               "pd_nodes_" + old_boundary_info.get_sideset_name(sbid);
 
         if (_retain_fe_mesh) // if retained, copy the corresponding boundaries, if any, to new mesh
@@ -788,18 +792,19 @@ MeshGeneratorPD::generate()
       {
         ++j;
         SubdomainID real_blk_id =
-            blk_id + 1000; // account for the 1000 increment after converting to PD mesh
+            blk_id + _pd_blk_offset_number; // account for the _pd_blk_offset_number increment after
+                                            // converting to PD mesh
         if (pd_mesh.getNodeBlockID(i) == real_blk_id)
         {
-          new_boundary_info.add_node(new_mesh->node_ptr(i), 999 - j);
-          new_boundary_info.nodeset_name(999 - j) =
-              "pd_nodes_block_" + Moose::stringify(blk_id + 1000);
+          new_boundary_info.add_node(new_mesh->node_ptr(i), _pd_nodeset_offset_number - j);
+          new_boundary_info.nodeset_name(_pd_nodeset_offset_number - j) =
+              "pd_nodes_block_" + Moose::stringify(blk_id + _pd_blk_offset_number);
         }
       }
     }
 
-    new_boundary_info.add_node(new_mesh->node_ptr(i), 999);
-    new_boundary_info.nodeset_name(999) = "pd_nodes_all";
+    new_boundary_info.add_node(new_mesh->node_ptr(i), _pd_nodeset_offset_number);
+    new_boundary_info.nodeset_name(_pd_nodeset_offset_number) = "pd_nodes_all";
   }
 
   old_mesh.reset(); // destroy the old_mesh unique_ptr

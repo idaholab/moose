@@ -4,7 +4,7 @@
 
   [./fmg]
     type = FileMeshGenerator
-    file = cylinder_circle.e
+    file = cylinder.e
   [../]
   [./mgpd]
     type = MeshGeneratorPD
