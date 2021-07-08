@@ -397,4 +397,18 @@
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
+
+  [./definition_scraping_markers]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '%-START-SON-DEFINITION-%.*?%-END-SON-DEFINITION-%'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#17324'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check beginning and ending markers'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
 []

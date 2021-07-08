@@ -814,7 +814,8 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree("");
     _parser.buildJsonSyntaxTree(tree);
     SONDefinitionFormatter formatter;
-    Moose::out << formatter.toString(tree.getRoot()) << "\n";
+    Moose::out << "%-START-SON-DEFINITION-%\n"
+               << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
     _ready_to_exit = true;
   }
   else if (isParamValid("yaml"))
