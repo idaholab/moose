@@ -33,7 +33,6 @@ class TestBuild(unittest.TestCase):
     def getCommandLineArguments(self, **kwargs):
         """Mimic build command_line_options"""
         kwargs.setdefault('config', 'config.yml')
-        kwargs.setdefault('subconfigs', [])
         kwargs.setdefault('args', None)
         kwargs.setdefault('disable', [])
         kwargs.setdefault('fast', False)

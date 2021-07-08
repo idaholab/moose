@@ -14,7 +14,9 @@ import logging
 import collections
 from mooseutils import recursive_update
 from mooseutils.yaml_load import yaml_load
+
 import MooseDocs
+from ..tree import pages
 from ..common import exceptions
 
 LOG = logging.getLogger(__name__)
@@ -87,15 +89,18 @@ def load_config(filename, **kwargs):
 
 def load_configs(filenames, **kwargs):
     """
-    Read the config.yml files listed in filenames and create unique Translator objects for each.
+    Read the YAML files listed in filenames and create unique Translator objects for each. The
+    kwargs are applied the same to all configurations (see the load_config() method).
 
-    The primary (first) configuration file is treated specially in that the content identified by
-    all of the others is pooled into its corresponding Translator object. For any sub (non-first)
-    configuration, only content from the primary one is added to its own. Note that the kwargs are
-    applied to all configurations.
+    The content specified by each configuration is added to a common pool of content and then
+    distributed to each Translator object. The contents output is a list of lists containing the
+    pages that a corresponding translator is responsible for. Each translator creates independent
+    Extensions, Reader, Renderer, and Executioner objects to build its designated page objects, but
+    they still should have access to those built by any other translator.
 
-    The contents ouput lists the list of pages that each Translator object in the translators list
-    is responsible for. The primary translator is responsible for building any redundant content.
+    The local names of all page objects must be unique within the global content pool. The only
+    exceptions are pages.Directory objects, for which duplicates may occur, but only the primary
+    (first) translator contains them in its content list.
     """
     translators = list()
     configurations = list()
@@ -104,21 +109,27 @@ def load_configs(filenames, **kwargs):
         translators.append(trans)
         configurations.append(config)
 
-    # Exchange content between primary translator and all subtranslators
-    contents = [[page for page in translators[0].getPages()]]
-    primary_content = [page.local for page in contents[0]]
-    for translator in translators[1:]:
-        contents.append(list())
-        for page in [p for p in translator.getPages()]:
-            if page.local in primary_content:
-                translator.removePage(page)
-            else:
-                contents[-1].append(page)
-                translators[0].addPage(page, False)
+    # Set contents for each translator then loop through and distribute their contents to all others
+    contents = [[page for page in translator.getPages()] for translator in translators]
+    pooled = list() # initialize global content pool
+    for index, translator in enumerate(translators):
+        cotranslators = [t for t in translators if t is not translator]
+        for page in contents[index]:
+            if page.local in pooled:
+                if not isinstance(page, pages.Directory):
+                    msg = "A page or file '{}' was specified by {}, but one by the same name had " \
+                          "already been added to the content pool by another configuration file."
 
-        # Add content from the primary translator
-        for page in contents[0]:
-            translator.addPage(page, False)
+                    # Could this just be a LOG.error() and we proceed anyways? [crswong888]
+                    raise exceptions.MooseDocsException(msg, page.local, filenames[index])
+
+                # if the content is a directory, just remove it from the current translator
+                translator.removePage(page)
+                contents[index].remove(page)
+            else:
+                pooled.append(page.local)
+                for ct in cotranslators:
+                    ct.addPage(page, False)
 
     return translators, contents, configurations
 
