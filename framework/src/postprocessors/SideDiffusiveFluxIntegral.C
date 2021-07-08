@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", SideDiffusiveFluxIntegral);
 registerMooseObject("MooseApp", ADSideDiffusiveFluxIntegral);
+registerMooseObject("MooseApp", SideVectorDiffusivityFluxIntegral);
+registerMooseObject("MooseApp", ADSideVectorDiffusivityFluxIntegral);
 registerMooseObjectRenamed("MooseApp",
                            SideFluxIntegral,
                            "06/30/2021 24:00",
@@ -24,9 +26,9 @@ registerMooseObjectRenamed("MooseApp",
 
 defineLegacyParams(SideDiffusiveFluxIntegral);
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 InputParameters
-SideDiffusiveFluxIntegralTempl<is_ad>::validParams()
+SideDiffusiveFluxIntegralTempl<is_ad, T>::validParams()
 {
   InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>(
@@ -37,18 +39,18 @@ SideDiffusiveFluxIntegralTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-SideDiffusiveFluxIntegralTempl<is_ad>::SideDiffusiveFluxIntegralTempl(
+template <bool is_ad, typename T>
+SideDiffusiveFluxIntegralTempl<is_ad, T>::SideDiffusiveFluxIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
     _diffusivity(getParam<MaterialPropertyName>("diffusivity")),
-    _diffusion_coef(getGenericMaterialProperty<Real, is_ad>(_diffusivity))
+    _diffusion_coef(getGenericMaterialProperty<T, is_ad>(_diffusivity))
 {
 }
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 Real
-SideDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
+SideDiffusiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
 {
   if (_fv)
   {
@@ -60,11 +62,35 @@ SideDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     const auto & grad_u = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
 
     // FIXME Get the diffusion coefficient on the face, see #16809
-    return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * grad_u * _normals[_qp];
+    return -diffusivityGradientProduct(grad_u, MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
+           _normals[_qp];
   }
   else
-    return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * _grad_u[_qp] * _normals[_qp];
+    return -diffusivityGradientProduct(_grad_u[_qp], MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
+           _normals[_qp];
 }
 
-template class SideDiffusiveFluxIntegralTempl<false>;
-template class SideDiffusiveFluxIntegralTempl<true>;
+template <bool is_ad, typename T>
+RealVectorValue
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivityGradientProduct(const RealVectorValue & grad_u,
+                                                                     const Real diffusivity)
+{
+  return grad_u * diffusivity;
+}
+
+template <bool is_ad, typename T>
+RealVectorValue
+SideDiffusiveFluxIntegralTempl<is_ad, T>::diffusivityGradientProduct(
+    const RealVectorValue & grad_u, const RealVectorValue & diffusivity)
+{
+  RealVectorValue d_grad_u = grad_u;
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    d_grad_u(i) *= diffusivity(i);
+
+  return d_grad_u;
+}
+
+template class SideDiffusiveFluxIntegralTempl<false, Real>;
+template class SideDiffusiveFluxIntegralTempl<true, Real>;
+template class SideDiffusiveFluxIntegralTempl<false, RealVectorValue>;
+template class SideDiffusiveFluxIntegralTempl<true, RealVectorValue>;
