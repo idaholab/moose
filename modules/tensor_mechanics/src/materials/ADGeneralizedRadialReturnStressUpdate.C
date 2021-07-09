@@ -179,3 +179,17 @@ ADGeneralizedRadialReturnStressUpdate::outputIterationSummary(std::stringstream 
   }
   ADGeneralizedReturnMappingSolution::outputIterationSummary(iter_output, total_it);
 }
+
+bool
+ADGeneralizedRadialReturnStressUpdate::isBlockDiagonal(const AnisotropyMatrixReal & A)
+{
+  AnisotropyMatrixRealBlock A_bottom_left(A.block<3, 3>(0, 3));
+  AnisotropyMatrixRealBlock A_top_right(A.block<3, 3>(3, 0));
+
+  for (unsigned int index_i = 0; index_i < 3; index_i++)
+    for (unsigned int index_j = 0; index_j < 3; index_j++)
+      if (A_bottom_left(index_i, index_j) != 0 || A_top_right(index_i, index_j) != 0)
+        return false;
+
+  return true;
+}

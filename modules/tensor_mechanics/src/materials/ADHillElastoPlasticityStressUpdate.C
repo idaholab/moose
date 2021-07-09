@@ -201,16 +201,56 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       B_eigen(index_i, index_j) = MetaPhysicL::raw_value(b_matrix(index_i, index_j));
 
-  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es_b(B_eigen);
+  if (isBlockDiagonal(B_eigen))
+  {
+    Eigen::SelfAdjointEigenSolver<AnisotropyMatrixRealBlock> es_b_left(B_eigen.block<3, 3>(0, 0));
+    Eigen::SelfAdjointEigenSolver<AnisotropyMatrixRealBlock> es_b_right(B_eigen.block<3, 3>(3, 3));
 
-  auto lambda_b = es_b.eigenvalues();
-  auto v_b = es_b.eigenvectors();
-  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-    _b_eigenvalues[_qp](index_i) = lambda_b(index_i);
+    auto lambda_b_left = es_b_left.eigenvalues();
+    auto v_b_left = es_b_left.eigenvectors();
 
-  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-    for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      _b_eigenvectors[_qp](index_i, index_j) = v_b(index_i, index_j);
+    auto lambda_b_right = es_b_right.eigenvalues();
+    auto v_b_right = es_b_right.eigenvectors();
+
+    _b_eigenvalues[_qp](0) = lambda_b_left(0);
+    _b_eigenvalues[_qp](1) = lambda_b_left(1);
+    _b_eigenvalues[_qp](2) = lambda_b_left(2);
+    _b_eigenvalues[_qp](3) = lambda_b_right(0);
+    _b_eigenvalues[_qp](4) = lambda_b_right(1);
+    _b_eigenvalues[_qp](5) = lambda_b_right(2);
+
+    _b_eigenvectors[_qp](0, 0) = v_b_left(0, 0);
+    _b_eigenvectors[_qp](0, 1) = v_b_left(0, 1);
+    _b_eigenvectors[_qp](0, 2) = v_b_left(0, 2);
+    _b_eigenvectors[_qp](1, 0) = v_b_left(1, 0);
+    _b_eigenvectors[_qp](1, 1) = v_b_left(1, 1);
+    _b_eigenvectors[_qp](1, 2) = v_b_left(1, 2);
+    _b_eigenvectors[_qp](2, 0) = v_b_left(2, 0);
+    _b_eigenvectors[_qp](2, 1) = v_b_left(2, 1);
+    _b_eigenvectors[_qp](2, 2) = v_b_left(2, 2);
+    _b_eigenvectors[_qp](3, 3) = v_b_right(0, 0);
+    _b_eigenvectors[_qp](3, 4) = v_b_right(0, 1);
+    _b_eigenvectors[_qp](3, 5) = v_b_right(0, 2);
+    _b_eigenvectors[_qp](4, 3) = v_b_right(1, 0);
+    _b_eigenvectors[_qp](4, 4) = v_b_right(1, 1);
+    _b_eigenvectors[_qp](4, 5) = v_b_right(1, 2);
+    _b_eigenvectors[_qp](5, 3) = v_b_right(2, 0);
+    _b_eigenvectors[_qp](5, 4) = v_b_right(2, 1);
+    _b_eigenvectors[_qp](5, 5) = v_b_right(2, 2);
+  }
+  else
+  {
+    Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es_b(B_eigen);
+
+    auto lambda_b = es_b.eigenvalues();
+    auto v_b = es_b.eigenvectors();
+    for (unsigned int index_i = 0; index_i < dimension; index_i++)
+      _b_eigenvalues[_qp](index_i) = lambda_b(index_i);
+
+    for (unsigned int index_i = 0; index_i < dimension; index_i++)
+      for (unsigned int index_j = 0; index_j < dimension; index_j++)
+        _b_eigenvectors[_qp](index_i, index_j) = v_b(index_i, index_j);
+  }
 
   _alpha_matrix[_qp] = sqrt_Delta;
   _alpha_matrix[_qp].right_multiply(_b_eigenvectors[_qp]);
