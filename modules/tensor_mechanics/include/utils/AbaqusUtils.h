@@ -29,13 +29,26 @@ public:
   static void setCommunicator(const libMesh::Parallel::Communicator * communicator);
   static const libMesh::Parallel::Communicator * getCommunicator() { return _communicator; }
 
+  /// get data vector iterator with error checking
+  template <typename T>
+  static typename std::map<int, std::vector<T>>::iterator
+  getSMAIterator(std::map<int, std::vector<T>> & array, int id, const std::string & function);
+
+  /// get thread local array
+  template <typename T>
+  static typename std::map<int, std::vector<T>> &
+  getSMAThreadArray(std::vector<std::map<int, std::vector<T>>> & local_array,
+                    const std::string & function);
+
   /// thread storage initialization
   static void smaInitialize();
 
+  ///@{ Shared Memory Arrays
   static std::map<int, std::vector<int>> _sma_int_array;
   static std::map<int, std::vector<Real>> _sma_float_array;
   static std::vector<std::map<int, std::vector<int>>> _sma_local_int_array;
   static std::vector<std::map<int, std::vector<Real>>> _sma_local_float_array;
+  ///@}
 
   ///@{ Mutex API
   static void mutexInit(std::size_t n) { _mutex[n] = std::make_unique<Threads::spin_mutex>(); }
@@ -48,3 +61,26 @@ private:
   static std::string _job_name;
   static const libMesh::Parallel::Communicator * _communicator;
 };
+
+template <typename T>
+typename std::map<int, std::vector<T>>::iterator
+AbaqusUtils::getSMAIterator(std::map<int, std::vector<T>> & array,
+                            int id,
+                            const std::string & function)
+{
+  auto it = array.find(id);
+  if (it == array.end())
+    mooseError("Invalid id ", id, " in ", function, ".");
+  return it;
+}
+
+template <typename T>
+typename std::map<int, std::vector<T>> &
+AbaqusUtils::getSMAThreadArray(std::vector<std::map<int, std::vector<T>>> & local_array,
+                               const std::string & function)
+{
+  ParallelUniqueId puid;
+  if (puid.id >= local_array.size())
+    mooseError("SMA storage not properly initialized in ", function, ".");
+  return local_array[puid.id];
+}
