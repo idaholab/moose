@@ -1,0 +1,282 @@
+solid Cluster_34_Copy_1_1
+facet
+outer loop
+vertex 157.115 110.004 84.0817
+vertex 145.764 101.76 66.5219
+vertex 124.399 95.2411 69.0099
+endloop
+endfacet
+facet
+outer loop
+vertex 157.115 110.004 84.0817
+vertex 124.399 95.2411 69.0099
+vertex 114.385 96.9658 89.0577
+endloop
+endfacet
+facet
+outer loop
+vertex 157.115 110.004 84.0817
+vertex 114.385 96.9658 89.0577
+vertex 125.736 105.21 106.618
+endloop
+endfacet
+facet
+outer loop
+vertex 157.115 110.004 84.0817
+vertex 125.736 105.21 106.618
+vertex 147.102 111.728 104.13
+endloop
+endfacet
+facet
+outer loop
+vertex 33.2878 73.0269 112.097
+vertex 47.5171 84.4523 138.422
+vertex 77.9638 94.3221 137.168
+endloop
+endfacet
+facet
+outer loop
+vertex 33.2878 73.0269 112.097
+vertex 77.9638 94.3221 137.168
+vertex 94.1811 92.7665 109.589
+endloop
+endfacet
+facet
+outer loop
+vertex 33.2878 73.0269 112.097
+vertex 94.1811 92.7665 109.589
+vertex 79.9517 81.3412 83.265
+endloop
+endfacet
+facet
+outer loop
+vertex 33.2878 73.0269 112.097
+vertex 79.9517 81.3412 83.265
+vertex 49.5051 71.4713 84.5189
+endloop
+endfacet
+facet
+outer loop
+vertex 32.2497 85.449 102.321
+vertex 42.921 84.0908 82.8518
+vertex 32.4346 76.0522 64.9583
+endloop
+endfacet
+facet
+outer loop
+vertex 32.2497 85.449 102.321
+vertex 32.4346 76.0522 64.9583
+vertex 11.2768 69.3717 66.5338
+endloop
+endfacet
+facet
+outer loop
+vertex 32.2497 85.449 102.321
+vertex 11.2768 69.3717 66.5338
+vertex 0.605445 70.7299 86.0027
+endloop
+endfacet
+facet
+outer loop
+vertex 32.2497 85.449 102.321
+vertex 0.605445 70.7299 86.0027
+vertex 11.0919 78.7686 103.896
+endloop
+endfacet
+facet
+outer loop
+vertex 188.064 111.611 87.9432
+vertex 161.192 82.9205 10.1281
+vertex 79.8145 53.2154 0.34597
+endloop
+endfacet
+facet
+outer loop
+vertex 188.064 111.611 87.9432
+vertex 79.8145 53.2154 0.34597
+vertex 25.3082 52.2012 68.3789
+endloop
+endfacet
+facet
+outer loop
+vertex 188.064 111.611 87.9432
+vertex 25.3082 52.2012 68.3789
+vertex 52.1798 80.892 146.194
+endloop
+endfacet
+facet
+outer loop
+vertex 188.064 111.611 87.9432
+vertex 52.1798 80.892 146.194
+vertex 133.558 110.597 155.976
+endloop
+endfacet
+facet
+outer loop
+vertex 152.913 61.2445 79.0364
+vertex 142.712 57.6276 113.847
+vertex 122.28 83.3694 129.623
+endloop
+endfacet
+facet
+outer loop
+vertex 152.913 61.2445 79.0364
+vertex 122.28 83.3694 129.623
+vertex 112.05 112.728 110.587
+endloop
+endfacet
+facet
+outer loop
+vertex 152.913 61.2445 79.0364
+vertex 112.05 112.728 110.587
+vertex 122.251 116.345 75.7765
+endloop
+endfacet
+facet
+outer loop
+vertex 152.913 61.2445 79.0364
+vertex 122.251 116.345 75.7765
+vertex 142.682 90.6032 60.001
+endloop
+endfacet
+facet
+outer loop
+vertex 65.6867 47.5501 114.948
+vertex 52.5167 57.0347 136.743
+vertex 39.3081 80.7434 135.384
+endloop
+endfacet
+facet
+outer loop
+vertex 65.6867 47.5501 114.948
+vertex 39.3081 80.7434 135.384
+vertex 39.2696 94.9677 112.231
+endloop
+endfacet
+facet
+outer loop
+vertex 65.6867 47.5501 114.948
+vertex 39.2696 94.9677 112.231
+vertex 52.4396 85.4831 90.436
+endloop
+endfacet
+facet
+outer loop
+vertex 65.6867 47.5501 114.948
+vertex 52.4396 85.4831 90.436
+vertex 65.6482 61.7743 91.7948
+endloop
+endfacet
+facet
+outer loop
+vertex 24.5998 20.7193 51.1988
+vertex 14.8869 65.3415 58.2648
+vertex 39.3866 89.7485 88.9159
+endloop
+endfacet
+facet
+outer loop
+vertex 24.5998 20.7193 51.1988
+vertex 39.3866 89.7485 88.9159
+vertex 73.5992 69.5331 112.501
+endloop
+endfacet
+facet
+outer loop
+vertex 24.5998 20.7193 51.1988
+vertex 73.5992 69.5331 112.501
+vertex 83.3121 24.9108 105.435
+endloop
+endfacet
+facet
+outer loop
+vertex 24.5998 20.7193 51.1988
+vertex 83.3121 24.9108 105.435
+vertex 58.8124 0.50384 74.7838
+endloop
+endfacet
+facet
+outer loop
+vertex 143.145 86.0844 126.982
+vertex 124.606 99.8526 115.198
+vertex 121.315 124.882 121.1
+endloop
+endfacet
+facet
+outer loop
+vertex 143.145 86.0844 126.982
+vertex 121.315 124.882 121.1
+vertex 136.563 136.143 138.786
+endloop
+endfacet
+facet
+outer loop
+vertex 143.145 86.0844 126.982
+vertex 136.563 136.143 138.786
+vertex 155.102 122.375 150.57
+endloop
+endfacet
+facet
+outer loop
+vertex 143.145 86.0844 126.982
+vertex 155.102 122.375 150.57
+vertex 158.393 97.3455 144.668
+endloop
+endfacet
+facet
+outer loop
+vertex 149.054 75.592 52.0777
+vertex 112.161 78.5606 19.9802
+vertex 88.4864 120.994 13.7275
+endloop
+endfacet
+facet
+outer loop
+vertex 149.054 75.592 52.0777
+vertex 88.4864 120.994 13.7275
+vertex 101.705 160.459 39.5722
+endloop
+endfacet
+facet
+outer loop
+vertex 149.054 75.592 52.0777
+vertex 101.705 160.459 39.5722
+vertex 138.598 157.49 71.6696
+endloop
+endfacet
+facet
+outer loop
+vertex 149.054 75.592 52.0777
+vertex 138.598 157.49 71.6696
+vertex 162.272 115.057 77.9224
+endloop
+endfacet
+facet
+outer loop
+vertex 118.261 79.3041 116.219
+vertex 134.445 124.18 105.1
+vertex 149.362 154.351 140.688
+endloop
+endfacet
+facet
+outer loop
+vertex 118.261 79.3041 116.219
+vertex 149.362 154.351 140.688
+vertex 148.095 139.648 187.395
+endloop
+endfacet
+facet
+outer loop
+vertex 118.261 79.3041 116.219
+vertex 148.095 139.648 187.395
+vertex 131.911 94.7721 198.514
+endloop
+endfacet
+facet
+outer loop
+vertex 118.261 79.3041 116.219
+vertex 131.911 94.7721 198.514
+vertex 116.994 64.6004 162.926
+endloop
+endfacet
+endsolid Cluster_34_Copy_1_1

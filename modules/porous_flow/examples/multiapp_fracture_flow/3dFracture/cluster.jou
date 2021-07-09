@@ -1,0 +1,149 @@
+reset
+create vertex 157.115 110.004 84.0817
+create vertex 145.764 101.76 66.5219
+create vertex 124.399 95.2411 69.0099
+create vertex 114.385 96.9658 89.0577
+create vertex 125.736 105.21 106.618
+create vertex 147.102 111.728 104.13
+compress
+create curve vertex 1 2
+create curve vertex 2 3
+create curve vertex 3 4
+create curve vertex 4 5
+create curve vertex 5 6
+create curve vertex 6 1
+create surface curve 1 2 3 4 5 6
+create vertex 33.2878 73.0269 112.097
+create vertex 47.5171 84.4523 138.422
+create vertex 77.9638 94.3221 137.168
+create vertex 94.1811 92.7665 109.589
+create vertex 79.9517 81.3412 83.265
+create vertex 49.5051 71.4713 84.5189
+compress
+create curve vertex 7 8
+create curve vertex 8 9
+create curve vertex 9 10
+create curve vertex 10 11
+create curve vertex 11 12
+create curve vertex 12 7
+create surface curve 7 8 9 10 11 12
+create vertex 32.2497 85.449 102.321
+create vertex 42.921 84.0908 82.8518
+create vertex 32.4346 76.0522 64.9583
+create vertex 11.2768 69.3717 66.5338
+create vertex 0.605445 70.7299 86.0027
+create vertex 11.0919 78.7686 103.896
+compress
+create curve vertex 13 14
+create curve vertex 14 15
+create curve vertex 15 16
+create curve vertex 16 17
+create curve vertex 17 18
+create curve vertex 18 13
+create surface curve 13 14 15 16 17 18
+create vertex 188.064 111.611 87.9432
+create vertex 161.192 82.9205 10.1281
+create vertex 79.8145 53.2154 0.34597
+create vertex 25.3082 52.2012 68.3789
+create vertex 52.1798 80.892 146.194
+create vertex 133.558 110.597 155.976
+compress
+create curve vertex 19 20
+create curve vertex 20 21
+create curve vertex 21 22
+create curve vertex 22 23
+create curve vertex 23 24
+create curve vertex 24 19
+create surface curve 19 20 21 22 23 24
+create vertex 152.913 61.2445 79.0364
+create vertex 142.712 57.6276 113.847
+create vertex 122.28 83.3694 129.623
+create vertex 112.05 112.728 110.587
+create vertex 122.251 116.345 75.7765
+create vertex 142.682 90.6032 60.001
+compress
+create curve vertex 25 26
+create curve vertex 26 27
+create curve vertex 27 28
+create curve vertex 28 29
+create curve vertex 29 30
+create curve vertex 30 25
+create surface curve 25 26 27 28 29 30
+create vertex 65.6867 47.5501 114.948
+create vertex 52.5167 57.0347 136.743
+create vertex 39.3081 80.7434 135.384
+create vertex 39.2696 94.9677 112.231
+create vertex 52.4396 85.4831 90.436
+create vertex 65.6482 61.7743 91.7948
+compress
+create curve vertex 31 32
+create curve vertex 32 33
+create curve vertex 33 34
+create curve vertex 34 35
+create curve vertex 35 36
+create curve vertex 36 31
+create surface curve 31 32 33 34 35 36
+create vertex 24.5998 20.7193 51.1988
+create vertex 14.8869 65.3415 58.2648
+create vertex 39.3866 89.7485 88.9159
+create vertex 73.5992 69.5331 112.501
+create vertex 83.3121 24.9108 105.435
+create vertex 58.8124 0.50384 74.7838
+compress
+create curve vertex 37 38
+create curve vertex 38 39
+create curve vertex 39 40
+create curve vertex 40 41
+create curve vertex 41 42
+create curve vertex 42 37
+create surface curve 37 38 39 40 41 42
+create vertex 143.145 86.0844 126.982
+create vertex 124.606 99.8526 115.198
+create vertex 121.315 124.882 121.1
+create vertex 136.563 136.143 138.786
+create vertex 155.102 122.375 150.57
+create vertex 158.393 97.3455 144.668
+compress
+create curve vertex 43 44
+create curve vertex 44 45
+create curve vertex 45 46
+create curve vertex 46 47
+create curve vertex 47 48
+create curve vertex 48 43
+create surface curve 43 44 45 46 47 48
+create vertex 149.054 75.592 52.0777
+create vertex 112.161 78.5606 19.9802
+create vertex 88.4864 120.994 13.7275
+create vertex 101.705 160.459 39.5722
+create vertex 138.598 157.49 71.6696
+create vertex 162.272 115.057 77.9224
+compress
+create curve vertex 49 50
+create curve vertex 50 51
+create curve vertex 51 52
+create curve vertex 52 53
+create curve vertex 53 54
+create curve vertex 54 49
+create surface curve 49 50 51 52 53 54
+create vertex 118.261 79.3041 116.219
+create vertex 134.445 124.18 105.1
+create vertex 149.362 154.351 140.688
+create vertex 148.095 139.648 187.395
+create vertex 131.911 94.7721 198.514
+create vertex 116.994 64.6004 162.926
+compress
+create curve vertex 55 56
+create curve vertex 56 57
+create curve vertex 57 58
+create curve vertex 58 59
+create curve vertex 59 60
+create curve vertex 60 55
+create surface curve 55 56 57 58 59 60
+imprint all
+merge all
+surface all size 10
+surface all scheme trimesh
+mesh surface all
+surface all smooth scheme laplacian free
+smooth surface all
+export mesh "Cluster_34.exo" overwrite
