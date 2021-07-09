@@ -13,6 +13,8 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
+registerMooseObject("MooseApp", SolveObject);
+
 SolveObject::SolveObject(const InputParameters & parameters)
   : MooseObject(parameters),
     PerfGraphInterface(this),

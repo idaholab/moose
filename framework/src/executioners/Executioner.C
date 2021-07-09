@@ -17,6 +17,7 @@
 #include "SlepcSupport.h"
 #include "SecantSolve.h"
 #include "SteffensenSolve.h"
+#include "Factory.h"
 
 // C++ includes
 #include <vector>
@@ -104,4 +105,18 @@ Executioner::addAttributeReporter(const std::string & name, Real initial_value)
   getReporterValueByName<PostprocessorValue>(r_name, 2);
 
   return value;
+}
+
+void
+Executioner::addSolveObject(const std::string & type,
+                            const std::string & name,
+                            InputParameters & parameters)
+{
+  if (_solve_object_names.count(type))
+    mooseError("Solve object in type ", type, " has been constructed");
+
+  parameters.set<SubProblem *>("_subproblem") = &feProblem();
+  parameters.set<SystemBase *>("_sys") = &feProblem().getNonlinearSystemBase();
+  _solve_objects[name] = _app.getFactory().create<SolveObject>(type, name, parameters, 0);
+  _solve_object_names[type] = name;
 }

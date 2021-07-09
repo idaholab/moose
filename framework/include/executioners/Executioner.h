@@ -137,6 +137,12 @@ public:
    */
   static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
+  /**
+   * Use factory to add a solve object to be called outside
+   */
+  void
+  addSolveObject(const std::string & type, const std::string & name, InputParameters & parameters);
+
 protected:
   /**
    * Adds a postprocessor that the executioner can directly assign values to
@@ -167,4 +173,10 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
+
+  /// A map from solve object names to the objects constructed by actions
+  std::map<std::string, std::shared_ptr<SolveObject>> _solve_objects;
+
+  /// A map from solve object types to the object names
+  std::map<std::string, std::string> _solve_object_names;
 };

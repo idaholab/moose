@@ -15,6 +15,8 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
+registerMooseObject("MooseApp", PicardSolve);
+
 defineLegacyParams(PicardSolve);
 
 InputParameters

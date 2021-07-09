@@ -11,6 +11,8 @@
 
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("MooseTestApp", FixedPoint);
+
 InputParameters
 FixedPoint::validParams()
 {
