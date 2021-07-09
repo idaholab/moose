@@ -60,7 +60,7 @@ public:
   /**
    * Initialize the executioner
    */
-  virtual void init() {}
+  virtual void init();
 
   /**
    * Pure virtual execute function MUST be overridden by children classes.
@@ -145,6 +145,11 @@ public:
 
 protected:
   /**
+   * Integrity check to be performed in init
+   */
+  virtual void checkIntegrity() {}
+
+  /**
    * Adds a postprocessor that the executioner can directly assign values to
    * @param name The name of the postprocessor to create
    * @param initial_value The initial value of the postprocessor value
@@ -167,6 +172,11 @@ protected:
 
   MooseEnum _iteration_method;
   std::shared_ptr<FixedPointSolve> _fixed_point_solve;
+
+  /// Current timestep.
+  int & _time_step;
+  /// Current time
+  Real & _time;
 
   // Restart
   std::string _restart_file_base;

@@ -35,8 +35,6 @@ Steady::Steady(const InputParameters & parameters)
     _problem(_fe_problem),
     _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _system_time(getParam<Real>("time")),
-    _time_step(_problem.timeStep()),
-    _time(_problem.time()),
     _final_timer(registerTimedSection("final", 1))
 {
   _fixed_point_solve->setInnerSolve(*_feproblem_solve);
@@ -53,9 +51,7 @@ Steady::init()
     return;
   }
 
-  checkIntegrity();
-  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _problem.initialSetup();
+  Executioner::init();
 }
 
 void

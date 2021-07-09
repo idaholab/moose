@@ -50,7 +50,7 @@ public:
   /**
    * Make sure time kernel is not presented
    */
-  virtual void checkIntegrity();
+  virtual void checkIntegrity() override;
 
   /**
    * Perform inverse power iterations with the initial guess of the solution

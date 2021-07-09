@@ -220,10 +220,6 @@ protected:
   Moose::TimeIntegratorType _time_scheme;
   std::shared_ptr<TimeStepper> _time_stepper;
 
-  /// Current timestep.
-  int & _t_step;
-  /// Current time
-  Real & _time;
   /// Previous time
   Real & _time_old;
   /// Current delta t... or timestep size.

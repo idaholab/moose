@@ -65,6 +65,8 @@ Executioner::Executioner(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
+    _time_step(_fe_problem.timeStep()),
+    _time(_fe_problem.time()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose"))
 {
@@ -119,4 +121,12 @@ Executioner::addSolveObject(const std::string & type,
   parameters.set<SystemBase *>("_sys") = &feProblem().getNonlinearSystemBase();
   _solve_objects[name] = _app.getFactory().create<SolveObject>(type, name, parameters, 0);
   _solve_object_names[type] = name;
+}
+
+void
+Executioner::init()
+{
+  checkIntegrity();
+  _fe_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _fe_problem.initialSetup();
 }

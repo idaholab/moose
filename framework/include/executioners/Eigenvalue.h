@@ -54,7 +54,7 @@ public:
   /**
    * Eigenvalue executioner does not allow time kernels
    */
-  virtual void checkIntegrity();
+  virtual void checkIntegrity() override;
 
   /**
    * Get the number of grid sequencing steps
@@ -78,8 +78,6 @@ protected:
   const PostprocessorValue * const _normalization;
 
   Real _system_time;
-  int & _time_step;
-  Real & _time;
 
   PerfID _final_timer;
 
