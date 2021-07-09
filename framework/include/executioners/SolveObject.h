@@ -26,11 +26,22 @@ class SolveObject : public MooseObject, public PerfGraphInterface, public Postpr
 public:
   SolveObject(Executioner & ex);
 
+  static InputParameters validParams() { return emptyInputParameters(); }
+
   /**
    * Solve routine provided by this object.
    * @return True if solver is converged.
    */
-  virtual bool solve() = 0;
+  virtual bool solve()
+  {
+    if (_inner_solve)
+      return _inner_solve->solve();
+    else
+    {
+      _console << "Empty solve." << std::endl;
+      return true;
+    }
+  }
 
   /// Set the inner solve object wrapped by this object.
   virtual void setInnerSolve(SolveObject & solve) { _inner_solve = &solve; }
