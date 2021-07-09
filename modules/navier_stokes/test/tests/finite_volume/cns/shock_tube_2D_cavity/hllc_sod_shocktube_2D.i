@@ -38,7 +38,7 @@ x_sep = 35
   [./delete]
     type = BlockDeletionGenerator
     input = wall
-    block_id = 0
+    block = 0
   [../]
 []
 

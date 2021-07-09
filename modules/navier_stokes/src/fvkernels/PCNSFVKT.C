@@ -88,7 +88,7 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
 
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
-      "PCNSFVKT objects require global AD indexing because they  require gradient "
+      "PCNSFVKT objects require global AD indexing because they require gradient "
       "reconstruction. Please cd into the root of your MOOSE directory and run './configure'");
 #endif
 }
@@ -99,7 +99,7 @@ PCNSFVKT::computeAlphaAndOmega(const ADReal & u_elem_normal,
                                const ADReal & c_elem,
                                const ADReal & c_neighbor) const
 {
-  // Equations from Greenshields sans multiplication by area (which well be done in
+  // Equations from Greenshields sans multiplication by area (which will be done in
   // computeResidual/Jacobian
   const auto psi_elem =
       std::max({c_elem + u_elem_normal, c_neighbor + u_neighbor_normal, ADReal(0)});
