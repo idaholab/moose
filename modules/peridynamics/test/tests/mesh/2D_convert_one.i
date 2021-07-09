@@ -1,4 +1,3 @@
-
 [Mesh]
   type = PeridynamicsMesh
   horizon_number = 3
@@ -10,8 +9,9 @@
   [./gpd]
     type = MeshGeneratorPD
     input = fmg
-    retain_fe_mesh = true
-    convert_block_ids = '1 2'
+    retain_fe_mesh = false
+    blocks_to_pd = 1
+    #blocks_as_fe = 2
   [../]
 []
 

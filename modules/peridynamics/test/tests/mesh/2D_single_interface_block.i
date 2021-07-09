@@ -15,11 +15,11 @@
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = false
-    convert_block_ids = '1 2 3 4'
-    single_converted_block = true
-    connect_block_id_pairs = '1 2 2 3 3 4'
-    single_interface_block = true
-    construct_peridynamics_sideset = true
+    blocks_to_pd = '1 2 3 4'
+    merge_pd_blocks = true
+    bonding_block_pairs = '1 2; 2 3; 3 4'
+    merge_pd_interfacial_blocks = true
+    construct_pd_sidesets = true
   [../]
 []
 
