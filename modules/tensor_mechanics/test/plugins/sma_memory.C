@@ -9,50 +9,82 @@ extern "C" void
 uexternaldb_(
     int * LOP, int * /* LRESTART */, Real /* TIME */[], Real * /* DTIME */, int * KSTEP, int * KINC)
 {
+  const bool threaded = getnumthreads() > 1;
+
   switch (*LOP)
   {
     // beginning of the simulation
     case 0:
     {
-      Real * fa = SMAFloatArrayCreate(1, 5, 1.1);
+      Real * fa = threaded ? SMALocalFloatArrayCreate(7, 5, 1.1) : SMAFloatArrayCreate(7, 5, 1.1);
       Real fasum = 0.0;
       for (unsigned int i = 0; i < 5; ++i)
         fasum += fa[i];
 
       // test wrong handle error based on kstep setting
-      Real * fa2 = SMAFloatArrayAccess(*KSTEP == 1 ? 2 : 1);
+      Real * fa2 = threaded ? SMALocalFloatArrayAccess(*KSTEP == 1 ? 2 : 7)
+                            : SMAFloatArrayAccess(*KSTEP == 1 ? 2 : 7);
       if (fa != fa2)
         mooseError("Mismatching pointers");
 
-      int * ia = SMAIntArrayCreate(67, 39, 9);
+      int * ia = threaded ? SMALocalIntArrayCreate(67, 39, 9) : SMAIntArrayCreate(67, 39, 9);
       int iasum = 0;
       for (unsigned int i = 0; i < 39; ++i)
         iasum += ia[i];
 
       // test wrong handle error based on kstep setting
-      int * i2 = SMAIntArrayAccess(*KSTEP == 2 ? 13 : 67);
-      if (ia != i2)
+      int * ia2 = threaded ? SMALocalIntArrayAccess(*KSTEP == 2 ? 13 : 67)
+                           : SMAIntArrayAccess(*KSTEP == 2 ? 13 : 67);
+      if (ia != ia2)
         mooseError("Mismatching pointers");
 
-      Moose::out << *LOP << "lop " << fasum << ' ' << SMAFloatArraySize(1) << ' ' << iasum << ' '
-                 << SMAIntArraySize(67) << '\n';
+      if (get_thread_id() == 0)
+        Moose::out << *LOP << "lop " << fasum << ' '
+                   << (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7)) << ' ' << iasum
+                   << ' ' << (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)) << '\n';
+      break;
     }
 
-    // beginnging of the timestep
+    // beginning of the timestep
     case 1:
     {
-      Real * fa = SMAFloatArrayAccess(1);
-      for (unsigned int i = 0; i < SMAFloatArraySize(1); ++i)
+      Real * fa = threaded ? SMALocalFloatArrayAccess(7) : SMAFloatArrayAccess(7);
+      for (unsigned int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7));
+           ++i)
         fa[i] += i + *KINC;
 
-      int * ia = SMAIntArrayAccess(1);
-      for (unsigned int i = 0; i < SMAIntArraySize(67); ++i)
+      int * ia = threaded ? SMALocalIntArrayAccess(67) : SMAIntArrayAccess(67);
+      for (unsigned int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
         ia[i] += i + *KINC;
+      break;
     }
 
     // end of the simulation
     case 3:
     {
+      Real * fa = threaded ? SMALocalFloatArrayAccess(7) : SMAFloatArrayAccess(7);
+      Real fasum = 0.0;
+      for (unsigned int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7));
+           ++i)
+        fasum += fa[i] + 0;
+      if (threaded)
+        SMALocalFloatArrayDelete(7);
+      else
+        SMAFloatArrayDelete(7);
+
+      int iasum = 0;
+      int * ia = threaded ? SMALocalIntArrayAccess(67) : SMAIntArrayAccess(67);
+      for (unsigned int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
+        iasum += ia[i];
+
+      if (threaded)
+        SMALocalIntArrayDelete(67);
+      else
+        SMAIntArrayDelete(67);
+
+      if (get_thread_id() == 0)
+        Moose::out << *LOP << "lop " << fasum << ' ' << iasum << ' ' << '\n';
+      break;
     }
   }
 }

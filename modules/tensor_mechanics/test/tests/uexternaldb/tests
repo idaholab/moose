@@ -62,7 +62,8 @@
     valgrind = 'NONE'
     cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
     expect_out = 'getoutdir           1 \. '
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the simulation output directory.'
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
+                  'simulation output directory.'
   []
 
   [getjobname]
@@ -72,7 +73,8 @@
     valgrind = 'NONE'
     cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
     expect_out = 'getjobname          17 utility_functions '
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the simulation job name.'
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
+                  'simulation job name.'
   []
 
   [messages]
@@ -117,6 +119,73 @@
       expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
                    '   !'
       detail = 'non-fatal error level.'
+    []
+  []
+
+  [mutex]
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide Abaqus compatible mutex management '
+    [single_thread]
+      type = 'RunApp'
+      input = 'mutex_test.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      min_threads = 1
+      max_threads = 1
+      expect_out = 'sum = 1000.'
+      detail = 'supporting single threaded execution.'
+    []
+    [two_threads]
+      type = 'RunApp'
+      input = 'mutex_test.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      min_threads = 2
+      max_threads = 2
+      expect_out = 'sum = 2000.'
+      detail = 'supporting at least 2 threads.'
+    []
+    [four_threads]
+      type = 'RunApp'
+      input = 'mutex_test.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      min_threads = 4
+      max_threads = 4
+      expect_out = 'sum = 4000.'
+      detail = 'supporting at least 4 threads.'
+    []
+  []
+
+  [sma_memory]
+    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API for accessing '
+                  'shared memory objects '
+    [single_thread]
+      type = 'RunApp'
+      input = 'sma_memory.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      expect_out = '3lop 40.5 1950'
+      detail = 'supporting single threaded execution.'
+    []
+    [two_threads]
+      type = 'RunApp'
+      input = 'sma_memory.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      min_threads = 2
+      max_threads = 2
+      expect_out = '3lop 40.5 1950'
+      detail = 'supporting single threaded execution.'
+    []
+    [four_threads]
+      type = 'RunApp'
+      input = 'sma_memory.i'
+      library_mode = 'DYNAMIC'
+      valgrind = 'NONE'
+      min_threads = 4
+      max_threads = 4
+      expect_out = '3lop 40.5 1950'
+      detail = 'supporting single threaded execution.'
     []
   []
 []

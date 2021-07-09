@@ -56,6 +56,7 @@ extern "C" int __attribute__((visibility("default"))) get_thread_id_()
   ParallelUniqueId puid;
   return puid.id;
 }
+extern "C" int __attribute__((visibility("default"))) get_thread_id() { return get_thread_id_(); }
 
 // Output directory
 
@@ -334,6 +335,18 @@ extern "C" void __attribute__((visibility("default"))) SMALocalFloatArrayDelete(
 // Mutex handling
 
 std::array<std::unique_ptr<Threads::spin_mutex>, 101> AbaqusUtils::_mutex = {nullptr};
+
+void
+AbaqusUtils::mutexInit(std::size_t n)
+{
+  // Guard the initialization with a double checked lock
+  if (!_mutex[n])
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    if (!_mutex[n])
+      _mutex[n] = std::make_unique<Threads::spin_mutex>();
+  }
+}
 
 void
 AbaqusUtils::mutexLock(std::size_t n)

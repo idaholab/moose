@@ -51,7 +51,7 @@ public:
   ///@}
 
   ///@{ Mutex API
-  static void mutexInit(std::size_t n) { _mutex[n] = std::make_unique<Threads::spin_mutex>(); }
+  static void mutexInit(std::size_t n);
   static void mutexLock(std::size_t n);
   static void mutexUnlock(std::size_t n);
   ///@}
