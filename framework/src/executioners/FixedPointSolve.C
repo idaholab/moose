@@ -341,8 +341,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
   Real end_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_end_norm[_fixed_point_it - 1]
                                            : std::numeric_limits<Real>::max());
 
-  _executioner.preSolve();
-
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
   {
@@ -433,8 +431,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
     return false;
   }
 
-  _executioner.postSolve();
-
   if (_has_fixed_point_its && _has_fixed_point_norm)
     if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
     {
@@ -481,11 +477,6 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
-  }
-  if (_executioner.augmentedFixedPointConvergenceCheck())
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-    return true;
   }
   if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
   {
@@ -555,7 +546,7 @@ FixedPointSolve::autoAdvance() const
 {
   bool auto_advance = !(_has_fixed_point_its && _problem.isTransient());
 
-  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_fixed_point_its)
+  if (dynamic_cast<EigenExecutionerBase *>(_app.getExecutioner()) && _has_fixed_point_its)
     auto_advance = true;
 
   if (_auto_advance_set_by_user)

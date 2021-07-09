@@ -32,15 +32,13 @@ public:
    */
   virtual void preExecute() override;
 
-  /**
-   * Calls a custom execution flag for testing.
-   */
-  virtual void postSolve() override;
-
 private:
   /// The type of test that this object is to perform
   MooseEnum _test_type;
 
   /// A value to report (used for addAttributeReporter test)
   PostprocessorValue * _some_value_that_needs_to_be_reported;
+
+  /// A modified FEProblemSolve
+  TestFEProblemSolve _test_solve;
 };

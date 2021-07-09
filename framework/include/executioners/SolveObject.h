@@ -36,8 +36,6 @@ public:
   virtual void setInnerSolve(SolveObject & solve) { _inner_solve = &solve; }
 
 protected:
-  /// Executioner used to construct this
-  Executioner & _executioner;
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Displaced problem

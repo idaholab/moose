@@ -116,13 +116,11 @@ NonlinearEigen::takeStep()
 {
   _console << " Nonlinear iteration starts" << std::endl;
 
-  preSolve();
   _problem.timestepSetup();
   _problem.advanceState();
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   _last_solve_converged = nonlinearSolve(_nl_rel_tol, _nl_abs_tol, _l_tol, _eigenvalue);
-  postSolve();
 
   if (lastSolveConverged())
   {

@@ -97,7 +97,6 @@ InversePowerMethod::takeStep()
   // save the initial guess and mark a new time step
   _problem.advanceState();
 
-  preSolve();
   Real initial_res;
   _last_solve_converged = inversePowerIteration(_min_iter,
                                                 _max_iter,
@@ -109,7 +108,6 @@ InversePowerMethod::takeStep()
                                                 _sol_check_tol,
                                                 _eigenvalue,
                                                 initial_res);
-  postSolve();
 
   if (lastSolveConverged())
   {
