@@ -650,10 +650,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
     mooseAssert(num_primary_nodes,
                 "There are no primary nodes on boundary ID "
-                    << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+                    << primary_bnd_id << ". Does that boundary ID even exist on the mesh?");
     mooseAssert(num_secondary_nodes,
                 "There are no secondary nodes on boundary ID "
-                    << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+                    << secondary_bnd_id << ". Does that boundary ID even exist on the mesh?");
 
     node_unique_id_offset += multiplicity * num_primary_nodes + 2 * num_secondary_nodes;
   }
@@ -692,36 +692,25 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
       // Get sub-element nodes and center reference coordinates
       std::vector<std::array<unsigned int, 4>> sub_elem_nodes(secondary_side_elem->n_sub_elem());
-      // std::vector<Point> xi(secondary_side_elem->n_sub_elem());
       switch (secondary_side_elem->type())
       {
         case TRI3:
           sub_elem_nodes[0] = {{0, 1, 2}};
-          // xi[0] = Point(1. / 3., 1. / 3., 0);
           break;
         case QUAD4:
           sub_elem_nodes[0] = {{0, 1, 2, 3}};
-          // xi[0] = Point(0, 0, 0);
           break;
         case TRI6:
           sub_elem_nodes[0] = {{0, 3, 5}};
           sub_elem_nodes[1] = {{3, 4, 5}};
           sub_elem_nodes[2] = {{3, 1, 4}};
           sub_elem_nodes[3] = {{5, 4, 2}};
-          // xi[0] = Point(1. / 6., 1. / 6., 0);
-          // xi[1] = Point(1. / 3., 1. / 3., 0);
-          // xi[2] = Point(2. / 3., 1. / 6., 0);
-          // xi[3] = Point(1. / 6., 2. / 3., 0);
           break;
         case QUAD9:
           sub_elem_nodes[0] = {{0, 4, 8, 7}};
           sub_elem_nodes[1] = {{4, 1, 5, 8}};
           sub_elem_nodes[2] = {{8, 5, 2, 6}};
           sub_elem_nodes[3] = {{7, 8, 6, 3}};
-          // xi[0] = Point(-0.5, -0.5, 0);
-          // xi[1] = Point(0.5, -0.5, 0);
-          // xi[2] = Point(0.5, 0.5, 0);
-          // xi[3] = Point(-0.5, 0.5, 0);
           break;
         default:
           mooseError(
@@ -731,6 +720,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       // Calculate center point and normal then build each sub-element
       // Note that we are linearizing subelements, so instead of using shape functions to
       // determine center points and normals we take average of the sub-element vertices
+      // This is an important distinction, averaging over all nodes of second order elements
+      // produces a mortar segment mesh with significant gaps
       std::vector<MortarSegmentHelper *> mortar_segment_helper(secondary_side_elem->n_sub_elem());
       const auto nodal_normals = getNodalNormals(*secondary_side_elem);
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))

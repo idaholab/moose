@@ -321,7 +321,6 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       VectorValue<Dual2> x1;
       for (auto n : make_range(primal_elem->n_nodes()))
         x1 += Moose::fe_lagrange_2D_shape(primal_type, primal_order, n, xi) * primal_elem->point(n);
-
       auto u = x1 - x0;
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
                            u(2) * normal(0) - u(0) * normal(2),
@@ -351,12 +350,12 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
         if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 || q_pts[qp](0) + q_pts[qp](1) > 1)
-          mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
+          mooseError("Quadrature point: ", q_pts[qp], " out of bounds");
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
       {
         if (q_pts[qp](0) < -1 || q_pts[qp](0) > 1 || q_pts[qp](1) < -1 || q_pts[qp](1) > 1)
-          mooseError("Quadrature point: ", q_pts[qp], "out of bounds");
+          mooseError("Quadrature point: ", q_pts[qp], " out of bounds");
       }
     }
     else
