@@ -123,8 +123,8 @@ FixedPointSolve::validParams()
   return params;
 }
 
-FixedPointSolve::FixedPointSolve(Executioner & ex)
-  : SolveObject(ex),
+FixedPointSolve::FixedPointSolve(const InputParameters & parameters)
+  : SolveObject(parameters),
     _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
     _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
     _has_fixed_point_its(_max_fixed_point_its > 1),
@@ -159,7 +159,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _auto_advance_user_value(_auto_advance_set_by_user ? getParam<bool>("auto_advance") : true)
 {
   // Handle deprecated parameters
-  if (!parameters().isParamSetByAddParam("relaxed_variables"))
+  if (!parameters.isParamSetByAddParam("relaxed_variables"))
     _transformed_vars = getParam<std::vector<std::string>>("relaxed_variables");
 
   if (_min_fixed_point_its > _max_fixed_point_its)

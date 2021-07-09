@@ -10,6 +10,7 @@
 #include "TestFEProblemSolve.h"
 
 #include "MooseTestAppTypes.h"
+#include "FEProblemBase.h"
 
 InputParameters
 TestFEProblemSolve::validParams()
@@ -18,7 +19,10 @@ TestFEProblemSolve::validParams()
   return params;
 }
 
-TestFEProblemSolve::TestFEProblemSolve(Executioner & ex) : FEProblemSolve(ex) {}
+TestFEProblemSolve::TestFEProblemSolve(const InputParameters & parameters)
+  : FEProblemSolve(parameters)
+{
+}
 
 bool
 TestFEProblemSolve::solve()

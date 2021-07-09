@@ -131,8 +131,8 @@ FEProblemSolve::validParams()
   return params;
 }
 
-FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : SolveObject(ex),
+FEProblemSolve::FEProblemSolve(const InputParameters & parameters)
+  : SolveObject(parameters),
     _splitting(getParam<std::vector<std::string>>("splitting")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {

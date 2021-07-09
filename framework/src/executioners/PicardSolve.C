@@ -70,31 +70,31 @@ PicardSolve::validParams()
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex)
+PicardSolve::PicardSolve(const InputParameters & parameters) : FixedPointSolve(parameters)
 {
   // Handle deprecated parameters
-  if (!parameters().isParamSetByAddParam("picard_max_its"))
+  if (!parameters.isParamSetByAddParam("picard_max_its"))
   {
     _max_fixed_point_its = getParam<unsigned int>("picard_max_its");
     _has_fixed_point_its = _max_fixed_point_its > 1;
   }
 
-  if (!parameters().isParamSetByAddParam("accept_on_max_picard_iteration"))
+  if (!parameters.isParamSetByAddParam("accept_on_max_picard_iteration"))
     _accept_max_it = getParam<bool>("accept_on_max_picard_iteration");
 
-  if (!parameters().isParamSetByAddParam("disable_picard_residual_norm_check"))
+  if (!parameters.isParamSetByAddParam("disable_picard_residual_norm_check"))
     _has_fixed_point_norm = !getParam<bool>("disable_picard_residual_norm_check");
 
-  if (!parameters().isParamSetByAddParam("picard_rel_tol"))
+  if (!parameters.isParamSetByAddParam("picard_rel_tol"))
     _fixed_point_rel_tol = getParam<Real>("picard_rel_tol");
 
-  if (!parameters().isParamSetByAddParam("picard_abs_tol"))
+  if (!parameters.isParamSetByAddParam("picard_abs_tol"))
     _fixed_point_abs_tol = getParam<Real>("picard_abs_tol");
 
   if (isParamValid("picard_custom_pp"))
     _fixed_point_custom_pp = &getPostprocessorValue("picard_custom_pp");
 
-  if (!parameters().isParamSetByAddParam("picard_force_norms"))
+  if (!parameters.isParamSetByAddParam("picard_force_norms"))
     _fixed_point_force_norms = getParam<bool>("picard_force_norms");
 
   allocateStorage(true);

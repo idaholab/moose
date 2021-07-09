@@ -132,7 +132,7 @@ protected:
   MooseEigenSystem & _eigen_sys;
 
   /// dummy solve object for properly setting PETSc options
-  FEProblemSolve _feproblem_solve;
+  std::shared_ptr<FEProblemSolve> _feproblem_solve;
 
   /// Storage for the eigenvalue computed by the executioner
   PostprocessorValue & _eigenvalue;

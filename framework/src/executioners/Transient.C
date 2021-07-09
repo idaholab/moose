@@ -142,7 +142,7 @@ Transient::validParams()
 Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
-    _feproblem_solve(*this),
+    _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _t_step(_problem.timeStep()),
@@ -175,7 +175,7 @@ Transient::Transient(const InputParameters & parameters)
     _final_timer(registerTimedSection("final", 1)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
+  fixedPointSolve().setInnerSolve(*_feproblem_solve);
 
   // Handle deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
@@ -336,7 +336,7 @@ Transient::execute()
      * problems because Transient::endStep and Transient::postStep get called from
      * TransientMultiApp::solveStep in that case.
      */
-    if (!_fixed_point_solve->autoAdvance())
+    if (!fixedPointSolve().autoAdvance())
     {
       _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
@@ -392,7 +392,7 @@ Transient::incrementStepOrReject()
        * problems because Transient::endStep and Transient::postStep get called from
        * TransientMultiApp::solveStep in that case.
        */
-      if (!_fixed_point_solve->autoAdvance())
+      if (!fixedPointSolve().autoAdvance())
       {
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
@@ -436,7 +436,7 @@ Transient::takeStep(Real input_dt)
   _problem.onTimestepBegin();
 
   _time_stepper->step();
-  _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
+  _xfem_repeat_step = fixedPointSolve().XFEMRepeatStep();
 
   _last_solve_converged = _time_stepper->converged();
 
@@ -446,7 +446,7 @@ Transient::takeStep(Real input_dt)
     return;
   }
 
-  if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
+  if (!(_problem.haveXFEM() && fixedPointSolve().XFEMRepeatStep()))
   {
     if (lastSolveConverged())
       _time_stepper->acceptStep();

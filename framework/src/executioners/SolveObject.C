@@ -13,8 +13,8 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
-SolveObject::SolveObject(Executioner & ex)
-  : MooseObject(ex.parameters()),
+SolveObject::SolveObject(const InputParameters & parameters)
+  : MooseObject(parameters),
     PerfGraphInterface(this),
     PostprocessorInterface(this),
     _problem(*getCheckedPointerParam<FEProblemBase *>(

@@ -16,7 +16,7 @@ class TestFEProblemSolve : public FEProblemSolve
 public:
   static InputParameters validParams();
 
-  TestFEProblemSolve(Executioner & ex);
+  TestFEProblemSolve(const InputParameters & parameters);
 
   virtual bool solve() override;
 };

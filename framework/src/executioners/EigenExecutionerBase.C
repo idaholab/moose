@@ -58,7 +58,7 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase())),
-    _feproblem_solve(*this),
+    _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _eigenvalue(addAttributeReporter("eigenvalue", getParam<Real>("k0"))),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),

@@ -11,6 +11,7 @@
 #include "MooseTestAppTypes.h"
 #include "MooseApp.h"
 #include "ActionWarehouse.h"
+#include "TestFEProblemSolve.h"
 
 registerMooseObject("MooseTestApp", TestSteady);
 
@@ -27,12 +28,14 @@ TestSteady::validParams()
 }
 
 TestSteady::TestSteady(const InputParameters & parameters)
-  : Steady(parameters), _test_type(getParam<MooseEnum>("test_type")), _test_solve(*this)
+  : Steady(parameters),
+    _test_type(getParam<MooseEnum>("test_type")),
+    _test_solve(addSolveObject<TestFEProblemSolve>())
 {
   if (_test_type == "addAttributeReporter")
     _some_value_that_needs_to_be_reported = &addAttributeReporter("luggage_combo", 0);
 
-  _fixed_point_solve->setInnerSolve(_test_solve);
+  _fixed_point_solve->setInnerSolve(*_test_solve);
 }
 
 TestSteady::~TestSteady() {}

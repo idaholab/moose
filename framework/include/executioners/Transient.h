@@ -212,7 +212,7 @@ protected:
   FEProblemBase & _problem;
 
   /// inner-most solve object to perform Newton solve with PETSc on every time step
-  FEProblemSolve _feproblem_solve;
+  std::shared_ptr<FEProblemSolve> _feproblem_solve;
 
   /// Reference to nonlinear system base for faster access
   NonlinearSystemBase & _nl;

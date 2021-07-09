@@ -40,5 +40,5 @@ private:
   PostprocessorValue * _some_value_that_needs_to_be_reported;
 
   /// A modified FEProblemSolve
-  TestFEProblemSolve _test_solve;
+  std::shared_ptr<FEProblemSolve> _test_solve;
 };

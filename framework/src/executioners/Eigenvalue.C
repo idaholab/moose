@@ -80,7 +80,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Executioner(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh")),
-    _feproblem_solve(*this),
+    _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
                                                  : nullptr),
     _system_time(getParam<Real>("time")),
@@ -105,7 +105,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
 
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
+  _fixed_point_solve->setInnerSolve(*_feproblem_solve);
   _time = _system_time;
 
   if (isParamValid("normalization"))

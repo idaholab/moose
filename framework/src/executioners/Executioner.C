@@ -28,6 +28,8 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  // we temporarily allow deprecated parameters for previous implementation of Picard iteration
+  // This should be replaced with FixedPointSolve::validParams() in the future.
   params += PicardSolve::validParams();
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
@@ -70,11 +72,11 @@ Executioner::Executioner(const InputParameters & parameters)
 
   // Instantiate the SolveObject for the fixed point iteration algorithm
   if (_iteration_method == "picard")
-    _fixed_point_solve = libmesh_make_unique<PicardSolve>(*this);
+    _fixed_point_solve = addSolveObject<PicardSolve>();
   else if (_iteration_method == "secant")
-    _fixed_point_solve = libmesh_make_unique<SecantSolve>(*this);
+    _fixed_point_solve = addSolveObject<SecantSolve>();
   else if (_iteration_method == "steffensen")
-    _fixed_point_solve = libmesh_make_unique<SteffensenSolve>(*this);
+    _fixed_point_solve = addSolveObject<SteffensenSolve>();
 }
 
 Problem &

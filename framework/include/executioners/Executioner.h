@@ -116,7 +116,14 @@ public:
       mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
   }
 
-  FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
+  FixedPointSolve & fixedPointSolve()
+  {
+    auto ptr = dynamic_cast<FixedPointSolve *>(_fixed_point_solve.get());
+    if (ptr)
+      return *ptr;
+    else
+      mooseError("fixedPointSolve object is not constructed by the executioner.");
+  }
 
   /**
    * Get the verbose output flag
@@ -140,10 +147,20 @@ protected:
   virtual PostprocessorValue & addAttributeReporter(const std::string & name,
                                                     Real initial_value = 0);
 
+  /**
+   * Add a solve object directly
+   * Note: Executioner must contains the valid parameters of the solve object.
+   */
+  template <typename T>
+  std::shared_ptr<T> addSolveObject()
+  {
+    return std::make_shared<T>(_pars);
+  }
+
   FEProblemBase & _fe_problem;
 
   MooseEnum _iteration_method;
-  std::unique_ptr<FixedPointSolve> _fixed_point_solve;
+  std::shared_ptr<FixedPointSolve> _fixed_point_solve;
 
   // Restart
   std::string _restart_file_base;
