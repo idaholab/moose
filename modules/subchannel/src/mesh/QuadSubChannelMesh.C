@@ -10,7 +10,7 @@ registerMooseObject("SubChannelApp", QuadSubChannelMesh);
 InputParameters
 QuadSubChannelMesh::validParams()
 {
-  InputParameters params = SubChannelMeshBase::validParams();
+  InputParameters params = SubChannelMesh::validParams();
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
@@ -18,13 +18,17 @@ QuadSubChannelMesh::validParams()
 }
 
 QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
-  : SubChannelMeshBase(params),
+  : SubChannelMesh(params),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _n_channels(_nx * _ny),
     _n_gaps((_nx - 1) * _ny + (_ny - 1) * _nx),
     _gap(getParam<Real>("gap"))
 {
+  if (_nx < 2 && _ny < 2)
+    mooseError(name(),
+               ": The number of subchannels cannot be less than 2 in both directions (x and y). "
+               "Smallest assembly allowed is either 2X1 or 1X2. ");
   // Resize the gap-to-channel and channel-to-gap maps.
   _gap_to_chan_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
@@ -69,14 +73,9 @@ QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
 
       // make a gap size map
       if (iy == 0 || iy == _ny - 1)
-      {
         _gij_map[i_gap] = (_pitch - _rod_diameter) / 2 + _gap;
-      }
       else
-      {
         _gij_map[i_gap] = (_pitch - _rod_diameter);
-      }
-
       ++i_gap;
     }
   }
@@ -116,7 +115,7 @@ QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
 }
 
 QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
-  : SubChannelMeshBase(other_mesh),
+  : SubChannelMesh(other_mesh),
     _nx(other_mesh._nx),
     _ny(other_mesh._ny),
     _n_channels(other_mesh._n_channels),
@@ -144,8 +143,8 @@ QuadSubChannelMesh::buildMesh()
   mesh.clear();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   mesh.set_spatial_dimension(3);
-  mesh.reserve_elem(_nz * _ny * _nx);
-  mesh.reserve_nodes((_nz + 1) * _ny * _nx);
+  mesh.reserve_elem(_n_cells * _ny * _nx);
+  mesh.reserve_nodes((_n_cells + 1) * _ny * _nx);
   _nodes.resize(_nx * _ny);
   // Add the points in the shape of a rectilinear grid.  The grid is regular
   // on the xy-plane with a spacing of `pitch` between points.  The grid along
@@ -159,8 +158,8 @@ QuadSubChannelMesh::buildMesh()
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
       int i_ch = _nx * iy + ix;
-      _nodes[i_ch].reserve(_nz);
-      for (unsigned int iz = 0; iz < _nz + 1; iz++)
+      _nodes[i_ch].reserve(_n_cells);
+      for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
       {
         _nodes[i_ch].push_back(mesh.add_point(
             Point(_pitch * ix - offset_x, _pitch * iy - offset_y, _z_grid[iz]), node_id++));
@@ -175,19 +174,19 @@ QuadSubChannelMesh::buildMesh()
   {
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      for (unsigned int iz = 0; iz < _nz; iz++)
+      for (unsigned int iz = 0; iz < _n_cells; iz++)
       {
         Elem * elem = new Edge2;
         elem->set_id(elem_id++);
         elem = mesh.add_elem(elem);
-        const int indx1 = ((_nz + 1) * _nx) * iy + (_nz + 1) * ix + iz;
-        const int indx2 = ((_nz + 1) * _nx) * iy + (_nz + 1) * ix + (iz + 1);
+        const int indx1 = ((_n_cells + 1) * _nx) * iy + (_n_cells + 1) * ix + iz;
+        const int indx2 = ((_n_cells + 1) * _nx) * iy + (_n_cells + 1) * ix + (iz + 1);
         elem->set_node(0) = mesh.node_ptr(indx1);
         elem->set_node(1) = mesh.node_ptr(indx2);
 
         if (iz == 0)
           boundary_info.add_side(elem, 0, 0);
-        if (iz == _nz - 1)
+        if (iz == _n_cells - 1)
           boundary_info.add_side(elem, 1, 1);
       }
     }

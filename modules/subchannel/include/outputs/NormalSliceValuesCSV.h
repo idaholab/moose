@@ -15,7 +15,7 @@ public:
 
 protected:
   QuadSubChannelMesh & _mesh;
-  Eigen::MatrixXd _exitValue;
+  Eigen::MatrixXd _exit_value;
   const VariableName & _variable;
   const Real & _height;
 

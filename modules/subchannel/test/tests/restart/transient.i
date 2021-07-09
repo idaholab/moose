@@ -4,7 +4,7 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
 [Mesh]
-  type = BetterQuadSubChannelMesh
+  type = QuadSubChannelMesh
   nx = 3
   ny = 3
   n_cells = 10
@@ -60,7 +60,7 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = BetterSubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 1.8
@@ -120,17 +120,17 @@ P_out = 4.923e6 # Pa
 
 [ICs]
   [S_ic]
-    type = BetterQuadFlowAreaIC
+    type = QuadFlowAreaIC
     variable = S
   []
 
   [w_perim_ic]
-    type = BetterQuadWettedPerimIC
+    type = QuadWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_ic]
-    type = BetterQuadPowerIC
+    type = QuadPowerIC
     variable = q_prime
     power = 1e6
     filename = "power_profile.txt"

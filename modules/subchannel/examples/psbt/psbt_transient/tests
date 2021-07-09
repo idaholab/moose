@@ -1,0 +1,7 @@
+[Tests]
+  [transient_check_syntax]
+    type = 'RunApp'
+    input = 'psbt_transient.i'
+    check_input = true
+  []
+[]

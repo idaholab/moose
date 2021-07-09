@@ -4,7 +4,7 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
 [Mesh]
-  type = BetterQuadSubChannelMesh
+  type = QuadSubChannelMesh
   nx = 6
   ny = 6
   n_cells = 50
@@ -51,10 +51,10 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = BetterSubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
-  CT = 1.8
+  CT = 2.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -63,17 +63,17 @@ P_out = 4.923e6 # Pa
 
 [ICs]
   [S_IC]
-    type = BetterQuadFlowAreaIC
+    type = QuadFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = BetterQuadWettedPerimIC
+    type = QuadWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = BetterQuadPowerIC
+    type = QuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
@@ -148,117 +148,35 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
-  checkpoint = true
   [Temp_Out_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = T
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "Temp_Out.txt"
     height = 3.658
   []
   [mdot_Out_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_Out.txt"
     height = 3.658
   []
   [mdot_In_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = mdot
-    execute_on = final
+    execute_on = TIMESTEP_END
     file_base = "mdot_In.txt"
     height = 0.0
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   nl_rel_tol = 0.9
   l_tol = 0.9
+  start_time = 0.0
+  end_time = 8
+  dt = 1.0
 []
 
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-
-[MultiApps]
-  [pretty_mesh]
-    type = FullSolveMultiApp
-    input_files = "pretty_mesh.i"
-    execute_on = "timestep_end"
-  []
-[]
-
-[Transfers]
-  [xfer_mdot]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = mdot
-    variable = mdot
-  []
-  [xfer_SumWij]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = SumWij
-    variable = SumWij
-  []
-  [xfer_P]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = P
-    variable = P
-  []
-  [xfer_DP]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = DP
-    variable = DP
-  []
-  [xfer_h]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = h
-    variable = h
-  []
-  [xfer_T]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = T
-    variable = T
-  []
-  [xfer_rho]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = rho
-    variable = rho
-  []
-  [xfer_mu]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = mu
-    variable = mu
-  []
-  [xfer_q_prime]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = q_prime
-    variable = q_prime
-  []
-  [xfer_S]
-    type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
-    direction = to_multiapp
-    source_variable = S
-    variable = S
-  []
-[]

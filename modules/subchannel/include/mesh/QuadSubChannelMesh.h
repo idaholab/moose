@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SubChannelMeshBase.h"
+#include "SubChannelMesh.h"
 #include "Enums.h"
 
-class QuadSubChannelMesh : public SubChannelMeshBase
+class QuadSubChannelMesh : public SubChannelMesh
 {
 public:
   QuadSubChannelMesh(const InputParameters & parameters);
@@ -59,12 +59,11 @@ protected:
   std::vector<std::vector<Node *>> _gapnodes;
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
-  /// matrix
+  /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;
-  /// vector map of gap size (m)
+  /// Vector to store gap size
   std::vector<double> _gij_map;
-  Real _max_dz;
-  /// subchannel type
+  /// Subchannel type
   std::vector<EChannelType> _subch_type;
 
 public:

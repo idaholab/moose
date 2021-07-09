@@ -7,11 +7,11 @@
 /**
  * Base class for subchannel meshes
  */
-class BetterSubChannelMeshBase : public MooseMesh
+class SubChannelMesh : public MooseMesh
 {
 public:
-  BetterSubChannelMeshBase(const InputParameters & parameters);
-  BetterSubChannelMeshBase(const BetterSubChannelMeshBase & other_mesh);
+  SubChannelMesh(const InputParameters & parameters);
+  SubChannelMesh(const SubChannelMesh & other_mesh);
 
   /**
    * Get axial location of layers

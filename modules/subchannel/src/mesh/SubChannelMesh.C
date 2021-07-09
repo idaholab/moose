@@ -1,7 +1,7 @@
-#include "BetterSubChannelMeshBase.h"
+#include "SubChannelMesh.h"
 
 InputParameters
-BetterSubChannelMeshBase::validParams()
+SubChannelMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
   params.set<MooseEnum>("dim") = "3";
@@ -17,7 +17,7 @@ BetterSubChannelMeshBase::validParams()
   return params;
 }
 
-BetterSubChannelMeshBase::BetterSubChannelMeshBase(const InputParameters & params)
+SubChannelMesh::SubChannelMesh(const InputParameters & params)
   : MooseMesh(params),
     _heated_length(getParam<Real>("heated_length")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
@@ -33,7 +33,7 @@ BetterSubChannelMeshBase::BetterSubChannelMeshBase(const InputParameters & param
     _z_grid.push_back(_z_grid.back() + dz);
 }
 
-BetterSubChannelMeshBase::BetterSubChannelMeshBase(const BetterSubChannelMeshBase & other_mesh)
+SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
   : MooseMesh(other_mesh),
     _heated_length(other_mesh._heated_length),
     _z_grid(other_mesh._z_grid),

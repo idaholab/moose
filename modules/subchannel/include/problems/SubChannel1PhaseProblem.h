@@ -1,20 +1,20 @@
 #pragma once
 #include "ExternalProblem.h"
 #include "SubChannelApp.h"
-#include "BetterSubChannelMeshBase.h"
+#include "SubChannelMesh.h"
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
 
-class BetterSubChannel1PhaseProblem;
+class SubChannel1PhaseProblem;
 
 /**
  * Base class for the 1-phase steady-state/transient sub channel solver.
  */
-class BetterSubChannel1PhaseProblem : public ExternalProblem
+class SubChannel1PhaseProblem : public ExternalProblem
 {
 public:
-  BetterSubChannel1PhaseProblem(const InputParameters & params);
-  virtual ~BetterSubChannel1PhaseProblem();
+  SubChannel1PhaseProblem(const InputParameters & params);
+  virtual ~SubChannel1PhaseProblem();
 
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction direction) override;
@@ -23,7 +23,7 @@ public:
 
 protected:
   /// Returns friction factor
-  virtual double computeFrictionFactor(double Re);
+  virtual double computeFrictionFactor(double Re) = 0;
   /// Computes diversion crossflow per gap for block iblock
   virtual void computeWij(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -77,7 +77,7 @@ protected:
   const Real & _dt;
   /// Outlet Pressure
   const Real & _P_out;
-  BetterSubChannelMeshBase & _subchannel_mesh;
+  SubChannelMesh & _subchannel_mesh;
   /// Thermal diffusion coefficient used in turbulent crossflow
   const Real & _beta;
   /// Turbulent modeling parameter used in axial momentum equation

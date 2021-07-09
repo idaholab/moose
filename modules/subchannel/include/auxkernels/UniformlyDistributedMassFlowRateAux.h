@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "SubChannelMeshBase.h"
+#include "SubChannelMesh.h"
 
 /**
  * Computes mass float rate from total mass flow at the inlet
@@ -19,5 +19,5 @@ protected:
   /// Specified mass flow
   const Real & _mass_flow;
   /// Geometry information
-  SubChannelMeshBase & _subchannel_mesh;
+  SubChannelMesh & _subchannel_mesh;
 };
