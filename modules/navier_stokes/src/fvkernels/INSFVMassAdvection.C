@@ -35,6 +35,17 @@ INSFVMassAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
 
-  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+  // Interpolate velocity on the face
+  if (_velocity_interpolator)
+    _velocity_interpolator->interpolate(
+        _velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp], _face_info);
+  else
+    Moose::FV::interpolate(_velocity_interp_method,
+                           v,
+                           _vel_elem[_qp],
+                           _vel_neighbor[_qp],
+                           *_face_info,
+                           true);
+
   return _normal * v * _rho;
 }
