@@ -1,5 +1,5 @@
 [Mesh]
-  second_order = false
+  second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 3
@@ -7,12 +7,12 @@
     ny = 3
     nz = 3
     xmin = 0
-    xmax = 0.333333333
+    xmax = 0.3
     ymin = 0
     ymax = 1
     zmin = 0
     zmax = 1
-    elem_type = TET4
+    elem_type = HEX27
   [../]
   [./left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -28,16 +28,16 @@
   [./right_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 3
-    nz = 3
-    xmin = 0.333333333
-    xmax = 1
+    nx = 1
+    ny = 2
+    nz = 2
+    xmin = 0.3
+    xmax = 0.6
     ymin = 0
     ymax = 1
     zmin = 0
     zmax = 1
-    elem_type = TET4
+    elem_type = HEX27
   [../]
   [./right_block_id]
     type = SubdomainIDGenerator
@@ -125,13 +125,15 @@
 [Variables]
   [./T]
     block = '1 2'
-    order = FIRST
+    order = SECOND
   [../]
   [./lambda]
     block = 'secondary_lower'
-    family = LAGRANGE
-    order = FIRST
-    use_dual = true
+    family = MONOMIAL
+    order = CONSTANT
+    # family = LAGRANGE
+    # order = FIRST
+    # use_dual = true
   [../]
 []
 
@@ -166,15 +168,15 @@
 [Functions]
  [./forcing_function]
  type = ParsedFunction
- value = ''
+ value = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
  [../]
  [./exact_soln_primal]
  type = ParsedFunction
- value = ''
+ value = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
  [../]
  [exact_soln_lambda]
  type = ParsedFunction
- value = ''
+ value = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
  []
 []
 
@@ -191,6 +193,7 @@
     secondary_subdomain = '10001'
     variable = lambda
     secondary_variable = T
+    delta = .1
   [../]
 []
 
