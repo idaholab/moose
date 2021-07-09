@@ -2120,8 +2120,12 @@ protected:
   GeometricSearchData _geometric_search_data;
   MortarData _mortar_data;
 
+  /// Whether to call DisplacedProblem::reinitElem when this->reinitElem is called
   bool _reinit_displaced_elem;
+  /// Whether to call DisplacedProblem::reinitElemFace when this->reinitElemFace is called
   bool _reinit_displaced_face;
+  /// Whether to call DisplacedProblem::reinitNeighbor when this->reinitNeighbor is called
+  bool _reinit_displaced_neighbor;
 
   /// whether input file has been written
   bool _input_file_saved;

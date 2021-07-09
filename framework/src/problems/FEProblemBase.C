@@ -269,6 +269,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mortar_data(*this),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
+    _reinit_displaced_neighbor(false),
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
@@ -1326,7 +1327,11 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
   if (_has_nonlocal_coupling && _currently_computing_jacobian)
     _assembly[tid]->prepareNonlocal();
 
-  if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
+  if (_displaced_problem &&
+      // _reinit_displaced_neighbor applies to interface type objects which will do computations
+      // based on both elem and neighbor. Consequently, despite what you might think by its name, we
+      // must make sure we prepare the displaced elem
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
   {
     _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), tid);
     if (_has_nonlocal_coupling)
@@ -1380,7 +1385,8 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, THREAD_ID tid)
 {
   SubdomainID did = elem->subdomain_id();
   _assembly[tid]->setCurrentSubdomainID(did);
-  if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->assembly(tid).setCurrentSubdomainID(did);
 }
 
@@ -1389,7 +1395,8 @@ FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, THRE
 {
   SubdomainID did = elem->neighbor_ptr(side)->subdomain_id();
   _assembly[tid]->setCurrentNeighborSubdomainID(did);
-  if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->assembly(tid).setCurrentNeighborSubdomainID(did);
 }
 
@@ -1398,7 +1405,8 @@ FEProblemBase::setNeighborSubdomainID(const Elem * elem, THREAD_ID tid)
 {
   SubdomainID did = elem->subdomain_id();
   _assembly[tid]->setCurrentNeighborSubdomainID(did);
-  if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->assembly(tid).setCurrentNeighborSubdomainID(did);
 }
 
@@ -1919,7 +1927,7 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
   _nl->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
   _aux->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
 
-  if (_displaced_problem && _reinit_displaced_face)
+  if (_displaced_problem && _reinit_displaced_neighbor)
   {
     // There are cases like for cohesive zone modeling without significant sliding where we cannot
     // use FEInterface::inverse_map in Assembly::reinitElemAndNeighbor in the displaced problem
@@ -2821,7 +2829,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
-    _reinit_displaced_face = true;
+    _reinit_displaced_neighbor = true;
 
     if (use_undisplaced_reference_points)
     {
@@ -3494,9 +3502,11 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     {
       if (euo || nuo)
         _reinit_displaced_elem = true;
-      else if (suo || iuo)
+      else if (suo)
         // shouldn't we add isuo
         _reinit_displaced_face = true;
+      else if (iuo)
+        _reinit_displaced_neighbor = true;
     }
 
     if (guo && !tguo)
