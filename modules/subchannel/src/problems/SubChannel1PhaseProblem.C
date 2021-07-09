@@ -1,4 +1,4 @@
-#include "BetterSubChannel1PhaseProblem.h"
+#include "SubChannel1PhaseProblem.h"
 #include "SystemBase.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dense_matrix.h"
@@ -12,12 +12,11 @@
 #include <iostream>
 #include <cmath>
 #include "AuxiliarySystem.h"
-registerMooseObject("SubChannelApp", BetterSubChannel1PhaseProblem);
 
 struct Ctx
 {
   int iblock;
-  BetterSubChannel1PhaseProblem * schp;
+  SubChannel1PhaseProblem * schp;
 };
 
 PetscErrorCode
@@ -53,7 +52,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 }
 
 InputParameters
-BetterSubChannel1PhaseProblem::validParams()
+SubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<Real>("beta",
@@ -70,7 +69,7 @@ BetterSubChannel1PhaseProblem::validParams()
   return params;
 }
 
-BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParameters & params)
+SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
@@ -81,7 +80,7 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
     _compute_power(getParam<bool>("compute_power")),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
-    _subchannel_mesh(dynamic_cast<BetterSubChannelMeshBase &>(_mesh)),
+    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
     _fp(nullptr)
@@ -105,7 +104,7 @@ BetterSubChannel1PhaseProblem::BetterSubChannel1PhaseProblem(const InputParamete
 }
 
 void
-BetterSubChannel1PhaseProblem::initialSetup()
+SubChannel1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
 
@@ -123,7 +122,7 @@ BetterSubChannel1PhaseProblem::initialSetup()
   _q_prime_soln = new SolutionHandle(getVariable(0, "q_prime"));
 }
 
-BetterSubChannel1PhaseProblem::~BetterSubChannel1PhaseProblem()
+SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
 {
   delete _mdot_soln;
   delete _SumWij_soln;
@@ -139,39 +138,13 @@ BetterSubChannel1PhaseProblem::~BetterSubChannel1PhaseProblem()
 }
 
 bool
-BetterSubChannel1PhaseProblem::converged()
+SubChannel1PhaseProblem::converged()
 {
   return _converged;
 }
 
-double
-BetterSubChannel1PhaseProblem::computeFrictionFactor(double Re)
-{
-  double a, b;
-  if (Re < 1)
-  {
-    return 64.0;
-  }
-  else if (Re >= 1 and Re < 5000)
-  {
-    a = 64.0;
-    b = -1.0;
-  }
-  else if (Re >= 5000 and Re < 30000)
-  {
-    a = 0.316;
-    b = -0.25;
-  }
-  else
-  {
-    a = 0.184;
-    b = -0.20;
-  }
-  return a * std::pow(Re, b);
-}
-
 void
-BetterSubChannel1PhaseProblem::computeWij(int iblock)
+SubChannel1PhaseProblem::computeWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -205,7 +178,7 @@ BetterSubChannel1PhaseProblem::computeWij(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeSumWij(int iblock)
+SubChannel1PhaseProblem::computeSumWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -230,7 +203,7 @@ BetterSubChannel1PhaseProblem::computeSumWij(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeMdot(int iblock)
+SubChannel1PhaseProblem::computeMdot(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -265,7 +238,7 @@ BetterSubChannel1PhaseProblem::computeMdot(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeWijPrime(int iblock)
+SubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -300,7 +273,7 @@ BetterSubChannel1PhaseProblem::computeWijPrime(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeDP(int iblock)
+SubChannel1PhaseProblem::computeDP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -375,7 +348,7 @@ BetterSubChannel1PhaseProblem::computeDP(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeP(int iblock)
+SubChannel1PhaseProblem::computeP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -394,7 +367,7 @@ BetterSubChannel1PhaseProblem::computeP(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeh(int iblock)
+SubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -466,7 +439,7 @@ BetterSubChannel1PhaseProblem::computeh(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeT(int iblock)
+SubChannel1PhaseProblem::computeT(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -482,7 +455,7 @@ BetterSubChannel1PhaseProblem::computeT(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeRho(int iblock)
+SubChannel1PhaseProblem::computeRho(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -507,7 +480,7 @@ BetterSubChannel1PhaseProblem::computeRho(int iblock)
 }
 
 void
-BetterSubChannel1PhaseProblem::computeMu(int iblock)
+SubChannel1PhaseProblem::computeMu(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -532,7 +505,7 @@ BetterSubChannel1PhaseProblem::computeMu(int iblock)
 }
 
 libMesh::DenseVector<Real>
-BetterSubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
+SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
@@ -637,9 +610,9 @@ BetterSubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector
 }
 
 PetscErrorCode
-BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
-                                               const libMesh::DenseVector<Real> & solution,
-                                               libMesh::DenseVector<Real> & root)
+SubChannel1PhaseProblem::petscSnesSolver(int iblock,
+                                         const libMesh::DenseVector<Real> & solution,
+                                         libMesh::DenseVector<Real> & root)
 {
   SNES snes;
   KSP ksp;
@@ -721,7 +694,7 @@ BetterSubChannel1PhaseProblem::petscSnesSolver(int iblock,
 }
 
 void
-BetterSubChannel1PhaseProblem::externalSolve()
+SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
   auto P_error = 1.0;
@@ -793,4 +766,4 @@ BetterSubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
 }
 
-void BetterSubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}
+void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

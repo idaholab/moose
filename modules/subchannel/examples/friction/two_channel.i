@@ -3,7 +3,7 @@ mass_flux_in = 3500 # kg /sec m2
 P_out = 155e+5 # Pa
 
 [Mesh]
-  type = BetterQuadSubChannelMesh
+  type = QuadSubChannelMesh
   nx = 1
   ny = 2
   n_cells = 100
@@ -57,7 +57,7 @@ P_out = 155e+5 # Pa
 []
 
 [Problem]
-  type = BetterSubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 0.0
@@ -156,21 +156,21 @@ P_out = 155e+5 # Pa
 [Outputs]
   exodus = true
   [Temp_Out_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
     height = 10.0
   []
   [mdot_Out_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_Out.txt"
     height = 10.0
   []
   [mdot_In_MATRIX]
-    type = BetterNormalSliceValues
+    type = NormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_In.txt"

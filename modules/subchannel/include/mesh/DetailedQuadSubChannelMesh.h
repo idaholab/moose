@@ -2,10 +2,10 @@
 
 #include "QuadSubChannelMesh.h"
 
-class DetailedSubChannelMesh : public QuadSubChannelMesh
+class DetailedQuadSubChannelMesh : public QuadSubChannelMesh
 {
 public:
-  DetailedSubChannelMesh(const InputParameters & parameters);
+  DetailedQuadSubChannelMesh(const InputParameters & parameters);
   virtual void buildMesh() override;
 
 public:

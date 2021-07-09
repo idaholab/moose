@@ -5,13 +5,13 @@ registerMooseObject("SubChannelApp", LiquidWaterSubChannel1PhaseProblem);
 InputParameters
 LiquidWaterSubChannel1PhaseProblem::validParams()
 {
-  InputParameters params = SubChannel1PhaseProblemBase::validParams();
+  InputParameters params = SubChannel1PhaseProblem::validParams();
   return params;
 }
 
 LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
     const InputParameters & params)
-  : SubChannel1PhaseProblemBase(params)
+  : SubChannel1PhaseProblem(params)
 {
 }
 

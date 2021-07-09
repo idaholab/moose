@@ -15,7 +15,7 @@ UniformlyDistributedMassFlowRateAux::UniformlyDistributedMassFlowRateAux(
     const InputParameters & parameters)
   : AuxKernel(parameters),
     _mass_flow(getParam<Real>("mass_flow")),
-    _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh))
+    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
 {
 }
 

@@ -1,27 +1,26 @@
-#include "BetterDetailedQuadSubChannelMesh.h"
+#include "DetailedQuadSubChannelMesh.h"
 
 #include <array>
 #include <cmath>
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("SubChannelApp", BetterDetailedQuadSubChannelMesh);
+registerMooseObject("SubChannelApp", DetailedQuadSubChannelMesh);
 
 InputParameters
-BetterDetailedQuadSubChannelMesh::validParams()
+DetailedQuadSubChannelMesh::validParams()
 {
-  InputParameters params = BetterQuadSubChannelMesh::validParams();
+  InputParameters params = QuadSubChannelMesh::validParams();
   return params;
 }
 
-BetterDetailedQuadSubChannelMesh::BetterDetailedQuadSubChannelMesh(
-    const InputParameters & parameters)
-  : BetterQuadSubChannelMesh(parameters)
+DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(const InputParameters & parameters)
+  : QuadSubChannelMesh(parameters)
 {
 }
 
 void
-BetterDetailedQuadSubChannelMesh::buildMesh()
+DetailedQuadSubChannelMesh::buildMesh()
 {
   UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(getMesh());
   mesh.clear();

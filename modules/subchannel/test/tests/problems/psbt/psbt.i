@@ -7,7 +7,8 @@ P_out = 4.923e6 # Pa
   type = QuadSubChannelMesh
   nx = 6
   ny = 6
-  max_dz = 0.02
+  n_cells = 50
+  n_blocks = 1
   pitch = 0.0126
   rod_diameter = 0.00950
   gap = 0.00095 # the half gap between sub-channel assemblies
@@ -31,9 +32,9 @@ P_out = 4.923e6 # Pa
   []
   [rho]
   []
-  [S]
+  [mu]
   []
-  [Sij]
+  [S]
   []
   [w_perim]
   []
@@ -52,9 +53,12 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  abeta = 0.08
-  CT = 1.0
-  enforce_uniform_pressure = false
+  beta = 0.006
+  CT = 2.0
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
+  P_out = ${P_out}
 []
 
 [ICs]
@@ -84,7 +88,7 @@ P_out = 4.923e6 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -93,10 +97,18 @@ P_out = 4.923e6 # Pa
     value = 0.0
   []
 
+  [Viscosity_ic]
+    type = ViscosityIC
+    variable = mu
+    p = ${P_out}
+    T = T
+    fp = water
+  []
+
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -104,7 +116,7 @@ P_out = 4.923e6 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -117,13 +129,6 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
