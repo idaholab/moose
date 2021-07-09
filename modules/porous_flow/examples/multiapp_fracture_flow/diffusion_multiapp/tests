@@ -1,0 +1,34 @@
+[Tests]
+[single_var]
+  type = CSVDiff
+  input = single_var.i
+  csvdiff = single_var_final_csv_final_results_0001.csv
+  requirement = "PorousFlow shall provide examples of heat-transfer between matrix and fracture systems, including an example where the matrix and fracture occupy identical spatial domains and the heat transfer is set to zero"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_primer.md'
+[]
+[two_vars]
+  type = CSVDiff
+  input = two_vars.i
+  csvdiff = two_vars_final_csv_final_results_0001.csv
+  requirement = "PorousFlow shall provide examples of heat-transfer between matrix and fracture systems, including an example where the matrix and fracture occupy identical spatial domains"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_primer.md'
+[]
+[fracture_app_heat]
+  type = CSVDiff
+  input = fracture_app_heat.i
+  csvdiff = fracture_app_heat_final_csv_final_results_0001.csv
+  requirement = "PorousFlow shall provide examples of heat-transfer between matrix and fracture systems, including an example where the matrix and fracture occupy identical spatial domains, and a MultiApp approach is used where heat energy is transferred between the fracture and matrix Apps"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_primer.md'
+[]
+[fracture_app]
+  type = CSVDiff
+  input = fracture_app.i
+  csvdiff = fracture_app_final_csv_final_results_0001.csv
+  requirement = "PorousFlow shall provide examples of heat-transfer between matrix and fracture systems, including an example where the matrix and fracture occupy identical spatial domains, and a MultiApp approach is used where temperature is transferred between the fracture and matrix Apps"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_primer.md'
+[]
+[]
