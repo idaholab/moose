@@ -12,8 +12,8 @@
 InputParameters
 GeneralReporter::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
-  params += Reporter::validParams();
+  InputParameters params = Reporter::validParams();
+  params += GeneralUserObject::validParams();
   return params;
 }
 

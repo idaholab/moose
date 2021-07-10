@@ -14,8 +14,8 @@ defineLegacyParams(InternalSidePostprocessor);
 InputParameters
 InternalSidePostprocessor::validParams()
 {
-  InputParameters params = InternalSideUserObject::validParams();
-  params += Postprocessor::validParams();
+  InputParameters params = Postprocessor::validParams();
+  params += InternalSideUserObject::validParams();
   return params;
 }
 

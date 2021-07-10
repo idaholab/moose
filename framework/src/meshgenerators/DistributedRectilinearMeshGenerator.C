@@ -34,8 +34,8 @@ registerMooseObject("MooseApp", DistributedRectilinearMeshGenerator);
 InputParameters
 DistributedRectilinearMeshGenerator::validParams()
 {
-  InputParameters params = PetscExternalPartitioner::validParams();
-  params += MeshGenerator::validParams();
+  InputParameters params = MeshGenerator::validParams();
+  params += PetscExternalPartitioner::validParams();
 
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>(

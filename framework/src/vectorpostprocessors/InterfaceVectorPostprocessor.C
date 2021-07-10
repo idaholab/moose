@@ -12,8 +12,8 @@
 InputParameters
 InterfaceVectorPostprocessor::validParams()
 {
-  InputParameters params = InterfaceUserObject::validParams();
-  params += VectorPostprocessor::validParams();
+  InputParameters params = VectorPostprocessor::validParams();
+  params += InterfaceUserObject::validParams();
   return params;
 }
 

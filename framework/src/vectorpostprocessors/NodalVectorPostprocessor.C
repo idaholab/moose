@@ -17,8 +17,8 @@ defineLegacyParams(NodalVectorPostprocessor);
 InputParameters
 NodalVectorPostprocessor::validParams()
 {
-  InputParameters params = NodalUserObject::validParams();
-  params += VectorPostprocessor::validParams();
+  InputParameters params = VectorPostprocessor::validParams();
+  params += NodalUserObject::validParams();
   return params;
 }
 

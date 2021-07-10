@@ -14,8 +14,8 @@ defineLegacyParams(GeneralVectorPostprocessor);
 InputParameters
 GeneralVectorPostprocessor::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
-  params += VectorPostprocessor::validParams();
+  InputParameters params = VectorPostprocessor::validParams();
+  params += GeneralUserObject::validParams();
   return params;
 }
 
