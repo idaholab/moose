@@ -20,7 +20,7 @@
 InputParameters
 FixedPointSolve::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = SolveObject::validParams();
 
   params.addParam<unsigned int>(
       "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");

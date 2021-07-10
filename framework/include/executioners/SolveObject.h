@@ -26,7 +26,7 @@ class SolveObject : public MooseObject, public PerfGraphInterface, public Postpr
 public:
   SolveObject(const InputParameters & parameters);
 
-  static InputParameters validParams() { return emptyInputParameters(); }
+  static InputParameters validParams();
 
   /**
    * Solve routine provided by this object.

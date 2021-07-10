@@ -27,7 +27,7 @@ FEProblemSolve::mooseLineSearches()
 InputParameters
 FEProblemSolve::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = SolveObject::validParams();
 
   params.addParam<std::vector<std::string>>("splitting",
                                             "Top-level splitting defining a "

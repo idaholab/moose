@@ -29,11 +29,13 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += Reporter::validParams();
+  params += ReporterInterface::validParams();
+  params.registerBase("Executioner");
+
   // we temporarily allow deprecated parameters for previous implementation of Picard iteration
   // This should be replaced with FixedPointSolve::validParams() in the future.
   params += PicardSolve::validParams();
-  params += Reporter::validParams();
-  params += ReporterInterface::validParams();
 
   params.addParam<MooseEnum>("fixed_point_algorithm",
                              iterationMethods(),
@@ -46,8 +48,6 @@ Executioner::validParams()
       "",
       "File base name used for restart",
       "Please use \"Problem/restart_file_base\" instead");
-
-  params.registerBase("Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
@@ -119,6 +119,7 @@ Executioner::addSolveObject(const std::string & type,
 
   parameters.set<SubProblem *>("_subproblem") = &feProblem();
   parameters.set<SystemBase *>("_sys") = &feProblem().getNonlinearSystemBase();
+  parameters.set<bool>("verbose") = getParam<bool>("verbose");
   _solve_objects[name] = _app.getFactory().create<SolveObject>(type, name, parameters, 0);
   _solve_object_names[type] = name;
 }

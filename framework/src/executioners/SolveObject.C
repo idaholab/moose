@@ -15,6 +15,17 @@
 
 registerMooseObject("MooseApp", SolveObject);
 
+InputParameters
+SolveObject::validParams()
+{
+  auto params = MooseObject::validParams();
+  params += PerfGraphInterface::validParams();
+  params += PostprocessorInterface::validParams();
+  params.addParam<bool>("verbose", false, "True to print more information about the solve object");
+  params.registerBase("SolveObject");
+  return params;
+}
+
 SolveObject::SolveObject(const InputParameters & parameters)
   : MooseObject(parameters),
     PerfGraphInterface(this),

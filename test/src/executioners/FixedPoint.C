@@ -16,7 +16,7 @@ registerMooseObject("MooseTestApp", FixedPoint);
 InputParameters
 FixedPoint::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = SolveObject::validParams();
 
   params.addParam<unsigned int>("fp_max_its", 50, "Max Fixed Point Iterations");
   params.addRangeCheckedParam<Real>(
