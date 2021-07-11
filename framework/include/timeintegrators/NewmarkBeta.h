@@ -51,8 +51,8 @@ protected:
   /// Newmark time integration parameter-gamma
   Real _gamma;
 
-  /// Active time
-  Real _active_t;
+  /// Inactive time steps
+  int _inactive_tsteps;
 
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
