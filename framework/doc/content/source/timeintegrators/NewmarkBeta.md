@@ -21,6 +21,27 @@ In the above equations, $\beta$ and $\gamma$ are Newmark time integration parame
 
 When using the constant average acceleration method that has no numerical damping, high frequency noise can sometimes be observed in the velocity and acceleration time histories for a problem with prescribed displacement  [!citep](bathe2012insight). Using other parameters for $\beta$ and $\gamma$ results in non-zero numerical damping that damps out part of the high frequency noise but not all of it. Hilber-Hughes-Taylor (HHT) time integration is a variation of the Newmark method that damps out high frequency noise especially in structural dynamics problems. More details about this Newmark and HHT time integration schemes can be found in these [lecture notes](http://people.duke.edu/~hpgavin/cee541/NumericalIntegration.pdf). HHT time integration requires modification to the equation of motion and is currently implemented only for structural dynamics problems in tensor mechanics module.
 
+When using Newmark time integration in structural dynamics problems that require an initial static step (most commonly for gravity analysis), a convenient method in MOOSE is to disable the inertia kernels (which can be done using the [controls system](/syntax/controls/index.md)), the velocity and acceleration calculations, and the stiffness damping (which can be done by setting `static_initialization=true` in the stressdivergence kernels) during the first time step. This leads to solving the equation, Ku = F, in the first time step, which essentially initializes displacements and stresses from gravity loading. When using the Newmark-Beta time integrator (which we most often use for dynamics) or any other time integrator, we cannot switch off time derivatives (velocity and acceleration) calculations through the control system. Therefore, the time integrator will compute velocity and acceleration for the static step, which results in large spikes since the gravity step essentially leads to a sudden change in displacement. This combined with the properties of Newmark-Beta time integration results in noise in the whole simulation. Such a spurious response can be avoided by using the `inactive_tsteps` parameter. This parameter ensures that the first and second time derivatives calculates using the NewmarkBeta time integrator are set to zero for the first few time steps. The time derivative calculations are started when the time step number is greater than `inactive_tsteps`.
+
+A sample result of using this parameter is shown below. The result corresponds to the time derivative of a ramp function, which is typically the displacement response under gravity. The velocities and accelerations calculated for this function with and without calculating the derivatives on the first time step are shown.
+
+!row!
+
+!media time_integrators/inactive_tsteps_u.png
+       style=width:34%;float:right;padding-top:2.5%;
+       caption=Displacement
+
+!media time_integrators/inactive_tsteps_udot.png
+      style=width:34%;float:right;padding-top:2.5%;
+      caption=Velocity
+
+!media time_integrators/inactive_tsteps_udotdot.png
+       style=width:34%;float:right;padding-top:2.5%;
+       caption=Acceleration
+
+!row-end!
+
+
 !syntax parameters /Executioner/TimeIntegrator/NewmarkBeta
 
 !syntax inputs /Executioner/TimeIntegrator/NewmarkBeta
