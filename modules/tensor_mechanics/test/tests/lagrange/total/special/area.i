@@ -100,7 +100,7 @@
 [AuxKernels]
   [./stress_zz]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_zz
     index_i = 2
     index_j = 2

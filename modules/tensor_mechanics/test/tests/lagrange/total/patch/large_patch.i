@@ -102,7 +102,7 @@
 [AuxKernels]
   [./stress_xx]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_xx
     index_i = 0
     index_j = 0
@@ -110,7 +110,7 @@
   [../]
   [./stress_yy]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_yy
     index_i = 1
     index_j = 1
@@ -118,7 +118,7 @@
   [../]
   [./stress_zz]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_zz
     index_i = 2
     index_j = 2
@@ -126,7 +126,7 @@
   [../]
   [./stress_xy]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_xy
     index_i = 0
     index_j = 1
@@ -134,7 +134,7 @@
   [../]
   [./stress_xz]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_xz
     index_i = 0
     index_j = 2
@@ -142,7 +142,7 @@
   [../]
   [./stress_yz]
     type = RankTwoAux
-    rank_two_tensor = stress
+    rank_two_tensor = cauchy_stress
     variable = stress_yz
     index_i = 1
     index_j = 2

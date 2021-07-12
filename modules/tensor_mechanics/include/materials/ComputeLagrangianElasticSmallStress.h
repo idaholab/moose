@@ -21,7 +21,6 @@ class ComputeLagrangianElasticSmallStress : public ComputeLagrangianStressSmall
 public:
   static InputParameters validParams();
   ComputeLagrangianElasticSmallStress(const InputParameters & parameters);
-  virtual ~ComputeLagrangianElasticSmallStress(){};
 
 protected:
   /// Implement the elastic small stress update

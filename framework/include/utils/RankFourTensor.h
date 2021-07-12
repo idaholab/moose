@@ -74,7 +74,8 @@ public:
     initNone,
     initIdentity,
     initIdentityFour,
-    initIdentitySymmetricFour
+    initIdentitySymmetricFour,
+    initIdentityDeviatoric
   };
 
   /**
@@ -139,6 +140,10 @@ public:
   // Named constructors
   static RankFourTensorTempl<T> Identity() { return RankFourTensorTempl<T>(initIdentity); }
   static RankFourTensorTempl<T> IdentityFour() { return RankFourTensorTempl<T>(initIdentityFour); };
+  static RankFourTensorTempl<T> IdentityDeviatoric()
+  {
+    return RankFourTensorTempl<T>(initIdentityDeviatoric);
+  };
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
@@ -339,11 +344,22 @@ public:
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensorTempl<T> innerProductTranspose(const RankTwoTensorTempl<T> &) const;
 
+  /// Sum C_ijkl M_kl for a given i,j
+  T contractionIj(unsigned int, unsigned int, const RankTwoTensorTempl<T> &) const;
+
+  /// Sum M_ij C_ijkl for a given k,l
+  T contractionKl(unsigned int, unsigned int, const RankTwoTensorTempl<T> &) const;
+
   /// Calculates the sum of Ciijj for i and j varying from 0 to 2
   T sum3x3() const;
 
   /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
   VectorValue<T> sum3x1() const;
+
+  /// Calculates C_ijkl A_jm B_kn C_lt
+  RankFourTensorTempl<T> tripleProductJkl(const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &) const;
 
   /// checks if the tensor is symmetric
   bool isSymmetric() const;

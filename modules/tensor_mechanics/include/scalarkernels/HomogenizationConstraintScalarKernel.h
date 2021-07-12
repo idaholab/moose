@@ -45,8 +45,6 @@ public:
   virtual void computeResidual();
   /// Copies the on-diagonal Jacobian from the user object
   virtual void computeJacobian();
-  /// Implemented in TotalLagrangianStressDivergence
-  virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
   /// If true we're using large deformation kinematics

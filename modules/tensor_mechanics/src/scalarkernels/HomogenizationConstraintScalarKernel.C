@@ -70,8 +70,3 @@ HomogenizationConstraintScalarKernel::computeJacobian()
       ke(_i, _j) += _jacobian(
           _indices[_i].first, _indices[_i].second, _indices[_j].first, _indices[_j].second);
 }
-
-void
-HomogenizationConstraintScalarKernel::computeOffDiagJacobian(unsigned int jvar)
-{
-}

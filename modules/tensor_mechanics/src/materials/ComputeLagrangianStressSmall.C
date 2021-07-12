@@ -14,14 +14,23 @@ ComputeLagrangianStressSmall::validParams()
 
 ComputeLagrangianStressSmall::ComputeLagrangianStressSmall(const InputParameters & parameters)
   : ComputeLagrangianStressCauchy(parameters),
-    _small_stress(declareProperty<RankTwoTensor>("small_stress")),
-    _small_stress_old(getMaterialPropertyOld<RankTwoTensor>("small_stress")),
-    _small_jacobian(declareProperty<RankFourTensor>("small_jacobian")),
-    _cauchy_stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
-    _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>("mechanical_strain")),
-    _strain_increment(getMaterialPropertyByName<RankTwoTensor>("strain_increment")),
+    _small_stress(declareProperty<RankTwoTensor>(_base_name + "small_stress")),
+    _small_stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "small_stress")),
+    _small_jacobian(declareProperty<RankFourTensor>(_base_name + "small_jacobian")),
+    _cauchy_stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "cauchy_stress")),
+    _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rate(getParam<MooseEnum>("objective_rate").getEnum<ObjectiveRate>())
 {
+}
+
+void
+ComputeLagrangianStressSmall::initQpStatefulProperties()
+{
+  ComputeLagrangianStressBase::initQpStatefulProperties();
+
+  _small_stress[_qp].zero();
+  _cauchy_stress[_qp].zero();
 }
 
 void
@@ -29,9 +38,9 @@ ComputeLagrangianStressSmall::computeQpCauchyStress()
 {
   computeQpSmallStress();
   // Actually do the objective integration
-  if (_ld)
+  if (_large_kinematics)
   {
-    _objectiveUpdate();
+    computeQpObjectiveUpdate();
   }
   // Just a copy for small strains
   else
@@ -42,7 +51,7 @@ ComputeLagrangianStressSmall::computeQpCauchyStress()
 }
 
 void
-ComputeLagrangianStressSmall::_objectiveUpdate()
+ComputeLagrangianStressSmall::computeQpObjectiveUpdate()
 {
   // Common to most/all models
 
@@ -56,10 +65,10 @@ ComputeLagrangianStressSmall::_objectiveUpdate()
   switch (_rate)
   {
     case ObjectiveRate::Truesdell:
-      J = _updateTensor(dL);
+      J = updateTensor(dL);
       break;
     case ObjectiveRate::Jaumann:
-      J = _updateTensor(0.5 * (dL - dL.transpose()));
+      J = updateTensor(0.5 * (dL - dL.transpose()));
       break;
   }
 
@@ -72,10 +81,10 @@ ComputeLagrangianStressSmall::_objectiveUpdate()
   switch (_rate)
   {
     case ObjectiveRate::Truesdell:
-      U = _truesdellTangent(_cauchy_stress[_qp]);
+      U = truesdellTangent(_cauchy_stress[_qp]);
       break;
     case ObjectiveRate::Jaumann:
-      U = _jaumannTangent(_cauchy_stress[_qp]);
+      U = jaumannTangent(_cauchy_stress[_qp]);
       break;
   }
 
@@ -85,71 +94,25 @@ ComputeLagrangianStressSmall::_objectiveUpdate()
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::_updateTensor(const RankTwoTensor & Q)
+ComputeLagrangianStressSmall::updateTensor(const RankTwoTensor & Q)
 {
-  RankFourTensor J;
   auto I = RankTwoTensor::Identity();
-  auto trQ = Q.trace();
-
-  for (size_t i = 0; i < 3; i++)
-  {
-    for (size_t j = 0; j < 3; j++)
-    {
-      for (size_t m = 0; m < 3; m++)
-      {
-        for (size_t n = 0; n < 3; n++)
-        {
-          J(i, j, m, n) = (1.0 + trQ) * I(i, m) * I(j, n) - Q(i, m) * I(j, n) - I(i, m) * Q(j, n);
-        }
-      }
-    }
-  }
-  return J;
+  return (1.0 + Q.trace()) * I.mixedProductIkJl(I) - Q.mixedProductIkJl(I) - I.mixedProductIkJl(Q);
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::_truesdellTangent(const RankTwoTensor & S)
+ComputeLagrangianStressSmall::truesdellTangent(const RankTwoTensor & S)
 {
-  RankFourTensor U;
   auto I = RankTwoTensor::Identity();
 
-  for (size_t m = 0; m < 3; m++)
-  {
-    for (size_t n = 0; n < 3; n++)
-    {
-      for (size_t k = 0; k < 3; k++)
-      {
-        for (size_t l = 0; l < 3; l++)
-        {
-          U(m, n, k, l) = I(k, l) * S(m, n) - I(m, k) * S(l, n) - I(n, k) * S(m, l);
-        }
-      }
-    }
-  }
-
-  return U;
+  return S.outerProduct(I) - I.mixedProductIkJl(S.transpose()) - S.mixedProductIlJk(I);
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::_jaumannTangent(const RankTwoTensor & S)
+ComputeLagrangianStressSmall::jaumannTangent(const RankTwoTensor & S)
 {
-  RankFourTensor U;
   auto I = RankTwoTensor::Identity();
 
-  for (size_t m = 0; m < 3; m++)
-  {
-    for (size_t n = 0; n < 3; n++)
-    {
-      for (size_t k = 0; k < 3; k++)
-      {
-        for (size_t l = 0; l < 3; l++)
-        {
-          U(m, n, k, l) =
-              0.5 * (I(m, l) * S(k, n) + I(n, l) * S(m, k) - I(m, k) * S(l, n) - I(n, k) * S(m, l));
-        }
-      }
-    }
-  }
-
-  return U;
+  return 0.5 * (I.mixedProductIlJk(S.transpose()) + S.mixedProductIkJl(I) -
+                I.mixedProductIkJl(S.transpose()) - S.mixedProductIlJk(I));
 }

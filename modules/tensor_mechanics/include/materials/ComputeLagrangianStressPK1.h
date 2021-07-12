@@ -22,18 +22,22 @@
 //      2) The derivative of the increment in the Cauchy stress wrt the
 //         increment in the spatial velocity gradient
 //
-class ComputeLagrangianStressPK : public ComputeLagrangianStressBase
+class ComputeLagrangianStressPK1 : public ComputeLagrangianStressBase
 {
 public:
   static InputParameters validParams();
-  ComputeLagrangianStressPK(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStressPK(){};
+  ComputeLagrangianStressPK1(const InputParameters & parameters);
+  virtual ~ComputeLagrangianStressPK1(){};
 
 protected:
-  /// Calculate the stress update to provide both measures (cauchy and pk)
+  /// Calculate the stress update to provide both measures (cauchy and pk1)
   virtual void computeQpStressUpdate() override;
-  /// Provide for the actual PK stress update (just PK)
-  virtual void computeQpPKStress() = 0;
+  /// Provide for the actual PK stress update (just PK1)
+  virtual void computeQpPK1Stress() = 0;
+
+private:
+  /// Wrap the PK stress to get the Cauchy stress
+  virtual void computeQpCauchyStress();
 
 protected:
   /// Inverse incremental deformation gradient
@@ -42,8 +46,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _F;
   /// Volume change
   const MaterialProperty<Real> & _detJ;
-
-private:
-  /// Wrap the PK stress to get the Cauchy stress
-  virtual void _wrapPKStress();
 };

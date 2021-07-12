@@ -17,4 +17,11 @@
     exodiff = 'objective_shear_out.e'
     requirement = "Classical demonstration that the shear stress/strain response remains linear for a Truesdell rate."
   [../]
+  [./base_name]
+    type = Exodiff
+    input = 'patch.i'
+    exodiff = 'patch_out.e'
+    requirement = "System still functions if you supply a base_name"
+    abs_zero = 1e-6
+  [../]
 []

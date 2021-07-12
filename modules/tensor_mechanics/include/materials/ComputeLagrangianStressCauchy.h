@@ -26,13 +26,16 @@ class ComputeLagrangianStressCauchy : public ComputeLagrangianStressBase
 public:
   static InputParameters validParams();
   ComputeLagrangianStressCauchy(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStressCauchy(){};
 
 protected:
   /// Calculate the stress update to provide both measures (cauchy and pk)
   virtual void computeQpStressUpdate() override;
   /// Provide for the actual Cauchy stress update (just cauchy)
   virtual void computeQpCauchyStress() = 0;
+
+private:
+  /// Wrap the Cauchy stress to get the PK stress
+  virtual void computeQpPK1Stress();
 
 protected:
   /// Inverse incremental deformation gradient
@@ -41,8 +44,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// Volume change
   const MaterialProperty<Real> & _detJ;
-
-private:
-  /// Wrap the Cauchy stress to get the PK stress
-  virtual void _wrapCauchyStress();
 };

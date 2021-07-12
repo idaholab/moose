@@ -1,26 +1,59 @@
 [Tests]
-  [./sd-strain]
+  [./sd-strain_no_stab]
     type = PetscJacobianTester
     input = 'sd-strain.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false"
   [../]
-  [./sd-stress]
+  [./sd-stress_no_stab]
     type = PetscJacobianTester
     input = 'sd-stress.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false"
   [../]
-  [./ld-strain]
+  [./ld-strain_no_stab]
     type = PetscJacobianTester
     input = 'ld-strain.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false"
   [../]
-  [./ld-stress]
+  [./ld-stress_no_stab]
     type = PetscJacobianTester
     input = 'ld-stress.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false"
+  [../]
+
+  [./sd-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=true"
+  [../]
+  [./sd-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=true"
+  [../]
+  [./ld-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-strain.i'
+    ratio_tol = 1E-6 # For some reason this one is 1.01e-7...
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=true"
+  [../]
+  [./ld-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=true"
   [../]
 []

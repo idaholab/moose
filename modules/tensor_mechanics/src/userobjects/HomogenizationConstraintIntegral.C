@@ -26,19 +26,22 @@ HomogenizationConstraintIntegral::validParams()
                                                      "Functions giving the targets to hit");
   params.addParam<bool>("large_kinematics", false, "Using large displacements?");
 
+  params.addParam<std::string>("base_name", "Material property base name");
+
   return params;
 }
 
 HomogenizationConstraintIntegral::HomogenizationConstraintIntegral(
     const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _ld(getParam<bool>("large_kinematics")),
+    _large_kinematics(getParam<bool>("large_kinematics")),
     _ndisp(coupledComponents("displacements")),
-    _ncomps(HomogenizationConstants::required.at(_ld)[_ndisp - 1]),
-    _F(getMaterialPropertyByName<RankTwoTensor>("deformation_gradient")),
-    _pk1_stress(getMaterialPropertyByName<RankTwoTensor>("pk1_stress")),
-    _pk1_jacobian(getMaterialPropertyByName<RankFourTensor>("pk1_jacobian")),
-    _indices(HomogenizationConstants::indices.at(_ld)[_ndisp - 1])
+    _ncomps(HomogenizationConstants::required.at(_large_kinematics)[_ndisp - 1]),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _pk1_stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "pk1_stress")),
+    _pk1_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian")),
+    _indices(HomogenizationConstants::indices.at(_large_kinematics)[_ndisp - 1])
 {
   const std::vector<FunctionName> & names = getParam<std::vector<FunctionName>>("targets");
 
@@ -128,7 +131,7 @@ HomogenizationConstraintIntegral::computeResidual()
   // Loop over each term
   for (_h = 0; _h < _ncomps; _h++)
   {
-    if (_ld)
+    if (_large_kinematics)
     {
       // PK stress
       if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Stress)
@@ -189,7 +192,7 @@ HomogenizationConstraintIntegral::computeJacobian()
       }
       else if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Strain)
       {
-        if (_ld)
+        if (_large_kinematics)
           res(i, j, a, b) = ldStrainJacobian(i, j, a, b);
         else
           res(i, j, a, b) = sdStrainJacobian(i, j, a, b);

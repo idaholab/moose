@@ -124,10 +124,13 @@
 []
 
 [Materials]
-  [./compute_stress]
-    type = ComputeLagrangianStressStVenantKirchhoff
-    mu = 67000.0
+  [./elastic_tensor]
+    type = ComputeIsotropicElasticityTensor
+    shear_modulus = 67000.0
     lambda = 40000.0
+  [../]
+  [./compute_stress]
+    type = StVenantKirchhoffStressUpdate
   [../]
   [./compute_strain]
     type = ComputeLagrangianStrain

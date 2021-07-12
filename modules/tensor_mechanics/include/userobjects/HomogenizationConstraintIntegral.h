@@ -78,11 +78,14 @@ protected:
 
 protected:
   /// If true use large displacement kinematics
-  const bool _ld;
+  const bool _large_kinematics;
   /// Problem dimension
   unsigned int _ndisp;
   /// Number of constraints
   unsigned int _ncomps;
+
+  /// Prepend to the material properties
+  const std::string _base_name;
 
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;

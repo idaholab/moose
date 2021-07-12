@@ -3,6 +3,7 @@
 [GlobalParams]
   displacements = 'disp_x'
   large_kinematics = true
+  stabilize_strain = true
 []
 
 [Variables]

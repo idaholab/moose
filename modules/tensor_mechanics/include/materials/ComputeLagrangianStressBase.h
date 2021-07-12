@@ -10,9 +10,8 @@
 #pragma once
 
 #include "Material.h"
-#include "DerivativeMaterialInterface.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /// Provide stresses in the form required for the Lagrangian kernels
 //    This base class represents a material interface "contract"
@@ -47,14 +46,15 @@
 //
 //    If false all the stress measures and all the strain measures except
 //    the deformation gradient are equivalent and the stress update can use
-//    small deformation kinematics
+//    small deformation kinematics.  The deformation gradient is the identity
+//    for small deformation kinematics, as we use it as a push-forward in the
+//    kernel.
 //
-class ComputeLagrangianStressBase : public DerivativeMaterialInterface<Material>
+class ComputeLagrangianStressBase : public Material
 {
 public:
   static InputParameters validParams();
   ComputeLagrangianStressBase(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStressBase(){};
 
 protected:
   /// Initialize everything with zeros
@@ -66,7 +66,10 @@ protected:
 
 protected:
   /// If true use large deformations
-  bool _ld;
+  const bool _large_kinematics;
+
+  /// Prepend to the material properties
+  const std::string _base_name;
 
   /// The Cauchy stress
   MaterialProperty<RankTwoTensor> & _cauchy_stress;

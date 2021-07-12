@@ -10,9 +10,8 @@
 #pragma once
 
 #include "Material.h"
-#include "DerivativeMaterialInterface.h"
-#include "RankFourTensor.h"
-#include "RankTwoTensor.h"
+#include "RankFourTensorForward.h"
+#include "RankTwoTensorForward.h"
 
 /// Calculate strains to use the MOOSE materials with the Lagrangian kernels
 //    This class calculates strain measures used by ComputeLagrangianStress
@@ -23,48 +22,55 @@
 //    It has two basic jobs
 //    1) Calculate the deformation gradient at time steps n+1 and n
 //       (the MOOSE material system doesn't bother for the SmallStrain case)
+//       This includes including F_bar stabilization, if requested
 //    2) Calculate the kinematic quantities needed by the kernels:
 //      a) The incremental inverse deformation gradient
 //      b) The inverse deformation gradient
 //      c) The determinant of the current deformation gradient
 //
+//    If required by the stabilize_strain flag it averages the pressure parts
+//    of the deformation gradient.
+//
 //    This object cooperates with the homogenization constraint system by
 //    adding in the scalar field representing the macroscale displacement
 //    gradient before calculating strains.
 //
-class ComputeLagrangianStrain : public DerivativeMaterialInterface<Material>
+class ComputeLagrangianStrain : public Material
 {
 public:
   static InputParameters validParams();
   ComputeLagrangianStrain(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStrain(){};
 
 protected:
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
+  /// Loop over qp
+  virtual void computeProperties() override;
   /// Update all the kinematic quantities
   virtual void computeQpProperties() override;
 
 private:
   /// Calculate the strains based on the spatial velocity gradient
-  void _calculateIncrementalStrains(RankTwoTensor L);
-  /// Calculate the eigenstrain increment to subtract from the total strain
-  /// increment
-  RankTwoTensor _eigenstrainIncrement();
-  /// Calculate the homogenization macrogradient based on the scalar variable
-  /// values
-  RankTwoTensor _homogenizationContribution();
+  void calculateIncrementalStrains(const RankTwoTensor & L);
+  /// Subtract the eigenstrain increment to subtract from the total strain
+  void subtractEigenstrainIncrement(RankTwoTensor & strain);
+  /// Calculate the unstabilized and stabilized deformation gradients
+  void calculateDeformationGradient();
 
 protected:
   // Displacements and displacement gradients
-  unsigned int _ndisp;
+  const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableValue *> _disp_old;
-  std::vector<const VariableGradient *> _grad_disp_old;
+
+  /// Material system base name
+  const std::string _base_name;
 
   /// If true the equilibrium conditions is calculated with large deformations
-  bool _ld;
+  const bool _large_kinematics;
+
+  /// If true stabilize the strains with F_bar
+  const bool _stabilize_strain;
 
   // The eigenstrains
   std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -85,6 +91,12 @@ protected:
   /// Old deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad_old;
 
+  /// Unstabilized deformation gradient
+  MaterialProperty<RankTwoTensor> & _unstabilized_def_grad;
+
+  /// Average deformation gradient (really element-level)
+  MaterialProperty<RankTwoTensor> & _avg_def_grad;
+
   /// Inverse incremental deformation gradient
   MaterialProperty<RankTwoTensor> & _inv_df;
   /// Inverse deformation gradient
@@ -92,10 +104,9 @@ protected:
   /// Volume change
   MaterialProperty<Real> & _detJ;
 
-  /// The scalar variables providing the homogenization strain
-  const VariableValue & _macro_gradient;
-  /// The "reshaped" actual homogenization gradient contribution
-  //    This is optional, could be removed without affecting the formulation
-  //    It's just nice to have for output
-  MaterialProperty<RankTwoTensor> & _homogenization_contribution;
+  /// Names of any extra homogenization gradients
+  std::vector<MaterialPropertyName> _homogenization_gradient_names;
+
+  /// Actual homogenization contributions
+  std::vector<const MaterialProperty<RankTwoTensor> *> _homogenization_contributions;
 };

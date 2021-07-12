@@ -247,7 +247,7 @@
 
 [Kernels]
   [./sdx]
-      type = TotalLagrangianStressDivergence
+      type = HomogenizedTotalLagrangianStressDivergence
       variable = disp_x
       component = 0
   [../]
@@ -314,6 +314,10 @@
   [../]
   [./compute_strain]
     type = ComputeLagrangianStrain
+    homogenization_gradient_names = 'homogenization_gradient'
+  [../]
+  [./compute_homogenization_gradient]
+    type = ComputeHomogenizedLagrangianStrain
   [../]
 []
 

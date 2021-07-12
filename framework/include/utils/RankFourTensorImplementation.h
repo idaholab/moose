@@ -83,6 +83,19 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const InitMethod init)
               _vals[index++] = 0.5 * Real(i == k && j == l) + 0.5 * Real(i == l && j == k);
       break;
 
+    case initIdentityDeviatoric:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+            {
+              _vals[index] = Real(i == k && j == l);
+              if ((i == j) && (k == l))
+                _vals[index] -= 1.0 / 3.0;
+              index++;
+            }
+      break;
+
     default:
       mooseError("Unknown RankFourTensorTempl<T> initialization pattern.");
   }
@@ -900,6 +913,34 @@ RankFourTensorTempl<T>::innerProductTranspose(const RankTwoTensorTempl<T> & b) c
 
 template <typename T>
 T
+RankFourTensorTempl<T>::contractionIj(unsigned int i,
+                                      unsigned int j,
+                                      const RankTwoTensorTempl<T> & M) const
+{
+  T val = 0;
+  for (unsigned int k = 0; k < N; k++)
+    for (unsigned int l = 0; l < N; l++)
+      val += (*this)(i, j, k, l) * M(k, l);
+
+  return val;
+}
+
+template <typename T>
+T
+RankFourTensorTempl<T>::contractionKl(unsigned int k,
+                                      unsigned int l,
+                                      const RankTwoTensorTempl<T> & M) const
+{
+  T val = 0;
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      val += (*this)(i, j, k, l) * M(i, j);
+
+  return val;
+}
+
+template <typename T>
+T
 RankFourTensorTempl<T>::sum3x3() const
 {
   // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking
@@ -919,6 +960,25 @@ RankFourTensorTempl<T>::sum3x1() const
   a(1) = (*this)(1, 1, 0, 0) + (*this)(1, 1, 1, 1) + (*this)(1, 1, 2, 2); // C1100 + C1111 + C1122
   a(2) = (*this)(2, 2, 0, 0) + (*this)(2, 2, 1, 1) + (*this)(2, 2, 2, 2); // C2200 + C2211 + C2222
   return a;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::tripleProductJkl(const RankTwoTensorTempl<T> & A,
+                                         const RankTwoTensorTempl<T> & B,
+                                         const RankTwoTensorTempl<T> & C) const
+{
+  RankFourTensorTempl<T> R;
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            for (unsigned int n = 0; n < N; n++)
+              for (unsigned int t = 0; t < N; t++)
+                R(i, j, k, l) += (*this)(i, m, n, t) * A(j, m) * B(k, n) * C(l, t);
+
+  return R;
 }
 
 template <typename T>

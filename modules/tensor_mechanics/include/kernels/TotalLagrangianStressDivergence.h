@@ -9,109 +9,70 @@
 
 #pragma once
 
-#include "DerivativeMaterialInterface.h"
-#include "Kernel.h"
-#include "RankFourTensor.h"
-#include "RankTwoTensor.h"
-
-#include "HomogenizationConstraintIntegral.h" // Index constants
-#include "MooseVariableScalar.h"
+#include "LagrangianStressDivergenceBase.h"
 
 /// Enforce equilibrium with a total Lagrangian formulation
 //    This class enforces equilibrium when used in conjunction with
 //    the corresponding strain calculator (CalculateStrainLagrangianKernel)
 //    and with either a stress calculator that provides the
-//    "cauchy_stress" and the appropriate "material_jacobian",
-//    which needs to be the derivative of the increment in Cauchy stress
-//    with respect to the increment in the spatial velocity gradient.
+//    1st PK stress ("pk1_stress") and the derivative of the 1st PK stress
+//    with respect to the deformation gradient ("pk1_jacobian")
 //
-//    The WrapStressLagrangianKernel exists to wrap the existing MOOSE
-//    material system to provide this information, or new materials
-//    can provide it directly.
+//    This kernel should be used with the new "ComputeLagrangianStressBase"
+//    stress update system and the "ComputeLagrangianStrain" system for strains.
 //
-//    The total Lagrangian formulation can interact with the homogenization
-//    system defined by the HomogenizationConstraintScalarKernel and
-//    HomogenizationConstraintIntegral user object by providing the
-//    correct off-diagonal Jacobian entries.
 //
-class TotalLagrangianStressDivergence : public DerivativeMaterialInterface<Kernel>
+class TotalLagrangianStressDivergence : public LagrangianStressDivergenceBase
 {
 public:
   static InputParameters validParams();
   TotalLagrangianStressDivergence(const InputParameters & parameters);
-  virtual ~TotalLagrangianStressDivergence(){};
 
 protected:
-  /// Implement the
-  /// R^{\alpha}=\int_{V}J\sigma_{ij}\phi_{i,K}^{\alpha}F_{Kj}^{-1}dV
-  /// residual
+  /// Implement the R^{\alpha}=\int_{V}J\sigma_{ij}\phi_{i,K}^{\alpha}F_{Kj}^{-1}dV residual
   virtual Real computeQpResidual() override;
   /// On diagonal Jacobian, only involves the solid mechanics kernel
   virtual Real computeQpJacobian() override;
   /// Off diagonal Jacobian, solid mechanics + homogenization constraint
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  /// Homogenization constraint diagonal term
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+
+  /// Trial gradient averaging
+  virtual void precalculateJacobian();
+
+  /// Stabilize a generic gradient tensor
+  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga);
+
+  /// Calculate the full test gradient (could later be modified for stabilization)
+  RankTwoTensor testGrad(unsigned int i);
+
+  /// Compute the stabilized trial function gradient tensor
+  RankTwoTensor trialGrad(unsigned int k);
 
 private:
   // *** Base kernel ***
 
   /// The material part of the Jacobian
-  Real materialJacobian(unsigned int i,
-                        unsigned int k,
-                        const RealGradient & grad_phi,
-                        const RealGradient & grad_psi);
+  Real materialJacobian(const RankTwoTensor & grad_test, const RankTwoTensor & grad_trial);
 
-  // *** Homogenization-constraint system ***
+  /// Calculate the average gradient of some type (test or trial)
+  void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
 
-  /// Calculate the displacement-scalar part of the off-diagonal constraint
-  /// Jacobian
-  Real computeBaseJacobian();
-  /// Calculate the scalar-base part of the off-diagonal constraint
-  /// Jacobian
-  //    Properly this would belong in the ScalarKernel, but as it varies
-  //    by element it's best to put it here
-  Real computeConstraintJacobian();
-
-  /// Calculate the material part of the base disp-scalar jacobian
-  Real materialBaseJacobian();
-
-  /// Small deformation scalar-displacement component for strain constraints
-  Real sdConstraintJacobianStrain();
-  /// Large deformation scalar-displacement component for strain constraints
-  Real ldConstraintJacobianStrain();
-
-  /// Material scalar-displacement component for stress constraints
-  Real materialConstraintJacobianStress();
+  /// Compute the average trial function gradient
+  void computeAverageGradPhi();
 
 protected:
-  /// If true use large kinematics
-  bool _ld;
-
-  /// Which residual vector index this kernel handles
-  unsigned int _component;
-  /// Total number of displacements
-  unsigned int _ndisp;
-
-  // The displacement variables and gradients
-  std::vector<unsigned int> _disp_nums;
-  std::vector<MooseVariable *> _disp_vars;
-
   /// The 1st Piola-Kirchhoff stress
   const MaterialProperty<RankTwoTensor> & _pk1;
   /// The derivative of the PK1 stress with respect to the
   /// deformation gradient
   const MaterialProperty<RankFourTensor> & _dpk1;
 
-  /// The scalar variable used to enforce the homogenization constraints
-  unsigned int _macro_gradient_num;
-  const MooseVariableScalar * _macro_gradient;
+  /// Averaged trial function gradients
+  std::vector<RealVectorValue> _avg_grad_trial;
 
-  // Which indices are constrained and what types of constraints
-  const HomogenizationConstants::index_list _indices;
-  std::vector<HomogenizationConstants::ConstraintType> _ctypes;
+  /// The unmodified deformation gradient
+  const MaterialProperty<RankTwoTensor> & _uF;
 
-  /// Used internally to iterate over each scalar component (i.e. each
-  /// constraint)
-  unsigned int _h;
+  /// The element-average deformation gradient
+  const MaterialProperty<RankTwoTensor> & _aF;
 };

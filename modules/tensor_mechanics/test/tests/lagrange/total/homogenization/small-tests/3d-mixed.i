@@ -96,21 +96,21 @@
   [./sxx]
     type = RankTwoAux
     variable = sxx
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
   [../]
   [./syy]
     type = RankTwoAux
     variable = syy
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 1
   [../]
   [./sxy]
     type = RankTwoAux
     variable = sxy
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 1
   [../]
@@ -118,21 +118,21 @@
   [./zz]
     type = RankTwoAux
     variable = szz
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 2
   [../]
   [./syz]
     type = RankTwoAux
     variable = syz
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 2
   [../]
   [./sxz]
     type = RankTwoAux
     variable = sxz
-    rank_two_tensor = stress
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 2
   [../]
@@ -192,17 +192,17 @@
 
 [Kernels]
   [./sdx]
-      type = TotalLagrangianStressDivergence
+      type = HomogenizedTotalLagrangianStressDivergence
       variable = disp_x
       component = 0
   [../]
   [./sdy]
-      type = TotalLagrangianStressDivergence
+      type = HomogenizedTotalLagrangianStressDivergence
       variable = disp_y
       component = 1
   [../]
   [./sdz]
-      type = TotalLagrangianStressDivergence
+      type = HomogenizedTotalLagrangianStressDivergence
       variable = disp_z
       component = 2
   [../]
@@ -329,6 +329,10 @@
   [../]
   [./compute_strain]
     type = ComputeLagrangianStrain
+    homogenization_gradient_names = 'homogenization_gradient'
+  [../]
+  [./compute_homogenization_gradient]
+    type = ComputeHomogenizedLagrangianStrain
   [../]
 []
 

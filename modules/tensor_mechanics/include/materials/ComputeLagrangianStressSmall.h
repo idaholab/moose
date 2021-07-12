@@ -28,15 +28,30 @@ class ComputeLagrangianStressSmall : public ComputeLagrangianStressCauchy
 public:
   static InputParameters validParams();
   ComputeLagrangianStressSmall(const InputParameters & parameters);
-  virtual ~ComputeLagrangianStressSmall(){};
 
 protected:
+  /// Initialize the new (small) stress
+  virtual void initQpStatefulProperties() override;
+
   /// Implement the objective update
   virtual void computeQpCauchyStress() override;
 
   /// Method to implement to provide the small stress update
   //    This method must provide the _small_stress and _small_jacobian
   virtual void computeQpSmallStress() = 0;
+
+private:
+  /// Actually do the objective integration
+  void computeQpObjectiveUpdate();
+
+  /// Update tensor
+  RankFourTensor updateTensor(const RankTwoTensor & Q);
+
+  /// Jacobian tensor for the Truesdell rate
+  RankFourTensor truesdellTangent(const RankTwoTensor & S);
+
+  /// Jacobian tensor for the Jaumann rate
+  RankFourTensor jaumannTangent(const RankTwoTensor & S);
 
 protected:
   /// The updated small stress
@@ -64,16 +79,4 @@ private:
     Truesdell,
     Jaumann
   } _rate;
-
-  /// Actually do the objective integration
-  void _objectiveUpdate();
-
-  /// Update tensor
-  RankFourTensor _updateTensor(const RankTwoTensor & Q);
-
-  /// Jacobian tensor for the Truesdell rate
-  RankFourTensor _truesdellTangent(const RankTwoTensor & S);
-
-  /// Jacobian tensor for the Jaumann rate
-  RankFourTensor _jaumannTangent(const RankTwoTensor & S);
 };

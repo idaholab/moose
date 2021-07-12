@@ -10,9 +10,15 @@ ComputeLagrangianStrain::validParams()
   params.addRequiredCoupledVar("displacements", "Displacement variables");
   params.addParam<bool>(
       "large_kinematics", false, "Use large displacement kinematics in the kernel.");
+  params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
   params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names",
                                                      "List of eigenstrains to account for");
-  params.addCoupledVar("macro_gradient", "Optional scalar field with the macro gradient");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "homogenization_gradient_names",
+      "List of homogenization gradients to add to the "
+      "displacement gradient");
+
+  params.addParam<std::string>("base_name", "Material property base name");
 
   // We rely on this *not* having use_displaced mesh on
   params.suppressParameter<bool>("use_displaced_mesh");
@@ -21,27 +27,32 @@ ComputeLagrangianStrain::validParams()
 }
 
 ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Material>(parameters),
+  : Material(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
-    _ld(getParam<bool>("large_kinematics")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _large_kinematics(getParam<bool>("large_kinematics")),
+    _stabilize_strain(getParam<bool>("stabilize_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _eigenstrains_old(_eigenstrain_names.size()),
-    _total_strain(declareProperty<RankTwoTensor>("total_strain")),
-    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>("total_strain")),
-    _mechanical_strain(declareProperty<RankTwoTensor>("mechanical_strain")),
-    _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>("mechanical_strain")),
-    _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-    _def_grad(declareProperty<RankTwoTensor>("deformation_gradient")),
-    _def_grad_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
-    _inv_df(declareProperty<RankTwoTensor>("inv_inc_def_grad")),
-    _inv_def_grad(declareProperty<RankTwoTensor>("inv_def_grad")),
-    _detJ(declareProperty<Real>("detJ")),
-    _macro_gradient(isCoupledScalar("macro_gradient", 0) ? coupledScalarValue("macro_gradient")
-                                                         : _zero),
-    _homogenization_contribution(declareProperty<RankTwoTensor>("homogenization_contribution"))
+    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
+    _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _def_grad(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _def_grad_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _unstabilized_def_grad(
+        declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _avg_def_grad(declareProperty<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
+    _inv_df(declareProperty<RankTwoTensor>(_base_name + "inv_inc_def_grad")),
+    _inv_def_grad(declareProperty<RankTwoTensor>(_base_name + "inv_def_grad")),
+    _detJ(declareProperty<Real>(_base_name + "detJ")),
+    _homogenization_gradient_names(
+        getParam<std::vector<MaterialPropertyName>>("homogenization_gradient_names")),
+    _homogenization_contributions(_homogenization_gradient_names.size())
 {
   // Setup eigenstrains
   for (unsigned int i = 0; i < _eigenstrain_names.size(); i++)
@@ -49,23 +60,38 @@ ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & paramet
     _eigenstrains[i] = &getMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
     _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
   }
+
+  // In the future maybe there is a reason to have more than one, but for now
+  if (_homogenization_gradient_names.size() > 1)
+    mooseError("ComputeLagrangianStrain cannot accommodate more than one "
+               "homogenization gradient");
+
+  // Setup homogenization contributions
+  for (unsigned int i = 0; i < _homogenization_gradient_names.size(); i++)
+  {
+    _homogenization_contributions[i] =
+        &getMaterialProperty<RankTwoTensor>(_homogenization_gradient_names[i]);
+  }
 }
 
 void
 ComputeLagrangianStrain::initialSetup()
 {
-  // Grab the actual displacements
-  for (unsigned int i = 0; i < _ndisp; i++)
+  // Setup displacements/zeros
+  for (unsigned int i = 0; i < 3; i++)
   {
-    _disp[i] = &coupledValue("displacements", i);
-    _grad_disp[i] = &coupledGradient("displacements", i);
-  }
-
-  // All others zero (so this will work naturally for plane strain problems)
-  for (unsigned int i = _ndisp; i < 3; i++)
-  {
-    _disp[i] = &_zero;
-    _grad_disp[i] = &_grad_zero;
+    // Actual displacement
+    if (i < _ndisp)
+    {
+      _disp[i] = &coupledValue("displacements", i);
+      _grad_disp[i] = &coupledGradient("displacements", i);
+    }
+    // Zero
+    else
+    {
+      _disp[i] = &_zero;
+      _grad_disp[i] = &_grad_zero;
+    }
   }
 }
 
@@ -74,30 +100,30 @@ ComputeLagrangianStrain::initQpStatefulProperties()
 {
   _total_strain[_qp].zero();
   _mechanical_strain[_qp].zero();
-  _strain_increment[_qp].zero();
-  _def_grad[_qp] = RankTwoTensor::Identity();
-  _inv_df[_qp] = RankTwoTensor::Identity();
-  _inv_def_grad[_qp] = RankTwoTensor::Identity();
-  _detJ[_qp] = 1.0;
-  _homogenization_contribution[_qp].zero();
+  _def_grad[_qp].setToIdentity();
+}
+
+void
+ComputeLagrangianStrain::computeProperties()
+{
+  // Average the volumetric terms, if required
+  calculateDeformationGradient();
+
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpProperties();
 }
 
 void
 ComputeLagrangianStrain::computeQpProperties()
 {
-  // We'll calculate the deformation gradient even for small kinematics
-  _def_grad[_qp] =
-      (RankTwoTensor::Identity() +
-       RankTwoTensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
-
   // Add in the macroscale gradient contribution
-  _homogenization_contribution[_qp] = _homogenizationContribution();
-  _def_grad[_qp] += _homogenization_contribution[_qp];
+  for (auto contribution : _homogenization_contributions)
+    _def_grad[_qp] += (*contribution)[_qp];
 
   // If the kernel is large deformation then we need the "actual"
   // kinematic quantities
   RankTwoTensor L;
-  if (_ld)
+  if (_large_kinematics)
   {
     _inv_def_grad[_qp] = _def_grad[_qp].inverse();
     _detJ[_qp] = _def_grad[_qp].det();
@@ -113,101 +139,81 @@ ComputeLagrangianStrain::computeQpProperties()
     L = _def_grad[_qp] - _def_grad_old[_qp];
   }
 
-  _calculateIncrementalStrains(L);
+  calculateIncrementalStrains(L);
 }
 
 void
-ComputeLagrangianStrain::_calculateIncrementalStrains(RankTwoTensor L)
+ComputeLagrangianStrain::calculateIncrementalStrains(const RankTwoTensor & L)
 {
   // Get the deformation increments
-  RankTwoTensor D = (L + L.transpose()) / 2.0;
-  _strain_increment[_qp] = D - _eigenstrainIncrement();
+  _strain_increment[_qp] = (L + L.transpose()) / 2.0;
 
   // Increment the total strain
-  _total_strain[_qp] = _total_strain_old[_qp] + D;
+  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+  // Get rid of the eigenstrains
+  subtractEigenstrainIncrement(_strain_increment[_qp]);
 
   // Increment the mechanical strain
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
 }
 
-RankTwoTensor
-ComputeLagrangianStrain::_eigenstrainIncrement()
+void
+ComputeLagrangianStrain::subtractEigenstrainIncrement(RankTwoTensor & strain)
 {
-  // Sum the eigenstrains
-  RankTwoTensor res;
-  res.zero();
   for (size_t i = 0; i < _eigenstrain_names.size(); i++)
   {
-    res += ((*_eigenstrains[i])[_qp] - (*_eigenstrains_old[i])[_qp]);
+    strain -= (*_eigenstrains[i])[_qp];
+    strain += (*_eigenstrains_old[i])[_qp];
   }
-  return res;
 }
 
-RankTwoTensor
-ComputeLagrangianStrain::_homogenizationContribution()
+void
+ComputeLagrangianStrain::calculateDeformationGradient()
 {
-  if (isCoupledScalar("macro_gradient", 0))
+  // First calculate the base deformation gradient at each qp
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    _unstabilized_def_grad[_qp] =
+        (RankTwoTensor::Identity() +
+         RankTwoTensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
+
+  // If stabilization is on do the volumetric correction
+  if (_stabilize_strain)
   {
-    if (_ld)
+    // Average the deformation gradient
+    RankTwoTensor F0;
+    F0.zero();
+    Real cv = 0.0;
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      if (_ndisp == 1)
-      {
-        return RankTwoTensor(_macro_gradient[0], 0, 0, 0, 0, 0, 0, 0, 0);
-      }
-      else if (_ndisp == 2)
-      {
-        return RankTwoTensor(_macro_gradient[0],
-                             _macro_gradient[2],
-                             0,
-                             _macro_gradient[3],
-                             _macro_gradient[1],
-                             0,
-                             0,
-                             0,
-                             0);
-      }
-      else
-      {
-        return RankTwoTensor(_macro_gradient[0],
-                             _macro_gradient[1],
-                             _macro_gradient[2],
-                             _macro_gradient[3],
-                             _macro_gradient[4],
-                             _macro_gradient[5],
-                             _macro_gradient[6],
-                             _macro_gradient[7],
-                             _macro_gradient[8]);
-      }
+      cv += _JxW[_qp] * _coord[_qp];
+      F0 += _JxW[_qp] * _coord[_qp] * _unstabilized_def_grad[_qp];
     }
-    else
+    F0 /= cv;
+    // Make the appropriate modification, depending on small or large
+    // deformations
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      if (_ndisp == 1)
+      _avg_def_grad[_qp] = F0;
+      if (_large_kinematics)
       {
-        return RankTwoTensor(_macro_gradient[0], 0, 0, 0, 0, 0, 0, 0, 0);
-      }
-      else if (_ndisp == 2)
-      {
-        return RankTwoTensor(
-            _macro_gradient[0], 0, 0, _macro_gradient[2], _macro_gradient[1], 0, 0, 0, 0);
+        _def_grad[_qp] =
+            std::pow(_avg_def_grad[_qp].det() / _unstabilized_def_grad[_qp].det(), 1.0 / 3.0) *
+            _unstabilized_def_grad[_qp];
       }
       else
-      {
-        return RankTwoTensor(_macro_gradient[0],
-                             0.0,
-                             0.0,
-                             _macro_gradient[5],
-                             _macro_gradient[1],
-                             0.0,
-                             _macro_gradient[4],
-                             _macro_gradient[3],
-                             _macro_gradient[2]);
-      }
+        _def_grad[_qp] = _unstabilized_def_grad[_qp] +
+                         (_avg_def_grad[_qp].trace() - _unstabilized_def_grad[_qp].trace()) *
+                             RankTwoTensor::Identity() / 3.0;
     }
   }
+  // If not stabilized just copy over
   else
   {
-    RankTwoTensor res;
-    res.zero();
-    return res;
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    {
+      _avg_def_grad[_qp] = _unstabilized_def_grad[_qp];
+      _def_grad[_qp] = _unstabilized_def_grad[_qp];
+    }
   }
 }

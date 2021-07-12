@@ -7,13 +7,17 @@ ComputeLagrangianElasticSmallStress::validParams()
 {
   InputParameters params = ComputeLagrangianStressSmall::validParams();
 
+  params.addParam<MaterialPropertyName>(
+      "elasticity_tensor", "elasticity_tensor", "The name of the elasticity tensor.");
+
   return params;
 }
 
 ComputeLagrangianElasticSmallStress::ComputeLagrangianElasticSmallStress(
     const InputParameters & parameters)
   : ComputeLagrangianStressSmall(parameters),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>("elasticity_tensor"))
+    _elasticity_tensor(
+        getMaterialProperty<RankFourTensor>(getParam<MaterialPropertyName>("elasticity_tensor")))
 {
 }
 

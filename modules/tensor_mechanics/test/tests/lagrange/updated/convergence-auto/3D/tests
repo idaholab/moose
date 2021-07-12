@@ -1,14 +1,58 @@
 [Tests]
-  [./dirichlet]
+  [./dirichlet_small_neither]
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false GlobalParams/stabilize_strain=false"
   [../]
-  [./neumann]
+  [./neumann_small_neither]
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false GlobalParams/stabilize_strain=false"
+  [../]
+  [./dirichlet_large_neither]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true GlobalParams/stabilize_strain=false"
+  [../]
+  [./neumann_large_neither]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true GlobalParams/stabilize_strain=false"
+  [../]
+  [./dirichlet_small_right]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false GlobalParams/stabilize_strain=true"
+  [../]
+  [./neumann_small_right]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false GlobalParams/stabilize_strain=true"
+  [../]
+  [./dirichlet_large_right]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true GlobalParams/stabilize_strain=true"
+  [../]
+  [./neumann_large_right]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true GlobalParams/stabilize_strain=true"
   [../]
 []
