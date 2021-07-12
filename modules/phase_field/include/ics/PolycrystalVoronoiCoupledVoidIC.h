@@ -35,14 +35,9 @@ protected:
   const unsigned int _op_num;
   const unsigned int _op_index;
 
-  const bool _columnar_3D;
-
   const PolycrystalVoronoi & _poly_ic_uo;
 
-  const FileName _file_name;
-
   virtual Real value(const Point & p) override;
-  // virtual RealGradient gradient(const Point & p) override;
 
   unsigned int _grain_num;
   std::vector<Point> _centerpoints;

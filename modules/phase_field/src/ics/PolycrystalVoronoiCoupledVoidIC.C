@@ -12,7 +12,6 @@
 // MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
-#include "DelimitedFileReader.h"
 #include "GrainTrackerInterface.h"
 #include "PolycrystalVoronoi.h"
 
@@ -21,8 +20,6 @@ PolycrystalVoronoiCoupledVoidIC::actionParameters()
 {
   InputParameters params = ::validParams<InitialCondition>();
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters of grain");
-  params.addParam<bool>(
-      "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
   params.addCoupledVar("v", "Coupled variable associated with the void");
   params.addRequiredParam<Real>("invalue", "Variable value inside the coupled void");
   params.addRequiredParam<Real>("outvalue", "Variable value outside the coupled void");
@@ -40,11 +37,6 @@ PolycrystalVoronoiCoupledVoidIC::validParams()
   params.addParam<unsigned int>("op_index", 0, "The index for the current order parameter");
   params.addRequiredParam<UserObjectName>(
       "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
-  params.addParam<FileName>(
-      "file_name",
-      "",
-      "File containing grain centroids, if file_name is provided, the centroids "
-      "from the file will be used.");
   return params;
 }
 
@@ -52,9 +44,7 @@ PolycrystalVoronoiCoupledVoidIC::PolycrystalVoronoiCoupledVoidIC(const InputPara
   : InitialCondition(parameters),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index")),
-    _columnar_3D(getParam<bool>("columnar_3D")),
     _poly_ic_uo(getUserObject<PolycrystalVoronoi>("polycrystal_ic_uo")),
-    _file_name(getParam<FileName>("file_name")),
     _var_val(coupledValue("v")),
     _invalue(getParam<Real>("invalue")),
     _outvalue(getParam<Real>("outvalue"))
