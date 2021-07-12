@@ -31,7 +31,7 @@ public:
   virtual void finalize() override {}
   virtual void threadJoin(const UserObject & y) override;
 
-  /// accessor for the void speed
+  /// accessor for the wave speed
   std::vector<ADReal> waveSpeed(const Elem * elem, unsigned int side) const;
 
   /// Query whether this processor has data for the provided element and side

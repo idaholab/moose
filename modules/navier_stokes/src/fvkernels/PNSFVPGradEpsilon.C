@@ -23,7 +23,7 @@ PNSFVPGradEpsilon::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addRequiredParam<FunctionName>("epsilon_function", "A function describing epsilon");
+  params.addRequiredParam<FunctionName>("epsilon_function", "A function describing the porosity");
   return params;
 }
 

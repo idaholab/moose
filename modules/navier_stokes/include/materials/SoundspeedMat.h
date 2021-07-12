@@ -14,7 +14,7 @@
 class SinglePhaseFluidProperties;
 
 /**
- * Computes the speed of sound from other Navier-Stokes materials
+ * Computes the speed of sound from other Navier-Stokes material properties
  */
 class SoundspeedMat : public Material
 {

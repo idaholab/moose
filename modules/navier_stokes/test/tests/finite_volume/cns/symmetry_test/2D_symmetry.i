@@ -208,13 +208,6 @@ angle = 45
     rhov = rho_v
     rho_et = rho_E
   []
-
-  [fluid_props]
-    type = GeneralFluidProps
-    porosity = 1
-    characteristic_length = 1
-  []
-
   [sound_speed]
     type = SoundspeedMat
     fp = fp

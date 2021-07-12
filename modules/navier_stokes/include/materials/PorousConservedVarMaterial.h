@@ -13,6 +13,11 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * This object takes a conserved porous-flow variable set (rho epsilon, rho epsilon U,
+ * rho epsilon et) and computes all the necessary quantities for solving the compressible porous
+ * Euler equations
+ */
 class PorousConservedVarMaterial : public Material
 {
 public:

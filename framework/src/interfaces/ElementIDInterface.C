@@ -19,6 +19,12 @@
 
 #include "libmesh/mesh_base.h"
 
+InputParameters
+ElementIDInterface::validParams()
+{
+  return emptyInputParameters();
+}
+
 ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
   : _obj_parameters(moose_object->parameters()),
     _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh())

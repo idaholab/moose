@@ -19,7 +19,6 @@ namespace NS
 using namespace HeatConduction;
 
 // geometric quantities
-static const std::string pebble_diameter = "pebble_diameter";
 static const std::string infinite_porosity = "infinite_porosity";
 static const std::string axis = "axis";
 static const std::string center = "center";

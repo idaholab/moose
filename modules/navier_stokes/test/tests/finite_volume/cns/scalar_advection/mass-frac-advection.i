@@ -286,7 +286,6 @@ v_in=1
 []
 
 [Executioner]
-  solve_type = NEWTON
   type = Transient
   [TimeIntegrator]
     type = ActuallyExplicitEuler

@@ -34,7 +34,7 @@ PCNSFVKT::validParams()
   params.addParam<bool>(
       "knp_for_omega",
       true,
-      "Whether to use the Kurgano, Noelle, and Petrova method to compute the omega parameter for "
+      "Whether to use the Kurganov, Noelle, and Petrova method to compute the omega parameter for "
       "stabilization. If false, then the Kurganov-Tadmor method will be used.");
   return params;
 }

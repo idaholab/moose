@@ -11,6 +11,10 @@
 
 #include "FVTimeKernel.h"
 
+/**
+ * Applies a residual equal to
+ * \f$\epsilon \frac{\partial u}{\partial t}\f$
+ */
 class FVPorosityTimeDerivative : public FVTimeKernel
 {
 public:

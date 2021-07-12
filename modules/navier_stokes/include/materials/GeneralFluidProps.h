@@ -33,10 +33,9 @@ protected:
 
   /**
    * Characteristic length $d$ used in computing the Reynolds number
-   * $Re=\rho_fVd/\mu_f$. If not provided, then a default is taken as
-   * the pebble diameter (if available).
+   * $Re=\rho_fVd/\mu_f$.
    */
-  Real _d;
+  const Real _d;
 
   /// variables
   const ADMaterialProperty<Real> & _pressure;
@@ -86,15 +85,11 @@ protected:
 
   /**
    * Derivative of Prandtl number with respect to pressure.
-   * TODO: currently neglects derivative of specific heat with respect to pressure
-   * due to a lack of interface in the fluid property module.
    */
   MaterialProperty<Real> & _dPr_dp;
 
   /**
    * Derivative of Prandtl number with respect to temperature.
-   * TODO: currently neglects derivative of specific heat with respect to temperature
-   * due to a lack of interface in the fluid property module.
    */
   MaterialProperty<Real> & _dPr_dT;
 

@@ -13,6 +13,10 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * This object takes a conserved free-flow variable set (rho, rhoU, rho et) and computes all the
+ * necessary quantities for solving the compressible free-flow Euler equations
+ */
 class ConservedVarValuesMaterial : public Material
 {
 public:

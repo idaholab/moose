@@ -76,8 +76,10 @@ protected:
   const ADMaterialProperty<Real> & _specific_internal_energy_neighbor;
   ///@}
 
+  ///@{ total energies left == elem, right == neighbor
   const ADMaterialProperty<Real> & _rho_et_elem;
   const ADMaterialProperty<Real> & _rho_et_neighbor;
+  ///@}
 
   ///@{ velocities left == elem, right == neighbor
   const ADMaterialProperty<RealVectorValue> & _vel_elem;

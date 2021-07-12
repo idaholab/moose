@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PCNSFVMomentumPressureRZ.h"
+#include "PNSFVMomentumPressureRZ.h"
 
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PCNSFVMomentumPressureRZ);
+registerMooseObject("NavierStokesApp", PNSFVMomentumPressureRZ);
 
 InputParameters
-PCNSFVMomentumPressureRZ::validParams()
+PNSFVMomentumPressureRZ::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
@@ -23,7 +23,7 @@ PCNSFVMomentumPressureRZ::validParams()
   return params;
 }
 
-PCNSFVMomentumPressureRZ::PCNSFVMomentumPressureRZ(const InputParameters & params)
+PNSFVMomentumPressureRZ::PNSFVMomentumPressureRZ(const InputParameters & params)
   : FVElementalKernel(params),
     _p(getADMaterialProperty<Real>(NS::pressure)),
     _eps(getMaterialProperty<Real>(NS::porosity))
@@ -31,7 +31,7 @@ PCNSFVMomentumPressureRZ::PCNSFVMomentumPressureRZ(const InputParameters & param
 }
 
 ADReal
-PCNSFVMomentumPressureRZ::computeQpResidual()
+PNSFVMomentumPressureRZ::computeQpResidual()
 {
   mooseAssert(_subproblem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ,
               "This object should only be active in an RZ coordinate system.");

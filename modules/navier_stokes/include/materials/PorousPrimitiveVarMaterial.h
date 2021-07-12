@@ -13,6 +13,10 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * This object takes a primitive porous-flow variable set (pressure, superficial velocity, T_fluid)
+ * and computes all the necessary quantities for solving the compressible porous Euler equations
+ */
 class PorousPrimitiveVarMaterial : public Material
 {
 public:

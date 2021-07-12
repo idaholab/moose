@@ -11,6 +11,11 @@
 
 #include "FVTimeKernel.h"
 
+/**
+ * Applies a residual equal to a supplied material property which is supposed to represent a time
+ * derivative, e.g. the derivative of the product of density and a passive scalar
+ * \f$\frac{\partial \rho s}{\partial t}\f$
+ */
 class FVMatPropTimeKernel : public FVTimeKernel
 {
 public:

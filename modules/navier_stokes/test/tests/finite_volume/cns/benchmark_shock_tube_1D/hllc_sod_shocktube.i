@@ -140,13 +140,6 @@ middle = 50
     rho_et = rho_E
     fp = fp
   []
-
-  [fluid_props]
-    type = GeneralFluidProps
-    porosity = 1
-    pebble_diameter = 0.06
-    fp = fp
-  []
 []
 
 [Preconditioning]

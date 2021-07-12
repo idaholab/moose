@@ -13,6 +13,10 @@
 
 class SinglePhaseFluidProperties;
 
+/**
+ * This object takes a mixed porous-flow variable set (pressure, rho epsilon U, T_fluid) and
+ * computes all the necessary quantities for solving the compressible porous Euler equations
+ */
 class PorousMixedVarMaterial : public Material
 {
 public:

@@ -23,11 +23,10 @@ GeneralFluidProps::validParams()
   params.addClassDescription("Computes fluid properties using a (P, T) formulation");
 
   params.addRequiredCoupledVar(NS::porosity, "porosity");
-  params.addRangeCheckedParam<Real>(
-      NS::pebble_diameter, NS::pebble_diameter + " > 0.0 ", "Pebble diameter");
-  params.addRangeCheckedParam<Real>("characteristic_length",
-                                    "characteristic_length > 0.0 ",
-                                    "characteristic length for Reynolds number calculation");
+  params.addRequiredRangeCheckedParam<Real>(
+      "characteristic_length",
+      "characteristic_length > 0.0 ",
+      "characteristic length for Reynolds number calculation");
   return params;
 }
 
@@ -35,6 +34,7 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _eps(coupledValue(NS::porosity)),
+    _d(getParam<Real>("characteristic_length")),
 
     _pressure(getADMaterialProperty<Real>(NS::pressure)),
     _rhoE(getADMaterialProperty<Real>(NS::total_energy_density)),
@@ -70,24 +70,6 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
     _Re_h(declareADProperty<Real>(NS::Reynolds_hydraulic)),
     _Re_i(declareADProperty<Real>(NS::Reynolds_interstitial))
 {
-  if (parameters.isParamSetByUser("characteristic_length"))
-  {
-    _d = getParam<Real>("characteristic_length");
-    if (parameters.isParamSetByUser(NS::pebble_diameter))
-      paramWarning(NS::pebble_diameter,
-                   "'",
-                   NS::pebble_diameter,
-                   "' is unused when the 'characteristic_length' parameter is also specified.");
-  }
-  else
-  {
-    if (parameters.isParamSetByUser(NS::pebble_diameter))
-      _d = getParam<Real>(NS::pebble_diameter);
-    else
-      mooseError("Either the 'characteristic_length' or '",
-                 NS::pebble_diameter,
-                 "' parameter must be specified");
-  }
 }
 
 void
@@ -126,7 +108,7 @@ GeneralFluidProps::computeQpProperties()
                                            _dk_dT[_qp]);
 
   // (pore / particle) Reynolds number based on superficial velocity and
-  // pebble diameter. Only call Reynolds() one time to compute all three so that
+  // characteristic length. Only call Reynolds() one time to compute all three so that
   // we don't redundantly check that viscosity is not too close to zero.
   _Re[_qp] = std::max(
       fp::reynolds(_rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)), 1.0);
