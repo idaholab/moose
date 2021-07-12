@@ -22,4 +22,7 @@ public:
 
 protected:
   virtual std::string getKernelType();
+
+  std::vector<AuxVariableName> _velocities;
+  std::vector<AuxVariableName> _accelerations;
 };
