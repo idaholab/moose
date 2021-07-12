@@ -13,13 +13,25 @@ class TestContinuity(unittest.TestCase):
         x,y,z = sympy.symbols('x y z')
         u = eval(str(exact).replace('R.x','x').replace('R.y','y').replace('R.z','z'))
         du_dx = sympy.diff(u, x)
-        # lambda = normals_secondary * diff_secondary * grad_u_secondary
-        lm = 1 * 1 * du_dx
+        lm = du_dx
         self.function_args = [
             'Functions/forcing_function/value="' + mms.fparser(f) + '"',
             'Functions/exact_soln_primal/value="' + mms.fparser(exact) + '"',
             'Functions/exact_soln_lambda/value="' + mms.fparser(lm) + '"']
-        self.gold_values = {}
+        self.gold_values = {
+            'p1p0-u_0' : 1.9377283124612794,
+            'p1p0-lm_0' : 1.077753324242711,
+            'p1p0-u_0.4' : 1.9333420708370546,
+            'p1p0-lm_0.4' : 1.0119801248538074,
+            'p1p1-u_0' : 1.9863327490325773,
+            'p1p1-lm_0' : 1.9981889938191515,
+            'p1p1-u_0.4' : 1.9700137771303148,
+            'p1p1-lm_0.4' : 1.6806101907253725,
+            'p1p1dual-u_0' : 1.9917618834617183,
+            'p1p1dual-lm_0' : 1.5211652338088115,
+            'p1p1dual-u_0.4' : 1.9725965200427749,
+            'p1p1dual-lm_0.4' : 1.5755342813487287
+        }
 
         self.tolerance = 1e-3
     def do_plot(self, input_file, num_refinements, cli_args, figure, label, mpi=1):
@@ -42,11 +54,6 @@ class TestContinuity(unittest.TestCase):
                                name,
                                plots_to_do=None,
                                mpi=1):
-        if not plots_to_do:
-            if (fine == 2):
-                plots_to_do = ['same']
-            else:
-                plots_to_do = ['coarse_secondary', 'coarse_primary']
         fig = mms.ConvergencePlot('Element Size ($h$)', ylabel='$L_2$ Error')
         second_order = False
         for cli_arg in additional_cli_args:
@@ -57,13 +64,12 @@ class TestContinuity(unittest.TestCase):
         else:
             deltas = [0, 0.4]
         for delta in deltas:
-            if 'same' in plots_to_do:
-                self.do_plot('continuity.i',
-                             num_refinements,
-                             ["Constraints/mortar/delta="+str(delta)] + additional_cli_args,
-                             fig,
-                             "same_"+str(delta),
-                             mpi)
+            self.do_plot('continuity.i',
+                         num_refinements,
+                         ["Constraints/mortar/delta="+str(delta)] + additional_cli_args,
+                         fig,
+                         str(delta),
+                         mpi)
         fig.set_title(name)
         fig.save(name+'.png')
         return fig
@@ -73,19 +79,30 @@ class TestContinuity(unittest.TestCase):
                         "Variables/lambda/family=MONOMIAL",
                         "Variables/lambda/order=CONSTANT",
                         "Variables/lambda/use_dual=false",
-                        "Mesh/left_block/elem_type=HEX8"]
+                        "Mesh/left_block/elem_type=HEX8",
+                        "Mesh/right_block/elem_type=HEX8"]
         elif geom_disc == "p1p1":
             cli_args = ["Variables/T/order=FIRST",
                         "Variables/lambda/family=LAGRANGE",
                         "Variables/lambda/order=FIRST",
                         "Variables/lambda/use_dual=false",
-                        "Mesh/left_block/elem_type=HEX8"]
+                        "Mesh/left_block/elem_type=HEX8",
+                        "Mesh/right_block/elem_type=HEX8"]
         elif geom_disc == "p1p1dual":
             cli_args = ["Variables/T/order=FIRST",
                         "Variables/lambda/family=LAGRANGE",
                         "Variables/lambda/order=FIRST",
                         "Variables/lambda/use_dual=true",
-                        "Mesh/left_block/elem_type=HEX8"]
+                        "Mesh/left_block/elem_type=HEX8",
+                        "Mesh/right_block/elem_type=HEX8"]
+        elif geom_disc == "p2p1":
+            cli_args = ["Mesh/second_order=true",
+                        "Variables/T/order=SECOND",
+                        "Variables/lambda/family=LAGRANGE",
+                        "Variables/lambda/order=FIRST",
+                        "Variables/lambda/use_dual=false",
+                        "Mesh/left_block/elem_type=HEX8",
+                        "Mesh/right_block/elem_type=HEX8"]
         name_to_slope = {}
         for fine_value in fine_values:
             name = geom_disc
@@ -96,8 +113,8 @@ class TestContinuity(unittest.TestCase):
                                               mpi=mpi)
             for key, value in fig.label_to_slope.items():
                 name_to_slope.update({"-".join([name, key]) : value})
-                # self.gold_values.update({"-".join([name, key]) : value})
         for key, test_value in name_to_slope.items():
+            # print("{} : {}".format(key, test_value))
             gold_value = self.gold_values.get(key)
             self.assertIsNotNone(gold_value)
             self.assertTrue(fuzzyEqual(test_value, gold_value, self.tolerance))
@@ -105,17 +122,23 @@ class TestContinuity(unittest.TestCase):
          self.run_geometric_discretization("p1p0", fine_values, num_refinements, mpi)
          self.run_geometric_discretization("p1p1", fine_values, num_refinements, mpi)
          self.run_geometric_discretization("p1p1dual", fine_values, num_refinements, mpi)
+         self.run_geometric_discretization("p2p1", fine_values, num_refinements, mpi)
          for key, test_value in self.gold_values.items():
              print("{} : {}".format(key, test_value))
+
 class P1P0(TestContinuity):
-    def testP1P0(self, fine_values=[2], num_refinements=3, mpi=0):
+    def testP1P0(self, fine_values=[2], num_refinements=4, mpi=1):
         self.run_geometric_discretization("p1p0", fine_values, num_refinements, mpi)
 class P1P1(TestContinuity):
-    def testP1P1(self, fine_values=[2], num_refinements=3, mpi=0):
+    def testP1P1(self, fine_values=[2], num_refinements=4, mpi=1):
         self.run_geometric_discretization("p1p1", fine_values, num_refinements, mpi)
 class P1P1dual(TestContinuity):
-    def testP1P1(self, fine_values=[2], num_refinements=3, mpi=0):
+    def testP1P1(self, fine_values=[2], num_refinements=4, mpi=1):
         self.run_geometric_discretization("p1p1dual", fine_values, num_refinements, mpi)
+class P2P1(TestContinuity):
+    def testP2P1(self, fine_values=[2], num_refinements=4, mpi=0):
+        self.run_geometric_discretization("p2p1", fine_values, num_refinements, mpi)
+
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
 # instance = TestContinuity()
