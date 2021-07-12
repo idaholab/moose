@@ -9,17 +9,14 @@
 
 #pragma once
 
-#include "TensorMechanicsAction.h"
+#include "DynamicTensorMechanicsAction.h"
 
-class DynamicTensorMechanicsAction : public TensorMechanicsAction
+class LegacyDynamicTensorMechanicsAction : public DynamicTensorMechanicsAction
 {
 public:
   static InputParameters validParams();
 
-  DynamicTensorMechanicsAction(const InputParameters & params);
+  LegacyDynamicTensorMechanicsAction(const InputParameters & params);
 
   virtual void act();
-
-protected:
-  virtual std::string getKernelType();
 };

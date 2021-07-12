@@ -12,13 +12,27 @@
 #include "FEProblem.h"
 #include "Parser.h"
 
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "meta_action");
+
 registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "setup_mesh_complete");
 
 registerMooseAction("TensorMechanicsApp",
                     DynamicTensorMechanicsAction,
                     "validate_coordinate_systems");
 
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_variable");
+
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_aux_variable");
+
 registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
+
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_aux_kernel");
+
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_material");
+
+registerMooseAction("TensorMechanicsApp",
+                    DynamicTensorMechanicsAction,
+                    "add_master_action_material");
 
 InputParameters
 DynamicTensorMechanicsAction::validParams()
@@ -45,6 +59,28 @@ DynamicTensorMechanicsAction::validParams()
 DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params)
   : TensorMechanicsAction(params)
 {
+}
+
+void
+DynamicTensorMechanicsAction::act()
+{
+  // Add aux variables for acceleration
+  if (_current_task == "add_aux_variable")
+  {
+  }
+
+  // Add aux kernel for acceleration
+  if (_current_task == "add_aux_variable")
+  {
+  }
+
+  // add inertia kernel
+  if (_current_task == "add_kernel")
+  {
+  }
+
+  // call parent class method
+  TensorMechanicsAction::act();
 }
 
 std::string
