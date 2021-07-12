@@ -16,4 +16,13 @@
     design = 'MaterialTensorAverage.md'
     issues = '#15424'
   [../]
+
+  [./normal_displacement]
+    type = 'Exodiff'
+    input = 'normal_boundary_displacement.i'
+    exodiff = 'normal_boundary_displacement_out.e'
+    requirement = 'The system shall compute normal displacements on a surface for checking correct application of penalty boundary conditions.'
+    design = 'NormalBoundaryDisplacement.md'
+    issues = '#16346'
+  [../]
 []
