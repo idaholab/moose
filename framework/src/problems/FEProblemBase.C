@@ -2744,7 +2744,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
-    _reinit_displaced_face = true;
+    _reinit_displaced_neighbor = true;
 
     if (use_undisplaced_reference_points)
     {
