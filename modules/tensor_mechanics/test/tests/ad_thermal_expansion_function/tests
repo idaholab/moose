@@ -47,7 +47,19 @@
       type = CSVDiff
       input = 'mean.i'
       csvdiff = 'mean_out.csv'
-      detail = 'using a mean thermal expansion coefficient'
+      detail = 'using a mean thermal expansion coefficient derived form a function'
+    [../]
+    [./polynomial_const]
+      type = CSVDiff
+      input = 'polynomial_const.i'
+      csvdiff = 'polynomial_const_out.csv'
+      detail = 'using a mean thermal expansion coefficient derived from a 0th order polynomial'
+    [../]
+    [./polynomial]
+      type = CSVDiff
+      input = 'polynomial.i'
+      csvdiff = 'polynomial_out.csv'
+      detail = 'using a mean thermal expansion coefficient derived from a 2nd order polynomial'
     [../]
     [./instantaneous]
       type = CSVDiff
