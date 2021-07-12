@@ -32,6 +32,7 @@ $\hat{n}$ is the boundary outward facing normal vector. The boundary term is a r
 integration by parts and the divergence theorem during the weak form derivation from
 [tutorial03-heat-eq].
 
+!bibtex bibliography !!include to make sure next/previous are last on page
 
 !content pagination previous=tutorial03_verification/index.md
                     next=tutorial03_verification/step02_fem_convergence.md

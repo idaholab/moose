@@ -1,0 +1,34 @@
+[Tests]
+  design = tutorial03/index.md
+  issues = '#18276'
+
+  [1d_analytical]
+    requirement = "The system shall include an example problem for verification from an analytical solution:"
+
+    [input]
+      type = Exodiff
+      input = 1d_analytical.i
+      exodiff = 1d_analytical_out.e
+
+      detail = "with a complete input file;"
+    []
+
+    [results]
+      type = CheckFiles
+      command = step03_results.py
+      check_files = 1d_analytical_0099.png
+      prereq = 1d_analytical/input
+
+      detail = "a graph comparing the simulated and exact results; and"
+    []
+
+    [study]
+      type = CheckFiles
+      command = step03_study.py
+      check_files = '1d_analytical_spatial.png 1d_analytical_temporal.png'
+      required_python_packages = sympy
+
+      detail = "a spatial and temporal convergence study."
+    []
+  []
+[]
