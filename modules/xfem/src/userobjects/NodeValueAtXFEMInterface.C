@@ -76,22 +76,18 @@ NodeValueAtXFEMInterface::execute()
 
   _pl->enable_out_of_mesh_mode();
 
-  std::vector<Point> point_vec(1);
-
   for (const auto & node : cutter_mesh->node_ptr_range())
   {
     unsigned int i = node->id();
 
     if ((*_pl)(*node) != nullptr)
     {
-      const Elem * elem = getElemContainingPoint(*node, true);
+      const Elem * elem = getElemContainingPoint(*node, /*positive_level_set = */ true);
 
       if (elem != nullptr)
       {
-        point_vec[0] = *node;
-
-        _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.reinitElemPhys(elem, point_vec, 0);
+        _subproblem.setCurrentSubdomainID(elem, /*_tid */ 0);
+        _subproblem.reinitElemPhys(elem, {*node}, 0);
 
         _values_positive_level_set_side[i] = (dynamic_cast<MooseVariable *>(_var))->sln()[0];
         _grad_values_positive_level_set_side[i] =
@@ -101,10 +97,8 @@ NodeValueAtXFEMInterface::execute()
       const Elem * elem2 = getElemContainingPoint(*node, false);
       if (elem2 != nullptr)
       {
-        point_vec[0] = *node;
-
-        _subproblem.setCurrentSubdomainID(elem2, 0);
-        _subproblem.reinitElemPhys(elem2, point_vec, 0);
+        _subproblem.setCurrentSubdomainID(elem2, /*_tid */ 0);
+        _subproblem.reinitElemPhys(elem2, {*node}, 0);
 
         _values_negative_level_set_side[i] = (dynamic_cast<MooseVariable *>(_var))->sln()[0];
         _grad_values_negative_level_set_side[i] =

@@ -819,7 +819,9 @@ pointSegmentDistance(const Point & x0, const Point & x1, const Point & x2, Point
 {
   Point dx = x2 - x1;
   Real m2 = dx * dx;
-  // find parameter value of closest point on segment
+  mooseAssert(m2 != 0,
+              "In XFEMFuncs::pointSegmentDistance(), x0 and x1 should be two different points.");
+  // find parameter coordinate of closest point on segment
   Real s12 = (x2 - x0) * dx / m2;
   if (s12 < 0)
     s12 = 0;
@@ -939,6 +941,85 @@ pointTriangleDistance(const Point & x0,
       }
     }
   }
+  mooseError("Cannot find closes location in XFEMFuncs::pointTriangleDistance().");
+}
+
+bool
+intersectWithEdge(const Point & p1,
+                  const Point & p2,
+                  const std::vector<Point> & vertices,
+                  Point & pint)
+{
+  bool has_intersection = false;
+
+  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
+  Point point = vertices[0];
+  Point normal = elem_plane.unit_normal(point);
+
+  std::array<Real, 3> plane_point = {{point(0), point(1), point(2)}};
+  std::array<Real, 3> planenormal = {{normal(0), normal(1), normal(2)}};
+  std::array<Real, 3> edge_point1 = {{p1(0), p1(1), p1(2)}};
+  std::array<Real, 3> edge_point2 = {{p2(0), p2(1), p2(2)}};
+  std::array<Real, 3> cut_point = {{0.0, 0.0, 0.0}};
+
+  if (Xfem::plane_normal_line_exp_int_3d(
+          &plane_point[0], &planenormal[0], &edge_point1[0], &edge_point2[0], &cut_point[0]) == 1)
+  {
+    Point temp_p(cut_point[0], cut_point[1], cut_point[2]);
+    if (isInsideCutPlane(vertices, temp_p) && isInsideEdge(p1, p2, temp_p))
+    {
+      pint = temp_p;
+      has_intersection = true;
+    }
+  }
+
+  return has_intersection;
+}
+
+bool
+isInsideEdge(const Point & p1, const Point & p2, const Point & p)
+{
+  Real dotp1 = (p1 - p) * (p2 - p1);
+  Real dotp2 = (p2 - p) * (p2 - p1);
+  return (dotp1 * dotp2 <= 0.0);
+}
+
+Real
+getRelativePosition(const Point & p1, const Point & p2, const Point & p)
+{
+  Real full_len = (p2 - p1).norm();
+  Real len_p1_p = (p - p1).norm();
+  return len_p1_p / full_len;
+}
+
+bool
+isInsideCutPlane(const std::vector<Point> & vertices, const Point & p)
+{
+  unsigned int n_node = vertices.size();
+
+  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
+  Point normal = elem_plane.unit_normal(vertices[0]);
+
+  bool inside = false;
+  unsigned int counter = 0;
+
+  for (unsigned int i = 0; i < n_node; ++i)
+  {
+    unsigned int iplus1 = (i < n_node - 1 ? i + 1 : 0);
+    Point middle2p = p - 0.5 * (vertices[i] + vertices[iplus1]);
+    const Point side_tang = vertices[iplus1] - vertices[i];
+    Point side_norm = side_tang.cross(normal);
+
+    normalizePoint(middle2p);
+    normalizePoint(side_norm);
+
+    if (middle2p * side_norm <= 0)
+      counter += 1;
+  }
+
+  if (counter == n_node)
+    inside = true;
+  return inside;
 }
 
 } // namespace XFEM

@@ -17,7 +17,7 @@ MeshCutLevelSetAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-      "Auxiliary Kernel that calcuates level set value using line segments' description.");
+      "Calculates signed distance from interface defined by InterfaceMeshCutUserObject.");
   params.addParam<UserObjectName>(
       "mesh_cut_user_object",
       "Name of InterfaceMeshCutUserObject that gives cut mesh information.");

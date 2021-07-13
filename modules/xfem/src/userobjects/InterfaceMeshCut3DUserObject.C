@@ -9,9 +9,7 @@
 
 #include "InterfaceMeshCut3DUserObject.h"
 #include "XFEMMovingInterfaceVelocityBase.h"
-#include "libmesh/plane.h"
 #include "libmesh/enum_point_locator_type.h"
-#include "XFEMFuncs.h"
 
 registerMooseObject("XFEMApp", InterfaceMeshCut3DUserObject);
 
@@ -19,8 +17,7 @@ InputParameters
 InterfaceMeshCut3DUserObject::validParams()
 {
   InputParameters params = InterfaceMeshCutUserObjectBase::validParams();
-  params.addClassDescription(
-      "Creates a UserObject for a mesh cutter in 3D material interface problems");
+  params.addClassDescription("A userobject to cut a 3D mesh using a 2D cutter mesh.");
   return params;
 }
 
@@ -34,85 +31,8 @@ InterfaceMeshCut3DUserObject::InterfaceMeshCut3DUserObject(const InputParameters
 }
 
 void
-InterfaceMeshCut3DUserObject::initialize()
+InterfaceMeshCut3DUserObject::calculateNormal()
 {
-  std::vector<Point> new_position(_cutter_mesh->n_nodes());
-
-  _pl = _mesh.getPointLocator();
-  _pl->enable_out_of_mesh_mode();
-
-  std::map<unsigned int, Real> node_velocity;
-  Real sum = 0.0;
-  unsigned count = 0;
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    if ((*_pl)(*node) != nullptr)
-    {
-      Real velocity;
-      if (_func == nullptr)
-        velocity =
-            _interface_velocity->computeMovingInterfaceVelocity(node->id(), nodeNomal(node->id()));
-      else
-        velocity = _func->value(_t, *node);
-
-      // only updates when t_step >0
-      if (_t_step <= 0)
-        velocity = 0.0;
-
-      node_velocity[node->id()] = velocity;
-      sum += velocity;
-      count++;
-    }
-  }
-
-  if (count == 0)
-    mooseError("No node of the cutter mesh is found inside the computational domain.");
-
-  Real average_velocity = sum / count;
-
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    if ((*_pl)(*node) == nullptr)
-      node_velocity[node->id()] = average_velocity;
-  }
-
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    Point p = *node;
-    p += _dt * nodeNomal(node->id()) * node_velocity[node->id()];
-    new_position[node->id()] = p;
-  }
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-    _cutter_mesh->node_ref(node->id()) = new_position[node->id()];
-
-  if (_output_exodus)
-  {
-    std::vector<dof_id_type> di;
-    for (const auto & node : _cutter_mesh->node_ptr_range())
-    {
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_x"));
-      _explicit_system->solution->set(
-          di[0], new_position[node->id()](0) - _initial_nodes_location[node->id()](0));
-
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_y"));
-      _explicit_system->solution->set(
-          di[0], new_position[node->id()](1) - _initial_nodes_location[node->id()](1));
-
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_z"));
-      _explicit_system->solution->set(
-          di[0], new_position[node->id()](2) - _initial_nodes_location[node->id()](2));
-    }
-
-    _explicit_system->solution->close();
-
-    _exodus_io->append(true);
-    _exodus_io->write_timestep(
-        _app.getOutputFileBase() + "_" + name() + ".e", *_equation_systems, _t_step + 1, _t);
-  }
-
   _pseudo_normal.clear();
 
   for (const auto & elem : _cutter_mesh->element_ptr_range())
@@ -175,7 +95,7 @@ InterfaceMeshCut3DUserObject::initialize()
 }
 
 Point
-InterfaceMeshCut3DUserObject::nodeNomal(const unsigned int & node_id)
+InterfaceMeshCut3DUserObject::nodeNormal(const unsigned int & node_id)
 {
   Point normal(0.0);
 
@@ -243,11 +163,11 @@ InterfaceMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
         }
 
         Point intersection;
-        if (intersectWithEdge(*node1, *node2, vertices, intersection) &&
+        if (Xfem::intersectWithEdge(*node1, *node2, vertices, intersection) &&
             std::find(cut_edges.begin(), cut_edges.end(), j) == cut_edges.end())
         {
           cut_edges.push_back(j);
-          cut_pos.emplace_back(getRelativePosition(*node1, *node2, intersection));
+          cut_pos.emplace_back(Xfem::getRelativePosition(*node1, *node2, intersection));
         }
       }
     }
@@ -285,89 +205,6 @@ InterfaceMeshCut3DUserObject::cutFragmentByGeometry(
 {
   mooseError("cutFragmentByGeometry not yet implemented for 3D mesh cutting");
   return false;
-}
-
-bool
-InterfaceMeshCut3DUserObject::intersectWithEdge(const Point & p1,
-                                                const Point & p2,
-                                                const std::vector<Point> & vertices,
-                                                Point & pint) const
-{
-  bool has_intersection = false;
-
-  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
-  Point point = vertices[0];
-  Point normal = elem_plane.unit_normal(point);
-
-  std::array<Real, 3> plane_point = {{point(0), point(1), point(2)}};
-  std::array<Real, 3> planenormal = {{normal(0), normal(1), normal(2)}};
-  std::array<Real, 3> edge_point1 = {{p1(0), p1(1), p1(2)}};
-  std::array<Real, 3> edge_point2 = {{p2(0), p2(1), p2(2)}};
-  std::array<Real, 3> cut_point = {{0.0, 0.0, 0.0}};
-
-  if (Xfem::plane_normal_line_exp_int_3d(
-          &plane_point[0], &planenormal[0], &edge_point1[0], &edge_point2[0], &cut_point[0]) == 1)
-  {
-    Point temp_p(cut_point[0], cut_point[1], cut_point[2]);
-    if (isInsideCutPlane(vertices, temp_p) && isInsideEdge(p1, p2, temp_p))
-    {
-      pint = temp_p;
-      has_intersection = true;
-    }
-  }
-
-  return has_intersection;
-}
-
-bool
-InterfaceMeshCut3DUserObject::isInsideEdge(const Point & p1,
-                                           const Point & p2,
-                                           const Point & p) const
-{
-  Real dotp1 = (p1 - p) * (p2 - p1);
-  Real dotp2 = (p2 - p) * (p2 - p1);
-  return (dotp1 * dotp2 <= 0.0);
-}
-
-Real
-InterfaceMeshCut3DUserObject::getRelativePosition(const Point & p1,
-                                                  const Point & p2,
-                                                  const Point & p) const
-{
-  Real full_len = (p2 - p1).norm();
-  Real len_p1_p = (p - p1).norm();
-  return len_p1_p / full_len;
-}
-
-bool
-InterfaceMeshCut3DUserObject::isInsideCutPlane(const std::vector<Point> & vertices,
-                                               const Point & p) const
-{
-  unsigned int n_node = vertices.size();
-
-  Plane elem_plane(vertices[0], vertices[1], vertices[2]);
-  Point normal = elem_plane.unit_normal(vertices[0]);
-
-  bool inside = false;
-  unsigned int counter = 0;
-
-  for (unsigned int i = 0; i < n_node; ++i)
-  {
-    unsigned int iplus1 = (i < n_node - 1 ? i + 1 : 0);
-    Point middle2p = p - 0.5 * (vertices[i] + vertices[iplus1]);
-    const Point side_tang = vertices[iplus1] - vertices[i];
-    Point side_norm = side_tang.cross(normal);
-
-    Xfem::normalizePoint(middle2p);
-    Xfem::normalizePoint(side_norm);
-
-    if (middle2p * side_norm <= 0)
-      counter += 1;
-  }
-
-  if (counter == n_node)
-    inside = true;
-  return inside;
 }
 
 Real
