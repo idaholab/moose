@@ -17,7 +17,7 @@ typedef SideDiffusiveFluxAverageTempl<false> SideDiffusiveFluxAverage;
 typedef SideDiffusiveFluxAverageTempl<true> ADSideDiffusiveFluxAverage;
 
 template <bool is_ad>
-class SideDiffusiveFluxAverageTempl : public SideDiffusiveFluxIntegralTempl<is_ad>
+class SideDiffusiveFluxAverageTempl : public SideDiffusiveFluxIntegralTempl<is_ad, Real>
 {
 public:
   static InputParameters validParams();

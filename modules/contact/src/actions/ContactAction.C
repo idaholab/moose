@@ -43,9 +43,10 @@ ContactAction::validParams()
   InputParameters params = Action::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<BoundaryName>("primary", "The primary surface");
-  params.addRequiredParam<BoundaryName>("secondary", "The secondary surface");
-
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "primary", "The list of boundary IDs referring to primary sidesets");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "secondary", "The list of boundary IDs referring to secondary sidesets");
   params.addParam<MeshGeneratorName>("mesh", "", "The mesh generator for mortar method");
   params.addParam<VariableName>("secondary_gap_offset",
                                 "Offset to gap distance from secondary side");
@@ -139,16 +140,23 @@ ContactAction::validParams()
 
 ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
-    _primary(getParam<BoundaryName>("primary")),
-    _secondary(getParam<BoundaryName>("secondary")),
+    _primary(getParam<std::vector<BoundaryName>>("primary")),
+    _secondary(getParam<std::vector<BoundaryName>>("secondary")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
     _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
-    _use_dual(getParam<bool>("use_dual"))
-
+    _use_dual(getParam<bool>("use_dual")),
+    _number_pairs(_primary.size())
 {
+
+  if (_primary.size() != _secondary.size())
+    paramError("primary",
+               "Sizes of 'primary' and 'secondary' arrays in contact action's input must match");
+
+  if (_primary.size() != 1 && _formulation == "mortar")
+    paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
 
   if (_formulation == "tangential_penalty")
   {
@@ -236,62 +244,64 @@ ContactAction::act()
     if (!_problem->getDisplacedProblem())
       mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                  "Mesh block.");
+    // Create auxiliary kernels for each contact pairs
+    for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
     {
-      InputParameters params = _factory.getValidParams("PenetrationAux");
-      params.applyParameters(parameters(),
-                             {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+      {
+        InputParameters params = _factory.getValidParams("PenetrationAux");
+        params.applyParameters(parameters(),
+                               {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
 
-      std::vector<VariableName> displacements =
-          getParam<std::vector<VariableName>>("displacements");
-      const auto order = _problem->systemBaseNonlinear()
-                             .system()
-                             .variable_type(displacements[0])
-                             .order.get_order();
+        std::vector<VariableName> displacements =
+            getParam<std::vector<VariableName>>("displacements");
+        const auto order = _problem->systemBaseNonlinear()
+                               .system()
+                               .variable_type(displacements[0])
+                               .order.get_order();
 
-      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
-      params.set<BoundaryName>("paired_boundary") = _primary;
-      params.set<AuxVariableName>("variable") = "penetration";
-      if (isParamValid("secondary_gap_offset"))
-        params.set<std::vector<VariableName>>("secondary_gap_offset") = {
-            getParam<VariableName>("secondary_gap_offset")};
-      if (isParamValid("mapped_primary_gap_offset"))
-        params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
-            getParam<VariableName>("mapped_primary_gap_offset")};
+        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+        params.set<std::vector<BoundaryName>>("boundary") = {_secondary[contact_pair]};
+        params.set<BoundaryName>("paired_boundary") = _primary[contact_pair];
+        params.set<AuxVariableName>("variable") = "penetration";
+        if (isParamValid("secondary_gap_offset"))
+          params.set<std::vector<VariableName>>("secondary_gap_offset") = {
+              getParam<VariableName>("secondary_gap_offset")};
+        if (isParamValid("mapped_primary_gap_offset"))
+          params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
+              getParam<VariableName>("mapped_primary_gap_offset")};
+        params.set<bool>("use_displaced_mesh") = true;
+        std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter);
 
-      params.set<bool>("use_displaced_mesh") = true;
-      std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter);
+        _problem->addAuxKernel("PenetrationAux", name, params);
+      }
+      // Add ContactPressureAuxAction
+      {
+        InputParameters params = _factory.getValidParams("ContactPressureAux");
+        params.applyParameters(parameters(), {"order"});
 
-      _problem->addAuxKernel("PenetrationAux", name, params);
-    }
-    // Add ContactPressureAuxAction
-    {
-      InputParameters params = _factory.getValidParams("ContactPressureAux");
-      params.applyParameters(parameters(), {"order"});
+        std::vector<VariableName> displacements =
+            getParam<std::vector<VariableName>>("displacements");
+        const auto order = _problem->systemBaseNonlinear()
+                               .system()
+                               .variable_type(displacements[0])
+                               .order.get_order();
 
-      std::vector<VariableName> displacements =
-          getParam<std::vector<VariableName>>("displacements");
-      const auto order = _problem->systemBaseNonlinear()
-                             .system()
-                             .variable_type(displacements[0])
-                             .order.get_order();
+        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        params.set<std::vector<BoundaryName>>("boundary") = {_secondary[contact_pair]};
+        params.set<BoundaryName>("paired_boundary") = _primary[contact_pair];
+        params.set<AuxVariableName>("variable") = "contact_pressure";
+        params.addRequiredCoupledVar("nodal_area", "The nodal area");
+        params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
+        params.set<bool>("use_displaced_mesh") = true;
 
-      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
-      params.set<BoundaryName>("paired_boundary") = _primary;
-      params.set<AuxVariableName>("variable") = "contact_pressure";
-      params.addRequiredCoupledVar("nodal_area", "The nodal area");
-      params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
+        std::string name =
+            _name + "_contact_pressure_" + Moose::stringify(contact_auxkernel_counter++);
 
-      params.set<bool>("use_displaced_mesh") = true;
-
-      std::string name =
-          _name + "_contact_pressure_" + Moose::stringify(contact_auxkernel_counter++);
-
-      params.set<ExecFlagEnum>("execute_on",
-                               true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
-      _problem->addAuxKernel("ContactPressureAux", name, params);
+        params.set<ExecFlagEnum>("execute_on",
+                                 true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
+        _problem->addAuxKernel("ContactPressureAux", name, params);
+      }
     }
   }
 
@@ -329,7 +339,7 @@ ContactAction::act()
   if (_current_task == "add_user_object")
   {
     auto var_params = _factory.getValidParams("NodalArea");
-    var_params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
+    var_params.set<std::vector<BoundaryName>>("boundary") = _secondary;
     var_params.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
 
     mooseAssert(_problem, "Problem pointer is NULL");
@@ -365,6 +375,7 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_mesh_generator")
   {
+
     // Don't do mesh generators when recovering.
     if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
     {
@@ -380,8 +391,8 @@ ContactAction::addMortarContact()
       primary_params.set<SubdomainName>("new_block_name") = primary_subdomain_name;
       secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
 
-      primary_params.set<std::vector<BoundaryName>>("sidesets") = {_primary};
-      secondary_params.set<std::vector<BoundaryName>>("sidesets") = {_secondary};
+      primary_params.set<std::vector<BoundaryName>>("sidesets") = {_primary[0]};
+      secondary_params.set<std::vector<BoundaryName>>("sidesets") = {_secondary[0]};
 
       _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
       _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
@@ -462,8 +473,8 @@ ContactAction::addMortarContact()
       {
         InputParameters params = _factory.getValidParams("ComputeWeightedGapLMMechanicalContact");
 
-        params.set<BoundaryName>("primary_boundary") = _primary;
-        params.set<BoundaryName>("secondary_boundary") = _secondary;
+        params.set<BoundaryName>("primary_boundary") = _primary[0];
+        params.set<BoundaryName>("secondary_boundary") = _secondary[0];
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
@@ -485,8 +496,8 @@ ContactAction::addMortarContact()
       {
         InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
-        params.set<BoundaryName>("primary") = _primary;
-        params.set<BoundaryName>("secondary") = _secondary;
+        params.set<BoundaryName>("primary") = _primary[0];
+        params.set<BoundaryName>("secondary") = _secondary[0];
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<bool>("use_displaced_mesh") = true;
         params.set<MooseEnum>("ncp_function_type") = "min";
@@ -512,8 +523,8 @@ ContactAction::addMortarContact()
         InputParameters params =
             _factory.getValidParams("ComputeFrictionalForceLMMechanicalContact");
 
-        params.set<BoundaryName>("primary_boundary") = _primary;
-        params.set<BoundaryName>("secondary_boundary") = _secondary;
+        params.set<BoundaryName>("primary_boundary") = _primary[0];
+        params.set<BoundaryName>("secondary_boundary") = _secondary[0];
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<bool>("use_displaced_mesh") = true;
@@ -539,8 +550,8 @@ ContactAction::addMortarContact()
       {
         InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
-        params.set<BoundaryName>("primary") = _primary;
-        params.set<BoundaryName>("secondary") = _secondary;
+        params.set<BoundaryName>("primary") = _primary[0];
+        params.set<BoundaryName>("secondary") = _secondary[0];
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<bool>("use_displaced_mesh") = true;
         params.set<MooseEnum>("ncp_function_type") = "min";
@@ -559,8 +570,8 @@ ContactAction::addMortarContact()
 
         params = _factory.getValidParams("TangentialMortarLMMechanicalContact");
 
-        params.set<BoundaryName>("primary_boundary") = _primary;
-        params.set<BoundaryName>("secondary_boundary") = _secondary;
+        params.set<BoundaryName>("primary_boundary") = _primary[0];
+        params.set<BoundaryName>("secondary_boundary") = _secondary[0];
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<NonlinearVariableName>("variable") = tangential_lagrange_multiplier_name;
@@ -588,8 +599,8 @@ ContactAction::addMortarContact()
     {
       InputParameters params = _factory.getValidParams(constraint_type);
 
-      params.set<BoundaryName>("primary_boundary") = _primary;
-      params.set<BoundaryName>("secondary_boundary") = _secondary;
+      params.set<BoundaryName>("primary_boundary") = _primary[0];
+      params.set<BoundaryName>("secondary_boundary") = _secondary[0];
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
       params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = variable_name;
@@ -635,9 +646,12 @@ ContactAction::addNodeFaceContact()
 
   InputParameters params = _factory.getValidParams(constraint_type);
 
-  params.applyParameters(
-      parameters(),
-      {"displacements", "secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+  params.applyParameters(parameters(),
+                         {"displacements",
+                          "secondary_gap_offset",
+                          "mapped_primary_gap_offset",
+                          "primary",
+                          "secondary"});
 
   const auto order =
       _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
@@ -646,30 +660,36 @@ ContactAction::addNodeFaceContact()
   params.set<bool>("use_displaced_mesh") = true;
   params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
 
-  if (_formulation != "ranfs")
+  for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
   {
-    params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
-    params.set<BoundaryName>("boundary") = _primary;
-    if (isParamValid("secondary_gap_offset"))
-      params.set<std::vector<VariableName>>("secondary_gap_offset") = {
-          getParam<VariableName>("secondary_gap_offset")};
-    if (isParamValid("mapped_primary_gap_offset"))
-      params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
-          getParam<VariableName>("mapped_primary_gap_offset")};
-  }
+    if (_formulation != "ranfs")
+    {
+      params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
+      params.set<BoundaryName>("boundary") = _primary[contact_pair];
+      if (isParamValid("secondary_gap_offset"))
+        params.set<std::vector<VariableName>>("secondary_gap_offset") = {
+            getParam<VariableName>("secondary_gap_offset")};
+      if (isParamValid("mapped_primary_gap_offset"))
+        params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
+            getParam<VariableName>("mapped_primary_gap_offset")};
+    }
 
-  for (unsigned int i = 0; i < ndisp; ++i)
-  {
-    std::string name = action_name + "_constraint_" + Moose::stringify(i);
+    for (unsigned int i = 0; i < ndisp; ++i)
+    {
+      std::string name =
+          action_name + "_constraint_" + Moose::stringify(contact_pair) + "_" + Moose::stringify(i);
 
-    if (_formulation == "ranfs")
-      params.set<MooseEnum>("component") = i;
-    else
-      params.set<unsigned int>("component") = i;
+      if (_formulation == "ranfs")
+        params.set<MooseEnum>("component") = i;
+      else
+        params.set<unsigned int>("component") = i;
 
-    params.set<NonlinearVariableName>("variable") = displacements[i];
-    params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
-    _problem->addConstraint(constraint_type, name, params);
+      params.set<BoundaryName>("primary") = _primary[contact_pair];
+      params.set<BoundaryName>("secondary") = _secondary[contact_pair];
+      params.set<NonlinearVariableName>("variable") = displacements[i];
+      params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
+      _problem->addConstraint(constraint_type, name, params);
+    }
   }
 }
 
