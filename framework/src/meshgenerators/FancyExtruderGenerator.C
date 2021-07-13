@@ -44,9 +44,9 @@ FancyExtruderGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
-  params.addClassDescription("Extrudes a 2D mesh into 3D, can have variable a variable height for "
-                             "each elevation, variable number of layers within each elevation and "
-                             "remap subdomain_ids within each elevation");
+  params.addClassDescription("Extrudes a 2D mesh into 3D, can have a variable height for each "
+                             "elevation, variable number of layers within each elevation and remap "
+                             "subdomain_ids and element extra integers within each elevation.");
 
   params.addRequiredParam<std::vector<Real>>("heights", "The height of each elevation");
 
@@ -57,6 +57,17 @@ FancyExtruderGenerator::validParams()
       "subdomain_swaps",
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the subdomains for that elevation");
+
+  params.addParam<std::vector<std::string>>(
+      "elem_integer_names_to_swap",
+      "Array of element extra integer names that need to be swapped during extrusion.");
+
+  params.addParam<std::vector<std::vector<unsigned int>>>(
+      "elem_integers_swaps",
+      "For each row, every two entries are interpreted as a pair of 'from' and 'to' to remap the "
+      "element extra integer for that elevation. If multiple element extra integers need to be "
+      "swapped, the enties are stacked based on the order provided in "
+      "'elem_integer_names_to_swap'.");
 
   params.addRequiredParam<Point>(
       "direction",
@@ -80,6 +91,8 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
     _heights(getParam<std::vector<Real>>("heights")),
     _num_layers(getParam<std::vector<unsigned int>>("num_layers")),
     _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
+    _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
+    _elem_integers_swaps(getParam<std::vector<std::vector<unsigned int>>>("elem_integers_swaps")),
     _direction(getParam<Point>("direction")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<boundary_id_type>("top_boundary") : 0),
@@ -123,6 +136,34 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
     for (unsigned int j = 0; j < elevation_swaps.size(); j += 2)
       elevation_swap_pairs[elevation_swaps[j]] = elevation_swaps[j + 1];
   }
+
+  if (_elem_integers_swaps.size() &&
+      (_elem_integers_swaps.size() != num_elevations * _elem_integer_names_to_swap.size()))
+    paramError("elem_integers_swaps",
+               "If specified, 'elem_integers_swaps' must be the same length as the product of the "
+               "length of 'heights' and the length of 'elem_integer_names_to_swap'.");
+
+  _elem_integers_swap_pairs.resize(_elem_integers_swaps.size());
+  // Reprocess the elem_integers_swaps to make pairs out of them so they are easier to use
+  for (unsigned int i = 0; i < _elem_integer_names_to_swap.size(); i++)
+  {
+    for (unsigned int j = 0; j < num_elevations; j++)
+    {
+      const auto & elevation_extra_swaps = _elem_integers_swaps[i * num_elevations + j];
+      auto & elevation_extra_swap_pairs = _elem_integers_swap_pairs[i * num_elevations + j];
+
+      if (elevation_extra_swaps.size() % 2)
+        paramError("elem_integers_swaps",
+                   "Row ",
+                   i * num_elevations + j + 1,
+                   " of elem_integers_swaps in ",
+                   name(),
+                   " does not contain an even number of entries! Num entries: ",
+                   elevation_extra_swaps.size());
+      for (unsigned int k = 0; k < elevation_extra_swaps.size(); k += 2)
+        elevation_extra_swap_pairs[elevation_extra_swaps[k]] = elevation_extra_swaps[k + 1];
+    }
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -134,6 +175,34 @@ FancyExtruderGenerator::generate()
 
   auto mesh = buildMeshBaseObject();
   mesh->set_mesh_dimension(_input->mesh_dimension() + 1);
+
+  // Check if the element integer names are existent in the input mesh.
+  for (unsigned int i = 0; i < _elem_integer_names_to_swap.size(); i++)
+    if (_input->has_elem_integer(_elem_integer_names_to_swap[i]))
+      _elem_integer_indices_to_swap.push_back(
+          _input->get_elem_integer_index(_elem_integer_names_to_swap[i]));
+    else
+      paramError("elem_integer_names_to_swap",
+                 "Element ",
+                 i + 1,
+                 " of 'elem_integer_names_to_swap' in is not a valid extra element integer of the "
+                 "input mesh.");
+
+  // prepare for transferring extra element integers from orignal mesh to the extruded mesh.
+  const unsigned int num_extra_elem_integers = _input->n_elem_integers();
+  std::vector<std::string> id_names;
+
+  for (unsigned int i = 0; i < num_extra_elem_integers; i++)
+  {
+    id_names.push_back(_input->get_elem_integer_name(i));
+    if (!mesh->has_elem_integer(id_names[i]))
+      mesh->add_elem_integer(id_names[i]);
+  }
+
+  // retreive subdomain/sideset/nodeset name maps
+  const auto & input_subdomain_map = _input->get_subdomain_name_map();
+  const auto & input_sideset_map = _input->get_boundary_info().get_sideset_name_map();
+  const auto & input_nodeset_map = _input->get_boundary_info().get_nodeset_name_map();
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
@@ -510,6 +579,25 @@ FancyExtruderGenerator::generate()
 
         new_elem = mesh->add_elem(new_elem);
 
+        // maintain extra integers
+        for (unsigned int i = 0; i < num_extra_elem_integers; i++)
+          new_elem->set_extra_integer(i, elem->get_extra_integer(i));
+
+        if (_elem_integers_swap_pairs.size())
+        {
+          for (unsigned int i = 0; i < _elem_integer_indices_to_swap.size(); i++)
+          {
+            auto & elevation_extra_swap_pairs = _elem_integers_swap_pairs[i * _heights.size() + e];
+
+            auto new_extra_id_it = elevation_extra_swap_pairs.find(
+                elem->get_extra_integer(_elem_integer_indices_to_swap[i]));
+
+            if (new_extra_id_it != elevation_extra_swap_pairs.end())
+              new_elem->set_extra_integer(_elem_integer_indices_to_swap[i],
+                                          new_extra_id_it->second);
+          }
+        }
+
         // Copy any old boundary ids on all sides
         for (auto s : elem->side_index_range())
         {
@@ -562,6 +650,16 @@ FancyExtruderGenerator::generate()
       }
     }
   }
+
+  // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
+  if (!input_subdomain_map.empty())
+    mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
+  if (!input_sideset_map.empty())
+    mesh->get_boundary_info().set_sideset_name_map().insert(input_sideset_map.begin(),
+                                                            input_sideset_map.end());
+  if (!input_nodeset_map.empty())
+    mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
+                                                            input_nodeset_map.end());
 
   mesh->set_isnt_prepared();
 
