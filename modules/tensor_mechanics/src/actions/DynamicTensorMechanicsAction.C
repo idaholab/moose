@@ -52,8 +52,14 @@ DynamicTensorMechanicsAction::validParams()
                         "quasi-static analysis (by solving Ku = F) "
                         "in the first time step.");
 
-  params.addParam<std::vector<AuxVariableName>>("velocities", "");
-  params.addParam<std::vector<AuxVariableName>>("accelerations", "");
+  params.addParam<std::vector<AuxVariableName>>(
+      "velocities",
+      std::vector<AuxVariableName>({"vel_x", "vel_y", "vel_z"}),
+      "Names of the velocity variables");
+  params.addParam<std::vector<AuxVariableName>>(
+      "accelerations",
+      std::vector<AuxVariableName>({"accel_x", "accel_y", "accel_z"}),
+      "Names of the acceleration variables");
 
   params.addParam<Real>("beta", 0.25, "beta parameter for Newmark Time integration");
   params.addParam<Real>("gamma", 0.5, "gamma parameter for Newmark Time integration");
@@ -78,12 +84,11 @@ DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters
 void
 DynamicTensorMechanicsAction::act()
 {
-  const std::array<std::string, 3> dir{"x", "y", "z"};
+  const std::array<std::string, 3> dir{{"x", "y", "z"}};
 
-  // error check vecolities and accelerations parameters
-  if (_velocities.size() != _ndisp)
+  if (_velocities.size() < _ndisp)
     paramError("velocities", "Supply one velocity variable per displacement direction");
-  if (_accelerations.size() != _ndisp)
+  if (_accelerations.size() < _ndisp)
     paramError("accelerations", "Supply one acceleration variable per displacement direction");
 
   // Add aux variables for velocities and accelerations
@@ -98,37 +103,43 @@ DynamicTensorMechanicsAction::act()
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      _problem->addVariable("MooseVariable", _velocities[i], params);
-      _problem->addVariable("MooseVariable", _accelerations[i], params);
+      _problem->addAuxVariable("MooseVariable", _velocities[i], params);
+      _problem->addAuxVariable("MooseVariable", _accelerations[i], params);
     }
   }
 
   // Add aux kernel for velocities and accelerations
   if (_current_task == "add_aux_kernel")
   {
-    // velocity aux kernels
-    for (unsigned int i = 0; i < _ndisp; ++i)
-    {
-      auto kernel_type = "NewmarkVelAux";
-      auto params = getKernelParameters(kernel_type);
-      params.set<NonlinearVariableName>("variable") = _velocities[i];
-      params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.applyParameters(parameters());
-      _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _velocities[i], params);
-    }
+    //
+    // Note: AuxKernels that are limited to TIMESTEP_END to not get their dependencies
+    // resolved automatically. Thus we _must_ construct the accleration kernels _first_.
+    // NewmarkAccelAux only uses the old velocity.
+    //
 
     // acceleration aux kernels
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
       auto kernel_type = "NewmarkAccelAux";
-      auto params = getKernelParameters(kernel_type);
-      params.set<NonlinearVariableName>("variable") = _accelerations[i];
+      auto params = _factory.getValidParams(kernel_type);
+      params.set<AuxVariableName>("variable") = _accelerations[i];
       params.set<std::vector<VariableName>>("displacement") = {_displacements[i]};
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.applyParameters(parameters());
       _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _accelerations[i], params);
+    }
+
+    // velocity aux kernels
+    for (unsigned int i = 0; i < _ndisp; ++i)
+    {
+      auto kernel_type = "NewmarkVelAux";
+      auto params = _factory.getValidParams(kernel_type);
+      params.set<AuxVariableName>("variable") = _velocities[i];
+      params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.applyParameters(parameters());
+      _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _velocities[i], params);
     }
   }
 
@@ -138,14 +149,15 @@ DynamicTensorMechanicsAction::act()
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
       auto kernel_type = "InertialForce";
-      auto params = getKernelParameters(kernel_type);
+      auto params = _factory.getValidParams(kernel_type);
 
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
+      params.set<bool>("use_displaced_mesh") = false;
       params.applyParameters(parameters());
 
-      _problem->addKernel(kernel_type, "TM_" + name() + '_' + dir[i], params);
+      _problem->addKernel(kernel_type, "TM_" + name() + "_inertia_" + dir[i], params);
     }
   }
 
