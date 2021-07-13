@@ -11,6 +11,7 @@
 
 #include <vector>
 #include "libmesh/point.h"
+#include "libmesh/plane.h"
 #include "EFAPoint.h"
 
 using namespace libMesh;
@@ -108,10 +109,13 @@ Real pointSegmentDistance(const Point & x0, const Point & x1, const Point & x2, 
  * @param x1,x2,x3 Coordinates of triangle vertices
  * @param x0 Coordinate of the point
  * @param xp Closest point coordinate on the triangle
- * @param region The seven regions where the closest point might locate
+ * @param region The seven regions where the closest point could be located
  * @return distance from a point x0 to a triangle defined by x1-x2-x3
  */
 
+// See "Generating Signed Distance Fields From Triangle Meshes" for details.
+// (http://www2.imm.dtu.dk/pubdb/edoc/imm1289.pdf)
+//
 //        R1
 //         1
 //        *  *
@@ -127,5 +131,42 @@ Real pointTriangleDistance(const Point & x0,
                            const Point & x3,
                            Point & xp,
                            unsigned int & region);
+
+/**
+ * check if a line intersects with an element defined by vertices
+ * calculate the distance from a point to triangle.
+ * @param p1,p2 End points of the line segment
+ * @param vertices Vertices of element
+ * @param pint Intersection point
+ * @return true if a line intersects with an element
+ */
+bool intersectWithEdge(const Point & p1,
+                       const Point & p2,
+                       const std::vector<Point> & vertices,
+                       Point & pint);
+
+/**
+ * check if point is inside the edge p1-p2
+ * @param p1,p2 End points of the line segment
+ * @param p Point coordinate
+ * @return true if a point is inside the edge p1-p2
+ */
+bool isInsideEdge(const Point & p1, const Point & p2, const Point & p);
+
+/**
+ * Get the relative position of p from p1
+ * @param p1,p2 End points of the line segment
+ * @param p Point coordinate
+ * @return the relative position of p from p1
+ */
+Real getRelativePosition(const Point & p1, const Point & p2, const Point & p);
+
+/**
+ * Check if point p is inside a plane
+ * @param vertices Vertices of the plane
+ * @param p Point coordinate
+ * @return true if point p is inside a plane
+ */
+bool isInsideCutPlane(const std::vector<Point> & vertices, const Point & p);
 
 } // namespace Xfem

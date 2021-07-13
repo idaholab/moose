@@ -10,9 +10,6 @@
 #pragma once
 
 #include "InterfaceMeshCutUserObjectBase.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/equation_systems.h"
 /**
  * Mesh cutter for 2D material interface problems.
  */
@@ -25,8 +22,6 @@ public:
   static InputParameters validParams();
 
   InterfaceMeshCut2DUserObject(const InputParameters & parameters);
-
-  virtual void initialize() override;
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
@@ -45,9 +40,11 @@ public:
    */
   virtual Real calculateSignedDistance(Point p) const override;
 
-  virtual Point nodeNomal(const unsigned int & node_id) override;
+  virtual Point nodeNormal(const unsigned int & node_id) override;
+
+  virtual void calculateNormal() override;
 
 protected:
   /// Map of element normal
-  std::map<unsigned int, Point> _element_normal;
+  std::unordered_map<unsigned int, Point> _element_normal;
 };

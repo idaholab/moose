@@ -99,6 +99,93 @@ InterfaceMeshCutUserObjectBase::initialSetup()
   }
 }
 
+void
+InterfaceMeshCutUserObjectBase::initialize()
+{
+  std::vector<Point> new_position(_cutter_mesh->n_nodes());
+
+  _pl = _mesh.getPointLocator();
+  _pl->enable_out_of_mesh_mode();
+
+  std::map<unsigned int, Real> node_velocity;
+  Real sum = 0.0;
+  unsigned count = 0;
+  // Loop all the nodes to calculate the velocity
+  for (const auto & node : _cutter_mesh->node_ptr_range())
+  {
+    if ((*_pl)(*node) != nullptr)
+    {
+      Real velocity;
+      if (_func == nullptr)
+        velocity =
+            _interface_velocity->computeMovingInterfaceVelocity(node->id(), nodeNormal(node->id()));
+      else
+        velocity = _func->value(_t, *node);
+
+      // only updates when t_step >0
+      if (_t_step <= 0)
+        velocity = 0.0;
+
+      node_velocity[node->id()] = velocity;
+      sum += velocity;
+      count++;
+    }
+  }
+
+  if (count == 0)
+    mooseError("No node of the cutter mesh is found inside the computational domain.");
+
+  Real average_velocity = sum / count;
+
+  for (const auto & node : _cutter_mesh->node_ptr_range())
+  {
+    if ((*_pl)(*node) == nullptr)
+      node_velocity[node->id()] = average_velocity;
+  }
+
+  for (const auto & node : _cutter_mesh->node_ptr_range())
+  {
+    Point p = *node;
+    p += _dt * nodeNormal(node->id()) * node_velocity[node->id()];
+    new_position[node->id()] = p;
+  }
+  for (const auto & node : _cutter_mesh->node_ptr_range())
+    _cutter_mesh->node_ref(node->id()) = new_position[node->id()];
+
+  if (_output_exodus)
+  {
+    std::vector<dof_id_type> di;
+    for (const auto & node : _cutter_mesh->node_ptr_range())
+    {
+      _explicit_system->get_dof_map().dof_indices(
+          node, di, _explicit_system->variable_number("disp_x"));
+      _explicit_system->solution->set(
+          di[0], new_position[node->id()](0) - _initial_nodes_location[node->id()](0));
+
+      _explicit_system->get_dof_map().dof_indices(
+          node, di, _explicit_system->variable_number("disp_y"));
+      _explicit_system->solution->set(
+          di[0], new_position[node->id()](1) - _initial_nodes_location[node->id()](1));
+
+      if (_mesh.dimension() == 3)
+      {
+        _explicit_system->get_dof_map().dof_indices(
+            node, di, _explicit_system->variable_number("disp_z"));
+        _explicit_system->solution->set(
+            di[0], new_position[node->id()](2) - _initial_nodes_location[node->id()](2));
+      }
+    }
+
+    _explicit_system->solution->close();
+
+    _exodus_io->append(true);
+    _exodus_io->write_timestep(
+        _app.getOutputFileBase() + "_" + name() + ".e", *_equation_systems, _t_step + 1, _t);
+  }
+
+  calculateNormal();
+}
+
 const std::vector<Point>
 InterfaceMeshCutUserObjectBase::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
 {

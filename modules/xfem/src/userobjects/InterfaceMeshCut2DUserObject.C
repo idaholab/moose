@@ -16,8 +16,7 @@ InputParameters
 InterfaceMeshCut2DUserObject::validParams()
 {
   InputParameters params = InterfaceMeshCutUserObjectBase::validParams();
-  params.addClassDescription(
-      "Creates a UserObject for a mesh cutter in 2D material interface problems");
+  params.addClassDescription("A userobject to cut a 2D mesh using a 1D cutter mesh.");
   return params;
 }
 
@@ -27,83 +26,12 @@ InterfaceMeshCut2DUserObject::InterfaceMeshCut2DUserObject(const InputParameters
   for (const auto & elem : _cutter_mesh->element_ptr_range())
     if (elem->type() != EDGE2)
       mooseError(
-          "InterfaceMeshCut2DUserObject currently only supports TRI3 element in the cut mesh.");
+          "InterfaceMeshCut2DUserObject currently only supports EDGE2 element in the cut mesh.");
 }
 
 void
-InterfaceMeshCut2DUserObject::initialize()
+InterfaceMeshCut2DUserObject::calculateNormal()
 {
-  std::vector<Point> new_position(_cutter_mesh->n_nodes());
-  _pl = _mesh.getPointLocator();
-  _pl->enable_out_of_mesh_mode();
-
-  std::map<unsigned int, Real> node_velocity;
-  Real sum = 0.0;
-  unsigned count = 0;
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    if ((*_pl)(*node) != nullptr)
-    {
-      Real velocity;
-      if (_func == nullptr)
-        velocity =
-            _interface_velocity->computeMovingInterfaceVelocity(node->id(), nodeNomal(node->id()));
-      else
-        velocity = _func->value(_t, *node);
-
-      // only updates when t_step >0
-      if (_t_step <= 0)
-        velocity = 0.0;
-
-      node_velocity[node->id()] = velocity;
-      sum += velocity;
-      count++;
-    }
-  }
-
-  if (count == 0)
-    mooseError("No node of the cutter mesh is found inside the computational domain.");
-
-  Real average_velocity = sum / count;
-
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    if ((*_pl)(*node) == nullptr)
-      node_velocity[node->id()] = average_velocity;
-  }
-
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-  {
-    Point p = *node;
-    p += _dt * nodeNomal(node->id()) * node_velocity[node->id()];
-    new_position[node->id()] = p;
-  }
-  for (const auto & node : _cutter_mesh->node_ptr_range())
-    _cutter_mesh->node_ref(node->id()) = new_position[node->id()];
-
-  if (_output_exodus)
-  {
-    std::vector<dof_id_type> di;
-    for (const auto & node : _cutter_mesh->node_ptr_range())
-    {
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_x"));
-      _explicit_system->solution->set(
-          di[0], new_position[node->id()](0) - _initial_nodes_location[node->id()](0));
-
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_y"));
-      _explicit_system->solution->set(
-          di[0], new_position[node->id()](1) - _initial_nodes_location[node->id()](1));
-    }
-
-    _explicit_system->solution->close();
-
-    _exodus_io->append(true);
-    _exodus_io->write_timestep(
-        _app.getOutputFileBase() + "_" + name() + ".e", *_equation_systems, _t_step + 1, _t);
-  }
-
   _element_normal.clear();
 
   for (const auto & elem : _cutter_mesh->element_ptr_range())
@@ -119,7 +47,7 @@ InterfaceMeshCut2DUserObject::initialize()
 }
 
 Point
-InterfaceMeshCut2DUserObject::nodeNomal(const unsigned int & node_id)
+InterfaceMeshCut2DUserObject::nodeNormal(const unsigned int & node_id)
 {
   Point normal(0.0);
 

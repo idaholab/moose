@@ -10,9 +10,6 @@
 #pragma once
 
 #include "InterfaceMeshCutUserObjectBase.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/equation_systems.h"
 
 /**
  * Mesh cutter for 3D material interface problems.
@@ -26,8 +23,6 @@ public:
   static InputParameters validParams();
 
   InterfaceMeshCut3DUserObject(const InputParameters & parameters);
-
-  virtual void initialize() override;
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,
@@ -46,32 +41,11 @@ public:
    */
   virtual Real calculateSignedDistance(Point p) const override;
 
-  virtual Point nodeNomal(const unsigned int & node_id) override;
+  virtual Point nodeNormal(const unsigned int & node_id) override;
+
+  virtual void calculateNormal() override;
 
 protected:
-  /**
-    Check if a line intersects with an element
-   */
-  bool intersectWithEdge(const Point & p1,
-                         const Point & p2,
-                         const std::vector<Point> & _vertices,
-                         Point & pint) const;
-
-  /**
-    Check if point p is inside the edge p1-p2
-   */
-  bool isInsideEdge(const Point & p1, const Point & p2, const Point & p) const;
-
-  /**
-    Get the relative position of p from p1
-   */
-  Real getRelativePosition(const Point & p1, const Point & p2, const Point & p) const;
-
-  /**
-    Check if point p is inside a plane
-   */
-  bool isInsideCutPlane(const std::vector<Point> & _vertices, const Point & p) const;
-
   /// Map of pseudo normal of element plane, three nodes and three sides of each element
-  std::map<unsigned int, std::array<Point, 7>> _pseudo_normal;
+  std::unordered_map<unsigned int, std::array<Point, 7>> _pseudo_normal;
 };

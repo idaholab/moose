@@ -16,6 +16,9 @@
 #include "Function.h"
 #include "libmesh/enum_to_string.h"
 #include "XFEMFuncs.h"
+#include "libmesh/exodusII_io.h"
+#include "libmesh/explicit_system.h"
+#include "libmesh/equation_systems.h"
 
 /**
  * InterfaceMeshCutUserObjectBase:
@@ -35,6 +38,8 @@ public:
 
   virtual void initialSetup() override;
 
+  virtual void initialize() override;
+
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
@@ -49,7 +54,10 @@ public:
   virtual Real calculateSignedDistance(Point p) const = 0;
 
   /// return the normal at node
-  virtual Point nodeNomal(const unsigned int & node_id) = 0;
+  virtual Point nodeNormal(const unsigned int & node_id) = 0;
+
+  /// calculate element (pseudo) normal values
+  virtual void calculateNormal() = 0;
 
   virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
 
@@ -57,9 +65,9 @@ protected:
   /// The cutter mesh
   std::shared_ptr<MeshBase> _cutter_mesh;
   /// node to element map of cut mesh
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
   /// initial nodes location
-  std::map<dof_id_type, Point> _initial_nodes_location;
+  std::unordered_map<dof_id_type, Point> _initial_nodes_location;
   /// Pointer to XFEMMovingInterfaceVelocityBase object
   const XFEMMovingInterfaceVelocityBase * _interface_velocity;
   /// Velocity function
