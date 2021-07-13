@@ -13,27 +13,27 @@
 []
 
 [Variables]
-  [./temp]
+  [./temperature]
   [../]
 []
 
 [Kernels]
   [./heat]
     type = AnisoHeatConduction
-    variable = temp
+    variable = temperature
   [../]
 []
 
 [BCs]
-  [./temps]
+  [./temperatures]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = 1
     value = 0
   [../]
   [./neum]
     type = NeumannBC
-    variable = temp
+    variable = temperature
     boundary = 2
     value = 100
   [../]
@@ -44,9 +44,8 @@
     type = AnisoHeatConductionMaterial
     block = 1
     specific_heat = 0.116
-    thermal_conductivity_x_pp = tcx
-    thermal_conductivity_y_pp = tcy
-    thermal_conductivity_z_pp = tcz
+    thermal_conductivity = '10.0 0 0 0 10.0 0 0 0 10.0'
+    temperature = temperature
   [../]
   [./density]
     type = GenericConstantMaterial
