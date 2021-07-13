@@ -21,6 +21,7 @@ InputParameters
 SteffensenSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
+  params.addClassDescription("Steffensen iteration for tightly coupled multiphysics calculations.");
 
   return params;
 }

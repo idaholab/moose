@@ -23,6 +23,7 @@ InputParameters
 PicardSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
+  params.addClassDescription("Picard iteration for tightly coupled multiphysics calculations.");
 
   params.addDeprecatedParam<unsigned int>(
       "picard_max_its",

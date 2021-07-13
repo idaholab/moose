@@ -19,6 +19,7 @@ InputParameters
 SolveObject::validParams()
 {
   auto params = MooseObject::validParams();
+  params.addClassDescription("Empty solve object that all solove objects are derived from.");
   params += PerfGraphInterface::validParams();
   params += PostprocessorInterface::validParams();
   params.addParam<bool>("verbose", false, "True to print more information about the solve object");

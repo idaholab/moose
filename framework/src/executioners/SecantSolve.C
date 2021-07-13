@@ -21,6 +21,7 @@ InputParameters
 SecantSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
+  params.addClassDescription("Secant iteration for tightly coupled multiphysics calculations.");
 
   return params;
 }

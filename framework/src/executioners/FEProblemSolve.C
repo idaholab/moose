@@ -28,6 +28,8 @@ InputParameters
 FEProblemSolve::validParams()
 {
   InputParameters params = SolveObject::validParams();
+  params.addClassDescription(
+      "Interact with PETSc/SLEPc for solving nonlinar stringly coupled multiphysics problems.");
 
   params.addParam<std::vector<std::string>>("splitting",
                                             "Top-level splitting defining a "

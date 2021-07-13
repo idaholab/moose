@@ -29,6 +29,8 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params.addClassDescription("The executioner that all other executioners are derived from "
+                             "provides management of all solve objects.");
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
   params.registerBase("Executioner");
