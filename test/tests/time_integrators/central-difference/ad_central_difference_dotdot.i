@@ -6,7 +6,6 @@
 # correctly using the Central Difference method for an AD
 # variable.
 #
-# @Requirement F1.30
 ###########################################################
 
 [Mesh]

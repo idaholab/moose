@@ -169,19 +169,7 @@ public:
 
   const ADTemplateVariableValue<OutputType> & adUDot() const;
 
-  const ADTemplateVariableValue<OutputType> & adUDotDot() const
-  {
-    _need_ad = _need_ad_u_dotdot = true;
-
-    if (!_time_integrator)
-      // If we don't have a time integrator (this will be the case for variables that are a part of
-      // the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just going to
-      // copy the values from _u_dotdot. Of course in order to be able to do that we need to
-      // calculate _u_dotdot
-      _need_u_dotdot = true;
-
-    return _ad_u_dotdot;
-  }
+  const ADTemplateVariableValue<OutputType> & adUDotDot() const;
 
   const FieldVariableValue & uDot() const;
 
@@ -550,4 +538,17 @@ MooseVariableDataFV<OutputType>::adUDot() const
     _need_u_dot = true;
 
   return _ad_u_dot;
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseVariableDataFV<OutputType>::adUDotDot() const
+{
+  _need_ad = _need_ad_u_dotdot = true;
+
+  if (!safeToComputeADUDot())
+    // We will just copy the value of _u_dotdot into _ad_u_dotdot
+    _need_u_dotdot = true;
+
+  return _ad_u_dotdot;
 }

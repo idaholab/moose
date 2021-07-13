@@ -5,7 +5,6 @@
 # Testing that the second time derivative is calculated
 # correctly using the Newmark-Beta method for an AD variable
 #
-# @Requirement F1.30
 ###########################################################
 
 [Mesh]
