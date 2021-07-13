@@ -17,6 +17,9 @@
 
 #include "BlockRestrictable.h"
 
+#include "HomogenizationConstraintIntegral.h" // just for the constants
+#include "AddVariableAction.h"
+
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
@@ -38,6 +41,10 @@ registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material")
 
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_master_action_material");
 
+registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_scalar_kernel");
+
+registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_user_object");
+
 InputParameters
 TensorMechanicsAction::validParams()
 {
@@ -51,6 +58,18 @@ TensorMechanicsAction::validParams()
                                               "that the stress divergence kernels will be "
                                               "applied to");
   params.addParamNamesToGroup("block", "Advanced");
+
+  params.addParam<bool>("new_system",
+                        false,
+                        "If true use the new "
+                        "LagrangianStressDiverence kernels.");
+
+  MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
+  params.addParam<MooseEnum>("formulation",
+                             formulationType,
+                             "Select between the total Lagrangian (TOTAL) "
+                             "and updated Lagrangian (UPDATED) formulations "
+                             "for the new kernel system.");
 
   params.addParam<MultiMooseEnum>("additional_generate_output",
                                   TensorMechanicsActionBase::outputPropertiesType(),
@@ -90,6 +109,16 @@ TensorMechanicsAction::validParams()
                         "Collects all material eigenstrains and passes to required strain "
                         "calculator within TMA internally.");
 
+  // Homogenization system input
+  MultiMooseEnum constraintType("strain stress");
+  params.addParam<MultiMooseEnum>("constraint_types",
+                                  HomogenizationConstants::mooseConstraintType,
+                                  "Type of each constraint: "
+                                  "stress or strain.");
+  params.addParam<std::vector<FunctionName>>("targets",
+                                             "Functions giving the target "
+                                             "values of each constraint.");
+
   return params;
 }
 
@@ -114,7 +143,14 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _direction_valid(params.isParamSetByUser("direction")),
     _verbose(getParam<bool>("verbose")),
     _spherical_center_point_valid(params.isParamSetByUser("spherical_center_point")),
-    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names"))
+    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names")),
+    _lagrangian_kernels(getParam<bool>("new_system")),
+    _lk_large_kinematics(_strain == Strain::Finite),
+    _lk_formulation(getParam<MooseEnum>("formulation").getEnum<LKFormulation>()),
+    _lk_locking(getParam<bool>("volumetric_locking_correction")),
+    _lk_homogenization(false),
+    _constraint_types(getParam<MultiMooseEnum>("constraint_types")),
+    _targets(getParam<std::vector<FunctionName>>("targets"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -143,7 +179,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
 
   // determine if displaced mesh is to be used
   _use_displaced_mesh = (_strain == Strain::Finite);
-  if (params.isParamSetByUser("use_displaced_mesh"))
+  if (params.isParamSetByUser("use_displaced_mesh") && !_lagrangian_kernels)
   {
     bool use_displaced_mesh_param = getParam<bool>("use_displaced_mesh");
     if (use_displaced_mesh_param != _use_displaced_mesh && params.isParamSetByUser("strain"))
@@ -213,6 +249,58 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
 
   // Get eigenstrain names if passed by user
   _eigenstrain_names = getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
+
+  // Determine if we're going to use the homogenization system for the new
+  // lagrangian kernels
+  bool ctype_set = params.isParamSetByUser("constraint_types");
+  bool targets_set = params.isParamSetByUser("targets");
+  if (ctype_set || targets_set)
+  {
+    if (!(ctype_set && targets_set))
+      mooseError("To use the Lagrangian kernel homogenization system you "
+                 "most provide both the constraint_types and the targets "
+                 "parameters");
+    _lk_homogenization = true;
+    // Do consistency checking on the kernel options
+    if (_lk_homogenization && (_lk_formulation == LKFormulation::Updated))
+      mooseError("The Lagrangian kernel homogenization system requires the "
+                 "use of formulation = TOTAL");
+  }
+
+  // Cross check options to weed out incompatible choices for the new lagrangian
+  // kernel system
+  if (_lagrangian_kernels)
+  {
+    if (_use_ad)
+      mooseError("The Lagrangian kernel system is not yet compatible with AD. "
+                 "Do not set the use_automatic_differentiation flag.");
+
+    if (params.isParamSetByUser("use_finite_deform_jacobian"))
+      mooseError("The Lagrangian kernel system always produces the exact "
+                 "Jacobian.  use_finite_deform_jacobian is redundant and "
+                 " should not be set");
+    if (params.isParamSetByUser("global_strain"))
+      mooseError("The Lagrangian kernel system is not compatible with "
+                 "the global_strain option.  Use the homogenization "
+                 " system instead");
+    if (params.isParamSetByUser("decomposition_method"))
+      mooseError("The decomposition_method parameter should not be used "
+                 " with the Lagrangian kernel system.  Similar options "
+                 " for native small deformation material models are "
+                 " available as part of the ComputeLagrangianStress "
+                 " material system.");
+  }
+  else
+  {
+    if (params.isParamSetByUser("formulation"))
+      mooseError("The StressDiveregenceTensor system always uses an "
+                 " updated Lagrangian formulation.  Do not set the "
+                 " formulation parameter, it is only used with the "
+                 " new Lagrangian kernel system.");
+    if (_lk_homogenization)
+      mooseError("The homogenization system can only be used with the "
+                 "new Lagrangian kernels");
+  }
 }
 
 void
@@ -236,6 +324,10 @@ TensorMechanicsAction::act()
   {
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
+      if (_lagrangian_kernels)
+        paramError("Plane formulation not available with Lagrangian kernels");
+      ;
+
       if (_use_ad)
         paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
       // Set the action parameters
@@ -277,26 +369,40 @@ TensorMechanicsAction::act()
     }
   }
 
-  // Add variables (optional)
-  else if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  // Add variables
+  else if (_current_task == "add_variable")
   {
-    auto params = _factory.getValidParams("MooseVariable");
-    // determine necessary order
-    const bool second = _problem->mesh().hasSecondOrderElements();
-
-    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
-    params.set<MooseEnum>("family") = "LAGRANGE";
-    if (isParamValid("scaling"))
-      params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-
-    // Loop through the displacement variables
-    for (const auto & disp : _displacements)
+    if (getParam<bool>("add_variables"))
     {
-      // Create displacement variables
-      _problem->addVariable("MooseVariable", disp, params);
+      auto params = _factory.getValidParams("MooseVariable");
+      // determine necessary order
+      const bool second = _problem->mesh().hasSecondOrderElements();
+
+      params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
+      params.set<MooseEnum>("family") = "LAGRANGE";
+      if (isParamValid("scaling"))
+        params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
+      // Loop through the displacement variables
+      for (const auto & disp : _displacements)
+      {
+        // Create displacement variables
+        _problem->addVariable("MooseVariable", disp, params);
+      }
+    }
+
+    // Homogenization scalar
+    if (_lk_homogenization)
+    {
+      InputParameters params = _factory.getValidParams("MooseVariable");
+      params.set<MooseEnum>("family") = "SCALAR";
+      params.set<MooseEnum>("order") = TensorMechanicsAction::_order_mapper.at(
+          HomogenizationConstants::required.at(_lk_large_kinematics)[_ndisp - 1]);
+      auto fe_type = AddVariableAction::feType(params);
+      auto var_type = AddVariableAction::determineType(fe_type, 1);
+      _problem->addVariable(var_type, _hname, params);
     }
   }
-
   // Add Materials
   else if (_current_task == "add_master_action_material")
   {
@@ -304,89 +410,12 @@ TensorMechanicsAction::act()
     if (_auto_eigenstrain)
       actEigenstrainNames();
 
-    std::string type;
-
-    // no plane strain
-    if (_planar_formulation == PlanarFormulation::None)
-    {
-      std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
-          {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
-          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental},
-           "ComputeIncrementalSmallStrain"},
-          {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
-           "ComputeAxisymmetricRZIncrementalStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
-           "ComputeAxisymmetricRZFiniteStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal},
-           "ComputeRSphericalSmallStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental},
-           "ComputeRSphericalIncrementalStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental},
-           "ComputeRSphericalFiniteStrain"}};
-
-      auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
-      if (type_it != type_map.end())
-        type = type_it->second;
-      else
-        mooseError("Unsupported strain formulation");
-    }
-    else if (_planar_formulation == PlanarFormulation::WeakPlaneStress ||
-             _planar_formulation == PlanarFormulation::PlaneStrain ||
-             _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
-    {
-      if (_use_ad && (_planar_formulation == PlanarFormulation::PlaneStrain ||
-                      _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain))
-        paramError("use_automatic_differentiation",
-                   "AD not setup for use with PlaneStrain or GeneralizedPlaneStrain");
-
-      std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
-          {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputePlaneSmallStrain"},
-          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental},
-           "ComputePlaneIncrementalStrain"},
-          {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputePlaneFiniteStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetric1DSmallStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
-           "ComputeAxisymmetric1DIncrementalStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
-           "ComputeAxisymmetric1DFiniteStrain"}};
-
-      // choose kernel type based on coordinate system
-      auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
-      if (type_it != type_map.end())
-        type = type_it->second;
-      else
-        mooseError("Unsupported coordinate system for plane strain.");
-    }
+    // Easiest just to branch on type here, as the strain systems are completely
+    // different
+    if (_lagrangian_kernels)
+      actLagrangianKernelStrain();
     else
-      mooseError("Unsupported planar formulation");
-
-    // set material parameters
-    auto params = _factory.getValidParams(ad_prepend + type);
-    params.applyParameters(parameters(),
-                           {"displacements",
-                            "use_displaced_mesh",
-                            "out_of_plane_strain",
-                            "scalar_out_of_plane_strain"});
-
-    if (isParamValid("strain_base_name"))
-      params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
-
-    params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
-    params.set<bool>("use_displaced_mesh") = false;
-
-    if (isParamValid("scalar_out_of_plane_strain"))
-      params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
-          getParam<VariableName>("scalar_out_of_plane_strain")};
-
-    if (isParamValid("out_of_plane_strain"))
-      params.set<std::vector<VariableName>>("out_of_plane_strain") = {
-          getParam<VariableName>("out_of_plane_strain")};
-
-    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
-
-    _problem->addMaterial(ad_prepend + type, name() + "_strain", params);
+      actStressDivergenceTensorsStrain();
   }
 
   // Add Stress Divergence (and optionally WeakPlaneStress) Kernels
@@ -414,9 +443,15 @@ TensorMechanicsAction::act()
         params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
       if (_diag_save_in.size() == _ndisp)
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
-      if (isParamValid("out_of_plane_strain"))
+      if (isParamValid("out_of_plane_strain") && !_lagrangian_kernels)
         params.set<std::vector<VariableName>>("out_of_plane_strain") = {
             getParam<VariableName>("out_of_plane_strain")};
+
+      if (_lk_homogenization)
+      {
+        params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
+        params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+      }
 
       _problem->addKernel(ad_prepend + tensor_kernel_type, kernel_name, params);
     }
@@ -428,6 +463,34 @@ TensorMechanicsAction::act()
       params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
 
       _problem->addKernel(ad_prepend + "WeakPlaneStress", wps_kernel_name, params);
+    }
+  }
+  else if (_current_task == "add_scalar_kernel")
+  {
+    if (_lk_homogenization)
+    {
+      InputParameters params = _factory.getValidParams("HomogenizationConstraintScalarKernel");
+      params.set<NonlinearVariableName>("variable") = _hname;
+      params.set<unsigned int>("ndim") = _ndisp;
+      params.set<UserObjectName>("integrator") = _integrator_name;
+      params.set<bool>("large_kinematics") = _lk_large_kinematics;
+
+      _problem->addScalarKernel(
+          "HomogenizationConstraintScalarKernel", "HomogenizationConstraints", params);
+    }
+  }
+  else if (_current_task == "add_user_object")
+  {
+    if (_lk_homogenization)
+    {
+      InputParameters params = _factory.getValidParams("HomogenizationConstraintIntegral");
+      params.set<std::vector<VariableName>>("displacements") = _displacements;
+      params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+      params.set<std::vector<FunctionName>>("targets") = _targets;
+      params.set<bool>("large_kinematics") = _lk_large_kinematics;
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+
+      _problem->addUserObject("HomogenizationConstraintIntegral", _integrator_name, params);
     }
   }
 }
@@ -826,7 +889,6 @@ TensorMechanicsAction::actOutputMatProp()
 void
 TensorMechanicsAction::actGatherActionParameters()
 {
-
   // Gather info about all other master actions when we add variables
   if (_current_task == "validate_coordinate_systems" && getParam<bool>("add_variables"))
   {
@@ -849,20 +911,162 @@ TensorMechanicsAction::actGatherActionParameters()
   }
 }
 
+void
+TensorMechanicsAction::actLagrangianKernelStrain()
+{
+  std::string type = "ComputeLagrangianStrain";
+  auto params = _factory.getValidParams(type);
+
+  if (isParamValid("strain_base_name"))
+    params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
+
+  params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
+
+  params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
+
+  params.set<bool>("large_kinematics") = _lk_large_kinematics;
+
+  params.set<bool>("stabilize_strain") = _lk_locking;
+
+  if (_lk_homogenization)
+  {
+    params.set<std::vector<MaterialPropertyName>>("homogenization_gradient_names") = {
+        _homogenization_strain_name};
+  }
+
+  _problem->addMaterial(type, name() + "_strain", params);
+
+  // Add the homogenization strain calculator
+  if (_lk_homogenization)
+  {
+    std::string type = "ComputeHomogenizedLagrangianStrain";
+    auto params = _factory.getValidParams(type);
+
+    params.set<MaterialPropertyName>("homogenization_gradient_name") = _homogenization_strain_name;
+    params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
+    params.set<bool>("large_kinematics") = _lk_large_kinematics;
+    params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
+
+    _problem->addMaterial(type, name() + "_compute_" + _homogenization_strain_name, params);
+  }
+}
+
+void
+TensorMechanicsAction::actStressDivergenceTensorsStrain()
+{
+  std::string ad_prepend = _use_ad ? "AD" : "";
+
+  std::string type;
+
+  // no plane strain
+  if (_planar_formulation == PlanarFormulation::None)
+  {
+    std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalSmallStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
+         "ComputeAxisymmetricRZIncrementalStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
+         "ComputeAxisymmetricRZFiniteStrain"},
+        {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal}, "ComputeRSphericalSmallStrain"},
+        {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental},
+         "ComputeRSphericalIncrementalStrain"},
+        {{Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental},
+         "ComputeRSphericalFiniteStrain"}};
+
+    auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
+    if (type_it != type_map.end())
+      type = type_it->second;
+    else
+      mooseError("Unsupported strain formulation");
+  }
+  else if (_planar_formulation == PlanarFormulation::WeakPlaneStress ||
+           _planar_formulation == PlanarFormulation::PlaneStrain ||
+           _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
+  {
+    if (_use_ad && (_planar_formulation == PlanarFormulation::PlaneStrain ||
+                    _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain))
+      paramError("use_automatic_differentiation",
+                 "AD not setup for use with PlaneStrain or GeneralizedPlaneStrain");
+
+    std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputePlaneSmallStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputePlaneIncrementalStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputePlaneFiniteStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetric1DSmallStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
+         "ComputeAxisymmetric1DIncrementalStrain"},
+        {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
+         "ComputeAxisymmetric1DFiniteStrain"}};
+
+    // choose kernel type based on coordinate system
+    auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
+    if (type_it != type_map.end())
+      type = type_it->second;
+    else
+      mooseError("Unsupported coordinate system for plane strain.");
+  }
+  else
+    mooseError("Unsupported planar formulation");
+
+  // set material parameters
+  auto params = _factory.getValidParams(ad_prepend + type);
+  params.applyParameters(
+      parameters(),
+      {"displacements", "use_displaced_mesh", "out_of_plane_strain", "scalar_out_of_plane_strain"});
+
+  if (isParamValid("strain_base_name"))
+    params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
+
+  params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
+  params.set<bool>("use_displaced_mesh") = false;
+
+  if (isParamValid("scalar_out_of_plane_strain"))
+    params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
+        getParam<VariableName>("scalar_out_of_plane_strain")};
+
+  if (isParamValid("out_of_plane_strain"))
+    params.set<std::vector<VariableName>>("out_of_plane_strain") = {
+        getParam<VariableName>("out_of_plane_strain")};
+
+  params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
+
+  _problem->addMaterial(ad_prepend + type, name() + "_strain", params);
+}
+
 std::string
 TensorMechanicsAction::getKernelType()
 {
-  std::map<Moose::CoordinateSystemType, std::string> type_map = {
-      {Moose::COORD_XYZ, "StressDivergenceTensors"},
-      {Moose::COORD_RZ, "StressDivergenceRZTensors"},
-      {Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors"}};
-
-  // choose kernel type based on coordinate system
-  auto type_it = type_map.find(_coord_system);
-  if (type_it != type_map.end())
-    return type_it->second;
+  if (_lagrangian_kernels)
+  {
+    if (_coord_system != Moose::COORD_XYZ)
+      mooseError("Lagrangian kernel system can only be used in Cartesian "
+                 "coordinates");
+    if (_lk_homogenization)
+      return "HomogenizedTotalLagrangianStressDivergence";
+    else if (_lk_formulation == LKFormulation::Total)
+      return "TotalLagrangianStressDivergence";
+    else if (_lk_formulation == LKFormulation::Updated)
+      return "UpdatedLagrangianStressDivergence";
+    else
+      mooseError("Unknown formulation type");
+  }
   else
-    mooseError("Unsupported coordinate system");
+  {
+    std::map<Moose::CoordinateSystemType, std::string> type_map = {
+        {Moose::COORD_XYZ, "StressDivergenceTensors"},
+        {Moose::COORD_RZ, "StressDivergenceRZTensors"},
+        {Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors"}};
+
+    // choose kernel type based on coordinate system
+    auto type_it = type_map.find(_coord_system);
+    if (type_it != type_map.end())
+      return type_it->second;
+    else
+      mooseError("Unsupported coordinate system");
+  }
 }
 
 InputParameters
@@ -874,7 +1078,18 @@ TensorMechanicsAction::getKernelParameters(std::string type)
       {"displacements", "use_displaced_mesh", "save_in", "diag_save_in", "out_of_plane_strain"});
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
-  params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+
+  if (_lagrangian_kernels)
+  {
+    params.set<bool>("use_displaced_mesh") =
+        (_lk_large_kinematics && (_lk_formulation == LKFormulation::Updated));
+    params.set<bool>("large_kinematics") = _lk_large_kinematics;
+    params.set<bool>("stabilize_strain") = _lk_locking;
+  }
+  else
+  {
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+  }
 
   return params;
 }
