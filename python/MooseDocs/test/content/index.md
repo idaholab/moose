@@ -1,4 +1,4 @@
-!config navigation breadcrumbs=False
+!config navigation breadcrumbs=False scrollspy=False
 
 # MooseDocs Test Pages
 

@@ -89,8 +89,9 @@ def load_config(filename, **kwargs):
 
 def load_configs(filenames, **kwargs):
     """
-    Read the YAML files listed in filenames and create unique Translator objects for each. The
-    kwargs are applied the same to all configurations (see the load_config() method).
+    Read the YAML files listed in filenames and create unique Translator objects for each. Each
+    configuration should specify the same translator destination unless it is set globally via the
+    kwargs. The kwargs are applied the same to all configurations (see the load_config() method).
 
     The content specified by each configuration is added to a common pool of content and then
     distributed to each Translator object. The contents output is a list of lists containing the
@@ -99,15 +100,33 @@ def load_configs(filenames, **kwargs):
     they still should have access to those built by any other translator.
 
     The local names of all page objects must be unique within the global content pool. The only
-    exceptions are pages.Directory objects, for which duplicates may occur, but only the primary
-    (first) translator contains them in its content list.
+    exceptions are pages.Directory objects, for which duplicates may occur.
     """
+    destination = kwargs.get('Translator', dict()).get('destination')
+    destined = False
     translators = list()
     configurations = list()
     for file in filenames:
         trans, config = load_config(file, **kwargs)
+
+        # Make sure translators are all outputting to the same destination
+        current = config.get('Translator', dict()).get('destination')
+        if current is not None:
+            if destined and current != destination:
+                msg = "The translator destination '{}' was specified by {}, but another " \
+                      "configuration file used '{}'. Please specify a value in only one file or " \
+                      "the same value in all files. Otherwise, use the kwargs to override all."
+                raise exceptions.MooseDocsException(msg, current, file, destination)
+            elif destination is None:
+                destination = current
+                destined = True
+
         translators.append(trans)
         configurations.append(config)
+
+    if destined:
+        for translator in translators:
+            translator.update(destination=destination)
 
     # Set contents for each translator then loop through and distribute their contents to all others
     contents = [[page for page in translator.getPages()] for translator in translators]
@@ -119,13 +138,7 @@ def load_configs(filenames, **kwargs):
                 if not isinstance(page, pages.Directory):
                     msg = "A page or file '{}' was specified by {}, but one by the same name had " \
                           "already been added to the content pool by another configuration file."
-
-                    # Could this just be a LOG.error() and we proceed anyways? [crswong888]
                     raise exceptions.MooseDocsException(msg, page.local, filenames[index])
-
-                # if the content is a directory, just remove it from the current translator
-                translator.removePage(page)
-                contents[index].remove(page)
             else:
                 pooled.append(page.local)
                 for ct in cotranslators:

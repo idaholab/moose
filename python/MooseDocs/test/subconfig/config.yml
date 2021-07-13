@@ -24,5 +24,6 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MooseDocs Subsite
         home: /subsite/index.md
+        search: False
     MooseDocs.extensions.comment: default
     MooseDocs.extensions.modal: default

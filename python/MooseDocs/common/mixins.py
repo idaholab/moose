@@ -18,6 +18,12 @@ from ..common import exceptions
 #: A value for allowing ConfigObject.get method to work with a default of None
 UNSET = uuid.uuid4()
 
+def assertInitialized(object, method):
+    """Error if the object is not set, and which method to call to do so."""
+    if object is None:
+        msg = "The {}() method must be called prior to accessing this property."
+        raise MooseDocs.common.exceptions.MooseDocsException(msg, method)
+
 class ConfigObject(object):
     """
     Base class for objects that contain configure options.
@@ -128,14 +134,8 @@ class ReaderObject(object):
     @property
     def reader(self):
         """Return the Reader object."""
-        self.assertInitialized()
+        assertInitialized(self.__reader, 'setReader')
         return self.__reader
-
-    def assertInitialized(self):
-        """Error if the reader is not set."""
-        if self.__reader is None:
-            msg = "The setTranslator() method must be called prior to accessing this property."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg)
 
 class RendererObject(object):
     """
@@ -151,13 +151,8 @@ class RendererObject(object):
     @property
     def renderer(self):
         """Return the Renderer object."""
+        assertInitialized(self.__renderer, 'setRenderer')
         return self.__renderer
-
-    def assertInitialized(self):
-        """Error if the renderer has not been set."""
-        if self.__renderer is None:
-            msg = "The setRenderer() method must be called prior to accessing this property."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
 
 class ComponentObject(object):
     """
@@ -165,18 +160,25 @@ class ComponentObject(object):
     """
     def __init__(self):
         self.__components = []
+        self.__translator = None
+
+    @property
+    def translator(self):
+        """Return the translator instance."""
+        assertInitialized(self.__translator, 'setTranslator')
+        return self.__translator
 
     @property
     def components(self):
-        """
-        Return the list of Component objects.
-        """
+        """Return the list of Component objects."""
         return self.__components
 
+    def setTranslator(self, translator):
+        """Method called by Translator to allow components access to it."""
+        self.__translator = translator
+
     def addComponent(self, comp):
-        """
-        Add a Component object.
-        """
+        """Add a Component object."""
         self.__components.append(comp)
 
 class TranslatorObject(object):
@@ -200,6 +202,4 @@ class TranslatorObject(object):
 
     def assertInitialized(self):
         """Error if the translator is not set."""
-        if self.__translator is None:
-            msg = "The setTranslator() method must be called prior to accessing this property."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg)
+        assertInitialized(self.__translator, 'setTranslator')
