@@ -123,11 +123,9 @@ for the problem to ensure that the appropriate rate of convergence is achieved a
 is refined. The file in [mms_spatial] is the complete input file that performs the desired
 solve.
 
-!listing mms_spatial.i id=mms_spatial
-                       caption=Complete input file for the solving the diffusion equation for use
-                               with the method of manufactured solutions for a spatial convergende
-                               study.
-
+!listing mms/test/mms_spatial.i id=mms_spatial
+         caption=Complete input file for the solving the diffusion equation for use with the method
+                 of manufactured solutions for a spatial convergence study.
 
 It is important that the boundary conditions are satisfied exactly, often the easiest
 method to achieve this is to use a [FunctionDirichletBC.md] using the exact solution, which is
@@ -143,10 +141,8 @@ There are many ways to accomplish this, including using the automated tools incl
 python package. The code in [mms_spatial_script] demonstrates the use of the `run_spatial` function
 to perform 4 levels of refinement for both first and second order finite elements.
 
-
 !listing mms/test/mms_spatial.py end=TESTING id=mms_spatial_script
-                        caption=Python script for performing and plotting a spatial convergence
-                                study.
+         caption=Python script for performing and plotting a spatial convergence study.
 
 To determine if the convergence is correct the results from the above input file may be analyzed
 by plotting the data on a log-log plot. The 'mms' package includes a `ConvergencePlot` object
@@ -199,7 +195,7 @@ file for the temporal problem is shown in [mms_temporal].
 []
 ```
 
-!listing mms_temporal.i id=mms_temporal
+!listing mms/test/mms_temporal.i id=mms_temporal
                        caption=Complete input file for the solving the diffusion equation for use
                                with the method of manufactured solutions for a temporal convergence
                                study.

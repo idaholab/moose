@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 # MooseDocs:start:spatial
 import mms
 df = mms.run_spatial('1d_analytical.i', 6, 'Mesh/nx=10', console=False)

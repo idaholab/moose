@@ -31,4 +31,52 @@
       detail = "a spatial and temporal convergence study."
     []
   []
+
+  [2d_mms]
+    requirement = "The system shall include an example problem for verification from an computed solution using the method of manufacture solutions (MMS):"
+
+    [input]
+      type = Exodiff
+      input = 2d_main.i
+      exodiff = 2d_main_out.e
+
+      detail = "based on a physically base system;"
+    []
+
+    [main_spatial]
+      type = Exodiff
+      input = '2d_main.i 2d_mms_spatial.i'
+      exodiff = 2d_mms_spatial_out.e
+
+      detail = "with input for a spatial convergence study;"
+    []
+
+    [main_temporal]
+      type = Exodiff
+      input = '2d_main.i 2d_mms_temporal.i'
+      exodiff = 2d_mms_temporal_out.e
+
+      detail = "with input for a temporal convergence study;"
+    []
+
+    [results]
+      type = CheckFiles
+      command = step04_results.py
+      check_files = 2d_main_054.png
+      prereq = 2d_mms/input
+      display_required = true
+
+      detail = "a graph comparing the simulated and exact results; and"
+    []
+
+    [study]
+      type = CheckFiles
+      command = step04_study.py
+      check_files = '2d_mms_spatial.png 2d_mms_temporal.png'
+      required_python_packages = sympy
+      heavy = true
+
+      detail = "a spatial and temporal convergence study."
+    []
+  []
 []

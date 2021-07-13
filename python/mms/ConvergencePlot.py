@@ -23,7 +23,7 @@ class ConvergencePlot(object):
 
     Key, value Options:
         xlabel[str]: The label for the x-axis
-      ylabel[str]: The label for the y-axis
+        ylabel[str]: The label for the y-axis
     """
     Line = collections.namedtuple('Line', 'x y label')
 
