@@ -14,7 +14,7 @@
     input = 'ad_central_difference_dotdot.i'
     csvdiff = 'ad_central_difference_dotdot_out.csv'
 
-    requirement = "The CentralDifference time integrator shall correctly compute the second"
-                  " time derivative of an AD variable."
+    requirement = "A central differencing time integrator shall correctly compute the second"
+                  " time derivative of an automatic differentiation variable."
   [../]
 []

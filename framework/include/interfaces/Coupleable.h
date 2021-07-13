@@ -777,7 +777,7 @@ protected:
    * Second time derivative of a coupled variable for ad simulations
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the second time derivative of the coupled
+   * @return Reference to an ADVariableValue containing the second time derivative of the coupled
    * variable
    */
   const ADVariableValue & adCoupledDotDot(const std::string & var_name,

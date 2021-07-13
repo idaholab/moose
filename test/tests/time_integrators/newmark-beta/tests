@@ -34,8 +34,8 @@
     input = 'ad_newmark_beta_dotdot.i'
     csvdiff = 'ad_newmark_beta_dotdot_out.csv'
 
-    requirement = "The NewmarkBeta time integrator shall correctly compute the second"
-                  " time derivative of an AD variable using the default beta"
+    requirement = "A Newmark-beta method time integrator shall correctly compute the second"
+                  " time derivative of an automatic differentiation variable using the default beta"
                   " and gamma parameters."
   [../]
 []

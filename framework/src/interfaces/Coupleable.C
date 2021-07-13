@@ -1777,7 +1777,7 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
 const ADVariableValue &
 Coupleable::adCoupledDotDot(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   if (!var)
     return *getADDefaultValue(var_name);
