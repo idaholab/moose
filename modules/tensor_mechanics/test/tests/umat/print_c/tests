@@ -1,0 +1,66 @@
+[Tests]
+  issues = '#18237'
+  design = 'AbaqusUMATStress.md'
+  [print_c]
+    type = 'RunApp'
+    input = 'print_c.i'
+    cli_args = "Materials/active='umat'"
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    expect_out = 'stran 0 = -0.0000143\nstran 1 = 0.0000476\nstran 2 = -0.0000143\nstran 3 = '
+                 '-0.0000000\nstran 4 = 0.0000000\nstran 5 = -0.0000000\ndstran 0 = '
+                 '-0.0000143\ndstran 1 = 0.0000476\ndstran 2 = -0.0000143\ndstran 3 = '
+                 '-0.0000000\ndstran 4 = 0.0000000\ndstran 5 = -0.0000000\nstress 0 = '
+                 '-0.0000000\nstress 1 = 10.0000000\nstress 2 = -0.0000000\nstress 3 = '
+                 '-0.0000000\nstress 4 = 0.0000000\nstress 5 = -0.0000000\ncoords 0 = '
+                 '0.2886751\ncoords 1 = 0.2886751\ncoords 2 = 0.2886751\ndfgrd0 0 = '
+                 '1.0000000\ndfgrd0 1 = 0.0000000\ndfgrd0 2 = 0.0000000\ndfgrd0 3 = '
+                 '0.0000000\ndfgrd0 4 = 1.0000000\ndfgrd0 5 = 0.0000000\ndfgrd0 6 = 0.0000000\n'
+                 'dfgrd0 7 = 0.0000000\ndfgrd0 8 = 1.0000000\ndfgrd1 0 = '
+                 '0.9999857\ndfgrd1 1 = 0.0000000\ndfgrd1 2 = 0.0000000\ndfgrd1 3 = '
+                 '-0.0000000\ndfgrd1 4 = 1.0000476\ndfgrd1 5 = -0.0000000\ndfgrd1 6 = '
+                 '-0.0000000\ndfgrd1 7 = 0.0000000\ndfgrd1 8 = 0.9999857\ndrot 0 = 1.0000000\ndrot 1 '
+                 '= 0.0000000\ndrot 2 = 0.0000000\ndrot 3 = -0.0000000\ndrot 4 = 1.0000000\ndrot 5 = '
+                 '-0.0000000\ndrot 6 = -0.0000000\ndrot 7 = 0.0000000\ndrot 8 = 1.0000000\ntime 0 = '
+                 '10.0000000\ntime 1 = 10.0000000\ncelent = 1.0000000\nndi = 3\nnshr = 3\nntens = '
+                 '6\nnoel = 0\nnpt = 7\nlayer = -1\nkspt = -1\nkstep = 1\nkinc = 1\ncmname = umat'
+    requirement = 'The Abaqus UMAT interface shall pass correct values into a C UMAT routine for '
+                  'STRAN, DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, '
+                  'DFGRD1, NOEL, NPT, and KINC, when a single element is subjected to axial loading. '
+                  'Values are checked against verified references '
+  []
+  [print_compare_c]
+    type = 'Exodiff'
+    input = 'print_compare_c.i'
+    cli_args = "Materials/active='umat_c' Outputs/file_base=print_compare_c_out"
+    exodiff = 'print_compare_c_out.e'
+    requirement = 'MOOSE shall generate identical numerical results regardless of whether the UMAT '
+                  'interface is written in Fortran or C. Generation of reference results.'
+  []
+  [print_compare_f]
+    type = 'Exodiff'
+    input = 'print_compare_c.i'
+    cli_args = "Materials/active='umat_f' Outputs/file_base=print_compare_f_out"
+    exodiff = 'print_compare_f_out.e'
+    requirement = 'MOOSE shall generate identical numerical results regardless of whether the UMAT '
+                  'interface is written in Fortran or C. Verification.'
+  []
+  [print_eigen]
+    type = 'RunApp'
+    input = 'print_compare_c.i'
+    cli_args = "Materials/active='umat_eigen'"
+    expect_out = 'Eigenvalues 0 769.231\nEigenvalues 1 2500\nEigenvalues 2 '
+                 '769.231\nEigenvalues 3 384.615\nEigenvalues 4 384.615\nEigenvalues '
+                 '5 384.615\n'
+    requirement = 'MOOSE shall allow for the correct use of Eigen matrices in C UMAT functions.'
+  []
+[]
+
+#'dfgrd0 7 = 0.0000000\ndfgrd0 8 = 1.0000000\ndfgrd1 0 = '
+#'0.9999857\ndfgrd1 1 = 0.0000000\ndfgrd1 2 = 0.0000000\ndfgrd1 3 = '
+#'-0.0000000\ndfgrd1 4 = 1.0000476\ndfgrd1 5 = -0.0000000\ndfgrd1 6 = '
+#'-0.0000000\ndfgrd1 7 = 0.0000000\ndfgrd1 8 = 0.9999857\ndrot 0 = 1.0000000\ndrot 1 '
+#'= 0.0000000\ndrot 2 = 0.0000000\ndrot 3 = -0.0000000\ndrot 4 = 1.0000000\ndrot 5 = '
+#'-0.0000000\ndrot 6 = -0.0000000\ndrot 7 = 0.0000000\ndrot 8 = 1.0000000\ntime 0 = '
+#'10.0000000\ntime 1 = 10.0000000\ncelent = 1.0000000\nndi = 3\nnshr = 3\nntens = '
+#'6\nnoel = 0\nnpt = 7\nlayer = -1\nkspt = -1\nkstep = 1\nkinc = 1\ncmname = umat
