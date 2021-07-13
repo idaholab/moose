@@ -125,13 +125,6 @@ class Translator(mixins.ConfigObject):
 
         self.__executioner.addPage(page, set_uid)
 
-    def removePage(self, page):
-        """
-        Remove a page from the current list of available pages. This can be safely called at any
-        point during the build.
-        """
-        self.__executioner.removePage(page)
-
     def getPages(self):
         """Return the Page objects"""
         return self.__executioner.getPages()
@@ -226,8 +219,14 @@ class Translator(mixins.ConfigObject):
                   "be called twice."
             raise exceptions.MooseDocsException(msg, type(self))
 
-        # Attach translator to Executioner
+        # Attach translator to Reader, Renderer, and Executioner
+        self.__reader.setTranslator(self)
+        self.__renderer.setTranslator(self)
         self.__executioner.setTranslator(self)
+
+        # Call the component init() methods
+        Translator.callFunction(self.__reader, 'init')
+        Translator.callFunction(self.__renderer, 'init')
 
         # Initialize the extension and call the extend method, then set the extension object
         # on each of the extensions.
@@ -256,10 +255,10 @@ class Translator(mixins.ConfigObject):
         self.__executioner.init(self.destination, nodes)
         self.__initialized = True
 
-    def execute(self, nodes=None, num_threads=1):
+    def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """Perform build for all pages, see executioners."""
         self.__assertInitialize()
-        self.__executioner(nodes, num_threads)
+        self.__executioner(nodes, num_threads, read, tokenize, render, write)
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""

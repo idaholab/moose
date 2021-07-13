@@ -35,10 +35,10 @@ class MediaExtension(command.CommandExtension):
         return config
 
     def initPage(self, page):
-        page[self.name] = dict(prefix=self.get('prefix'))
+        page[self.name] = dict()
 
     def preRead(self, page):
-        page['prefix'] = page[self.name]['prefix']
+        page['prefix'] = page[self.name].get('prefix', self.get('prefix'))
 
     def extend(self, reader, renderer):
         self.requires(command, floats)

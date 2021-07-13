@@ -37,10 +37,6 @@ class KatexExtension(command.CommandExtension):
         config['macros'] = (None, "Macro definitions to apply to equations.")
         return config
 
-    def __init__(self, *args, **kwargs):
-        super(KatexExtension, self).__init__(*args, **kwargs)
-        self.macros = None
-
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -94,7 +90,7 @@ class KatexExtension(command.CommandExtension):
 
             if self.get('macros', None):
                 mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
-                self.macros = '{' + mc + '}'
+                self.setAttribute('macros', '{' + mc + '}')
 
 class EquationCommand(command.CommandComponent):
     COMMAND = ('equation', 'eq')
@@ -233,8 +229,10 @@ class RenderEquation(components.RenderComponent):
         config = dict()
         config['displayMode'] = display
         config['throwOnError'] = 'false'
-        if self.extension.macros:
-            config['macros'] = self.extension.macros
+
+        macros = self.extension.getAttribute('macros', None)
+        if macros:
+            config['macros'] = macros
 
         config_str = ','.join('{}:{}'.format(key, value) for key, value in config.items())
 

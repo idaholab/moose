@@ -50,20 +50,21 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('stable', False)
         return types.SimpleNamespace(**kwargs)
 
+    # Note: mock.patch.object() decorators are applied from the bottom upwards
     @mock.patch.object(base.Translator, 'execute')
     @mock.patch.object(base.Translator, 'update')
     @mock.patch.object(base.Translator, 'init')
-    def testBuildDefault(self, execute_mock, update_mock, init_mock):
+    def testBuildDefault(self, init_mock, update_mock, execute_mock):
         opt = self.getCommandLineArguments()
         status = build.main(opt)
         update_mock.assert_called_once()
         init_mock.assert_called_once()
-        execute_mock.assert_called_once()
+        execute_mock.assert_called()
 
     @mock.patch.object(base.Translator, 'execute')
     @mock.patch.object(base.Translator, 'update')
     @mock.patch.object(base.Translator, 'init')
-    def testBuildConfigEdit(self, execute_mock, update_mock, init_mock):
+    def testBuildConfigEdit(self, init_mock, update_mock, execute_mock):
         load_func = MooseDocs.common.load_config
 
         # Un-modified
