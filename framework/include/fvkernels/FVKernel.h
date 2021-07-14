@@ -15,8 +15,10 @@
 #include "BlockRestrictable.h"
 #include "FunctionInterface.h"
 #include "SetupInterface.h"
+#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "Assembly.h"
+#include "Restartable.h"
 
 class SubProblem;
 
@@ -37,8 +39,10 @@ class FVKernel : public MooseObject,
                  public TransientInterface,
                  public BlockRestrictable,
                  public FunctionInterface,
+                 public UserObjectInterface,
                  public PostprocessorInterface,
-                 public SetupInterface
+                 public SetupInterface,
+                 public Restartable
 {
 public:
   static InputParameters validParams();

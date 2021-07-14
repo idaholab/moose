@@ -4,7 +4,7 @@
   u = vel_x
   v = vel_y
   w = vel_z
-  p = p
+  pressure = p
   integrate_p_by_parts = false
   laplace = false
   supg = true

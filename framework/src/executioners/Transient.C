@@ -98,6 +98,12 @@ Transient::validParams()
       "steady_state_start_time",
       0.0,
       "Minimum amount of time to run before checking for steady state conditions.");
+  params.addParam<bool>(
+      "normalize_solution_diff_norm_by_dt",
+      true,
+      "Whether to divide the solution difference norm by dt. If taking 'small' "
+      "time steps you probably want this to be true. If taking very 'large' timesteps in an "
+      "attempt to *reach* a steady-state, you probably want this parameter to be false.");
 
   params.addParam<std::vector<std::string>>("time_periods", "The names of periods");
   params.addParam<std::vector<Real>>("time_period_starts", "The start times of time periods");
@@ -166,7 +172,8 @@ Transient::Transient(const InputParameters & parameters)
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
-    _final_timer(registerTimedSection("final", 1))
+    _final_timer(registerTimedSection("final", 1)),
+    _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -451,7 +458,8 @@ Transient::takeStep(Real input_dt)
 
   _time_stepper->postSolve();
 
-  _solution_change_norm = relativeSolutionDifferenceNorm() / _dt;
+  _solution_change_norm =
+      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 
   return;
 }

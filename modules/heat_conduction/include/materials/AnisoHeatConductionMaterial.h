@@ -9,42 +9,49 @@
 
 #pragma once
 
+#include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-// Forward Declarations
 class Function;
 
 /**
- * Simple material with constant properties.
+ * Calculates thermal conductivity and specific heat of the material
  */
-class AnisoHeatConductionMaterial : public Material
+template <bool is_ad>
+class AnisoHeatConductionMaterialTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  AnisoHeatConductionMaterial(const InputParameters & parameters);
+  AnisoHeatConductionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
+  const unsigned int _dim;
+
+  const Real _ref_temp;
   const bool _has_temp;
-  const VariableValue & _temperature;
+  const GenericVariableValue<is_ad> & _T;
+  const unsigned int _T_var;
+  const VariableName _T_name;
 
-  const Real _my_thermal_conductivity_x;
-  const Real _my_thermal_conductivity_y;
-  const Real _my_thermal_conductivity_z;
-  const PostprocessorValue * const _thermal_conductivity_x_pp;
-  const PostprocessorValue * const _thermal_conductivity_y_pp;
-  const PostprocessorValue * const _thermal_conductivity_z_pp;
-  const Real _my_specific_heat;
+  const std::string _base_name;
 
-  MaterialProperty<Real> * const _thermal_conductivity_x;
-  MaterialProperty<Real> * const _thermal_conductivity_x_dT;
-  MaterialProperty<Real> * const _thermal_conductivity_y;
-  MaterialProperty<Real> * const _thermal_conductivity_y_dT;
-  MaterialProperty<Real> * const _thermal_conductivity_z;
-  MaterialProperty<Real> * const _thermal_conductivity_z_dT;
+  const RankTwoTensor _user_provided_thermal_conductivity;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _thermal_conductivity;
+  MaterialProperty<RankTwoTensor> & _dthermal_conductivity_dT;
+  const Function * const _thermal_conductivity_temperature_coefficient_function;
 
-  MaterialProperty<Real> & _specific_heat;
-  const Function * const _specific_heat_temperature_function;
+  GenericMaterialProperty<Real, is_ad> & _specific_heat;
+  MaterialProperty<Real> & _dspecific_heat_dT;
+  const Function * const _specific_heat_function;
+
+  void
+  setDerivatives(GenericRankTwoTensor<is_ad> & prop, RankTwoTensor dprop_dT, const ADReal & ad_T);
+  void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);
 };
+
+typedef AnisoHeatConductionMaterialTempl<false> AnisoHeatConductionMaterial;
+typedef AnisoHeatConductionMaterialTempl<true> ADAnisoHeatConductionMaterial;

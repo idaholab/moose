@@ -9,138 +9,149 @@
 
 #include "AnisoHeatConductionMaterial.h"
 #include "Function.h"
+#include "ConstantFunction.h"
 #include "MooseMesh.h"
+#include "RankTwoTensorImplementation.h"
 
 #include "libmesh/quadrature.h"
 
 registerMooseObject("HeatConductionApp", AnisoHeatConductionMaterial);
+registerMooseObject("HeatConductionApp", ADAnisoHeatConductionMaterial);
 
+template <bool is_ad>
 InputParameters
-AnisoHeatConductionMaterial::validParams()
+AnisoHeatConductionMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addCoupledVar("temp", "Coupled Temperature");
-
-  params.addParam<Real>("thermal_conductivity_x", "The thermal conductivity in the x direction");
-  params.addParam<Real>("thermal_conductivity_y", "The thermal conductivity in the y direction");
-  params.addParam<Real>("thermal_conductivity_z", "The thermal conductivity in the z direction");
-  params.addParam<PostprocessorName>("thermal_conductivity_x_pp",
-                                     "The thermal conductivity PP name in the x direction");
-  params.addParam<PostprocessorName>("thermal_conductivity_y_pp",
-                                     "The thermal conductivity PP name in the y direction");
-  params.addParam<PostprocessorName>("thermal_conductivity_z_pp",
-                                     "The thermal conductivity PP name in the z direction");
-
-  params.addParam<Real>("specific_heat", "The specific heat value");
+  params.addCoupledVar("temperature", "Coupled variable for temperature.");
+  params.addParam<Real>(
+      "reference_temperature", 293.0, "Reference temperature for thermal conductivity in Kelvin.");
+  params.addParam<std::string>("base_name", "Material property base name.");
+  params.addRequiredParam<std::vector<Real>>("thermal_conductivity",
+                                             "The thermal conductivity tensor values");
   params.addParam<FunctionName>(
-      "specific_heat_temperature_function", "", "Specific heat as a function of temperature.");
-
+      "thermal_conductivity_temperature_coefficient_function",
+      "",
+      "Temperature coefficient for thermal conductivity as a function of temperature.");
+  params.addRequiredParam<FunctionName>("specific_heat",
+                                        "Specific heat as a function of temperature.");
+  params.addClassDescription("General-purpose material model for anisotropic heat conduction");
   return params;
 }
 
-AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const InputParameters & parameters)
-  : Material(parameters),
+template <bool is_ad>
+AnisoHeatConductionMaterialTempl<is_ad>::AnisoHeatConductionMaterialTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _dim(_subproblem.mesh().dimension()),
+    _ref_temp(getParam<Real>("reference_temperature")),
 
-    _has_temp(isCoupled("temp")),
-    _temperature(_has_temp ? coupledValue("temp") : _zero),
+    _has_temp(isCoupled("temperature")),
+    _T(coupledGenericValue<is_ad>("temperature")),
+    _T_var(coupled("temperature")),
+    _T_name(getVar("temperature", 0)->name()),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
 
-    _my_thermal_conductivity_x(
-        isParamValid("thermal_conductivity_x") ? getParam<Real>("thermal_conductivity_x") : -1),
-    _my_thermal_conductivity_y(
-        isParamValid("thermal_conductivity_y") ? getParam<Real>("thermal_conductivity_y") : -1),
-    _my_thermal_conductivity_z(
-        isParamValid("thermal_conductivity_z") ? getParam<Real>("thermal_conductivity_z") : -1),
+    _user_provided_thermal_conductivity(getParam<std::vector<Real>>("thermal_conductivity")),
+    _thermal_conductivity(
+        declareGenericProperty<RankTwoTensor, is_ad>(_base_name + "thermal_conductivity")),
+    _dthermal_conductivity_dT(
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "thermal_conductivity", _T_name)),
+    _thermal_conductivity_temperature_coefficient_function(
+        getParam<FunctionName>("thermal_conductivity_temperature_coefficient_function") != ""
+            ? &getFunction("thermal_conductivity_temperature_coefficient_function")
+            : nullptr),
 
-    _thermal_conductivity_x_pp(isParamValid("thermal_conductivity_x_pp")
-                                   ? &getPostprocessorValue("thermal_conductivity_x_pp")
-                                   : NULL),
-    _thermal_conductivity_y_pp(isParamValid("thermal_conductivity_y_pp")
-                                   ? &getPostprocessorValue("thermal_conductivity_y_pp")
-                                   : NULL),
-    _thermal_conductivity_z_pp(isParamValid("thermal_conductivity_z_pp")
-                                   ? &getPostprocessorValue("thermal_conductivity_z_pp")
-                                   : NULL),
-
-    _my_specific_heat(isParamValid("specific_heat") ? getParam<Real>("specific_heat") : 0),
-
-    _thermal_conductivity_x(&declareProperty<Real>("thermal_conductivity_x")),
-    _thermal_conductivity_x_dT(&declareProperty<Real>("thermal_conductivity_x_dT")),
-    _thermal_conductivity_y(isParamValid("thermal_conductivity_y") ||
-                                    isParamValid("thermal_conductivity_y_pp")
-                                ? &declareProperty<Real>("thermal_conductivity_y")
-                                : NULL),
-    _thermal_conductivity_y_dT(
-        _thermal_conductivity_y ? &declareProperty<Real>("thermal_conductivity_y_dT") : NULL),
-    _thermal_conductivity_z(isParamValid("thermal_conductivity_z") ||
-                                    isParamValid("thermal_conductivity_z_pp")
-                                ? &declareProperty<Real>("thermal_conductivity_z")
-                                : NULL),
-    _thermal_conductivity_z_dT(
-        _thermal_conductivity_z ? &declareProperty<Real>("thermal_conductivity_z_dT") : NULL),
-
-    _specific_heat(declareProperty<Real>("specific_heat")),
-    _specific_heat_temperature_function(
-        getParam<FunctionName>("specific_heat_temperature_function") != ""
-            ? &getFunction("specific_heat_temperature_function")
-            : NULL)
+    _specific_heat(declareGenericProperty<Real, is_ad>(_base_name + "specific_heat")),
+    _dspecific_heat_dT(declarePropertyDerivative<Real>(_base_name + "specific_heat", _T_name)),
+    _specific_heat_function(&getFunction("specific_heat"))
 {
-  bool k_x = isParamValid("thermal_conductivity_x") || (NULL != _thermal_conductivity_x_pp);
-  bool k_y = isParamValid("thermal_conductivity_y") || (NULL != _thermal_conductivity_y_pp);
-  bool k_z = isParamValid("thermal_conductivity_z") || (NULL != _thermal_conductivity_z_pp);
-
-  if (!k_x || (_subproblem.mesh().dimension() > 1 && !k_y) ||
-      (_subproblem.mesh().dimension() > 2 && !k_z))
-  {
-    mooseError("Incomplete set of orthotropic thermal conductivity parameters");
-  }
-  if (_specific_heat_temperature_function && !_has_temp)
-  {
-    mooseError("Must couple with temperature if using specific heat function");
-  }
-  if (isParamValid("specific_heat") && _specific_heat_temperature_function)
-  {
-    mooseError("Cannot define both specific heat and specific heat temperature function");
-  }
-
-  k_x = isParamValid("thermal_conductivity_x") && (NULL != _thermal_conductivity_x_pp);
-  k_y = isParamValid("thermal_conductivity_y") && (NULL != _thermal_conductivity_y_pp);
-  k_z = isParamValid("thermal_conductivity_z") && (NULL != _thermal_conductivity_z_pp);
-  if (k_x || k_y || k_z)
-  {
-    mooseError("Cannot define thermal conductivity value and Postprocessor");
-  }
 }
 
+template <bool is_ad>
 void
-AnisoHeatConductionMaterial::computeProperties()
+AnisoHeatConductionMaterialTempl<is_ad>::initQpStatefulProperties()
 {
-  for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
-  {
-    (*_thermal_conductivity_x)[qp] =
-        _thermal_conductivity_x_pp ? *_thermal_conductivity_x_pp : _my_thermal_conductivity_x;
-    (*_thermal_conductivity_x_dT)[qp] = 0;
-    if (_thermal_conductivity_y)
-    {
-      (*_thermal_conductivity_y)[qp] =
-          _thermal_conductivity_y_pp ? *_thermal_conductivity_y_pp : _my_thermal_conductivity_y;
-      (*_thermal_conductivity_y_dT)[qp] = 0;
-    }
-    if (_thermal_conductivity_z)
-    {
-      (*_thermal_conductivity_z)[qp] =
-          _thermal_conductivity_z_pp ? *_thermal_conductivity_z_pp : _my_thermal_conductivity_z;
-      (*_thermal_conductivity_z_dT)[qp] = 0;
-    }
+  _thermal_conductivity[_qp] = _user_provided_thermal_conductivity;
+  DerivativeMaterialInterface::initQpStatefulProperties();
+}
 
-    if (_specific_heat_temperature_function)
+template <bool is_ad>
+void
+AnisoHeatConductionMaterialTempl<is_ad>::setDerivatives(GenericRankTwoTensor<is_ad> & prop,
+                                                        RankTwoTensor dprop_dT,
+                                                        const ADReal & T)
+{
+  for (unsigned int i = 0; i < _dim; ++i)
+    for (unsigned int j = 0; j < _dim; ++j)
     {
-      Point p;
-      _specific_heat[qp] = _specific_heat_temperature_function->value(_temperature[qp], p);
+      if (T < 0)
+        prop(i, j).derivatives() = 0.0;
+      else
+        prop(i, j).derivatives() = dprop_dT(i, j) * T.derivatives();
     }
-    else
-    {
-      _specific_heat[qp] = _my_specific_heat;
-    }
+}
+
+template <>
+void
+AnisoHeatConductionMaterialTempl<false>::setDerivatives(GenericRankTwoTensor<false> &,
+                                                        RankTwoTensor,
+                                                        const ADReal &)
+{
+  mooseError("Mistaken call of setDerivatives in a non-AD AnisoHeatConductionMaterial");
+}
+
+template <bool is_ad>
+void
+AnisoHeatConductionMaterialTempl<is_ad>::setDerivatives(GenericReal<is_ad> & prop,
+                                                        Real dprop_dT,
+                                                        const ADReal & T)
+{
+  if (T < 0)
+    prop.derivatives() = 0;
+  else
+    prop.derivatives() = dprop_dT * T.derivatives();
+}
+
+template <>
+void
+AnisoHeatConductionMaterialTempl<false>::setDerivatives(Real &, Real, const ADReal &)
+{
+  mooseError("Mistaken call of setDerivatives in a non-AD AnisoHeatConductionMaterial version");
+}
+
+template <bool is_ad>
+void
+AnisoHeatConductionMaterialTempl<is_ad>::computeQpProperties()
+{
+  Real temp_qp = MetaPhysicL::raw_value(_T[_qp]);
+
+  if (_thermal_conductivity_temperature_coefficient_function)
+  {
+    const auto & p = _q_point[_qp];
+    _thermal_conductivity[_qp] =
+        _user_provided_thermal_conductivity *
+        (1 + _thermal_conductivity_temperature_coefficient_function->value(temp_qp, p) *
+                 (temp_qp - _ref_temp));
+    _dthermal_conductivity_dT[_qp] =
+        _user_provided_thermal_conductivity *
+        _thermal_conductivity_temperature_coefficient_function->timeDerivative(temp_qp, p) *
+        (temp_qp - _ref_temp);
+    if (is_ad)
+      setDerivatives(_thermal_conductivity[_qp], _dthermal_conductivity_dT[_qp], _T[_qp]);
+  }
+  else
+    _thermal_conductivity[_qp] = _user_provided_thermal_conductivity;
+
+  const auto & p = _q_point[_qp];
+  _specific_heat[_qp] = _specific_heat_function->value(temp_qp, p);
+  if (is_ad && (dynamic_cast<const ConstantFunction *>(_specific_heat_function) == nullptr))
+  {
+    _dspecific_heat_dT[_qp] = _specific_heat_function->timeDerivative(temp_qp, p);
+    setDerivatives(_specific_heat[_qp], _dspecific_heat_dT[_qp], _T[_qp]);
   }
 }
+
+template class AnisoHeatConductionMaterialTempl<false>;
+template class AnisoHeatConductionMaterialTempl<true>;

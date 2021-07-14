@@ -21,6 +21,7 @@
 #include "INSFVSymmetryBC.h"
 #include "INSFVAttributes.h"
 #include "MooseUtils.h"
+#include "NS.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -39,7 +40,7 @@ InputParameters
 INSFVMomentumAdvection::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
-  params.addRequiredCoupledVar("pressure", "The pressure variable.");
+  params.addRequiredCoupledVar(NS::pressure, "The pressure variable.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -68,7 +69,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("pressure", 0))),
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar(NS::pressure, 0))),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
@@ -86,7 +87,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
 #endif
 
   if (!_p_var)
-    paramError("pressure", "the pressure must be a INSFVPressureVariable.");
+    paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
 
   if (!_u_var)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");

@@ -1,4 +1,3 @@
-#
 # This problem is taken from the Abaqus verification manual:
 #   "1.5.8 Patch test for heat transfer elements"
 #
@@ -64,7 +63,7 @@
 [] # Mesh
 
 [Functions]
-  [./temps]
+  [./temp_function]
     type = ParsedFunction
     value='200*x+100*y+200*z'
   [../]
@@ -90,11 +89,11 @@
 
 [BCs]
 
-  [./temps]
+  [./temperatures]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
-    function = temps
+    function = temp_function
   [../]
 
 [] # BCs
@@ -104,11 +103,9 @@
   [./heat]
     type = AnisoHeatConductionMaterial
     block = 1
-
     specific_heat = 0.116
-    thermal_conductivity_x = 4.85e-4
-    thermal_conductivity_y = 4.85e-4
-    thermal_conductivity_z = 4.85e-4
+    thermal_conductivity = '4.85e-4 0 0 0 4.85e-4 0 0 0 4.85e-4'
+    temperature = temp
   [../]
 
 [] # Materials

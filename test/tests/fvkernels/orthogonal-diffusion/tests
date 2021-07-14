@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FVOrthogonalDiffusion.md FVOrthogonalBoundaryDiffusion.md'
+  issues = '#16758'
+  [orthogonal-diffusion]
+    type = Exodiff
+    input = orthogonal-diffusion.i
+    exodiff = orthogonal-diffusion_out.e
+    requirement = 'The system shall be able to solve diffusion on an orthogonal grid using a diffusion kernel which accounts only for orthogonal diffusion.'
+  []
+[]

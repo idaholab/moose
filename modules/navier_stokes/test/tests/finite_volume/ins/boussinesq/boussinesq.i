@@ -139,7 +139,7 @@ temp_ref=${fparse hot_temp / 2.}
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_buoyancy]
     type = INSFVMomentumBoussinesq
@@ -180,7 +180,7 @@ temp_ref=${fparse hot_temp / 2.}
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    p = pressure
+    pressure = pressure
   []
   [v_buoyancy]
     type = INSFVMomentumBoussinesq

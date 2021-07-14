@@ -75,7 +75,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_friction_linear]
     type = NSFVMomentumFriction
@@ -110,7 +110,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    p = pressure
+    pressure = pressure
   []
   [v_friction_linear]
     type = NSFVMomentumFriction

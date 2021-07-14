@@ -25,7 +25,7 @@ public:
 protected:
   virtual Real coefficient() const override;
 
-  /// emissivity of the cylinder irht with the boundary
+  /// emissivity of the cylinder in radiative heat transfer with the boundary
   const Real _eps_cylinder;
 
   /// radius of the boundary

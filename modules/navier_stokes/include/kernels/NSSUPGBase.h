@@ -60,11 +60,11 @@ protected:
   const VariableValue & _d_rhoudot_du;
   const VariableValue & _d_rhovdot_du;
   const VariableValue & _d_rhowdot_du;
-  const VariableValue & _d_rhoEdot_du;
+  const VariableValue & _d_rho_etdot_du;
 
   // Temperature is need to compute speed of sound
   const VariableValue & _temperature;
 
   // Enthalpy aux variable
-  const VariableValue & _enthalpy;
+  const VariableValue & _specific_total_enthalpy;
 };

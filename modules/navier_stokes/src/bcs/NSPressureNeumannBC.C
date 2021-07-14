@@ -20,7 +20,7 @@ NSPressureNeumannBC::validParams()
 
   params.addClassDescription("This kernel is appropriate for use with a 'zero normal flow' "
                              "boundary condition in the context of the Euler equations.");
-  params.addRequiredCoupledVar("pressure", "The current value of the pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The current value of the pressure");
   params.addRequiredParam<unsigned>(
       "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
 
@@ -29,7 +29,7 @@ NSPressureNeumannBC::validParams()
 
 NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters)
   : NSIntegratedBC(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _component(getParam<unsigned>("component")),
     _pressure_derivs(*this)
 {

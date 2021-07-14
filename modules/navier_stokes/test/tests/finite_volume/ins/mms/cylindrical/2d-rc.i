@@ -48,7 +48,6 @@ rho=1.1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -73,7 +72,6 @@ rho=1.1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -84,7 +82,7 @@ rho=1.1
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -104,7 +102,6 @@ rho=1.1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -115,7 +112,7 @@ rho=1.1
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    p = pressure
+    pressure = pressure
   []
   [v_forcing]
     type = FVBodyForce

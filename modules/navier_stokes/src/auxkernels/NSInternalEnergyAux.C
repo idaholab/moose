@@ -26,7 +26,7 @@ NSInternalEnergyAux::validParams()
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // Only required in 3D...
-  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(NS::total_energy_density, "total energy");
 
   return params;
 }
@@ -37,7 +37,7 @@ NSInternalEnergyAux::NSInternalEnergyAux(const InputParameters & parameters)
     _u_vel(coupledValue(NS::velocity_x)),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
-    _rhoE(coupledValue(NS::total_energy))
+    _rho_et(coupledValue(NS::total_energy_density))
 {
 }
 
@@ -46,5 +46,5 @@ NSInternalEnergyAux::computeValue()
 {
   const RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  return _rhoE[_qp] / _rho[_qp] - 0.5 * vel.norm_sq();
+  return _rho_et[_qp] / _rho[_qp] - 0.5 * vel.norm_sq();
 }

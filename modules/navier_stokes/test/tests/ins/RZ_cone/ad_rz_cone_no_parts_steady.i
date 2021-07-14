@@ -60,7 +60,7 @@
   [./momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
   [../]
 []
 

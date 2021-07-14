@@ -80,7 +80,7 @@ velocity_interp_method='average'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -110,7 +110,7 @@ velocity_interp_method='average'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    p = pressure
+    pressure = pressure
   []
   [v_forcing]
     type = FVBodyForce

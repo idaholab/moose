@@ -118,7 +118,7 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // also ensure that the block [./declarator] is the expected block_decl from above
   addLine("decl{");
   _level++;
-  addLine("MinOccurs=1");
+  addLine("MinOccurs=0");
   addLine("MaxOccurs=1");
   addLine("ValType=String");
   if (!is_starblock)
@@ -290,7 +290,7 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
     std::string basic_type = param["basic_type"];
     bool is_array = false;
     if (cpp_type == "FunctionExpression" || cpp_type == "FunctionName" ||
-        basic_type.compare(0, 6, "Array:") == 0)
+        basic_type.compare(0, 6, "Array:") == 0 || cpp_type.compare(0, 13, "Eigen::Matrix") == 0)
       is_array = true;
     pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &cpp_type);
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
@@ -310,7 +310,7 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
       bool required = param["required"];
       if (required && def.empty())
         addLine("ChildAtLeastOne=[ \"" + backtrack(_level) + "GlobalParams/" + name +
-                "/value\"   \"" + name + "/value\"" + " ]");
+                "/value\"   \"" + name + "\" ]");
     }
 
     // *** open parameter

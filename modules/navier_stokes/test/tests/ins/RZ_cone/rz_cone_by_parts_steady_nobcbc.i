@@ -91,7 +91,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     variable = vel_x
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 0
   [../]
   [./v_out]
@@ -100,7 +100,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     variable = vel_y
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 1
   [../]
   # When the NoBCBC is applied on the outlet boundary then there is nothing
@@ -122,14 +122,14 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     variable = p
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
   [../]
   [./x_momentum_space]
     type = INSMomentumLaplaceFormRZ
     variable = vel_x
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 0
   [../]
   [./y_momentum_space]
@@ -137,7 +137,7 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
     variable = vel_y
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 1
   [../]
 []

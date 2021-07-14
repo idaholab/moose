@@ -9,6 +9,7 @@
 
 #include "INSMomentumNoBCBCBase.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 InputParameters
 INSMomentumNoBCBCBase::validParams()
@@ -20,7 +21,8 @@ INSMomentumNoBCBCBase::validParams()
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", "z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   // Required parameters
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
@@ -45,7 +47,7 @@ INSMomentumNoBCBCBase::INSMomentumNoBCBCBase(const InputParameters & parameters)
     _u_vel(coupledValue("u")),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-    _p(coupledValue("p")),
+    _p(coupledValue(NS::pressure)),
 
     // Gradients
     _grad_u_vel(coupledGradient("u")),
@@ -56,7 +58,7 @@ INSMomentumNoBCBCBase::INSMomentumNoBCBCBase(const InputParameters & parameters)
     _u_vel_var_number(coupled("u")),
     _v_vel_var_number(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
     _w_vel_var_number(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
-    _p_var_number(coupled("p")),
+    _p_var_number(coupled(NS::pressure)),
 
     // Required parameters
     _gravity(getParam<RealVectorValue>("gravity")),

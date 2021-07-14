@@ -61,7 +61,7 @@ protected:
   // Helper functions that add AuxKernels
   void addPressureOrTemperatureAux(const std::string & kernel_type);
   void addNSVelocityAux(unsigned int component);
-  void addEnthalpyAux();
+  void addSpecificTotalEnthalpyAux();
   void addNSMachAux();
   void addNSInternalEnergyAux();
   void addSpecificVolumeComputation();
@@ -111,6 +111,8 @@ protected:
   unsigned int _dim;
   /// Subdomain IDs
   std::set<SubdomainID> _block_ids;
+  /// pressure variable name
+  const std::string _pressure_variable_name;
 
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;

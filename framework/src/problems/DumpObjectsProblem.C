@@ -188,7 +188,7 @@ DumpObjectsProblem::stringifyParameters(const InputParameters & parameters)
         }
 
         // delete trailing space
-        if (param_value.back() == ' ')
+        if (!param_value.empty() && param_value.back() == ' ')
           param_value.pop_back();
 
         // add quotes if the parameter contains spaces or is empty

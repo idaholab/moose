@@ -27,6 +27,7 @@ public:
   virtual ~IdealGasFluidProperties();
 
   virtual Real p_from_v_e(Real v, Real e) const override;
+  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
   virtual void p_from_v_e(const DualReal & v,
                           const DualReal & e,
@@ -34,6 +35,7 @@ public:
                           DualReal & dp_dv,
                           DualReal & dp_de) const override;
   virtual Real T_from_v_e(Real v, Real e) const override;
+  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
   virtual void T_from_v_e(const DualReal & v,
                           const DualReal & e,
@@ -41,6 +43,7 @@ public:
                           DualReal & dT_dv,
                           DualReal & dT_de) const override;
   virtual Real c_from_v_e(Real v, Real e) const override;
+  virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp_from_v_e(Real v, Real e) const override;
   virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
@@ -62,6 +65,7 @@ public:
   virtual Real e_from_v_h(Real v, Real h) const override;
   virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
   virtual Real rho_from_p_T(Real p, Real T) const override;
+  virtual ADReal rho_from_p_T(const ADReal & p, const ADReal & T) const override;
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
   virtual void rho_from_p_T(const DualReal & p,
@@ -70,10 +74,22 @@ public:
                             DualReal & drho_dp,
                             DualReal & drho_dT) const override;
   virtual Real e_from_p_rho(Real p, Real rho) const override;
+  virtual ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
   virtual void
   e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+  virtual void e_from_p_rho(const ADReal & p,
+                            const ADReal & rho,
+                            ADReal & e,
+                            ADReal & de_dp,
+                            ADReal & de_drho) const override;
   virtual Real e_from_T_v(Real T, Real v) const override;
   virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  virtual ADReal e_from_T_v(const ADReal & T, const ADReal & v) const override;
+  virtual void e_from_T_v(const ADReal & T,
+                          const ADReal & v,
+                          ADReal & e,
+                          ADReal & de_dT,
+                          ADReal & de_dv) const override;
   virtual Real p_from_T_v(Real T, Real v) const override;
   virtual void p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const override;
   virtual Real h_from_T_v(Real T, Real v) const override;
@@ -109,6 +125,8 @@ public:
   virtual Real gamma_from_v_e(Real v, Real e) const override;
   virtual Real gamma_from_p_T(Real p, Real T) const override;
   virtual Real c_from_p_T(Real p, Real T) const override;
+  virtual ADReal c_from_p_T(const ADReal & p, const ADReal & T) const override;
+  virtual void c_from_p_T(Real /*p*/, Real T, Real & c, Real & dc_dp, Real & dc_dT) const override;
 
   virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 

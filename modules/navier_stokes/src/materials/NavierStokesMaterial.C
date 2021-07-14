@@ -20,37 +20,39 @@
 
 #include "libmesh/quadrature.h"
 
+namespace nms = NS;
+
 InputParameters
 NavierStokesMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addClassDescription("This is the base class all materials should use if you are trying to "
-                             "use the Navier-Stokes Kernels.");
-  params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
-  params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in >= 2D
-  params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D
+  params.addClassDescription(
+      "This is the base class of all materials should use if you are trying to "
+      "use the Navier-Stokes Kernels.");
+  params.addRequiredCoupledVar(nms::velocity_x, "x-velocity");
+  params.addCoupledVar(nms::velocity_y, "y-velocity"); // only required in >= 2D
+  params.addCoupledVar(nms::velocity_z, "z-velocity"); // only required in 3D
 
-  params.addRequiredCoupledVar(NS::temperature, "temperature");
-  params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
+  params.addRequiredCoupledVar(nms::temperature, "temperature");
+  params.addRequiredCoupledVar(nms::specific_total_enthalpy, "specific total enthalpy");
 
-  params.addRequiredCoupledVar(NS::density, "density");
-  params.addRequiredCoupledVar(NS::momentum_x, "x-momentum");
-  params.addCoupledVar(NS::momentum_y, "y-momentum"); // only required in >= 2D
-  params.addCoupledVar(NS::momentum_z, "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar(NS::total_energy, "energy");
+  params.addRequiredCoupledVar(nms::density, "density");
+  params.addRequiredCoupledVar(nms::momentum_x, "x-momentum");
+  params.addCoupledVar(nms::momentum_y, "y-momentum"); // only required in >= 2D
+  params.addCoupledVar(nms::momentum_z, "z-momentum"); // only required in 3D
+  params.addRequiredCoupledVar(nms::total_energy_density, "energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
-
   return params;
 }
 
 NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters)
   : Material(parameters),
     _mesh_dimension(_mesh.dimension()),
-    _grad_u(coupledGradient(NS::velocity_x)),
-    _grad_v(_mesh_dimension >= 2 ? coupledGradient(NS::velocity_y) : _grad_zero),
-    _grad_w(_mesh_dimension == 3 ? coupledGradient(NS::velocity_z) : _grad_zero),
+    _grad_u(coupledGradient(nms::velocity_x)),
+    _grad_v(_mesh_dimension >= 2 ? coupledGradient(nms::velocity_y) : _grad_zero),
+    _grad_w(_mesh_dimension == 3 ? coupledGradient(nms::velocity_z) : _grad_zero),
 
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
@@ -70,33 +72,33 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters)
     _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
 
     // Coupled solution values needed for computing SUPG stabilization terms
-    _u_vel(coupledValue(NS::velocity_x)),
-    _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
-    _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
+    _u_vel(coupledValue(nms::velocity_x)),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue(nms::velocity_y) : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue(nms::velocity_z) : _zero),
 
-    _temperature(coupledValue(NS::temperature)),
-    _enthalpy(coupledValue(NS::enthalpy)),
+    _temperature(coupledValue(nms::temperature)),
+    _specific_total_enthalpy(coupledValue(nms::specific_total_enthalpy)),
 
     // Coupled solution values
-    _rho(coupledValue(NS::density)),
-    _rho_u(coupledValue(NS::momentum_x)),
-    _rho_v(_mesh.dimension() >= 2 ? coupledValue(NS::momentum_y) : _zero),
-    _rho_w(_mesh.dimension() == 3 ? coupledValue(NS::momentum_z) : _zero),
-    _rho_E(coupledValue(NS::total_energy)),
+    _rho(coupledValue(nms::density)),
+    _rho_u(coupledValue(nms::momentum_x)),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue(nms::momentum_y) : _zero),
+    _rho_w(_mesh.dimension() == 3 ? coupledValue(nms::momentum_z) : _zero),
+    _rho_et(coupledValue(nms::total_energy_density)),
 
     // Time derivative values
-    _drho_dt(coupledDot(NS::density)),
-    _drhou_dt(coupledDot(NS::momentum_x)),
-    _drhov_dt(_mesh.dimension() >= 2 ? coupledDot(NS::momentum_y) : _zero),
-    _drhow_dt(_mesh.dimension() == 3 ? coupledDot(NS::momentum_z) : _zero),
-    _drhoE_dt(coupledDot(NS::total_energy)),
+    _drho_dt(coupledDot(nms::density)),
+    _drhou_dt(coupledDot(nms::momentum_x)),
+    _drhov_dt(_mesh.dimension() >= 2 ? coupledDot(nms::momentum_y) : _zero),
+    _drhow_dt(_mesh.dimension() == 3 ? coupledDot(nms::momentum_z) : _zero),
+    _drhoE_dt(coupledDot(nms::total_energy_density)),
 
     // Gradients
-    _grad_rho(coupledGradient(NS::density)),
-    _grad_rho_u(coupledGradient(NS::momentum_x)),
-    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(NS::momentum_y) : _grad_zero),
-    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(NS::momentum_z) : _grad_zero),
-    _grad_rho_E(coupledGradient(NS::total_energy)),
+    _grad_rho(coupledGradient(nms::density)),
+    _grad_rho_u(coupledGradient(nms::momentum_x)),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(nms::momentum_y) : _grad_zero),
+    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(nms::momentum_z) : _grad_zero),
+    _grad_rho_et(coupledGradient(nms::total_energy_density)),
 
     // Material properties for stabilization
     _hsupg(declareProperty<Real>("hsupg")),
@@ -449,7 +451,7 @@ NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // E_{k0} (density gradient term)
     _calE[qp][k][0].zero();
-    _calE[qp][k][0] = (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * Ck_T;
+    _calE[qp][k][0] = (0.5 * (_fp.gamma() - 1.0) * velmag2 - _specific_total_enthalpy[qp]) * Ck_T;
 
     for (unsigned int m = 1; m <= 3; ++m)
     {
@@ -458,7 +460,7 @@ NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
-      _calE[qp][k][m](k, m_local) = _enthalpy[qp];                 // H * D_{km}
+      _calE[qp][k][m](k, m_local) = _specific_total_enthalpy[qp];  // H * D_{km}
       _calE[qp][k][m] += (1. - _fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 
@@ -472,17 +474,17 @@ NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   // (which is a MooseArray of RealGradients) objects?
   RealVectorValue mom_resid = _calA[qp][0] * _grad_rho[qp] + _calA[qp][1] * _grad_rho_u[qp] +
                               _calA[qp][2] * _grad_rho_v[qp] + _calA[qp][3] * _grad_rho_w[qp] +
-                              _calA[qp][4] * _grad_rho_E[qp];
+                              _calA[qp][4] * _grad_rho_et[qp];
 
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
   Real energy_resid =
-      (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * (vel * _grad_rho[qp]) +
-      _enthalpy[qp] * divU +
+      (0.5 * (_fp.gamma() - 1.0) * velmag2 - _specific_total_enthalpy[qp]) * (vel * _grad_rho[qp]) +
+      _specific_total_enthalpy[qp] * divU +
       (1. - _fp.gamma()) * (vel(0) * (vel * _grad_rho_u[qp]) + vel(1) * (vel * _grad_rho_v[qp]) +
                             vel(2) * (vel * _grad_rho_w[qp])) +
-      _fp.gamma() * (vel * _grad_rho_E[qp]);
+      _fp.gamma() * (vel * _grad_rho_et[qp]);
 
   // Now for the actual residual values...
 

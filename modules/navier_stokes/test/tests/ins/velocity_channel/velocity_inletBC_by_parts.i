@@ -39,14 +39,14 @@
     variable = p
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
   [../]
   [./x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 0
   [../]
   [./y_momentum_space]
@@ -54,7 +54,7 @@
     variable = vel_y
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 1
   [../]
 []

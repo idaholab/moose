@@ -28,4 +28,13 @@
     design = 'FancyExtruderGenerator.md'
     issues = '#16902'
   []
+  [extruder_with_element_extra_integer_swap]
+    type = 'Exodiff'
+    input = fancy_extruder_with_element_extra_integer_swap.i
+    exodiff = 'fancy_extruder_with_element_extra_integer_swap_out.e'
+
+    requirement = 'The system shall be able to retain and swap element extra integers during extrusion.'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#18087'
+  []
 []

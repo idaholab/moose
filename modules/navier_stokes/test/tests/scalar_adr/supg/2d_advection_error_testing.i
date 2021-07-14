@@ -4,7 +4,7 @@ ay=1
 [GlobalParams]
   u = ${ax}
   v = ${ay}
-  p = 0
+  pressure = 0
   tau_type = mod
   transient_term = true
 []

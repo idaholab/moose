@@ -88,7 +88,7 @@
   [./momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
   [../]
   [momentum_supg]
     type = INSADMomentumSUPG
@@ -122,7 +122,7 @@
   [outlet]
     type = INSADMomentumNoBCBC
     variable = velocity
-    p = p
+    pressure = p
     boundary = 'top'
   []
   # When the NoBCBC is applied on the outlet boundary then there is nothing

@@ -120,3 +120,13 @@ After `postResidual()` the `NodalBC` BCs are applied with the time at the final 
 When the mesh changes the linear solver needs to be destroyed and recreated.
 This is done by simply building a new one and setting it up again.  This happens
 automatically just by "overwriting" the `std::unique_ptr` to the LinearSolver.
+
+### Relevant Executioner solver options
+
+You can ignore this section if using `solve_type = lumped`. No [Executioner.md]
+parameters are relevant to you in that case. However, for `consistent` or
+`lump_preconditioned` solve types, the `l_tol` and `l_max_its` parameters are
+used in the solution process. Nonlinear executioner options are not
+relevant. When using PETSc as the default solver package, `pc` and `ksp` options
+from the `petsc_options*` parameters will be used while `snes` options will be
+ignored.

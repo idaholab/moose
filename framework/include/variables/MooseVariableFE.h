@@ -262,7 +262,7 @@ public:
   // damping
   const FieldVariableValue & increment() const { return _element_data->increment(); }
 
-  const FieldVariableValue & vectorTagValue(TagID tag) const
+  const FieldVariableValue & vectorTagValue(TagID tag) const override
   {
     return _element_data->vectorTagValue(tag);
   }
@@ -641,7 +641,7 @@ public:
     return _element_data->nodalValueArray(Moose::Older);
   }
 
-  const DoFValue & nodalVectorTagValue(TagID tag) const;
+  const DoFValue & nodalVectorTagValue(TagID tag) const override;
   const DoFValue & nodalMatrixTagValue(TagID tag) const;
 
   const typename Moose::ADType<OutputType>::type & adNodalValue() const;

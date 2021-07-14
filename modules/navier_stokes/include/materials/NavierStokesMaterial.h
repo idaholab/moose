@@ -80,15 +80,15 @@ protected:
   // Temperature is needed to compute speed of sound
   const VariableValue & _temperature;
 
-  // Enthalpy is needed in computing energy equation strong residuals
-  const VariableValue & _enthalpy;
+  // Specific total enthalpy is needed in computing energy equation strong residuals
+  const VariableValue & _specific_total_enthalpy;
 
   // Main solution variables are all needed for computing strong residuals
   const VariableValue & _rho;
   const VariableValue & _rho_u;
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
-  const VariableValue & _rho_E;
+  const VariableValue & _rho_et;
 
   // Time derivative values for dependent variables
   const VariableValue & _drho_dt;
@@ -102,7 +102,7 @@ protected:
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
-  const VariableGradient & _grad_rho_E;
+  const VariableGradient & _grad_rho_et;
 
   // The real-valued material properties representing the element stabilization
   // parameters for each of the equations.

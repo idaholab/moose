@@ -22,7 +22,7 @@ NSMomentumInviscidFlux::validParams()
   InputParameters params = NSKernel::validParams();
   params.addClassDescription(
       "The inviscid flux (convective + pressure terms) for the momentum conservation equations.");
-  params.addRequiredCoupledVar("pressure", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>(
       "component",
       "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
@@ -31,7 +31,7 @@ NSMomentumInviscidFlux::validParams()
 
 NSMomentumInviscidFlux::NSMomentumInviscidFlux(const InputParameters & parameters)
   : NSKernel(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _component(getParam<unsigned int>("component"))
 {
 }

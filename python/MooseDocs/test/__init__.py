@@ -25,6 +25,7 @@ class MooseDocsTestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(MooseDocsTestCase, self).__init__(*args, **kwargs)
+        # ast = Abstract Syntax Tree
         self.__ast = None
         self.__result = None
         self.__translator = None

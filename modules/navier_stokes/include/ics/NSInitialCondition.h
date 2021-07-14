@@ -42,4 +42,7 @@ protected:
 
   // Fluid properties
   const IdealGasFluidProperties & _fp;
+
+  /// pressure variable name
+  const std::string _pressure_variable_name;
 };

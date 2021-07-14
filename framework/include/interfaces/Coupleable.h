@@ -1266,16 +1266,8 @@ protected:
   /**
    * Helper that that be used to retrieve a variable of arbitrary type \p T
    */
-  template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type = 0>
+  template <typename T>
   const T * getVarHelper(const std::string & var_name, unsigned int comp) const;
-
-  /**
-   * Reverse compatibility helper that can be used to retried a variable of type \p
-   * MooseVariableFE<T>
-   */
-  template <typename T,
-            typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type = 0>
-  const MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Extract pointer to a coupled variable
@@ -1438,7 +1430,7 @@ private:
   const MooseObject * const _obj;
 };
 
-template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
+template <typename T>
 const T *
 Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
 {
@@ -1485,11 +1477,4 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
     mooseError(
         "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
   }
-}
-
-template <typename T, typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type>
-const MooseVariableFE<T> *
-Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
-{
-  return getVarHelper<MooseVariableFE<T>>(var_name, comp);
 }

@@ -36,7 +36,6 @@ velocity_interp_method='average'
     u = u
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -55,7 +54,6 @@ velocity_interp_method='average'
     u = u
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -66,7 +64,7 @@ velocity_interp_method='average'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_forcing]
     type = FVBodyForce

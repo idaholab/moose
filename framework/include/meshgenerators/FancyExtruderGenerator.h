@@ -44,8 +44,18 @@ protected:
   /// Subdomains to swap out for each elevation
   const std::vector<std::vector<subdomain_id_type>> & _subdomain_swaps;
 
+  /// Names and indices of extra element integers to swap
+  const std::vector<std::string> & _elem_integer_names_to_swap;
+  std::vector<unsigned int> _elem_integer_indices_to_swap;
+
+  /// Extra element integers to swap out for each elevation and each element interger name
+  const std::vector<std::vector<unsigned int>> & _elem_integers_swaps;
+
   /// Easier to work with version of _sudomain_swaps
   std::vector<std::unordered_map<subdomain_id_type, subdomain_id_type>> _subdomain_swap_pairs;
+
+  /// Easier to work with version of _elem_integers_swaps
+  std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
 
   /// The direction of the extrusion
   Point _direction;

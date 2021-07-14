@@ -209,7 +209,12 @@ public:
 
   void clearAllDofIndices() final;
 
-  const FieldVariableValue & vectorTagValue(TagID tag)
+  const DoFValue & nodalVectorTagValue(TagID) const override
+  {
+    mooseError("nodalVectorTagValue not implemented for finite volume variables.");
+  }
+
+  const FieldVariableValue & vectorTagValue(TagID tag) const override
   {
     return _element_data->vectorTagValue(tag);
   }
