@@ -8,7 +8,7 @@
   rod_diameter = 0.125
   gap = 0.1
   heated_length = 1
-  spacer_k = '0.5'
+  spacer_k = '0.0'
   spacer_z = '0'
 []
 

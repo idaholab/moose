@@ -27,16 +27,31 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
     _n_cells(getParam<unsigned int>("n_cells")),
     _n_blocks(getParam<unsigned int>("n_blocks"))
 {
-  _z_grid.push_back(0.0);
+  if (_spacer_z.size() != _spacer_k.size())
+    mooseError(name(), " : Size of vector spacer_z should be equal to size of vector spacer_k");
+
+  if (_spacer_z.back() > _heated_length)
+    mooseError(name(), " : Location of spacers should be less than the heated length");
+
   Real dz = _heated_length / _n_cells;
-  for (unsigned int i = 0; i < _n_cells; i++)
-    _z_grid.push_back(_z_grid.back() + dz);
+  for (unsigned int i = 0; i < _n_cells + 1; i++)
+    _z_grid.push_back(dz * i);
+
+  std::vector<int> spacer_cell;
+  for (const auto & elem : _spacer_z)
+    spacer_cell.emplace_back(std::round(elem * _n_cells / _heated_length));
+
+  _k_grid.resize(_n_cells + 1, 0.0);
+
+  for (unsigned int index = 0; index < spacer_cell.size(); index++)
+    _k_grid[spacer_cell[index]] += _spacer_k[index];
 }
 
 SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
   : MooseMesh(other_mesh),
     _heated_length(other_mesh._heated_length),
     _z_grid(other_mesh._z_grid),
+    _k_grid(other_mesh._k_grid),
     _spacer_z(other_mesh._spacer_z),
     _spacer_k(other_mesh._spacer_k),
     _pitch(other_mesh._pitch),

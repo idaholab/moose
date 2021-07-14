@@ -19,6 +19,11 @@ public:
   virtual const std::vector<Real> & getZGrid() const { return _z_grid; }
 
   /**
+   * Get axial cell location and value of loss coefficient
+   */
+  virtual const std::vector<Real> & getKGrid() const { return _k_grid; }
+
+  /**
    * Return the number of axial cells
    */
   virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
@@ -99,6 +104,8 @@ protected:
   Real _heated_length;
   /// axial location of nodes
   std::vector<Real> _z_grid;
+  /// axial form loss coefficient per computational cell
+  std::vector<Real> _k_grid;
   /// axial location of the spacers
   const std::vector<Real> & _spacer_z;
   /// form loss coefficient of the spacers

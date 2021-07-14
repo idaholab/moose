@@ -281,6 +281,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
+    auto k_grid = _subchannel_mesh.getKGrid();
     auto dz = z_grid[iz] - z_grid[iz - 1];
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
@@ -337,7 +338,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 
       auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
       auto fi = computeFrictionFactor(Re);
-      auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
+      auto ki = k_grid[iz - 1];
+      auto Friction_Term = (fi * dz / Dh_i + ki) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
                            (S * (*_rho_soln)(node_out));
       auto Gravity_Term = _g_grav * (*_rho_soln)(node_out)*dz * S;
       auto DP = std::pow(S, -1.0) * (time_term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
