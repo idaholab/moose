@@ -17,7 +17,7 @@
 #include "libmesh/point.h"
 
 DiracKernelInfo::DiracKernelInfo()
-  : _point_locator(), _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)
+  : _point_locator(), _point_equal_distance(libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
 }
 
@@ -151,6 +151,6 @@ DiracKernelInfo::findPoint(const Point & p,
 bool
 DiracKernelInfo::pointsFuzzyEqual(const Point & a, const Point & b)
 {
-  const Real dist_sq = (a - b).norm_sq();
-  return dist_sq < _point_equal_distance_sq;
+  const Real dist = (a - b).norm();
+  return dist < _point_equal_distance;
 }
