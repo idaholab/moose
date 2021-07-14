@@ -130,4 +130,10 @@ Executioner::init()
   checkIntegrity();
   _fe_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _fe_problem.initialSetup();
+
+  for (auto & ptr : _self_solve_objects)
+    ptr->init();
+
+  for (auto & pair : _solve_objects)
+    pair.second->init();
 }

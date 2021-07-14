@@ -46,6 +46,13 @@ public:
   /// Set the inner solve object wrapped by this object.
   virtual void setInnerSolve(SolveObject & solve) { _inner_solve = &solve; }
 
+  /// Initialization to be done before solve
+  virtual void init() {}
+
+  /// Initialization to be done before problem init
+  /// Note: this is the place for tasks that cannot be done in constructor or in init.
+  virtual void preProblemInit() {}
+
 protected:
   /// Reference to FEProblem
   FEProblemBase & _problem;

@@ -55,7 +55,14 @@ public:
   /**
    * Perform initializations during executing actions right before init_problem task
    */
-  virtual void preProblemInit() {}
+  virtual void preProblemInit()
+  {
+    for (auto & ptr : _self_solve_objects)
+      ptr->preProblemInit();
+
+    for (auto & pair : _solve_objects)
+      pair.second->preProblemInit();
+  }
 
   /**
    * Initialize the executioner
@@ -165,7 +172,9 @@ protected:
   template <typename T>
   std::shared_ptr<T> addSolveObject()
   {
-    return std::make_shared<T>(_pars);
+    auto ptr = std::make_shared<T>(_pars);
+    _self_solve_objects.push_back(ptr);
+    return ptr;
   }
 
   FEProblemBase & _fe_problem;
@@ -189,4 +198,7 @@ protected:
 
   /// A map from solve object types to the object names
   std::map<std::string, std::string> _solve_object_names;
+
+  /// A map from solve object types to the object names
+  std::vector<std::shared_ptr<SolveObject>> _self_solve_objects;
 };
