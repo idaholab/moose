@@ -68,28 +68,27 @@ umat_(double * stress,
 
   if (*npt == 7)
   {
-	Moose::out << std::fixed << std::setprecision(7);
+    Moose::out << std::fixed << std::setprecision(7);
     for (int k1 = 0; k1 < *ntens; ++k1)
       Moose::out << "stran " << k1 << " = " << stran[k1] << "\n";
 
     for (int k1 = 0; k1 < *ntens; ++k1)
-      Moose::out << "dstran " << k1 << " = " << dstran[k1]<< "\n";
+      Moose::out << "dstran " << k1 << " = " << dstran[k1] << "\n";
 
     for (int k1 = 0; k1 < *ntens; ++k1)
-      Moose::out << "stress " << k1 << " = " << stress[k1]<< "\n";
+      Moose::out << "stress " << k1 << " = " << stress[k1] << "\n";
 
     for (int k1 = 0; k1 < *ndi; ++k1)
-      Moose::out << "coords " << k1 << " = " << coords[k1]<< "\n";
+      Moose::out << "coords " << k1 << " = " << coords[k1] << "\n";
 
     for (int k1 = 0; k1 < *ndi * *ndi; ++k1)
-      Moose::out << "dfgrd0 " << k1 << " = " << dfgrd0[k1]<< "\n";
+      Moose::out << "dfgrd0 " << k1 << " = " << dfgrd0[k1] << "\n";
 
     for (int k1 = 0; k1 < *ndi * *ndi; ++k1)
-      Moose::out << "dfgrd1 " << k1 << " = " << dfgrd1[k1]<< "\n";
+      Moose::out << "dfgrd1 " << k1 << " = " << dfgrd1[k1] << "\n";
 
     for (int k1 = 0; k1 < *ndi * *ndi; ++k1)
-        Moose::out << "drot " << k1 << " = " << drot[k1]<< "\n";
-
+      Moose::out << "drot " << k1 << " = " << drot[k1] << "\n";
 
     Moose::out << "time 0 = " << time[0] << "\n";
     Moose::out << "time 1 = " << time[1] << "\n";
