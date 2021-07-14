@@ -36,7 +36,7 @@ ninja install -v
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export VTKLIB_DIR=${VTK_PREFIX}/lib
-export VTKINCLUDE_DIR=${VTK_PREFIX}/include/vtk-${friendly_version}
+export VTKINCLUDE_DIR=${VTK_PREFIX}/include/vtk-${SHORT_VTK_NAME}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset VTKLIB_DIR
