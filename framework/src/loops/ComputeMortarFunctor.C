@@ -23,6 +23,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/enum_to_string.h"
 
 #include "metaphysicl/dualnumberarray.h"
 
@@ -70,6 +71,10 @@ ComputeMortarFunctor::operator()()
 
   // Array to hold custom quadrature point locations on the secondary and primary sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
+
+
+  auto secondary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
+  auto primary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem");
 
   unsigned int num_cached = 0;
 
@@ -161,7 +166,7 @@ ComputeMortarFunctor::operator()()
       }
     }
     else
-      projectQPoints3d(msm_elem, msinfo.secondary_elem, custom_xi1_pts);
+      projectQPoints3d(msm_elem, msinfo.secondary_elem, secondary_sub_elem_ind, custom_xi1_pts);
 
     const auto normals = _amg.getNormals(*msinfo.secondary_elem, custom_xi1_pts);
     const auto nodal_normals = _amg.getNodalNormals(*msinfo.secondary_elem);
@@ -195,7 +200,7 @@ ComputeMortarFunctor::operator()()
         }
       }
       else
-        projectQPoints3d(msm_elem, msinfo.primary_elem, custom_xi2_pts);
+        projectQPoints3d(msm_elem, msinfo.primary_elem, primary_sub_elem_ind, custom_xi2_pts);
 
       const Elem * reinit_primary_elem = primary_ip;
 
@@ -283,6 +288,7 @@ ComputeMortarFunctor::operator()()
 void
 ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
                                        const Elem * primal_elem,
+                                       const unsigned int sub_elem_ind,
                                        std::vector<Point> & q_pts)
 {
   auto && msm_order = msm_elem->default_order();
@@ -292,6 +298,103 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
   Point e1 = msm_elem->point(0) - msm_elem->point(1);
   Point e2 = msm_elem->point(2) - msm_elem->point(1);
   const Point normal = e2.cross(e1).unit();
+
+  // Get sub-elem (for second order meshes, otherwise trivial)
+  const auto sub_elem = msm_elem->get_extra_integer(sub_elem_ind);
+  // const ElemType type = primal_elem->type();
+
+  auto get_sub_elem_inds = [primal_elem, sub_elem]()->std::array<unsigned int,4>{
+    switch(primal_elem->type())
+    {
+      case TRI3:
+        return {{0, 1, 2, /*dummy, out of range*/ 10}};
+      case QUAD4:
+        return {{0, 1, 2, 3}};
+      case TRI6:
+        switch(sub_elem)
+        {
+          case 0:
+            return {{0, 3, 5, /*dummy, out of range*/ 10}};
+          case 1:
+            return {{3, 4, 5, /*dummy, out of range*/ 10}};
+          case 2:
+            return {{3, 1, 4, /*dummy, out of range*/ 10}};
+          case 3:
+            return {{5, 4, 2, /*dummy, out of range*/ 10}};
+          default:
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
+                sub_elem);
+        }
+      case QUAD9:
+        switch(sub_elem)
+        {
+          case 0:
+            return {{0, 4, 8, 7}};
+          case 1:
+            return {{4, 1, 5, 8}};
+          case 2:
+            return {{8, 5, 2, 6}};
+          case 3:
+            return {{7, 8, 6, 3}};
+          default:
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
+                sub_elem);
+        }
+      default:
+        mooseError("get_sub_elem_inds: Face element type: ",
+            libMesh::Utility::enum_to_string<ElemType>(primal_elem->type()),
+            " invalid for 3D mortar");
+    }
+  };
+
+  // Transforms quadrature point from first order sub-elements (in case of second-order)
+  // to primal element
+  auto transform_qp = [primal_elem, sub_elem](const Real nu, const Real xi){
+    switch(primal_elem->type())
+    {
+      case TRI3:
+        return Point(nu, xi, 0);
+      case QUAD4:
+        return Point(nu, xi, 0);
+      case TRI6:
+        switch(sub_elem)
+        {
+          case 0:
+            return Point(0.5 * nu, 0.5 * xi, 0);
+          case 1:
+            return Point(0.5 * (1 - xi), 0.5 * (nu + xi), 0);
+          case 2:
+            return Point(0.5 * (1 + nu), 0.5 * xi, 0);
+          case 3:
+            return Point(0.5 * nu, 0.5 * (1 + xi), 0);
+          default:
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
+                sub_elem);
+        }
+      case QUAD9:
+        switch(sub_elem)
+        {
+          case 0:
+            return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
+          case 1:
+            return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
+          case 2:
+            return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
+          case 3:
+            return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
+          default:
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
+                sub_elem);
+        }
+      default:
+        mooseError("transform_qp: Face element type: ",
+            libMesh::Utility::enum_to_string<ElemType>(primal_elem->type()),
+            " invalid for 3D mortar");
+    }
+  };
+
+  // Get sub-elem node indexes
+  auto sub_elem_inds = get_sub_elem_inds();
 
   // Loop through quadrature points on msm_elem
   for (auto qp : make_range(_qrule_msm->n_points()))
@@ -311,7 +414,6 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     xi2.value() = _qrule_msm->qp(qp)(1);
     xi2.derivatives()[1] = 1.0;
     VectorValue<Dual2> xi(xi1, xi2, 0);
-    auto && primal_order = primal_elem->default_order();
     auto && primal_type = primal_elem->type();
     unsigned int current_iterate = 0, max_iterates = 10;
 
@@ -319,15 +421,14 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     do
     {
       VectorValue<Dual2> x1;
-      for (auto n : make_range(primal_elem->n_nodes()))
-        x1 += Moose::fe_lagrange_2D_shape(primal_type, primal_order, n, xi) * primal_elem->point(n);
+      for (auto n : make_range(primal_elem->n_vertices()))
+        x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) * primal_elem->point(sub_elem_inds[n]);
       auto u = x1 - x0;
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
                            u(2) * normal(0) - u(0) * normal(2),
                            u(0) * normal(1) - u(1) * normal(0));
 
-      // TODO: change newton tolerance
-      if (F.norm() < 1e-10)
+      if (F.norm() < 1e-12)
         break;
 
       RealEigenMatrix J(3, 2);
@@ -341,12 +442,9 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       xi(1) += dxi(1);
     } while (++current_iterate < max_iterates);
 
-    // TODO: Check that inside elem
     if (current_iterate < max_iterates)
     {
-      q_pts[qp](0) = xi(0).value();
-      q_pts[qp](1) = xi(1).value();
-      q_pts[qp](2) = 0;
+      q_pts[qp] = transform_qp(xi(0).value(), xi(1).value());
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
         if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 || q_pts[qp](0) + q_pts[qp](1) > 1)

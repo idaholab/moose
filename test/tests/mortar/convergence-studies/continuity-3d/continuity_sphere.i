@@ -2,35 +2,21 @@
   second_order = true
   [./file]
     type = FileMeshGenerator
-    file = spheres_hex8.e
+    file = spheres_hex27.e
   [../]
   [./secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
-    new_block_id = 12
+    new_block_id = 11
     new_block_name = "secondary"
-    sidesets = '102'
+    sidesets = '101'
   [../]
   [./primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
-    new_block_id = 11
+    new_block_id = 12
     new_block_name = "primary"
-    sidesets = '101'
-  [../]
-  [./outer]
-    input = primary
-    type = LowerDBlockFromSidesetGenerator
-    new_block_id = 1002
-    new_block_name = "outer"
-    sidesets = '2'
-  [../]
-  [./inner]
-    input = outer
-    type = LowerDBlockFromSidesetGenerator
-    new_block_id = 1001
-    new_block_name = "inner"
-    sidesets = '1'
+    sidesets = '102'
   [../]
 []
 
@@ -41,14 +27,14 @@
 [Variables]
   [./T]
     block = '1 2'
-    order = FIRST
+    order = SECOND
   [../]
   [./lambda]
     block = 'secondary'
     # family = MONOMIAL
     # order = CONSTANT
     family = LAGRANGE
-    order = FIRST
+    order = SECOND
     # use_dual = true
   [../]
 []
@@ -58,7 +44,7 @@
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln_primal
     variable = T
-    boundary = '1 2'
+    boundary = '1 2 101 102'
   [../]
 []
 
@@ -92,7 +78,7 @@
  [../]
  [exact_soln_lambda]
  type = ParsedFunction
- value = '-4'
+ value = '4'
  []
 []
 
@@ -103,10 +89,10 @@
 [Constraints]
   [./mortar]
     type = EqualValueConstraint
-    primary_boundary = 1
-    secondary_boundary = 2
-    primary_subdomain = '11'
-    secondary_subdomain = '12'
+    primary_boundary = 2
+    secondary_boundary = 1
+    primary_subdomain = '12'
+    secondary_subdomain = '11'
     variable = lambda
     secondary_variable = T
     delta = .1
@@ -140,22 +126,22 @@
 []
 
 [Postprocessors]
- [L2lambda]
- type = ElementL2Error
- variable = lambda
- function = exact_soln_lambda
- execute_on = 'timestep_end'
- block = 'secondary'
- []
- [L2u]
- type = ElementL2Error
- variable = T
- function = exact_soln_primal
- execute_on = 'timestep_end'
- block = '1 2'
- []
- [h]
- type = AverageElementSize
- block = '1 2'
- []
+  [L2lambda]
+    type = ElementL2Error
+    variable = lambda
+    function = exact_soln_lambda
+    execute_on = 'timestep_end'
+    block = 'secondary'
+  []
+  [L2u]
+    type = ElementL2Error
+    variable = T
+    function = exact_soln_primal
+    execute_on = 'timestep_end'
+    block = '1 2'
+  []
+  [h]
+    type = AverageElementSize
+    block = '1 2'
+  []
 []

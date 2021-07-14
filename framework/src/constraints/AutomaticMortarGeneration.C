@@ -630,6 +630,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // split.
   std::map<const Elem *, std::set<Elem *>> secondary_elems_to_mortar_segments;
 
+  // Add an integer flag to mortar segment mesh to keep track of which subelem
+  // of second order primal elements mortar segments correspond to
+  auto secondary_sub_elem = mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
+  auto primary_sub_elem = mortar_segment_mesh->add_elem_integer("primary_sub_elem");
+
   // Number of new msm elems can be created by clipping and triangulating
   // secondary node with primary node
   // Note this parameter is subject to change, just a heuristic for now
@@ -672,8 +677,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
-    for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                          end_el = mesh.active_elements_end();
+    for (MeshBase::const_element_iterator el = mesh.active_local_elements_begin(),
+                                          end_el = mesh.active_local_elements_end();
          el != end_el;
          ++el)
     {
@@ -690,7 +695,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
        * each of the sub-elements is linearized
        */
 
-      // Get sub-element nodes and center reference coordinates
+      // Get sub-element nodes
       std::vector<std::array<unsigned int, 4>> sub_elem_nodes(secondary_side_elem->n_sub_elem());
       switch (secondary_side_elem->type())
       {
@@ -811,8 +816,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         if (processed_primary_elems.count(primary_elem_candidate))
           continue;
 
-        // TODO: don't need to reinitialize this map each time, use map<type, vector<vector>> maybe
-        // or think of better way Get sub-element nodes
+// TODO: don't need to reinitialize this map each time, use map<type, vector<vector>> maybe
+// or think of better way Get sub-element nodes
         std::vector<std::array<unsigned int, 4>> primary_sub_elem_nodes(
             primary_elem_candidate->n_sub_elem());
         switch (primary_elem_candidate->type())
@@ -847,10 +852,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // include nodes for all sub-elements of this secondary and primary pair
         std::vector<Point> nodal_points;
         std::vector<std::array<unsigned int, 3>> elem_to_node_map;
+        std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
 
-        // TODO: change how nodal_points and elem_to_node_map output, right now each helper
-        // simply appends their nodes and map at end so it's simple to check if there was
-        // non-trivial overlap but this is error-prone.
+// TODO: change how nodal_points and elem_to_node_map output, right now each helper
+// simply appends their nodes and map at end so it's simple to check if there was
+// non-trivial overlap but this is error-prone.
         for (auto iel : make_range(secondary_side_elem->n_sub_elem()))
         {
           for (auto jel : make_range(primary_elem_candidate->n_sub_elem()))
@@ -862,6 +868,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
               nodes[iv] = primary_elem_candidate->point(n);
             }
             mortar_segment_helper[iel]->getMortarSegments(nodes, nodal_points, elem_to_node_map);
+
+            // Keep track of which secondary and primary sub-elements created segment
+            for (auto i = sub_elem_map.size(); i < elem_to_node_map.size(); ++i)
+              sub_elem_map.push_back(std::make_pair(iel, jel));
           }
         }
 
@@ -904,7 +914,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           }
 
           // Loop through triangular elements in map
-          for (auto segment_nodes : elem_to_node_map)
+          for (auto el : make_range(elem_to_node_map.size()))
           {
             // Create new triangular element
             Elem * new_elem;
@@ -916,10 +926,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Attach newly created nodes
             for (auto i : make_range(3))
-              new_elem->set_node(i) = new_nodes[segment_nodes[i]];
+              new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
 
             // Add elements to mortar segment mesh
             mortar_segment_mesh->add_elem(new_elem);
+            new_elem->set_extra_integer(secondary_sub_elem, sub_elem_map[el].first);
+            new_elem->set_extra_integer(primary_sub_elem, sub_elem_map[el].second);
 
             // Fill out mortar segment info
             MortarSegmentInfo msinfo;
@@ -929,10 +941,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Associate this MSM elem with the MortarSegmentInfo.
             msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
-
-            // Maintain the mapping between secondary elems and mortar segment elems contained
-            // within them.
-            secondary_elems_to_mortar_segments[secondary_side_elem].insert(new_elem);
           }
         }
         // End loop through primary element candidates
@@ -946,6 +954,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         Real remainder = mortar_segment_helper[sel]->remainder();
         if (remainder > 1e-8)
         {
+// TODO: Make the user aware this is happening. It is a standard behavior for some
+// problems but we want to make sure that when primary elems aren't found that should be
+// that the user can know what's going on.
+// Maybe make Mortar Diagnostics info, that outputs number of segments, number of secondary elems without pair, etc.
           std::vector<Node *> new_nodes;
           for (auto n : make_range(secondary_side_elem->n_vertices()))
           {
@@ -977,6 +989,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
           // Add elements to mortar segment mesh
           mortar_segment_mesh->add_elem(new_elem);
+          new_elem->set_extra_integer(secondary_sub_elem, sel);
 
           // Fill out mortar segment info
           MortarSegmentInfo msinfo;
@@ -987,10 +1000,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
           // Associate this MSM elem with the MortarSegmentInfo.
           msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
-
-          // Maintain the mapping between secondary elems and mortar segment elems contained within
-          // them.
-          secondary_elems_to_mortar_segments[secondary_side_elem].insert(new_elem);
         }
       }
       // End loop through secondary elements
@@ -1057,13 +1066,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       // PrimaryLower
       mortar_interface_coupling.insert(
           std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
-
-      // SecondaryPrimary
-      mortar_interface_coupling.insert(std::make_pair(secondary_elem->interior_parent()->id(),
-                                                      primary_elem->interior_parent()->id()));
-      // PrimarySecondary
-      mortar_interface_coupling.insert(std::make_pair(primary_elem->interior_parent()->id(),
-                                                      secondary_elem->interior_parent()->id()));
     }
   }
 }
