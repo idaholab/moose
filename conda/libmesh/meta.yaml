@@ -25,7 +25,6 @@ requirements:
 
   run:
     - pkg-config
-    - libnetcdf {{ netcdf }}                            # [linux]
     - moose-libmesh-vtk {{ moose_libmesh_vtk }}
     - moose-petsc {{ moose_petsc }}
     - libpng {{ libpng }}

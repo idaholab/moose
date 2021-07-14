@@ -227,9 +227,6 @@ libglu:
 mesalib:
   - 18.3.1 h590aaf7_0
 
-netcdf:
-  - 4.6.2
-
 libpng:
   - 1.6.37 h7cec526_2          # [osx]
   - 1.6.37 hed695b0_2          # [linux]
