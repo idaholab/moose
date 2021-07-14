@@ -1,5 +1,5 @@
 [Tests]
-  design = tutorial03/index.md
+  design = tutorial03_verification/index.md
   issues = '#18276'
 
   [1d_analytical]
@@ -9,6 +9,7 @@
       type = Exodiff
       input = 1d_analytical.i
       exodiff = 1d_analytical_out.e
+      recover = false
 
       detail = "with a complete input file;"
     []
@@ -18,6 +19,9 @@
       command = step03_results.py
       check_files = 1d_analytical_0099.png
       prereq = 1d_analytical/input
+      recover = false
+      method = opt
+      required_python_packages = 'matplotlib numpy vtk'
 
       detail = "a graph comparing the simulated and exact results; and"
     []
@@ -26,7 +30,9 @@
       type = CheckFiles
       command = step03_study.py
       check_files = '1d_analytical_spatial.png 1d_analytical_temporal.png'
-      required_python_packages = sympy
+      recover = false
+      method = opt
+      required_python_packages = 'matplotlib numpy sympy'
 
       detail = "a spatial and temporal convergence study."
     []
@@ -39,6 +45,7 @@
       type = Exodiff
       input = 2d_main.i
       exodiff = 2d_main_out.e
+      recover = false
 
       detail = "based on a physically base system;"
     []
@@ -47,6 +54,7 @@
       type = Exodiff
       input = '2d_main.i 2d_mms_spatial.i'
       exodiff = 2d_mms_spatial_out.e
+      recover = false
 
       detail = "with input for a spatial convergence study;"
     []
@@ -55,6 +63,7 @@
       type = Exodiff
       input = '2d_main.i 2d_mms_temporal.i'
       exodiff = 2d_mms_temporal_out.e
+      recover = false
 
       detail = "with input for a temporal convergence study;"
     []
@@ -65,6 +74,9 @@
       check_files = 2d_main_054.png
       prereq = 2d_mms/input
       display_required = true
+      method = opt
+      required_python_packages = 'matplotlib numpy vtk'
+      recover = false
 
       detail = "a graph comparing the simulated and exact results; and"
     []
@@ -73,8 +85,10 @@
       type = CheckFiles
       command = step04_study.py
       check_files = '2d_mms_spatial.png 2d_mms_temporal.png'
-      required_python_packages = sympy
+      required_python_packages = 'matplotlib numpy sympy'
+      method = opt
       heavy = true
+      recover = false
 
       detail = "a spatial and temporal convergence study."
     []
