@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2021.01.06" %}
+{% set version = "2021.07.13" %}
 
 package:
   name: moose-tools
@@ -10,32 +10,49 @@ source:
 
 build:
   number: {{ build }}
-  skip: True # [not linux]
-  noarch: python
 
 requirements:
-  host:
-    - python >=3.6,<3.8
-    - vtk 8.2.0
+  build:
+    - python {{ python }}
 
   run:
-    - python >=3.6,<3.8
-    - vtk 8.2.0
-    - numpy
-    - pyqt
-    - matplotlib
-    - pandas
-    - livereload
-    - yaml
-    - pyyaml
-    - beautifulsoup4
-    - pybtex
-    - mock
-    - lxml
-    - scikit-image
-    - pylatexenc
-    - jinja2
-    - mako
+    - gcc_linux-64       {{ gcc }}            # [linux]
+    - gxx_linux-64       {{ gxx }}            # [linux]
+    - gfortran_linux-64  {{ fortran }}        # [linux]
+    - gcc_impl_linux-64  {{ gccimpl }}        # [linux]
+    - clang              {{ clang }}          # [osx]
+    - clang_osx-64       {{ clangosx }}       # [osx]
+    - clangxx            {{ clangxx }}        # [osx]
+    - clangxx_osx-64     {{ clangxxosx }}     # [osx]
+    - compiler-rt        {{ compilerrt }}     # [osx]
+    - compiler-rt_osx-64 {{ compilerrtosx }}  # [osx]
+    - libllvm11          {{ libllvm }}        # [osx]
+    - clang-tools                             # [osx]
+    - llvm-openmp        {{ llvmopenmp }}     # [osx]
+    - gfortran_osx-64    {{ osxfortran }}     # [osx]
+    - libclang           {{ libclang }}       # [osx]
+    - libcxx             {{ libcxx }}         # [osx]
+    - libblas            {{ libblas }}        # [osx]
+    - libcblas           {{ libcblas }}       # [osx]
+    - liblapack          {{ liblapack }}      # [osx]
+    - libopenblas        {{ libopenblas }}    # [osx]
+    - vtk                {{ vtk}}
+    - numpy              {{ numpy }}
+    - pyqt               {{ pyqt }}
+    - matplotlib         {{ matplotlib }}
+    - pandas             {{ pandas }}
+    - livereload         {{ livereload }}
+    - yaml               {{ yaml }}
+    - pyyaml             {{ pyyaml }}
+    - beautifulsoup4     {{ beautifulsoup4 }}
+    - pybtex             {{ pybtex }}
+    - mock               {{ mock }}
+    - lxml               {{ lxml }}
+    - scikit-image       {{ scikit_image }}
+    - pylatexenc         {{ pylatexenc }}
+    - jinja2             {{ jinja2 }}
+    - mako               {{ mako }}
+    - python
 
 test:
   imports:
