@@ -253,12 +253,12 @@ E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel)
 }
 
 void
-h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & D_h_de, Real & D_h_dp, Real & D_h_drho)
+h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho)
 {
   h = e + p / rho;
-  D_h_de = 1.0;
-  D_h_dp = 1.0 / rho;
-  D_h_drho = -p / (rho * rho);
+  dh_de = 1.0;
+  dh_dp = 1.0 / rho;
+  dh_drho = -p / (rho * rho);
 }
 
 bool
