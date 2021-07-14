@@ -27,6 +27,7 @@ public:
   ConstantFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;
+  virtual Real timeDerivative(Real t, const Point & p) const override;
 
 protected:
   const Real & _value;
