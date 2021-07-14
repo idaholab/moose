@@ -96,7 +96,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # in ParallelBarrier it is a multiprocessing Manger.dict() object.
         self._global_attributes = dict()
 
-    def init(self, destination, nodes):
+    def init(self, nodes, destination):
         """Initialize the Page objects."""
 
         # Call Extension init() method
@@ -108,7 +108,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # Initialize Page objects
         LOG.info('Executing extension initPage() methods...')
         t = time.time()
-        for node in nodes or self.getPages():
+        for node in nodes:
             # Setup destination and output extension
             node.base = destination
             if isinstance(node, pages.Source):
@@ -164,7 +164,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         if read:
             self.translator.executeMethod('preExecute', log=True)
 
-        nodes = nodes or self.getPages()
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         if source_nodes:
             t = time.time()
@@ -247,10 +246,14 @@ class Serial(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """Perform the translation, in serial."""
-        self._run(nodes, self._readHelper, 'Read')
-        self._run(nodes, self._tokenizeHelper, 'Tokenize')
-        self._run(nodes, self._renderHelper, 'Render')
-        self._run(nodes, self._writeHelper, 'Write')
+        if read:
+            self._run(nodes, self._readHelper, 'Read')
+        if tokenize:
+            self._run(nodes, self._tokenizeHelper, 'Tokenize')
+        if render:
+            self._run(nodes, self._renderHelper, 'Render')
+        if write:
+            self._run(nodes, self._writeHelper, 'Write')
 
     def _run(self, nodes, target, prefix):
         """Run and optionally profile a function"""
@@ -299,35 +302,42 @@ class ParallelQueue(Executioner):
         self._page_ast = None
         self._page_result = None
 
-        self._manager = multiprocessi.Manger()
+        self._manager = multiprocessing.Manager()
         self._global_attributes = self._manager.dict()
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
 
         n = len(self.getPages())
-        self._page_content = [None]*n
-        self._page_ast = [None]*n
-        self._page_result = [None]*n
+        if read and self._page_content is None:
+            self._page_content = [None]*n
+        if tokenize and self._page_ast is None:
+            self._page_ast = [None]*n
+        if render and self._page_result is None:
+            self._page_result = [None]*n
 
         # READ
-        self._run(nodes, self._page_content, self._read_target, num_threads,
-                  lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
-                  "Reading")
+        if read:
+            self._run(nodes, self._page_content, self._read_target, num_threads,
+                      lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
+                      "Reading")
 
         # TOKENIZE
-        self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
-                  lambda n: -len(self._page_content[n.uid]),
-                  "Tokenizing")
+        if tokenize:
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
+                      lambda n: -len(self._page_content[n.uid]),
+                      "Tokenizing")
 
         # RENDER
-        self._run(nodes, self._page_result, self._render_target, num_threads,
-                  lambda n: -self._page_ast[n.uid].count,
-                  "Rendering")
+        if render:
+            self._run(nodes, self._page_result, self._render_target, num_threads,
+                      lambda n: -self._page_ast[n.uid].count,
+                      "Rendering")
 
         # WRITE
-        self._run(nodes, None, self._write_target, num_threads,
-                  lambda n: -self._page_result[n.uid].count,
-                  "Writing")
+        if write:
+            self._run(nodes, None, self._write_target, num_threads,
+                      lambda n: -self._page_result[n.uid].count,
+                      "Writing")
 
     def _run(self, nodes, container, target, num_threads=1, key=None, prefix='Running'):
         """Helper function for running in parallel using Queues"""
@@ -518,32 +528,38 @@ class ParallelPipe(Executioner):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self._page_content = None
         self._page_ast = None
         self._page_result = None
 
-        self._manager = multiprocessi.Manger()
+        self._manager = multiprocessing.Manager()
         self._global_attributes = self._manager.dict()
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
 
         n = len(self.getPages())
-        self._page_content = [None]*n
-        self._page_ast = [None]*n
-        self._page_result = [None]*n
+        if read and self._page_content is None:
+            self._page_content = [None]*n
+        if tokenize and self._page_ast is None:
+            self._page_ast = [None]*n
+        if render and self._page_result is None:
+            self._page_result = [None]*n
 
         # READ
-        self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
+        if read:
+            self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
 
         # TOKENIZE
-        self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
+        if tokenize:
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
 
         # RENDER
-        self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
+        if render:
+            self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
 
         # WRITE
-        self._run(nodes, None, self._write_target, num_threads, "Writing")
+        if write:
+            self._run(nodes, None, self._write_target, num_threads, "Writing")
 
     def _run(self, nodes, container, target, num_threads=1, prefix='Running'):
         """Helper function for running in parallel using Pipe"""

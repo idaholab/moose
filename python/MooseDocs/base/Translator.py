@@ -252,13 +252,13 @@ class Translator(mixins.ConfigObject):
             self.__checkRequires(ext)
 
         # Initialize the Page objects
-        self.__executioner.init(self.destination, nodes)
+        self.__executioner.init(nodes or self.getPages(), self.destination)
         self.__initialized = True
 
     def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """Perform build for all pages, see executioners."""
         self.__assertInitialize()
-        self.__executioner(nodes, num_threads, read, tokenize, render, write)
+        self.__executioner(nodes or self.getPages(), num_threads, read, tokenize, render, write)
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""
@@ -288,13 +288,16 @@ class Translator(mixins.ConfigObject):
             for i in range(n, 0, -1):
                 self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
 
-    def executePageMethod(self, method, page, args=tuple(), **kwargs):
+    def executePageMethod(self, method, page, args=None):
         """Helper for calling per Page object methods."""
         if page.get(method, True):
-            self.executeMethod(method, args=(page, *args), **kwargs)
+            self.executeMethod(method, args=(page, *(args or tuple())), log=False)
 
-    def executeMethod(self, method, args=tuple(), extensions=None, log=False):
+    def executeMethod(self, method, args=None, log=False):
         """Helper to call pre/post or other methods from extension, reader, and renderer objects."""
+        if args is None:
+            args = tuple()
+
         if log:
             LOG.info('Executing {} methods...'.format(method))
             t = time.time()
@@ -305,7 +308,7 @@ class Translator(mixins.ConfigObject):
             if method in self.__renderer.__TRANSLATOR_METHODS__:
                 Translator.callFunction(self.__renderer, method, args)
 
-        for ext in (extensions if extensions is not None else self.extensions):
+        for ext in self.extensions:
             if ext.active and (method in ext.__TRANSLATOR_METHODS__):
                 Translator.callFunction(ext, method, args)
 
