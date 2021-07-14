@@ -160,13 +160,15 @@ def main(options):
     if options.stable:
         pass
     elif options.fast:
-        options.disable += ['appsyntax', 'navigation', 'sqa', 'civet', 'gitutils']
+        options.disable += ['MooseDocs.extensions.appsyntax', 'MooseDocs.extensions.navigation',
+                            'MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet',
+                            'MooseDocs.extensions.gitutils']
     else:
-        options.disable += ['sqa', 'civet', 'gitutils']
+        options.disable += ['MooseDocs.extensions.sqa', 'MooseDocs.extensions.civet',
+                            'MooseDocs.extensions.gitutils']
 
     for name in options.disable:
-        ext = '.'.join(['MooseDocs', 'extensions', name.lower()])
-        kwargs['Extensions'][ext] = dict(active=False)
+        kwargs['Extensions'][name] = dict(active=False)
 
     # Apply Translator settings
     if options.destination:
