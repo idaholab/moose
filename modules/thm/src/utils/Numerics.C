@@ -167,6 +167,12 @@ v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA)
   dv_drhoA = -A / (rhoA * rhoA);
 }
 
+ADReal
+v_from_rhoA_A(ADReal rhoA, ADReal A)
+{
+  return A / rhoA;
+}
+
 void
 v_from_arhoA_alpha_A(Real arhoA, Real alpha, Real A, Real & v, Real & dv_darhoA, Real & dv_dalpha)
 {

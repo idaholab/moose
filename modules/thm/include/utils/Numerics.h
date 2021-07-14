@@ -234,6 +234,15 @@ void rho_from_arhoA_alpha_A(
 void v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA);
 
 /**
+ * Computes specific volume and its derivatives from rho*A, and area.
+ *
+ * @param[in] rhoA   rho*A
+ * @param[in] A      area
+ * @return v         specific volume
+ */
+ADReal v_from_rhoA_A(ADReal rhoA, ADReal A);
+
+/**
  * Computes specific volume and its derivatives from alpha*rho*A, volume fraction, and area.
  *
  * @param[in] arhoA        alpha*rho*A

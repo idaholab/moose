@@ -154,7 +154,7 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   {
-    const std::string class_name = "VolumeJunction1PhaseUserObject";
+    const std::string class_name = "ADVolumeJunction1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
@@ -189,7 +189,7 @@ VolumeJunction1Phase::addMooseObjects()
         FlowModelSinglePhase::RHOA, FlowModelSinglePhase::RHOUA, FlowModelSinglePhase::RHOEA};
     for (std::size_t j = 0; j < var_names.size(); j++)
     {
-      const std::string class_name = "VolumeJunction1PhaseBC";
+      const std::string class_name = "ADVolumeJunction1PhaseBC";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
@@ -222,13 +222,13 @@ VolumeJunction1Phase::addMooseObjects()
   for (std::size_t i = 0; i < N_EQ; i++)
   {
     {
-      const std::string class_name = "ODETimeDerivative";
+      const std::string class_name = "ADScalarTimeDerivative";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
       _sim.addScalarKernel(class_name, genName(name(), var_names[i], "td"), params);
     }
     {
-      const std::string class_name = "VolumeJunctionAdvectionScalarKernel";
+      const std::string class_name = "ADVolumeJunctionAdvectionScalarKernel";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
       params.set<UserObjectName>("volume_junction_uo") = _junction_uo_name;
