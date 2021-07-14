@@ -296,7 +296,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     _sim.addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
   }
   {
-    const std::string class_name = "OneD3EqnEnergyHeatFluxFromHeatStructure3D";
+    const std::string class_name = "ADOneD3EqnEnergyHeatFluxFromHeatStructure3D";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
@@ -304,9 +304,6 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<UserObjectName>("user_object") = T_wall_avg_uo_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-    params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     _sim.addKernel(class_name, genName(name(), "heat_flux_kernel"), params);
   }
 
@@ -316,29 +313,22 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
         getComponentByName<FlowChannel1Phase>(_flow_channel_names[i]);
     const UserObjectName heat_transfer_uo_name = genName(name(), "heat_flux_uo", i);
     {
-      const std::string class_name = "HeatTransferFromHeatStructure3D1PhaseUserObject";
+      const std::string class_name = "ADHeatTransferFromHeatStructure3D1PhaseUserObject";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
       params.set<FlowChannel3DAlignment *>("_fch_alignment") = _fch_alignments[i];
       params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
       params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
       params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-      params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
-      params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
-      params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
       params.set<ExecFlagEnum>("execute_on") = execute_on;
       _sim.addUserObject(class_name, heat_transfer_uo_name, params);
     }
     {
-      const std::string class_name = "ConvectionHeatTransfer3DBC";
+      const std::string class_name = "ADConvectionHeatTransfer3DBC";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
       params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
       params.set<UserObjectName>("ht_uo") = heat_transfer_uo_name;
-      params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
-      params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
-      params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-      params.set<std::vector<VariableName>>("T_wall") = {HeatConductionModel::TEMPERATURE};
       _sim.addBoundaryCondition(class_name, genName(name(), "heat_flux_bc", i), params);
     }
   }

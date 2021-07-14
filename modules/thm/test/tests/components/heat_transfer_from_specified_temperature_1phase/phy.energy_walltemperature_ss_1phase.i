@@ -59,7 +59,7 @@
 
 [Postprocessors]
   [hf_pipe]
-    type = HeatRateConvection1Phase
+    type = ADHeatRateConvection1Phase
     block = pipe
     T_wall = T_wall
     T = T

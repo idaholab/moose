@@ -1,0 +1,26 @@
+#include "ADHeatFlux3EqnBC.h"
+#include "ADHeatFluxFromHeatStructureBaseUserObject.h"
+#include "THMIndices3Eqn.h"
+#include "Assembly.h"
+
+registerMooseObject("THMApp", ADHeatFlux3EqnBC);
+
+InputParameters
+ADHeatFlux3EqnBC::validParams()
+{
+  InputParameters params = ADHeatFluxBaseBC::validParams();
+  return params;
+}
+
+ADHeatFlux3EqnBC::ADHeatFlux3EqnBC(const InputParameters & parameters)
+  : ADHeatFluxBaseBC(parameters)
+{
+}
+
+ADReal
+ADHeatFlux3EqnBC::computeQpResidual()
+{
+  const std::vector<ADReal> & q_wall = _q_uo.getHeatFlux(_current_elem->id());
+  const std::vector<ADReal> & P_hf = _q_uo.getHeatedPerimeter(_current_elem->id());
+  return -_hs_scale * q_wall[_qp] * P_hf[_qp] * _test[_i][_qp];
+}

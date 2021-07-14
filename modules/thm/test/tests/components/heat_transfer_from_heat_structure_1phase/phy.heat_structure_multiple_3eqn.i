@@ -183,10 +183,10 @@ cp2 = 600
 
   start_time = 0
   end_time = 4e5
-  dt = 2e4
+  dt = 1e4
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'newton'
   line_search = 'basic'
   nl_rel_tol = 0
   nl_abs_tol = 1e-6
@@ -199,6 +199,9 @@ cp2 = 600
     type = GAUSS
     order = SECOND
   []
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
 []
 
 [Postprocessors]

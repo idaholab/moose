@@ -33,7 +33,7 @@ HeatTransferFromExternalAppHeatFlux1Phase::addMooseObjects()
   HeatTransfer1PhaseBase::addMooseObjects();
 
   {
-    const std::string class_name = "CoupledVariableValueMaterial";
+    const std::string class_name = "ADCoupledVariableValueMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<MaterialPropertyName>("prop_name") = _q_wall_name;
@@ -43,7 +43,7 @@ HeatTransferFromExternalAppHeatFlux1Phase::addMooseObjects()
 
   // wall heat transfer kernel
   {
-    const std::string class_name = "OneDEnergyWallHeatFlux";
+    const std::string class_name = "ADOneDEnergyWallHeatFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;

@@ -88,7 +88,7 @@
     execute_on = 'initial timestep_end'
   []
   [hf_pipe]
-    type = HeatRateConvection1Phase
+    type = ADHeatRateConvection1Phase
     block = fch
     T_wall = T_wall
     T = T

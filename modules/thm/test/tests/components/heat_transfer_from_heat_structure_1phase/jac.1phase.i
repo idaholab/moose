@@ -68,8 +68,6 @@
   [pc]
     type = SMP
     full = true
-    petsc_options_iname = '-snes_test_err'
-    petsc_options_value = ' 1e-11'
   []
 []
 
@@ -82,10 +80,7 @@
   abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
-  nl_rel_tol = 1e-9
-  nl_abs_tol = 1e-8
-  nl_max_its = 1
 
-  l_tol = 1e-3
-  l_max_its = 30
+  petsc_options_iname = '-snes_test_err'
+  petsc_options_value = ' 1e-11'
 []
