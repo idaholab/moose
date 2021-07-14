@@ -1,6 +1,6 @@
 [Tests]
   design = "NewmarkBeta.md"
-  issues = "#12185"
+  issues = "#12185 #18233"
   [./newmark_beta_default]
     type = 'CSVDiff'
     input = 'newmark_beta_default_parameters.i'
@@ -19,5 +19,14 @@
     requirement = "The NewmarkBeta time integrator shall correctly compute the first"
                   " and second time derivatives of a variable using user provided beta"
                   " and gamma parameters."
+  [../]
+  [./newmark_beta_inactive_steps]
+    type = 'CSVDiff'
+    input = 'newmark_beta_inactive_steps.i'
+    csvdiff = 'newmark_beta_inactive_steps_out.csv'
+
+    allow_warnings = True
+    requirement = "The NewmarkBeta time integrator shall correctly use the inactive_tsteps"
+                  " parameter."
   [../]
 []
