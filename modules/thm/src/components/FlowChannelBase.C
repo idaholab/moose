@@ -308,7 +308,7 @@ FlowChannelBase::setupDh()
 
   if (_has_Dh)
   {
-    const std::string class_name = "GenericFunctionMaterial";
+    const std::string class_name = "ADGenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {FlowModel::HYDRAULIC_DIAMETER};
@@ -319,7 +319,7 @@ FlowChannelBase::setupDh()
   }
   else
   {
-    const std::string class_name = "HydraulicDiameterCircularMaterial";
+    const std::string class_name = "ADHydraulicDiameterCircularMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
@@ -334,7 +334,7 @@ FlowChannelBase::addCommonObjects()
   ts_execute_on = {EXEC_TIMESTEP_BEGIN, EXEC_INITIAL};
 
   {
-    std::string class_name = "DirectionMaterial";
+    std::string class_name = "ADDirectionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     _sim.addMaterial(class_name, genName(name(), "dir_mat"), params);
@@ -389,7 +389,7 @@ FlowChannelBase::addCommonObjects()
   {
     if (_n_heat_transfer_connections > 1)
     {
-      const std::string class_name = "WeightedAverageMaterial";
+      const std::string class_name = "ADWeightedAverageMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<MaterialPropertyName>("prop_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
@@ -399,7 +399,7 @@ FlowChannelBase::addCommonObjects()
     }
     else if (_n_heat_transfer_connections == 0)
     {
-      const std::string class_name = "ConstantMaterial";
+      const std::string class_name = "ADConstantMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();

@@ -8,9 +8,6 @@ ADConstantMaterial::validParams()
   InputParameters params = Material::validParams();
   params.addParam<Real>("value", 0., "Constant value being assigned into the property");
   params.addRequiredParam<std::string>("property_name", "The property name to declare");
-  params.addCoupledVar(
-      "derivative_vars",
-      "Names of variables for which to create (zero) material derivative properties");
   return params;
 }
 
