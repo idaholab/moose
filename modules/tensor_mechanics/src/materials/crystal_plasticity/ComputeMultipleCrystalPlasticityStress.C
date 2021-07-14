@@ -207,6 +207,8 @@ ComputeMultipleCrystalPlasticityStress::updateStress(RankTwoTensor & cauchy_stre
 
   // Loop through all models and calculate the schmid tensor for the current state of the crystal
   // lattice
+  // Not sure if we should pass in the updated or the original rotation here
+  // If not, then we should not need to compute the flow direction every iteration here
   for (unsigned int i = 0; i < _num_models; ++i)
     _models[i]->calculateFlowDirection(_crysrot[_qp]);
 
