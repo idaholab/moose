@@ -13,8 +13,8 @@ P_out = 4.923e6 # Pa
   rod_diameter = 0.00950
   gap = 0.00095 # the half gap between sub-channel assemblies
   heated_length = 1
-  spacer_z = '0   0.5'
-  spacer_k = '0.7 0.1'
+  spacer_z = '0.0'
+  spacer_k = '0.0'
 []
 
 [AuxVariables]

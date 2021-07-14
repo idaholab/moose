@@ -1,8 +1,9 @@
 [Tests]
-  [friction]
+  [enthalpy]
     type = Exodiff
     input = two_channel.i
     exodiff = two_channel_out.e
+    custom_cmp = 'test.exodiff'
     method = '!DBG'
     valgrind = NONE
     recover = false
