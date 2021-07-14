@@ -1,0 +1,22 @@
+[Tests]
+  design = 'NonlinearSystemBase.md'
+  issues = '#16212'
+  [auto_scaling]
+    requirement = 'The system shall be able to automatically compute scaling factors based on Jacobian'
+    [on_diag]
+      type = Exodiff
+      input = test.i
+      exodiff = test_out.e
+      detail = 'data solely along the diagonal'
+      expect_out = 'u:\s+0\.375'
+    []
+    [off_diag]
+      type = Exodiff
+      input = test.i
+      exodiff = off_diag.e
+      detail = 'data both on- and off-diagonal'
+      cli_args = 'Executioner/off_diagonals_in_auto_scaling=true Outputs/file_base=off_diag'
+      expect_out = 'u:\s+0\.1832'
+    []
+  []
+[]

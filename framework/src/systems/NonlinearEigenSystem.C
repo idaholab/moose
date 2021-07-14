@@ -28,6 +28,7 @@
 #include "libmesh/libmesh_config.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/diagonal_matrix.h"
 #include "libmesh/petsc_shell_matrix.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -465,7 +466,7 @@ NonlinearEigenSystem::turnOffJacobian()
 void
 NonlinearEigenSystem::computeScalingJacobian()
 {
-  _eigen_problem.computeJacobianTag(*_current_solution, _scaling_matrix, precondMatrixTag());
+  _eigen_problem.computeJacobianTag(*_current_solution, *_scaling_matrix, precondMatrixTag());
 }
 
 void

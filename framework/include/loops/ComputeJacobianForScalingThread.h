@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeJacobianThread.h"
+#include "ComputeFullJacobianThread.h"
 #include "MooseTypes.h" // for TagID
 
 #include "libmesh/threads.h"
@@ -17,7 +17,7 @@
 
 class FEProblemBase;
 
-class ComputeJacobianForScalingThread : public ComputeJacobianThread
+class ComputeJacobianForScalingThread : public ComputeFullJacobianThread
 {
 public:
   ComputeJacobianForScalingThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
@@ -26,4 +26,7 @@ public:
   ComputeJacobianForScalingThread(ComputeJacobianForScalingThread & x, Threads::split split);
 
   void operator()(const libMesh::ConstElemRange & range, bool bypass_threading = false) final;
+
+protected:
+  virtual void computeJacobian() override;
 };
