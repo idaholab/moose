@@ -874,7 +874,7 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
 #endif
 
-    if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
+    if (_need_ad_u_dot && safeToComputeADUDot() && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
       _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
@@ -894,18 +894,29 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
         _ad_grad_u,
         nqp);
 
-  if (_need_ad_u_dot && _time_integrator)
-    assignForAllQps(_ad_dofs_dot[0], _ad_u_dot, nqp);
-
-  if (_need_ad_u_dot && !_time_integrator)
-    assignForAllQps(_u_dot[0], _ad_u_dot, nqp);
+  if (_need_ad_u_dot)
+  {
+    if (safeToComputeADUDot())
+      assignForAllQps(_ad_dofs_dot[0], _ad_u_dot, nqp);
+    else
+      assignForAllQps(_u_dot[0], _ad_u_dot, nqp);
+  }
 }
 
 template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
 {
+  mooseAssert(index == 0, "We only ever have one dof value locally");
   _dof_values[index] = value;
+
+  // Update the qp values as well
+  for (const auto qp : make_range(_u.size()))
+    _u[qp] = value;
+
+  if (_need_ad_u)
+    for (const auto qp : make_range(_ad_u.size()))
+      _ad_u[qp] = value;
 }
 
 template <typename OutputType>
@@ -954,7 +965,13 @@ void
 MooseVariableDataFV<OutputType>::insert(NumericVector<Number> & residual)
 {
   initDofIndices();
-  residual.insert(&_dof_values[0], _dof_indices);
+  if (_dof_indices.size())
+  {
+    mooseAssert(
+        _dof_indices.size() == 1,
+        "Finite volume variables should be constant monomial and have only one dof per element.");
+    residual.insert(&_dof_values[0], _dof_indices);
+  }
 }
 
 template <typename OutputType>

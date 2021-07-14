@@ -38,6 +38,7 @@
 class MaterialBase;
 class MooseMesh;
 class SubProblem;
+class FaceInfo;
 
 template <>
 InputParameters validParams<MaterialBase>();
@@ -224,6 +225,8 @@ public:
    */
   virtual bool ghostable() const { return false; }
 
+  void setFaceInfo(const FaceInfo & fi) { _face_info = &fi; }
+
 protected:
   /**
    * Users must override this method.
@@ -321,6 +324,11 @@ protected:
   bool _has_stateful_property;
 
   bool _overrides_init_stateful_props = true;
+
+  const FaceInfo * _face_info = nullptr;
+
+private:
+  const MaterialPropertyName _declare_suffix;
 };
 
 template <typename T>
@@ -337,8 +345,12 @@ MaterialBase::declareProperty(const std::string & name)
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyByName(const std::string & prop_name)
+MaterialBase::declarePropertyByName(const std::string & prop_name_in)
 {
+  const auto prop_name =
+      _declare_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
   registerPropName(prop_name, false, MaterialBase::CURRENT);
   return materialData().declareProperty<T>(prop_name);
 }
@@ -441,8 +453,12 @@ MaterialBase::declareADProperty(const std::string & name)
 
 template <typename T>
 ADMaterialProperty<T> &
-MaterialBase::declareADPropertyByName(const std::string & prop_name)
+MaterialBase::declareADPropertyByName(const std::string & prop_name_in)
 {
+  const auto prop_name =
+      _declare_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
   registerPropName(prop_name, false, MaterialBase::CURRENT);
   return materialData().declareADProperty<T>(prop_name);
 }

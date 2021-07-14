@@ -110,7 +110,7 @@
     variable = u
     a1 = a1
     a2 = a2
-    p = p
+    pressure = p
     component = 0
   [../]
 
@@ -120,7 +120,7 @@
     variable = v
     a1 = a1
     a2 = a2
-    p = p
+    pressure = p
     component = 1
   [../]
 

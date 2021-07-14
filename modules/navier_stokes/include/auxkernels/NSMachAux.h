@@ -30,11 +30,23 @@ public:
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _u_vel;
-  const VariableValue & _v_vel;
-  const VariableValue & _w_vel;
-  const VariableValue & _specific_volume;
-  const VariableValue & _internal_energy;
+  /// Whether to use material properties instead of coupled variables to compute the Mach number
+  const bool _use_mat_props;
+
+  const VariableValue * const _u_vel;
+  const VariableValue * const _v_vel;
+  const VariableValue * const _w_vel;
+  const VariableValue * const _specific_volume;
+  const VariableValue * const _specific_internal_energy;
+
+  /// speed
+  const ADMaterialProperty<Real> * const _mat_speed;
+
+  /// pressure
+  const ADMaterialProperty<Real> * const _mat_pressure;
+
+  /// fluid temperature
+  const ADMaterialProperty<Real> * const _mat_T_fluid;
 
   // Fluid properties
   const SinglePhaseFluidProperties & _fp;

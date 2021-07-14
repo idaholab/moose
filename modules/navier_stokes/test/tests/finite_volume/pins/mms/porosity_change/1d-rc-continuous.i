@@ -125,7 +125,7 @@ velocity_interp_method='rc'
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = u
-    p = pressure
+    pressure = pressure
     porosity = porosity
     momentum_component = 'x'
   []
@@ -134,14 +134,14 @@ velocity_interp_method='rc'
   [u_pressure_porosity]
     type = PINSFVMomentumPressureFlux
     variable = u
-    p = pressure
+    pressure = pressure
     porosity = porosity
     momentum_component = 'x'
   []
   [u_pressure_porosity_gradient]
     type = PINSFVMomentumPressurePorosityGradient
     variable = u
-    p = pressure
+    pressure = pressure
     porosity = porosity
     momentum_component = 'x'
   []

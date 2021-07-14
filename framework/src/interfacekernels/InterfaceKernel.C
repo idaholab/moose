@@ -50,7 +50,7 @@ InterfaceKernelTempl<T>::InterfaceKernelTempl(const InputParameters & parameters
     _grad_phi(_assembly.gradPhiFace(_var)),
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
-    _neighbor_var(*getVarHelper<T>("neighbor_var", 0)),
+    _neighbor_var(*getVarHelper<MooseVariableFE<T>>("neighbor_var", 0)),
     _neighbor_value(_is_implicit ? _neighbor_var.slnNeighbor() : _neighbor_var.slnOldNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
     _phi_neighbor(_assembly.phiFaceNeighbor(_neighbor_var)),

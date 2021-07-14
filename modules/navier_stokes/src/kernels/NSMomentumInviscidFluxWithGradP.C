@@ -20,6 +20,7 @@ NSMomentumInviscidFluxWithGradP::validParams()
   params.addClassDescription(
       "This class computes the inviscid flux with pressure gradient in the momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
@@ -38,7 +39,7 @@ NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputPara
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_E;
+  _gradU[4] = &_grad_rho_et;
 }
 
 Real
@@ -130,7 +131,7 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
           + dFdp * _test[_i][_qp];
     }
 
-    else if (jvar == _rhoE_var_number)
+    else if (jvar == _rho_et_var_number)
     {
       // Pressure term Jacobian
       return dFdp * _test[_i][_qp];

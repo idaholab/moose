@@ -23,7 +23,7 @@ INSFVMaterial::validParams()
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
-  params.addRequiredCoupledVar("pressure", "The pressure variable.");
+  params.addRequiredCoupledVar(NS::pressure, "The pressure variable.");
   params.addCoupledVar("temperature", "the temperature");
   params.addParam<MaterialPropertyName>("cp_name", "cp", "the name of the specific heat capacity");
   return params;
@@ -34,7 +34,7 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     _u_vel(adCoupledValue("u")),
     _v_vel(adCoupledValue("v")),
     _w_vel(adCoupledValue("w")),
-    _p_var(adCoupledValue("pressure")),
+    _p_var(adCoupledValue(NS::pressure)),
     _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
     _rho_u(declareADProperty<Real>(NS::momentum_x)),
     _rho_v(declareADProperty<Real>(NS::momentum_y)),

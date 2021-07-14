@@ -40,6 +40,15 @@ public:
   virtual Real p_from_v_e(Real v, Real e) const override;
 
   /**
+   * Pressure from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return pressure (Pa)
+   */
+  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
+
+  /**
    * Pressure and its derivatives from specific volume and specific internal energy
    *
    * @param[in] v        specific volume (m$^3$/kg)
@@ -64,6 +73,15 @@ public:
    * @return temperature (K)
    */
   virtual Real T_from_v_e(Real v, Real e) const override;
+
+  /**
+   * Temperature from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return temperature (K)
+   */
+  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
 
   /**
    * Temperature and its derivatives from specific volume and specific internal energy
@@ -320,6 +338,23 @@ public:
    */
   virtual void
   mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+
+  using SinglePhaseFluidProperties::e_from_T_v;
+  Real e_from_T_v(Real T, Real /*v*/) const override;
+  void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  ADReal e_from_T_v(const ADReal & T, const ADReal & v) const override;
+  void e_from_T_v(const ADReal & T,
+                  const ADReal & v,
+                  ADReal & e,
+                  ADReal & de_dT,
+                  ADReal & de_dv) const override;
+
+  using SinglePhaseFluidProperties::p_from_T_v;
+  Real p_from_T_v(Real T, Real v) const override;
+  ADReal p_from_T_v(const ADReal & T, const ADReal & v) const override;
+
+  using SinglePhaseFluidProperties::e_from_p_rho;
+  ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
 
 protected:
   /// specific heat at constant volume

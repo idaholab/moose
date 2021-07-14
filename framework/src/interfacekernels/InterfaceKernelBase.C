@@ -23,6 +23,7 @@ InterfaceKernelBase::validParams()
 {
   InputParameters params = NeighborResidualObject::validParams();
   params += BoundaryRestrictable::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

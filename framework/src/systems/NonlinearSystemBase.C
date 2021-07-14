@@ -356,6 +356,37 @@ NonlinearSystemBase::timestepSetup()
     _element_dampers.timestepSetup(tid);
     _nodal_dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
+
+    if (_fe_problem.haveFV())
+    {
+      std::vector<FVFluxBC *> bcs;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxBC")
+          .template condition<AttribThread>(tid)
+          .queryInto(bcs);
+
+      std::vector<FVInterfaceKernel *> iks;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVInterfaceKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(iks);
+
+      std::vector<FVFluxKernel *> kernels;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(kernels);
+
+      for (auto * bc : bcs)
+        bc->timestepSetup();
+      for (auto * ik : iks)
+        ik->timestepSetup();
+      for (auto * kernel : kernels)
+        kernel->timestepSetup();
+    }
   }
   _scalar_kernels.timestepSetup();
   _constraints.timestepSetup();

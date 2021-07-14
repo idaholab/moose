@@ -58,7 +58,7 @@
   [./momentum_pressure]
     type = INSADMomentumPressure
     variable = velocity
-    p = p
+    pressure = p
     integrate_p_by_parts = true
   [../]
 

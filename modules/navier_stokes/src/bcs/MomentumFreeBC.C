@@ -9,6 +9,7 @@
 
 #include "MomentumFreeBC.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", MomentumFreeBC);
 
@@ -20,7 +21,7 @@ MomentumFreeBC::validParams()
   params.addCoupledVar("vel_y", "y-component of velocity");
   params.addCoupledVar("vel_z", "z-component of velocity");
   params.addRequiredParam<unsigned int>("component", "Component of the momentum equation");
-  params.addRequiredCoupledVar("pressure", "The value of pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The value of pressure");
   params.addClassDescription(
       "Implements free flow boundary conditions for one of the momentum equations.");
   return params;
@@ -29,7 +30,7 @@ MomentumFreeBC::validParams()
 MomentumFreeBC::MomentumFreeBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _component(getParam<unsigned int>("component")),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _vel_x(coupledValue("vel_x")),
     _vel_y(_mesh.dimension() >= 2 ? coupledValue("vel_y") : _zero),
     _vel_z(_mesh.dimension() >= 3 ? coupledValue("vel_z") : _zero)

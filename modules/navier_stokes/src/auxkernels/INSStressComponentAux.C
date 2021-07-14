@@ -9,6 +9,7 @@
 
 #include "INSStressComponentAux.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSStressComponentAux);
 
@@ -20,7 +21,7 @@ INSStressComponentAux::validParams()
   params.addClassDescription("This class computes the stress component based on "
                              "pressure and velocity for incompressible Navier-Stokes");
   params.addCoupledVar("velocity", "The velocity component");
-  params.addCoupledVar("pressure", 0, "The pressure");
+  params.addCoupledVar(NS::pressure, 0, "The pressure");
   params.addRangeCheckedParam<unsigned int>("comp", 0, "0<=comp<=2", "The component");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The viscosity");
 
@@ -30,7 +31,7 @@ INSStressComponentAux::validParams()
 INSStressComponentAux::INSStressComponentAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _grad_velocity(isCoupled("velocity") ? coupledGradient("velocity") : _grad_zero),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _comp(getParam<unsigned>("comp")),
     _mu(getMaterialProperty<Real>("mu_name"))
 {

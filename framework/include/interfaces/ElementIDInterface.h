@@ -24,6 +24,8 @@ class ElementIDInterface
 {
 public:
   ElementIDInterface(const MooseObject * moose_object);
+  static InputParameters validParams();
+
   virtual ~ElementIDInterface() {}
 
   /**

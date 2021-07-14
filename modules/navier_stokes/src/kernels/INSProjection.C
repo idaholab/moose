@@ -9,6 +9,7 @@
 
 #include "INSProjection.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSProjection);
 
@@ -23,7 +24,8 @@ INSProjection::validParams()
   params.addRequiredCoupledVar("a1", "x-acceleration");
   params.addCoupledVar("a2", "y-acceleration"); // only required in 2D and 3D
   params.addCoupledVar("a3", "z-acceleration"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   // Required parameters
   params.addRequiredParam<unsigned>(
@@ -45,13 +47,13 @@ INSProjection::INSProjection(const InputParameters & parameters)
     _a3(_mesh.dimension() == 3 ? coupledValue("a3") : _zero),
 
     // Gradients
-    _grad_p(coupledGradient("p")),
+    _grad_p(coupledGradient(NS::pressure)),
 
     // Variable numberings
     _a1_var_number(coupled("a1")),
     _a2_var_number(_mesh.dimension() >= 2 ? coupled("a2") : libMesh::invalid_uint),
     _a3_var_number(_mesh.dimension() == 3 ? coupled("a3") : libMesh::invalid_uint),
-    _p_var_number(coupled("p")),
+    _p_var_number(coupled(NS::pressure)),
 
     // Required parameters
     _component(getParam<unsigned>("component")),

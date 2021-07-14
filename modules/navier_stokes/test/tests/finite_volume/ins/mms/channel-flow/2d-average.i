@@ -2,7 +2,6 @@ mu=1.1
 rho=1.1
 advected_interp_method='average'
 velocity_interp_method='average'
-force_boundary_execution=true
 
 [Mesh]
   [gen]
@@ -79,7 +78,7 @@ force_boundary_execution=true
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    p = pressure
+    pressure = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -109,7 +108,7 @@ force_boundary_execution=true
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    p = pressure
+    pressure = pressure
   []
   [v_forcing]
     type = FVBodyForce

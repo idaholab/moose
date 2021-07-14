@@ -2,7 +2,7 @@ velocity=1
 
 [GlobalParams]
   u = ${velocity}
-  p = 0
+  pressure = 0
   tau_type = opt
 []
 

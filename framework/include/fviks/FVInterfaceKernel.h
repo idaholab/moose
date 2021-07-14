@@ -79,11 +79,6 @@ public:
    */
   virtual void computeJacobian(const FaceInfo & fi);
 
-  /**
-   * Compute the off-diagonal contributions to the jacobian on the interface
-   */
-  virtual void computeOffDiagJacobian(const FaceInfo &){};
-
 protected:
   /**
    * @return Interface residual terms. The result will be multiplied by the face area
@@ -127,6 +122,21 @@ protected:
    * @return The mesh this object lives on. Either undisplaced or displaced
    */
   const MooseMesh & mesh() const { return _mesh; }
+
+  /**
+   * setup data useful for this object
+   */
+  void setupData(const FaceInfo & fi);
+
+  /**
+   * Process the provided residual given \p var_num and whether this is on the neighbor side
+   */
+  void processResidual(Real resid, unsigned int var_num, bool neighbor);
+
+  /**
+   * Process the derivatives for the provided residual and dof index
+   */
+  void processDerivatives(const ADReal & resid, dof_id_type dof_index);
 
   /// To be consistent with FE interfaces we introduce this quadrature point member. However, for FV
   /// calculations there should every only be one qudrature point and it should be located at the

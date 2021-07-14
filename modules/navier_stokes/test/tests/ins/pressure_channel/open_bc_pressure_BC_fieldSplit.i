@@ -36,14 +36,14 @@
     variable = p
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
   [../]
   [./x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 0
     integrate_p_by_parts = false
   [../]
@@ -52,7 +52,7 @@
     variable = vel_y
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 1
     integrate_p_by_parts = false
   [../]
@@ -114,7 +114,7 @@
       # S = CA^{-1}B
       # The preconditioning is accomplished via the following steps
       # (1) p^{(0)} = f_v - CA^{-1}f_u,
-      # (2) p = (-S)^{-1} p^{(0)}
+      # (2) pressure = (-S)^{-1} p^{(0)}
       # (3) u = A^{-1}(f_u-Bp)
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition'
       petsc_options_value = 'full selfp'

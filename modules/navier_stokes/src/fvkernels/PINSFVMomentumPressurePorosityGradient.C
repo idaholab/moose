@@ -9,6 +9,7 @@
 
 #include "PINSFVMomentumPressurePorosityGradient.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumPressurePorosityGradient);
 
@@ -18,7 +19,8 @@ PINSFVMomentumPressurePorosityGradient::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Introduces the coupled pressure times porosity gradient term "
                              "into the Navier-Stokes porous media momentum equation.");
-  params.addRequiredCoupledVar("p", "The pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -32,7 +34,7 @@ PINSFVMomentumPressurePorosityGradient::validParams()
 PINSFVMomentumPressurePorosityGradient::PINSFVMomentumPressurePorosityGradient(
     const InputParameters & params)
   : FVElementalKernel(params),
-    _p(coupledValue("p")),
+    _p(coupledValue(NS::pressure)),
     _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {

@@ -10,6 +10,7 @@
 #include "INSADMomentumNoBCBC.h"
 #include "MooseMesh.h"
 #include "INSADObjectTracker.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumNoBCBC);
 
@@ -20,7 +21,8 @@ INSADMomentumNoBCBC::validParams()
 
   params.addClassDescription("This class implements the 'No BC' boundary condition based on the "
                              "'Laplace' form of the viscous stress tensor.");
-  params.addRequiredCoupledVar("p", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addParam<bool>("integrate_p_by_parts",
                         true,
                         "Allows simulations to be run with pressure BC if set to false");
@@ -36,7 +38,7 @@ INSADMomentumNoBCBC::validParams()
 
 INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
   : ADVectorIntegratedBC(parameters),
-    _p(adCoupledValue("p")),
+    _p(adCoupledValue(NS::pressure)),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
     _mu(getADMaterialProperty<Real>("mu_name")),
     _form(getParam<MooseEnum>("viscous_form"))

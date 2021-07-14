@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "EnthalpyAux.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", EnthalpyAux);
 
@@ -17,7 +18,7 @@ EnthalpyAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rho", "Density");
   params.addRequiredCoupledVar("rho_et", "Total energy");
-  params.addCoupledVar("pressure", "Coupled value pressure");
+  params.addCoupledVar(NS::pressure, "Coupled value pressure");
   params.addClassDescription("This AuxKernel computes the specific enthalpy of the fluid"
                              "from the total energy and the pressure.");
 
@@ -28,7 +29,7 @@ EnthalpyAux::EnthalpyAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _rho_et(coupledValue("rho_et")),
-    _pressure(coupledValue("pressure"))
+    _pressure(coupledValue(NS::pressure))
 {
 }
 

@@ -32,5 +32,5 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
-  const VariableValue & _rhoE;
+  const VariableValue & _rho_et;
 };

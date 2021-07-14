@@ -105,7 +105,7 @@
     variable = u
     u_star = u_star
     v_star = v_star
-    p = p
+    pressure = p
     component = 0
   [../]
 
@@ -114,7 +114,7 @@
     variable = v
     u_star = u_star
     v_star = v_star
-    p = p
+    pressure = p
     component = 1
   [../]
 

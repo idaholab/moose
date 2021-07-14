@@ -15,6 +15,8 @@
 #include "Assembly.h"
 #include "FaceInfo.h"
 #include "MooseVariableFV.h"
+#include "Limiter.h"
+#include "MathUtils.h"
 #include "libmesh/elem.h"
 #include "libmesh/compare_types.h"
 
@@ -27,6 +29,8 @@ namespace Moose
 {
 namespace FV
 {
+class Limiter;
+
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
 /// properties, etc.) at the face (centroid).  These methods are used in the
@@ -125,6 +129,54 @@ interpolate(InterpMethod m,
     case InterpMethod::Average:
       result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
+    default:
+      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+  }
+}
+
+/**
+ * Computes the product of the advected and the advector based on the given interpolation method
+ */
+template <typename T1,
+          typename T2,
+          typename T3,
+          template <typename>
+          class Vector1,
+          template <typename>
+          class Vector2>
+void
+interpolate(InterpMethod m,
+            Vector1<T1> & result,
+            const T2 & fi_elem_advected,
+            const T2 & fi_neighbor_advected,
+            const Vector2<T3> & fi_elem_advector,
+            const Vector2<T3> & fi_neighbor_advector,
+            const FaceInfo & fi)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+      result = linearInterpolation(fi_elem_advected * fi_elem_advector,
+                                   fi_neighbor_advected * fi_neighbor_advector,
+                                   fi,
+                                   true);
+      break;
+    case InterpMethod::Upwind:
+    {
+      const auto face_advector = linearInterpolation(MetaPhysicL::raw_value(fi_elem_advector),
+                                                     MetaPhysicL::raw_value(fi_neighbor_advector),
+                                                     fi,
+                                                     true);
+      Real elem_coeff, neighbor_coeff;
+      if (face_advector * fi.normal() > 0)
+        elem_coeff = 1, neighbor_coeff = 0;
+      else
+        elem_coeff = 0, neighbor_coeff = 1;
+
+      result = elem_coeff * fi_elem_advected * fi_elem_advector +
+               neighbor_coeff * fi_neighbor_advected * fi_neighbor_advector;
+      break;
+    }
     default:
       mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
   }
@@ -300,6 +352,60 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
 
   return std::make_tuple(elem_one, elem_two, one_is_elem);
 }
+
+/**
+ * From Moukalled 12.30
+ *
+ * r_f = (phiC - phiU) / (phiD - phiC)
+ *
+ * However, this formula is only clear on grids where upwind locations can be readily determined,
+ * which is not the case for unstructured meshes. So we leverage a virtual upwind location and
+ * Moukalled 12.65
+ *
+ * phiD - phiU = 2 * grad(phi)_C * dCD ->
+ * phiU = phiD - 2 * grad(phi)_C * dCD
+ *
+ * Combining the two equations and performing some algebraic manipulation yields this equation for
+ * r_f:
+ *
+ * r_f = 2 * grad(phi)_C * dCD / (phiD - phiC) - 1
+ *
+ * This equation is clearly asymmetric considering the face between C and D because of the
+ * subscript on grad(phi). Hence this method can be thought of as constructing an r associated with
+ * the C side of the face
+ */
+template <typename Scalar, typename Vector>
+ADReal
+rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
+{
+  if ((phiD - phiC) == 0)
+    return 1e6 * MathUtils::sign(gradC * dCD) + 0 * (gradC * dCD + phiD + phiC);
+
+  return 2. * gradC * dCD / (phiD - phiC) - 1.;
 }
 
+/**
+ * Interpolates with a limiter
+ */
+template <typename Scalar, typename Vector>
+ADReal
+interpolate(const Limiter & limiter,
+            const Scalar & phiC,
+            const Scalar & phiD,
+            const Vector & gradC,
+            const FaceInfo & fi,
+            const bool C_is_elem)
+{
+  // Using beta, w_f, g nomenclature from Greenshields
+  const auto r_f = rF(phiC, phiD, gradC, C_is_elem ? fi.dCF() : RealVectorValue(-fi.dCF()));
+  const auto beta = limiter(r_f);
+
+  const auto w_f = C_is_elem ? fi.gC() : (1. - fi.gC());
+
+  const auto g = beta * (1. - w_f);
+
+  return (1. - g) * phiC + g * phiD;
+}
+
+}
 }

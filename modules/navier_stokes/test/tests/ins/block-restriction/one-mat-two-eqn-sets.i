@@ -89,7 +89,7 @@
   [./momentum_pressure0]
     type = INSADMomentumPressure
     variable = velocity0
-    p = p0
+    pressure = p0
     integrate_p_by_parts = true
     block = 0
   [../]
@@ -133,7 +133,7 @@
   [./momentum_pressure1]
     type = INSADMomentumPressure
     variable = velocity0
-    p = p0
+    pressure = p0
     integrate_p_by_parts = true
     block = 1
   [../]

@@ -10,6 +10,8 @@
 #include "IdealGasFluidProperties.h"
 #include "Conversion.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("FluidPropertiesApp", IdealGasFluidProperties);
 
 InputParameters
@@ -66,6 +68,16 @@ IdealGasFluidProperties::p_from_v_e(Real v, Real e) const
   return (_gamma - 1.0) * e / v;
 }
 
+ADReal
+IdealGasFluidProperties::p_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  if (v.value() == 0.0)
+    throw MooseException(name() + ": Invalid value of specific volume detected (v = " +
+                         Moose::stringify(v.value()) + ").");
+
+  return (_gamma - 1.0) * e / v;
+}
+
 void
 IdealGasFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
@@ -78,13 +90,19 @@ void
 IdealGasFluidProperties::p_from_v_e(
     const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
 {
-  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  p = p_from_v_e(v, e);
   dp_dv = -(_gamma - 1.0) * e / v / v;
   dp_de = (_gamma - 1.0) / v;
 }
 
 Real
 IdealGasFluidProperties::T_from_v_e(Real /*v*/, Real e) const
+{
+  return e / _cv;
+}
+
+ADReal
+IdealGasFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & e) const
 {
   return e / _cv;
 }
@@ -101,7 +119,7 @@ void
 IdealGasFluidProperties::T_from_v_e(
     const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
 {
-  T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  T = T_from_v_e(v, e);
   dT_dv = 0.0;
   dT_de = 1.0 / _cv;
 }
@@ -115,6 +133,19 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
   if (c2 < 0)
     mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
                    Moose::stringify(c2) + ".");
+
+  return std::sqrt(c2);
+}
+
+ADReal
+IdealGasFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  const auto T = T_from_v_e(v, e);
+
+  const auto c2 = _gamma * _R_specific * T;
+  if (MetaPhysicL::raw_value(c2) < 0)
+    mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
+                   Moose::stringify(MetaPhysicL::raw_value(c2)) + ".");
 
   return std::sqrt(c2);
 }
@@ -136,6 +167,21 @@ Real
 IdealGasFluidProperties::c_from_p_T(Real /*p*/, Real T) const
 {
   return std::sqrt(_cp * _R * T / (_cv * _molar_mass));
+}
+
+ADReal
+IdealGasFluidProperties::c_from_p_T(const ADReal & /*p*/, const ADReal & T) const
+{
+  return std::sqrt(_cp * _R * T / (_cv * _molar_mass));
+}
+
+void
+IdealGasFluidProperties::c_from_p_T(
+    const Real /*p*/, const Real T, Real & c, Real & dc_dp, Real & dc_dT) const
+{
+  c = std::sqrt(_cp * _R * T / (_cv * _molar_mass));
+  dc_dp = 0;
+  dc_dT = 0.5 / c * _cp * _R / (_cv * _molar_mass);
 }
 
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
@@ -319,6 +365,12 @@ IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
   return p * _molar_mass / (_R * T);
 }
 
+ADReal
+IdealGasFluidProperties::rho_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return p * _molar_mass / (_R * T);
+}
+
 void
 IdealGasFluidProperties::rho_from_p_T(const DualReal & p,
                                       const DualReal & T,
@@ -326,7 +378,7 @@ IdealGasFluidProperties::rho_from_p_T(const DualReal & p,
                                       DualReal & drho_dp,
                                       DualReal & drho_dT) const
 {
-  rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
+  rho = rho_from_p_T(p, T);
   drho_dp = _molar_mass / (_R * T);
   drho_dT = -p * _molar_mass / (_R * T * T);
 }
@@ -346,9 +398,24 @@ IdealGasFluidProperties::e_from_p_rho(Real p, Real rho) const
   return p / (_gamma - 1.0) / rho;
 }
 
+ADReal
+IdealGasFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
+{
+  return p / (_gamma - 1.0) / rho;
+}
+
 void
 IdealGasFluidProperties::e_from_p_rho(
     Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  e = e_from_p_rho(p, rho);
+  de_dp = 1.0 / (_gamma - 1.0) / rho;
+  de_drho = -p / (_gamma - 1.0) / rho / rho;
+}
+
+void
+IdealGasFluidProperties::e_from_p_rho(
+    const ADReal & p, const ADReal & rho, ADReal & e, ADReal & de_dp, ADReal & de_drho) const
 {
   e = e_from_p_rho(p, rho);
   de_dp = 1.0 / (_gamma - 1.0) / rho;
@@ -363,6 +430,21 @@ IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/) const
 
 void
 IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/, Real & e, Real & de_dT, Real & de_dv) const
+{
+  e = _cv * T;
+  de_dT = _cv;
+  de_dv = 0.0;
+}
+
+ADReal
+IdealGasFluidProperties::e_from_T_v(const ADReal & T, const ADReal & /*v*/) const
+{
+  return _cv * T;
+}
+
+void
+IdealGasFluidProperties::e_from_T_v(
+    const ADReal & T, const ADReal & /*v*/, ADReal & e, ADReal & de_dT, ADReal & de_dv) const
 {
   e = _cv * T;
   de_dT = _cv;

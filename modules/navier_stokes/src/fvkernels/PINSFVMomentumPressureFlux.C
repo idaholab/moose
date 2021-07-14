@@ -22,7 +22,8 @@ PINSFVMomentumPressureFlux::validParams()
                              "incompressible Navier-Stokes momentum equation. This kernel "
                              "is also executed on boundaries.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
-  params.addRequiredCoupledVar("p", "Pressure variable");
+  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
@@ -35,8 +36,8 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
   : FVFluxKernel(params),
     _eps(coupledValue("porosity")),
     _eps_neighbor(coupledNeighborValue("porosity")),
-    _p_elem(adCoupledValue("p")),
-    _p_neighbor(adCoupledNeighborValue("p")),
+    _p_elem(adCoupledValue(NS::pressure)),
+    _p_neighbor(adCoupledNeighborValue(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

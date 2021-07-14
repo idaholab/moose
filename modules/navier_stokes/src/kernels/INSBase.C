@@ -9,6 +9,7 @@
 
 #include "INSBase.h"
 #include "Assembly.h"
+#include "NS.h"
 
 InputParameters
 INSBase::validParams()
@@ -22,7 +23,8 @@ INSBase::validParams()
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar("p", "pressure");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
@@ -49,13 +51,13 @@ INSBase::INSBase(const InputParameters & parameters)
     _u_vel(coupledValue("u")),
     _v_vel(coupledValue("v")),
     _w_vel(coupledValue("w")),
-    _p(coupledValue("p")),
+    _p(coupledValue(NS::pressure)),
 
     // Gradients
     _grad_u_vel(coupledGradient("u")),
     _grad_v_vel(coupledGradient("v")),
     _grad_w_vel(coupledGradient("w")),
-    _grad_p(coupledGradient("p")),
+    _grad_p(coupledGradient(NS::pressure)),
 
     // second derivative tensors
     _second_u_vel(coupledSecond("u")),
@@ -76,7 +78,7 @@ INSBase::INSBase(const InputParameters & parameters)
     _u_vel_var_number(coupled("u")),
     _v_vel_var_number(coupled("v")),
     _w_vel_var_number(coupled("w")),
-    _p_var_number(coupled("p")),
+    _p_var_number(coupled(NS::pressure)),
 
     _gravity(getParam<RealVectorValue>("gravity")),
 

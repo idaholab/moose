@@ -303,4 +303,10 @@ public:
   virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const = 0;
   virtual const MooseArray<Number> & dofValuesDuDotDotDu() const = 0;
   virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const = 0;
+
+  /**
+   * tag values getters
+   */
+  virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
+  virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
 };
