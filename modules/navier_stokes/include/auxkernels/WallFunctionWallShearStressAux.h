@@ -12,7 +12,9 @@
 #include "AuxKernel.h"
 
 #include "INSFVVelocityVariable.h"
-
+/**
+ * Computes wall shear stress values based on wall functions.
+ */
 class WallFunctionWallShearStressAux : public AuxKernel
 {
 public:
@@ -39,5 +41,6 @@ protected:
   /// Dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
 
+  /// Wall boundaries
   std::vector<BoundaryName> _wall_boundary_names;
 };

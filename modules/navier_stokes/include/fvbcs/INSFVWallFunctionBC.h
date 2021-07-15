@@ -12,7 +12,10 @@
 #include "INSFVNaturalFreeSlipBC.h"
 
 #include "INSFVVelocityVariable.h"
-
+/**
+ * A class for setting the wall shear stress at the walls, based on
+ * the standard wall function formulation.
+ */
 class INSFVWallFunctionBC : public INSFVNaturalFreeSlipBC
 {
 public:
@@ -41,5 +44,4 @@ protected:
   /// Dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
 
-  // std::vector<BoundaryName> _wall_boundary_names;
 };
