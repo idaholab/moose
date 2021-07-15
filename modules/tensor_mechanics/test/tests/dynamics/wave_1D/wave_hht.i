@@ -24,229 +24,125 @@
   ymax = 4.0
   zmin = 0.0
   zmax = 0.1
+  use_displaced_mesh = false
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-[]
-
-[Kernels]
-  [./DynamicTensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/DynamicMaster]
+  [all]
+    add_variables = true
     alpha = -0.3
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
     beta = 0.3025
     gamma = 0.6
-    alpha = -0.3
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    beta = 0.3025
-    gamma = 0.6
-    alpha = -0.3
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-    beta = 0.3025
-    gamma = 0.6
-    alpha = -0.3
-  [../]
-
+  []
 []
-
-[AuxKernels]
-  [./accel_x]
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_x]
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
-  [./accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
-  [./accel_z]
-    type = NewmarkAccelAux
-    variable = accel_z
-    displacement = disp_z
-    velocity = vel_z
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_z]
-    type = NewmarkVelAux
-    variable = vel_z
-    acceleration = accel_z
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
-[]
-
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
-    value=0.0
-  [../]
-  [./top_x]
+    value = 0.0
+  []
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
-    value=0.0
-  [../]
-  [./top_z]
+    value = 0.0
+  []
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
-    value=0.0
-  [../]
-  [./right_x]
+    value = 0.0
+  []
+  [right_x]
     type = DirichletBC
     variable = disp_x
     boundary = right
-    value=0.0
-  [../]
-  [./right_z]
+    value = 0.0
+  []
+  [right_z]
     type = DirichletBC
     variable = disp_z
     boundary = right
-    value=0.0
-  [../]
-  [./left_x]
+    value = 0.0
+  []
+  [left_x]
     type = DirichletBC
     variable = disp_x
     boundary = left
-    value=0.0
-  [../]
-  [./left_z]
+    value = 0.0
+  []
+  [left_z]
     type = DirichletBC
     variable = disp_z
     boundary = left
-    value=0.0
-  [../]
-  [./front_x]
+    value = 0.0
+  []
+  [front_x]
     type = DirichletBC
     variable = disp_x
     boundary = front
-    value=0.0
-  [../]
-  [./front_z]
+    value = 0.0
+  []
+  [front_z]
     type = DirichletBC
     variable = disp_z
     boundary = front
-    value=0.0
-  [../]
-  [./back_x]
+    value = 0.0
+  []
+  [back_x]
     type = DirichletBC
     variable = disp_x
     boundary = back
-    value=0.0
-  [../]
-  [./back_z]
+    value = 0.0
+  []
+  [back_z]
     type = DirichletBC
     variable = disp_z
     boundary = back
-    value=0.0
-  [../]
-  [./bottom_x]
+    value = 0.0
+  []
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
-    value=0.0
-  [../]
-  [./bottom_z]
+    value = 0.0
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
-    value=0.0
-  [../]
-  [./bottom_y]
+    value = 0.0
+  []
+  [bottom_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = bottom
     function = displacement_bc
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1 0'
-  [../]
+  []
 
-  [./strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
-    block = 0
-  [../]
+  []
 
-  [./density]
+  [density]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'density'
     prop_values = '1'
-  [../]
+  []
 
 []
 
@@ -259,40 +155,38 @@
   dt = 0.1
 []
 
-
 [Functions]
-  [./displacement_bc]
+  [displacement_bc]
     type = PiecewiseLinear
     data_file = 'sine_wave.csv'
     format = columns
-  [../]
-
+  []
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
-  [./disp_1]
+  []
+  [disp_1]
     type = NodalVariableValue
     nodeid = 1
     variable = vel_y
-  [../]
-  [./disp_2]
+  []
+  [disp_2]
     type = NodalVariableValue
     nodeid = 3
     variable = vel_y
-  [../]
-  [./disp_3]
+  []
+  [disp_3]
     type = NodalVariableValue
     nodeid = 10
     variable = vel_y
-  [../]
-  [./disp_4]
+  []
+  [disp_4]
     type = NodalVariableValue
     nodeid = 14
     variable = vel_y
-  [../]
+  []
 []
 
 [Outputs]

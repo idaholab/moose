@@ -39,12 +39,6 @@ DynamicTensorMechanicsAction::validParams()
 {
   InputParameters params = TensorMechanicsAction::validParams();
   params.addClassDescription("Set up dynamic stress divergence kernels");
-  params.addParam<MaterialPropertyName>("zeta",
-                                        0.0,
-                                        "Name of material property or a constant real "
-                                        "number defining the zeta parameter for the "
-                                        "Rayleigh damping.");
-  params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
   params.addParam<bool>("static_initialization",
                         false,
                         "Set to true get the system to "
@@ -61,6 +55,10 @@ DynamicTensorMechanicsAction::validParams()
       std::vector<AuxVariableName>({"accel_x", "accel_y", "accel_z"}),
       "Names of the acceleration variables");
 
+  params.addParam<Real>("alpha",
+                        0,
+                        "alpha parameter for mass dependent numerical damping induced "
+                        "by HHT time integration scheme");
   params.addParam<Real>("beta", 0.25, "beta parameter for Newmark Time integration");
   params.addParam<Real>("gamma", 0.5, "gamma parameter for Newmark Time integration");
   params.addParam<MaterialPropertyName>("eta",
@@ -68,9 +66,16 @@ DynamicTensorMechanicsAction::validParams()
                                         "Name of material property or a constant real "
                                         "number defining the eta parameter for the "
                                         "Rayleigh damping.");
+  params.addParam<MaterialPropertyName>("zeta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the zeta parameter for the "
+                                        "Rayleigh damping.");
 
   params.addParam<MaterialPropertyName>(
       "density", "density", "Name of Material Property that provides the density");
+  params.addParamNamesToGroup("alpha beta gamma eta zeta", "Time integration parameters");
+
   return params;
 }
 
@@ -113,7 +118,7 @@ DynamicTensorMechanicsAction::act()
   {
     //
     // Note: AuxKernels that are limited to TIMESTEP_END to not get their dependencies
-    // resolved automatically. Thus we _must_ construct the accleration kernels _first_.
+    // resolved automatically. Thus we _must_ construct the acceleration kernels _first_.
     // NewmarkAccelAux only uses the old velocity.
     //
 
