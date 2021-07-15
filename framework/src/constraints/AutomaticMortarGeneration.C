@@ -30,6 +30,7 @@
 #include "libmesh/quadrature_nodal.h"
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/enum_to_string.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -624,12 +625,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 {
-  // We maintain a mapping from lower-dimensional secondary elements in
-  // the original mesh to (sets of) elements in mortar_segment_mesh.
-  // This allows us to quickly determine which elements need to be
-  // split.
-  std::map<const Elem *, std::set<Elem *>> secondary_elems_to_mortar_segments;
-
   // Add an integer flag to mortar segment mesh to keep track of which subelem
   // of second order primal elements mortar segments correspond to
   auto secondary_sub_elem = mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
@@ -669,7 +664,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     const auto primary_subd_id = pr.first;
     const auto secondary_subd_id = pr.second;
 
-    // 1. Build k-d tree for primary interface to generate candidates
+    // Build k-d tree for use in Step 1.2 for primary interface coarse screening
     NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(mesh, primary_subd_id);
     subdomain_kd_tree_t kd_tree(
         3, mesh_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(/*max leaf=*/10));
@@ -677,6 +672,53 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
+    // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
+    auto get_sub_elem_nodes = [](const ElemType type,
+                                 const unsigned int sub_elem) -> std::array<unsigned int, 4> {
+      switch (type)
+      {
+        case TRI3:
+          return {{0, 1, 2, /*dummy, out of range*/ 10}};
+        case QUAD4:
+          return {{0, 1, 2, 3}};
+        case TRI6:
+          switch (sub_elem)
+          {
+            case 0:
+              return {{0, 3, 5, /*dummy, out of range*/ 10}};
+            case 1:
+              return {{3, 4, 5, /*dummy, out of range*/ 10}};
+            case 2:
+              return {{3, 1, 4, /*dummy, out of range*/ 10}};
+            case 3:
+              return {{5, 4, 2, /*dummy, out of range*/ 10}};
+            default:
+              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
+          }
+        case QUAD9:
+          switch (sub_elem)
+          {
+            case 0:
+              return {{0, 4, 8, 7}};
+            case 1:
+              return {{4, 1, 5, 8}};
+            case 2:
+              return {{8, 5, 2, 6}};
+            case 3:
+              return {{7, 8, 6, 3}};
+            default:
+              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
+          }
+        default:
+          mooseError("get_sub_elem_inds: Face element type: ",
+                     libMesh::Utility::enum_to_string<ElemType>(type),
+                     " invalid for 3D mortar");
+      }
+    };
+
+    /**
+     *  Step 1: Build mortar segments for all secondary elements
+     */
     for (MeshBase::const_element_iterator el = mesh.active_local_elements_begin(),
                                           end_el = mesh.active_local_elements_end();
          el != end_el;
@@ -688,67 +730,48 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (secondary_side_elem->subdomain_id() != secondary_subd_id)
         continue;
 
-      /**
-       * Linearize element
-       * For first order face elements (Tri3 and Quad4) elements are simply linearized around center
-       * For second order face elements (Tri6 and Quad9), elements are sub-divided four times, then
-       * each of the sub-elements is linearized
-       */
-
-      // Get sub-element nodes
-      std::vector<std::array<unsigned int, 4>> sub_elem_nodes(secondary_side_elem->n_sub_elem());
-      switch (secondary_side_elem->type())
-      {
-        case TRI3:
-          sub_elem_nodes[0] = {{0, 1, 2}};
-          break;
-        case QUAD4:
-          sub_elem_nodes[0] = {{0, 1, 2, 3}};
-          break;
-        case TRI6:
-          sub_elem_nodes[0] = {{0, 3, 5}};
-          sub_elem_nodes[1] = {{3, 4, 5}};
-          sub_elem_nodes[2] = {{3, 1, 4}};
-          sub_elem_nodes[3] = {{5, 4, 2}};
-          break;
-        case QUAD9:
-          sub_elem_nodes[0] = {{0, 4, 8, 7}};
-          sub_elem_nodes[1] = {{4, 1, 5, 8}};
-          sub_elem_nodes[2] = {{8, 5, 2, 6}};
-          sub_elem_nodes[3] = {{7, 8, 6, 3}};
-          break;
-        default:
-          mooseError(
-              "Face element type: ", secondary_side_elem->type(), "not supported for 3D mortar");
-      }
-
-      // Calculate center point and normal then build each sub-element
-      // Note that we are linearizing subelements, so instead of using shape functions to
-      // determine center points and normals we take average of the sub-element vertices
-      // This is an important distinction, averaging over all nodes of second order elements
-      // produces a mortar segment mesh with significant gaps
       std::vector<MortarSegmentHelper *> mortar_segment_helper(secondary_side_elem->n_sub_elem());
       const auto nodal_normals = getNodalNormals(*secondary_side_elem);
+
+      /**
+       * Step 1.1: Linearize secondary face elements
+       *
+       * For first order face elements (Tri3 and Quad4) elements are simply linearized around center
+       * For second order face elements (Tri6 and Quad9), elements are sub-divided into four first
+       * order elements then each of the sub-elements is linearized around their respective centers
+       */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
         Point center;
         Point normal;
         std::vector<Point> nodes(secondary_side_elem->n_vertices());
+
+        // Get indices of sub-element nodes in element
+        auto sub_elem_nodes = get_sub_elem_nodes(secondary_side_elem->type(), sel);
+
+        // Loop through sub_element nodes, collect points and compute center and normal
         for (auto iv : make_range(secondary_side_elem->n_vertices()))
         {
-          const auto n = sub_elem_nodes[sel][iv];
+          const auto n = sub_elem_nodes[iv];
           nodes[iv] = secondary_side_elem->point(n);
           center += secondary_side_elem->point(n);
           normal += nodal_normals[n];
         }
         center /= secondary_side_elem->n_vertices();
         normal /= secondary_side_elem->n_vertices();
+
+        // Build and store linearized sub-elements for later use
         mortar_segment_helper[sel] = new MortarSegmentHelper(nodes, center, normal);
       }
 
-      // Search point for performing Nanoflann searches.
+      /**
+       * Step 1.2: Coarse screening using a k-d tree to find nodes on the primary interface that are
+       *    'close to' a center point of the secondary element.
+       */
+
+      // Search point for performing Nanoflann (k-d tree) searches.
       // In each case we use the center point of the original element (not sub-elements for second
-      // order elements). This is because we want to do search for all sub-elements simultaneously
+      // order elements). This is to do search for all sub-elements simultaneously
       std::array<Real, 3> query_pt;
       Point center_point;
       switch (secondary_side_elem->type())
@@ -776,7 +799,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       // first search is done on neighbors
       const std::size_t num_results = 3;
 
-      // Get candidate nodes
       // Initialize result_set and do the search.
       std::vector<size_t> ret_index(num_results);
       std::vector<Real> out_dist_sqr(num_results);
@@ -784,14 +806,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
       kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParams(10));
 
-      // Once we've processed a primary elem we don't want to revisit
+      // Initialize list of processed primary elements, we don't want to revisit processed elements
       std::set<const Elem *> processed_primary_elems;
 
-      // Check closest nodes to find an element with non-trivial overlap
+      // Initialize candidate set and flag for switching between coarse screening and breadth-first
+      // search
       bool primary_elem_found = false;
       std::set<const Elem *> primary_elem_candidates;
 
-      // Add all elems near candidate points to list to check
+      // Loop candidate nodes (returned by Nanoflann) and add all adjoining elems to candidate set
       for (auto r : make_range(result_set.size()))
       {
         // Verify that the squared distance we compute is the same as nanoflann's
@@ -808,6 +831,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           primary_elem_candidates.insert(elem);
       }
 
+      /**
+       * Step 1.3: Loop through primary candidate nodes, create mortar segments
+       *
+       * Once an element with non-trivial projection onto secondary element identified, switch
+       * to breadth-first search (drop all current candidates and add only neighbors of elements
+       * with non-trivial overlap)
+       */
       while (!primary_elem_candidates.empty())
       {
         const Elem * primary_elem_candidate = *primary_elem_candidates.begin();
@@ -816,65 +846,52 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         if (processed_primary_elems.count(primary_elem_candidate))
           continue;
 
-// TODO: don't need to reinitialize this map each time, use map<type, vector<vector>> maybe
-// or think of better way Get sub-element nodes
-        std::vector<std::array<unsigned int, 4>> primary_sub_elem_nodes(
-            primary_elem_candidate->n_sub_elem());
-        switch (primary_elem_candidate->type())
-        {
-          case TRI3:
-            primary_sub_elem_nodes[0] = {{0, 1, 2}};
-            break;
-          case QUAD4:
-            primary_sub_elem_nodes[0] = {{0, 1, 2, 3}};
-            break;
-          case TRI6:
-            primary_sub_elem_nodes[0] = {{0, 3, 5}};
-            primary_sub_elem_nodes[1] = {{3, 4, 5}};
-            primary_sub_elem_nodes[2] = {{3, 1, 4}};
-            primary_sub_elem_nodes[3] = {{5, 4, 2}};
-            break;
-          case QUAD9:
-            primary_sub_elem_nodes[0] = {{0, 4, 8, 7}};
-            primary_sub_elem_nodes[1] = {{4, 1, 5, 8}};
-            primary_sub_elem_nodes[2] = {{8, 5, 2, 6}};
-            primary_sub_elem_nodes[3] = {{7, 8, 6, 3}};
-            break;
-          default:
-            mooseError("Face element type: ",
-                       primary_elem_candidate->type(),
-                       "not supported for 3D mortar");
-        }
-
-        // Linearize and clip primary sub-element against secondary sub-elements, then triangulate.
-        // Produces a set of nodes with a map that associates nodes to tri elements
-        // Note that mortar segment helper simply appends nodes to list, so list of nodes will
-        // include nodes for all sub-elements of this secondary and primary pair
+        // Initialize set of nodes used to construct mortar segmenet elements
         std::vector<Point> nodal_points;
+
+        // Initialize map from mortar segmenet elements to nodes
         std::vector<std::array<unsigned int, 3>> elem_to_node_map;
+
+        // Initialize list of secondary and primary sub-elements that formed each mortar segment
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
 
-// TODO: change how nodal_points and elem_to_node_map output, right now each helper
-// simply appends their nodes and map at end so it's simple to check if there was
-// non-trivial overlap but this is error-prone.
-        for (auto iel : make_range(secondary_side_elem->n_sub_elem()))
+        /**
+         * Step 1.3.2: Sub-divide primary element candidate, then project onto secondary
+         * sub-elements, perform polygon clipping, and triangulate to form mortar segments
+         */
+        for (auto p_el : make_range(primary_elem_candidate->n_sub_elem()))
         {
-          for (auto jel : make_range(primary_elem_candidate->n_sub_elem()))
+          // Get nodes of primary sub-elements
+          auto sub_elem_nodes = get_sub_elem_nodes(primary_elem_candidate->type(), p_el);
+
+          // Get list of primary sub-element vertex nodes
+          std::vector<Point> primary_sub_elem(primary_elem_candidate->n_vertices());
+          for (auto iv : make_range(primary_elem_candidate->n_vertices()))
           {
-            std::vector<Point> nodes(primary_elem_candidate->n_vertices());
-            for (auto iv : make_range(primary_elem_candidate->n_vertices()))
-            {
-              const auto n = primary_sub_elem_nodes[jel][iv];
-              nodes[iv] = primary_elem_candidate->point(n);
-            }
-            mortar_segment_helper[iel]->getMortarSegments(nodes, nodal_points, elem_to_node_map);
+            const auto n = sub_elem_nodes[iv];
+            primary_sub_elem[iv] = primary_elem_candidate->point(n);
+          }
+
+          // Loop through secondary sub-elements
+          for (auto s_el : make_range(secondary_side_elem->n_sub_elem()))
+          {
+            // Mortar segment helpers were defined for each secondary sub-element, they will:
+            //  1. Project primary sub-element onto linearized secondary sub-element
+            //  2. Clip projected primary sub-element against secondary sub-element
+            //  3. Triangulate clipped polygon to form mortar segments
+            //
+            // Mortar segment helpers append a list of mortar segment nodes and connectivities that
+            // can be directly used to build mortar segments
+            mortar_segment_helper[s_el]->getMortarSegments(
+                primary_sub_elem, nodal_points, elem_to_node_map);
 
             // Keep track of which secondary and primary sub-elements created segment
             for (auto i = sub_elem_map.size(); i < elem_to_node_map.size(); ++i)
-              sub_elem_map.push_back(std::make_pair(iel, jel));
+              sub_elem_map.push_back(std::make_pair(s_el, p_el));
           }
         }
 
+        // Mark primary elmenet as processed and remove from candidate list
         processed_primary_elems.insert(primary_elem_candidate);
         primary_elem_candidates.erase(primary_elem_candidate);
 
@@ -903,7 +920,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             primary_elem_candidates.insert(neighbor);
           }
 
-          // Loop through points, create nodes
+          /**
+           * Step 1.3.3: Create mortar segments and add to mortar segment mesh
+           */
           std::vector<Node *> new_nodes;
           for (auto pt : nodal_points)
           {
@@ -945,19 +964,26 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         }
         // End loop through primary element candidates
       }
-      // If secondary element has significant remaining area after being projected, add to msm
-      // with weight equal to remaining area fraction. This is an approximation, should really add
-      // remaining mortar segment elements in correct place but I think it will be good enough for
-      // most cases.
+
+      /**
+       * Step 1.4: Create mortar segments with no corresponding primary element
+       *
+       * If secondary sub-element has significant area remaining without associated primary element,
+       * add the entire sub-element to MSM but set weight equal to remaining area fraction.
+       */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
         Real remainder = mortar_segment_helper[sel]->remainder();
         if (remainder > 1e-8)
         {
-// TODO: Make the user aware this is happening. It is a standard behavior for some
-// problems but we want to make sure that when primary elems aren't found that should be
-// that the user can know what's going on.
-// Maybe make Mortar Diagnostics info, that outputs number of segments, number of secondary elems without pair, etc.
+          // Increment counter of secondary elements either partially or fully lacking primary
+          if (remainder == 1.0)
+            mooseDoOnce(
+                mooseWarning("Some secondary elements on mortar interface were unable to identify"
+                             "a corresponding primary element; this may be expected depending on "
+                             "problem geometry"
+                             "but may indicate a failure of the element search or projection"));
+
           std::vector<Node *> new_nodes;
           for (auto n : make_range(secondary_side_elem->n_vertices()))
           {

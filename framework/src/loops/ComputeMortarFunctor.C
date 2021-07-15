@@ -301,10 +301,10 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
 
   // Get sub-elem (for second order meshes, otherwise trivial)
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_ind);
-  // const ElemType type = primal_elem->type();
+  const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_inds = [primal_elem, sub_elem]()->std::array<unsigned int,4>{
-    switch(primal_elem->type())
+  auto get_sub_elem_inds = [primal_type, sub_elem]() -> std::array<unsigned int, 4> {
+    switch (primal_type)
     {
       case TRI3:
         return {{0, 1, 2, /*dummy, out of range*/ 10}};
@@ -342,15 +342,15 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
         }
       default:
         mooseError("get_sub_elem_inds: Face element type: ",
-            libMesh::Utility::enum_to_string<ElemType>(primal_elem->type()),
-            " invalid for 3D mortar");
+                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
+                   " invalid for 3D mortar");
     }
   };
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
-  auto transform_qp = [primal_elem, sub_elem](const Real nu, const Real xi){
-    switch(primal_elem->type())
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi) {
+    switch (primal_type)
     {
       case TRI3:
         return Point(nu, xi, 0);
@@ -388,8 +388,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
         }
       default:
         mooseError("transform_qp: Face element type: ",
-            libMesh::Utility::enum_to_string<ElemType>(primal_elem->type()),
-            " invalid for 3D mortar");
+                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
+                   " invalid for 3D mortar");
     }
   };
 
@@ -414,10 +414,10 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     xi2.value() = _qrule_msm->qp(qp)(1);
     xi2.derivatives()[1] = 1.0;
     VectorValue<Dual2> xi(xi1, xi2, 0);
-    auto && primal_type = primal_elem->type();
     unsigned int current_iterate = 0, max_iterates = 10;
 
-    // Newton iteration to find reference coords where qp projects
+    // Project qp from mortar segments to first order sub-elements (elements in case of first order
+    // geometry)
     do
     {
       VectorValue<Dual2> x1;
@@ -444,6 +444,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
 
     if (current_iterate < max_iterates)
     {
+      // Transfer quadrature point from sub-element to element and store
       q_pts[qp] = transform_qp(xi(0).value(), xi(1).value());
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
