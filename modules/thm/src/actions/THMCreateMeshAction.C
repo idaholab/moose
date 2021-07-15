@@ -49,7 +49,8 @@ THMCreateMeshAction::act()
         params.applyParameters(p->getObjectParams());
       params.set<MooseMesh *>("mesh") = _mesh.get();
       params.set<bool>("use_nonlinear") = _app.useNonlinear();
-      params.set<bool>("error_on_jacobian_nonzero_reallocation") = true;
+      if (!p || !p->getObjectParams().isParamSetByUser("error_on_jacobian_nonzero_reallocation"))
+        params.set<bool>("error_on_jacobian_nonzero_reallocation") = true;
       _problem = _factory.create<FEProblemBase>(class_name, "THM:problem", params);
     }
   }
