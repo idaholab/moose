@@ -30,7 +30,7 @@ FormLossFromExternalApp1Phase::addMooseObjects()
   FormLoss1PhaseBase::addMooseObjects();
 
   {
-    const std::string class_name = "CoupledVariableValueMaterial";
+    const std::string class_name = "ADCoupledVariableValueMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<MaterialPropertyName>("prop_name") = "K_prime";
