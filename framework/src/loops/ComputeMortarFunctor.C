@@ -72,8 +72,8 @@ ComputeMortarFunctor::operator()()
   // Array to hold custom quadrature point locations on the secondary and primary sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-
-  auto secondary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
+  auto secondary_sub_elem_ind =
+      _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
   auto primary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem");
 
   unsigned int num_cached = 0;
@@ -311,7 +311,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       case QUAD4:
         return {{0, 1, 2, 3}};
       case TRI6:
-        switch(sub_elem)
+        switch (sub_elem)
         {
           case 0:
             return {{0, 3, 5, /*dummy, out of range*/ 10}};
@@ -322,11 +322,10 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           case 3:
             return {{5, 4, 2, /*dummy, out of range*/ 10}};
           default:
-            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
-                sub_elem);
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ", sub_elem);
         }
       case QUAD9:
-        switch(sub_elem)
+        switch (sub_elem)
         {
           case 0:
             return {{0, 4, 8, 7}};
@@ -337,8 +336,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           case 3:
             return {{7, 8, 6, 3}};
           default:
-            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
-                sub_elem);
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ", sub_elem);
         }
       default:
         mooseError("get_sub_elem_inds: Face element type: ",
@@ -357,7 +355,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       case QUAD4:
         return Point(nu, xi, 0);
       case TRI6:
-        switch(sub_elem)
+        switch (sub_elem)
         {
           case 0:
             return Point(0.5 * nu, 0.5 * xi, 0);
@@ -368,11 +366,10 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           case 3:
             return Point(0.5 * nu, 0.5 * (1 + xi), 0);
           default:
-            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
-                sub_elem);
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ", sub_elem);
         }
       case QUAD9:
-        switch(sub_elem)
+        switch (sub_elem)
         {
           case 0:
             return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
@@ -383,8 +380,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           case 3:
             return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
           default:
-            mooseError("get_sub_elem_inds: Invalid sub_elem: ",
-                sub_elem);
+            mooseError("get_sub_elem_inds: Invalid sub_elem: ", sub_elem);
         }
       default:
         mooseError("transform_qp: Face element type: ",
@@ -422,7 +418,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     {
       VectorValue<Dual2> x1;
       for (auto n : make_range(primal_elem->n_vertices()))
-        x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) * primal_elem->point(sub_elem_inds[n]);
+        x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) *
+              primal_elem->point(sub_elem_inds[n]);
       auto u = x1 - x0;
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
                            u(2) * normal(0) - u(0) * normal(2),
