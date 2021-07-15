@@ -33,13 +33,11 @@
   [rho_mat]
     type = ADConstantMaterial
     property_name = rho
-    derivative_vars = 'arhoA'
     value = 1000
   []
   [vel_mat]
     type = ADConstantMaterial
     property_name = vel
-    derivative_vars = 'arhoA arhouA'
     value = 5
   []
   [D_h_mat]
@@ -50,7 +48,6 @@
   [mu_mat]
     type = ADConstantMaterial
     property_name = mu
-    derivative_vars = 'arhoA arhouA arhoEA'
     value = 0.1
   []
 

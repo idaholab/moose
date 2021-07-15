@@ -25,14 +25,14 @@
 
 [Materials]
   [f_wall_mat]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     block = 'pipe'
-    prop_names = 'f_D df_D/drhoA df_D/drhouA df_D/drhoEA'
-    prop_values = '0.123 0 0 0'
+    prop_names = 'f_D'
+    prop_values = '0.123'
   []
 
   [htc_wall_mat]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     block = 'pipe'
     prop_names = 'Hw'
     prop_values = '4.321'
