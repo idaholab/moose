@@ -97,7 +97,7 @@ p_out = 7e6
 
 [Postprocessors]
   [inlet_in_m_dot]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = 'inlet_bc'
     equation = mass
   []
@@ -147,7 +147,7 @@ p_out = 7e6
     equation = mass
   []
   [outlet_out_m_dot]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = 'outlet_bc'
     equation = mass
   []

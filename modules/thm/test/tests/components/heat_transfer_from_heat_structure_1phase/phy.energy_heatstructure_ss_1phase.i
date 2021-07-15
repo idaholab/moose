@@ -114,14 +114,14 @@
 
 [Postprocessors]
   [E_in]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = inlet
     equation = energy
     execute_on = 'initial timestep_end'
   []
 
   [E_out]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = outlet
     equation = energy
     execute_on = 'initial timestep_end'
