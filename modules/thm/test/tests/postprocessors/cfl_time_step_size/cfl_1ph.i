@@ -74,7 +74,7 @@
 
 [Postprocessors]
   [cfl]
-    type = CFLTimeStepSize
+    type = ADCFLTimeStepSize
     CFL = 0.5
     vel_names = 'vel'
     c_names = 'c'
