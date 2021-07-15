@@ -91,7 +91,7 @@ Shaft::addMooseObjects()
   }
 
   {
-    std::string class_name = "ShaftTimeDerivativeScalarKernel";
+    std::string class_name = "ADShaftTimeDerivativeScalarKernel";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = _omega_var_name;
     params.set<std::vector<UserObjectName>>("uo_names") = {uo_names};
@@ -100,7 +100,7 @@ Shaft::addMooseObjects()
 
   for (std::size_t i = 0; i < uo_names.size(); i++)
   {
-    std::string class_name = "ShaftComponentTorqueScalarKernel";
+    std::string class_name = "ADShaftComponentTorqueScalarKernel";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = _omega_var_name;
     params.set<UserObjectName>("shaft_connected_component_uo") = uo_names[i];

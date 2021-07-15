@@ -31,7 +31,7 @@ ShaftConnectedMotor::addMooseObjects()
 {
   const UserObjectName & uo_name = getShaftConnectedUserObjectName();
   {
-    std::string class_name = "ShaftConnectedMotorUserObject";
+    std::string class_name = "ADShaftConnectedMotorUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("torque") = _torque;
     params.set<Real>("inertia") = _inertia;

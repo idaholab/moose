@@ -216,6 +216,12 @@ e_from_arhoA_arhouA_arhoEA(Real arhoA,
   de_darhoEA_val = de_darhoEA(arhoA);
 }
 
+ADReal
+e_from_arhoA_arhouA_arhoEA(ADReal arhoA, ADReal arhouA, ADReal arhoEA)
+{
+  return arhoEA / arhoA - 0.5 * arhouA * arhouA / (arhoA * arhoA);
+}
+
 void
 e_from_E_vel(Real E, Real vel, Real & e, Real & de_dE, Real & de_dvel)
 {
@@ -265,6 +271,12 @@ h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, R
   dh_de = 1.0;
   dh_dp = 1.0 / rho;
   dh_drho = -p / (rho * rho);
+}
+
+ADReal
+h_from_e_p_rho(ADReal e, ADReal p, ADReal rho)
+{
+  return e + p / rho;
 }
 
 bool

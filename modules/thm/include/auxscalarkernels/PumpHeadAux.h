@@ -2,7 +2,7 @@
 
 #include "AuxScalarKernel.h"
 
-class ShaftConnectedPump1PhaseUserObject;
+class ADShaftConnectedPump1PhaseUserObject;
 
 /**
  * Head computed in the 1-phase shaft-connected pump
@@ -15,7 +15,7 @@ public:
 protected:
   virtual Real computeValue();
   /// 1-phase shaft-connected pump user object
-  const ShaftConnectedPump1PhaseUserObject & _pump_uo;
+  const ADShaftConnectedPump1PhaseUserObject & _pump_uo;
 
 public:
   static InputParameters validParams();

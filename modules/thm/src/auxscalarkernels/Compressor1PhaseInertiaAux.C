@@ -1,5 +1,5 @@
 #include "Compressor1PhaseInertiaAux.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Compressor1PhaseInertiaAux);
 
@@ -15,12 +15,12 @@ Compressor1PhaseInertiaAux::validParams()
 
 Compressor1PhaseInertiaAux::Compressor1PhaseInertiaAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _compressor_uo(getUserObject<ShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
+    _compressor_uo(getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
 Real
 Compressor1PhaseInertiaAux::computeValue()
 {
-  return _compressor_uo.getMomentOfInertia();
+  return MetaPhysicL::raw_value(_compressor_uo.getMomentOfInertia());
 }

@@ -301,6 +301,8 @@ void e_from_arhoA_arhouA_arhoEA(Real arhoA,
                                 Real & de_darhouA,
                                 Real & de_darhoEA);
 
+ADReal e_from_arhoA_arhouA_arhoEA(ADReal arhoA, ADReal arhouA, ADReal arhoEA);
+
 /**
  * Computes specific internal energy and its derivatives from specific total energy and velocity
  *
@@ -371,6 +373,8 @@ void E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel);
  * @param[out] dh_drho   derivative of specific enthalpy w.r.t. density
  */
 void h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho);
+
+ADReal h_from_e_p_rho(ADReal e, ADReal p, ADReal rho);
 
 /**
  * Determine if inlet boundary condition should be applied

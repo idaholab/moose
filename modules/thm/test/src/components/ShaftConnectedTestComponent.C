@@ -39,7 +39,7 @@ ShaftConnectedTestComponent::addMooseObjects()
   const VariableName omega_var_name = scc.getOmegaVariableName();
 
   {
-    std::string class_name = "ShaftConnectedTestComponentUserObject";
+    std::string class_name = "ADShaftConnectedTestComponentUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
@@ -55,13 +55,13 @@ ShaftConnectedTestComponent::addMooseObjects()
   }
 
   {
-    const std::string class_name = "ODETimeDerivative";
+    const std::string class_name = "ADScalarTimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = _jct_var_name;
     _sim.addScalarKernel(class_name, genName(name(), _jct_var_name, "td"), params);
   }
   {
-    const std::string class_name = "VolumeJunctionAdvectionScalarKernel";
+    const std::string class_name = "ADVolumeJunctionAdvectionScalarKernel";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = _jct_var_name;
     params.set<UserObjectName>("volume_junction_uo") = getShaftConnectedUserObjectName();

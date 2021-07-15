@@ -1,5 +1,5 @@
 #include "Compressor1PhaseDeltaPAux.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Compressor1PhaseDeltaPAux);
 
@@ -15,12 +15,12 @@ Compressor1PhaseDeltaPAux::validParams()
 
 Compressor1PhaseDeltaPAux::Compressor1PhaseDeltaPAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _compressor_uo(getUserObject<ShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
+    _compressor_uo(getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
 Real
 Compressor1PhaseDeltaPAux::computeValue()
 {
-  return _compressor_uo.getCompressorDeltaP();
+  return MetaPhysicL::raw_value(_compressor_uo.getCompressorDeltaP());
 }

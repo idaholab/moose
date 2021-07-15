@@ -2,7 +2,6 @@
 
 #include "VolumeJunction1Phase.h"
 #include "ShaftConnectable.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
 
 /**
  * 1-phase compressor that must be connected to a Shaft component

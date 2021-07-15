@@ -1,5 +1,5 @@
 #include "Turbine1PhaseDrivingTorqueAux.h"
-#include "ShaftConnectedTurbine1PhaseUserObject.h"
+#include "ADShaftConnectedTurbine1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Turbine1PhaseDrivingTorqueAux);
 
@@ -14,12 +14,12 @@ Turbine1PhaseDrivingTorqueAux::validParams()
 
 Turbine1PhaseDrivingTorqueAux::Turbine1PhaseDrivingTorqueAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _turbine_uo(getUserObject<ShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
+    _turbine_uo(getUserObject<ADShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
 {
 }
 
 Real
 Turbine1PhaseDrivingTorqueAux::computeValue()
 {
-  return _turbine_uo.getDrivingTorque();
+  return MetaPhysicL::raw_value(_turbine_uo.getDrivingTorque());
 }

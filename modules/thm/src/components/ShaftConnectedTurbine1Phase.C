@@ -102,7 +102,7 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   {
-    const std::string class_name = "ShaftConnectedTurbine1PhaseUserObject";
+    const std::string class_name = "ADShaftConnectedTurbine1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;

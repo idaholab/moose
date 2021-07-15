@@ -2,7 +2,7 @@
 
 #include "AuxScalarKernel.h"
 
-class ShaftConnectedTurbine1PhaseUserObject;
+class ADShaftConnectedTurbine1PhaseUserObject;
 
 /**
  * Driving torque computed in the 1-phase shaft-connected turbine
@@ -15,7 +15,7 @@ public:
 protected:
   virtual Real computeValue();
   /// 1-phase shaft-connected turbine user object
-  const ShaftConnectedTurbine1PhaseUserObject & _turbine_uo;
+  const ADShaftConnectedTurbine1PhaseUserObject & _turbine_uo;
 
 public:
   static InputParameters validParams();
