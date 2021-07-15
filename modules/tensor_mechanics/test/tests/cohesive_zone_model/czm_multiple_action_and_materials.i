@@ -75,12 +75,12 @@
 [Modules/TensorMechanics/CohesiveZoneMaster]
   [./czm_ik_012]
     boundary = 'Block0_Block1 Block1_Block2'
-    kinematic = TotalLagrangian
+    strain = FINITE
     base_name = 'czm_b012'
   [../]
   [./czm_ik_23]
     boundary = 'Block2_Block3'
-    kinematic = TotalLagrangian
+    strain = FINITE
     base_name = 'czm_b23'
   [../]
 []
