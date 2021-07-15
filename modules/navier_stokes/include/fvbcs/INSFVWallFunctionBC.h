@@ -43,5 +43,4 @@ protected:
 
   /// Dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
-
 };
