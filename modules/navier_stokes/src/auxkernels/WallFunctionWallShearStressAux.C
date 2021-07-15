@@ -123,7 +123,7 @@ WallFunctionWallShearStressAux::computeValue()
   ADReal parallel_speed = parallel_velocity.norm();
   ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
 
-  if (parallel_speed.value() < 1e-6)
+  if (parallel_speed < 1e-6)
     return 0;
 
   if (!std::isfinite(parallel_speed.value()))
