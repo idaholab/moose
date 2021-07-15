@@ -281,7 +281,7 @@ class Translator(mixins.ConfigObject):
 
     def executePageMethod(self, method, page, args=tuple()):
         """Helper for calling per Page object methods."""
-        if page.get(method, True):
+        if page.attributes.get(method, True):
             self.executeMethod(method, args=(page, *args), log=False)
 
     def executeMethod(self, method, args=tuple(), log=False):

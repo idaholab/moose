@@ -13,17 +13,17 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
-@mooseutils.addProperty('base', ptype=str)                  # set by Translator::init
-@mooseutils.addProperty('source', ptype=str, required=True) # supplied source file/directory
-@mooseutils.addProperty('external', ptype=bool, default=False) # set by get_content.py used by appsyntax.py
-class Page(mooseutils.AutoPropertyMixin):
+class Page(object):
     """
     Base class for input content that defines the methods called by the translator.
 
     This classes uses properties to minimize modifications after construction.
     """
     def __init__(self, fullname, **kwargs):
-        super(Page, self).__init__(**kwargs)
+        self.base = kwargs.pop('base', None) # set by Translator::init
+        self.source = kwargs.pop('source') # supplied source file/directory
+        self.external = kwargs.pop('external', False) # set by get_content.py used by appsyntax.py
+        self.attributes = kwargs
         self._fullname = fullname            # local path of the node
         self._name = fullname.split('/')[-1] # folder/file name
         self.__unique_id = uuid.uuid4()      # a unique identifier
@@ -53,6 +53,18 @@ class Page(mooseutils.AutoPropertyMixin):
         """Returns the local folder depth"""
         return self.local.strip(os.sep).count(os.sep)
 
+    def get(self, *args):
+        """Return attribute by name as defined by key/value in init."""
+        return self.attributes.get(*args)
+
+    def __setitem__(self, key, value):
+        """Set attribute with []"""
+        self.attributes[key] = value
+
+    def __getitem__(self, key):
+        """Get attribute with []"""
+        return self.attributes[key]
+
     def relativeSource(self, other):
         """Location of this page related to the other page."""
         return os.path.relpath(self.local, os.path.dirname(other.local))
@@ -71,11 +83,11 @@ class Page(mooseutils.AutoPropertyMixin):
         return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
                                    self.local, self.source)
 
-@mooseutils.addProperty('content', ptype=str, default='')
 class Text(Page):
     """Text only Page node for unit testing."""
     COLOR = 'GREEN'
     def __init__(self, **kwargs):
+        self.content = kwargs.pop('content', '')
         super(Text, self).__init__('_text_', source='_text_', **kwargs)
 
 class Directory(Page):
@@ -92,13 +104,13 @@ class File(Page):
     """
     COLOR = 'MAGENTA'
 
-@mooseutils.addProperty('output_extension', ptype=str) # set by Translator::init
 class Source(File):
     """
     Node for content that is being converted (e.g., Markdown files).
     """
     COLOR = 'YELLOW'
     def __init__(self, *args, **kwargs):
+        self.output_extension = kwargs.pop('output_extension', None)
         super(Source, self).__init__(*args, **kwargs)
 
     @property

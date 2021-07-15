@@ -14,20 +14,19 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
-@mooseutils.addProperty('hidden', default=False, ptype=bool)
-@mooseutils.addProperty('removed', default=False, ptype=bool)
-@mooseutils.addProperty('test', default=False, ptype=bool)
-@mooseutils.addProperty('alias', ptype=str)
-@mooseutils.addProperty('group', ptype=str)
-@mooseutils.addProperty('markdown', ptype=str)
-@mooseutils.addProperty('color', ptype=str, default='RED')
-class NodeBase(moosetree.Node, mooseutils.AutoPropertyMixinBase):
+class NodeBase(moosetree.Node):
     """
     Node for MOOSE syntax that serves as the parent for actions/objects.
     """
     def __init__(self, *args, **kwargs):
-        mooseutils.AutoPropertyMixinBase.__init__(self, **kwargs)
-        moosetree.Node.__init__(self, *args, **{k:v for k, v in kwargs.items() if not hasattr(self, k)})
+        self.hidden = kwargs.pop('hidden', False)
+        self.removed = kwargs.pop('removed', False)
+        self.test = kwargs.pop('test', False)
+        self.alias = kwargs.pop('alias', None)
+        self.group = kwargs.pop('group', None)
+        self.markdown = kwargs.pop('markdown', None)
+        self.color = kwargs.pop('color', 'RED')
+        moosetree.Node.__init__(self, *args, **kwargs)
 
     def fullpath(self):
         """
@@ -150,20 +149,18 @@ class SyntaxNode(NodeBase):
                                                       isinstance(node, node_type) and \
                                                       (group is None or group in node.groups())]
 
-@mooseutils.addProperty('classname', ptype=str)
-@mooseutils.addProperty('description', ptype=str)
-@mooseutils.addProperty('source', ptype=str)
-@mooseutils.addProperty('header', ptype=str)
-@mooseutils.addProperty('parameters', ptype=dict)
 class ObjectNodeBase(NodeBase):
     """
     Base class for nodes associated with C++ objects (Action, MooseObjectAction, or MooseObject).
     """
 
     def __init__(self, parent, name, **kwargs):
-        kwargs.setdefault('classname', kwargs.pop('class', name))
         kwargs.setdefault('group', kwargs.pop('label', None))
-        kwargs.setdefault('source', kwargs.pop('register_file', None))
+        self.classname = kwargs.pop('classname', kwargs.pop('class', name))
+        self.description = kwargs.pop('description', None)
+        self.source = kwargs.pop('source', None)
+        self.header = kwargs.pop('header', None)
+        self.parameters = kwargs.pop('parameters', None)
         NodeBase.__init__(self, parent, name, **kwargs)
 
         if self.source == '':
@@ -194,12 +191,12 @@ class MooseObjectNode(ObjectNodeBase):
         ObjectNodeBase.__init__(self, *args, **kwargs)
         self.color = 'YELLOW'
 
-@mooseutils.addProperty('tasks', ptype=set)
 class ActionNode(ObjectNodeBase):
     """
     Node for a registered C++ Action class.
     """
     def __init__(self, *args, **kwargs):
+        self.tasks = kwargs.pop('tasks', None)
         ObjectNodeBase.__init__(self, *args, **kwargs)
         self.color = 'MAGENTA'
 

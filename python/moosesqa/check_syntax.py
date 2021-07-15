@@ -52,6 +52,7 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
 
     # Locate markdown file and determine if it is a stub page
     prefix = object_prefix if is_object else syntax_prefix
+    print(prefix, node.markdown, node.name)
     md_path = os.path.join(prefix, node.markdown)
     md_file = find_md_file(md_path, file_cache, logger)
     is_missing_description = is_object and (not node.description) and (not node.removed)

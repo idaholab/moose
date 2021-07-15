@@ -41,11 +41,6 @@
     requirement = "MOOSE python utilities shall include a tool for reading YAML files."
     required_python_packages = yaml
   []
-  [AutoPropertyMixin]
-    type = PythonUnitTest
-    input = test_AutoPropertyMixin.py
-    requirement = "MOOSE python utilities shall include an object for defining automatic, type checked properties."
-  []
   [make_chunks]
     type = PythonUnitTest
     input = test_make_chunks.py
