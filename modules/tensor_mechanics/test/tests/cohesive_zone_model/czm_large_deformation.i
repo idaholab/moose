@@ -196,7 +196,7 @@
 [Modules/TensorMechanics/CohesiveZoneMaster]
   [./czm_ik]
     boundary = 'interface'
-    kinematic = TotalLagrangian
+    strain = FINITE
   [../]
 []
 

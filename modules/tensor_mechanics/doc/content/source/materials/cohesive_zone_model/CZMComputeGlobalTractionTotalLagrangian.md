@@ -111,7 +111,7 @@ The [CZM Interface Kernel Total Lagrangian](CZMInterfaceKernelTotalLagrangian.md
 
 ## Example Input File Syntax
 
-This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `kinematic=TotalLagrangian`.
+This object is automatically added from the [Cohesive Master Master Action](CohesiveZoneMaster/index.md) when `strain=FINITE`.
 
 !syntax parameters /Materials/CZMComputeGlobalTractionTotalLagrangian
 

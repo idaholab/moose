@@ -24,6 +24,13 @@ public:
   void act() override;
 
 protected:
+  /// method to prepare save_in and diag_save_in inputs for hte interface kernel
+  void prepareSaveInInputs(std::vector<AuxVariableName> & /*save_in_names*/,
+                           std::string & /*save_in_side*/,
+                           const std::vector<AuxVariableName> & /*var_name_master*/,
+                           const std::vector<AuxVariableName> & /*var_name_slave*/,
+                           const int & /*i*/) const;
+
   /// the disaplcements varaible names
   std::vector<VariableName> _displacements;
 
@@ -34,11 +41,18 @@ protected:
   const std::string _base_name;
 
   /// strain formulation
-  enum class Kinematic
+  enum class Strain
   {
-    SmallStrain,
-    TotalLagrangian
-  } _kinematic;
+    Small,
+    Finite
+  } _strain;
+
+  ///@{ residual debugging
+  std::vector<AuxVariableName> _save_in_master;
+  std::vector<AuxVariableName> _diag_save_in_master;
+  std::vector<AuxVariableName> _save_in_slave;
+  std::vector<AuxVariableName> _diag_save_in_slave;
+  ///@}
 
   /// kernel's and materials's names
   ///@{
