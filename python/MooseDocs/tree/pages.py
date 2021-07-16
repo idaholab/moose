@@ -65,6 +65,9 @@ class Page(object):
         """Get attribute with []"""
         return self.attributes[key]
 
+    def update(self, *args, **kwargs):
+        self.attributes.update(*args, **kwargs)
+
     def relativeSource(self, other):
         """Location of this page related to the other page."""
         return os.path.relpath(self.local, os.path.dirname(other.local))

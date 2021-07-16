@@ -158,7 +158,7 @@ class ObjectNodeBase(NodeBase):
         kwargs.setdefault('group', kwargs.pop('label', None))
         self.classname = kwargs.pop('classname', kwargs.pop('class', name))
         self.description = kwargs.pop('description', None)
-        self.source = kwargs.pop('source', None)
+        self.source = kwargs.pop('source', kwargs.pop('register_file', None))
         self.header = kwargs.pop('header', None)
         self.parameters = kwargs.pop('parameters', None)
         NodeBase.__init__(self, parent, name, **kwargs)
