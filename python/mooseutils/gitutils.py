@@ -207,3 +207,21 @@ def git_repo(loc=os.getcwd(), remotes=['upstream', 'origin']):
         match = re.match(r'git@(?P<host>.*?):(?P<site>.*?)\.git', address)
         address = 'https://{}/{}'.format(match.group('host'), match.group('site'))
     return address
+
+def git_remotes(working_dir=None):
+    """
+    Return URL to name remotes.
+    """
+    if working_dir is None: working_dir = os.getcwd()
+    lookup = dict()
+    for remote in mooseutils.check_output(['git', 'remote', '-v'], encoding='utf-8', cwd=working_dir).strip(' \n').split('\n'):
+        name, addr = remote.split(maxsplit=1)
+        lookup[addr] = name
+    return lookup
+
+def git_add_and_fetch_remote(url, name, branch, working_dir=None):
+    """
+    Add then fetch a remote with *name* and remote location *url*.
+    """
+    mooseutils.check_output(['git', 'remote', 'add', name, url], cwd=working_dir, check=True)
+    mooseutils.check_output(['git', 'fetch', name, branch], cwd=working_dir, check=True)

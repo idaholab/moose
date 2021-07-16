@@ -36,8 +36,6 @@ class CivetExtension(command.CommandExtension):
         config['remotes'] = (dict(), "Remote CIVET repositories to pull result; each item in " \
                              "the dict should have another dict with a 'url', 'repo', and 'repo_url'.")
         config['branch'] = ('master', "The main stable branch for extracting test results.")
-        config['author'] = ('moosetest', "The 'author' of the merge commit into the stable main branch.")
-
         config['download_test_results'] = (True, "Automatically download and aggregate test results for the current merge commits.")
         config['generate_test_reports'] = (True, "Generate test report pages, if results exist from download or local file(s).")
         config['test_reports_location'] = ('civet', "The local directory where the generated test reports will be inserted.")
@@ -94,15 +92,20 @@ class CivetExtension(command.CommandExtension):
         # Only populate the database if the specified branch and author match current repository
         start = time.time()
         LOG.info("Collecting CIVET results...")
+        branch = self.get('branch')
         for name, category in self.get('remotes').items():
             LOG.info("Gathering CIVET results for '%s'.", name)
             if category.get('download_test_results', self.get('download_test_results', True)):
                 repo_url = category.get('repo_url', 'https://github.com').rstrip('/')
                 repo_url += '/{}'.format(category.get('repo'))
-                self.__hashes = mooseutils.get_civet_hashes(repo_url,
-                                                            branch=self.get('branch'),
-                                                            author=self.get('author'),
-                                                            logger=LOG)
+
+                remotes = mooseutils.git_remotes()
+                remote = remotes.get(repo_url, None)
+                if remote is None:
+                    remote = '__MooseDocs.extensions.civet__'
+                    mooseutils.git_add_and_fetch_remote(repo_url, remote, branch)
+
+                self.__hashes = mooseutils.get_civet_hashes(f'{remote}/{branch}')
                 LOG.info("Downloading CIVET results for '%s' category.", name)
 
             local = mooseutils.eval_path(category.get('test_results_cache', self.get('test_results_cache')))
