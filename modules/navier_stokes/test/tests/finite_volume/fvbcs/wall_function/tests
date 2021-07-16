@@ -10,5 +10,6 @@
     ad_indexing_type = 'global'
     issues = '#18273'
     design = 'rans_theory.md INSFVWallFunctionBC.md'
+    recover = false
   []
 []
