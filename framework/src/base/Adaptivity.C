@@ -268,6 +268,10 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
   MeshRefinement mesh_refinement(*mesh);
   if (level == libMesh::invalid_uint)
     level = mesh->uniformRefineLevel();
+
+  mesh->getMesh().skip_partitioning(true);
+  mesh->getMesh().allow_remote_element_removal(false);
+  mesh->needsRemoteElemDeletion(false);
   mesh_refinement.uniformly_refine(level);
 }
 
