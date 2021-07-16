@@ -49,11 +49,39 @@
       csvdiff = 'mean_out.csv'
       detail = 'using a mean thermal expansion coefficient'
     [../]
+    [./mean_complex]
+      type = CSVDiff
+      input = 'mean_complex.i'
+      csvdiff = 'mean_complex_out.csv'
+      detail = 'using a complex mean thermal expansion coefficient'
+    [../]
+    [./mean_complex_jac]
+      type = 'PetscJacobianTester'
+      input = 'mean_complex.i'
+      run_sim = True
+      ratio_tol = 1e-7
+      difference_tol = 1e-7
+      detail = 'using a complex mean thermal expansion coefficient and compute a perfect jacobian'
+    [../]
     [./instantaneous]
       type = CSVDiff
       input = 'instantaneous.i'
       csvdiff = 'instantaneous_out.csv'
       detail = 'using a instantaneous thermal expansion coefficient'
+    [../]
+    [./instantaneous_complex]
+      type = CSVDiff
+      input = 'instantaneous_complex.i'
+      csvdiff = 'instantaneous_complex_out.csv'
+      detail = 'using a complex instantaneous thermal expansion coefficient'
+    [../]
+    [./instantaneous_complex_jac]
+      type = 'PetscJacobianTester'
+      input = 'instantaneous_complex.i'
+      run_sim = True
+      ratio_tol = 1e-7
+      difference_tol = 1e-7
+      detail = 'using a complex instantaneous thermal expansion coefficient and compute a perfect jacobian'
     [../]
     [./dilatation]
       type = CSVDiff
