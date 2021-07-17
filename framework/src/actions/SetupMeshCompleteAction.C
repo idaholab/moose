@@ -49,8 +49,8 @@ SetupMeshCompleteAction::act()
   {
     // we don't need to run mesh modifiers *again* after they ran already during the mesh
     // splitting process
-    if (_app.isUseSplit())
-      return;
+    //if (_app.isUseSplit())
+    //  return;
 
     // uniform refinement has been done on master, so skip
     if (_app.masterMesh())
