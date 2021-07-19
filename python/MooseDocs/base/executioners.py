@@ -16,6 +16,7 @@ import traceback
 import multiprocessing
 import mooseutils
 import random
+import platform
 
 import MooseDocs
 from ..tree import pages
@@ -404,8 +405,16 @@ class ParallelBarrier(Executioner):
     def execute(self, nodes, num_threads=1):
         """Perform the translation with multiprocessing."""
 
-        barrier = multiprocessing.Barrier(num_threads)
-        manager = multiprocessing.Manager()
+        # The method for spawning processes changed to "spawn" for macOS in python 3.9, currently
+        # MooseDocs does npt work with this combination. This will be remedied in moosetools
+        # migration.
+        if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
+            ctx = multiprocessing.get_context('fork')
+        else:
+            ctx = multiprocessing
+
+        barrier = ctx.Barrier(num_threads)
+        manager = ctx.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
         self._global_attributes = manager.dict()
 
@@ -416,7 +425,7 @@ class ParallelBarrier(Executioner):
         jobs = []
         random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=self._target, args=(chunk, barrier, page_attributes))
+            p = ctx.Process(target=self._target, args=(chunk, barrier, page_attributes))
             jobs.append(p)
             p.start()
 
