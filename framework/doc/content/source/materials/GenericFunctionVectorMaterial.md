@@ -13,7 +13,7 @@ quadratic in time anisotropic diffusion coefficient for this finite volume diffu
 We add the prefix `AD` as this simulation is making use of automatic differentiation to compute the Jacobian exactly.
 The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusion kernel.
 
-!listing test/tests/functions/generic_function_material/generic_function_material.i block=Functions Materials/gfm
+!listing test/tests/functions/generic_function_material/generic_function_vector_material_test.i block=Functions Materials/gfm
 
 !syntax parameters /Materials/GenericFunctionVectorMaterial
 
