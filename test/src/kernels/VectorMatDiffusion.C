@@ -20,7 +20,7 @@ VectorMatDiffusion::validParams()
 }
 
 VectorMatDiffusion::VectorMatDiffusion(const InputParameters & parameters)
-  : VectorDiffusion(parameters), _coef(getMaterialProperty<RealVectorValue>("prop_name"))
+  : VectorDiffusion(parameters), _coef(getMaterialProperty<RealVectorValue>("coef"))
 {
 }
 
