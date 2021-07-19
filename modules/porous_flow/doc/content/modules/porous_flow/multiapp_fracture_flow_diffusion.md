@@ -134,9 +134,9 @@ This is identical to the conforming case except:
 
 ## Results
 
-The L2 error of the fracture temperature in each approach (square-root of the sum of squares of differences between the $T_{f}$ and the benchmark result) is plotted in [frac_l2_error].  As expected, the error is proportional to $\Delta t$.  The error when using the MultiApp approaches is larger than the non-MultiApp approach, because $T_{f}$ is fixed when $T_{m}$ is being solved for, and vice versa.  The conforming and nonconforming cases produce similar results for larger time-steps, but as the time-step size reduces the results are slightly different, just because of the small differences in the effective finite-element discretisation.
+The L2 error of the fracture temperature in each approach (square-root of the sum of squares of differences between the $T_{f}$ and the benchmark $\Delta t = 0.125$ result) is plotted in [frac_l2_error].  As expected, the error is proportional to $\Delta t$.  The error when using the MultiApp approaches is larger than the non-MultiApp approach, because $T_{f}$ is fixed when $T_{m}$ is being solved for, and vice versa.  The conforming and nonconforming cases produce similar results for larger time-steps, but as the time-step size reduces the results are slightly different, just because of the small differences in the effective finite-element discretisation.
 
 !media porous_flow/examples/multiapp_flow/frac_l2_error.png
 	style=width:60%;margin:auto;padding-top:2.5%;
 	id=frac_l2_error
-	caption=L2 error of each approach to modelling the mixed-dimensional diffusion equation
+	caption=L2 error of each approach (with respect to the benchmark where $\Delta t$ is 0.125) to modelling the mixed-dimensional diffusion equation

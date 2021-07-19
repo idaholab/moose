@@ -74,7 +74,7 @@ Hence a [PorousFlowPermeabilityKozenyCarman](PorousFlowPermeabilityKozenyCarman.
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=permeability
 
-Because there is essentially no rock material within the fracture, the matrix internal energy is zero, and it is assumed that the thermal conductivity is constant and independent of $a$ (in reality, this too should increase with $a$, but PorousFlow currently lacks this capability, and thermal conductivity is unlikely to be important within the fracture):
+PorousFlow's "matrix internal energy" quantifies the internal energy of the rock material.  Since there is essentially no rock material within the fracture, the matrix internal energy for the fracture App is zero.  It is assumed that the thermal conductivity is constant and independent of $a$ (in reality, this too should increase with $a$, but PorousFlow currently lacks this capability, and thermal conductivity is unlikely to be important within the fracture):
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=internal_energy
 
