@@ -58,6 +58,8 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
+  params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
+  params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -83,6 +85,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
+    _P_tol(getParam<Real>("P_tol")),
+    _T_tol(getParam<Real>("T_tol")),
     _fp(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
@@ -700,12 +704,11 @@ SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
   auto P_error = 1.0;
-  auto P_tol = 1e-6;
   unsigned int P_it = 0;
   unsigned int P_it_max = 2 * _n_blocks;
   if (_n_blocks == 1)
     P_it_max = 1;
-  while (P_error > P_tol && P_it < P_it_max)
+  while (P_error > _P_tol && P_it < P_it_max)
   {
     P_it += 1;
     if (P_it == P_it_max and _n_blocks != 1)
@@ -720,12 +723,11 @@ SubChannel1PhaseProblem::externalSolve()
       int last_node = (iblock + 1) * _block_size;
       int first_node = iblock * _block_size + 1;
       auto T_block_error = 1.0;
-      auto T_tol = 1e-6;
       auto T_it_max = 5;
       auto T_it = 0;
       _console << "Solving Block :" << iblock << " From first node :" << first_node
                << " to last node :" << last_node << std::endl;
-      while (T_block_error > T_tol && T_it < T_it_max)
+      while (T_block_error > _T_tol && T_it < T_it_max)
       {
         T_it += 1;
         if (T_it == T_it_max)
