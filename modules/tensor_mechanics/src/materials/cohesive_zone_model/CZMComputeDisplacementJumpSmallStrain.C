@@ -31,5 +31,5 @@ void
 CZMComputeDisplacementJumpSmallStrain::computeLocalDisplacementJump()
 {
   _interface_displacement_jump[_qp] =
-      _czm_reference_rotation[_qp].transpose() * _displacement_jump_global[_qp];
+      _czm_total_rotation[_qp].transpose() * _displacement_jump_global[_qp];
 }

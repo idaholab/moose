@@ -29,6 +29,9 @@ protected:
   ///  specific kinematic formulation
   virtual void computeLocalDisplacementJump() = 0;
 
+  /// method computing the required rotation matrices
+  virtual void computeRotationMatrices();
+
   /// Base name of the material system
   const std::string _base_name;
 
@@ -50,6 +53,6 @@ protected:
   MaterialProperty<RealVectorValue> & _interface_displacement_jump;
   ///@}
 
-  /// the rotation matrix transforming from the interface to the global coordinate systems in the undeformed configuration
-  MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
+  /// the rotation matrix transforming from the interface to the global coordinate systems
+  MaterialProperty<RankTwoTensor> & _czm_total_rotation;
 };

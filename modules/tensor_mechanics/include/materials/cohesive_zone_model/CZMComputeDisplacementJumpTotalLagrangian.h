@@ -27,20 +27,11 @@ protected:
   /// total Lagrangian approach
   void computeLocalDisplacementJump() override;
 
+  /// method computing the required rotation matrices
+  void computeRotationMatrices() override;
+
   /// method computing F and the associated rotation
   void computeFandR();
-
-  /// the old displacement jump in global and interface coordiantes
-  ///@{
-  const MaterialProperty<RealVectorValue> & _displacement_jump_global_old;
-  const MaterialProperty<RealVectorValue> & _interface_displacement_jump_old;
-  ///@}
-
-  /// the displacement jump increments in global and interface coordiantes
-  ///@{
-  MaterialProperty<RealVectorValue> & _displacement_jump_global_inc;
-  MaterialProperty<RealVectorValue> & _interface_displacement_jump_inc;
-  ///@}
 
   /// the coupled displacement and neighbor displacement gradient
   ///@{
@@ -49,20 +40,11 @@ protected:
   ///@}
 
   /// the interface deformation gradient
-  ///@{
   MaterialProperty<RankTwoTensor> & _F;
-  const MaterialProperty<RankTwoTensor> & _F_old;
-  ///@}
 
   /// the interface rotation caused by deformation and rigid body motion
-  ///@{
   MaterialProperty<RankTwoTensor> & _R;
-  const MaterialProperty<RankTwoTensor> & _R_old;
-  ///@}
 
-  /// the total interface rotation and its increment (Q=R*Q0)
-  ///@{
-  MaterialProperty<RankTwoTensor> & _czm_total_rotation;
-  MaterialProperty<RankTwoTensor> & _czm_total_rotation_inc;
-  ///@}
+  /// the rotation matrix transforming from local to global coordinates in the undeformed configuration
+  MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
 };

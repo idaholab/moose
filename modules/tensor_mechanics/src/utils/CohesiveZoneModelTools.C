@@ -49,24 +49,6 @@ computedFinversedF(const RankTwoTensor & F_inv)
   return -F_inv.mixedProductIkJl(F_inv.transpose());
 }
 
-RankTwoTensor
-computeVelocityGradientLinearApprox(const RankTwoTensor & F, const RankTwoTensor & F_old)
-{
-  return RankTwoTensor::Identity() - F_old * F.inverse();
-}
-
-RankFourTensor
-computeDL_DF(const RankFourTensor & DFinv_DF, const RankTwoTensor & F_old)
-{
-  return -F_old.mixedProductIjJklm(DFinv_DF);
-}
-
-RankTwoTensor
-computeDtraceL_DF(const RankFourTensor & DL_DF)
-{
-  return RankTwoTensor::Identity().initialContraction(DL_DF);
-}
-
 Real
 computeAreaRatio(const RankTwoTensor & FinvT, const Real & J, const RealVectorValue & N)
 {
@@ -96,33 +78,16 @@ computeDAreaRatioDF(const RankTwoTensor & FinvT,
   return J * FinvT * Fitr_N_norm + R2temp;
 }
 
-Real
-computeAreaIncrementRate(const Real Ltrace, const RankTwoTensor & L, const RealVectorValue & n)
+RealVectorValue
+computeNormalComponents(const RealVectorValue & normal, const RealVectorValue & vector)
 {
-  return Ltrace - n * (L * n);
+  return (normal * vector) * normal;
 }
 
-RankTwoTensor
-computeDAreaIncrementRateDF(const RankTwoTensor & L,
-                            const RankTwoTensor & DLtrace_DF,
-                            const RankFourTensor & DL_DF,
-                            const RealVectorValue & N,
-                            const RankTwoTensor & R,
-                            const RankFourTensor & DR_DF)
+RealVectorValue
+computeTangentComponents(const RealVectorValue & normal, const RealVectorValue & vector)
 {
-  RankTwoTensor R2temp;
-  for (unsigned int p = 0; p < 3; p++)
-    for (unsigned int q = 0; q < 3; q++)
-    {
-      R2temp(p, q) = 0;
-      for (unsigned int i = 0; i < 3; i++)
-        for (unsigned int j = 0; j < 3; j++)
-          for (unsigned int k = 0; k < 3; k++)
-            for (unsigned int l = 0; l < 3; l++)
-              R2temp(p, q) += DR_DF(i, k, p, q) * N(k) * L(i, j) * R(j, l) * N(l) +
-                              DR_DF(j, l, p, q) * N(l) * L(i, j) * R(i, k) * N(k) +
-                              DL_DF(i, j, p, q) * R(i, k) * N(k) * R(j, l) * N(l);
-    }
-  return DLtrace_DF - R2temp;
+  return vector - computeNormalComponents(normal, vector);
 }
+
 } // namespace CohesiveZoneModelTools

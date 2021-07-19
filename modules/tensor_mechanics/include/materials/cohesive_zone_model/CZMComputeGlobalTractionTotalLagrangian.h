@@ -34,29 +34,16 @@ protected:
   void computedTPK1dJumpGlobal();
 
   /// computes the area ratio and increment rate derivatives
-  void computeAreaRatioAndIncrementRateDerivatives();
+  void computeAreaRatioAndDerivatives();
 
   /// computes the PK1 traction derivatives w.r.t. F
   void computedTPK1dF();
 
-  /// the displacement jump, its increment, and its old value in global coordinates
-  ///@{
+  /// the displacement jump in global coordinates
   const MaterialProperty<RealVectorValue> & _displacement_jump_global;
-  RealVectorValue _displacement_jump_global_inc;
-  const MaterialProperty<RealVectorValue> & _displacement_jump_global_old;
-  ///@}
 
-  /// the interface traction increment, and old values
-  ///@{
-  RealVectorValue _interface_traction_inc;
-  const MaterialProperty<RealVectorValue> & _interface_traction_old;
-  ///@}
-
-  /// the interface total and incremental rotation
-  ///@{
-  const MaterialProperty<RankTwoTensor> & _czm_total_rotation;
-  const MaterialProperty<RankTwoTensor> & _czm_total_rotation_inc;
-  ///@}
+  /// the rotation matrix transforming from local to global coordinates in the undeformed configuration
+  const MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
 
   /// the rotation associated to F
   const MaterialProperty<RankTwoTensor> & _R;
@@ -67,11 +54,8 @@ protected:
   RankFourTensor _dczm_total_rotation_dF;
   ///@}
 
-  /// the current, and old interface deformation gradient values
-  ///@{
+  /// the interface deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;
-  const MaterialProperty<RankTwoTensor> & _F_old;
-  ///@}
 
   /// the deformation gradient determinant;
   Real _J;
@@ -79,30 +63,15 @@ protected:
   /// the inverse of the deformation gradient
   RankTwoTensor _F_inv;
 
-  /// the velocity gradient increment
-  RankTwoTensor _DL;
-
-  /// the PK1 traction values
-  ///@{
+  /// the PK1 traction
   MaterialProperty<RealVectorValue> & _PK1traction;
-  MaterialProperty<RealVectorValue> & _PK1traction_inc;
-  const MaterialProperty<RealVectorValue> & _PK1traction_old;
-  ///@}
 
+  /// the derivitve of the PK1 traction w.r.t. F
   MaterialProperty<RankThreeTensor> & _dPK1traction_dF;
 
-  /// the area ratio and the area increment rate
+  /// the area ratio and its derivtive w.r.t. F
   ///@{
   Real _area_ratio;
-  Real _area_increment_rate;
-  ///@}
-
-  /// the area ratio and the area increment rate derivatives w.r.t. F
-  ///@{
   RankTwoTensor _d_area_ratio_dF;
-  RankTwoTensor _d_area_increment_rate_dF;
   ///@}
-
-  /// the midplane normal in the deformed configuration
-  RealVectorValue _midplane_normal;
 };

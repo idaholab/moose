@@ -30,7 +30,7 @@ CZMComputeGlobalTractionSmallStrain::CZMComputeGlobalTractionSmallStrain(
 void
 CZMComputeGlobalTractionSmallStrain::computeEquilibriumTracionAndDerivatives()
 {
-  _traction_global[_qp] = _czm_reference_rotation[_qp] * _interface_traction[_qp];
-  _dtraction_djump_global[_qp] = _czm_reference_rotation[_qp] * _dinterface_traction_djump[_qp] *
-                                 _czm_reference_rotation[_qp].transpose();
+  _traction_global[_qp] = _czm_total_rotation[_qp] * _interface_traction[_qp];
+  _dtraction_djump_global[_qp] = _czm_total_rotation[_qp] * _dinterface_traction_djump[_qp] *
+                                 _czm_total_rotation[_qp].transpose();
 }

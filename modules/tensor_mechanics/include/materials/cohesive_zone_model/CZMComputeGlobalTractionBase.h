@@ -42,6 +42,6 @@ protected:
   const MaterialProperty<RankTwoTensor> & _dinterface_traction_djump;
   ///@}
 
-  /// the rotation matrix trnasforming from interface to global coordinates in the undeformed configuration
-  const MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
+  /// the rotation matrix trnasforming from interface to global coordinates
+  const MaterialProperty<RankTwoTensor> & _czm_total_rotation;
 };

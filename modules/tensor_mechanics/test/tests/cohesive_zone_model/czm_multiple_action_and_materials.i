@@ -1,11 +1,3 @@
-#
-# Stretch + rotation test
-#
-# This test is designed to compute a uniaxial stress and then follow it as the mesh is rotated by 45 degrees.
-#
-# The mesh is composed of two, single-elemnt blocks
-# The large deforamtion traction separation kinematic assumes linear rotations and uses the velocity gradient L to keep track of area changes, hence it converges to the proper solutoin in the limit of dt->0. Smaller the time step higher the accuracy.
-
 [Mesh]
   [./msh]
     type = GeneratedMeshGenerator
@@ -26,6 +18,18 @@
     input = subdomain_id
     split_interface = true
   []
+  [add_side_sets]
+    input = split
+    type = SideSetsFromNormalsGenerator
+    normals = '0 -1  0
+               0  1  0
+               -1 0  0
+               1  0  0
+               0  0 -1
+               0  0  1'
+    fixed_normal = true
+    new_boundary = 'y0 y1 x0 x1 z0 z1'
+  []
 []
 
 [GlobalParams]
@@ -40,31 +44,46 @@
   [../]
 []
 
+[Constraints]
+  [x1]
+    type = EqualValueBoundaryConstraint
+    variable = disp_x
+    secondary = 'x1'    # boundary
+    penalty = 1e6
+  []
+  [y1]
+    type = EqualValueBoundaryConstraint
+    variable = disp_y
+    secondary = 'y1'    # boundary
+    penalty = 1e6
+  []
+[]
+
 [BCs]
   [./fix_x]
     type = DirichletBC
     preset = true
     value = 0.0
-    boundary = left
+    boundary = x0
     variable = disp_x
   [../]
   [./fix_y]
     type = DirichletBC
     preset = true
     value = 0.0
-    boundary = bottom
+    boundary = y0
     variable = disp_y
   [../]
   [./fix_z]
     type = DirichletBC
     preset = true
     value = 0.0
-    boundary = back
+    boundary = z0
     variable = disp_z
   [../]
   [./back_z]
     type = FunctionNeumannBC
-    boundary = front
+    boundary = z1
     variable = disp_z
     use_displaced_mesh = false
     function = stretch
@@ -75,20 +94,18 @@
 [Modules/TensorMechanics/CohesiveZoneMaster]
   [./czm_ik_012]
     boundary = 'Block0_Block1 Block1_Block2'
-    strain = FINITE
     base_name = 'czm_b012'
   [../]
   [./czm_ik_23]
     boundary = 'Block2_Block3'
-    strain = FINITE
     base_name = 'czm_b23'
   [../]
 []
 
 [Materials]
   # cohesive materials
-  [./czm_3dc1]
-    type = SalehaniIrani3DCTractionIncremental
+  [./czm_3dc]
+    type = SalehaniIrani3DCTraction
     boundary = 'Block0_Block1 Block1_Block2'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5
@@ -96,13 +113,11 @@
     maximum_shear_traction = 300
     base_name = 'czm_b012'
   [../]
-  [./czm_3dc3]
-    type = SalehaniIrani3DCTraction
+  [./czm_elastic_incremental]
+    type = PureElasticTractionSeparationIncremental
     boundary = 'Block2_Block3'
-    normal_gap_at_maximum_normal_traction = 4
-    tangential_gap_at_maximum_shear_traction = 2
-    maximum_normal_traction = 500
-    maximum_shear_traction = 300
+    normal_stiffness = 500
+    tangent_stiffness = 300
     base_name = 'czm_b23'
   [../]
   # bulk materials
@@ -127,28 +142,6 @@
         generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
       [../]
     [../]
-  [../]
-[]
-
-[Postprocessors]
-  [./nonlin]
-    type = NumNonlinearIterations
-  [../]
-  [./stress_zz_01]
-    type = SideAverageValue
-    variable = stress_zz
-    boundary = Block0_Block1
-  [../]
-  [./stress_zz_12]
-    type = SideAverageValue
-    variable = stress_zz
-    boundary = Block1_Block2
-  [../]
-
-  [./stress_zz_23]
-    type = SideAverageValue
-    variable = stress_zz
-    boundary = Block2_Block3
   [../]
 []
 

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CZMComputeDisplacementJumpTotalLagrangian.h"
+#include "RotationMatrix.h"
 
 registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpTotalLagrangian);
 
@@ -25,21 +26,10 @@ CZMComputeDisplacementJumpTotalLagrangian::validParams()
 CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagrangian(
     const InputParameters & parameters)
   : CZMComputeDisplacementJumpBase(parameters),
-    _displacement_jump_global_old(
-        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "displacement_jump_global")),
-    _interface_displacement_jump_old(
-        getMaterialPropertyOldByName<RealVectorValue>(_base_name + "interface_displacement_jump")),
-    _displacement_jump_global_inc(
-        declarePropertyByName<RealVectorValue>(_base_name + "displacement_jump_global_inc")),
-    _interface_displacement_jump_inc(
-        declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump_inc")),
     _F(declarePropertyByName<RankTwoTensor>(_base_name + "F_czm")),
-    _F_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "F_czm")),
     _R(declarePropertyByName<RankTwoTensor>(_base_name + "czm_rotation")),
-    _R_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "czm_rotation")),
-    _czm_total_rotation(declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation")),
-    _czm_total_rotation_inc(
-        declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation_inc"))
+    _czm_reference_rotation(
+        declarePropertyByName<RankTwoTensor>(_base_name + "czm_reference_rotation"))
 {
   // initializing the displacement gradeint vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -68,17 +58,17 @@ CZMComputeDisplacementJumpTotalLagrangian::initQpStatefulProperties()
 void
 CZMComputeDisplacementJumpTotalLagrangian::computeLocalDisplacementJump()
 {
-  computeFandR();
-  _czm_total_rotation_inc[_qp] = (_R[_qp] - _R_old[_qp]) * _czm_reference_rotation[_qp];
-  _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
-  _displacement_jump_global_inc[_qp] =
-      _displacement_jump_global[_qp] - _displacement_jump_global_old[_qp];
-
-  _interface_displacement_jump_inc[_qp] =
-      _czm_total_rotation_inc[_qp].transpose() * _displacement_jump_global[_qp] +
-      _czm_total_rotation[_qp].transpose() * _displacement_jump_global_inc[_qp];
   _interface_displacement_jump[_qp] =
-      _interface_displacement_jump_old[_qp] + _interface_displacement_jump_inc[_qp];
+      _czm_total_rotation[_qp].transpose() * _displacement_jump_global[_qp];
+}
+
+void
+CZMComputeDisplacementJumpTotalLagrangian::computeRotationMatrices()
+{
+  _czm_reference_rotation[_qp] =
+      RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
+  computeFandR();
+  _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
 }
 
 void

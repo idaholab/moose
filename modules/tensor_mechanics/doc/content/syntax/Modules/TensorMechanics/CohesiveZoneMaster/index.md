@@ -1,6 +1,6 @@
 # Cohesive Zone Master Action System
 
-!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
+!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
 
 ## Description
 
@@ -71,15 +71,15 @@ Both types of `ComputeLocalTraction` objects allow using either the `Small Strai
 
 The following example show how to use the `CohesiveZoneMaster` action.
 
-!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_large_deformation.i block=Modules/TensorMechanics/CohesiveZoneMaster
+!listing modules/tensor_mechanics/test/tests/cohesive_zone_model/stretch_rotate_large_deformation.i block=Modules/TensorMechanics/CohesiveZoneMaster
 
 If necessary, multiple instances of the `CohesiveZoneMaster` action can be added, for instance when different material properties `base_name` are needed for different boundaries. The `base_name` parameter used in the action should also be provided to the associated materials.
 
 !listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i start=[Modules/TensorMechanics/CohesiveZoneMaster] end=[Modules] include-end=false
 
-!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
-!syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
-!syntax inputs /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
+!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
+!syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
+!syntax inputs /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
 
 ## Associated Actions
 

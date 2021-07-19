@@ -18,31 +18,27 @@ namespace CohesiveZoneModelTools
 
 RealVectorValue computedVnormdV(const RealVectorValue & V);
 
+/// compute the derivative of the rotation matrix, R=FU^-1, using Chen and Wheeler 1993
 RankFourTensor computedRdF(const RankTwoTensor & R, const RankTwoTensor & U);
 
+/// compute the derivative of F^-1 w.r.t. to F
 RankFourTensor computedFinversedF(const RankTwoTensor & F_inv);
 
-RankTwoTensor computeVelocityGradientLinearApprox(const RankTwoTensor & F,
-                                                  const RankTwoTensor & F_old);
-
-RankFourTensor computeDL_DF(const RankFourTensor & DFinv_DF, const RankTwoTensor & F_old);
-
-RankTwoTensor computeDtraceL_DF(const RankFourTensor & DL_DF);
-
+/// compute the area ratio betweeen the deformed and undeformed configuration, and its derivatives w.r.t. the deformation gradient, F
+///@{
 Real computeAreaRatio(const RankTwoTensor & FinvT, const Real & J, const RealVectorValue & N);
-
 RankTwoTensor computeDAreaRatioDF(const RankTwoTensor & FinvT,
                                   const RealVectorValue & N,
                                   const Real & J,
                                   const RankFourTensor & DFinv_DF);
+///@}
 
-Real
-computeAreaIncrementRate(const Real Ltrace, const RankTwoTensor & L, const RealVectorValue & n);
+/// compute the normal componets of a vector
+RealVectorValue computeNormalComponents(const RealVectorValue & normal,
+                                        const RealVectorValue & vector);
 
-RankTwoTensor computeDAreaIncrementRateDF(const RankTwoTensor & L,
-                                          const RankTwoTensor & DLtrace_DF,
-                                          const RankFourTensor & DL_DF,
-                                          const RealVectorValue & N,
-                                          const RankTwoTensor & R,
-                                          const RankFourTensor & DR_DF);
+/// compute the tangent componets of a vector
+RealVectorValue computeTangentComponents(const RealVectorValue & normal,
+                                         const RealVectorValue & vector);
+
 } // namespace CohesiveZoneModelTools

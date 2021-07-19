@@ -1,6 +1,13 @@
+# base test to check the implemantation traction separation laws
+# Loads are expressed using functions. See the czm_materials/3DC section in the
+# test file  for examples.
 [Mesh]
   [./msh]
     type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 1
+    nz = 1
   []
   [./subdomain_1]
     type = SubdomainBoundingBoxGenerator
@@ -20,6 +27,18 @@
     input = subdomain_2
     type = BreakMeshByBlockGenerator
   [../]
+  [add_side_sets]
+    input = breakmesh
+    type = SideSetsFromNormalsGenerator
+    normals = '0 -1  0
+               0  1  0
+               -1 0  0
+               1  0  0
+               0  0 -1
+               0  0  1'
+    fixed_normal = true
+    new_boundary = 'y0 y1 x0 x1 z0 z1'
+  []
 []
 
 [GlobalParams]
@@ -36,7 +55,9 @@
 
 [Modules/TensorMechanics/CohesiveZoneMaster]
   [./czm1]
+    strain = SMALL
     boundary = 'interface'
+    generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'
   [../]
 []
 
@@ -45,40 +66,40 @@
     type = DirichletBC
     variable = disp_x
     preset = false
-    boundary = left
+    boundary = x0
     value = 0.0
   [../]
   [./left_y]
     type = DirichletBC
     variable = disp_y
     preset = false
-    boundary = left
+    boundary = x0
     value = 0.0
   [../]
   [./left_z]
     type = DirichletBC
     variable = disp_z
     preset = false
-    boundary = left
+    boundary = x0
     value = 0.0
   [../]
   [./right_x]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
-    boundary = right
+    boundary = x1
   [../]
   [./right_y]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
-    boundary = right
+    boundary = x1
   [../]
   [./right_z]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
-    boundary = right
+    boundary = x1
   [../]
 []
 
@@ -93,13 +114,8 @@
     type = ComputeLinearElasticStress
     block = '1 2'
   [../]
-  [./czm_3dc]
-    type = SalehaniIrani3DCTraction
+  [./czm_mat]
     boundary = 'interface'
-    normal_gap_at_maximum_normal_traction = 1
-    tangential_gap_at_maximum_shear_traction = 0.5
-    maximum_normal_traction = 100
-    maximum_shear_traction = 70
   [../]
 []
 
@@ -122,7 +138,7 @@
   l_max_its = 50
   start_time = 0.0
   dt = 0.2
-  end_time = 5
+  end_time = 3
   dtmin = 0.2
   line_search = none
 []
@@ -130,62 +146,5 @@
 [Outputs]
   [./out]
     type = Exodus
-  [../]
-[]
-
-[Postprocessors]
-  [./sxx]
-    type = SideAverageValue
-    variable = stress_xx
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./syy]
-    type = SideAverageValue
-    variable = stress_yy
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./szz]
-    type = SideAverageValue
-    variable = stress_zz
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./syz]
-    type = SideAverageValue
-    variable = stress_yz
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./sxz]
-    type = SideAverageValue
-    variable = stress_xz
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./sxy]
-    type = SideAverageValue
-    variable = stress_xy
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'interface'
-  [../]
-  [./disp_x]
-    type = SideAverageValue
-    variable = disp_x
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'right'
-  [../]
-  [./disp_y]
-    type = SideAverageValue
-    variable = disp_y
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'right'
-  [../]
-  [./disp_z]
-    type = SideAverageValue
-    variable = disp_z
-    execute_on = 'INITIAL TIMESTEP_END'
-    boundary = 'right'
   [../]
 []

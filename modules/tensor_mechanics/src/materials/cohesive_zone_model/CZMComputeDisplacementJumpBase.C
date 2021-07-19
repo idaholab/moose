@@ -37,8 +37,7 @@ CZMComputeDisplacementJumpBase::CZMComputeDisplacementJumpBase(const InputParame
         declarePropertyByName<RealVectorValue>(_base_name + "displacement_jump_global")),
     _interface_displacement_jump(
         declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump")),
-    _czm_reference_rotation(
-        declarePropertyByName<RankTwoTensor>(_base_name + "czm_reference_rotation"))
+    _czm_total_rotation(declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation"))
 {
   // Enforce consistency
   if (_ndisp != _mesh.dimension())
@@ -72,8 +71,6 @@ CZMComputeDisplacementJumpBase::initQpStatefulProperties()
 void
 CZMComputeDisplacementJumpBase::computeQpProperties()
 {
-  _czm_reference_rotation[_qp] =
-      RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
 
   // computing the displacement jump
   for (unsigned int i = 0; i < _ndisp; i++)
@@ -81,5 +78,12 @@ CZMComputeDisplacementJumpBase::computeQpProperties()
   for (unsigned int i = _ndisp; i < 3; i++)
     _displacement_jump_global[_qp](i) = 0;
 
+  computeRotationMatrices();
   computeLocalDisplacementJump();
+}
+
+void
+CZMComputeDisplacementJumpBase::computeRotationMatrices()
+{
+  _czm_total_rotation[_qp] = RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
 }
