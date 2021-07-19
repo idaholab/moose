@@ -82,6 +82,10 @@ protected:
   const Real & _beta;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
+  /// Convergence tolerance for the pressure loop in external solve
+  const Real & _P_tol;
+  /// Convergence tolerance for the temperature loop in external solve
+  const Real & _T_tol;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * _mdot_soln;
   SolutionHandle * _SumWij_soln;

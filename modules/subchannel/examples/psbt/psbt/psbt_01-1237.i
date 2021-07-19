@@ -53,8 +53,10 @@ P_out = 4.923e6 # Pa
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  beta = 0.08
+  beta = 0.006
   CT = 2.0
+  P_tol = 1e-6
+  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
   compute_power = true
