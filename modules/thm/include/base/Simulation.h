@@ -62,7 +62,8 @@ public:
    * @param name Name of the component
    * @param params Input parameters
    */
-  void addComponent(const std::string & type, const std::string & name, InputParameters params);
+  virtual void
+  addComponent(const std::string & type, const std::string & name, InputParameters params);
 
   /**
    * Find out if simulation has a component with the given name
@@ -139,23 +140,23 @@ public:
   /**
    * Create mesh for this simulation
    */
-  void buildMesh();
+  virtual void buildMesh();
 
   /**
    * Add variables involved in this simulation
    */
-  void addVariables();
+  virtual void addVariables();
 
   /**
    * Add components based physics
    */
-  void addComponentPhysics();
+  virtual void addComponentPhysics();
 
   /**
    * Perform mesh setup actions such as setting up the coordinate system(s) and
    * creating ghosted elements.
    */
-  void setupMesh();
+  virtual void setupMesh();
 
   /**
    * Get the THMApp
@@ -330,7 +331,7 @@ protected:
    */
   void setupInitialConditionsFromFile();
 
-  void setupInitialConditions();
+  void setupInitialConditionObjects();
 
   /**
    * Sets the coordinate system for each subdomain
