@@ -73,7 +73,7 @@ GenericFunctionVectorMaterialTempl<is_ad>::GenericFunctionVectorMaterialTempl(
   {
     _properties[i] = &declareGenericProperty<RealVectorValue, is_ad>(_prop_names[i]);
     for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-      _functions[i*LIBMESH_DIM+j] = &getFunctionByName(_prop_values[i*LIBMESH_DIM+j]);
+      _functions[i * LIBMESH_DIM + j] = &getFunctionByName(_prop_values[i * LIBMESH_DIM + j]);
   }
 }
 
@@ -97,7 +97,7 @@ GenericFunctionVectorMaterialTempl<is_ad>::computeQpFunctions()
 {
   for (unsigned int i = 0; i < _num_props; i++)
     for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-      (*_properties[i])[_qp](j) = (*_functions[i*LIBMESH_DIM+j]).value(_t, _q_point[_qp]);
+      (*_properties[i])[_qp](j) = (*_functions[i * LIBMESH_DIM + j]).value(_t, _q_point[_qp]);
 }
 
 template class GenericFunctionVectorMaterialTempl<false>;

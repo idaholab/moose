@@ -15,7 +15,8 @@ InputParameters
 VectorMatDiffusion::validParams()
 {
   InputParameters params = VectorDiffusion::validParams();
-  params.addParam<MaterialPropertyName>("coef", "The anisotropic (diagonal) coefficient of diffusion");
+  params.addParam<MaterialPropertyName>("coef",
+                                        "The anisotropic (diagonal) coefficient of diffusion");
   return params;
 }
 
