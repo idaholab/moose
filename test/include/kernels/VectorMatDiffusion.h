@@ -9,13 +9,16 @@
 
 #pragma once
 
-#include "VectorDiffusion.h"
+#include "Kernel.h"
 #include "MaterialProperty.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
+
 
 /**
  * A diffusion kernel with a vector material property, representing a diagonal tensor
  */
-class VectorMatDiffusion : public VectorDiffusion
+class VectorMatDiffusion : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   static InputParameters validParams();
@@ -27,4 +30,6 @@ protected:
   virtual Real computeQpJacobian() override;
 
   const MaterialProperty<RealVectorValue> & _coef;
+
+  const MaterialProperty<RealVectorValue> & _grad_coef;
 };

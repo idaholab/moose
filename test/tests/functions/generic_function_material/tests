@@ -1,11 +1,28 @@
 [Tests]
-  issues = '#1335'
-  design = 'source/materials/GenericFunctionMaterial.md'
-  [./test]
+  [scalar]
     type = 'Exodiff'
     input = 'generic_function_material_test.i'
     exodiff = 'generic_function_material_test_out.e'
     scale_refine = 5
     requirement = "The Material system shall support defining properties within the input file that are associated with functions."
-  [../]
+    issues = '#1335'
+    design = 'source/materials/GenericFunctionMaterial.md'
+  []
+  [vector]
+    type = 'Exodiff'
+    input = 'generic_function_vector_material_test.i'
+    exodiff = 'generic_function_vector_material_test_out.e'
+    requirement = "The Material system shall support defining vector properties within the input file that are associated with functions."
+    issues = '#18372'
+    design = 'source/materials/GenericFunctionVectorMaterial.md'
+  []
+  [vector_error]
+    type = 'RunException'
+    input = 'generic_function_vector_material_test.i'
+    cli_args = "Materials/gfm/prop_values='diff_func_x'"
+    requirement = "The Material system shall error out if the number of functions supplied does not match the size of the vector function material properties."
+    issues = '#18372'
+    design = 'source/materials/GenericFunctionVectorMaterial.md'
+    expect_err = 'Number of prop_names'
+  []
 []
