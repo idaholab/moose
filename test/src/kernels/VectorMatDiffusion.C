@@ -42,8 +42,8 @@ Real
 VectorMatDiffusion::computeQpJacobian()
 {
   RealVectorValue term_1(_coef[_qp](0) * _grad_phi[_j][_qp](0),
-                             _coef[_qp](1) * _grad_phi[_j][_qp](1),
-                             _coef[_qp](2) * _grad_phi[_j][_qp](2));
+                         _coef[_qp](1) * _grad_phi[_j][_qp](1),
+                         _coef[_qp](2) * _grad_phi[_j][_qp](2));
   RealVectorValue term_2(_grad_coef[_qp](0) * _phi[0][_qp],
                          _grad_coef[_qp](1) * _phi[1][_qp],
                          _grad_coef[_qp](2) * _phi[2][_qp]);

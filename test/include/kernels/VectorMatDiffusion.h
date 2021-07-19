@@ -14,7 +14,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-
 /**
  * A diffusion kernel with a vector material property, representing a diagonal tensor
  */
