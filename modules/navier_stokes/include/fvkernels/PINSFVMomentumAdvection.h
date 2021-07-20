@@ -31,7 +31,7 @@ protected:
                    const ADRealVectorValue & neighbor_v) override;
 
   virtual ADReal computeQpResidual() override;
-  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
+  VectorValue<ADReal> coeffCalculator(const Elem & elem) const override;
 
   /// porosity variable to compute gradients
   const MooseVariableFV<Real> * const _eps_var;

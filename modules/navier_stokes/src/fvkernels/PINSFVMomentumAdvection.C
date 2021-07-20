@@ -40,7 +40,7 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 VectorValue<ADReal>
-PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) const
+PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
 {
   // these coefficients arise from simple control volume balances of advection and diffusion. These
   // coefficients are the linear coefficients associated with the centroid of the control volume.
@@ -74,18 +74,13 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff,
-                         &elem_velocity,
-                         &mu,
-#ifndef NDEBUG
-                         &elem,
-#endif
-                         this](const Elem & libmesh_dbg_var(functor_elem),
-                               const Elem * const neighbor,
-                               const FaceInfo * const fi,
-                               const Point & surface_vector,
-                               Real libmesh_dbg_var(coord),
-                               const bool elem_has_info) {
+  auto action_functor = [&coeff, &elem_velocity, &elem, this](
+                            const Elem & libmesh_dbg_var(functor_elem),
+                            const Elem * const neighbor,
+                            const FaceInfo * const fi,
+                            const Point & surface_vector,
+                            Real libmesh_dbg_var(coord),
+                            const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
 
@@ -105,6 +100,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
 
+    const auto elem_mu = _mu(&elem);
+
     if (onBoundary(*fi))
     {
       // Compute the face porosity
@@ -118,7 +115,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
         {
           // Need to account for viscous shear stress from wall
           for (const auto i : make_range(_dim))
-            coeff(i) += mu / eps_face * surface_vector.norm() /
+            coeff(i) += elem_mu / eps_face * surface_vector.norm() /
                         std::abs((fi->faceCentroid() - rc_centroid) * normal) *
                         (1 - normal(i) * normal(i));
 
@@ -154,8 +151,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
             // equation 8.89. So relative to the internal face viscous term, we have substituted
             // eqn. 8.82 for 8.78
             // Note: If mu is an effective diffusivity, this should not be divided by eps_face
-            temp_coeff +=
-                mu / eps_face * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
+            temp_coeff += elem_mu / eps_face * surface_vector.norm() /
+                          (fi->faceCentroid() - rc_centroid).norm();
 
           // For flow boundaries, the coefficient addition is the same for every velocity component
           for (const auto i : make_range(_dim))
@@ -168,7 +165,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
         {
           // Moukalled eqns. 15.154 - 15.156, adapted for porosity
           for (const auto i : make_range(_dim))
-            coeff(i) += 2. * mu / eps_face * surface_vector.norm() /
+            coeff(i) += 2. * elem_mu / eps_face * surface_vector.norm() /
                         std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) *
                         normal(i);
 
@@ -185,6 +182,11 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     }
 
     // Else we are on an internal face
+
+    const auto neighbor_mu = _mu(neighbor);
+    ADReal face_mu;
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_mu, elem_mu, neighbor_mu, *fi, elem_has_info);
 
     // Compute the face porosity
     // Note: Try to be consistent with how the superficial velocity is computed in computeQpResidual
@@ -216,7 +218,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
     // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
     // E_f, equation 8.69
-    temp_coeff += mu / eps_face * surface_vector.norm() /
+    temp_coeff += face_mu / eps_face * surface_vector.norm() /
                   (fi->neighborCentroid() - fi->elemCentroid()).norm();
 
     // For internal faces the coefficient is the same for every velocity component.
@@ -274,6 +276,9 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
         MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > 1e-12)
       return;
 
+  mooseAssert((neighbor && this->hasBlocks(neighbor->subdomain_id())),
+              "We should be on an internal face...");
+
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
   const VectorValue<ADReal> & grad_p = _p_var->adGradSln(*_face_info);
@@ -283,17 +288,15 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   const VectorValue<ADReal> & unc_grad_p = _p_var->uncorrectedAdGradSln(*_face_info);
 
   const Point & elem_centroid = _face_info->elemCentroid();
-  const Point * const neighbor_centroid = neighbor ? &_face_info->neighborCentroid() : nullptr;
+  const Point & neighbor_centroid = _face_info->neighborCentroid();
   Real elem_volume = _face_info->elemVolume();
-  Real neighbor_volume = neighbor ? _face_info->neighborVolume() : 0;
-  const auto & elem_mu = _mu_elem[_qp];
+  Real neighbor_volume = _face_info->neighborVolume();
 
   // Now we need to perform the computations of D
-  const VectorValue<ADReal> & elem_a = rcCoeff(*elem, elem_mu);
+  const VectorValue<ADReal> & elem_a = rcCoeff(*elem);
 
-  mooseAssert(neighbor ? _subproblem.getCoordSystem(elem->subdomain_id()) ==
-                             _subproblem.getCoordSystem(neighbor->subdomain_id())
-                       : true,
+  mooseAssert(_subproblem.getCoordSystem(elem->subdomain_id()) ==
+                  _subproblem.getCoordSystem(neighbor->subdomain_id()),
               "Coordinate systems must be the same between the two elements");
 
   Real coord;
@@ -310,26 +313,19 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 
   VectorValue<ADReal> face_D;
 
-  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
+  const VectorValue<ADReal> & neighbor_a = rcCoeff(*neighbor);
+
+  coordTransformFactor(_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
+  neighbor_volume *= coord;
+
+  VectorValue<ADReal> neighbor_D = 0;
+  for (const auto i : make_range(_dim))
   {
-    const auto & neighbor_mu = _mu_neighbor[_qp];
-
-    const VectorValue<ADReal> & neighbor_a = rcCoeff(*neighbor, neighbor_mu);
-
-    coordTransformFactor(_subproblem, neighbor->subdomain_id(), *neighbor_centroid, coord);
-    neighbor_volume *= coord;
-
-    VectorValue<ADReal> neighbor_D = 0;
-    for (const auto i : make_range(_dim))
-    {
-      mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
-      neighbor_D(i) = neighbor_volume / neighbor_a(i);
-    }
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
+    mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
+    neighbor_D(i) = neighbor_volume / neighbor_a(i);
   }
-  else
-    face_D = elem_D;
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto eps_face = MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(
@@ -342,7 +338,7 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 #else
 
 VectorValue<ADReal>
-PINSFVMomentumAdvection::coeffCalculator(const Elem &, const ADReal &) const
+PINSFVMomentumAdvection::coeffCalculator(const Elem &) const
 {
   mooseError("PINSFVMomentumAdvection only works with global AD indexing");
 }
