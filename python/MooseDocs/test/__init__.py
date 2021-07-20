@@ -66,20 +66,16 @@ class MooseDocsTestCase(unittest.TestCase):
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
 
-        base.Executioner.setMutable(self.__text, True)
         self.__translator.executioner.read(self.__text) # runs pre- and post-read methods
         self.__ast = self.__translator.executioner.tokenize(self.__text, text)
-        base.Executioner.setMutable(self.__text, False)
         return self.__ast
 
     def render(self, ast, *args, **kwargs):
         """Helper for rendering AST"""
-        base.Executioner.setMutable(self.__text, True)
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
             self.tokenize('')
         self.__result = self.__translator.executioner.render(self.__text, ast)
-        base.Executioner.setMutable(self.__text, False)
         return self.__result
 
     def execute(self, text, *args, **kwargs):

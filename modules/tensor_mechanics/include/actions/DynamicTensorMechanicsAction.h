@@ -18,6 +18,11 @@ public:
 
   DynamicTensorMechanicsAction(const InputParameters & params);
 
+  virtual void act();
+
 protected:
   virtual std::string getKernelType();
+
+  std::vector<AuxVariableName> _velocities;
+  std::vector<AuxVariableName> _accelerations;
 };

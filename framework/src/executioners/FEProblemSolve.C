@@ -100,6 +100,10 @@ FEProblemSolve::validParams()
       "Whether the scaling factors should only be computed once at the beginning of the simulation "
       "through an extra Jacobian evaluation. If this is set to false, then the scaling factors "
       "will be computed during an extra Jacobian evaluation at the beginning of every time step.");
+  params.addParam<bool>(
+      "off_diagonals_in_auto_scaling",
+      false,
+      "Whether to consider off-diagonals when determining automatic scaling factors.");
   params.addRangeCheckedParam<Real>(
       "resid_vs_jac_scaling_param",
       0,
@@ -118,11 +122,12 @@ FEProblemSolve::validParams()
       "The number of grids to use for a grid sequencing algorithm. This includes the final grid, "
       "so num_grids = 1 indicates just one solve in a time-step");
 
-  params.addParamNamesToGroup("l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
-                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
-                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
-                              "automatic_scaling compute_scaling_once num_grids",
-                              "Solver");
+  params.addParamNamesToGroup(
+      "l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
+      "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
+      "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
+      "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling num_grids",
+      "Solver");
   return params;
 }
 
@@ -135,7 +140,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       _moose_line_searches.end())
     _problem.addLineSearch(_pars);
 
-// Extract and store PETSc related settings on FEProblemBase
+  // Extract and store PETSc related settings on FEProblemBase
   Moose::PetscSupport::storePetscOptions(_problem, _pars);
 
   EquationSystems & es = _problem.es();
@@ -204,6 +209,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
   _nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
+  _nl.offDiagonalsInAutoScaling(getParam<bool>("off_diagonals_in_auto_scaling"));
   if (isParamValid("scaling_group_variables"))
     _nl.scalingGroupVariables(
         getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));

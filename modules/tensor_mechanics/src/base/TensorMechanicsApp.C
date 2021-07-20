@@ -42,7 +42,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
 
   registerSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
-  registerSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
+  registerSyntax("LegacyDynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
 
   registerSyntax("EmptyAction", "BCs/Pressure");
@@ -56,7 +56,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
                  "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
   registerSyntax("GlobalStrainAction", "Modules/TensorMechanics/GlobalStrain/*");
   registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
+  registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/DynamicMaster");
   registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
+  registerSyntax("DynamicTensorMechanicsAction", "Modules/TensorMechanics/DynamicMaster/*");
 
   registerSyntax("CommonLineElementAction", "Modules/TensorMechanics/LineElementMaster");
   registerSyntax("LineElementAction", "Modules/TensorMechanics/LineElementMaster/*");
