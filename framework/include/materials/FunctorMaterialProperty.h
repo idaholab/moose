@@ -53,26 +53,16 @@ FunctorMaterialProperty<T>::setFunction(const MooseMesh & mesh,
                                         const std::set<SubdomainID> & block_ids,
                                         PolymorphicLambda my_lammy)
 {
-  auto add_new_lambda = [&](const SubdomainID lm_block_id) {
-    auto pr = _elem_functor.emplace(lm_block_id, ElemFn(my_lammy));
-    if (!pr.second)
-      mooseError("No insertion in the functor material property ",
-                 _name,
-                 " for block id ",
-                 lm_block_id,
-                 ". Another material must already provide this material property on that block.");
-  };
-
   for (const auto block_id : block_ids)
   {
     if (block_id == Moose::ANY_BLOCK_ID)
     {
       const auto & inner_block_ids = mesh.meshSubdomains();
       for (const auto inner_block_id : inner_block_ids)
-        add_new_lambda(inner_block_id);
+        _elem_functor.emplace(inner_block_id, my_lammy);
     }
     else
-      add_new_lambda(block_id);
+      _elem_functor.emplace(block_id, my_lammy);
   }
 
   return *this;
