@@ -62,6 +62,10 @@
   [temperature]
     type = PorousFlowTemperature  # needed because of the PorousFlowPolyLineSink
   []
+  [total_strain]
+    type = ComputeSmallStrain
+    displacements = disp_x
+  []
   [vol_strain]
     type = PorousFlowVolumetricStrain
     displacements = disp_x
