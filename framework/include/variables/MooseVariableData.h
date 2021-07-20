@@ -107,6 +107,16 @@ public:
 
   //////////////// Heavy lifting computational routines //////////////////////////////
 
+
+  /**
+   * compute the variable values
+   */
+  void computeValuesFace(const FaceInfo & fi);
+
+  void computeGhostValuesFace(const FaceInfo & fi, MooseVariableData<OutputType> & other_face);
+
+  void computeADAveraging();
+
   /**
    * compute the variable values
    */
@@ -287,10 +297,24 @@ public:
     return _ad_u;
   }
 
+  const ADTemplateVariableValue<OutputType> & adSlnAvg() const
+  {
+    _need_averaging = true;
+    _need_ad = _need_ad_u = true;
+    return _ad_u_average;
+  }
+
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
+  }
+
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const
+  {
+    _need_averaging = true;
+    _need_ad = _need_ad_grad_u = true;
+    return _ad_grad_u_average;
   }
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const
@@ -602,6 +626,10 @@ private:
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_second_u;
 
+  /// Averaging flags
+  mutable bool _need_averaging;
+  mutable bool _face_averaging;
+
   /// local solution flags
   mutable bool _need_dof_values;
   mutable bool _need_dof_values_old;
@@ -665,6 +693,8 @@ private:
 
   /// AD u
   ADTemplateVariableValue<OutputType> _ad_u;
+  ADTemplateVariableValue<OutputType> _ad_u_average;
+ADTemplateVariableGradient<OutputType> _ad_grad_u_average;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
   MooseArray<ADReal> _ad_dof_values;

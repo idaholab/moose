@@ -46,6 +46,14 @@ public:
                                                          unsigned int comp = 0) const;
 
   /**
+   * Get the coupled neighbor variable gradient value for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
+  virtual const ADVariableGradient & adCoupledNeighborGradient(const std::string & var_name,
+                                                               unsigned int comp = 0) const;
+
+
+  /**
    * Get the time derivative of the coupled neighbor variable value for \p var_name with derivative
    * information for automatic differentiation objects
    */
@@ -103,4 +111,7 @@ public:
 
 protected:
   bool _neighbor_nodal;
+
+  /// Whether the MooseObject is a finite volume object
+  const bool _is_fv;
 };

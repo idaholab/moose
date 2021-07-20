@@ -271,9 +271,17 @@ public:
   {
     return _element_data->adSln();
   }
+  const ADTemplateVariableValue<OutputType> & adSlnAvg() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
   }
 
   /**
@@ -331,9 +339,17 @@ public:
   {
     return _neighbor_data->adSln();
   }
+  const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
   {
     return _neighbor_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvgNeighbor() const override
+  {
+    mooseError("There is no element averaging for FV variables.");
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
   {

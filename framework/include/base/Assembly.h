@@ -271,6 +271,12 @@ public:
   const QBase * const & qRuleFace() const { return _const_current_qrule_face; }
 
   /**
+   * Returns the reference to the current FV quadrature being used on a current face
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const QBase * const & qRuleFVFace() const { return _const_current_FV_qrule_face; }
+
+  /**
    * Returns the reference to the current quadrature being used on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -635,7 +641,7 @@ public:
    */
   void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
 
-  void reinitFVFace(const FaceInfo & fi);
+  void reinitFVFace(const FaceInfo & fi, bool areFE);
 
   /**
    * Reinitialize an element and its neighbor along a particular side.
@@ -2208,8 +2214,12 @@ private:
   /// APIs return a const QBase * const &. Without the const QBase * member we would be casting the
   /// non-const version, which creates a temporary, and we cannot return a reference to a temporary
   const QBase * _const_current_qrule_face;
+  /// FV quadrature rule used on faces.
+  const QBase * _const_current_FV_qrule_face;
   /// quadrature rule used on faces
   QBase * _current_qrule_face;
+  /// FV quadrature rule used on faces
+  QBase * _current_FV_qrule_face;
   /// The current arbitrary quadrature rule used on element faces
   ArbitraryQuadrature * _current_qface_arbitrary;
   /// The current quadrature points on a face
