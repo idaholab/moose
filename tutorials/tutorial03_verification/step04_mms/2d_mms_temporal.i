@@ -48,4 +48,7 @@
     variable = T
     function = mms_exact
   []
+  [delta_t]
+    type = TimestepSize
+  []
 []

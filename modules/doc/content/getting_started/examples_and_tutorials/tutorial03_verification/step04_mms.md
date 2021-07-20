@@ -49,7 +49,7 @@ which will execute for nine hours of simulation time.
 | $c_p$             | 2000   | $J\cdot kg^{-1}\cdot K^{-1}$ |
 | $\kappa$          | 40     | $m^{-1}$ |
 | $q_k(x, 0, t)$    | -5     | $W\cdot m^{-2}$ |
-| $T(x, -0.2 m, t)$ | 263.15 | $W\cdot m^{-2}$ |
+| $T(x, -0.2 m, t)$ | 263.15 | $K$ |
 
 As in the previous step, a complete input file will be explained block by block. It shall
 be assumed that the input file is named `~/projects/problems/verification/2d_main.i`. Again,
@@ -265,7 +265,7 @@ The resulting convergence data indicate that the simulation is converging to the
 the correct rate for first and second-order elements, thus verifying that the finite element solution
 is computing the results as expected.
 
-!media heat_conduction/tutorial03_verification/2d_mms_spatial.png
+!media tutorial03_verification/2d_mms_spatial.png
        id=tutorial03-spatial-graph
        caption=Results of the spatial convergence study comparing the finite element simulation with
                the assumed two-dimensional solution.
@@ -280,7 +280,7 @@ cannot be represented by the numerical time integration scheme. A decay function
 has minimal changes in time and tends to a easy to recognize solution of `xy`.
 
 !equation id=tutorial03_temporal_solution
-T = x*y*\textrm{exp}(-1/32400 t)
+T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 
 Again, the `mms` package, as shown in [tutorial03_temporal_function], used to compute the necessary
 forcing function. The package can directly output the the input file format both the computed
@@ -309,14 +309,20 @@ is nearly identical to the spatial counter part, as such is included completely 
 
 !listing tutorial03_verification/step04_mms/2d_mms_temporal.i link=false
 
-The only differences are the function definitions and the element size computation is removed,
-because it is not required.
+The only differences are the function definitions and the use of timestep size instead of the
+element size computation.
+
+Again, the `mms` package can be used to perform the study.
+
+!listing tutorial03_verification/step04_mms/step04_study.py id=tutorial04-temporal-study
+         caption=Example use of the `mms` package to run and plot spatial convergence.
+         link=False start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=False
 
 The resulting convergence data indicate that the simulation is converging to the known solution at
 the correct rate for first and second-order time integration schemes, thus verifying that the
 time integration is computing the correct results.
 
-!media heat_conduction/tutorial03_verification/2d_mms_temporal.png
+!media tutorial03_verification/2d_mms_temporal.png
        id=tutorial03-temporal-graph
        caption=Results of the temporal convergence study comparing the finite element simulation with
                the assumed two-dimensional solution.

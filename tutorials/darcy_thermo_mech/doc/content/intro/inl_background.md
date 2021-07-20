@@ -11,8 +11,8 @@ www.inl.gov
 
 !---
 
-- INL is the fifth-largest employer in Idaho with 3,900 employees and more than 350 interns
-- In 2018 the INL budget was $1,172,116,000
+- INL is the one of the largest employers in Idaho with 5,336 employees and 478 interns
+- In 2021 the INL budget was over $1 billion
 
 !---
 

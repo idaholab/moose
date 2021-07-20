@@ -1,8 +1,10 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  xmax = 0.03
-  nx = 200
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 1
+    xmax = 0.03
+    nx = 200
+  []
 []
 
 [Variables]
@@ -85,6 +87,7 @@
     end_point = '0.03 0 0'
     num_points = 200
     sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [T_simulation]
     type = LineValueSampler
@@ -93,5 +96,6 @@
     end_point = '0.03 0 0'
     num_points = 200
     sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []

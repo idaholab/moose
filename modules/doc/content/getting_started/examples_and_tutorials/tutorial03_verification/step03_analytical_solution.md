@@ -211,7 +211,7 @@ The resulting convergence data indicate that the simulation is converging to the
 at the correct rate for first-order elements, thus verifying that the finite element solution
 is computing the results as expected.
 
-!media heat_conduction/tutorial03_verification/1d_analytical_spatial.png
+!media tutorial03_verification/1d_analytical_spatial.png
        id=tutorial03-analytical-spatial-graph
        caption=Results of the spatial convergence study comparing the finite element simulation with the known one-dimensional analytical solution.
 
@@ -230,7 +230,7 @@ The resulting convergence data indicate that the simulation is converging to the
 at the correct rate for second-order time integration, thus verifying that the numerical integration
 scheme is operating as expected.
 
-!media heat_conduction/tutorial03_verification/1d_analytical_temporal.png
+!media tutorial03_verification/1d_analytical_temporal.png
        id=tutorial03-analytical-temporal-graph
        caption=Results of the spatial convergence study comparing the finite element simulation with the known one-dimensional analytical solution.
 

@@ -10,9 +10,9 @@ a complete description please refer to the module specific documentation.
 ## Transient Heat Equation
 
 !equation id=tutorial03-heat-eq
-\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega,
+\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega
 
-Where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the
+$T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the
 density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source,
 and $\Omega$ is the spatial domain. Boundary conditions are defined on the boundary of the
 domain $\partial \Omega$, the type and application of which will be discussed for the specific
