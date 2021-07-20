@@ -586,6 +586,8 @@ SubProblem::checkBlockMatProps()
   // Variable for storing all available blocks/boundaries from the mesh
   std::set<SubdomainID> all_ids(mesh().meshSubdomains());
 
+  std::stringstream errors;
+
   // Loop through the properties to check
   for (const auto & check_it : _map_block_material_props_check)
   {
@@ -615,16 +617,15 @@ SubProblem::checkBlockMatProps()
           std::string check_name = restrictionSubdomainCheckName(id);
           if (check_name.empty())
             check_name = std::to_string(id);
-          mooseError("Material property '",
-                     prop_it.second,
-                     "', requested by '",
-                     prop_it.first,
-                     "' is not defined on block ",
-                     check_name);
+          errors << "Material property '" << prop_it.second << "', requested by '" << prop_it.first
+                 << "' is not defined on block " << check_name << "\n";
         }
       }
     }
   }
+
+  if (!errors.str().empty())
+    mooseError(errors.str());
 }
 
 void
@@ -635,6 +636,8 @@ SubProblem::checkBoundaryMatProps()
 
   // Variable for storing all available blocks/boundaries from the mesh
   std::set<BoundaryID> all_ids(mesh().getBoundaryIDs());
+
+  std::stringstream errors;
 
   // Loop through the properties to check
   for (const auto & check_it : _map_boundary_material_props_check)
@@ -665,16 +668,15 @@ SubProblem::checkBoundaryMatProps()
           std::string check_name = restrictionBoundaryCheckName(id);
           if (check_name.empty())
             check_name = std::to_string(id);
-          mooseError("Material property '",
-                     prop_it.second,
-                     "', requested by '",
-                     prop_it.first,
-                     "' is not defined on boundary ",
-                     check_name);
+          errors << "Material property '" << prop_it.second << "', requested by '" << prop_it.first
+                 << "' is not defined on boundary " << check_name << "\n";
         }
       }
     }
   }
+
+  if (!errors.str().empty())
+    mooseError(errors.str());
 }
 
 void
