@@ -27,7 +27,14 @@ PorousFlowHeatEnergy::validParams()
                                              "The index(es) of the fluid phase that this "
                                              "Postprocessor is restricted to.  Multiple "
                                              "indices can be entered.");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<std::string>(
+      "base_name",
+      "For non-mechanically-coupled systems with no TensorMechanics strain calculators, base_name "
+      "need not be set.  For mechanically-coupled systems, base_name should be the same base_name "
+      "as given to the TensorMechanics object that computes strain, so that this Postprocessor can "
+      "correctly account for changes in mesh volume.  For non-mechanically-coupled systems, "
+      "base_name should not be the base_name of any TensorMechanics strain calculators.");
+  params.set<bool>("use_displaced_mesh") = false;
   params.addParam<unsigned int>("kernel_variable_number",
                                 0,
                                 "The PorousFlow variable number (according to the dictatory) of "
@@ -43,6 +50,11 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _has_total_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain(_has_total_strain
+                      ? &getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")
+                      : nullptr),
     _fluid_present(_num_phases > 0),
     _include_porous_skeleton(getParam<bool>("include_porous_skeleton")),
     _phase_index(getParam<std::vector<unsigned int>>("phase")),
@@ -108,7 +120,13 @@ PorousFlowHeatEnergy::computeIntegral()
   {
     Real nodal_volume = 0.0;
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      nodal_volume += _JxW[_qp] * _coord[_qp] * test[node][_qp];
+    {
+      const Real n_v = _JxW[_qp] * _coord[_qp] * test[node][_qp];
+      if (_has_total_strain)
+        nodal_volume += n_v * (1.0 + (*_total_strain)[_qp].trace());
+      else
+        nodal_volume += n_v;
+    }
 
     Real energy = 0.0;
     if (_include_porous_skeleton)
