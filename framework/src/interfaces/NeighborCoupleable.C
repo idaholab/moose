@@ -19,7 +19,9 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
                                        bool nodal,
                                        bool neighbor_nodal,
                                        bool is_fv)
-  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal)
+  : Coupleable(moose_object, nodal, is_fv),
+    _neighbor_nodal(neighbor_nodal),
+    _is_fv(is_fv)
 {
 }
 
@@ -57,7 +59,30 @@ NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigne
                "use old solution data which do not have derivatives so adCoupledNeighborValue is "
                "not appropriate. Please use coupledNeighborValue instead");
 
+  if (!var->isFV() && _is_fv)
+    return var->adSlnAvgNeighbor();
   return var->adSlnNeighbor();
+}
+
+const ADVariableGradient &
+NeighborCoupleable::adCoupledNeighborGradient(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return getADDefaultGradient();
+
+  if (_neighbor_nodal)
+  mooseError("Nodal variables do not have gradients");
+
+  if (!_c_is_implicit)
+    mooseError("adCoupledNeighborGradient returns a data structure with derivatives. Explicit schemes "
+               "use old solution data which do not have derivatives so adCoupledNeighborValue is "
+               "not appropriate. Please use coupledNeighborGradient instead");
+
+  if (!var->isFV() && _is_fv)
+    return var->adGradSlnAvgNeighbor();
+  return var->adGradSlnNeighbor();
 }
 
 const ADVariableValue &
