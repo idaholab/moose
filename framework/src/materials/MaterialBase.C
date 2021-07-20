@@ -147,18 +147,18 @@ MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State st
     _supplied_prop_ids.insert(property_id);
 
     _props_to_flags[prop_name] |= static_cast<int>(state);
+
+    // Store material properties for block ids
+    for (const auto & block_id : blockIDs())
+      _fe_problem.storeSubdomainMatPropName(block_id, prop_name);
+
+    // Store material properties for the boundary ids
+    for (const auto & boundary_id : boundaryIDs())
+      _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
   }
 
   if (static_cast<int>(state) % 2 == 0)
     _has_stateful_property = true;
-
-  // Store material properties for block ids
-  for (const auto & block_id : blockIDs())
-    _fe_problem.storeSubdomainMatPropName(block_id, prop_name);
-
-  // Store material properties for the boundary ids
-  for (const auto & boundary_id : boundaryIDs())
-    _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
 }
 
 std::set<OutputName>

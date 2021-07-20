@@ -428,7 +428,7 @@
   [./missing_coupled_mat_prop_test]
     type = 'RunException'
     input = 'missing_coupled_mat_prop_test.i'
-    expect_err = "One or more Material Properties were not supplied on block"
+    expect_err = "Material property 'mp1', requested by 'mat_global'"
 
     requirement = 'The system shall report an error when a material property is requested but not supplied on a mesh block.'
     issues = '#1405'
