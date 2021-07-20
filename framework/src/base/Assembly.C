@@ -162,7 +162,9 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_lower_helper[dim])->get_JxW();
   }
 
-  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
+  _fe_msm = (_mesh_dimension == 2)
+                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
+                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
   _JxW_msm = &_fe_msm->get_JxW();
   // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
   // _coord_msm
@@ -2395,6 +2397,21 @@ Assembly::reinitMortarElem(const Elem * elem)
               "You should be calling reinitMortarElem on a lower dimensional element");
 
   _fe_msm->reinit(elem);
+
+  MooseArray<Point> array_q_points;
+  array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
+  setCoordinateTransformation(_qrule_msm, array_q_points, _coord_msm, elem->subdomain_id());
+}
+
+void
+Assembly::reinitMortarElem(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const wts)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitMortarElem on a lower dimensional element");
+
+  _fe_msm->reinit(elem, pts, wts);
 
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
