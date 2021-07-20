@@ -22,6 +22,9 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
 
+// Eigen needs LU
+#include "Eigen/LU"
+
 // C++ includes
 #include <iomanip>
 #include <ostream>
@@ -386,29 +389,18 @@ RankFourTensorTempl<Real>::invSymm() const
 
 template <typename T>
 RankFourTensorTempl<T>
-RankFourTensorTempl<T>::inverse() const
-{
-  mooseError("The inverse operation calls to LAPACK and only supports plain Real type tensors.");
-}
-
-template <>
-RankFourTensorTempl<Real>
-RankFourTensorTempl<Real>::inverse() const
+RankFourTensorTempl<T>::inverse()
 {
   // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
   // simply the inverse of the 9x9 matrix of the tensor entries.
   // So all we need to do is inverse _vals (with the appropriate row-major
   // storage)
 
-  // Setup 9x9
-  std::vector<PetscScalar> mat(N4);
-  std::copy(_vals, _vals + N4, mat.begin());
+  RankFourTensorTempl<T> ret;
+  Eigen::Map<Eigen::Matrix<T, 9, 9>>(ret._vals, 9, 9) =
+      Eigen::Map<Eigen::Matrix<T, 9, 9>>(_vals, 9, 9).inverse();
 
-  // LAPACK inverse
-  MatrixTools::inverse(mat, N * N);
-
-  // The result is just the vector in row-major
-  return RankFourTensor(mat, RankFourTensor::general);
+  return ret;
 }
 
 template <typename T>
@@ -977,6 +969,22 @@ RankFourTensorTempl<T>::tripleProductJkl(const RankTwoTensorTempl<T> & A,
             for (unsigned int n = 0; n < N; n++)
               for (unsigned int t = 0; t < N; t++)
                 R(i, j, k, l) += (*this)(i, m, n, t) * A(j, m) * B(k, n) * C(l, t);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::singleProductI(const RankTwoTensorTempl<T> & A) const
+{
+  RankFourTensorTempl<T> R;
+
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            R(i, j, k, l) += (*this)(m, j, k, l) * A(i, m);
 
   return R;
 }

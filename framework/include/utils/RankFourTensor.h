@@ -244,7 +244,7 @@ public:
    * This returns A_ijkl such that C_ijkl*A_klmn = de_im de_jn
    * i.e. the general rank four inverse
    */
-  RankFourTensorTempl<T> inverse() const;
+  RankFourTensorTempl<T> inverse();
 
   /**
    * Rotate the tensor using
@@ -360,6 +360,9 @@ public:
   RankFourTensorTempl<T> tripleProductJkl(const RankTwoTensorTempl<T> &,
                                           const RankTwoTensorTempl<T> &,
                                           const RankTwoTensorTempl<T> &) const;
+
+  /// Calculates C_mjkl A_im
+  RankFourTensorTempl<T> singleProductI(const RankTwoTensorTempl<T> &) const;
 
   /// checks if the tensor is symmetric
   bool isSymmetric() const;

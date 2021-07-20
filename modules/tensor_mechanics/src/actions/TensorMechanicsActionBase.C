@@ -33,7 +33,7 @@ const std::vector<char> TensorMechanicsActionBase::_component_table = {'x', 'y',
 // shortcuts
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
     TensorMechanicsActionBase::_rank_two_invariant_table = {
-        {"vonmises", {"VonMisesStress", {"stress"}}},
+        {"vonmises", {"VonMisesStress", {"stress", "cauchy_stress", "pk1_stress", "pk2_stress"}}},
         {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic",
          {"Hydrostatic", {"stress", "cauchy_stress", "pk1_stress", "pk2_stress", "small_stress"}}},
@@ -41,6 +41,8 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
          {"L2norm",
           {"mechanical_strain",
            "stress",
+           "cauchy_stress",
+           "pk1_stress",
            "strain",
            "elastic_strain",
            "plastic_strain",

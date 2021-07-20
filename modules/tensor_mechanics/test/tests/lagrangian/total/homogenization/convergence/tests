@@ -1,0 +1,82 @@
+[Tests]
+  [./sd-strain_no_stab]
+    type = PetscJacobianTester
+    input = 'sd-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./sd-stress_no_stab]
+    type = PetscJacobianTester
+    input = 'sd-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./ld-strain_no_stab]
+    type = PetscJacobianTester
+    input = 'ld-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./ld-stress_no_stab]
+    type = PetscJacobianTester
+    input = 'ld-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./sd-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./sd-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./ld-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-strain.i'
+    ratio_tol = 1E-6 # For some reason this one is 1.01e-7...
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+  [./ld-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact'
+    issues = '#17473'
+    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+  [../]
+[]

@@ -103,6 +103,39 @@ The TensorMechanics module is being developed by users at national laboratories
 and universities around the world. Learn how to get in touch with the developers
 on the [help/contact_us.md optional=True] page.
 
+## New Mechanics Kernels
+
+The Tensor Mechanics module currently has two, partially interoperable 
+underlying systems:
+
+- The old system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels.
+- A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
+
+The older system is fully compatible with the entirety of the Tensor Mechanics and MOOSE ecosystems.  However, it suffers from convergence issues caused by
+non-exact Jacobians when not used with the Automatic Differentiation variants of the kernels and underlying materials.
+
+The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians, but is a work in progress.  Currently, it supports
+
+- A [common interface](tensor_mechanics/NewBackground.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
+- An [improved material system](tensor_mechanics/NewMaterialSystem.md), that provides multiple options for implementing new materials models.  The new material system can also automatically convert a small deformation material model to large deformation kinematics by integrating a user-select objective stress rate.
+- Both [total Lagrangian](/TotalLagrangianStressDivergence.md) and [updated Lagrangian](/UpdatedLagrangianStressDivergence.md) formulations.
+- A [homogenization system](/tensor_mechanics/Homogenization.md) designed to enforce cell-average deformation or stress conditions over a periodic unit cell.
+- [Stabilization for linear elements](/tensor_mechanics/Stabilization.md) for use in incompressible or nearly-incompressible problems through a $\bar{\boldsymbol{F}}$ formulation.
+
+However, it does not currently support:
+
+- Full interoperability with the current Tensor Mechanics materials.
+- Cylindrical or spherical coordinates.
+- Full interoperability with the other MOOSE modules.
+
+The future goal for the new system is full interoperability with the rest of the module.  Currently, users should consider using the new system
+for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or 
+for problems where the stress update provided by the constitutive model is very expensive, as the new kernels will achieve convergence
+in many fewer nonlinear iterations, when compared to the older system.
+
+Both the new and old systems are accessible through the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md), which simplifies the process of
+setting up and running models.
+
 ## Developing New Tensor Mechanics Code
 
 Consider becoming a developer yourself.

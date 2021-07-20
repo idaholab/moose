@@ -1,0 +1,47 @@
+[Tests]
+  [./cauchy_linear]
+    type = PetscJacobianTester
+    input = 'cauchy-elastic.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeLagrangianElasticSmallStress'
+    requirement = 'Correct Jacobian coming from the material model'
+  [../]
+  [./pk_stvenant]
+    type = PetscJacobianTester
+    input = 'stvenantkirchhoff.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeStVenantKirchhoffStress'
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
+  [../]
+  [./pk_stvenant_small]
+    type = PetscJacobianTester
+    input = 'stvenantkirchhoff_small.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeStVenantKirchhoffStress'
+    requirement = 'Correct Jacobian coming from the material model for linear kinematics'
+  [../]
+  [./neohookean]
+    type = PetscJacobianTester
+    input = 'neohookean.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeNeoHookeanStress'
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
+  [../]
+  [./neohookean_small]
+    type = PetscJacobianTester
+    input = 'neohookean_small.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeNeoHookeanStress'
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
+  [../]
+[]
