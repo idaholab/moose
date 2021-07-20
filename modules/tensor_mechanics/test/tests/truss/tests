@@ -79,6 +79,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under tension."
+    allow_warnings = True # see #18371
   [../]
   [./tensile_nohardening]
     type = 'Exodiff'
@@ -88,6 +89,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under tension."
+    allow_warnings = True # see #18371
   [../]
   [./tensile_hardeningfn]
     type = 'Exodiff'
@@ -97,6 +99,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under tension."
+    allow_warnings = True # see #18371
   [../]
   [./compressive]
     type = 'Exodiff'
@@ -106,6 +109,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under compression."
+    allow_warnings = True # see #18371
   [../]
   [./compressive_nohardening]
     type = 'Exodiff'
@@ -115,6 +119,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under compression."
+    allow_warnings = True # see #18371
   [../]
   [./compressive_hardeningfn]
     type = 'Exodiff'
@@ -124,6 +129,7 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under compression."
+    allow_warnings = True # see #18371
   [../]
   [./error_nohardening]
     type = 'RunException'
@@ -133,7 +139,6 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "PlasticTruss material should produce error if neither the hardening"
                   " constant nor a hardening function is provided."
-
   [../]
   [./error_hardening]
     type = 'RunException'
@@ -143,6 +148,5 @@
     design = "source/materials/PlasticTruss.md"
     requirement = "PlasticTruss material should produce error if both hardening"
                   " constant and hardening function are provided."
-
   [../]
 []
