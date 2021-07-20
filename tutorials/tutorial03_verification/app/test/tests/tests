@@ -87,7 +87,6 @@
       check_files = '2d_mms_spatial.png 2d_mms_temporal.png'
       required_python_packages = 'matplotlib numpy sympy'
       method = opt
-      heavy = true
       recover = false
 
       detail = "a spatial and temporal convergence study."
