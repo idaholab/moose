@@ -138,6 +138,17 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 }
 
 void
+EigenProblem::execute(const ExecFlagType & exec_type)
+{
+  if (exec_type == EXEC_INITIAL)
+    // we need to scale the solution properly and we can do this only all initial setup of
+    // depending objects by the residual evaluations has been done to this point.
+    preScaleEigenVector();
+
+  FEProblemBase::execute(exec_type);
+}
+
+void
 EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
                                  SparseMatrix<Number> & jacobian,
                                  TagID tag)

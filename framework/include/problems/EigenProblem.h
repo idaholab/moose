@@ -152,6 +152,12 @@ public:
                          TagID tagB);
 
   /**
+   * Convenience function for performing execution of MOOSE systems.
+   * We override this function to perform an initial scaling.
+   */
+  virtual void execute(const ExecFlagType & exec_type) override;
+
+  /**
    * For nonlinear eigen solver, a good initial value can help convergence.
    * Should set initial values for only eigen variables.
    */
