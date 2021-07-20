@@ -60,19 +60,14 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
-    # this is clearly n_not_ stress_YY
-    # we should re-gold this and use
-    # generate_outputs = 'stress_xy strain_xy' in the master action
-    # but for now I'm keeping this to demonstarte that the master action
-    # does not diff in this converted input file.
-    index_i = 0
+    index_i = 1
     index_j = 1
   []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
-    index_i = 0
+    index_i = 1
     index_j = 1
   []
 []
@@ -85,6 +80,7 @@
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.1
     stiffness_damping_coefficient = 0.1
+    density = 7750
   []
 []
 
@@ -124,7 +120,7 @@
       boundary = bottom
       function = pressure
       factor = 1
-      alpha = 0.11
+      hht_alpha = 0.11
     []
   []
 []
@@ -135,15 +131,8 @@
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
   []
-
   [stress]
     type = ComputeLinearElasticStress
-  []
-
-  [density]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    prop_values = '7750'
   []
 []
 
