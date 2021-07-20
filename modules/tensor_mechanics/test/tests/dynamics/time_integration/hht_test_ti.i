@@ -72,7 +72,7 @@
 [Kernels]
   [./DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    alpha = 0.11
+    hht_alpha = 0.11
   [../]
   [./inertia_x]
     type = InertialForce

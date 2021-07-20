@@ -1,29 +1,21 @@
-# Test for rayleigh damping implemented using HHT time integration
-#
+# Test for  Newmark time integration
+
 # The test is for an 1D bar element of  unit length fixed on one end
 # with a ramped pressure boundary condition applied to the other end.
-# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
-# alpha, beta and gamma are HHT time integration parameters
+# beta and gamma are Newmark time integration parameters
 # The equation of motion in terms of matrices is:
 #
-# M*accel + (eta*M+zeta*K)*[(1+alpha)vel-alpha vel_old]
-# + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
+# M*accel + K*disp = P*Area
 #
 # Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
 #
 # This equation is equivalent to:
 #
-# density*accel + eta*density*[(1+alpha)vel-alpha vel_old]
-# + zeta*[(1+alpha)*d/dt(Div stress)- alpha*d/dt(Div stress_old)]
-# + alpha *(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
+# density*accel + Div Stress = P
 #
-# The first two terms on the left are evaluated using the Inertial force kernel
-# The next three terms on the left involving zeta and alpha are evaluated using
-# the DynamicStressDivergenceTensors Kernel
+# The first term on the left is evaluated using the Inertial force kernel
+# The last term on the left is evaluated using StressDivergenceTensors
 # The residual due to Pressure is evaluated using Pressure boundary condition
-#
-# The system will come to steady state slowly after the pressure becomes constant.
-# Alpha equal to zero will result in Newmark integration.
 
 [Mesh]
   type = GeneratedMesh
@@ -37,7 +29,6 @@
   ymax = 1.0
   zmin = 0.0
   zmax = 0.1
-  use_displaced_mesh = false
 []
 
 [GlobalParams]
@@ -55,16 +46,21 @@
   []
 []
 
+[Modules/TensorMechanics/DynamicMaster]
+  [all]
+    add_variables = true
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    strain = SMALL
+    density = 7750
+  []
+[]
+
 [AuxKernels]
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
-    # this is clearly n_not_ stress_YY
-    # we should re-gold this and use
-    # generate_outputs = 'stress_xy strain_xy' in the master action
-    # but for now I'm keeping this to demonstarte that the master action
-    # does not diff in this converted input file.
     index_i = 0
     index_j = 1
   []
@@ -74,17 +70,6 @@
     variable = strain_yy
     index_i = 0
     index_j = 1
-  []
-[]
-
-[Modules/TensorMechanics/DynamicMaster]
-  [all]
-    add_variables = true
-    hht_alpha = 0.11
-    newmark_beta = 0.25
-    newmark_gamma = 0.5
-    mass_damping_coefficient = 0.1
-    stiffness_damping_coefficient = 0.1
   []
 []
 
@@ -124,7 +109,7 @@
       boundary = bottom
       function = pressure
       factor = 1
-      alpha = 0.11
+      displacements = 'disp_x disp_y disp_z'
     []
   []
 []
@@ -132,18 +117,13 @@
 [Materials]
   [Elasticity_tensor]
     type = ComputeElasticityTensor
+    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
   []
-
   [stress]
     type = ComputeLinearElasticStress
-  []
-
-  [density]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    prop_values = '7750'
+    block = 0
   []
 []
 
@@ -190,6 +170,7 @@
     type = ElementAverageValue
     variable = strain_yy
   []
+
 []
 
 [Outputs]

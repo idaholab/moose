@@ -72,7 +72,7 @@
 [Kernels]
   [./DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    zeta = 'zeta_rayleigh'
+    stiffness_damping_coefficient = 'zeta_rayleigh'
   [../]
   [./inertia_x]
     type = InertialForce

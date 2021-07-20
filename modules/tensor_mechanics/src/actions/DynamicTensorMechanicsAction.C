@@ -55,26 +55,25 @@ DynamicTensorMechanicsAction::validParams()
       std::vector<AuxVariableName>({"accel_x", "accel_y", "accel_z"}),
       "Names of the acceleration variables");
 
-  params.addParam<Real>("alpha",
+  params.addParam<Real>("hht_alpha",
                         0,
                         "alpha parameter for mass dependent numerical damping induced "
                         "by HHT time integration scheme");
-  params.addParam<Real>("beta", 0.25, "beta parameter for Newmark Time integration");
-  params.addParam<Real>("gamma", 0.5, "gamma parameter for Newmark Time integration");
-  params.addParam<MaterialPropertyName>("eta",
+  params.addParam<Real>("newmark_beta", 0.25, "beta parameter for Newmark Time integration");
+  params.addParam<Real>("newmark_gamma", 0.5, "gamma parameter for Newmark Time integration");
+  params.addParam<MaterialPropertyName>("mass_damping_coefficient",
                                         0.0,
                                         "Name of material property or a constant real "
-                                        "number defining the eta parameter for the "
-                                        "Rayleigh damping.");
-  params.addParam<MaterialPropertyName>("zeta",
+                                        "number defining mass Rayleigh parameter (eta).");
+  params.addParam<MaterialPropertyName>("stiffness_damping_coefficient",
                                         0.0,
                                         "Name of material property or a constant real "
-                                        "number defining the zeta parameter for the "
-                                        "Rayleigh damping.");
+                                        "number defining stiffness Rayleigh parameter (zeta).");
 
   params.addParam<MaterialPropertyName>(
       "density", "density", "Name of Material Property that provides the density");
-  params.addParamNamesToGroup("alpha beta gamma eta zeta", "Time integration parameters");
+  params.addParamNamesToGroup("hht_alpha newmark_beta newmark_gamma",
+                              "Time integration parameters");
 
   return params;
 }
@@ -131,6 +130,7 @@ DynamicTensorMechanicsAction::act()
       params.set<std::vector<VariableName>>("displacement") = {_displacements[i]};
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.set<Real>("beta") = getParam<Real>("newmark_beta");
       params.applyParameters(parameters());
       _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _accelerations[i], params);
     }
@@ -143,6 +143,7 @@ DynamicTensorMechanicsAction::act()
       params.set<AuxVariableName>("variable") = _velocities[i];
       params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.set<Real>("gamma") = getParam<Real>("newmark_gamma");
       params.applyParameters(parameters());
       _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _velocities[i], params);
     }
@@ -160,6 +161,12 @@ DynamicTensorMechanicsAction::act()
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<bool>("use_displaced_mesh") = false;
+      params.set<Real>("beta") = getParam<Real>("newmark_beta");
+      params.set<Real>("gamma") = getParam<Real>("newmark_gamma");
+      params.set<Real>("alpha") = getParam<Real>("hht_alpha");
+      params.set<MaterialPropertyName>("eta") =
+          getParam<MaterialPropertyName>("mass_damping_coefficient");
+
       params.applyParameters(parameters());
 
       _problem->addKernel(kernel_type, "TM_" + name() + "_inertia_" + dir[i], params);
@@ -178,4 +185,18 @@ DynamicTensorMechanicsAction::getKernelType()
     return "DynamicStressDivergenceTensors";
   else
     mooseError("Unsupported coordinate system");
+}
+
+InputParameters
+DynamicTensorMechanicsAction::getKernelParameters(std::string type)
+{
+  TensorMechanicsAction::getKernelParameters(type);
+  InputParameters params = _factory.getValidParams(type);
+  params.applyParameters(parameters(), {"zeta", "alpha"});
+
+  params.set<Real>("alpha") = getParam<Real>("hht_alpha");
+  params.set<MaterialPropertyName>("zeta") =
+      getParam<MaterialPropertyName>("stiffness_damping_coefficient");
+
+  return params;
 }
