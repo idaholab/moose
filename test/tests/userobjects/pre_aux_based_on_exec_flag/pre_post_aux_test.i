@@ -66,8 +66,11 @@
   # the most up to date information. scale2 is pushed into PRE_AUX and hence picks
   # up the value of total_u from the last timestep.
   #
-  # Additionally, the aux kernel NormalizationAuxTest2 uses scale1. If the
-  # execute_on = 'final' flag for NormalizationAuxTest1 were not accounted
+  # Additionally, the aux kernel NormalizationAuxTest1 uses scale1. User objects
+  # including postprocessors and their depending user objects are automatically
+  # put into PRE_AUX group when the user objects are used by an auxiliary kernel
+  # on the same execute_on flag.
+  # If the execute_on = 'final' flag for NormalizationAuxTest1 were not accounted
   # for, the scale1 would be forced into PRE_AUX by the dependency and
   # scale1 and scale2 would behave the same. When the dependency is handled
   # correctly, this does not occur
