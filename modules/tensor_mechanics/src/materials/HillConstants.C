@@ -29,7 +29,10 @@ HillConstants::validParams()
                                    "Provide the rotation angles for the transformation matrix. "
                                    "This should be a vector that provides "
                                    "the rotation angles about z-, y-, and x-axis, respectively.");
-
+  params.addParam<std::vector<FunctionName>>(
+      "function_names",
+      "A set of functions that describe the evolution of anisotropy with temperature");
+  params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }
 
@@ -41,20 +44,53 @@ HillConstants::HillConstants(const InputParameters & parameters)
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
     _zyx_angles(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
                                                 : RealVectorValue(0.0, 0.0, 0.0)),
-    _transformation_tensor(6, 6)
+    _transformation_tensor(6, 6),
+    _has_temp(isParamValid("temperature")),
+    _temperature(_has_temp ? coupledValue("temperature") : _zero),
+    _function_names(getParam<std::vector<FunctionName>>("function_names")),
+    _num_functions(_function_names.size()),
+    _functions(_num_functions)
+
 {
-  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
-  rotateHillConstants(_hill_constants_input);
+  if (_has_temp && _num_functions != 6)
+    paramError("function_names",
+               "Six functions need to be provided to determine the evolution of Hill's "
+               "coefficients F, G, H, L, M, and N, when temperature dependency is selected.");
+
+  for (unsigned int i = 0; i < _num_functions; i++)
+  {
+    _functions[i] = &getFunctionByName(_function_names[i]);
+    if (_functions[i] == nullptr)
+      paramError("function_names", "Function names provided cannot retrieve a function.");
+  }
+
+  if (!_has_temp)
+  {
+    _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+    rotateHillConstants(_hill_constants_input);
+  }
 }
 
 void
 HillConstants::computeQpProperties()
 {
+  if (_has_temp)
+  {
+    _hill_constant_material[_qp].resize(6);
+
+    const Point p;
+    for (unsigned int i = 0; i < 6; i++)
+      _hill_constant_material[_qp][i] =
+          _functions[i]->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
+
+    rotateHillConstants(_hill_constant_material[_qp]);
+  }
+
   _hill_constant_material[_qp] = _hill_constants;
 }
 
 void
-HillConstants::rotateHillConstants(std::vector<Real> & hill_constants_input)
+HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_input)
 {
   const Real sz = std::sin(_zyx_angles(0) * libMesh::pi / 180.0);
   const Real cz = std::cos(_zyx_angles(0) * libMesh::pi / 180.0);
