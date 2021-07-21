@@ -34,22 +34,20 @@ FVMatAdvection::validParams()
 
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
-    _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant_elem(isParamValid("advected_quantity")
-                        ? getADMaterialProperty<Real>("advected_quantity").get()
-                        : _u_elem),
-    _adv_quant_neighbor(isParamValid("advected_quantity")
-                            ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
-                            : _u_neighbor)
+    _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
+    _adv_quant(isParamValid("advected_quantity")
+                   ? static_cast<const FunctorInterface<ADReal> &>(
+                         getFunctorMaterialProperty<ADReal>("advected_quantity"))
+                   : static_cast<const FunctorInterface<ADReal> &>(variable()))
 {
   using namespace Moose::FV;
 
+  _cd_limiter = Limiter::build(LimiterType::CentralDifference);
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
+    _limiter = Limiter::build(LimiterType::CentralDifference);
   else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
+    _limiter = Limiter::build(LimiterType::Upwind);
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(advected_interp_method));
@@ -58,19 +56,11 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
 ADReal
 FVMatAdvection::computeQpResidual()
 {
-  ADReal u_interface;
-
   using namespace Moose::FV;
 
-  // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
+  _v = _vel(std::make_tuple(_face_info, _cd_limiter.get(), /*this doesn't matter for cd*/ true));
+  const auto adv_quant_interface =
+      _adv_quant(std::make_tuple(_face_info, _limiter.get(), _v * _face_info->normal() > 0));
 
-  interpolate(_advected_interp_method,
-              u_interface,
-              _adv_quant_elem[_qp],
-              _adv_quant_neighbor[_qp],
-              _v,
-              *_face_info,
-              true);
-  return _normal * _v * u_interface;
+  return _normal * _v * adv_quant_interface;
 }

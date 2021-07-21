@@ -20,17 +20,16 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
+  const FunctorMaterialProperty<ADRealVectorValue> & _vel;
 
   /// The advected quantity on the elem
-  const MooseArray<ADReal> & _adv_quant_elem;
+  const FunctorInterface<ADReal> & _adv_quant;
 
-  /// The advected quantity on the neighbor
-  const MooseArray<ADReal> & _adv_quant_neighbor;
+  /// Central differencing to compute the velocity
+  std::unique_ptr<Moose::FV::Limiter> _cd_limiter;
 
-  /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _advected_interp_method;
+  /// The limiting method to use for the advected quantity
+  std::unique_ptr<Moose::FV::Limiter> _limiter;
 
   /// The interfacial velocity. We cache this in the residual computation in case a derived class
   /// might want to use it

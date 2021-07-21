@@ -33,28 +33,32 @@ ADCoupledVelocityMaterial::validParams()
 
 ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _velocity(declareADProperty<RealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
-    _rho_u(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_u"))),
-    _rho_v(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_v"))),
-    _rho_w(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_w"))),
-    _vel_x(adCoupledValue("vel_x")),
-    _vel_y(isParamValid("vel_y") ? &adCoupledValue("vel_y") : nullptr),
-    _vel_z(isParamValid("vel_z") ? &adCoupledValue("vel_z") : nullptr),
-    _rho(adCoupledValue("rho"))
+    _velocity(
+        declareFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
+    _rho_u(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"))),
+    _rho_v(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_v"))),
+    _rho_w(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_w"))),
+    _vel_x(getFunctor<MooseVariableFVReal>("vel_x", 0)),
+    _vel_y(isParamValid("vel_y") ? &getFunctor<MooseVariableFVReal>("vel_y", 0) : nullptr),
+    _vel_z(isParamValid("vel_z") ? &getFunctor<MooseVariableFVReal>("vel_z", 0) : nullptr),
+    _rho(getFunctor<MooseVariableFVReal>("rho", 0))
 {
-}
+  _velocity.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADRealVectorValue {
+    ADRealVectorValue velocity(_vel_x(geom_quantity));
+    velocity(1) = _vel_y ? (*_vel_y)(geom_quantity) : ADReal(0);
+    velocity(2) = _vel_z ? (*_vel_z)(geom_quantity) : ADReal(0);
+    return velocity;
+  });
 
-void
-ADCoupledVelocityMaterial::computeQpProperties()
-{
-  ADRealVectorValue & velocity = _velocity[_qp];
+  _rho_u.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+    return _rho(geom_quantity) * _vel_x(geom_quantity);
+  });
 
-  velocity(0) = _vel_x[_qp];
-  _rho_u[_qp] = _rho[_qp] * velocity(0);
+  _rho_v.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+    return _vel_y ? _rho(geom_quantity) * (*_vel_y)(geom_quantity) : ADReal(0);
+  });
 
-  velocity(1) = _vel_y ? (*_vel_y)[_qp] : 0;
-  _rho_v[_qp] = _vel_y ? _rho[_qp] * velocity(1) : 0;
-
-  velocity(2) = _vel_z ? (*_vel_z)[_qp] : 0;
-  _rho_w[_qp] = _vel_z ? _rho[_qp] * velocity(2) : 0;
+  _rho_w.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+    return _vel_z ? _rho(geom_quantity) * (*_vel_z)(geom_quantity) : ADReal(0);
+  });
 }

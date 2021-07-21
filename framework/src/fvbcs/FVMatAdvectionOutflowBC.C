@@ -25,52 +25,30 @@ FVMatAdvectionOutflowBC::validParams()
       "Outflow boundary condition taking the advected quantity from a material property");
   MooseEnum advected_interp_method("average upwind", "upwind");
 
-  params.addParam<MooseEnum>("advected_interp_method",
-                             advected_interp_method,
-                             "The interpolation to use for the advected quantity. Options are "
-                             "'upwind' and 'average', with the default being 'upwind'.");
+  params.addDeprecatedParam<MooseEnum>(
+      "advected_interp_method",
+      advected_interp_method,
+      "The interpolation to use for the advected quantity. Options are "
+      "'upwind' and 'average', with the default being 'upwind'.",
+      "There's no such thing as interpolation on a boundary");
   return params;
 }
 
 FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
-    _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant_elem(isParamValid("advected_quantity")
-                        ? getADMaterialProperty<Real>("advected_quantity").get()
-                        : _u),
-    _adv_quant_neighbor(isParamValid("advected_quantity")
-                            ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
-                            : _u_neighbor)
+    _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
+    _adv_quant(isParamValid("advected_quantity")
+                   ? static_cast<const FunctorInterface<ADReal> &>(
+                         getFunctorMaterialProperty<ADReal>("advected_quantity"))
+                   : static_cast<const FunctorInterface<ADReal> &>(variable()))
 {
-  using namespace Moose::FV;
-
-  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(advected_interp_method));
 }
 
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  ADReal adv_quant_boundary;
-
-  using namespace Moose::FV;
-
-  // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
-
-  interpolate(_advected_interp_method,
-              adv_quant_boundary,
-              _adv_quant_elem[_qp],
-              _adv_quant_neighbor[_qp],
-              _v,
-              *_face_info,
-              true);
+  _v = _vel(std::make_tuple(_face_info, nullptr, true));
+  const auto adv_quant_boundary =
+      _adv_quant(std::make_tuple(_face_info, nullptr, _v * _face_info->normal() > 0));
   return _normal * _v * adv_quant_boundary;
 }

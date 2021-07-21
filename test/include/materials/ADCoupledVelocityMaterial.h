@@ -19,15 +19,13 @@ public:
   ADCoupledVelocityMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
+  FunctorMaterialProperty<ADRealVectorValue> & _velocity;
+  FunctorMaterialProperty<ADReal> & _rho_u;
+  FunctorMaterialProperty<ADReal> & _rho_v;
+  FunctorMaterialProperty<ADReal> & _rho_w;
 
-  ADMaterialProperty<RealVectorValue> & _velocity;
-  ADMaterialProperty<Real> & _rho_u;
-  ADMaterialProperty<Real> & _rho_v;
-  ADMaterialProperty<Real> & _rho_w;
-
-  const ADVariableValue & _vel_x;
-  const ADVariableValue * const _vel_y;
-  const ADVariableValue * const _vel_z;
-  const ADVariableValue & _rho;
+  const FunctorInterface<ADReal> & _vel_x;
+  const FunctorInterface<ADReal> * const _vel_y;
+  const FunctorInterface<ADReal> * const _vel_z;
+  const FunctorInterface<ADReal> & _rho;
 };
