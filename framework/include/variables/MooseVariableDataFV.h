@@ -169,6 +169,8 @@ public:
 
   const ADTemplateVariableValue<OutputType> & adUDot() const;
 
+  const ADTemplateVariableValue<OutputType> & adUDotDot() const;
+
   const FieldVariableValue & uDot() const;
 
   const FieldVariableValue & uDotDot() const;
@@ -377,6 +379,7 @@ private:
   mutable bool _need_ad;
   mutable bool _need_ad_u;
   mutable bool _need_ad_u_dot;
+  mutable bool _need_ad_u_dotdot;
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_second_u;
 
@@ -444,7 +447,9 @@ private:
   ADTemplateVariableSecond<OutputShape> _ad_second_u;
   MooseArray<DualReal> _ad_dof_values;
   MooseArray<DualReal> _ad_dofs_dot;
+  MooseArray<DualReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputShape> _ad_u_dot;
+  ADTemplateVariableValue<OutputShape> _ad_u_dotdot;
 
   // time derivatives
 
@@ -494,6 +499,9 @@ private:
 
   /// The quadrature rule
   const QBase * _qrule;
+
+  /// A dummy ADReal variable
+  ADReal _ad_real_dummy = 0;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////
@@ -530,4 +538,17 @@ MooseVariableDataFV<OutputType>::adUDot() const
     _need_u_dot = true;
 
   return _ad_u_dot;
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseVariableDataFV<OutputType>::adUDotDot() const
+{
+  _need_ad = _need_ad_u_dotdot = true;
+
+  if (!safeToComputeADUDot())
+    // We will just copy the value of _u_dotdot into _ad_u_dotdot
+    _need_u_dotdot = true;
+
+  return _ad_u_dotdot;
 }

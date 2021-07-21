@@ -16,6 +16,7 @@ import traceback
 import multiprocessing
 import mooseutils
 import random
+import platform
 
 import MooseDocs
 from ..tree import pages
@@ -117,9 +118,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             # Setup Page Config
             config = dict()
             for ext in self.translator.extensions:
-                node['__{}__'.format(ext.name)] = dict()
+                node.attributes['__{}__'.format(ext.name)] = dict()
             self.translator.executePageMethod('initPage', node)
-            Executioner.setMutable(node, False)
 
         LOG.info('Executing extension initPage() methods complete [%s sec.]', time.time() - t)
 
@@ -154,23 +154,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         raise NotImplementedError("The execute method must be defined.")
 
-    @staticmethod
-    def setMutable(node, value):
-        """Helper for controlling the mutable state of Page objects.
-
-        When MooseDocs runs in parallel the Page objects are copied to sub processes using the
-        multiprocessing module, thus during operation calculations are preformed using the copies.
-        If the attributes are altered, only the copies are altered not the original from the
-        root process.
-
-        However, on the process responsible for performing the calculation the copy of the Page
-        object attributes is returned and used to update the page on the root process. The MooseDocs
-        system allows for a Page object to be retrieved from anywhere. This flag prevents
-        modification of attributes from processes that do not own the object to avoid misleading
-        results.
-        """
-        node._AutoPropertyMixin__mutable = value
-
     def __call__(self, nodes, num_threads=1):
         """
         Called by Translator object, this executes the steps listed in the class description.
@@ -204,9 +187,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     def read(self, node):
         """Perform reading of page content."""
         content = None
-        if node.get('active', True):
+        if node.attributes.get('active', True):
             self.translator.executePageMethod('preRead', node)
-            content = self.translator.reader.read(node) if node.get('read', True) else ''
+            content = self.translator.reader.read(node) if node.attributes.get('read', True) else ''
             self.translator.executePageMethod('postRead', node, args=(copy.copy(content),))
 
         return content
@@ -215,9 +198,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Perform tokenization and call all associated callbacks for the supplied page."""
 
         ast = self.translator.reader.getRoot()
-        if node.get('active', True):
+        if node.attributes.get('active', True):
             self.translator.executePageMethod('preTokenize', node, args=(ast,))
-            if node.get('tokenize', True):
+            if node.attributes.get('tokenize', True):
                 self.translator.reader.tokenize(ast, content, node)
             self.translator.executePageMethod('postTokenize', node, args=(ast,))
 
@@ -227,9 +210,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Perform rendering and call all associated callbacks for the supplied page."""
 
         result = self.translator.renderer.getRoot()
-        if node.get('active', True):
+        if node.attributes.get('active', True):
             self.translator.executePageMethod('preRender', node, args=(result,))
-            if node.get('render', True):
+            if node.attributes.get('render', True):
                 self.translator.renderer.render(result, ast, node)
             self.translator.executePageMethod('postRender', node, args=(result,))
         return result
@@ -237,9 +220,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     def write(self, node, result):
         """Perform writing and call all associated callbacks for the supplied page."""
 
-        if node.get('active', True):
+        if node.attributes.get('active', True):
             self.translator.executePageMethod('preWrite', node, args=(result,))
-            if node.get('write', True):
+            if node.attributes.get('write', True):
                 self.translator.renderer.write(node, result.root)
             self.translator.executePageMethod('postWrite', node)
         return result
@@ -282,7 +265,6 @@ class Serial(Executioner):
 
     def _readHelper(self, nodes):
         for node in nodes:
-            Executioner.setMutable(node, True)
             content = self.read(node)
             self._page_content[node.uid] = content
 
@@ -299,7 +281,6 @@ class Serial(Executioner):
     def _writeHelper(self, nodes):
         for node in nodes:
             self.write(node, self._page_result[node.uid])
-            Executioner.setMutable(node, False)
 
 class ParallelQueue(Executioner):
     """
@@ -372,9 +353,7 @@ class ParallelQueue(Executioner):
             if container is not None:
                 container[uid] = out
             node = self._page_objects[uid]
-            Executioner.setMutable(node, True)
             node.attributes.update(attributes)
-            Executioner.setMutable(node, False)
 
         for i in range(num_threads):
             page_queue.put(ParallelQueue.STOP)
@@ -386,10 +365,8 @@ class ParallelQueue(Executioner):
 
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._page_objects[uid]
-            Executioner.setMutable(node, True)
             content = self.read(node)
             qout.put((uid, node.attributes, content))
-            Executioner.setMutable(node, False)
 
     def _tokenize_target(self, qin, qout):
         """Function for calling self.tokenize with Queue objects."""
@@ -397,10 +374,8 @@ class ParallelQueue(Executioner):
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._page_objects[uid]
             content = self._page_content[uid]
-            Executioner.setMutable(node, True)
             ast = self.tokenize(node, content)
             qout.put((uid, node.attributes, ast))
-            Executioner.setMutable(node, False)
 
     def _render_target(self, qin, qout):
         """Function for calling self.tokenize with Queue objects."""
@@ -408,10 +383,8 @@ class ParallelQueue(Executioner):
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._page_objects[uid]
             ast = self._page_ast[uid]
-            Executioner.setMutable(node, True)
             result = self.render(node, ast)
             qout.put((uid, node.attributes, result))
-            Executioner.setMutable(node, False)
 
     def _write_target(self, qin, qout):
         """Function for calling self.write with Queue objects."""
@@ -419,10 +392,8 @@ class ParallelQueue(Executioner):
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._page_objects[uid]
             result = self._page_result[uid]
-            Executioner.setMutable(node, True)
             ast = self.write(node, result)
             qout.put((uid, node.attributes, None))
-            Executioner.setMutable(node, False)
 
 class ParallelBarrier(Executioner):
     """
@@ -434,21 +405,27 @@ class ParallelBarrier(Executioner):
     def execute(self, nodes, num_threads=1):
         """Perform the translation with multiprocessing."""
 
-        barrier = multiprocessing.Barrier(num_threads)
-        manager = multiprocessing.Manager()
+        # The method for spawning processes changed to "spawn" for macOS in python 3.9, currently
+        # MooseDocs does npt work with this combination. This will be remedied in moosetools
+        # migration.
+        if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
+            ctx = multiprocessing.get_context('fork')
+        else:
+            ctx = multiprocessing
+
+        barrier = ctx.Barrier(num_threads)
+        manager = ctx.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
         self._global_attributes = manager.dict()
 
         # Initialize the page attributes container using the existing list of Page node objects
         for i in range(len(page_attributes)):
-            Executioner.setMutable(self._page_objects[i], True)
             page_attributes[i] = self._page_objects[i].attributes
-            Executioner.setMutable(self._page_objects[i], False)
 
         jobs = []
         random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=self._target, args=(chunk, barrier, page_attributes))
+            p = ctx.Process(target=self._target, args=(chunk, barrier, page_attributes))
             jobs.append(p)
             p.start()
 
@@ -473,10 +450,8 @@ class ParallelBarrier(Executioner):
 
         # READ
         for node in nodes:
-            Executioner.setMutable(node, True)
             content = self.read(node)
             page_attributes[node.uid] = node.attributes
-            Executioner.setMutable(node, False)
             local_content[node.uid] = content
 
         barrier.wait()
@@ -485,11 +460,9 @@ class ParallelBarrier(Executioner):
         # TOKENIZE
         for node in nodes:
             content = local_content.pop(node.uid)
-            Executioner.setMutable(node, True)
             mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
             ast = self.tokenize(node, content)
             page_attributes[node.uid] = node.attributes
-            Executioner.setMutable(node, False)
             local_ast[node.uid] = ast
 
         barrier.wait()
@@ -498,11 +471,9 @@ class ParallelBarrier(Executioner):
         # RENDER
         for node in nodes:
             ast = local_ast.pop(node.uid)
-            Executioner.setMutable(node, True)
             mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
             result = self.render(node, ast)
             page_attributes[node.uid] = node.attributes
-            Executioner.setMutable(node, False)
             local_result[node.uid] = result
 
         barrier.wait()
@@ -511,10 +482,8 @@ class ParallelBarrier(Executioner):
         # WRITE
         for node in nodes:
             result = local_result.pop(node.uid)
-            Executioner.setMutable(node, True)
             mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
             result = self.write(node, result)
-            Executioner.setMutable(node, False)
 
     def _updateAttributes(self, page_attributes):
         """Update the local page objects with attributes gathered from the other processes"""
@@ -577,9 +546,7 @@ class ParallelPipe(Executioner):
                 data = conn1.recv()
                 for uid, attributes, out in data:
                     node = self._page_objects[uid]
-                    Executioner.setMutable(node, True)
                     node.attributes.update(attributes)
-                    Executioner.setMutable(node, False)
 
                     if container is not None:
                         container[uid] = out
@@ -591,10 +558,8 @@ class ParallelPipe(Executioner):
 
         data = list()
         for node in nodes:
-            Executioner.setMutable(node, True)
             content = self.read(node)
             data.append((node.uid, node.attributes, content))
-            Executioner.setMutable(node, False)
 
         with self.LOCK:
             conn.send(data)
@@ -605,10 +570,8 @@ class ParallelPipe(Executioner):
         data = list()
         for node in nodes:
             content = self._page_content[node.uid]
-            Executioner.setMutable(node, True)
             ast = self.tokenize(node, content)
             data.append((node.uid, node.attributes, ast))
-            Executioner.setMutable(node, False)
 
         with self.LOCK:
             conn.send(data)
@@ -619,10 +582,8 @@ class ParallelPipe(Executioner):
         data = list()
         for node in nodes:
             ast = self._page_ast[node.uid]
-            Executioner.setMutable(node, True)
             result = self.render(node, ast)
             data.append((node.uid, node.attributes, result))
-            Executioner.setMutable(node, False)
 
         with self.LOCK:
             conn.send(data)
@@ -633,10 +594,8 @@ class ParallelPipe(Executioner):
         data = list()
         for node in nodes:
             result = self._page_result[node.uid]
-            Executioner.setMutable(node, True)
             self.write(node, result)
             data.append((node.uid, node.attributes, None))
-            Executioner.setMutable(node, False)
 
         with self.LOCK:
             conn.send(data)

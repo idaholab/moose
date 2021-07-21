@@ -11,11 +11,11 @@ import os
 import collections
 import mooseutils
 
-@mooseutils.addProperty('name', ptype=str, required=True)
-@mooseutils.addProperty('title', ptype=str, required=True)
-@mooseutils.addProperty('filename', ptype=str)
-class Document(mooseutils.AutoPropertyMixin):
-    pass
+class Document(object):
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        self.title = kwargs.pop('title')
+        self.filename = kwargs.pop('filename', None)
 
 INL_DOCUMENTS = ['safety_software_determination',
                  'quality_level_determination',

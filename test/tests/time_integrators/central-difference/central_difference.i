@@ -3,7 +3,8 @@
 # demonstrating the use of the TimeIntegrator system.
 #
 # Testing that the first and second time derivatives
-# are calculated correctly using the Newmark-Beta method
+# are calculated correctly using the Central Difference
+# method
 #
 # @Requirement F1.30
 ###########################################################

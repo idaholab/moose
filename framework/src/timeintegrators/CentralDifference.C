@@ -45,13 +45,12 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
 }
 
 void
-CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
+CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot,
+                                            const dof_id_type & dof,
+                                            DualReal & ad_u_dotdot) const
 {
-  auto u_dotdot = ad_u_dot; // TODO: Ask Alex if this has to be ad_u_dotdot. Currently, it will
-                            // change u_dotdot when called.
-
   computeTimeDerivativeHelper(
-      ad_u_dot, u_dotdot, _solution_old(dof), _solution_older(dof), _solution_old_old_old(dof));
+      ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof), _solution_old_old_old(dof));
 }
 
 void

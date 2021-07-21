@@ -1,4 +1,4 @@
-{% set build = 6 %}
+{% set build = 7 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.3.2" %}
 
@@ -8,7 +8,7 @@ package:
 
 source:
   fn: mpich-{{ version }}.tar.gz
-  url: http://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
+  url: https://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
   sha256: 4bfaf8837a54771d3e4922c84071ef80ffebddbb6971a006038d91ee7ef959b9
 
 build:

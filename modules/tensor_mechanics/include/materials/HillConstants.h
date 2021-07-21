@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMaterial.h"
+#include "Function.h"
 
 /**
  * This class defines a Hill tensor material object with a given base name.
@@ -25,7 +26,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  virtual void rotateHillConstants(std::vector<Real> & hill_constants_input);
+  virtual void rotateHillConstants(const std::vector<Real> & hill_constants_input);
 
   /// Base name of the material system
   const std::string _base_name;
@@ -42,4 +43,19 @@ protected:
 
   /// Transformation matrix
   DenseMatrix<Real> _transformation_tensor;
+
+  /// Flag to determine if temperature is supplied by the user
+  const bool _has_temp;
+
+  /// Temperature variable value
+  const VariableValue & _temperature;
+
+  /// Function names
+  const std::vector<FunctionName> _function_names;
+
+  /// Number of function names
+  const unsigned int _num_functions;
+
+  /// The functions describing the temperature dependence
+  std::vector<const Function *> _functions;
 };

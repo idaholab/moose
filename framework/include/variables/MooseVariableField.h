@@ -126,9 +126,19 @@ public:
   virtual const ADTemplateVariableValue<OutputType> & adUDot() const = 0;
 
   /**
+   * AD second time derivative getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adUDotDot() const = 0;
+
+  /**
    * AD neighbor time derivative getter
    */
   virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const = 0;
+
+  /**
+   * AD neighbor second time derivative getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adUDotDotNeighbor() const = 0;
 
   /**
    * Return the AD dof values

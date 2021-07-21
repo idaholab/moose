@@ -9,6 +9,7 @@
 
 #include "ComputeJacobianForScalingThread.h"
 #include "MooseError.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/elem.h"
 
@@ -16,14 +17,14 @@ using namespace libMesh;
 
 ComputeJacobianForScalingThread::ComputeJacobianForScalingThread(FEProblemBase & fe_problem,
                                                                  const std::set<TagID> & tags)
-  : ComputeJacobianThread(fe_problem, tags)
+  : ComputeFullJacobianThread(fe_problem, tags)
 {
 }
 
 // Splitting Constructor
 ComputeJacobianForScalingThread::ComputeJacobianForScalingThread(
     ComputeJacobianForScalingThread & x, Threads::split split)
-  : ComputeJacobianThread(x, split)
+  : ComputeFullJacobianThread(x, split)
 {
 }
 
@@ -73,4 +74,13 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
   {
     caughtMooseException(e);
   }
+}
+
+void
+ComputeJacobianForScalingThread::computeJacobian()
+{
+  if (_nl.offDiagonalsInAutoScaling())
+    ComputeFullJacobianThread::computeJacobian();
+  else
+    ComputeJacobianThread::computeJacobian();
 }

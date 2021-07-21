@@ -23,6 +23,9 @@ NewmarkBeta::validParams()
       "Computes the first and second time derivative of variable using Newmark-Beta method.");
   params.addRangeCheckedParam<Real>("beta", 0.25, "beta > 0.0", "beta value");
   params.addRangeCheckedParam<Real>("gamma", 0.5, "gamma >= 0.5", "gamma value");
+  params.addParam<int>("inactive_tsteps",
+                       0,
+                       "The time derivatives will set to be zero for this number of time steps.");
   return params;
 }
 
@@ -30,6 +33,7 @@ NewmarkBeta::NewmarkBeta(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _beta(getParam<Real>("beta")),
     _gamma(getParam<Real>("gamma")),
+    _inactive_tsteps(getParam<int>("inactive_tsteps")),
     _du_dotdot_du(_sys.duDotDotDu())
 {
   _fe_problem.setUDotOldRequested(true);
@@ -73,9 +77,16 @@ NewmarkBeta::computeTimeDerivatives()
   NumericVector<Number> & u_dot_old = *_sys.solutionUDotOld();
   NumericVector<Number> & u_dotdot_old = *_sys.solutionUDotDotOld();
 
-  u_dotdot = *_solution;
-
-  computeTimeDerivativeHelper(u_dot, _solution_old, u_dot_old, u_dotdot, u_dotdot_old);
+  if (_fe_problem.timeStep() <= _inactive_tsteps)
+  {
+    u_dot.zero();
+    u_dotdot.zero();
+  }
+  else
+  {
+    u_dotdot = *_solution;
+    computeTimeDerivativeHelper(u_dot, _solution_old, u_dot_old, u_dotdot, u_dotdot_old);
+  }
 
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();
@@ -87,15 +98,19 @@ NewmarkBeta::computeTimeDerivatives()
 }
 
 void
-NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
+NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot,
+                                      const dof_id_type & dof,
+                                      DualReal & ad_u_dotdot) const
 {
   const auto & u_old = _solution_old(dof);
   const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
   const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
 
-  auto u_dotdot = ad_u_dot;
+  // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
+  // MooseVariableData
+  ad_u_dotdot = ad_u_dot;
 
-  computeTimeDerivativeHelper(ad_u_dot, u_old, u_dot_old, u_dotdot, u_dotdot_old);
+  computeTimeDerivativeHelper(ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old);
 }
 
 void

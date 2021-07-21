@@ -20,32 +20,25 @@ from .check_syntax import check_syntax
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
 
-@mooseutils.addProperty('app_syntax', ptype=moosesyntax.SyntaxNode)
-@mooseutils.addProperty('app_types', ptype=list)
-@mooseutils.addProperty('working_dir', ptype=str)
-@mooseutils.addProperty('exe_name', ptype=str)
-@mooseutils.addProperty('exe_directory', ptype=str)
-@mooseutils.addProperty('content_directory', ptype=str)
-@mooseutils.addProperty('object_prefix', ptype=str)
-@mooseutils.addProperty('syntax_prefix', ptype=str)
-@mooseutils.addProperty('remove', ptype=list)
-@mooseutils.addProperty('alias', ptype=list)
-@mooseutils.addProperty('unregister', ptype=list)
-@mooseutils.addProperty('allow_test_objects', ptype=bool, default=False)
 class SQAMooseAppReport(SQAReport):
     """
     Report of MooseObject and MOOSE syntax markdown pages.
     """
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
-        # Default attributes
-        self.exe_directory = self.exe_directory or mooseutils.git_root_dir()
-        self.exe_name = self.exe_name or os.path.basename(self.exe_directory)
-        self.working_dir = self.working_dir or mooseutils.git_root_dir()
-        self.content_directory = self.content_directory or os.path.join(self.exe_directory, 'doc', 'content')
-        self.object_prefix = self.object_prefix or os.path.join(self.content_directory, 'source')
-        self.syntax_prefix = self.syntax_prefix or os.path.join(self.content_directory, 'syntax')
+        self.app_syntax = kwargs.pop('app_syntax', None)
+        self.app_types = kwargs.pop('app_types', None)
+        self.working_dir = kwargs.pop('working_dir', mooseutils.git_root_dir())
+        self.exe_directory = kwargs.pop('exe_directory', mooseutils.git_root_dir())
+        self.exe_name = kwargs.pop('exe_name', os.path.basename(self.exe_directory))
+        self.content_directory = kwargs.pop('content_directory', os.path.join(self.exe_directory, 'doc', 'content'))
+        self.object_prefix = kwargs.pop('object_prefix', os.path.join(self.content_directory, 'source'))
+        self.syntax_prefix = kwargs.pop('syntax_prefix', os.path.join(self.content_directory, 'syntax'))
+        self.remove = kwargs.pop('remove', None)
+        self.alias = kwargs.pop('alias', None)
+        self.unregister = kwargs.pop('unregister', None)
+        self.allow_test_objects = kwargs.pop('allow_test_objects', False)
+        super().__init__(**kwargs)
 
     def execute(self, **kwargs):
         """Perform app syntax checking"""

@@ -20,7 +20,6 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/linear_solver.h"
-#include "libmesh/diagonal_matrix.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -53,6 +52,8 @@ template <typename T>
 class NumericVector;
 template <typename T>
 class SparseMatrix;
+template <typename T>
+class DiagonalMatrix;
 } // namespace libMesh
 
 /**
@@ -653,6 +654,12 @@ public:
     _scaling_group_variables = scaling_group_variables;
   }
 
+  bool offDiagonalsInAutoScaling() const { return _off_diagonals_in_auto_scaling; }
+  void offDiagonalsInAutoScaling(bool off_diagonals_in_auto_scaling)
+  {
+    _off_diagonals_in_auto_scaling = off_diagonals_in_auto_scaling;
+  }
+
 #ifndef MOOSE_SPARSE_AD
   /**
    * Set the required size of the derivative vector
@@ -941,8 +948,11 @@ protected:
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
+  /// Whether to include off diagonals when determining automatic scaling factors
+  bool _off_diagonals_in_auto_scaling;
+
   /// A diagonal matrix used for computing scaling
-  DiagonalMatrix<Number> _scaling_matrix;
+  std::unique_ptr<DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
   /**

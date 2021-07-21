@@ -19,16 +19,19 @@ from .check_requirements import check_requirements, RequirementLogHelper
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
 
-@mooseutils.addProperty('working_dirs', ptype=list)
-@mooseutils.addProperty('directories', ptype=list)
-@mooseutils.addProperty('specs', ptype=str)
-@mooseutils.addProperty('test_names', ptype=set)
-@mooseutils.addProperty('global_report', ptype=bool, default=False)
-@mooseutils.addProperty('include_non_testable', ptype=bool, default=False)
 class SQARequirementReport(SQAReport):
     """
     Data wrapper for SQA requirement/design/issue information.
     """
+    def __init__(self, **kwargs):
+        self.working_dirs = kwargs.pop('working_dirs', None)
+        self.directories = kwargs.pop('directories', None)
+        self.specs = kwargs.pop('specs', None)
+        self.test_names = kwargs.pop('test_names', None)
+        self.global_report = kwargs.pop('global_report', False)
+        self.include_non_testable = kwargs.pop('include_non_testable', False)
+        SQAReport.__init__(self, **kwargs)
+
     def execute(self, **kwargs):
         """
         Computes the percent complete, number missing items, and the pass/fail status
@@ -65,11 +68,14 @@ class SQARequirementReport(SQAReport):
         logger = check_requirements(requirements, color_text=self.color_text, file_list=file_list, **kwargs)
         return logger
 
-@mooseutils.addProperty('reports', ptype=list)
 class SQARequirementDiffReport(SQAReport):
     """
     Report for SQA missing requirement/design/issue information.
     """
+    def __init__(self, **kwargs):
+        self.reports = kwargs.pop('reports', None)
+        SQAReport.__init__(self, **kwargs)
+
     def execute(self, **kwargs):
 
         # Create/run the repository level report

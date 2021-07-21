@@ -87,7 +87,7 @@
 [Kernels]
   [./DynamicTensorMechanics] # zeta*K*vel + K * disp
     displacements = 'disp_x disp_y disp_z'
-    zeta = 0.000025
+    stiffness_damping_coefficient = 0.000025
     static_initialization = true #turns off rayliegh damping for the first time step to stabilize system under gravity
   [../]
   [./inertia_x] # M*accel + eta*M*vel

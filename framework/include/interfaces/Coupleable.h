@@ -774,6 +774,16 @@ protected:
   std::vector<const ADVariableValue *> adCoupledDots(const std::string & var_name) const;
 
   /**
+   * Second time derivative of a coupled variable for ad simulations
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVariableValue containing the second time derivative of the coupled
+   * variable
+   */
+  const ADVariableValue & adCoupledDotDot(const std::string & var_name,
+                                          unsigned int comp = 0) const;
+
+  /**
    * Time derivative of a vector coupled variable for ad simulations
    * @param var_name Name of vector coupled variable
    * @param comp Component number

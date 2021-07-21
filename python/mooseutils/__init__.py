@@ -18,7 +18,6 @@ from .gitutils import git_is_branch, git_is_config
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path
-from .AutoPropertyMixin import AutoPropertyMixinBase, AutoPropertyMixin, Property, addProperty
 from .levenshtein import levenshtein, levenshteinDistance
 from .json_load import json_load, json_parse
 from .jsondiff import JSONDiffer

@@ -9,22 +9,19 @@
 import enum
 import mooseutils
 
-@mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('filename', ptype=str)
-@mooseutils.addProperty('local', ptype=str)
-@mooseutils.addProperty('line', ptype=int)
-@mooseutils.addProperty('type', ptype=str)
-@mooseutils.addProperty('prerequisites', ptype=set)
-@mooseutils.addProperty('skip', ptype=bool, default=False)
-@mooseutils.addProperty('deleted', ptype=bool, default=False)
-@mooseutils.addProperty('text', ptype=str)
-class TestSpecification(mooseutils.AutoPropertyMixin):
+class TestSpecification(object):
     """Object for storing Test specification information w/r/t SQA"""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.prerequisites is None:
-            self.prerequisites = set()
+        self.name = kwargs.pop('name', None)
+        self.filename = kwargs.pop('filename', None)
+        self.local = kwargs.pop('local', None)
+        self.line = kwargs.pop('line', None)
+        self.type = kwargs.pop('type', None)
+        self.prerequisites = kwargs.pop('prerequisites', set())
+        self.skip = kwargs.pop('skip', False)
+        self.deleted = kwargs.pop('deleted', False)
+        self.text = kwargs.pop('text', None)
 
     @property
     def testable(self):
@@ -34,37 +31,34 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
     def __str__(self):
         return 'Specification: {}'.format(self.name)
 
-@mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('filename', ptype=str)
-@mooseutils.addProperty('line', ptype=int)
-@mooseutils.addProperty('specification', ptype=TestSpecification)
-@mooseutils.addProperty('details', ptype=list)
-@mooseutils.addProperty('requirement', ptype=str)
-@mooseutils.addProperty('requirement_line', ptype=int)
-@mooseutils.addProperty('issues', ptype=list)
-@mooseutils.addProperty('issues_line', ptype=int)
-@mooseutils.addProperty('design', ptype=list)
-@mooseutils.addProperty('design_line', ptype=int)
-@mooseutils.addProperty('collections', ptype=set)
-@mooseutils.addProperty('collections_line', ptype=int)
-@mooseutils.addProperty('classification', ptype=str)
-@mooseutils.addProperty('classification_line', ptype=int)
-@mooseutils.addProperty('deprecated', ptype=bool, default=False)
-@mooseutils.addProperty('deprecated_line', ptype=int)
-@mooseutils.addProperty('verification', ptype=list)
-@mooseutils.addProperty('verification_line', ptype=int)
-@mooseutils.addProperty('validation', ptype=list)
-@mooseutils.addProperty('validation_line', ptype=int)
-@mooseutils.addProperty('label', ptype=str)
-@mooseutils.addProperty('duplicate', ptype=bool, default=False)
-@mooseutils.addProperty('prefix', ptype=str, default=None)
-class Requirement(mooseutils.AutoPropertyMixin):
+class Requirement(object):
     """struct for storing Requirement information."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.details is None:
-            self.details = list()
+        self.name = kwargs.pop('name', None)
+        self.filename = kwargs.pop('filename', None)
+        self.line = kwargs.pop('line', None)
+        self.specification = kwargs.pop('specification', None)
+        self.details = kwargs.pop('details', list())
+        self.requirement = kwargs.pop('requirement', None)
+        self.requirement_line = kwargs.pop('requirement_line', None)
+        self.issues = kwargs.pop('issues', None)
+        self.issues_line = kwargs.pop('issues_line', None)
+        self.design = kwargs.pop('design', None)
+        self.design_line = kwargs.pop('design_line', None)
+        self.collections = kwargs.pop('collections', None)
+        self.collections_line = kwargs.pop('collections_line', None)
+        self.classification = kwargs.pop('classification', None)
+        self.classification_line = kwargs.pop('classification_line', None)
+        self.deprecated = kwargs.pop('deprecated', False)
+        self.deprecated_line = kwargs.pop('deprecated_line', None)
+        self.verification = kwargs.pop('verification', None)
+        self.verification_line = kwargs.pop('verification_line', None)
+        self.validation = kwargs.pop('validation', None)
+        self.validation_line = kwargs.pop('validation_line', None)
+        self.label = kwargs.pop('label', None)
+        self.duplicate = kwargs.pop('duplicate', False)
+        self.prefix = kwargs.pop('prefix', None)
 
     @property
     def names(self):
@@ -127,18 +121,17 @@ class Requirement(mooseutils.AutoPropertyMixin):
                 out += '\n  ' + str(d)
         return out.format(self.name, repr(self.requirement), repr(self.design), repr(self.issues))
 
-@mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('filename', ptype=str)
-@mooseutils.addProperty('line', ptype=int)
-@mooseutils.addProperty('detail', ptype=str)
-@mooseutils.addProperty('detail_line', ptype=int)
-@mooseutils.addProperty('specification', ptype=TestSpecification)
-@mooseutils.addProperty('duplicate', ptype=bool, default=False)
-class Detail(mooseutils.AutoPropertyMixin):
+class Detail(object):
     """struct for storing Detail information of a Requirement."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        self.name = kwargs.pop('name', None)
+        self.filename = kwargs.pop('filename', None)
+        self.line = kwargs.pop('line', None)
+        self.detail = kwargs.pop('detail', None)
+        self.detail_line = kwargs.pop('detail_line', None)
+        self.specification = kwargs.pop('specification', None)
+        self.duplicate = kwargs.pop('duplicate', False)
 
     @property
     def testable(self):

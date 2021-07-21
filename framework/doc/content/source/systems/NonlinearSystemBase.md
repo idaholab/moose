@@ -63,15 +63,23 @@ factor for themselves.
 The current implementation of automatic scaling in MOOSE is fairly simple and
 proceeds according to these steps:
 
-1. Compute the on-diagonal Jacobians and/or residuals for all `Kernels`, `ScalarKernels`,
+1. Compute the Jacobians and/or residuals for all `Kernels`, `ScalarKernels`,
    `NodalKernels`, and `FVKernels`
-2. Assemble the results
-3. Examine the Jacobian diagonal or residual for every row corresponding to a
+    - If `off_diagonals_in_auto_scaling` is set to `true` in the input file,
+      then we aggregate all entries in a Jacobian row into a single row value
+      taking the absolute value of any value that is submitted to the
+      `SparseMatrix::add` method.
+    - If `off_diagonals_in_auto_scaling` is not specified or is set to `false`
+      in the input file, then only the diagonal entries of the Jacobian matrix
+      are considered
+    - Regardless of the value of `off_diagonals_in_auto_scaling` the result of
+      this operation is a `NumericVector` of data
+2. Examine the vector of Jacobian data or residual vector for every row corresponding to a
    given variable (or group of variables; recall the `scaling_group_variables`
    parameter) and then compute a scaling factor such that the maximum absolute
-   value of the Jacobian diagonal or residual across all of a variable's (or
+   value of the Jacobian data vector or residual across all of a variable's (or
    group of variables) rows is unity.
-4. If a hybrid of residual and Jacobian scaling has been requested, then a
+3. If a hybrid of residual and Jacobian scaling has been requested, then a
    single scaling factor is computed from the residual scaling factor and
    Jacobian scaling factor. That computation for each variable (group) is done
    with the following code, where `inverse_scaling_factor` actually denotes that

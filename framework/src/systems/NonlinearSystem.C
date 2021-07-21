@@ -402,7 +402,7 @@ NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 void
 NonlinearSystem::computeScalingJacobian()
 {
-  _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, _scaling_matrix);
+  _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, *_scaling_matrix);
 }
 
 void
