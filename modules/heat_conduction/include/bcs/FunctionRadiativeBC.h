@@ -17,16 +17,22 @@
  * Boundary condition for radiative heat exchange with a cylinder, the outer
  * surface of the domain is assumed to be cylindrical as well
  */
-class FunctionRadiativeBC : public RadiativeHeatFluxBCBase
+template <bool is_ad>
+class FunctionRadiativeBCTempl : public RadiativeHeatFluxBCBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  FunctionRadiativeBC(const InputParameters & parameters);
+  FunctionRadiativeBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real coefficient() const override;
+  virtual GenericReal<is_ad> coefficient() const override;
 
   /// emissivity function
   const Function & _emissivity;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef FunctionRadiativeBCTempl<false> FunctionRadiativeBC;
+typedef FunctionRadiativeBCTempl<true> ADFunctionRadiativeBC;

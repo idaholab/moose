@@ -45,6 +45,7 @@ ADIntegratedBCTempl<T>::ADIntegratedBCTempl(const InputParameters & parameters)
     _grad_u(_var.adGradSln()),
     _ad_JxW(_assembly.adJxWFace()),
     _ad_coord(_assembly.adCoordTransformation()),
+    _phi(_assembly.phi(_var)),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   _subproblem.haveADObjects(true);

@@ -15,15 +15,16 @@
  * Boundary condition for radiative heat exchange with a cylinder, the outer
  * surface of the domain is assumed to be cylindrical as well
  */
-class InfiniteCylinderRadiativeBC : public RadiativeHeatFluxBCBase
+template <bool is_ad>
+class InfiniteCylinderRadiativeBCTempl : public RadiativeHeatFluxBCBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  InfiniteCylinderRadiativeBC(const InputParameters & parameters);
+  InfiniteCylinderRadiativeBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real coefficient() const override;
+  virtual GenericReal<is_ad> coefficient() const override;
 
   /// emissivity of the cylinder in radiative heat transfer with the boundary
   const Real _eps_cylinder;
@@ -36,4 +37,9 @@ protected:
 
   /// coefficients are constant and pre-computed
   Real _coefficient;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef InfiniteCylinderRadiativeBCTempl<false> InfiniteCylinderRadiativeBC;
+typedef InfiniteCylinderRadiativeBCTempl<true> ADInfiniteCylinderRadiativeBC;

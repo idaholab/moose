@@ -11,11 +11,13 @@
 #include "MathUtils.h"
 
 registerMooseObject("HeatConductionApp", FunctionRadiativeBC);
+registerMooseObject("HeatConductionApp", ADFunctionRadiativeBC);
 
+template <bool is_ad>
 InputParameters
-FunctionRadiativeBC::validParams()
+FunctionRadiativeBCTempl<is_ad>::validParams()
 {
-  InputParameters params = RadiativeHeatFluxBCBase::validParams();
+  InputParameters params = RadiativeHeatFluxBCBaseTempl<is_ad>::validParams();
   params.addClassDescription("Boundary condition for radiative heat exchange where the emissivity "
                              "function is supplied by a Function.");
   params.addRequiredParam<FunctionName>(
@@ -23,13 +25,18 @@ FunctionRadiativeBC::validParams()
   return params;
 }
 
-FunctionRadiativeBC::FunctionRadiativeBC(const InputParameters & parameters)
-  : RadiativeHeatFluxBCBase(parameters), _emissivity(getFunction("emissivity_function"))
+template <bool is_ad>
+FunctionRadiativeBCTempl<is_ad>::FunctionRadiativeBCTempl(const InputParameters & parameters)
+  : RadiativeHeatFluxBCBaseTempl<is_ad>(parameters), _emissivity(getFunction("emissivity_function"))
 {
 }
 
-Real
-FunctionRadiativeBC::coefficient() const
+template <bool is_ad>
+GenericReal<is_ad>
+FunctionRadiativeBCTempl<is_ad>::coefficient() const
 {
   return _emissivity.value(_t, _q_point[_qp]);
 }
+
+template class FunctionRadiativeBCTempl<false>;
+template class FunctionRadiativeBCTempl<true>;
