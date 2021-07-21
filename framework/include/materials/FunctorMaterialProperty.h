@@ -14,6 +14,7 @@
 #include "MooseError.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
 
 #include <unordered_map>
 #include <functional>
@@ -72,6 +73,8 @@ template <typename T>
 T
 FunctorMaterialProperty<T>::operator()(const Elem * const elem) const
 {
+  mooseAssert(elem && elem != libMesh::remote_elem,
+              "The element must be non-null and non-remote in functor material properties");
   auto it = _elem_functor.find(elem->subdomain_id());
   mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
   return it->second(elem);

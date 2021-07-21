@@ -101,6 +101,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     // face from the Rhie-Chow element
 
     const auto elem_mu = _mu(&elem);
+    const auto elem_rho = _rho(&elem);
 
     if (onBoundary(*fi))
     {
@@ -139,7 +140,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
           const auto advection_coeffs =
               Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
           ADReal temp_coeff =
-              _rho * face_velocity / eps_face * surface_vector * advection_coeffs.first;
+              elem_rho * face_velocity / eps_face * surface_vector * advection_coeffs.first;
 
           if (_fully_developed_flow_boundaries.find(bc_id) ==
               _fully_developed_flow_boundaries.end())
@@ -187,6 +188,10 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     ADReal face_mu;
     Moose::FV::interpolate(
         Moose::FV::InterpMethod::Average, face_mu, elem_mu, neighbor_mu, *fi, elem_has_info);
+    const auto neighbor_rho = _rho(neighbor);
+    ADReal face_rho;
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, elem_has_info);
 
     // Compute the face porosity
     // Note: Try to be consistent with how the superficial velocity is computed in computeQpResidual
@@ -213,7 +218,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     // so we just use the 'first' member of the returned pair
     const auto advection_coeffs =
         Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, interp_v);
-    ADReal temp_coeff = _rho * interp_v / eps_face * surface_vector * advection_coeffs.first;
+    ADReal temp_coeff = face_rho * interp_v / eps_face * surface_vector * advection_coeffs.first;
 
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
     // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for

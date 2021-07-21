@@ -80,7 +80,7 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const Real & _rho;
+  const FunctorMaterialProperty<ADReal> & _rho;
 
   /// the dimension of the simulation
   const unsigned int _dim;
