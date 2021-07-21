@@ -36,6 +36,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -61,7 +62,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 std::string
-MaterialPropertyInterface::deducePropertyName(const std::string & name)
+MaterialPropertyInterface::deducePropertyName(const std::string & name) const
 {
   if (_mi_params.have_parameter<MaterialPropertyName>(name))
     return _mi_params.get<MaterialPropertyName>(name);
@@ -92,6 +93,46 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 
     // return the raw pointer inside the shared pointer
     return default_property.get();
+  }
+
+  return nullptr;
+}
+
+template <>
+const FunctorMaterialProperty<Real> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {
+    auto & prop = _mi_subproblem.declareFunctorProperty<Real>(name);
+    prop.setFunction(_mi_subproblem.mesh(),
+                     _mi_block_ids,
+                     [real_value](auto /*geom_quantity*/) -> Real { return real_value; });
+    return &prop;
+  }
+
+  return nullptr;
+}
+
+template <>
+const FunctorMaterialProperty<ADReal> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {
+    auto & prop = _mi_subproblem.declareFunctorProperty<ADReal>(name);
+    prop.setFunction(_mi_subproblem.mesh(),
+                     _mi_block_ids,
+                     [real_value](auto /*geom_quantity*/) -> ADReal { return real_value; });
+    return &prop;
   }
 
   return nullptr;
