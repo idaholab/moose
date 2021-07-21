@@ -9,7 +9,7 @@ The recommended way for Level 1 users to submit jobs to INL HPC is through an On
 ### Specifying a Project
 
 
-Every job submission is required to have a project specified. This is normally entered with the PBS "-P" option. However, you do not need to enter "-P" here, just the project name. Project names must be selected from the list on [HPC Web](http://hpcweb.hpc.inl.gov/home/pbs#specifying-a-project). If more than one project name is appropriate, use your best judgment to choose the most applicable project name. If no project name is available that is applicable to your job, use one of the general-purpose technical area job names, e.g., “ne_gen” for nuclear energy applications (see Figure 2).
+Every job submission is required to have a project specified. This is normally entered with the PBS "-P" option. However, you do not need to enter "-P" here, just the project name. Project names must be selected from this list [PBS Job Codes](pbs.md). If more than one project name is appropriate, use your best judgment to choose the most applicable project name. If no project name is available that is applicable to your job, use one of the general-purpose technical area job names, e.g., “ne_gen” for nuclear energy applications (see Figure 2).
 
 
 !media large_media/ncrc/app_sub_1.png style=width:80%;margin-left:10px caption=Top part of the NCRC job submission form. id=NCRC_job_1
