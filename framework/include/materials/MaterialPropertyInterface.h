@@ -59,7 +59,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const FunctorMaterialProperty<T> & getFunctorMaterialProperty(const std::string & name) const;
+  const FunctorMaterialProperty<T> & getFunctorMaterialProperty(const std::string & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
@@ -272,7 +272,7 @@ protected:
   FEProblemBase & _mi_feproblem;
 
   /// Reference to the subproblem
-  const SubProblem & _mi_subproblem;
+  SubProblem & _mi_subproblem;
 
   /// Current threaded it
   const THREAD_ID _mi_tid;
@@ -300,6 +300,13 @@ protected:
    */
   template <typename T>
   const MaterialProperty<T> * defaultMaterialProperty(const std::string & name);
+
+  /**
+   * Helper function to parse default material property values. This is implemented
+   * as a specialization for supported types and returns NULL in all other cases.
+   */
+  template <typename T>
+  const FunctorMaterialProperty<T> * defaultFunctorMaterialProperty(const std::string & name);
 
   /**
    * Helper function to parse default material property values. This is implemented
@@ -392,10 +399,16 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 
 template <typename T>
 const FunctorMaterialProperty<T> &
-MaterialPropertyInterface::getFunctorMaterialProperty(const std::string & name) const
+MaterialPropertyInterface::getFunctorMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const FunctorMaterialProperty<T> * const default_property =
+      defaultFunctorMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
 
   return _mi_subproblem.getFunctorProperty<T>(prop_name);
 }
@@ -467,6 +480,14 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 
 // General version for types that do not accept default values
 template <typename T>
+const FunctorMaterialProperty<T> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & /*name*/)
+{
+  return nullptr;
+}
+
+// General version for types that do not accept default values
+template <typename T>
 const ADMaterialProperty<T> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
 {
@@ -477,6 +498,14 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*
 template <>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty<Real>(const std::string & name);
+
+template <>
+const FunctorMaterialProperty<Real> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty<Real>(const std::string & name);
+
+template <>
+const FunctorMaterialProperty<ADReal> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty<ADReal>(const std::string & name);
 
 template <>
 const ADMaterialProperty<Real> *
