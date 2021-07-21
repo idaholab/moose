@@ -26,21 +26,21 @@ class TestCheckScript(unittest.TestCase):
         # Test that script runs from within the containing directory
         cmd = ['python', 'moosedocs.py', 'check', '--config', 'sqa_reports.yml']
         cwd = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test', 'doc'))
-        out = mooseutils.check_output(cmd, cwd=cwd)
+        out = mooseutils.check_output(cmd, cwd=cwd, check=False)
         self.assertIn('moose_test', out)
         self.assertIn('WARNING', out)
 
         # Test that script runs from within the containing directory, without MOOSE_DIR
         env = copy.copy(os.environ)
         env.pop('MOOSE_DIR', None)
-        out = mooseutils.check_output(cmd, cwd=cwd, env=env)
+        out = mooseutils.check_output(cmd, cwd=cwd, env=env, check=False)
         self.assertIn('moose_test', out)
         self.assertIn('WARNING', out)
 
         # Test that script runs from without the containing directory
         cmd = ['python', 'test/doc/moosedocs.py', 'check', '--config', 'sqa_reports.yml']
         cwd = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
-        out = mooseutils.check_output(cmd, cwd=cwd)
+        out = mooseutils.check_output(cmd, cwd=cwd, check=False)
         self.assertIn('moose_test', out)
         self.assertIn('WARNING', out)
 
