@@ -309,38 +309,68 @@ AttribPreIC::isEqual(const Attribute & other) const
   return isMatch(other);
 }
 
-void
-AttribPreAux::initFrom(const MooseObject * /*obj*/)
-{
-}
 bool
 AttribPreAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPreAux *>(&other);
-  return a && (a->_val == _val);
+  if (!a || a->_vals.size() < 1)
+    return false;
+  auto cond = a->_vals[0];
+
+  for (auto val : _vals)
+    if (val == cond)
+      return true;
+  return false;
 }
 
 bool
 AttribPreAux::isEqual(const Attribute & other) const
 {
-  return isMatch(other);
+  auto a = dynamic_cast<const AttribPreAux *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
 }
 
 void
-AttribPostAux::initFrom(const MooseObject * /*obj*/)
+AttribPreAux::initFrom(const MooseObject * /*obj*/)
 {
 }
+
 bool
 AttribPostAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPostAux *>(&other);
-  return a && (a->_val == _val);
+  if (!a || a->_vals.size() < 1)
+    return false;
+  auto cond = a->_vals[0];
+
+  for (auto val : _vals)
+    if (val == cond)
+      return true;
+  return false;
 }
 
 bool
 AttribPostAux::isEqual(const Attribute & other) const
 {
-  return isMatch(other);
+  auto a = dynamic_cast<const AttribPostAux *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
+}
+
+void
+AttribPostAux::initFrom(const MooseObject * /*obj*/)
+{
 }
 
 void
