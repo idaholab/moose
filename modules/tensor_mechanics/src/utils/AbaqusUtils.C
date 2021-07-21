@@ -25,13 +25,15 @@ AbaqusUtils::setCommunicator(const libMesh::Parallel::Communicator * communicato
   _communicator = communicator;
 }
 
-extern "C" void __attribute__((visibility("default"))) getnumcpus_(int * num)
+extern "C" void
+getnumcpus_(int * num)
 {
   auto communicator = AbaqusUtils::getCommunicator();
   *num = communicator->size();
 }
 
-extern "C" TIMPI::communicator __attribute__((visibility("default"))) get_communicator()
+extern "C" TIMPI::communicator
+get_communicator()
 {
   auto communicator = AbaqusUtils::getCommunicator();
   return communicator->get();
@@ -39,24 +41,35 @@ extern "C" TIMPI::communicator __attribute__((visibility("default"))) get_commun
 
 // Threads
 
-extern "C" void __attribute__((visibility("default"))) getrank_(int * rank)
+extern "C" void
+getrank_(int * rank)
 {
   auto communicator = AbaqusUtils::getCommunicator();
   *rank = communicator->rank();
 }
 
-extern "C" int __attribute__((visibility("default"))) getnumthreads_()
+extern "C" int
+getnumthreads_()
 {
   return libMesh::n_threads();
 }
-extern "C" int __attribute__((visibility("default"))) getnumthreads() { return getnumthreads_(); }
+extern "C" int
+getnumthreads()
+{
+  return getnumthreads_();
+}
 
-extern "C" int __attribute__((visibility("default"))) get_thread_id_()
+extern "C" int
+get_thread_id_()
 {
   ParallelUniqueId puid;
   return puid.id;
 }
-extern "C" int __attribute__((visibility("default"))) get_thread_id() { return get_thread_id_(); }
+extern "C" int
+get_thread_id()
+{
+  return get_thread_id_();
+}
 
 // Output directory
 
@@ -88,7 +101,8 @@ AbaqusUtils::setInputFile(const std::string & input_file)
   _job_name = job_name;
 }
 
-extern "C" void __attribute__((visibility("default"))) getoutdir_(char * dir, unsigned int * len)
+extern "C" void
+getoutdir_(char * dir, unsigned int * len)
 {
   auto output_dir = AbaqusUtils::getOutputDir();
   *len = output_dir.length();
@@ -96,7 +110,8 @@ extern "C" void __attribute__((visibility("default"))) getoutdir_(char * dir, un
     dir[i] = i < *len ? output_dir[i] : ' ';
 }
 
-extern "C" void __attribute__((visibility("default"))) getjobname_(char * dir, unsigned int * len)
+extern "C" void
+getjobname_(char * dir, unsigned int * len)
 {
   auto job_name = AbaqusUtils::getJobName();
   *len = job_name.length();
@@ -106,7 +121,8 @@ extern "C" void __attribute__((visibility("default"))) getjobname_(char * dir, u
 
 // error/warning/info message output
 
-extern "C" void __attribute__((visibility("default"))) stdb_abqerr_(
+extern "C" void
+stdb_abqerr_(
     int * lop, char * format, int * intv, double * realv, char * charv, std::size_t format_len)
 {
   std::string message;
@@ -205,7 +221,8 @@ std::map<int, std::vector<Real>> AbaqusUtils::_sma_float_array;
 std::vector<std::map<int, std::vector<int>>> AbaqusUtils::_sma_local_int_array;
 std::vector<std::map<int, std::vector<Real>>> AbaqusUtils::_sma_local_float_array;
 
-extern "C" int * __attribute__((visibility("default"))) SMAIntArrayCreate(int id, int len, int val)
+extern "C" int *
+SMAIntArrayCreate(int id, int len, int val)
 {
   auto ib = AbaqusUtils::_sma_int_array.emplace(id, std::vector<int>(len, val));
   if (ib.second == false)
@@ -213,7 +230,7 @@ extern "C" int * __attribute__((visibility("default"))) SMAIntArrayCreate(int id
   return ib.first->second.data();
 }
 
-extern "C" Real * __attribute__((visibility("default")))
+extern "C" Real *
 SMAFloatArrayCreate(int id, int len, Real val)
 {
   auto ib = AbaqusUtils::_sma_float_array.emplace(id, std::vector<Real>(len, val));
@@ -222,7 +239,7 @@ SMAFloatArrayCreate(int id, int len, Real val)
   return ib.first->second.data();
 }
 
-extern "C" int * __attribute__((visibility("default")))
+extern "C" int *
 SMALocalIntArrayCreate(int id, int len, int val)
 {
   AbaqusUtils::smaInitialize();
@@ -232,7 +249,7 @@ SMALocalIntArrayCreate(int id, int len, int val)
   return array.data();
 }
 
-extern "C" Real * __attribute__((visibility("default")))
+extern "C" Real *
 SMALocalFloatArrayCreate(int id, int len, Real val)
 {
   AbaqusUtils::smaInitialize();
@@ -244,19 +261,22 @@ SMALocalFloatArrayCreate(int id, int len, Real val)
 
 // Array access
 
-extern "C" int * __attribute__((visibility("default"))) SMAIntArrayAccess(int id)
+extern "C" int *
+SMAIntArrayAccess(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_int_array, id, "SMAIntArrayAccess");
   return it->second.data();
 }
 
-extern "C" Real * __attribute__((visibility("default"))) SMAFloatArrayAccess(int id)
+extern "C" Real *
+SMAFloatArrayAccess(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_float_array, id, "SMAFloatArrayAccess");
   return it->second.data();
 }
 
-extern "C" int * __attribute__((visibility("default"))) SMALocalIntArrayAccess(int id)
+extern "C" int *
+SMALocalIntArrayAccess(int id)
 {
   auto & array =
       AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_int_array, "SMALocalIntArrayAccess");
@@ -264,7 +284,8 @@ extern "C" int * __attribute__((visibility("default"))) SMALocalIntArrayAccess(i
   return it->second.data();
 }
 
-extern "C" Real * __attribute__((visibility("default"))) SMALocalFloatArrayAccess(int id)
+extern "C" Real *
+SMALocalFloatArrayAccess(int id)
 {
   auto & array = AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_float_array,
                                                 "SMALocalFloatArrayAccess");
@@ -274,19 +295,22 @@ extern "C" Real * __attribute__((visibility("default"))) SMALocalFloatArrayAcces
 
 // Array size check
 
-extern "C" std::size_t __attribute__((visibility("default"))) SMAIntArraySize(int id)
+extern "C" std::size_t
+SMAIntArraySize(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_int_array, id, "SMAIntArraySize");
   return it->second.size();
 }
 
-extern "C" std::size_t __attribute__((visibility("default"))) SMAFloatArraySize(int id)
+extern "C" std::size_t
+SMAFloatArraySize(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_float_array, id, "SMAFloatArraySize");
   return it->second.size();
 }
 
-extern "C" std::size_t __attribute__((visibility("default"))) SMALocalIntArraySize(int id)
+extern "C" std::size_t
+SMALocalIntArraySize(int id)
 {
   auto & array =
       AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_int_array, "SMALocalIntArraySize");
@@ -294,7 +318,8 @@ extern "C" std::size_t __attribute__((visibility("default"))) SMALocalIntArraySi
   return it->second.size();
 }
 
-extern "C" std::size_t __attribute__((visibility("default"))) SMALocalFloatArraySize(int id)
+extern "C" std::size_t
+SMALocalFloatArraySize(int id)
 {
   auto & array =
       AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_float_array, "SMALocalFloatArraySize");
@@ -304,19 +329,22 @@ extern "C" std::size_t __attribute__((visibility("default"))) SMALocalFloatArray
 
 // Array deletion
 
-extern "C" void __attribute__((visibility("default"))) SMAIntArrayDelete(int id)
+extern "C" void
+SMAIntArrayDelete(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_int_array, id, "SMAIntArrayDelete");
   AbaqusUtils::_sma_int_array.erase(it);
 }
 
-extern "C" void __attribute__((visibility("default"))) SMAFloatArrayDelete(int id)
+extern "C" void
+SMAFloatArrayDelete(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_float_array, id, "SMAFloatArrayDelete");
   AbaqusUtils::_sma_float_array.erase(it);
 }
 
-extern "C" void __attribute__((visibility("default"))) SMALocalIntArrayDelete(int id)
+extern "C" void
+SMALocalIntArrayDelete(int id)
 {
   auto & array =
       AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_int_array, "SMALocalIntArrayDelete");
@@ -324,7 +352,8 @@ extern "C" void __attribute__((visibility("default"))) SMALocalIntArrayDelete(in
   array.erase(it);
 }
 
-extern "C" void __attribute__((visibility("default"))) SMALocalFloatArrayDelete(int id)
+extern "C" void
+SMALocalFloatArrayDelete(int id)
 {
   auto & array = AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_float_array,
                                                 "SMALocalFloatArrayDelete");
@@ -364,17 +393,20 @@ AbaqusUtils::mutexUnlock(std::size_t n)
   _mutex[n]->unlock();
 }
 
-extern "C" void __attribute__((visibility("default"))) MutexInit(int id)
+extern "C" void
+MutexInit(int id)
 {
   AbaqusUtils::mutexInit(id);
 }
 
-extern "C" void __attribute__((visibility("default"))) MutexLock(int id)
+extern "C" void
+MutexLock(int id)
 {
   AbaqusUtils::mutexLock(id);
 }
 
-extern "C" void __attribute__((visibility("default"))) MutexUnlock(int id)
+extern "C" void
+MutexUnlock(int id)
 {
   AbaqusUtils::mutexUnlock(id);
 }
