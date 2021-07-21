@@ -98,15 +98,19 @@ NewmarkBeta::computeTimeDerivatives()
 }
 
 void
-NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
+NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot,
+                                      const dof_id_type & dof,
+                                      DualReal & ad_u_dotdot) const
 {
   const auto & u_old = _solution_old(dof);
   const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
   const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
 
-  auto u_dotdot = ad_u_dot;
+  // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
+  // MooseVariableData
+  ad_u_dotdot = ad_u_dot;
 
-  computeTimeDerivativeHelper(ad_u_dot, u_old, u_dot_old, u_dotdot, u_dotdot_old);
+  computeTimeDerivativeHelper(ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old);
 }
 
 void

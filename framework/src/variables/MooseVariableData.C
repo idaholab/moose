@@ -49,6 +49,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     _need_u_dot(false),
     _need_ad_u_dot(false),
     _need_u_dotdot(false),
+    _need_ad_u_dotdot(false),
     _need_u_dot_old(false),
     _need_u_dotdot_old(false),
     _need_du_dot_du(false),
@@ -1413,6 +1414,12 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_u_dot.resize(nqp);
   }
 
+  if (_need_ad_u_dotdot)
+  {
+    _ad_dofs_dotdot.resize(num_dofs);
+    _ad_u_dotdot.resize(nqp);
+  }
+
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = Moose::adOffset(
       _var_num, _sys.getMaxVarNDofsPerElem(), _element_type, _sys.system().n_vars());
@@ -1443,6 +1450,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     if (_need_ad_u_dot)
       _ad_u_dot[qp] = _ad_zero;
+
+    if (_need_ad_u_dotdot)
+      _ad_u_dotdot[qp] = _ad_zero;
   }
 
   for (unsigned int i = 0; i < num_dofs; i++)
@@ -1460,7 +1470,10 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
-      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
+      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
+                                                 _dof_indices[i],
+                                                 _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
+                                                                   : _ad_real_dummy);
     }
   }
 
@@ -1489,13 +1502,21 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
 
       if (_need_ad_u_dot && _time_integrator)
+      {
         _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
+        if (_need_ad_u_dotdot)
+          _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
+      }
     }
   }
 
   if (_need_ad_u_dot && !_time_integrator)
     for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
+    {
       _ad_u_dot[qp] = _u_dot[qp];
+      if (_need_ad_u_dotdot)
+        _ad_u_dotdot[qp] = _u_dotdot[qp];
+    }
 }
 
 template <>
