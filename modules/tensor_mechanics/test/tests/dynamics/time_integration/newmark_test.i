@@ -31,200 +31,198 @@
   zmax = 0.1
 []
 
-
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-  [./stress_yy]
+  [vel_x]
+  []
+  [accel_x]
+  []
+  [vel_y]
+  []
+  [accel_y]
+  []
+  [vel_z]
+  []
+  [accel_z]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./inertia_x]
+  []
+  [inertia_x]
     type = InertialForce
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
     beta = 0.25
     gamma = 0.5
-  [../]
-  [./inertia_y]
+  []
+  [inertia_y]
     type = InertialForce
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
     beta = 0.25
     gamma = 0.5
-  [../]
-  [./inertia_z]
+  []
+  [inertia_z]
     type = InertialForce
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
     beta = 0.25
     gamma = 0.5
-  [../]
+  []
 
 []
 
 [AuxKernels]
-  [./accel_x]
+  [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
     velocity = vel_x
     beta = 0.25
     execute_on = timestep_end
-  [../]
-  [./vel_x]
+  []
+  [vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     gamma = 0.5
     execute_on = timestep_end
-  [../]
-  [./accel_y]
+  []
+  [accel_y]
     type = NewmarkAccelAux
     variable = accel_y
     displacement = disp_y
     velocity = vel_y
     beta = 0.25
     execute_on = timestep_end
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     gamma = 0.5
     execute_on = timestep_end
-  [../]
-  [./accel_z]
+  []
+  [accel_z]
     type = NewmarkAccelAux
     variable = accel_z
     displacement = disp_z
     velocity = vel_z
     beta = 0.25
     execute_on = timestep_end
-  [../]
-  [./vel_z]
+  []
+  [vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
     gamma = 0.5
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 0
     index_j = 1
-  [../]
+  []
 
 []
 
-
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
-    value=0.0
-  [../]
-  [./top_x]
+    value = 0.0
+  []
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
-    value=0.0
-  [../]
-  [./top_z]
+    value = 0.0
+  []
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
-    value=0.0
-  [../]
-  [./bottom_x]
+    value = 0.0
+  []
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
-    value=0.0
-  [../]
-  [./bottom_z]
+    value = 0.0
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
-    value=0.0
-  [../]
-  [./Pressure]
-    [./Side1]
+    value = 0.0
+  []
+  [Pressure]
+    [Side1]
       boundary = bottom
       function = pressure
       factor = 1
       displacements = 'disp_x disp_y disp_z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
-  [../]
+  []
 
-  [./strain]
+  [strain]
     type = ComputeSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'density'
     prop_values = '7750'
-  [../]
+  []
 
 []
 
@@ -235,43 +233,42 @@
   dt = 0.1
 []
 
-
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 1.0 2.0 5.0'
     y = '0.0 0.1 0.2 1.0 1.0 1.0'
     scale_factor = 1e9
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
-  [./disp]
+  []
+  [disp]
     type = NodalMaxValue
     variable = disp_y
     boundary = bottom
-  [../]
-  [./vel]
+  []
+  [vel]
     type = NodalMaxValue
     variable = vel_y
     boundary = bottom
-  [../]
-  [./accel]
+  []
+  [accel]
     type = NodalMaxValue
     variable = accel_y
     boundary = bottom
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
-  [../]
+  []
 
 []
 

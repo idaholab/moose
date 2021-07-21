@@ -1,16 +1,18 @@
-# Wave propogation in 1D using HHT time integration
+# Wave propogation in 1D using Newmark time integration in the presence of Rayleigh damping
 #
 # The test is for an 1D bar element of length 4m  fixed on one end
 # with a sinusoidal pulse dirichlet boundary condition applied to the other end.
-# alpha, beta and gamma are Newmark  time integration parameters
+# beta and gamma are Newmark  time integration parameters
+# eta and zeta are mass dependent and stiffness dependent Rayleigh damping
+# coefficients, respectively.
 # The equation of motion in terms of matrices is:
 #
-# M*accel + K*((1+alpha)*disp-alpha*disp_old) = 0
+# M*accel + (eta*M+zeta*K)*vel +K*disp = 0
 #
 # Here M is the mass matrix, K is the stiffness matrix
 #
 # The displacement at the second, third and fourth node at t = 0.1 are
-# -8.097405701570538350e-02, 2.113131879547342634e-02 and -5.182787688751439893e-03, respectively.
+# -7.776268399030435152e-02, 1.949967184623528985e-02 and -4.615737877580032046e-03, respectively
 
 [Mesh]
   type = GeneratedMesh
@@ -24,19 +26,49 @@
   ymax = 4.0
   zmin = 0.0
   zmax = 0.1
-  use_displaced_mesh = false
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
+[AuxVariables]
+  [stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
 [Modules/TensorMechanics/DynamicMaster]
   [all]
     add_variables = true
-    hht_alpha = -0.3
+    stiffness_damping_coefficient = 0.1
+    mass_damping_coefficient = 0.1
     newmark_beta = 0.3025
     newmark_gamma = 0.6
+    strain = SMALL
+    density = 1
+  []
+[]
+
+[AuxKernels]
+  [stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 0
+    index_j = 1
+  []
+  [strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yy
+    index_i = 0
+    index_j = 1
   []
 []
 
@@ -130,20 +162,14 @@
 [Materials]
   [Elasticity_tensor]
     type = ComputeElasticityTensor
+    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1 0'
   []
-
   [stress]
     type = ComputeLinearElasticStress
+    block = 0
   []
-
-  [density]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    prop_values = '1'
-  []
-
 []
 
 [Executioner]
@@ -161,6 +187,7 @@
     data_file = 'sine_wave.csv'
     format = columns
   []
+
 []
 
 [Postprocessors]
@@ -170,22 +197,22 @@
   [disp_1]
     type = NodalVariableValue
     nodeid = 1
-    variable = vel_y
+    variable = disp_y
   []
   [disp_2]
     type = NodalVariableValue
     nodeid = 3
-    variable = vel_y
+    variable = disp_y
   []
   [disp_3]
     type = NodalVariableValue
     nodeid = 10
-    variable = vel_y
+    variable = disp_y
   []
   [disp_4]
     type = NodalVariableValue
     nodeid = 14
-    variable = vel_y
+    variable = disp_y
   []
 []
 

@@ -35,177 +35,102 @@
   zmax = 0.1
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-  [./stress_yy]
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
-[Kernels]
-  [./DynamicTensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/DynamicMaster]
+  [all]
+    add_variables = true
     hht_alpha = 0.11
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-  [../]
-
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    density = 7750
+  []
 []
 
 [AuxKernels]
-  [./accel_x] # These auxkernls are only for checking output
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = accel_x
-    first = false
-  [../]
-  [./accel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = accel_y
-    first = false
-  [../]
-  [./accel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = accel_z
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = vel_x
-  [../]
-  [./vel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = vel_y
-  [../]
-  [./vel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = vel_z
-  [../]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 0
     index_j = 1
-  [../]
+  []
 []
 
-
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
-    value=0.0
-  [../]
-  [./top_x]
+    value = 0.0
+  []
+  [top_x]
     type = DirichletBC
     variable = disp_x
     boundary = top
-    value=0.0
-  [../]
-  [./top_z]
+    value = 0.0
+  []
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
-    value=0.0
-  [../]
-  [./bottom_x]
+    value = 0.0
+  []
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
-    value=0.0
-  [../]
-  [./bottom_z]
+    value = 0.0
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
-    value=0.0
-  [../]
-  [./Pressure]
-    [./Side1]
+    value = 0.0
+  []
+  [Pressure]
+    [Side1]
       boundary = bottom
       function = pressure
-      displacements = 'disp_x disp_y disp_z'
       factor = 1
       alpha = 0.11
-    [../]
-  [../]
+      displacements = 'disp_x disp_y disp_z'
+    []
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
-  [../]
-
-  [./strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = 0
-  [../]
-  [./density]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names = 'density'
-    prop_values = '7750'
-  [../]
+  []
 
 []
 
@@ -214,52 +139,47 @@
   start_time = 0
   end_time = 2
   dt = 0.1
-
-  # Time integration scheme
-  scheme = 'newmark-beta'
 []
 
-
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0.0 0.1 0.2 1.0 2.0 5.0'
     y = '0.0 0.1 0.2 1.0 1.0 1.0'
     scale_factor = 1e9
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
-  [./disp]
+  []
+  [disp]
     type = NodalMaxValue
     variable = disp_y
     boundary = bottom
-  [../]
-  [./vel]
+  []
+  [vel]
     type = NodalMaxValue
     variable = vel_y
     boundary = bottom
-  [../]
-  [./accel]
+  []
+  [accel]
     type = NodalMaxValue
     variable = accel_y
     boundary = bottom
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = ElementAverageValue
     variable = strain_yy
-  [../]
+  []
 []
 
 [Outputs]
-  file_base = 'hht_test_out'
   exodus = true
   perf_graph = true
 []
