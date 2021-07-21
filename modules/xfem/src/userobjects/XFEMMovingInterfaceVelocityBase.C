@@ -30,8 +30,8 @@ XFEMMovingInterfaceVelocityBase::initialize()
   const UserObject * uo =
       &(_fe_problem.getUserObjectBase(getParam<UserObjectName>("value_at_interface_uo")));
 
-  if (dynamic_cast<const PointValueAtXFEMInterface *>(uo) == nullptr)
-    mooseError("UserObject casting to PointValueAtXFEMInterface in XFEMMovingInterfaceVelocity");
+  if (dynamic_cast<const NodeValueAtXFEMInterface *>(uo) == nullptr)
+    mooseError("UserObject casting to NodeValueAtXFEMInterface in XFEMMovingInterfaceVelocity");
 
-  _value_at_interface_uo = dynamic_cast<const PointValueAtXFEMInterface *>(uo);
+  _value_at_interface_uo = dynamic_cast<const NodeValueAtXFEMInterface *>(uo);
 }

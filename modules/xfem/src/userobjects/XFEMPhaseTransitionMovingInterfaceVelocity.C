@@ -37,15 +37,14 @@ XFEMPhaseTransitionMovingInterfaceVelocity::XFEMPhaseTransitionMovingInterfaceVe
 
 Real
 XFEMPhaseTransitionMovingInterfaceVelocity::computeMovingInterfaceVelocity(
-    unsigned int point_id) const
+    dof_id_type point_id, RealVectorValue normal) const
 {
   Real value_positive = _value_at_interface_uo->getValueAtPositiveLevelSet()[point_id];
   Real value_negative = _value_at_interface_uo->getValueAtNegativeLevelSet()[point_id];
   RealVectorValue grad_positive = _value_at_interface_uo->getGradientAtPositiveLevelSet()[point_id];
   RealVectorValue grad_negative = _value_at_interface_uo->getGradientAtNegativeLevelSet()[point_id];
 
-  // Current implementation only supports the case that the interface is moving horizontally
-  return std::abs((_diffusivity_at_positive_level_set * grad_positive(0) -
-                   _diffusivity_at_negative_level_set * grad_negative(0)) /
-                  (value_positive - value_negative + _equilibrium_concentration_jump));
+  return std::abs((_diffusivity_at_positive_level_set * grad_positive -
+                   _diffusivity_at_negative_level_set * grad_negative) *
+                  normal / (value_positive - value_negative + _equilibrium_concentration_jump));
 }
