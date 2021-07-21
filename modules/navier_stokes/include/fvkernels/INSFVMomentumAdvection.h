@@ -36,10 +36,7 @@ protected:
   /**
    * interpolation overload for the velocity
    */
-  virtual void interpolate(Moose::FV::InterpMethod m,
-                           ADRealVectorValue & interp_v,
-                           const ADRealVectorValue & elem_v,
-                           const ADRealVectorValue & neighbor_v);
+  virtual void interpolate(Moose::FV::InterpMethod m, ADRealVectorValue & interp_v);
 
   virtual ADReal computeQpResidual() override;
 

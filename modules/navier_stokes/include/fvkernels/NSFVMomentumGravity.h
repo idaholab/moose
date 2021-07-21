@@ -26,7 +26,7 @@ protected:
   const RealVectorValue _gravity;
 
   /// The density
-  const ADMaterialProperty<Real> & _rho;
+  const FunctorMaterialProperty<ADReal> & _rho;
   /// index x|y|z
   const unsigned int _index;
 };

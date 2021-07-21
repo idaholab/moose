@@ -24,8 +24,4 @@ protected:
 
   /// The advected quantity on the elem
   const FunctorInterface<ADReal> & _adv_quant;
-
-  /// The interfacial velocity. We cache this in the residual computation in case a derived class
-  /// might want to use it
-  ADRealVectorValue _v;
 };

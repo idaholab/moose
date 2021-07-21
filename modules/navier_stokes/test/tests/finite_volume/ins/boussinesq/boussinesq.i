@@ -258,8 +258,13 @@ temp_ref=${fparse hot_temp / 2.}
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'k cp alpha'
-    prop_values = '${k} ${cp} ${alpha}'
+    prop_names = 'k alpha'
+    prop_values = '${k} ${alpha}'
+  []
+  [const_functor]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'cp'
+    prop_values = '${cp}'
   []
   [ins_fv]
     type = INSFVMaterial

@@ -30,8 +30,4 @@ protected:
 
   /// The limiting method to use for the advected quantity
   std::unique_ptr<Moose::FV::Limiter> _limiter;
-
-  /// The interfacial velocity. We cache this in the residual computation in case a derived class
-  /// might want to use it
-  ADRealVectorValue _v;
 };

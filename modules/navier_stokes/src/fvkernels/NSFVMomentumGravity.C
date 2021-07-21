@@ -34,7 +34,7 @@ NSFVMomentumGravity::validParams()
 NSFVMomentumGravity::NSFVMomentumGravity(const InputParameters & params)
   : FVElementalKernel(params),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _rho(getADMaterialProperty<Real>(NS::density)),
+    _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 }
@@ -42,5 +42,5 @@ NSFVMomentumGravity::NSFVMomentumGravity(const InputParameters & params)
 ADReal
 NSFVMomentumGravity::computeQpResidual()
 {
-  return -_rho[_qp] * _gravity(_index);
+  return -_rho(_current_elem) * _gravity(_index);
 }

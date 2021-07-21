@@ -58,9 +58,10 @@ FVMatAdvection::computeQpResidual()
 {
   using namespace Moose::FV;
 
-  _v = _vel(std::make_tuple(_face_info, _cd_limiter.get(), /*this doesn't matter for cd*/ true));
+  const auto v =
+      _vel(std::make_tuple(_face_info, _cd_limiter.get(), /*this doesn't matter for cd*/ true));
   const auto adv_quant_interface =
-      _adv_quant(std::make_tuple(_face_info, _limiter.get(), _v * _face_info->normal() > 0));
+      _adv_quant(std::make_tuple(_face_info, _limiter.get(), v * _face_info->normal() > 0));
 
-  return _normal * _v * adv_quant_interface;
+  return _normal * v * adv_quant_interface;
 }

@@ -35,16 +35,13 @@ PINSFVMomentumDiffusion::validParams()
 
 PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _mu_elem(getADMaterialProperty<Real>("mu")),
-    _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
+    _mu(getFunctorMaterialProperty<ADReal>("mu")),
+    _eps(getFunctor<MooseVariableFVReal>("porosity", 0)),
     _index(getParam<MooseEnum>("momentum_component")),
-    _vel_elem(isParamValid("vel") ? &getADMaterialProperty<RealVectorValue>("vel") : nullptr),
-    _vel_neighbor(isParamValid("vel") ? &getNeighborADMaterialProperty<RealVectorValue>("vel")
-                                      : nullptr),
+    _vel(isParamValid("vel") ? &getFunctorMaterialProperty<ADRealVectorValue>("vel") : nullptr),
     _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
-    _smooth_porosity(getParam<bool>("smooth_porosity"))
+    _smooth_porosity(getParam<bool>("smooth_porosity")),
+    _cd_limiter()
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
@@ -68,39 +65,27 @@ PINSFVMomentumDiffusion::computeQpResidual()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   // Compute the diffusion driven by the velocity gradient
-  // Interpolate viscosity divided by porosity on the face
-  ADReal mu_eps_face;
-  interpolate(Moose::FV::InterpMethod::Average,
-              mu_eps_face,
-              _mu_elem[_qp] / _eps[_qp],
-              _mu_neighbor[_qp] / _eps_neighbor[_qp],
-              *_face_info,
-              true);
+
+  const auto mu_face = _mu(std::make_tuple(_face_info, &_cd_limiter, true));
+  const auto eps_face = _eps(std::make_tuple(_face_info, &_cd_limiter, true));
 
   // Compute face superficial velocity gradient
   auto dudn = gradUDotNormal();
 
   // First term of residual
-  ADReal residual = mu_eps_face * dudn;
+  ADReal residual = mu_face / eps_face * dudn;
 
   if (_smooth_porosity)
   {
     // Get the face porosity gradient separately
     const auto & grad_eps_face = MetaPhysicL::raw_value(_eps_var->adGradSln(*_face_info));
 
-    ADRealVectorValue term_elem = _mu_elem[_qp] / _eps[_qp] / _eps[_qp] * grad_eps_face;
-    ADRealVectorValue term_neighbor =
-        _mu_neighbor[_qp] / _eps_neighbor[_qp] / _eps_neighbor[_qp] * grad_eps_face;
-    for (int i = 0; i < LIBMESH_DIM; i++)
-    {
-      term_elem(i) *= (*_vel_elem)[_qp](i);
-      term_neighbor(i) *= (*_vel_neighbor)[_qp](i);
-    }
+    ADRealVectorValue term_face = mu_face / (eps_face * eps_face) * grad_eps_face;
+    const auto vel_face = (*_vel)(std::make_tuple(_face_info, &_cd_limiter, true));
 
-    // Interpolate to get the face value
-    ADRealVectorValue term_face;
-    interpolate(
-        Moose::FV::InterpMethod::Average, term_face, term_elem, term_neighbor, *_face_info, true);
+    for (int i = 0; i < LIBMESH_DIM; i++)
+      term_face(i) *= vel_face(i);
+
     residual -= term_face * _normal;
   }
   return -residual;

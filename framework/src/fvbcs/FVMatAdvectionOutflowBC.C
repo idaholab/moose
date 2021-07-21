@@ -47,8 +47,8 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  _v = _vel(std::make_tuple(_face_info, nullptr, true));
+  const auto v = _vel(std::make_tuple(_face_info, nullptr, true));
   const auto adv_quant_boundary =
-      _adv_quant(std::make_tuple(_face_info, nullptr, _v * _face_info->normal() > 0));
-  return _normal * _v * adv_quant_boundary;
+      _adv_quant(std::make_tuple(_face_info, nullptr, v * _face_info->normal() > 0));
+  return _normal * v * adv_quant_boundary;
 }

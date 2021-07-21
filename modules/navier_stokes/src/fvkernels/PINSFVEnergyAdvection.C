@@ -38,19 +38,12 @@ ADReal
 PINSFVEnergyAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
-  ADReal adv_quant_interface;
 
   // Velocity interpolation
-  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+  this->interpolate(_velocity_interp_method, v);
 
-  // Interpolation of advected quantity
-  Moose::FV::interpolate(_advected_interp_method,
-                         adv_quant_interface,
-                         _adv_quant_elem[_qp],
-                         _adv_quant_neighbor[_qp],
-                         v,
-                         *_face_info,
-                         true);
+  const auto adv_quant_interface =
+      _adv_quant(std::make_tuple(_face_info, _limiter.get(), v * _face_info->normal() > 0));
 
   return _normal * v * adv_quant_interface;
 }

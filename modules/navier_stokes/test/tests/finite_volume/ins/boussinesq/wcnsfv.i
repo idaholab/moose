@@ -1,4 +1,4 @@
-mu = 1
+mu = 1e-3
 rho = 'rho'
 k = 1
 cp = 1
@@ -22,10 +22,8 @@ hot_temp=${fparse rayleigh + cold_temp}
     xmax = 1
     ymin = 0
     ymax = 1
-    # nx = 32
-    # ny = 32
-    nx = 2
-    ny = 2
+    nx = 64
+    ny = 64
   []
 []
 
@@ -71,6 +69,9 @@ hot_temp=${fparse rayleigh + cold_temp}
     order = FIRST
     family = MONOMIAL
   []
+  [rho]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -101,6 +102,12 @@ hot_temp=${fparse rayleigh + cold_temp}
     function = 'T'
     execute_on = 'initial timestep_end'
     args = 'T'
+  []
+  [rho]
+    type = FunctorMatPropElementalAux
+    mat_prop = 'rho'
+    variable = 'rho'
+    execute_on = 'initial timestep_end'
   []
 []
 
@@ -154,7 +161,6 @@ hot_temp=${fparse rayleigh + cold_temp}
     gravity = '0 -1 0'
     rho = ${rho}
     momentum_component = 'x'
-    rho_functor_prop = true
   []
 
   [v_advection]
@@ -187,7 +193,6 @@ hot_temp=${fparse rayleigh + cold_temp}
     gravity = '0 -1 0'
     rho = ${rho}
     momentum_component = 'y'
-    rho_functor_prop = true
   []
 
   [temp_conduction]
@@ -210,17 +215,10 @@ hot_temp=${fparse rayleigh + cold_temp}
 []
 
 [FVBCs]
-  [top_x]
-    type = INSFVNoSlipWallBC
-    variable = u
-    boundary = 'top'
-    function = 'lid_function'
-  []
-
   [no_slip_x]
     type = INSFVNoSlipWallBC
     variable = u
-    boundary = 'left right bottom'
+    boundary = 'left right top bottom'
     function = 0
   []
 
@@ -257,8 +255,13 @@ hot_temp=${fparse rayleigh + cold_temp}
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'k cp alpha'
-    prop_values = '${k} ${cp} ${alpha}'
+    prop_names = 'k alpha'
+    prop_values = '${k} ${alpha}'
+  []
+  [const_functor]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'cp'
+    prop_values = '${cp}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial
@@ -287,9 +290,9 @@ hot_temp=${fparse rayleigh + cold_temp}
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      300                lu           NONZERO'
-  nl_rel_tol = 1e-12
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
+  nl_rel_tol = 1e-10
 []
 
 [Outputs]

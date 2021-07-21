@@ -34,27 +34,9 @@ ADReal
 PINSFVMassAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
-  ADReal face_rho;
-  Point normal;
 
-  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
-  if (onBoundary(*_face_info))
-  {
-    const auto ft = _face_info->faceType(_var.name());
-    const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
-    normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
-    face_rho = out_of_elem ? _rho(&_face_info->elem()) : _rho(_face_info->neighborPtr());
-  }
-  else
-  {
-    normal = _face_info->normal();
-    Moose::FV::interpolate(_advected_interp_method,
-                           face_rho,
-                           _rho(&_face_info->elem()),
-                           _rho(_face_info->neighborPtr()),
-                           v,
-                           *_face_info,
-                           true);
-  }
-  return normal * v * face_rho;
+  this->interpolate(_velocity_interp_method, v);
+  const auto rho_interface =
+      _rho(std::make_tuple(_face_info, _limiter.get(), v * _face_info->normal() > 0));
+  return _normal * v * rho_interface;
 }
