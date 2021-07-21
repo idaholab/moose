@@ -1,25 +1,26 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
+mu=1.1
+rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-  cache_face_values = true
-[]
+pressure_face_gradient_caching = true
+velocity_face_gradient_caching = true
+pressure_face_value_caching = true
+velocity_face_value_caching = true
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    dim = 2
+    dim = 3
     xmin = 0
-    xmax = 5
+    xmax = 10
     ymin = -1
     ymax = 1
-    nx = 50
-    ny = 16
+    zmin = -1
+    zmax = 1
+    nx = 15
+    ny = 5
+    nz = 5
   []
 []
 
@@ -31,16 +32,25 @@ velocity_interp_method='rc'
   [u]
     type = INSFVVelocityVariable
     initial_condition = 1
+    cache_face_gradients = ${velocity_face_gradient_caching}
+    cache_face_values = ${velocity_face_value_caching}
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 1e-6
+    cache_face_gradients = ${velocity_face_gradient_caching}
+    cache_face_values = ${velocity_face_value_caching}
+  []
+  [w]
+    type = INSFVVelocityVariable
+    initial_condition = 1e-6
+    cache_face_gradients = ${velocity_face_gradient_caching}
+    cache_face_values = ${velocity_face_value_caching}
   []
   [pressure]
     type = INSFVPressureVariable
-  []
-  [temperature]
-    type = INSFVEnergyVariable
+    cache_face_gradients = ${pressure_face_gradient_caching}
+    cache_face_values = ${pressure_face_value_caching}
   []
 []
 
@@ -54,6 +64,7 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
+    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -68,6 +79,7 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
+    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -80,7 +92,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    pressure = pressure
+    p = pressure
   []
 
   [v_advection]
@@ -93,6 +105,7 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
+    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -105,31 +118,33 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    pressure = pressure
+    p = pressure
   []
 
-  [energy_advection]
-    type = INSFVEnergyAdvection
-    variable = temperature
+  [w_advection]
+    type = INSFVMomentumAdvection
+    variable = w
+    advected_quantity = 'rhow'
     vel = 'velocity'
-    velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
     pressure = pressure
     u = u
     v = v
+    w = w
     mu = ${mu}
     rho = ${rho}
   []
-  [energy_diffusion]
+  [w_viscosity]
     type = FVDiffusion
-    coeff = ${k}
-    variable = temperature
+    variable = w
+    coeff = ${mu}
   []
-  [ambient_convection]
-    type = NSFVEnergyAmbientConvection
-    variable = temperature
-    T_ambient = 100
-    alpha = 'alpha'
+  [w_pressure]
+    type = INSFVMomentumPressure
+    variable = w
+    momentum_component = 'z'
+    p = pressure
   []
 []
 
@@ -146,58 +161,71 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [walls-u]
-    type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
-    variable = u
+  [inlet-w]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = w
     function = 0
+  []
+
+  [walls-u]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top bottom front back'
+    variable = u
   []
   [walls-v]
-    type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top bottom front back'
     variable = v
-    function = 0
   []
+  [walls-w]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top bottom front back'
+    variable = w
+  []
+
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = 0
   []
-  [inlet_t]
-    type = FVDirichletBC
-    boundary = 'left'
-    variable = temperature
-    value = 1
-  []
 []
 
 [Materials]
-  [const]
-    type = ADGenericConstantMaterial
-    prop_names = 'cp alpha'
-    prop_values = '${cp} 1'
-  []
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     v = 'v'
+    w = 'w'
     pressure = 'pressure'
     rho = ${rho}
-    temperature = 'temperature'
+  []
+[]
+
+[Postprocessors]
+  [physical]
+    type = MemoryUsage
+    mem_type = physical_memory
+    value_type = total
+    # by default MemoryUsage reports the peak value for the current timestep
+    # out of all samples that have been taken (at linear and non-linear iterations)
+    execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'asm      100               '
   line_search = 'none'
-  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-8
 []
 
 [Outputs]
+  hide = 'physical'
+  perf_graph = true
   exodus = true
   csv = true
 []

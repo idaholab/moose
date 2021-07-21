@@ -14,6 +14,7 @@ velocity_interp_method='rc'
 
 [GlobalParams]
   two_term_boundary_expansion = true
+  cache_face_values = true
 []
 
 [Problem]

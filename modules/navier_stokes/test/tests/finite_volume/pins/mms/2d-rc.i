@@ -46,6 +46,7 @@ velocity_interp_method='rc'
 [GlobalParams]
   porosity = porosity
   two_term_boundary_expansion = true
+  cache_face_values = true
 []
 
 [FVKernels]
