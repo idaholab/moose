@@ -34,14 +34,10 @@ FVMatAdvection::validParams()
 
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
-    _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant_elem(isParamValid("advected_quantity")
-                        ? getADMaterialProperty<Real>("advected_quantity").get()
-                        : _u_elem),
-    _adv_quant_neighbor(isParamValid("advected_quantity")
-                            ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
-                            : _u_neighbor)
+    _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
+    _adv_quant(isParamValid("advected_quantity")
+                   ? getFunctorMaterialProperty<ADReal>("advected_quantity")
+                   : _var)
 {
   using namespace Moose::FV;
 
