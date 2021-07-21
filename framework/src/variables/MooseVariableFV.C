@@ -559,6 +559,29 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::getInternalFaceValue(
+    const MooseVariableFV<OutputType>::FaceArg & face) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  const Moose::FV::Limiter * const limiter = std::get<1>(face);
+  mooseAssert(limiter, "the limiter must be non-null");
+  const bool elem_is_upwind = std::get<2>(face);
+
+  const auto elem_value = getElemValue(&fi->elem());
+  mooseAssert(fi->neighborPtr(), "We're supposed to be on an internal face.");
+  const auto neighbor_value = getElemValue(fi->neighborPtr());
+  const auto & upwind_value = elem_is_upwind ? elem_value : neighbor_value;
+  const auto & downwind_value = elem_is_upwind ? neighbor_value : elem_value;
+  const auto & upwind_gradient =
+      elem_is_upwind ? adGradSln(&fi->elem()) : adGradSln(fi->neighborPtr());
+
+  return Moose::FV::interpolate(
+      *limiter, upwind_value, downwind_value, upwind_gradient, *fi, elem_is_upwind);
+}
+
+template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
                                                   const FaceInfo & fi,
@@ -1032,6 +1055,23 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 {
   _element_data->clearDofIndices();
   _neighbor_data->clearDofIndices();
+}
+
+template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::operator()(const MooseVariableFV<OutputType>::FaceArg & face) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi))
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(face);
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
 }
 
 template class MooseVariableFV<Real>;

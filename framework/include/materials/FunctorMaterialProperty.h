@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "FunctorInterface.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/remote_elem.h"
@@ -28,54 +29,15 @@ public:
 };
 
 template <typename T>
-class FunctorMaterialProperty : public FunctorPropertyValue
+class FunctorMaterialProperty : public FunctorPropertyValue, public GenericFunctor<T>
 {
 public:
-  FunctorMaterialProperty(const std::string & name) : FunctorPropertyValue(), _name(name) {}
-
-  using ElemFn = std::function<T(const Elem *)>;
-
-  template <typename PolymorphicLambda>
-  FunctorMaterialProperty<T> & setFunction(const MooseMesh & mesh,
-                                           const std::set<SubdomainID> & block_ids,
-                                           PolymorphicLambda my_lammy);
-
-  T operator()(const Elem * elem) const;
-
-private:
-  std::unordered_map<SubdomainID, ElemFn> _elem_functor;
-  std::string _name;
-};
-
-template <typename T>
-template <typename PolymorphicLambda>
-FunctorMaterialProperty<T> &
-FunctorMaterialProperty<T>::setFunction(const MooseMesh & mesh,
-                                        const std::set<SubdomainID> & block_ids,
-                                        PolymorphicLambda my_lammy)
-{
-  for (const auto block_id : block_ids)
+  FunctorMaterialProperty(const std::string & name)
+    : FunctorPropertyValue(), GenericFunctor<T>(name)
   {
-    if (block_id == Moose::ANY_BLOCK_ID)
-    {
-      const auto & inner_block_ids = mesh.meshSubdomains();
-      for (const auto inner_block_id : inner_block_ids)
-        _elem_functor.emplace(inner_block_id, my_lammy);
-    }
-    else
-      _elem_functor.emplace(block_id, my_lammy);
   }
 
-  return *this;
-}
-
-template <typename T>
-T
-FunctorMaterialProperty<T>::operator()(const Elem * const elem) const
-{
-  mooseAssert(elem && elem != libMesh::remote_elem,
-              "The element must be non-null and non-remote in functor material properties");
-  auto it = _elem_functor.find(elem->subdomain_id());
-  mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
-  return it->second(elem);
-}
+  using typename GenericFunctor<T>::FaceArg;
+  using typename GenericFunctor<T>::FunctorType;
+  using typename GenericFunctor<T>::FunctorReturnType;
+};
