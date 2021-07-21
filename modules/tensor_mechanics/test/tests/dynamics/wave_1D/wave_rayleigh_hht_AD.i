@@ -57,8 +57,8 @@
 [Kernels]
   [./DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    alpha = -0.3
-    zeta = 0.1
+    hht_alpha = -0.3
+    stiffness_damping_coefficient = 0.1
     use_automatic_differentiation = true
   [../]
   [./inertia_x]

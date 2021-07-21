@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2021.07.13" %}
+{% set version = "2021.07.14" %}
 
 package:
   name: moose-tools
@@ -36,7 +36,7 @@ requirements:
     - libcblas           {{ libcblas }}       # [osx]
     - liblapack          {{ liblapack }}      # [osx]
     - libopenblas        {{ libopenblas }}    # [osx]
-    - vtk                {{ vtk}}
+    - vtk                {{ vtk }}
     - numpy              {{ numpy }}
     - pyqt               {{ pyqt }}
     - matplotlib         {{ matplotlib }}

@@ -383,7 +383,11 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: install_libs install_bin install_harness install_exodiff
+install: install_libs install_bin install_harness install_exodiff install_adreal_monolith
+
+install_adreal_monolith: ADRealMonolithic.h
+	@ mkdir -p $(moose_include_dir)
+	@cp -f $< $(moose_include_dir)/
 
 install_exodiff: all
 	@echo "Installing exodiff"
@@ -485,9 +489,9 @@ clobberall: clobber
           echo $$item >> .clang_complete;  \
         done
 
-ADRealMonolithic.h:
+ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@echo "Building monolithic ADReal header for JIT compilation"
-	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $(MOOSE_DIR)/framework/include/utils/ADReal.h > ADRealMonolithic.h
+	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands.json:

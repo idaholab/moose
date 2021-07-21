@@ -1,29 +1,21 @@
-# Test for rayleigh damping implemented using HHT time integration
-#
+# Test for  Newmark time integration
+
 # The test is for an 1D bar element of  unit length fixed on one end
 # with a ramped pressure boundary condition applied to the other end.
-# zeta and eta correspond to the stiffness and mass proportional rayleigh damping
-# alpha, beta and gamma are HHT time integration parameters
+# beta and gamma are Newmark time integration parameters
 # The equation of motion in terms of matrices is:
 #
-# M*accel + (eta*M+zeta*K)*[(1+alpha)vel-alpha vel_old]
-# + alpha*(K*disp - K*disp_old) + K*disp = P(t+alpha dt)*Area
+# M*accel + K*disp = P*Area
 #
 # Here M is the mass matrix, K is the stiffness matrix, P is the applied pressure
 #
 # This equation is equivalent to:
 #
-# density*accel + eta*density*[(1+alpha)vel-alpha vel_old]
-# + zeta*[(1+alpha)*d/dt(Div stress)- alpha*d/dt(Div stress_old)]
-# + alpha *(Div stress - Div stress_old) +Div Stress= P(t+alpha dt)
+# density*accel + Div Stress = P
 #
-# The first two terms on the left are evaluated using the Inertial force kernel
-# The next three terms on the left involving zeta and alpha are evaluated using
-# the DynamicStressDivergenceTensors Kernel
+# The first term on the left is evaluated using the Inertial force kernel
+# The last term on the left is evaluated using StressDivergenceTensors
 # The residual due to Pressure is evaluated using Pressure boundary condition
-#
-# The system will come to steady state slowly after the pressure becomes constant.
-# Alpha equal to zero will result in Newmark integration.
 
 [Mesh]
   type = GeneratedMesh
@@ -39,28 +31,11 @@
   zmax = 0.1
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [AuxVariables]
-  [vel_x]
-  []
-  [accel_x]
-  []
-  [vel_y]
-  []
-  [accel_y]
-  []
-  [vel_z]
-  []
-  [accel_z]
-  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -69,85 +44,33 @@
     order = CONSTANT
     family = MONOMIAL
   []
-
 []
 
-[Kernels]
-  [DynamicTensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    stiffness_damping_coefficient = 0.1
-    hht_alpha = 0.11
+[Modules/TensorMechanics/DynamicMaster]
+  [all]
+    add_variables = true
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    strain = SMALL
+    density = 7750
   []
-  [inertia_x]
-    type = InertialForce
-    variable = disp_x
-    eta = 0.1
-    alpha = 0.11
-  []
-  [inertia_y]
-    type = InertialForce
-    variable = disp_y
-    eta = 0.1
-    alpha = 0.11
-  []
-  [inertia_z]
-    type = InertialForce
-    variable = disp_z
-    eta = 0.1
-    alpha = 0.11
-  []
-
 []
 
 [AuxKernels]
-  [accel_x] # These auxkernels are only to check output
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = accel_x
-    first = false
-  []
-  [accel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = accel_y
-    first = false
-  []
-  [accel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = accel_z
-    first = false
-  []
-  [vel_x]
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = vel_x
-  []
-  [vel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = vel_y
-  []
-  [vel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = vel_z
-  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
-    index_i = 1
+    index_i = 0
     index_j = 1
   []
   [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
-    index_i = 1
+    index_i = 0
     index_j = 1
   []
-
 []
 
 [BCs]
@@ -185,9 +108,8 @@
     [Side1]
       boundary = bottom
       function = pressure
-      displacements = 'disp_x disp_y disp_z'
       factor = 1
-      hht_alpha = 0.11
+      displacements = 'disp_x disp_y disp_z'
     []
   []
 []
@@ -199,25 +121,10 @@
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
   []
-
-  [strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  []
-
   [stress]
     type = ComputeLinearElasticStress
     block = 0
   []
-
-  [density]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names = 'density'
-    prop_values = '7750'
-  []
-
 []
 
 [Executioner]
@@ -225,9 +132,6 @@
   start_time = 0
   end_time = 2
   dt = 0.1
-
-  # Time integrator scheme
-  scheme = "newmark-beta"
 []
 
 [Functions]
@@ -266,10 +170,10 @@
     type = ElementAverageValue
     variable = strain_yy
   []
+
 []
 
 [Outputs]
-  file_base = 'rayleigh_hht_out'
   exodus = true
   perf_graph = true
 []

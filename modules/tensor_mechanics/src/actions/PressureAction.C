@@ -35,7 +35,12 @@ PressureAction::validParams()
                                                 "The save_in variables for z displacement");
 
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
-  params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
+  params.addParam<Real>("hht_alpha",
+                        0,
+                        "alpha parameter for mass dependent numerical damping induced "
+                        "by HHT time integration scheme");
+  params.addDeprecatedParam<Real>(
+      "alpha", "alpha parameter for HHT time integration", "Please use hht_alpha");
   params.addParam<FunctionName>("function", "The function that describes the pressure");
   params.addParam<bool>("use_automatic_differentiation",
                         false,
@@ -75,6 +80,9 @@ PressureAction::act()
     InputParameters params = _factory.getValidParams(kernel_name);
     params.applyParameters(parameters(), {"factor"});
     params.set<bool>("use_displaced_mesh") = true;
+    params.set<Real>("alpha") =
+        isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
+
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
