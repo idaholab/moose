@@ -49,8 +49,6 @@ INSFVWallFunctionBC::validParams()
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addParam<Real>("rho", "fluid density");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
-  // params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid
-  // walls");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -107,15 +105,9 @@ INSFVWallFunctionBC::computeQpResidual()
 
   // Compute the shear stress component for this momentum equation
   if (_axis_index == 0)
-  {
-    return tau * parallel_dir(0);
-  }
-  else if (_axis_index == 1)
-  {
-    return tau * parallel_dir(1);
-  }
-  else
-  {
-    return tau * parallel_dir(2);
-  }
+     return tau * parallel_dir(0);
+   else if (_axis_index == 1)
+     return tau * parallel_dir(1);
+   else
+     return tau * parallel_dir(2);
 }

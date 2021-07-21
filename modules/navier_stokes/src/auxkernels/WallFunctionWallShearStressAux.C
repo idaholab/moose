@@ -67,6 +67,24 @@ WallFunctionWallShearStressAux::WallFunctionWallShearStressAux(const InputParame
     _mu(getADMaterialProperty<Real>("mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
+  #ifndef MOOSE_GLOBAL_AD_INDEXING
+    mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+               "configure script in the root MOOSE directory with the configure option "
+               "'--with-ad-indexing-type=global'");
+  #endif
+
+    if (!_u_var)
+      paramError("u", "the u velocity must be an INSFVVelocityVariable.");
+
+    if (_dim >= 2 && !_v_var)
+      paramError("v",
+                 "In two or more dimensions, the v velocity must be supplied and it must be an "
+                 "INSFVVelocityVariable.");
+
+    if (_dim >= 3 && !params.isParamValid("w"))
+      paramError("w",
+                 "In three-dimensions, the w velocity must be supplied and it must be an "
+                 "INSFVVelocityVariable.");
 }
 
 Real
