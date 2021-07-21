@@ -329,10 +329,17 @@ public:
   {
     return _element_data->adSln();
   }
-
+  const ADTemplateVariableValue<OutputType> & adSlnAvg() const override
+  {
+    return _element_data->adSlnAvg();
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const override
+  {
+    return _element_data->adGradSlnAvg();
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -348,9 +355,17 @@ public:
   {
     return _neighbor_data->adSln();
   }
+  const ADTemplateVariableValue<OutputType> & adSlnAvgNeighbor() const override
+  {
+    return _neighbor_data->adSlnAvg();
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
   {
     return _neighbor_data->adGradSln();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnAvgNeighbor() const override
+  {
+    return _neighbor_data->adGradSlnAvg();
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
   {
@@ -457,6 +472,7 @@ public:
   /// Actually compute variable values from the solution vectors
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
+  virtual void computeFaceValues(const FaceInfo & fi) override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
