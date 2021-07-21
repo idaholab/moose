@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataFV.h"
+#include "FunctorInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -49,7 +50,7 @@ class NumericVector;
 /// RealVectorValue     RealVectorValue       Real
 /// RealEigenVector      Real                  RealEigenVector
 template <typename OutputType>
-class MooseVariableFV : public MooseVariableField<OutputType>
+class MooseVariableFV : public MooseVariableField<OutputType>, public FunctorInterface<ADReal>
 {
 public:
   using OutputGradient = typename MooseVariableField<OutputType>::OutputGradient;
@@ -436,7 +437,9 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
-  ADReal operator()(const Elem * elem) const { return getElemValue(elem); }
+  ADReal operator()(const Elem * const & elem) const override final { return getElemValue(elem); }
+  ADReal operator()(
+      const std::pair<const FaceInfo *, const Moose::FV::Limiter *> & face) const override final;
 
   /**
    * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor

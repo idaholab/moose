@@ -1034,6 +1034,22 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
   _neighbor_data->clearDofIndices();
 }
 
+template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::operator()(const FaceInfo * const fi) const
+{
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi))
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(fi->neighborPtr(), *fi, (*this)(&fi->elem()));
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable
