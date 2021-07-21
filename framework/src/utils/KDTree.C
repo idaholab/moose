@@ -24,7 +24,7 @@ KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
 }
 
 void
-KDTree::neighborSearch(Point & query_point,
+KDTree::neighborSearch(const Point & query_point,
                        unsigned int patch_size,
                        std::vector<std::size_t> & return_index)
 {
@@ -33,7 +33,7 @@ KDTree::neighborSearch(Point & query_point,
 }
 
 void
-KDTree::neighborSearch(Point & query_point,
+KDTree::neighborSearch(const Point & query_point,
                        unsigned int patch_size,
                        std::vector<std::size_t> & return_index,
                        std::vector<Real> & return_dist_sqr)
@@ -51,7 +51,7 @@ KDTree::neighborSearch(Point & query_point,
 }
 
 void
-KDTree::radiusSearch(Point & query_point,
+KDTree::radiusSearch(const Point & query_point,
                      Real radius,
                      std::vector<std::pair<std::size_t, Real>> & indices_dist)
 {
