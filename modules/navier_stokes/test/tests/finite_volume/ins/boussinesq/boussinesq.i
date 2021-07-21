@@ -151,7 +151,7 @@ temp_ref=${fparse hot_temp / 2.}
     momentum_component = 'x'
   []
   [u_gravity]
-    type = INSFVMomentumGravity
+    type = NSFVMomentumGravity
     variable = u
     gravity = '0 -1 0'
     rho = ${rho}
@@ -192,7 +192,7 @@ temp_ref=${fparse hot_temp / 2.}
     momentum_component = 'y'
   []
   [v_gravity]
-    type = INSFVMomentumGravity
+    type = NSFVMomentumGravity
     variable = v
     gravity = '0 -1 0'
     rho = ${rho}
