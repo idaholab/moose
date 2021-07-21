@@ -99,6 +99,46 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 }
 
 template <>
+const FunctorMaterialProperty<Real> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {
+    auto & prop = _mi_subproblem.declareFunctorProperty<Real>(name);
+    prop.setFunction(_mi_subproblem.mesh(),
+                     _mi_block_ids,
+                     [real_value](auto /*geom_quantity*/) -> Real { return real_value; });
+    return &prop;
+  }
+
+  return nullptr;
+}
+
+template <>
+const FunctorMaterialProperty<ADReal> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {
+    auto & prop = _mi_subproblem.declareFunctorProperty<ADReal>(name);
+    prop.setFunction(_mi_subproblem.mesh(),
+                     _mi_block_ids,
+                     [real_value](auto /*geom_quantity*/) -> ADReal { return real_value; });
+    return &prop;
+  }
+
+  return nullptr;
+}
+
+template <>
 const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 {
