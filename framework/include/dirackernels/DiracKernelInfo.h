@@ -100,6 +100,6 @@ protected:
   /// adaptivity.
   std::unique_ptr<PointLocatorBase> _point_locator;
 
-  /// threshold distance squared below which two points are considered identical
-  const Real _point_equal_distance_sq;
+  /// threshold distance below which two points are considered identical
+  const Real _point_equal_distance;
 };
