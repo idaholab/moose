@@ -31,7 +31,8 @@ public:
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
   virtual void computeADTimeDerivatives(DualReal & ad_u_dot,
-                                        const dof_id_type & dof) const override;
+                                        const dof_id_type & dof,
+                                        DualReal & ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:

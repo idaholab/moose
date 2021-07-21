@@ -321,6 +321,10 @@ public:
   {
     return _element_data->adUDot();
   }
+  const ADTemplateVariableValue<OutputType> & adUDotDot() const override
+  {
+    return _element_data->adUDotDot();
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -338,6 +342,10 @@ public:
   const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override
   {
     return _neighbor_data->adUDot();
+  }
+  const ADTemplateVariableValue<OutputType> & adUDotDotNeighbor() const override
+  {
+    return _neighbor_data->adUDotDot();
   }
 
   /// Initializes/computes variable values from the solution vectors for the

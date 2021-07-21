@@ -2,11 +2,10 @@
 # This is a simple test with a time-dependent problem
 # demonstrating the use of the TimeIntegrator system.
 #
-# Testing that the first and second time derivatives
-# are calculated correctly using the Central Difference
-# method
+# Testing that the second time derivative is calculated
+# correctly using the Central Difference method for an AD
+# variable.
 #
-# @Requirement F1.30
 ###########################################################
 
 [Mesh]
@@ -35,26 +34,26 @@
 
 [Kernels]
   [./ie]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = u
   [../]
 
   [./diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   [../]
 []
 
 [BCs]
   [./left]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = u
     boundary = 'left'
     function = forcing_fn
     preset = false
   [../]
   [./right]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = u
     boundary = 'right'
     function = forcing_fn
@@ -75,16 +74,8 @@
 []
 
 [Postprocessors]
-  [./udot]
-    type = ElementAverageTimeDerivative
-    variable = u
-  [../]
   [./udotdot]
     type = ElementAverageSecondTimeDerivative
-    variable = u
-  [../]
-  [./u]
-    type = ElementAverageValue
     variable = u
   [../]
 []
