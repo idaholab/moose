@@ -231,6 +231,7 @@
 [VectorPostprocessors]
   [line]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     sort_by = x
     start_point = '0 0 0'
     end_point = '2000 0 0'

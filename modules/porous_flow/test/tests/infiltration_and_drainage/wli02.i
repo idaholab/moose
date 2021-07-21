@@ -135,6 +135,7 @@
 [VectorPostprocessors]
   [swater]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     variable = SWater
     start_point = '-1000 0 0'
     end_point = '0 0 0'
