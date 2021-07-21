@@ -278,3 +278,18 @@ MooseObject::paramInfo(const std::string & param, Args... args) const
 {
   mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
 }
+
+#define mooseDoOnceOnFlag(do_this, exec_flag)                                                      \
+  do                                                                                               \
+  {                                                                                                \
+    static std::map<std::pair<std::string, unsigned int>, unsigned int> did_this_on_exec_map;      \
+    const auto key = std::make_pair(name(), __LINE__);                                             \
+    if (!did_this_on_exec_map.count(key))                                                          \
+      did_this_on_exec_map[key] = std::numeric_limits<unsigned int>::max();                        \
+    auto & did_this_on_exec = did_this_on_exec_map[key];                                           \
+    if (Moose::show_multiple || _app.executionCount(exec_flag) != did_this_on_exec)                \
+    {                                                                                              \
+      did_this_on_exec = _app.executionCount(exec_flag);                                           \
+      do_this;                                                                                     \
+    }                                                                                              \
+  } while (0)

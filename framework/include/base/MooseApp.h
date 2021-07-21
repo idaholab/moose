@@ -827,6 +827,20 @@ public:
    */
   virtual bool errorOnJacobianNonzeroReallocation() const { return false; }
 
+  /**
+   * Appends to the execution count (obtained using executionCount()) for the flag \p exec_type.
+   */
+  void appendExecution(const ExecFlagType & exec_type) { ++_exec_counts[exec_type]; }
+  /**
+   * \returns The number of times the flag \p exec_type was executed.
+   *
+   * NOTE: This does require that you keep track of executions using appendExecution().
+   */
+  unsigned int executionCount(const ExecFlagType & exec_type) const
+  {
+    return _exec_counts.count(exec_type) ? _exec_counts.at(exec_type) : 0;
+  }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -1124,6 +1138,9 @@ private:
 
   /// Memory profiling
   bool _heap_profiling = false;
+
+  /// Mapping for how many times an exec flag has been executed
+  std::map<ExecFlagType, unsigned int> _exec_counts;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
