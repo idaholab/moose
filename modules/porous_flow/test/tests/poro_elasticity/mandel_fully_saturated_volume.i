@@ -1,7 +1,6 @@
 # Mandel's problem of consolodation of a drained medium
 # Using the FullySaturatedDarcyBase and FullySaturatedFullySaturatedMassTimeDerivative kernels
 # with multiply_by_density = false, so that this problem becomes linear
-# Note the use of consistent_with_displaced_mesh = false in the calculation of volumetric strain
 #
 # A sample is in plane strain.
 # -a <= x <= a
@@ -236,7 +235,6 @@
   []
   [vol_strain]
     type = PorousFlowVolumetricStrain
-    consistent_with_displaced_mesh = false
   []
   [ppss]
     type = PorousFlow1PhaseFullySaturated

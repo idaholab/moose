@@ -63,7 +63,7 @@ def expectedP(t, z):
 
 def get_moose_results(fn):
     f = open(fn, 'r')
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     f.close()
     t = [d[0] for d in data]
     u = [(-d[12] - initial_displacement) / (final_displacement - initial_displacement) for d in data]

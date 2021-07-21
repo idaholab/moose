@@ -244,14 +244,12 @@
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
   [total_heat]
     type = PorousFlowHeatEnergy
     phase = 0
     execute_on = 'timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
   [err_T]

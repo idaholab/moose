@@ -144,7 +144,7 @@ PorousFlowBasicTHM::addMaterials()
   if ((_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
        _deps.dependsOn(_included_objects, "volumetric_strain_nodal")) &&
       _mechanical)
-    addVolumetricStrainMaterial(_coupled_displacements, false);
+    addVolumetricStrainMaterial(_coupled_displacements, _base_name);
 
   // Relative permeability might be needed by Darcy-velocity Aux, so add a material
   // setting kr=1

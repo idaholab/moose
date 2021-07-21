@@ -26,7 +26,7 @@ def moose(fn):
         subsample = [np.power(10, log10_max_val * i / float(num_pts_displayed - 1)) for i in range(num_pts_displayed)] # 1 to max_val in logarithmic progression
         subsample = sorted(list(set([0] + [int(np.round(s)) for s in subsample])))  # 0 to len(data)-1 in log progression
         data = [data[i] for i in subsample]
-        data = ([d[0] for d in data], [d[6] for d in data], [d[11] for d in data])
+        data = ([d[9] for d in data], [d[5] for d in data], [d[3] for d in data])
         f.close()
     except:
         sys.stderr.write("Cannot read " + fn + ", or it contains erroneous data\n")
@@ -36,6 +36,7 @@ def moose(fn):
 
 moose_timesteps = ["0062", "0098", "0135", "0231"]
 moose_timesteps = ["0078", "0204", "0412", "0745"]
+moose_timesteps = ["0078", "0179", "0386", "0662"]
 moosePTSUSS = [moose("2D_c_csv_ptsuss_" + ts + ".csv") for ts in moose_timesteps]
 
 plt.figure()

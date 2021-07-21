@@ -30,12 +30,6 @@
 # porepressure = 10*(s*t - 0.3*0.612245*s*t) = 8.163265*s*t
 # stress_xx = (2 - 2*1.5/3)*0.612245*s*t = 0.612245*s*t
 # stress_zz = (2 + 4*shear/3)*0.612245*s*t = 2.44898*s*t
-#
-# Finally, note that the volumetric strain has
-# consistent_with_displaced_mesh = false
-# which is needed when using the FullySaturated version of the Kernels
-# in order to generate the above results
-
 [Mesh]
   type = GeneratedMesh
   dim = 3

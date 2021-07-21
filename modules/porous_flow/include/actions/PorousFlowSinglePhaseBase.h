@@ -76,4 +76,7 @@ protected:
 
   /// Unit used for time
   const MooseEnum _time_unit;
+
+  /// base_name used in the TensorMechanics strain calculator
+  const std::string _base_name;
 };

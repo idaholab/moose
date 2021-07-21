@@ -99,6 +99,9 @@ PorousFlowSinglePhaseBase::validParams()
       "The unit of time used everywhere in the input file except for in the "
       "FluidProperties-module objects.  This can be set to the non-default value only for "
       "fluid_properties_type = PorousFlowSingleComponentFluid");
+  params.addParam<std::string>("base_name",
+                               "The base_name used in the TensorMechanics strain calculator.  This "
+                               "is only relevant for mechanically-coupled models.");
   params.addClassDescription("Base class for single-phase simulations");
   return params;
 }
@@ -119,7 +122,8 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
     _save_component_rate_in(getParam<std::vector<AuxVariableName>>("save_component_rate_in")),
     _temperature_unit(getParam<MooseEnum>("temperature_unit")),
     _pressure_unit(getParam<MooseEnum>("pressure_unit")),
-    _time_unit(getParam<MooseEnum>("time_unit"))
+    _time_unit(getParam<MooseEnum>("time_unit")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
   if (_thermal && _temperature_var.size() != 1)
     mooseError("PorousFlowSinglePhaseBase: You need to specify a temperature variable to perform "
@@ -263,6 +267,8 @@ PorousFlowSinglePhaseBase::addKernels()
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
       params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
+      if (_base_name != "")
+        params.set<std::string>("base_name") = _base_name;
       _problem->addKernel(kernel_type, kernel_name, params);
     }
   }

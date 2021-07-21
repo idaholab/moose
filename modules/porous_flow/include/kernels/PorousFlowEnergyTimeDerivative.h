@@ -43,6 +43,15 @@ protected:
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
+  /// base name used in the Tensor Mechanics strain calculator
+  const std::string _base_name;
+
+  /// Whether there is a Material called _base_name_total_strain
+  const bool _has_total_strain;
+
+  /// Old value of total strain calculated by a Tensor Mechanics strain calculator, if it exists, otherwise nullptr
+  const MaterialProperty<RankTwoTensor> * const _total_strain_old;
+
   /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
   const MaterialProperty<Real> & _porosity;
 

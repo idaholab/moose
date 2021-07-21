@@ -1,8 +1,6 @@
 # Terzaghi's problem of consolodation of a drained medium
 # The FullySaturated Kernels are used, with multiply_by_density = false
 # so that this becomes a linear problem with constant Biot Modulus
-# Also, since the FullySaturated Kernels are used, we have to
-# use consistent_with_displaced_mesh = false in the calculation of volumetric strain
 #
 # A saturated soil sample sits in a bath of water.
 # It is constrained on its sides, and bottom.
@@ -203,7 +201,6 @@
   []
   [vol_strain]
     type = PorousFlowVolumetricStrain
-    consistent_with_displaced_mesh = false
   []
   [ppss]
     type = PorousFlow1PhaseFullySaturated

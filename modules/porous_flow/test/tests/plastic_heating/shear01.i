@@ -33,6 +33,7 @@
   [energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temperature
+    base_name = non_existent
   []
   [phe]
     type = PorousFlowPlasticHeatEnergy

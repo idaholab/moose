@@ -165,11 +165,11 @@ protected:
   /**
    * Adds a quadpoint volumetric strain material
    * @param displacements the names of the displacement variables
-   * @param consistent_with_displaced_mesh The volumetric strain should be consistent with the
+   * @param base_name The base_name used in the TensorMechanics strain calculator
    * displaced mesh
    */
   void addVolumetricStrainMaterial(const std::vector<VariableName> & displacements,
-                                   bool consistent_with_displaced_mesh);
+                                   const std::string & base_name);
 
   /**
    * Adds a single-component fluid Material

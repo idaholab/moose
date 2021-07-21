@@ -9,6 +9,8 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
+This page describes mass lumping.  There is an added complication in mechanically-coupled systems that involve mesh deformation, and [another page](porous_flow/time_derivative.md) describes the numerical implementation in such cases.
+
 Consider here just the fluid-flow equation, as the heat-energy equation is analogous.  The
 time-derivative term is discretised as
 

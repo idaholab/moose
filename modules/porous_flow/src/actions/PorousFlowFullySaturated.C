@@ -172,6 +172,8 @@ PorousFlowFullySaturated::addKernels()
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("multiply_by_density") = _multiply_by_density;
     params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
+    if (_base_name != "")
+      params.set<std::string>("base_name") = _base_name;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -317,7 +319,7 @@ PorousFlowFullySaturated::addMaterials()
 
   if (_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
       _deps.dependsOn(_included_objects, "volumetric_strain_nodal"))
-    addVolumetricStrainMaterial(_coupled_displacements, true);
+    addVolumetricStrainMaterial(_coupled_displacements, _base_name);
 
   // Relative permeability might be needed by Darcy-velocity Aux, so add a material
   // setting kr=1
