@@ -305,4 +305,62 @@ can be combined with a `ConstantAux` to model a mixing length that is
 proportional to the wall-distance in the near-wall region and constant
 elsewhere.
 
+## Wall Function Boundary Condition for Velocity
+
+In wall-bounded flows, the velocity gradients present in the near wall region
+are quite steep. Therefore, the mesh resolution needed to capture these
+gradients can become expensive. To economize computer time and storage, wall
+functions have been proposed, which are equations empirically derived to satisfy
+the physics in the near wall region under certain assumptions.
+
+Experimental and dimensional analysis shows that for high $y^+$ values
+($y^+>30$) the wall shear stress $\tau_w$ is related to the mean velocity
+parallel to the wall through the so-called logarithmic law of the wall:
+[!citep](moukalled2016_ch17) [!citep](launder1983numerical)
+
+\begin{equation}
+v^{+}_t = \frac{1}{\kappa} ln(Ey^+)
+\end{equation}
+
+where:
+
+- $v_t ^+ = \frac{|v_t|}{v_{\tau}}$ is the dimensionless wall-tangential velocity component.
+- $v_t$ is the wall-tangential velocity component at the centroid of the adjacent cell to the wall.
+- $v_{\tau} = \sqrt{\frac{|\tau_w|}{\rho}}$ is the friction velocity.
+- $y^+ = \frac{y_d v_{\tau}}{\nu}$ is the dimensionless wall distance
+- $\kappa$ is the von Karman constant
+- $E$ is the log law offset
+
+The log law offset is set for smooth walls to a value of 9.0
+[!citep](launder1983numerical).Theoretically, in the viscous sublayer for
+low $y^+$ values ($y^+<5$), the functional form of the velocity is linear
+ $v^{+}_t=y^+$. The log law offset is obtained by matching the viscous sublayer
+ profile with the logarithmic law of the wall at $y^+=11.25$.
+ [!citep](launder1983numerical). Rough walls are not currently supported.
+  Nonetheless, this could be done through a modification of the log law offset.
+
+The logarithmic law of the wall provides an implicit equation for the magnitude
+of the wall shear stress. The orientation of the wall shear stress is dictated
+by the orientation of the tangential velocity, which is parallel to the wall.
+Its sense is opposite to the velocity's sense. Its implementation is present in
+[INSFVWallFunctionBC](source/fvbcs/INSFVWallFunctionBC.md).
+
+This shear stress is used in solving the momentum equation by invoking its
+value as a flux source term. The second condition needed is the
+non-penetrability of the velocity through the wall, such that the mass flux
+through that face is zero [!citep](segal1993isnas).
+
+The location of the first cell centroid must be such that $y^+>11.25$. Auxiliary
+Kernel [WallFunctionYPlusAux](source/auxkernels/WallFunctionYPlusAux.md) can
+be used to obtain the $y^+$ value. Another Auxiliary Kernel allows to obtain the
+wall shear stress, [WallFunctionWallShearStressAux](source/auxkernels/WallFunctionWallShearStressAux.md).
+
+This standard wall function was originally calibrated for fully developed
+turbulent flows in steady state, in absence of an external force and an adverse
+pressure gradient. It may not provide accurate results under separation,
+recirculation or low Reynolds number flows.
+
+
+
+
 !bibtex bibliography

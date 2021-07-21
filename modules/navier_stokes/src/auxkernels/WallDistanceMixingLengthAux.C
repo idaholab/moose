@@ -64,5 +64,16 @@ WallDistanceMixingLengthAux::computeValue()
   }
 
   // Return the mixing length
-  return _von_karman_const * std::sqrt(min_sq_dist);
+  Real delta = 0.1; //arbitrary boundary layer thickness based on geometry
+  Real _von_karman_const_0 = 0.09;
+  if (std::sqrt(min_sq_dist)/delta <= _von_karman_const_0/_von_karman_const)
+  {
+    return _von_karman_const * std::sqrt(min_sq_dist);
+  }
+  else
+  {
+    return _von_karman_const_0 * delta;
+  }
+
+
 }
