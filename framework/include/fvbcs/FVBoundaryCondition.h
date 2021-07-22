@@ -70,6 +70,8 @@ public:
    */
   const SubProblem & subProblem() const { return _subproblem; }
 
+  const MooseVariableFV<Real> & variable() const { return _var; }
+
 protected:
   MooseVariableFV<Real> & _var;
 
