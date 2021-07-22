@@ -49,6 +49,13 @@ InversePowerMethod::InversePowerMethod(const InputParameters & parameters)
     mooseError("eig_check_tol<0!");
   if (_l_tol < 0.0)
     paramError("l_tol", "l_tol<0!");
+
+  mooseDeprecated(
+      "'InversePowerMethod' executioner is deprecated in favor of 'Eigenvalue' executioner.\n",
+      "Few parameters such as 'bx_norm', 'k0', 'xdiff', 'max_power_iterations', "
+      "'min_power_iterations', 'eig_check_tol', 'sol_check_tol', and 'output_before_normalization' "
+      "are no longer supported.\n",
+      "However, 'Eigenvalue' executioner supports more solving options by interfacing SLEPc.\n");
 }
 
 void
