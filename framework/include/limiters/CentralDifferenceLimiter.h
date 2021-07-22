@@ -23,7 +23,14 @@ namespace FV
 class CentralDifferenceLimiter : public Limiter
 {
 public:
-  ADReal operator()(const ADReal & /*r_f*/) const override final { return 1; }
+  ADReal operator()(const ADReal &,
+                    const ADReal &,
+                    const ADRealVectorValue *,
+                    const RealVectorValue &) const override final
+  {
+    return 1;
+  }
+  bool constant() const override final { return true; }
 
   CentralDifferenceLimiter() = default;
 };

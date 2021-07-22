@@ -395,21 +395,19 @@ rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVec
  *
  * @return a pair where the first Real is c_upwind and the second Real is c_downwind
  */
-template <typename Scalar, typename Vector>
-std::pair<ADReal, ADReal>
+inline std::pair<ADReal, ADReal>
 interpCoeffs(const Limiter & limiter,
-             const Scalar & phi_upwind,
-             const Scalar & phi_downwind,
-             const Vector & grad_phi_upwind,
+             const ADReal & phi_upwind,
+             const ADReal & phi_downwind,
+             const ADRealVectorValue * const grad_phi_upwind,
              const FaceInfo & fi,
              const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
-  const auto r_f = rF(phi_upwind,
-                      phi_downwind,
-                      grad_phi_upwind,
-                      fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
-  const auto beta = limiter(r_f);
+  const auto beta = limiter(phi_upwind,
+                            phi_downwind,
+                            grad_phi_upwind,
+                            fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 
@@ -420,18 +418,16 @@ interpCoeffs(const Limiter & limiter,
 /**
  * Interpolates with a limiter
  */
-template <typename Scalar, typename Vector>
-ADReal
+inline ADReal
 interpolate(const Limiter & limiter,
-            const Scalar & phi_upwind,
-            const Scalar & phi_downwind,
-            const Vector & grad_phi_upwind,
+            const ADReal & phi_upwind,
+            const ADReal & phi_downwind,
+            const ADRealVectorValue * const grad_phi_upwind,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
   auto pr = interpCoeffs(limiter, phi_upwind, phi_downwind, grad_phi_upwind, fi, fi_elem_is_upwind);
   return pr.first * phi_upwind + pr.second * phi_downwind;
 }
-
 }
 }

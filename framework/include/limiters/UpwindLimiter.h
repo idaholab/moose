@@ -22,7 +22,14 @@ namespace FV
 class UpwindLimiter : public Limiter
 {
 public:
-  ADReal operator()(const ADReal & /*r_f*/) const override final { return 0; }
+  ADReal operator()(const ADReal &,
+                    const ADReal &,
+                    const ADRealVectorValue *,
+                    const RealVectorValue &) const override final
+  {
+    return 0;
+  }
+  bool constant() const override final { return true; }
 
   UpwindLimiter() = default;
 };

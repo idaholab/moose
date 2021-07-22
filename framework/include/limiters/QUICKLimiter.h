@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Limiter.h"
+#include "FVUtils.h"
 
 namespace Moose
 {
@@ -22,7 +23,17 @@ namespace FV
 class QUICKLimiter : public Limiter
 {
 public:
-  ADReal operator()(const ADReal & r_f) const override final { return (3. + r_f) / 4.; }
+  ADReal operator()(const ADReal & phi_upwind,
+                    const ADReal & phi_downwind,
+                    const ADRealVectorValue * grad_phi_upwind,
+                    const RealVectorValue & dCD) const override final
+  {
+    mooseAssert(grad_phi_upwind, "min-mod limiter requires a gradient");
+    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
+
+    return (3. + r_f) / 4.;
+  }
+  bool constant() const override final { return false; }
 
   QUICKLimiter() = default;
 };

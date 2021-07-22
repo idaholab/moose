@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADReal.h"
+#include "MooseTypes.h"
 #include <memory>
 
 class MooseEnum;
@@ -40,7 +41,11 @@ public:
    * Defines the slope limiter function $\beta(r_f)$ where $r_f$ represents the ratio of upstream to
    * downstream gradients
    */
-  virtual ADReal operator()(const ADReal & r_f) const = 0;
+  virtual ADReal operator()(const ADReal & phi_upwind,
+                            const ADReal & phi_downwind,
+                            const ADRealVectorValue * grad_phi_upwind,
+                            const RealVectorValue & dCD) const = 0;
+  virtual bool constant() const = 0;
 
   Limiter() = default;
 

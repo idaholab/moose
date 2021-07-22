@@ -574,11 +574,16 @@ MooseVariableFV<OutputType>::getInternalFaceValue(
   const auto neighbor_value = getElemValue(fi->neighborPtr());
   const auto & upwind_value = elem_is_upwind ? elem_value : neighbor_value;
   const auto & downwind_value = elem_is_upwind ? neighbor_value : elem_value;
-  const auto & upwind_gradient =
-      elem_is_upwind ? adGradSln(&fi->elem()) : adGradSln(fi->neighborPtr());
+  auto upwind_gradient = [this, elem_is_upwind, fi]() -> const ADRealVectorValue & {
+    return elem_is_upwind ? adGradSln(&fi->elem()) : adGradSln(fi->neighborPtr());
+  };
 
-  return Moose::FV::interpolate(
-      *limiter, upwind_value, downwind_value, upwind_gradient, *fi, elem_is_upwind);
+  return Moose::FV::interpolate(*limiter,
+                                upwind_value,
+                                downwind_value,
+                                limiter->constant() ? nullptr : &upwind_gradient(),
+                                *fi,
+                                elem_is_upwind);
 }
 
 template <typename OutputType>
