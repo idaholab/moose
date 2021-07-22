@@ -21,7 +21,7 @@ For a MOOSE-based application, +ensure that the equations are solved correctly+.
 
 !---
 
-## Practice: Process
+### Process
 
 The process of performing a verification study is simple in practice:
 

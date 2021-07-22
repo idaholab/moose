@@ -32,7 +32,7 @@ left boundary ($x=0$) and the natural boundary condition on the opposite boundar
 
 !---
 
-!media tutorial03_verification/1d_exact.mp4
+!media tutorial03_verification/1d_exact.mp4 style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -113,7 +113,7 @@ with the input file included using the "-i" option as follows.
 
 !---
 
-!media tutorial03_verification/1d_analytical.mp4
+!media tutorial03_verification/1d_analytical.mp4 style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

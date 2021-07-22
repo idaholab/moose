@@ -9,7 +9,9 @@
 
 where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the
 density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source,
-and $\Omega$ is the spatial domain. Boundary conditions are defined on the boundary of the
+and $\Omega$ is the spatial domain.
+
+Boundary conditions are defined on the boundary of the
 domain $\partial \Omega$, the type and application of which will be discussed for the specific
 application of the heat equation throughout the tutorial.
 

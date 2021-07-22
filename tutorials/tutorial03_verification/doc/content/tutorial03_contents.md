@@ -4,6 +4,6 @@
 
 !---
 
-## Theory vs +Practice+
+## Theory vs. Practice
 
 The theory will be mentioned, but putting the theory into +practice+ will be the focus.

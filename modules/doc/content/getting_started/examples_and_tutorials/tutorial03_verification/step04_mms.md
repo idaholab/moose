@@ -3,7 +3,7 @@
 ## Introduction
 
 In practice an exact solution to the problem being solved is not known, since there would
-be know reason to perform a finite element simulation if the answer is known. If the solution
+be no reason to perform a simulation if the answer is known. If the solution
 is not known then the error can not be known. However, it is possible to "manufacture" a solution
 using a method known as [!ac](MMS). In this step of the tutorial the two-dimensional heat equation
 will be used to simulate a physical system. Then using this simulation as a starting point a
@@ -28,10 +28,10 @@ right is subjected to the maximum source, again defined using a sine function.
 
 where $\Kappa$ is the extinction coefficient.
 
-The system is subjected to Neumann boundary conditions at the top surface boundary ($y=0$) $k\nabla T
-\cdot \hat{n} = q_k(x,t)$, which approximates the radiative cooling of the snow surface. The left and
+The system is subjected to Neumann boundary conditions at the top surface boundary ($y=0$),
+which approximates the radiative cooling of the snow surface. The left and
 right sides of the domain are subjected to the natural boundary condition, which for this problem
-approximates and "insulated" boundary condition. Finally, the bottom is subjected a constant
+approximates an "insulated" boundary condition. Finally, the bottom is subjected a constant
 temperature.
 
 ## Simulation
@@ -52,8 +52,8 @@ which will execute for nine hours of simulation time.
 | $T(x, -0.2 m, t)$ | 263.15 | $K$ |
 
 As in the previous step, a complete input file will be explained block by block. It shall
-be assumed that the input file is named `~/projects/problems/verification/2d_main.i`. Again,
-this file can be created and edited using any text editor program.
+be assumed that the input file is named `~/projects/problems/verification/2d_main.i`.
+This file can be created and edited using any text editor program.
 
 The problem requires a two-dimensional rectangular domain, which can be defined using
 the [Mesh System](syntax/Mesh/index.md) as defined in the `[Mesh]` block  of the input.
@@ -63,8 +63,7 @@ The number of elements ("nx" and "ny") are defined to result in square elements.
 
 There is a single unknown, temperature ($T$), to compute. This unknown is declared using the
 [Variables System](syntax/Variables/index.md) in the `[Variables]` block and used the default
-configuration of a first-order Lagrange finite element variable. Note, within this block the name of
-the variable is arbitrary; "T" was selected here to match up the equations definitions.
+configuration of a first-order Lagrange finite element variable.
 
 !listing tutorial03_verification/step04_mms/2d_main.i link=False block=Variables
 
@@ -82,7 +81,7 @@ corresponding spatial location and time.
 
 !listing tutorial03_verification/step04_mms/2d_main.i link=False block=Functions
 
-The "volumetric" portions equation weak form are defined using the
+The "volumetric" portion of the weak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of three `Kernel` objects as follows.
 
@@ -91,11 +90,11 @@ can be done with the use of three `Kernel` objects as follows.
 The sub-block "T_time" defines the time derivative, "T_cond" defines the conduction portion
 of the equation, and "T_source" defines the heat source term, please refer to
 [tutorial03_verification/step01_heat_conduction.md] for details regarding the weak form of the heat
-equation. Both blocks include the "variable" parameter, which
+equation. All blocks include the "variable" parameter, which
 is set equal to "T". The remaining parameters define the values for $k$, $\rho$, and $c_p$ as the
 constant values defined in [tutorial03-snow-values].
 
-The boundary portions of the equation weak form are defined using the
+The boundary portions of the weak form are defined using the
 [Boundary Condition System](syntax/BCs/index.md) in the `[BCs]` block. At top of the domain ($y=0$) a
 Neumann condition is applied with a constant outward flux. On the button of the domain
 ($y=-0.2 \textrm{m}$) a constant temperature is defined.
@@ -130,7 +129,7 @@ cd ~/projects/problems/verification
 When complete an output file will be produced with the name "2d_main_out.e", this file
 can be viewed using [Paraview](https://www.paraview.org/) or [application_usage/peacock.md].
 [tutorial03-snow-results] show the change in temperature across the domain with time. A key
-feature is that the surface cools rapidly as the heat source begins to wane, creating large
+feature is that the surface remains cool as the heat source warms the snow internally, creating large
 temperature gradient at the surface.
 
 !media tutorial03_verification/2d_main.mp4 id=tutorial03-snow-results
@@ -139,7 +138,7 @@ temperature gradient at the surface.
 
 ## MMS Overview
 
-The [!ac](MMS) is a simple method of manufacturing a known solution for a [!ac](PDE), in this
+The [!ac](MMS) is a method of manufacturing a known solution for a [!ac](PDE), in this
 case the transient heat equation. The method is explained in detail in the context of the
 `mms` python package included with [!ac](MOOSE): [python/mms.md]. A brief overview shall be
 provided here, but the reader is referred to the package documentation for a more detailed
@@ -153,7 +152,7 @@ The method can be summarized into three basic steps:
    The form of the solution is arbitrary, but certain characteristics are desirable. Mainly, a
    solution should be selected that cannot be exactly represented by the [!ac](FEM) shape function or
    the numerical integration scheme, for spatial and temporal convergence studies, respectively.
-   Without these characteristic the assumed solution can be solved exactly, thus there will not be
+   Without these characteristic the assumed solution could possibly be solved exactly, thus there will not be
    error and the solution cannot converge to the solution.
 
 2. Apply the assumed solution to the [!ac](PDE) to compute a residual function. For example, consider
@@ -180,7 +179,7 @@ The method can be summarized into three basic steps:
 While it is possible to perform these steps with hand calculations, this can become difficult and
 error prone for more complex equations. For this reason the `mms` python package included with
 [!ac](MOOSE) was created. This package will be used to apply these steps to the two-dimensional
-heat equation example in the following sections.
+heat equation example defined above.
 
 ## Spatial Convergence
 
@@ -196,8 +195,8 @@ first-order [!ac](FEM) shape functions and the first-order time integration can 
 portion of the equation and not result in temporal error accumulation.
 
 The `mms` package, as shown in [tutorial03_step04_function], used to compute the necessary
-forcing function. The package can directly output the the input file format both the computed
-forcing function and the assumed solution, making adding it to the input file trival.
+forcing function. The package can directly output the the input file format for the computed
+forcing function and the assumed solution, making adding it to the input file trivial.
 
 !listing tutorial03_verification/step04_mms/step04_function.py id=tutorial03_step04_function link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
          caption=Compute the forcing function using [!ac](MMS).
@@ -227,7 +226,7 @@ an independent file. It shall be assumed this file is named
 `~/projects/problems/verification/2d_mms_spatial.i`.
 
 The forcing function and exact solution are added using a parsed function, in similar to the
-existing functions withing the simulation.
+existing functions within the simulation.
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Functions
 
@@ -249,7 +248,7 @@ the results will be disappointing. The reason is that the initial and boundary c
 simulation do not satisfy the assumed solution. In most cases, unless the study is testing
 boundary condition object specifically, the easiest approach is to use the assumed solution
 to set both the initial condition and boundary conditions. This can be done by adding
-a function based initial and boundary condition objects, and setting the "active" line which
+function based initial and boundary condition objects, and setting the "active" line which
 will disable all sub-blocks not listed.
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=BCs ICs
@@ -282,9 +281,9 @@ has minimal changes in time and tends to a easy to recognize solution of `xy`.
 !equation id=tutorial03_temporal_solution
 T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 
-Again, the `mms` package, as shown in [tutorial03_temporal_function], used to compute the necessary
-forcing function. The package can directly output the the input file format both the computed
-forcing function and the assumed solution, making adding it to the input file trival.
+Again, the `mms` package, as shown in [tutorial03_temporal_function], is used to compute the necessary
+forcing function. The package can directly output the the input file format of the computed
+forcing function and the assumed solution, making adding it to the input file trivial.
 
 !listing tutorial03_verification/step04_mms/step04_function.py id=tutorial03_temporal_function link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0
          caption=Compute the forcing function using [!ac](MMS).
@@ -309,7 +308,7 @@ is nearly identical to the spatial counter part, as such is included completely 
 
 !listing tutorial03_verification/step04_mms/2d_mms_temporal.i link=false
 
-The only differences are the function definitions and the use of timestep size instead of the
+The only differences are the function definitions and the use of time step size instead of the
 element size computation.
 
 Again, the `mms` package can be used to perform the study.
@@ -331,6 +330,6 @@ time integration is computing the correct results.
 
 The above example demonstrates that a convergence study may be performed on simulations without
 a known solution by manufacturing a solution. Performing a convergence study is crucial to building
-robust simulations tools, as such a python package is provided to aid in performing the anaylysis.
+robust simulations tools, as such a python package is provided to aid in performing the analysis.
 
 !content pagination previous=tutorial03_verification/step03_analytical_solution.md

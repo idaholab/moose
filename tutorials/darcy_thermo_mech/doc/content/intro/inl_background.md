@@ -29,7 +29,7 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 
-!media darcy_thermo_mech/inl_atr.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_atr.jpg style=width:25%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

@@ -8,12 +8,12 @@ shall be considered to verify a model. The verification process shall be broken 
 
 1. Define a problem, with a known exact solution.
 2. Simulate the problem.
-3. Compute the error between the known solution and simulation
+3. Compute the error between the known solution and simulation.
 4. Perform convergence study.
 
 ## Problem Statement
 
-[!cite](incropera1996fundamentals) presents a one-dimensional solution for this equation as:
+[!cite](incropera1996fundamentals) presents a one-dimensional solution for the heat equation as:
 
 !equation id=tutorial03-analytical-solution
 T(t,x) = T_0 + \frac{\dot{q}}{k} \Bigg\lbrack 2 \sqrt{\frac{\alpha t}{\pi}}
@@ -22,9 +22,10 @@ T(t,x) = T_0 + \frac{\dot{q}}{k} \Bigg\lbrack 2 \sqrt{\frac{\alpha t}{\pi}}
 
 where $T$ is the temperature, $T_0$ is the initial temperature, $t$ is time, $x$ is position,
 $\dot{q}$ is the heat source, $k$ is thermal conductivity, and $\alpha$ is the thermal diffusivity.
+
 Thermal diffusivity is defined as the ratio of thermal conductivity ($k$) to the product of density ($\rho$)
-and specific heat capacity ($c_p$). The system is subjected to Neumann boundary conditions at the
-left boundary ($x=0$) $k\nabla T \cdot \hat{n} = q_k(x,t)$ and the natural boundary condition on
+and specific heat capacity ($c$). The system is subjected to Neumann boundary conditions at the
+left boundary ($x=0$) and the natural boundary condition on
 the opposite boundary.
 
 ## Simulation
@@ -40,7 +41,7 @@ simulation and a duration of 1 second shall be utilized.
 | $\dot{q}$    | 7E5   | $W\cdot m^{-3}$ |
 | $k$          | 80.2  | $W\cdot m^{-1}\cdot K^{-1}$ |
 | $\rho$       | 7800  | $kg\cdot m^{-3}$ |
-| $c_p$        | 450   | $J\cdot kg^{-1}\cdot K^{-1}$ |
+| $c$          | 450   | $J\cdot kg^{-1}\cdot K^{-1}$ |
 | $q_k(0,t)$   | 7E5   | $W\cdot m^{-2}$ |
 | $q_k(0.03,t)$ | 0    | $W\cdot m^{-2}$ |
 
@@ -67,7 +68,7 @@ execute without failure, then the following sections should be followed to setup
 ### Simulation Input
 
 [!ac](MOOSE) operates using input files, as such, an input file shall be detailed that is capable of
-simulating this problem and its use demonstrated. This section will detail the various sections
+simulating this problem and its use demonstrated. This section will describe the various sections
 of the input file that should be created for the current problem. The location of this input
 file is arbitrary, but it shall be assumed that the content below will be in a file named
 `~/projects/problems/verification/1d_analytical.i`. This file can be created and edited
@@ -82,11 +83,11 @@ $x$-direction from 0 to 0.03 $m$ using 200 elements.
 There is a single unknown, temperature ($T$), to compute. This unknown is declared using the
 [Variables System](syntax/Variables/index.md) in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable. Note, within this block the name of
-the variable is arbitrary; "T" was selected here to match up the equations definitions.
+the variable is arbitrary; "T" was selected here to match the equation.
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Variables
 
-The "volumetric" portions equation weak form are defined using the
+The "volumetric" portions of the wak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of two `Kernel` objects as follows.
 
@@ -98,9 +99,10 @@ regarding the weak form of the heat equation. Both blocks include the "variable"
 is set equal to "T". The remaining parameters define the values for $k$, $\rho$, and $c_p$ as the
 constant values defined in [tutorial03-analytical-values].
 
-The boundary portions of the equation weak form are defined using the
+The boundary portions of the weak form are defined using the
 [Boundary Condition System](syntax/BCs/index.md) in the `[BCs]` block. At $x=0$ a
-Neumann condition is applied with a value of 7E5, by default $x=0$ is given the name of "left".
+Neumann condition is applied with a value of 7E5. The generated mesh, by default, labels the
+boundary at $x=0$ as "left".
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=BCs
 
@@ -113,10 +115,8 @@ within the `[Executioner]` block using the [Executioner System](syntax/Execution
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Executioner
 
-Finally, the output method is defined. In this case the ExodusII format is enabled within the
-`[Outputs]` block using the [Outputs System](syntax/Outputs/index.md). As is, no CSV output is
-produced. However, in the following section additional output will be added that will result
-gin CSV files being created.
+Finally, the output method is defined. In this case the ExodusII and CSV format are enabled within the
+`[Outputs]` block using the [Outputs System](syntax/Outputs/index.md).
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Outputs
 
@@ -152,9 +152,8 @@ which computes the error of the given variable (e.g., "T") and the known solutio
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors
 
-In addition to the computed error, the average element size is also output. As detailed in
-previously, this quantity is required to perform the convergence study.
-
+In addition to the computed error, the average element size is also output. As detailed
+previously, this quantity is necessary to perform the convergence study.
 
 Another useful item to add to the input, especially for a one-dimensional problem, are line samples
 along the length of the simulation for the computed and exact solution via the
@@ -195,11 +194,11 @@ command line with "x" being an integer representing the number of refinements to
 The `mms` package includes a function (`run_spatial`) for performing and automatically modifies
 the supplied input file to perform increase levels of uniform refinement. After each run the
 results are collected into a `pandas.DataFrame` object, which can be used in the `ConvergencePlot`
-object to output a plot.
+object to create a plot.
 
 For example, for [tutorial03-analytical-spatial-code] results in spatial convergence plot shown in
 [tutorial03-analytical-spatial-graph]. In this case, the input file created above (`1d_analytical.i`)
-is executed with six levels of uniform refinement (0, 1, 2, 3, 4, 5). Also, notice that an extra
+is executed with six levels of uniform refinement (0--5). Notice that an extra
 argument `Mesh/nx=10` is supplied to reduce the number of elements to 10 for the initial mesh. The
 `console` flag suppress the screen output from the simulations.
 
@@ -239,7 +238,7 @@ scheme is operating as expected.
 The analysis performed here provides three levels of verification: (1) the finite element solution
 matches the known solution with minimal error, (2) the spatial error converges at the
 expected rate for first-order finite elements, and (3) the temporal error converges at the
-expected rate for second-order numerical integration. These results create verify that the
+expected rate for second-order numerical integration. These results verify that the
 simulation is computing correctly for the 1D heat equation.
 
 !bibtex bibliography !!include to make sure next/previous are last on page

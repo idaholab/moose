@@ -5,7 +5,7 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_intro.png style=width:90%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_intro.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -26,37 +26,37 @@ Multi-physics Object Oriented Simulation Environment
 
 ## MOOSE Team
 
-!media darcy_thermo_mech/moose_team.png style=width:100%;
+!media darcy_thermo_mech/moose_team.png style=width:85%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-!media darcy_thermo_mech/moose_design.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_design.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
 ## General Capabilities
 
-- Continuous and Discontinuous Galerkin FEM
-- Finite Volume
-- Fully Coupled, Fully Implicit (and explicit)
+- continuous and Discontinuous Galerkin FEM
+- finite Volume
+- fully coupled, fully implicit (and explicit)
 - [!ac](AD)
-- Unstructured mesh with FEM shapes
-- Higher order geometry
-- Mesh Adaptivity (refinement and coarsening)
-- Massively Parallel (MPI and threads)
-- User code agnostic of dimension, parallelism, shape functions, etc.
+- unstructured mesh with FEM shapes
+- higher order geometry
+- mesh adaptivity (refinement and coarsening)
+- massively parallel (MPI and threads)
+- user code agnostic of dimension, parallelism, shape functions, etc.
 
 !---
 
 ## Object-oriented, pluggable system
 
-!media darcy_thermo_mech/moose_systems.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_systems.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
 ## Example Code
 
-!media darcy_thermo_mech/moose_code.png style=width:100%;
+!media darcy_thermo_mech/moose_code.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -73,7 +73,7 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Development Process
 
-!media darcy_thermo_mech/civet_flow.png style=width:100%;
+!media darcy_thermo_mech/civet_flow.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -85,8 +85,8 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_contributors.png style=width:90%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-!media darcy_thermo_mech/moose_add_del.png style=width:90%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;

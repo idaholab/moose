@@ -4,33 +4,29 @@
 
 ## Summary
 
-In practice an exact solution is not known, since there would be know reason to perform a finite
-element simulation if the answer is known.
+In practice an exact solution is not known, since there would be no reason to perform a
+simulation if the answer is known.
 
-It is possible to "manufacture" a solution using a method known as [!ac](MMS).
+It is possible to "manufacture" a solution using the [!ac](MMS).
 
 The two-dimensional heat equation will be used to simulate a physical system and used as basis
-for spatial and temporal convergence study will be performed using the [!ac](MMS).
+for spatial and temporal convergence study using the [!ac](MMS).
 
 !---
 
 ## Theory: Method of Manufactured Solution
 
-The [!ac](MMS) is a simple method of manufacturing a known solution for a [!ac](PDE), in this
-case the transient heat equation. The method can be summarized into three basic steps:
+The[!ac](MMS) can be summarized into three basic steps:
 
-1. Define an assumed solution for the [!ac](PDE) of interest, for example $T=2tx^2$.
+1. Assume a solution for the [!ac](PDE) of interest: $T=2tx^2$
 
-2. Apply the assumed solution to the [!ac](PDE) to compute a residual function. For example, consider
-   the following simple [!ac](PDE).
+2. Apply assumed solution to compute a residual function. For example,
 
    !equation
-   \frac{\partial T}{\partial x} + t = 0
-
-   Substitute the assumed solution of $t=2tx^2$ into this equation to compute the residual.
-
-   !equation
-   \frac{\partial}{\partial x}(2tx^2) + t = 4tx
+   \begin{align*}
+   \frac{\partial T}{\partial x} + t &= 0 \\
+   \frac{\partial}{\partial x}(2tx^2) + t &= 4tx
+   \end{align*}
 
 3. Apply the negative of the computed function and perform the desired convergence study. For example,
    the example [!ac](PDE) above becomes:
@@ -146,11 +142,10 @@ can be done with the use of three `Kernel` objects as follows.
 The boundary portions of the equation weak form are defined using the
 Boundary Condition System in the `[BCs]` block. At top of the domain ($y=0$) a
 Neumann condition is applied with a constant outward flux. On the button of the domain
-($y=-0.2 \textrm{m}$) a constant temperature is defined.
+($y=-0.2 \textrm{m}$) a constant temperature is defined. The remain boundaries are "insulated",
+which is known as the natural boundary condition.
 
 !listing tutorial03_verification/step04_mms/2d_main.i link=False block=BCs
-
-The remain boundaries are "insulated", which is known as the natural boundary condition.
 
 !---
 
@@ -184,7 +179,7 @@ with the input file included using the "-i" option as follows.
 
 !---
 
-!media tutorial03_verification/2d_main.mp4
+!media tutorial03_verification/2d_main.mp4 style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
