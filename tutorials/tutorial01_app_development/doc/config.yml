@@ -1,0 +1,44 @@
+Content:
+    tutorial03:
+        root_dir: ${MOOSE_DIR}/tutorials/tutorial01_app_development/doc/content
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - contrib/**
+            - css/**
+            - js/**
+            - bib/**
+    large_media:
+        root_dir: ${MOOSE_DIR}/large_media
+        content:
+            - tutorials/INL_poster_40x30.png
+            - tutorials/tutorial01_app_development/**
+
+Renderer:
+    type: MooseDocs.base.RevealRenderer
+    theme: simple
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.bibtex: default
+    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.style: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.listing:
+        modal-link: False
+    MooseDocs.extensions.reveal:
+        background_image: INL_poster_40x30.png
