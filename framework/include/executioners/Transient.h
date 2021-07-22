@@ -180,6 +180,12 @@ public:
   Real & timestepTol() { return _timestep_tolerance; }
 
   /**
+   * Set the timestep tolerance
+   * @param tolerance timestep tolerance
+   */
+  virtual void setTimestepTolerance(const Real & tolerance) { _timestep_tolerance = tolerance; }
+
+  /**
    * Is the current step at a sync point (sync times, time interval, target time, etc)?
    * @return Bool indicataing whether we are at a sync point
    */
