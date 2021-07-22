@@ -36,7 +36,7 @@
    input = 'tot_model.i'
    cli_args = 'Materials/strain_energy_density/incremental=true'
    design = 'StrainEnergyDensity.md'
-   expect_err = 'One or more Material Properties were not supplied on block'
+   expect_err = "Material property 'strain_increment', requested by"
    requirement = 'Moose shall be capable of informing a user when they '
                  'incorrectly choose to use the incremental strain energy '
                  'density formulation in a material utilizing small strain.'
