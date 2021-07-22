@@ -1,0 +1,18 @@
+[Tests]
+  [./dirichlet]
+    type = CSVDiff
+    input = 'dirichlet.i'
+    csvdiff = 'dirichlet_out.csv'
+    requirement = "Quadratic convergence in 2D for DirichletBCs, SMP matches FDP."
+    issues = '#17472'
+    design = 'kernels/lagrangian/UpdatedLagrangianStressDivergence'
+  [../]
+  [./neumann]
+    type = CSVDiff
+    input = 'neumann.i'
+    csvdiff = 'neumann_out.csv'
+    requirement = "Quadratic convergence in 2D for NeumannBCs, SMP matches FDP."
+    issues = '#17472'
+    design = 'kernels/lagrangian/UpdatedLagrangianStressDivergence'
+  [../]
+[]

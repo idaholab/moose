@@ -1,0 +1,38 @@
+[Tests]
+  [./jaumann_shear]
+    type = CSVDiff
+    input = 'jaumann_shear.i'
+    csvdiff = 'jaumann_shear_out.csv'
+    requirement = "Classical Jaumann response to pure shear"
+    abs_zero = 1e-6
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeLagrangainStressSmall'
+  [../]
+  [./truesdell_shear]
+    type = CSVDiff
+    input = 'truesdell_shear.i'
+    csvdiff = 'truesdell_shear_out.csv'
+    requirement = "Classical Truesdell response to pure shear"
+    abs_zero = 1e-6
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeLagrangainStressSmall'
+  [../]
+  [./truesdell_jacobian]
+    type = PetscJacobianTester
+    input = 'truesdell_jacobian.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Treusdell tangent is exact"
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeLagrangainStressSmall'
+  [../]
+  [./jaumann_jacobian]
+    type = PetscJacobianTester
+    input = 'jaumann_jacobian.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact"
+    issues = '#17472'
+    design = 'materials/lagrangian/ComputeLagrangainStressSmall'
+  [../]
+[]
