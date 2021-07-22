@@ -67,8 +67,6 @@ Eigenvalue::validParams()
   // If Newton and Inverse Power is combined in SLEPc side
   params.addPrivateParam<bool>("_newton_inverse_power", false);
 
-  params.addParam<Real>("time", 0.0, "System time");
-
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
   Moose::SlepcSupport::getSlepcValidParams(params);

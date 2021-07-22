@@ -1742,7 +1742,8 @@ NonlinearSystemBase::getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> &
 
 void
 NonlinearSystemBase::findImplicitGeometricCouplingEntries(
-    GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type>> & graph)
+    GeometricSearchData & geom_search_data,
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> & graph)
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators =
       geom_search_data._nearest_node_locators;
@@ -1860,14 +1861,14 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(GeometricSearchData & g
   // this work with tag system
   auto & jacobian = getMatrix(systemMatrixTag());
 
-  std::map<dof_id_type, std::vector<dof_id_type>> graph;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> graph;
 
   findImplicitGeometricCouplingEntries(geom_search_data, graph);
 
   for (const auto & it : graph)
   {
     dof_id_type dof = it.first;
-    const std::vector<dof_id_type> & row = it.second;
+    const auto & row = it.second;
 
     for (const auto & coupled_dof : row)
       jacobian.add(dof, coupled_dof, 0);
@@ -3041,7 +3042,7 @@ NonlinearSystemBase::augmentSparsity(SparsityPattern::Graph & sparsity,
   {
     _fe_problem.updateGeomSearch();
 
-    std::map<dof_id_type, std::vector<dof_id_type>> graph;
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> graph;
 
     findImplicitGeometricCouplingEntries(_fe_problem.geomSearchData(), graph);
 
@@ -3064,7 +3065,7 @@ NonlinearSystemBase::augmentSparsity(SparsityPattern::Graph & sparsity,
       if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
         continue;
 
-      const std::vector<dof_id_type> & row = git.second;
+      const auto & row = git.second;
 
       SparsityPattern::Row & sparsity_row = sparsity[local_dof];
 
