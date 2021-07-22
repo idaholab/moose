@@ -45,18 +45,16 @@ public:
 
   virtual void execute() override;
 
-  virtual void checkIntegrity();
+  virtual void checkIntegrity() override;
 
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
   FEProblemBase & _problem;
 
-  FEProblemSolve _feproblem_solve;
+  std::shared_ptr<FEProblemSolve> _feproblem_solve;
 
   Real _system_time;
-  int & _time_step;
-  Real & _time;
 
   PerfID _final_timer;
 

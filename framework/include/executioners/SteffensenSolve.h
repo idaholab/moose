@@ -15,7 +15,7 @@
 class SteffensenSolve : public FixedPointSolve
 {
 public:
-  SteffensenSolve(Executioner & ex);
+  SteffensenSolve(const InputParameters & parameters);
 
   static InputParameters validParams();
 

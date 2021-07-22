@@ -11,10 +11,12 @@
 
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("MooseTestApp", FixedPoint);
+
 InputParameters
 FixedPoint::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = SolveObject::validParams();
 
   params.addParam<unsigned int>("fp_max_its", 50, "Max Fixed Point Iterations");
   params.addRangeCheckedParam<Real>(
@@ -30,8 +32,8 @@ FixedPoint::validParams()
   return params;
 }
 
-FixedPoint::FixedPoint(Executioner & ex)
-  : SolveObject(ex),
+FixedPoint::FixedPoint(const InputParameters & parameters)
+  : SolveObject(parameters),
     _fp_problem(dynamic_cast<FixedPointProblem &>(_problem)),
     _fp_max_its(getParam<unsigned int>("fp_max_its")),
     _fp_abs_tol(getParam<Real>("fp_abs_tol")),

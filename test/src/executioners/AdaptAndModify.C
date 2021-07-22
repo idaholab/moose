@@ -33,7 +33,7 @@ AdaptAndModify::incrementStepOrReject()
   if (_last_solve_converged)
   {
     _time_old = _time;
-    _t_step++;
+    _time_step++;
 
     _problem.advanceState();
   }

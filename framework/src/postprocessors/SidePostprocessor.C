@@ -14,8 +14,8 @@ defineLegacyParams(SidePostprocessor);
 InputParameters
 SidePostprocessor::validParams()
 {
-  InputParameters params = SideUserObject::validParams();
-  params += Postprocessor::validParams();
+  InputParameters params = Postprocessor::validParams();
+  params += SideUserObject::validParams();
   return params;
 }
 

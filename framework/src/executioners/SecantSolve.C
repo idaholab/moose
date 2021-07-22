@@ -15,15 +15,21 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
+registerMooseObject("MooseApp", SecantSolve);
+
 InputParameters
 SecantSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
+  params.addClassDescription("Secant iteration for tightly coupled multiphysics calculations.");
 
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
+SecantSolve::SecantSolve(const InputParameters & parameters) : FixedPointSolve(parameters)
+{
+  allocateStorage(true);
+}
 
 void
 SecantSolve::allocateStorage(const bool primary)

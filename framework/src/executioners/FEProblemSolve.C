@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("MooseApp", FEProblemSolve);
+
 defineLegacyParams(FEProblemSolve);
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
@@ -25,7 +27,9 @@ FEProblemSolve::mooseLineSearches()
 InputParameters
 FEProblemSolve::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = SolveObject::validParams();
+  params.addClassDescription(
+      "Interact with PETSc/SLEPc for solving nonlinar stringly coupled multiphysics problems.");
 
   params.addParam<std::vector<std::string>>("splitting",
                                             "Top-level splitting defining a "
@@ -131,8 +135,8 @@ FEProblemSolve::validParams()
   return params;
 }
 
-FEProblemSolve::FEProblemSolve(Executioner & ex)
-  : SolveObject(ex),
+FEProblemSolve::FEProblemSolve(const InputParameters & parameters)
+  : SolveObject(parameters),
     _splitting(getParam<std::vector<std::string>>("splitting")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
 {

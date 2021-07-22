@@ -1,0 +1,18 @@
+[Tests]
+  design = 'syntax/Executioner/index.md'
+  issues = '#18180'
+  [./flexible_steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = "MOOSE shall support adding solve objects through inputs that are to be used by custom executioners."
+    recover = false
+  [../]
+  [./flexible_picard_steady]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e picard_master_out_sub0.e'
+    requirement = "MOOSE shall support adding multiple solve objects through inputs that are to be used by custom executioners."
+    recover = false
+  [../]
+[]

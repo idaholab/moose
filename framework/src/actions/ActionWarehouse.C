@@ -150,7 +150,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
         if (!_syntax.verifyMooseObjectTask(base, task))
           mooseError("Task ", task, " is not registered to build ", base, " derived objects");
       }
-      else
+      else if (task != "add_solve_object")
         mooseError("Unable to locate registered base parameter for ", moa->getMooseObjectType());
     }
 

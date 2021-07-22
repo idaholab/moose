@@ -24,20 +24,36 @@ class AuxiliarySystem;
 class SolveObject : public MooseObject, public PerfGraphInterface, public PostprocessorInterface
 {
 public:
-  SolveObject(Executioner & ex);
+  SolveObject(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /**
    * Solve routine provided by this object.
    * @return True if solver is converged.
    */
-  virtual bool solve() = 0;
+  virtual bool solve()
+  {
+    if (_inner_solve)
+      return _inner_solve->solve();
+    else
+    {
+      _console << "Empty solve." << std::endl;
+      return true;
+    }
+  }
 
   /// Set the inner solve object wrapped by this object.
   virtual void setInnerSolve(SolveObject & solve) { _inner_solve = &solve; }
 
+  /// Initialization to be done before solve
+  virtual void init() {}
+
+  /// Initialization to be done before problem init
+  /// Note: this is the place for tasks that cannot be done in constructor or in init.
+  virtual void preProblemInit() {}
+
 protected:
-  /// Executioner used to construct this
-  Executioner & _executioner;
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Displaced problem

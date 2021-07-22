@@ -17,6 +17,7 @@
 #include "SlepcSupport.h"
 #include "SecantSolve.h"
 #include "SteffensenSolve.h"
+#include "Factory.h"
 
 // C++ includes
 #include <vector>
@@ -28,9 +29,15 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += PicardSolve::validParams();
+  params.addClassDescription("The executioner that all other executioners are derived from "
+                             "provides management of all solve objects.");
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
+  params.registerBase("Executioner");
+
+  // we temporarily allow deprecated parameters for previous implementation of Picard iteration
+  // This should be replaced with FixedPointSolve::validParams() in the future.
+  params += PicardSolve::validParams();
 
   params.addParam<MooseEnum>("fixed_point_algorithm",
                              iterationMethods(),
@@ -43,8 +50,6 @@ Executioner::validParams()
       "",
       "File base name used for restart",
       "Please use \"Problem/restart_file_base\" instead");
-
-  params.registerBase("Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
@@ -62,6 +67,8 @@ Executioner::Executioner(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
+    _time_step(_fe_problem.timeStep()),
+    _time(_fe_problem.time()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose"))
 {
@@ -70,11 +77,11 @@ Executioner::Executioner(const InputParameters & parameters)
 
   // Instantiate the SolveObject for the fixed point iteration algorithm
   if (_iteration_method == "picard")
-    _fixed_point_solve = libmesh_make_unique<PicardSolve>(*this);
+    _fixed_point_solve = addSolveObject<PicardSolve>();
   else if (_iteration_method == "secant")
-    _fixed_point_solve = libmesh_make_unique<SecantSolve>(*this);
+    _fixed_point_solve = addSolveObject<SecantSolve>();
   else if (_iteration_method == "steffensen")
-    _fixed_point_solve = libmesh_make_unique<SteffensenSolve>(*this);
+    _fixed_point_solve = addSolveObject<SteffensenSolve>();
 }
 
 Problem &
@@ -102,4 +109,33 @@ Executioner::addAttributeReporter(const std::string & name, Real initial_value)
   getReporterValueByName<PostprocessorValue>(r_name, 2);
 
   return value;
+}
+
+void
+Executioner::addSolveObject(const std::string & type,
+                            const std::string & name,
+                            InputParameters & parameters)
+{
+  if (_solve_object_names.count(type))
+    mooseError("Solve object in type ", type, " has been constructed");
+
+  parameters.set<SubProblem *>("_subproblem") = &feProblem();
+  parameters.set<SystemBase *>("_sys") = &feProblem().getNonlinearSystemBase();
+  parameters.set<bool>("verbose") = getParam<bool>("verbose");
+  _solve_objects[name] = _app.getFactory().create<SolveObject>(type, name, parameters, 0);
+  _solve_object_names[type] = name;
+}
+
+void
+Executioner::init()
+{
+  checkIntegrity();
+  _fe_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _fe_problem.initialSetup();
+
+  for (auto & ptr : _self_solve_objects)
+    ptr->init();
+
+  for (auto & pair : _solve_objects)
+    pair.second->init();
 }

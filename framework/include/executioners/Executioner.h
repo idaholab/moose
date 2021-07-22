@@ -55,12 +55,19 @@ public:
   /**
    * Perform initializations during executing actions right before init_problem task
    */
-  virtual void preProblemInit() {}
+  virtual void preProblemInit()
+  {
+    for (auto & ptr : _self_solve_objects)
+      ptr->preProblemInit();
+
+    for (auto & pair : _solve_objects)
+      pair.second->preProblemInit();
+  }
 
   /**
    * Initialize the executioner
    */
-  virtual void init() {}
+  virtual void init();
 
   /**
    * Pure virtual execute function MUST be overridden by children classes.
@@ -77,16 +84,6 @@ public:
    * Override this for actions that should take place after execution
    */
   virtual void postExecute() {}
-
-  /**
-   * Override this for actions that should take place before execution, called by PicardSolve
-   */
-  virtual void preSolve() {}
-
-  /**
-   * Override this for actions that should take place after execution, called by PicardSolve
-   */
-  virtual void postSolve() {}
 
   /**
    * Deprecated:
@@ -126,18 +123,14 @@ public:
       mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
   }
 
-  FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
-
-  /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedPicardConvergenceCheck() const
+  FixedPointSolve & fixedPointSolve()
   {
-    mooseDeprecated(
-        "augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
-    return false;
+    auto ptr = dynamic_cast<FixedPointSolve *>(_fixed_point_solve.get());
+    if (ptr)
+      return *ptr;
+    else
+      mooseError("fixedPointSolve object is not constructed by the executioner.");
   }
-
-  /// Augmented fixed point iteration convergence check that to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedFixedPointConvergenceCheck() const { return false; }
 
   /**
    * Get the verbose output flag
@@ -151,7 +144,18 @@ public:
    */
   static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
+  /**
+   * Use factory to add a solve object to be called outside
+   */
+  void
+  addSolveObject(const std::string & type, const std::string & name, InputParameters & parameters);
+
 protected:
+  /**
+   * Integrity check to be performed in init
+   */
+  virtual void checkIntegrity() {}
+
   /**
    * Adds a postprocessor that the executioner can directly assign values to
    * @param name The name of the postprocessor to create
@@ -161,14 +165,40 @@ protected:
   virtual PostprocessorValue & addAttributeReporter(const std::string & name,
                                                     Real initial_value = 0);
 
+  /**
+   * Add a solve object directly
+   * Note: Executioner must contains the valid parameters of the solve object.
+   */
+  template <typename T>
+  std::shared_ptr<T> addSolveObject()
+  {
+    auto ptr = std::make_shared<T>(_pars);
+    _self_solve_objects.push_back(ptr);
+    return ptr;
+  }
+
   FEProblemBase & _fe_problem;
 
   MooseEnum _iteration_method;
-  std::unique_ptr<FixedPointSolve> _fixed_point_solve;
+  std::shared_ptr<FixedPointSolve> _fixed_point_solve;
+
+  /// Current timestep.
+  int & _time_step;
+  /// Current time
+  Real & _time;
 
   // Restart
   std::string _restart_file_base;
 
   /// True if printing out additional information
   const bool & _verbose;
+
+  /// A map from solve object names to the objects constructed by actions
+  std::map<std::string, std::shared_ptr<SolveObject>> _solve_objects;
+
+  /// A map from solve object types to the object names
+  std::map<std::string, std::string> _solve_object_names;
+
+  /// A map from solve object types to the object names
+  std::vector<std::shared_ptr<SolveObject>> _self_solve_objects;
 };

@@ -80,12 +80,10 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Executioner(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh")),
-    _feproblem_solve(*this),
+    _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
                                                  : nullptr),
     _system_time(getParam<Real>("time")),
-    _time_step(_eigen_problem.timeStep()),
-    _time(_eigen_problem.time()),
     _final_timer(registerTimedSection("final", 1))
 {
 // Extract and store SLEPc options
@@ -105,7 +103,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
 
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
+  _fixed_point_solve->setInnerSolve(*_feproblem_solve);
   _time = _system_time;
 
   if (isParamValid("normalization"))
@@ -151,9 +149,6 @@ Eigenvalue::init()
       mooseError("Normalization postprocessor ", normpp, " requires execute_on = 'linear'");
   }
 
-  // Does not allow time kernels
-  checkIntegrity();
-
   // Provide vector of ones to solver
   // "auto_initialization" is on by default and we init the vector values associated
   // with eigen-variables as ones. If "auto_initialization" is turned off by users,
@@ -165,9 +160,7 @@ Eigenvalue::init()
   if (getParam<bool>("auto_initialization"))
     _eigen_problem.initEigenvector(1.0);
 
-  // Some setup
-  _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _eigen_problem.initialSetup();
+  Executioner::init();
 
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();

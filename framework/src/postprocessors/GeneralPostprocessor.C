@@ -14,8 +14,8 @@ defineLegacyParams(GeneralPostprocessor);
 InputParameters
 GeneralPostprocessor::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
-  params += Postprocessor::validParams();
+  InputParameters params = Postprocessor::validParams();
+  params += GeneralUserObject::validParams();
   return params;
 }
 

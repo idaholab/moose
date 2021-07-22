@@ -212,7 +212,7 @@ protected:
   FEProblemBase & _problem;
 
   /// inner-most solve object to perform Newton solve with PETSc on every time step
-  FEProblemSolve _feproblem_solve;
+  std::shared_ptr<FEProblemSolve> _feproblem_solve;
 
   /// Reference to nonlinear system base for faster access
   NonlinearSystemBase & _nl;
@@ -220,10 +220,6 @@ protected:
   Moose::TimeIntegratorType _time_scheme;
   std::shared_ptr<TimeStepper> _time_stepper;
 
-  /// Current timestep.
-  int & _t_step;
-  /// Current time
-  Real & _time;
   /// Previous time
   Real & _time_old;
   /// Current delta t... or timestep size.

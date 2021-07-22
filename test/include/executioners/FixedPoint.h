@@ -18,7 +18,7 @@ class FixedPoint : public SolveObject
 public:
   static InputParameters validParams();
 
-  FixedPoint(Executioner & ex);
+  FixedPoint(const InputParameters & parameters);
 
   virtual bool solve() override;
 

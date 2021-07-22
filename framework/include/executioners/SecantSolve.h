@@ -15,7 +15,7 @@
 class SecantSolve : public FixedPointSolve
 {
 public:
-  SecantSolve(Executioner & ex);
+  SecantSolve(const InputParameters & parameters);
 
   static InputParameters validParams();
 

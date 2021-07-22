@@ -23,7 +23,7 @@ InputParameters validParams<PicardSolve>();
 class PicardSolve : public FixedPointSolve
 {
 public:
-  PicardSolve(Executioner & ex);
+  PicardSolve(const InputParameters & parameters);
 
   static InputParameters validParams();
 

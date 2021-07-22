@@ -17,7 +17,7 @@
 class FixedPointSolve : public SolveObject
 {
 public:
-  FixedPointSolve(Executioner & ex);
+  FixedPointSolve(const InputParameters & parameters);
 
   virtual ~FixedPointSolve() = default;
 

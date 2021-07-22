@@ -15,20 +15,23 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
+registerMooseObject("MooseApp", SteffensenSolve);
+
 InputParameters
 SteffensenSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
+  params.addClassDescription("Steffensen iteration for tightly coupled multiphysics calculations.");
 
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex)
+SteffensenSolve::SteffensenSolve(const InputParameters & parameters) : FixedPointSolve(parameters)
 {
   allocateStorage(true);
 
   // Steffensen method uses half-steps
-  if (!parameters().isParamSetByAddParam("fixed_point_min_its"))
+  if (!parameters.isParamSetByAddParam("fixed_point_min_its"))
     _min_fixed_point_its *= 2;
   _max_fixed_point_its *= 2;
 }

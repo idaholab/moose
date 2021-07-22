@@ -14,8 +14,8 @@ defineLegacyParams(ElementVectorPostprocessor);
 InputParameters
 ElementVectorPostprocessor::validParams()
 {
-  InputParameters params = ElementUserObject::validParams();
-  params += VectorPostprocessor::validParams();
+  InputParameters params = VectorPostprocessor::validParams();
+  params += ElementUserObject::validParams();
   return params;
 }
 

@@ -142,11 +142,9 @@ Transient::validParams()
 Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
-    _feproblem_solve(*this),
+    _feproblem_solve(addSolveObject<FEProblemSolve>()),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
-    _t_step(_problem.timeStep()),
-    _time(_problem.time()),
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
@@ -175,7 +173,7 @@ Transient::Transient(const InputParameters & parameters)
     _final_timer(registerTimedSection("final", 1)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
+  fixedPointSolve().setInnerSolve(*_feproblem_solve);
 
   // Handle deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
@@ -187,7 +185,7 @@ Transient::Transient(const InputParameters & parameters)
   if (!parameters.isParamSetByAddParam("ss_tmin"))
     _steady_state_start_time = getParam<Real>("ss_tmin");
 
-  _t_step = 0;
+  _time_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
 
@@ -239,8 +237,7 @@ Transient::init()
     _time_stepper = _app.getFactory().create<TimeStepper>("ConstantDT", "TimeStepper", pars);
   }
 
-  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _problem.initialSetup();
+  Executioner::init();
 
   /**
    * If this is a restart run, the user may want to override the start time, which we already set in
@@ -262,9 +259,10 @@ Transient::init()
 
   if (_app.isRecovering()) // Recover case
   {
-    if (_t_step == 0)
-      mooseError("Internal error in Transient executioner: _t_step is equal to 0 while recovering "
-                 "in init().");
+    if (_time_step == 0)
+      mooseError(
+          "Internal error in Transient executioner: _time_step is equal to 0 while recovering "
+          "in init().");
 
     _dt_old = _dt;
   }
@@ -277,7 +275,7 @@ Transient::preExecute()
 
   if (!_app.isRecovering())
   {
-    _t_step = 0;
+    _time_step = 0;
     _dt = 0;
     _next_interval_output_time = 0.0;
     if (!_app.isRestarting())
@@ -327,7 +325,7 @@ Transient::execute()
 
   if (lastSolveConverged())
   {
-    _t_step++;
+    _time_step++;
 
     /*
      * Call the multi-app executioners endStep and
@@ -336,7 +334,7 @@ Transient::execute()
      * problems because Transient::endStep and Transient::postStep get called from
      * TransientMultiApp::solveStep in that case.
      */
-    if (!_fixed_point_solve->autoAdvance())
+    if (!fixedPointSolve().autoAdvance())
     {
       _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
@@ -373,16 +371,16 @@ Transient::incrementStepOrReject()
     if (!_xfem_repeat_step)
     {
 #ifdef LIBMESH_ENABLE_AMR
-      if (_t_step != 0)
+      if (_time_step != 0)
         _problem.adaptMesh();
 #endif
 
       _time_old = _time;
-      _t_step++;
+      _time_step++;
 
       _problem.advanceState();
 
-      if (_t_step == 1)
+      if (_time_step == 1)
         return;
 
       /*
@@ -392,7 +390,7 @@ Transient::incrementStepOrReject()
        * problems because Transient::endStep and Transient::postStep get called from
        * TransientMultiApp::solveStep in that case.
        */
-      if (!_fixed_point_solve->autoAdvance())
+      if (!fixedPointSolve().autoAdvance())
       {
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
@@ -436,7 +434,7 @@ Transient::takeStep(Real input_dt)
   _problem.onTimestepBegin();
 
   _time_stepper->step();
-  _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
+  _xfem_repeat_step = fixedPointSolve().XFEMRepeatStep();
 
   _last_solve_converged = _time_stepper->converged();
 
@@ -446,7 +444,7 @@ Transient::takeStep(Real input_dt)
     return;
   }
 
-  if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
+  if (!(_problem.haveXFEM() && fixedPointSolve().XFEMRepeatStep()))
   {
     if (lastSolveConverged())
       _time_stepper->acceptStep();
@@ -498,22 +496,22 @@ Real
 Transient::computeConstrainedDT()
 {
   //  // If start up steps are needed
-  //  if (_t_step == 1 && _n_startup_steps > 1)
+  //  if (_time_step == 1 && _n_startup_steps > 1)
   //    _dt = _input_dt/(double)(_n_startup_steps);
-  //  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+  //  else if (_time_step == 1+_n_startup_steps && _n_startup_steps > 1)
   //    _dt = _input_dt;
 
   Real dt_cur = _dt;
   std::ostringstream diag;
 
   // After startup steps, compute new dt
-  if (_t_step > _n_startup_steps)
+  if (_time_step > _n_startup_steps)
     dt_cur = getDT();
 
   else
   {
     diag << "Timestep < n_startup_steps, using old dt: " << std::setw(9) << std::setprecision(6)
-         << std::setfill('0') << std::showpoint << std::left << _dt << " tstep: " << _t_step
+         << std::setfill('0') << std::showpoint << std::left << _dt << " tstep: " << _time_step
          << " n_startup_steps: " << _n_startup_steps << std::endl;
   }
   _unconstrained_dt = dt_cur;
@@ -610,7 +608,7 @@ Transient::keepGoing()
       }
 
       // Check for stop condition based upon number of simulation steps and/or solution end time:
-      if (static_cast<unsigned int>(_t_step) >= _num_steps)
+      if (static_cast<unsigned int>(_time_step) >= _num_steps)
         keep_going = false;
 
       if ((_time >= _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))

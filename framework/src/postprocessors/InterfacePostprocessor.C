@@ -12,8 +12,8 @@
 InputParameters
 InterfacePostprocessor::validParams()
 {
-  InputParameters params = InterfaceUserObject::validParams();
-  params += Postprocessor::validParams();
+  InputParameters params = Postprocessor::validParams();
+  params += InterfaceUserObject::validParams();
   params.addClassDescription(
       "Basic class for Interface Postprocessors. All InterfacePostprocessors "
       "should be derived from this class.");

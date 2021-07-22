@@ -143,6 +143,17 @@ InputParameters::operator=(const InputParameters & rhs)
 InputParameters &
 InputParameters::operator+=(const InputParameters & rhs)
 {
+  bool has_base = have_parameter<std::string>("_moose_base");
+  std::string base;
+  if (has_base)
+    base = InputParameters::get<std::string>("_moose_base");
+
+  bool both_has_execute_on =
+      rhs.have_parameter<ExecFlagEnum>("execute_on") && have_parameter<ExecFlagEnum>("execute_on");
+  ExecFlagEnum target_execute_on;
+  if (both_has_execute_on)
+    target_execute_on = InputParameters::get<ExecFlagEnum>("execute_on");
+
   Parameters::operator+=(rhs);
 
   // TODO: this is not a proper merge - if a particular parameter exists in both this and rhs,
@@ -159,6 +170,15 @@ InputParameters::operator+=(const InputParameters & rhs)
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
   _new_to_deprecated_coupled_vars.insert(rhs._new_to_deprecated_coupled_vars.begin(),
                                          rhs._new_to_deprecated_coupled_vars.end());
+
+  if (has_base)
+    // restore the old base
+    registerBase(base);
+
+  if (both_has_execute_on)
+    // we should make the execution flags available in the merged enum
+    for (auto & item : target_execute_on.items())
+      InputParameters::set<ExecFlagEnum>("execute_on").addAvailableFlags(item);
   return *this;
 }
 

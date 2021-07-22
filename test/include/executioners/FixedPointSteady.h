@@ -21,5 +21,5 @@ public:
   FixedPointSteady(const InputParameters & parameters);
 
 protected:
-  FixedPoint _fixed_point;
+  std::shared_ptr<FixedPoint> _fixed_point;
 };
