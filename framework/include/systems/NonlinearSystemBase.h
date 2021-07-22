@@ -273,13 +273,6 @@ public:
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
 
   /**
-   * Finds the implicit sparsity graph between geometrically related dofs.
-   */
-  void
-  findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
-                                       std::map<dof_id_type, std::vector<dof_id_type>> & graph);
-
-  /**
    * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being
    * coupled that
    * are related geometrically (i.e. near each other across a gap).
@@ -955,6 +948,13 @@ protected:
   std::unique_ptr<DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
+  /**
+   * Finds the implicit sparsity graph between geometrically related dofs.
+   */
+  void findImplicitGeometricCouplingEntries(
+      GeometricSearchData & geom_search_data,
+      std::unordered_map<dof_id_type, std::vector<dof_id_type>> & graph);
+
   /**
    * Setup group scaling containers
    */
