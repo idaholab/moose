@@ -385,16 +385,24 @@ rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVec
 }
 
 /**
- * Interpolates with a limiter
+ * Produce the interpolation coefficients in the equation:
+ *
+ * \phi_f = c_upwind * \phi_{upwind} + c_downwind * \phi_{downwind}
+ *
+ * A couple of examples: if we are doing an average interpolation with
+ * an orthogonal regular grid, then the pair will be (0.5, 0.5). If we are doing an
+ * upwind interpolation then the pair will be (1.0, 0.0).
+ *
+ * @return a pair where the first Real is c_upwind and the second Real is c_downwind
  */
 template <typename Scalar, typename Vector>
-ADReal
-interpolate(const Limiter & limiter,
-            const Scalar & phi_upwind,
-            const Scalar & phi_downwind,
-            const Vector & grad_phi_upwind,
-            const FaceInfo & fi,
-            const bool fi_elem_is_upwind)
+std::pair<ADReal, ADReal>
+interpCoeffs(const Limiter & limiter,
+             const Scalar & phi_upwind,
+             const Scalar & phi_downwind,
+             const Vector & grad_phi_upwind,
+             const FaceInfo & fi,
+             const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
   const auto r_f = rF(phi_upwind,
@@ -407,7 +415,22 @@ interpolate(const Limiter & limiter,
 
   const auto g = beta * (1. - w_f);
 
-  return (1. - g) * phi_upwind + g * phi_downwind;
+  return std::make_pair(1. - g, g);
+}
+/**
+ * Interpolates with a limiter
+ */
+template <typename Scalar, typename Vector>
+ADReal
+interpolate(const Limiter & limiter,
+            const Scalar & phi_upwind,
+            const Scalar & phi_downwind,
+            const Vector & grad_phi_upwind,
+            const FaceInfo & fi,
+            const bool fi_elem_is_upwind)
+{
+  auto pr = interpCoeffs(limiter, phi_upwind, phi_downwind, grad_phi_upwind, fi, fi_elem_is_upwind);
+  return pr.first * phi_upwind + pr.second * phi_downwind;
 }
 
 }
