@@ -9,26 +9,28 @@
 
 #pragma once
 
-#include "CZMMaterialBase.h"
+#include "CZMComputeLocalTractionIncrementalBase.h"
 
 /**
  * Implementation of the non-stateful exponential traction separation law
  * proposed by Salehani, Mohsen Khajeh and Irani, Nilgoon 2018
  **/
-class SalehaniIrani3DCTraction : public CZMMaterialBase
+class SalehaniIrani3DCTractionIncremental : public CZMComputeLocalTractionIncrementalBase
 {
 public:
   static InputParameters validParams();
-  SalehaniIrani3DCTraction(const InputParameters & parameters);
+  SalehaniIrani3DCTractionIncremental(const InputParameters & parameters);
 
 protected:
-  virtual RealVectorValue computeTraction() override;
-
-  virtual RankTwoTensor computeTractionDerivatives() override;
+  void computeInterfaceTractionIncrementAndDerivatives() override;
 
   /// the displacement jump associated to the maximum traction
-  const std::vector<Real> _delta_u0;
+  const RealVectorValue _delta_u0;
 
   /// the vector representing the maximum allowed traction in each direction
-  const std::vector<Real> _max_allowable_traction;
+  const RealVectorValue _max_allowable_traction;
+
+private:
+  RealVectorValue computeTraction();
+  RankTwoTensor computeTractionDerivatives();
 };
