@@ -390,21 +390,24 @@ rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVec
 template <typename Scalar, typename Vector>
 ADReal
 interpolate(const Limiter & limiter,
-            const Scalar & phiC,
-            const Scalar & phiD,
-            const Vector & gradC,
+            const Scalar & phi_upwind,
+            const Scalar & phi_downwind,
+            const Vector & grad_phi_upwind,
             const FaceInfo & fi,
-            const bool C_is_elem)
+            const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
-  const auto r_f = rF(phiC, phiD, gradC, C_is_elem ? fi.dCF() : RealVectorValue(-fi.dCF()));
+  const auto r_f = rF(phi_upwind,
+                      phi_downwind,
+                      grad_phi_upwind,
+                      fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
   const auto beta = limiter(r_f);
 
-  const auto w_f = C_is_elem ? fi.gC() : (1. - fi.gC());
+  const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 
   const auto g = beta * (1. - w_f);
 
-  return (1. - g) * phiC + g * phiD;
+  return (1. - g) * phi_upwind + g * phi_downwind;
 }
 
 }
