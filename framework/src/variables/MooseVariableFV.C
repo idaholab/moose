@@ -688,6 +688,10 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
   mooseAssert(isExtrapolatedBoundaryFace(fi),
               "This function should only be called on extrapolated boundary faces");
 
+  auto it = _face_to_value.find(&fi);
+  if (it != _face_to_value.end())
+    return it->second;
+
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
 
@@ -697,7 +701,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
     // for us
     adGradSln(elem);
 
-    auto it = _face_to_value.find(&fi);
+    it = _face_to_value.find(&fi);
     mooseAssert(it != _face_to_value.end(),
                 "adGradSln(elem) should have generated the boundary face value for us");
 
