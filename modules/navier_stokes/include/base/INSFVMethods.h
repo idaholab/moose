@@ -10,6 +10,8 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseError.h"
+#include "MooseTypes.h"
 
 // Finds the friction velocity using standard velocity wall functions formulation.
 // It is used in WallFunctionWallShearStressAux, WallFunctionYPlusAux and

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMethods.h"
-#include "MooseError.h"
 
 ADReal
 findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
@@ -22,6 +21,7 @@ findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
 
   ADReal u_star = std::sqrt(nu * u / dist);
 
+  //Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
     ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;

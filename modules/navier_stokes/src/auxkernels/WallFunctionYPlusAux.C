@@ -8,35 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WallFunctionYPlusAux.h"
+#include "INSFVMethods.h"
 
 registerMooseObject("NavierStokesApp", WallFunctionYPlusAux);
-
-ADReal
-findUStar2(Real mu, Real rho, ADReal u, Real dist)
-{
-  constexpr int MAX_ITERS{50};
-  constexpr Real REL_TOLERANCE{1e-6};
-
-  constexpr Real von_karman{0.4187};
-
-  Real nu = mu / rho;
-
-  ADReal u_star = std::sqrt(nu * u / dist);
-
-  for (int i = 0; i < MAX_ITERS; ++i)
-  {
-    ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;
-    ADReal deriv = (1 + std::log(u_star * dist / (0.111 * nu))) / von_karman;
-    ADReal new_u_star = u_star - residual / deriv;
-
-    ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
-    u_star = new_u_star;
-    if (rel_err < REL_TOLERANCE)
-      return u_star;
-  }
-
-  mooseError("Could not find the friction velocity for WallFunctionYPlusAux");
-}
 
 InputParameters
 WallFunctionYPlusAux::validParams()
@@ -130,7 +104,7 @@ WallFunctionYPlusAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = findUStar2(_mu[_qp].value(), _rho, parallel_speed, dist);
+  ADReal u_star = findUStar(_mu[_qp].value(), _rho, parallel_speed, dist);
   ADReal tau = u_star * u_star * _rho;
 
   return (dist * u_star * _rho / _mu[_qp]).value();
