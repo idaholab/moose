@@ -64,6 +64,4 @@ WallDistanceMixingLengthAux::computeValue()
   }
   // Return the mixing length
   return _von_karman_const * std::sqrt(min_sq_dist);
-
-
 }

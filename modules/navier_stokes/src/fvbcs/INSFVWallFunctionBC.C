@@ -79,9 +79,9 @@ INSFVWallFunctionBC::computeQpResidual()
 
   // Compute the shear stress component for this momentum equation
   if (_axis_index == 0)
-     return tau * parallel_dir(0);
-   else if (_axis_index == 1)
-     return tau * parallel_dir(1);
-   else
-     return tau * parallel_dir(2);
+    return tau * parallel_dir(0);
+  else if (_axis_index == 1)
+    return tau * parallel_dir(1);
+  else
+    return tau * parallel_dir(2);
 }

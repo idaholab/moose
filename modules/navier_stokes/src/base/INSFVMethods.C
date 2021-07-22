@@ -21,7 +21,7 @@ findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
 
   ADReal u_star = std::sqrt(nu * u / dist);
 
-  //Newton-Raphson method to solve for u_star (friction velocity).
+  // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
     ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;
