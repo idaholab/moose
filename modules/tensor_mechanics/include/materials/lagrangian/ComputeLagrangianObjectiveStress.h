@@ -23,11 +23,11 @@
 //    This class is then responsible for completing the cauchy stress
 //    update with an objective integration, providing _cauchy_stress
 //    and _cauchy_jacobian properties
-class ComputeLagrangianStressSmall : public ComputeLagrangianStressCauchy
+class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy
 {
 public:
   static InputParameters validParams();
-  ComputeLagrangianStressSmall(const InputParameters & parameters);
+  ComputeLagrangianObjectiveStress(const InputParameters & parameters);
 
 protected:
   /// Initialize the new (small) stress

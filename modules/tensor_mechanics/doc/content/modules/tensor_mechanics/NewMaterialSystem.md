@@ -119,7 +119,7 @@ to define the model.
 | [`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md) | None                                                                                 | Cauchy stress, $\sigma_{ij}$                 | $\frac{d \sigma_{ij}}{d \Delta l_{kl}}$ |
 | [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md)       | None                                                                                 | 1st Piola-Kirchhoff stress, $P_{iJ}$         | $\frac{d P_{iJ}}{d F_{kL}}$             |
 | [`ComputeLagrangianStressPK2`](ComputeLagrangianStressPK2.md)       | Green-Lagrange strain, $E_{IJ} = \frac{1}{2}\left(F_{kI}F_{kJ} - \delta_{IJ}\right)$ | 2nd Piola-Kirchhoff stress, $S_{IJ}$         | $\frac{d S_{IJ}}{d E_{IJ}}$             |
-| [`ComputeLagrangianStressSmall`](ComputeLagrangianStressSmall.md)   | None                                                                                 | Small stress, $s_{ij}$                       | $\frac{d s_{ij}}{d \varepsilon_{kl}}$   |
+| [`ComputeLagrangianObjectiveStress`](ComputeLagrangianObjectiveStress.md)   | None                                                                                 | Small stress, $s_{ij}$                       | $\frac{d s_{ij}}{d \varepsilon_{kl}}$   |
 
 
 

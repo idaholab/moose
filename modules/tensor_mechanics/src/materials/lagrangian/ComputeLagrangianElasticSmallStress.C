@@ -5,7 +5,7 @@ registerMooseObject("TensorMechanicsApp", ComputeLagrangianElasticSmallStress);
 InputParameters
 ComputeLagrangianElasticSmallStress::validParams()
 {
-  InputParameters params = ComputeLagrangianStressSmall::validParams();
+  InputParameters params = ComputeLagrangianObjectiveStress::validParams();
 
   params.addParam<MaterialPropertyName>(
       "elasticity_tensor", "elasticity_tensor", "The name of the elasticity tensor.");
@@ -15,7 +15,7 @@ ComputeLagrangianElasticSmallStress::validParams()
 
 ComputeLagrangianElasticSmallStress::ComputeLagrangianElasticSmallStress(
     const InputParameters & parameters)
-  : ComputeLagrangianStressSmall(parameters),
+  : ComputeLagrangianObjectiveStress(parameters),
     _elasticity_tensor(
         getMaterialProperty<RankFourTensor>(getParam<MaterialPropertyName>("elasticity_tensor")))
 {

@@ -12,7 +12,7 @@ which returns the small stress as a linear function of the small strain.
 $C_{ijkl}$ is an elasticity tensor calculated by a [`ComputeElasticityTensor`](ComputeElasticityTensor.md) object,
 with a name provided in the stress calculator input.
 
-This model inherits from [`ComputeLagrangianStressSmall`](ComputeLagrangianStressSmall.md) and so
+This model inherits from [`ComputeLagrangianObjectiveStress`](ComputeLagrangianObjectiveStress.md) and so
 it will integrate an objective stress rate to provide a "hypoelastic" large deformation constitutive
 response based solely on the small strain model.
 

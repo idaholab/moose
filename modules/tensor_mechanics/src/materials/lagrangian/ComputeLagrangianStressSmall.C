@@ -1,7 +1,7 @@
-#include "ComputeLagrangianStressSmall.h"
+#include "ComputeLagrangianObjectiveStress.h"
 
 InputParameters
-ComputeLagrangianStressSmall::validParams()
+ComputeLagrangianObjectiveStress::validParams()
 {
   InputParameters params = ComputeLagrangianStressCauchy::validParams();
 
@@ -14,7 +14,8 @@ ComputeLagrangianStressSmall::validParams()
   return params;
 }
 
-ComputeLagrangianStressSmall::ComputeLagrangianStressSmall(const InputParameters & parameters)
+ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
+    const InputParameters & parameters)
   : ComputeLagrangianStressCauchy(parameters),
     _small_stress(declareProperty<RankTwoTensor>(_base_name + "small_stress")),
     _small_stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "small_stress")),
@@ -27,7 +28,7 @@ ComputeLagrangianStressSmall::ComputeLagrangianStressSmall(const InputParameters
 }
 
 void
-ComputeLagrangianStressSmall::initQpStatefulProperties()
+ComputeLagrangianObjectiveStress::initQpStatefulProperties()
 {
   ComputeLagrangianStressBase::initQpStatefulProperties();
 
@@ -36,7 +37,7 @@ ComputeLagrangianStressSmall::initQpStatefulProperties()
 }
 
 void
-ComputeLagrangianStressSmall::computeQpCauchyStress()
+ComputeLagrangianObjectiveStress::computeQpCauchyStress()
 {
   computeQpSmallStress();
   // Actually do the objective integration
@@ -53,7 +54,7 @@ ComputeLagrangianStressSmall::computeQpCauchyStress()
 }
 
 void
-ComputeLagrangianStressSmall::computeQpObjectiveUpdate()
+ComputeLagrangianObjectiveStress::computeQpObjectiveUpdate()
 {
   // Common to most/all models
 
@@ -96,14 +97,14 @@ ComputeLagrangianStressSmall::computeQpObjectiveUpdate()
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::updateTensor(const RankTwoTensor & Q)
+ComputeLagrangianObjectiveStress::updateTensor(const RankTwoTensor & Q)
 {
   auto I = RankTwoTensor::Identity();
   return (1.0 + Q.trace()) * I.mixedProductIkJl(I) - Q.mixedProductIkJl(I) - I.mixedProductIkJl(Q);
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::truesdellTangent(const RankTwoTensor & S)
+ComputeLagrangianObjectiveStress::truesdellTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
 
@@ -111,7 +112,7 @@ ComputeLagrangianStressSmall::truesdellTangent(const RankTwoTensor & S)
 }
 
 RankFourTensor
-ComputeLagrangianStressSmall::jaumannTangent(const RankTwoTensor & S)
+ComputeLagrangianObjectiveStress::jaumannTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
 

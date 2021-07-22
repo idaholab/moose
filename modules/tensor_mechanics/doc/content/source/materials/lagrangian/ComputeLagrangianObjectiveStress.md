@@ -1,4 +1,4 @@
-# ComputeLagrangianStressSmall
+# ComputeLagrangianObjectiveStress
 
 ## Overview
 
@@ -38,7 +38,7 @@ FEA code uses the Jaumann rate, so enabling this option allows users to
 compare results to that product.
 
 This conversion only needs to happen for large deformation kinematics.
-The `ComputeLagrangianStressSmall` base class takes the
+The `ComputeLagrangianObjectiveStress` base class takes the
 `large_kinematics` flag as input and only performs the 
 objective integration process if it is set to `true`.
 
@@ -63,7 +63,7 @@ The choice of the kinematic tensor $Q_{ik}$ defines the
 particular objective rate, so long as the model returns the correct tangent
 matrix $\hat{T}_{ijkl}$.
 
-The conversion process in `ComputeLagrangianStressSmall` must solve this
+The conversion process in `ComputeLagrangianObjectiveStress` must solve this
 equation to find the updated Cauchy stress for an arbitrary kinematic
 measure $Q$.
 It turns out this update is linear and the solution for the updated Cauchy stress
@@ -101,7 +101,7 @@ common case of scalar internal variables, as these have no associated direction.
 
 ## Specific Objective Rates
 
-The `ComputeLagrangianStressSmall` class choices between different objective rates with the `objective_rate`
+The `ComputeLagrangianObjectiveStress` class choices between different objective rates with the `objective_rate`
 input parameter.  Currently there are two choices for implemented rates: the (default) Truesdell rate, `truesdell`,
 and the Jaumnn rate, `jaumann`.
 
@@ -176,7 +176,7 @@ regardless of the time increment, including one of the options in the base tenso
 Models may exhibit anomalous, unphysical behavior when subjected to large shear deformations.  [shear] compares the results of
 shearing a block of material to very large shear strains using both the Truesdell and Jaumann rates.  The 
 shear stress/strain response for the Jaumann model oscillates, which is not a reasonable, physical response for the
-elastic material.  The Truesdell rate, which is used by default by `ComputeLagrangianStressSmall` models, avoids
+elastic material.  The Truesdell rate, which is used by default by `ComputeLagrangianObjectiveStress` models, avoids
 this non-physical behavior.
 
 !media media/tensor_mechanics/shearcompare.png

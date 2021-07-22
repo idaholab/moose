@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "Material.h"
+
 /// Calculate the tensor corresponding to homogenization gradient
 //    This class takes a scalar field of the right size representing a
 //    constant deformation gradient over the domain and casts it into

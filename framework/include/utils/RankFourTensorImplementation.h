@@ -397,8 +397,8 @@ RankFourTensorTempl<T>::inverse()
   // storage)
 
   RankFourTensorTempl<T> ret;
-  Eigen::Map<Eigen::Matrix<T, 9, 9>>(ret._vals, 9, 9) =
-      Eigen::Map<Eigen::Matrix<T, 9, 9>>(_vals, 9, 9).inverse();
+  Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(ret._vals, 9, 9) =
+      Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(_vals, 9, 9).inverse();
 
   return ret;
 }
