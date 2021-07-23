@@ -15,20 +15,6 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
-#include "MooseTypes.h"
-#include "MooseVariableFEBase.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
-#include "MooseVariableField.h"
-//#include "MooseVariableData.h"
-
-#include "libmesh/numeric_vector.h"
-#include "libmesh/dof_map.h"
-#include "libmesh/elem.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/dense_vector.h"
-#include "libmesh/dense_vector.h"
-
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters)
