@@ -694,7 +694,7 @@ private:
   /// AD u
   ADTemplateVariableValue<OutputType> _ad_u;
   ADTemplateVariableValue<OutputType> _ad_u_average;
-ADTemplateVariableGradient<OutputType> _ad_grad_u_average;
+  ADTemplateVariableGradient<OutputType> _ad_grad_u_average;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
   MooseArray<ADReal> _ad_dof_values;

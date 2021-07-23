@@ -15,6 +15,20 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
+#include "MooseTypes.h"
+#include "MooseVariableFEBase.h"
+#include "SubProblem.h"
+#include "MooseMesh.h"
+#include "MooseVariableField.h"
+//#include "MooseVariableData.h"
+
+#include "libmesh/numeric_vector.h"
+#include "libmesh/dof_map.h"
+#include "libmesh/elem.h"
+#include "libmesh/quadrature.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/dense_vector.h"
+
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters)
@@ -436,6 +450,35 @@ MooseVariableFE<OutputType>::computeFaceValues(const FaceInfo & fi)
   }
   else
     mooseError("FE to FV coupling broken.");
+}
+
+template <>
+void
+MooseVariableFE<Real>::computeAdGradFaceAvg(const FaceInfo & fi)
+{
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
+#endif
+
+  _ad_grad_u_face = adGradSlnAvg();
+  _ad_grad_neighbor_u_face = adGradSlnAvgNeighbor();
+
+  // This is needed since the gradients are not calculated through reinit
+  // with MooseVariableFE<Real>::adGradSln(const FaceInfo & fi)
+  computeFaceValues(fi);
+
+  _ad_grad_u_face = adGradSlnAvg();
+  _ad_grad_neighbor_u_face = adGradSlnAvgNeighbor();
+
+  _ad_grad_face_avg = (_ad_grad_u_face[0] + _ad_grad_neighbor_u_face[0]) / 2.0;
+}
+
+template <>
+VectorValue<ADReal>
+MooseVariableFE<Real>::adGradSln(const FaceInfo & fi)
+{
+  computeAdGradFaceAvg(fi);
+  return _ad_grad_face_avg;
 }
 
 template <typename OutputType>

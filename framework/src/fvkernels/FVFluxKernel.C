@@ -300,3 +300,18 @@ FVFluxKernel::gradUDotNormal() const
 {
   return Moose::FV::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
 }
+
+ADRealVectorValue
+FVFluxKernel::adCoupledGradientFace(const std::string & name)
+{
+  const auto * _coupled_check = getVarHelper<MooseVariableField<Real>>(name, 0);
+
+  if (_coupled_check->isFV())
+  {
+    const MooseVariableFV<Real> * _coupled_var = dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar(name, 0));
+    return _coupled_var->adGradSln(*_face_info);
+  }
+
+  MooseVariable & _coupled_var = *getVar(name, 0);
+  return _coupled_var.adGradSln(*_face_info);
+}

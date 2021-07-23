@@ -52,6 +52,10 @@ InputParameters validParams<ArrayMooseVariable>();
 template <typename OutputType>
 class MooseVariableFE : public MooseVariableField<OutputType>
 {
+private:
+  ADTemplateVariableGradient<OutputType> _ad_grad_u_face;
+  ADTemplateVariableGradient<OutputType> _ad_grad_neighbor_u_face;
+
 public:
   using OutputGradient = typename MooseVariableField<OutputType>::OutputGradient;
   using OutputSecond = typename MooseVariableField<OutputType>::OutputSecond;
@@ -481,6 +485,13 @@ public:
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;
   virtual void computeFaceValues(const FaceInfo & fi) override;
+
+  /// Adding a adGradSln that is the average of the face gradients on both sides
+
+  VectorValue<ADReal> _ad_grad_face_avg;
+  void computeAdGradFaceAvg(const FaceInfo & fi);
+  VectorValue<ADReal> adGradSln(const FaceInfo & fi);
+
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
