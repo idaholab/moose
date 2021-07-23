@@ -64,7 +64,6 @@ class RevealExtension(command.CommandExtension):
     def postTokenize(self, page, ast):
         ast.insert(0, Section(None))
 
-
         section = None
         for child in ast.children:
             if child.name == 'Section':

@@ -2,10 +2,10 @@
 
 ## Introduction
 
-In practice an exact solution to the problem being solved is not known, since there would
+In practice an exact solution to the problem being solved is rarely known, since there would
 be no reason to perform a simulation if the answer is known. If the solution
-is not known then the error can not be known. However, it is possible to "manufacture" a solution
-using a method known as [!ac](MMS). In this step of the tutorial the two-dimensional heat equation
+is not known then the error cannot be computed. However, it is possible to "manufacture" a solution
+using a method known as the [!ac](MMS). In this step of the tutorial the two-dimensional heat equation
 will be used to simulate a physical system. Then using this simulation as a starting point a
 spatial and temporal convergence study will be performed using the [!ac](MMS).
 

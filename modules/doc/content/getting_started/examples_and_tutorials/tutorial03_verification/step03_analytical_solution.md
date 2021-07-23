@@ -8,7 +8,7 @@ shall be considered to verify a model. The verification process shall be broken 
 
 1. Define a problem, with a known exact solution.
 2. Simulate the problem.
-3. Compute the error between the known solution and simulation.
+3. Compute the error between the known solution and the simulation.
 4. Perform convergence study.
 
 ## Problem Statement
@@ -25,7 +25,7 @@ $\dot{q}$ is the heat source, $k$ is thermal conductivity, and $\alpha$ is the t
 
 Thermal diffusivity is defined as the ratio of thermal conductivity ($k$) to the product of density ($\rho$)
 and specific heat capacity ($c$). The system is subjected to Neumann boundary conditions at the
-left boundary ($x=0$) and the natural boundary condition on
+left boundary ($x=0$) and the natural boundary condition (zero flux) on
 the opposite boundary.
 
 ## Simulation
@@ -67,10 +67,10 @@ execute without failure, then the following sections should be followed to setup
 
 ### Simulation Input
 
-[!ac](MOOSE) operates using input files, as such, an input file shall be detailed that is capable of
+[!ac](MOOSE) operates using input files, as such, an input file is detailed below that is capable of
 simulating this problem and its use demonstrated. This section will describe the various sections
 of the input file that should be created for the current problem. The location of this input
-file is arbitrary, but it shall be assumed that the content below will be in a file named
+file is arbitrary, but it is assumed that the content below will be in a file named
 `~/projects/problems/verification/1d_analytical.i`. This file can be created and edited
 using any text editor program.
 
@@ -87,7 +87,7 @@ the variable is arbitrary; "T" was selected here to match the equation.
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Variables
 
-The "volumetric" portions of the wak form are defined using the
+The "volumetric" portions of the weak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of two `Kernel` objects as follows.
 
@@ -182,21 +182,20 @@ with the finite element implementation. However, if the error is reduced at the 
 with decreasing mesh size and timestep size then it is reasonable that the finite element
 formulation and temporal numerical integration are implemented correctly.
 
-[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, as
-such shall be used here. For details regarding the package, please refer to the [mms.md] documentation.
+[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [mms.md] documentation.
 
 ### Spatial Convergence
 
-To perform a spatial convergence the input file create needs to be executed with decreasing element
+To perform a spatial convergence the input file created needs to be executed with decreasing element
 size, which in [!ac](MOOSE) can be done by adding the `Mesh/uniform_refine=x` option to the
 command line with "x" being an integer representing the number of refinements to perform.
 
-The `mms` package includes a function (`run_spatial`) for performing and automatically modifies
-the supplied input file to perform increase levels of uniform refinement. After each run the
+The `mms` package includes a function (`run_spatial`) for performing and automatically modifying
+the supplied input file to perform increasing levels of uniform refinement. After each run the
 results are collected into a `pandas.DataFrame` object, which can be used in the `ConvergencePlot`
 object to create a plot.
 
-For example, for [tutorial03-analytical-spatial-code] results in spatial convergence plot shown in
+For example, for [tutorial03-analytical-spatial-code] results of the spatial convergence study are shown as a plot in
 [tutorial03-analytical-spatial-graph]. In this case, the input file created above (`1d_analytical.i`)
 is executed with six levels of uniform refinement (0--5). Notice that an extra
 argument `Mesh/nx=10` is supplied to reduce the number of elements to 10 for the initial mesh. The
@@ -239,7 +238,7 @@ The analysis performed here provides three levels of verification: (1) the finit
 matches the known solution with minimal error, (2) the spatial error converges at the
 expected rate for first-order finite elements, and (3) the temporal error converges at the
 expected rate for second-order numerical integration. These results verify that the
-simulation is computing correctly for the 1D heat equation.
+simulation is correctly solving the 1D heat equation.
 
 !bibtex bibliography !!include to make sure next/previous are last on page
 

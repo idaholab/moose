@@ -4,13 +4,13 @@
 
 To begin this tutorial an overview of the transient heat equation is presented, as it will be
 used as the basis of the tutorial throughout the various steps. This equation has already been
-coded and is provided in the [heat conduction module](modules/heat_conduction/index.md). For
+implemented and is provided in the [heat conduction module](modules/heat_conduction/index.md). For
 a complete description please refer to the module specific documentation.
 
 ## Transient Heat Equation
 
 !equation id=tutorial03-heat-eq
-\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega
+\rho(\vec{x}) c(\vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega
 
 $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the
 density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source,

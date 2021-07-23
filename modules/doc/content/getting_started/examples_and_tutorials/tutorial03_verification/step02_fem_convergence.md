@@ -47,7 +47,7 @@ computed error is the $L_2$ norm.
 
 !alert tip title=Eliminate spatial error if possible
 When performing a temporal convergence study, it is best to design the simulation such
-that error associated with [!ac](FEM) approximation is eliminated or minimal.
+that error associated with the [!ac](FEM) approximation is eliminated or minimal.
 
 
 !bibtex bibliography !!include to make sure next/previous are last on page

@@ -1,6 +1,6 @@
 # Tutorial 3: Code Verification id=tutorial-03
 
-In this tutorial the use of analytically solutions and the [!ac](MMS) are presented for use as
+In this tutorial the use of analytical solutions and the [!ac](MMS) are presented for use as
 code verification methods.
 
 ## Tutorial Contents id=contents
