@@ -5,7 +5,7 @@
 ## Theory: Heat Equation
 
 !equation
-\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega,
+\rho(\vec{x}) c(\vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q}\,\text{for}\,\vec{x} \in \Omega,
 
 where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinates, $\rho$ is the
 density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source,
@@ -64,11 +64,11 @@ $\lparen \phi_i, \dot{q} \rparen\implies$ `HeatSouce`
 
 ## Practice: BoundaryCondition Objects
 
-In MOOSE, boundary terms are represent by `BoundaryConditionls` objects and added within the `[BCs]`
+In MOOSE, boundary terms are represented by `BoundaryCondition` objects and added within the `[BCs]`
 input block. For this problem the necessary objects exist within the framework.
 
 
-$-\langle \phi_i, k(t,\vec{x}) \nabla T_h \cdot \hat{n} \rangle\implies$ `NeumanBC`
+$-\langle \phi_i, k(t,\vec{x}) \nabla T_h \cdot \hat{n} \rangle\implies$ `NeumannBC`
 
 !listing tutorial03_verification/step04_mms/2d_main.i link=False block=BCs remove=BCs/bottom
 

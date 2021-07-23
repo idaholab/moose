@@ -31,14 +31,14 @@ where $\Kappa$ is the extinction coefficient.
 The system is subjected to Neumann boundary conditions at the top surface boundary ($y=0$),
 which approximates the radiative cooling of the snow surface. The left and
 right sides of the domain are subjected to the natural boundary condition, which for this problem
-approximates an "insulated" boundary condition. Finally, the bottom is subjected a constant
-temperature.
+approximates an "insulated" boundary condition. Finally, a constant
+temperature is imposed on the bottom boundary.
 
 ## Simulation
 
 The heat conduction module of [!ac](MOOSE) is capable of performing the desired simulation.
 The values in [tutorial03-snow-values] provide the numeric values to be used for the simulation,
-which will execute for nine hours of simulation time.
+which will solve for nine hours of simulation time.
 
 !table id=tutorial03-snow-values caption=Numerical values used for two-dimensional simulation of snow.
 | Variable          | Value  | Units |
@@ -75,7 +75,7 @@ in the `[ICs]` block. In this case a constant value throughout the domain is pro
 The volumetric heat source, $\dot{q}$, is defined using the
 [Function System](syntax/Functions/index.md) using the `[Functions]` block. The function, as defined
 in [tutorial03_heat_source] can be defined directly in the input file using the parsed function
-capability. The "vars" and "vals" parameters are used to defined named constants within the
+capability. The "vars" and "vals" parameters are used to define named constants within the
 equation. The variables "x", "y", "z", and "t" are always available and represent the
 corresponding spatial location and time.
 
@@ -153,7 +153,7 @@ The method can be summarized into three basic steps:
    solution should be selected that cannot be exactly represented by the [!ac](FEM) shape function or
    the numerical integration scheme, for spatial and temporal convergence studies, respectively.
    Without these characteristic the assumed solution could possibly be solved exactly, thus there will not be
-   error and the solution cannot converge to the solution.
+   error and the rate of convergence to the solution cannot be examined.
 
 2. Apply the assumed solution to the [!ac](PDE) to compute a residual function. For example, consider
    the following simple [!ac](PDE).
@@ -191,10 +191,10 @@ shall be the assumed solution for the spatial study.
 T = t\sin(\pi x)\cdot\sin(5\pi y)
 
 The assumed solution has two characteristics: it cannot be exactly represented by the
-first-order [!ac](FEM) shape functions and the first-order time integration can capture the time
+first-order [!ac](FEM) shape functions and the first-order time integration can exactly capture the time
 portion of the equation and not result in temporal error accumulation.
 
-The `mms` package, as shown in [tutorial03_step04_function], used to compute the necessary
+The `mms` package, as shown in [tutorial03_step04_function], is used to compute the necessary
 forcing function. The package can directly output the the input file format for the computed
 forcing function and the assumed solution, making adding it to the input file trivial.
 
@@ -225,12 +225,12 @@ the additional blocks required to perform the spatial convergence study and be c
 an independent file. It shall be assumed this file is named
 `~/projects/problems/verification/2d_mms_spatial.i`.
 
-The forcing function and exact solution are added using a parsed function, in similar to the
+The forcing function and exact solution are added using a parsed function, similar to the
 existing functions within the simulation.
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Functions
 
-The forcing function is applied the the simulation by adding another heat source `Kernel` object.
+The forcing function is applied to the simulation by adding another heat source `Kernel` object.
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Kernels
 
@@ -239,13 +239,13 @@ as done in the previous example in [Step 03](tutorial03_verification/step03_anal
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Postprocessors
 
-CSV output also needs to be added, which is added as expected.
+CSV output also needs to be added,
 
 !listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Outputs
 
-At this point, it is tempting to perform the study and the reader is encourage to do so; however,
+At this point, it is tempting to perform the study and the reader is encouraged to do so; however,
 the results will be disappointing. The reason is that the initial and boundary conditions for the
-simulation do not satisfy the assumed solution. In most cases, unless the study is testing
+simulation do not satisfy the assumed solution. In most cases, unless the study is testing the
 boundary condition object specifically, the easiest approach is to use the assumed solution
 to set both the initial condition and boundary conditions. This can be done by adding
 function based initial and boundary condition objects, and setting the "active" line which
@@ -276,7 +276,7 @@ The temporal convergence study is performed in the same manner as the spatial st
 an assumed solution is selected as defined in [tutorial03_temporal_solution]. In this case, the
 spatial portion can be represented exactly by the shape functions and the temporal function
 cannot be represented by the numerical time integration scheme. A decay function is selected that
-has minimal changes in time and tends to a easy to recognize solution of `xy`.
+has minimal changes in time and tends to an easy-to-recognize solution of `xy`.
 
 !equation id=tutorial03_temporal_solution
 T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
@@ -330,6 +330,6 @@ time integration is computing the correct results.
 
 The above example demonstrates that a convergence study may be performed on simulations without
 a known solution by manufacturing a solution. Performing a convergence study is crucial to building
-robust simulations tools, as such a python package is provided to aid in performing the analysis.
+robust simulation tools, as such a python package is provided to aid in performing the analysis.
 
 !content pagination previous=tutorial03_verification/step03_analytical_solution.md

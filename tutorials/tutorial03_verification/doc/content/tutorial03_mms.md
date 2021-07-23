@@ -41,8 +41,8 @@ The[!ac](MMS) can be summarized into three basic steps:
 
 ### Assumed Solution
 
-The form of the solution is arbitrary, but certain characteristics are desirable to eliminate the
-accumulation of error unnecessarily.
+The form of the solution is arbitrary, but certain characteristics are desirable to eliminate an unnecessary
+accumulation of error.
 
 - For a spatial study, the solution +should not+ be exactly represented by the shape
   functions and +should+ be exactly represented by the numerical integration scheme.
@@ -129,7 +129,7 @@ available and represent the corresponding spatial location and time.
 
 ### Kernels
 
-The "volumetric" portions equation weak form are defined using the
+The "volumetric" portions of the weak form of the equation are defined using the
 Kernel System in the `[Kernels]` block, for this example this
 can be done with the use of three `Kernel` objects as follows.
 
@@ -340,7 +340,7 @@ $ python temporal_function.py
 
 ### Temporal Convergence: Input
 
-A third input is created. The content is follows the input to the spatial counter part, as such is
+A third input is created. The content follows the input to the spatial counter part and as such is
 included completely below.
 
 !listing tutorial03_verification/step04_mms/2d_mms_temporal.i link=false
@@ -349,7 +349,7 @@ included completely below.
 
 ### Temporal Convergence: Run
 
-The `mms` package can be used to perform the convergence study. In this case, both a first and
+The `mms` package can be used to perform the convergence study. In this case, both first and
 second-order shape functions are considered.
 
 !listing tutorial03_verification/step04_mms/step04_study.py

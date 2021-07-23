@@ -69,7 +69,7 @@
   type = Transient
   solve_type = 'NEWTON'
   dt = 600 # 10 min
-  end_time = 32400 # 9 hour (Dec. in Idaho Falls)
+  end_time = 32400 # 9 hour
 []
 
 [Outputs]

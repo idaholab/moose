@@ -28,4 +28,4 @@ The process of performing a verification study is simple in practice:
 1. Perform simulation with a known solution and measure the error.
 2. Refine the simulation (spatially or temporally) and repeat step 1.
 
-If the error is reduced at a defined rate, then your simulation is numerically correct.
+If the error is reduced at the expected rate, then your simulation is numerically correct.

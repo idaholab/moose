@@ -53,4 +53,4 @@ for i, t in enumerate(T_exact.times()):
 
 # Leave this commented out, don't want to worry about setting up ffmpeg on test machines
 # chigger.utils.img2mov('1d_analytical_*.png', '1d_analytical.mp4', duration=20, overwrite=True)
-chigger.utils.img2mov('1d_exact_*.png', '1d_exact.mp4', duration=10, overwrite=True)
+# chigger.utils.img2mov('1d_exact_*.png', '1d_exact.mp4', duration=10, overwrite=True)

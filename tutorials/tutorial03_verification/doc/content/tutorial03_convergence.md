@@ -38,7 +38,7 @@ where $t$ is time and $i$ is the time step number.
 
 There is no pre-defined measure of the element size.
 
-Often alternatives for directly computing element information is used. For example, the square root
+Often alternatives for directly computing element information are used. For example, the square root
 of the number of degrees-of-freedom can be used as a measure of element size for 2D regular grids.
 
 !---
