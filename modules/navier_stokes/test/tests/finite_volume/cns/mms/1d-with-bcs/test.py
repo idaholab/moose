@@ -214,5 +214,16 @@ class TestBasic1DVaryingPorousKTMixedUpwind(unittest.TestCase):
             print("%s slope, %f" % (key, value))
             self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
 
+class PWCNSFV(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial('pwcnsfv.i', 8, "--error", "--error-unused", y_pp=['L2sup_vel_x', 'L2pressure'])
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=['L2sup_vel_x', 'L2pressure'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('pwcnsfv.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 1., .1))
+
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
