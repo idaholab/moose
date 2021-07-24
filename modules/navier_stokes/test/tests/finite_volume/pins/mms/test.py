@@ -12,7 +12,7 @@ def run_spatial(*args, **kwargs):
 
 class TestRC(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('1d-rc.i', 5, y_pp=['L2u', 'L2p'], mpi=8)
+        df1 = run_spatial('1d-rc.i', 5, y_pp=['L2u', 'L2p'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -20,6 +20,34 @@ class TestRC(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
+
+class TestRCNoDiffusion(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial('1d-rc-no-diffusion.i', 5, y_pp=['L2u', 'L2p'])
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=['L2u', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('1d-rc-no-diffusion.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            if (key == 'L2u'):
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .1))
+            else:
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .1))
+
+class TestRCNoDiffusionStrongBC(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial('1d-rc-no-diffusion-strong-bc.i', 6, y_pp=['L2u', 'L2p'])
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=['L2u', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('1d-rc-no-diffusion-strong-bc.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            if (key == 'L2u'):
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .1))
+            else:
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .1))
 
 class TestRC_2D(unittest.TestCase):
     def test(self):
