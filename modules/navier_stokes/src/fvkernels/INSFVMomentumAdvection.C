@@ -303,6 +303,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),
                 "Surely the element has to match one of the face information's elements right?");
+    static const ADReal dummy = 0;
 
     const Point normal = elem_has_info ? fi->normal() : Point(-fi->normal());
     const Point & rc_centroid = elem_has_info ? fi->elemCentroid() : fi->neighborCentroid();
@@ -354,7 +355,18 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
           if (_w_var)
             face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-          ADReal temp_coeff = face_rho * face_velocity * surface_vector;
+          // At the point that we support more advection interpolation strategies than upwind and
+          // average (central-differencing), we will need to pass phi_downwind, phi_upwind, and
+          // grad_phi_upwind arguments to interpCoeffs. However, because upwind and average
+          // interpolations are independent of the values of those arguments we can just pass in a
+          // dummy value for the phi values and a nullptr for the gradient
+          const bool fi_elem_is_upwind = face_velocity * fi->normal() > 0;
+          const auto advection_coeffs =
+              Moose::FV::interpCoeffs(*_limiter, dummy, dummy, nullptr, *fi, fi_elem_is_upwind);
+          const bool functor_elem_is_upwind = (fi_elem_is_upwind == (&elem == &fi->elem()));
+          const auto & advection_coeff =
+              functor_elem_is_upwind ? advection_coeffs.first : advection_coeffs.second;
+          ADReal temp_coeff = face_rho * face_velocity * surface_vector * advection_coeff;
 
           if (_fully_developed_flow_boundaries.find(bc_id) ==
               _fully_developed_flow_boundaries.end())
@@ -418,7 +430,6 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     // arguments to interpCoeffs. However, because upwind and average interpolations are independent
     // of the values of those arguments we can just pass in a dummy value for the phi values and a
     // nullptr for the gradient
-    static const ADReal dummy = 0;
     const bool fi_elem_is_upwind = interp_v * fi->normal() > 0;
     const auto advection_coeffs =
         Moose::FV::interpCoeffs(*_limiter, dummy, dummy, nullptr, *fi, fi_elem_is_upwind);
