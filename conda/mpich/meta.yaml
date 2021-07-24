@@ -1,4 +1,4 @@
-{% set build = 7 %}
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.3.2" %}
 

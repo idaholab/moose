@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2021.07.14" %}
+{% set version = "2021.07.23" %}
 
 package:
   name: moose-tools
@@ -26,7 +26,7 @@ requirements:
     - clangxx_osx-64     {{ clangxxosx }}     # [osx]
     - compiler-rt        {{ compilerrt }}     # [osx]
     - compiler-rt_osx-64 {{ compilerrtosx }}  # [osx]
-    - libllvm11          {{ libllvm }}        # [osx]
+    - libllvm12          {{ libllvm }}        # [osx]
     - clang-tools                             # [osx]
     - llvm-openmp        {{ llvmopenmp }}     # [osx]
     - gfortran_osx-64    {{ osxfortran }}     # [osx]
