@@ -16,7 +16,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("MarmotApp", GrandPotentialSinteringMaterial);
+registerMooseObject("PhaseFieldApp", GrandPotentialSinteringMaterial);
 
 InputParameters
 GrandPotentialSinteringMaterial::validParams()

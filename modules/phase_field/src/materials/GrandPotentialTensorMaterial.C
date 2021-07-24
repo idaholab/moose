@@ -17,7 +17,7 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-registerMooseObject("MarmotApp", GrandPotentialTensorMaterial);
+registerMooseObject("PhaseFieldApp", GrandPotentialTensorMaterial);
 
 InputParameters
 GrandPotentialTensorMaterial::validParams()

@@ -15,7 +15,7 @@
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("MarmotApp", PolycrystalDiffusivityTensorBase);
+registerMooseObject("PhaseFieldApp", PolycrystalDiffusivityTensorBase);
 
 InputParameters
 PolycrystalDiffusivityTensorBase::validParams()
