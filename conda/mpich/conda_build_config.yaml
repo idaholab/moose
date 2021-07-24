@@ -2,10 +2,10 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - 2021.07.14 build_0
+  - 2021.07.14 build_1
 
 moose_petsc:
-  - 3.15.1 build_2
+  - 3.15.1 build_3
 
 SHORT_VTK_NAME:
   - 6.3
@@ -14,10 +14,10 @@ vtk_version:
   - 6.3.0
 
 moose_libmesh_vtk:
-  - 6.3.0 build_7
+  - 6.3.0 build_8
 
 moose_mpich:
-  - 3.3.2 build_7
+  - 3.3.2 build_8
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
 python:
@@ -165,37 +165,37 @@ zip_keys:
 
 #### Changes to the following require extensive testing
 libllvm:
-  - 11.0.0 hf85e3d2_0
+  - 12.0.1 hd011deb_0
 
 libclang:
-  - 11.0.0 default_h9e6edd0_2
+  - 12.0.1 default_he082bbe_0
 
 compilerrt:
-  - 11.0.0 h01488ec_2
+  - 12.0.1 he01351e_0
 
 compilerrtosx:
-  - 11.0.0 hd3c4e95_2
+  - 12.0.1 hd3f61c9_0
 
 clangxx:
-  - 11.0.0 default_h9e6edd0_2
+  - 12.0.1 default_he082bbe_0
 
 clangosx:
-  - 11.0.0 hb91bd55_5
+  - 12.0.1 hb91bd55_0
 
 clangxxosx:
-  - 11.0.0 h7e1b574_5
+  - 12.0.1 h7e1b574_0
 
 clang:
-  - 11.0.0 h694c41f_2
+  - 12.0.1 h694c41f_0
 
 llvmopenmp:
-  - 11.0.0 h73239a0_1
+  - 12.0.1 hda6cdc1_0
 
 osxfortran:
-  - 7.3.0 h22b1bf0_7
+  - 9.3.0 h18f7dce_14
 
 libcxx:
-  - 11.0.0 h4c3b8ed_1
+  - 12.0.1 habf9029_0
 
 gcc:
   - 9.3.0 h7247604_29
@@ -210,16 +210,16 @@ gccimpl:
   - 9.3.0 h28f5a38_17
 
 libblas:
-  - 3.9.0 8_openblas
+  - 3.9.0 9_openblas
 
 libcblas:
-  - 3.9.0 8_openblas
+  - 3.9.0 9_openblas
 
 liblapack:
-  - 3.9.0 8_openblas
+  - 3.9.0 9_openblas
 
 libopenblas:
-  - 0.3.12 openmp_h63d9170_1
+  - 0.3.15 openmp_h5e1b9a4_1
 
 libglu:
   - 9.0.0 hf484d3e_1000
