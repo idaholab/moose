@@ -1,14 +1,14 @@
-mu = 1e-3
+mu = 1
 rho = 'rho'
 k = 1
 cp = 1
 alpha = 1
 vel = 'velocity'
 velocity_interp_method = 'rc'
-advected_interp_method = 'upwind'
-rayleigh=1e3
-cold_temp=273
-hot_temp=${fparse rayleigh + cold_temp}
+advected_interp_method = 'average'
+# rayleigh=1e3
+cold_temp=300
+hot_temp=310
 
 [GlobalParams]
   two_term_boundary_expansion = true
@@ -19,9 +19,9 @@ hot_temp=${fparse rayleigh + cold_temp}
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 1
+    xmax = 10
     ymin = 0
-    ymax = 1
+    ymax = 10
     nx = 64
     ny = 64
   []
@@ -292,7 +292,6 @@ hot_temp=${fparse rayleigh + cold_temp}
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
-  nl_rel_tol = 1e-10
 []
 
 [Outputs]
