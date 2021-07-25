@@ -36,6 +36,10 @@ proportional to the concentration of a variable $v$ which is also diffusing.
 In this example the input parameter "coef" that corresponds to $\sigma$ is omitted. In this case the
 "coef" value defaults to one.
 
+!alert note
+The coupled variable [!param](v) cannot be equal to the equation [!param](variable) with this kernel.
+Use the [CoefReaction](/CoefReaction.md) kernel for this purpose.
+
 !syntax parameters /Kernels/CoupledForce
 
 !syntax inputs /Kernels/CoupledForce
