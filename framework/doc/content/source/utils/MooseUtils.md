@@ -1,6 +1,6 @@
 # MooseUtils Namespace
 
-[MOOSE] includes a number of C++ utility classes and functions that may be useful for developing
+MOOSE includes a number of C++ utility classes and functions that may be useful for developing
 applications. These utilities are within the MooseUtils C++ namespace. The following summarized
 some of the available items.
 
@@ -16,7 +16,7 @@ outside of the header, is numeric and can be converted to a C++ double. Addition
 assumed that the first row or column defines the number of columns for the entire file, if the
 number of columns differs from the first row an error will be produced.
 
-Within [MOOSE] this utility is utilized by the [CSVReader](/CSVReader.md), which is part of
+Within MOOSE this utility is utilized by the [CSVReader](/CSVReader.md), which is part of
 the [VectorPostprocessors] system. This object will be used to explain the use of the utility.
 
 Using the DelimitedFileReader is very simple and requires three steps. First, include the
