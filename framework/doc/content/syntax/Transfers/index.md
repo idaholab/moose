@@ -1,29 +1,29 @@
 # Transfers System
 
-When running simulations that contain [MultiApps]---simulations running other sub-simulations---it is
-often required to move data to and from the sub-applications. Transfer objects in [MOOSE] are
-designed for this purpose.
+When running simulations that contain [MultiApps](/MultiApps/index.md)---simulations running
+other sub-simulations---it is often required to move data to and from the sub-applications. Transfer
+objects in MOOSE are designed for this purpose.
 
 !alert note
-Prior to understanding Transfers it is important to grasp the idea of [MultiApps] first, so please
-refer to the [MultiApps] documentation for additional information.
+Prior to understanding Transfers it is important to grasp the idea of [MultiApps](/MultiApps/index.md) first, so please
+refer to the [MultiApps](/MultiApps/index.md) documentation for additional information.
 
 ## Example Transfer
 
-Assuming that the concept of [MultiApps] is understood, Transfers are best understood via an example
+Assuming that the concept of [MultiApps](/MultiApps/index.md) is understood, Transfers are best understood via an example
 problem. First, consider a "master" simulation that is solving the transient diffusion equation. This
 master simulation also includes two "sub" applications that rely on the average value of the unknown
 from the master application.
 
 ### The "master" Simulation
 
-[transfers-master-multiapps] is an input file snippet showing the [MultiApps] block that includes a
+[transfers-master-multiapps] is an input file snippet showing the [MultiApps](/MultiApps/index.md) block that includes a
 [TransientMultiApp](/TransientMultiApp.md), this sub-application will execute along with the master
 (at the end of each timestep) as time progresses.
 
 !listing test/tests/transfers/multiapp_postprocessor_to_scalar/master.i
          block=MultiApps id=transfers-master-multiapps
-         caption=The [MultiApps] block of the "master" application that contains two sub-application
+         caption=The [MultiApps](/MultiApps/index.md) block of the "master" application that contains two sub-application
                  that solves along with the master as time progresses.
 
 For this example, the sub-applications require that the average from the master in the form of a
