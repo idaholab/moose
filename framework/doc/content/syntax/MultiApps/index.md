@@ -41,7 +41,7 @@ The execution order of all MultiApps at the same point is not determined.
 The order is also irrelevant because no data transfers directly among MultiApps.
 To enforce the ordering of execution, users can use multi-level MultiApps or set the MultiApps executed at different points.
 If a `MultiApp` is set to be executed on timestep_begin or timestep_end, the formed loosely-coupled systems of fully-coupled
-equations can be solved with [Picard iterations](syntax/Executioner/index.md).
+equations can be solved with [Fixed Point iterations](syntax/Executioner/index.md).
 
 !listing multiapps/transient_multiapp/dt_from_master.i block=MultiApps
 
@@ -102,7 +102,7 @@ When restarting or recovering, the main app restores the restart data of all sub
 (a data structure holding all the current state including solution vectors, stateful material properties,
 post-processors, restartable quantties declared in objects and etc. of the sub-apps), which are used by
 sub-apps to restart/recover the calculations in their initial setups.
-The same backups are also used by multiapps for saving/restoring the current state during Picard iterations.
+The same backups are also used by multiapps for saving/restoring the current state during fixed point iterations.
 
 A sub-app may choose to use a restart file instead of the main backup file by setting [!param](/Problem/FEProblem/force_restart) to true.
 

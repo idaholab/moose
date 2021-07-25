@@ -46,7 +46,7 @@ or set controllable parameters:
   parameters are being controlled, all of the values will be set.
 
 These methods operator in a similar fashion as
-other systems in [MOOSE] (e.g., `getPostprocessorValue` in the [Postprocessors] system), each
+other systems in MOOSE (e.g., `getPostprocessorValue` in the [Postprocessors] system), each
 expects an input parameter name (`std::string`) that is prescribed in the `validParams` method.
 
 There are additional overloaded methods that allow for the setting and getting of controllable values
@@ -56,13 +56,13 @@ what is needed.  Please refer to the source code for a complete list.
 ## Controls Block
 
 `Control` objects are defined in the input file in the Controls block, similar to other systems
-in [MOOSE]. For example, the following input file snippet shows the use of the
+in MOOSE. For example, the following input file snippet shows the use of the
 [RealFunctionControl](/RealFunctionControl.md) object.
 
 !listing test/tests/controls/real_function_control/real_function_control.i
          block=Controls
          id=controls_example
-         caption=Example of a Control object used in a [MOOSE] input file.
+         caption=Example of a Control object used in a MOOSE input file.
 
 ## Object and Parameter Names id=object-and-parameter-names
 
@@ -77,7 +77,7 @@ the syntax for a parameter name is specified as: `block/object/name`.
          block=Kernels
          id=controls_example2
          caption=Example of a "Kernel" block that contains a parameter that is controlled via a
-                 [MOOSE] Control object.
+                 MOOSE Control object.
 
 As shown in [controls_example] an asterisk ("*") can be substituted for any one of these three
 "names", doing so allows multiple parameters to match and be controlled simultaneously.
@@ -87,7 +87,7 @@ In similar fashion, object names can be defined (e.g., as in the
 as above but the parameter name is not included.
 
 In both cases there is an alternative form for defining an object and parameter names:
-`base::object/name`. In this case "base" is the [MOOSE] base system that the object is derived from.
+`base::object/name`. In this case "base" is the MOOSE base system that the object is derived from.
 For example, `Kernel::diff/coef`.
 
 ## Child Objects
