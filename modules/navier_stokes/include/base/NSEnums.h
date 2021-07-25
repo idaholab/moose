@@ -22,31 +22,31 @@ MooseEnum getSplittingEnum();
 
 namespace NS
 {
-  namespace phase
-  {
-    enum PhaseEnum
-    {
-      fluid,
-      solid
-    };
-  }
+namespace phase
+{
+enum PhaseEnum
+{
+  fluid,
+  solid
+};
+}
 
-  namespace settings
-  {
-    enum LocalityEnum
-    {
-      local,
-      global
-    };
-  }
+namespace settings
+{
+enum LocalityEnum
+{
+  local,
+  global
+};
+}
 
-  namespace splitting
-  {
-    enum SplittingEnum
-    {
-      porosity,
-      thermal_conductivity,
-      effective_thermal_conductivity
-    };
-  }
+namespace splitting
+{
+enum SplittingEnum
+{
+  porosity,
+  thermal_conductivity,
+  effective_thermal_conductivity
+};
+}
 }

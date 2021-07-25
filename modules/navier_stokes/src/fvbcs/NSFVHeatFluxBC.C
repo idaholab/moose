@@ -11,7 +11,7 @@
 #include "NS.h"
 #include "NSEnums.h"
 
-registerADMooseObject("MooseApp", NSFVHeatFluxBC);
+registerADMooseObject("NavierStokesApp", NSFVHeatFluxBC);
 
 InputParameters
 NSFVHeatFluxBC::validParams()
@@ -19,31 +19,33 @@ NSFVHeatFluxBC::validParams()
   InputParameters params = FVFluxBC::validParams();
 
   params.addRequiredParam<Real>("value", "total heat flux");
-  params.addRequiredParam<MooseEnum>("phase", getPhaseEnum(),
-    "'fluid' or 'solid' phase to which this BC is applied.");
+  params.addRequiredParam<MooseEnum>(
+      "phase", getPhaseEnum(), "'fluid' or 'solid' phase to which this BC is applied.");
 
-  params.addRequiredParam<MooseEnum>("splitting", getSplittingEnum(),
-    "type of splitting");
+  params.addRequiredParam<MooseEnum>("splitting", getSplittingEnum(), "type of splitting");
 
-  params.addRequiredParam<MooseEnum>("locality", getLocalityEnum(),
-    "whether to use local (at the boundary) or global (domain-averaged) "
-    "parameter values");
+  params.addRequiredParam<MooseEnum>(
+      "locality",
+      getLocalityEnum(),
+      "whether to use local (at the boundary) or global (domain-averaged) "
+      "parameter values");
 
   params.addCoupledVar(NS::porosity, "porosity");
 
   params.addParam<PostprocessorName>("average_porosity",
-    "postprocessor that provides domain-averaged proosity");
-  params.addParam<PostprocessorName>("average_k_fluid",
-    "postprocessor that provides domain-averaged fluid thermal conductivity");
-  params.addParam<PostprocessorName>("average_kappa",
-    "postprocessor that provides domain-averaged fluid thermal dispersion");
-  params.addParam<PostprocessorName>("average_k_solid",
-    "postprocessor that provides domain-averaged solid thermal conductivity");
-  params.addParam<PostprocessorName>("average_kappa_solid",
-    "postprocessor that provides domain-averaged solid effective thermal "
-    "conductivity");
+                                     "postprocessor that provides domain-averaged proosity");
+  params.addParam<PostprocessorName>(
+      "average_k_fluid", "postprocessor that provides domain-averaged fluid thermal conductivity");
+  params.addParam<PostprocessorName>(
+      "average_kappa", "postprocessor that provides domain-averaged fluid thermal dispersion");
+  params.addParam<PostprocessorName>(
+      "average_k_solid", "postprocessor that provides domain-averaged solid thermal conductivity");
+  params.addParam<PostprocessorName>(
+      "average_kappa_solid",
+      "postprocessor that provides domain-averaged solid effective thermal "
+      "conductivity");
   params.addClassDescription("Constant heat flux boundary condition with phase splitting "
-    "for fluid and solid energy equations");
+                             "for fluid and solid energy equations");
 
   return params;
 }
@@ -57,36 +59,43 @@ NSFVHeatFluxBC::NSFVHeatFluxBC(const InputParameters & parameters)
 
     // quantities needed for global evaluations
     _average_eps(_locality == NS::settings::global &&
-      _split_type != NS::splitting::thermal_conductivity ?
-      &getPostprocessorValue("average_porosity") : nullptr),
-    _average_k_f(_locality == NS::settings::global &&
-      _split_type != NS::splitting::porosity ?
-      &getPostprocessorValue("average_k_fluid") : nullptr),
+                         _split_type != NS::splitting::thermal_conductivity
+                     ? &getPostprocessorValue("average_porosity")
+                     : nullptr),
+    _average_k_f(_locality == NS::settings::global && _split_type != NS::splitting::porosity
+                     ? &getPostprocessorValue("average_k_fluid")
+                     : nullptr),
     _average_k_s(_locality == NS::settings::global &&
-      _split_type == NS::splitting::thermal_conductivity ?
-      &getPostprocessorValue("average_k_solid") : nullptr),
+                         _split_type == NS::splitting::thermal_conductivity
+                     ? &getPostprocessorValue("average_k_solid")
+                     : nullptr),
     _average_kappa_s(_locality == NS::settings::global &&
-      _split_type == NS::splitting::effective_thermal_conductivity ?
-      &getPostprocessorValue("average_kappa_solid") : nullptr),
+                             _split_type == NS::splitting::effective_thermal_conductivity
+                         ? &getPostprocessorValue("average_kappa_solid")
+                         : nullptr),
     _average_kappa(_locality == NS::settings::global &&
-      _split_type == NS::splitting::effective_thermal_conductivity ?
-      &getPostprocessorValue("average_kappa") : nullptr),
+                           _split_type == NS::splitting::effective_thermal_conductivity
+                       ? &getPostprocessorValue("average_kappa")
+                       : nullptr),
 
     // quantities needed for local evaluations
-    _eps(_locality == NS::settings::local &&
-      _split_type != NS::splitting::thermal_conductivity ?
-      coupledValue(NS::porosity) : _zero),
-    _k_f(_locality == NS::settings::local && _split_type != NS::splitting::porosity ?
-      &getADMaterialProperty<Real>(NS::k) : nullptr),
-    _k_s(_locality == NS::settings::local &&
-      _split_type == NS::splitting::thermal_conductivity ?
-      &getADMaterialProperty<Real>(NS::k_s) : nullptr),
+    _eps(_locality == NS::settings::local && _split_type != NS::splitting::thermal_conductivity
+             ? coupledValue(NS::porosity)
+             : _zero),
+    _k_f(_locality == NS::settings::local && _split_type != NS::splitting::porosity
+             ? &getADMaterialProperty<Real>(NS::k)
+             : nullptr),
+    _k_s(_locality == NS::settings::local && _split_type == NS::splitting::thermal_conductivity
+             ? &getADMaterialProperty<Real>(NS::k_s)
+             : nullptr),
     _kappa(_locality == NS::settings::local &&
-      _split_type == NS::splitting::effective_thermal_conductivity ?
-      &getADMaterialProperty<RealVectorValue>(NS::kappa) : nullptr),
+                   _split_type == NS::splitting::effective_thermal_conductivity
+               ? &getADMaterialProperty<RealVectorValue>(NS::kappa)
+               : nullptr),
     _kappa_s(_locality == NS::settings::local &&
-      _split_type == NS::splitting::effective_thermal_conductivity ?
-      &getADMaterialProperty<Real>(NS::kappa_s) : nullptr)
+                     _split_type == NS::splitting::effective_thermal_conductivity
+                 ? &getADMaterialProperty<Real>(NS::kappa_s)
+                 : nullptr)
 {
 }
 
@@ -121,16 +130,16 @@ NSFVHeatFluxBC::computeQpResidual()
         // TODO: for the case of an anisotropic conductivity, we technically should
         // grab the component of kappa perpendicular to the boundary.
 
-       // Need this logic to avoid AD failures when taking norms of zero. The
-       // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
-       // 3 components
-       ADReal kappa;
-       if ((MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](0), 0)) &&
-           (MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](1), 0)) &&
-           (MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](2), 0)))
-         kappa = 1e-42;
-       else
-         kappa = (*_kappa)[_qp].norm() / std::sqrt(3.0);
+        // Need this logic to avoid AD failures when taking norms of zero. The
+        // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
+        // 3 components
+        ADReal kappa;
+        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](0), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](1), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)[_qp](2), 0)))
+          kappa = 1e-42;
+        else
+          kappa = (*_kappa)[_qp].norm() / std::sqrt(3.0);
 
         ADReal d = _eps[_qp] * kappa + (*_kappa_s)[_qp];
         fraction = d > tol ? _eps[_qp] * kappa / d : 0.5;

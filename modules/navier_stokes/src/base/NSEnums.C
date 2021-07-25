@@ -9,17 +9,20 @@
 
 #include "NSEnums.h"
 
-MooseEnum getPhaseEnum()
+MooseEnum
+getPhaseEnum()
 {
   return MooseEnum("fluid solid");
 }
 
-MooseEnum getLocalityEnum()
+MooseEnum
+getLocalityEnum()
 {
   return MooseEnum("local global");
 }
 
-MooseEnum getSplittingEnum()
+MooseEnum
+getSplittingEnum()
 {
   return MooseEnum("porosity thermal_conductivity effective_thermal_conductivity");
 }

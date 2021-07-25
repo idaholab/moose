@@ -84,7 +84,7 @@ flux=10
 
 [FVBCs]
   [left_Ts]
-    type = FVHeatFluxBC
+    type = NSFVHeatFluxBC
     variable = Ts
     boundary = 'left'
     phase = 'solid'
@@ -97,7 +97,7 @@ flux=10
     value = 1000.0
   []
   [left_Tf]
-    type = FVHeatFluxBC
+    type = NSFVHeatFluxBC
     variable = Tf
     boundary = 'left'
     phase = 'fluid'
