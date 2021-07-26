@@ -533,7 +533,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Material derivative test
   registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
-  registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
 
   addActionTypes(syntax);
 }
