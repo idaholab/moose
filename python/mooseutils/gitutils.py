@@ -225,3 +225,9 @@ def git_add_and_fetch_remote(url, name, branch, working_dir=None):
     """
     mooseutils.check_output(['git', 'remote', 'add', name, url], cwd=working_dir, check=True)
     mooseutils.check_output(['git', 'fetch', name, branch], cwd=working_dir, check=True)
+
+def git_fetch_remote(name, branch, working_dir=None):
+    """
+    Add then fetch a remote with *name* and remote location *url*.
+    """
+    mooseutils.check_output(['git', 'fetch', name, branch], cwd=working_dir, check=True)

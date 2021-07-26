@@ -104,6 +104,8 @@ class CivetExtension(command.CommandExtension):
                 if remote is None:
                     remote = '__MooseDocs.extensions.civet__'
                     mooseutils.git_add_and_fetch_remote(repo_url, remote, branch)
+                else:
+                    mooseutils.get_fetch_remote(remote, branch)
 
                 self.__hashes = mooseutils.get_civet_hashes(f'{remote}/{branch}')
                 LOG.info("Downloading CIVET results for '%s' category.", name)
