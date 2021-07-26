@@ -183,6 +183,7 @@ FixedPointSolve::solve()
   _fixed_point_timestep_end_norm.clear();
   _fixed_point_timestep_begin_norm.resize(_max_fixed_point_its);
   _fixed_point_timestep_end_norm.resize(_max_fixed_point_its);
+  _pp_history.str("");
 
   bool converged = true;
 
