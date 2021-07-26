@@ -14,12 +14,12 @@ import pandas
 SPATIAL = 0
 TEMPORAL = 1
 
-def _runner(input_file, num_refinements, *args, **kwargs):
+def _runner(input_files, num_refinements, *args, **kwargs):
     """
     Helper class for running MOOSE-based application input file for convergence study.
 
     Inputs:
-        input_file[str]: The name of the input file to run
+        input_file(s)[str|list]: The name of the input file(s) run
         num_refinements: The number of refinements to perform
 
     Optional Key-Value Options:
@@ -50,13 +50,17 @@ def _runner(input_file, num_refinements, *args, **kwargs):
     dt = kwargs.pop('dt', 1) # only used with rtype=TEMPORAL
     file_base = kwargs.pop('file_base', None)
 
+    # Create list of input_files, if single file provided
+    if isinstance(input_files, str): input_files = [input_files]
+
     # Check that input file exists
-    if not os.path.isfile(input_file):
-        raise IOError("The supplied file, '{}', does not exist.".format(input_file))
+    for input_file in input_files:
+        if not os.path.isfile(input_file):
+            raise IOError("The supplied file, '{}', does not exist.".format(input_file))
 
     # Assume output CSV file, if not specified
     if csv is None:
-        fcsv = input_file.replace('.i', '_out.csv')
+        fcsv = input_files[-1].replace('.i', '_out.csv')
 
     # Locate the executable
     if executable is None:
@@ -70,7 +74,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
         raise IOError("No application executable found.")
 
     # Build custom arguments
-    cli_args = ['-i', input_file]
+    cli_args = ['-i'] + input_files
     cli_args += args
 
     # Run input file and build up output

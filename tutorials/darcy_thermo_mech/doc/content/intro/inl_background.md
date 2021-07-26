@@ -11,8 +11,8 @@ www.inl.gov
 
 !---
 
-- INL is the fifth-largest employer in Idaho with 3,900 employees and more than 350 interns
-- In 2018 the INL budget was $1,172,116,000
+- INL is the one of the largest employers in Idaho with 5,336 employees and 478 interns
+- In 2021 the INL budget was over $1 billion
 
 !---
 
@@ -29,7 +29,7 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 
-!media darcy_thermo_mech/inl_atr.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_atr.jpg style=width:25%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
