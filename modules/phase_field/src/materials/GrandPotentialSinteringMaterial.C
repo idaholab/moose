@@ -199,7 +199,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
   _d2omegavdw2[_qp] = -_drhovdw[_qp];
 
   // Calculate solid phase density and potential
-  Real d3rhosdw3;
+  Real d3rhosdw3 = 0;
   switch (_solid_energy)
   {
     case 0: // PARABOLIC
