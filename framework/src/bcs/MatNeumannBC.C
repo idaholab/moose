@@ -10,11 +10,13 @@
 #include "MatNeumannBC.h"
 
 registerMooseObject("MooseApp", MatNeumannBC);
+registerMooseObject("MooseApp", ADMatNeumannBC);
 
+template <bool is_ad>
 InputParameters
-MatNeumannBC::validParams()
+MatNeumannBCTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addParam<Real>("value", 1.0, "The value to be enforced on the boundary.");
   params.declareControllable("value");
   params.addClassDescription("Imposes the integrated boundary condition "
@@ -27,15 +29,17 @@ MatNeumannBC::validParams()
   return params;
 }
 
-MatNeumannBC::MatNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    _value(getParam<Real>("value")),
-    _boundary_prop(getMaterialProperty<Real>("boundary_material"))
+template <bool is_ad>
+MatNeumannBCTempl<is_ad>::MatNeumannBCTempl(const InputParameters & parameters)
+  : GenericIntegratedBC<is_ad>(parameters),
+    _value(this->template getParam<Real>("value")),
+    _boundary_prop(this->template getGenericMaterialProperty<Real, is_ad>("boundary_material"))
 {
 }
 
-Real
-MatNeumannBC::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+MatNeumannBCTempl<is_ad>::computeQpResidual()
 {
   return -_test[_i][_qp] * _value * _boundary_prop[_qp];
 }

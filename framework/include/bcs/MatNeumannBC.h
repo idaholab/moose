@@ -9,25 +9,32 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "GenericIntegratedBC.h"
 
 /**
  * Implements a Neumann BC where D grad(u) = value * M on the boundary, where
  * value is a constant and M is a material property.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class MatNeumannBC : public IntegratedBC
+template <bool is_ad>
+class MatNeumannBCTempl : public GenericIntegratedBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MatNeumannBC(const InputParameters & parameters);
+  MatNeumannBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Value of constant on the boundary.
   const Real & _value;
+
   /// Value of material property on the boundary.
-  const MaterialProperty<Real> & _boundary_prop;
+  const GenericMaterialProperty<Real, is_ad> & _boundary_prop;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef MatNeumannBCTempl<false> MatNeumannBC;
+typedef MatNeumannBCTempl<true> ADMatNeumannBC;
