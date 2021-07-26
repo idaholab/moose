@@ -38,7 +38,7 @@ template <bool is_ad>
 class ParsedMaterialHelper : public FunctionMaterialBase<is_ad>, public FunctionParserUtils<is_ad>
 {
 public:
-  using DerivativeMaterialPropertyNameInterface::SymbolName;
+  using FunctionMaterialBase<is_ad>::SymbolName;
 
   enum class VariableNameMappingMode
   {

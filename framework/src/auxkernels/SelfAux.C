@@ -19,13 +19,19 @@ SelfAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Returns the specified variable as an auxiliary variable with the same value.");
+  params.addCoupledVar("v",
+                       "Optional variable to take the value of. If omitted the value of the "
+                       "`variable` itself is returned.");
   return params;
 }
 
-SelfAux::SelfAux(const InputParameters & parameters) : AuxKernel(parameters) {}
+SelfAux::SelfAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _v(isCoupled("v") ? coupledValue("v") : _u)
+{
+}
 
 Real
 SelfAux::computeValue()
 {
-  return _u[_qp];
+  return _v[_qp];
 }

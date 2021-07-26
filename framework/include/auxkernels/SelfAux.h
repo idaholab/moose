@@ -33,5 +33,6 @@ public:
 
 protected:
   virtual Real computeValue() override;
-};
 
+  const VariableValue & _v;
+};
