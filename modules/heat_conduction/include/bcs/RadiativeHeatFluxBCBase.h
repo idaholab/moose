@@ -9,21 +9,22 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "GenericIntegratedBC.h"
 
 /**
  * Boundary condition for radiative heat flux where temperature and the
  * temperature of a body in radiative heat transfer are specified.
  */
-class RadiativeHeatFluxBCBase : public IntegratedBC
+template <bool is_ad>
+class RadiativeHeatFluxBCBaseTempl : public GenericIntegratedBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  RadiativeHeatFluxBCBase(const InputParameters & parameters);
+  RadiativeHeatFluxBCBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual GenericReal<is_ad> computeQpResidual();
   virtual Real computeQpJacobian();
 
   /**
@@ -33,7 +34,7 @@ protected:
    * coefficientBody: cbody
    * Tinf: temperature of the body irhs
    */
-  virtual Real coefficient() const = 0;
+  virtual GenericReal<is_ad> coefficient() const = 0;
 
   /// Stefan-Boltzmann constant
   const Real _sigma_stefan_boltzmann;
@@ -43,4 +44,9 @@ protected:
 
   /// Emissivity of the boundary
   const Real _eps_boundary;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef RadiativeHeatFluxBCBaseTempl<false> RadiativeHeatFluxBCBase;
+typedef RadiativeHeatFluxBCBaseTempl<true> ADRadiativeHeatFluxBCBase;

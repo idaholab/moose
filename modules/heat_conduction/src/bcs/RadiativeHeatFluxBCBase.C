@@ -11,10 +11,11 @@
 #include "Function.h"
 #include "MathUtils.h"
 
+template <bool is_ad>
 InputParameters
-RadiativeHeatFluxBCBase::validParams()
+RadiativeHeatFluxBCBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
   params.addParam<FunctionName>(
       "Tinfinity", "0", "Temperature of the body in radiative heat transfer.");
@@ -24,25 +25,39 @@ RadiativeHeatFluxBCBase::validParams()
   return params;
 }
 
-RadiativeHeatFluxBCBase::RadiativeHeatFluxBCBase(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
+template <bool is_ad>
+RadiativeHeatFluxBCBaseTempl<is_ad>::RadiativeHeatFluxBCBaseTempl(
+    const InputParameters & parameters)
+  : GenericIntegratedBC<is_ad>(parameters),
+    _sigma_stefan_boltzmann(this->template getParam<Real>("stefan_boltzmann_constant")),
     _tinf(getFunction("Tinfinity")),
-    _eps_boundary(getParam<Real>("boundary_emissivity"))
+    _eps_boundary(this->template getParam<Real>("boundary_emissivity"))
 {
 }
 
-Real
-RadiativeHeatFluxBCBase::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+RadiativeHeatFluxBCBaseTempl<is_ad>::computeQpResidual()
 {
-  Real T4 = MathUtils::pow(_u[_qp], 4);
-  Real T4inf = MathUtils::pow(_tinf.value(_t, _q_point[_qp]), 4);
+  GenericReal<is_ad> T4 = MathUtils::pow(_u[_qp], 4);
+  GenericReal<is_ad> T4inf = MathUtils::pow(_tinf.value(_t, _q_point[_qp]), 4);
   return _test[_i][_qp] * _sigma_stefan_boltzmann * coefficient() * (T4 - T4inf);
 }
 
+template <>
 Real
-RadiativeHeatFluxBCBase::computeQpJacobian()
+RadiativeHeatFluxBCBaseTempl<false>::computeQpJacobian()
 {
   Real T3 = MathUtils::pow(_u[_qp], 3);
   return 4 * _sigma_stefan_boltzmann * _test[_i][_qp] * coefficient() * T3 * _phi[_j][_qp];
 }
+
+template <>
+Real
+RadiativeHeatFluxBCBaseTempl<true>::computeQpJacobian()
+{
+  return 0;
+}
+
+template class RadiativeHeatFluxBCBaseTempl<false>;
+template class RadiativeHeatFluxBCBaseTempl<true>;
