@@ -24,7 +24,7 @@
   using ParsedMaterialHelper<T>::functionsPostParse;                                               \
   using ParsedMaterialHelper<T>::functionsOptimize;                                                \
   using ParsedMaterialHelper<T>::_func_F;                                                          \
-  using ParsedMaterialHelper<T>::_variable_names;                                                  \
+  using ParsedMaterialHelper<T>::_symbol_names;                                                    \
   using ParsedMaterialHelper<T>::_mat_prop_descriptors;                                            \
   using ParsedMaterialHelper<T>::_tol;                                                             \
   using ParsedMaterialHelper<T>::_postprocessor_values;                                            \
@@ -38,6 +38,8 @@ template <bool is_ad>
 class ParsedMaterialHelper : public FunctionMaterialBase<is_ad>, public FunctionParserUtils<is_ad>
 {
 public:
+  using DerivativeMaterialPropertyNameInterface::SymbolName;
+
   enum class VariableNameMappingMode
   {
     USE_MOOSE_NAMES,
@@ -83,7 +85,7 @@ protected:
   SymFunctionPtr _func_F;
 
   /// variable names used in the expression (depends on the map_mode)
-  std::vector<std::string> _variable_names;
+  std::vector<SymbolName> _symbol_names;
 
   /// convenience typedef for the material property descriptors
   typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;
@@ -99,9 +101,9 @@ protected:
 
   /**
    * Flag to indicate if MOOSE nonlinear variable names should be used as FParser variable names.
-   * This should be true only for DerivativeParsedMaterial. If set to false, this class looks up the
-   * input parameter name for each coupled variable and uses it as the FParser parameter name when
-   * parsing the FParser expression.
+   * This should be USE_MOOSE_NAMES only for DerivativeParsedMaterial. If set to USE_PARAM_NAMES,
+   * this class looks up the input parameter name for each coupled variable and uses it as the
+   * FParser parameter name when parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
 };

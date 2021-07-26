@@ -29,6 +29,8 @@ protected:
   usingParsedMaterialHelperMembers(is_ad);
 
 public:
+  using DerivativeMaterialPropertyNameInterface::SymbolName;
+
   DerivativeParsedMaterialHelperTempl(
       const InputParameters & parameters,
       VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES);
@@ -63,6 +65,12 @@ protected:
   /// next available variable number for automatically created material property derivative variables
   unsigned int _dmatvar_index;
 
+  /**
+   * list of all indices into _variable_names to take derivatives, w.r.t. By default this always
+   * includes 0.._nargs-1, which are the coupled variables
+   */
+  std::vector<std::size_t> _derivative_symbol_table;
+
 private:
   // for bulk registration of material property derivatives
   std::vector<MaterialPropertyDerivativeRule> _bulk_rules;
@@ -73,7 +81,7 @@ struct DerivativeParsedMaterialHelperTempl<is_ad>::Derivative
 {
   GenericMaterialProperty<Real, is_ad> * _mat_prop;
   SymFunctionPtr _F;
-  std::vector<std::string> _darg_names;
+  std::vector<SymbolName> _darg_names;
 };
 
 template <bool is_ad>
