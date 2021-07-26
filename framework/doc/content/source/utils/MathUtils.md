@@ -1,6 +1,6 @@
 # MathUtils Namespace
 
-[MOOSE] includes a number of C++ utility classes and functions that may be useful for developing
+MOOSE includes a number of C++ utility classes and functions that may be useful for developing
 applications with mathematical expressions.
 
 ## Polynomial evaluations
