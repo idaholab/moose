@@ -64,6 +64,9 @@ protected:
 
   const ADRealVectorValue & normal() const { return _normal; }
 
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+  makeElemAndFace(const Elem * elem) const;
+
   MooseVariableFV<Real> & _var;
 
   const unsigned int _qp = 0;

@@ -25,9 +25,6 @@ protected:
   /// The advected quantity on the elem
   const FunctorInterface<ADReal> & _adv_quant;
 
-  /// Central differencing to compute the velocity
-  std::unique_ptr<Moose::FV::Limiter> _cd_limiter;
-
-  /// The limiting method to use for the advected quantity
-  std::unique_ptr<Moose::FV::Limiter> _limiter;
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
 };

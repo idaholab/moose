@@ -36,11 +36,13 @@ class FunctorInterface
 {
 public:
   using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool>;
+  using ElemAndFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
   virtual ~FunctorInterface() = default;
 
   virtual T operator()(const libMesh::Elem * const & elem) const = 0;
+  virtual T operator()(const ElemAndFaceArg & elem_and_face) const = 0;
   virtual T
   operator()(const std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool> & face) const = 0;
 };
@@ -52,10 +54,12 @@ public:
   GenericFunctor(const std::string & name) : _name(name) {}
 
   using typename FunctorInterface<T>::FaceArg;
+  using typename FunctorInterface<T>::ElemAndFaceArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
   using ElemFn = std::function<T(const Elem * const &)>;
+  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
   using FaceFn = std::function<T(const FaceArg &)>;
 
   template <typename PolymorphicLambda>
@@ -64,10 +68,12 @@ public:
                    PolymorphicLambda my_lammy);
 
   T operator()(const Elem * const & elem) const override final;
+  T operator()(const ElemAndFaceArg & elem_and_face) const override final;
   T operator()(const FaceArg & face) const override final;
 
 private:
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
+  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
   FaceFn _face_functor;
   std::string _name;
 };
@@ -79,16 +85,21 @@ GenericFunctor<T>::setFunction(const MooseMesh & mesh,
                                const std::set<SubdomainID> & block_ids,
                                PolymorphicLambda my_lammy)
 {
+  auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
+    _elem_functor.emplace(block_id, my_lammy);
+    _elem_and_face_functor.emplace(block_id, my_lammy);
+  };
+
   for (const auto block_id : block_ids)
   {
     if (block_id == Moose::ANY_BLOCK_ID)
     {
       const auto & inner_block_ids = mesh.meshSubdomains();
       for (const auto inner_block_id : inner_block_ids)
-        _elem_functor.emplace(inner_block_id, my_lammy);
+        add_lammy(inner_block_id);
     }
     else
-      _elem_functor.emplace(block_id, my_lammy);
+      add_lammy(block_id);
   }
 
   _face_functor = my_lammy;
@@ -103,6 +114,20 @@ GenericFunctor<T>::operator()(const Elem * const & elem) const
   auto it = _elem_functor.find(elem->subdomain_id());
   mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
   return it->second(elem);
+}
+
+template <typename T>
+T
+GenericFunctor<T>::operator()(const ElemAndFaceArg & elem_and_face) const
+{
+  mooseAssert((std::get<0>(elem_and_face) && std::get<0>(elem_and_face) != libMesh::remote_elem) ||
+                  std::get<1>(elem_and_face),
+              "The element must be non-null and non-remote or the face must be non-null in functor "
+              "material properties");
+  auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
+  mooseAssert(it != _elem_and_face_functor.end(),
+              "The provided subdomain ID doesn't exist in the map!");
+  return it->second(elem_and_face);
 }
 
 template <typename T>

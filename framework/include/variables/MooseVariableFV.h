@@ -455,6 +455,7 @@ public:
 
   using FunctorInterface<ADReal>::FaceArg;
   ADReal operator()(const Elem * const & elem) const override final { return getElemValue(elem); }
+  ADReal operator()(const ElemAndFaceArg & elem_and_face) const override final;
   ADReal operator()(const FaceArg & face) const override final;
 
   /**

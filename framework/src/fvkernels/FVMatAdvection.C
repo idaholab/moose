@@ -42,12 +42,11 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
 {
   using namespace Moose::FV;
 
-  _cd_limiter = Limiter::build(LimiterType::CentralDifference);
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
-    _limiter = Limiter::build(LimiterType::CentralDifference);
+    _advected_interp_method = InterpMethod::Average;
   else if (advected_interp_method == "upwind")
-    _limiter = Limiter::build(LimiterType::Upwind);
+    _advected_interp_method = InterpMethod::Upwind;
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(advected_interp_method));
@@ -56,12 +55,23 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
 ADReal
 FVMatAdvection::computeQpResidual()
 {
+  ADReal adv_quant_interface;
+  ADRealVectorValue v;
+
   using namespace Moose::FV;
 
-  const auto v =
-      _vel(std::make_tuple(_face_info, _cd_limiter.get(), /*this doesn't matter for cd*/ true));
-  const auto adv_quant_interface =
-      _adv_quant(std::make_tuple(_face_info, _limiter.get(), v * _face_info->normal() > 0));
+  const auto elem_face = makeElemAndFace(&_face_info->elem());
+  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
 
+  // Currently only Average is supported for the velocity
+  interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
+
+  interpolate(_advected_interp_method,
+              adv_quant_interface,
+              _adv_quant(elem_face),
+              _adv_quant(neighbor_face),
+              v,
+              *_face_info,
+              true);
   return _normal * v * adv_quant_interface;
 }

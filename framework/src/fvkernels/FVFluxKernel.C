@@ -300,3 +300,18 @@ FVFluxKernel::gradUDotNormal() const
 {
   return Moose::FV::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
 }
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxKernel::makeElemAndFace(const Elem * elem) const
+{
+  if (elem && this->hasBlocks(elem->subdomain_id()))
+    return std::make_tuple(elem, _face_info, elem->subdomain_id());
+  else
+  {
+    const Elem * const elem_across =
+        (elem == &_face_info->elem()) ? _face_info->neighborPtr() : &_face_info->elem();
+    mooseAssert(elem_across && this->hasBlocks(elem_across->subdomain_id()),
+                "How are there no elements with subs on here!");
+    return std::make_tuple(elem, _face_info, elem_across->subdomain_id());
+  }
+}

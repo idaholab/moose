@@ -1083,6 +1083,28 @@ MooseVariableFV<OutputType>::operator()(const MooseVariableFV<OutputType>::FaceA
   }
 }
 
+template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) const
+{
+  const Elem * const requested_elem = std::get<0>(elem_and_face);
+  mooseAssert(requested_elem != remote_elem,
+              "If the requested element is remote then I think we've messed up our ghosting");
+
+  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
+    return getElemValue(requested_elem);
+  else
+  {
+    const FaceInfo * const fi = std::get<1>(elem_and_face);
+    mooseAssert(fi, "We need a FaceInfo");
+    mooseAssert((requested_elem == &fi->elem()) || (requested_elem == fi->neighborPtr()),
+                "The requested element should match something from the FaceInfo");
+    const Elem * const elem_across =
+        (requested_elem == &fi->elem()) ? fi->neighborPtr() : &fi->elem();
+    return getNeighborValue(requested_elem, *fi, getElemValue(elem_across));
+  }
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable
