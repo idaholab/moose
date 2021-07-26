@@ -34,7 +34,8 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
                                                      Moose::ElementType element_type,
                                                      const Elem * const & elem)
 
-  : _var(var),
+  : MeshChangedInterface(var.parameters()),
+    _var(var),
     _fe_type(_var.feType()),
     _var_num(_var.number()),
     _var_name(_var.name()),
@@ -1287,6 +1288,13 @@ MooseVariableDataFV<OutputType>::prepareIC()
   mooseAssert(_qrule, "We should have a non-null qrule");
   const auto nqp = _qrule->n_points();
   _u.resize(nqp);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::meshChanged()
+{
+  _prev_elem = nullptr;
 }
 
 template class MooseVariableDataFV<Real>;
