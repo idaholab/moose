@@ -173,14 +173,13 @@ def get_civet_results(local=DEFAULT_JOBS_CACHE,
     return database
 
 
-def get_civet_hashes(remote, start='HEAD', branch='master', author='moosetest', logger=None):
+def get_civet_hashes(commit=None):
     """
     Helper function for returning the hashes associated with testing using CIVET.
 
-    In general, this function should be run from the "master" branch or a release tag that
-    stems from a release branch. In this scenario, the script performs the following tasks.
+    $ git log --merges -n 1 start
 
-    $ git log --merges --author moosetest -n 1 HEAD
+    This will return something similar to the following if *commit* is "upstream/master".
 
     commit 90123e7b6bd52f1bc36e68aac5d1fa95e76aeb91
     Merge: 20330877ed d72a8d0d69
@@ -201,19 +200,25 @@ def get_civet_hashes(remote, start='HEAD', branch='master', author='moosetest', 
     returned.
     """
 
-    # Create "git clone" command
-    clone_cmd = ['git', 'clone', '--single-branch', '--branch', branch, remote, 'tmp']
-    if logger is not None:
-        logger.info("Cloning repository to gather commit information, this can take several minutes.")
-
     # Merge information command
-    merge_cmd = ['git', 'log', '--merges', '--author', author, '-n', '1', start]
+    merge_cmd = ['git', 'log', '--merges', '-n', '1', commit]
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        subprocess.run(clone_cmd, capture_output=True, text=True, check=True, cwd=tmp_dir)
-        out = subprocess.run(merge_cmd, capture_output=True, text=True, check=True,
-                             cwd=os.path.join(tmp_dir, 'tmp'))
+    out = subprocess.run(merge_cmd, capture_output=True, text=True, check=True)
+    regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
+    match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
+    return (match.group('master'), match.group('devel')) if match else None
 
-        regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
-        match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
-        return (match.group('master'), match.group('devel')) if match else None
+
+    """
+    if not git_is_repo():
+        raise OSError("The current working directory ({}) is not a git repository.".format(os.getcwd()))
+
+    full_branch = f'{remote}/{branch}'
+    remotes = mooseutils.get_branches()
+    if full_branch not in remotes:
+        raise OSError(f"The branch '{full_branch}' does not exist.")
+
+    # Create "git clone" command
+    fetch_cmd = ['git', 'fetch', remote, branch]
+    subprocess.run(fetch_cmd, capture_output=True, text=True, check=True)
+    """
