@@ -9,7 +9,6 @@
   xmax = 680
   ymin = 0
   ymax = 680
-  uniform_refine = 1
 []
 
 [GlobalParams]
