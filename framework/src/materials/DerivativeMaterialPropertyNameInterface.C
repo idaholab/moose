@@ -14,10 +14,10 @@
 
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::derivativePropertyName(
-    const MaterialPropertyName & base, const std::vector<VariableName> & c) const
+    const MaterialPropertyName & base, const std::vector<SymbolName> & c) const
 {
   // to obtain well defined names we sort alphabetically
-  std::vector<VariableName> a(c);
+  std::vector<SymbolName> a(c);
   std::sort(a.begin(), a.end());
 
   // derivative order
@@ -54,14 +54,14 @@ DerivativeMaterialPropertyNameInterface::derivativePropertyName(
 
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst(
-    const MaterialPropertyName & base, const VariableName & c1) const
+    const MaterialPropertyName & base, const SymbolName & c1) const
 {
   return "d" + base + "/d" + c1;
 }
 
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::derivativePropertyNameSecond(
-    const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2) const
+    const MaterialPropertyName & base, const SymbolName & c1, const SymbolName & c2) const
 {
   return derivativePropertyName(base, {c1, c2});
 }
@@ -69,9 +69,9 @@ DerivativeMaterialPropertyNameInterface::derivativePropertyNameSecond(
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::derivativePropertyNameThird(
     const MaterialPropertyName & base,
-    const VariableName & c1,
-    const VariableName & c2,
-    const VariableName & c3) const
+    const SymbolName & c1,
+    const SymbolName & c2,
+    const SymbolName & c3) const
 {
   return derivativePropertyName(base, {c1, c2, c3});
 }

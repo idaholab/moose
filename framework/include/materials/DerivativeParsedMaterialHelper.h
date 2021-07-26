@@ -73,7 +73,7 @@ struct DerivativeParsedMaterialHelperTempl<is_ad>::Derivative
 {
   GenericMaterialProperty<Real, is_ad> * _mat_prop;
   SymFunctionPtr _F;
-  std::vector<VariableName> _darg_names;
+  std::vector<std::string> _darg_names;
 };
 
 template <bool is_ad>

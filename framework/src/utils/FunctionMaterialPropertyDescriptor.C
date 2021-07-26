@@ -16,7 +16,7 @@
 template <bool is_ad>
 FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const std::string & expression, MooseObject * parent)
-  : _dependent_vars(), _derivative_vars(), _parent(parent)
+  : _dependent_symbols(), _derivative_symbols(), _parent(parent)
 {
   auto define = expression.find_last_of(":=");
 
@@ -51,8 +51,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
-    _dependent_vars(rhs._dependent_vars),
-    _derivative_vars(rhs._derivative_vars),
+    _dependent_symbols(rhs._dependent_symbols),
+    _derivative_symbols(rhs._derivative_symbols),
     _value(nullptr),
     _parent(rhs._parent),
     _property_name(rhs._property_name)
@@ -64,8 +64,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs, MooseObject * parent)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
-    _dependent_vars(rhs._dependent_vars),
-    _derivative_vars(rhs._derivative_vars),
+    _dependent_symbols(rhs._dependent_symbols),
+    _derivative_symbols(rhs._derivative_symbols),
     _value(nullptr),
     _parent(parent),
     _property_name(rhs._property_name)
@@ -85,9 +85,9 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseVector(
 
 template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor<is_ad>::addDerivative(const VariableName & var)
+FunctionMaterialPropertyDescriptor<is_ad>::addDerivative(const SymbolName & var)
 {
-  _derivative_vars.push_back(var);
+  _derivative_symbols.push_back(var);
   _value = nullptr;
   updatePropertyName();
 }
@@ -96,19 +96,20 @@ template <bool is_ad>
 bool
 FunctionMaterialPropertyDescriptor<is_ad>::dependsOn(const std::string & var) const
 {
-  return std::find(_dependent_vars.begin(), _dependent_vars.end(), var) != _dependent_vars.end() ||
-         std::find(_derivative_vars.begin(), _derivative_vars.end(), var) != _derivative_vars.end();
+  return std::find(_dependent_symbols.begin(), _dependent_symbols.end(), var) !=
+             _dependent_symbols.end() ||
+         std::find(_derivative_symbols.begin(), _derivative_symbols.end(), var) !=
+             _derivative_symbols.end();
 }
 
 template <bool is_ad>
-std::vector<VariableName>
-FunctionMaterialPropertyDescriptor<is_ad>::getDependentVariables()
+std::vector<DerivativeMaterialPropertyNameInterface::SymbolName>
+FunctionMaterialPropertyDescriptor<is_ad>::getDependentSymbols()
 {
-  std::set<VariableName> all;
-  all.insert(_dependent_vars.begin(), _dependent_vars.end());
-  all.insert(_derivative_vars.begin(), _derivative_vars.end());
+  std::set<SymbolName> all(_dependent_symbols.begin(), _dependent_symbols.end());
+  all.insert(_derivative_symbols.begin(), _derivative_symbols.end());
 
-  return std::vector<VariableName>(all.begin(), all.end());
+  return std::vector<SymbolName>(all.begin(), all.end());
 }
 
 template <bool is_ad>
@@ -121,7 +122,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
   if (open == std::string::npos && close == std::string::npos)
   {
     // no derivative requested
-    parseDependentVariables(expression);
+    parseDependentSymbols(expression);
 
     return;
   }
@@ -137,16 +138,16 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
     {
       // rest of argument list 0 is the function and 1,.. are the variable to take the derivative
       // w.r.t.
-      MooseUtils::tokenize(arguments, _derivative_vars, 0, ",");
+      MooseUtils::tokenize(arguments, _derivative_symbols, 0, ",");
 
       // check for empty [] brackets
-      if (_derivative_vars.size() > 0)
+      if (_derivative_symbols.size() > 0)
       {
         // parse argument zero of D[] as the function material property
-        parseDependentVariables(_derivative_vars[0]);
+        parseDependentSymbols(_derivative_symbols[0]);
 
-        // remove function from the _derivative_vars vector
-        _derivative_vars.erase(_derivative_vars.begin());
+        // remove function from the _derivative_symbols vector
+        _derivative_symbols.erase(_derivative_symbols.begin());
         updatePropertyName();
 
         return;
@@ -154,8 +155,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
     }
     else
     {
-      parseDependentVariables(arguments.substr(0, close2 + 1));
-      MooseUtils::tokenize(arguments.substr(close2 + 2), _derivative_vars, 0, ",");
+      parseDependentSymbols(arguments.substr(0, close2 + 1));
+      MooseUtils::tokenize(arguments.substr(close2 + 2), _derivative_symbols, 0, ",");
       updatePropertyName();
       return;
     }
@@ -166,7 +167,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
 
 template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor<is_ad>::parseDependentVariables(const std::string & expression)
+FunctionMaterialPropertyDescriptor<is_ad>::parseDependentSymbols(const std::string & expression)
 {
   auto open = expression.find_first_of("(");
   auto close = expression.find_last_of(")");
@@ -182,12 +183,12 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDependentVariables(const std::st
     _base_name = expression.substr(0, open);
 
     // parse argument list
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_vars, 0, ",");
+    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_symbols, 0, ",");
 
     // cremove duplicates from dependent variable list
-    std::sort(_dependent_vars.begin(), _dependent_vars.end());
-    _dependent_vars.erase(std::unique(_dependent_vars.begin(), _dependent_vars.end()),
-                          _dependent_vars.end());
+    std::sort(_dependent_symbols.begin(), _dependent_symbols.end());
+    _dependent_symbols.erase(std::unique(_dependent_symbols.begin(), _dependent_symbols.end()),
+                             _dependent_symbols.end());
   }
   else
     mooseError("Malformed material_properties expression '", expression, "'");
@@ -198,10 +199,10 @@ void
 FunctionMaterialPropertyDescriptor<is_ad>::printDebug()
 {
   Moose::out << "MPD: " << _fparser_name << ' ' << _base_name << " deriv = [";
-  for (auto & dv : _derivative_vars)
+  for (auto & dv : _derivative_symbols)
     Moose::out << dv << ' ';
   Moose::out << "] dep = [";
-  for (auto & dv : _dependent_vars)
+  for (auto & dv : _dependent_symbols)
     Moose::out << dv << ' ';
   Moose::out << "] " << getPropertyName() << '\n';
 }
@@ -220,10 +221,10 @@ FunctionMaterialPropertyDescriptor<is_ad>::value() const
     // get the material property reference
     if (_material_parent)
       _value = &(_material_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
-                                                                              _derivative_vars));
+                                                                              _derivative_symbols));
     else if (_kernel_parent)
-      _value = &(
-          _kernel_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name, _derivative_vars));
+      _value = &(_kernel_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
+                                                                            _derivative_symbols));
     else
       mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                  "Kernel object.");
@@ -236,7 +237,7 @@ template <bool is_ad>
 void
 FunctionMaterialPropertyDescriptor<is_ad>::updatePropertyName()
 {
-  _property_name = derivativePropertyName(_base_name, _derivative_vars);
+  _property_name = derivativePropertyName(_base_name, _derivative_symbols);
 }
 
 // explicit instantiation
