@@ -10,13 +10,13 @@
 #include "NeumannBC.h"
 
 registerMooseObject("MooseApp", NeumannBC);
+registerMooseObject("MooseApp", ADNeumannBC);
 
-defineLegacyParams(NeumannBC);
-
+template <bool is_ad>
 InputParameters
-NeumannBC::validParams()
+NeumannBCTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
   params.declareControllable("value");
   params.addClassDescription("Imposes the integrated boundary condition "
@@ -25,13 +25,18 @@ NeumannBC::validParams()
   return params;
 }
 
-NeumannBC::NeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _value(getParam<Real>("value"))
+template <bool is_ad>
+NeumannBCTempl<is_ad>::NeumannBCTempl(const InputParameters & parameters)
+  : GenericIntegratedBC<is_ad>(parameters), _value(this->template getParam<Real>("value"))
 {
 }
 
-Real
-NeumannBC::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+NeumannBCTempl<is_ad>::computeQpResidual()
 {
   return -_test[_i][_qp] * _value;
 }
+
+template class NeumannBCTempl<false>;
+template class NeumannBCTempl<true>;

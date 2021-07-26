@@ -16,9 +16,8 @@ template <bool is_ad>
 InputParameters
 MatNeumannBCTempl<is_ad>::validParams()
 {
-  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
-  params.addParam<Real>("value", 1.0, "The value to be enforced on the boundary.");
-  params.declareControllable("value");
+  InputParameters params = NeumannBCTempl<is_ad>::validParams();
+
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{C \\partial u}{\\partial n}=M*h$, "
                              "where $h$ is a constant, $M$ is a material property, and $C$ is a "
@@ -31,8 +30,7 @@ MatNeumannBCTempl<is_ad>::validParams()
 
 template <bool is_ad>
 MatNeumannBCTempl<is_ad>::MatNeumannBCTempl(const InputParameters & parameters)
-  : GenericIntegratedBC<is_ad>(parameters),
-    _value(this->template getParam<Real>("value")),
+  : NeumannBCTempl<is_ad>(parameters),
     _boundary_prop(this->template getGenericMaterialProperty<Real, is_ad>("boundary_material"))
 {
 }
