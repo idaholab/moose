@@ -9,31 +9,28 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
-
-class NeumannBC;
-
-template <>
-InputParameters validParams<NeumannBC>();
+#include "GenericIntegratedBC.h"
 
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class NeumannBC : public IntegratedBC
+template <bool is_ad>
+class NeumannBCTempl : public GenericIntegratedBC<is_ad>
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   static InputParameters validParams();
 
-  NeumannBC(const InputParameters & parameters);
+  NeumannBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Value of grad(u) on the boundary.
   const Real & _value;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef NeumannBCTempl<false> NeumannBC;
+typedef NeumannBCTempl<true> ADNeumannBC;

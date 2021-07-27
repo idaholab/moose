@@ -64,7 +64,7 @@ def command_line_options(subparser, parent):
                         help="A list of file to build, this is useful for testing. The paths " \
                              "should be as complete as necessary to make the name unique, just " \
                              "as done within the markdown itself.")
-    parser.add_argument('--stable', action='store_true',
+    parser.add_argument('--stable', '--with-sqa', action='store_true',
                         help="By default the CIVET and SQA related extensions are disabled " \
                         "because they are slow and require the use of dependent Git submodules. " \
                         "These extensions are intended for use on the stable website only. " \
@@ -136,7 +136,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 page.base = self._translator.get('destination')
                 if isinstance(page, pages.Source):
                     page.output_extension = self._translator.renderer.EXTENSION
-                self._translator.addContent(page)
+                self._translator.addPage(page)
                 return page
 
 def main(options):

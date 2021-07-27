@@ -5,7 +5,7 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_intro.png style=width:100%;
+!media darcy_thermo_mech/moose_intro.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -20,44 +20,43 @@ Multi-physics Object Oriented Simulation Environment
 
   - being easily extended and maintained
   - working efficiently on a few and many processors
-  - providing an object-oriented, pluggable system for creating all aspects of a simulation tool
+  - providing an object-oriented, extensible system for creating all aspects of a simulation tool
 
 !---
 
 ## MOOSE Team
 
-!media darcy_thermo_mech/moose_team.png style=width:100%;
+!media darcy_thermo_mech/moose_team.png style=width:85%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-!media darcy_thermo_mech/moose_design.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_design.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-## FEM Capabilities
+## General Capabilities
 
-- User code agnostic of dimension
-- Continuous and Discontinuous Galerkin
-- Fully Coupled, Fully Implicit (and explicit)
+- continuous and Discontinuous Galerkin FEM
+- finite Volume
+- fully coupled, fully implicit (and explicit)
 - [!ac](AD)
-- Unstructured mesh with FEM shapes (Quads, Tris, Hexes, Tets, Pyramids, Wedges,...)
-- Higher order geometry (curvilinear, etc.)
-- Mesh Adaptivity (refinement and coarsening)
-- Massively Parallel (MPI+Threads)
-- User code agnostic of parallelism
-- User code agnostic of shape functions
+- unstructured mesh with FEM shapes
+- higher order geometry
+- mesh adaptivity (refinement and coarsening)
+- massively parallel (MPI and threads)
+- user code agnostic of dimension, parallelism, shape functions, etc.
 
 !---
 
 ## Object-oriented, pluggable system
 
-!media darcy_thermo_mech/moose_systems.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_systems.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
 ## Example Code
 
-!media darcy_thermo_mech/moose_code.png style=width:100%;
+!media darcy_thermo_mech/moose_code.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -74,21 +73,20 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Development Process
 
-!media darcy_thermo_mech/civet_flow.png style=width:100%;
+!media darcy_thermo_mech/civet_flow.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
 ## Community
 
-###### moose-users@googlegroups.com
+###### https://github.com/idaholab/moose/discussions
 
 !media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
-       caption=Total posts (top) and topics (bottom) from June 1, 2019 to May 25, 2020.
 
 !---
 
-!media darcy_thermo_mech/moose_contributors.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-!media darcy_thermo_mech/moose_add_del.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;

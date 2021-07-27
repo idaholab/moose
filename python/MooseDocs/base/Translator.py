@@ -118,7 +118,7 @@ class Translator(mixins.ConfigObject):
             msg = "The {} object has already been initialized, the addPage method must be called " \
                   "prior to initialization. Extension objects can add pages within the init() " \
                   "method."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
+            raise exceptions.MooseDocsException(msg, type(self))
 
         self.__executioner.addPage(page)
 

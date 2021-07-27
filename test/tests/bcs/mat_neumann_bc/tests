@@ -7,4 +7,10 @@
     exodiff = 'mat_neumann_out.e'
     requirement = 'The system shall support applying a material property as a Neumann boundary condition.'
   [../]
+  [./ad_test]
+    type = 'Exodiff'
+    input = 'ad_mat_neumann.i'
+    exodiff = 'ad_mat_neumann_out.e'
+    requirement = 'The system shall support applying a material property as a Neumann boundary condition using AD.'
+  [../]
 []
