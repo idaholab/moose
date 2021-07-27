@@ -11,6 +11,7 @@
 
 #include "MooseArray.h"
 #include "MooseTypes.h"
+#include "MeshChangedInterface.h"
 
 #include "libmesh/tensor_tools.h"
 #include "libmesh/vector_value.h"
@@ -38,7 +39,7 @@ class QBase;
 }
 
 template <typename OutputType>
-class MooseVariableDataFV
+class MooseVariableDataFV : public MeshChangedInterface
 {
 public:
   // type for gradient, second and divergence of template class OutputType
@@ -274,6 +275,8 @@ public:
    * (0 = current, 1 = old, 2 = older, etc).
    */
   unsigned int oldestSolutionStateRequested() const;
+
+  void meshChanged() override;
 
 private:
   void initializeSolnVars();
