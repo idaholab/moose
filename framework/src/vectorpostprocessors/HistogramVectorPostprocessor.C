@@ -34,11 +34,6 @@ HistogramVectorPostprocessor::HistogramVectorPostprocessor(const InputParameters
     _vpp_name(getParam<VectorPostprocessorName>("vpp")),
     _num_bins(getParam<unsigned int>("num_bins"))
 {
-  const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
-  for (const auto & vec_name : vpp.getVectorNames())
-    _histogram_data[vec_name] = {&declareVector(vec_name + "_lower"),
-                                 &declareVector(vec_name + "_upper"),
-                                 &declareVector(vec_name)};
 }
 
 void
@@ -49,6 +44,14 @@ HistogramVectorPostprocessor::initialize()
 void
 HistogramVectorPostprocessor::execute()
 {
+  if (_histogram_data.empty())
+  {
+    const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
+    for (const auto & vec_name : vpp.getVectorNames())
+      _histogram_data[vec_name] = {&declareVector(vec_name + "_lower"),
+                                   &declareVector(vec_name + "_upper"),
+                                   &declareVector(vec_name)};
+  }
   if (processor_id() == 0) // Only compute on processor 0
   {
     const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
