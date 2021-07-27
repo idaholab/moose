@@ -81,7 +81,8 @@ public:
     NONE,
     CONVERGED_ABS,
     CONVERGED_REL,
-    EXACT_GUESS
+    EXACT_GUESS,
+    NOT_CONVERGED
   };
 
 protected:
@@ -107,12 +108,7 @@ protected:
    */
   void sizeItems(const NestedSolve::DynamicVector & guess,
                  NestedSolve::DynamicVector & residual,
-                 NestedSolve::DynamicMatrix & jacobian) const
-  {
-    const auto N = guess.size();
-    residual.resize(N, 1);
-    jacobian.resize(N, N);
-  }
+                 NestedSolve::DynamicMatrix & jacobian) const;
 
   /**
    * Sizing is a no-op for compile time sized types (and scalars)
@@ -192,12 +188,15 @@ NestedSolve::nonlinear(NestedSolve::DynamicVector & guess, R computeResidual, J 
     J & _jacobian;
   };
 
-  _state = State::NONE;
-
   // adaptor functor to utilize the Eigen non-linear solver
   auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
-  solver.solve(guess);
+  auto status = solver.solve(guess);
+
+  if (status == Eigen::HybridNonLinearSolverSpace::RelativeErrorTooSmall)
+    _state = State::CONVERGED_REL;
+  else
+    _state = State::NOT_CONVERGED;
 }
 
 template <typename R, typename J>
@@ -226,15 +225,18 @@ NestedSolve::nonlinear(Real & guess, R computeResidual, J computeJacobian)
     J & _jacobian;
   };
 
-  _state = State::NONE;
-
   // adaptor functor to utilize the Eigen non-linear solver
   auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
   V guess_eigen(1);
   guess_eigen << guess;
-  solver.solve(guess_eigen);
+  auto status = solver.solve(guess_eigen);
   guess = guess_eigen(0);
+
+  if (status == Eigen::HybridNonLinearSolverSpace::RelativeErrorTooSmall)
+    _state = State::CONVERGED_REL;
+  else
+    _state = State::NOT_CONVERGED;
 }
 
 template <typename R, typename J>
@@ -271,17 +273,20 @@ NestedSolve::nonlinear(RealVectorValue & guess, R computeResidual, J computeJaco
     J & _jacobian;
   };
 
-  _state = State::NONE;
-
   // adaptor functor to utilize the Eigen non-linear solver
   auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor)> solver(functor);
   V guess_eigen(3);
   guess_eigen << guess(0), guess(1), guess(2);
-  solver.solve(guess_eigen);
+  auto status = solver.solve(guess_eigen);
   guess(0) = guess_eigen(0);
   guess(1) = guess_eigen(1);
   guess(2) = guess_eigen(2);
+
+  if (status == Eigen::HybridNonLinearSolverSpace::RelativeErrorTooSmall)
+    _state = State::CONVERGED_REL;
+  else
+    _state = State::NOT_CONVERGED;
 }
 
 template <typename V, typename T>
@@ -293,8 +298,6 @@ NestedSolve::nonlinear(V & guess, T compute)
   CorrespondingJacobian<V> jacobian;
   sizeItems(guess, residual, jacobian);
 
-  _state = State::NONE;
-
   std::size_t n_iterations = 0;
   compute(guess, residual, jacobian);
 
@@ -305,24 +308,29 @@ NestedSolve::nonlinear(V & guess, T compute)
     _state = State::EXACT_GUESS;
     return;
   }
-
   auto r_square = r0_square;
+
+  // lambda to check for convergence and set the state accordingly
+  auto is_converged = [&]() {
+    if (r_square < _absolute_tolerance_square)
+    {
+      _state = State::CONVERGED_ABS;
+      return true;
+    }
+    if (r_square / r0_square < _relative_tolerance_square)
+    {
+      _state = State::CONVERGED_REL;
+      return true;
+    }
+    return false;
+  };
+
+  // perform non-linear iterations
   while (n_iterations < _max_iterations)
   {
     // check convergence
-    if (n_iterations >= _min_iterations)
-    {
-      if (r_square < _absolute_tolerance_square)
-      {
-        _state = State::CONVERGED_ABS;
-        return;
-      }
-      if (r_square / r0_square < _relative_tolerance_square)
-      {
-        _state = State::CONVERGED_REL;
-        return;
-      }
-    }
+    if (n_iterations >= _min_iterations && is_converged())
+      return;
 
     // solve and apply next increment
     linear(jacobian, delta, residual);
@@ -333,4 +341,8 @@ NestedSolve::nonlinear(V & guess, T compute)
     compute(guess, residual, jacobian);
     r_square = normSquare(residual);
   }
+
+  // if we exceed the max iterations, we could still be converged
+  if (!is_converged())
+    _state = State::NOT_CONVERGED;
 }

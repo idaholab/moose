@@ -4,7 +4,7 @@
 
 The `NestedSolve` utility class implements a non-linear solve for NxN systems.
 It can be used in Kernels, Materials, and UserObjects to compute quantities
-given by the solution of a non-linear equation system trather than a closed form
+given by the solution of a non-linear equation system rather than a closed form
 expression.
 
 Such a non-linear equation system is defined by a residual function and a
@@ -17,7 +17,7 @@ material properties available in the class the NestedSolve is utilized.
 
 `NestedSolve` is a C++ class object needs to be instantiated (constructed) to
 set up a solver environment. This solver environment can be a local or member
-variable of the the object it is used within.
+variable of the object it is used within.
 
 The purpose of the solve environment is to store *solver options*, such as
 tolerances, and *solver state*, such as convergence reason or failure state of
@@ -102,7 +102,7 @@ the system.
 ### Powell's Dogleg method solver
 
 While the previous example used a single lambda to compute residual and Jacobian
-at the same time, we can insteat change the code to have sparate lambdas to
+at the same time, we can instead change the code to have sparate lambdas to
 allow independent calculation of residual and Jacobian. This facilitates the use
 of solver methods that evaluate the residual more frequantly than the Jacobian,
 such as line search and trust region strategies.

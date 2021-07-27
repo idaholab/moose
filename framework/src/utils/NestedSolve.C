@@ -52,6 +52,16 @@ NestedSolve::NestedSolve(const InputParameters & params)
 }
 
 void
+NestedSolve::sizeItems(const NestedSolve::DynamicVector & guess,
+                       NestedSolve::DynamicVector & residual,
+                       NestedSolve::DynamicMatrix & jacobian) const
+{
+  const auto N = guess.size();
+  residual.resize(N, 1);
+  jacobian.resize(N, N);
+}
+
+void
 NestedSolve::linear(RankTwoTensor A, RealVectorValue & x, RealVectorValue b) const
 {
   x = A.inverse() * b;
