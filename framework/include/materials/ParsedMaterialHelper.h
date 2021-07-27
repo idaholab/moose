@@ -12,6 +12,7 @@
 #include "FunctionMaterialBase.h"
 #include "FunctionParserUtils.h"
 #include "FunctionMaterialPropertyDescriptor.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
 
 #include "libmesh/fparser_ad.hh"
 
@@ -38,7 +39,7 @@ template <bool is_ad>
 class ParsedMaterialHelper : public FunctionMaterialBase<is_ad>, public FunctionParserUtils<is_ad>
 {
 public:
-  using FunctionMaterialBase<is_ad>::SymbolName;
+  typedef DerivativeMaterialPropertyNameInterface::SymbolName SymbolName;
 
   enum class VariableNameMappingMode
   {

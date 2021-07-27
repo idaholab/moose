@@ -10,6 +10,8 @@
 #pragma once
 
 #include "ParsedMaterialHelper.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
+
 #include "libmesh/fparser_ad.hh"
 
 #define usingDerivativeParsedMaterialHelperMembers(T)                                              \
@@ -29,7 +31,7 @@ protected:
   usingParsedMaterialHelperMembers(is_ad);
 
 public:
-  using DerivativeMaterialPropertyNameInterface::SymbolName;
+  typedef DerivativeMaterialPropertyNameInterface::SymbolName SymbolName;
 
   DerivativeParsedMaterialHelperTempl(
       const InputParameters & parameters,
