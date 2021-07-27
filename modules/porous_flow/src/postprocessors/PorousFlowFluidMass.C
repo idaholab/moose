@@ -49,6 +49,7 @@ PorousFlowFluidMass::validParams()
       "correctly account for changes in mesh volume.  For non-mechanically-coupled systems, "
       "base_name should not be the base_name of any TensorMechanics strain calculators.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Calculates the mass of a fluid component in a region");
   return params;
 }

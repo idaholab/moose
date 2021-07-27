@@ -1,4 +1,4 @@
-# The sample is a annulus in RZ coordinates.
+# The sample is an annulus in RZ coordinates.
 # Roller BCs are applied to the r_min, r_max and bottom boundaries
 # A constant displacement is applied to the top: disp_z = -0.01*t.
 # There is no fluid flow.

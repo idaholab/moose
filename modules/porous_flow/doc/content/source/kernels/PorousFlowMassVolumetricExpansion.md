@@ -13,8 +13,7 @@ A mass-lumped version is implemented.
 
 See [mass lumping](/mass_lumping.md) for details.
 
-!alert note
-This Kernel should employ `use_displaced_mesh = false`.  Further information can be found [here](porous_flow/time_derivative.md)
+Because it contains volumetric strain, this Kernel always sets `use_displaced_mesh = false` and the parameter cannot be altered by the user.  Further information can be found [here](porous_flow/time_derivative.md)
 
 The multiplication by $\rho_{\beta}$ is optional and is controlled by the `multiply_by_density` flag.  It is sometimes advantageous to use this flag because the problem becomes more linear.  However, this sometimes changes the nature of the physical problem modelled, and care must be taken when using other PorousFlow objects (that intrinsically have `multiply_by_density = true`, such as [PorousFlowFluidMass](PorousFlowFluidMass.md)) so new users are encouraged to use the default `multiply_by_density = true` flag until they gain familiarity with PorousFlow.
 

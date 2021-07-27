@@ -8,8 +8,7 @@ This `Kernel` implements the weak form of
 \end{equation*}
 where all parameters are defined in the [nomenclature](/nomenclature.md).
 
-!alert note
-This Kernel should employ `use_displaced_mesh = false`.  Further information can be found [here](porous_flow/time_derivative.md)
+Because it contains volumetric strain, this Kernel always sets `use_displaced_mesh = false` and the parameter cannot be altered by the user.  Further information can be found [here](porous_flow/time_derivative.md)
 
 !syntax parameters /Kernels/PorousFlowHeatVolumetricExpansion
 

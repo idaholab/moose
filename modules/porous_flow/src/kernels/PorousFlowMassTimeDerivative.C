@@ -47,6 +47,7 @@ PorousFlowMassTimeDerivative::validParams()
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Derivative of fluid-component mass with respect to time.  Mass "
                              "lumping to the nodes is used.");
   return params;

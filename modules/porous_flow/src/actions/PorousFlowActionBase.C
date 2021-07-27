@@ -453,7 +453,7 @@ PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName
     std::string material_name = "PorousFlowActionBase_VolumetricStrain";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("displacements") = displacements;
-    if (base_name != "")
+    if (!base_name.empty())
       params.set<std::string>("base_name") = base_name;
     _problem->addMaterial(material_type, material_name, params);
   }

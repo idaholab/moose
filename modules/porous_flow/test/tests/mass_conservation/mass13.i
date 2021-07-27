@@ -1,4 +1,4 @@
-# The sample is a annulus in RZ coordinates.
+# The sample is an annulus in RZ coordinates.
 # Roller BCs are applied to the rmin, top and bottom boundaries
 # A constant displacement is applied to the outer boundary: disp_r = -0.01 * t * (r - rmin)/(rmax - rmin).
 # There is no fluid flow.

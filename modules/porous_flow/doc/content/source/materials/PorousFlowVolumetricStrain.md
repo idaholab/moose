@@ -8,7 +8,7 @@ This Material computes volumetric strain and volumetric strain rate.  It require
 It also calculates derivatives of these with respect to the PorousFlow variables.
 
 !alert note
-It is possible to supply a `base_name` if your TensorMechanics strain calculator also has a `base_name`.
+If your TensorMechanics strain calculator uses `base_name` then you must ensure that you supply the same `base_name` to this material.  [This page](porous_flow/time_derivative.md) contains more information.
 
 !alert note
 The derivatives calculated assume Cartesian small strain.  Therefore, if you use a finite-strain calculator, or if you're using other coordinate systems, such as RZ coordinates, the Jacobian won't be exact, which will lead to slightly poorer convergence

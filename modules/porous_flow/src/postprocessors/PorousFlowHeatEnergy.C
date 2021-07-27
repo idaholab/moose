@@ -35,6 +35,7 @@ PorousFlowHeatEnergy::validParams()
       "correctly account for changes in mesh volume.  For non-mechanically-coupled systems, "
       "base_name should not be the base_name of any TensorMechanics strain calculators.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addParam<unsigned int>("kernel_variable_number",
                                 0,
                                 "The PorousFlow variable number (according to the dictatory) of "

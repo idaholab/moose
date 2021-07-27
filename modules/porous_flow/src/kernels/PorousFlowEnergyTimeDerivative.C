@@ -35,6 +35,7 @@ PorousFlowEnergyTimeDerivative::validParams()
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Derivative of heat-energy-density wrt time");
   return params;
 }

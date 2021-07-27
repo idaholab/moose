@@ -35,6 +35,8 @@ PorousFlowMassVolumetricExpansion::validParams()
       "fluid_component", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Component_mass*rate_of_solid_volumetric_expansion.  This Kernel "
                              "lumps the component mass to the nodes.");
   return params;

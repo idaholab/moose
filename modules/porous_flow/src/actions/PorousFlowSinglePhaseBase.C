@@ -267,7 +267,7 @@ PorousFlowSinglePhaseBase::addKernels()
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
       params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
-      if (_base_name != "")
+      if (!_base_name.empty())
         params.set<std::string>("base_name") = _base_name;
       _problem->addKernel(kernel_type, kernel_name, params);
     }

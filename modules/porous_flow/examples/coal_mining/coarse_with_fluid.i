@@ -226,7 +226,6 @@
   []
   [mass0]
     type = PorousFlowMassTimeDerivative
-    use_displaced_mesh = false
     fluid_component = 0
     variable = porepressure
   []
@@ -239,8 +238,7 @@
   []
   [poro_vol_exp]
     type = PorousFlowMassVolumetricExpansion
-    use_displaced_mesh = false
-     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     variable = porepressure
     fluid_component = 0
   []
