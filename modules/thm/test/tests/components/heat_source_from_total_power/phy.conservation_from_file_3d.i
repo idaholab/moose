@@ -45,7 +45,7 @@ energy_change = ${fparse power_fraction * power * t}
 
 [Postprocessors]
   [E_tot]
-    type = HeatStructureEnergy3D
+    type = ADHeatStructureEnergy3D
     block = 'heat_structure:rgn1 heat_structure:rgn2'
     execute_on = 'initial timestep_end'
   []

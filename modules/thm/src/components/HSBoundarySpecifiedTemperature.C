@@ -24,7 +24,7 @@ void
 HSBoundarySpecifiedTemperature::addMooseObjects()
 {
   {
-    std::string class_name = "FunctionDirichletBC";
+    std::string class_name = "ADFunctionDirichletBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;

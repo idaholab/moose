@@ -73,7 +73,7 @@
 
 [Postprocessors]
   [energy_hs]
-    type = HeatStructureEnergy3D
+    type = ADHeatStructureEnergy3D
     block = blk:0
     execute_on = 'INITIAL TIMESTEP_END'
   []

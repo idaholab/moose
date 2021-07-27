@@ -34,12 +34,12 @@
 
 [Kernels]
   [td]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = T
   []
 
   [diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = T
   []
 

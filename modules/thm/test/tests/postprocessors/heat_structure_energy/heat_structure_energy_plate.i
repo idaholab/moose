@@ -72,7 +72,7 @@
 
 [Postprocessors]
   [E_tot]
-    type = HeatStructureEnergy
+    type = ADHeatStructureEnergy
     block = 'heat_structure:region2'
     plate_depth = 4.0
     execute_on = 'initial'
