@@ -69,7 +69,7 @@ IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeStressInitialize(
 template <bool is_ad>
 GenericReal<is_ad>
 IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeHardeningDerivative(
-    GenericReal<is_ad> scalar)
+    const GenericReal<is_ad> & scalar)
 {
   const GenericReal<is_ad> stress_delta = _effective_trial_stress - _three_shear_modulus * scalar;
   GenericReal<is_ad> slope = std::pow(stress_delta, (1.0 / _strain_hardening_exponent - 1.0)) /

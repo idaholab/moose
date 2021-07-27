@@ -163,7 +163,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
 
 template <>
 Real
-IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(Real scalar)
+IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(const Real & scalar)
 {
   if (_hardening_function)
   {
@@ -178,7 +178,7 @@ IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(Real scalar)
 
 template <>
 ADReal
-IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(ADReal scalar)
+IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(const ADReal & scalar)
 {
   if (_hardening_function)
   {
@@ -197,8 +197,9 @@ IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(ADReal scalar)
 }
 
 template <bool is_ad>
-GenericReal<is_ad> IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative(
-    GenericReal<is_ad> /*scalar*/)
+GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative(
+    const GenericReal<is_ad> & /*scalar*/)
 {
   if (_hardening_function)
   {

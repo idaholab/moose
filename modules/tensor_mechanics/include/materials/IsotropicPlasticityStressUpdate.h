@@ -57,8 +57,8 @@ protected:
   computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
   virtual void computeYieldStress(const GenericRankFourTensor<is_ad> & elasticity_tensor);
-  virtual GenericReal<is_ad> computeHardeningValue(GenericReal<is_ad> scalar);
-  virtual GenericReal<is_ad> computeHardeningDerivative(GenericReal<is_ad> scalar);
+  virtual GenericReal<is_ad> computeHardeningValue(const GenericReal<is_ad> & scalar);
+  virtual GenericReal<is_ad> computeHardeningDerivative(const GenericReal<is_ad> & scalar);
 
   /// a string to prepend to the plastic strain Material Property name
   const std::string _plastic_prepend;

@@ -45,7 +45,7 @@ protected:
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
                           const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
   virtual void computeYieldStress(const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
-  virtual GenericReal<is_ad> computeHardeningDerivative(GenericReal<is_ad> scalar) override;
+  virtual GenericReal<is_ad> computeHardeningDerivative(const GenericReal<is_ad> & scalar) override;
 
   ///@{ Power law hardening coefficients
   Real _K;

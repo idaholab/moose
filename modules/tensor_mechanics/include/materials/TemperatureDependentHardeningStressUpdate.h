@@ -31,8 +31,8 @@ protected:
                                        const RankFourTensor & elasticity_tensor) override;
 
   virtual void computeYieldStress(const RankFourTensor & elasticity_tensor) override;
-  virtual Real computeHardeningValue(Real scalar) override;
-  virtual Real computeHardeningDerivative(Real scalar) override;
+  virtual Real computeHardeningValue(const Real & scalar) override;
+  virtual Real computeHardeningDerivative(const Real & scalar) override;
 
   /**
    * Determines the section of the piecewise temperature dependent hardening

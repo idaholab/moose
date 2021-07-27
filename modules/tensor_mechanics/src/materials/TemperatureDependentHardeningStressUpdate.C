@@ -127,7 +127,7 @@ TemperatureDependentHardeningStressUpdate::initializeHardeningFunctions()
 }
 
 Real
-TemperatureDependentHardeningStressUpdate::computeHardeningValue(Real scalar)
+TemperatureDependentHardeningStressUpdate::computeHardeningValue(const Real & scalar)
 {
   const Real strain = _effective_inelastic_strain_old[_qp] + scalar;
   const Real stress =
@@ -137,7 +137,8 @@ TemperatureDependentHardeningStressUpdate::computeHardeningValue(Real scalar)
   return stress - _yield_stress;
 }
 
-Real TemperatureDependentHardeningStressUpdate::computeHardeningDerivative(Real /*scalar*/)
+Real
+TemperatureDependentHardeningStressUpdate::computeHardeningDerivative(const Real & /*scalar*/)
 {
   const Real strain_old = _effective_inelastic_strain_old[_qp];
 
