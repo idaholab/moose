@@ -32,6 +32,11 @@ HillConstants::validParams()
   params.addParam<std::vector<FunctionName>>(
       "function_names",
       "A set of functions that describe the evolution of anisotropy with temperature");
+  params.addParam<bool>(
+      "use_large_rotation",
+      false,
+      "Whether to rotate the Hill tensor (anisotropic parameters) to account for large kinematic "
+      "rotations. It's recommended to set it to true if large displacements are to be expected.");
   params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }
@@ -39,6 +44,10 @@ HillConstants::validParams()
 HillConstants::HillConstants(const InputParameters & parameters)
   : ADMaterial(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _rotation_total_hill(declareADProperty<RankTwoTensor>(_base_name + "rotation_total_hill")),
+    _rotation_total_hill_old(
+        getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation_total_hill")),
+    _rotation_increment(getADMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _hill_constants_input(6),
     _hill_constants(6),
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
@@ -49,9 +58,11 @@ HillConstants::HillConstants(const InputParameters & parameters)
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _function_names(getParam<std::vector<FunctionName>>("function_names")),
     _num_functions(_function_names.size()),
-    _functions(_num_functions)
+    _functions(_num_functions),
+    _use_large_rotation(getParam<bool>("use_large_rotation"))
 
 {
+  _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
   if (_has_temp && _num_functions != 6)
     paramError("function_names",
                "Six functions need to be provided to determine the evolution of Hill's "
@@ -64,16 +75,44 @@ HillConstants::HillConstants(const InputParameters & parameters)
       paramError("function_names", "Function names provided cannot retrieve a function.");
   }
 
-  if (!_has_temp)
-  {
-    _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+  if (!_has_temp && !_use_large_rotation)
     rotateHillConstants(_hill_constants_input);
-  }
+
+  if (_use_large_rotation && isParamValid("rotation_angles"))
+    paramError(
+        "rotation_angles",
+        "Use of both updates of anisotropic coefficients through rotation_angles (initial rigid "
+        "body rotation) and finite strain rotation kinematics are not supported at this time.");
+}
+
+void
+HillConstants::initQpStatefulProperties()
+{
+  RankTwoTensor identity_rotation(RankTwoTensor::initIdentity);
+
+  _rotation_total_hill[_qp] = identity_rotation;
 }
 
 void
 HillConstants::computeQpProperties()
 {
+
+  // Account for finite strain rotation influence on anisotropic coefficients
+  if (_use_large_rotation)
+  {
+    _rotation_total_hill[_qp] = _rotation_increment[_qp] * _rotation_total_hill_old[_qp];
+    std::array<Real, 3> angles_zyx =
+        computeZYXAngles(MetaPhysicL::raw_value(_rotation_total_hill[_qp]));
+    _zyx_angles(0) = angles_zyx[0] / libMesh::pi * 180.0;
+    _zyx_angles(1) = angles_zyx[1] / libMesh::pi * 180.0;
+    _zyx_angles(2) = angles_zyx[2] / libMesh::pi * 180.0;
+
+    // Make sure to provide the original coefficients to the orientation transformation
+    _hill_constant_material[_qp].resize(6);
+    _hill_constant_material[_qp] = _hill_constants_input;
+  }
+
+  // Account for temperature dependency
   if (_has_temp)
   {
     _hill_constant_material[_qp].resize(6);
@@ -82,11 +121,54 @@ HillConstants::computeQpProperties()
     for (unsigned int i = 0; i < 6; i++)
       _hill_constant_material[_qp][i] =
           _functions[i]->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
-
-    rotateHillConstants(_hill_constant_material[_qp]);
   }
 
+  // We need to update the coefficients whether we use temperature dependency or large rotation
+  // kinematics (or both)
+  if (_has_temp || _use_large_rotation)
+    rotateHillConstants(_hill_constant_material[_qp]);
+
+  // Update material coefficients whether or not they are temperature-dependent
   _hill_constant_material[_qp] = _hill_constants;
+}
+
+std::array<Real, 3>
+HillConstants::computeZYXAngles(const RankTwoTensor & rotation_matrix)
+{
+  std::array<Real, 3> zyx_array;
+
+  const double rotation_02 = rotation_matrix(0, 2);
+  if (rotation_02 < 1.0)
+  {
+    if (rotation_02 > -1.0)
+    {
+      // z angle
+      zyx_array[0] = std::atan2(-rotation_matrix(0, 1), rotation_matrix(0, 0));
+      // y angle
+      zyx_array[1] = std::asin(rotation_matrix(0, 2));
+      // x angle
+      zyx_array[2] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(2, 2));
+    }
+    else
+    {
+      // z angle
+      zyx_array[0] = 0.0;
+      // y angle
+      zyx_array[1] = -libMesh::pi / 2.0;
+      // x angle
+      zyx_array[2] = -std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+    }
+  }
+  else
+  {
+    // z angle
+    zyx_array[0] = 0.0;
+    // y angle
+    zyx_array[1] = libMesh::pi / 2.0;
+    // x angle
+    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+  }
+  return zyx_array;
 }
 
 void
