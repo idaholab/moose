@@ -12,12 +12,14 @@
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
+registerMooseObject("TensorMechanicsApp", ADIsotropicPlasticityStressUpdate);
 registerMooseObject("TensorMechanicsApp", IsotropicPlasticityStressUpdate);
 
+template <bool is_ad>
 InputParameters
-IsotropicPlasticityStressUpdate::validParams()
+IsotropicPlasticityStressUpdateTempl<is_ad>::validParams()
 {
-  InputParameters params = RadialReturnStressUpdate::validParams();
+  InputParameters params = RadialReturnStressUpdateTempl<is_ad>::validParams();
   params.addClassDescription("This class uses the discrete material in a radial return isotropic "
                              "plasticity model.  This class is one of the basic radial return "
                              "constitutive models, yet it can be used in conjunction with other "
@@ -41,24 +43,29 @@ IsotropicPlasticityStressUpdate::validParams()
   return params;
 }
 
-IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters),
-    _plastic_prepend(getParam<std::string>("plastic_prepend")),
-    _yield_stress_function(
-        isParamValid("yield_stress_function") ? &getFunction("yield_stress_function") : NULL),
-    _yield_stress(getParam<Real>("yield_stress")),
-    _hardening_constant(getParam<Real>("hardening_constant")),
-    _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
-                                                           : NULL),
+template <bool is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::IsotropicPlasticityStressUpdateTempl(
+    const InputParameters & parameters)
+  : RadialReturnStressUpdateTempl<is_ad>(parameters),
+    _plastic_prepend(this->template getParam<std::string>("plastic_prepend")),
+    _yield_stress_function(this->isParamValid("yield_stress_function")
+                               ? &this->getFunction("yield_stress_function")
+                               : NULL),
+    _yield_stress(this->template getParam<Real>("yield_stress")),
+    _hardening_constant(this->template getParam<Real>("hardening_constant")),
+    _hardening_function(
+        this->isParamValid("hardening_function") ? &this->getFunction("hardening_function") : NULL),
     _yield_condition(-1.0), // set to a non-physical value to catch uninitalized yield condition
     _hardening_slope(0.0),
-    _plastic_strain(
-        declareProperty<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
-    _plastic_strain_old(
-        getMaterialPropertyOld<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
-    _hardening_variable(declareProperty<Real>(_base_name + "hardening_variable")),
-    _hardening_variable_old(getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
-    _temperature(coupledValue("temperature"))
+    _plastic_strain(this->template declareGenericProperty<RankTwoTensor, is_ad>(
+        _base_name + _plastic_prepend + "plastic_strain")),
+    _plastic_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>(
+        _base_name + _plastic_prepend + "plastic_strain")),
+    _hardening_variable(
+        this->template declareGenericProperty<Real, is_ad>(_base_name + "hardening_variable")),
+    _hardening_variable_old(
+        this->template getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
+    _temperature(this->template coupledGenericValue<is_ad>("temperature"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
     mooseError("Yield stress must be greater than zero");
@@ -66,33 +73,38 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
   if (_yield_stress_function == NULL && !parameters.isParamSetByUser("yield_stress"))
     mooseError("Either yield_stress or yield_stress_function must be given");
 
-  if (!parameters.isParamSetByUser("hardening_constant") && !isParamValid("hardening_function"))
+  if (!parameters.isParamSetByUser("hardening_constant") &&
+      !this->isParamValid("hardening_function"))
     mooseError("Either hardening_constant or hardening_function must be defined");
 
-  if (parameters.isParamSetByUser("hardening_constant") && isParamValid("hardening_function"))
+  if (parameters.isParamSetByUser("hardening_constant") && this->isParamValid("hardening_function"))
     mooseError(
         "Only the hardening_constant or only the hardening_function can be defined but not both");
 }
 
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdate::initQpStatefulProperties()
+IsotropicPlasticityStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _hardening_variable[_qp] = 0.0;
   _plastic_strain[_qp].zero();
 }
 
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
+IsotropicPlasticityStressUpdateTempl<is_ad>::propagateQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 
-  propagateQpStatefulPropertiesRadialReturn();
+  RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn();
 }
 
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdate::computeStressInitialize(const Real & effective_trial_stress,
-                                                         const RankFourTensor & elasticity_tensor)
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
+    const GenericReal<is_ad> & effective_trial_stress,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
   computeYieldStress(elasticity_tensor);
 
@@ -101,9 +113,10 @@ IsotropicPlasticityStressUpdate::computeStressInitialize(const Real & effective_
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
-Real
-IsotropicPlasticityStressUpdate::computeResidual(const Real & effective_trial_stress,
-                                                 const Real & scalar)
+template <bool is_ad>
+GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeResidual(
+    const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
   mooseAssert(_yield_condition != -1.0,
               "the yield stress was not updated by computeStressInitialize");
@@ -121,9 +134,10 @@ IsotropicPlasticityStressUpdate::computeResidual(const Real & effective_trial_st
   return 0.0;
 }
 
-Real
-IsotropicPlasticityStressUpdate::computeDerivative(const Real & /*effective_trial_stress*/,
-                                                   const Real & /*scalar*/)
+template <bool is_ad>
+GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeDerivative(
+    const GenericReal<is_ad> & /*effective_trial_stress*/, const GenericReal<is_ad> & /*scalar*/)
 {
   if (_yield_condition > 0.0)
     return -1.0 - _hardening_slope / _three_shear_modulus;
@@ -131,26 +145,29 @@ IsotropicPlasticityStressUpdate::computeDerivative(const Real & /*effective_tria
   return 1.0;
 }
 
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdate::iterationFinalize(Real scalar)
+IsotropicPlasticityStressUpdateTempl<is_ad>::iterationFinalize(GenericReal<is_ad> scalar)
 {
   if (_yield_condition > 0.0)
     _hardening_variable[_qp] = computeHardeningValue(scalar);
 }
 
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdate::computeStressFinalize(
-    const RankTwoTensor & plastic_strain_increment)
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
+    const GenericRankTwoTensor<is_ad> & plastic_strain_increment)
 {
   _plastic_strain[_qp] += plastic_strain_increment;
 }
 
+template <>
 Real
-IsotropicPlasticityStressUpdate::computeHardeningValue(Real scalar)
+IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(Real scalar)
 {
   if (_hardening_function)
   {
-    const Real strain_old = _effective_inelastic_strain_old[_qp];
+    const Real strain_old = this->_effective_inelastic_strain_old[_qp];
     const Point p;
 
     return _hardening_function->value(strain_old + scalar, p) - _yield_stress;
@@ -159,11 +176,33 @@ IsotropicPlasticityStressUpdate::computeHardeningValue(Real scalar)
   return _hardening_variable_old[_qp] + _hardening_slope * scalar;
 }
 
-Real IsotropicPlasticityStressUpdate::computeHardeningDerivative(Real /*scalar*/)
+template <>
+ADReal
+IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(ADReal scalar)
 {
   if (_hardening_function)
   {
-    const Real strain_old = _effective_inelastic_strain_old[_qp];
+    const Real strain_old = this->_effective_inelastic_strain_old[_qp];
+    const Point p;
+    const Real t = strain_old + MetaPhysicL::raw_value(scalar);
+
+    DualReal hardening_function_value = _hardening_function->value(t, p);
+    hardening_function_value.derivatives() =
+        (strain_old + scalar).derivatives() * _hardening_function->timeDerivative(t, p);
+
+    return hardening_function_value - _yield_stress;
+  }
+
+  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
+}
+
+template <bool is_ad>
+GenericReal<is_ad> IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative(
+    GenericReal<is_ad> /*scalar*/)
+{
+  if (_hardening_function)
+  {
+    const Real strain_old = this->_effective_inelastic_strain_old[_qp];
     const Point p; // Always (0,0,0)
 
     return _hardening_function->timeDerivative(strain_old, p);
@@ -172,8 +211,10 @@ Real IsotropicPlasticityStressUpdate::computeHardeningDerivative(Real /*scalar*/
   return _hardening_constant;
 }
 
+template <>
 void
-IsotropicPlasticityStressUpdate::computeYieldStress(const RankFourTensor & /*elasticity_tensor*/)
+IsotropicPlasticityStressUpdateTempl<false>::computeYieldStress(
+    const RankFourTensor & /*elasticity_tensor*/)
 {
   if (_yield_stress_function)
   {
@@ -181,7 +222,33 @@ IsotropicPlasticityStressUpdate::computeYieldStress(const RankFourTensor & /*ela
     _yield_stress = _yield_stress_function->value(_temperature[_qp], p);
 
     if (_yield_stress <= 0.0)
-      mooseError(
-          "In ", _name, ": The calculated yield stress (", _yield_stress, ") is less than zero");
+      mooseError("In ",
+                 this->_name,
+                 ": The calculated yield stress (",
+                 _yield_stress,
+                 ") is less than zero");
+  }
+}
+
+template <>
+void
+IsotropicPlasticityStressUpdateTempl<true>::computeYieldStress(
+    const ADRankFourTensor & /*elasticity_tensor*/)
+{
+  if (_yield_stress_function)
+  {
+    const Point p;
+
+    _yield_stress = _yield_stress_function->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
+    _yield_stress.derivatives() =
+        _temperature[_qp].derivatives() *
+        _yield_stress_function->timeDerivative(MetaPhysicL::raw_value(_temperature[_qp]), p);
+
+    if (_yield_stress <= 0.0)
+      mooseException("In ",
+                     this->_name,
+                     ": The calculated yield stress (",
+                     _yield_stress.value(),
+                     ") is less than zero");
   }
 }
