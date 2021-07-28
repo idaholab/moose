@@ -88,6 +88,16 @@ public:
   const T & getParam(const std::string & name) const;
 
   /**
+   * Retrieve two parameters and provide pair of parameters for the object
+   * @param param1 The name of first parameter
+   * @param param2 The name of second parameter
+   * @return Vector of pairs of first and second parameters
+   */
+  template <typename T1, typename T2>
+  std::vector<std::pair<T1, T2>> getParamPair(const std::string & param1,
+                                              const std::string & param2) const;
+
+  /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */
@@ -253,6 +263,27 @@ const T &
 MooseObject::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T1, typename T2>
+std::vector<std::pair<T1, T2>>
+MooseObject::getParamPair(const std::string & param1, const std::string & param2)
+{
+  std::vector<std::pair<T1, T2>> parameter_pair;
+
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    auto v1 = getParam<std::vector<T1>>(param1);
+    auto v2 = getParam<std::vector<T2>>(param2);
+
+    if (v1.size() == v2.size())
+      for (size_t i = 0; i < v1.size(); ++i)
+        parameter_pair.push_back(std::make_pair(v1[i], v2[i]));
+    else
+      mooseError("Unequal length of vectors " + param1 + " and " + param2 + " \n");
+  }
+  else
+    mooseError("Invalid Parameter");
 }
 
 template <typename... Args>
