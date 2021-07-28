@@ -80,8 +80,7 @@ TemperatureDependentHardeningStressUpdateTempl<
     yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
-  _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(
-      new LinearInterpolation(_hf_temperatures, yield_stress_vec));
+  _interp_yield_stress = std::make_unique<LinearInterpolation>(_hf_temperatures, yield_stress_vec);
 }
 
 template <bool is_ad>

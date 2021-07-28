@@ -20,21 +20,21 @@
 []
 
 [AuxVariables]
-  [./total_strain_yy]
+  [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = ParsedFunction
     value = t*(0.1)
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = true
@@ -44,57 +44,57 @@
 []
 
 [AuxKernels]
-  [./total_strain_yy]
+  [total_strain_yy]
     type = ADRankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yy
     index_i = 1
     index_j = 1
-  [../]
- []
+  []
+[]
 
 [BCs]
-  [./y_pull_function]
+  [y_pull_function]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = top
     function = top_pull
-  [../]
-  [./x_bot]
+  []
+  [x_bot]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.3
-  [../]
-  [./power_law_hardening]
+  []
+  [power_law_hardening]
     type = ADIsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = 'power_law_hardening'
-  [../]
+  []
 []
 
 [Executioner]
@@ -119,20 +119,20 @@
 []
 
 [Postprocessors]
-  [./stress_yy]
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = ElementAverageValue
     variable = total_strain_yy
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     file_base = PowerLawHardening_out
-  [../]
+  []
 []

@@ -50,11 +50,12 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::IsotropicPlasticityStressUpdateTemp
     _plastic_prepend(this->template getParam<std::string>("plastic_prepend")),
     _yield_stress_function(this->isParamValid("yield_stress_function")
                                ? &this->getFunction("yield_stress_function")
-                               : NULL),
+                               : nullptr),
     _yield_stress(this->template getParam<Real>("yield_stress")),
     _hardening_constant(this->template getParam<Real>("hardening_constant")),
-    _hardening_function(
-        this->isParamValid("hardening_function") ? &this->getFunction("hardening_function") : NULL),
+    _hardening_function(this->isParamValid("hardening_function")
+                            ? &this->getFunction("hardening_function")
+                            : nullptr),
     _yield_condition(-1.0), // set to a non-physical value to catch uninitalized yield condition
     _hardening_slope(0.0),
     _plastic_strain(this->template declareGenericProperty<RankTwoTensor, is_ad>(
@@ -70,7 +71,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::IsotropicPlasticityStressUpdateTemp
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
     mooseError("Yield stress must be greater than zero");
 
-  if (_yield_stress_function == NULL && !parameters.isParamSetByUser("yield_stress"))
+  if (_yield_stress_function == nullptr && !parameters.isParamSetByUser("yield_stress"))
     mooseError("Either yield_stress or yield_stress_function must be given");
 
   if (!parameters.isParamSetByUser("hardening_constant") &&
