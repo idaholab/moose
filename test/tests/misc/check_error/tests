@@ -35,20 +35,30 @@
   [./add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Cannot have more than one variable with the same name: q"
 
-    requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting types.'
-    issues = '#1222'
+    requirement = 'The system shall report an error when multiple AuxVariables with the same named are added to the system.'
+    issues = '#1222 #18465'
   [../]
 
   [./add_aux_scalar_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
     cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Cannot have more than one variable with the same name: q"
 
-    requirement = 'The system shall report an error when multiple Scalar AuxVariables are added to the system with conflicting types.'
-    issues = '#9313'
+    requirement = 'The system shall report an error when multiple Scalar AuxVariables with the same name are added to the system.'
+    issues = '#9313 #18465'
+  [../]
+
+  [./add_variable_multiple_test]
+    type = 'RunException'
+    input = 'add_variable_multiple_test.i'
+    cli_args = 'Variables/u/family=MONOMIAL'
+    expect_err = "Cannot have more than one variable with the same name: u"
+
+    requirement = 'The system shall report an error when multiple Variables with the same named are added to the system.'
+    issues = '#18465'
   [../]
 
   [./bad_bc_test]

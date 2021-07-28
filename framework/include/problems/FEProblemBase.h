@@ -2071,7 +2071,7 @@ protected:
   void meshChangedHelper(bool intermediate_change = false);
 
   /// Helper to check for duplicate variable names across systems or within a single system
-  bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
+  bool duplicateVariableCheck(const std::string & var_name, bool is_aux);
 
   void computeUserObjectsInternal(const ExecFlagType & type,
                                   const Moose::AuxGroup & group,

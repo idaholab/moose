@@ -2202,17 +2202,14 @@ FEProblemBase::getSampler(const std::string & name, THREAD_ID tid)
 
 bool
 FEProblemBase::duplicateVariableCheck(const std::string & var_name,
-                                      const FEType & type,
                                       bool is_aux)
 {
   SystemBase * curr_sys_ptr = _nl.get();
   SystemBase * other_sys_ptr = _aux.get();
-  std::string error_prefix = "";
   if (is_aux)
   {
     curr_sys_ptr = _aux.get();
     other_sys_ptr = _nl.get();
-    error_prefix = "Aux";
   }
 
   if (other_sys_ptr->hasVariable(var_name))
@@ -2220,17 +2217,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                var_name);
 
   if (curr_sys_ptr->hasVariable(var_name))
-  {
-    const Variable & var =
-        curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
-    if (var.type() != type)
-      mooseError(error_prefix,
-                 "Variable with name '",
-                 var_name,
-                 "' already exists but is of a differing type!");
-
-    return true;
-  }
+    mooseError("Cannot have more than one variable with the same name: ", var_name);
 
   return false;
 }
@@ -2240,10 +2227,7 @@ FEProblemBase::addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & params)
 {
-  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
-
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ false))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2263,7 +2247,7 @@ FEProblemBase::addVariable(const std::string & var_name,
 {
   mooseDeprecated("Please use the addVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ false))
     return;
 
   std::string var_type;
@@ -2301,7 +2285,7 @@ FEProblemBase::addArrayVariable(const std::string & var_name,
 {
   mooseDeprecated("Please use the addVariable(type_name, name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ false))
     return;
 
   auto moose_type = "ArrayMooseVariable";
@@ -2333,7 +2317,7 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
     _max_scalar_order = order;
 
   FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ false))
     return;
 
   InputParameters params = _factory.getValidParams("MooseVariableScalar");
@@ -2529,10 +2513,7 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & params)
 {
-  auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
-
-  if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ true))
     return;
 
   params.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -2551,7 +2532,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
 {
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ true))
     return;
 
   std::string var_type;
@@ -2587,7 +2568,7 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
 {
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ true))
     return;
 
   InputParameters params = _factory.getValidParams("ArrayMooseVariable");
@@ -2618,7 +2599,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
     _max_scalar_order = order;
 
   FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
+  if (duplicateVariableCheck(var_name, /* is_aux = */ true))
     return;
 
   InputParameters params = _factory.getValidParams("MooseVariableScalar");
