@@ -32,14 +32,30 @@ SurrogateTrainer::validParams()
   InputParameters params = SurrogateTrainerBase::validParams();
   params.addRequiredParam<SamplerName>("sampler",
                                        "Sampler used to create predictor and response data.");
+  params.addParam<ReporterName>(
+      "converged_reporter",
+      "Reporter value used to determine if a sample's multiapp solve converged.");
+  params.addParam<bool>("skip_unconverged_samples",
+                        false,
+                        "True to skip samples where the multiapp did not converge, "
+                        "'stochastic_reporter' is required to do this.");
   return params;
 }
 
 SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
     _sampler(getSampler("sampler")),
-    _row_data(_sampler.getNumberOfCols())
+    _row_data(_sampler.getNumberOfCols()),
+    _skip_unconverged(getParam<bool>("skip_unconverged_samples")),
+    _converged(nullptr)
 {
+  if (_skip_unconverged)
+  {
+    if (!isParamValid("converged_reporter"))
+      paramError("skip_unconverged_samples",
+                 "'converged_reporter' needs to be specified to skip unconverged sample.");
+    _converged = &getTrainingData<bool>(getParam<ReporterName>("converged_reporter"));
+  }
 }
 
 void
@@ -83,7 +99,8 @@ SurrogateTrainer::execute()
     for (auto & pair : _training_data)
       pair.second->setCurrentIndex((pair.second->isDistributed() ? _local_row : _row));
 
-    train();
+    if (!_skip_unconverged || *_converged)
+      train();
 
     _local_row++;
   }

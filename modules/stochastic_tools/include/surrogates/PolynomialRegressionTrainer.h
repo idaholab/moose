@@ -29,7 +29,9 @@ private:
   const std::vector<Real> & _sampler_row;
 
   /// Response value
-  const Real & _rval;
+  const Real * _rval;
+  /// Vector response value
+  const std::vector<Real> * _rvecval;
 
   /// Predictor values from reporters
   std::vector<const Real *> _pvals;
@@ -47,7 +49,7 @@ private:
   const Real & _penalty;
 
   /// Coefficients of regression model
-  std::vector<Real> & _coeff;
+  std::vector<std::vector<Real>> & _coeff;
 
   /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
   const unsigned int & _max_degree;
@@ -61,6 +63,6 @@ private:
   ///@{
   /// Matrix and rhs for the regression problem
   DenseMatrix<Real> _matrix;
-  DenseVector<Real> _rhs;
+  std::vector<DenseVector<Real>> _rhs;
   ///@}
 };
