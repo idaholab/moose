@@ -80,7 +80,7 @@ E_change = ${fparse scale * heat_flux_integral * t}
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [E_hs]
-    type = HeatStructureEnergyRZ
+    type = ADHeatStructureEnergyRZ
     block = 'hs:region'
     axis_dir = '0 0 1'
     axis_point = '0 0 0'

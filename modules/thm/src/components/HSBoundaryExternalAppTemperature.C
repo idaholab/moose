@@ -34,7 +34,7 @@ void
 HSBoundaryExternalAppTemperature::addMooseObjects()
 {
   {
-    std::string class_name = "MatchedValueBC";
+    std::string class_name = "ADMatchedValueBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;

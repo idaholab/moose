@@ -61,7 +61,7 @@ R_i = 1.0
 
 [Postprocessors]
   [Q_axial]
-    type = SideFluxIntegralRZ
+    type = ADSideFluxIntegralRZ
     boundary = heat_structure:radial2:axial1:axial2
     variable = T_solid
     diffusivity = thermal_conductivity
@@ -70,7 +70,7 @@ R_i = 1.0
     execute_on = 'INITIAL'
   []
   [Q_radial]
-    type = SideFluxIntegralRZ
+    type = ADSideFluxIntegralRZ
     boundary = heat_structure:radial1:radial2
     variable = T_solid
     diffusivity = thermal_conductivity

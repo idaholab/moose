@@ -50,7 +50,7 @@ HSBoundaryAmbientConvection::addMooseObjects()
 
   {
     const std::string class_name =
-        is_cylindrical ? "ConvectionHeatTransferRZBC" : "ConvectionHeatTransferBC";
+        is_cylindrical ? "ADConvectionHeatTransferRZBC" : "ADConvectionHeatTransferBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;

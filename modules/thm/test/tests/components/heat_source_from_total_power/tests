@@ -25,7 +25,7 @@
     cli_args = "
       Components/heat_structure/type=HeatStructurePlate
       Components/heat_structure/depth=2
-      Postprocessors/E_tot/type=HeatStructureEnergy
+      Postprocessors/E_tot/type=ADHeatStructureEnergy
       Postprocessors/E_tot/plate_depth=2
       Outputs/file_base=phy.conservation_plate"
     csvdiff = 'phy.conservation_plate.csv'
@@ -39,7 +39,7 @@
     cli_args = "
       Components/heat_structure/type=HeatStructureCylindrical
       Components/heat_structure/inner_radius=1.0
-      Postprocessors/E_tot/type=HeatStructureEnergyRZ
+      Postprocessors/E_tot/type=ADHeatStructureEnergyRZ
       Postprocessors/E_tot/axis_point='0 1 0'
       Postprocessors/E_tot/axis_dir='1 0 0'
       Outputs/file_base=phy.conservation_cylinder"

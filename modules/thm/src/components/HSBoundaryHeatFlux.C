@@ -48,7 +48,7 @@ HSBoundaryHeatFlux::addMooseObjects()
   const bool is_cylindrical = hs_cyl != nullptr;
 
   {
-    const std::string class_name = is_cylindrical ? "HSHeatFluxRZBC" : "HSHeatFluxBC";
+    const std::string class_name = is_cylindrical ? "ADHSHeatFluxRZBC" : "ADHSHeatFluxBC";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
