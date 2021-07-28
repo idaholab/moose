@@ -94,8 +94,8 @@ public:
    * @return Vector of pairs of first and second parameters
    */
   template <typename T1, typename T2>
-  std::vector<std::pair<T1, T2>> getParamPair(const std::string & param1,
-                                              const std::string & param2) const;
+  std::vector<std::pair<T1, T2>> getParamPairs(const std::string & param1,
+                                               const std::string & param2) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -267,7 +267,7 @@ MooseObject::getParam(const std::string & name) const
 
 template <typename T1, typename T2>
 std::vector<std::pair<T1, T2>>
-MooseObject::getParamPair(const std::string & param1, const std::string & param2) const
+MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
 {
   if (!isParamValid(param1))
     paramError(param1, "Invalid parameter");
@@ -279,8 +279,9 @@ MooseObject::getParamPair(const std::string & param1, const std::string & param2
 
   if (v1.size() != v2.size())
     callMooseErrorRaw("Sizes of vector parameters " + paramErrorPrefix(_pars, param1) + " and " +
-            paramErrorPrefix(_pars, param2) + " are unequal \n", &_app);
-  
+                          paramErrorPrefix(_pars, param2) + " are unequal \n",
+                      &_app);
+
   std::vector<std::pair<T1, T2>> parameter_pair;
   for (std::size_t i = 0; i < v1.size(); ++i)
     parameter_pair.emplace_back(std::make_pair(v1[i], v2[i]));
