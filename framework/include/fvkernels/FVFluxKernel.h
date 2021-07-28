@@ -55,8 +55,6 @@ protected:
   /// those calculations will be handled for appropriately by this function.
   virtual ADReal gradUDotNormal() const;
 
-  virtual ADRealVectorValue adCoupledGradientFace(const std::string & name);
-
   /// Kernels are called even on boundaries in case one is for a variable with
   /// a dirichlet BC - in which case we need to run the kernel with a
   /// ghost-element.  This returns true if we need to run because of dirichlet

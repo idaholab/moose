@@ -1731,6 +1731,14 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
   return var->adGradSlnNeighbor();
 }
 
+ADRealVectorValue
+Coupleable::adCoupledGradientFace(const std::string & var_name, const FaceInfo & fi)
+{
+  auto _coupled_var = getVarHelper<MooseVariableField<Real>>(var_name, 0);
+
+  return _coupled_var->adGradSln(fi);
+}
+
 const ADVariableSecond &
 Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp) const
 {

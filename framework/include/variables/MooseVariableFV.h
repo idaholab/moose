@@ -303,6 +303,20 @@ public:
   const VectorValue<ADReal> & adGradSln(const FaceInfo & fi) const;
 
   /**
+   * Retrieve the const adGradSln(const FaceInfo & fi) when
+   * non-const adGradSln(const FaceInfo & fi) is called for. This is because
+   * adGradSln(const FaceInfo & fi) for FE variable are non-const.
+   */
+  const VectorValue<ADReal> & adGradSlnCall(const FaceInfo & fi) const
+  {
+    return adGradSln(fi);
+  }
+  VectorValue<ADReal> adGradSln(const FaceInfo & fi) override
+  {
+    return adGradSlnCall(fi);
+  }
+
+  /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
    * uncorrected gradient is a simple linear interpolation between cell gradients computed at the
    * centers of the two neighboring cells. "Correcting" the face gradient involves weighting the

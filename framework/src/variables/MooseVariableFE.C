@@ -468,6 +468,13 @@ MooseVariableFE<Real>::adGradSln(const FaceInfo & fi)
 }
 
 template <typename OutputType>
+VectorValue<ADReal>
+MooseVariableFE<OutputType>::adGradSln(const FaceInfo & /*fi*/)
+{
+  mooseError("adGradSln(const FaceInfo & fi) are only for MooseVariableFE<Real>.");
+}
+
+template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeNeighborValuesFace()
 {

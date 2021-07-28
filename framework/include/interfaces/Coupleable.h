@@ -477,6 +477,13 @@ protected:
    */
   const ADVariableGradient & adCoupledGradient(const std::string & var_name,
                                                unsigned int comp = 0) const;
+
+  /**
+   * Returns gradient of a coupled variable at an element face for
+   * FV Kernel / BC coupling
+   */
+  virtual ADRealVectorValue adCoupledGradientFace(const std::string & var_name, const FaceInfo & fi);
+
   /**
    * Returns the gradients for all of a coupled variable's components for use in Automatic
    * Differentiation
@@ -1280,6 +1287,12 @@ protected:
   const T * getVarHelper(const std::string & var_name, unsigned int comp) const;
 
   /**
+   * Helper that that be used to retrieve a variable of arbitrary type \p T
+   */
+  template <typename T>
+  T * getVarHelper(const std::string & var_name, unsigned int comp);
+
+  /**
    * Extract pointer to a coupled variable
    * @param var_name Name of parameter desired
    * @param comp Component number of multiple coupled variables
@@ -1443,6 +1456,55 @@ private:
 template <typename T>
 const T *
 Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
+{
+  auto name_to_use = var_name;
+
+  // First check for supplied name
+  if (!checkVar(var_name, comp, 0))
+  {
+    // See if there is an associated deprecated name that the user may have used instead
+    auto it = _new_to_deprecated_coupled_vars.find(var_name);
+    if (it == _new_to_deprecated_coupled_vars.end())
+      return nullptr;
+    else
+    {
+      auto deprecated_name = it->second;
+      if (checkVar(deprecated_name, comp, 0))
+        name_to_use = deprecated_name;
+      else
+        return nullptr;
+    }
+  }
+
+  auto coupled_vars_it = _coupled_vars.find(name_to_use);
+
+  mooseAssert(coupled_vars_it != _coupled_vars.end(),
+              "Trying to get a coupled var " << name_to_use << " that doesn't exist");
+
+  if (auto coupled_var = dynamic_cast<T *>(coupled_vars_it->second[comp]))
+    return coupled_var;
+  else
+  {
+    for (auto & var : _coupled_standard_moose_vars)
+      if (var->name() == name_to_use)
+        mooseError("The named variable is a standard variable, try a "
+                   "'coupled[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_vector_moose_vars)
+      if (var->name() == name_to_use)
+        mooseError("The named variable is a vector variable, try a "
+                   "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_array_moose_vars)
+      if (var->name() == name_to_use)
+        mooseError("The named variable is an array variable, try a "
+                   "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
+    mooseError(
+        "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
+  }
+}
+
+template <typename T>
+T *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
 {
   auto name_to_use = var_name;
 

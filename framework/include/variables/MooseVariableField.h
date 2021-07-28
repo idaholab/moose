@@ -117,6 +117,11 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
 
   /**
+   * AD grad solution at the face for FV problems
+   */
+  virtual VectorValue<ADReal> adGradSln(const FaceInfo & fi) = 0;
+
+  /**
    * AD grad element / face average getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnAvg() const = 0;
