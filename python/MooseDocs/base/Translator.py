@@ -73,10 +73,10 @@ class Translator(mixins.ConfigObject):
         if executioner is None:
             self.__executioner = ParallelBarrier()
 
-        # Populate the content list and set the translator_uid key for the page objects
+        # Populate the content list and set the translator key for the page objects
         for p in content:
             self.addPage(p)
-            p.translator_uid = self.__unique_id
+            p.translator = self
 
         # Caching for page searches (see findPages)
         self.__page_cache = dict()
@@ -115,15 +115,11 @@ class Translator(mixins.ConfigObject):
         """Return the destination directory."""
         return self.get('destination')
 
-    def addPage(self, page, set_uid=True):
+    def addPage(self, page):
         """Add an additional page to the list of available pages."""
+        self.__executioner.addPage(page)
         if self.__initialized:
-            msg = "The {} object has already been initialized, the addPage method must be called " \
-                  "prior to initialization. Extension objects can add pages within the init() " \
-                  "method."
-            raise exceptions.MooseDocsException(msg, type(self))
-
-        self.__executioner.addPage(page, set_uid)
+            self.__executioner.init([page], self.destination)
 
     def getPages(self):
         """Return the Page objects"""

@@ -142,7 +142,7 @@ def load_configs(filenames, **kwargs):
             else:
                 pooled.append(page.local)
                 for ct in cotranslators:
-                    ct.addPage(page, False)
+                    ct.addPage(page)
 
     return translators, contents, configurations
 

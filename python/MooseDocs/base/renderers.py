@@ -22,14 +22,6 @@ from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
 
-def create_directory(location):
-    """Helper for creating a directory."""
-    with MooseDocs.base.Executioner.LOCK:
-        dirname = os.path.dirname(location)
-        if dirname and not os.path.isdir(dirname):
-            LOG.debug('CREATE DIR %s', dirname)
-            os.makedirs(dirname)
-
 class Renderer(mixins.ConfigObject, mixins.ComponentObject):
     """
     Base renderer for converting AST to an output format.
@@ -169,13 +161,13 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         This is called by the Tranlator object.
         """
         if isinstance(page, pages.Source):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
             LOG.debug('WRITE %s-->%s', page.source, page.destination)
             with codecs.open(page.destination, 'w', encoding='utf-8') as fid:
                 fid.write(result.write())
 
         elif isinstance(page, pages.File):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
             LOG.debug('COPY: %s-->%s', page.source, page.destination)
             if not os.path.exists(page.source):
                 LOG.error('Unknown file: %s', page.source)
@@ -183,7 +175,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
                 shutil.copyfile(page.source, page.destination)
 
         elif isinstance(page, pages.Directory):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
 
         elif isinstance(page, pages.Text):
             pass
@@ -221,6 +213,14 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             msg = "The component object {} does not have a {} method."
             raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
         return getattr(component, self.METHOD)
+
+    def _create_directory(self, location):
+        """Helper for creating a directory."""
+        with self.translator.executioner._lock:
+            dirname = os.path.dirname(location)
+            if dirname and not os.path.isdir(dirname):
+                LOG.debug('CREATE DIR %s', dirname)
+                os.makedirs(dirname)
 
     def __getFunction(self, token):
         """

@@ -87,7 +87,6 @@ class CommandBase(components.ReaderComponent):
         components.ReaderComponent.__init__(self, *args, **kwargs)
 
     def createToken(self, parent, info, page):
-        uid = page.translator_uid
         cmd = (info['command'], info['subcommand'])
         settings = info['settings']
 
@@ -106,10 +105,10 @@ class CommandBase(components.ReaderComponent):
 
         # Locate the command object to call from pool built by current translator object
         try:
-            obj = CommandExtension.EXTENSION_COMMANDS[uid][cmd]
+            obj = CommandExtension.EXTENSION_COMMANDS[page.translator.uid][cmd]
         except KeyError:
             try:
-                obj = CommandExtension.EXTENSION_COMMANDS[uid][(cmd[0], '*')]
+                obj = CommandExtension.EXTENSION_COMMANDS[page.translator.uid][(cmd[0], '*')]
             except KeyError:
                 msg = "The following command combination is unknown: '{} {}'."
                 raise common.exceptions.MooseDocsException(msg.format(*cmd))

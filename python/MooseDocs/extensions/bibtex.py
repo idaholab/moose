@@ -47,17 +47,20 @@ class BibtexExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
-        self.__database = BibliographyData()
+        self.__database = None
         self.__bib_files = list()
         self.__bib_file_database = dict()
 
     def preExecute(self):
+        set_strict_mode(False) # allow incorrectly formatted author/editor names
 
-        set_strict_mode(False)
-
+        # If this is invoked during a live serve, we need to recompile the list of '.bib' files and
+        # read them again, otherwise there's no way to distinguish existing entries from duplicates
+        self.__bib_files = []
         for node in self.translator.findPages(lambda p: p.source.endswith('.bib')):
             self.__bib_files.append(node.source)
 
+        self.__database = BibliographyData()
         for bfile in self.__bib_files:
             try:
                 db = parse_file(bfile)
