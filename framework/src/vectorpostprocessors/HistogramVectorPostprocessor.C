@@ -34,11 +34,18 @@ HistogramVectorPostprocessor::HistogramVectorPostprocessor(const InputParameters
     _vpp_name(getParam<VectorPostprocessorName>("vpp")),
     _num_bins(getParam<unsigned int>("num_bins"))
 {
+}
+
+void
+HistogramVectorPostprocessor::initialSetup()
+{
   const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
   for (const auto & vec_name : vpp.getVectorNames())
     _histogram_data[vec_name] = {&declareVector(vec_name + "_lower"),
                                  &declareVector(vec_name + "_upper"),
                                  &declareVector(vec_name)};
+  if (_histogram_data.empty())
+    paramError("vpp", "The specified VectorPostprocessor does not have any declared vectors");
 }
 
 void
