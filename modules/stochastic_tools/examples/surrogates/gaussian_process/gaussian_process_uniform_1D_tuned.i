@@ -110,18 +110,23 @@
     gp_name = 'gauss_process_avg'
     execute_on = final
   []
+[]
+
+[Reporters]
   [cart_avg]
-    type = EvaluateGaussianProcess
+    type = EvaluateSurrogate
     model = gauss_process_avg
     sampler = cart_sample
-    output_samples = true
+    evaluate_std = 'true'
+    parallel_type = ROOT
     execute_on = final
   []
   [train_avg]
-    type = EvaluateGaussianProcess
+    type = EvaluateSurrogate
     model = gauss_process_avg
     sampler = train_sample
-    output_samples = true
+    evaluate_std = 'true'
+    parallel_type = ROOT
     execute_on = final
   []
 []

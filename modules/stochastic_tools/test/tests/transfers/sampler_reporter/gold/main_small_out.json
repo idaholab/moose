@@ -1,6 +1,4 @@
 {
-    "number_of_parts": 4,
-    "part": 0,
     "time_steps": [
         {
             "reporters": {
@@ -11,41 +9,25 @@
                     },
                     "values": [
                         {
-                            "name": "data:pp:value",
-                            "type": "std::vector<double>",
-                            "value": []
-                        },
-                        {
-                            "name": "multiapp_converged",
+                            "name": "data:converged",
+                            "row_begin": 0,
+                            "row_end": 3,
                             "type": "std::vector<bool>",
-                            "value": []
-                        }
-                    ]
-                }
-            },
-            "time": 0.0,
-            "time_step": 0
-        },
-        {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:pp:value",
-                            "type": "std::vector<double>",
                             "value": [
-                                0.0
+                                true,
+                                true,
+                                true
                             ]
                         },
                         {
-                            "name": "multiapp_converged",
-                            "type": "std::vector<bool>",
+                            "name": "data:pp:value",
+                            "row_begin": 0,
+                            "row_end": 3,
+                            "type": "std::vector<double>",
                             "value": [
-                                true
+                                0.0,
+                                1.0,
+                                2.0
                             ]
                         }
                     ]

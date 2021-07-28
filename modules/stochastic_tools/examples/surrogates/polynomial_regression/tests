@@ -39,7 +39,7 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5"
       csvdiff = "uniform_surr_out_pc_max_res_0001.csv uniform_surr_out_pr_max_res_0001.csv
-                 uniform_surr_out_pc_max_stats_0001.csv uniform_surr_out_pr_max_stats_0001.csv"
+                 uniform_surr_out_pc_max_stats_0001.csv"
       method = opt
       detail = "with uniform parameter distributions "
     []
@@ -49,7 +49,7 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5"
       csvdiff = "normal_surr_out_pc_max_res_0001.csv normal_surr_out_pr_max_res_0001.csv
-                 normal_surr_out_pc_max_stats_0001.csv normal_surr_out_pr_max_stats_0001.csv"
+                 normal_surr_out_pc_max_stats_0001.csv"
       method = opt
       detail = "and with normally distributed parameters."
     []

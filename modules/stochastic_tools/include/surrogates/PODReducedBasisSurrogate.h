@@ -33,9 +33,6 @@ public:
   /// Get the nodal QoI of the reconstructed solution for a given variable.
   Real getNodalQoI(std::string var_name, unsigned int qoi_type) const;
 
-  /// Must have function, not used in this object.
-  virtual Real evaluate(const std::vector<Real> & x) const override;
-
 protected:
   /// Initialize reduced matrices, vectors and additional containers.
   void initializeReducedSystem();

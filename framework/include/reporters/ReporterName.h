@@ -98,6 +98,11 @@ public:
    */
   void setIsVectorPostprocessor() { _special_type = SpecialType::VECTORPOSTPROCESSOR; }
 
+  /**
+   * Whether or not the ReporterName is empty, similar to std::string::empty()
+   */
+  bool empty() { return _object_name.empty() || _value_name.empty(); }
+
 private:
   /**
    * Enum for storing a "special" type for this Reporter.

@@ -18,6 +18,7 @@ public:
 
   PolynomialRegressionSurrogate(const InputParameters & parameters);
 
+  using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
