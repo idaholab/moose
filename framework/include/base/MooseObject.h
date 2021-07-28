@@ -269,17 +269,13 @@ template <typename T1, typename T2>
 std::vector<std::pair<T1, T2>>
 MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
 {
-  if (!isParamValid(param1))
-    paramError(param1, "Invalid parameter");
-  if (!isParamValid(param2))
-    paramError(param2, "Invalid parameter");
-
   auto v1 = getParam<std::vector<T1>>(param1);
   auto v2 = getParam<std::vector<T2>>(param2);
 
   if (v1.size() != v2.size())
-    callMooseErrorRaw("Sizes of vector parameters " + paramErrorPrefix(_pars, param1) + " and " +
-                          paramErrorPrefix(_pars, param2) + " are unequal \n",
+    callMooseErrorRaw("Vector parameters " + paramErrorPrefix(_pars, param1) +
+                          "(size: " + v1.size() + ") and " + paramErrorPrefix(_pars, param2) +
+                          "(size: " + v2.size() + ") are of different lengths \n",
                       &_app);
 
   std::vector<std::pair<T1, T2>> parameter_pair;
