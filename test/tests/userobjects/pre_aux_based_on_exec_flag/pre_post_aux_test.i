@@ -18,7 +18,20 @@
 []
 
 [AuxVariables]
- [w]
+ [w1]
+   order = FIRST
+   family = LAGRANGE
+   initial_condition = 2
+ []
+ [w2]
+   order = FIRST
+   family = LAGRANGE
+ []
+ [w3]
+   order = FIRST
+   family = LAGRANGE
+ []
+ [w4]
    order = FIRST
    family = LAGRANGE
  []
@@ -37,62 +50,100 @@
 []
 
 [AuxKernels]
-  active = 'NormalizationAuxTest1'
-  [NormalizationAuxTest1]
+  # The purpose of this auxkernel is to provide the variable w1
+  # and the scalepostprocessors included below will either get
+  # an updated w1 or the previous w1 value depending on whether
+  # they are forced in preaux or postaux
+  [NormalizationAuxW1]
     type = NormalizationAux
-    variable = w
+    variable = w1
     source_variable = u
-    normalization = scale1
-    execute_on = 'FINAL'
+    shift = -100.0
+    normalization = 1.0
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
   []
-  [NormalizationAuxTest3]
+  # This establishes a dependency for scale_initial on exec INITIAL
+  [NormalizationAuxINITIAL]
     type = NormalizationAux
-    variable = w
+    variable = w2
     source_variable = u
-    normalization = scale3
+    normalization = scale_initial
+    execute_on = 'INITIAL'
+  []
+  # This establishes a dependency for scale_initial on exec TIMESTEP_END
+  [NormalizationAuxTIMESTEP_END]
+    type = NormalizationAux
+    variable = w3
+    source_variable = u
+    normalization = scale_td_end
     execute_on = 'TIMESTEP_END'
+  []
+  # This establishes a dependency for scale_initial on exec FINAL
+  [NormalizationAuxFINAL]
+    type = NormalizationAux
+    variable = w4
+    source_variable = u
+    normalization = scale_final
+    execute_on = 'FINAL'
   []
 []
 
 [Postprocessors]
-  [./total_u]
-    type = ElementIntegralVariablePostprocessor
-    variable = u
-  [../]
-
-  # scale1 and scale2 depend on the ElementUO total_u. total_u is executed on
-  # timestep_end in POST_AUX _before_ the GeneralPostprocessors. scale1 is executed
-  # at its default location, timestep_end/POST_AUX/after total_u and hence gets
-  # the most up to date information. scale2 is pushed into PRE_AUX and hence picks
-  # up the value of total_u from the last timestep.
   #
-  # Additionally, the aux kernel NormalizationAuxTest1 uses scale1. User objects
-  # including postprocessors and their depending user objects are automatically
-  # put into PRE_AUX group when the user objects are used by an auxiliary kernel
-  # on the same execute_on flag.
-  # If the execute_on = 'final' flag for NormalizationAuxTest1 were not accounted
-  # for, the scale1 would be forced into PRE_AUX by the dependency and
-  # scale1 and scale2 would behave the same. When the dependency is handled
-  # correctly, this does not occur
-  # When NormalizationAuxTest3 is active, all posprocessors then have
-  # PRE_AUX dependency and the same value
-  [./scale1]
-    type = ScalePostprocessor
-    value = total_u
-    scaling_factor = 1
+  # scalePostAux always gets run post_aux
+  #
+  [./total_u1]
+    type = ElementIntegralVariablePostprocessor
+    variable = w1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
   [../]
-
-  [./scale2]
+  [./scalePostAux]
     type = ScalePostprocessor
-    value = total_u
+    value = total_u1
     scaling_factor = 1
-    force_preaux = true
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
   [../]
-
-  [./scale3]
+  #
+  # shoule only run pre_aux on initial
+  #
+  [./total_u2]
+    type = ElementIntegralVariablePostprocessor
+    variable = w1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  [../]
+  [./scale_initial]
     type = ScalePostprocessor
-    value = total_u
+    value = total_u2
     scaling_factor = 1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  [../]
+  #
+  # shoule be forced into preaux on timestep_end
+  #
+  [./total_u3]
+    type = ElementIntegralVariablePostprocessor
+    variable = w1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  [../]
+  [./scale_td_end]
+    type = ScalePostprocessor
+    value = total_u3
+    scaling_factor = 1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  [../]
+  #
+  # shoule be forced into preaux on final
+  #
+  [./total_u4]
+    type = ElementIntegralVariablePostprocessor
+    variable = w1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  [../]
+  [./scale_final]
+    type = ScalePostprocessor
+    value = total_u4
+    scaling_factor = 1
+    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
   [../]
 []
 

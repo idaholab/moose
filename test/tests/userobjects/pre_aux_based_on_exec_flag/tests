@@ -5,18 +5,8 @@
   [./test_preaux_based_on_exec_flag_final]
     type = 'CSVDiff'
     input = 'pre_post_aux_test.i'
-    csvdiff = 'pre_post_aux_test1_out.csv'
-    cli_args = 'Outputs/file_base=pre_post_aux_test1_out'
+    csvdiff = 'pre_post_aux_test_out.csv'
 
     requirement = 'MOOSE shall consider that when auxkernel depends on a UO, the exec flag will be taken into consideration to determin when the UO must be executed preaux.'
-  [../]
-  [./test_preaux_based_on_exec_flag_td_end]
-    type = 'CSVDiff'
-    input = 'pre_post_aux_test.i'
-    csvdiff = 'pre_post_aux_test2_out.csv'
-
-    requirement = 'MOOSE shall consider that when auxkernel depends on a UO, the exec flag will be taken into consideration to determin when the UO must be executed preaux.'
-    cli_args = 'AuxKernels/active=NormalizationAuxTest3
-                Outputs/file_base=pre_post_aux_test2_out'
   [../]
 []
