@@ -24,8 +24,8 @@ requirements:
     - moose-mpich {{ moose_mpich }}
     - cmake
     - ninja
-    - libglu  {{ libglu }}              # [linux]
-    - mesalib {{ mesalib }}             # [linux]
+    - libglu  {{ moose_libglu }}        # [linux]
+    - mesalib {{ moose_mesalib }}       # [linux]
     - {{ cdt('libxt-devel') }}          # [linux]
     - {{ cdt('libsm-devel') }}          # [linux]
     - {{ cdt('libx11-devel') }}         # [linux]
@@ -36,8 +36,8 @@ requirements:
 
   run:
     - moose-mpich
-    - libglu  {{ libglu }}              # [linux]
-    - mesalib {{ mesalib }}             # [linux]
+    - libglu  {{ moose_libglu }}        # [linux]
+    - mesalib {{ moose_mesalib }}       # [linux]
     - {{ cdt('libxt-devel') }}          # [linux]
     - {{ cdt('libsm-devel') }}          # [linux]
     - {{ cdt('libx11-devel') }}         # [linux]

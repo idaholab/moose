@@ -26,18 +26,18 @@ requirements:
   host:
     - cmake
     - moose-mpich {{ moose_mpich }}
-    - libblas     {{ libblas }}     # [osx]
-    - libcblas    {{ libcblas }}    # [osx]
-    - liblapack   {{ liblapack }}   # [osx]
-    - libopenblas {{ libopenblas }} # [osx]
+    - libblas     {{ moose_libblas }}     # [osx]
+    - libcblas    {{ moose_libcblas }}    # [osx]
+    - liblapack   {{ moose_liblapack }}   # [osx]
+    - libopenblas {{ moose_libopenblas }} # [osx]
 
   run:
     - cmake
     - moose-mpich {{ moose_mpich }}
-    - libblas     {{ libblas }}     # [osx]
-    - libcblas    {{ libcblas }}    # [osx]
-    - liblapack   {{ liblapack }}   # [osx]
-    - libopenblas {{ libopenblas }} # [osx]
+    - libblas     {{ moose_libblas }}     # [osx]
+    - libcblas    {{ moose_libcblas }}    # [osx]
+    - liblapack   {{ moose_liblapack }}   # [osx]
+    - libopenblas {{ moose_libopenblas }} # [osx]
 
 test:
   requires:

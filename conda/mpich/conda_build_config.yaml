@@ -20,13 +20,13 @@ moose_mpich:
   - 3.3.2 build_8
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
-python:
+moose_python:
   - 3.9
   - 3.8
   - 3.7
   - 3.6
 
-vtk:
+moose_vtk:
   - 9.0.1 no_osmesa_py39h3dd132e_102 # [osx]
   - 9.0.1 no_osmesa_py38h523a0c9_102 # [osx]
   - 9.0.1 no_osmesa_py37hc0470e1_102 # [osx]
@@ -36,7 +36,7 @@ vtk:
   - 9.0.3 no_osmesa_py37h7b56ff3_100 # [linux]
   - 9.0.3 no_osmesa_py36hfa3a401_100 # [linux]
 
-numpy:
+moose_numpy:
   - 1.21.0 py39h7eed0ac_0      # [osx]
   - 1.21.0 py38had91d27_0      # [osx]
   - 1.21.0 py37h84c02c4_0      # [osx]
@@ -46,7 +46,7 @@ numpy:
   - 1.21.0 py37h038b26d_0      # [linux]
   - 1.19.5 py36h2aa4a07_1      # [linux]
 
-pyqt:
+moose_pyqt:
   - 5.12.3 py39h6e9494a_7      # [osx]
   - 5.12.3 py38h50d1736_7      # [osx]
   - 5.12.3 py37hf985489_7      # [osx]
@@ -56,7 +56,7 @@ pyqt:
   - 5.12.3 py37h89c1867_7      # [linux]
   - 5.12.3 py36h5fab9bb_7      # [linux]
 
-matplotlib:
+moose_matplotlib:
   - 3.3.3 py39h6e9494a_0       # [osx]
   - 3.3.3 py38h50d1736_0       # [osx]
   - 3.3.3 py37hf985489_0       # [osx]
@@ -66,7 +66,7 @@ matplotlib:
   - 3.4.2 py37h89c1867_0       # [linux]
   - 3.3.4 py36h5fab9bb_0       # [linux]
 
-pandas:
+moose_pandas:
   - 1.2.1 py39h089d6f7_0       # [osx]
   - 1.2.1 py38he9f00de_0       # [osx]
   - 1.2.1 py37h010c265_0       # [osx]
@@ -76,7 +76,7 @@ pandas:
   - 1.3.0 py37h219a48f_0       # [linux]
   - 1.1.5 py36h284efc9_0       # [linux]
 
-pyyaml:
+moose_pyyaml:
   - 5.4.1 py39hcbf5805_0       # [osx]
   - 5.4.1 py38h5406a74_0       # [osx]
   - 5.4.1 py37hf967b71_0       # [osx]
@@ -86,7 +86,7 @@ pyyaml:
   - 5.4.1 py37h5e8e339_0       # [linux]
   - 5.4.1 py36h8f6f2f9_0       # [linux]
 
-pybtex:
+moose_pybtex:
   - 0.24.0 py39h6e9494a_0      # [osx]
   - 0.24.0 py38h50d1736_0      # [osx]
   - 0.24.0 py37hf985489_0      # [osx]
@@ -96,7 +96,7 @@ pybtex:
   - 0.24.0 py37h89c1867_0      # [linux]
   - 0.24.0 py36h5fab9bb_0      # [linux]
 
-mock:
+moose_mock:
   - 4.0.3 py39h6e9494a_1       # [osx]
   - 4.0.3 py38h50d1736_1       # [osx]
   - 4.0.3 py37hf985489_1       # [osx]
@@ -106,7 +106,7 @@ mock:
   - 4.0.3 py37h89c1867_1       # [linux]
   - 4.0.3 py36h5fab9bb_1       # [linux]
 
-lxml:
+moose_lxml:
   - 4.6.3 py39hf41e7f8_0       # [osx]
   - 4.6.3 py38h6ea4786_0       # [osx]
   - 4.6.3 py37h250624f_0       # [osx]
@@ -116,7 +116,7 @@ lxml:
   - 4.6.3 py37h77fd288_0       # [linux]
   - 4.6.3 py36h04a5ba7_0       # [linux]
 
-scikit_image:
+moose_scikit_image:
   - 0.18.1 py39h089d6f7_0      # [osx]
   - 0.18.1 py38he9f00de_0      # [osx]
   - 0.18.1 py37h010c265_0      # [osx]
@@ -126,108 +126,108 @@ scikit_image:
   - 0.18.2 py37h219a48f_0      # [linux]
   - 0.17.2 py36h284efc9_4      # [linux]
 
-beautifulsoup4:
+moose_beautifulsoup4:
   - 4.9.3 pyhb0f4dca_0         # [linux]
   - 4.9.3 pyhb0f4dca_0         # [osx]
 
-pylatexenc:
+moose_pylatexenc:
   - 2.10 pyhd8ed1ab_0          # [linux]
   - 2.10 pyhd8ed1ab_0          # [osx]
 
-jinja2:
+moose_jinja2:
   - 3.0.1 pyhd8ed1ab_0         # [linux]
   - 3.0.1 pyhd8ed1ab_0         # [osx]
 
-mako:
+moose_mako:
   - 1.1.4 pyh44b312d_0         # [linux]
   - 1.1.4 pyh44b312d_0         # [osx]
 
-livereload:
+moose_livereload:
   - 2.6.3 pyh9f0ad1d_0         # [linux]
   - 2.6.3 pyh9f0ad1d_0         # [osx]
 
-yaml:
+moose_yaml:
   - 0.2.5 h516909a_0           # [linux]
   - 0.2.5 haf1e3a3_0           # [osx]
 
 zip_keys:
-  - python
-  - vtk
-  - numpy
-  - pyqt
-  - matplotlib
-  - pandas
-  - pyyaml
-  - pybtex
-  - mock
-  - lxml
-  - scikit_image
+  - moose_python
+  - moose_vtk
+  - moose_numpy
+  - moose_pyqt
+  - moose_matplotlib
+  - moose_pandas
+  - moose_pyyaml
+  - moose_pybtex
+  - moose_mock
+  - moose_lxml
+  - moose_scikit_image
 
 #### Changes to the following require extensive testing
-libllvm:
+moose_libllvm:
   - 11.1.0 hd011deb_2
 
-libclang:
+moose_libclang:
   - 11.1.0 default_he082bbe_1
 
-compilerrt:
+moose_compilerrt:
   - 11.1.0 h654b07c_0
 
-compilerrtosx:
+moose_compilerrtosx:
   - 11.1.0 h8c5fa43_0
 
-clangxx:
+moose_clangxx:
   - 11.1.0 default_he082bbe_1
 
-clangosx:
+moose_clangosx:
   - 11.1.0 hb91bd55_2
 
-clangxxosx:
+moose_clangxxosx:
   - 11.1.0 h7e1b574_2
 
-clang:
+moose_clang:
   - 11.1.0 h694c41f_1
 
-llvmopenmp:
+moose_llvmopenmp:
   - 11.1.0 hda6cdc1_1
 
-osxfortran:
+moose_osxfortran:
   - 9.3.0 h18f7dce_14
 
-libcxx:
+moose_libcxx:
   - 11.1.0 habf9029_0
 
-gcc:
+moose_gcc:
   - 9.3.0 h7247604_29
 
-gxx:
+moose_gxx:
   - 9.3.0 h0d07fa4_29
 
-fortran:
+moose_fortran:
   - 9.3.0 ha1c937c_29
 
-gccimpl:
+moose_gccimpl:
   - 9.3.0 h28f5a38_17
 
-libblas:
+moose_libblas:
   - 3.9.0 10_openblas
 
-libcblas:
+moose_libcblas:
   - 3.9.0 10_openblas
 
-liblapack:
+moose_liblapack:
   - 3.9.0 10_openblas
 
-libopenblas:
+moose_libopenblas:
   - 0.3.17 openmp_h3351f45_1
 
-libglu:
+moose_libglu:
   - 9.0.0 hf484d3e_1000
 
-mesalib:
+moose_mesalib:
   - 18.3.1 h590aaf7_0
 
-libpng:
+moose_libpng:
   - 1.6.37 h7cec526_2          # [osx]
   - 1.6.37 hed695b0_2          # [linux]
 
@@ -237,12 +237,12 @@ mpi:
 
 pin_run_as_build:
   moose_mpich: x.x.x
-  libblas: x.x.x
-  libcblas: x.x.x
-  liblapack: x.x.x
+  moose_libblas: x.x.x
+  moose_libcblas: x.x.x
+  moose_liblapack: x.x.x
   moose_petsc: x.x.x
   moose_libmesh_vtk: x.x.x
-  python: x.x
+  moose_python: x.x
 
 CONDA_BUILD_SYSROOT:           # [osx]
   - /opt/MacOSX10.9.sdk        # [osx]

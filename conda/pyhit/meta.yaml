@@ -14,21 +14,21 @@ build:
 
 requirements:
   build:
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - clangxx      {{ clangxx }}             # [osx]
-    - python       {{ python }}
+    - gxx_linux-64 {{ moose_gxx }}                 # [linux]
+    - clangxx      {{ moose_clangxx }}             # [osx]
+    - python       {{ moose_python }}
     - cython
 
   host:
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - clangxx      {{ clangxx }}             # [osx]
-    - python       {{ python }}
+    - gxx_linux-64 {{ moose_gxx }}                 # [linux]
+    - clangxx      {{ moose_clangxx }}             # [osx]
+    - python       {{ moose_python }}
     - cython
 
   run:
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - clangxx      {{ clangxx }}             # [osx]
-    - python       {{ python }}
+    - gxx_linux-64 {{ moose_gxx }}                 # [linux]
+    - clangxx      {{ moose_clangxx }}             # [osx]
+    - python       {{ moose_python }}
 
 test:
   imports:

@@ -13,45 +13,45 @@ build:
 
 requirements:
   build:
-    - python {{ python }}
+    - python {{ moose_python }}
 
   run:
-    - gcc_linux-64       {{ gcc }}            # [linux]
-    - gxx_linux-64       {{ gxx }}            # [linux]
-    - gfortran_linux-64  {{ fortran }}        # [linux]
-    - gcc_impl_linux-64  {{ gccimpl }}        # [linux]
-    - clang              {{ clang }}          # [osx]
-    - clang_osx-64       {{ clangosx }}       # [osx]
-    - clangxx            {{ clangxx }}        # [osx]
-    - clangxx_osx-64     {{ clangxxosx }}     # [osx]
-    - compiler-rt        {{ compilerrt }}     # [osx]
-    - compiler-rt_osx-64 {{ compilerrtosx }}  # [osx]
-    - libllvm12          {{ libllvm }}        # [osx]
-    - clang-tools                             # [osx]
-    - llvm-openmp        {{ llvmopenmp }}     # [osx]
-    - gfortran_osx-64    {{ osxfortran }}     # [osx]
-    - libclang           {{ libclang }}       # [osx]
-    - libcxx             {{ libcxx }}         # [osx]
-    - libblas            {{ libblas }}        # [osx]
-    - libcblas           {{ libcblas }}       # [osx]
-    - liblapack          {{ liblapack }}      # [osx]
-    - libopenblas        {{ libopenblas }}    # [osx]
-    - vtk                {{ vtk }}
-    - numpy              {{ numpy }}
-    - pyqt               {{ pyqt }}
-    - matplotlib         {{ matplotlib }}
-    - pandas             {{ pandas }}
-    - livereload         {{ livereload }}
-    - yaml               {{ yaml }}
-    - pyyaml             {{ pyyaml }}
-    - beautifulsoup4     {{ beautifulsoup4 }}
-    - pybtex             {{ pybtex }}
-    - mock               {{ mock }}
-    - lxml               {{ lxml }}
-    - scikit-image       {{ scikit_image }}
-    - pylatexenc         {{ pylatexenc }}
-    - jinja2             {{ jinja2 }}
-    - mako               {{ mako }}
+    - gcc_linux-64       {{ moose_gcc }}            # [linux]
+    - gxx_linux-64       {{ moose_gxx }}            # [linux]
+    - gfortran_linux-64  {{ moose_fortran }}        # [linux]
+    - gcc_impl_linux-64  {{ moose_gccimpl }}        # [linux]
+    - clang              {{ moose_clang }}          # [osx]
+    - clang_osx-64       {{ moose_clangosx }}       # [osx]
+    - clangxx            {{ moose_clangxx }}        # [osx]
+    - clangxx_osx-64     {{ moose_clangxxosx }}     # [osx]
+    - compiler-rt        {{ moose_compilerrt }}     # [osx]
+    - compiler-rt_osx-64 {{ moose_compilerrtosx }}  # [osx]
+    - libllvm12          {{ moose_libllvm }}        # [osx]
+    - clang-tools                                   # [osx]
+    - llvm-openmp        {{ moose_llvmopenmp }}     # [osx]
+    - gfortran_osx-64    {{ moose_osxfortran }}     # [osx]
+    - libclang           {{ moose_libclang }}       # [osx]
+    - libcxx             {{ moose_libcxx }}         # [osx]
+    - libblas            {{ moose_libblas }}        # [osx]
+    - libcblas           {{ moose_libcblas }}       # [osx]
+    - liblapack          {{ moose_liblapack }}      # [osx]
+    - libopenblas        {{ moose_libopenblas }}    # [osx]
+    - vtk                {{ moose_vtk }}
+    - numpy              {{ moose_numpy }}
+    - pyqt               {{ moose_pyqt }}
+    - matplotlib         {{ moose_matplotlib }}
+    - pandas             {{ moose_pandas }}
+    - livereload         {{ moose_livereload }}
+    - yaml               {{ moose_yaml }}
+    - pyyaml             {{ moose_pyyaml }}
+    - beautifulsoup4     {{ moose_beautifulsoup4 }}
+    - pybtex             {{ moose_pybtex }}
+    - mock               {{ moose_mock }}
+    - lxml               {{ moose_lxml }}
+    - scikit-image       {{ moose_scikit_image }}
+    - pylatexenc         {{ moose_pylatexenc }}
+    - jinja2             {{ moose_jinja2 }}
+    - mako               {{ moose_mako }}
     - python
 
 test:
