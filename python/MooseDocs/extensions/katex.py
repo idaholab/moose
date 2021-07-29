@@ -84,9 +84,9 @@ class KatexExtension(command.CommandExtension):
 
         renderer = self.translator.renderer
         if common.has_tokens(ast, 'Equation') and isinstance(renderer, renderers.HTMLRenderer):
-            renderer.addCSS('katex', "contrib/katex/katex.min.css", puid=page.uid)
-            renderer.addCSS('katex_moose', "css/katex_moose.css", puid=page.uid)
-            renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True, puid=page.uid)
+            renderer.addCSS('katex', "contrib/katex/katex.min.css", page)
+            renderer.addCSS('katex_moose', "css/katex_moose.css", page)
+            renderer.addJavaScript('katex', "contrib/katex/katex.min.js", page, head=True)
 
             if self.get('macros', None):
                 mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())

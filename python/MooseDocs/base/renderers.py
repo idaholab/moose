@@ -183,22 +183,6 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         else:
             LOG.error('Unknown Node type: %s', type(page))
 
-    def setAttribute(self, *args):
-        """
-        Set a global attribute to be communicated across processors.
-
-        This is designed to be called from the <pre/post><Render/Write> methods
-        """
-        self.translator.executioner.setGlobalAttribute(*args)
-
-    def getAttribute(self, *args):
-        """
-        Get a global attribute to be communicated across processors.
-
-        This is designed to be called from the <pre/post><Render/Write> methods
-        """
-        return self.translator.executioner.getGlobalAttribute(*args)
-
     def _method(self, component):
         """
         Return the desired method to call on the RenderComponent object.
@@ -249,10 +233,9 @@ class HTMLRenderer(Renderer):
         config['extra-css'] = ([], "List of additional CSS files to include.")
         return config
 
-    def init(self):
-        self.setAttribute('head_javascript', dict())
-        self.setAttribute('javascript', dict())
-        self.setAttribute('css', dict())
+    def __init__(self, *args, **kwargs):
+        Renderer.__init__(self, *args, **kwargs)
+        self.__global_files = dict()
 
         if self.get('google_analytics', False):
             self.addJavaScript('google_analytics', 'js/google_analytics.js')
@@ -264,24 +247,34 @@ class HTMLRenderer(Renderer):
         html.Tag(head, 'meta', charset="UTF-8", close=False)
         return html.Tag(root, 'body')
 
-    def addJavaScript(self, name, filename, head=False, puid=None, **kwargs):
-        """Add a javascript dependency."""
-        attr = 'head_javascript' if head else 'javascript'
-        js = self.getAttribute(attr)
-        key = (name, puid)
-        if key not in js:
-            self.setAttribute(attr, {**js, key: (filename, kwargs)})
+    def addJavaScript(self, name, filename, page=None, head=False, **kwargs):
+        """
+        Add a javascript dependency. Do not attempt to call this function to add a global renderer
+        file, i.e., with `page=None`, from within the read/tokenize/render/write methods.
+        """
+        key = (name, 'head_javascript' if head else 'javascript')
 
-    def addCSS(self, name, filename, puid=None, **kwargs):
-        """Add a CSS dependency."""
-        css = self.getAttribute('css')
-        key = (name, puid)
-        if key not in css:
-            self.setAttribute('css', {**css, key: (filename, kwargs)})
+        # Add a global script to be included in all HTML pages, otherwise add a per-page script
+        if page is None:
+            self.__global_files[key] = (filename, kwargs)
+        else:
+            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
+
+    def addCSS(self, name, filename, page=None, **kwargs):
+        """
+        Add a CSS dependency. Do not attempt to call this function to add a global renderer file,
+        i.e., with `page=None`, from within the read/tokenize/render/write methods.
+        """
+        key = (name, 'css')
+
+        # Add a global style sheet to be included in all HTML pages, otherwise add a per-page sheet
+        if page is None:
+            self.__global_files[key] = (filename, kwargs)
+        else:
+            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
 
     def postRender(self, page, result):
         """Insert CSS/JS dependencies into html node tree."""
-        root = result.root
 
         def rel(path):
             """Helper to create relative paths for js/css dependencies."""
@@ -289,6 +282,8 @@ class HTMLRenderer(Renderer):
                 return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
+        # get the parent nodes to tag
+        root = result.root
         head = moosetree.find(root, lambda n: n.name == 'head')
         body = moosetree.find(root, lambda n: n.name == 'body')
 
@@ -298,21 +293,17 @@ class HTMLRenderer(Renderer):
                      sizes="16x16 32x32 64x64 128x128")
 
         # Add the extra-css, this is done here to make sure it shows up last
+        files = {**self.__global_files, **page.get('renderer_files', dict())}
         for i, css in enumerate(self.get('extra-css')):
-            key = 'extra-css-{}'.format(i)
-            if key not in self.getAttribute('css'):
-                self.addCSS(key, css)
+            files[('extra-css-{}'.format(i), 'css')] = (css, {})
 
-        for (key, puid), (name, kwargs) in self.getAttribute('css').items():
-            if ((puid is None) or (puid == page.uid)):
+        for (key, context) in sorted(files, key=(lambda f: f[1])):
+            name, kwargs = files.pop((key, context))
+            if context == 'css':
                 html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
-
-        for (key, puid), (name, kwargs)  in self.getAttribute('head_javascript').items():
-            if ((puid is None) or (puid == page.uid)):
+            elif context == 'head_javascript':
                 html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
-
-        for (key, puid), (name, kwargs)  in self.getAttribute('javascript').items():
-            if ((puid is None) or (puid == page.uid)):
+            elif context == 'javascript':
                 html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
 
 class MaterializeRenderer(HTMLRenderer):
@@ -329,8 +320,9 @@ class MaterializeRenderer(HTMLRenderer):
         config = HTMLRenderer.defaultConfig()
         return config
 
-    def init(self):
-        super().init()
+    def __init__(self, *args, **kwargs):
+        HTMLRenderer.__init__(self, *args, **kwargs)
+        self.__index = False     # page index created
 
         self.addCSS('materialize', "contrib/materialize/materialize.min.css",
                     media="screen,projection")
@@ -450,9 +442,8 @@ class RevealRenderer(HTMLRenderer):
         config['theme'] = ('simple', "The CSS theme to use (simple).")
         return config
 
-    def init(self):
-        super().init()
-
+    def __init__(self, *args, **kwargs):
+        HTMLRenderer.__init__(self, *args, **kwargs)
         self.addCSS('reveal', "contrib/reveal/reveal.css")
         self.addCSS('reveal_theme', "contrib/reveal/{}.css".format(self.get('theme')), id_="theme")
         self.addCSS('reveal_css', "css/reveal_moose.css")
