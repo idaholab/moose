@@ -224,6 +224,9 @@ TensorMechanicsAction::act()
   // Deal with the optional AuxVariable based tensor quantity output
   actOutputGeneration();
 
+  // Add displacement and output variables
+  actAddVariable();
+
   // Meta action which optionally spawns other actions
   if (_current_task == "meta_action")
   {
@@ -267,26 +270,6 @@ TensorMechanicsAction::act()
       if (isParamValid("extra_vector_tags"))
         action_params.set<std::vector<TagName>>("extra_vector_tags") =
             getParam<std::vector<TagName>>("extra_vector_tags");
-    }
-  }
-
-  // Add variables (optional)
-  else if (_current_task == "add_variable" && getParam<bool>("add_variables"))
-  {
-    auto params = _factory.getValidParams("MooseVariable");
-    // determine necessary order
-    const bool second = _problem->mesh().hasSecondOrderElements();
-
-    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
-    params.set<MooseEnum>("family") = "LAGRANGE";
-    if (isParamValid("scaling"))
-      params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-
-    // Loop through the displacement variables
-    for (const auto & disp : _displacements)
-    {
-      // Create displacement variables
-      _problem->addVariable("MooseVariable", disp, params);
     }
   }
 
@@ -473,33 +456,6 @@ TensorMechanicsAction::actOutputGeneration()
 {
   if (_current_task == "add_material")
     actOutputMatProp();
-
-  // Add variables (optional)
-  if (_current_task == "add_aux_variable")
-  {
-    unsigned int index = 0;
-    for (auto out : _generate_output)
-    {
-      const auto & order = _material_output_order[index];
-      const auto & family = _material_output_family[index];
-
-      std::string type = (order == "CONSTANT" && family == "MONOMIAL")
-                             ? "MooseVariableConstMonomial"
-                             : "MooseVariable";
-
-      // Create output helper aux variables
-      auto params = _factory.getValidParams(type);
-      params.set<MooseEnum>("order") = order;
-      params.set<MooseEnum>("family") = family;
-
-      if (family == "MONOMIAL")
-        _problem->addAuxVariable(type, _base_name + out, params);
-      else
-        _problem->addVariable(type, _base_name + out, params);
-
-      index++;
-    }
-  }
 
   // Add output AuxKernels
   else if (_current_task == "add_aux_kernel")
@@ -823,6 +779,57 @@ TensorMechanicsAction::actGatherActionParameters()
       if (added_size == 0 && actions.size() > 1)
         mooseError("No TensorMechanics/Master action can be block unrestricted if more than one "
                    "TensorMechanics/Master action is specified.");
+    }
+  }
+}
+
+void
+TensorMechanicsAction::actAddVariable()
+{
+  // Add displacement variables (optional)
+  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  {
+    auto params = _factory.getValidParams("MooseVariable");
+    // determine necessary order
+    const bool second = _problem->mesh().hasSecondOrderElements();
+
+    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
+    params.set<MooseEnum>("family") = "LAGRANGE";
+    if (isParamValid("scaling"))
+      params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
+    // Loop through the displacement variables
+    for (const auto & disp : _displacements)
+    {
+      // Create displacement variables
+      _problem->addVariable("MooseVariable", disp, params);
+    }
+  }
+
+  // Add output variables
+  if (_current_task == "add_aux_variable")
+  {
+    unsigned int index = 0;
+    for (auto out : _generate_output)
+    {
+      const auto & order = _material_output_order[index];
+      const auto & family = _material_output_family[index];
+
+      std::string type = (order == "CONSTANT" && family == "MONOMIAL")
+                             ? "MooseVariableConstMonomial"
+                             : "MooseVariable";
+
+      // Create output helper aux variables
+      auto params = _factory.getValidParams(type);
+      params.set<MooseEnum>("order") = order;
+      params.set<MooseEnum>("family") = family;
+
+      if (family == "MONOMIAL")
+        _problem->addAuxVariable(type, _base_name + out, params);
+      else
+        _problem->addVariable(type, _base_name + out, params);
+
+      index++;
     }
   }
 }

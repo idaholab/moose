@@ -27,6 +27,7 @@ protected:
   void actEigenstrainNames();
   void actOutputMatProp();
   void actGatherActionParameters();
+  void actAddVariable();
   void verifyOrderAndFamilyOutputs();
 
   virtual std::string getKernelType();
