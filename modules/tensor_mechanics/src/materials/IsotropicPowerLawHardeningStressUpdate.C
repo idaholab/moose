@@ -112,3 +112,6 @@ IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::getIsotropicLameLambda(
         "Check to ensure that your Elasticity Tensor is truly Isotropic: different lambda values");
   return lame_lambda;
 }
+
+template class IsotropicPowerLawHardeningStressUpdateTempl<false>;
+template class IsotropicPowerLawHardeningStressUpdateTempl<true>;

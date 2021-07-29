@@ -254,3 +254,6 @@ IsotropicPlasticityStressUpdateTempl<true>::computeYieldStress(
                      ") is less than zero");
   }
 }
+
+template class IsotropicPlasticityStressUpdateTempl<false>;
+template class IsotropicPlasticityStressUpdateTempl<true>;

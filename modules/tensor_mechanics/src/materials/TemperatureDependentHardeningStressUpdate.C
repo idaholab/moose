@@ -169,3 +169,6 @@ TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeYieldStress(
     mooseError("The yield stress must be greater than zero, but during the simulation your yield "
                "stress became less than zero.");
 }
+
+template class TemperatureDependentHardeningStressUpdateTempl<false>;
+template class TemperatureDependentHardeningStressUpdateTempl<true>;
