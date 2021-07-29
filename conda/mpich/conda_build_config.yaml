@@ -27,10 +27,10 @@ moose_python:
   - 3.6
 
 moose_vtk:
-  - 9.0.1 no_osmesa_py39h3dd132e_102 # [osx]
-  - 9.0.1 no_osmesa_py38h523a0c9_102 # [osx]
-  - 9.0.1 no_osmesa_py37hc0470e1_102 # [osx]
-  - 9.0.1 no_osmesa_py36hc362858_102 # [osx]
+  - 9.0.1 no_osmesa_py39h9af63fb_109 # [osx]
+  - 9.0.1 no_osmesa_py38h1d02333_109 # [osx]
+  - 9.0.1 no_osmesa_py37hbb2da5a_109 # [osx]
+  - 9.0.1 no_osmesa_py36h6f68f9a_109 # [osx]
   - 9.0.3 no_osmesa_py39h801044d_100 # [linux]
   - 9.0.3 no_osmesa_py38h3850a3d_100 # [linux]
   - 9.0.3 no_osmesa_py37h7b56ff3_100 # [linux]
@@ -57,19 +57,19 @@ moose_pyqt:
   - 5.12.3 py36h5fab9bb_7      # [linux]
 
 moose_matplotlib:
-  - 3.3.3 py39h6e9494a_0       # [osx]
-  - 3.3.3 py38h50d1736_0       # [osx]
-  - 3.3.3 py37hf985489_0       # [osx]
-  - 3.3.3 py36h79c6626_0       # [osx]
+  - 3.4.2 py39h6e9494a_0       # [osx]
+  - 3.4.2 py38h50d1736_0      # [osx]
+  - 3.4.2 py37hf985489_0       # [osx]
+  - 3.3.3 py36h79c6626_0      # [osx]
   - 3.4.2 py39hf3d152e_0       # [linux]
   - 3.4.2 py38h578d9bd_0       # [linux]
   - 3.4.2 py37h89c1867_0       # [linux]
   - 3.3.4 py36h5fab9bb_0       # [linux]
 
 moose_pandas:
-  - 1.2.1 py39h089d6f7_0       # [osx]
-  - 1.2.1 py38he9f00de_0       # [osx]
-  - 1.2.1 py37h010c265_0       # [osx]
+  - 1.3.1 py39h4d6be9b_0       # [osx]
+  - 1.3.1 py38h1f261ad_0      # [osx]
+  - 1.3.1 py37hb23ed4d_0       # [osx]
   - 1.1.5 py36h2be6da3_0       # [osx]
   - 1.3.0 py39hde0f152_0       # [linux]
   - 1.3.0 py38h1abd341_0       # [linux]
@@ -117,9 +117,9 @@ moose_lxml:
   - 4.6.3 py36h04a5ba7_0       # [linux]
 
 moose_scikit_image:
-  - 0.18.1 py39h089d6f7_0      # [osx]
-  - 0.18.1 py38he9f00de_0      # [osx]
-  - 0.18.1 py37h010c265_0      # [osx]
+  - 0.18.2 py39h4d6be9b_0      # [osx]
+  - 0.18.2 py38h1f261ad_0     # [osx]
+  - 0.18.2 py37hb23ed4d_0      # [osx]
   - 0.17.2 py36h2be6da3_4      # [osx]
   - 0.18.2 py39hde0f152_0      # [linux]
   - 0.18.2 py38h1abd341_0      # [linux]
@@ -192,7 +192,7 @@ moose_llvmopenmp:
   - 11.1.0 hda6cdc1_1
 
 moose_osxfortran:
-  - 9.3.0 h18f7dce_14
+  - 7.3.0 h22b1bf0_11
 
 moose_libcxx:
   - 11.1.0 habf9029_0
@@ -210,16 +210,16 @@ moose_gccimpl:
   - 9.3.0 h28f5a38_17
 
 moose_libblas:
-  - 3.9.0 10_openblas
+  - 3.9.0 8_openblas
 
 moose_libcblas:
-  - 3.9.0 10_openblas
+  - 3.9.0 8_openblas
 
 moose_liblapack:
-  - 3.9.0 10_openblas
+  - 3.9.0 8_openblas
 
 moose_libopenblas:
-  - 0.3.17 openmp_h3351f45_1
+  - 0.3.12 openmp_h63d9170_1
 
 moose_libglu:
   - 9.0.0 hf484d3e_1000
