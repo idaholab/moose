@@ -39,6 +39,9 @@ public:
 
   const Real & getGap() const { return _gap; }
 
+  /**
+   * Return the index of the sub-channel for a given point
+   */
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
 
   virtual EChannelType getSubchannelType(unsigned int index) const override

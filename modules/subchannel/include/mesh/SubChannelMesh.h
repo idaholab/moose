@@ -80,9 +80,19 @@ public:
   virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const = 0;
 
   /**
+   * Return unheated length at entry
+   */
+  virtual const Real & getHeatedLengthEntry() const { return _unheated_length_entry; }
+
+  /**
    * Return heated length
    */
   virtual const Real & getHeatedLength() const { return _heated_length; }
+
+  /**
+   * Return unheated length at exit
+   */
+  virtual const Real & getHeatedLengthExit() const { return _unheated_length_exit; }
 
   /**
    * Return a subchannel index for a given physical point `p`
@@ -100,8 +110,12 @@ public:
   virtual Real getGapWidth(unsigned int gap_index) const = 0;
 
 protected:
+  /// unheated length of the fuel rod at the entry of the assembly
+  Real _unheated_length_entry;
   /// heated length of the fuel rod
   Real _heated_length;
+  /// unheated length of the fuel rod at the exit of the assembly
+  Real _unheated_length_exit;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell

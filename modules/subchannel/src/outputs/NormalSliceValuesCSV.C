@@ -77,11 +77,19 @@ NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
     }
   }
 
-  _exit_value.resize(1, _mesh.getNy() * _mesh.getNx());
+  Eigen::MatrixXd exit_value;
+  exit_value.resize(1, _mesh.getNy() * _mesh.getNx());
+
+  for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
+  {
+    unsigned int i = (i_ch / _mesh.getNx());   // row
+    unsigned int j = i_ch - i * _mesh.getNx(); // column
+    exit_value(0, i_ch) = _exit_value(i, j);
+  }
 
   const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
   std::ofstream myfile1;
   myfile1.open(_file_base, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exit_value.format(CSVFormat) << "\n";
+  myfile1 << std::setprecision(6) << std::fixed << exit_value.format(CSVFormat) << "\n";
   myfile1.close();
 }
