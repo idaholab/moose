@@ -67,6 +67,9 @@ protected:
   /// set generated from the combined block restrictions of all TensorMechanics/Master action blocks
   std::set<SubdomainID> _subdomain_id_union;
 
+  /// this will be true for only one single TensorMechanics (or derived) action
+  bool _is_primary_action;
+
   /// strain formulation
   enum class Strain
   {

@@ -100,6 +100,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
+    _is_primary_action(false),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
     _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
     _out_of_plane_direction(
@@ -765,6 +766,12 @@ TensorMechanicsAction::actGatherActionParameters()
   if (_current_task == "validate_coordinate_systems" && getParam<bool>("add_variables"))
   {
     auto actions = _awh.getActions<TensorMechanicsAction>();
+
+    // is the current action teh first one in the warehouse?
+    if (actions.empty())
+      mooseError("Internal error");
+    _is_primary_action = (actions[0] == this);
+
     for (const auto & action : actions)
     {
       const auto size_before = _subdomain_id_union.size();
@@ -787,7 +794,7 @@ void
 TensorMechanicsAction::actAddVariable()
 {
   // Add displacement variables (optional)
-  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  if (_is_primary_action && _current_task == "add_variable")
   {
     auto params = _factory.getValidParams("MooseVariable");
     // determine necessary order
@@ -798,12 +805,16 @@ TensorMechanicsAction::actAddVariable()
     if (isParamValid("scaling"))
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
+    // generate `block` parameter
+    std::transform(_subdomain_id_union.begin(),
+                   _subdomain_id_union.end(),
+                   std::back_inserter(params.set<std::vector<SubdomainName>>("block")),
+                   [&](SubdomainID id) { return Moose::stringify(id); });
+
     // Loop through the displacement variables
     for (const auto & disp : _displacements)
-    {
       // Create displacement variables
       _problem->addVariable("MooseVariable", disp, params);
-    }
   }
 
   // Add output variables

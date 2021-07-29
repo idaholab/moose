@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<MooseVariable>()
 {
-  auto params = validParams<MooseVariableFEBase>();
+  auto params = MooseVariableFEBase::validParams();
   params.addClassDescription(
       "Represents standard field variables, e.g. Lagrange, Hermite, or non-constant Monomials");
   return params;
