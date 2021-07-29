@@ -391,6 +391,8 @@ SubChannel1PhaseProblem::computeh(int iblock)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
     auto dz = z_grid[iz] - z_grid[iz - 1];
+    auto heated_length = _subchannel_mesh.getHeatedLength();
+    auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -402,6 +404,12 @@ SubChannel1PhaseProblem::computeh(int iblock)
       auto h_out = 0.0;
       double sumWijh = 0.0;
       double sumWijPrimeDhij = 0.0;
+      double added_enthalpy;
+      if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
+        added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+      else
+        added_enthalpy = 0.0;
+
       // Calculate sum of crossflow into channel i from channels j around i
       unsigned int counter = 0;
       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -425,8 +433,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
         counter++;
       }
 
-      h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij +
-               ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0 +
+      h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy +
                _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
               (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
 
@@ -720,19 +727,19 @@ SubChannel1PhaseProblem::externalSolve()
     auto P_L2norm_old_axial = _P_soln->L2norm();
     for (unsigned int iblock = 0; iblock < _n_blocks; iblock++)
     {
-      int last_node = (iblock + 1) * _block_size;
-      int first_node = iblock * _block_size + 1;
+      int last_level = (iblock + 1) * _block_size;
+      int first_level = iblock * _block_size + 1;
       auto T_block_error = 1.0;
       auto T_it_max = 5;
       auto T_it = 0;
-      _console << "Solving Block :" << iblock << " From first node :" << first_node
-               << " to last node :" << last_node << std::endl;
+      _console << "Solving Block: " << iblock << " From first level: " << first_level
+               << " to last level: " << last_level << std::endl;
       while (T_block_error > _T_tol && T_it < T_it_max)
       {
         T_it += 1;
         if (T_it == T_it_max)
         {
-          _console << "Reached maximum number of temperature iterations for block :" << iblock
+          _console << "Reached maximum number of temperature iterations for block: " << iblock
                    << std::endl;
           _converged = false;
         }
@@ -756,7 +763,7 @@ SubChannel1PhaseProblem::externalSolve()
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
             std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));
-        _console << "T_block_error : " << T_block_error << std::endl;
+        _console << "T_block_error: " << T_block_error << std::endl;
       }
     }
     auto P_L2norm_new_axial = _P_soln->L2norm();
@@ -768,6 +775,17 @@ SubChannel1PhaseProblem::externalSolve()
   _Wij_old = _Wij;
   _console << "Finished executing subchannel solver\n";
   _aux->solution().close();
+
+  auto power_in = 0.0;
+  auto power_out = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
+    power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+    power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
+  }
+  _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
 }
 
 void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

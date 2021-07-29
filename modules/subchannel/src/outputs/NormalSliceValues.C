@@ -78,6 +78,6 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
 
   std::ofstream myfile1;
   myfile1.open(_file_base, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exit_value << "\n";
+  myfile1 << std::setprecision(6) << std::fixed << _exit_value << "\n \n";
   myfile1.close();
 }
