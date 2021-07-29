@@ -26,7 +26,7 @@ requirements:
     - clangxx_osx-64     {{ moose_clangxxosx }}     # [osx]
     - compiler-rt        {{ moose_compilerrt }}     # [osx]
     - compiler-rt_osx-64 {{ moose_compilerrtosx }}  # [osx]
-    - libllvm12          {{ moose_libllvm }}        # [osx]
+    - libllvm11          {{ moose_libllvm }}        # [osx]
     - clang-tools                                   # [osx]
     - llvm-openmp        {{ moose_llvmopenmp }}     # [osx]
     - gfortran_osx-64    {{ moose_osxfortran }}     # [osx]
