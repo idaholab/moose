@@ -55,7 +55,7 @@
 
 [AuxKernels]
   [temp_aux]
-    type = ADFunctionAux
+    type = FunctionAux
     variable = temp
     function = temp_hist
   []
@@ -145,7 +145,6 @@
   []
   [radial_return_stress]
     type = ADComputeMultipleInelasticStress
-    tangent_operator = elastic
     inelastic_models = 'temp_dep_hardening'
   []
 []
