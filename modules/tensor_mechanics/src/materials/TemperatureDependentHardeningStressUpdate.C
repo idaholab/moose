@@ -13,11 +13,13 @@
 #include "ElasticityTensorTools.h"
 
 registerMooseObject("TensorMechanicsApp", TemperatureDependentHardeningStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADTemperatureDependentHardeningStressUpdate);
 
+template <bool is_ad>
 InputParameters
-TemperatureDependentHardeningStressUpdate::validParams()
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::validParams()
 {
-  InputParameters params = IsotropicPlasticityStressUpdate::validParams();
+  InputParameters params = IsotropicPlasticityStressUpdateTempl<is_ad>::validParams();
   params.addClassDescription("Computes the stress as a function of temperature "
                              "and plastic strain from user-supplied hardening "
                              "functions. This class can be used in conjunction "
@@ -41,11 +43,13 @@ TemperatureDependentHardeningStressUpdate::validParams()
   return params;
 }
 
-TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUpdate(
-    const InputParameters & parameters)
-  : IsotropicPlasticityStressUpdate(parameters),
-    _hardening_functions_names(getParam<std::vector<FunctionName>>("hardening_functions")),
-    _hf_temperatures(getParam<std::vector<Real>>("temperatures"))
+template <bool is_ad>
+TemperatureDependentHardeningStressUpdateTempl<
+    is_ad>::TemperatureDependentHardeningStressUpdateTempl(const InputParameters & parameters)
+  : IsotropicPlasticityStressUpdateTempl<is_ad>(parameters),
+    _hardening_functions_names(
+        this->template getParam<std::vector<FunctionName>>("hardening_functions")),
+    _hf_temperatures(this->template getParam<std::vector<Real>>("temperatures"))
 {
   const unsigned int len = _hardening_functions_names.size();
   if (len < 2)
@@ -66,36 +70,39 @@ TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUp
   std::vector<Real> yield_stress_vec;
   for (unsigned int i = 0; i < len; ++i)
   {
-    const PiecewiseLinear * const f =
-        dynamic_cast<const PiecewiseLinear *>(&getFunctionByName(_hardening_functions_names[i]));
+    const PiecewiseLinear * const f = dynamic_cast<const PiecewiseLinear *>(
+        &this->getFunctionByName(_hardening_functions_names[i]));
     if (!f)
-      mooseError("Function ", _hardening_functions_names[i], " not found in ", name());
+      mooseError("Function ", _hardening_functions_names[i], " not found in ", this->name());
 
     _hardening_functions[i] = f;
 
     yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
-  _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(
-      new LinearInterpolation(_hf_temperatures, yield_stress_vec));
+  _interp_yield_stress = std::make_unique<LinearInterpolation>(_hf_temperatures, yield_stress_vec);
 }
 
+template <bool is_ad>
 void
-TemperatureDependentHardeningStressUpdate::computeStressInitialize(
-    const Real & effectiveTrialStress, const RankFourTensor & elasticity_tensor)
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeStressInitialize(
+    const GenericReal<is_ad> & effectiveTrialStress,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
   initializeHardeningFunctions();
   computeYieldStress(elasticity_tensor);
 
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
-  _hardening_variable[_qp] = _hardening_variable_old[_qp];
-  _plastic_strain[_qp] = _plastic_strain_old[_qp];
+  this->_yield_condition =
+      effectiveTrialStress - this->_hardening_variable_old[_qp] - this->_yield_stress;
+  this->_hardening_variable[_qp] = this->_hardening_variable_old[_qp];
+  this->_plastic_strain[_qp] = this->_plastic_strain_old[_qp];
 }
 
+template <bool is_ad>
 void
-TemperatureDependentHardeningStressUpdate::initializeHardeningFunctions()
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::initializeHardeningFunctions()
 {
-  const Real temp = _temperature[_qp];
+  const Real temp = MetaPhysicL::raw_value(this->_temperature[_qp]);
   if (temp > _hf_temperatures[0] && temp < _hf_temperatures.back())
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
@@ -126,32 +133,39 @@ TemperatureDependentHardeningStressUpdate::initializeHardeningFunctions()
     mooseError("The hardening function fraction cannot be less than zero.");
 }
 
-Real
-TemperatureDependentHardeningStressUpdate::computeHardeningValue(Real scalar)
+template <bool is_ad>
+GenericReal<is_ad>
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeHardeningValue(
+    const GenericReal<is_ad> & scalar)
 {
-  const Real strain = _effective_inelastic_strain_old[_qp] + scalar;
-  const Real stress =
+  const Real strain = this->_effective_inelastic_strain_old[_qp] + MetaPhysicL::raw_value(scalar);
+  const GenericReal<is_ad> stress =
       (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point()) +
       _hf_fraction * _hardening_functions[_hf_index_hi]->value(strain, Point());
 
-  return stress - _yield_stress;
+  return stress - this->_yield_stress;
 }
 
-Real TemperatureDependentHardeningStressUpdate::computeHardeningDerivative(Real /*scalar*/)
+template <bool is_ad>
+GenericReal<is_ad>
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeHardeningDerivative(
+    const GenericReal<is_ad> & /*scalar*/)
 {
-  const Real strain_old = _effective_inelastic_strain_old[_qp];
+  const Real strain_old = this->_effective_inelastic_strain_old[_qp];
 
   return (1.0 - _hf_fraction) *
              _hardening_functions[_hf_index_lo]->timeDerivative(strain_old, Point()) +
          _hf_fraction * _hardening_functions[_hf_index_hi]->timeDerivative(strain_old, Point());
 }
 
+template <bool is_ad>
 void
-TemperatureDependentHardeningStressUpdate::computeYieldStress(
-    const RankFourTensor & /*elasticity_tensor*/)
+TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeYieldStress(
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
-  _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
-  if (_yield_stress <= 0.0)
+  this->_yield_stress =
+      _interp_yield_stress->sample(MetaPhysicL::raw_value(this->_temperature[_qp]));
+  if (this->_yield_stress <= 0.0)
     mooseError("The yield stress must be greater than zero, but during the simulation your yield "
                "stress became less than zero.");
 }
