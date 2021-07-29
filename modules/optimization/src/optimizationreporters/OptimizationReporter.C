@@ -62,6 +62,7 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _parameters[i]->assign(initial_condition.begin() + v,
                            initial_condition.begin() + v + _nvalues[i]);
     v += _nvalues[i];
+    std::cout << "_nvalues[i]  " << _nvalues[i] << std::endl;
   }
 
   _misfit_values.resize(_measurement_values.size(), 0.0);

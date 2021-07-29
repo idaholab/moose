@@ -6,15 +6,21 @@
   parameter_names = 'parameter_results'
   num_values = '3'
   initial_condition = '1 1 1'
+<<<<<<< HEAD:test/tests/optimizationreporter/objective_gradient_minimize/function_load_quadratic/master.i
 
+=======
+  # lower_bounds = '-5000 0     -1000'
+  # upper_bounds = '0     10000  0'
+  misfit_name = 'misfit'
+>>>>>>> 5d604ba (changes for milestone report):test/tests/formfunction/objective_gradient_minimize/function_load_quadratic/master.i
   adjoint_data_name = 'adjoint'
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
-  petsc_options_iname = '-tao_gatol -tao_ls_type'
-  petsc_options_value = '1e-4 unit'
+  tao_solver = taocg #taolmvm
+  petsc_options_iname = '-tao_max_it -tao_fmin -tao_ls_type' # tao_gatol'
+  petsc_options_value = '50 4 unit' #1e-4
    # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
    # petsc_options_value='1 true true false 0.0001 0.0001'
   verbose = true
@@ -79,6 +85,9 @@
     type = ConstantReporter
     real_vector_names = measured
     real_vector_values = '0 0 0 0'
+  []
+  [optInfo]
+    type = OptimizationInfo
   []
 []
 

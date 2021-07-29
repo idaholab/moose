@@ -8,6 +8,21 @@
   ymax = 2
 []
 
+[AuxVariables]
+  [bodyLoad]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [./bodyLoad]
+    type = ADMaterialRealAux
+    property = volumetric_heat
+    variable = bodyLoad
+  [../]
+[]
+
 [Variables]
   [temperature]
   []
@@ -55,7 +70,7 @@
 [Functions]
   [volumetric_heat_func]
     type = ParsedFunction
-    value = alpha*x*x+beta*beta*x+c
+    value = alpha*x*x+beta*x+c
     vars = 'alpha beta c'
     vals = '0 0 0'
   []
@@ -84,20 +99,61 @@
 []
 
 [VectorPostprocessors]
+  # [data_pt]
+  #   type = MeasuredDataPointSampler
+  #   variable = temperature
+  #   points = '0.2 0.5 0
+  #             0.5 0.5 0
+  #             1.5 0.5 0
+  #             1.8 0.5 0'
+  #   measured_values = '210 220 160 120'
+  #   outputs=none
+  # []
+  # [data_pt]
+  #   type = MeasuredDataPointSampler
+  #   variable = temperature
+  #   points = '0.3 1.1 0
+  #             0.6 1.1 0
+  #             0.9 1.1 0
+  #             1.2 1.1 0'
+  #   measured_values = '260 271 265 236'
+  #   outputs=none
+  # []
   [data_pt]
     type = MeasuredDataPointSampler
     variable = temperature
     points = '0.2 0.5 0
               0.5 0.5 0
               1.5 0.5 0
-              1.8 0.5 0'
-    measured_values = '210 220 160 120'
+              1.8 0.5 0
+              0.3 1.1 0
+              0.6 1.1 0
+              0.9 1.1 0
+              1.2 1.1 0'
+    measured_values = '210 220 160 120 260 271 265 236'
+    outputs=none
   []
+  [horizontal]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0 0.5 0'
+    end_point = '2 0.5 0'
+    num_points = 21
+    sort_by = x
+  [../]
+  [horizontal2]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0 1.1 0'
+    end_point = '2 1.1 0'
+    num_points = 21
+    sort_by = x
+  [../]
 []
 
 [Outputs]
   # console = true
   exodus = true
-  # csv = true
-  file_base = 'forward'
+  csv = true
+  # file_base = 'forward'
 []

@@ -96,7 +96,7 @@ function_vals = '0 0 0'
   []
   [volumetric_heat_func_deriv_beta]
     type = ParsedFunction
-    value = 2*beta*x
+    value = x
     vars = 'alpha beta c'
     vals = ${function_vals}
   []
@@ -131,7 +131,8 @@ function_vals = '0 0 0'
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0 0; 10 10 10 10'
+    # value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0 0; 10 10 10 10'
+    value = '0.2 0.5 1.5 1.8 0.3 0.6 0.9 1.2;0.5 0.5 0.5 0.5 1.1 1.1 1.1 1.1;0 0 0 0 0 0 0 0;10 10 10 10 10 10 10 10'
   []
   [adjoint_pt]
     type = VectorOfPostprocessors
@@ -142,6 +143,6 @@ function_vals = '0 0 0'
 
 [Outputs]
   # console = true
-  exodus = true
+  #exodus = true
   file_base = 'adjoint'
 []
