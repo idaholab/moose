@@ -25,13 +25,12 @@ ConstantReporter::validParams()
   return params;
 }
 
-ConstantReporter::ConstantReporter(const InputParameters & parameters)
-  : GeneralReporter(parameters),
-    _int(declareConstantReporterValues<int>("integer")),
-    _real(declareConstantReporterValues<Real>("real")),
-    _string(declareConstantReporterValues<std::string>("string")),
-    _int_vec(declareConstantVectorReporterValues<int>("integer")),
-    _real_vec(declareConstantVectorReporterValues<Real>("real")),
-    _string_vec(declareConstantVectorReporterValues<std::string>("string"))
+ConstantReporter::ConstantReporter(const InputParameters & parameters) : GeneralReporter(parameters)
 {
+  declareConstantReporterValues<int>("integer");
+  declareConstantReporterValues<Real>("real");
+  declareConstantReporterValues<std::string>("string");
+  declareConstantVectorReporterValues<int>("integer");
+  declareConstantVectorReporterValues<Real>("real");
+  declareConstantVectorReporterValues<std::string>("string");
 }
