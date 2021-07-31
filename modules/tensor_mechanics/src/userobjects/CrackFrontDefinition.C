@@ -36,7 +36,8 @@ void
 addCrackFrontDefinitionParams(InputParameters & params)
 {
   MooseEnum direction_method("CrackDirectionVector CrackMouth CurvedCrackFront");
-  MooseEnum end_direction_method("NoSpecialTreatment CrackDirectionVector", "NoSpecialTreatment");
+  MooseEnum end_direction_method("NoSpecialTreatment CrackDirectionVector CrackTangentVector",
+                                 "NoSpecialTreatment");
   params.addParam<std::vector<Point>>("crack_front_points", "Set of points to define crack front");
   params.addParam<bool>("closed_loop", false, "Set of points forms forms a closed loop");
   params.addRequiredParam<MooseEnum>(
@@ -56,6 +57,10 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<RealVectorValue>(
       "crack_direction_vector_end_2",
       "Direction of crack propagation for the node at end 2 of the crack");
+  params.addParam<RealVectorValue>("crack_tangent_vector_end_1",
+                                   "Direction of crack tangent for the node at end 1 of the crack");
+  params.addParam<RealVectorValue>("crack_tangent_vector_end_2",
+                                   "Direction of crack tangent for the node at end 2 of the crack");
   params.addParam<std::vector<BoundaryName>>(
       "crack_mouth_boundary", "Boundaries whose average coordinate defines the crack mouth");
   params.addParam<std::vector<BoundaryName>>("intersecting_boundary",
@@ -106,6 +111,8 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),
+    _use_mesh_cutter(false),
+    _is_cutter_modified(false),
     _closed_loop(getParam<bool>("closed_loop")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
@@ -147,6 +154,21 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
         getParam<UserObjectName>("crack_front_points_provider"));
     _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
+
+    if (getParam<UserObjectName>("crack_front_points_provider") == "cut_mesh")
+    {
+      _use_mesh_cutter = true;
+      if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
+        paramError("crack_direction_method",
+                   "Using 'crack_front_points_provider = cut_mesh' requires also setting "
+                   "'crack_direction_method = CurvedCrackFront'");
+      if (isParamValid("crack_mouth_boundary"))
+        paramError("crack_mouth_boundary",
+                   "'crack_mouth_boundary' cannot be set when using 'crack_front_points_provider = "
+                   "cut_mesh'");
+      if (_treat_as_2d)
+        paramError("2d", "'2d' cannot be set when using 'crack_front_points_provider = cut_mesh'");
+    }
   }
   else if (isParamValid("number_points_from_provider"))
     paramError("number_points_from_provider",
@@ -220,6 +242,20 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
   }
 
+  if (_end_direction_method == END_DIRECTION_METHOD::END_CRACK_TANGENT_VECTOR)
+  {
+    if (!isParamValid("crack_tangent_vector_end_1"))
+      paramError("crack_tangent_vector_end_1",
+                 "crack_tangent_vector_end_1 must be specified if crack_end_tangent_method = "
+                 "CrackTangentVector");
+    if (!isParamValid("crack_tangent_vector_end_2"))
+      paramError("crack_tangent_vector_end_2",
+                 "crack_tangent_vector_end_2 must be specified if crack_end_tangent_method = "
+                 "CrackTangentVector");
+    _crack_tangent_vector_end_1 = getParam<RealVectorValue>("crack_tangent_vector_end_1");
+    _crack_tangent_vector_end_2 = getParam<RealVectorValue>("crack_tangent_vector_end_2");
+  }
+
   if (isParamValid("disp_x") && isParamValid("disp_y") && isParamValid("disp_z"))
   {
     _disp_x_var_name = getParam<VariableName>("disp_x");
@@ -260,8 +296,13 @@ void
 CrackFrontDefinition::initialSetup()
 {
   if (_crack_front_points_provider != nullptr)
+  {
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
+    if (_use_mesh_cutter)
+      _crack_plane_normals =
+          _crack_front_points_provider->getCrackPlaneNormals(_num_points_from_provider);
+  }
 
   _crack_mouth_boundary_ids = _mesh.getBoundaryIDs(_crack_mouth_boundary_names, true);
   _intersecting_boundary_ids = _mesh.getBoundaryIDs(_intersecting_boundary_names, true);
@@ -305,6 +346,23 @@ CrackFrontDefinition::initialSetup()
 void
 CrackFrontDefinition::initialize()
 {
+  // Update the crack front for fracture integral calculations
+  // This is only useful for 3D growing cracks which are currently described by the mesh cutter
+  if (_use_mesh_cutter && _is_cutter_modified)
+  {
+    _crack_front_points =
+        _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
+    _crack_plane_normals =
+        _crack_front_points_provider->getCrackPlaneNormals(_num_points_from_provider);
+    updateCrackFrontGeometry();
+    std::size_t num_crack_front_points = getNumCrackFrontPoints();
+    if (_q_function_type == "GEOMETRY")
+      for (std::size_t i = 0; i < num_crack_front_points; ++i)
+      {
+        bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
+        _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
+      }
+  }
 }
 
 void
@@ -468,10 +526,11 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
     {
       pickLoopCrackEndNodes(end_nodes, nodes, node_to_line_elem_map, line_elems);
       _closed_loop = true;
-      if (_end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR)
+      if (_end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR ||
+          _end_direction_method == END_DIRECTION_METHOD::END_CRACK_TANGENT_VECTOR)
         paramError("end_direction_method",
                    "In CrackFrontDefinition, end_direction_method cannot be CrackDirectionVector "
-                   "for a closed-loop crack");
+                   "or CrackTangentVector for a closed-loop crack");
       if (_intersecting_boundary_names.size() > 0)
         paramError("intersecting_boundary",
                    "In CrackFrontDefinition, intersecting_boundary cannot be specified for a "
@@ -799,15 +858,35 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
       tangent_direction = tangent_direction / tangent_direction.norm();
+
+      // If end tangent directions are given, correct the tangent at the end nodes
+      if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT &&
+          _end_direction_method == END_DIRECTION_METHOD::END_CRACK_TANGENT_VECTOR)
+      {
+        if (ntype == END_1_NODE)
+          tangent_direction = _crack_tangent_vector_end_1;
+        else if (ntype == END_2_NODE)
+          tangent_direction = _crack_tangent_vector_end_2;
+      }
+
       _tangent_directions.push_back(tangent_direction);
       _crack_directions.push_back(
-          calculateCrackFrontDirection(*getCrackFrontPoint(i), tangent_direction, ntype));
+          calculateCrackFrontDirection(*getCrackFrontPoint(i), tangent_direction, ntype, i));
+
+      // correct tangent direction in the case of _use_mesh_cutter
+      if (_use_mesh_cutter)
+        _tangent_directions[i] = _crack_plane_normals[i].cross(_crack_directions[i]);
 
       // If the end directions are given by the user, correct also the tangent at the end nodes
       if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT &&
           _end_direction_method == END_DIRECTION_METHOD::END_CRACK_DIRECTION_VECTOR &&
           (ntype == END_1_NODE || ntype == END_2_NODE))
-        _tangent_directions[i] = _crack_plane_normal.cross(_crack_directions[i]);
+      {
+        if (_use_mesh_cutter)
+          _tangent_directions[i] = _crack_plane_normals[i].cross(_crack_directions[i]);
+        else
+          _tangent_directions[i] = _crack_plane_normal.cross(_crack_directions[i]);
+      }
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
@@ -876,7 +955,10 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     {
       RankTwoTensor rot_mat;
       rot_mat.fillRow(0, _crack_directions[i]);
-      rot_mat.fillRow(1, _crack_plane_normal);
+      if (_use_mesh_cutter)
+        rot_mat.fillRow(1, _crack_plane_normals[i]);
+      else
+        rot_mat.fillRow(1, _crack_plane_normal);
       rot_mat.fillRow(2, _tangent_directions[i]);
       _rot_matrix.push_back(rot_mat);
     }
@@ -942,7 +1024,7 @@ CrackFrontDefinition::updateDataForCrackDirection()
       _crack_mouth_coordinates(_symmetry_plane) = 0.0;
   }
 
-  if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT)
+  if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT && !_use_mesh_cutter)
   {
     _crack_plane_normal.zero();
 
@@ -992,7 +1074,8 @@ CrackFrontDefinition::updateDataForCrackDirection()
 RealVectorValue
 CrackFrontDefinition::calculateCrackFrontDirection(const Point & crack_front_point,
                                                    const RealVectorValue & tangent_direction,
-                                                   const CRACK_NODE_TYPE ntype) const
+                                                   const CRACK_NODE_TYPE ntype,
+                                                   const std::size_t crack_front_point_index) const
 {
   RealVectorValue crack_dir;
   RealVectorValue zero_vec(0.0);
@@ -1042,12 +1125,21 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Point & crack_front_poi
     }
     else if (_direction_method == DIRECTION_METHOD::CURVED_CRACK_FRONT)
     {
-      crack_dir = tangent_direction.cross(_crack_plane_normal);
+      if (_use_mesh_cutter)
+        crack_dir = tangent_direction.cross(_crack_plane_normals[crack_front_point_index]);
+      else
+        crack_dir = tangent_direction.cross(_crack_plane_normal);
     }
   }
   crack_dir = crack_dir.unit();
 
   return crack_dir;
+}
+
+void
+CrackFrontDefinition::updateNumberOfCrackFrontPoints(std::size_t num_points)
+{
+  _num_points_from_provider = num_points;
 }
 
 const Node *
@@ -1219,7 +1311,11 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp,
   }
 
   // Find theta, the angle between r and the crack front plane
-  RealVectorValue crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal, point_index);
+  RealVectorValue crack_plane_normal;
+  if (_use_mesh_cutter)
+    crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normals[point_index], point_index);
+  else
+    crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal, point_index);
   Real p_to_plane_dist = std::abs(closest_point_to_p * crack_plane_normal);
 
   // Determine if qp is above or below the crack plane
@@ -1760,4 +1856,10 @@ CrackFrontDefinition::projectToFrontAtPoint(Real & dist_to_front,
   RealVectorValue projection_point = *crack_front_point + dist_along_tangent * crack_front_tangent;
   RealVectorValue axis_to_current_node = p - projection_point;
   dist_to_front = axis_to_current_node.norm();
+}
+
+void
+CrackFrontDefinition::isCutterModified(const bool is_cutter_modified)
+{
+  _is_cutter_modified = is_cutter_modified;
 }

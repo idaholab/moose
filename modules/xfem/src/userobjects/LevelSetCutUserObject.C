@@ -170,6 +170,12 @@ LevelSetCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points
   mooseError("getCrackFrontPoints() is not implemented for this object.");
 }
 
+const std::vector<RealVectorValue>
+LevelSetCutUserObject::getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackPlaneNormals() is not implemented for this object.");
+}
+
 CutSubdomainID
 LevelSetCutUserObject::getCutSubdomainID(const Node * node) const
 {
