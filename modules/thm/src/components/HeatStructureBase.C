@@ -433,7 +433,7 @@ HeatStructureBase::addVariables()
 void
 HeatStructureBase::addMooseObjects()
 {
-  if (parameters().isParamValid("materials"))
+  if (isParamValid("materials"))
   {
     _hc_model->addMaterials();
 
