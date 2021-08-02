@@ -56,7 +56,9 @@ HillConstants::HillConstants(const InputParameters & parameters)
                                             : nullptr),
     _hill_constants_input(6),
     _hill_constants(6),
+    _hill_tensor(6, 6),
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
+    _hill_tensor_material(declareProperty<ADDenseMatrix>(_base_name + "hill_constants")),
     _zyx_angles(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
                                                 : RealVectorValue(0.0, 0.0, 0.0)),
     _transformation_tensor(6, 6),
@@ -138,6 +140,7 @@ HillConstants::computeQpProperties()
 
   // Update material coefficients whether or not they are temperature-dependent
   _hill_constant_material[_qp] = _hill_constants;
+  _hill_tensor_material[_qp] = _hill_tensor;
 }
 
 std::array<Real, 3>
@@ -409,4 +412,22 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   //  Moose::out << "After, L: " << _hill_constants[3] << "\n";
   //  Moose::out << "After, M: " << _hill_constants[4] << "\n";
   //  Moose::out << "After, N: " << _hill_constants[5] << "\n";
+
+  // Alternative approach for hill tensor rotation
+  // criteria for hill constants vs hill tensor rotation needs to be defined
+  _hill_tensor.zero();
+
+  _hill_tensor(0, 0) = G + H;
+  _hill_tensor(1, 1) = F + H;
+  _hill_tensor(2, 2) = F + G;
+  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
+  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
+  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
+
+  _hill_tensor(3, 3) = 2.0 * N;
+  _hill_tensor(4, 4) = 2.0 * L;
+  _hill_tensor(5, 5) = 2.0 * M;
+
+  _hill_tensor.right_multiply_transpose(_transformation_tensor);
+  _hill_tensor.left_multiply(_transformation_tensor);
 }

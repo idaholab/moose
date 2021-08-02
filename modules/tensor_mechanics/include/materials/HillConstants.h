@@ -47,9 +47,11 @@ protected:
   /// Hill constants for orthotropic inelasticity
   std::vector<Real> _hill_constants_input;
   std::vector<Real> _hill_constants;
+  ADDenseMatrix _hill_tensor;
 
   /// material property for storing hill constants
   MaterialProperty<std::vector<Real>> & _hill_constant_material;
+  MaterialProperty<ADDenseMatrix> & _hill_tensor_material;
 
   /// Angles for transformation of hill tensor
   RealVectorValue _zyx_angles;
