@@ -32,6 +32,10 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
+  virtual void finalize() override
+  {
+    // executioner output on final has been called and we do not need to call it again
+  }
   virtual void postExecute() override
   {
     // executioner postExecute has been called and we do not need to call it again
