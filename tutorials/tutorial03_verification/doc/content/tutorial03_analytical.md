@@ -113,10 +113,6 @@ with the input file included using the "-i" option as follows.
 
 !---
 
-!media tutorial03_verification/1d_analytical.mp4 style=width:75%;margin-left:auto;margin-right:auto;display:block;
-
-!---
-
 ## Practice: Compute Error
 
 To compute the error the exact solution must be added, from which the error can be computed using
@@ -143,6 +139,10 @@ can be computed using the `NodalL2Error` object. This is created within the `[Po
 along with the average element size.
 
 !listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors
+
+!---
+
+!media tutorial03_verification/1d_analytical.mp4 style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

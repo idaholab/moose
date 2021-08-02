@@ -16,7 +16,7 @@ for spatial and temporal convergence study using the [!ac](MMS).
 
 ## Theory: Method of Manufactured Solution
 
-The[!ac](MMS) can be summarized into three basic steps:
+The [!ac](MMS) can be summarized into three basic steps:
 
 1. Assume a solution for the [!ac](PDE) of interest: $T=2tx^2$
 
