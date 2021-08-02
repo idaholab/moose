@@ -8,10 +8,8 @@ such tests.
 The first step in the process is to be sure that the strong form of your equation is well understood.
 For this example, a diffusion equation is being considered.
 
-\begin{equation}
-\label{strong}
+!equation id=mms_strong
 \nabla \cdot \nabla u = 0.
-\end{equation}
 
 Next, assume a solution to this equation. It is important to pick an equation that has the necessary
 order to allow for all the derivatives to be computed, both spatially and temporally.
@@ -34,28 +32,23 @@ $u=t^3xy$.
 For the example problem a spatial convergence study is being performed initially, so the assumed
 exact solution is selected as
 
-\begin{equation}
-\label{exact}
+
+!equation id=mms_exact
 u = \sin({2\pi x})\sin({2\pi y}).
-\end{equation}
 
 Using the assumed solution a forcing function ($f$) can be computed from the strong form such that
 
-\begin{equation}
-\label{mms}
+!equation id=mms_pde
 \nabla \cdot \nabla u - f = 0.
-\end{equation}
 
-This is simply done by inserting the assumed solution ([exact]) into the left-hand side of the
-strong form of the equation ([strong]) and computing the result. The result of this calculation is
+This is simply done by inserting the assumed solution ([mms_exact]) into the left-hand side of the
+strong form of the equation ([mms_strong][) and computing the result. The result of this calculation is
 the forcing function $f$:
 
-\begin{equation}
-\label{force}
+!equation id=mms_force
 f = 8\pi^2\sin(2x\pi)\sin(2y\pi)
-\end{equation}
 
-[mms] is now a problem that can be solved and compared against the exact solution ([exact]).
+[mms_pde] is now a problem that can be solved and compared against the exact solution ([mms_exact]).
 
 ## Computing Forcing Function
 
@@ -159,7 +152,7 @@ For more information regarding convergence rates refer to [!citet](fish2007first
 ## Temporal Convergence
 
 In similar fashion it is possible to perform a temporal convergence study. In this example the
-same strong form is considered, see [strong]. However, the assumed solution is modified
+same strong form is considered, see [mms_strong]. However, the assumed solution is modified
 such that the spatial solution can be exactly represented by first order finite elements. The
 assumed solution is given in [time_exact] and the resulting forcing function in [time_force].
 
