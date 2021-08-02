@@ -46,7 +46,7 @@ block. For this problem the necessary objects exist within the heat conduction m
 
 $\lparen \phi_i, \rho(\vec{x}) c(\vec{x})\frac{\partial T_h}{\partial t} \rparen\implies$ `HeatConductionTimeDerivative`
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_cond Kernels/T_source
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_cond Kernels/T_source
 
 !---
 
@@ -54,11 +54,11 @@ $\lparen \phi_i, \rho(\vec{x}) c(\vec{x})\frac{\partial T_h}{\partial t} \rparen
 
 $\lparen \nabla \phi_i, k(t,\vec{x}) \nabla T_h \rparen\implies$ `HeatConduction`
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_time Kernels/T_source
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_time Kernels/T_source
 
 $\lparen \phi_i, \dot{q} \rparen\implies$ `HeatSouce`
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_time Kernels/T_cond
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Kernels remove=Kernels/T_time Kernels/T_cond
 
 !---
 
@@ -70,7 +70,7 @@ input block. For this problem the necessary objects exist within the framework.
 
 $-\langle \phi_i, k(t,\vec{x}) \nabla T_h \cdot \hat{n} \rangle\implies$ `NeumannBC`
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=BCs remove=BCs/bottom
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=BCs remove=BCs/bottom
 
 !---
 
@@ -78,4 +78,4 @@ $-\langle \phi_i, k(t,\vec{x}) \nabla T_h \cdot \hat{n} \rangle\implies$ `Neuman
 
 The Dirichlet conditions, which prescribes a value on a boundary can also be utilized.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=BCs remove=BCs/top
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=BCs remove=BCs/top

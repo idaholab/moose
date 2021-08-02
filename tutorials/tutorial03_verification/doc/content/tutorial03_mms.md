@@ -94,7 +94,7 @@ needed to simulate this problem.
 The problem requires a two-dimensional rectangular domain, which can be defined using
 the Mesh System as defined in the `[Mesh]` block  of the input.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Mesh
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Mesh
 
 !---
 
@@ -104,7 +104,7 @@ There is a single unknown, temperature ($T$), to compute. This unknown is declar
 Variables System in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Variables
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Variables
 
 !---
 
@@ -113,7 +113,7 @@ configuration of a first-order Lagrange finite element variable.
 The initial condition ($T_0$) is applied using the Initial Condition System
 in the `[ICs]` block. In this case a constant value throughout the domain is provided.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=ICs
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=ICs
 
 !---
 
@@ -123,7 +123,7 @@ The volumetric heat source, $\dot{q}$, is defined using the
 Function System using the `[Functions]` block. The variables "x", "y", "z", and "t" are always
 available and represent the corresponding spatial location and time.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Functions
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Functions
 
 !---
 
@@ -133,7 +133,7 @@ The "volumetric" portions of the weak form of the equation are defined using the
 Kernel System in the `[Kernels]` block, for this example this
 can be done with the use of three `Kernel` objects as follows.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Kernels
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Kernels
 
 !---
 
@@ -145,7 +145,7 @@ Neumann condition is applied with a constant outward flux. On the button of the 
 ($y=-0.2 \textrm{m}$) a constant temperature is defined. The remain boundaries are "insulated",
 which is known as the natural boundary condition.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=BCs
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=BCs
 
 !---
 
@@ -155,7 +155,7 @@ The problem is solved using Newton's method with a first-order backward Euler me
 of 600 seconds (10 min.) up to a simulation time of nine hours. These settings are applied within the
 `[Executioner]` block using the Executioner System.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Executioner
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Executioner
 
 !---
 
@@ -164,7 +164,7 @@ of 600 seconds (10 min.) up to a simulation time of nine hours. These settings a
 The ExodusII and CSV format is enabled within the `[Outputs]` block using the Outputs
 System.
 
-!listing tutorial03_verification/step04_mms/2d_main.i link=False block=Outputs
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Outputs
 
 !---
 
@@ -209,7 +209,7 @@ T = t\sin(\pi x)\cdot\sin(5\pi y)
 The `mms` package can compute the necessary forcing function and output the the input file syntax
 for both the forcing function and the assumed solution.
 
-!listing tutorial03_verification/step04_mms/step04_function.py link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
 
 !---
 
@@ -245,7 +245,7 @@ an independent file.
 The forcing function and exact solution are added using a parsed function, in similar to the
 existing functions withing the simulation.
 
-!listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Functions
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=Functions
 
 !---
 
@@ -253,7 +253,7 @@ existing functions withing the simulation.
 
 The forcing function is applied the the simulation by adding another heat source `Kernel` object.
 
-!listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Kernels
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=Kernels
 
 !---
 
@@ -262,7 +262,7 @@ The forcing function is applied the the simulation by adding another heat source
 To perform the study the error and element size are required, these are added as `Postprocessors`
 block.
 
-!listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Postprocessors
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=Postprocessors
 
 !---
 
@@ -270,7 +270,7 @@ block.
 
 CSV output also needs to be added, which is added as expected.
 
-!listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=Outputs
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=Outputs
 
 !---
 
@@ -280,7 +280,7 @@ The initial and boundary conditions for the simulation do not satisfy the assume
 easiest approach to remedy this is to use the assumed solution
 to set both the initial condition and boundary conditions.
 
-!listing tutorial03_verification/step04_mms/2d_mms_spatial.i link=false block=BCs ICs
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_spatial.i link=false block=BCs ICs
 
 !---
 
@@ -289,7 +289,7 @@ to set both the initial condition and boundary conditions.
 The `mms` package can be used to perform the convergence study. In this case, both a first and
 second-order shape functions are considered.
 
-!listing tutorial03_verification/step04_mms/step04_study.py
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_study.py
          link=False start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=False
 
 !---
@@ -317,7 +317,7 @@ T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 The `mms` package can compute the necessary forcing function and output the the input file syntax
 for both the forcing function and the assumed solution.
 
-!listing tutorial03_verification/step04_mms/step04_function.py link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0
 
 !---
 
@@ -343,7 +343,7 @@ $ python temporal_function.py
 A third input is created. The content follows the input to the spatial counter part and as such is
 included completely below.
 
-!listing tutorial03_verification/step04_mms/2d_mms_temporal.i link=false
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_temporal.i link=false
 
 !---
 
@@ -352,7 +352,7 @@ included completely below.
 The `mms` package can be used to perform the convergence study. In this case, both first and
 second-order shape functions are considered.
 
-!listing tutorial03_verification/step04_mms/step04_study.py
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_study.py
          link=False start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=False
 
 !---

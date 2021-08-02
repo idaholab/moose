@@ -50,7 +50,7 @@ program.
 
 The domain of the problem is defined using the Mesh System using the `[Mesh]` block of the input file.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Mesh
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Mesh
 
 !---
 
@@ -60,7 +60,7 @@ There is a single unknown, temperature ($T$), to compute. This unknown is declar
 Variables System in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Variables
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Variables
 
 !---
 
@@ -69,7 +69,7 @@ configuration of a first-order Lagrange finite element variable.
 The "volumetric" portions equation weak form are defined using the Kernel System in the `[Kernels]`
 block.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Kernels
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Kernels
 
 !---
 
@@ -79,7 +79,7 @@ The boundary portions of the equation weak form are defined using the
 Boundary Condition System in the `[BCs]` block. At $x=0$ a
 Neumann condition is applied with a value of 7E5, by default $x=0$ is given the name of "left".
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=BCs
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=BCs
 
 !---
 
@@ -89,7 +89,7 @@ The problem is solved using Newton's method with a second-order backward differe
 with a timestep of 0.01 seconds up to a simulation time of one second. These settings are applied
 within the `[Executioner]` block using the Executioner System.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Executioner
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Executioner
 
 !---
 
@@ -98,7 +98,7 @@ within the `[Executioner]` block using the Executioner System.
 The ExodusII and CSV format is enabled within the `[Outputs]` block using the Outputs
 System.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Outputs
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Outputs
 
 !---
 
@@ -125,7 +125,7 @@ the [!ac](FEM) solution.
 
 The known solution can be defined using the Function System in the `Functions` block.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Functions
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Functions
 
 The "vars" and "vals" have a one-to-one relationship, e.g., $k=80.2$. If defined in this manner
 then the names in "vars" can be used in the definition of the equation in the "value" parameter.
@@ -138,7 +138,7 @@ The $L_2$-norm of the differnce between the computed and exact solution
 can be computed using the `NodalL2Error` object. This is created within the `[Postprocessors]` block
 along with the average element size.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors
 
 !---
 
@@ -159,7 +159,7 @@ To perform a spatial convergence the input file create needs to be executed with
 size, which in [!ac](MOOSE) can be done by adding the `Mesh/uniform_refine=x` option to the
 command line with "x" being an integer representing the number of refinements to perform.
 
-!listing tutorial03_verification/step03_analytical/step03_study.py
+!listing tutorial03_verification/app/test/tests/step03_analytical/step03_study.py
          link=False start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=False
 
 !---
@@ -173,7 +173,7 @@ command line with "x" being an integer representing the number of refinements to
 The temporal convergence study is nearly identical to the spatial.
 For a temporal study, the time step is reduced.
 
-!listing tutorial03_verification/step03_analytical/step03_study.py
+!listing tutorial03_verification/app/test/tests/step03_analytical/step03_study.py
          link=False start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=False
 
 !---
