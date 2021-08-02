@@ -5,4 +5,13 @@
     exodiff = 'phy.rz_out.e'
     custom_cmp = 'phy.rz.exodiff'
   []
+
+  [phy:rz_mats]
+    type = Exodiff
+    input = 'phy.rz_mats.i'
+    exodiff = 'phy.rz_out.e'
+    custom_cmp = 'phy.rz.exodiff'
+    cli_args = 'Outputs/file_base=phy.rz_out'
+    prereq = phy:rz
+  []
 []

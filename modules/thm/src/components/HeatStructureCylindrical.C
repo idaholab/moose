@@ -11,8 +11,7 @@ HeatStructureCylindrical::validParams()
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each radial region [m]");
   params.addRequiredParam<std::vector<unsigned int>>("n_part_elems",
                                                      "Number of elements of each radial region");
-  params.addRequiredParam<std::vector<std::string>>("materials",
-                                                    "Material name for each radial region");
+  params.addParam<std::vector<std::string>>("materials", "Material name for each radial region");
   params.addParam<Real>("num_rods", 1.0, "Number of rods represented by this heat structure");
   params.addParam<Real>("inner_radius", 0., "Inner radius of the heat structure [m]");
 
@@ -60,5 +59,6 @@ HeatStructureCylindrical::check() const
 
   checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
   checkEqualSize<std::string, Real>("names", "widths");
-  checkEqualSize<std::string, std::string>("names", "materials");
+  if (isParamValid("materials"))
+    checkEqualSize<std::string, std::string>("names", "materials");
 }
