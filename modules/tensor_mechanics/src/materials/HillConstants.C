@@ -44,10 +44,16 @@ HillConstants::validParams()
 HillConstants::HillConstants(const InputParameters & parameters)
   : ADMaterial(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _rotation_total_hill(declareADProperty<RankTwoTensor>(_base_name + "rotation_total_hill")),
-    _rotation_total_hill_old(
-        getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation_total_hill")),
-    _rotation_increment(getADMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _use_large_rotation(getParam<bool>("use_large_rotation")),
+    _rotation_total_hill(_use_large_rotation
+                             ? &declareADProperty<RankTwoTensor>(_base_name + "rotation_total_hill")
+                             : nullptr),
+    _rotation_total_hill_old(_use_large_rotation ? &getMaterialPropertyOldByName<RankTwoTensor>(
+                                                       _base_name + "rotation_total_hill")
+                                                 : nullptr),
+    _rotation_increment(_use_large_rotation ? &getADMaterialProperty<RankTwoTensor>(
+                                                  _base_name + "rotation_increment")
+                                            : nullptr),
     _hill_constants_input(6),
     _hill_constants(6),
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
@@ -58,9 +64,7 @@ HillConstants::HillConstants(const InputParameters & parameters)
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _function_names(getParam<std::vector<FunctionName>>("function_names")),
     _num_functions(_function_names.size()),
-    _functions(_num_functions),
-    _use_large_rotation(getParam<bool>("use_large_rotation"))
-
+    _functions(_num_functions)
 {
   _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
   if (_has_temp && _num_functions != 6)
@@ -88,25 +92,29 @@ HillConstants::HillConstants(const InputParameters & parameters)
 void
 HillConstants::initQpStatefulProperties()
 {
-  RankTwoTensor identity_rotation(RankTwoTensor::initIdentity);
-
-  _rotation_total_hill[_qp] = identity_rotation;
+  if (_use_large_rotation)
+  {
+    RankTwoTensor identity_rotation(RankTwoTensor::initIdentity);
+    (*_rotation_total_hill)[_qp] = identity_rotation;
+  }
 }
 
 void
 HillConstants::computeQpProperties()
 {
-
   // Account for finite strain rotation influence on anisotropic coefficients
   if (_use_large_rotation)
   {
-    _rotation_total_hill[_qp] = _rotation_increment[_qp] * _rotation_total_hill_old[_qp];
+    (*_rotation_total_hill)[_qp] = (*_rotation_increment)[_qp] * (*_rotation_total_hill_old)[_qp];
     std::array<Real, 3> angles_zyx =
-        computeZYXAngles(MetaPhysicL::raw_value(_rotation_total_hill[_qp]));
+        computeZYXAngles(MetaPhysicL::raw_value((*_rotation_total_hill)[_qp]));
     _zyx_angles(0) = angles_zyx[0] / libMesh::pi * 180.0;
     _zyx_angles(1) = angles_zyx[1] / libMesh::pi * 180.0;
     _zyx_angles(2) = angles_zyx[2] / libMesh::pi * 180.0;
 
+    Moose::out << "Z angle: " << _zyx_angles(0) << "\n";
+    Moose::out << "Y angle: " << _zyx_angles(1) << "\n";
+    Moose::out << "X angle: " << _zyx_angles(2) << "\n";
     // Make sure to provide the original coefficients to the orientation transformation
     _hill_constant_material[_qp].resize(6);
     _hill_constant_material[_qp] = _hill_constants_input;
@@ -137,37 +145,99 @@ HillConstants::computeZYXAngles(const RankTwoTensor & rotation_matrix)
 {
   std::array<Real, 3> zyx_array;
 
-  const double rotation_02 = rotation_matrix(0, 2);
-  if (rotation_02 < 1.0)
+  //  const double rotation_00 = rotation_matrix(0, 0);
+  //  const double rotation_10 = rotation_matrix(1, 0);
+  //
+  //  if (std::abs(rotation_00) == 0.0 && std::abs(rotation_10) == 0.0)
+  //  {
+  //    // z angle
+  //    zyx_array[0] = std::atan2(rotation_matrix(0, 1), rotation_matrix(1, 1));
+  //    // y angle
+  //    zyx_array[1] = libMesh::pi / 2.0;
+  //    // x angle
+  //    zyx_array[2] = 0.0;
+  //  }
+  //  else
+  //  {
+  //    // z angle
+  //    zyx_array[0] = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
+  //    // y angle
+  //    zyx_array[1] = std::atan2(-rotation_matrix(2, 0),
+  //                              std::sqrt(rotation_matrix(0, 0) * rotation_matrix(0, 0) +
+  //                                        rotation_matrix(1, 0) * rotation_matrix(1, 0)));
+  //    // x angle
+  //    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
+  //  }
+
+  //  const double rotation_02 = rotation_matrix(0, 2);
+  //  if (rotation_02 < 1.0)
+  //  {
+  //    if (rotation_02 > -1.0)
+  //    {
+  //      // z angle
+  //      zyx_array[0] = std::atan2(-rotation_matrix(0, 1), rotation_matrix(0, 0));
+  //      // y angle
+  //      zyx_array[1] = std::asin(rotation_matrix(0, 2));
+  //      // x angle
+  //      zyx_array[2] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(2, 2));
+  //    }
+  //    else
+  //    {
+  //      // z angle
+  //      zyx_array[0] = 0.0;
+  //      // y angle
+  //      zyx_array[1] = -libMesh::pi / 2.0;
+  //      // x angle
+  //      zyx_array[2] = -std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+  //    }
+  //  }
+  //  else
+  //  {
+  //    // z angle
+  //    zyx_array[0] = 0.0;
+  //    // y angle
+  //    zyx_array[1] = libMesh::pi / 2.0;
+  //    // x angle
+  //    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+  //  }
+
+  const double rotation_20 = rotation_matrix(2, 0);
+  if (rotation_20 < 1.0)
   {
-    if (rotation_02 > -1.0)
+    if (rotation_20 > -1.0)
     {
       // z angle
-      zyx_array[0] = std::atan2(-rotation_matrix(0, 1), rotation_matrix(0, 0));
+      zyx_array[0] = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
       // y angle
-      zyx_array[1] = std::asin(rotation_matrix(0, 2));
+      zyx_array[1] = std::asin(-rotation_matrix(2, 0));
       // x angle
-      zyx_array[2] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(2, 2));
+      zyx_array[2] = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
     }
     else
     {
       // z angle
-      zyx_array[0] = 0.0;
+      zyx_array[0] = -std::atan2(-rotation_matrix(1, 2), rotation_matrix(1, 1));
       // y angle
-      zyx_array[1] = -libMesh::pi / 2.0;
+      zyx_array[1] = libMesh::pi / 2.0;
       // x angle
-      zyx_array[2] = -std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+      zyx_array[2] = 0.0;
     }
   }
   else
   {
     // z angle
-    zyx_array[0] = 0.0;
+    zyx_array[0] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(1, 1));
     // y angle
-    zyx_array[1] = libMesh::pi / 2.0;
+    zyx_array[1] = -libMesh::pi / 2.0;
     // x angle
-    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
+    zyx_array[2] = 0.0;
   }
+
+  if (std::abs(zyx_array[1] - libMesh::pi / 2.0) < TOLERANCE * TOLERANCE)
+    mooseDoOnce(mooseWarning("Euler angles used to define rotation of anisotropic parameters face "
+                             "a singularity. The definition of Hill coefficients F, G, H, L, M, "
+                             "and N may not be accurate. This message is printed once."));
+
   return zyx_array;
 }
 
@@ -182,6 +252,10 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
 
   const Real sx = std::sin(_zyx_angles(2) * libMesh::pi / 180.0);
   const Real cx = std::cos(_zyx_angles(2) * libMesh::pi / 180.0);
+
+  //  Moose::out << "Inside: _zyx_angles(0) Z: " << _zyx_angles(0) << "\n";
+  //  Moose::out << "Inside: _zyx_angles(1) Y: " << _zyx_angles(1) << "\n";
+  //  Moose::out << "Inside: _zyx_angles(2) X: " << _zyx_angles(2) << "\n";
 
   // transformation matrix is formed by performing the ZYX rotation
   _transformation_tensor(0, 0) = cy * cy * cz * cz;
@@ -242,6 +316,13 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   const Real & L = hill_constants_input[3];
   const Real & M = hill_constants_input[4];
   const Real & N = hill_constants_input[5];
+
+  //  Moose::out << "Before, F: " << F << "\n";
+  //  Moose::out << "Before, G: " << G << "\n";
+  //  Moose::out << "Before, H: " << H << "\n";
+  //  Moose::out << "Before, L: " << L << "\n";
+  //  Moose::out << "Before, M: " << M << "\n";
+  //  Moose::out << "Before, N: " << N << "\n";
 
   // rotated hill constants are calculated from rotated hill tensor, Hill_rot = Tm*Hill*Tm^T
   _hill_constants[0] = -_transformation_tensor(1, 0) *
@@ -321,4 +402,11 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
                        L * _transformation_tensor(3, 4) * _transformation_tensor(3, 4) +
                        M * _transformation_tensor(3, 5) * _transformation_tensor(3, 5) +
                        N * _transformation_tensor(3, 3) * _transformation_tensor(3, 3);
+
+  //  Moose::out << "After, F: " << _hill_constants[0] << "\n";
+  //  Moose::out << "After, G: " << _hill_constants[1] << "\n";
+  //  Moose::out << "After, H: " << _hill_constants[2] << "\n";
+  //  Moose::out << "After, L: " << _hill_constants[3] << "\n";
+  //  Moose::out << "After, M: " << _hill_constants[4] << "\n";
+  //  Moose::out << "After, N: " << _hill_constants[5] << "\n";
 }

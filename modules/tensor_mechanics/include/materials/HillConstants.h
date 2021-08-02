@@ -33,13 +33,16 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
+  /// Flag to determine whether to rotate Hill's coefficients with large strain kinematics
+  const bool _use_large_rotation;
+
   /// Rotation up to current step "n" to compute Hill tensor
-  ADMaterialProperty<RankTwoTensor> & _rotation_total_hill;
+  ADMaterialProperty<RankTwoTensor> * _rotation_total_hill;
   /// Rotation up to "n - 1" (previous) step to compute Hill tensor
-  const MaterialProperty<RankTwoTensor> & _rotation_total_hill_old;
+  const MaterialProperty<RankTwoTensor> * _rotation_total_hill_old;
 
   /// Strain increment material property
-  const ADMaterialProperty<RankTwoTensor> & _rotation_increment;
+  const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
 
   /// Hill constants for orthotropic inelasticity
   std::vector<Real> _hill_constants_input;
@@ -68,9 +71,6 @@ protected:
 
   /// The functions describing the temperature dependence
   std::vector<const Function *> _functions;
-
-  /// Flag to determine whether to rotate Hill's coefficients with large strain kinematics
-  const bool _use_large_rotation;
 
 private:
   /// Compute Euler angles in <Z Y X> sequence from strain kinematic rotation matrix

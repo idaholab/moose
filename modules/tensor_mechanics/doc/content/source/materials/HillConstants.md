@@ -17,7 +17,7 @@ The transformation matrix is formed assuming anti-clockwise rotation about z-, y
 \label{eq:transformation_matrix}
  T_m = T_x T_y T_z
 \end{equation}
-Here, T_x, T_y, T_z are the transformation matrices about x-, y- and z-axis, respectively:
+Here, $T_x$, $T_y$, $T_z$ are the transformation matrices about x-, y- and z-axis, respectively:
 \begin{equation}
 \begin{aligned}
 \label{eq:rotation_matrices}
@@ -49,10 +49,24 @@ Here, T_x, T_y, T_z are the transformation matrices about x-, y- and z-axis, res
 \end{equation}
 where, $\alpha$, $\beta$ and $\theta$ are the rotation angles. Note that, to reduce the computational cost, only the components required for the updated hill constants are computed from the rotated Hill tensor.
 
+## Temperature dependency and large deformation kinematics
+
+The Hill coefficients vary depending on temperature (due to texture) and depending on the material's rotation. To that effect, the user can create functions describing the evolution of the coefficients with temperature and provide it to the material, as follows:
+
+!listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/ad_aniso_creep_temperature_coefficients_function_variation.i block=Materials/hill_constants
+
+where six piecewise linear functions are created to define the material directional creep dependency with temperature.
+
+In addition, or independently, the user can choose to account for finite strain rotation to update these coefficients. To do so, the user needs to set the input argument `use_large_rotation` to true, which will trigger the use of [eq:rotate_hill_tensor] to account for the rotation. Updating of directional coefficients with finite strain rotation kinematics is stronly encouraged when the material is expected to suffer large deformation (e.g. ballooning) or to undergo rigid body rotation (e.g. significant bending of a beam or pipe).
+
+!listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/3d_bar_orthotropic_90deg_rotation_ad_creep_z.i block=Materials/hill_tensor
+
+!alert note
+Temperature coupling and large deformation updates have only been tested on creep models.
+
 ### Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_anisotropic_plasticity/ad_aniso_plasticity_x.i
-         block=Materials/hill_tensor
+!listing modules/tensor_mechanics/test/tests/ad_anisotropic_plasticity/ad_aniso_plasticity_x.i block=Materials/hill_tensor
 
 !syntax parameters /Materials/HillConstants
 
