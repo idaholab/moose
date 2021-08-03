@@ -69,6 +69,7 @@ HillConstants::HillConstants(const InputParameters & parameters)
     _functions(_num_functions)
 {
   _hill_constants_input = getParam<std::vector<Real>>("hill_constants");
+
   if (_has_temp && _num_functions != 6)
     paramError("function_names",
                "Six functions need to be provided to determine the evolution of Hill's "
@@ -114,9 +115,6 @@ HillConstants::computeQpProperties()
     _zyx_angles(1) = angles_zyx[1] / libMesh::pi * 180.0;
     _zyx_angles(2) = angles_zyx[2] / libMesh::pi * 180.0;
 
-    Moose::out << "Z angle: " << _zyx_angles(0) << "\n";
-    Moose::out << "Y angle: " << _zyx_angles(1) << "\n";
-    Moose::out << "X angle: " << _zyx_angles(2) << "\n";
     // Make sure to provide the original coefficients to the orientation transformation
     _hill_constant_material[_qp].resize(6);
     _hill_constant_material[_qp] = _hill_constants_input;
@@ -146,96 +144,31 @@ HillConstants::computeQpProperties()
 std::array<Real, 3>
 HillConstants::computeZYXAngles(const RankTwoTensor & rotation_matrix)
 {
+  // Extract Euler angles according to a ZYX angle sequence
   std::array<Real, 3> zyx_array;
 
-  //  const double rotation_00 = rotation_matrix(0, 0);
-  //  const double rotation_10 = rotation_matrix(1, 0);
-  //
-  //  if (std::abs(rotation_00) == 0.0 && std::abs(rotation_10) == 0.0)
-  //  {
-  //    // z angle
-  //    zyx_array[0] = std::atan2(rotation_matrix(0, 1), rotation_matrix(1, 1));
-  //    // y angle
-  //    zyx_array[1] = libMesh::pi / 2.0;
-  //    // x angle
-  //    zyx_array[2] = 0.0;
-  //  }
-  //  else
-  //  {
-  //    // z angle
-  //    zyx_array[0] = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-  //    // y angle
-  //    zyx_array[1] = std::atan2(-rotation_matrix(2, 0),
-  //                              std::sqrt(rotation_matrix(0, 0) * rotation_matrix(0, 0) +
-  //                                        rotation_matrix(1, 0) * rotation_matrix(1, 0)));
-  //    // x angle
-  //    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-  //  }
-
-  //  const double rotation_02 = rotation_matrix(0, 2);
-  //  if (rotation_02 < 1.0)
-  //  {
-  //    if (rotation_02 > -1.0)
-  //    {
-  //      // z angle
-  //      zyx_array[0] = std::atan2(-rotation_matrix(0, 1), rotation_matrix(0, 0));
-  //      // y angle
-  //      zyx_array[1] = std::asin(rotation_matrix(0, 2));
-  //      // x angle
-  //      zyx_array[2] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(2, 2));
-  //    }
-  //    else
-  //    {
-  //      // z angle
-  //      zyx_array[0] = 0.0;
-  //      // y angle
-  //      zyx_array[1] = -libMesh::pi / 2.0;
-  //      // x angle
-  //      zyx_array[2] = -std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
-  //    }
-  //  }
-  //  else
-  //  {
-  //    // z angle
-  //    zyx_array[0] = 0.0;
-  //    // y angle
-  //    zyx_array[1] = libMesh::pi / 2.0;
-  //    // x angle
-  //    zyx_array[2] = std::atan2(rotation_matrix(1, 0), rotation_matrix(1, 1));
-  //  }
-
   const double rotation_20 = rotation_matrix(2, 0);
-  if (rotation_20 < 1.0)
+  if (rotation_20 > -1.0)
   {
-    if (rotation_20 > -1.0)
-    {
-      // z angle
-      zyx_array[0] = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-      // y angle
-      zyx_array[1] = std::asin(-rotation_matrix(2, 0));
-      // x angle
-      zyx_array[2] = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-    }
-    else
-    {
-      // z angle
-      zyx_array[0] = -std::atan2(-rotation_matrix(1, 2), rotation_matrix(1, 1));
-      // y angle
-      zyx_array[1] = libMesh::pi / 2.0;
-      // x angle
-      zyx_array[2] = 0.0;
-    }
+    // z angle
+    zyx_array[0] = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
+    // y angle
+    zyx_array[1] = std::asin(-rotation_matrix(2, 0));
+    // x angle
+    zyx_array[2] = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
   }
   else
   {
     // z angle
-    zyx_array[0] = std::atan2(-rotation_matrix(1, 2), rotation_matrix(1, 1));
+    zyx_array[0] = -std::atan2(-rotation_matrix(1, 2), rotation_matrix(1, 1));
     // y angle
-    zyx_array[1] = -libMesh::pi / 2.0;
+    zyx_array[1] = libMesh::pi / 2.0;
     // x angle
     zyx_array[2] = 0.0;
   }
 
+  // We expect this singularity would not be a problem for general large deformation rotation.
+  // Alternatively, we can switch the implementation to work with quaternions.
   if (std::abs(zyx_array[1] - libMesh::pi / 2.0) < TOLERANCE * TOLERANCE)
     mooseDoOnce(mooseWarning("Euler angles used to define rotation of anisotropic parameters face "
                              "a singularity. The definition of Hill coefficients F, G, H, L, M, "
@@ -255,10 +188,6 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
 
   const Real sx = std::sin(_zyx_angles(2) * libMesh::pi / 180.0);
   const Real cx = std::cos(_zyx_angles(2) * libMesh::pi / 180.0);
-
-  //  Moose::out << "Inside: _zyx_angles(0) Z: " << _zyx_angles(0) << "\n";
-  //  Moose::out << "Inside: _zyx_angles(1) Y: " << _zyx_angles(1) << "\n";
-  //  Moose::out << "Inside: _zyx_angles(2) X: " << _zyx_angles(2) << "\n";
 
   // transformation matrix is formed by performing the ZYX rotation
   _transformation_tensor(0, 0) = cy * cy * cz * cz;
@@ -312,20 +241,13 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   _transformation_tensor(5, 4) = (-sy * sy + cy * cy) * sx * cz + sy * sz * cx;
   _transformation_tensor(5, 5) = (-sz * sz + cz * cz) * cx * cy - 2.0 * sx * sy * sz * cy * cz;
 
-  // store hill constants
+  // Store hill constants on input
   const Real & F = hill_constants_input[0];
   const Real & G = hill_constants_input[1];
   const Real & H = hill_constants_input[2];
   const Real & L = hill_constants_input[3];
   const Real & M = hill_constants_input[4];
   const Real & N = hill_constants_input[5];
-
-  //  Moose::out << "Before, F: " << F << "\n";
-  //  Moose::out << "Before, G: " << G << "\n";
-  //  Moose::out << "Before, H: " << H << "\n";
-  //  Moose::out << "Before, L: " << L << "\n";
-  //  Moose::out << "Before, M: " << M << "\n";
-  //  Moose::out << "Before, N: " << N << "\n";
 
   // rotated hill constants are calculated from rotated hill tensor, Hill_rot = Tm*Hill*Tm^T
   _hill_constants[0] = -_transformation_tensor(1, 0) *
@@ -406,15 +328,9 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
                        M * _transformation_tensor(3, 5) * _transformation_tensor(3, 5) +
                        N * _transformation_tensor(3, 3) * _transformation_tensor(3, 3);
 
-  //  Moose::out << "After, F: " << _hill_constants[0] << "\n";
-  //  Moose::out << "After, G: " << _hill_constants[1] << "\n";
-  //  Moose::out << "After, H: " << _hill_constants[2] << "\n";
-  //  Moose::out << "After, L: " << _hill_constants[3] << "\n";
-  //  Moose::out << "After, M: " << _hill_constants[4] << "\n";
-  //  Moose::out << "After, N: " << _hill_constants[5] << "\n";
-
   // Alternative approach for hill tensor rotation
-  // criteria for hill constants vs hill tensor rotation needs to be defined
+  // Both ways of computing anisotropic coefficient updates are carried out here
+  // and one is selected when computing the stress updates (for creep, e.g.)
   _hill_tensor.zero();
 
   _hill_tensor(0, 0) = G + H;

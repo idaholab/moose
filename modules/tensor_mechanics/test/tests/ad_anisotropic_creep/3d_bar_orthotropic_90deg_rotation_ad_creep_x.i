@@ -37,7 +37,7 @@
     add_variables = true
     volumetric_locking_correction = true
     use_automatic_differentiation = true
-    generate_output = 'elastic_strain_yy stress_yy creep_strain_yy'
+    generate_output = 'elastic_strain_xx stress_xx creep_strain_xx creep_strain_yy creep_strain_zz'
   []
 []
 
@@ -51,7 +51,7 @@
   [hill_tensor]
     type = HillConstants
     # F G H L M N
-    hill_constants = "0.5 1.0 0.5 1.5 1.5 1.5"
+    hill_constants = "0.25 0.4 0.65 1.5 1.5 1.5"
     use_large_rotation = true
   []
   [trial_creep]
@@ -74,90 +74,91 @@
 []
 
 [BCs]
-  [fix_z]
+  [fix_x]
     type = ADDirichletBC
-    variable = disp_z
+    variable = disp_x
     boundary = bottom
     value = 0
   []
 
+  [rot_z]
+    type = DisplacementAboutAxis
+    boundary = bottom
+    function = t
+    angle_units = degrees
+    axis_origin = '0. 0. 0.'
+    axis_direction = '1. 0. 1.0e-13'
+    component = 2
+    variable = disp_z
+  []
+  #
   [rot_y]
     type = DisplacementAboutAxis
     boundary = bottom
-    function = 0
+    function = t
     angle_units = degrees
     axis_origin = '0. 0. 0.'
-    axis_direction = '0. 0. 1.'
+    axis_direction = '1. 0. 1.0e-13'
     component = 1
     variable = disp_y
   []
-  #
-  [rot_x]
+
+  [rot_z90]
     type = DisplacementAboutAxis
     boundary = bottom
-    function = 0
+    function = 90
     angle_units = degrees
     axis_origin = '0. 0. 0.'
-    axis_direction = '0. 0. 1.'
-    component = 0
-    variable = disp_x
+    axis_direction = '1. 0. 1.0e-13'
+    component = 2
+    variable = disp_z
   []
-
+  #
   [rot_y90]
     type = DisplacementAboutAxis
     boundary = bottom
-    function = 0
+    function = 90
     angle_units = degrees
     axis_origin = '0. 0. 0.'
-    axis_direction = '0. 0. 1.'
+    axis_direction = '1. 0. 1.0e-13'
     component = 1
     variable = disp_y
   []
-  #
-  [rot_x90]
-    type = DisplacementAboutAxis
-    boundary = bottom
-    function = 0
-    angle_units = degrees
-    axis_origin = '0. 0. 0.'
-    axis_direction = '0. 0. 1.'
-    component = 0
-    variable = disp_x
-  []
 
   [press]
+    type = Pressure
     boundary = top
     function = '-1.0*(t-90)*0.1'
     use_displaced_mesh = true
     displacements = 'disp_x disp_y disp_z'
-    type = Pressure
-    variable = disp_y
-    component = 1
+    variable = disp_z
+    component = 2
   []
+[]
 
+[Postprocessors]
+  # The strain is along Z axis, naming it creep_strain_yy
+  # for better comparison.
+  [creep_strain_yy]
+    type = ADElementAverageMaterialProperty
+    mat_prop = creep_strain_zz
+  []
 []
 
 [Controls]
   [c1]
     type = TimePeriod
-    enable_objects = 'BCs::rot_x BCs::rot_y'
-    disable_objects = 'BCs::rot_x90 BCs::rot_y90 BCs::press'
+    enable_objects = 'BCs::rot_z BCs::rot_y'
+    disable_objects = 'BCs::rot_z90 BCs::rot_y90 BCs::press'
     start_time = '0'
     end_time = '90'
   []
   [c190plus]
     type = TimePeriod
-    enable_objects = 'BCs::rot_x90 BCs::rot_y90 BCs::press'
-    disable_objects = 'BCs::rot_x BCs::rot_y '
+    enable_objects = 'BCs::rot_z90 BCs::rot_y90 BCs::press'
+    disable_objects = 'BCs::rot_z BCs::rot_y '
     start_time = '90'
     end_time = '390'
-  []
-[]
-
-[Postprocessors]
-  [creep_strain_xx]
-    type = ADElementAverageMaterialProperty
-    mat_prop = creep_strain_yy
   []
 []
 
@@ -172,10 +173,11 @@
 
   line_search = 'none'
 
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-11
   nl_max_its = 50
-  automatic_scaling = true
+
+  # automatic_scaling = true
   l_tol = 1e-4
   l_max_its = 50
   start_time = 0.0
