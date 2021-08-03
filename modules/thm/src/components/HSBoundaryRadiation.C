@@ -79,6 +79,6 @@ HSBoundaryRadiation::addMooseObjects()
     pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    _sim.addPostprocessor(class_name, genName(name(), "integral"), pars);
+    _sim.addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
   }
 }
