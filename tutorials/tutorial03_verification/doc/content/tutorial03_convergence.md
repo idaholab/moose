@@ -48,19 +48,19 @@ of the number of degrees-of-freedom can be used as a measure of element size for
 MOOSE includes a number of error calculations, for Lagrange shape functions the
 $L_2$-norm computed at the nodes is adequate.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors remove=Postprocessors/h
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors remove=Postprocessors/h
 
 !---
 
 ## Practice: $\Delta t$
 
-!listing tutorial03_verification/step04_mms/2d_mms_temporal.i link=False block=Postprocessors remove=Postprocessors/error
+!listing tutorial03_verification/app/test/tests/step04_mms/2d_mms_temporal.i link=False block=Postprocessors remove=Postprocessors/error
 
 !---
 
 ## Practice: Element Size
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors remove=Postprocessors/error
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors remove=Postprocessors/error
 
 
 !---

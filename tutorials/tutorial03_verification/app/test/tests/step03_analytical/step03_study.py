@@ -2,7 +2,7 @@
 
 # MooseDocs:start:spatial
 import mms
-df = mms.run_spatial('1d_analytical.i', 6, 'Mesh/nx=10', console=False)
+df = mms.run_spatial('1d_analytical.i', 6, 'Mesh/gen/nx=10', console=False)
 fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
 fig.plot(df, label='1st Order', marker='o', markersize=8)
 fig.save('1d_analytical_spatial.png')

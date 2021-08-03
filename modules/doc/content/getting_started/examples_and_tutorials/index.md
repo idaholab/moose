@@ -87,14 +87,18 @@ Demonstrate the use of analytical solutions and the [!ac](MMS) for code verifica
 [Porous Flow Tutorial](modules/porous_flow/tutorial_00.md)\\
 This tutorial guides the user through some commonly-used aspects of the [Porous Flow](modules/porous_flow/index.md) module. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
 
-## Workshop id=workshop
+## Workshops id=workshop
 
-The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live workshops. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the workshop slides and a recent video recording of the workshop<!--change this sentence to be a plural reference, "recording(s)," when/if more workshop recordings become available-->.
+The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the training presentation, a recent video recording of the training, and other targeted more advanced workshop presentations.
 
-- [Workshop Slideshow](https://www.mooseframework.org/workshop)
-- [MOOSE Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
+- [MOOSE Training Workshop](https://www.mooseframework.org/workshop)
+- [MOOSE Training Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
+- [MOOSE MultiApp Workshop](https://www.mooseframework.org/workshop/multiapps)
+- [MOOSE Verification Workshop](https://www.mooseframework.org/workshop/verification)
 
 MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
+
+
 
 ## C++ Programming References id=programming
 

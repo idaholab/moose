@@ -3,6 +3,11 @@
 !style halign=center
 www.mooseframework.org
 
+!--
+
+!style halign=center fontsize=150%
+[Tutorial 3: Code Verification](https://mooseframework.inl.gov/getting_started/examples_and_tutorials/tutorial03_verification)
+
 !---
 
 !include tutorial03_contents.md
@@ -34,16 +39,6 @@ www.mooseframework.org
 !---
 
 !include tutorial03_mms.md
-
-!---
-
-# Resources
-
-!style halign=center fontsize=medium
-www.mooseframework.org/getting_started/examples_and_tutorials/tutorial03_verification
-
-!style halign=center fontsize=medium
-www.mooseframework.org/workshop/verification
 
 !---
 
