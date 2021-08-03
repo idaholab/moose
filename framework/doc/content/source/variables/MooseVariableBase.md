@@ -39,7 +39,7 @@ multi-component finite element variables. This is useful for instance in the
 `Assembly` class where we can abstract the coupling matrix entries or in
 Jacobian computing
 objects like `Kernels` when we want to fetch the numerical ID of the variable
-using `coupled`. Moreoever, this design structure mirrors that of the `FE`
+using `coupled`. Moreover, this design structure mirrors that of the `FE`
 design in LibMesh, where `FEAbstract` is an abstract base class that implements
 all methods independent of `FE` type and the class
 template `FEGenericBase<T>` implements the type dependent methods analogous to
@@ -54,7 +54,7 @@ single-component are instantiated with the template argument `Real`; these hold
 variables of finite element families `LAGRANGE`, `MONOMIAL`, `HERMITE`,
 etc. Multi-component vector finite element variables are instantiated with the
 template argument `RealVectorValue` and currently encompass the finite element
-familes `NEDELEC_ONE` and `LAGRANGE_VEC`. The former is useful for
+families `NEDELEC_ONE` and `LAGRANGE_VEC`. The former is useful for
 electromagnetic applications or for general PDEs that involve a curl
 operation. The latter is potentially useful for tensor mechanic or Navier-Stokes
 simulations where historically displacement or velocity variables have been
@@ -102,8 +102,8 @@ These getter methods ultimately query different map containers in the `VariableW
 ### SubProblem
 
 Another common interface object member is `_subproblem`. `_subproblem` has the
-following acessors methods which take `THREAD_ID` and a `std::string` variable
-name as arguments (note that acessors through variable IDs do not exist through
+following accessors methods which take `THREAD_ID` and a `std::string` variable
+name as arguments (note that accessors through variable IDs do not exist through
 `SubProblem`):
 
 - `getVariable`: returns a reference to a `MooseVariableFEBase`. Useful when access
