@@ -46,7 +46,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _Fbar(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _Fbar(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _Fbar_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _state_var(declareProperty<std::vector<Real>>(_base_name + "state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
