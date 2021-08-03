@@ -113,17 +113,17 @@ SubChannel1PhaseProblem::initialSetup()
   ExternalProblem::initialSetup();
 
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
-  _mdot_soln = new SolutionHandle(getVariable(0, "mdot"));
-  _SumWij_soln = new SolutionHandle(getVariable(0, "SumWij"));
-  _P_soln = new SolutionHandle(getVariable(0, "P"));
-  _DP_soln = new SolutionHandle(getVariable(0, "DP"));
-  _h_soln = new SolutionHandle(getVariable(0, "h"));
-  _T_soln = new SolutionHandle(getVariable(0, "T"));
-  _rho_soln = new SolutionHandle(getVariable(0, "rho"));
-  _mu_soln = new SolutionHandle(getVariable(0, "mu"));
-  _S_flow_soln = new SolutionHandle(getVariable(0, "S"));
-  _w_perim_soln = new SolutionHandle(getVariable(0, "w_perim"));
-  _q_prime_soln = new SolutionHandle(getVariable(0, "q_prime"));
+  _mdot_soln = new SolutionHandle(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
+  _SumWij_soln = new SolutionHandle(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
+  _P_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE));
+  _DP_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE_DROP));
+  _h_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTHALPY));
+  _T_soln = new SolutionHandle(getVariable(0, SubChannelApp::TEMPERATURE));
+  _rho_soln = new SolutionHandle(getVariable(0, SubChannelApp::DENSITY));
+  _mu_soln = new SolutionHandle(getVariable(0, SubChannelApp::VISCOSITY));
+  _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTROPY));
+  _w_perim_soln = new SolutionHandle(getVariable(0, SubChannelApp::WETTED_PERIMETER));
+  _q_prime_soln = new SolutionHandle(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
 }
 
 SubChannel1PhaseProblem::~SubChannel1PhaseProblem()

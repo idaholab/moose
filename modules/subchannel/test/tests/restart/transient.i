@@ -26,31 +26,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-[]
-
 [Modules]
   [FluidProperties]
     [water]
@@ -59,7 +34,7 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
