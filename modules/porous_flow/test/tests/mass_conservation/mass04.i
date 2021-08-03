@@ -308,7 +308,6 @@
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'initial timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
 []

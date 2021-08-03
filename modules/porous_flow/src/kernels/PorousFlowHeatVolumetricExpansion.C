@@ -26,6 +26,8 @@ PorousFlowHeatVolumetricExpansion::validParams()
                         "true for related Kernels and Materials");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Energy-density*rate_of_solid_volumetric_expansion.  The "
                              "energy-density is lumped to the nodes");
   return params;

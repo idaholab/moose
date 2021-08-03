@@ -86,12 +86,12 @@ def rehbinder(r):
     free_u = thermal_expansion * Tref * r0 * free_uhat * (1 + poisson) / (1 - poisson) # Corrected Eqn(16)
     return (T, P, fixed_u, free_u)
 
-def moose(fn):
+def moose(fn, rcol, datacol):
     try:
         f = open(fn)
         data = f.readlines()[1:-1]
-        data = [map(float, d.strip().split(",")) for d in data]
-        data = ([d[0] for d in data], [d[4] for d in data])
+        data = [list(map(float, d.strip().split(","))) for d in data]
+        data = ([d[rcol] for d in data], [d[datacol] for d in data])
         f.close()
     except:
         sys.stderr.write("Cannot read " + fn + ", or it contains erroneous data\n")
@@ -99,13 +99,13 @@ def moose(fn):
     return data
 
 mooser = [0.1 * i for i in range(1, 11)]
-fixedT = moose("gold/fixed_outer_T_0001.csv")
-fixedP = moose("gold/fixed_outer_P_0001.csv")
-fixedu = moose("gold/fixed_outer_U_0001.csv")
-freeu = moose("gold/free_outer_U_0001.csv")
+fixedT = moose("gold/fixed_outer_T_0001.csv", 0, 4)
+fixedP = moose("gold/fixed_outer_P_0001.csv", 0, 4)
+fixedu = moose("gold/fixed_outer_U_0001.csv", 0, 4)
+freeu = moose("gold/free_outer_U_0001.csv", 0, 4)
 
 rpoints = np.arange(0.1, 1.0, 0.01)
-expected = zip(*[rehbinder(r) for r in rpoints])
+expected = list(zip(*[rehbinder(r) for r in rpoints]))
 
 plt.figure()
 plt.plot(rpoints, expected[0], 'k-', linewidth = 3.0, label = 'expected')

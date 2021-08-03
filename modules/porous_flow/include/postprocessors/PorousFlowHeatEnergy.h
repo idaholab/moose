@@ -33,6 +33,13 @@ protected:
   /// Number of fluid phases
   const unsigned int _num_phases;
 
+  /// base name used in the Tensor Mechanics strain calculator
+  const std::string _base_name;
+  /// Whether there is a Material called _base_name_total_strain
+  const bool _has_total_strain;
+  /// Value of total strain calculated by a Tensor Mechanics strain calculator, if it exists, otherwise nullptr
+  const MaterialProperty<RankTwoTensor> * const _total_strain;
+
   /// Whether fluid is present
   const bool _fluid_present;
 

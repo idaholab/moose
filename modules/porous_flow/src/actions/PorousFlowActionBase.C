@@ -443,7 +443,7 @@ PorousFlowActionBase::addNearestQpMaterial()
 
 void
 PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName> & displacements,
-                                                  bool consistent_with_displaced_mesh)
+                                                  const std::string & base_name)
 {
   if (_current_task == "add_material")
   {
@@ -453,7 +453,8 @@ PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName
     std::string material_name = "PorousFlowActionBase_VolumetricStrain";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("displacements") = displacements;
-    params.set<bool>("consistent_with_displaced_mesh") = consistent_with_displaced_mesh;
+    if (!base_name.empty())
+      params.set<std::string>("base_name") = base_name;
     _problem->addMaterial(material_type, material_name, params);
   }
 }

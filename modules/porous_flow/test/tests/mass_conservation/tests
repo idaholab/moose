@@ -37,7 +37,7 @@
     threading = '!pthreads'
     requirement = 'PorousFlow shall conserve mass in a material with impermeable boundaries that is compressed mechanically'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
-    issues = '#13155'
+    issues = '#13155 #18324'
   [../]
   [./mass05]
     type = 'CSVDiff'
@@ -93,5 +93,35 @@
     requirement = 'If the user enters a PorousFlow variable number that is not less than the number of PorousFlow variables, PorousFlow shall produce an appropriate error message and exit'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
+  [../]
+  [./mass11]
+    type = 'CSVDiff'
+    input = 'mass11.i'
+    csvdiff = 'mass11_csv.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall conserve mass in a material with impermeable boundaries that is allowed to expand mechanically while being injected with fluid'
+    design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
+    issues = '#18324'
+  [../]
+  [./mass12]
+    type = 'CSVDiff'
+    input = 'mass12.i'
+    csvdiff = 'mass12_csv.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall conserve mass in an annular material with impermeable boundaries that is compressed verticaly'
+    design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
+    issues = '#18324'
+  [../]
+  [./mass13]
+    type = 'CSVDiff'
+    input = 'mass13.i'
+    csvdiff = 'mass13_csv.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall conserve mass in an annular material with impermeable boundaries that is compressed radially'
+    design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
+    issues = '#18324'
   [../]
 []

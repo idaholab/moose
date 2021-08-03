@@ -161,6 +161,8 @@ PorousFlowUnsaturated::addKernels()
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
+    if (!_base_name.empty())
+      params.set<std::string>("base_name") = _base_name;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -306,7 +308,7 @@ PorousFlowUnsaturated::addMaterials()
 
   if (_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
       _deps.dependsOn(_included_objects, "volumetric_strain_nodal"))
-    addVolumetricStrainMaterial(_coupled_displacements, true);
+    addVolumetricStrainMaterial(_coupled_displacements, _base_name);
 }
 
 void

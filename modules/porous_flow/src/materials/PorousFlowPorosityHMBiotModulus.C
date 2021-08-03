@@ -59,18 +59,18 @@ PorousFlowPorosityHMBiotModulus::computeQpProperties()
   const unsigned qp_to_use =
       (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
 
-  const Real denom = 1.0 + _vol_strain_rate_qp[qp_to_use] * _dt;
-  _porosity[_qp] =
-      (_porosity_old[_qp] * std::exp(-((*_pf)[_qp] - _pf_old[_qp]) / _fluid_bulk_modulus) +
-       ((*_pf)[_qp] - _pf_old[_qp]) / _biot_modulus +
-       _biot * ((*_vol_strain_qp)[qp_to_use] - _vol_strain_qp_old[qp_to_use])) /
-      denom;
+  const Real denom = (1.0 + _vol_strain_rate_qp[qp_to_use] * _dt + _vol_strain_qp_old[qp_to_use]);
+  const Real s_p = _porosity_old[_qp] * (1 + _vol_strain_qp_old[qp_to_use]);
+  _porosity[_qp] = (s_p * std::exp(-((*_pf)[_qp] - _pf_old[_qp]) / _fluid_bulk_modulus) +
+                    ((*_pf)[_qp] - _pf_old[_qp]) / _biot_modulus +
+                    _biot * ((*_vol_strain_qp)[qp_to_use] - _vol_strain_qp_old[qp_to_use])) /
+                   denom;
 
   _dporosity_dvar[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
     _dporosity_dvar[_qp][v] =
         (*_dpf_dvar)[_qp][v] *
-        (-_porosity_old[_qp] * std::exp(-((*_pf)[_qp] - _pf_old[_qp]) / _fluid_bulk_modulus) /
+        (-s_p * std::exp(-((*_pf)[_qp] - _pf_old[_qp]) / _fluid_bulk_modulus) /
              _fluid_bulk_modulus +
          1.0 / _biot_modulus) /
         denom;

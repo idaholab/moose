@@ -114,6 +114,9 @@
   [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   []
+  [total_strain]
+    type = ComputeSmallStrain
+  []
   [vol_strain]
     type = PorousFlowVolumetricStrain
   []

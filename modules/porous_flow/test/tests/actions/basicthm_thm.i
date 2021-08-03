@@ -1,4 +1,4 @@
-# PorousFlowBasicTHM action with coupling_type = ThermoHydroMechanicalGenerator
+# PorousFlowBasicTHM action with coupling_type = ThermoHydroMechanical
 
 [Mesh]
   [gen]
