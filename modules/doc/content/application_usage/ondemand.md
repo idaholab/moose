@@ -4,13 +4,14 @@
 
 ## Access
 
-Idaho National Lab's Open OnDemand instance can be accessed externally via https://hpcondemand.inl.gov/ with your INL HPC username and pin + token or internally at https://ondemand.hpc.inl.gov with your INL HPC username and password.
+Idaho National Lab's Open OnDemand instance can be accessed externally via [hpcondemand.inl.gov](https://hpcondemand.inl.gov/) with your INL HPC username and pin + token or internally at [ondemand.hpc.inl.gov](https://ondemand.hpc.inl.gov) with your INL HPC username and password.
 
 Once authenticated in the OnDemand system, the top navigation bar has a menu item "NCRC". Clicking on this will show a dropdown menu that is populated with the NCRC apps that you have been granted level 1 access to. The following documentation is applicable for each level 1 NCRC application.
 
 ## Submission and Job Information
 
 ### Specifying a Project
+
 Every job submission is required to have a project specified. This is normally entered with the PBS "-P" option. However, you do not need to enter "-P" here, just the project name. Project names must be selected from the list on [HPC Web](http://hpcweb.hpc.inl.gov/home/pbs#specifying-a-project). If more than one project name is appropriate, use your best judgment to choose the most applicable project name. If no project name is available that is applicable to your job, use one of the general-purpose technical area job names, e.g., “ne_gen” for nuclear energy applications.
 
 ### Input File
@@ -25,11 +26,13 @@ You do not need the `app-opt -i` and you need the full path to your equivalent o
 ## Advanced Code and Input Settings
 
 ### Specific Version Hash
+
 This option allows you to run a specific build of the herd code. To get a list of the different version hashes that are allowed here, you can open a terminal on the appropriate cluster and run `module spider APP` and you will be presented with multiple versions of each herd application. 
 
 To get more information about each build, put `--help` or `-h` in the advanced parameters field below. Using the `--help` or `-h` flag will print the command help information to your output file and return.
 
 ### Advanced Parameters
+
 By default, your submission of this forms creates a basic submission command that gets submitted to the requested 
 cluster.
 
@@ -49,9 +52,11 @@ You are allowed to put more than one in this box. Everything that you put in thi
 To get a full list and more explanation on these command line options, please see the [command line usage documentation](https://mooseframework.inl.gov/application_usage/command_line_usage.html).
 
 ## Working Directory Information
+
 By default, your working directory is set to the same directory where your input file is located. You can change this if you would prefer a different directory by checking the checkbox and entering the new directory. You can also use the "Select Directory" button to get a file dialog box to select the directory instead of typing it out by hand.
 
 ## HPC Information
+
 The HPC information section is an interactive form to create your scheduler submission.
 
 - Select the cluster you wish to run on. The amount of resources and the time you may request for your submission for will depend on the cluster.
@@ -67,6 +72,7 @@ The HPC information section is an interactive form to create your scheduler subm
 | Sawtooth | 48                 | 168          |
 
 ### Advanced HPC Submission Settings
+
 By default, the scheduler decides how much memory to assign to the job if the amount of memory is not explicity provided. You can change this default behavior by clicking the "Show advanced HPC submission settings" checkbox and entering the amount of memory. 
 
 You can also select the max amount of memory for a node if you would like to use all of a node. Selecting all of the cores for a node also provides the max amount of memory.
