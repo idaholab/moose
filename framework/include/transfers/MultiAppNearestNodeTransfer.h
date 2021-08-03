@@ -98,10 +98,13 @@ protected:
   std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 
 private:
+  /// Target local nodes for a receiving nodal variable
+  std::vector<Node *> _target_local_nodes;
+
   /**
    * Get the local nodes on the target boundary for the transfer
    * @param to_problem_id index of the problem transfer is sending to
    * @return target local nodes
    */
-  std::vector<Node *> getTargetLocalNodes(const unsigned int to_problem_id);
+  const std::vector<Node *> & getTargetLocalNodes(const unsigned int to_problem_id);
 };
