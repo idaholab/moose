@@ -17,6 +17,9 @@ Content:
     large_media:
         root_dir: ${MOOSE_DIR}/large_media
         content:
+            - tutorials/tutorial03_verification/*
+            - tutorials/darcy_thermo_mech/*
+            - tutorials/INL_poster_40x30.png
             - python/mms/*
 Renderer:
     type: MooseDocs.base.RevealRenderer
