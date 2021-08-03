@@ -225,6 +225,11 @@ velocity_interp_method='rc'
     mu = ${mu}
     momentum_component = y
   []
+  [symmetry_pressure]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
