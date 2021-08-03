@@ -224,8 +224,11 @@ protected:
   Moose::CoordinateSystemType getBlockCoordSystem();
 
 private:
-  /// Set of block ids supplied by the user via the input file (for error reporting)
+  /// Set of block ids supplied by the user via the input file (for error checking)
   std::set<SubdomainID> _blk_ids;
+
+  /// Vector of block ids supplied by the user via the input file (for error reporting)
+  std::vector<SubdomainID> _vec_ids;
 
   /// Vector the block names supplied by the user via the input file
   std::vector<SubdomainName> _blocks;

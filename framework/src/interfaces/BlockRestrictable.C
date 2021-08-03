@@ -94,13 +94,13 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blocks = moose_object->getParam<std::vector<SubdomainName>>("block");
 
     // Get the IDs from the supplied names
-    std::vector<SubdomainID> vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
+    _vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
 
-    // Store the IDs, handling ANY_BLOCK_ID if supplied
+    // Store the IDs in a set, handling ANY_BLOCK_ID if supplied
     if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end())
       _blk_ids.insert(Moose::ANY_BLOCK_ID);
     else
-      _blk_ids.insert(vec_ids.begin(), vec_ids.end());
+      _blk_ids.insert(_vec_ids.begin(), _vec_ids.end());
   }
 
   // When 'blocks' is not set and there is a "variable", use the blocks from the variable
@@ -146,9 +146,20 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "the following block ids do not exist on the mesh:";
+      auto sep = "";
+      msg << "the following blocks (ids) do not exist on the mesh:";
       for (const auto & id : diff)
-        msg << " " << id;
+      {
+        if (_blk_name.size() > 0)
+        {
+          auto & name =
+              _blocks.at(std::find(_vec_ids.begin(), _vec_ids.end(), id) - _vec_ids.begin());
+          msg << sep << " " << name << " (" << id << ")";
+        }
+        else
+          msg << sep << " " << id;
+        sep = ",";
+      }
       moose_object->paramError("block", msg.str());
     }
   }

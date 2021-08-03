@@ -90,14 +90,14 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
     _boundary_names = moose_object->getParam<std::vector<BoundaryName>>("boundary");
 
     // Get the IDs from the supplied names
-    std::vector<BoundaryID> vec_ids = _bnd_mesh->getBoundaryIDs(_boundary_names, true);
+    _vec_ids = _bnd_mesh->getBoundaryIDs(_boundary_names, true);
 
     // Store the IDs, handling ANY_BOUNDARY_ID if supplied
     if (std::find(_boundary_names.begin(), _boundary_names.end(), "ANY_BOUNDARY_ID") !=
         _boundary_names.end())
       _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
     else
-      _bnd_ids.insert(vec_ids.begin(), vec_ids.end());
+      _bnd_ids.insert(_vec_ids.begin(), _vec_ids.end());
   }
 
   // Produce error if the object is not allowed to be both block and boundary restricted
@@ -124,12 +124,12 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
     if (_bnd_nodal)
     {
       valid_ids = &_bnd_mesh->meshNodesetIds();
-      message_ptr = "node set";
+      message_ptr = "node sets";
     }
     else
     {
       valid_ids = &_bnd_mesh->meshSidesetIds();
-      message_ptr = "side set";
+      message_ptr = "side sets";
     }
 
     std::vector<BoundaryID> diff;
@@ -143,10 +143,20 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "the following " << message_ptr << " ids do not exist on the mesh:";
+      auto sep = "";
+      msg << "the following " << message_ptr << " (ids) do not exist on the mesh:";
       for (const auto & id : diff)
-        msg << " " << id;
-
+      {
+        if (_boundary_names.size() > 0)
+        {
+          auto & name =
+              _boundary_names.at(std::find(_vec_ids.begin(), _vec_ids.end(), id) - _vec_ids.begin());
+          msg << sep << " " << name << " (" << id << ")";
+        }
+        else
+          msg << sep << " " << id;
+        sep = ",";
+      }
       if (!_bnd_nodal)
         // Diagnostic message
         msg << "\n\nMOOSE distinguishes between \"node sets\" and \"side sets\" depending on "
