@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#17900'
+  design = 'NSInitialCondition.md'
+  [ns_ics]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    requirement = 'The system shall be able to set initial conditions for fluid flow variables.'
+  []
+  [cns_ics]
+    type = 'Exodiff'
+    input = 'cns_test.i'
+    exodiff = 'cns_test_out.e'
+    requirement = 'The system shall be able to set intial conditions for porous flow variables.'
+  []
+[]
