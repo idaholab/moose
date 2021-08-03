@@ -35,7 +35,8 @@ JSONOutput::validParams()
 JSONOutput::JSONOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _reporter_data(_problem_ptr->getReporterData()),
-    _one_file_per_timestep(getParam<bool>("one_file_per_timestep"))
+    _one_file_per_timestep(getParam<bool>("one_file_per_timestep")),
+    _json(declareRestartableData<nlohmann::json>("json_out_str"))
 {
 }
 
@@ -162,4 +163,18 @@ JSONOutput::output(const ExecFlagType & type)
     std::ofstream out(filename().c_str());
     out << std::setw(4) << _json << std::endl;
   }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, nlohmann::json & json, void * /*context*/)
+{
+  stream << json;
+}
+
+template <>
+void
+dataLoad(std::istream & stream, nlohmann::json & json, void * /*context*/)
+{
+  stream >> json;
 }
