@@ -3,6 +3,19 @@
 #include "AppFactory.h"
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
+#include "SubChannelSyntax.h"
+
+const std::string SubChannelApp::MASS_FLOW_RATE = "mdot";
+const std::string SubChannelApp::ENTROPY = "S";
+const std::string SubChannelApp::SUM_CROSSFLOW = "SumWij";
+const std::string SubChannelApp::PRESSURE = "P";
+const std::string SubChannelApp::PRESSURE_DROP = "DP";
+const std::string SubChannelApp::ENTHALPY = "h";
+const std::string SubChannelApp::TEMPERATURE = "T";
+const std::string SubChannelApp::DENSITY = "rho";
+const std::string SubChannelApp::VISCOSITY = "mu";
+const std::string SubChannelApp::WETTED_PERIMETER = "w_perim";
+const std::string SubChannelApp::LINEAR_HEAT_RATE = "q_prime";
 
 InputParameters
 SubChannelApp::validParams()
@@ -26,6 +39,7 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"SubChannelApp"});
 
   /* register custom execute flags, action syntax, etc. here */
+  SubChannel::associateSyntax(s, af);
 }
 
 void
