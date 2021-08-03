@@ -1,4 +1,4 @@
-# SpiralAnularMeshGenerator
+# SpiralAnnularMeshGenerator
 
 !syntax description /Mesh/SpiralAnnularMeshGenerator
 
