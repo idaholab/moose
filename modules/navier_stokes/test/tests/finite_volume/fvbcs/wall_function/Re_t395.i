@@ -3,13 +3,7 @@ von_karman_const = 0.41
 H = 1 #halfwidth of the channel
 L = 150
 
-#Re_t = 395
 Re = 13700
-
-#rho = 1
-#mu = 1
-#nu = 1
-#momentum_force = ${fparse Re_t * Re_t * nu * nu / H / H / H}  #needs periodic BC's
 
 rho = 1
 bulk_u = 1
@@ -33,19 +27,6 @@ velocity_interp_method='rc'
   []
 []
 
-#[Mesh]
-#  [gen]
-#    type = GeneratedMeshGenerator
-#    dim = 2
-#    xmin = 0
-#    xmax = ${L}
-#    ymin = 0
-#    ymax = ${H}  #Channel is 2H tall, half channel H for symmetry
-#    nx = 40
-#    ny = 3
-#  []
-#[]
-
 [Problem]
   fv_bcs_integrity_check = false
 []
@@ -53,11 +34,11 @@ velocity_interp_method='rc'
 [Variables]
   [u]
     type = INSFVVelocityVariable
-    initial_condition = 0
+    initial_condition = 1e-6
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 0
+    initial_condition = 1e-6
   []
   [pressure]
     type = INSFVPressureVariable
