@@ -103,25 +103,28 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseMatProps(
   if (order > _derivative_order)
     return;
 
+  // FParser symbol we are deriving w.r.t.
+  auto derivative_var = _derivative_symbol_table[var];
+  auto derivative_symbol = _symbol_names[derivative_var];
+
   // generate parent material property descriptors derivatives
   MatPropDescriptorList mpd_list;
   for (const auto & parent_mpd : parent_mpd_list)
   {
     // if this material property does not depend on the variable we are deriving w.r.t. skip it
-    if (!parent_mpd.dependsOn(_arg_names[var]))
+    if (!parent_mpd.dependsOn(derivative_symbol))
       continue;
 
     // otherwise add it to _mat_prop_descriptors
     FunctionMaterialPropertyDescriptor<is_ad> mpd(parent_mpd);
-    mpd.addDerivative(_symbol_names[_derivative_symbol_table[var]]);
+    mpd.addDerivative(derivative_symbol);
 
     // create a new symbol name for it
     std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
     mpd.setSymbolName(newvarname);
 
     // add the new mpd and register it as the current variable derivative of the parent mpd
-    _bulk_rules.emplace_back(
-        parent_mpd.getSymbolName(), _symbol_names[_derivative_symbol_table[var]], newvarname);
+    _bulk_rules.emplace_back(parent_mpd.getSymbolName(), derivative_symbol, newvarname);
 
     // append to list
     mpd_list.push_back(mpd);
