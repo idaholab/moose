@@ -47,7 +47,7 @@ Here, $T_x$, $T_y$, $T_z$ are the transformation matrices about x-, y- and z-axi
              \end{bmatrix}}
 \end{aligned}
 \end{equation}
-where, $\alpha$, $\beta$ and $\theta$ are the rotation angles. Note that, to reduce the computational cost, only the components required for the updated hill constants are computed from the rotated Hill tensor.
+where, $\alpha$, $\beta$ and $\theta$ are the rotation angles.
 
 ## Temperature dependency and large deformation kinematics
 
@@ -57,7 +57,7 @@ The Hill coefficients vary depending on temperature (due to texture) and dependi
 
 where six piecewise linear functions are created to define the material directional creep dependency with temperature.
 
-In addition, or independently, the user can choose to account for finite strain rotation to update these coefficients. To do so, the user needs to set the input argument `use_large_rotation` to true, which will trigger the use of [eq:rotate_hill_tensor] to account for the rotation. Updating of directional coefficients with finite strain rotation kinematics is stronly encouraged when the material is expected to suffer large deformation (e.g. ballooning) or to undergo rigid body rotation (e.g. significant bending of a beam or pipe).
+In addition, or independently, the user can choose to account for finite strain rotation to update these coefficients. To do so, the user needs to set the input argument `use_large_rotation` to true, which will trigger the use of [eq:rotate_hill_tensor] to account for the rotation. Updating of directional coefficients with finite strain rotation kinematics is stronly encouraged when the material is expected to suffer large deformation (e.g. ballooning) or to undergo rigid body rotation (e.g. significant bending of a beam or pipe). In order to make use of the transformed full rotation tensor in constitutive models, such as, [ADHillCreepStressUpdate](/ADHillCreepStressUpdate.md), an additional flag to the input file's block needs to be passed: `use_transformation = true`.
 
 !listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/3d_bar_orthotropic_90deg_rotation_ad_creep_z.i block=Materials/hill_tensor
 

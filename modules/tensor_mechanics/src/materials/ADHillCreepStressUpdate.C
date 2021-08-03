@@ -230,9 +230,7 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
     const Real & L = _hill_constants[_qp][3];
     const Real & M = _hill_constants[_qp][4];
     const Real & N = _hill_constants[_qp][5];
-    // Reference for plastic multiplier:
-    // Finite element modelling investigation of the effects of cladding texture on creep in PWR
-    // fuel pins Anna Antoniou, Masters degree, 2015.
+
     inelasticStrainIncrement(0, 0) =
         prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
     inelasticStrainIncrement(1, 1) =

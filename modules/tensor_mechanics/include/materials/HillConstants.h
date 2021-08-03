@@ -11,8 +11,7 @@
 
 #include "ADMaterial.h"
 #include "Function.h"
-#include "Eigen/Dense"
-#include "Eigen/Eigenvalues"
+
 /**
  * This class defines a Hill tensor material object with a given base name.
  */

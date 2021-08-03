@@ -175,7 +175,6 @@
   nl_abs_tol = 1e-11
   nl_max_its = 50
 
-  # automatic_scaling = true
   l_tol = 1e-4
   l_max_its = 50
   start_time = 0.0
