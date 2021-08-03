@@ -5,8 +5,6 @@
 
 ## Access
 
-Idaho National Lab's Open OnDemand instance can be accessed externally via https://hpcondemand.inl.gov/ with your INL HPC username and pin + token or internally at https://ondemand.hpc.inl.gov with your INL HPC username and password.
-
 Idaho National Lab's Open OnDemand instance can be accessed externally via [hpcondemand.inl.gov](https://hpcondemand.inl.gov/) with your INL HPC username and pin + token or internally at [ondemand.hpc.inl.gov](https://ondemand.hpc.inl.gov) with your INL HPC username and password.
 
 Once authenticated in the OnDemand system, the top navigation bar has a menu item "NCRC". Clicking on this will show a dropdown menu that is populated with the NCRC apps that you have been granted level 1 access to. The following documentation is applicable for each level 1 NCRC application.
