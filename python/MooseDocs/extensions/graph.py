@@ -66,7 +66,7 @@ class GraphExtension(command.CommandExtension):
         if common.has_tokens(ast, 'ScatterToken', 'HistogramToken'):
             renderer = self.translator.renderer
             if isinstance(renderer, renderers.HTMLRenderer):
-                renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", head=True, puid=page.uid)
+                renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", page, head=True)
 
 class GraphScatter(command.CommandComponent):
     """

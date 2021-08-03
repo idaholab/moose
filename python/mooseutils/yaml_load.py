@@ -31,10 +31,10 @@ class IncludeYamlFile(object):
             raise IOError(msg.format(filename, line, parent))
 
         with open(filename, 'r') as f:
-            content = yaml.load(f, lambda s: Loader(s, include=include))
+            content = yaml.load(f, lambda s: Loader(s, root, include))
             keys = items[1:] if len(items) > 1 else []
             for key in keys:
-                content = content[key]
+                content = content[int(key) if isinstance(content, list) else key]
 
         self.content = content
         self.items = items

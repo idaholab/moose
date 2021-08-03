@@ -18,15 +18,7 @@ def make_extension(**kwargs):
 
 def find_heading(page, id_=None):
     """Helper for returning a copy of the heading tokens."""
-    h = None
-    if id_ is None:
-        h = page.get('title')
-    else:
-        data = page.get('headings', dict())
-        h = data.get(id_, None)
-
-    if h is not None:
-        return h.copy()
+    return page.get('title') if id_ is None else page.get('headings', dict()).get(id_)
 
 class HeadingExtension(Extension):
     """

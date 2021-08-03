@@ -22,14 +22,6 @@ from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
 
-def create_directory(location):
-    """Helper for creating a directory."""
-    with MooseDocs.base.Executioner.LOCK:
-        dirname = os.path.dirname(location)
-        if dirname and not os.path.isdir(dirname):
-            LOG.debug('CREATE DIR %s', dirname)
-            os.makedirs(dirname)
-
 class Renderer(mixins.ConfigObject, mixins.ComponentObject):
     """
     Base renderer for converting AST to an output format.
@@ -169,13 +161,13 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         This is called by the Tranlator object.
         """
         if isinstance(page, pages.Source):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
             LOG.debug('WRITE %s-->%s', page.source, page.destination)
             with codecs.open(page.destination, 'w', encoding='utf-8') as fid:
                 fid.write(result.write())
 
         elif isinstance(page, pages.File):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
             LOG.debug('COPY: %s-->%s', page.source, page.destination)
             if not os.path.exists(page.source):
                 LOG.error('Unknown file: %s', page.source)
@@ -183,7 +175,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
                 shutil.copyfile(page.source, page.destination)
 
         elif isinstance(page, pages.Directory):
-            create_directory(page.destination)
+            self._create_directory(page.destination)
 
         elif isinstance(page, pages.Text):
             pass
@@ -205,6 +197,14 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             msg = "The component object {} does not have a {} method."
             raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
         return getattr(component, self.METHOD)
+
+    def _create_directory(self, location):
+        """Helper for creating a directory."""
+        with self.translator.executioner._lock:
+            dirname = os.path.dirname(location)
+            if dirname and not os.path.isdir(dirname):
+                LOG.debug('CREATE DIR %s', dirname)
+                os.makedirs(dirname)
 
     def __getFunction(self, token):
         """
@@ -235,9 +235,7 @@ class HTMLRenderer(Renderer):
 
     def __init__(self, *args, **kwargs):
         Renderer.__init__(self, *args, **kwargs)
-        self.__head_javascript = Storage()
-        self.__javascript = Storage()
-        self.__css = Storage()
+        self.__global_files = dict()
 
         if self.get('google_analytics', False):
             self.addJavaScript('google_analytics', 'js/google_analytics.js')
@@ -249,24 +247,34 @@ class HTMLRenderer(Renderer):
         html.Tag(head, 'meta', charset="UTF-8", close=False)
         return html.Tag(root, 'body')
 
-    def addJavaScript(self, name, filename, location='_end', head=False, puid=None, **kwargs):
-        """Add a javascript dependency."""
-        key = (name, puid)
-        if head:
-            if key not in self.__head_javascript:
-                self.__head_javascript.add(key, (filename, kwargs), location)
-        elif key not in self.__javascript:
-            self.__javascript.add(key, (filename, kwargs), location)
+    def addJavaScript(self, name, filename, page=None, head=False, **kwargs):
+        """
+        Add a javascript dependency. Do not attempt to call this function to add a global renderer
+        file, i.e., with `page=None`, from within the read/tokenize/render/write methods.
+        """
+        key = (name, 'head_javascript' if head else 'javascript')
 
-    def addCSS(self, name, filename, location='_end', puid=None, **kwargs):
-        """Add a CSS dependency."""
-        key = (name, puid)
-        if key not in self.__css:
-            self.__css.add(key, (filename, kwargs), location)
+        # Add a global script to be included in all HTML pages, otherwise add a per-page script
+        if page is None:
+            self.__global_files[key] = (filename, kwargs)
+        else:
+            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
+
+    def addCSS(self, name, filename, page=None, **kwargs):
+        """
+        Add a CSS dependency. Do not attempt to call this function to add a global renderer file,
+        i.e., with `page=None`, from within the read/tokenize/render/write methods.
+        """
+        key = (name, 'css')
+
+        # Add a global style sheet to be included in all HTML pages, otherwise add a per-page sheet
+        if page is None:
+            self.__global_files[key] = (filename, kwargs)
+        else:
+            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
 
     def postRender(self, page, result):
         """Insert CSS/JS dependencies into html node tree."""
-        root = result.root
 
         def rel(path):
             """Helper to create relative paths for js/css dependencies."""
@@ -274,6 +282,8 @@ class HTMLRenderer(Renderer):
                 return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
+        # get the parent nodes to tag
+        root = result.root
         head = moosetree.find(root, lambda n: n.name == 'head')
         body = moosetree.find(root, lambda n: n.name == 'body')
 
@@ -283,21 +293,17 @@ class HTMLRenderer(Renderer):
                      sizes="16x16 32x32 64x64 128x128")
 
         # Add the extra-css, this is done here to make sure it shows up last
+        files = {**self.__global_files, **page.get('renderer_files', dict())}
         for i, css in enumerate(self.get('extra-css')):
-            key = 'extra-css-{}'.format(i)
-            if key not in self.__css:
-                self.addCSS(key, css)
+            files[('extra-css-{}'.format(i), 'css')] = (css, {})
 
-        for (key, puid), (name, kwargs) in self.__css.items():
-            if ((puid is None) or (puid == page.uid)):
+        for (key, context) in sorted(files, key=(lambda f: f[1])):
+            name, kwargs = files.pop((key, context))
+            if context == 'css':
                 html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
-
-        for (key, puid), (name, kwargs)  in self.__head_javascript.items():
-            if ((puid is None) or (puid == page.uid)):
+            elif context == 'head_javascript':
                 html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
-
-        for (key, puid), (name, kwargs)  in self.__javascript.items():
-            if ((puid is None) or (puid == page.uid)):
+            elif context == 'javascript':
                 html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
 
 class MaterializeRenderer(HTMLRenderer):

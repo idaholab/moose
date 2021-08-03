@@ -129,14 +129,13 @@ def create_file_page(name, filename, in_ext):
     else:
         return pages.File(name, source=filename)
 
-def get_files(items, in_ext, git_ls_files=True):
+def get_files(items, in_ext):
     """
     Get a list of files to consider given the content configuration.
     """
 
     filenames = []
     for value in items:
-
         if 'root_dir' not in value:
             LOG.error('The supplied items must be a list of dict items, each with a "root_dir" and '
                       'optionally a "content" entry.')
@@ -195,7 +194,6 @@ def get_content(items, in_ext):
             if dir_key not in nodes:
                 nodes[dir_key] = pages.Directory(dir_key, external=external,
                                                  source=os.path.join(root, dir_key))
-
 
         # Create the file node, if it doesn't already exist. This enforces that the first
         # item in the supplied content lists is the page that is rendered.

@@ -1,0 +1,8 @@
+Content:
+    subsite:
+        root_dir: !include python/MooseDocs/test/subconfig/config.yml Content 0
+        content:
+            - subsite/*
+
+Renderer: !include python/MooseDocs/test/subconfig/config.yml Renderer
+Extensions: !include python/MooseDocs/test/subconfig/config.yml Extensions
