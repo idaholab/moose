@@ -6,3 +6,5 @@
 
 # Steps to Reproduce Bug
 <!-- Describe how the bug could reproduced - input files can be attached if helpful -->
+
+/label ~bug

@@ -7,3 +7,5 @@
 # Possible Enhancement Impact
 <!-- Describe the impact the enhancement may have on existing applications and functionality.
 For example, would a public API change or some existing object internal changes be required? -->
+
+/label ~enhancement
