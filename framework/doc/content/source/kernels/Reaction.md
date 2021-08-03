@@ -20,6 +20,11 @@ parameters. An example block is shown below for a diffusion-reaction equation:
 
 !listing test/tests/fvkernels/fv_coupled_var/coupled.i block=Kernels
 
+!alert note
+There is no AD (automatic differentiation) or FV (finite volume) version of `Reaction`.
+If you wish to use AD / FV, use [ADCoupledForce](/ADCoupledForce.md) /
+[FVCoupledForce](/FVCoupledForce.md) respectively.
+
 !syntax parameters /Kernels/Reaction
 
 !syntax inputs /Kernels/Reaction

@@ -34,7 +34,7 @@ CoupledForce::CoupledForce(const InputParameters & parameters)
 {
   if (_var.number() == _v_var)
     mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
-               "consider using Reaction or somethig similar");
+               "consider using the CoefReaction kernel or something similar");
 }
 
 Real
