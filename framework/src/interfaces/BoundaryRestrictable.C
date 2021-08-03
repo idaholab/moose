@@ -149,8 +149,8 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
       {
         if (_boundary_names.size() > 0)
         {
-          auto & name =
-              _boundary_names.at(std::find(_vec_ids.begin(), _vec_ids.end(), id) - _vec_ids.begin());
+          auto & name = _boundary_names.at(std::find(_vec_ids.begin(), _vec_ids.end(), id) -
+                                           _vec_ids.begin());
           msg << sep << " " << name << " (" << id << ")";
         }
         else
