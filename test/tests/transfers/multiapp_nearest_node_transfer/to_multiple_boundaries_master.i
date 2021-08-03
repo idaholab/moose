@@ -9,7 +9,6 @@
   dim = 2
   nx = 4
   ny = 4
-  elem_type = QUAD8
 []
 
 [Variables]
