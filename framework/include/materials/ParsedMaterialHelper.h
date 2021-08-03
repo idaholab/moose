@@ -85,7 +85,11 @@ protected:
   /// The undiffed free energy function parser object.
   SymFunctionPtr _func_F;
 
-  /// variable names used in the expression (depends on the map_mode)
+  /**
+   * Symbol names used in the expression (depends on the map_mode).
+   * We distinguish "symbols" i.e. FParser placeholder names from "variables", which
+   * are MOOSE solution objects
+   */
   std::vector<SymbolName> _symbol_names;
 
   /// convenience typedef for the material property descriptors

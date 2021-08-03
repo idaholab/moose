@@ -42,20 +42,26 @@ template <bool is_ad>
 void
 DerivativeParsedMaterialHelperTempl<is_ad>::functionsPostParse()
 {
-  // set up the list of all FParser symbold to derive w.r.t.
+  // set up the list of all FParser symbols to derive w.r.t.
   auto additional_derivative_symbols =
       this->template getParam<std::vector<SymbolName>>("additional_derivative_symbols");
 
+  // build a list of indices into _symbol_table for all symbols we want to derive w.r.t.
+  // we start with all MOOSE variables, which we _always_ take the derivatives w.r.t.
   _derivative_symbol_table.reserve(_nargs + additional_derivative_symbols.size());
   for (unsigned i = 0; i < _nargs; ++i)
     _derivative_symbol_table.push_back(i);
 
+  // then we add the additional derivative symbols
   for (auto & ads : additional_derivative_symbols)
   {
+    // find the index of the symbol if it exists
     auto it = std::find(_symbol_names.begin(), _symbol_names.end(), ads);
     if (it == _symbol_names.end())
       this->paramError("additional_derivative_symbols", "Invalid symbol name '", ads, "'.");
     auto idx = std::distance(_symbol_names.begin(), it);
+
+    // make sure it is not a MOOSE variable (we already added those) - their index is < nargs
     if (idx < _nargs)
       this->paramError(
           "additional_derivative_symbols",
@@ -63,6 +69,15 @@ DerivativeParsedMaterialHelperTempl<is_ad>::functionsPostParse()
           ads,
           "' is a coupled variable. Derivatives w.r.t. coupled variables are always taken "
           "and they must not be specified again.");
+
+    // check that the user did not specify any duplicates in the additional_derivative_symbols
+    // parameter
+    if (std::count(
+            additional_derivative_symbols.begin(), additional_derivative_symbols.end(), ads) > 1)
+      this->paramError(
+          "additional_derivative_symbols", "Symbol name '", ads, "' was given more than once.");
+
+    // if all checks passed, add the symbol index to the list
     _derivative_symbol_table.push_back(idx);
   }
 
@@ -131,7 +146,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseDerivative(unsigned int var,
   if (order > _derivative_order)
     return;
 
-  // variable we are deriving w.r.t.
+  // FParser symbol we are deriving w.r.t.
   auto derivative_var = _derivative_symbol_table[var];
   auto derivative_symbol = _symbol_names[derivative_var];
 

@@ -72,9 +72,9 @@ public:
   void addDerivative(const SymbolName & symbol);
 
   /**
-   * Check if a material property depends on a given variable.
+   * Check if a material property depends on a given FParser symbol.
    * A dependency is indicated by either directly specifying it, or by requesting a
-   * derivative w.r.t. that variable using the D[x,a] syntax
+   * derivative w.r.t. that symbol using the D[x,a] syntax
    */
   bool dependsOn(const SymbolName & symbol) const;
 
