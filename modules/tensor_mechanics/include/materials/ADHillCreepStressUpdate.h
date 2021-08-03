@@ -127,9 +127,16 @@ protected:
   /// Hill constant material
   const MaterialProperty<std::vector<Real>> & _hill_constants;
 
+  /// Hill tensor, when global axes do not (somehow) align with those of the material
+  /// Example: Large rotation due to rigid body and/or large deformation kinematics
+  const MaterialProperty<DenseMatrix<Real>> & _hill_tensor;
+
   /// Square of the q function for orthotropy
   ADReal _qsigma;
 
   /// 2 * shear modulus
   ADReal _two_shear_modulus;
+
+  /// Whether to use fully transformed Hill's tensor due to rigid body or large deformation kinematic rotation
+  const bool _use_transformation;
 };
