@@ -29,7 +29,10 @@ NSInitialCondition::validParams()
                                          "The name of the pressure variable",
                                          "pressure_variable_name is deprecated, use variable_type");
   MooseEnum variable_types(
-      "ht e Mach pressure rho rhou rhov rhow rho_et specific_volume temperature vel_x vel_y vel_z");
+      NS::specific_total_enthalpy + " " + NS::specific_internal_energy + " " + NS::mach_number +
+      " " + NS::pressure + " " + NS::density + " " + NS::momentum_x + " " + NS::momentum_y + " " +
+      NS::momentum_z + " " + NS::total_energy_density + " " + NS::specific_volume + " " +
+      NS::temperature + " " + NS::velocity_x + " " + NS::velocity_y + " " + NS::velocity_z);
   params.addParam<MooseEnum>(
       "variable_type",
       variable_types,

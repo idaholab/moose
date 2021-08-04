@@ -27,9 +27,15 @@ PNSInitialCondition::validParams()
       "PNSInitialCondition sets intial constant values for any porous flow variable.");
 
   MooseEnum variable_types(
-      "pressure temperature rho rhou rhov rhow superficial_rho superficial_rhou superficial_rhov "
-      "superficial_rhow vel_x vel_y vel_z superficial_vel_x superficial_vel_y superficial_vel_z "
-      "specific_volume Mach ht e rho_et superficial_rho_ht superficial_rho_et");
+      NS::specific_total_enthalpy + " " + NS::specific_internal_energy + " " + NS::mach_number +
+      " " + NS::pressure + " " + NS::density + " " + NS::momentum_x + " " + NS::momentum_y + " " +
+      NS::momentum_z + " " + NS::total_energy_density + " " + NS::specific_volume + " " +
+      NS::temperature + " " + NS::velocity_x + " " + NS::velocity_y + " " + NS::velocity_z + " " +
+      NS::superficial_velocity_x + " " + NS::superficial_velocity_y + " " +
+      NS::superficial_velocity_z + " " + NS::superficial_density + " " +
+      NS::superficial_momentum_x + " " + NS::superficial_momentum_y + " " +
+      NS::superficial_momentum_z + " " + NS::superficial_total_energy_density + " " +
+      NS::superficial_total_enthalpy_density);
   params.addParam<MooseEnum>(
       "variable_type",
       variable_types,
