@@ -91,6 +91,10 @@
   [pf]
     type = PorousFlowEffectiveFluidPressure
   []
+  [total_strain]
+    type = ComputeSmallStrain
+    displacements = disp
+  []
   [volstrain]
     type = PorousFlowVolumetricStrain
     displacements = disp

@@ -175,7 +175,7 @@ class NavigationExtension(Extension):
             else:
                 location = page.destination.replace(dest, home)
 
-            for data in page['search']:
+            for data in page.get('search', list()):
                 url = '{}#{}'.format(location, data['bookmark'])
                 items.append(dict(title=data['title'], text=data['text'], location=url))
 

@@ -182,7 +182,7 @@ with the finite element implementation. However, if the error is reduced at the 
 with decreasing mesh size and timestep size then it is reasonable that the finite element
 formulation and temporal numerical integration are implemented correctly.
 
-[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [mms.md] documentation.
+[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [python/mms.md] documentation.
 
 ### Spatial Convergence
 

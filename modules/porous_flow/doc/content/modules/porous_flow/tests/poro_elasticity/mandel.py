@@ -60,7 +60,7 @@ def expected(x, t):
 
 def get_moose_results(fi):
     f = open(fi)
-    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    data = [list(map(float, line.strip().split(","))) for line in f.readlines()[1:] if line.strip()]
     f.close()
     t = [d[0] for d in data]
     p0 = [d[1] for d in data]

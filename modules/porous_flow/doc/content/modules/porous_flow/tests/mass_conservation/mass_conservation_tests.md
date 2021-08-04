@@ -117,6 +117,19 @@ Here $P$ is the fluid porepressure, which is $P_{0}$ at $t=0$; $K_{f}$ is the fl
 
 PorousFlow produces these results exactly, and, importantly, conserves fluid mass.
 
+Similar tests are run in "RZ" coordinates.
+
+## Mass conservation in a deformable material with a source
+
+A single unit element, with roller BCs on its sides and bottom, is injected with fluid at rate $s$ kg.s$^{-1}$.  Its top is free to move.  
+
+!listing modules/porous_flow/test/tests/mass_conservation/mass11.i
+
+Under these conditions the fluid mass should increase at rate $s$, and the porepressure should increase accordingly.  The total stress $\sigma_{zz}$ should be zero since the top is free to move, so the effective stress should be $\sigma_{zz} = \alpha_{B} P$.  MOOSE produces these results exactly.
+
+Similar tests are run in "RZ" coordinates.
+
+
 ## Mass computation with a saturation threshold in multi-component, multi-phase fluids
 
 The [PorousFlowFluidMass postprocessor](PorousFlowFluidMass.md) may be used to compute the total mass of each component in each phase, as well as the total mass of each component in all phases.  Furthermore, a saturation threshold may be set to  only count the fluid above the threshold.

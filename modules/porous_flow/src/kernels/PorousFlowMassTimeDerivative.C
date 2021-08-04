@@ -28,6 +28,14 @@ PorousFlowMassTimeDerivative::validParams()
                         "is not necessary for simulations involving only linear lagrange elements. "
                         " If you set this to true, you will also want to set the same parameter to "
                         "true for related Kernels and Materials");
+  params.addParam<std::string>(
+      "base_name",
+      "For mechanically-coupled systems, this Kernel will depend on the volumetric strain.  "
+      "base_name should almost always be the same base_name as given to the TensorMechanics object "
+      "that computes strain.  Supplying a base_name to this Kernel but not defining an associated "
+      "TensorMechanics strain calculator means that this Kernel will not depend on volumetric "
+      "strain.  That could be useful when models contain solid mechanics that is not coupled to "
+      "porous flow, for example");
   params.addParam<bool>(
       "multiply_by_density",
       true,
@@ -38,6 +46,8 @@ PorousFlowMassTimeDerivative::validParams()
       "fluid_component", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Derivative of fluid-component mass with respect to time.  Mass "
                              "lumping to the nodes is used.");
   return params;
@@ -51,6 +61,11 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     _num_phases(_dictator.numPhases()),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
     _multiply_by_density(getParam<bool>("multiply_by_density")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _has_total_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain_old(_has_total_strain
+                          ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")
+                          : nullptr),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
     _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")),
@@ -103,8 +118,10 @@ PorousFlowMassTimeDerivative::computeQpResidual()
     mass_old +=
         dens_old * _fluid_saturation_nodal_old[_i][ph] * _mass_frac_old[_i][ph][_fluid_component];
   }
+  const Real strain = (_has_total_strain ? (*_total_strain_old)[_qp].trace() : 0.0);
 
-  return _test[_i][_qp] * (_porosity[_i] * mass - _porosity_old[_i] * mass_old) / _dt;
+  return _test[_i][_qp] * (1.0 + strain) * (_porosity[_i] * mass - _porosity_old[_i] * mass_old) /
+         _dt;
 }
 
 Real
@@ -130,6 +147,8 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
 {
   const unsigned nearest_qp = (_strain_at_nearest_qp ? (*_nearest_qp)[_i] : _i);
 
+  const Real strain = (_has_total_strain ? (*_total_strain_old)[_qp].trace() : 0.0);
+
   // porosity is dependent on variables that are lumped to the nodes,
   // but it can depend on the gradient
   // of variables, which are NOT lumped to the nodes, hence:
@@ -142,7 +161,7 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
   }
 
   if (_i != _j)
-    return _test[_i][_qp] * dmass / _dt;
+    return _test[_i][_qp] * (1.0 + strain) * dmass / _dt;
 
   // As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
   for (unsigned ph = 0; ph < _num_phases; ++ph)
@@ -158,5 +177,5 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
     dmass += dens * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_fluid_component] *
              _dporosity_dvar[_i][pvar];
   }
-  return _test[_i][_qp] * dmass / _dt;
+  return _test[_i][_qp] * (1.0 + strain) * dmass / _dt;
 }

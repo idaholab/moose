@@ -26,11 +26,6 @@
 # The relationship between the constant poroelastic source
 # s (m^3/second/m^3) and the PorousFlow source, S (kg/second/m^3) is
 # S = fluid_density * s = s * exp(porepressure/fluid_bulk)
-#
-# Finally, note that the volumetric strain has
-# consistent_with_displaced_mesh = false
-# which is needed when using the FullySaturated version of the Kernels
-# in order to generate the above results
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -244,7 +239,6 @@
   []
   [vol_strain]
     type = PorousFlowVolumetricStrain
-    consistent_with_displaced_mesh = false
   []
   [ppss]
     type = PorousFlow1PhaseFullySaturated

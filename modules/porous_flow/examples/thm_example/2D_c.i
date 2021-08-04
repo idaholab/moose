@@ -98,7 +98,6 @@
   [mass_water_dot]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
-    use_displaced_mesh = false
     variable = pwater
   []
   [flux_water]
@@ -110,7 +109,6 @@
   [mass_co2_dot]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
-    use_displaced_mesh = false
     variable = sgas
   []
   [flux_co2]
@@ -121,7 +119,6 @@
   []
   [energy_dot]
     type = PorousFlowEnergyTimeDerivative
-    use_displaced_mesh = false
     variable = temp
   []
   [advection]

@@ -19,7 +19,6 @@
       command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe '
       prereq = materialize/barrier
       detail = "using a pipe-based parallel scheme; and"
-      skip = '#15887'
     []
     [queue]
       type = RunCommand
@@ -36,7 +35,6 @@
       command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
       detail = "using a serial scheme;"
     []
-
     [barrier]
       type = RunCommand
       command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
@@ -48,7 +46,6 @@
       command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
       prereq = html/barrier
       detail = "using a pipe-based parallel scheme; and"
-      skip = '#15887'
     []
     [queue]
       type = RunCommand
@@ -76,14 +73,12 @@
       command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
       prereq = latex/barrier
       detail = "using a pipe-based parallel scheme; and"
-      skip = 'WIP'
     []
     [queue]
       type = RunCommand
       command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
       detail = "using a queue-based parallel scheme."
       prereq = latex/pipe
-      skip = 'WIP'
     []
   []
 []
