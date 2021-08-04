@@ -60,6 +60,22 @@
   [results]
     type = StochasticReporter
   []
+  [train_avg]
+    type = EvaluateSurrogate
+    model = GP_avg
+    sampler = train_sample
+    evaluate_std = 'true'
+    parallel_type = ROOT
+    execute_on = final
+  []
+  [cart_avg]
+    type = EvaluateSurrogate
+    model = GP_avg
+    sampler = cart_sample
+    evaluate_std = 'true'
+    parallel_type = ROOT
+    execute_on = final
+  []
 []
 
 [Trainers]
@@ -92,20 +108,6 @@
 []
 
 [VectorPostprocessors]
-  [train_avg]
-    type = EvaluateGaussianProcess
-    model = GP_avg
-    sampler = train_sample
-    output_samples = true
-    execute_on = final
-  []
-  [cart_avg]
-    type = EvaluateGaussianProcess
-    model = GP_avg
-    sampler = cart_sample
-    output_samples = true
-    execute_on = final
-  []
   [hyperparams]
     type = GaussianProcessData
     gp_name = 'GP_avg'

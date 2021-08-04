@@ -56,21 +56,24 @@
 []
 
 # Computing statistics
-[VectorPostprocessors]
+[Reporters]
   [eval_surr]
     type = EvaluateSurrogate
     model = 'pc_max pc_min pr_max pr_min np_max np_min'
     sampler = sample
+    parallel_type = ROOT
   []
   [eval_surr_stats]
-    type = Statistics
-    vectorpostprocessors = eval_surr
+    type = StatisticsReporter
+    reporters = 'eval_surr/pc_max eval_surr/pc_min eval_surr/pr_max eval_surr/pr_min eval_surr/np_max eval_surr/np_min'
     compute = 'mean stddev'
     ci_method = 'percentile'
-    ci_levels = '0.05'
+    ci_levels = '0.05 0.95'
   []
 []
 
 [Outputs]
-  csv = true
+  [out]
+    type = JSON
+  []
 []

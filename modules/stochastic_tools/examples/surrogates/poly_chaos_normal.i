@@ -44,18 +44,23 @@
   []
 []
 
-# Computing statistics
-[VectorPostprocessors]
+[Reporters]
   [samp_avg]
     type = EvaluateSurrogate
     model = poly_chaos_avg
     sampler = sample
+    parallel_type = ROOT
   []
   [samp_max]
     type = EvaluateSurrogate
     model = poly_chaos_max
     sampler = sample
+    parallel_type = ROOT
   []
+[]
+
+# Computing statistics
+[VectorPostprocessors]
   [stats_avg]
     type = PolynomialChaosStatistics
     pc_name = 'poly_chaos_avg'

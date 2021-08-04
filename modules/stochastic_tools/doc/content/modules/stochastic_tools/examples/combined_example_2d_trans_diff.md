@@ -133,11 +133,11 @@ information available within the corresponding restartable data files.
 !listing surrogates/combined/trans_diff_2d/trans_diff_surr.i block=Surrogates
 
 These surrogate models are then evaluated at the points defined in the testing sample batch.
-This is done using objects in the `VectorPostprocessors` block. Furthermore,
+This is done using objects in the `Reporters` block. Furthermore,
 the mean values and standard deviations of the QoI-s together with the $95\%$ confidence intervals
 are generated as well.
 
-!listing surrogates/combined/trans_diff_2d/trans_diff_surr.i block=VectorPostprocessors
+!listing surrogates/combined/trans_diff_2d/trans_diff_surr.i block=Reporters
 
 ## Results and Analysis
 

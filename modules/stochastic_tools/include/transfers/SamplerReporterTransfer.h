@@ -12,7 +12,9 @@
 // MOOSE includes
 #include "StochasticToolsTransfer.h"
 #include "ReporterTransferInterface.h"
-#include "StochasticReporter.h"
+
+// Need forward declration for some reason
+class StochasticReporter;
 
 /**
  * Transfer Reporters from sub-applications to a StochasticReporter on the main application.
@@ -47,11 +49,6 @@ protected:
   void intitializeStochasticReporters();
 
   /**
-   * Used to resize main app reporters to sampler dimensions
-   */
-  void resizeStochasticReporters();
-
-  /**
    * Transfer reporter values
    * @param global_index The global row of the sampler matrix
    * @param app_index The subapp index to transfer from
@@ -61,15 +58,12 @@ protected:
   /// Name of reporters on the sub-applications
   const std::vector<ReporterName> & _sub_reporter_names;
 
-  /// Name of StochasticReporter on the main
-  const std::string & _sr_name;
-
-  /// Storage vector names
-  const std::vector<ReporterName> _reporter_names;
-
-  /// Name of the reporter value for multiapp convergence
-  const ReporterName _converged_name;
-
   /// StochasticReporter object where values are being transferred
   StochasticReporter * _results = nullptr;
+
+  /// Storage vector names
+  std::vector<ReporterName> _reporter_names;
+
+  /// Reporter value for whether or not sub app converged
+  std::vector<bool> * _converged;
 };

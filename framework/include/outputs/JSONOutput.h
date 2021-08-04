@@ -27,12 +27,17 @@ protected:
   const ReporterData & _reporter_data;
 
 private:
+  /// Flag to create a file for each time step
+  const bool _one_file_per_timestep;
+
   /// The root JSON node for output
-  nlohmann::json _json;
+  nlohmann::json & _json;
 
   /// True when distributed data exists for output
   bool _has_distributed = false;
-
-  /// Flag to create a file for each time step
-  const bool _one_file_per_timestep;
 };
+
+template <>
+void dataStore(std::ostream & stream, nlohmann::json & json, void * context);
+template <>
+void dataLoad(std::istream & stream, nlohmann::json & json, void * context);

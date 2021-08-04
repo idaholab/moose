@@ -20,11 +20,14 @@
     execute_on = INITIAL
     outputs = none
   []
+[]
+
+[Reporters]
   [results]
     type = EvaluateSurrogate
     model = surrogate
     sampler = test
-    output_samples = true
+    parallel_type = ROOT
     execute_on = final
   []
 []
