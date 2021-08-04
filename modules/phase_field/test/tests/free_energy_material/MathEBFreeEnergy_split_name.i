@@ -11,7 +11,7 @@
 []
 
 [Variables]
-  [c]
+  [d]
     [InitialCondition]
       type = CrossIC
       x1 = 0.0
@@ -24,27 +24,41 @@
   []
 []
 
+[AuxVariables]
+  [c]
+  []
+[]
+
+[AuxKernels]
+  [c]
+    type = SelfAux
+    variable = c
+    v = d
+    execute_on = 'INITIAL TIMESTEP_END FINAL'
+  []
+[]
+
 [Preconditioning]
   active = 'SMP'
   [PBP]
     type = PBP
-    solve_order = 'w c'
+    solve_order = 'w d'
     preconditioner = 'AMG ASM'
-    off_diag_row = 'c '
+    off_diag_row = 'd '
     off_diag_column = 'w '
   []
 
   [SMP]
     type = SMP
-    off_diag_row = 'w c'
-    off_diag_column = 'c w'
+    off_diag_row = 'w d'
+    off_diag_column = 'd w'
   []
 []
 
 [Kernels]
   [cres]
     type = SplitCHParsed
-    variable = c
+    variable = d
     kappa_name = kappa_c
     w = w
     f_name = F
@@ -59,7 +73,7 @@
   [time]
     type = CoupledTimeDerivative
     variable = w
-    v = c
+    v = d
   []
 []
 
@@ -88,7 +102,7 @@
   [free_energy]
     type = MathEBFreeEnergy
     f_name = F
-    c = c
+    c = d
   []
 []
 
@@ -112,4 +126,5 @@
 
 [Outputs]
   exodus = true
+  hide = d
 []

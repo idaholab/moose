@@ -26,7 +26,7 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
                                                   VariableNameMappingMode map_mode)
   : FunctionMaterialBase<is_ad>(parameters),
     FunctionParserUtils<is_ad>(parameters),
-    _variable_names(_nargs),
+    _symbol_names(_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
     _map_mode(map_mode)
@@ -107,16 +107,16 @@ ParsedMaterialHelper<is_ad>::functionParse(
   {
     case VariableNameMappingMode::USE_MOOSE_NAMES:
       for (unsigned int i = 0; i < _nargs; ++i)
-        _variable_names[i] = _arg_names[i];
+        _symbol_names[i] = _arg_names[i];
       break;
 
     case VariableNameMappingMode::USE_PARAM_NAMES:
       for (unsigned i = 0; i < _nargs; ++i)
       {
         if (_arg_param_numbers[i] < 0)
-          _variable_names[i] = _arg_param_names[i];
+          _symbol_names[i] = _arg_param_names[i];
         else
-          _variable_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
+          _symbol_names[i] = _arg_param_names[i] + std::to_string(_arg_param_numbers[i]);
       }
       break;
 
@@ -136,17 +136,12 @@ ParsedMaterialHelper<is_ad>::functionParse(
 
     // for every argument look through the entire tolerance vector to find a match
     for (MooseIndex(tol_names) j = 0; j < tol_names.size(); ++j)
-      if (_variable_names[i] == tol_names[j])
+      if (_symbol_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
         break;
       }
   }
-
-  // build 'variables' argument for fparser
-  std::string variables;
-  for (unsigned i = 0; i < _nargs; ++i)
-    variables += "," + _variable_names[i];
 
   // get all material properties
   unsigned int nmat_props = mat_prop_expressions.size();
@@ -158,18 +153,18 @@ ParsedMaterialHelper<is_ad>::functionParse(
         FunctionMaterialPropertyDescriptor<is_ad>(mat_prop_expressions[i], this);
 
     // get the fparser symbol name for the new material property
-    variables += "," + _mat_prop_descriptors[i].getSymbolName();
+    _symbol_names.push_back(_mat_prop_descriptors[i].getSymbolName());
   }
 
   // get all coupled postprocessors
   for (const auto & pp : postprocessor_names)
   {
     _postprocessor_values.push_back(&this->getPostprocessorValueByName(pp));
-    variables += "," + pp;
+    _symbol_names.push_back(pp);
   }
 
-  // erase leading comma
-  variables.erase(0, 1);
+  // build 'variables' argument for fparser
+  std::string variables = Moose::stringify(_symbol_names);
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)

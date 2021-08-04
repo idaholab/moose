@@ -53,7 +53,7 @@ MaterialDerivativeTestAction::MaterialDerivativeTestAction(const InputParameters
     _second(false),
     _derivatives({{_prop_name, {}}})
 {
-  std::vector<std::vector<std::vector<VariableName>>> derivative_table(_derivative_order + 1);
+  std::vector<std::vector<std::vector<SymbolName>>> derivative_table(_derivative_order + 1);
 
   // 0th derivative is a (single) derivative w.r.t. to _no_ variables
   derivative_table[0] = {{}};
@@ -64,7 +64,7 @@ MaterialDerivativeTestAction::MaterialDerivativeTestAction(const InputParameters
       for (const auto & var : _args)
       {
         // take previous order derivative and derive w.r.t. one of the args
-        auto derivative = std::vector<VariableName>(function);
+        auto derivative = std::vector<SymbolName>(function);
         derivative.push_back(var);
 
         // add derivative to list
@@ -96,7 +96,7 @@ MaterialDerivativeTestAction::act()
         case PropTypeEnum::RANKTWOTENSOR:
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
-              _problem->addVariable("var_" + derivative.first + "_" + Moose::stringify(i) + "_" +
+              _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
                                         Moose::stringify(j),
                                     fetype,
                                     1.0,
@@ -108,9 +108,9 @@ MaterialDerivativeTestAction::act()
             for (unsigned int j = 0; j < 3; ++j)
               for (unsigned int k = 0; k < 3; ++k)
                 for (unsigned int l = 0; l < 3; ++l)
-                  _problem->addVariable("var_" + derivative.first + "_" + Moose::stringify(i) +
-                                            "_" + Moose::stringify(j) + "_" + Moose::stringify(k) +
-                                            "_" + Moose::stringify(l),
+                  _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) +
+                                            '_' + Moose::stringify(j) + '_' + Moose::stringify(k) +
+                                            '_' + Moose::stringify(l),
                                         fetype,
                                         1.0,
                                         nullptr);
@@ -129,7 +129,7 @@ MaterialDerivativeTestAction::act()
         {
           auto params = _factory.getValidParams("MaterialDerivativeTestKernel");
           params.set<std::vector<VariableName>>("args") = _args;
-          params.set<std::vector<VariableName>>("derivative") = derivative.second;
+          params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           params.set<NonlinearVariableName>("variable") = "var_" + derivative.first;
           _problem->addKernel("MaterialDerivativeTestKernel", "kernel_" + derivative.first, params);
@@ -140,13 +140,13 @@ MaterialDerivativeTestAction::act()
         {
           auto params = _factory.getValidParams("MaterialDerivativeRankTwoTestKernel");
           params.set<std::vector<VariableName>>("args") = _args;
-          params.set<std::vector<VariableName>>("derivative") = derivative.second;
+          params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
             {
               auto suffix =
-                  derivative.first + "_" + Moose::stringify(i) + "_" + Moose::stringify(j);
+                  derivative.first + '_' + Moose::stringify(i) + '_' + Moose::stringify(j);
               params.set<NonlinearVariableName>("variable") = "var_" + suffix;
               params.set<unsigned int>("i") = i;
               params.set<unsigned int>("j") = j;
@@ -160,15 +160,15 @@ MaterialDerivativeTestAction::act()
         {
           auto params = _factory.getValidParams("MaterialDerivativeRankFourTestKernel");
           params.set<std::vector<VariableName>>("args") = _args;
-          params.set<std::vector<VariableName>>("derivative") = derivative.second;
+          params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
               for (unsigned int k = 0; k < 3; ++k)
                 for (unsigned int l = 0; l < 3; ++l)
                 {
-                  auto suffix = derivative.first + "_" + Moose::stringify(i) + "_" +
-                                Moose::stringify(j) + "_" + Moose::stringify(k) + "_" +
+                  auto suffix = derivative.first + '_' + Moose::stringify(i) + '_' +
+                                Moose::stringify(j) + '_' + Moose::stringify(k) + '_' +
                                 Moose::stringify(l);
                   params.set<NonlinearVariableName>("variable") = "var_" + suffix;
                   params.set<unsigned int>("i") = i;
@@ -210,7 +210,7 @@ MaterialDerivativeTestAction::act()
             for (unsigned int j = 0; j < 3; ++j)
               for (auto & arg : _args)
               {
-                row.push_back("var_" + derivative.first + "_" + Moose::stringify(i) + "_" +
+                row.push_back("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
                               Moose::stringify(j));
                 col.push_back(arg);
               }
@@ -223,8 +223,8 @@ MaterialDerivativeTestAction::act()
                 for (unsigned int l = 0; l < 3; ++l)
                   for (auto & arg : _args)
                   {
-                    row.push_back("var_" + derivative.first + "_" + Moose::stringify(i) + "_" +
-                                  Moose::stringify(j) + "_" + Moose::stringify(k) + "_" +
+                    row.push_back("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
+                                  Moose::stringify(j) + '_' + Moose::stringify(k) + '_' +
                                   Moose::stringify(l));
                     col.push_back(arg);
                   }

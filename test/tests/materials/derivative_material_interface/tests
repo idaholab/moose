@@ -1,6 +1,6 @@
 [Tests]
   design = 'DerivativeMaterialInterface.md'
-  issues = '#4299 #6360 #5055 #6901 #5039 #14975 #15207'
+  issues = '#4299 #6360 #5055 #6901 #5039 #14975 #15207 #18402'
 
   [analytic_derivatives]
     requirement = 'The system shall be capable of producing analytic derivatives of material '
@@ -275,6 +275,38 @@
       recover = false
       detail = 'throwing an exception.'
       skip = 'not supported yet'
+    []
+  []
+
+  [additional_derivatives]
+    requirement = "The system shall allow users to request derivatives with respect to function "
+                  "symbols other than MOOSE variables "
+    [mat_props]
+      type = 'Exodiff'
+      input = 'additional_derivatives.i'
+      exodiff = 'additional_derivatives_out.e'
+      detail = "such as derivatives w.r.t. material properties"
+    []
+    [error_unknown]
+      type = 'RunException'
+      input = 'additional_derivatives.i'
+      expect_err = "Invalid symbol name 'unknown'."
+      cli_args = "Materials/term/additional_derivative_symbols='unknown'"
+      detail = "and error out if derivatives w.r.t unknown symbols are requested"
+    []
+    [error_variable]
+      type = 'RunException'
+      input = 'additional_derivatives.i'
+      expect_err = "Symbol name 'a' is a coupled variable. Derivatives w.r.t. coupled variables are always taken and they must not be specified again."
+      cli_args = "Materials/term/additional_derivative_symbols='a'"
+      detail = "and error out if derivatives MOOSE variables are requested in additional_derivative_symbols (as they are requested by default)"
+    []
+    [error_duplicate]
+      type = 'RunException'
+      input = 'additional_derivatives.i'
+      expect_err = "Symbol name 'e' was given more than once."
+      cli_args = "Materials/term/additional_derivative_symbols='e d e'"
+      detail = "and error out if any symbols are supplied more than once"
     []
   []
 []

@@ -156,6 +156,14 @@ stringify(const T<U...> & c,
 std::string stringifyExact(Real);
 }
 
+template <typename T1, typename T2>
+std::vector<T2>
+vectorCast(std::vector<T2> in)
+{
+  std::vector<T2> out(in.begin(), in.end());
+  return out;
+}
+
 /**
  * Convert point represented as std::vector into Point
  * @param pos Point represented as a vector

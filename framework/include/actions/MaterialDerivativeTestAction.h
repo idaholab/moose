@@ -47,5 +47,5 @@ protected:
   const bool _second;
 
   /// every derivative given by a list of variables to derive w.r.t
-  std::map<MaterialPropertyName, std::vector<VariableName>> _derivatives;
+  std::map<MaterialPropertyName, std::vector<SymbolName>> _derivatives;
 };
