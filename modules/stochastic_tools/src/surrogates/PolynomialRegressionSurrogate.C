@@ -40,7 +40,7 @@ PolynomialRegressionSurrogate::evaluate(const std::vector<Real> & x) const
   {
     Real tmp_val(1.0);
     for (unsigned int j = 0; j < _power_matrix[i].size(); ++j)
-      tmp_val *= pow(x[j], _power_matrix[i][j]);
+      tmp_val *= MathUtils::pow(x[j], _power_matrix[i][j]);
     val += _coeff[0][i] * tmp_val;
   }
 
@@ -59,7 +59,7 @@ PolynomialRegressionSurrogate::evaluate(const std::vector<Real> & x, std::vector
   {
     Real tmp_val(1.0);
     for (unsigned int j = 0; j < _power_matrix[i].size(); ++j)
-      tmp_val *= pow(x[j], _power_matrix[i][j]);
+      tmp_val *= MathUtils::pow(x[j], _power_matrix[i][j]);
     for (unsigned int r = 0; r < _coeff.size(); ++r)
       y[r] += _coeff[r][i] * tmp_val;
   }

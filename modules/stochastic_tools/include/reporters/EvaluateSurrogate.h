@@ -31,7 +31,7 @@ protected:
   /// Sampler for evaluating surrogate model
   Sampler & _sampler;
   /// The data type for the response value
-  MultiMooseEnum _response_types;
+  const MultiMooseEnum _response_types;
   /// Whether or not to compute standard deviation
   std::vector<bool> _doing_std;
   /// Pointers to surrogate model

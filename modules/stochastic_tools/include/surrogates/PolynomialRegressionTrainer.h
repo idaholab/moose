@@ -29,9 +29,9 @@ private:
   const std::vector<Real> & _sampler_row;
 
   /// Response value
-  const Real * _rval;
+  const Real * const _rval;
   /// Vector response value
-  const std::vector<Real> * _rvecval;
+  const std::vector<Real> * const _rvecval;
 
   /// Predictor values from reporters
   std::vector<const Real *> _pvals;

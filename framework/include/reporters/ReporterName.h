@@ -101,7 +101,7 @@ public:
   /**
    * Whether or not the ReporterName is empty, similar to std::string::empty()
    */
-  bool empty() { return _object_name.empty() || _value_name.empty(); }
+  bool empty() const { return _object_name.empty() || _value_name.empty(); }
 
 private:
   /**

@@ -103,7 +103,7 @@ SamplerReporterTransfer::intitializeStochasticReporters()
       {
         const ReporterData & rdata = _multi_app->appProblemBase(i).getReporterData();
         ReporterName rname =
-            _results->declareStochastiReporterClone(*_sampler_ptr, rdata, sub_rname, prefix);
+            _results->declareStochasticReporterClone(*_sampler_ptr, rdata, sub_rname, prefix);
         if (rname.empty())
           paramError("from_reporter",
                      "Reporter value ",

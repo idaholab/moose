@@ -34,7 +34,7 @@ of the surrogate model, the same objects can be used in the `Samplers` block:
 
 !listing polynomial_regression/evaluate.i block=Samplers
 
-Finally, a reporter of type `EvaluateSurrogate` is created to extract the approximate value of the
+Finally, a reporter of type [EvaluateSurrogate.md] is created to extract the approximate value of the
 QoI(s):
 
 !listing polynomial_regression/evaluate.i block=Reporters

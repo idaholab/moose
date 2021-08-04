@@ -11,19 +11,7 @@ See [examples/surrogate_creation.md], [examples/surrogate_training.md], and [exa
 
 !listing modules/stochastic_tools/test/tests/surrogates/nearest_point/evaluate.i caption=Simple example using EvaluateSurrogate
 
-!listing caption=CSV output
-surrogate
-8
-8
-24
-40
-56
-72
-88
-104
-120
-136
-...
+!listing surrogates/nearest_point/gold/evaluate_out_results_0002.csv caption=CSV output
 
 !syntax parameters /Reporters/EvaluateSurrogate
 

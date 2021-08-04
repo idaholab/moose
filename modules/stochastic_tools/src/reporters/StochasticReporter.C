@@ -36,10 +36,10 @@ StochasticReporter::StochasticReporter(const InputParameters & parameters)
 }
 
 ReporterName
-StochasticReporter::declareStochastiReporterClone(const Sampler & sampler,
-                                                  const ReporterData & from_data,
-                                                  const ReporterName & from_reporter,
-                                                  std::string prefix)
+StochasticReporter::declareStochasticReporterClone(const Sampler & sampler,
+                                                   const ReporterData & from_data,
+                                                   const ReporterName & from_reporter,
+                                                   std::string prefix)
 {
   std::string value_name = (prefix.empty() ? "" : prefix + ":") + from_reporter.getObjectName() +
                            ":" + from_reporter.getValueName();

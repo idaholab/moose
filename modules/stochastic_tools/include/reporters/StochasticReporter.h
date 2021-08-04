@@ -114,10 +114,10 @@ public:
   virtual void finalize() override {}
 
 protected:
-  virtual ReporterName declareStochastiReporterClone(const Sampler & sampler,
-                                                     const ReporterData & from_data,
-                                                     const ReporterName & from_reporter,
-                                                     std::string prefix = "");
+  virtual ReporterName declareStochasticReporterClone(const Sampler & sampler,
+                                                      const ReporterData & from_data,
+                                                      const ReporterName & from_reporter,
+                                                      std::string prefix = "");
   template <typename T>
   std::vector<T> & declareStochasticReporter(std::string value_name, const Sampler & sampler);
   friend class SamplerReporterTransfer;

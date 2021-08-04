@@ -48,8 +48,12 @@ PolynomialRegressionTrainer::validParams()
 PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sampler_row(getSamplerData()),
-    _rval(nullptr),
-    _rvecval(nullptr),
+    _rval(getParam<MooseEnum>("response_type") == 0
+              ? &getTrainingData<Real>(getParam<ReporterName>("response"))
+              : nullptr),
+    _rvecval(getParam<MooseEnum>("response_type") == 1
+                 ? &getTrainingData<std::vector<Real>>(getParam<ReporterName>("response"))
+                 : nullptr),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
     _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
     _n_dims((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
@@ -66,13 +70,6 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
     _matrix(_n_poly_terms, _n_poly_terms),
     _rhs(1, DenseVector<Real>(_n_poly_terms, 0.0))
 {
-  const unsigned int rtype(getParam<MooseEnum>("response_type"));
-  const ReporterName & rname(getParam<ReporterName>("response"));
-  if (rtype == 0)
-    _rval = &getTrainingData<Real>(rname);
-  else if (rtype == 1)
-    _rvecval = &getTrainingData<std::vector<Real>>(rname);
-
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
     _pvals[i] = &getTrainingData<Real>(pnames[i]);

@@ -19,9 +19,9 @@ EvaluateSurrogate::validParams()
 {
   InputParameters params = StochasticReporter::validParams();
   params += SurrogateModelInterface::validParams();
+  params += SamplerInterface::validParams();
   params.addClassDescription("Tool for sampling surrogate models.");
   params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of surrogate models.");
-  params += SamplerInterface::validParams();
   params.addRequiredParam<SamplerName>("sampler",
                                        "Sampler to use for evaluating surrogate models.");
   MultiMooseEnum rtypes(SurrogateModel::defaultResponseTypes().getRawNames(), "real");
@@ -50,12 +50,7 @@ EvaluateSurrogate::EvaluateSurrogate(const InputParameters & parameters)
   for (const auto & nm : model_names)
     _model.push_back(&getSurrogateModelByName(nm));
 
-  if (_response_types.size() == 1)
-  {
-    for (unsigned int i = 1; i < _model.size(); ++i)
-      _response_types.push_back(_response_types[0]);
-  }
-  if (_response_types.size() != _model.size())
+  if (_response_types.size() != 1 && _response_types.size() != _model.size())
     paramError("response_type",
                "Number of entries must be 1 or equal to the number of entries in 'model'.");
 
@@ -64,22 +59,23 @@ EvaluateSurrogate::EvaluateSurrogate(const InputParameters & parameters)
     paramError("evaluate_std",
                "Nmber of entries must be 1 or equal to the number of entries in 'model'.");
   _doing_std.resize(_model.size());
-  for (unsigned int i = 0; i < _model.size(); ++i)
+  for (const auto i : make_range(_model.size()))
     _doing_std[i] = estd.size() == 1 ? estd[0] == "true" : estd[i] == "true";
 
   _real_values.resize(_model.size(), nullptr);
   _real_std.resize(_model.size(), nullptr);
   _vector_real_values.resize(_model.size(), nullptr);
   _vector_real_std.resize(_model.size(), nullptr);
-  for (unsigned int i = 0; i < _model.size(); ++i)
+  for (const auto i : make_range(_model.size()))
   {
-    if (_response_types[i] == "real")
+    const std::string rtype = _response_types.size() == 1 ? _response_types[0] : _response_types[i];
+    if (rtype == "real")
     {
       _real_values[i] = &declareStochasticReporter<Real>(model_names[i], _sampler);
       if (_doing_std[i])
         _real_std[i] = &declareStochasticReporter<Real>(model_names[i] + "_std", _sampler);
     }
-    else if (_response_types[i] == "vector_real")
+    else if (rtype == "vector_real")
     {
       _vector_real_values[i] =
           &declareStochasticReporter<std::vector<Real>>(model_names[i], _sampler);
@@ -96,11 +92,10 @@ void
 EvaluateSurrogate::execute()
 {
   // Loop over samples
-  dof_id_type ind = 0;
-  for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
+  for (const auto ind : make_range(_sampler.getNumberOfLocalRows()))
   {
-    std::vector<Real> data = _sampler.getNextLocalRow();
-    for (unsigned int m = 0; m < _model.size(); ++m)
+    const std::vector<Real> data = _sampler.getNextLocalRow();
+    for (const auto m : make_range(_model.size()))
     {
       if (_real_values[m] && _real_std[m])
         (*_real_values[m])[ind] = _model[m]->evaluate(data, (*_real_std[m])[ind]);
@@ -111,6 +106,5 @@ EvaluateSurrogate::execute()
       else if (_vector_real_values[m])
         _model[m]->evaluate(data, (*_vector_real_values[m])[ind]);
     }
-    ind++;
   }
 }
