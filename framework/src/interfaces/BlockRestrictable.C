@@ -28,7 +28,7 @@ BlockRestrictable::validParams()
 
   // Add the user-facing 'block' input parameter
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of block ids (SubdomainID) that this object will be applied");
+      "block", "The list of blocks (ids or names) that this object will be applied");
 
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
@@ -146,7 +146,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     if (!diff.empty())
     {
       std::ostringstream msg;
-      auto sep = "";
+      auto sep = " ";
       msg << "the following blocks (ids) do not exist on the mesh:";
       for (const auto & id : diff)
       {
@@ -154,11 +154,14 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
         {
           auto & name =
               _blocks.at(std::find(_vec_ids.begin(), _vec_ids.end(), id) - _vec_ids.begin());
-          msg << sep << " " << name << " (" << id << ")";
+          if (std::to_string(id) != name)
+            msg << sep << name << " (" << id << ")";
+          else
+            msg << sep << id;
         }
         else
-          msg << sep << " " << id;
-        sep = ",";
+          msg << sep << id;
+        sep = ", ";
       }
       moose_object->paramError("block", msg.str());
     }
