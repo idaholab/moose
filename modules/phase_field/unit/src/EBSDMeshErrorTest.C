@@ -12,22 +12,22 @@
 TEST_F(EBSDMeshErrorTest, fileDoesNotExist)
 {
   // generate input parameter set
-  InputParameters params = validParams<EBSDMesh>();
+  InputParameters params = validParams<EBSDMeshGenerator>();
   params.addPrivateParam("_moose_app", _app.get());
   params.set<std::string>("_object_name", "EBSD");
-  params.set<std::string>("_type") = "EBSDMesh";
+  params.set<std::string>("_type") = "EBSDMeshGenerator";
 
   // set filename
   params.set<FileName>("filename") = "FILEDOESNOTEXIST";
 
-  // construct mesh object
-  std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
+  // construct mesh generator object
+  auto mesh = std::make_unique<EBSDMeshGenerator>(params);
 
   try
   {
     // trigger mesh building with invalid EBSD filename
-    mesh->buildMesh();
-    FAIL() << "buildMesh should have failed but didn't";
+    mesh->generate();
+    FAIL() << "generate should have failed but didn't";
   }
   catch (const std::exception & e)
   {
@@ -46,7 +46,7 @@ TEST_F(EBSDMeshErrorTest, headerError)
       {"data/ebsd/ebsd3D_zerosize.txt", "Error reading header, EBSD grid size is zero."},
       {"data/ebsd/ebsd3D_zerodim.txt", "Error reading header, EBSD data is zero dimensional."},
       {"data/ebsd/ebsd3D_norefine.txt",
-       "EBSDMesh error. Requested uniform_refine levels not possible."},
+       "EBSDMeshGenerator error. Requested uniform_refine levels not possible."},
   };
 
   for (unsigned int i = 0; i < ntestcase; ++i)
@@ -55,23 +55,23 @@ TEST_F(EBSDMeshErrorTest, headerError)
     auto error = testcase[i][1];
 
     // generate input parameter set
-    InputParameters params = validParams<EBSDMesh>();
+    auto params = EBSDMeshGenerator::validParams();
     params.addPrivateParam("_moose_app", _app.get());
     params.set<std::string>("_object_name") = filename; // use the filename to define a unique name
-    params.set<std::string>("_type") = "EBSDMesh";
+    params.set<std::string>("_type") = "EBSDMeshGenerator";
 
     // set filename
     params.set<FileName>("filename") = filename;
     params.set<unsigned int>("uniform_refine") = 2;
 
     // construct mesh object
-    std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
+    auto mesh = std::make_unique<EBSDMeshGenerator>(params);
 
     try
     {
       // trigger mesh building with invalid EBSD filename
-      mesh->buildMesh();
-      FAIL() << "buildMesh should have failed but didn't";
+      mesh->generate();
+      FAIL() << "generate should have failed but didn't";
     }
     catch (const std::exception & e)
     {
