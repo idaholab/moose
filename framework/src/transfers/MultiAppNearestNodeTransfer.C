@@ -136,7 +136,7 @@ MultiAppNearestNodeTransfer::execute()
 
       if (is_to_nodal)
       {
-        std::vector<Node *> target_local_nodes = getTargetLocalNodes(i_to);
+        const std::vector<Node *> & target_local_nodes = getTargetLocalNodes(i_to);
 
         // For error checking: keep track of all target_local_nodes
         // which are successfully mapped to at least one domain where
@@ -490,7 +490,7 @@ MultiAppNearestNodeTransfer::execute()
 
     if (is_to_nodal)
     {
-      std::vector<Node *> target_local_nodes = getTargetLocalNodes(i_to);
+      const std::vector<Node *> & target_local_nodes = getTargetLocalNodes(i_to);
 
       for (const auto & node : target_local_nodes)
       {
