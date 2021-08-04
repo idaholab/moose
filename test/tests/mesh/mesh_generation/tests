@@ -33,7 +33,7 @@
   []
 
   [annular_errors]
-    issues = '#8432'
+    issues = '#8432 #18486'
     design = 'meshgenerators/AnnularMeshGenerator.md'
     requirement = 'The system shall include the ability to generate an annular mesh that errors when'
     [annular_except1]
@@ -76,6 +76,27 @@
       input = annular_except6.i
       expect_err = 'quad_subdomain_id must not equal tri_subdomain_id'
       detail = 'shall throw an error if the quadrilateral and triangular subdomain ids are the same.'
+    []
+    [annular_except7]
+      type = 'RunException'
+      input = 'annular_mesh_generator_radial_positions.i'
+      cli_args = 'Mesh/amg/nr=1'
+      expect_err = "The 'nr' parameter cannot be specified together with 'radial_positions'"
+      detail = 'shall throw an error if both radial positions and the number of radial elements are prescribed.'
+    []
+    [annular_except8]
+      type = 'RunException'
+      input = 'annular_mesh_generator_radial_positions.i'
+      cli_args = 'Mesh/amg/growth_r=1'
+      expect_err = "The 'growth_r' parameter cannot be specified together with 'radial_positions'"
+      detail = 'shall throw an error if both radial positions and the radius growth parameter are prescribed.'
+    []
+    [annular_except9]
+      type = 'RunException'
+      input = 'annular_mesh_generator_radial_positions.i'
+      cli_args = 'Mesh/amg/rmin=3'
+      expect_err = "The following provided value is not within the bounds between 'rmin' and 'rmax': 2"
+      detail = 'shall throw an error if any of the radial positions fall out of the bounds between rmin and rmax.'
     []
   []
   [annular]

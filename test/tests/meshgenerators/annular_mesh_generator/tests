@@ -32,4 +32,15 @@
     deprecated = true
     no_error_deprecated = true
   [../]
+  [./annular_mesh_generator_radial_positions]
+    type = 'Exodiff'
+    input = 'annular_mesh_generator_radial_positions.i'
+    cli_args = '--mesh-only'
+    exodiff = 'annular_mesh_generator_radial_positions_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall generate an annular mesh with prescribed radial positions of the intermediate rings of nodes'
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#18486'
+  [../]
 []

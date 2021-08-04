@@ -32,6 +32,8 @@ AnnularMeshGenerator::validParams()
       "rmin>=0.0",
       "Inner radius.  If rmin=0 then a disc mesh (with no central hole) will be created.");
   params.addRequiredParam<Real>("rmax", "Outer radius");
+  params.addParam<std::vector<Real>>("radial_positions",
+                                     "Directly prescribed positions of intermediate radial nodes");
   params.addDeprecatedParam<Real>("tmin",
                                   0.0,
                                   "Minimum angle, measured in radians anticlockwise from x axis",
@@ -73,10 +75,12 @@ AnnularMeshGenerator::validParams()
 
 AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    _nr(getParam<unsigned int>("nr")),
     _nt(getParam<unsigned int>("nt")),
     _rmin(getParam<Real>("rmin")),
     _rmax(getParam<Real>("rmax")),
+    _radial_positions(getParam<std::vector<Real>>("radial_positions")),
+    _nr(parameters.isParamSetByUser("radial_positions") ? _radial_positions.size() + 1
+                                                        : getParam<unsigned int>("nr")),
     _dmin(parameters.isParamSetByUser("tmin") ? getParam<Real>("tmin") / M_PI * 180.0
                                               : getParam<Real>("dmin")),
     _dmax(parameters.isParamSetByUser("tmax") ? getParam<Real>("tmax") / M_PI * 180.0
@@ -95,6 +99,21 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
       (parameters.isParamSetByUser("dmin") || parameters.isParamSetByUser("dmax")))
     paramError("tmin",
                "You specified the angles using both degrees and radians. Please use degrees.");
+
+  if (_radial_positions.size() != 0)
+  {
+    if (parameters.isParamSetByUser("nr"))
+      paramError("nr", "The 'nr' parameter cannot be specified together with 'radial_positions'");
+    if (parameters.isParamSetByUser("growth_r"))
+      paramError("growth_r",
+                 "The 'growth_r' parameter cannot be specified together with 'radial_positions'");
+    for (auto rpos : _radial_positions)
+      if (rpos <= _rmin || rpos >= _rmax)
+        paramError(
+            "radial_positions",
+            "The following provided value is not within the bounds between 'rmin' and 'rmax': ",
+            rpos);
+  }
 
   if (_rmax <= _rmin)
     paramError("rmax", "rmax must be greater than rmin");
@@ -145,6 +164,8 @@ AnnularMeshGenerator::generate()
   {
     if (layer_num == 1)
       current_r = _rmin; // account for precision loss
+    else if (_radial_positions.size() > 0)
+      current_r = _radial_positions[layer_num - 2];
     else
     {
       if (_growth_r > 0)
