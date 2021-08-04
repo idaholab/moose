@@ -146,7 +146,7 @@ class Translator(mixins.ConfigObject):
             exact[bool]: (False) When True an exact path match is required.
         """
         if isinstance(arg, str):
-            items = self.__page_cache.get(arg, None)
+            items = self.__page_cache.get(arg, None) if not exact else None
             if items is None:
                 func = lambda p: (p.local == arg) or \
                                  (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
