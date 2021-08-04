@@ -1,0 +1,14 @@
+[Tests]
+  design = "Eigenvalue.md"
+  issues = "#18493"
+
+  [ne_array_mo]
+    type = 'CSVDiff'
+    input = 'ne_array_mo.i'
+    csvdiff = 'ne_array_mo_out_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    expect_out = 'PJFNK\s+with\s+matrix\s+only'
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation"
+  []
+[]
