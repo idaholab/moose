@@ -30,9 +30,9 @@ InterfaceMeshCut2DUserObject::InterfaceMeshCut2DUserObject(const InputParameters
 }
 
 void
-InterfaceMeshCut2DUserObject::calculateNormal()
+InterfaceMeshCut2DUserObject::calculateNormals()
 {
-  _element_normal.clear();
+  _element_normals.clear();
 
   for (const auto & elem : _cutter_mesh->element_ptr_range())
   {
@@ -42,7 +42,7 @@ InterfaceMeshCut2DUserObject::calculateNormal()
     Point normal_ab = Point(-(b - a)(1), (b - a)(0), 0);
     normal_ab /= normal_ab.norm();
 
-    _element_normal.insert(std::make_pair(elem->id(), normal_ab));
+    _element_normals.insert(std::make_pair(elem->id(), normal_ab));
   }
 }
 
@@ -65,6 +65,11 @@ InterfaceMeshCut2DUserObject::nodeNormal(const unsigned int & node_id)
   }
 
   unsigned int num = _node_to_elem_map[node_id].size();
+
+  if (num == 0)
+    mooseError("InterfaceMeshCut2DUserObject, the node is not found in node_to_elem_map in "
+               "calculting its normal.");
+
   return normal / num;
 }
 
@@ -73,6 +78,8 @@ InterfaceMeshCut2DUserObject::cutElementByGeometry(const Elem * elem,
                                                    std::vector<Xfem::CutEdge> & cut_edges,
                                                    std::vector<Xfem::CutNode> & cut_nodes) const
 {
+  mooseAssert(elem->dim() == 2, "Dimension of element to be cut must be 2");
+
   bool elem_cut = false;
 
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
@@ -82,11 +89,8 @@ InterfaceMeshCut2DUserObject::cutElementByGeometry(const Elem * elem,
     for (unsigned int i = 0; i < n_sides; ++i)
     {
       std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
-      if (curr_side->type() != EDGE2)
-        mooseError("In cutElementByGeometry element side must be EDGE2, but type is: ",
-                   libMesh::Utility::enum_to_string(curr_side->type()),
-                   " base element type is: ",
-                   libMesh::Utility::enum_to_string(elem->type()));
+
+      mooseAssert(curr_side->type() == EDGE2, "Element side type must be EDGE2.");
 
       const Node * node1 = curr_side->node_ptr(0);
       const Node * node2 = curr_side->node_ptr(1);
@@ -133,6 +137,7 @@ InterfaceMeshCut2DUserObject::cutFragmentByGeometry(
     std::vector<std::vector<Point>> & /*frag_edges*/,
     std::vector<Xfem::CutEdge> & /*cut_edges*/) const
 {
+  mooseError("cutFragmentByGeometry not yet implemented for InterfaceMeshCut2DUserObject");
   return false;
 }
 

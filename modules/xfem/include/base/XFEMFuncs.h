@@ -96,7 +96,8 @@ bool intersectSegmentWithCutLine(const Point & segment_point1,
 Real crossProduct2D(const Point & point_a, const Point & point_b);
 
 /**
- * calculate the distance from a point to a line segment.
+ * Calculate the signed distance from a point to a line segment. Positive values are on the side of
+ * the line segment's normal (using standard conventions).
  * @param x1,x2 Coordinates of line segment end points
  * @param x0 Coordinate of the point
  * @param xp Closest point coordinate on the line segment
@@ -105,7 +106,8 @@ Real crossProduct2D(const Point & point_a, const Point & point_b);
 Real pointSegmentDistance(const Point & x0, const Point & x1, const Point & x2, Point & xp);
 
 /**
- * calculate the distance from a point to triangle.
+ * Calculate the signed distance from a point to a triangle. Positive values are on the side of the
+ * triangle's normal (using standard conventions).
  * @param x1,x2,x3 Coordinates of triangle vertices
  * @param x0 Coordinate of the point
  * @param xp Closest point coordinate on the triangle
@@ -136,7 +138,7 @@ Real pointTriangleDistance(const Point & x0,
  * check if a line intersects with an element defined by vertices
  * calculate the distance from a point to triangle.
  * @param p1,p2 End points of the line segment
- * @param vertices Vertices of element
+ * @param vertices Vertices of two-node element.
  * @param pint Intersection point
  * @return true if a line intersects with an element
  */
@@ -146,7 +148,7 @@ bool intersectWithEdge(const Point & p1,
                        Point & pint);
 
 /**
- * check if point is inside the edge p1-p2
+ * check if point is inside the straight edge p1-p2
  * @param p1,p2 End points of the line segment
  * @param p Point coordinate
  * @return true if a point is inside the edge p1-p2
@@ -154,7 +156,7 @@ bool intersectWithEdge(const Point & p1,
 bool isInsideEdge(const Point & p1, const Point & p2, const Point & p);
 
 /**
- * Get the relative position of p from p1
+ * Get the relative position of p from p1 respect to the total length of the line segment
  * @param p1,p2 End points of the line segment
  * @param p Point coordinate
  * @return the relative position of p from p1

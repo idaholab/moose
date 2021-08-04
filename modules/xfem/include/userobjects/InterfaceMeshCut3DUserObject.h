@@ -34,18 +34,14 @@ public:
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<Xfem::CutFace> & cut_faces) const override;
 
-  /**
-   * calculate the signed distance value for a given point.
-   * @param p Coordinate of point
-   * @return Signed distance
-   */
   virtual Real calculateSignedDistance(Point p) const override;
 
   virtual Point nodeNormal(const unsigned int & node_id) override;
 
-  virtual void calculateNormal() override;
+  virtual void calculateNormals() override;
 
 protected:
-  /// Map of pseudo normal of element plane, three nodes and three sides of each element
+  /// Map of information defining cutting elements, stored in this order for each element:
+  /// pseudo normal, three nodes, and three sides
   std::unordered_map<unsigned int, std::array<Point, 7>> _pseudo_normal;
 };

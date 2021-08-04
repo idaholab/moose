@@ -26,12 +26,12 @@ InterfaceMeshCut3DUserObject::InterfaceMeshCut3DUserObject(const InputParameters
 {
   for (const auto & elem : _cutter_mesh->element_ptr_range())
     if (elem->type() != TRI3)
-      mooseError(
-          "InterfaceMeshCut3DUserObject currently only supports TRI3 element in the cut mesh.");
+      mooseError("InterfaceMeshCut3DUserObject currently only supports TRI3 elements in the "
+                 "cutting mesh.");
 }
 
 void
-InterfaceMeshCut3DUserObject::calculateNormal()
+InterfaceMeshCut3DUserObject::calculateNormals()
 {
   _pseudo_normal.clear();
 
@@ -123,18 +123,17 @@ bool
 InterfaceMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
                                                    std::vector<Xfem::CutFace> & cut_faces) const
 {
-  bool elem_cut = false;
+  mooseAssert(elem->dim() == 3, "Dimension of element to be cut must be 3");
 
-  if (elem->dim() != 3)
-    mooseError("The structural mesh to be cut by a surface mesh must be 3D!");
+  bool elem_cut = false;
 
   for (unsigned int i = 0; i < elem->n_sides(); ++i)
   {
     // This returns the lowest-order type of side.
     std::unique_ptr<const Elem> curr_side = elem->side_ptr(i);
-    if (curr_side->dim() != 2)
-      mooseError("In cutElementByGeometry dimension of side must be 2, but it is ",
-                 curr_side->dim());
+
+    mooseAssert(curr_side->dim() == 2, "Side dimension must be 2");
+
     unsigned int n_edges = curr_side->n_sides();
 
     std::vector<unsigned int> cut_edges;
@@ -167,7 +166,7 @@ InterfaceMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
             std::find(cut_edges.begin(), cut_edges.end(), j) == cut_edges.end())
         {
           cut_edges.push_back(j);
-          cut_pos.emplace_back(Xfem::getRelativePosition(*node1, *node2, intersection));
+          cut_pos.push_back(Xfem::getRelativePosition(*node1, *node2, intersection));
         }
       }
     }

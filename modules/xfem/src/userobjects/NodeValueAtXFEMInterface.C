@@ -24,7 +24,7 @@ NodeValueAtXFEMInterface::validParams()
       "variable", "The name of the variable that this UserObject operates on");
   params.addParam<UserObjectName>(
       "interface_mesh_cut_userobject",
-      "Name of InterfaceMeshCutUserObject that provides nodes location to this UserObject.");
+      "Name of InterfaceMeshCutUserObject that provides cut locations to this UserObject.");
   params.addRequiredParam<VariableName>(
       "level_set_var", "The name of level set variable used to represent the interface");
   params.addClassDescription("Obtain field values and gradients on the interface.");

@@ -24,7 +24,7 @@
  * InterfaceMeshCutUserObjectBase:
  * (1) reads in a mesh describing the interface,
  * (2) uses the mesh to do cutting of 2D/3D elements, and
- * (3) grows the mesh based on intreface velocites.
+ * (3) grows the mesh based on interface velocites.
  */
 
 class XFEMMovingInterfaceVelocityBase;
@@ -43,21 +43,29 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  virtual const std::vector<RealVectorValue>
+  getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
+
   /// Get the cutter mesh pointer
   std::shared_ptr<MeshBase> getCutterMesh() const { return _cutter_mesh; };
 
   /**
-   * calculate the signed distance value for a given point.
+   *
+   * Calculate the signed distance for a given point relative to the surface. This is computed as
+   * the smallest distance from any face (3D) or edge (2D) in the surface, and the sign is positive
+   * if the node is on the side of that edge that coincides with its normal vector.
    * @param p Coordinate of point
    * @return Signed distance
    */
   virtual Real calculateSignedDistance(Point p) const = 0;
 
-  /// return the normal at node
+  /// return the normal at a node in the cutting mesh
   virtual Point nodeNormal(const unsigned int & node_id) = 0;
 
-  /// calculate element (pseudo) normal values
-  virtual void calculateNormal() = 0;
+  /**
+   * calculate the element normal values for all of the elements.
+   */
+  virtual void calculateNormals() = 0;
 
   virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;
 
@@ -88,4 +96,10 @@ protected:
   const CutSubdomainID _negative_id;
   /// The CutSubdomainID for the positive side of the cut
   const CutSubdomainID _positive_id;
+  /// Local variable number for displacement x
+  unsigned int _var_num_disp_x;
+  /// Local variable number for displacement y
+  unsigned int _var_num_disp_y;
+  /// Local variable number for displacement z
+  unsigned int _var_num_disp_z;
 };

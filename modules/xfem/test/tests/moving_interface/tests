@@ -165,7 +165,7 @@
     map = false
     unique_id = true
     abs_zero = 1e-8
-    requirement = 'The XFEM module shall provide an ability to solve a 3d simple phase transition '
+    requirement = 'The XFEM module shall provide an ability to solve a simple 3d phase transition '
                   'problem in which the phase boundary is defined by and XFEM surface and the '
                   'interface velocity depends on the jump of variables and gradients across the '
                   'interface.'

@@ -96,6 +96,11 @@ InterfaceMeshCutUserObjectBase::initialSetup()
     _equation_systems->init();
     _exodus_io->write_equation_systems(_app.getOutputFileBase() + "_" + name() + ".e",
                                        *_equation_systems);
+
+    _var_num_disp_x = _explicit_system->variable_number("disp_x");
+    _var_num_disp_y = _explicit_system->variable_number("disp_y");
+    if (_mesh.dimension() == 3)
+      _var_num_disp_z = _explicit_system->variable_number("disp_z");
   }
 }
 
@@ -157,20 +162,17 @@ InterfaceMeshCutUserObjectBase::initialize()
     std::vector<dof_id_type> di;
     for (const auto & node : _cutter_mesh->node_ptr_range())
     {
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_x"));
+      _explicit_system->get_dof_map().dof_indices(node, di, _var_num_disp_x);
       _explicit_system->solution->set(
           di[0], new_position[node->id()](0) - _initial_nodes_location[node->id()](0));
 
-      _explicit_system->get_dof_map().dof_indices(
-          node, di, _explicit_system->variable_number("disp_y"));
+      _explicit_system->get_dof_map().dof_indices(node, di, _var_num_disp_y);
       _explicit_system->solution->set(
           di[0], new_position[node->id()](1) - _initial_nodes_location[node->id()](1));
 
       if (_mesh.dimension() == 3)
       {
-        _explicit_system->get_dof_map().dof_indices(
-            node, di, _explicit_system->variable_number("disp_z"));
+        _explicit_system->get_dof_map().dof_indices(node, di, _var_num_disp_z);
         _explicit_system->solution->set(
             di[0], new_position[node->id()](2) - _initial_nodes_location[node->id()](2));
       }
@@ -183,13 +185,19 @@ InterfaceMeshCutUserObjectBase::initialize()
         _app.getOutputFileBase() + "_" + name() + ".e", *_equation_systems, _t_step + 1, _t);
   }
 
-  calculateNormal();
+  calculateNormals();
 }
 
 const std::vector<Point>
 InterfaceMeshCutUserObjectBase::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
+}
+
+const std::vector<RealVectorValue>
+InterfaceMeshCutUserObjectBase::getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackPlaneNormals() is not implemented for this object.");
 }
 
 CutSubdomainID

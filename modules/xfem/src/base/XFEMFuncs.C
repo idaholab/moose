@@ -819,8 +819,8 @@ pointSegmentDistance(const Point & x0, const Point & x1, const Point & x2, Point
 {
   Point dx = x2 - x1;
   Real m2 = dx * dx;
-  mooseAssert(m2 != 0,
-              "In XFEMFuncs::pointSegmentDistance(), x0 and x1 should be two different points.");
+  if (m2 == 0)
+    mooseError("In XFEMFuncs::pointSegmentDistance(), x0 and x1 should be two different points.");
   // find parameter coordinate of closest point on segment
   Real s12 = (x2 - x0) * dx / m2;
   if (s12 < 0)
@@ -941,7 +941,7 @@ pointTriangleDistance(const Point & x0,
       }
     }
   }
-  mooseError("Cannot find closes location in XFEMFuncs::pointTriangleDistance().");
+  mooseError("Cannot find closest location in XFEMFuncs::pointTriangleDistance().");
 }
 
 bool
@@ -951,6 +951,9 @@ intersectWithEdge(const Point & p1,
                   Point & pint)
 {
   bool has_intersection = false;
+
+  if (vertices.size() != 3)
+    mooseError("The number of vertices of cutting element must be 3.");
 
   Plane elem_plane(vertices[0], vertices[1], vertices[2]);
   Point point = vertices[0];
@@ -996,6 +999,9 @@ bool
 isInsideCutPlane(const std::vector<Point> & vertices, const Point & p)
 {
   unsigned int n_node = vertices.size();
+
+  if (n_node != 3)
+    mooseError("The number of vertices of cutting element must be 3.");
 
   Plane elem_plane(vertices[0], vertices[1], vertices[2]);
   Point normal = elem_plane.unit_normal(vertices[0]);
