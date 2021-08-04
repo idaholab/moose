@@ -10,8 +10,6 @@ In this example, we initialize the first component of the superficial momentum w
 
 !listing modules/navier_stokes/test/tests/ics/cns_test.i block=ICs/superficial_rhou
 
-!syntax description /ICs/PNSInitialCondition
-
 !syntax parameters /ICs/PNSInitialCondition
 
 !syntax inputs /ICs/PNSInitialCondition

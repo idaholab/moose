@@ -8,8 +8,6 @@ In this example, we initialize the density at the desired initial temperature an
 
 !listing modules/navier_stokes/test/tests/ics/test.i block=ICs/rho
 
-!syntax description /ICs/NSInitialCondition
-
 !syntax parameters /ICs/NSInitialCondition
 
 !syntax inputs /ICs/NSInitialCondition
