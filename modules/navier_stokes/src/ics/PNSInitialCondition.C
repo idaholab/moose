@@ -28,17 +28,19 @@ PNSInitialCondition::validParams()
 
   MooseEnum variable_types(
       "pressure temperature rho rhou rhov rhow superficial_rho superficial_rhou superficial_rhov "
-       "superficial_rhow vel_x vel_y vel_z superficial_vel_x superficial_vel_y superficial_vel_z "
-       "specific_volume Mach ht e rho_et superficial_rho_ht superficial_rho_et");
-  params.addParam<MooseEnum>("variable_type",
+      "superficial_rhow vel_x vel_y vel_z superficial_vel_x superficial_vel_y superficial_vel_z "
+      "specific_volume Mach ht e rho_et superficial_rho_ht superficial_rho_et");
+  params.addParam<MooseEnum>(
+      "variable_type",
       variable_types,
       "Specifies what this variable is in the Navier Stokes namespace of variables");
   params.addRequiredParam<Real>("initial_pressure",
                                 "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature",
                                 "The initial temperature, assumed constant everywhere");
-  params.addParam<RealVectorValue>("initial_interstitial_velocity",
-                                   "The initial interstitial velocity, assumed constant everywhere");
+  params.addParam<RealVectorValue>(
+      "initial_interstitial_velocity",
+      "The initial interstitial velocity, assumed constant everywhere");
   params.addParam<RealVectorValue>("initial_superficial_velocity",
                                    "The initial superficial velocity, assumed constant everywhere");
   params.addCoupledVar("porosity", "Porosity variable (defaults to porosity material property).");
@@ -50,10 +52,8 @@ PNSInitialCondition::validParams()
 
 PNSInitialCondition::PNSInitialCondition(const InputParameters & parameters)
   : InitialCondition(parameters),
-    _variable_type(
-        isParamValid("variable_type") ?
-        getParam<MooseEnum>("variable_type") :
-        MooseEnum(_var.name(), _var.name())),
+    _variable_type(isParamValid("variable_type") ? getParam<MooseEnum>("variable_type")
+                                                 : MooseEnum(_var.name(), _var.name())),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _superficial_velocities_set(isParamValid("initial_superficial_velocity") ? true : false),

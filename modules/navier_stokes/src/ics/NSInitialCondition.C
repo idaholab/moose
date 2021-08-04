@@ -31,7 +31,9 @@ NSInitialCondition::validParams()
   MooseEnum variable_types(
       "ht e Mach pressure rho rhou rhov rhow rho_et specific_volume temperature vel_x vel_y vel_z");
   params.addParam<MooseEnum>(
-      "variable_type", variable_types, "Specifies what this variable is in the Navier Stokes namespace of variables");
+      "variable_type",
+      variable_types,
+      "Specifies what this variable is in the Navier Stokes namespace of variables");
   params.addRequiredParam<Real>("initial_pressure",
                                 "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature",
@@ -46,8 +48,8 @@ NSInitialCondition::validParams()
 
 NSInitialCondition::NSInitialCondition(const InputParameters & parameters)
   : InitialCondition(parameters),
-    _variable_type(
-        isParamValid("variable_type") ? getParam<MooseEnum>("variable_type") : MooseEnum(_var.name(), _var.name())),
+    _variable_type(isParamValid("variable_type") ? getParam<MooseEnum>("variable_type")
+                                                 : MooseEnum(_var.name(), _var.name())),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _initial_velocity(getParam<RealVectorValue>("initial_velocity")),
