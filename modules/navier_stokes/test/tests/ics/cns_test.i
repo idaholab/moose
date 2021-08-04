@@ -212,6 +212,11 @@ T=273.15
   []
   [superficial_rhou]
     type = PNSInitialCondition
+    fluid_properties = 'fp'
+    initial_pressure = ${p_initial}
+    initial_temperature = ${T}
+    initial_superficial_velocity = '1 0.2 18'
+    porosity = porosity
     variable = 'superficial_rhou'
   []
   [superficial_rhov]

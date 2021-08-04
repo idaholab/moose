@@ -143,6 +143,10 @@ T=273.15
   []
   [rho]
     type = NSInitialCondition
+    fluid_properties = 'fp'
+    initial_pressure = ${p_initial}
+    initial_temperature = ${T}
+    initial_velocity = '1 0.2 18'
     variable = 'rho'
   []
   [rhou]
