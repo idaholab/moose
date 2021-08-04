@@ -36,11 +36,19 @@ public:
   virtual Real value(const Point & p);
 
 protected:
-  Real _initial_pressure;
-  Real _initial_temperature;
-  RealVectorValue _initial_velocity;
+  /// Used to map the variable to one of the expected types
+  const std::string _variable_type;
 
-  // Fluid properties
+  /// Initial constant value of the pressure
+  const Real _initial_pressure;
+
+  /// Initial constant value of the fluid temperature
+  const Real _initial_temperature;
+
+  /// Initial constant value of the velocity
+  const RealVectorValue _initial_velocity;
+
+  /// Fluid properties
   const IdealGasFluidProperties & _fp;
 
   /// pressure variable name

@@ -27,8 +27,8 @@ PNSInitialCondition::validParams()
 
   MooseEnum variable_types(
       "pressure temperature rho rhou rhov rhow superficial_rho superficial_rhou superficial_rhov "
-       "superficial_rhouw vel_x vel_y vel_z superficial_vel_x superficial_vel_y superficial_vel_z "
-       "specific_volume Mach ht er ho_et superficial_rho_ht superficial_rho_et");
+       "superficial_rhow vel_x vel_y vel_z superficial_vel_x superficial_vel_y superficial_vel_z "
+       "specific_volume Mach ht e rho_et superficial_rho_ht superficial_rho_et");
   params.addParam<MooseEnum>(
       "variable_type", variable_types, "Specifies what this variable is in the Navier Stokes namespace of variables");
   params.addRequiredParam<Real>("initial_pressure",
