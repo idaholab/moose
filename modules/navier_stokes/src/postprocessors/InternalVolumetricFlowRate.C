@@ -49,8 +49,7 @@ InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & p
     _fv_advected_variable(
         dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getADMaterialProperty<Real>("advected_mat_prop")),
-    _advected_material_property_neighbor(getNeighborADMaterialProperty<Real>("advected_mat_prop"))
+    _advected_material_property(getFunctorMaterialProperty<ADReal>("advected_mat_prop"))
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -126,8 +125,10 @@ InternalVolumetricFlowRate::computeQpIntegral()
       // The material property needs to be interpolated since we are on an internal face
       Moose::FV::interpolate(_advected_interp_method,
                              advected_quantity,
-                             MetaPhysicL::raw_value(_advected_material_property[_qp]),
-                             MetaPhysicL::raw_value(_advected_material_property_neighbor[_qp]),
+                             MetaPhysicL::raw_value(_advected_material_property(
+                                 std::make_pair(Moose::ElementType::Element, _qp))),
+                             MetaPhysicL::raw_value(_advected_material_property(
+                                 std::make_pair(Moose::ElementType::Neighbor, _qp))),
                              RealVectorValue(vx_face, vy_face, vz_face),
                              *fi,
                              current_elem_is_fi_elem);
@@ -144,7 +145,8 @@ InternalVolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+      return MetaPhysicL::raw_value(
+                 _advected_material_property(std::make_pair(Moose::ElementType::Element, _qp))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

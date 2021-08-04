@@ -253,6 +253,12 @@ mu=18.23e-6
     prop_names = 'porosity'
     prop_values = '1'
   []
+  [functor_rho]
+    type = RhoFromPTFunctorMaterial
+    fp = fp
+    temperature = T_fluid
+    pressure = pressure
+  []
 []
 
 [Executioner]

@@ -58,7 +58,7 @@
     prop_values = '1  1'
   []
   [ADconst]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     block = '1 2 3'
     prop_names = 'rho_ad'
     prop_values = '1'

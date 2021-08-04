@@ -51,6 +51,9 @@ protected:
    */
   const ADReal & uOnGhost() const;
 
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+  makeElemAndFace(bool fi_elem) const;
+
 private:
   /// Computes the Jacobian contribution for every coupled variable.
   ///

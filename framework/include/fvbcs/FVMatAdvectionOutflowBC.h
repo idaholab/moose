@@ -24,4 +24,7 @@ protected:
 
   /// The advected quantity on the elem
   const FunctorInterface<ADReal> & _adv_quant;
+
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
 };

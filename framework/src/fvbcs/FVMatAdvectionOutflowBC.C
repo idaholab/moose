@@ -25,12 +25,10 @@ FVMatAdvectionOutflowBC::validParams()
       "Outflow boundary condition taking the advected quantity from a material property");
   MooseEnum advected_interp_method("average upwind", "upwind");
 
-  params.addDeprecatedParam<MooseEnum>(
-      "advected_interp_method",
-      advected_interp_method,
-      "The interpolation to use for the advected quantity. Options are "
-      "'upwind' and 'average', with the default being 'upwind'.",
-      "There's no such thing as interpolation on a boundary");
+  params.addParam<MooseEnum>("advected_interp_method",
+                             advected_interp_method,
+                             "The interpolation to use for the advected quantity. Options are "
+                             "'upwind' and 'average', with the default being 'upwind'.");
   return params;
 }
 
@@ -42,13 +40,38 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
                          getFunctorMaterialProperty<ADReal>("advected_quantity"))
                    : static_cast<const FunctorInterface<ADReal> &>(variable()))
 {
+  using namespace Moose::FV;
+
+  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
+  if (advected_interp_method == "average")
+    _advected_interp_method = InterpMethod::Average;
+  else if (advected_interp_method == "upwind")
+    _advected_interp_method = InterpMethod::Upwind;
+  else
+    mooseError("Unrecognized interpolation type ",
+               static_cast<std::string>(advected_interp_method));
 }
 
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  const auto v = _vel(std::make_tuple(_face_info, nullptr, true));
-  const auto adv_quant_boundary =
-      _adv_quant(std::make_tuple(_face_info, nullptr, v * _face_info->normal() > 0));
+  using namespace Moose::FV;
+
+  ADRealVectorValue v;
+  ADReal adv_quant_boundary;
+
+  const auto elem_face = makeElemAndFace(true);
+  const auto neighbor_face = makeElemAndFace(false);
+
+  // Currently only Average is supported for the velocity
+  interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
+
+  interpolate(_advected_interp_method,
+              adv_quant_boundary,
+              _adv_quant(elem_face),
+              _adv_quant(neighbor_face),
+              v,
+              *_face_info,
+              true);
   return _normal * v * adv_quant_boundary;
 }

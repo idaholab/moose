@@ -227,8 +227,13 @@ advected_interp_method = 'average'
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'k cp'
-    prop_values = '${k} ${cp}'
+    prop_names = 'k'
+    prop_values = '${k}'
+  []
+  [functor_constants]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'cp'
+    prop_values = '${cp}'
   []
   [ins_fv]
     type = INSFVMaterial

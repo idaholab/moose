@@ -21,5 +21,5 @@ protected:
   ADReal computeQpResidual() override;
 
   const Real & _rho;
-  const ADMaterialProperty<Real> & _cp;
+  const FunctorMaterialProperty<ADReal> & _cp;
 };
