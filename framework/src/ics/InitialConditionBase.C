@@ -46,7 +46,7 @@ InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
                    ->getVariable(parameters.get<THREAD_ID>("_tid"),
                                  parameters.get<VariableName>("variable"))
                    .isNodal()),
-    MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     FunctionInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
