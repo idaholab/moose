@@ -17,6 +17,7 @@ SolverParams::SolverParams()
     _eigen_problem_type(Moose::EPT_SLEPC_DEFAULT),
     _which_eigen_pairs(Moose::WEP_SLEPC_DEFAULT),
     _eigen_matrix_free(false),
+    _eigen_matrix_vector_mult(false),
     _customized_pc_for_eigen(false),
     _precond_matrix_free(false)
 {

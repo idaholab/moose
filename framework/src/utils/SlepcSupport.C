@@ -19,11 +19,15 @@
 #include "EigenProblem.h"
 #include "FEProblemBase.h"
 #include "NonlinearEigenSystem.h"
-
+// libMesh
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/slepc_macro.h"
-#include <memory>
+#include "libmesh/auto_ptr.h"
+// PETSc
+#include "petscsnes.h"
+// SLEPc
+#include "slepceps.h"
 
 namespace Moose
 {
@@ -36,7 +40,7 @@ InputParameters
 getSlepcValidParams(InputParameters & params)
 {
   MooseEnum solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
-                       "NONLINEAR_POWER NEWTON PJFNK JFNK",
+                       "NONLINEAR_POWER NEWTON PJFNK PJFNKMO JFNK",
                        "PJFNK");
   params.set<MooseEnum>("solve_type") = solve_type;
 
@@ -48,7 +52,8 @@ getSlepcValidParams(InputParameters & params)
                       "NONLINEAR_POWER: Nonlinear Power "
                       "NEWTON: Newton "
                       "PJFNK: Preconditioned Jacobian-free Newton-Kyrlov"
-                      "JFNK: Jacobian-free Newton-Kyrlov");
+                      "JFNK: Jacobian-free Newton-Kyrlov"
+                      "PJFNKMO: Preconditioned Jacobian-free Newton-Kyrlov with matrix only");
 
   // When the eigenvalue problems is reformed as a coupled nonlinear system,
   // we use part of Jacobian as the preconditioning matrix.
@@ -216,6 +221,13 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
   {
     eigen_problem.solverParams()._eigen_matrix_free = true;
     eigen_problem.solverParams()._precond_matrix_free = true;
+  }
+  // We indeed matrices so that we can implement residual evaluations
+  if (params.get<MooseEnum>("solve_type") == "PJFNKMO")
+  {
+    eigen_problem.solverParams()._eigen_matrix_free = true;
+    eigen_problem.solverParams()._precond_matrix_free = false;
+    eigen_problem.solverParams()._eigen_matrix_vector_mult = true;
   }
 }
 
@@ -452,6 +464,13 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       setNewtonPetscOptions(solver_params, params);
       break;
 
+    case Moose::EST_PJFNKMO:
+      solver_params._eigen_matrix_free = true;
+      solver_params._customized_pc_for_eigen = false;
+      solver_params._eigen_matrix_vector_mult = true;
+      setNewtonPetscOptions(solver_params, params);
+      break;
+
     default:
       mooseError("Unknown eigen solver type \n");
   }
@@ -533,6 +552,35 @@ moosePetscSNESFormMatricesTags(
 }
 
 PetscErrorCode
+mooseSlepcEigenFormFunctionMFFD(void * ctx, Vec x, Vec r)
+{
+  PetscErrorCode ierr;
+  PetscErrorCode (*func)(SNES, Vec, Vec, void *);
+  void * fctx;
+  PetscFunctionBegin;
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+  SNES snes = eigen_nl.getSNES();
+
+  eigen_problem->onLinearSolver(true);
+
+  ierr = SNESGetFunction(snes, NULL, &func, &fctx);
+  CHKERRQ(ierr);
+  if (fctx != ctx)
+  {
+    SETERRQ(
+        PetscObjectComm((PetscObject)snes), PETSC_ERR_ARG_INCOMP, "Contexts are not consistent \n");
+  }
+  ierr = (*func)(snes, x, r, ctx);
+  CHKERRQ(ierr);
+
+  eigen_problem->onLinearSolver(false);
+
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
 mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
   PetscBool jisshell, pisshell;
@@ -550,6 +598,41 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   CHKERRQ(ierr);
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
   CHKERRQ(ierr);
+
+  if (jismffd && eigen_problem->solverParams()._eigen_matrix_vector_mult)
+  {
+    ierr = MatMFFDSetFunction(jac, Moose::SlepcSupport::mooseSlepcEigenFormFunctionMFFD, ctx);
+    CHKERRQ(ierr);
+
+    EPS eps = eigen_nl.getEPS();
+    Mat A, B;
+    PetscBool aisshell, bisshell;
+    ierr = EPSGetOperators(eps, &A, &B);
+    CHKERRQ(ierr);
+    ierr = PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell);
+    CHKERRQ(ierr);
+    ierr = PetscObjectTypeCompare((PetscObject)B, MATSHELL, &bisshell);
+    CHKERRQ(ierr);
+    if (aisshell || bisshell)
+    {
+      SETERRQ(PetscObjectComm((PetscObject)snes),
+              PETSC_ERR_ARG_INCOMP,
+              "A and B matrices can not be shell matrices when using PJFNKMO \n");
+    }
+    // Form A and B
+    std::vector<Mat> mats = {A, B};
+    moosePetscSNESFormMatricesTags(
+        snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.eigenMatrixTag()});
+    if (pc != jac)
+    {
+      ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
+      CHKERRQ(ierr);
+      ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
+      CHKERRQ(ierr);
+    }
+    PetscFunctionReturn(0);
+  }
+
   ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pisshell);
   CHKERRQ(ierr);
   if ((jisshell || jismffd) && pisshell)
@@ -683,10 +766,31 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, TagID tag)
 PetscErrorCode
 mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 {
+  PetscErrorCode ierr;
+
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  {
+    EPS eps = eigen_nl.getEPS();
+    Mat A;
+    ST st;
+    // Rest ST state so that we can restrieve matrices
+    ierr = EPSGetST(eps, &st);
+    CHKERRQ(ierr);
+    ierr = STResetMatrixState(st);
+    CHKERRQ(ierr);
+    ierr = EPSGetOperators(eps, &A, NULL);
+    CHKERRQ(ierr);
+
+    ierr = MatMult(A, x, r);
+    CHKERRQ(ierr);
+
+    PetscFunctionReturn(0);
+  }
 
   moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.nonEigenVectorTag());
 
@@ -696,12 +800,28 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 {
+  PetscErrorCode ierr;
+
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
-  moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  {
+    EPS eps = eigen_nl.getEPS();
+    Mat B;
+
+    ierr = EPSGetOperators(eps, NULL, &B);
+    CHKERRQ(ierr);
+
+    ierr = MatMult(B, x, r);
+    CHKERRQ(ierr);
+  }
+  else
+  {
+    moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
+  }
 
   if (eigen_problem->negativeSignEigenKernel())
     VecScale(r, -1.);
@@ -712,11 +832,32 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 {
+  PetscErrorCode ierr;
+
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
-  NonlinearEigenSystem & nl = eigen_problem->getNonlinearEigenSystem();
-  System & sys = nl.system();
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+  System & sys = eigen_nl.system();
+
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  {
+    EPS eps = eigen_nl.getEPS();
+    Mat A, B;
+
+    ierr = EPSGetOperators(eps, &A, &B);
+    CHKERRQ(ierr);
+
+    ierr = MatMult(A, x, Ax);
+    CHKERRQ(ierr);
+    ierr = MatMult(B, x, Bx);
+    CHKERRQ(ierr);
+
+    if (eigen_problem->negativeSignEigenKernel())
+      VecScale(Bx, -1.);
+
+    PetscFunctionReturn(0);
+  }
 
   PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
 
@@ -736,8 +877,11 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
     BX.zero();
   }
 
-  eigen_problem->computeResidualAB(
-      *sys.current_local_solution.get(), AX, BX, nl.nonEigenVectorTag(), nl.eigenVectorTag());
+  eigen_problem->computeResidualAB(*sys.current_local_solution.get(),
+                                   AX,
+                                   BX,
+                                   eigen_nl.nonEigenVectorTag(),
+                                   eigen_nl.eigenVectorTag());
 
   AX.close();
   BX.close();

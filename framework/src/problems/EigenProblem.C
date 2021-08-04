@@ -58,6 +58,13 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _do_free_power_iteration(false),
     _output_inverse_eigenvalue(false),
+    _on_linear_solver(false),
+    _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
+    _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
+    _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
+    _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
+    _solve_timer(registerTimedSection("solve", 1)),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _has_normalization(false),
     _normal_factor(1.0),
     _first_solve(declareRestartableData<bool>("first_solve", true))
@@ -583,7 +590,8 @@ EigenProblem::init()
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If matrix_free=true, this tells Libmesh to use shell matrices
-  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
+  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free &&
+                                      !solverParams()._eigen_matrix_vector_mult);
   // We need to tell libMesh if we are using a shell preconditioning matrix
   _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
 #endif
@@ -603,7 +611,8 @@ EigenProblem::isNonlinearEigenvalueSolver() const
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
-         solverParams()._eigen_solve_type == Moose::EST_JFNK;
+         solverParams()._eigen_solve_type == Moose::EST_JFNK ||
+         solverParams()._eigen_solve_type == Moose::EST_PJFNKMO;
 }
 
 void

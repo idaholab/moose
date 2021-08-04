@@ -365,21 +365,28 @@ NonlinearEigenSystem::nonlinearSolver()
 SNES
 NonlinearEigenSystem::getSNES()
 {
-  SlepcEigenSolver<Number> * solver =
-      cast_ptr<SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
-
-  if (!solver)
-    mooseError("There is no a eigen solver");
+  EPS eps = getEPS();
 
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
-    EPS eps = solver->eps();
     SNES snes = nullptr;
     Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes);
     return snes;
   }
   else
     mooseError("There is no SNES in linear eigen solver");
+}
+
+EPS
+NonlinearEigenSystem::getEPS()
+{
+  SlepcEigenSolver<Number> * solver =
+      cast_ptr<SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
+
+  if (!solver)
+    mooseError("There is no a eigen solver");
+
+  return solver->eps();
 }
 
 void

@@ -483,6 +483,11 @@ public:
   virtual bool computingInitialResidual() const override;
 
   /**
+   * Return solver type as a human readable string
+   */
+  virtual std::string solverTypeString() { return Moose::stringify(solverParams()._type); }
+
+  /**
    * Returns true if we are in or beyond the initialSetup stage
    */
   virtual bool startedInitialSetup() { return _started_initial_setup; }

@@ -30,6 +30,11 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
+  virtual std::string solverTypeString() override
+  {
+    return Moose::stringify(solverParams()._eigen_solve_type);
+  }
+
 #ifdef LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
@@ -189,6 +194,16 @@ public:
    */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
 
+  /**
+   * Whether or not we are in a linear solver iteration
+   */
+  bool onLinearSolver() const { return _on_linear_solver; }
+
+  /**
+   * Set a flag to indicate whether or not we are in a linear solver iteration
+   */
+  void onLinearSolver(bool ols) { _on_linear_solver = ols; }
+
 private:
   /**
    * Do some free/extra power iterations
@@ -219,6 +234,15 @@ protected:
   bool _do_free_power_iteration;
   /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvalue.
   bool _output_inverse_eigenvalue;
+  /// Whether or not we are in linear solver
+  bool _on_linear_solver;
+  /// Timers
+  PerfID _compute_jacobian_tag_timer;
+  PerfID _compute_jacobian_ab_timer;
+  PerfID _compute_residual_tag_timer;
+  PerfID _compute_residual_ab_timer;
+  PerfID _solve_timer;
+  PerfID _compute_jacobian_blocks_timer;
 
   /// Whether or not we normalize eigenvector
   bool _has_normalization;
