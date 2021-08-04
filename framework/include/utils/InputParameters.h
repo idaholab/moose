@@ -743,6 +743,11 @@ public:
                                                const std::vector<T> * the_type);
   ///@}
 
+  /// Combine two vector parameters into a single vector of pairs
+  template <typename T1, typename T2>
+  std::vector<std::pair<T1, T2>> getPairs(const std::string & param1,
+                                          const std::string & param2) const;
+
   /**
    * Return list of controllable parameters
    */
@@ -806,6 +811,9 @@ public:
   }
   std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; }
   ///@}
+
+  /// generate error message prefix with parameter name and location (if available)
+  std::string errorPrefix(const std::string & param) const;
 
   /**
    * Get/set a string representing the raw, unmodified token text for the given param.  This is
@@ -1572,6 +1580,29 @@ InputParameters::getParamHelper(const std::string & name,
                                 const std::vector<T> *)
 {
   return pars.get<std::vector<T>>(name);
+}
+
+template <typename T1, typename T2>
+std::vector<std::pair<T1, T2>>
+InputParameters::getPairs(const std::string & param1, const std::string & param2) const
+{
+  auto v1 = get<std::vector<T1>>(param1);
+  auto v2 = get<std::vector<T2>>(param2);
+
+  auto controllable = getControllableParameters();
+  if (controllable.count(param1) || controllable.count(param2))
+    mooseError(errorPrefix(param1) + " and/or " + errorPrefix(param2) +
+               " are controllable parameters and cannot be retireved using "
+               "MooseObject::getParamPairs/InputParameters::getPairs");
+
+  if (v1.size() != v2.size())
+    mooseError("Vector parameters " + errorPrefix(param1) + "(size: " + v1.size() + ") and " +
+               errorPrefix(param2) + "(size: " + v2.size() + ") are of different lengths \n");
+
+  std::vector<std::pair<T1, T2>> parameter_pair;
+  for (std::size_t i = 0; i < v1.size(); ++i)
+    parameter_pair.emplace_back(std::make_pair(v1[i], v2[i]));
+  return parameter_pair;
 }
 
 InputParameters emptyInputParameters();

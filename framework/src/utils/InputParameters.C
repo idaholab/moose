@@ -1108,3 +1108,12 @@ InputParameters::getControllableParameters() const
       controllable.emplace(it->first);
   return controllable;
 }
+
+std::string
+InputParameters::errorPrefix(const std::string & param) const
+{
+  auto prefix = param + ":";
+  if (!inputLocation(param).empty())
+    prefix = inputLocation(param) + ": (" + paramFullpath(param) + ")";
+  return prefix;
+}
