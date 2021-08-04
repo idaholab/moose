@@ -27,7 +27,6 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: THM
         repo: https://hpcgitlab.hpc.inl.gov/idaholab/thm
-        home: https://hpcsc.hpc.inl.gov/ssl/THM/site/
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         allow-test-objects: true
