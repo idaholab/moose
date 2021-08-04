@@ -289,15 +289,12 @@ public:
   void setFrom(Key k)
   {
     _vals.clear();
-    _vals.push_back(k);
+    _vals.insert(k);
   }
 
   AttribPreAux(TheWarehouse & w) : Attribute(w, "pre_aux") {}
-  AttribPreAux(TheWarehouse & w, unsigned int val) : Attribute(w, "pre_aux")
-  {
-    _vals.push_back(val);
-  }
-  AttribPreAux(TheWarehouse & w, const std::vector<unsigned int> & vals)
+  AttribPreAux(TheWarehouse & w, unsigned int val) : Attribute(w, "pre_aux") { _vals.insert(val); }
+  AttribPreAux(TheWarehouse & w, const std::set<unsigned int> & vals)
     : Attribute(w, "pre_aux"), _vals(vals)
   {
   }
@@ -308,7 +305,7 @@ public:
   clonefunc(AttribPreAux);
 
 private:
-  std::vector<unsigned int> _vals;
+  std::set<unsigned int> _vals;
 };
 
 /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
@@ -324,15 +321,15 @@ public:
   void setFrom(Key k)
   {
     _vals.clear();
-    _vals.push_back(k);
+    _vals.insert(k);
   }
 
   AttribPostAux(TheWarehouse & w) : Attribute(w, "post_aux") {}
   AttribPostAux(TheWarehouse & w, unsigned int val) : Attribute(w, "post_aux")
   {
-    _vals.push_back(val);
+    _vals.insert(val);
   }
-  AttribPostAux(TheWarehouse & w, const std::vector<unsigned int> & vals)
+  AttribPostAux(TheWarehouse & w, const std::set<unsigned int> & vals)
     : Attribute(w, "post_aux"), _vals(vals)
   {
   }
@@ -343,7 +340,7 @@ public:
   clonefunc(AttribPostAux);
 
 private:
-  std::vector<unsigned int> _vals;
+  std::set<unsigned int> _vals;
 };
 
 class AttribName : public Attribute

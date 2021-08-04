@@ -166,10 +166,8 @@ groupUserObjects(TheWarehouse & w,
   }
 
   for (auto & item : pre_aux_dependencies)
-    w.update(item.first,
-             AttribPreAux(w, std::vector<unsigned int>(item.second.begin(), item.second.end())));
+    w.update(item.first, AttribPreAux(w, item.second));
 
   for (auto & item : post_aux_dependencies)
-    w.update(item.first,
-             AttribPostAux(w, std::vector<unsigned int>(item.second.begin(), item.second.end())));
+    w.update(item.first, AttribPostAux(w, item.second));
 }

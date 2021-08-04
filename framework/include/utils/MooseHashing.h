@@ -12,6 +12,7 @@
 #include <functional>
 #include <vector>
 #include <utility>
+#include <set>
 
 namespace Moose
 {
@@ -37,6 +38,16 @@ hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
 template <typename T, typename... Rest>
 inline void
 hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
+{
+  for (auto & val : v)
+    hash_combine(seed, val);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
+/// Used for hash function specialization for Attribute objects.
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const std::set<T> & v, Rest &&... rest)
 {
   for (auto & val : v)
     hash_combine(seed, val);

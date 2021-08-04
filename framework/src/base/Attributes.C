@@ -28,6 +28,8 @@
 #include "Reporter.h"
 #include "SystemBase.h"
 
+#include <algorithm>
+
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
 {
@@ -313,13 +315,18 @@ bool
 AttribPreAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPreAux *>(&other);
-  if (!a || a->_vals.size() < 1)
-    return false;
-  auto cond = a->_vals[0];
 
-  for (auto val : _vals)
-    if (val == cond)
-      return true;
+  if (!a)
+    return false;
+
+  mooseAssert(a->_vals.size() == 1,
+              "Anticipated this function being passed an AttribPreAux object with a _vals member "
+              "containing only one item");
+
+  auto cond = *a->_vals.begin();
+
+  if (_vals.find(cond) != _vals.end())
+    return true;
   return false;
 }
 
@@ -327,13 +334,10 @@ bool
 AttribPreAux::isEqual(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPreAux *>(&other);
-  if (!a || a->_vals.size() != _vals.size())
+  if (!a)
     return false;
 
-  for (size_t i = 0; i < a->_vals.size(); i++)
-    if (a->_vals[i] != _vals[i])
-      return false;
-  return true;
+  return _vals == a->_vals;
 }
 
 void
@@ -345,13 +349,18 @@ bool
 AttribPostAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPostAux *>(&other);
-  if (!a || a->_vals.size() < 1)
-    return false;
-  auto cond = a->_vals[0];
 
-  for (auto val : _vals)
-    if (val == cond)
-      return true;
+  if (!a)
+    return false;
+
+  mooseAssert(a->_vals.size() == 1,
+              "Anticipated this function being passed an AttribPostAux object with a _vals member "
+              "containing only one item");
+
+  auto cond = *a->_vals.begin();
+
+  if (_vals.find(cond) != _vals.end())
+    return true;
   return false;
 }
 
@@ -359,13 +368,10 @@ bool
 AttribPostAux::isEqual(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPostAux *>(&other);
-  if (!a || a->_vals.size() != _vals.size())
+  if (!a)
     return false;
 
-  for (size_t i = 0; i < a->_vals.size(); i++)
-    if (a->_vals[i] != _vals[i])
-      return false;
-  return true;
+  return _vals == a->_vals;
 }
 
 void
