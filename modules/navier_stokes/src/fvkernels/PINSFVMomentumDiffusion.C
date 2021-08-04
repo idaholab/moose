@@ -64,28 +64,52 @@ ADReal
 PINSFVMomentumDiffusion::computeQpResidual()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  // Compute the diffusion driven by the velocity gradient
+  using namespace Moose::FV;
 
-  const auto mu_face = _mu(std::make_tuple(_face_info, &_cd_limiter, true));
-  const auto eps_face = _eps(std::make_tuple(_face_info, &_cd_limiter, true));
+  const auto elem_face = makeElemAndFace(&_face_info->elem());
+  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
+  const auto mu_elem = _mu(elem_face);
+  const auto mu_neighbor = _mu(neighbor_face);
+  const auto eps_elem = _eps(elem_face);
+  const auto eps_neighbor = _eps(neighbor_face);
+
+  // Compute the diffusion driven by the velocity gradient
+  // Interpolate viscosity divided by porosity on the face
+  ADReal mu_eps_face;
+  interpolate(Moose::FV::InterpMethod::Average,
+              mu_eps_face,
+              mu_elem / eps_elem,
+              mu_neighbor / eps_neighbor,
+              *_face_info,
+              true);
 
   // Compute face superficial velocity gradient
   auto dudn = gradUDotNormal();
 
   // First term of residual
-  ADReal residual = mu_face / eps_face * dudn;
+  ADReal residual = mu_eps_face * dudn;
 
   if (_smooth_porosity)
   {
     // Get the face porosity gradient separately
     const auto & grad_eps_face = MetaPhysicL::raw_value(_eps_var->adGradSln(*_face_info));
 
-    ADRealVectorValue term_face = mu_face / (eps_face * eps_face) * grad_eps_face;
-    const auto vel_face = (*_vel)(std::make_tuple(_face_info, &_cd_limiter, true));
+    ADRealVectorValue term_elem = mu_elem / eps_elem / eps_elem * grad_eps_face;
+    ADRealVectorValue term_neighbor = mu_neighbor / eps_neighbor / eps_neighbor * grad_eps_face;
+
+    const auto vel_elem = (*_vel)(elem_face);
+    const auto vel_neighbor = (*_vel)(neighbor_face);
 
     for (int i = 0; i < LIBMESH_DIM; i++)
-      term_face(i) *= vel_face(i);
+    {
+      term_elem(i) *= vel_elem(i);
+      term_neighbor(i) *= vel_neighbor(i);
+    }
 
+    // Interpolate to get the face value
+    ADRealVectorValue term_face;
+    interpolate(
+        Moose::FV::InterpMethod::Average, term_face, term_elem, term_neighbor, *_face_info, true);
     residual -= term_face * _normal;
   }
   return -residual;

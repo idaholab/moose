@@ -76,7 +76,8 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _rho(getFunctorMaterialProperty<ADReal>("rho")),
-    _dim(_subproblem.mesh().dimension())
+    _dim(_subproblem.mesh().dimension()),
+    _cd_limiter(Moose::FV::Limiter::build(Moose::FV::LimiterType::CentralDifference))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -292,18 +293,21 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff, &elem_velocity, &elem, this](
-                            const Elem & libmesh_dbg_var(functor_elem),
-                            const Elem * const neighbor,
-                            const FaceInfo * const fi,
-                            const Point & surface_vector,
-                            Real libmesh_dbg_var(coord),
-                            const bool elem_has_info) {
+  auto action_functor = [&coeff,
+                         &elem_velocity,
+#ifndef NDEBUG
+                         &elem,
+#endif
+                         this](const Elem & libmesh_dbg_var(functor_elem),
+                               const Elem * const neighbor,
+                               const FaceInfo * const fi,
+                               const Point & surface_vector,
+                               Real libmesh_dbg_var(coord),
+                               const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),
                 "Surely the element has to match one of the face information's elements right?");
-    static const ADReal dummy = 0;
 
     const Point normal = elem_has_info ? fi->normal() : Point(-fi->normal());
     const Point & rc_centroid = elem_has_info ? fi->elemCentroid() : fi->neighborCentroid();
@@ -355,18 +359,9 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
           if (_w_var)
             face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-          // At the point that we support more advection interpolation strategies than upwind and
-          // average (central-differencing), we will need to pass phi_downwind, phi_upwind, and
-          // grad_phi_upwind arguments to interpCoeffs. However, because upwind and average
-          // interpolations are independent of the values of those arguments we can just pass in a
-          // dummy value for the phi values and a nullptr for the gradient
-          const bool fi_elem_is_upwind = face_velocity * fi->normal() > 0;
           const auto advection_coeffs =
-              Moose::FV::interpCoeffs(*_limiter, dummy, dummy, nullptr, *fi, fi_elem_is_upwind);
-          const bool functor_elem_is_upwind = (fi_elem_is_upwind == (&elem == &fi->elem()));
-          const auto & advection_coeff =
-              functor_elem_is_upwind ? advection_coeffs.first : advection_coeffs.second;
-          ADReal temp_coeff = face_rho * face_velocity * surface_vector * advection_coeff;
+              Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
+          ADReal temp_coeff = face_rho * face_velocity * surface_vector * advection_coeffs.first;
 
           if (_fully_developed_flow_boundaries.find(bc_id) ==
               _fully_developed_flow_boundaries.end())
@@ -425,18 +420,9 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
                            *fi,
                            elem_has_info);
 
-    // At the point that we support more advection interpolation strategies than upwind and average
-    // (central-differencing), we will need to pass phi_downwind, phi_upwind, and grad_phi_upwind
-    // arguments to interpCoeffs. However, because upwind and average interpolations are independent
-    // of the values of those arguments we can just pass in a dummy value for the phi values and a
-    // nullptr for the gradient
-    const bool fi_elem_is_upwind = interp_v * fi->normal() > 0;
     const auto advection_coeffs =
-        Moose::FV::interpCoeffs(*_limiter, dummy, dummy, nullptr, *fi, fi_elem_is_upwind);
-    const bool functor_elem_is_upwind = (fi_elem_is_upwind == (&elem == &fi->elem()));
-    const auto & advection_coeff =
-        functor_elem_is_upwind ? advection_coeffs.first : advection_coeffs.second;
-    ADReal temp_coeff = face_rho * interp_v * surface_vector * advection_coeff;
+        Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, interp_v);
+    ADReal temp_coeff = face_rho * interp_v * surface_vector * advection_coeffs.first;
 
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
     // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
@@ -484,7 +470,11 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
     return;
   }
 
-  v = _vel(std::make_tuple(_face_info, _cd_limiter.get(), true));
+  const auto elem_face = makeElemAndFace(elem);
+  const auto neighbor_face = makeElemAndFace(neighbor);
+
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
 
   if (m == Moose::FV::InterpMethod::Average)
     return;
@@ -563,11 +553,19 @@ ADReal
 INSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
+  ADReal adv_quant_interface;
+
+  const auto elem_face = makeElemAndFace(&_face_info->elem());
+  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
 
   this->interpolate(_velocity_interp_method, v);
-  const auto adv_quant_interface =
-      _adv_quant(std::make_tuple(_face_info, _limiter.get(), v * _face_info->normal() > 0));
-
+  Moose::FV::interpolate(_advected_interp_method,
+                         adv_quant_interface,
+                         _adv_quant(elem_face),
+                         _adv_quant(neighbor_face),
+                         v,
+                         *_face_info,
+                         true);
   return _normal * v * adv_quant_interface;
 }
 
