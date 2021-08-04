@@ -802,7 +802,7 @@ public:
   FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
 
   template <typename T>
-  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name) const;
+  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name);
 
 protected:
   /**
@@ -959,17 +959,9 @@ SubProblem::declareFunctorProperty(const std::string & name)
 
 template <typename T>
 const FunctorMaterialProperty<T> &
-SubProblem::getFunctorProperty(const std::string & name) const
+SubProblem::getFunctorProperty(const std::string & name)
 {
-  auto it = _functor_material_properties.find(name);
-  if (it == _functor_material_properties.end())
-    mooseError("Requested functor material property ",
-               name,
-               " not found. Make sure a material provides it");
-  auto * const property = dynamic_cast<FunctorMaterialProperty<T> * const>(it->second.get());
-  if (!property)
-    mooseError("Inconsistent material property types");
-  return *property;
+  return declareFunctorProperty<T>(name);
 }
 
 namespace Moose
