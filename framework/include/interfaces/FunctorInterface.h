@@ -45,6 +45,8 @@ public:
   virtual T operator()(const ElemAndFaceArg & elem_and_face) const = 0;
   virtual T
   operator()(const std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool> & face) const = 0;
+  virtual T operator()(const unsigned int & qp) const = 0;
+  virtual T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const = 0;
 };
 
 template <typename T>
@@ -61,6 +63,8 @@ public:
   using ElemFn = std::function<T(const Elem * const &)>;
   using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
   using FaceFn = std::function<T(const FaceArg &)>;
+  using QpFn = std::function<T(const unsigned int &)>;
+  using TQpFn = std::function<T(const std::pair<Moose::ElementType, unsigned int> &)>;
 
   template <typename PolymorphicLambda>
   void setFunction(const MooseMesh & mesh,
@@ -70,11 +74,15 @@ public:
   T operator()(const Elem * const & elem) const override final;
   T operator()(const ElemAndFaceArg & elem_and_face) const override final;
   T operator()(const FaceArg & face) const override final;
+  T operator()(const unsigned int & qp) const override final;
+  T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
 
 private:
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
   FaceFn _face_functor;
+  QpFn _qp_functor;
+  TQpFn _tqp_functor;
   std::string _name;
 };
 
@@ -103,6 +111,8 @@ GenericFunctor<T>::setFunction(const MooseMesh & mesh,
   }
 
   _face_functor = my_lammy;
+  _qp_functor = my_lammy;
+  _tqp_functor = my_lammy;
 }
 
 template <typename T>
@@ -136,4 +146,18 @@ GenericFunctor<T>::operator()(const GenericFunctor<T>::FaceArg & face) const
 {
   mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
   return _face_functor(face);
+}
+
+template <typename T>
+T
+GenericFunctor<T>::operator()(const unsigned int & qp) const
+{
+  return _qp_functor(qp);
+}
+
+template <typename T>
+T
+GenericFunctor<T>::operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const
+{
+  return _tqp_functor(tqp);
 }

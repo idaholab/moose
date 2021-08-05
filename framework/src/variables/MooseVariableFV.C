@@ -1105,6 +1105,26 @@ MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) co
   }
 }
 
+template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::operator()(
+    const std::pair<Moose::ElementType, unsigned int> & tqp) const
+{
+  const auto elem_type = tqp.first;
+  const auto qp = tqp.second;
+  switch (elem_type)
+  {
+    case Moose::ElementType::Element:
+      return adSln()[qp];
+
+    case Moose::ElementType::Neighbor:
+      return adSlnNeighbor()[qp];
+
+    default:
+      mooseError("Unrecognized element type");
+  }
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable
