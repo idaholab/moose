@@ -356,7 +356,7 @@ MaterialBase::declareFunctorProperty(const std::string & name)
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return _subproblem.declareFunctorProperty<T>(prop_name);
+  return _subproblem.declareFunctorProperty<T>(prop_name, _tid);
 }
 
 template <typename T>

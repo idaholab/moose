@@ -66,6 +66,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
   _active_fe_var_coupleable_vector_tags.resize(n_threads);
   _active_sc_var_coupleable_matrix_tags.resize(n_threads);
   _active_sc_var_coupleable_vector_tags.resize(n_threads);
+
+  _functor_material_properties.resize(n_threads);
 }
 
 SubProblem::~SubProblem() {}

@@ -410,7 +410,7 @@ MaterialPropertyInterface::getFunctorMaterialProperty(const std::string & name)
   if (default_property)
     return *default_property;
 
-  return _mi_subproblem.getFunctorProperty<T>(prop_name);
+  return _mi_subproblem.getFunctorProperty<T>(prop_name, _mi_tid);
 }
 
 template <typename T>

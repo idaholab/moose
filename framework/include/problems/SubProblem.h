@@ -799,10 +799,10 @@ public:
   void clearAllDofIndices();
 
   template <typename T>
-  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
+  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name, THREAD_ID tid);
 
   template <typename T>
-  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name);
+  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name, THREAD_ID tid);
 
 protected:
   /**
@@ -909,7 +909,7 @@ protected:
   bool _have_ad_objects;
 
   /// Functor material properties for this problem
-  std::unordered_map<std::string, std::unique_ptr<FunctorPropertyValue>>
+  std::vector<std::unordered_map<std::string, std::unique_ptr<FunctorPropertyValue>>>
       _functor_material_properties;
 
 private:
@@ -947,10 +947,13 @@ private:
 
 template <typename T>
 FunctorMaterialProperty<T> &
-SubProblem::declareFunctorProperty(const std::string & name)
+SubProblem::declareFunctorProperty(const std::string & name, const THREAD_ID tid)
 {
-  auto pr = _functor_material_properties.emplace(
-      name, std::make_unique<FunctorMaterialProperty<T>>(name));
+  mooseAssert(tid < _functor_material_properties.size(),
+              "Requested thread ID " << std::to_string(tid) << " too large");
+  auto & functor_material_properties = _functor_material_properties[tid];
+  auto pr =
+      functor_material_properties.emplace(name, std::make_unique<FunctorMaterialProperty<T>>(name));
   auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(pr.first->second.get());
   if (!property)
     mooseError("Inconsistent material property types");
@@ -959,9 +962,9 @@ SubProblem::declareFunctorProperty(const std::string & name)
 
 template <typename T>
 const FunctorMaterialProperty<T> &
-SubProblem::getFunctorProperty(const std::string & name)
+SubProblem::getFunctorProperty(const std::string & name, const THREAD_ID tid)
 {
-  return declareFunctorProperty<T>(name);
+  return declareFunctorProperty<T>(name, tid);
 }
 
 namespace Moose
