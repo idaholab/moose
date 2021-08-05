@@ -266,9 +266,6 @@ petscSetOptions(FEProblemBase & problem)
   // Reference to the options stored in FEPRoblem
   PetscOptions & petsc = problem.getPetscOptions();
 
-  if (petsc.inames.size() != petsc.values.size())
-    mooseError("PETSc names and options are not the same length");
-
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
   PetscOptionsClear();
 #else
@@ -280,9 +277,10 @@ petscSetOptions(FEProblemBase & problem)
   // Add any additional options specified in the input file
   for (const auto & flag : petsc.flags)
     setSinglePetscOption(flag.rawName().c_str());
+
   // Add option pairs
-  for (unsigned int i = 0; i < petsc.inames.size(); ++i)
-    setSinglePetscOption(petsc.inames[i], petsc.values[i]);
+  for (auto & option : petsc.pairs)
+    setSinglePetscOption(option.first, option.second);
 
   addPetscOptionsFromCommandline();
 }
@@ -612,10 +610,9 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   }
 
   // The parameters contained in the Action
-  const MultiMooseEnum & petsc_options = params.get<MultiMooseEnum>("petsc_options");
-  const MultiMooseEnum & petsc_options_inames = params.get<MultiMooseEnum>("petsc_options_iname");
-  const std::vector<std::string> & petsc_options_values =
-      params.get<std::vector<std::string>>("petsc_options_value");
+  const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
+  const auto & petsc_pair_options =
+      params.getPairs<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
 
   // A reference to the PetscOptions object that contains the settings that will be used in the
   // solve
@@ -668,10 +665,6 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       // We register the reason option as already existing
       reason_flag.first = true;
 
-  // Check that the name value pairs are sized correctly
-  if (petsc_options_inames.size() != petsc_options_values.size())
-    mooseError("PETSc names and options are not the same length");
-
   // Setup the name value pairs
   bool boomeramg_found = false;
   bool strong_threshold_found = false;
@@ -687,40 +680,30 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   bool matptap_found = false;
   bool hmg_strong_threshold_found = false;
 #endif
-  bool option_changed = false;
-  std::vector<std::string> new_option_names;
-  std::vector<std::string> new_option_values;
-  for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
+  std::vector<std::pair<std::string, std::string>> new_options;
+
+  for (const auto & option : petsc_pair_options)
   {
-    new_option_names.clear();
-    new_option_values.clear();
-    option_changed = false;
+    new_options.clear();
+
     // Do not add duplicate settings
-    if (find(po.inames.begin(), po.inames.end(), petsc_options_inames[i]) == po.inames.end())
+    if (MooseUtils::findPair(po.pairs, option.first, MooseUtils::Any) == po.pairs.end())
     {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
-      if (petsc_options_inames[i] == "-pc_factor_mat_solver_package")
-      {
-        new_option_names.push_back("-pc_factor_mat_solver_type");
-        new_option_values.push_back(petsc_options_values[i]);
-        option_changed = true;
-      }
+      if (option.first == "-pc_factor_mat_solver_package")
+        new_options.emplace_back("-pc_factor_mat_solver_type", option.second);
 #else
-      if (petsc_options_inames[i] == "-pc_factor_mat_solver_type")
-      {
-        new_option_names.push_back("-pc_factor_mat_solver_package");
-        new_option_values.push_back(petsc_options_values[i]);
-        option_changed = true;
-      }
+      if (option.first == "-pc_factor_mat_solver_type")
+        new_options.push_back("-pc_factor_mat_solver_package", option.second);
 #endif
 
       // Look for a pc description
-      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" ||
-          petsc_options_inames[i] == "-pc_hypre_type")
-        pc_description += petsc_options_values[i] + ' ';
+      if (option.first == "-pc_type" || option.first == "-pc_sub_type" ||
+          option.first == "-pc_hypre_type")
+        pc_description += option.second + ' ';
 
 #if !PETSC_VERSION_LESS_THAN(3, 12, 0)
-      if (petsc_options_inames[i] == "-pc_type" && petsc_options_values[i] == "hmg")
+      if (option.first == "-pc_type" && option.second == "hmg")
         hmg_found = true;
 
         // MPIAIJ for PETSc 3.12.0: -matptap_via
@@ -728,98 +711,76 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         // MPIAIJ for PETSc 3.13 or higher: -matptap_via, -matproduct_ptap_via
         // MAIJ for PETSc 3.13 or higher: -matproduct_ptap_via
 #if !PETSC_VERSION_LESS_THAN(3, 13, 0)
-      if (hmg_found && (petsc_options_inames[i] == "-matptap_via" ||
-                        petsc_options_inames[i] == "-matmaijptap_via"))
-      {
-        new_option_names.push_back("-matproduct_ptap_via");
-        new_option_values.push_back(petsc_options_values[i]);
-        option_changed = true;
-      }
+      if (hmg_found && (option.first == "-matptap_via" || option.first == "-matmaijptap_via"))
+        new_options.emplace_back("-matproduct_ptap_via", option.second);
 #else
-      if (hmg_found && (petsc_options_inames[i] == "-matproduct_ptap_via"))
+      if (hmg_found && (option.first == "-matproduct_ptap_via"))
       {
-        new_option_names.push_back("-matptap_via");
-        new_option_values.push_back(petsc_options_values[i]);
-        new_option_names.push_back("-matmaijptap_via");
-        new_option_values.push_back(petsc_options_values[i]);
-        option_changed = true;
+        new_options.emplace_back("-matptap_via", option.second);
+        new_options.emplace_back("-matmaijptap_via", option.second);
       }
 #endif
 
-      if (petsc_options_inames[i] == "-matptap_via" ||
-          petsc_options_inames[i] == "-matmaijptap_via" ||
-          petsc_options_inames[i] == "-matproduct_ptap_via")
+      if (option.first == "-matptap_via" || option.first == "-matmaijptap_via" ||
+          option.first == "-matproduct_ptap_via")
         matptap_found = true;
 
       // For 3D problems, we need to set this 0.7
-      if (petsc_options_inames[i] == "-hmg_inner_pc_hypre_boomeramg_strong_threshold")
+      if (option.first == "-hmg_inner_pc_hypre_boomeramg_strong_threshold")
         hmg_strong_threshold_found = true;
 #endif
       // This special case is common enough that we'd like to handle it for the user.
-      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+      if (option.first == "-pc_hypre_type" && option.second == "boomeramg")
         boomeramg_found = true;
-      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+      if (option.first == "-pc_hypre_boomeramg_strong_threshold")
         strong_threshold_found = true;
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-      if ((petsc_options_inames[i] == "-pc_factor_mat_solver_package" ||
-           petsc_options_inames[i] == "-pc_factor_mat_solver_type") &&
-          petsc_options_values[i] == "superlu_dist")
+      if ((option.first == "-pc_factor_mat_solver_package" ||
+           option.first == "-pc_factor_mat_solver_type") &&
+          option.second == "superlu_dist")
         superlu_dist_found = true;
-      if (petsc_options_inames[i] == "-mat_superlu_dist_fact")
+      if (option.first == "-mat_superlu_dist_fact")
         fact_pattern_found = true;
-      if (petsc_options_inames[i] == "-mat_superlu_dist_replacetinypivot")
+      if (option.first == "-mat_superlu_dist_replacetinypivot")
         tiny_pivot_found = true;
 #endif
 
-      if (option_changed)
-      {
-        for (MooseIndex(new_option_names.size()) op = 0; op < new_option_names.size(); op++)
-        {
-          po.inames.push_back(new_option_names[op]);
-          po.values.push_back(new_option_values[op]);
-        }
-      }
+      if (!new_options.empty())
+        std::copy(new_options.begin(), new_options.end(), std::back_inserter(po.pairs));
       else
-      {
-        po.inames.push_back(petsc_options_inames[i]);
-        po.values.push_back(petsc_options_values[i]);
-      }
+        po.pairs.push_back(option);
     }
     else
     {
-      for (unsigned int j = 0; j < po.inames.size(); j++)
-        if (po.inames[j] == petsc_options_inames[i])
-          po.values[j] = petsc_options_values[i];
+      for (unsigned int j = 0; j < po.pairs.size(); j++)
+        if (option.first == po.pairs[j].first)
+          po.pairs[j].second = option.second;
     }
   }
 
 #if !PETSC_VERSION_LESS_THAN(3, 14, 0)
   for (const auto & reason_flag : reason_flags)
-    // Was the option already found in PetscOptions::flags? Or does it exist in PetscOptions::inames
-    // already? If not, then we add our flag
+    // Was the option already found in PetscOptions::flags? Or does it exist in PetscOptions::pairs
+    // as an iname already? If not, then we add our flag
     if (!reason_flag.first &&
-        (std::find(po.inames.begin(), po.inames.end(), reason_flag.second) == po.inames.end()))
-    {
-      po.inames.push_back(reason_flag.second);
-      po.values.push_back("::failed");
-    }
+        (std::find_if(po.pairs.begin(), po.pairs.end(), [&reason_flag](auto & pair) {
+           return pair.first == reason_flag.second;
+         }) == po.pairs.end()))
+      po.pairs.emplace_back(reason_flag.second, "::failed");
 #endif
 
   // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold
-  // value
-  // We will provide that for the user here if they haven't supplied it themselves.
+  // value. We will provide that for the user here if they haven't supplied it themselves.
   if (boomeramg_found && !strong_threshold_found && fe_problem.mesh().dimension() == 3)
   {
-    po.inames.push_back("-pc_hypre_boomeramg_strong_threshold");
-    po.values.push_back("0.7");
+    po.pairs.emplace_back("-pc_hypre_boomeramg_strong_threshold", "0.7");
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
 #if !PETSC_VERSION_LESS_THAN(3, 12, 0)
   if (hmg_found && !hmg_strong_threshold_found && fe_problem.mesh().dimension() == 3)
   {
-    po.inames.push_back("-hmg_inner_pc_hypre_boomeramg_strong_threshold");
-    po.values.push_back("0.7");
+    po.pairs.emplace_back("-hmg_inner_pc_hypre_boomeramg_strong_threshold", "0.7");
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
@@ -828,13 +789,10 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   if (hmg_found && !matptap_found)
   {
 #if !PETSC_VERSION_LESS_THAN(3, 13, 0)
-    po.inames.push_back("-matproduct_ptap_via");
-    po.values.push_back("allatonce");
+    po.pairs.emplace_back("-matproduct_ptap_via", "allatonce");
 #else
-    po.inames.push_back("-matptap_via");
-    po.values.push_back("allatonce");
-    po.inames.push_back("-matmaijptap_via");
-    po.values.push_back("allatonce");
+    po.pairs.emplace_back("-matptap_via", "allatonce");
+    po.pairs.emplace_back("-matmaijptap_via", "allatonce");
 #endif
   }
 #endif
@@ -844,12 +802,12 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // SamePattern_SameRowPerm, otherwise we use whatever we have in PETSc
   if (superlu_dist_found && !fact_pattern_found)
   {
-    po.inames.push_back("-mat_superlu_dist_fact");
+    po.pairs.emplace_back("-mat_superlu_dist_fact",
 #if PETSC_VERSION_LESS_THAN(3, 7, 5)
-    po.values.push_back("SamePattern_SameRowPerm");
+                          "SamePattern_SameRowPerm");
     pc_description += "mat_superlu_dist_fact: SamePattern_SameRowPerm ";
 #else
-    po.values.push_back("SamePattern");
+                          "SamePattern");
     pc_description += "mat_superlu_dist_fact: SamePattern ";
 #endif
   }
@@ -857,8 +815,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // restore this superlu  option
   if (superlu_dist_found && !tiny_pivot_found)
   {
-    po.inames.push_back("-mat_superlu_dist_replacetinypivot");
-    po.values.push_back("1");
+    po.pairs.emplace_back("-mat_superlu_dist_replacetinypivot", "1");
     pc_description += " mat_superlu_dist_replacetinypivot: true ";
   }
 #endif
@@ -948,8 +905,8 @@ isSNESVI(FEProblemBase & fe_problem)
   for (int i = 0; i < argc; i++)
     cml_arg.push_back(args[i]);
 
-  if (std::find(petsc.values.begin(), petsc.values.end(), "vinewtonssls") == petsc.values.end() &&
-      std::find(petsc.values.begin(), petsc.values.end(), "vinewtonrsls") == petsc.values.end() &&
+  if (MooseUtils::findPair(petsc.pairs, MooseUtils::Any, "vinewtonssls") == petsc.pairs.end() &&
+      MooseUtils::findPair(petsc.pairs, MooseUtils::Any, "vinewtonrsls") == petsc.pairs.end() &&
       std::find(cml_arg.begin(), cml_arg.end(), "vinewtonssls") == cml_arg.end() &&
       std::find(cml_arg.begin(), cml_arg.end(), "vinewtonrsls") == cml_arg.end())
     return false;
@@ -1057,14 +1014,10 @@ disableNonlinearConvergedReason(FEProblemBase & fe_problem)
 
   petsc_options.flags.erase("-snes_converged_reason");
 
-  auto & inames = petsc_options.inames;
-  auto it = std::find(inames.begin(), inames.end(), "-snes_converged_reason");
-  if (it != inames.end())
-  {
-    const auto pos = std::distance(inames.begin(), it);
-    inames.erase(it);
-    petsc_options.values.erase(petsc_options.values.begin() + pos);
-  }
+  auto & pairs = petsc_options.pairs;
+  auto it = MooseUtils::findPair(pairs, "-snes_converged_reason", MooseUtils::Any);
+  if (it != pairs.end())
+    pairs.erase(it);
 }
 
 void
@@ -1074,14 +1027,10 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
 
   petsc_options.flags.erase("-ksp_converged_reason");
 
-  auto & inames = petsc_options.inames;
-  auto it = std::find(inames.begin(), inames.end(), "-ksp_converged_reason");
-  if (it != inames.end())
-  {
-    const auto pos = std::distance(inames.begin(), it);
-    inames.erase(it);
-    petsc_options.values.erase(petsc_options.values.begin() + pos);
-  }
+  auto & pairs = petsc_options.pairs;
+  auto it = MooseUtils::findPair(pairs, "-ksp_converged_reason", MooseUtils::Any);
+  if (it != pairs.end())
+    pairs.erase(it);
 }
 
 } // Namespace PetscSupport
