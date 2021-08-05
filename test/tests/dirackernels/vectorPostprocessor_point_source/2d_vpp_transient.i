@@ -30,13 +30,13 @@
   [./vpp_point_source]
     type = VectorPostprocessorPointSource
     variable = u
-    vector_postprocessor = point_sample
+    vector_postprocessor = point_sample_source
     value_name = u
   [../]
 []
 
 [VectorPostprocessors]
-  [point_sample]
+  [point_sample_source]
     type = PointValueSampler
     variable = u
     points = '0.2 0.8 0.0  0.2 0.2 0.0'

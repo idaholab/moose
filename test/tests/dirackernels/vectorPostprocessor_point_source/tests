@@ -1,25 +1,43 @@
 [Tests]
-  issues = '#15831'
-  design = 'syntax/DiracKernels/index.md'
-  [2dConstant]
+  design = 'VectorPostprocessorPointSource.md'
+  [vpp]
+    issues = '#15831'
+    requirement = 'The system shall support point sources with locations and values given by a'
+    [2dConstant]
+      type = 'Exodiff'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source reporter_point_source_err'"
+      exodiff = '2d_vpp_out.e'
+      detail = ' VectorPostprocessor in a steady state 2D problem, reproducing the constantPointSource.'
+    []
+    [3dConstant]
+      type = 'Exodiff'
+      input = '3d_vpp.i'
+      exodiff = '3d_vpp_out.e'
+      detail = " in steady state 3D problem, reproducing the constantPointSource."
+    []
+    [2dTransient]
+      type = 'CSVDiff'
+      input = '2d_vpp_transient.i'
+      csvdiff = '2d_vpp_transient_out_point_sample_out.csv'
+      detail = "in a transient problem with the vpp source value changing as the vpp changes."
+    []
+  []
+  [reporter]
+    issues = '#18528'
     type = 'Exodiff'
     input = '2d_vpp.i'
     exodiff = '2d_vpp_out.e'
-    requirement = "The system shall support point sources with locations and values given by a VectorPostprocessor "
-                  "in a steady state 2D problem, reproducing the constantPointSource."
+    cli_args = "DiracKernels/inactive='vpp_point_source reporter_point_source_err'"
+    requirement = "The system shall support point sources with locations and values given by a"
+                  " ConstantReporter in a steady state 2D problem, reproducing the constantPointSource."
   []
-  [3dConstant]
-    type = 'Exodiff'
-    input = '3d_vpp.i'
-    exodiff = '3d_vpp_out.e'
-    requirement = "The system shall support point sources with locations and values referenced by name from the input "
-                  "file given by a VectorPostprocessor in steady state 3D problem, reproducing the constantPointSource."
-  []
-  [2dTransient]
-    type = 'CSVDiff'
-    input = '2d_vpp_transient.i'
-    csvdiff = '2d_vpp_transient_out_point_sample_out.csv'
-    requirement = "The system shall support point sources with locations and values given by a vector postProcessor in a "
-                  "transient problem with the vpp source value changing as the vpp changes."
+  [wrong_size_error]
+    issues = '#18528'
+    type = 'RunException'
+    input = '2d_vpp.i'
+    cli_args = "DiracKernels/inactive='vpp_point_source'"
+    expect_err = "The value and coordinate vectors are a different size"
+    requirement = "The VectorPostprocessorPOintSource shall report an error if the input arrays are not the same size"
   []
 []

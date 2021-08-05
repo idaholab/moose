@@ -23,11 +23,28 @@
 []
 
 [DiracKernels]
+  inactive = 'reporter_point_source vpp_point_source'
   [./vpp_point_source]
     type = VectorPostprocessorPointSource
     variable = u
     value_name = 'u'
     vector_postprocessor = csv_reader
+  [../]
+  [./reporter_point_source]
+    type = VectorPostprocessorPointSource
+    variable = u
+    value_name = 'reporterData2/u2'
+    x_coord_name = 'reporterData1/x'
+    y_coord_name = 'reporterData1/y'
+    z_coord_name = 'reporterData1/z'
+  [../]
+  [./reporter_point_source_err]
+    type = VectorPostprocessorPointSource
+    variable = u
+    value_name = 'reporterData2/u2'
+    x_coord_name = 'reporterData2/x2'
+    y_coord_name = 'reporterData1/y'
+    z_coord_name = 'reporterData1/z'
   [../]
 []
 
@@ -51,6 +68,19 @@
     type = CSVReader
     csv_file = point_value_file.csv
   [../]
+[]
+
+[Reporters]
+  [reporterData1]
+    type = ConstantReporter
+    real_vector_names = 'x y z u'
+    real_vector_values = '0.2 0.2 0.0; 0.3 0.8 0.0; 0 0 0; 5 5 5'
+  []
+  [reporterData2]
+    type = ConstantReporter
+    real_vector_names = 'x2 y2 z2 u2'
+    real_vector_values = '0.2 0.2; 0.3 0.8 0.0; 0 0 0; 1 -.5 0'
+  []
 []
 
 [Executioner]

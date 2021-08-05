@@ -11,6 +11,7 @@
 
 // Moose Includes
 #include "DiracKernel.h"
+#include "ReporterInterface.h"
 
 // Forward Declarations
 class VectorPostprocessorPointSource;
@@ -23,7 +24,7 @@ InputParameters validParams<VectorPostprocessorPointSource>();
  * Coordinates and values are given by a vector Postprocessor.  Values and coordinates for the point
  * source are allowed change as the vector Postprocessor is updated.
  */
-class VectorPostprocessorPointSource : public DiracKernel
+class VectorPostprocessorPointSource : public DiracKernel, public ReporterInterface
 {
 public:
   static InputParameters validParams();
@@ -34,10 +35,10 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-  const VectorPostprocessorValue & _vpp_values;
-  const VectorPostprocessorValue & _x_coord;
-  const VectorPostprocessorValue & _y_coord;
-  const VectorPostprocessorValue & _z_coord;
+  const std::vector<Real> & _vpp_values;
+  const std::vector<Real> & _x_coord;
+  const std::vector<Real> & _y_coord;
+  const std::vector<Real> & _z_coord;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
 };
