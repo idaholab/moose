@@ -27,6 +27,58 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(double Re)
   return 0;
 }
 
+void
+LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iz)
+{
+  if (iz == 0)
+  {
+    mooseError(name(),
+               ": Cannot compute crossflow quantities at the inlet of the assembly. Boundary "
+               "conditions are applied here");
+  }
+  auto z_grid = _subchannel_mesh.getZGrid();
+  unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
+  auto dz = z_grid[iz] - z_grid[iz - 1];
+  for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+  {
+    auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+    unsigned int i_ch = chans.first;
+    unsigned int j_ch = chans.second;
+    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+    auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+    // area of channel i
+    auto Si = (*S_flow_soln)(node_in_i);
+    // area of channel j
+    auto Sj = (*S_flow_soln)(node_in_j);
+    // crossflow area between channels i,j dz*gap_width
+    auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+    const Real & pitch = _subchannel_mesh.getPitch();
+    const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+    const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+    const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+    auto theta = std::acos(wire_lead_length /
+                           std::sqrt(std::pow(wire_lead_length, 2) +
+                                     std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+    // Calculation of Turbulent Crossflow
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
+      auto dum1 = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+      auto dum2 = libMesh::pi / 6 * std::pow((pitch - rod_diameter / 2), 2);
+      auto dum3 = libMesh::pi * std::pow(rod_diameter, 2) / 24;
+      auto dum4 = std::sqrt(3) / 4 * std::pow(pitch, 2);
+      auto dum5 = libMesh::pi * std::pow(rod_diameter, 2) / 8;
+      auto eps = dum1 * pow((dum2 - dum3) / (dum4 - dum5), 0.5) * std::tan(theta);
+      WijPrime(i_gap, iz) = eps * 0.5 *
+                            (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
+                              (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
+                             (Si + Sj)) *
+                            Sij; // Kg/sec
+    }
+  }
+}
+
 double
 LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
     double Re, int i_ch, Real S, Real w_perim, Real Dh_i)
