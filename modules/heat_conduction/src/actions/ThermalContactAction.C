@@ -110,14 +110,8 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
     _penetration_var_name(_quadrature ? "qpoint_penetration" : "penetration"),
     _gap_value_name("paired_" + getParam<NonlinearVariableName>("variable")),
     _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable")),
-    _primary_name(getParam<std::vector<BoundaryName>>("primary")),
-    _secondary_name(getParam<std::vector<BoundaryName>>("secondary")),
-    _number_pairs(_primary_name.size())
+    _boundary_pairs(getParamPairs<BoundaryName, BoundaryName>("primary", "secondary"))
 {
-  if (_primary_name.size() != _secondary_name.size())
-    paramError(
-        "primary",
-        "Sizes of 'primary' and 'secondary' arrays in thermal contact action's input must match");
 }
 
 void
@@ -140,7 +134,7 @@ ThermalContactAction::act()
 void
 ThermalContactAction::addAuxKernels()
 {
-  for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
+  for (const auto & contact_pair : _boundary_pairs)
   {
     // Add gap aux kernel
     {
@@ -155,8 +149,8 @@ ThermalContactAction::addAuxKernels()
       params.set<AuxVariableName>("variable") = _gap_value_name;
       params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
 
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name[contact_pair]};
-      params.set<BoundaryName>("paired_boundary") = _primary_name[contact_pair];
+      params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+      params.set<BoundaryName>("paired_boundary") = contact_pair.first;
       params.set<VariableName>("paired_variable") = getParam<NonlinearVariableName>("variable");
 
       _problem->addAuxKernel(getParam<std::string>("gap_aux_type"),
@@ -165,8 +159,8 @@ ThermalContactAction::addAuxKernels()
 
       if (_quadrature)
       {
-        params.set<std::vector<BoundaryName>>("boundary") = {_primary_name[contact_pair]};
-        params.set<BoundaryName>("paired_boundary") = _secondary_name[contact_pair];
+        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.first};
+        params.set<BoundaryName>("paired_boundary") = contact_pair.second;
 
         _problem->addAuxKernel(getParam<std::string>("gap_aux_type"),
                                "gap_value_primary_" + name() + "_" +
@@ -192,8 +186,8 @@ ThermalContactAction::addAuxKernels()
         params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
             getParam<VariableName>("mapped_primary_gap_offset")};
       params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name[contact_pair]};
-      params.set<BoundaryName>("paired_boundary") = _primary_name[contact_pair];
+      params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+      params.set<BoundaryName>("paired_boundary") = contact_pair.first;
 
       _problem->addAuxKernel("PenetrationAux",
                              "penetration_" + name() + "_" + Moose::stringify(aux_kenels_counter++),
@@ -230,7 +224,7 @@ ThermalContactAction::addAuxVariables()
 void
 ThermalContactAction::addBCs()
 {
-  for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
+  for (const auto & contact_pair : _boundary_pairs)
   {
     const std::string object_name = getParam<std::string>("type");
     InputParameters params = _factory.getValidParams(object_name);
@@ -238,7 +232,7 @@ ThermalContactAction::addBCs()
 
     if (_quadrature)
     {
-      params.set<BoundaryName>("paired_boundary") = _primary_name[contact_pair];
+      params.set<BoundaryName>("paired_boundary") = contact_pair.first;
       params.set<bool>("use_displaced_mesh") = true;
     }
     else
@@ -247,7 +241,7 @@ ThermalContactAction::addBCs()
       params.set<std::vector<VariableName>>("gap_temp") = {_gap_value_name};
     }
 
-    params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name[contact_pair]};
+    params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
 
     _problem->addBoundaryCondition(
         object_name, "gap_bc_" + name() + "_" + Moose::stringify(bcs_counter), params);
@@ -255,8 +249,8 @@ ThermalContactAction::addBCs()
     if (_quadrature)
     {
       // Swap primary and secondary for this one
-      params.set<std::vector<BoundaryName>>("boundary") = {_primary_name[contact_pair]};
-      params.set<BoundaryName>("paired_boundary") = _secondary_name[contact_pair];
+      params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.first};
+      params.set<BoundaryName>("paired_boundary") = contact_pair.second;
 
       _problem->addBoundaryCondition(
           object_name, "gap_bc_primary_" + name() + "_" + Moose::stringify(bcs_counter), params);
@@ -271,7 +265,7 @@ ThermalContactAction::addDiracKernels()
   if (_quadrature)
     return;
 
-  for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
+  for (const auto & contact_pair : _boundary_pairs)
   {
     const std::string object_name = "GapHeatPointSourceMaster";
     InputParameters params = _factory.getValidParams(object_name);
@@ -281,8 +275,8 @@ ThermalContactAction::addDiracKernels()
                                     "normal_smoothing_method",
                                     "order",
                                     "variable"});
-    params.set<BoundaryName>("boundary") = _primary_name[contact_pair];
-    params.set<BoundaryName>("secondary") = _secondary_name[contact_pair];
+    params.set<BoundaryName>("boundary") = contact_pair.first;
+    params.set<BoundaryName>("secondary") = contact_pair.second;
 
     _problem->addDiracKernel(
         object_name, object_name + "_" + name() + "_" + Moose::stringify(dirac_counter++), params);
@@ -302,19 +296,19 @@ ThermalContactAction::addMaterials()
       mooseError(
           "Cannot specify both gap_conductance and gap_conductivity or gap_conductivity_function");
 
-    for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
+    for (const auto & contact_pair : _boundary_pairs)
     {
       const std::string object_type = "GapConductanceConstant";
       InputParameters params = _factory.getValidParams(object_type);
       params.applyParameters(parameters());
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name[contact_pair]};
+      params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
       _problem->addMaterial(object_type,
                             name() + "_" + "gap_value" + "_" + Moose::stringify(materials_counter),
                             params);
 
       if (_quadrature)
       {
-        params.set<std::vector<BoundaryName>>("boundary") = {_primary_name[contact_pair]};
+        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.first};
         _problem->addMaterial(object_type,
                               name() + "_" + "gap_value_primary" + "_" +
                                   Moose::stringify(materials_counter),
@@ -327,17 +321,17 @@ ThermalContactAction::addMaterials()
   {
     const std::string object_type = "GapConductance";
 
-    for (unsigned int contact_pair = 0; contact_pair < _number_pairs; contact_pair++)
+    for (const auto & contact_pair : _boundary_pairs)
     {
       InputParameters params = _factory.getValidParams(object_type);
       params.applyParameters(parameters(), {"variable"});
 
       params.set<std::vector<VariableName>>("variable") = {
           getParam<NonlinearVariableName>("variable")};
-      params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name[contact_pair]};
+      params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
 
       if (_quadrature)
-        params.set<BoundaryName>("paired_boundary") = _primary_name[contact_pair];
+        params.set<BoundaryName>("paired_boundary") = contact_pair.first;
       else
       {
         params.set<std::vector<VariableName>>("gap_temp") = {_gap_value_name};
@@ -350,8 +344,8 @@ ThermalContactAction::addMaterials()
 
       if (_quadrature)
       {
-        params.set<BoundaryName>("paired_boundary") = _secondary_name[contact_pair];
-        params.set<std::vector<BoundaryName>>("boundary") = {_primary_name[contact_pair]};
+        params.set<BoundaryName>("paired_boundary") = contact_pair.second;
+        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.first};
 
         _problem->addMaterial(object_type,
                               name() + "_" + "gap_value_primary" + "_" +
