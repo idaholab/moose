@@ -249,84 +249,89 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   const Real & M = hill_constants_input[4];
   const Real & N = hill_constants_input[5];
 
-  // rotated hill constants are calculated from rotated hill tensor, Hill_rot = Tm*Hill*Tm^T
-  _hill_constants[0] = -_transformation_tensor(1, 0) *
-                           (-G * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 1) +
-                            _transformation_tensor(2, 0) * (G + H)) -
-                       _transformation_tensor(1, 1) *
-                           (-F * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 0) +
-                            _transformation_tensor(2, 1) * (F + H)) -
-                       _transformation_tensor(1, 2) *
-                           (-F * _transformation_tensor(2, 1) - G * _transformation_tensor(2, 0) +
-                            _transformation_tensor(2, 2) * (F + G)) -
-                       2.0 * L * _transformation_tensor(1, 4) * _transformation_tensor(2, 4) -
-                       2.0 * M * _transformation_tensor(1, 5) * _transformation_tensor(2, 5) -
-                       2.0 * N * _transformation_tensor(1, 3) * _transformation_tensor(2, 3);
+  // If rotation due to large deformation is required, constants no longer properly describe
+  // transformed Hill tensor
+  if (!_use_large_rotation)
+  {
+    // rotated hill constants are calculated from rotated hill tensor, Hill_rot = Tm*Hill*Tm^T
+    _hill_constants[0] = -_transformation_tensor(1, 0) *
+                             (-G * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 1) +
+                              _transformation_tensor(2, 0) * (G + H)) -
+                         _transformation_tensor(1, 1) *
+                             (-F * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 0) +
+                              _transformation_tensor(2, 1) * (F + H)) -
+                         _transformation_tensor(1, 2) *
+                             (-F * _transformation_tensor(2, 1) - G * _transformation_tensor(2, 0) +
+                              _transformation_tensor(2, 2) * (F + G)) -
+                         2.0 * L * _transformation_tensor(1, 4) * _transformation_tensor(2, 4) -
+                         2.0 * M * _transformation_tensor(1, 5) * _transformation_tensor(2, 5) -
+                         2.0 * N * _transformation_tensor(1, 3) * _transformation_tensor(2, 3);
 
-  _hill_constants[1] = -_transformation_tensor(0, 0) *
-                           (-G * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 1) +
-                            _transformation_tensor(2, 0) * (G + H)) -
-                       _transformation_tensor(0, 1) *
-                           (-F * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 0) +
-                            _transformation_tensor(2, 1) * (F + H)) -
-                       _transformation_tensor(0, 2) *
-                           (-F * _transformation_tensor(2, 1) - G * _transformation_tensor(2, 0) +
-                            _transformation_tensor(2, 2) * (F + G)) -
-                       2.0 * L * _transformation_tensor(0, 4) * _transformation_tensor(2, 4) -
-                       2.0 * M * _transformation_tensor(0, 5) * _transformation_tensor(2, 5) -
-                       2.0 * N * _transformation_tensor(0, 3) * _transformation_tensor(2, 3);
+    _hill_constants[1] = -_transformation_tensor(0, 0) *
+                             (-G * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 1) +
+                              _transformation_tensor(2, 0) * (G + H)) -
+                         _transformation_tensor(0, 1) *
+                             (-F * _transformation_tensor(2, 2) - H * _transformation_tensor(2, 0) +
+                              _transformation_tensor(2, 1) * (F + H)) -
+                         _transformation_tensor(0, 2) *
+                             (-F * _transformation_tensor(2, 1) - G * _transformation_tensor(2, 0) +
+                              _transformation_tensor(2, 2) * (F + G)) -
+                         2.0 * L * _transformation_tensor(0, 4) * _transformation_tensor(2, 4) -
+                         2.0 * M * _transformation_tensor(0, 5) * _transformation_tensor(2, 5) -
+                         2.0 * N * _transformation_tensor(0, 3) * _transformation_tensor(2, 3);
 
-  _hill_constants[2] = -_transformation_tensor(0, 0) *
-                           (-G * _transformation_tensor(1, 2) - H * _transformation_tensor(1, 1) +
-                            _transformation_tensor(1, 0) * (G + H)) -
-                       _transformation_tensor(0, 1) *
-                           (-F * _transformation_tensor(1, 2) - H * _transformation_tensor(1, 0) +
-                            _transformation_tensor(1, 1) * (F + H)) -
-                       _transformation_tensor(0, 2) *
-                           (-F * _transformation_tensor(1, 1) - G * _transformation_tensor(1, 0) +
-                            _transformation_tensor(1, 2) * (F + G)) -
-                       2.0 * L * _transformation_tensor(0, 4) * _transformation_tensor(1, 4) -
-                       2.0 * M * _transformation_tensor(0, 5) * _transformation_tensor(1, 5) -
-                       2.0 * N * _transformation_tensor(0, 3) * _transformation_tensor(1, 3);
+    _hill_constants[2] = -_transformation_tensor(0, 0) *
+                             (-G * _transformation_tensor(1, 2) - H * _transformation_tensor(1, 1) +
+                              _transformation_tensor(1, 0) * (G + H)) -
+                         _transformation_tensor(0, 1) *
+                             (-F * _transformation_tensor(1, 2) - H * _transformation_tensor(1, 0) +
+                              _transformation_tensor(1, 1) * (F + H)) -
+                         _transformation_tensor(0, 2) *
+                             (-F * _transformation_tensor(1, 1) - G * _transformation_tensor(1, 0) +
+                              _transformation_tensor(1, 2) * (F + G)) -
+                         2.0 * L * _transformation_tensor(0, 4) * _transformation_tensor(1, 4) -
+                         2.0 * M * _transformation_tensor(0, 5) * _transformation_tensor(1, 5) -
+                         2.0 * N * _transformation_tensor(0, 3) * _transformation_tensor(1, 3);
 
-  _hill_constants[3] = 0.5 * _transformation_tensor(4, 0) *
-                           (-G * _transformation_tensor(4, 2) - H * _transformation_tensor(4, 1) +
-                            _transformation_tensor(4, 0) * (G + H)) +
-                       0.5 * _transformation_tensor(4, 1) *
-                           (-F * _transformation_tensor(4, 2) - H * _transformation_tensor(4, 0) +
-                            _transformation_tensor(4, 1) * (F + H)) +
-                       0.5 * _transformation_tensor(4, 2) *
-                           (-F * _transformation_tensor(4, 1) - G * _transformation_tensor(4, 0) +
-                            _transformation_tensor(4, 2) * (F + G)) +
-                       L * _transformation_tensor(4, 4) * _transformation_tensor(4, 4) +
-                       M * _transformation_tensor(4, 5) * _transformation_tensor(4, 5) +
-                       N * _transformation_tensor(4, 3) * _transformation_tensor(4, 3);
+    _hill_constants[3] = 0.5 * _transformation_tensor(4, 0) *
+                             (-G * _transformation_tensor(4, 2) - H * _transformation_tensor(4, 1) +
+                              _transformation_tensor(4, 0) * (G + H)) +
+                         0.5 * _transformation_tensor(4, 1) *
+                             (-F * _transformation_tensor(4, 2) - H * _transformation_tensor(4, 0) +
+                              _transformation_tensor(4, 1) * (F + H)) +
+                         0.5 * _transformation_tensor(4, 2) *
+                             (-F * _transformation_tensor(4, 1) - G * _transformation_tensor(4, 0) +
+                              _transformation_tensor(4, 2) * (F + G)) +
+                         L * _transformation_tensor(4, 4) * _transformation_tensor(4, 4) +
+                         M * _transformation_tensor(4, 5) * _transformation_tensor(4, 5) +
+                         N * _transformation_tensor(4, 3) * _transformation_tensor(4, 3);
 
-  _hill_constants[4] = 0.5 * _transformation_tensor(5, 0) *
-                           (-G * _transformation_tensor(5, 2) - H * _transformation_tensor(5, 1) +
-                            _transformation_tensor(5, 0) * (G + H)) +
-                       0.5 * _transformation_tensor(5, 1) *
-                           (-F * _transformation_tensor(5, 2) - H * _transformation_tensor(5, 0) +
-                            _transformation_tensor(5, 1) * (F + H)) +
-                       0.5 * _transformation_tensor(5, 2) *
-                           (-F * _transformation_tensor(5, 1) - G * _transformation_tensor(5, 0) +
-                            _transformation_tensor(5, 2) * (F + G)) +
-                       L * _transformation_tensor(5, 4) * _transformation_tensor(5, 4) +
-                       M * _transformation_tensor(5, 5) * _transformation_tensor(5, 5) +
-                       N * _transformation_tensor(5, 3) * _transformation_tensor(5, 3);
+    _hill_constants[4] = 0.5 * _transformation_tensor(5, 0) *
+                             (-G * _transformation_tensor(5, 2) - H * _transformation_tensor(5, 1) +
+                              _transformation_tensor(5, 0) * (G + H)) +
+                         0.5 * _transformation_tensor(5, 1) *
+                             (-F * _transformation_tensor(5, 2) - H * _transformation_tensor(5, 0) +
+                              _transformation_tensor(5, 1) * (F + H)) +
+                         0.5 * _transformation_tensor(5, 2) *
+                             (-F * _transformation_tensor(5, 1) - G * _transformation_tensor(5, 0) +
+                              _transformation_tensor(5, 2) * (F + G)) +
+                         L * _transformation_tensor(5, 4) * _transformation_tensor(5, 4) +
+                         M * _transformation_tensor(5, 5) * _transformation_tensor(5, 5) +
+                         N * _transformation_tensor(5, 3) * _transformation_tensor(5, 3);
 
-  _hill_constants[5] = 0.5 * _transformation_tensor(3, 0) *
-                           (-G * _transformation_tensor(3, 2) - H * _transformation_tensor(3, 1) +
-                            _transformation_tensor(3, 0) * (G + H)) +
-                       0.5 * _transformation_tensor(3, 1) *
-                           (-F * _transformation_tensor(3, 2) - H * _transformation_tensor(3, 0) +
-                            _transformation_tensor(3, 1) * (F + H)) +
-                       0.5 * _transformation_tensor(3, 2) *
-                           (-F * _transformation_tensor(3, 1) - G * _transformation_tensor(3, 0) +
-                            _transformation_tensor(3, 2) * (F + G)) +
-                       L * _transformation_tensor(3, 4) * _transformation_tensor(3, 4) +
-                       M * _transformation_tensor(3, 5) * _transformation_tensor(3, 5) +
-                       N * _transformation_tensor(3, 3) * _transformation_tensor(3, 3);
+    _hill_constants[5] = 0.5 * _transformation_tensor(3, 0) *
+                             (-G * _transformation_tensor(3, 2) - H * _transformation_tensor(3, 1) +
+                              _transformation_tensor(3, 0) * (G + H)) +
+                         0.5 * _transformation_tensor(3, 1) *
+                             (-F * _transformation_tensor(3, 2) - H * _transformation_tensor(3, 0) +
+                              _transformation_tensor(3, 1) * (F + H)) +
+                         0.5 * _transformation_tensor(3, 2) *
+                             (-F * _transformation_tensor(3, 1) - G * _transformation_tensor(3, 0) +
+                              _transformation_tensor(3, 2) * (F + G)) +
+                         L * _transformation_tensor(3, 4) * _transformation_tensor(3, 4) +
+                         M * _transformation_tensor(3, 5) * _transformation_tensor(3, 5) +
+                         N * _transformation_tensor(3, 3) * _transformation_tensor(3, 3);
+  }
 
   // Alternative approach for hill tensor rotation
   // Both ways of computing anisotropic coefficient updates are carried out here

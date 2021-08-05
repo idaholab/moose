@@ -65,6 +65,7 @@
     relative_tolerance = 1e-18
     # Force it to not use integration error
     max_integration_error = 100.0
+    use_transformation = true
   []
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor

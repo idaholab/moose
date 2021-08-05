@@ -53,7 +53,7 @@ protected:
    * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
    * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
    */
-  void computeHillTensorEigenDecomposition(const ADDenseMatrix & hill_tensor);
+  void computeHillTensorEigenDecomposition(const DenseMatrix<Real> & hill_tensor);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -100,7 +100,10 @@ protected:
   ADReal _yield_stress;
   /// Hill constant material
   const MaterialProperty<std::vector<Real>> & _hill_constants;
-  ADDenseMatrix _hill_tensor;
+
+  /// Hill tensor, when global axes do not (somehow) align with those of the material
+  /// Example: Large rotation due to rigid body and/or large deformation kinematics
+  const MaterialProperty<DenseMatrix<Real>> & _hill_tensor;
 
   ADDenseVector _stress_np1;
   /// 2 * shear modulus

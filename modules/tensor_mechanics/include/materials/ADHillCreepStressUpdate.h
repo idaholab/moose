@@ -136,7 +136,4 @@ protected:
 
   /// 2 * shear modulus
   ADReal _two_shear_modulus;
-
-  /// Whether to use fully transformed Hill's tensor due to rigid body or large deformation kinematic rotation
-  const bool _use_transformation;
 };

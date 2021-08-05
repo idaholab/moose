@@ -30,10 +30,6 @@ ADHillCreepStressUpdate::validParams()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
-  params.addParam<bool>("use_transformation",
-                        false,
-                        "Whether to employ updated Hill's tensor due to rigid body or large "
-                        "deformation kinematic rotations");
 
   return params;
 }
@@ -52,8 +48,7 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
     _exp_time(1.0),
     _hill_constants(getMaterialPropertyByName<std::vector<Real>>(_base_name + "hill_constants")),
     _hill_tensor(getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor")),
-    _qsigma(0.0),
-    _use_transformation(getParam<bool>("use_transformation"))
+    _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
