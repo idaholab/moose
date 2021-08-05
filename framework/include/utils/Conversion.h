@@ -112,9 +112,9 @@ std::string stringify(FEFamily f);
 /// Add pair stringify to support maps
 template <typename T, typename U>
 std::string
-stringify(const std::pair<T, U> & p)
+stringify(const std::pair<T, U> & p, const std::string & delim = ":")
 {
-  return stringify(p.first) + ':' + stringify(p.second);
+  return stringify(p.first) + delim + stringify(p.second);
 }
 
 /**

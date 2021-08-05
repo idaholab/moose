@@ -122,7 +122,6 @@ public:
 
   const std::set<std::string> & getAllTasks() const { return _all_tasks; }
 
-  ///@{
   /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
@@ -130,7 +129,6 @@ public:
    */
   template <typename T>
   const T & getParam(const std::string & name) const;
-  ///@}
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -140,6 +138,19 @@ public:
   T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
   {
     return parameters().getCheckedPointerParam<T>(name, error_string);
+  }
+
+  /**
+   * Retrieve two parameters and provide pair of parameters for the object
+   * @param param1 The name of first parameter
+   * @param param2 The name of second parameter
+   * @return Vector of pairs of first and second parameters
+   */
+  template <typename T1, typename T2>
+  std::vector<std::pair<T1, T2>> getParamPairs(const std::string & param1,
+                                               const std::string & param2) const
+  {
+    return parameters().getPairs<T1, T2>(param1, param2);
   }
 
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
