@@ -321,7 +321,7 @@ ContactAction::act()
   {
     auto var_params = _factory.getValidParams("NodalArea");
     var_params.set<std::vector<BoundaryName>>("boundary") =
-        getParam < std::vector<BoundaryName>("secondary");
+        getParam<std::vector<BoundaryName>>("secondary");
     var_params.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
 
     mooseAssert(_problem, "Problem pointer is NULL");
@@ -658,7 +658,7 @@ ContactAction::addNodeFaceContact()
 
     for (unsigned int i = 0; i < ndisp; ++i)
     {
-      std::string name = action_name + "_constraint_" + Moose::stringify(contact_pair, '_') + "_" +
+      std::string name = action_name + "_constraint_" + Moose::stringify(contact_pair, "_") + "_" +
                          Moose::stringify(i);
 
       if (_formulation == "ranfs")
