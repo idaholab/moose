@@ -8,15 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PerfGraphLivePrint.h"
+#include "PerfGraphRegistry.h"
 
 PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
   : ConsoleStreamInterface(app),
     _perf_graph(perf_graph),
+    _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _execution_list(perf_graph._execution_list),
     _done_future(perf_graph._done.get_future()),
     _destructing(perf_graph._destructing),
     _should_print(true),
-    _id_to_section_info(perf_graph._id_to_section_info),
     _time_limit(perf_graph._live_print_time_limit),
     _mem_limit(perf_graph._live_print_mem_limit),
     _stack_level(0),
@@ -32,18 +33,17 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
 void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
-  mooseAssert(_id_to_section_info.count(section_increment._id), "Not found in map");
+  auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
 
   // If the live_message is empty - just print the name
-  const auto message = !_id_to_section_info[section_increment._id]._live_message.empty()
-                           ? _id_to_section_info[section_increment._id]._live_message
-                           : _id_to_section_info[section_increment._id]._name;
+  const auto message =
+      !section_info._live_message.empty() ? section_info._live_message : section_info._name;
 
   // This line is different - need to finish the last line
   if (_last_printed_increment && _last_printed_increment != &section_increment &&
       (_last_printed_increment->_state == PerfGraph::IncrementState::PRINTED ||
        _last_printed_increment->_state == PerfGraph::IncrementState::CONTINUED) &&
-      _id_to_section_info[_last_printed_increment->_id]._print_dots)
+      section_info._print_dots)
     _console << '\n';
 
   // Do we need to print dots?
@@ -52,7 +52,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
        (section_increment._state == PerfGraph::IncrementState::PRINTED ||
         section_increment._state == PerfGraph::IncrementState::CONTINUED)))
   {
-    if (_id_to_section_info[section_increment._id]._print_dots)
+    if (section_info._print_dots)
     {
       _console << ".";
       section_increment._num_dots++;
@@ -65,7 +65,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     _console << std::string(2 * section_increment._print_stack_level, ' ') << "Still " << message;
 
     // If we're not printing dots - just finish the line
-    if (!_id_to_section_info[section_increment._id]._print_dots)
+    if (!section_info._print_dots)
       _console << '\n';
 
     section_increment._num_dots = 0;
@@ -75,7 +75,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     _console << std::string(2 * section_increment._print_stack_level, ' ') << message;
 
     // If we're not printing dots - just finish the line
-    if (!_id_to_section_info[section_increment._id]._print_dots)
+    if (!section_info._print_dots)
       _console << '\n';
 
     section_increment._num_dots = 0;
@@ -95,13 +95,14 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   if (_stack_level < 1)
     return;
 
-  mooseAssert(_id_to_section_info.count(section_increment_start._id),
+  mooseAssert(_perf_graph_registry.sectionExists(section_increment_start._id),
               "Not found in map: " << section_increment_start._id);
 
+  auto & section_info_start = _perf_graph_registry.sectionInfo(section_increment_start._id);
+
   // If the live_message is empty - just print the name
-  auto message = !_id_to_section_info[section_increment_start._id]._live_message.empty()
-                     ? _id_to_section_info[section_increment_start._id]._live_message
-                     : _id_to_section_info[section_increment_start._id]._name;
+  auto message = !section_info_start._live_message.empty() ? section_info_start._live_message
+                                                           : section_info_start._name;
 
   auto time_increment =
       std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
@@ -113,12 +114,12 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
 
   // Do we need to print "Finished"?
   // This happens after something else printed in-between when this increment started and finished
-  if (!_id_to_section_info[section_increment_start._id]._print_dots ||
+  if (!section_info_start._print_dots ||
       (_last_printed_increment && _last_printed_increment != &section_increment_start))
   {
     if ((_last_printed_increment &&
          _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
-         _id_to_section_info[_last_printed_increment->_id]._print_dots))
+         _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots))
       _console << '\n';
     const std::string finished("Finished ");
     _console << std::string(2 * section_increment_start._print_stack_level, ' ') << finished
@@ -168,7 +169,9 @@ PerfGraphLivePrint::printStack()
   {
     auto & section = *_print_thread_stack[s];
 
-    _console << std::string(s * 2, ' ') << _id_to_section_info[section._id]._live_message << '\n';
+    auto & section_info = _perf_graph_registry.sectionInfo(section._id);
+
+    _console << std::string(s * 2, ' ') << section_info._live_message << '\n';
   }
 
   _console << "-------\n" << std::endl;

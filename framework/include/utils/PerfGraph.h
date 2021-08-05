@@ -425,12 +425,6 @@ protected:
   /// Where the print thread should stop reading the execution list
   std::atomic<unsigned int> _execution_list_end;
 
-  /// Map of section names to IDs
-  std::unordered_map<std::string, PerfID> & _section_name_to_id;
-
-  /// Map of IDs to section information
-  std::unordered_map<PerfID, SectionInfo> & _id_to_section_info;
-
   /// The time for each section.  This is updated on updateTiming()
   /// Note that this is _total_ cumulative time across every place
   /// that section is in the graph

@@ -605,7 +605,7 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
-  TIME_SECTION("MooseApp::setupOptions", 5, "Setting Up Options");
+  TIME_SECTION("setupOptions", 5, "Setting Up Options");
 
   // MOOSE was updated to have the ability to register execution flags in similar fashion as
   // objects. However, this change requires all *App.C/h files to be updated with the new
@@ -728,7 +728,7 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(param_search);
 
     {
-      TIME_SECTION("MooseApp::dump", 1, "Building Syntax Tree");
+      TIME_SECTION("dump", 1, "Building Syntax Tree");
       _parser.buildJsonSyntaxTree(tree);
     }
 
@@ -1008,7 +1008,7 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 void
 MooseApp::runInputFile()
 {
-  TIME_SECTION("MooseApp::runInputFile", 3);
+  TIME_SECTION("runInputFile", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1047,7 +1047,7 @@ MooseApp::errorCheck()
 void
 MooseApp::executeExecutioner()
 {
-  TIME_SECTION("MooseApp::executeExecutioner", 3);
+  TIME_SECTION("executeExecutioner", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1132,7 +1132,7 @@ MooseApp::backup()
 void
 MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
-  TIME_SECTION("MooseApp::restore", 2, "Restoring Application");
+  TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = _executioner->feProblem();
@@ -1171,7 +1171,7 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  TIME_SECTION("MooseApp::run", 3);
+  TIME_SECTION("run", 3);
   if (isParamValid("show_docs") && getParam<bool>("show_docs"))
   {
     auto binname = appBinaryName();
@@ -1276,7 +1276,7 @@ MooseApp::run()
 
   try
   {
-    TIME_SECTION("MooseApp::setup", 2, "Setting Up");
+    TIME_SECTION("setup", 2, "Setting Up");
     setupOptions();
     runInputFile();
   }
@@ -1287,7 +1287,7 @@ MooseApp::run()
 
   if (!_check_input)
   {
-    TIME_SECTION("MooseApp::execute", 2, "Executing");
+    TIME_SECTION("execute", 2, "Executing");
     executeExecutioner();
   }
   else
@@ -1742,7 +1742,7 @@ MooseApp::createMeshGeneratorOrder()
   if (_ordered_generators.size() > 0)
     return;
 
-  TIME_SECTION("MooseApp::executeMeshGenerators", 1, "Executing Mesh Generators");
+  TIME_SECTION("executeMeshGenerators", 1, "Executing Mesh Generators");
 
   DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
 
@@ -1976,7 +1976,7 @@ MooseApp::restoreCachedBackup()
   if (!_cached_backup.get())
     mooseError("No cached Backup to restore!");
 
-  TIME_SECTION("MooseApp::restoreCachedBackup", 2, "Restoring Cached Backup");
+  TIME_SECTION("restoreCachedBackup", 2, "Restoring Cached Backup");
 
   restore(_cached_backup, isRestarting());
 
@@ -1987,7 +1987,7 @@ MooseApp::restoreCachedBackup()
 void
 MooseApp::createMinimalApp()
 {
-  TIME_SECTION("MooseApp::createMinimalApp", 3, "Creating Minimal App");
+  TIME_SECTION("createMinimalApp", 3, "Creating Minimal App");
 
   // SetupMeshAction
   {

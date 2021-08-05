@@ -11,6 +11,14 @@
 
 #include "PerfGraph.h"
 
+namespace moose
+{
+namespace internal
+{
+class PerfGraphRegistry;
+}
+}
+
 /**
  * This is effectively a functor that runs on a separate thread and
  * watches the state of the call stack to see if things need to be
@@ -62,6 +70,9 @@ protected:
   /// Reference to the PerfGraph to work with
   PerfGraph & _perf_graph;
 
+  /// Reference to the PerfGraphRegistry for convenience
+  const moose::internal::PerfGraphRegistry & _perf_graph_registry;
+
   /// Convenience reference to the execution_list within the PerfGraph
   std::array<PerfGraph::SectionIncrement, MAX_EXECUTION_LIST_SIZE> & _execution_list;
 
@@ -75,9 +86,6 @@ protected:
   /// This shadows PerfGraph._live_print_active so that we have consistency
   /// during a single printing
   bool _should_print;
-
-  /// Convenience from PerfGraph
-  std::unordered_map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
   /// Limit (in seconds) before printing
   Real & _time_limit;

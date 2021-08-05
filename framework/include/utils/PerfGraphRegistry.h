@@ -11,6 +11,8 @@
 
 #include "MooseTypes.h"
 
+#include <mutex>
+
 // Forward Declarations
 class PerfGraph;
 class PerfGraphLivePrint;
@@ -79,6 +81,39 @@ public:
                          const std::string & live_message,
                          const bool print_dots = true);
 
+  /**
+   * Given a name return the PerfID
+   * @section_name The name of the section
+   * @return the ID
+   */
+  PerfID sectionID(const std::string & section_name) const;
+
+  /**
+   * Given a PerfID return the SectionInfo
+   * @section_id The ID
+   * @return The SectionInfo
+   */
+  const SectionInfo & sectionInfo(const PerfID section_id) const;
+
+  /**
+   * Whether or not a section with that name has been registered
+   * @section_name The name of the section
+   * @return Whether or not it exists
+   */
+  bool sectionExists(const std::string & section_name) const;
+
+  /**
+   * Whether or not a section with that id has been registered
+   * @section_id The ID
+   * @return Whether or not it exists
+   */
+  bool sectionExists(const PerfID section_id) const;
+
+  /**
+   * @return number of registered sections
+   */
+  long unsigned int numSections() const;
+
 protected:
   PerfGraphRegistry(){};
 
@@ -96,13 +131,16 @@ protected:
   /// Map of IDs to section information
   std::unordered_map<PerfID, SectionInfo> _id_to_section_info;
 
+  /// Mutex for locking access to the section_name_to_id
+  /// NOTE: These can be changed to shared_mutexes once we get C++17
+  mutable std::mutex _section_name_to_id_mutex;
+
+  /// Mutex for locking access to the section_name_to_id
+  /// NOTE: These can be changed to shared_mutexes once we get C++17
+  mutable std::mutex _id_to_section_info_mutex;
+
   /// So it can be constructed
   friend PerfGraphRegistry & getPerfGraphRegistry();
-
-  /// For access from the PerfGraph system
-  friend class ::PerfGraph;
-  friend class ::PerfGraphLivePrint;
-  friend class ::PerfNode;
 };
 
 }

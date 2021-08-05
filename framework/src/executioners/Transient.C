@@ -172,8 +172,7 @@ Transient::Transient(const InputParameters & parameters)
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
-    _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt")),
-    _sln_diff(_nl.addVector("sln_diff", false, PARALLEL))
+    _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 

@@ -39,8 +39,6 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _stack(),
     _execution_list_begin(0),
     _execution_list_end(0),
-    _section_name_to_id(_perf_graph_registry._section_name_to_id),
-    _id_to_section_info(_perf_graph_registry._id_to_section_info),
     _active(true),
     _live_print_active(true),
     _destructing(false),
@@ -65,12 +63,7 @@ PerfGraph::~PerfGraph() { disableLivePrint(); }
 const std::string &
 PerfGraph::sectionName(const PerfID id) const
 {
-  auto find_it = _id_to_section_info.find(id);
-
-  if (find_it == _id_to_section_info.end())
-    mooseError("PerfGraph cannot find a section name associated with id: ", id);
-
-  return find_it->second._name;
+  return _perf_graph_registry.sectionInfo(id)._name;
 }
 
 void
@@ -100,7 +93,7 @@ PerfGraph::getNumCalls(const std::string & section_name)
   if (section_it == _section_time.end())
   {
     // The section exists but has not ran yet, in which case we can return zero
-    if (_section_name_to_id.count(section_name))
+    if (_perf_graph_registry.sectionExists(section_name))
       return 0;
 
     mooseError(
@@ -122,7 +115,7 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
   if (section_it == _section_time.end())
   {
     // The section exists but has not ran yet, in which case we can return zero
-    if (_section_name_to_id.count(section_name))
+    if (_perf_graph_registry.sectionExists(section_name))
       return 0;
 
     mooseError(
@@ -238,7 +231,7 @@ PerfGraph::push(const PerfID id)
 
   // Add this to the execution list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
+      (!_perf_graph_registry.sectionInfo(id)._live_message.empty() || _live_print_all))
     addToExecutionList(id, IncrementState::STARTED, current_time, start_memory);
 }
 
@@ -270,7 +263,8 @@ PerfGraph::pop()
 
   // Add this to the exection list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_id_to_section_info[current_node->id()]._live_message.empty() || _live_print_all))
+      (!_perf_graph_registry.sectionInfo(current_node->id())._live_message.empty() ||
+       _live_print_all))
   {
     addToExecutionList(current_node->id(), IncrementState::FINISHED, current_time, current_memory);
 
@@ -322,11 +316,11 @@ PerfGraph::updateTiming()
   // Update vector pointing to section times
   // Note: we are doing this _after_ recursively filling
   // because new entries may have been created
-  _section_time_ptrs.resize(_id_to_section_info.size());
+  _section_time_ptrs.resize(_perf_graph_registry.numSections());
 
   for (auto & section_time_it : _section_time)
   {
-    auto id = _section_name_to_id[section_time_it.first];
+    auto id = _perf_graph_registry.sectionID(section_time_it.first);
 
     _section_time_ptrs[id] = &section_time_it.second;
   }
@@ -346,8 +340,10 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto children_memory = current_node->childrenMemory();
   auto total_memory = current_node->totalMemory();
 
+  auto & section_info = _perf_graph_registry.sectionInfo(id);
+
   // RHS insertion on purpose
-  auto & section_time = _section_time[_id_to_section_info[id]._name];
+  auto & section_time = _section_time[section_info._name];
 
   section_time._self += self;
   section_time._children += children;
@@ -368,10 +364,10 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
                                  unsigned int level,
                                  unsigned int current_depth)
 {
-  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
+  mooseAssert(_perf_graph_registry.sectionExists(current_node->id()),
               "Unable to find section name!");
 
-  auto & current_section_info = _id_to_section_info[current_node->id()];
+  auto & current_section_info = _perf_graph_registry.sectionInfo(current_node->id());
 
   auto & name = current_section_info._name;
   auto & node_level = current_section_info._level;
@@ -424,9 +420,10 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
 
-  mooseAssert(_id_to_section_info.count(current_node->id()), "Could not find section info!");
+  mooseAssert(_perf_graph_registry.sectionExists(current_node->id()),
+              "Could not find section info!");
 
-  auto & name = _id_to_section_info[current_node->id()]._name;
+  auto & name = _perf_graph_registry.sectionInfo(current_node->id())._name;
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
@@ -617,7 +614,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
     if (!_section_time_ptrs[id])
       continue;
 
-    vtable.addRow(_id_to_section_info[id]._name,
+    vtable.addRow(_perf_graph_registry.sectionInfo(id)._name,
                   _section_time_ptrs[id]->_num_calls,
                   _section_time_ptrs[id]->_total_memory,
                   _section_time_ptrs[id]->_self,
