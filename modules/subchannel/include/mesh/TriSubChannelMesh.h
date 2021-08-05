@@ -80,6 +80,16 @@ public:
 
   virtual Real getGapWidth(unsigned int gap_index) const override { return _gij_map[gap_index]; }
 
+  virtual const std::pair<unsigned int, unsigned int> & getSweepFlowGaps(unsigned int i_chan) const
+  {
+    return _gap_pairs_sf[i_chan];
+  }
+
+  virtual const std::pair<unsigned int, unsigned int> & getSweepFlowChans(unsigned int i_chan) const
+  {
+    return _chan_pairs_sf[i_chan];
+  }
+
 protected:
   /// number of rings of fuel rods
   unsigned int _nrings;
@@ -135,6 +145,10 @@ protected:
   std::vector<EChannelType> _subch_type;
   /// gap type
   std::vector<EChannelType> _gap_type;
+  /// sweeping flow model gap pairs per channel to specify directional edge flow
+  std::vector<std::pair<unsigned int, unsigned int>> _gap_pairs_sf;
+  /// sweeping flow model channel pairs to specify directional edge flow
+  std::vector<std::pair<unsigned int, unsigned int>> _chan_pairs_sf;
 
 private:
   /// number of corners in the duct x-sec

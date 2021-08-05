@@ -235,6 +235,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   _gap_to_chan_map.resize(_n_gaps);
   gap_fill.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
+  _gap_pairs_sf.resize(_n_channels);
+  _chan_pairs_sf.resize(_n_channels);
   _gij_map.resize(_n_gaps);
   _sign_id_crossflow_map.resize(_n_channels);
   _gap_to_rod_map.resize(_n_gaps);
@@ -534,6 +536,88 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       }
     } // i
   }   // j
+
+  for (unsigned int k = 0; k < _n_channels; k++)
+  {
+    if (_subch_type[k] == EChannelType::EDGE)
+    {
+      _gap_pairs_sf[k].first = _chan_to_gap_map[k][0];
+      _gap_pairs_sf[k].second = _chan_to_gap_map[k][2];
+      auto k1 = _gap_pairs_sf[k].first;
+      auto k2 = _gap_pairs_sf[k].second;
+      if (_gap_to_chan_map[k1].first == k)
+      {
+        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;
+      }
+      else if (_gap_to_chan_map[k1].second == k)
+      {
+        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
+      }
+      else
+      {
+        mooseError(name(),
+                   " TriMesh could not form the channel pairs for the sweeping flow for the "
+                   "subchannel number ",
+                   k);
+      }
+      if (_gap_to_chan_map[k2].first == k)
+      {
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].second;
+      }
+      else if (_gap_to_chan_map[k2].second == k)
+      {
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
+      }
+      else
+      {
+        mooseError(name(),
+                   " TriMesh could not form the channel pairs for the sweeping flow for the "
+                   "subchannel number ",
+                   k);
+      }
+    }
+    else if (_subch_type[k] == EChannelType::CORNER)
+    {
+
+      _gap_pairs_sf[k].first = _chan_to_gap_map[k][1];
+      _gap_pairs_sf[k].second = _chan_to_gap_map[k][0];
+
+      auto k1 = _gap_pairs_sf[k].first;
+      auto k2 = _gap_pairs_sf[k].second;
+
+      if (_gap_to_chan_map[k1].first == k)
+      {
+        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;
+      }
+      else if (_gap_to_chan_map[k1].second == k)
+      {
+        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
+      }
+      else
+      {
+        mooseError(name(),
+                   " TriMesh could not form the channel pairs for the sweeping flow for the "
+                   "subchannel number ",
+                   k);
+      }
+
+      if (_gap_to_chan_map[k2].first == k)
+      {
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].second;
+      }
+      else if (_gap_to_chan_map[k2].second == k)
+      {
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
+      }
+      else
+      {
+        mooseError(name(),
+                   " TriMesh could not form the channel pairs for the sweeping flow for the "
+                   "subchannel number ",
+                   k);
+      }
+    }
+  }
 
   // set the _gij_map
 
