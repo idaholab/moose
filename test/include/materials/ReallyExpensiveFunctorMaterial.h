@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADKernel.h"
+#pragma once
 
-class FunctorMatDiffusion : public ADKernel
+#include "FunctorMaterial.h"
+
+class ReallyExpensiveFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  FunctorMatDiffusion(const InputParameters & parameters);
+  ReallyExpensiveFunctorMaterial(const InputParameters & parameters);
 
-protected:
-  ADReal computeQpResidual() override;
-
-  const FunctorInterface<Real> & _diff;
+private:
+  FunctorMaterialProperty<Real> & _slow_prop;
 };

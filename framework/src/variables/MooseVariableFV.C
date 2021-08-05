@@ -1107,10 +1107,11 @@ MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) co
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(const std::pair<unsigned int, SubdomainID> & qp) const
+MooseVariableFV<OutputType>::operator()(const QpArg & qp) const
 {
-  mooseAssert(this->hasBlocks(qp.second), "This variable doesn't exist in the requested block!");
-  return adSln()[qp.first];
+  mooseAssert(this->hasBlocks(qp.first->subdomain_id()),
+              "This variable doesn't exist in the requested block!");
+  return adSln()[qp.second];
 }
 
 template <typename OutputType>

@@ -804,6 +804,10 @@ public:
   template <typename T>
   const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name, THREAD_ID tid);
 
+  virtual void timestepSetup();
+  virtual void residualSetup();
+  virtual void jacobianSetup();
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

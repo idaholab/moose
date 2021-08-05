@@ -42,6 +42,7 @@ class FunctorInterface
 public:
   using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool, SubdomainID>;
   using ElemAndFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
+  using QpArg = std::pair<const libMesh::Elem *, unsigned int>;
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
   virtual ~FunctorInterface() = default;
@@ -79,9 +80,9 @@ public:
   /**
    * Evaluate the functor at the current qp point. Unlike the above overloads, there is a caveat to
    * calling this overload. Any variables involved in the functor evaluation must have their
-   * elemental data properly pre-initialized at the desired \p qp
+   * elemental data properly pre-initialized at the desired quadrature point
    */
-  virtual T operator()(const std::pair<unsigned int, SubdomainID> & qp) const = 0;
+  virtual T operator()(const QpArg & qp) const = 0;
 
   /**
    * @param tqp A pair with the first member corresponding to an \p ElementType, either Element,
@@ -104,6 +105,7 @@ class ConstantFunctor : public FunctorInterface<T>
 public:
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemAndFaceArg;
+  using typename FunctorInterface<T>::QpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
@@ -116,7 +118,7 @@ public:
 
   T operator()(const FaceArg &) const override final { return _value; }
 
-  T operator()(const std::pair<unsigned int, SubdomainID> &) const override final { return _value; }
+  T operator()(const QpArg &) const override final { return _value; }
 
   T
   operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &) const override final

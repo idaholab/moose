@@ -52,13 +52,13 @@
 
 [Materials]
   [./block0]
-    type = ADGenericConstantFunctorMaterial
+    type = GenericConstantFunctorMaterial
     block = '0'
     prop_names = 'D'
     prop_values = '4'
   [../]
   [./block1]
-    type = ADGenericConstantFunctorMaterial
+    type = GenericConstantFunctorMaterial
     block = '1'
     prop_names = 'D'
     prop_values = '2'

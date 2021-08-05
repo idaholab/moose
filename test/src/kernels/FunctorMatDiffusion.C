@@ -21,13 +21,12 @@ FunctorMatDiffusion::validParams()
 }
 
 FunctorMatDiffusion::FunctorMatDiffusion(const InputParameters & parameters)
-  : ADKernel(parameters), _diff(getFunctorMaterialProperty<ADReal>("diffusivity"))
+  : ADKernel(parameters), _diff(getFunctorMaterialProperty<Real>("diffusivity"))
 {
 }
 
 ADReal
 FunctorMatDiffusion::computeQpResidual()
 {
-  return _diff(std::make_pair(_qp, _current_elem->subdomain_id())) * _grad_test[_i][_qp] *
-         _grad_u[_qp];
+  return _diff(std::make_pair(_current_elem, _qp)) * _grad_test[_i][_qp] * _grad_u[_qp];
 }

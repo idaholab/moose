@@ -361,7 +361,9 @@ public:
   virtual std::vector<VariableName> getVariableNames();
 
   virtual void initialSetup();
-  virtual void timestepSetup();
+  void timestepSetup() override;
+  void residualSetup() override;
+  void jacobianSetup() override;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) override;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;

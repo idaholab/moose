@@ -1030,3 +1030,27 @@ SubProblem::clearAllDofIndices()
   systemBaseNonlinear().clearAllDofIndices();
   systemBaseAuxiliary().clearAllDofIndices();
 }
+
+void
+SubProblem::timestepSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second->timestepSetup();
+}
+
+void
+SubProblem::residualSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second->residualSetup();
+}
+
+void
+SubProblem::jacobianSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second->jacobianSetup();
+}

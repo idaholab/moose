@@ -32,4 +32,45 @@
       ad_indexing_type = 'global'
     []
   []
+  [prop_caching]
+    requirement = 'The system shall be able to evaluate, cache, and then clear functor material property evaluations'
+    [on_timestep_begin]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'at the beginning of timesteps'
+      cli_args = "Materials/slow_prop/execute_on='timestep_begin'"
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [always]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'always, so always perform evaluations'
+      ad_indexing_type = 'global'
+      prereq = 'prop_caching/on_timestep_begin'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [on_nonlinear]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'on nonlinear iterations'
+      cli_args = "Materials/slow_prop/execute_on='nonlinear'"
+      prereq = 'prop_caching/always'
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [on_linear]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'on linear iterations'
+      cli_args = "Materials/slow_prop/execute_on='linear'"
+      prereq = 'prop_caching/on_nonlinear'
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+  []
 []
