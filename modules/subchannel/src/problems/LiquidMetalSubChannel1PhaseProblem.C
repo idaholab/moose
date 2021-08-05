@@ -28,6 +28,143 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(double Re)
 }
 
 void
+LiquidMetalSubChannel1PhaseProblem::computeH(int iz)
+{
+  if (iz == 0)
+  {
+    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      h_soln->set(node, _fp->h_from_p_T((*P_soln)(node), (*T_soln)(node)));
+    }
+    return;
+  }
+  auto z_grid = _subchannel_mesh.getZGrid();
+  auto dz = z_grid[iz] - z_grid[iz - 1];
+  // go through the channels of the level.
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    const Real & pitch = _subchannel_mesh.getPitch();
+    const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+
+    // Start with applying mass-conservation equation & energy - conservation equation
+    // Find the nodes for the top and bottom of this element.
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    // Copy the variables at the inlet (bottom) of this element.
+    auto mdot_in = (*mdot_soln)(node_in);
+    auto h_in = (*h_soln)(node_in); // J/kg
+    auto volume = dz * (*S_flow_soln)(node_in);
+    auto mdot_out = (*mdot_soln)(node_out);
+    auto h_out = 0.0;
+    double sum_wijh = 0.0;
+    double sum_wijprime_dhij = 0.0;
+    // Calculate sum of crossflow into channel i from channels j around i
+    unsigned int counter = 0;
+    Real e_cond = 0.0;
+    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+    {
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int ii_ch = chans.first;
+      // i is always the smallest and first index in the mapping
+      unsigned int jj_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+      // Define donor enthalpy
+      auto h_star = 0.0;
+      if (Wij(i_gap, iz) > 0.0)
+      {
+        h_star = (*h_soln)(node_in_i);
+      }
+      else if (Wij(i_gap, iz) < 0.0)
+      {
+        h_star = (*h_soln)(node_in_j);
+      }
+      // take care of the sign by applying the map, use donor cell
+      sum_wijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz) * h_star;
+      sum_wijprime_dhij += WijPrime(i_gap, iz) *
+                           (2 * (*h_soln)(node_in) - (*h_soln)(node_in_j) - (*h_soln)(node_in_i));
+      counter++;
+
+      // compute the radial heat conduction through gaps
+      auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
+      auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
+      Real dist_ij = pitch;
+
+      if (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::EDGE)
+      {
+        dist_ij = pitch;
+      }
+      else if ((subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE) ||
+               (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER))
+      {
+        dist_ij = pitch;
+      }
+      else
+      {
+        dist_ij = pitch / std::sqrt(3);
+      }
+
+      auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+      auto thcon_i = _fp->k_from_p_T((*P_soln)(node_in_i), (*T_soln)(node_in_i));
+      auto thcon_j = _fp->k_from_p_T((*P_soln)(node_in_j), (*T_soln)(node_in_j));
+      auto shape_factor = 0.66 * (pitch / rod_diameter) *
+                          std::pow((_subchannel_mesh.getGapWidth(i_gap) / rod_diameter), -0.3);
+      if (ii_ch == i_ch)
+      {
+        e_cond += 0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
+                  ((*T_soln)(node_in_j) - (*T_soln)(node_in_i)) / dist_ij;
+      }
+      else
+      {
+        e_cond += -0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
+                  ((*T_soln)(node_in_j) - (*T_soln)(node_in_i)) / dist_ij;
+      }
+    }
+
+    // compute the axial heat conduction between current and lower axial node
+    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto thcon_i = _fp->k_from_p_T((*P_soln)(node_in_i), (*T_soln)(node_in_i));
+    auto thcon_j = _fp->k_from_p_T((*P_soln)(node_in_j), (*T_soln)(node_in_j));
+    auto Si = (*S_flow_soln)(node_in_i);
+    auto dist_ij = z_grid[iz] - z_grid[iz - 1];
+
+    e_cond +=
+        0.5 * (thcon_i + thcon_j) * Si * ((*T_soln)(node_in_j) - (*T_soln)(node_in_i)) / dist_ij;
+
+    int nz = _subchannel_mesh.getNumOfAxialNodes();
+    // compute the axial heat conduction between current and upper axial node
+    if (iz < nz)
+    {
+
+      auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
+      auto thcon_i = _fp->k_from_p_T((*P_soln)(node_in_i), (*T_soln)(node_in_i));
+      auto thcon_j = _fp->k_from_p_T((*P_soln)(node_in_j), (*T_soln)(node_in_j));
+      auto Si = (*S_flow_soln)(node_in_i);
+      auto dist_ij = z_grid[iz + 1] - z_grid[iz];
+      e_cond +=
+          0.5 * (thcon_i + thcon_j) * Si * ((*T_soln)(node_in_j) - (*T_soln)(node_in_i)) / dist_ij;
+    }
+
+    h_out = (mdot_in * h_in - sum_wijh - sum_wijprime_dhij + e_cond +
+             ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0 +
+             _TR * rho_soln->old(node_out) * h_soln->old(node_out) * volume / _dt) /
+            (mdot_out + _TR * (*rho_soln)(node_out)*volume / _dt);
+
+    if (h_out < 0)
+    {
+      _console << "Wij = : " << Wij << "\n";
+      mooseError(
+          name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", iz);
+    }
+    // Update the solution vectors at the outlet of the cell
+    h_soln->set(node_out, h_out); // J/kg
+  }
+}
+
+void
 LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iz)
 {
   if (iz == 0)
