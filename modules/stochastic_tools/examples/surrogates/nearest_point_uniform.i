@@ -33,17 +33,19 @@
   []
 []
 
-# Sampling surrogate
-[VectorPostprocessors]
-  [samp_avg]
+[Reporters]
+  # Sampling surrogate
+  [samp]
     type = EvaluateSurrogate
-    model = nearest_point_avg
+    model = 'nearest_point_avg nearest_point_max'
     sampler = sample
+    parallel_type = ROOT
   []
-  [samp_max]
-    type = EvaluateSurrogate
-    model = nearest_point_max
-    sampler = sample
+  # Computing statistics
+  [stats]
+    type = StatisticsReporter
+    reporters = 'samp/nearest_point_avg samp/nearest_point_max'
+    compute = 'mean stddev'
   []
 []
 
@@ -55,20 +57,6 @@
   [nearest_point_max]
     type = NearestPointSurrogate
     filename = 'nearest_point_training_out_nearest_point_max.rd'
-  []
-[]
-
-# Computing statistics
-[VectorPostprocessors]
-  [stats_avg]
-    type = Statistics
-    vectorpostprocessors = 'samp_avg'
-    compute = 'mean stddev'
-  []
-  [stats_max]
-    type = Statistics
-    vectorpostprocessors = 'samp_max'
-    compute = 'mean stddev'
   []
 []
 

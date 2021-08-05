@@ -23,15 +23,15 @@
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [samp_avg]
-    type = EvaluateGaussianProcess
+    type = EvaluateSurrogate
     model = GP_avg
     sampler = test_sample
-    output_samples = true
+    evaluate_std = 'true'
+    parallel_type = ROOT
     execute_on = final
   []
-
 []
 
 [Surrogates]

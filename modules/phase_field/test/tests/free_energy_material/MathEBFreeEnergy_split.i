@@ -11,95 +11,90 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
-  [./w]
-  [../]
+    []
+  []
+  [w]
+  []
 []
 
 [Preconditioning]
-active = 'SMP'
-  [./PBP]
-   type = PBP
-   solve_order = 'w c'
-   preconditioner = 'AMG ASM'
-   off_diag_row = 'c '
-   off_diag_column = 'w '
-  [../]
+  active = 'SMP'
+  [PBP]
+    type = PBP
+    solve_order = 'w c'
+    preconditioner = 'AMG ASM'
+    off_diag_row = 'c '
+    off_diag_column = 'w '
+  []
 
-  [./SMP]
-   type = SMP
-   off_diag_row = 'w c'
-   off_diag_column = 'c w'
-  [../]
+  [SMP]
+    type = SMP
+    off_diag_row = 'w c'
+    off_diag_column = 'c w'
+  []
 []
 
 [Kernels]
-
-  [./cres]
+  [cres]
     type = SplitCHParsed
     variable = c
     kappa_name = kappa_c
     w = w
     f_name = F
-  [../]
+  []
 
-  [./wres]
+  [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
 
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       primary = 0
       secondary = 2
       translation = '0 30.0 0'
-    [../]
+    []
 
-    [./left_right]
+    [left_right]
       primary = 1
       secondary = 3
       translation = '-30.0 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
-    prop_names  = 'M kappa_c'
+    prop_names = 'M kappa_c'
     prop_values = '1.0 2.0'
-  [../]
-  [./free_energy]
+  []
+  [free_energy]
     type = MathEBFreeEnergy
     f_name = F
     c = c
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   scheme = 'BDF2'
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type'

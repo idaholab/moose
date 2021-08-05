@@ -10,7 +10,7 @@
 #include "NearestNodeNumber.h"
 #include "UserObjectInterface.h"
 
-registerMooseObject("GeochemistryApp", NearestNodeNumber);
+registerMooseObject("MooseApp", NearestNodeNumber);
 
 InputParameters
 NearestNodeNumber::validParams()

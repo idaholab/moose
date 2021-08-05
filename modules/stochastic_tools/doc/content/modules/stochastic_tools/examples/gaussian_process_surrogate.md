@@ -56,9 +56,9 @@ Creation of the `Surrogate` block follows the standard procedure laid out for ot
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Surrogates
 
-One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard [EvaluateSurrogate](EvaluateSurrogate.md) vector post processor is replaced with the [EvaluateGaussianProcess](EvaluateGaussianProcess.md) vector post processor, which functions similarly but also outputs the standard deviation of the surrogate at the evaluation point.  
+One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard [EvaluateSurrogate](EvaluateSurrogate.md) reporter is used with specification of [!param](/Reporters/EvaluateSurrogate/evaluate_std), which also outputs the standard deviation of the surrogate at the evaluation point.  
 
-!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=VectorPostprocessors
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Reporters
 
 The Gaussian Process surrogate model can only be evaluated at discrete points in the parameter space, so if we wish to visualize the response model fine sampling is required. To accomplish this sampling a [CartesianProductSampler.md] evaluates the model for 100 evenly spaced $q$ values in $[9000,11000]$. This sampling is plotted below in [1D_untuned] (space between the 100 sampled points are filled by simple linear interpolation, so strictly speaking the plot is not exactly the model)
 

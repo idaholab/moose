@@ -69,17 +69,17 @@ public:
   const GenericMaterialProperty<Real, is_ad> & value() const;
 
   /// take another derivative
-  void addDerivative(const VariableName & var);
+  void addDerivative(const SymbolName & symbol);
 
   /**
-   * Check if a material property depends on a given variable.
+   * Check if a material property depends on a given FParser symbol.
    * A dependency is indicated by either directly specifying it, or by requesting a
-   * derivative w.r.t. that variable using the D[x,a] syntax
+   * derivative w.r.t. that symbol using the D[x,a] syntax
    */
-  bool dependsOn(const std::string & var) const;
+  bool dependsOn(const SymbolName & symbol) const;
 
-  /// builds a list of dependent variables (exactly all variabled for which depends on returns true)
-  std::vector<VariableName> getDependentVariables();
+  /// builds a list of dependent symbols (exactly all symbols for which depends on returns true)
+  std::vector<SymbolName> getDependentSymbols();
 
   /// output the internal state of this descriptor for debugging purposes
   void printDebug();
@@ -89,7 +89,7 @@ public:
 
 private:
   void parseDerivative(const std::string &);
-  void parseDependentVariables(const std::string &);
+  void parseDependentSymbols(const std::string &);
 
   /// name used in function expression
   std::string _fparser_name;
@@ -97,8 +97,8 @@ private:
   /// function material property base name
   std::string _base_name;
 
-  std::vector<VariableName> _dependent_vars;
-  std::vector<VariableName> _derivative_vars;
+  std::vector<SymbolName> _dependent_symbols;
+  std::vector<SymbolName> _derivative_symbols;
 
   /// material property value (this is lazily updated and cached when read through value())
   mutable const GenericMaterialProperty<Real, is_ad> * _value;

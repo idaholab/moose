@@ -19,10 +19,12 @@ PolynomialRegressionTrainer::validParams()
 
   params.addClassDescription("Computes coefficients for polynomial regession model.");
 
+  MooseEnum data_type("real=0 vector_real=1", "real");
   params.addRequiredParam<ReporterName>(
       "response",
       "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
       "column with 'sampler/col_<index>'.");
+  params.addParam<MooseEnum>("response_type", data_type, "Response data type.");
   params.addParam<std::vector<ReporterName>>(
       "predictors",
       std::vector<ReporterName>(),
@@ -46,14 +48,19 @@ PolynomialRegressionTrainer::validParams()
 PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sampler_row(getSamplerData()),
-    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _rval(getParam<MooseEnum>("response_type") == 0
+              ? &getTrainingData<Real>(getParam<ReporterName>("response"))
+              : nullptr),
+    _rvecval(getParam<MooseEnum>("response_type") == 1
+                 ? &getTrainingData<std::vector<Real>>(getParam<ReporterName>("response"))
+                 : nullptr),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
     _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
     _n_dims((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
                                                : (_pvals.size() + _pcols.size())),
     _regression_type(getParam<MooseEnum>("regression_type")),
     _penalty(getParam<Real>("penalty")),
-    _coeff(declareModelData<std::vector<Real>>("_coeff")),
+    _coeff(declareModelData<std::vector<std::vector<Real>>>("_coeff")),
     _max_degree(
         declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree"))),
     _power_matrix(declareModelData<std::vector<std::vector<unsigned int>>>(
@@ -61,7 +68,7 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
         StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree + 1))),
     _n_poly_terms(_power_matrix.size()),
     _matrix(_n_poly_terms, _n_poly_terms),
-    _rhs(_n_poly_terms)
+    _rhs(1, DenseVector<Real>(_n_poly_terms, 0.0))
 {
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
@@ -98,6 +105,11 @@ PolynomialRegressionTrainer::train()
       data_pow(d, i) = pow(val, i);
   }
 
+  // Emplace new values if necessary
+  if (_rvecval)
+    for (unsigned int r = _rhs.size(); r < _rvecval->size(); ++r)
+      _rhs.emplace_back(_n_poly_terms, 0.0);
+
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
     std::vector<unsigned int> i_powers(_power_matrix[i]);
@@ -117,7 +129,11 @@ PolynomialRegressionTrainer::train()
       _matrix(i, j) += i_value * j_value;
     }
 
-    _rhs(i) += i_value * _rval;
+    if (_rval)
+      _rhs[0](i) += i_value * (*_rval);
+    else if (_rvecval)
+      for (unsigned int r = 0; r < _rvecval->size(); ++r)
+        _rhs[r](i) += i_value * (*_rvecval)[r];
   }
 
   // Adding penalty term for Ridge regularization
@@ -129,10 +145,22 @@ PolynomialRegressionTrainer::train()
 void
 PolynomialRegressionTrainer::postTrain()
 {
+  // Make sure _rhs are all the same size
+  unsigned int nrval = _rhs.size();
+  gatherMax(nrval);
+  for (unsigned int r = _rhs.size(); r < nrval; ++r)
+    _rhs.emplace_back(_n_poly_terms, 0.0);
+
+  // Gather regression data
   gatherSum(_matrix.get_values());
-  gatherSum(_rhs.get_values());
+  for (auto & it : _rhs)
+    gatherSum(it.get_values());
 
   DenseVector<Real> sol;
-  _matrix.lu_solve(_rhs, sol);
-  _coeff = sol.get_values();
+  _coeff.resize(_rhs.size());
+  for (unsigned int r = 0; r < _rhs.size(); ++r)
+  {
+    _matrix.lu_solve(_rhs[r], sol);
+    _coeff[r] = sol.get_values();
+  }
 }

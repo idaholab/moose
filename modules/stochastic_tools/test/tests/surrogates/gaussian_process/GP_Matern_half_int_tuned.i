@@ -48,32 +48,38 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = train_sample
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg'
+    stochastic_reporter = results
+    from_reporter = 'avg/value'
+  []
+[]
+
+[Reporters]
+  [results]
+    type = StochasticReporter
+    parallel_type = ROOT
+  []
+  [samp_avg]
+    type = EvaluateSurrogate
+    model = GP_avg
+    sampler = test_sample
+    evaluate_std = 'true'
+    parallel_type = ROOT
+    execute_on = final
+  []
+  [train_avg]
+    type = EvaluateSurrogate
+    model = GP_avg
+    sampler = train_sample
+    evaluate_std = 'true'
+    parallel_type = ROOT
+    execute_on = final
   []
 []
 
 [VectorPostprocessors]
-  [results]
-    type = StochasticResults
-  []
-  [samp_avg]
-    type = EvaluateGaussianProcess
-    model = GP_avg
-    sampler = test_sample
-    output_samples = true
-    execute_on = final
-  []
-  [train_avg]
-    type = EvaluateGaussianProcess
-    model = GP_avg
-    sampler = train_sample
-    output_samples = true
-    execute_on = final
-  []
   [hyperparams]
     type = GaussianProcessData
     gp_name = 'GP_avg'
@@ -89,7 +95,7 @@
     standardize_params = 'true'           #Center and scale the training params
     standardize_data = 'true'             #Center and scale the training data
     sampler = train_sample
-    response = results/data:avg
+    response = results/data:avg:value
     tao_options = '-tao_bncg_type ssml_bfgs'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-9'

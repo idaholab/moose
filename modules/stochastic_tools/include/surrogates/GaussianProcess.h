@@ -20,8 +20,9 @@ class GaussianProcess : public SurrogateModel, public CovarianceInterface
 public:
   static InputParameters validParams();
   GaussianProcess(const InputParameters & parameters);
+  using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
-  virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
+  virtual Real evaluate(const std::vector<Real> & x, Real & std) const override;
 
   /**
    * This function is called by LoadCovarianceDataAction when the surrogate is

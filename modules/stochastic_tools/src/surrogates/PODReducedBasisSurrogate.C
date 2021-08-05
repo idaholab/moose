@@ -285,10 +285,3 @@ PODReducedBasisSurrogate::getNodalQoI(std::string var_name, unsigned int qoi_typ
 
   return (val);
 }
-
-Real
-PODReducedBasisSurrogate::evaluate(const std::vector<Real> & /*x*/) const
-{
-  mooseError("evaluate() is not implemented in PODReducedBasisSurrogate!");
-  return 0.0;
-}

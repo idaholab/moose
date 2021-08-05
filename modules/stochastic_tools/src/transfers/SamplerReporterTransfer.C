@@ -14,6 +14,7 @@
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
 #include "Sampler.h"
+#include "StochasticReporter.h"
 
 registerMooseObject("StochasticToolsApp", SamplerReporterTransfer);
 
@@ -41,13 +42,7 @@ SamplerReporterTransfer::validParams()
 SamplerReporterTransfer::SamplerReporterTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     ReporterTransferInterface(this),
-    _sub_reporter_names(getParam<std::vector<ReporterName>>("from_reporter")),
-    _sr_name(getParam<std::string>("stochastic_reporter")),
-    _reporter_names(
-        isParamValid("prefix")
-            ? getReporterNamesHelper(getParam<std::string>("prefix"), _sr_name, _sub_reporter_names)
-            : getReporterNamesHelper(_name, _sr_name, _sub_reporter_names)),
-    _converged_name(_sr_name, StochasticReporter::convergedReporterName())
+    _sub_reporter_names(getParam<std::vector<ReporterName>>("from_reporter"))
 {
 }
 
@@ -55,7 +50,7 @@ void
 SamplerReporterTransfer::initialSetup()
 {
   // Get the StochasticResults VPP object to populate
-  auto & uo = _fe_problem.getUserObject<UserObject>(_sr_name);
+  auto & uo = _fe_problem.getUserObject<UserObject>(getParam<std::string>("stochastic_reporter"));
   _results = dynamic_cast<StochasticReporter *>(&uo);
   if (!_results)
     paramError("stochastic_reporter", "This object must be a 'StochasticReporter' object.");
@@ -66,7 +61,6 @@ SamplerReporterTransfer::initialSetup()
 void
 SamplerReporterTransfer::initializeFromMultiapp()
 {
-  resizeStochasticReporters();
 }
 
 void
@@ -88,8 +82,6 @@ SamplerReporterTransfer::finalizeFromMultiapp()
 void
 SamplerReporterTransfer::execute()
 {
-  resizeStochasticReporters();
-
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
     transferStochasticReporters(i, i);
 }
@@ -99,32 +91,31 @@ SamplerReporterTransfer::intitializeStochasticReporters()
 {
   const dof_id_type n = _multi_app->numGlobalApps();
 
-  for (unsigned int r = 0; r < _sub_reporter_names.size(); ++r)
+  for (const auto & sub_rname : _sub_reporter_names)
     for (MooseIndex(n) i = 0; i < n; i++)
       if (_multi_app->hasLocalApp(i))
-        addReporterTransferMode(
-            _sub_reporter_names[r], REPORTER_MODE_ROOT, _multi_app->appProblemBase(i));
+        addReporterTransferMode(sub_rname, REPORTER_MODE_ROOT, _multi_app->appProblemBase(i));
 
-  for (unsigned int r = 0; r < _sub_reporter_names.size(); ++r)
+  const std::string prefix = isParamValid("prefix") ? getParam<std::string>("prefix") : name();
+  for (const auto & sub_rname : _sub_reporter_names)
     for (MooseIndex(n) i = 0; i < n; i++)
       if (_multi_app->hasLocalApp(i))
       {
-        declareVectorClone(_sub_reporter_names[r],
-                           _reporter_names[r],
-                           _multi_app->appProblemBase(i),
-                           _multi_app->problemBase(),
-                           REPORTER_MODE_DISTRIBUTED);
+        const ReporterData & rdata = _multi_app->appProblemBase(i).getReporterData();
+        ReporterName rname =
+            _results->declareStochasticReporterClone(*_sampler_ptr, rdata, sub_rname, prefix);
+        if (rname.empty())
+          paramError("from_reporter",
+                     "Reporter value ",
+                     sub_rname,
+                     " is of unsupported type ",
+                     rdata.getReporterContextBase(sub_rname).type(),
+                     ". Contact MOOSE developers on how to transfer this type of reporter value.");
+        _reporter_names.push_back(rname);
         break;
       }
-}
 
-void
-SamplerReporterTransfer::resizeStochasticReporters()
-{
-  for (const auto & rn : _reporter_names)
-    resizeReporter(rn, _multi_app->problemBase(), _sampler_ptr->getNumberOfLocalRows());
-
-  resizeReporter(_converged_name, _multi_app->problemBase(), _sampler_ptr->getNumberOfLocalRows());
+  _converged = &_results->declareStochasticReporter<bool>(name() + ":converged", *_sampler_ptr);
 }
 
 void
@@ -141,6 +132,6 @@ SamplerReporterTransfer::transferStochasticReporters(dof_id_type global_index,
                                _multi_app->problemBase(),
                                local_index);
 
-    _results->setSampleConverged(_multi_app->appProblemBase(app_index).converged(), local_index);
+    (*_converged)[local_index] = _multi_app->appProblemBase(app_index).converged();
   }
 }

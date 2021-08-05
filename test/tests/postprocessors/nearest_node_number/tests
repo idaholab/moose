@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#15749 #18504'
+  design = 'NearestNodeNumber.md'
+  [nearest_node_number_1]
+    type = CSVDiff
+    input = nearest_node_number_1.i
+    csvdiff = nearest_node_number_1_out.csv
+    requirement = "The system shall have the capability to compute the nearest node number to a given point."
+  []
+  [nearest_node_number_2]
+    type = CSVDiff
+    input = nearest_node_number_2.i
+    csvdiff = nearest_node_number_2_out.csv
+    requirement = "The system shall have the capability to compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant."
+  []
+  [nearest_node_number_3]
+    type = CSVDiff
+    input = nearest_node_number_3.i
+    csvdiff = nearest_node_number_3_out.csv
+    requirement = "The system shall have the capability to compute the nearest node number to a given point, including when the mesh is adapting"
+  []
+[]

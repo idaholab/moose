@@ -20,6 +20,7 @@ class PolynomialChaos : public SurrogateModel
 public:
   static InputParameters validParams();
   PolynomialChaos(const InputParameters & parameters);
+  using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
   /// Access number of dimensions/parameters

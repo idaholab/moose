@@ -10,33 +10,37 @@
 #pragma once
 
 // MOOSE includes
-#include "GeneralVectorPostprocessor.h"
+#include "StochasticReporter.h"
 #include "SurrogateModelInterface.h"
 #include "SurrogateModel.h"
 
 /**
  * A tool for output Sampler data.
  */
-class EvaluateSurrogate : public GeneralVectorPostprocessor,
-                          SurrogateModelInterface
+class EvaluateSurrogate : public StochasticReporter, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
 
   EvaluateSurrogate(const InputParameters & parameters);
-  virtual void initialize() override;
+  virtual void initialize() override {}
   virtual void execute() override;
-  virtual void finalize() override;
+  virtual void finalize() override {}
 
 protected:
   /// Sampler for evaluating surrogate model
   Sampler & _sampler;
-  /// Where or not to output all the samples used
-  const bool _output_samples;
-  /// Vector containing all the sample points for each parameter
-  std::vector<VectorPostprocessorValue *> _sample_vector;
+  /// The data type for the response value
+  const MultiMooseEnum _response_types;
+  /// Whether or not to compute standard deviation
+  std::vector<bool> _doing_std;
   /// Pointers to surrogate model
   std::vector<const SurrogateModel *> _model;
+  ///@{
   /// Vectors containing results of sampling model
-  std::vector<VectorPostprocessorValue *> _value_vector;
+  std::vector<std::vector<Real> *> _real_values;
+  std::vector<std::vector<std::vector<Real>> *> _vector_real_values;
+  std::vector<std::vector<Real> *> _real_std;
+  std::vector<std::vector<std::vector<Real>> *> _vector_real_std;
+  ///@}
 };

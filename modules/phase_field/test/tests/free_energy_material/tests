@@ -1,63 +1,100 @@
 [Tests]
-  [./IdealGasFreeEnergy]
+  [IdealGasFreeEnergy]
     type = 'Exodiff'
     input = 'IdealGasFreeEnergy.i'
     exodiff = 'IdealGasFreeEnergy_out.e'
-  [../]
+    issues = '#9696'
+    design = 'IdealGasFreeEnergy.md'
+    requirement = 'The system shall provide an object to compute the Helmholtz free energy density '
+                  'of an ideal gas.'
+  []
 
-  [./VanDerWaalsFreeEnergy]
+  [VanDerWaalsFreeEnergy]
     type = 'Exodiff'
     input = 'VanDerWaalsFreeEnergy.i'
     exodiff = 'VanDerWaalsFreeEnergy_out.e'
-  [../]
+    issues = '#9696'
+    design = 'VanDerWaalsFreeEnergy.md'
+    requirement = 'The system shall provide an object to compute the Helmholtz free energy density '
+                  'of a Van der Waals gas.'
+  []
 
-  [./MathFreeEnergy]
-    type = 'Exodiff'
-    input = 'MathFreeEnergy.i'
-    exodiff = 'MathFreeEnergy_oversample.e'
-  [../]
-  [./MathFreeEnergy_split]
-    type = 'Exodiff'
-    input = 'MathFreeEnergy_split.i'
-    exodiff = 'MathFreeEnergy_split_out.e'
-    max_parallel = 1                              # -pc_type lu
-  [../]
+  [MathFreeEnergy]
+    design = "MathEBFreeEnergy.md MathFreeEnergy.md"
+    issues = '#13138 #18402'
+    requirement = 'The system shall provide an object to compute a simple polynomial double well '
+                  'free energy'
 
-  [./MathEBFreeEnergy]
-    type = 'Exodiff'
-    input = 'MathEBFreeEnergy.i'
-    exodiff = 'MathEBFreeEnergy_oversample.e'
-  [../]
-  [./MathEBFreeEnergy_split]
-    type = 'Exodiff'
-    input = 'MathEBFreeEnergy_split.i'
-    exodiff = 'MathEBFreeEnergy_split_out.e'
-    max_parallel = 1                              # -pc_type lu
-  [../]
+    [non-split]
+      type = 'Exodiff'
+      input = 'MathFreeEnergy.i'
+      exodiff = 'MathFreeEnergy_oversample.e'
+      detail = "hardcoded in C++ and applied to a non-split Cahn-Hilliard system"
+    []
+    [split]
+      type = 'Exodiff'
+      input = 'MathFreeEnergy_split.i'
+      exodiff = 'MathFreeEnergy_split_out.e'
+      detail = "hardcoded in C++ and applied to a split Cahn-Hilliard system"
+    []
 
-  [./RegularSolutionFreeEnergy]
-    type = 'Exodiff'
-    input = 'RegularSolutionFreeEnergy.i'
-    exodiff = 'RegularSolutionFreeEnergy_out.e'
-  [../]
+    [eb-non-split]
+      type = 'Exodiff'
+      input = 'MathEBFreeEnergy.i'
+      exodiff = 'MathEBFreeEnergy_oversample.e'
+      detail = "implemented using the ExpressionBuilder system and applied to a non-split "
+               "Cahn-Hilliard system"
+    []
+    [eb-split]
+      type = 'Exodiff'
+      input = 'MathEBFreeEnergy_split.i'
+      exodiff = 'MathEBFreeEnergy_split_out.e'
+      detail = "implemented using the ExpressionBuilder system and applied to a split Cahn-Hilliard "
+               "system"
+    []
+    [eb-differing_names]
+      type = 'Exodiff'
+      input = 'MathEBFreeEnergy_split_name.i'
+      exodiff = 'MathEBFreeEnergy_split_name_out.e'
+      detail = 'implemented using the ExpressionBuilder system, correctly differentiating '
+                    'between variable names and corresponding parser symbol names (which are input '
+                    'parameter names)'
+    []
+  []
 
-  [./RegularSolutionFreeEnergy_const_T_default]
-    type = 'Exodiff'
-    input = 'RegularSolutionFreeEnergy_const_T.i'
-    exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
-  [../]
+  [RegularSolutionFreeEnergy]
+    issues = '#6186'
+    design = 'RegularSolutionFreeEnergy.md'
+    requirement = 'The system shall provide an object to compute the Helmholtz free energy density '
+                  'of a binary regular solution'
+    [coupled_temperatue]
+      type = 'Exodiff'
+      input = 'RegularSolutionFreeEnergy.i'
+      exodiff = 'RegularSolutionFreeEnergy_out.e'
+      detail = 'With a coupled temperature variable'
+    []
 
-  [./RegularSolutionFreeEnergy_const_T_specified]
-    type = 'Exodiff'
-    prereq = 'RegularSolutionFreeEnergy_const_T_default'
-    input = 'RegularSolutionFreeEnergy_const_T.i'
-    exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
-    cli_args = Materials/free_energy/T=300
-  [../]
+    [RegularSolutionFreeEnergy_const_T_default]
+      type = 'Exodiff'
+      input = 'RegularSolutionFreeEnergy_const_T.i'
+      exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
+      detail = 'With a default temperature of 300K'
+    []
 
-  [./RegularSolutionFreeEnergy_plog]
-    type = 'Exodiff'
-    input = 'RegularSolutionFreeEnergy_plog.i'
-    exodiff = 'RegularSolutionFreeEnergy_plog_out.e'
-  [../]
+    [RegularSolutionFreeEnergy_const_T_specified]
+      type = 'Exodiff'
+      input = 'RegularSolutionFreeEnergy_const_T.i'
+      exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
+      cli_args = Materials/free_energy/T=300
+      detail = 'With a specified constant temperature'
+    []
+
+    [RegularSolutionFreeEnergy_plog]
+      type = 'Exodiff'
+      input = 'RegularSolutionFreeEnergy_plog.i'
+      exodiff = 'RegularSolutionFreeEnergy_plog_out.e'
+      detail = 'With a the logarithm functions replaced by a Taylor expansion below a given '
+               'threshold value'
+    []
+  []
 []

@@ -21,9 +21,9 @@ A sampler is created to create sample points:
 
 !listing nearest_point/evaluate.i block=Samplers
 
-A vector postprocessor is then used to evaluate the surrogate model with the points taken from the sampler:
+A reporter is then used to evaluate the surrogate model with the points taken from the sampler:
 
-!listing nearest_point/evaluate.i block=VectorPostprocessors
+!listing nearest_point/evaluate.i block=Reporters
 
 !syntax parameters /Surrogates/NearestPointSurrogate
 
