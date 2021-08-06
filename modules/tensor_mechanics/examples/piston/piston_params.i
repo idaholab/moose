@@ -103,7 +103,6 @@
 []
 
 [Materials]
-  active = 'density_steel stress elasticity_tensor_steel'
   [./elasticity_tensor_steel]
     #Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
