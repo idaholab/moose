@@ -91,6 +91,11 @@ public:
   const T & getComponentByName(const std::string & name) const;
 
   /**
+   * Return list of components available in the simulation
+   */
+  const std::vector<std::shared_ptr<Component>> & getComponents() { return _components; }
+
+  /**
    * Called by a component to announce a variable
    * @param nl True is nonlinear variable is being added
    * @param name The name of the variable

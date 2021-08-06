@@ -141,11 +141,14 @@ Simulation::initSimulation()
   // sort the components using dependency resolver
   DependencyResolver<std::shared_ptr<Component>> dependency_resolver;
   for (const auto & comp : _components)
+  {
+    dependency_resolver.addItem(comp);
     for (const auto & dep : comp->getDependencies())
     {
       if (hasComponent(dep))
         dependency_resolver.insertDependency(comp, _comp_by_name[dep]);
     }
+  }
 
   std::sort(_components.begin(), _components.end(), dependency_resolver);
 }
