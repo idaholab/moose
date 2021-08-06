@@ -21,6 +21,9 @@ Content:
         content:
             - bib/**
 
+Executioner:
+    type: MooseDocs.base.Serial
+
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple

@@ -23,6 +23,9 @@ Content:
             - tutorials/INL_Hex_Light_Presentation_Background.jpg
             - python/mms/*
 
+Executioner:
+    type: MooseDocs.base.Serial
+
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple

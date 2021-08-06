@@ -178,7 +178,10 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         if source_nodes:
             t = time.time()
             n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
-            LOG.info('Translating using %s threads...', n)
+            if isinstance(self, MooseDocs.base.Serial):
+                LOG.info('Translating in serial...')
+            else:
+                LOG.info('Translating using %s threads...', n)
             self.execute(source_nodes, n, read, tokenize, render, write)
             LOG.info('Translating complete [%s sec.]', time.time() - t)
 
