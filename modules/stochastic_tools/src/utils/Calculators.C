@@ -32,13 +32,40 @@ OutType
 Mean<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
   auto local_count = data.size();
-  auto local_sum = std::accumulate(data.begin(), data.end(), 0.);
+  auto local_sum = std::accumulate(data.begin(), data.end(), OutType());
   if (is_distributed)
   {
     this->_communicator.sum(local_count);
     this->_communicator.sum(local_sum);
   }
-  return data.empty() ? 0. : local_sum / local_count;
+  return local_count == 0 ? 0.0 : local_sum / local_count;
+}
+
+template <typename InType, typename OutType>
+void
+Mean<InType, OutType>::initialize()
+{
+  _count = 0;
+  _sum = OutType();
+}
+
+template <typename InType, typename OutType>
+void
+Mean<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _count++;
+  _sum += val;
+}
+
+template <typename InType, typename OutType>
+void
+Mean<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+  {
+    this->_communicator.sum(_count);
+    this->_communicator.sum(_sum);
+  }
 }
 
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +80,28 @@ Min<InType, OutType>::compute(const InType & data, bool is_distributed) const
   return local_min;
 }
 
+template <typename InType, typename OutType>
+void
+Min<InType, OutType>::initialize()
+{
+  _min = std::numeric_limits<OutType>::max();
+}
+
+template <typename InType, typename OutType>
+void
+Min<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _min = std::min(_min, static_cast<OutType>(val));
+}
+
+template <typename InType, typename OutType>
+void
+Min<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+    this->_communicator.min(_min);
+}
+
 // MAX /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 OutType
@@ -65,15 +114,59 @@ Max<InType, OutType>::compute(const InType & data, bool is_distributed) const
   return local_max;
 }
 
+template <typename InType, typename OutType>
+void
+Max<InType, OutType>::initialize()
+{
+  _max = std::numeric_limits<OutType>::min();
+}
+
+template <typename InType, typename OutType>
+void
+Max<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _max = std::max(_max, static_cast<OutType>(val));
+}
+
+template <typename InType, typename OutType>
+void
+Max<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+    this->_communicator.max(_max);
+}
+
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 OutType
 Sum<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  auto local_sum = std::accumulate(data.begin(), data.end(), 0.);
+  auto local_sum = std::accumulate(data.begin(), data.end(), OutType());
   if (is_distributed)
     this->_communicator.sum(local_sum);
   return local_sum;
+}
+
+template <typename InType, typename OutType>
+void
+Sum<InType, OutType>::initialize()
+{
+  _sum = OutType();
+}
+
+template <typename InType, typename OutType>
+void
+Sum<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _sum += val;
+}
+
+template <typename InType, typename OutType>
+void
+Sum<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+    this->_communicator.sum(_sum);
 }
 
 // STDDEV //////////////////////////////////////////////////////////////////////////////////////////
@@ -82,23 +175,50 @@ OutType
 StdDev<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
   auto count = data.size();
-  auto sum = std::accumulate(data.begin(), data.end(), 0.);
-
+  auto sum = OutType();
+  auto sum_of_square = OutType();
+  for (const auto & val : data)
+  {
+    sum += val;
+    sum_of_square += val * val;
+  }
   if (is_distributed)
   {
     this->_communicator.sum(count);
     this->_communicator.sum(sum);
+    this->_communicator.sum(sum_of_square);
   }
+  return count <= 1 ? OutType() : std::sqrt((sum_of_square - sum * sum / count) / (count - 1));
+}
 
-  auto mean = sum / count;
-  auto sum_of_squares = std::accumulate(
-      data.begin(), data.end(), 0., [&mean](Real running_value, Real current_value) {
-        return running_value + std::pow(current_value - mean, 2);
-      });
+template <typename InType, typename OutType>
+void
+StdDev<InType, OutType>::initialize()
+{
+  _count = 0;
+  _sum = OutType();
+  _sum_of_square = OutType();
+}
+
+template <typename InType, typename OutType>
+void
+StdDev<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _count++;
+  _sum += val;
+  _sum_of_square += val * val;
+}
+
+template <typename InType, typename OutType>
+void
+StdDev<InType, OutType>::finalize(bool is_distributed)
+{
   if (is_distributed)
-    this->_communicator.sum(sum_of_squares);
-
-  return std::sqrt(sum_of_squares / (count - 1.));
+  {
+    this->_communicator.sum(_count);
+    this->_communicator.sum(_sum);
+    this->_communicator.sum(_sum_of_square);
+  }
 }
 
 // STDERR //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +229,7 @@ StdErr<InType, OutType>::compute(const InType & data, bool is_distributed) const
   auto count = data.size();
   if (is_distributed)
     this->_communicator.sum(count);
-  return StdDev<InType, OutType>::compute(data, is_distributed) / std::sqrt(count);
+  return count == 0 ? OutType() : StdDev<InType, OutType>::compute(data, is_distributed) / std::sqrt(count);
 }
 
 // RATIO ///////////////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +246,34 @@ Ratio<InType, OutType>::compute(const InType & data, bool is_distributed) const
     this->_communicator.min(local_min);
     this->_communicator.max(local_max);
   }
-  return local_min != 0. ? local_max / local_min : 0.;
+  return local_max / local_min;
+}
+
+template <typename InType, typename OutType>
+void
+Ratio<InType, OutType>::initialize()
+{
+  _min = std::numeric_limits<OutType>::max();
+  _max = std::numeric_limits<OutType>::min();
+}
+
+template <typename InType, typename OutType>
+void
+Ratio<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _min = std::min(_min, static_cast<OutType>(val));
+  _max = std::max(_max, static_cast<OutType>(val));
+}
+
+template <typename InType, typename OutType>
+void
+Ratio<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+  {
+    this->_communicator.min(_min);
+    this->_communicator.max(_max);
+  }
 }
 
 // L2NORM //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,8 +282,8 @@ OutType
 L2Norm<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
   auto local_sum = std::accumulate(
-      data.begin(), data.end(), 0., [](OutType running_value, OutType current_value) {
-        return running_value + std::pow(current_value, 2);
+      data.begin(), data.end(), OutType(), [](OutType running_value, OutType current_value) {
+        return running_value + current_value * current_value;
       });
 
   if (is_distributed)
@@ -145,34 +292,57 @@ L2Norm<InType, OutType>::compute(const InType & data, bool is_distributed) const
   return std::sqrt(local_sum);
 }
 
+template <typename InType, typename OutType>
+void
+L2Norm<InType, OutType>::initialize()
+{
+  _l2_norm = OutType();
+}
+
+template <typename InType, typename OutType>
+void
+L2Norm<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _l2_norm += val * val;
+}
+
+template <typename InType, typename OutType>
+void
+L2Norm<InType, OutType>::finalize(bool is_distributed)
+{
+  if (is_distributed)
+    this->_communicator.sum(_l2_norm);
+  _l2_norm = std::sqrt(_l2_norm);
+}
+
 // makeCalculator //////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-std::unique_ptr<const Calculator<InType, OutType>>
+std::unique_ptr<Calculator<InType, OutType>>
 makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other)
 {
   if (item == "min")
-    return libmesh_make_unique<const Min<InType, OutType>>(other, item);
+    return libmesh_make_unique<Min<InType, OutType>>(other, item);
 
   else if (item == "max")
-    return libmesh_make_unique<const Max<InType, OutType>>(other, item);
+    return libmesh_make_unique<Max<InType, OutType>>(other, item);
 
   else if (item == "sum")
-    return libmesh_make_unique<const Sum<InType, OutType>>(other, item);
+    return libmesh_make_unique<Sum<InType, OutType>>(other, item);
 
   else if (item == "mean" || item == "average") // average is deprecated
-    return libmesh_make_unique<const Mean<InType, OutType>>(other, item);
+    return libmesh_make_unique<Mean<InType, OutType>>(other, item);
 
   else if (item == "stddev")
-    return libmesh_make_unique<const StdDev<InType, OutType>>(other, item);
+    return libmesh_make_unique<StdDev<InType, OutType>>(other, item);
 
   else if (item == "stderr")
-    return libmesh_make_unique<const StdErr<InType, OutType>>(other, item);
+    return libmesh_make_unique<StdErr<InType, OutType>>(other, item);
 
   else if (item == "norm2")
-    return libmesh_make_unique<const L2Norm<InType, OutType>>(other, item);
+    return libmesh_make_unique<L2Norm<InType, OutType>>(other, item);
 
   else if (item == "ratio")
-    return libmesh_make_unique<const Ratio<InType, OutType>>(other, item);
+    return libmesh_make_unique<Ratio<InType, OutType>>(other, item);
 
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;
@@ -188,7 +358,7 @@ makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other
   template class StdErr<InType, OutType>;                                                          \
   template class Ratio<InType, OutType>;                                                           \
   template class L2Norm<InType, OutType>;                                                          \
-  template std::unique_ptr<const Calculator<InType, OutType>> makeCalculator<InType, OutType>(     \
+  template std::unique_ptr<Calculator<InType, OutType>> makeCalculator<InType, OutType>(           \
       const MooseEnumItem &, const libMesh::ParallelObject &)
 
 createCalculators(std::vector<Real>, Real);

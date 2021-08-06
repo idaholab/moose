@@ -119,7 +119,7 @@ Statistics::execute()
     {
       for (const auto & item : _compute_stats)
       {
-        std::unique_ptr<const StochasticTools::Calculator<std::vector<Real>, Real>> calc_ptr =
+        std::unique_ptr<StochasticTools::Calculator<std::vector<Real>, Real>> calc_ptr =
             StochasticTools::makeCalculator(item, *this);
         _stat_vectors[i]->emplace_back(calc_ptr->compute(data, is_distributed));
 

@@ -49,6 +49,12 @@ public:
 
   virtual ~Calculator() = default;
   virtual OutType compute(const InType &, bool) const = 0;
+
+  virtual void initialize() {}
+  virtual void update(const typename InType::value_type &) = 0;
+  virtual void finalize(bool) {}
+  virtual OutType get() const = 0;
+
   const std::string & name() const { return _name; }
 
 private:
@@ -61,6 +67,15 @@ class Mean : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _count == 0 ? OutType() : _sum / _count; }
+
+protected:
+  dof_id_type _count;
+  OutType _sum;
 };
 
 template <typename InType, typename OutType>
@@ -69,6 +84,14 @@ class Min : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _min; };
+
+protected:
+  OutType _min;
 };
 
 template <typename InType, typename OutType>
@@ -77,6 +100,14 @@ class Max : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _max; };
+
+protected:
+  OutType _max;
 };
 
 template <typename InType, typename OutType>
@@ -85,6 +116,14 @@ class Sum : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _sum; };
+
+protected:
+  OutType _sum;
 };
 
 template <typename InType, typename OutType>
@@ -93,6 +132,16 @@ class StdDev : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _count <= 1 ? OutType() : std::sqrt((_sum_of_square - _sum * _sum / _count) / (_count - 1)); };
+
+protected:
+  dof_id_type _count;
+  OutType _sum;
+  OutType _sum_of_square;
 };
 
 template <typename InType, typename OutType>
@@ -101,6 +150,8 @@ class StdErr : public StdDev<InType, OutType>
 public:
   using StdDev<InType, OutType>::StdDev;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual OutType get() const override { return this->_count == 0 ? OutType() : StdDev<InType, OutType>::get() / std::sqrt(this->_count); };
 };
 
 template <typename InType, typename OutType>
@@ -109,6 +160,15 @@ class Ratio : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _max / _min; };
+
+protected:
+  OutType _min;
+  OutType _max;
 };
 
 template <typename InType, typename OutType>
@@ -117,6 +177,14 @@ class L2Norm : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
   virtual OutType compute(const InType &, bool) const override;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _l2_norm; };
+
+protected:
+  OutType _l2_norm;
 };
 
 /*
@@ -125,7 +193,7 @@ public:
  * Explicit instantiations in C file.
  */
 template <typename InType = std::vector<Real>, typename OutType = Real>
-std::unique_ptr<const Calculator<InType, OutType>>
+std::unique_ptr<Calculator<InType, OutType>>
 makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
 
 } // namespace

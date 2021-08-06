@@ -36,7 +36,7 @@ MooseEnum makeBootstrapCalculatorEnum();
  * @param seed Seed for random number generator
  */
 template <typename InType, typename OutType>
-class BootstrapCalculator : public Calculator<InType, std::vector<OutType>>
+class BootstrapCalculator : public libMesh::ParallelObject
 {
 public:
   BootstrapCalculator(const libMesh::ParallelObject & other,
@@ -44,14 +44,16 @@ public:
                       const std::vector<Real> & levels,
                       unsigned int replicates,
                       unsigned int seed,
-                      const StochasticTools::Calculator<InType, OutType> & calc);
+                      StochasticTools::Calculator<InType, OutType> & calc);
+  virtual std::vector<OutType> compute(const InType &, const bool) = 0;
+  const std::string & name() const { return _name; }
 
 protected:
   // Compute Bootstrap estimates of a statistic
-  std::vector<OutType> computeBootstrapEstimates(const InType &, const bool) const;
+  std::vector<OutType> computeBootstrapEstimates(const InType &, const bool);
 
-  // Randomly shuffle a vector of data
-  InType resample(const InType &, MooseRandom &, const bool) const;
+  // Randomly shuffle a vector of data and apply calculator
+  OutType resample(StochasticTools::Calculator<InType, OutType> &, const InType &, MooseRandom &, const bool);
 
   // Confidence levels to compute in range (0, 1)
   const std::vector<Real> _levels;
@@ -63,7 +65,10 @@ protected:
   const unsigned int _seed;
 
   // The Calculator that computes the statistic of interest
-  const StochasticTools::Calculator<InType, OutType> & _calc;
+  StochasticTools::Calculator<InType, OutType> & _calc;
+
+private:
+  const std::string _name;
 };
 
 /*
@@ -74,7 +79,7 @@ class Percentile : public BootstrapCalculator<InType, OutType>
 {
 public:
   using BootstrapCalculator<InType, OutType>::BootstrapCalculator;
-  virtual std::vector<OutType> compute(const InType &, const bool) const override;
+  virtual std::vector<OutType> compute(const InType &, const bool) override;
 };
 
 /*
@@ -85,19 +90,19 @@ class BiasCorrectedAccelerated : public BootstrapCalculator<InType, OutType>
 {
 public:
   using BootstrapCalculator<InType, OutType>::BootstrapCalculator;
-  virtual std::vector<OutType> compute(const InType &, const bool) const override;
+  virtual std::vector<OutType> compute(const InType &, const bool) override;
 
 private:
   // Compute the acceleration, see Efron and Tibshirani (2003), Ch. 14, Eq. 14.15, p 186.
-  Real acceleration(const InType &, const bool) const;
+  Real acceleration(const InType &, const bool);
 };
 
 template <typename InType, typename OutType>
-std::unique_ptr<const BootstrapCalculator<InType, OutType>>
+std::unique_ptr<BootstrapCalculator<InType, OutType>>
 makeBootstrapCalculator(const MooseEnum &,
                         const libMesh::ParallelObject &,
                         const std::vector<Real> &,
                         unsigned int,
                         unsigned int,
-                        const StochasticTools::Calculator<InType, OutType> & calc);
+                        StochasticTools::Calculator<InType, OutType> & calc);
 } // namespace

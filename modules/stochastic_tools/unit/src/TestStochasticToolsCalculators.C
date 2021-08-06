@@ -17,46 +17,24 @@ using namespace StochasticTools;
 TEST(StochasticTools, Calculators)
 {
   const std::vector<Real> x = {6, 1, 7, 3, 4, 5, 2};
+  const std::vector<std::string> compute = {"mean", "min", "max", "sum", "stddev", "stderr", "ratio", "norm2"};
+  const std::vector<Real> expect = {4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259};
+
   Parallel::Communicator comm;
   ParallelObject po(comm);
+  std::vector<std::unique_ptr<StochasticTools::Calculator<std::vector<Real>, Real>>> calcs;
+  for (const auto & stat : compute)
+    calcs.push_back(StochasticTools::makeCalculator<std::vector<Real>, Real>(stat, po));
 
-  {
-    Mean<std::vector<Real>, Real> calc(po, "mean");
-    EXPECT_EQ(calc.compute(x, false), 4);
-  }
+  for (unsigned int i = 0; i < calcs.size(); ++i)
+    EXPECT_EQ(calcs[i]->compute(x, false), expect[i]);
 
+  for (unsigned int i = 0; i < calcs.size(); ++i)
   {
-    Min<std::vector<Real>, Real> calc(po, "min");
-    EXPECT_EQ(calc.compute(x, false), 1);
-  }
-
-  {
-    Max<std::vector<Real>, Real> calc(po, "max");
-    EXPECT_EQ(calc.compute(x, false), 7);
-  }
-
-  {
-    Sum<std::vector<Real>, Real> calc(po, "sum");
-    EXPECT_EQ(calc.compute(x, false), 28);
-  }
-
-  {
-    StdDev<std::vector<Real>, Real> calc(po, "stddev");
-    EXPECT_EQ(calc.compute(x, false), 2.1602468994692869408);
-  }
-
-  {
-    StdErr<std::vector<Real>, Real> calc(po, "stderr");
-    EXPECT_EQ(calc.compute(x, false), 0.81649658092772603446);
-  }
-
-  {
-    Ratio<std::vector<Real>, Real> calc(po, "ratio");
-    EXPECT_EQ(calc.compute(x, false), 7);
-  }
-
-  {
-    L2Norm<std::vector<Real>, Real> calc(po, "l2norm");
-    EXPECT_EQ(calc.compute(x, false), 11.832159566199232259);
+    calcs[i]->initialize();
+    for (const auto & val : x)
+      calcs[i]->update(val);
+    calcs[i]->finalize(false);
+    EXPECT_EQ(calcs[i]->get(), expect[i]);
   }
 }

@@ -36,12 +36,13 @@ BootstrapCalculator<InType, OutType>::BootstrapCalculator(
     const std::vector<Real> & levels,
     unsigned int replicates,
     unsigned int seed,
-    const StochasticTools::Calculator<InType, OutType> & calc)
-  : Calculator<InType, std::vector<OutType>>(other, name),
+    StochasticTools::Calculator<InType, OutType> & calc)
+  : libMesh::ParallelObject(other),
     _levels(levels),
     _replicates(replicates),
     _seed(seed),
-    _calc(calc)
+    _calc(calc),
+    _name(name)
 {
   mooseAssert(*std::min_element(levels.begin(), levels.end()) > 0,
               "The supplied levels must be greater than zero.");
@@ -52,7 +53,7 @@ BootstrapCalculator<InType, OutType>::BootstrapCalculator(
 template <typename InType, typename OutType>
 std::vector<OutType>
 BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & data,
-                                                                const bool is_distributed) const
+                                                                const bool is_distributed)
 {
   MooseRandom generator;
   generator.seed(0, _seed);
@@ -60,27 +61,89 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
   // Compute replicate statistics
   std::vector<OutType> values(_replicates);
   for (std::size_t i = 0; i < _replicates; ++i)
-  {
-    InType replicate = resample(data, generator, is_distributed);
-    values[i] = _calc.compute(replicate, is_distributed);
-  }
+    values[i] = resample(_calc, data, generator, is_distributed);
   std::sort(values.begin(), values.end());
   return values;
 }
 
 template <typename InType, typename OutType>
-InType
-BootstrapCalculator<InType, OutType>::resample(const InType & data,
+OutType
+BootstrapCalculator<InType, OutType>::resample(StochasticTools::Calculator<InType, OutType> & calc,
+                                               const InType & data,
                                                MooseRandom & generator,
-                                               const bool is_distributed) const
+                                               const bool is_distributed)
 {
-  return MooseUtils::resample(data, generator, 0, is_distributed ? &this->_communicator : nullptr);
+  const std::size_t seed_index = 0;
+  const std::size_t n_local = data.size();
+
+  calc.initialize();
+
+  if (!is_distributed)
+  {
+    for (std::size_t j = 0; j < n_local; ++j)
+    {
+      auto index = generator.randl(seed_index, 0, n_local);
+      calc.update(data[index]);
+    }
+  }
+  else
+  {
+    // Compute the global size of the vector
+    std::size_t n_global = n_local;
+    this->_communicator.sum(n_global);
+
+    // Compute the vector data offsets, the scope cleans up the "n_local" vector
+    std::vector<std::size_t> offsets(this->_communicator.size());
+    {
+      std::vector<std::size_t> local_sizes;
+      this->_communicator.allgather(n_local, local_sizes);
+      for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
+        offsets[i + 1] = offsets[i] + local_sizes[i];
+    }
+
+    // Advance the random number generator to the current offset
+    const auto rank = this->_communicator.rank();
+    for (std::size_t i = 0; i < offsets[rank]; ++i)
+      generator.randl(seed_index, 0, n_global);
+
+    // Compute the needs for this processor
+    std::unordered_map<processor_id_type, std::vector<std::size_t>> indices;
+    for (std::size_t i = 0; i < n_local; ++i)
+    {
+      const auto idx = generator.randl(seed_index, 0, n_global); // random global index
+
+      // Locate the rank and local index of the data desired
+      const auto idx_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx));
+      const auto idx_rank = std::distance(offsets.begin(), idx_offset_iter);
+      const auto idx_local_idx = idx - *idx_offset_iter;
+
+      // Push back the index to appropriate rank
+      indices[idx_rank].push_back(idx_local_idx);
+    }
+
+    // Advance the random number generator to the end of the global vector
+    for (std::size_t i = offsets[rank] + n_local; i < n_global; ++i)
+      generator.randl(seed_index, 0, n_global);
+
+    // Send the indices to the appropriate rank and have the calculator do its work
+    auto calc_functor =
+        [&data, &calc](processor_id_type /*pid*/,
+                       const std::vector<std::size_t> & indices) {
+          for (const auto & idx : indices)
+            calc.update(data[idx]);
+        };
+    Parallel::push_parallel_vector_data(this->_communicator, indices, calc_functor);
+  }
+
+  calc.finalize(is_distributed);
+  return calc.get();
 }
+
 
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 std::vector<OutType>
-Percentile<InType, OutType>::compute(const InType & data, const bool is_distributed) const
+Percentile<InType, OutType>::compute(const InType & data, const bool is_distributed)
 {
   // Bootstrap estimates
   const std::vector<OutType> values = this->computeBootstrapEstimates(data, is_distributed);
@@ -101,7 +164,7 @@ Percentile<InType, OutType>::compute(const InType & data, const bool is_distribu
 template <typename InType, typename OutType>
 std::vector<OutType>
 BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
-                                                   const bool is_distributed) const
+                                                   const bool is_distributed)
 {
   if (is_distributed)
     mooseError("Due to the computational demands, the BiasCorrectedAccelerated does not work with "
@@ -137,7 +200,7 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
 template <typename InType, typename OutType>
 Real
 BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
-                                                        const bool is_distributed) const
+                                                        const bool is_distributed)
 {
   // Jackknife statistics
   InType theta_i(data.size());
@@ -173,20 +236,20 @@ BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
 
 // makeBootstrapCalculator /////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-std::unique_ptr<const BootstrapCalculator<InType, OutType>>
+std::unique_ptr<BootstrapCalculator<InType, OutType>>
 makeBootstrapCalculator(const MooseEnum & item,
                         const libMesh::ParallelObject & other,
                         const std::vector<Real> & levels,
                         unsigned int replicates,
                         unsigned int seed,
-                        const StochasticTools::Calculator<InType, OutType> & calc)
+                        StochasticTools::Calculator<InType, OutType> & calc)
 {
-  std::unique_ptr<const BootstrapCalculator<InType, OutType>> ptr = nullptr;
+  std::unique_ptr<BootstrapCalculator<InType, OutType>> ptr = nullptr;
   if (item == "percentile")
-    ptr = libmesh_make_unique<const Percentile<InType, OutType>>(
+    ptr = libmesh_make_unique<Percentile<InType, OutType>>(
         other, item, levels, replicates, seed, calc);
   else if (item == "bca")
-    ptr = libmesh_make_unique<const BiasCorrectedAccelerated<InType, OutType>>(
+    ptr = libmesh_make_unique<BiasCorrectedAccelerated<InType, OutType>>(
         other, item, levels, replicates, seed, calc);
 
   if (!ptr)
@@ -198,13 +261,13 @@ makeBootstrapCalculator(const MooseEnum & item,
 #define createBootstrapCalculators(InType, OutType)                                                \
   template class Percentile<InType, OutType>;                                                      \
   template class BiasCorrectedAccelerated<InType, OutType>;                                        \
-  template std::unique_ptr<const BootstrapCalculator<InType, OutType>>                             \
+  template std::unique_ptr<BootstrapCalculator<InType, OutType>>                                   \
   makeBootstrapCalculator<InType, OutType>(const MooseEnum &,                                      \
                                            const libMesh::ParallelObject &,                        \
                                            const std::vector<Real> &,                              \
                                            unsigned int,                                           \
                                            unsigned int,                                           \
-                                           const StochasticTools::Calculator<InType, OutType> &)
+                                           StochasticTools::Calculator<InType, OutType> &)
 
 createBootstrapCalculators(std::vector<Real>, Real);
 createBootstrapCalculators(std::vector<int>, Real);
