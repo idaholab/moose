@@ -396,6 +396,7 @@
 
     requirement = 'The system shall report an error if one or more domain blocks do not have any active FVKernels objects assigned.'
     issues = '#1405 #15196'
+    ad_indexing_type = 'global'
   [../]
 
   [./incomplete_fvkernel_variable_coverage_test]
@@ -405,6 +406,7 @@
 
     requirement = 'The system shall report an error if one or more variables do not have any active FVKernel objects assigned.'
     issues = '#1405 #15196'
+    ad_indexing_type = 'global'
   [../]
 
   [./invalid_elemental_to_nodal_couple_test]

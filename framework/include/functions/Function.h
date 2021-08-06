@@ -39,7 +39,7 @@ class FunctionTempl : public MooseFunctionBase,
                       public Restartable,
                       public MeshChangedInterface,
                       public ScalarCoupleable,
-                      public Moose::Functor<T>
+                      public Moose::FunctorBase<T>
 {
 public:
   /**
@@ -82,7 +82,7 @@ public:
    */
   virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
 
-  using Moose::Functor<T>::gradient;
+  using Moose::FunctorBase<T>::gradient;
   /**
    * Function objects can optionally provide a gradient at a point. By default
    * this returns 0, you must override it.
@@ -111,21 +111,23 @@ public:
   void jacobianSetup() override;
 
 private:
-  using typename Moose::Functor<T>::FaceArg;
-  using typename Moose::Functor<T>::SingleSidedFaceArg;
-  using typename Moose::Functor<T>::ElemFromFaceArg;
-  using typename Moose::Functor<T>::ElemQpArg;
-  using typename Moose::Functor<T>::ElemSideQpArg;
-  using typename Moose::Functor<T>::ValueType;
-  using typename Moose::Functor<T>::GradientType;
-  using typename Moose::Functor<T>::DotType;
+  using typename Moose::FunctorBase<T>::ValueType;
+  using typename Moose::FunctorBase<T>::GradientType;
+  using typename Moose::FunctorBase<T>::DotType;
 
   /**
    * @return the time associated with the requested \p state
    */
   Real getTime(unsigned int state) const;
 
-  ValueType evaluate(const Elem * const & elem, unsigned int state) const override final;
+  using ElemArg = Moose::ElemArg;
+  using ElemFromFaceArg = Moose::ElemFromFaceArg;
+  using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
+  using FaceArg = Moose::FaceArg;
+  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
+
+  ValueType evaluate(const ElemArg & elem, unsigned int state) const override final;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face,
                      unsigned int state) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
@@ -133,7 +135,7 @@ private:
   ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
 
-  GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemArg & elem, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int state) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override final;
@@ -143,7 +145,7 @@ private:
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override final;
 
-  DotType evaluateDot(const Elem * const & elem, unsigned int state) const override final;
+  DotType evaluateDot(const ElemArg & elem, unsigned int state) const override final;
   DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
                       unsigned int state) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int state) const override final;

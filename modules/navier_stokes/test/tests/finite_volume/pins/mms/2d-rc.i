@@ -45,6 +45,17 @@ velocity_interp_method='rc'
 
 [GlobalParams]
   porosity = porosity
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+    porosity = porosity
+  []
 []
 
 [FVKernels]
@@ -53,11 +64,8 @@ velocity_interp_method='rc'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
   []
   [mass_forcing]
@@ -69,21 +77,19 @@ velocity_interp_method='rc'
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
@@ -92,29 +98,28 @@ velocity_interp_method='rc'
     pressure = pressure
   []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = u
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
 
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
     mu = ${mu}
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
@@ -123,9 +128,10 @@ velocity_interp_method='rc'
     pressure = pressure
   []
   [v_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = v
-    function = forcing_v
+    functor = forcing_v
+    momentum_component = 'y'
   []
 []
 
@@ -178,8 +184,8 @@ velocity_interp_method='rc'
     value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [forcing_u]
-    type = ParsedFunction
-    value = '0.625*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + 0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - 1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    type = ADParsedFunction
+    value = '0.5*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + 0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - 1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -188,8 +194,8 @@ velocity_interp_method='rc'
     value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [forcing_v]
-    type = ParsedFunction
-    value = '0.390625*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - 1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + 0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + 1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    type = ADParsedFunction
+    value = '0.3125*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - 1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + 0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + 1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []

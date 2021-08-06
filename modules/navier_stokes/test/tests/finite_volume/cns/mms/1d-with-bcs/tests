@@ -184,6 +184,7 @@
       exodiff = straight-channel-hllc_out.e
       detail = 'when the source has a cell-centered volumetric discretization'
       method = "!dbg"
+      threading = 'tbb openmp'
     []
   []
   [sources_give_hllc_problems_regular]
@@ -196,6 +197,7 @@
       detail = 'conservation of mass when no sources are present'
       cli_args = "FVKernels/inactive='drag'"
       method = "!dbg"
+      threading = 'tbb openmp'
     []
     [non_conserved]
       input = 'regular-straight-channel.i'
@@ -204,6 +206,7 @@
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources_out'
       method = "!dbg"
+      threading = 'tbb openmp'
     []
     [non_conserved_finer]
       input = 'regular-straight-channel.i'
@@ -212,6 +215,7 @@
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources-nx-150_out Mesh/gen_mesh/nx=150'
       method = "!dbg"
+      threading = 'tbb openmp'
     []
   []
   [pwcnsfv]

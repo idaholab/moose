@@ -1,4 +1,3 @@
-mu=1e-15
 rho='rho'
 advected_interp_method='upwind'
 velocity_interp_method='rc'
@@ -10,6 +9,16 @@ cp=${fparse gamma*R_specific/(gamma-1)}
 
 [GlobalParams]
   two_term_boundary_expansion = true
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = sup_vel_x
+    pressure = pressure
+    porosity = porosity
+  []
 []
 
 [Mesh]
@@ -81,10 +90,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = sup_vel_x
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
   []
@@ -97,15 +103,12 @@ cp=${fparse gamma*R_specific/(gamma-1)}
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = sup_vel_x
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = sup_vel_x
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressureFlux
@@ -116,9 +119,10 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     force_boundary_execution = false
   []
   [momentum_fn]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = sup_vel_x
-    function = 'forcing_rho_ud'
+    functor = 'forcing_rho_ud'
+    momentum_component = 'x'
   []
 []
 
@@ -191,7 +195,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     value = '-3.45300378856215*sin(1.1*x)'
   []
   [forcing_rho_ud]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = '-0.9*(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + 0.9*(10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) + 3.13909435323832*sin(x)*cos(1.1*x)^2/cos(x)^2 - 6.9060075771243*sin(1.1*x)*cos(1.1*x)/cos(x)'
   []
   [exact_T]

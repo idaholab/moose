@@ -7,5 +7,6 @@
     issues = '#16758'
     requirement = 'The system shall be able to solve the 1D Sod shock-tube benchmark problem using an HLLC scheme to compute convective fluxes.'
     cli_args = 'Executioner/num_steps=10'
+    threading = 'tbb openmp'
   [../]
 []

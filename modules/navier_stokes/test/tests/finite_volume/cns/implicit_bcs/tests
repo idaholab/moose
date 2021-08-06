@@ -7,5 +7,6 @@
     exodiff = hllc_sod_shocktube_out.e
     abs_zero = 1e-9
     requirement = "The system shall be able to impose boundary advective fluxes for HLLC discretizations that use implicit/interior cell information."
+    threading = 'tbb openmp'
   [../]
 []

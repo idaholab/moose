@@ -13,7 +13,7 @@
 InputParameters
 INSFVSlipWallBC::validParams()
 {
-  return FVFluxBC::validParams();
+  return INSFVFluxBC::validParams();
 }
 
-INSFVSlipWallBC::INSFVSlipWallBC(const InputParameters & params) : FVFluxBC(params) {}
+INSFVSlipWallBC::INSFVSlipWallBC(const InputParameters & params) : INSFVFluxBC(params) {}

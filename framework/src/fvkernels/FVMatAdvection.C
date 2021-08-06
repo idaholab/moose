@@ -35,9 +35,8 @@ FVMatAdvection::validParams()
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _vel(getFunctor<ADRealVectorValue>("vel")),
-    _adv_quant(isParamValid("advected_quantity")
-                   ? getFunctor<ADReal>("advected_quantity")
-                   : static_cast<const Moose::Functor<ADReal> &>(variable()))
+    _adv_quant(getFunctor<ADReal>(isParamValid("advected_quantity") ? "advected_quantity"
+                                                                    : variable().name()))
 {
   using namespace Moose::FV;
 

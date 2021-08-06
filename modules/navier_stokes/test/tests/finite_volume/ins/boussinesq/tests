@@ -46,6 +46,7 @@
     ad_indexing_type = 'global'
     method = '!dbg'
     valgrind = 'none'
+    threading = 'tbb openmp'
   []
   [transient_wcnsfv]
     type = Exodiff
@@ -57,16 +58,6 @@
     cli_args = "Outputs/out/execute_on='final'"
     recover = false # See https://github.com/idaholab/moose/issues/17906
     valgrind = 'none'
-  []
-  [high_rayleigh_transient_wcnsfv]
-    type = Exodiff
-    input = transient-wcnsfv.i
-    exodiff = wcnsfv-1e6.e
-    requirement = 'The system shall be able to model transient natural convection with a high Rayleigh number, of approximately 1e6, using a weakly compressible implementation.'
-    ad_indexing_type = 'global'
-    method = '!dbg'
-    cli_args = "Outputs/out/execute_on='final' Outputs/out/file_base=wcnsfv-1e6 l=300 Executioner/nl_abs_tol=1e-7 Mesh/gen/nx=32 Mesh/gen/ny=32 Executioner/steady_state_tolerance=1e-12"
-    heavy = true
-    recover = false # See https://github.com/idaholab/moose/issues/17906
+    threading = 'tbb openmp'
   []
 []

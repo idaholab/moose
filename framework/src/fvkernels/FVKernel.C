@@ -48,6 +48,7 @@ FVKernel::validParams()
                         false,
                         "Whether to use point neighbors, which introduces additional ghosting to "
                         "that used for simple face neighbors.");
+  params.set<bool>("_residual_object") = true;
 
   // FV Kernels always need one layer of ghosting because when looping over
   // faces to compute fluxes, the elements on each side of the face may be on

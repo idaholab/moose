@@ -13,7 +13,10 @@
 #include "FaceInfo.h"
 #include "Limiter.h"
 #include "MathUtils.h"
+#include "MooseFunctor.h"
 #include "libmesh/compare_types.h"
+#include "libmesh/elem.h"
+#include <tuple>
 
 template <typename>
 class MooseVariableFV;
@@ -22,6 +25,128 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * This creates a structure with info on : an element, \p FaceInfo, skewness correction and
+ * subdomain ID. The element returned will correspond to the method argument. The \p FaceInfo part
+ * of the structure will simply correspond to the current \p _face_info. The subdomain ID part of
+ * the structure will correspond to the subdomain ID of the method's element argument except in the
+ * case in which that subdomain ID does not correspond to a subdomain ID that the \p obj is defined
+ * on. In that case the subdomain ID of the structure will correspond to the subdomain ID of the
+ * element across the face, on which the \p obj *is* defined
+ */
+template <typename SubdomainRestrictable>
+ElemFromFaceArg
+makeSidedFace(const SubdomainRestrictable & obj,
+              const Elem * const elem,
+              const FaceInfo & fi,
+              const bool correct_skewness = false)
+{
+  if (elem && obj.hasBlocks(elem->subdomain_id()))
+    return {elem, &fi, correct_skewness, correct_skewness, elem->subdomain_id()};
+  else
+  {
+    const Elem * const elem_across = (elem == &fi.elem()) ? fi.neighborPtr() : &fi.elem();
+    mooseAssert(elem_across && obj.hasBlocks(elem_across->subdomain_id()),
+                "How are there no elements with subs on here!");
+    return {elem, &fi, correct_skewness, correct_skewness, elem_across->subdomain_id()};
+  }
+}
+
+/**
+ * @return the value of \p makeSidedFace called with the face info element
+ */
+template <typename SubdomainRestrictable>
+ElemFromFaceArg
+elemFromFace(const SubdomainRestrictable & obj,
+             const FaceInfo & fi,
+             const bool correct_skewness = false)
+{
+  return makeSidedFace(obj, &fi.elem(), fi, correct_skewness);
+}
+
+/**
+ * @return the value of \p makeSidedFace called with the face info neighbor
+ */
+template <typename SubdomainRestrictable>
+ElemFromFaceArg
+neighborFromFace(const SubdomainRestrictable & obj,
+                 const FaceInfo & fi,
+                 const bool correct_skewness = false)
+{
+  return makeSidedFace(obj, fi.neighborPtr(), fi, correct_skewness);
+}
+
+/**
+ * Determine the subdomain ID pair that should be used when creating a face argument for a
+ * functor. As explained in the doxygen for \p makeSidedFace these
+ * subdomain IDs do not simply correspond to the subdomain IDs of the face information element pair;
+ * they must respect the block restriction of the \p obj
+ */
+template <typename SubdomainRestrictable>
+std::pair<SubdomainID, SubdomainID>
+faceArgSubdomains(const SubdomainRestrictable & obj, const FaceInfo & fi)
+{
+  return std::make_pair(makeSidedFace(obj, &fi.elem(), fi).sub_id,
+                        makeSidedFace(obj, fi.neighborPtr(), fi).sub_id);
+}
+
+/**
+ * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
+ * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
+ * center values to faces
+ * @param fi the face information
+ * @param subs the two subdomains that should go into the face argument. The first member of this
+ * pair will be the "element" subdomain id and the second member of the pair will be the "neighbor"
+ * subdomain id
+ * @param skewness_correction whether to apply skew correction weights
+ * @param Whether to apply the face gradient when computing a skew corrected face value. A true
+ * value for this parameter in conjunction with a false value for \p skewness_correction parameter
+ * does not make sense. A false value for this parameter in conjunction with a true value for \p
+ * skewness_correction should only be set by someone who really knows what they're doing
+ * @return a face argument for functors
+ */
+inline FaceArg
+makeCDFace(const FaceInfo & fi,
+           const std::pair<SubdomainID, SubdomainID> & subs,
+           const bool skewness_correction = false,
+           const bool apply_gradient_correction = false)
+{
+  return {&fi,
+          Moose::FV::LimiterType::CentralDifference,
+          true,
+          skewness_correction,
+          apply_gradient_correction,
+          subs.first,
+          subs.second};
+}
+
+/**
+ * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
+ * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
+ * center values to faces. The subdomain ids for the face argument will be created from the face
+ * information object's \p elem() and \p neighbor() subdomain ids. If the latter is null, then an
+ * invalid subdomain ID will be used
+ * @param fi the face information
+ * @param skewness_correction whether to apply skew correction weights
+ * @param Whether to apply the face gradient when computing a skew corrected face value. A true
+ * value for this parameter in conjunction with a false value for \p skewness_correction parameter
+ * does not make sense. A false value for this parameter in conjunction with a true value for \p
+ * skewness_correction should only be set by someone who really knows what they're doing
+ * @return a face argument for functors
+ */
+inline FaceArg
+makeCDFace(const FaceInfo & fi,
+           const bool skewness_correction = false,
+           const bool apply_gradient_correction = false)
+{
+  return makeCDFace(
+      fi,
+      std::make_pair(fi.elem().subdomain_id(),
+                     fi.neighborPtr() ? fi.neighbor().subdomain_id() : Moose::INVALID_BLOCK_ID),
+      skewness_correction,
+      apply_gradient_correction);
+}
+
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
 /// properties, etc.) at the face (centroid).  These methods are used in the
@@ -129,7 +254,7 @@ linearInterpolation(const T & value1,
  */
 template <typename T, typename T2, typename T3>
 typename libMesh::CompareTypes<T, T2>::supertype
-skewCorrectedlinearInterpolation(const T & value1,
+skewCorrectedLinearInterpolation(const T & value1,
                                  const T2 & value2,
                                  const T3 & face_gradient,
                                  const FaceInfo & fi,
@@ -168,12 +293,49 @@ interpolate(InterpMethod m,
       // weights are used, but no correction is applied. This will change when the
       // old weights are replaced by the ones used with skewness-correction
       typename TensorTools::IncrementRank<T2>::type surface_gradient;
-      result = skewCorrectedlinearInterpolation(value1, value2, surface_gradient, fi, one_is_elem);
+      result = skewCorrectedLinearInterpolation(value1, value2, surface_gradient, fi, one_is_elem);
       break;
     }
     default:
       mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
   }
+}
+
+/**
+ * perform a possibly skew-corrected linear interpolation by evaluating the supplied functor with
+ * the provided functor face argument
+ */
+template <typename T>
+T
+linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
+{
+  mooseAssert(face.limiter_type == LimiterType::CentralDifference,
+              "this interpolation method is meant for linear interpolations");
+
+  mooseAssert(face.fi,
+              "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
+
+  const auto elem_from_face = face.elemFromFace();
+  const auto neighbor_from_face = face.neighborFromFace();
+
+  if (face.correct_skewness)
+  {
+    typedef typename TensorTools::IncrementRank<T>::type GradientType;
+    // This condition ensures that the recursive algorithm (face_center->
+    // face_gradient -> cell_gradient -> face_center -> ...) terminates after
+    // one loop. It is hardcoded to one loop at this point since it yields
+    // 2nd order accuracy on skewed meshes with the minimum additional effort.
+    FaceArg new_face(face);
+    new_face.apply_gradient_to_skewness = false;
+    const auto surface_gradient =
+        face.apply_gradient_to_skewness ? functor.gradient(new_face) : GradientType(0);
+
+    return skewCorrectedLinearInterpolation(
+        functor(elem_from_face), functor(neighbor_from_face), surface_gradient, *face.fi, true);
+  }
+  else
+    return linearInterpolation(
+        functor(elem_from_face), functor(neighbor_from_face), *face.fi, true);
 }
 
 /**
@@ -366,6 +528,19 @@ interpolate(const Limiter & limiter,
         limiter, phi_upwind(i), phi_downwind(i), &example_gradient, fi, fi_elem_is_upwind);
 
   return ret;
+}
+
+/**
+ * Return whether the supplied face is on a boundary of the \p object's execution
+ *
+ */
+template <typename SubdomainRestrictable>
+bool
+onBoundary(const SubdomainRestrictable & obj, const FaceInfo & fi)
+{
+  const bool internal = fi.neighborPtr() && obj.hasBlocks(fi.elemSubdomainID()) &&
+                        obj.hasBlocks(fi.neighborSubdomainID());
+  return !internal;
 }
 }
 }

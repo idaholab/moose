@@ -88,19 +88,13 @@ InternalVolumetricFlowRate::computeQpIntegral()
     // Get face value for velocity
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     const auto & vx_face =
-        _fv_vel_x
-            ? MetaPhysicL::raw_value(_fv_vel_x->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]))
-            : _vel_x[_qp];
+        _fv_vel_x ? MetaPhysicL::raw_value(_fv_vel_x->getInternalFaceValue(*fi)) : _vel_x[_qp];
 
     const auto & vy_face =
-        _fv_vel_y
-            ? MetaPhysicL::raw_value(_fv_vel_y->getInternalFaceValue(neighbor, *fi, _vel_y[_qp]))
-            : _vel_y[_qp];
+        _fv_vel_y ? MetaPhysicL::raw_value(_fv_vel_y->getInternalFaceValue(*fi)) : _vel_y[_qp];
 
     const auto & vz_face =
-        _fv_vel_z
-            ? MetaPhysicL::raw_value(_fv_vel_z->getInternalFaceValue(neighbor, *fi, _vel_z[_qp]))
-            : _vel_z[_qp];
+        _fv_vel_z ? MetaPhysicL::raw_value(_fv_vel_z->getInternalFaceValue(*fi)) : _vel_z[_qp];
 
     // Compute the advected quantity on the face
     Real advected_quantity;
@@ -123,13 +117,14 @@ InternalVolumetricFlowRate::computeQpIntegral()
     else if (_advected_mat_prop_supplied)
     {
       // The material property needs to be interpolated since we are on an internal face
-      Moose::FV::interpolate(_advected_interp_method,
-                             advected_quantity,
-                             MetaPhysicL::raw_value(_advected_material_property(_current_elem)),
-                             MetaPhysicL::raw_value(_advected_material_property(_neighbor_elem)),
-                             RealVectorValue(vx_face, vy_face, vz_face),
-                             *fi,
-                             current_elem_is_fi_elem);
+      Moose::FV::interpolate(
+          _advected_interp_method,
+          advected_quantity,
+          MetaPhysicL::raw_value(_advected_material_property(makeElemArg(_current_elem))),
+          MetaPhysicL::raw_value(_advected_material_property(makeElemArg(_neighbor_elem))),
+          RealVectorValue(vx_face, vy_face, vz_face),
+          *fi,
+          current_elem_is_fi_elem);
     }
     else
       advected_quantity = 1;

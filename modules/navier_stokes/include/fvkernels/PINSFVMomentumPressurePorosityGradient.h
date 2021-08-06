@@ -23,7 +23,7 @@ protected:
   /// the pressure
   const VariableValue & _p;
   /// the porosity variable
-  const MooseVariableFVReal * const _eps_var;
+  const Moose::Functor<ADReal> & _eps;
   /// index x|y|z
   const unsigned int _index;
 };

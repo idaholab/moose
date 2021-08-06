@@ -20,10 +20,4 @@ class PINSFVSymmetryVelocityBC : public INSFVSymmetryVelocityBC
 public:
   static InputParameters validParams();
   PINSFVSymmetryVelocityBC(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  /// porosity of the medium
-  const MooseVariableFV<Real> * const _eps_var;
 };

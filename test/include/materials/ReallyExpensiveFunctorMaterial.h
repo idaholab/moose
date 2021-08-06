@@ -17,7 +17,4 @@ public:
   static InputParameters validParams();
 
   ReallyExpensiveFunctorMaterial(const InputParameters & parameters);
-
-private:
-  FunctorMaterialProperty<Real> & _slow_prop;
 };

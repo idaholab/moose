@@ -19,6 +19,20 @@ velocity='velocity'
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    standard_body_forces = true
+    pressure = pressure
+  []
+[]
+
 [Problem]
   fv_bcs_integrity_check = true
 []
@@ -50,11 +64,8 @@ velocity='velocity'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = ${velocity}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
   []
   [mass_forcing]
@@ -66,20 +77,18 @@ velocity='velocity'
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = ${velocity}
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -88,28 +97,27 @@ velocity='velocity'
     pressure = pressure
   []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = u
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = ${velocity}
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -118,9 +126,10 @@ velocity='velocity'
     pressure = pressure
   []
   [v_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = v
-    function = forcing_v
+    functor = forcing_v
+    momentum_component = 'y'
   []
 
   [temp_conduction]
@@ -130,20 +139,17 @@ velocity='velocity'
   []
   [temp_advection]
     type = INSFVEnergyAdvection
-    vel = ${velocity}
     variable = temperature
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
   []
   [temp_forcing]
     type = FVBodyForce
     variable = temperature
-    function = forcing_t
+    functor = forcing_t
   []
 []
 
@@ -203,58 +209,58 @@ velocity='velocity'
 []
 
 [Functions]
-[exact_u]
-  type = ParsedFunction
-  value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
-[]
-[exact_rhou]
-  type = ParsedFunction
-  value = 'rho*sin((1/2)*y*pi)*cos((1/2)*x*pi)'
-  vars = 'rho'
-  vals = '${rho}'
-[]
-[forcing_u]
-  type = ParsedFunction
-  value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[exact_v]
-  type = ParsedFunction
-  value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
-[]
-[exact_rhov]
-  type = ParsedFunction
-  value = 'rho*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
-  vars = 'rho'
-  vals = '${rho}'
-[]
-[forcing_v]
-  type = ParsedFunction
-  value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[exact_p]
-  type = ParsedFunction
-  value = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
-[]
-[forcing_p]
-  type = ParsedFunction
-  value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
-  vars = 'rho'
-  vals = '${rho}'
-[]
-[exact_t]
-  type = ParsedFunction
-  value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
-[]
-[forcing_t]
-  type = ParsedFunction
-  value = '-pi*cp*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*cp*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*cp*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (5/16)*pi^2*k*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
-  vars = 'k rho cp'
-  vals = '${k} ${rho} ${cp}'
-[]
+  [exact_u]
+    type = ParsedFunction
+    value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+  []
+  [exact_rhou]
+    type = ParsedFunction
+    value = 'rho*sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+    vars = 'rho'
+    vals = '${rho}'
+  []
+  [forcing_u]
+    type = ADParsedFunction
+    value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [exact_v]
+    type = ParsedFunction
+    value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+  []
+  [exact_rhov]
+    type = ParsedFunction
+    value = 'rho*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    vars = 'rho'
+    vals = '${rho}'
+  []
+  [forcing_v]
+    type = ADParsedFunction
+    value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
+  []
+  [forcing_p]
+    type = ParsedFunction
+    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+    vars = 'rho'
+    vals = '${rho}'
+  []
+  [exact_t]
+    type = ParsedFunction
+    value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+  []
+  [forcing_t]
+    type = ParsedFunction
+    value = '-pi*cp*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*cp*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*cp*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (5/16)*pi^2*k*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    vars = 'k rho cp'
+    vals = '${k} ${rho} ${cp}'
+  []
 []
 
 [Executioner]

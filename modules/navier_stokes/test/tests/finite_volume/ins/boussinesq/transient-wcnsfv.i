@@ -3,7 +3,6 @@ rho = 'rho'
 k = 1
 cp = 1
 l = 10
-vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 cold_temp=300
@@ -11,6 +10,16 @@ hot_temp=310
 
 [GlobalParams]
   two_term_boundary_expansion = true
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+  []
 []
 
 [Mesh]
@@ -106,13 +115,10 @@ hot_temp=310
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    vel = ${vel}
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     u = u
     v = v
-    pressure = pressure
-    mu = ${mu}
     rho = ${rho}
   []
 
@@ -121,24 +127,23 @@ hot_temp=310
     variable = u
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'x'
   []
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -159,24 +164,23 @@ hot_temp=310
     variable = v
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'y'
   []
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -200,13 +204,10 @@ hot_temp=310
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
   []
 []

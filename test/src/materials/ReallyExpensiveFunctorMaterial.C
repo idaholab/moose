@@ -20,17 +20,16 @@ ReallyExpensiveFunctorMaterial::validParams()
 }
 
 ReallyExpensiveFunctorMaterial::ReallyExpensiveFunctorMaterial(const InputParameters & parameters)
-  : FunctorMaterial(parameters), _slow_prop(declareFunctorProperty<Real>("slow_prop"))
+  : FunctorMaterial(parameters)
 {
-  _slow_prop.setFunctor(_mesh,
-                        blockIDs(),
-                        [this](const auto &, const auto &) -> Real
-                        {
-                          Real total = 0;
-                          for (const auto & elem : *_mesh.getActiveLocalElementRange())
-                            total += elem->id();
-                          return total / total;
-                        });
-  _slow_prop.setCacheClearanceSchedule(
+  addFunctorProperty<Real>(
+      "slow_prop",
+      [this](const auto &, const auto &) -> Real
+      {
+        Real total = 0;
+        for (const auto & elem : *_mesh.getActiveLocalElementRange())
+          total += elem->id();
+        return total / total;
+      },
       std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
 }

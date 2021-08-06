@@ -85,16 +85,8 @@
     type = RunException
     ad_indexing_type = 'global'
     input = wrong-type.i
-    expect_err = '[Ii]nconsistent.*types for functor'
+    expect_err = 'requested a functor.*returns the type.*returns a different type'
     requirement = 'The system shall error if a functor material property is declared as returning one type and is retrieved as returning a different type.'
-    design = 'Materials/index.md'
-  []
-  [replace_underlying_type]
-    type = Exodiff
-    ad_indexing_type = 'global'
-    input = converted-prop.i
-    exodiff = converted-prop_out.e
-    requirement = 'The system shall allow replacement of an underlying functor material property type such that users do not have to worry about material ordering when declaring and retrieving functor material properties.'
     design = 'Materials/index.md'
   []
   [prop_name_issue]

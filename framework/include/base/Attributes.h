@@ -381,6 +381,36 @@ private:
   std::string _val;
 };
 
+/**
+ * Residual objects have this attribute
+ */
+class AttribResidualObject : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribResidualObject(TheWarehouse & w)
+    : Attribute(w, "residual_object"), _val(false), _initd(false)
+  {
+  }
+
+  AttribResidualObject(TheWarehouse & w, bool is_residual_object)
+    : Attribute(w, "residual_object"), _val(is_residual_object), _initd(true)
+  {
+  }
+
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribResidualObject);
+
+private:
+  bool _val;
+  bool _initd;
+};
+
 class AttribVar : public Attribute
 {
 public:

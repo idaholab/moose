@@ -13,6 +13,18 @@ velocity_interp_method='average'
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    pressure = pressure
+  []
+[]
+
 [Variables]
   [u]
     type = INSFVVelocityVariable
@@ -31,10 +43,7 @@ velocity_interp_method='average'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
-    mu = ${mu}
     rho = ${rho}
   []
   [mass_forcing]
@@ -46,19 +55,17 @@ velocity_interp_method='average'
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -67,11 +74,11 @@ velocity_interp_method='average'
     pressure = pressure
   []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = u
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
-
 []
 
 [FVBCs]
@@ -99,32 +106,32 @@ velocity_interp_method='average'
 []
 
 [Functions]
-[exact_u]
-  type = ParsedFunction
-  value = 'sin((1/2)*x*pi)'
-[]
-[exact_rhou]
-  type = ParsedFunction
-  value = 'rho*sin((1/2)*x*pi)'
-  vars = 'rho'
-  vals = '${rho}'
-[]
-[forcing_u]
-  type = ParsedFunction
-  value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - 1/2*pi*sin((1/2)*x*pi)'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[exact_p]
-  type = ParsedFunction
-  value = 'cos((1/2)*x*pi)'
-[]
-[forcing_p]
-  type = ParsedFunction
-  value = '(1/2)*pi*rho*cos((1/2)*x*pi)'
-  vars = 'rho'
-  vals = '${rho}'
-[]
+  [exact_u]
+    type = ParsedFunction
+    value = 'sin((1/2)*x*pi)'
+  []
+  [exact_rhou]
+    type = ParsedFunction
+    value = 'rho*sin((1/2)*x*pi)'
+    vars = 'rho'
+    vals = '${rho}'
+  []
+  [forcing_u]
+    type = ADParsedFunction
+    value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - 1/2*pi*sin((1/2)*x*pi)'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = 'cos((1/2)*x*pi)'
+  []
+  [forcing_p]
+    type = ParsedFunction
+    value = '(1/2)*pi*rho*cos((1/2)*x*pi)'
+    vars = 'rho'
+    vals = '${rho}'
+  []
 []
 
 [Executioner]

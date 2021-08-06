@@ -34,9 +34,6 @@ NSSpecificTotalEnthalpyAux::NSSpecificTotalEnthalpyAux(const InputParameters & p
     _rho_et(coupledValue(NS::total_energy_density)),
     _pressure(coupledValue(NS::pressure))
 {
-  mooseDeprecated("The NSSpecificTotalEnthalpyAux auxiliary kernel has been replaced by the "
-                  "SpecificTotalEnthalpyAux "
-                  "auxiliary kernel");
 }
 
 Real

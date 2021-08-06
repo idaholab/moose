@@ -51,8 +51,7 @@ through its action on the velocity in the momentum equation.
 Then we add the kernels acting on the 'x' component of the momentum, so essentially transcribing the first
 component of the momentum equation into MOOSE.
 
-The momentum advection term is defined by a `PINSFVMomentumAdvection` kernel. Here the porosity is constant,
-so the porosity gradient term, defined by a `PINSFVMomentumAdvectionPorosityGradient` kernel is not included.
+The momentum advection term is defined by a `PINSFVMomentumAdvection` kernel.
 The momentum equation requires a velocity and an advected quantity interpolation method. This is because this
 kernel is a `FVFlux` kernel, it uses the divergence theorem to compute the divergence based on face fluxes rather
 than on the volumetric divergence value. The velocity interpolation method may be `average` or `rc` (Rhie Chow).

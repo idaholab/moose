@@ -11,10 +11,8 @@
 
 #include "MooseMesh.h"
 #include "MooseError.h"
-#include "SubProblem.h"
-#include "Assembly.h"
+#include "MooseMeshUtils.h"
 #include "FaceInfo.h"
-#include "MooseVariableFV.h"
 #include "libmesh/elem.h"
 
 #include <tuple>
@@ -27,8 +25,9 @@ template <typename ActionFunctor>
 void
 loopOverElemFaceInfo(const Elem & elem,
                      const MooseMesh & mesh,
-                     const SubProblem & subproblem,
-                     ActionFunctor & act)
+                     ActionFunctor & act,
+                     const Moose::CoordinateSystemType coord_type,
+                     const unsigned int rz_radial_coord = libMesh::invalid_uint)
 {
   mooseAssert(elem.active(), "We should never call this method with an inactive element");
 
@@ -96,13 +95,8 @@ loopOverElemFaceInfo(const Elem & elem,
 
       const Point elem_normal = elem_has_info ? fi->normal() : Point(-fi->normal());
 
-      mooseAssert(neighbor ? subproblem.getCoordSystem(elem.subdomain_id()) ==
-                                 subproblem.getCoordSystem(neighbor->subdomain_id())
-                           : true,
-                  "Coordinate systems must be the same between element and neighbor");
-
       Real coord;
-      coordTransformFactor(subproblem, elem.subdomain_id(), fi->faceCentroid(), coord);
+      MooseMeshUtils::coordTransformFactor(fi->faceCentroid(), coord, coord_type, rz_radial_coord);
 
       const Point surface_vector = elem_normal * fi->faceArea() * coord;
 
@@ -114,31 +108,30 @@ loopOverElemFaceInfo(const Elem & elem,
 /**
  * This utility determines element one and element two given a \p FaceInfo \p fi and variable \p
  * var. You may ask what in the world "element one" and "element two" means, and that would be a
- * very good question. What it means is: a variable will *always* have degrees of freedom on element
- * one. A variable may or may not have degrees of freedom on element two. So we are introducing a
- * second terminology here. FaceInfo geometric objects have element-neighbor pairs. These
- * element-neighbor pairs are purely geometric and have no relation to the algebraic system of
- * variables. The elem1-elem2 notation introduced here is based on dof/algebraic information and may
- * very well be different from variable to variable, e.g. elem1 may correspond to the FaceInfo elem
- * for one variable (and correspondingly elem2 will be the FaceInfo neighbor), but elem1 may
- * correspond to the FaceInfo neighbor for another variable (and correspondingly for *that* variable
- * elem2 will be the FaceInfo elem).
- * @return A tuple, where the first item is elem1, the second item is elem2, and the third item is a
- * boolean indicating whether elem1 corresponds to the FaceInfo elem
+ * very good question. What it means is: a variable will *always* have degrees of freedom on
+ * element one. A variable may or may not have degrees of freedom on element two. So we are
+ * introducing a second terminology here. FaceInfo geometric objects have element-neighbor pairs.
+ * These element-neighbor pairs are purely geometric and have no relation to the algebraic system
+ * of variables. The elem1-elem2 notation introduced here is based on dof/algebraic information
+ * and may very well be different from variable to variable, e.g. elem1 may correspond to the
+ * FaceInfo elem for one variable (and correspondingly elem2 will be the FaceInfo neighbor), but
+ * elem1 may correspond to the FaceInfo neighbor for another variable (and correspondingly for
+ * *that* variable elem2 will be the FaceInfo elem).
+ * @return A tuple, where the first item is elem1, the second item is elem2, and the third item is
+ * a boolean indicating whether elem1 corresponds to the FaceInfo elem
  */
 template <typename OutputType>
 std::tuple<const Elem *, const Elem *, bool>
 determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var)
 {
   auto ft = fi.faceType(var.name());
-  mooseAssert(
-      ft == FaceInfo::VarFaceNeighbors::BOTH
-          ? var.hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
-                var.hasBlocks(fi.neighborPtr()->subdomain_id())
-          : true,
-      "Finite volume variable "
-          << var.name()
-          << " does not exist on both sides of the face despite what the FaceInfo is telling us.");
+  mooseAssert(ft == FaceInfo::VarFaceNeighbors::BOTH
+                  ? var.hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
+                        var.hasBlocks(fi.neighborPtr()->subdomain_id())
+                  : true,
+              "Finite volume variable " << var.name()
+                                        << " does not exist on both sides of the face despite "
+                                           "what the FaceInfo is telling us.");
   mooseAssert(ft == FaceInfo::VarFaceNeighbors::ELEM
                   ? var.hasBlocks(fi.elem().subdomain_id()) &&
                         (!fi.neighborPtr() || !var.hasBlocks(fi.neighborPtr()->subdomain_id()))

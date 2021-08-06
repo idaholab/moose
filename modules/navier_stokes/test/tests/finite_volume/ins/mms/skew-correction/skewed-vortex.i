@@ -13,6 +13,19 @@ rho=1.0
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+  []
+[]
+
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
@@ -40,11 +53,8 @@ rho=1.0
     variable = pressure
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    vel = 'velocity'
-    pressure = pressure
     u = vel_x
     v = vel_y
-    mu = ${mu}
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -56,20 +66,18 @@ rho=1.0
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    pressure = pressure
     u = vel_x
     v = vel_y
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = vel_x
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -78,28 +86,27 @@ rho=1.0
     pressure = pressure
   []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = vel_x
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    pressure = pressure
     u = vel_x
     v = vel_y
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = vel_y
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -108,9 +115,10 @@ rho=1.0
     pressure = pressure
   []
   [v_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = vel_y
-    function = forcing_v
+    functor = forcing_v
+    momentum_component = 'y'
   []
 []
 
@@ -153,13 +161,13 @@ rho=1.0
     value = 'x*(1-x)-2/12'
   []
   [forcing_u]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = '-4*mu/rho*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [forcing_v]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = '4*mu/rho*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
     vars = 'mu rho'
     vals = '${mu} ${rho}'

@@ -21,6 +21,7 @@ InputParameters
 PNSFVMomentumPressureFluxRZ::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
+  params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription(
       "Adds the porous $-p/r$ term into the radial component of the Navier-Stokes "
       "momentum equation for the problems in the RZ coordinate system when integrating by parts.");
@@ -32,6 +33,7 @@ PNSFVMomentumPressureFluxRZ::validParams()
 
 PNSFVMomentumPressureFluxRZ::PNSFVMomentumPressureFluxRZ(const InputParameters & params)
   : FVElementalKernel(params),
+    INSFVMomentumResidualObject(*this),
     _p(getFunctor<ADReal>(NS::pressure)),
     _eps(getFunctor<ADReal>(NS::porosity))
 {
@@ -45,5 +47,6 @@ PNSFVMomentumPressureFluxRZ::computeQpResidual()
 
   auto rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
-  return -_eps(_current_elem).value() * _p(_current_elem) / _q_point[_qp](rz_radial_coord);
+  return -_eps(makeElemArg(_current_elem)).value() * _p(makeElemArg(_current_elem)) /
+         _q_point[_qp](rz_radial_coord);
 }

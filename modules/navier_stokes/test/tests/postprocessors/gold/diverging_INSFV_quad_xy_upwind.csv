@@ -1,3 +1,3 @@
 time,inlet_advected_energy,inlet_mass_constant,inlet_mass_matprop,inlet_mass_variable,inlet_momentum_x,inlet_momentum_y,mid1_advected_energy,mid1_mass,mid1_momentum_x,mid1_momentum_y,mid2_advected_energy,mid2_mass,mid2_momentum_x,mid2_momentum_y,outlet_advected_energy,outlet_mass,outlet_momentum_x,outlet_momentum_y
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-1,-302,-1,-1,-1,-0.024476040741523,-0.94215502182725,310,1,-0.059947284338798,1.0723266687159,310,1,0.029410484806732,0.78663499152553,310,1,0.0034392597619175,0.76467916759833
+1,-302,-1,-1,-1,-0.025195378641889,-0.94215465208804,310,1,-0.062286028925569,1.0739179604894,310,1,0.029523717857796,0.79434918146723,310,1,0.0038101097170568,0.77229944912111

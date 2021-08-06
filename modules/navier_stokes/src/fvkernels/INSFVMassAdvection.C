@@ -16,7 +16,7 @@ INSFVMassAdvection::validParams()
 {
   auto params = INSFVMomentumAdvection::validParams();
   params.addClassDescription("Object for advecting mass, e.g. rho");
-  params.suppressParameter<MooseFunctorName>("advected_quantity");
+  params.suppressParameter<MooseEnum>("momentum_component");
   return params;
 }
 
@@ -33,13 +33,12 @@ INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)
 ADReal
 INSFVMassAdvection::computeQpResidual()
 {
-  ADRealVectorValue v;
   ADReal rho_interface;
 
   const auto elem_face = elemFromFace();
   const auto neighbor_face = neighborFromFace();
 
-  this->interpolate(_velocity_interp_method, v);
+  const auto v = _rc_uo.getVelocity(_velocity_interp_method, *_face_info, _tid);
   Moose::FV::interpolate(_advected_interp_method,
                          rho_interface,
                          _rho(elem_face),

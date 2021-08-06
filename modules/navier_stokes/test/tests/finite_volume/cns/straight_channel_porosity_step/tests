@@ -11,6 +11,7 @@
       ad_indexing_type = 'global'
       recover = false # See https://github.com/idaholab/moose/issues/17906
       valgrind = HEAVY
+      threading = 'tbb openmp'
     []
     [continuous_eps_hllc]
       type = Exodiff
@@ -18,6 +19,7 @@
       exodiff = hllc_out.e
       detail = 'the HLLC scheme'
       ad_indexing_type = 'global'
+      threading = 'tbb openmp'
     []
   []
   [twod_y_channel_upwind_frictional_porosity_function]
@@ -31,6 +33,7 @@
     method = "!dbg"
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PCNSFVMomentumFriction.md'
+    threading = 'tbb openmp'
   []
   [twod_y_channel_upwind_frictional_porosity_function_mixed]
     type = Exodiff
@@ -43,6 +46,7 @@
     method = "!dbg"
     valgrind = 'none'
     design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PCNSFVMomentumFriction.md'
+    threading = 'tbb openmp'
   []
   [deferred_correction]
     type = Exodiff
@@ -53,5 +57,6 @@
     abs_zero = 1e-8
     valgrind = HEAVY
     design = 'PCNSFVKTDC.md'
+    threading = 'tbb openmp'
   []
 []

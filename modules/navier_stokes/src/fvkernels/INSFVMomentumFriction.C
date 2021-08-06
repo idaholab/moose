@@ -14,7 +14,7 @@ registerMooseObject("NavierStokesApp", INSFVMomentumFriction);
 InputParameters
 INSFVMomentumFriction::validParams()
 {
-  InputParameters params = FVElementalKernel::validParams();
+  InputParameters params = INSFVElementalKernel::validParams();
 
   params.addClassDescription("Implements a basic linear or quadratic friction model as "
                              "a volumetric force, for example for the X-momentum equation: "
@@ -34,7 +34,7 @@ INSFVMomentumFriction::validParams()
 }
 
 INSFVMomentumFriction::INSFVMomentumFriction(const InputParameters & parameters)
-  : FVElementalKernel(parameters),
+  : INSFVElementalKernel(parameters),
     _linear_friction(isParamValid("linear_coef_name") ? &getFunctor<ADReal>("linear_coef_name")
                                                       : nullptr),
     _quadratic_friction(
@@ -48,12 +48,13 @@ INSFVMomentumFriction::INSFVMomentumFriction(const InputParameters & parameters)
                "coefficient material property");
 }
 
-ADReal
-INSFVMomentumFriction::computeQpResidual()
+void
+INSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
-  if (_use_linear_friction)
-    return (*_linear_friction)(_current_elem)*_drag_quantity(_current_elem);
-  else
-    return (*_quadratic_friction)(_current_elem)*_drag_quantity(_current_elem) *
-           std::abs(_drag_quantity(_current_elem));
+  const auto elem_arg = makeElemArg(&elem);
+  _rc_uo.addToB(&elem,
+                _index,
+                _use_linear_friction ? (*_linear_friction)(elem_arg)*_drag_quantity(elem_arg)
+                                     : (*_quadratic_friction)(elem_arg)*_drag_quantity(elem_arg) *
+                                           std::abs(_drag_quantity(elem_arg)));
 }

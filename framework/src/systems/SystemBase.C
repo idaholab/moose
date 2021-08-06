@@ -853,10 +853,14 @@ SystemBase::addVariable(const std::string & var_type,
       for (MooseIndex(components) component = 0; component < components; ++component)
         _numbered_vars[tid][var_num + component] = fe_var;
 
-      auto * const functor = dynamic_cast<Moose::FunctorBase *>(fe_var);
-      if (!functor)
+      if (auto * const functor = dynamic_cast<Moose::FunctorBase<ADReal> *>(fe_var))
+        _subproblem.addFunctor(name, *functor, tid);
+      else if (auto * const functor = dynamic_cast<Moose::FunctorBase<ADRealVectorValue> *>(fe_var))
+        _subproblem.addFunctor(name, *functor, tid);
+      else if (auto * const functor = dynamic_cast<Moose::FunctorBase<RealEigenVector> *>(fe_var))
+        _subproblem.addFunctor(name, *functor, tid);
+      else
         mooseError("This should be a functor");
-      _subproblem.addFunctor(name, const_cast<const Moose::FunctorBase *>(functor), tid);
     }
 
     if (var->blockRestricted())
@@ -1526,7 +1530,7 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   }
 
   _mesh.cacheVarIndicesByFace(moose_vars);
-  _mesh.computeFaceInfoFaceCoords(_subproblem);
+  _mesh.computeFaceInfoFaceCoords();
 }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING

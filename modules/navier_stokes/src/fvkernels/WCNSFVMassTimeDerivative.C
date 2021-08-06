@@ -32,5 +32,5 @@ WCNSFVMassTimeDerivative::WCNSFVMassTimeDerivative(const InputParameters & param
 ADReal
 WCNSFVMassTimeDerivative::computeQpResidual()
 {
-  return _rho_dot(_current_elem);
+  return _rho_dot(makeElemArg(_current_elem));
 }

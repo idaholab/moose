@@ -53,12 +53,12 @@ protected:
   /**
    * @return the value of \p makeSidedFace with \p fi_elem = true
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFromFace() const;
+  Moose::ElemFromFaceArg elemFromFace(bool correct_skewness = false) const;
 
   /**
    * @return the value of \p makeSidedFace with \p fi_elem = false
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
+  Moose::ElemFromFaceArg neighborFromFace(bool correct_skewness = false) const;
 
   /**
    * Determine the subdomain ID pair that should be used when creating a face argument for a
@@ -69,6 +69,9 @@ protected:
    * the block restriction of the variable this object is acting upon
    */
   std::pair<SubdomainID, SubdomainID> faceArgSubdomains() const;
+
+  /// The variable face type
+  FaceInfo::VarFaceNeighbors _face_type;
 
 private:
   /**
@@ -83,8 +86,7 @@ private:
    * equivalent to \p _face_info->neighborPtr()->subdomain_id(). We currently error in flux bcs if
    * the variable is defined on both sides of the face
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-  makeSidedFace(bool fi_elem) const;
+  Moose::ElemFromFaceArg makeSidedFace(bool fi_elem, bool correct_skewness = false) const;
 
   /// Computes the Jacobian contribution for every coupled variable.
   ///

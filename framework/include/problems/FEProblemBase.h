@@ -154,9 +154,7 @@ public:
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
 
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const override;
-  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
-                              const MultiMooseEnum & coord_sys);
+  void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
   /**
@@ -2332,6 +2330,8 @@ private:
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
 };
+
+using FVProblemBase = FEProblemBase;
 
 template <typename T>
 void

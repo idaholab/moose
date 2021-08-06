@@ -113,7 +113,8 @@ VolumetricFlowRate::computeQpIntegral()
                              true);
     }
     else if (_advected_mat_prop_supplied)
-      advected_quantity = MetaPhysicL::raw_value(_advected_material_property(_current_elem));
+      advected_quantity =
+          MetaPhysicL::raw_value(_advected_material_property(makeElemArg(_current_elem)));
     else
       advected_quantity = 1;
 

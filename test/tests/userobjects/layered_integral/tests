@@ -47,6 +47,7 @@
       input = 'layered_integral_fv_test.i'
       exodiff = 'fv_out.e'
       detail = 'and using finite volume variables.'
+      ad_indexing_type = 'global'
     []
   []
 

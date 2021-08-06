@@ -20,6 +20,9 @@ public:
   static InputParameters validParams();
   PINSFVEnergyAdvection(const InputParameters & params);
 
-private:
+protected:
   ADReal computeQpResidual() override;
+
+  /// The advected heat quantity
+  const Moose::Functor<ADReal> & _adv_quant;
 };

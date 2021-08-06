@@ -9,20 +9,21 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "INSFVElementalKernel.h"
 
 /**
- * Implements a linear or quadratic friction term for the momentum equation.
+ * Implements a linear or quadratic friction term for the momentum equation,
+ * for use with Rhie Chow interpolation for weakly and incompressible Navier Stokes equations
  */
-class INSFVMomentumFriction : public FVElementalKernel
+class INSFVMomentumFriction : public INSFVElementalKernel
 {
 public:
   static InputParameters validParams();
 
   INSFVMomentumFriction(const InputParameters & parameters);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVElementalKernel::gatherRCData;
+  void gatherRCData(const Elem &) override;
 
 protected:
   /// The linear friction factor, for laminar flow

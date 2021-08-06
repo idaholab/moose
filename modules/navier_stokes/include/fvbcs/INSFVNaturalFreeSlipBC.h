@@ -20,6 +20,9 @@ public:
   static InputParameters validParams();
   INSFVNaturalFreeSlipBC(const InputParameters & params);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVSlipWallBC::gatherRCData;
+
+  // A free slip wall boundary condition does not allow any outflow nor does it impose any viscous
+  // stress so there is no data to contribute from this object
+  void gatherRCData(const FaceInfo &) override {}
 };

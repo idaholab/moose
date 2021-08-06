@@ -7,5 +7,6 @@
     difference_tol = 1e-7
     run_sim = True
     requirement = 'The system shall be able to run a flux boundary condition and a flux kernel for different variables on the same boundary and calculate correct function and Jacobian values.'
+    ad_indexing_type = 'global'
   []
 []

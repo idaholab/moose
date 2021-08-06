@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedFunctionTest.h"
+#include "MathFVUtils.h"
 
 #include "libmesh/fe_map.h"
 #include "libmesh/quadrature_gauss.h"
@@ -23,6 +24,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "MooseParsedFunction";
   MooseParsedFunction f(params);
+  Moose::Functor<Real> f_wrapped(f);
   f.initialSetup();
   EXPECT_EQ(f.value(4, Point(1, 2, 3)), 11);
 
@@ -54,13 +56,14 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 
   // Test elem overloads
   const Elem * const elem = lm_mesh.elem_ptr(0);
+  const auto elem_arg = Moose::ElemArg{elem, false, false};
   const Point vtx_average = elem->vertex_average();
   f_traditional = f.value(0, vtx_average);
-  f_functor = f(elem, 0);
+  f_functor = f_wrapped(elem_arg, 0);
   gradient_traditional = f.gradient(0, vtx_average);
-  gradient_functor = f.gradient(elem, 0);
+  gradient_functor = f_wrapped.gradient(elem_arg, 0);
   dot_traditional = f.timeDerivative(0, vtx_average);
-  dot_functor = f.dot(elem, 0);
+  dot_functor = f_wrapped.dot(elem_arg, 0);
   test_eq();
 
   const Elem * neighbor = nullptr;
@@ -75,23 +78,21 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 
   // Test elem_from_face overloads
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  auto elem_from_face = std::make_tuple(elem, fi, elem->subdomain_id());
-  f_functor = f(elem_from_face, 0);
-  gradient_functor = f.gradient(elem_from_face, 0);
-  dot_functor = f.dot(elem_from_face, 0);
+  const auto elem_from_face = Moose::ElemFromFaceArg{elem, fi, false, false, elem->subdomain_id()};
+  f_functor = f_wrapped(elem_from_face, 0);
+  gradient_functor = f_wrapped.gradient(elem_from_face, 0);
+  dot_functor = f_wrapped.dot(elem_from_face, 0);
   test_eq();
 
   // Test face overloads
-  auto face = std::make_tuple(fi,
-                              Moose::FV::LimiterType::CentralDifference,
-                              true,
-                              std::make_pair(elem->subdomain_id(), neighbor->subdomain_id()));
+  auto face =
+      Moose::FV::makeCDFace(*fi, std::make_pair(elem->subdomain_id(), neighbor->subdomain_id()));
   f_traditional = f.value(0, fi->faceCentroid());
-  f_functor = f(face, 0);
+  f_functor = f_wrapped(face, 0);
   gradient_traditional = f.gradient(0, fi->faceCentroid());
-  gradient_functor = f.gradient(face, 0);
+  gradient_functor = f_wrapped.gradient(face, 0);
   dot_traditional = f.timeDerivative(0, fi->faceCentroid());
-  dot_functor = f.dot(face, 0);
+  dot_functor = f_wrapped.dot(face, 0);
   test_eq();
 
   // Test ElemQp overloads
@@ -104,11 +105,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   fe->reinit(elem);
   auto elem_qp = std::make_tuple(elem, 0, &qrule);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f(elem_qp, 0);
+  f_functor = f_wrapped(elem_qp, 0);
   gradient_traditional = f.gradient(0, xyz[0]);
-  gradient_functor = f.gradient(elem_qp, 0);
+  gradient_functor = f_wrapped.gradient(elem_qp, 0);
   dot_traditional = f.timeDerivative(0, xyz[0]);
-  dot_functor = f.dot(elem_qp, 0);
+  dot_functor = f_wrapped.dot(elem_qp, 0);
   test_eq();
 
   // Test ElemSideQp overloads
@@ -117,11 +118,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   fe->reinit(elem, side);
   auto elem_side_qp = std::make_tuple(elem, side, 0, &qrule_face);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f(elem_side_qp, 0);
+  f_functor = f_wrapped(elem_side_qp, 0);
   gradient_traditional = f.gradient(0, xyz[0]);
-  gradient_functor = f.gradient(elem_side_qp, 0);
+  gradient_functor = f_wrapped.gradient(elem_side_qp, 0);
   dot_traditional = f.timeDerivative(0, xyz[0]);
-  dot_functor = f.dot(elem_side_qp, 0);
+  dot_functor = f_wrapped.dot(elem_side_qp, 0);
   test_eq();
 }
 

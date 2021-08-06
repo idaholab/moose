@@ -14,6 +14,7 @@
 
 #include "MooseUtils.h"
 #include "MooseTypes.h"
+#include "FaceInfo.h"
 
 namespace MooseMeshUtils
 {
@@ -53,4 +54,49 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
  * @return a Point data containing the mesh centroid
  */
 Point meshCentroidCalculator(const MeshBase & mesh);
+
+/**
+ * compute a coordinate transformation factor
+ * @param point The libMesh \p Point in space where we are evaluating the factor
+ * @param factor The output of this function. Would be 1 for cartesian coordinate systems, 2*pi*r
+ * for cylindrical coordinate systems, and 4*pi*r^2 for spherical coordinate systems
+ * @param coord_type The coordinate system type, e.g. cartesian (COORD_XYZ), cylindrical (COORD_RZ),
+ * or spherical (COORD_RSPHERICAL)
+ * @param rz_radial_coord The index at which to index \p point for the radial coordinate when in a
+ * cylindrical coordinate system
+ */
+template <typename P, typename C>
+void
+coordTransformFactor(const P & point,
+                     C & factor,
+                     const Moose::CoordinateSystemType coord_type,
+                     const unsigned int rz_radial_coord = libMesh::invalid_uint)
+{
+  switch (coord_type)
+  {
+    case Moose::COORD_XYZ:
+      factor = 1.0;
+      break;
+    case Moose::COORD_RZ:
+    {
+      mooseAssert(rz_radial_coord != libMesh::invalid_uint,
+                  "Must pass in a valid rz radial coordinate");
+      factor = 2 * M_PI * point(rz_radial_coord);
+      break;
+    }
+    case Moose::COORD_RSPHERICAL:
+      factor = 4 * M_PI * point(0) * point(0);
+      break;
+    default:
+      mooseError("Unknown coordinate system");
+  }
+}
+
+inline void
+computeFaceInfoFaceCoord(FaceInfo & fi,
+                         const Moose::CoordinateSystemType coord_type,
+                         const unsigned int rz_radial_coord = libMesh::invalid_uint)
+{
+  coordTransformFactor(fi.faceCentroid(), fi.faceCoord(), coord_type, rz_radial_coord);
+}
 }

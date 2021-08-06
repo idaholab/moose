@@ -34,15 +34,10 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     _v_vel(isCoupled("v") ? getVarHelper<MooseVariableFVReal>("v", 0) : nullptr),
     _w_vel(isCoupled("w") ? getVarHelper<MooseVariableFVReal>("w", 0) : nullptr),
     _p_var(*getVarHelper<MooseVariableFVReal>(NS::pressure, 0)),
-    _velocity(declareFunctorProperty<ADRealVectorValue>(NS::velocity)),
-    _rho_u(declareFunctorProperty<ADReal>(NS::momentum_x)),
-    _rho_v(declareFunctorProperty<ADReal>(NS::momentum_y)),
-    _rho_w(declareFunctorProperty<ADReal>(NS::momentum_z)),
     _rho(getFunctor<ADReal>("rho")),
     _has_temperature(isParamValid("temperature")),
     _temperature(_has_temperature ? getVarHelper<MooseVariableFVReal>("temperature", 0) : nullptr),
-    _cp(_has_temperature ? &getFunctor<ADReal>("cp_name") : nullptr),
-    _rho_cp_temp(_has_temperature ? &declareFunctorProperty<ADReal>("rho_cp_temp") : nullptr)
+    _cp(_has_temperature ? &getFunctor<ADReal>("cp_name") : nullptr)
 {
   if (_mesh.dimension() >= 2 && !_v_vel)
     mooseError(
@@ -50,42 +45,37 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
   if (_mesh.dimension() >= 3 && !_w_vel)
     mooseError("If the mesh dimension is 3, then a 'w' variable parameter must be supplied");
 
-  _velocity.setFunctor(_mesh,
-                       blockIDs(),
-                       [this](const auto & r, const auto & t) -> ADRealVectorValue
-                       {
-                         ADRealVectorValue velocity(_u_vel(r, t));
-                         if (_mesh.dimension() >= 2)
-                           velocity(1) = (*_v_vel)(r, t);
-                         if (_mesh.dimension() >= 3)
-                           velocity(2) = (*_w_vel)(r, t);
-                         return velocity;
-                       });
-  _rho_u.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    { return _rho(r, t) * _u_vel(r, t); });
-  _rho_v.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    {
-                      if (_mesh.dimension() >= 2)
-                        return _rho(r, t) * (*_v_vel)(r, t);
-                      else
-                        return 0;
-                    });
-  _rho_w.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    {
-                      if (_mesh.dimension() >= 3)
-                        return _rho(r, t) * (*_w_vel)(r, t);
-                      else
-                        return 0;
-                    });
-  if (_has_temperature)
-    _rho_cp_temp->setFunctor(_mesh,
-                             blockIDs(),
+  addFunctorProperty<ADRealVectorValue>(NS::velocity,
+                                        [this](const auto & r, const auto & t) -> ADRealVectorValue
+                                        {
+                                          ADRealVectorValue velocity(_u_vel(r, t));
+                                          if (_mesh.dimension() >= 2)
+                                            velocity(1) = (*_v_vel)(r, t);
+                                          if (_mesh.dimension() >= 3)
+                                            velocity(2) = (*_w_vel)(r, t);
+                                          return velocity;
+                                        });
+  addFunctorProperty<ADReal>(NS::momentum_x,
                              [this](const auto & r, const auto & t) -> ADReal
-                             { return _rho(r, t) * (*_cp)(r, t) * (*_temperature)(r, t); });
+                             { return _rho(r, t) * _u_vel(r, t); });
+  addFunctorProperty<ADReal>(NS::momentum_y,
+                             [this](const auto & r, const auto & t) -> ADReal
+                             {
+                               if (_mesh.dimension() >= 2)
+                                 return _rho(r, t) * (*_v_vel)(r, t);
+                               else
+                                 return 0;
+                             });
+  addFunctorProperty<ADReal>(NS::momentum_z,
+                             [this](const auto & r, const auto & t) -> ADReal
+                             {
+                               if (_mesh.dimension() >= 3)
+                                 return _rho(r, t) * (*_w_vel)(r, t);
+                               else
+                                 return 0;
+                             });
+  if (_has_temperature)
+    addFunctorProperty<ADReal>("rho_cp_temp",
+                               [this](const auto & r, const auto & t) -> ADReal
+                               { return _rho(r, t) * (*_cp)(r, t) * (*_temperature)(r, t); });
 }

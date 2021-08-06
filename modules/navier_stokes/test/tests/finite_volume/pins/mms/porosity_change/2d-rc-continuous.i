@@ -16,6 +16,20 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = u
+    v = v
+    porosity = porosity
+    pressure = pressure
+  []
+[]
+
 [Problem]
   fv_bcs_integrity_check = true
 []
@@ -55,20 +69,14 @@ velocity_interp_method='rc'
 []
 
 [FVKernels]
-  inactive = 'u_pressure_porosity u_pressure_porosity_gradient
-              v_pressure_porosity v_pressure_porosity_gradient'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
-    smooth_porosity = true
   []
   [mass_forcing]
     type = FVBodyForce
@@ -79,27 +87,20 @@ velocity_interp_method='rc'
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
-    smooth_porosity = true
+    momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     porosity = porosity
-    smooth_porosity = false
-    superficial_velocity = 'velocity'
     momentum_component = 'x'
   []
-  # Option 1: eps * pressure gradient
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = u
@@ -107,52 +108,30 @@ velocity_interp_method='rc'
     porosity = porosity
     momentum_component = 'x'
   []
-
-  # Option 2: gradient (eps * pressure) - P * gradient(eps)
-  [u_pressure_porosity]
-    type = PINSFVMomentumPressureFlux
-    variable = u
-    pressure = pressure
-    porosity = porosity
-    momentum_component = 'x'
-  []
-  [u_pressure_porosity_gradient]
-    type = PINSFVMomentumPressurePorosityGradient
-    variable = u
-    pressure = pressure
-    porosity = porosity
-    momentum_component = 'x'
-  []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = u
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
 
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
-    smooth_porosity = true
+    momentum_component = 'y'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
     mu = ${mu}
     porosity = porosity
-    smooth_porosity = false
-    superficial_velocity = 'velocity'
     momentum_component = 'y'
   []
-  # Option 1: eps * pressure gradient
   [v_pressure]
     type = PINSFVMomentumPressure
     variable = v
@@ -160,26 +139,11 @@ velocity_interp_method='rc'
     porosity = porosity
     momentum_component = 'y'
   []
-
-  # Option 2: gradient (eps * pressure) - P * gradient(eps)
-  [v_pressure_porosity]
-    type = PINSFVMomentumPressureFlux
-    variable = v
-    pressure = pressure
-    porosity = porosity
-    momentum_component = 'y'
-  []
-  [v_pressure_porosity_gradient]
-    type = PINSFVMomentumPressurePorosityGradient
-    variable = v
-    pressure = pressure
-    porosity = porosity
-    momentum_component = 'y'
-  []
   [v_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = v
-    function = forcing_v
+    functor = forcing_v
+    momentum_component = 'y'
   []
 []
 
@@ -238,8 +202,8 @@ velocity_interp_method='rc'
     value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [forcing_u]
-    type = ParsedFunction
-    value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 0.005*pi*mu*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 7.5*pi*mu*exp(30 - 30*x)*sin((1/2)*x*pi)*sin((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)^2/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 1/4*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    type = ADParsedFunction
+    value = '15.0*mu*(-1/2*pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 + 0.01*mu*((1/2)*pi*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*pi*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 0.0002*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 15.0*pi*exp(30 - 30*x)*sin((1/2)*x*pi)*sin((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 450.0*exp(30 - 30*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 900.0*exp(60 - 60*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^3*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 450.0*exp(60 - 60*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^4*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3)) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)^2/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 1/4*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -248,8 +212,8 @@ velocity_interp_method='rc'
     value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [forcing_v]
-    type = ParsedFunction
-    value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.005*pi*mu*sin((1/4)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 - 3.75*pi*mu*exp(30 - 30*x)*cos((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)^2*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + (3/2)*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    type = ADParsedFunction
+    value = '0.01*mu*(-1/2*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 15.0*mu*((1/4)*pi*cos((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 0.01*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 0.0002*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/16*pi^2*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 450.0*exp(30 - 30*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 7.5*pi*exp(30 - 30*x)*cos((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 900.0*exp(60 - 60*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^3*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 450.0*exp(60 - 60*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^4*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3)) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)^2*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + (3/2)*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []

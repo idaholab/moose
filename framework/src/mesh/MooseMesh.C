@@ -194,7 +194,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _need_delete(false),
     _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true),
-    _is_displaced(false)
+    _is_displaced(false),
+    _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -229,7 +230,9 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _need_delete(other_mesh._need_delete),
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
-    _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries)
+    _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
+    _coord_sys(other_mesh._coord_sys),
+    _rz_coord_axis(other_mesh._rz_coord_axis)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -3260,7 +3263,7 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 }
 
 void
-MooseMesh::computeFaceInfoFaceCoords(const SubProblem & subproblem)
+MooseMesh::computeFaceInfoFaceCoords()
 {
   if (_face_info_dirty)
     mooseError("Trying to compute face-info coords when the information is dirty");
@@ -3276,7 +3279,7 @@ MooseMesh::computeFaceInfoFaceCoords(const SubProblem & subproblem)
       neighbor_subdomain_id = neighbor_elem->subdomain_id();
 
     coordTransformFactor(
-        subproblem, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
+        *this, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
   }
 }
 
@@ -3389,4 +3392,117 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
       }
     }
   }
+}
+
+void
+MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
+                          const MultiMooseEnum & coord_sys)
+{
+  TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
+
+  const std::set<SubdomainID> & subdomains = meshSubdomains();
+  if (blocks.size() == 0)
+  {
+    // no blocks specified -> assume the whole domain
+    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ; // all is going to be XYZ by default
+    if (coord_sys.size() == 0)
+      ; // relax, do nothing
+    else if (coord_sys.size() == 1)
+      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(
+          coord_sys[0]); // one system specified, the whole domain is going to have that system
+    else
+      mooseError("Multiple coordinate systems specified, but no blocks given.");
+
+    for (const auto & sbd : subdomains)
+      _coord_sys[sbd] = coord_type;
+  }
+  else
+  {
+    // user specified 'blocks' but not coordinate systems
+    if (coord_sys.size() == 0)
+    {
+      // set all blocks to cartesian coordinate system
+      for (const auto & block : blocks)
+      {
+        SubdomainID sid = getSubdomainID(block);
+        _coord_sys[sid] = Moose::COORD_XYZ;
+      }
+    }
+    else if (coord_sys.size() == 1)
+    {
+      // set all blocks to the coordinate system specified by `coord_sys[0]`
+      Moose::CoordinateSystemType coord_type =
+          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
+      for (const auto & block : blocks)
+      {
+        SubdomainID sid = getSubdomainID(block);
+        _coord_sys[sid] = coord_type;
+      }
+    }
+    else
+    {
+      if (blocks.size() != coord_sys.size())
+        mooseError("Number of blocks and coordinate systems does not match.");
+
+      for (unsigned int i = 0; i < blocks.size(); i++)
+      {
+        SubdomainID sid = getSubdomainID(blocks[i]);
+        Moose::CoordinateSystemType coord_type =
+            Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+        _coord_sys[sid] = coord_type;
+      }
+
+      for (const auto & sid : subdomains)
+        if (_coord_sys.find(sid) == _coord_sys.end())
+          mooseError("Subdomain '" + Moose::stringify(sid) +
+                     "' does not have a coordinate system specified.");
+    }
+  }
+}
+
+Moose::CoordinateSystemType
+MooseMesh::getCoordSystem(SubdomainID sid) const
+{
+  auto it = _coord_sys.find(sid);
+  if (it != _coord_sys.end())
+    return (*it).second;
+  else
+    mooseError("Requested subdomain ", sid, " does not exist.");
+}
+
+void
+MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
+{
+  _rz_coord_axis = rz_coord_axis;
+}
+
+unsigned int
+MooseMesh::getAxisymmetricRadialCoord() const
+{
+  if (_rz_coord_axis == 0)
+    return 1; // if the rotation axis is x (0), then the radial direction is y (1)
+  else
+    return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
+}
+
+void
+MooseMesh::checkCoordinateSystems()
+{
+  for (const auto & elem : getMesh().element_ptr_range())
+  {
+    SubdomainID sid = elem->subdomain_id();
+    if (_coord_sys[sid] == Moose::COORD_RZ && elem->dim() == 3)
+      mooseError("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) +
+                 " which contains 3D elements.");
+    if (_coord_sys[sid] == Moose::COORD_RSPHERICAL && elem->dim() > 1)
+      mooseError("An RSPHERICAL coordinate system was requested for subdomain " +
+                 Moose::stringify(sid) + " which contains 2D or 3D elements.");
+  }
+}
+
+void
+MooseMesh::setCoordData(const MooseMesh & other_mesh)
+{
+  _coord_sys = other_mesh._coord_sys;
+  _rz_coord_axis = other_mesh._rz_coord_axis;
 }

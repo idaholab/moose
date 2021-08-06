@@ -16,6 +16,7 @@ InputParameters
 INSFVMomentumPressure::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
+  params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "The pressure");
@@ -30,6 +31,7 @@ INSFVMomentumPressure::validParams()
 
 INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
   : FVElementalKernel(params),
+    INSFVMomentumResidualObject(*this),
     _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {

@@ -6,6 +6,7 @@
     input = 'hllc_uo_1D.i'
     csvdiff = 'hllc_uo_1D_out_wave_speeds_0001.csv'
     requirement = "The system shall be able to compute wave speeds for HLLC Riemann solvers."
+    threading = 'tbb openmp'
   [../]
 
   [./HLLC_wave_speeds_2D]
@@ -13,5 +14,6 @@
     input = 'hllc_uo_2D_tri.i'
     csvdiff = 'hllc_uo_2D_tri_out_wave_speeds_0001.csv'
     requirement = "The system shall be able to compute wave speeds for HLLC Riemann solvers in multiple dimensions."
+    threading = 'tbb openmp'
   [../]
 []

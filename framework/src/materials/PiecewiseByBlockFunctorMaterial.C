@@ -39,18 +39,17 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 PiecewiseByBlockFunctorMaterialTempl<is_ad>::PiecewiseByBlockFunctorMaterialTempl(
     const InputParameters & params)
-  : FunctorMaterial(params), _prop(declareFunctorProperty<GenericReal<is_ad>>("prop_name"))
+  : FunctorMaterial(params)
 {
   for (const auto & map_pr :
        getParam<std::map<std::string, std::string>>("subdomain_to_prop_value"))
   {
-    const MooseFunctorName value = map_pr.second;
-    const auto & functor = &getFunctor<GenericReal<is_ad>>(value);
-    _prop.setFunctor(_mesh,
-                     {_mesh.getSubdomainID(map_pr.first)},
-                     [functor](const auto & r, const auto & t) -> GenericReal<is_ad> {
-                       return (*functor)(r, t);
-                     });
+    const auto & name = map_pr.second;
+    const auto & functor = getFunctor<GenericReal<is_ad>>(name);
+    addFunctorPropertyByBlocks<GenericReal<is_ad>>(
+        "prop_name",
+        [&functor](const auto & r, const auto & t) -> GenericReal<is_ad> { return functor(r, t); },
+        std::set<SubdomainID>({_mesh.getSubdomainID(map_pr.first)}));
   }
 }
 

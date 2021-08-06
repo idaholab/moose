@@ -13,6 +13,7 @@
     # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
     # triggering the default relative tolerance error criterion
     valgrind = HEAVY
+    threading = 'tbb openmp'
   []
   [fluidprops]
     type = 'Exodiff'
@@ -21,5 +22,6 @@
     requirement = 'The system shall be able to output gradeurs, derivatives and adimensional quantities from realistic functor fluid properties'
     ad_indexing_type = 'global'
     recover = false
+    threading = 'tbb openmp'
   []
 []

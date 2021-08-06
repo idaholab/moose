@@ -17,6 +17,7 @@ InputParameters
 PINSFVMomentumPressureFlux::validParams()
 {
   auto params = FVFluxKernel::validParams();
+  params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription("Momentum pressure term eps grad_P, as a flux kernel "
                              "using the divergence theoreom, in the porous media "
                              "incompressible Navier-Stokes momentum equation. This kernel "
@@ -35,6 +36,7 @@ PINSFVMomentumPressureFlux::validParams()
 
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
+    INSFVMomentumResidualObject(*this),
     _eps(coupledValue(NS::porosity)),
     _eps_neighbor(coupledNeighborValue(NS::porosity)),
     _p_elem(adCoupledValue(NS::pressure)),

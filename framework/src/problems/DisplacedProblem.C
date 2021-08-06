@@ -81,18 +81,14 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
   automaticScaling(_mproblem.automaticScaling());
+
+  _mesh.setCoordData(_ref_mesh);
 }
 
 bool
 DisplacedProblem::isTransient() const
 {
   return _mproblem.isTransient();
-}
-
-Moose::CoordinateSystemType
-DisplacedProblem::getCoordSystem(SubdomainID sid) const
-{
-  return _mproblem.getCoordSystem(sid);
 }
 
 std::set<dof_id_type> &

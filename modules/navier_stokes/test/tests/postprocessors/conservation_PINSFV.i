@@ -40,6 +40,20 @@ velocity_interp_method='average'
   fv_bcs_integrity_check = true
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+    porosity = porosity
+  []
+[]
+
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable
@@ -78,11 +92,8 @@ velocity_interp_method='average'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
   []
@@ -90,16 +101,13 @@ velocity_interp_method='average'
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
@@ -107,6 +115,7 @@ velocity_interp_method='average'
     force_boundary_execution = true
     porosity = porosity
     mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
@@ -119,16 +128,13 @@ velocity_interp_method='average'
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
@@ -136,6 +142,7 @@ velocity_interp_method='average'
     force_boundary_execution = true
     porosity = porosity
     mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
@@ -147,14 +154,11 @@ velocity_interp_method='average'
 
   [temp_advection]
     type = PINSFVEnergyAdvection
-    vel = 'velocity'
     variable = temperature
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
   []
@@ -196,11 +200,13 @@ velocity_interp_method='average'
     type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = u
+    momentum_component = 'x'
   []
   [free-slip-v]
     type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = v
+    momentum_component = 'y'
   []
   [axis-u]
     type = PINSFVSymmetryVelocityBC
@@ -210,7 +216,6 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     momentum_component = x
-    porosity = porosity
   []
   [axis-v]
     type = PINSFVSymmetryVelocityBC
@@ -220,7 +225,6 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     momentum_component = y
-    porosity = porosity
   []
   [axis-p]
     type = INSFVSymmetryPressureBC

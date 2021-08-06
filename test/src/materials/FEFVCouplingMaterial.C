@@ -29,46 +29,29 @@ FEFVCouplingMaterial::FEFVCouplingMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fe_var(getFunctor<ADReal>("fe_var")),
     _fv_var(getFunctor<ADReal>("fv_var")),
-    _fe_prop(isFunctor("fe_var") ? &declareFunctorProperty<ADReal>("fe_prop") : nullptr),
-    _fv_prop(isFunctor("fv_var")
-                 ? &declareFunctorProperty<ADReal>(
-                       isParamValid("fv_prop_name") ? getParam<MaterialPropertyName>("fv_prop_name")
-                                                    : "fv_prop")
-                 : nullptr),
-    _declared_prop(
-        isParamValid("declared_prop_name")
-            ? &declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("declared_prop_name"))
-            : nullptr),
     _retrieved_prop(isParamValid("retrieved_prop_name") ? &getFunctor<ADReal>("retrieved_prop_name")
                                                         : nullptr)
 {
-  if (_declared_prop)
-  {
-    _declared_prop->setFunctor(
-        _mesh, blockIDs(), [](const auto &, const auto &) -> ADReal { return 1.; });
-    _declared_prop->setCacheClearanceSchedule({EXEC_TIMESTEP_BEGIN});
-  }
-  if (_fe_prop)
-  {
-    _fe_prop->setFunctor(_mesh,
-                         blockIDs(),
-                         [this](const auto & r, const auto & t) -> ADReal
-                         { return 1. + _fe_var(r, t); });
-    _fe_prop->setCacheClearanceSchedule(
+  if (isParamValid("declared_prop_name"))
+    addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("declared_prop_name"),
+                               [](const auto &, const auto &) -> ADReal { return 1.; },
+                               {EXEC_TIMESTEP_BEGIN});
+
+  if (isFunctor("fe_var"))
+    addFunctorProperty<ADReal>(
+        "fe_prop",
+        [this](const auto & r, const auto & t) -> ADReal { return 1. + _fe_var(r, t); },
         std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
-  }
-  if (_fv_prop)
-  {
-    _fv_prop->setFunctor(_mesh,
-                         blockIDs(),
-                         [this](const auto & r, const auto & t) -> ADReal
-                         {
-                           auto ret = 1. + _fv_var(r, t);
-                           if (_retrieved_prop)
-                             ret *= (*_retrieved_prop)(r, t);
-                           return ret;
-                         });
-    _fv_prop->setCacheClearanceSchedule(
+
+  if (isFunctor("fv_var"))
+    addFunctorProperty<ADReal>(
+        isParamValid("fv_prop_name") ? getParam<MaterialPropertyName>("fv_prop_name") : "fv_prop",
+        [this](const auto & r, const auto & t) -> ADReal
+        {
+          auto ret = 1. + _fv_var(r, t);
+          if (_retrieved_prop)
+            ret *= (*_retrieved_prop)(r, t);
+          return ret;
+        },
         std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
-  }
 }

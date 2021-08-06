@@ -17,29 +17,30 @@ using namespace libMesh;
 using namespace Moose;
 
 template <typename T>
-class TestFunctor : public Functor<T>
+class TestFunctor : public FunctorBase<T>
 {
 public:
-  using typename Functor<T>::FaceArg;
-  using typename Functor<T>::SingleSidedFaceArg;
-  using typename Functor<T>::ElemFromFaceArg;
-  using typename Functor<T>::ElemQpArg;
-  using typename Functor<T>::ElemSideQpArg;
-  using typename Functor<T>::FunctorType;
-  using typename Functor<T>::FunctorReturnType;
-  using typename Functor<T>::ValueType;
-  using typename Functor<T>::GradientType;
-  using typename Functor<T>::DotType;
+  using typename FunctorBase<T>::FunctorType;
+  using typename FunctorBase<T>::FunctorReturnType;
+  using typename FunctorBase<T>::ValueType;
+  using typename FunctorBase<T>::GradientType;
+  using typename FunctorBase<T>::DotType;
 
   TestFunctor() = default;
 
 private:
-  ValueType evaluate(const libMesh::Elem * const &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const FaceArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const Moose::ElemArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const Moose::ElemFromFaceArg &, unsigned int) const override final
+  {
+    return 0;
+  }
+  ValueType evaluate(const Moose::FaceArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const Moose::SingleSidedFaceArg &, unsigned int) const override final
+  {
+    return 0;
+  }
+  ValueType evaluate(const Moose::ElemQpArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const Moose::ElemSideQpArg &, unsigned int) const override final { return 0; }
 };
 
 TEST(MooseFunctorTest, testArgs)
@@ -61,13 +62,17 @@ TEST(MooseFunctorTest, testArgs)
   FaceInfo fi(elem.get(), 1, neighbor.get());
   QGauss qrule(1, CONSTANT);
 
-  auto face = std::make_tuple(&fi,
+  auto elem_arg = Moose::ElemArg{elem.get(), false, false};
+  auto face = Moose::FaceArg({&fi,
                               FV::LimiterType::CentralDifference,
                               true,
-                              std::make_pair(INVALID_BLOCK_ID, INVALID_BLOCK_ID));
-  auto single_face =
-      std::make_tuple(&fi, FV::LimiterType::CentralDifference, true, INVALID_BLOCK_ID);
-  auto elem_from_face = std::make_tuple(elem.get(), &fi, INVALID_BLOCK_ID);
+                              false,
+                              false,
+                              INVALID_BLOCK_ID,
+                              INVALID_BLOCK_ID});
+  auto single_face = Moose::SingleSidedFaceArg(
+      {&fi, FV::LimiterType::CentralDifference, true, false, false, INVALID_BLOCK_ID});
+  auto elem_from_face = Moose::ElemFromFaceArg({elem.get(), &fi, false, false, INVALID_BLOCK_ID});
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
 
@@ -84,7 +89,7 @@ TEST(MooseFunctorTest, testArgs)
     }
   };
 
-  test_dot(elem.get());
+  test_dot(elem_arg);
   test_dot(face);
   test_dot(single_face);
   test_dot(elem_from_face);
@@ -104,7 +109,7 @@ TEST(MooseFunctorTest, testArgs)
     }
   };
 
-  test_gradient(elem.get());
+  test_gradient(elem_arg);
   test_gradient(face);
   test_gradient(single_face);
   test_gradient(elem_from_face);
@@ -112,7 +117,7 @@ TEST(MooseFunctorTest, testArgs)
   test_gradient(elem_side_qp);
 
   ConstantFunctor<Real> cf(2);
-  EXPECT_EQ(cf(elem.get()), 2);
+  EXPECT_EQ(cf(elem_arg), 2);
   EXPECT_EQ(cf(elem_from_face), 2);
   EXPECT_EQ(cf(face), 2);
   EXPECT_EQ(cf(single_face), 2);
@@ -126,7 +131,7 @@ TEST(MooseFunctorTest, testArgs)
     for (const auto i : make_range(unsigned(LIBMESH_DIM)))
       EXPECT_EQ(result(i), 0);
   };
-  constant_gradient_test(elem.get());
+  constant_gradient_test(elem_arg);
   constant_gradient_test(elem_from_face);
   constant_gradient_test(face);
   constant_gradient_test(single_face);
@@ -134,7 +139,7 @@ TEST(MooseFunctorTest, testArgs)
   constant_gradient_test(elem_qp);
   constant_gradient_test(elem_side_qp);
 
-  EXPECT_EQ(cf.dot(elem.get()), 0);
+  EXPECT_EQ(cf.dot(elem_arg), 0);
   EXPECT_EQ(cf.dot(elem_from_face), 0);
   EXPECT_EQ(cf.dot(face), 0);
   EXPECT_EQ(cf.dot(single_face), 0);

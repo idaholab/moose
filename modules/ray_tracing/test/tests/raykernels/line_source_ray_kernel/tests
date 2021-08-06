@@ -21,6 +21,7 @@
       input = 'fv_simple_diffusion_line_source.i'
       exodiff = 'fv_simple_diffusion_line_source_out.e'
       detail = 'and finite volumes.'
+      ad_indexing_type = 'global'
     []
   []
 []

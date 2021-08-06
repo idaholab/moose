@@ -8,5 +8,6 @@
     cli_args = 'Executioner/end_time=0.1'
     abs_zero = 1e-9
     requirement = "The system shall be able to model supersonic nozzle flow using an HLLC advective flux discretization and with inlet boundary conditions based on stagnation temperature and stagnation pressure."
+    threading = 'tbb openmp'
   [../]
 []

@@ -59,7 +59,7 @@
     issues = '#16756'
     requirement = 'The system shall be able to solve transient relaxations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
     ad_indexing_type = 'global'
-    valgrind = HEAVY
+    valgrind = 'none'
     design = 'PINSFVEnergyTimeDerivative.md INSFVMomentumTimeDerivative.md'
   []
   [boussinesq]

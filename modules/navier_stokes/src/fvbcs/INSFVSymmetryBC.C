@@ -13,7 +13,7 @@
 InputParameters
 INSFVSymmetryBC::validParams()
 {
-  return FVFluxBC::validParams();
+  return emptyInputParameters();
 }
 
-INSFVSymmetryBC::INSFVSymmetryBC(const InputParameters & params) : FVFluxBC(params) {}
+INSFVSymmetryBC::INSFVSymmetryBC(const InputParameters &) {}

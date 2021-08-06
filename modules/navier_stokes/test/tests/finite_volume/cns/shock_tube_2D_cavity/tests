@@ -6,5 +6,6 @@
     input = 'hllc_sod_shocktube_2D.i'
     check_input = True
     requirement = "The system shall be able to run a two-dimensional version of Sod's shocktube problem."
+    threading = 'tbb openmp'
   [../]
 []

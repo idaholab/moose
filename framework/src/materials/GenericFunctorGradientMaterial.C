@@ -64,16 +64,12 @@ GenericFunctorGradientMaterialTempl<is_ad>::GenericFunctorGradientMaterialTempl(
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))
-  {
-    auto & prop = declareFunctorProperty<GenericRealVectorValue<is_ad>>(_prop_names[i]);
-    prop.setFunctor(_mesh,
-                    blockIDs(),
-                    [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
-                      return (*_functors[i]).gradient(r, t);
-                    });
-
-    prop.setCacheClearanceSchedule(clearance_schedule);
-  }
+    addFunctorProperty<GenericRealVectorValue<is_ad>>(
+        _prop_names[i],
+        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
+          return (*_functors[i]).gradient(r, t);
+        },
+        clearance_schedule);
 }
 
 template class GenericFunctorGradientMaterialTempl<false>;

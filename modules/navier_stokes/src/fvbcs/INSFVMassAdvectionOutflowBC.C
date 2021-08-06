@@ -67,9 +67,6 @@ INSFVMassAdvectionOutflowBC::computeQpResidual()
   if (_w_var)
     v(2) = _w_var->getBoundaryFaceValue(*_face_info);
 
-  mooseAssert(_normal * v >= 0,
-              "This boundary condition is for outflow but the flow is in the opposite direction of "
-              "the boundary normal");
   return _normal * v * _rho;
 #else
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "

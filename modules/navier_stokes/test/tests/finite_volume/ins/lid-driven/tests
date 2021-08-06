@@ -19,8 +19,8 @@
   []
   [jacobian]
     type = 'PetscJacobianTester'
-    input = 'lid-driven.i'
-    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
+    input = 'transient-lid-driven-with-energy.i'
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
     requirement = 'The system shall be able to compute a perfect Jacobian when solving a lid-driven incompressible Navier-Stokes problem with the finite volume method.'
     run_sim = True
     ad_indexing_type = 'global'
@@ -44,7 +44,14 @@
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
     method = '!dbg'
     ad_indexing_type = 'global'
-    valgrind = HEAVY
+    valgrind = 'none'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+  [quiescent]
+    type = 'Exodiff'
+    input = 'rz-gravity-quiescent-fluid.i'
+    exodiff = 'rz-gravity-quiescent-fluid_out.e'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall yield a quiescent fluid in an axisymmetric coordinate system with a gravitational force applied and Rhie-Chow interpolation used for the velocity field.'
   []
 []

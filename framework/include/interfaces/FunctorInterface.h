@@ -12,6 +12,7 @@
 #include "ADReal.h"
 #include "MooseTypes.h"
 #include "SubProblem.h"
+#include "MooseFunctorForward.h"
 
 #include <vector>
 #include <memory>
@@ -19,11 +20,6 @@
 
 class InputParameters;
 class MooseObject;
-namespace Moose
-{
-template <typename>
-class Functor;
-}
 
 /**
  * \class FunctorInterface
@@ -59,12 +55,18 @@ protected:
    */
   bool isFunctor(const std::string & name) const;
 
-private:
   /**
    * Small helper to look up a functor name through the input parameter keys
    */
   std::string deduceFunctorName(const std::string & name) const;
 
+  /**
+   * Helper method to create an elemental argument for a functor that includes whether to perform
+   * skewness corrections
+   */
+  Moose::ElemArg makeElemArg(const Elem * elem, bool correct_skewnewss = false) const;
+
+private:
   /**
    * Helper function to parse default functor values. This is implemented
    * as a specialization for supported types and returns NULL in all other cases.

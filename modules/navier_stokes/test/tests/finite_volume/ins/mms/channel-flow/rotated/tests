@@ -20,7 +20,7 @@
     requirement = 'The system shall demonstrate global second order convergence for all variables on a rotated mesh when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    min_parallel = 16
+    min_parallel = 8
     heavy = true
   []
   [plane-poiseuille-average-first]
@@ -30,7 +30,7 @@
     method = '!dbg'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    min_parallel = 16
+    min_parallel = 8
     heavy = true
     requirement = 'The system shall demonstrate global second order convergence for velocity variables and first order convergence for the pressure variable on a rotated mesh when using an average interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
   []
@@ -42,7 +42,7 @@
     requirement = 'The system shall demonstrate global second order convergence for all variables on a rotated mesh when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    min_parallel = 16
+    min_parallel = 8
     heavy = true
   []
 []

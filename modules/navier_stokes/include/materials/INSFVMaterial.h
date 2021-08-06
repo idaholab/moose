@@ -31,18 +31,6 @@ protected:
   /// pressure variable
   const MooseVariableFVReal & _p_var;
 
-  /// The velocity as a vector
-  FunctorMaterialProperty<ADRealVectorValue> & _velocity;
-
-  /// The density times the x-velocity
-  FunctorMaterialProperty<ADReal> & _rho_u;
-
-  /// The density times the y-velocity
-  FunctorMaterialProperty<ADReal> & _rho_v;
-
-  /// The density times the z-velocity
-  FunctorMaterialProperty<ADReal> & _rho_w;
-
   /// density
   const Moose::Functor<ADReal> & _rho;
 
@@ -50,5 +38,4 @@ protected:
 
   const MooseVariableFVReal * const _temperature;
   const Moose::Functor<ADReal> * const _cp;
-  FunctorMaterialProperty<ADReal> * const _rho_cp_temp;
 };

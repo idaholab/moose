@@ -13,6 +13,19 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = u
+    pressure = pressure
+    porosity = porosity
+  []
+[]
+
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable
@@ -67,10 +80,7 @@ velocity_interp_method='rc'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
   []
@@ -78,21 +88,19 @@ velocity_interp_method='rc'
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure

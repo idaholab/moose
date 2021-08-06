@@ -74,6 +74,7 @@ FVInterfaceKernel::validParams()
   params.declareControllable("enable");
   params.registerBase("FVInterfaceKernel");
   params.registerSystemAttributeName("FVInterfaceKernel");
+  params.set<bool>("_residual_object") = true;
   return params;
 }
 
@@ -207,15 +208,22 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
   processDerivatives(-r, neigh_dof_indices[0]);
 }
 
-std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVInterfaceKernel::elemFromFace() const
+Moose::ElemFromFaceArg
+FVInterfaceKernel::elemFromFace(const bool correct_skewness) const
 {
-  return std::make_tuple(&_face_info->elem(), _face_info, _face_info->elem().subdomain_id());
+  return {&_face_info->elem(),
+          _face_info,
+          correct_skewness,
+          correct_skewness,
+          _face_info->elem().subdomain_id()};
 }
 
-std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVInterfaceKernel::neighborFromFace() const
+Moose::ElemFromFaceArg
+FVInterfaceKernel::neighborFromFace(const bool correct_skewness) const
 {
-  return std::make_tuple(
-      _face_info->neighborPtr(), _face_info, _face_info->neighborPtr()->subdomain_id());
+  return {_face_info->neighborPtr(),
+          _face_info,
+          correct_skewness,
+          correct_skewness,
+          _face_info->neighborPtr()->subdomain_id()};
 }

@@ -71,7 +71,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     FunctorInterface(this),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _sys(changeSystem(parameters, _var)),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
@@ -84,16 +84,22 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");
 }
 
-std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>
+Moose::SingleSidedFaceArg
 FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
-                                        Moose::FV::LimiterType limiter_type) const
+                                        const Moose::FV::LimiterType limiter_type,
+                                        const bool correct_skewness) const
 {
   if (!fi)
     fi = _face_info;
   const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
 
   if (use_elem)
-    return std::make_tuple(fi, limiter_type, true, fi->elem().subdomain_id());
+    return {fi, limiter_type, true, correct_skewness, correct_skewness, fi->elem().subdomain_id()};
   else
-    return std::make_tuple(fi, limiter_type, true, fi->neighborPtr()->subdomain_id());
+    return {fi,
+            limiter_type,
+            true,
+            correct_skewness,
+            correct_skewness,
+            fi->neighborPtr()->subdomain_id()};
 }

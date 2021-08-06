@@ -16,6 +16,20 @@ velocity_interp_method='rc'
   []
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = PINSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+    porosity = porosity
+  []
+[]
+
 [Variables]
   inactive = 'lambda'
   [u]
@@ -51,11 +65,8 @@ velocity_interp_method='rc'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
   []
@@ -63,22 +74,20 @@ velocity_interp_method='rc'
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
@@ -100,22 +109,20 @@ velocity_interp_method='rc'
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
     mu = ${mu}
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
@@ -173,11 +180,13 @@ velocity_interp_method='rc'
     type = INSFVNaturalFreeSlipBC
     boundary = 'top'
     variable = u
+    momentum_component = 'x'
   []
   [free-slip-v]
     type = INSFVNaturalFreeSlipBC
     boundary = 'top'
     variable = v
+    momentum_component = 'y'
   []
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
@@ -187,7 +196,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     momentum_component = 'x'
-    porosity = porosity
   []
   [symmetry-v]
     type = PINSFVSymmetryVelocityBC
@@ -197,7 +205,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     momentum_component = 'y'
-    porosity = porosity
   []
   [symmetry-p]
     type = INSFVSymmetryPressureBC

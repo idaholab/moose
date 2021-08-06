@@ -9,6 +9,8 @@
 
 #include "Function.h"
 
+using namespace Moose;
+
 defineLegacyParams(Function);
 
 template <typename T>
@@ -164,17 +166,17 @@ FunctionTempl<T>::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
 
 template <typename T>
 typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const Elem * const & elem, const unsigned int state) const
+FunctionTempl<T>::evaluate(const ElemArg & elem_arg, const unsigned int state) const
 {
-  return value(getTime(state), elem->vertex_average());
+  return value(getTime(state), elem_arg.elem->vertex_average());
 }
 
 template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
-  const auto * const elem = std::get<0>(elem_from_face);
-  const auto * const fi = std::get<1>(elem_from_face);
+  const auto * const elem = elem_from_face.elem;
+  const auto * const fi = elem_from_face.fi;
   mooseAssert(fi, "We must have a non-null face information pointer");
   return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
 }
@@ -183,13 +185,13 @@ template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
 {
-  return value(getTime(state), std::get<0>(face)->faceCentroid());
+  return value(getTime(state), face.fi->faceCentroid());
 }
 template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const SingleSidedFaceArg & face, const unsigned int state) const
 {
-  return value(getTime(state), std::get<0>(face)->faceCentroid());
+  return value(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
@@ -216,9 +218,9 @@ FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned in
 
 template <typename T>
 typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const Elem * const & elem, const unsigned int state) const
+FunctionTempl<T>::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
 {
-  return gradient(getTime(state), elem->vertex_average());
+  return gradient(getTime(state), elem_arg.elem->vertex_average());
 }
 
 template <typename T>
@@ -226,8 +228,8 @@ typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                    const unsigned int state) const
 {
-  const auto * const elem = std::get<0>(elem_from_face);
-  const auto * const fi = std::get<1>(elem_from_face);
+  const auto * const elem = elem_from_face.elem;
+  const auto * const fi = elem_from_face.fi;
   mooseAssert(fi, "We must have a non-null face information pointer");
   return gradient(getTime(state),
                   (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
@@ -237,14 +239,14 @@ template <typename T>
 typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const FaceArg & face, const unsigned int state) const
 {
-  return gradient(getTime(state), std::get<0>(face)->faceCentroid());
+  return gradient(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
 typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const SingleSidedFaceArg & face, const unsigned int state) const
 {
-  return gradient(getTime(state), std::get<0>(face)->faceCentroid());
+  return gradient(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
@@ -272,9 +274,9 @@ FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
 
 template <typename T>
 typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const Elem * const & elem, const unsigned int state) const
+FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
 {
-  return timeDerivative(getTime(state), elem->vertex_average());
+  return timeDerivative(getTime(state), elem_arg.elem->vertex_average());
 }
 
 template <typename T>
@@ -282,8 +284,8 @@ typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const ElemFromFaceArg & elem_from_face,
                               const unsigned int state) const
 {
-  const auto * const elem = std::get<0>(elem_from_face);
-  const auto * const fi = std::get<1>(elem_from_face);
+  const auto * const elem = elem_from_face.elem;
+  const auto * const fi = elem_from_face.fi;
   mooseAssert(fi, "We must have a non-null face information pointer");
   return timeDerivative(getTime(state),
                         (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
@@ -293,14 +295,14 @@ template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
 {
-  return timeDerivative(getTime(state), std::get<0>(face)->faceCentroid());
+  return timeDerivative(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const SingleSidedFaceArg & face, const unsigned int state) const
 {
-  return timeDerivative(getTime(state), std::get<0>(face)->faceCentroid());
+  return timeDerivative(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
@@ -331,7 +333,7 @@ FunctionTempl<T>::timestepSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  Moose::Functor<T>::timestepSetup();
+  FunctorBase<T>::timestepSetup();
 }
 
 template <typename T>
@@ -340,7 +342,7 @@ FunctionTempl<T>::residualSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  Moose::Functor<T>::residualSetup();
+  FunctorBase<T>::residualSetup();
 }
 
 template <typename T>
@@ -349,7 +351,7 @@ FunctionTempl<T>::jacobianSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  Moose::Functor<T>::jacobianSetup();
+  FunctorBase<T>::jacobianSetup();
 }
 
 template class FunctionTempl<Real>;

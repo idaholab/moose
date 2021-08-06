@@ -16,6 +16,7 @@
     csvdiff = 'point_value_sampler_fv_out_point_sample_0001.csv'
 
     requirement = 'The system shall support the ability to sample field FV variables at user specified points.'
+    ad_indexing_type = 'global'
   []
 
   [error]
@@ -36,6 +37,7 @@
       cli_args = "VectorPostprocessors/point_sample/points='0.1 0.05 0' VectorPostprocessors/point_sample/warn_discontinuous_face_values=true"
       allow_warnings = true
       detail = 'on element faces and'
+      ad_indexing_type = 'global'
     []
     [at_node]
       type = 'RunApp'
@@ -44,6 +46,7 @@
       cli_args = "VectorPostprocessors/point_sample/points='0.1 0.1 0' VectorPostprocessors/point_sample/warn_discontinuous_face_values=true"
       allow_warnings = true
       detail = 'on element nodes.'
+      ad_indexing_type = 'global'
     []
   []
 
@@ -56,6 +59,7 @@
       csvdiff = 'sampler_discontinuous_on_face_point_sample_0001.csv'
       cli_args = "VectorPostprocessors/point_sample/points='0.1 0.05 0' Outputs/file_base=sampler_discontinuous_on_face"
       detail = 'on element faces and'
+      ad_indexing_type = 'global'
     []
     [at_node]
       type = 'CSVDiff'
@@ -63,6 +67,7 @@
       csvdiff = 'sampler_discontinuous_at_node_point_sample_0001.csv'
       cli_args = "VectorPostprocessors/point_sample/points='0.1 0.1 0'  Outputs/file_base=sampler_discontinuous_at_node"
       detail = 'on element nodes.'
+      ad_indexing_type = 'global'
     []
     [at_node_no_renumbering]
       type = 'CSVDiff'
@@ -70,6 +75,7 @@
       csvdiff = 'sampler_discontinuous_no_renumbering_point_sample_0001.csv'
       cli_args = "Mesh/allow_renumbering=false VectorPostprocessors/point_sample/points='0.1 0.1 0'  Outputs/file_base=sampler_discontinuous_no_renumbering"
       detail = 'whether elements are renumbered or not and'
+      ad_indexing_type = 'global'
     []
     [on_domain_boundary]
       type = 'CSVDiff'
@@ -79,6 +85,7 @@
       detail = 'on process domain boundaries.'
       min_parallel = 2
       max_parallel = 2
+      ad_indexing_type = 'global'
     []
   []
 []

@@ -10,6 +10,7 @@
     ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
+    threading = 'tbb openmp'
   []
   [turbulence]
     type = 'Exodiff'
@@ -23,5 +24,47 @@
     abs_zero = 1e-9
     recover = false # see #19126
     valgrind = HEAVY
+    min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
+    		     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
+		     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
+		     # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
+		     # That means we need one layer of neighbor cell gradients, which in turn means we need
+		     # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
+		     # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
+		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
+		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
+		     # debugging assertions (which I'm fixing)
+    threading = 'tbb openmp'
+  []
+  [transient-jac]
+    type = 'PetscJacobianTester'
+    input = 2d-transient.i
+    run_sim = True
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and show a perfect Jacobian.'
+    ad_indexing_type = 'global'
+    difference_tol = 1e-7
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
+    threading = 'tbb openmp'
+  []
+  [turbulence-jac]
+    type = 'PetscJacobianTester'
+    input = 2d-transient.i
+    run_sim = True
+    ad_indexing_type = 'global'
+    difference_tol = 1e-7
+    threading = 'tbb openmp'
+    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model and show a perfect Jacobian.'
+    mesh_mode = REPLICATED
+    min_ad_size = 53 # You can draw out the stencil. For Rhie-Chow we interpolate element 'a' coefficients
+    		     # to a face. Each element 'a' coefficient will be dependent on face computations of rho
+		     # and the eddy viscosity. For rho that means we need one layer of neighbor dofs from
+		     # pressure and temperature. For the eddy viscosity we require face gradient of velocity.
+		     # That means we need one layer of neighbor cell gradients, which in turn means we need
+		     # *two* layers of neighbor dofs from velocity. When you calculate it all out, you see
+		     # that we require 52 entries in our sparsity pattern for a face 'a' coefficient (which
+		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
+		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
+		     # debugging assertions (which I'm fixing)
   []
 []

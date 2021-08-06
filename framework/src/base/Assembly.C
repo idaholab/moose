@@ -19,6 +19,7 @@
 #include "MooseVariableScalar.h"
 #include "XFEMInterface.h"
 #include "DisplacedSystem.h"
+#include "MooseMeshUtils.h"
 
 // libMesh
 #include "libmesh/coupling_matrix.h"
@@ -39,30 +40,29 @@ coordTransformFactor(const SubProblem & s,
                      const SubdomainID sub_id,
                      const P & point,
                      C & factor,
+                     const SubdomainID neighbor_sub_id)
+{
+  coordTransformFactor(s.mesh(), sub_id, point, factor, neighbor_sub_id);
+}
+
+template <typename P, typename C>
+void
+coordTransformFactor(const MooseMesh & mesh,
+                     const SubdomainID sub_id,
+                     const P & point,
+                     C & factor,
                      const SubdomainID libmesh_dbg_var(neighbor_sub_id))
 {
   mooseAssert(neighbor_sub_id != libMesh::Elem::invalid_subdomain_id
-                  ? s.getCoordSystem(sub_id) == s.getCoordSystem(neighbor_sub_id)
+                  ? mesh.getCoordSystem(sub_id) == mesh.getCoordSystem(neighbor_sub_id)
                   : true,
               "Coordinate systems must be the same between element and neighbor");
-
-  switch (s.getCoordSystem(sub_id))
-  {
-    case Moose::COORD_XYZ:
-      factor = 1.0;
-      break;
-    case Moose::COORD_RZ:
-    {
-      unsigned int rz_radial_coord = s.getAxisymmetricRadialCoord();
-      factor = 2 * M_PI * point(rz_radial_coord);
-      break;
-    }
-    case Moose::COORD_RSPHERICAL:
-      factor = 4 * M_PI * point(0) * point(0);
-      break;
-    default:
-      mooseError("Unknown coordinate system");
-  }
+  const auto coord_type = mesh.getCoordSystem(sub_id);
+  MooseMeshUtils::coordTransformFactor(
+      point,
+      factor,
+      coord_type,
+      coord_type == Moose::COORD_RZ ? mesh.getAxisymmetricRadialCoord() : libMesh::invalid_uint);
 }
 
 Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
@@ -3433,6 +3433,27 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
     cacheResidual(dof, value, tag);
 }
 
+// swapped argument order from above methods to be consistent with argument order for
+// Assembly::processDerivatives
+void
+Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagID> & tags)
+{
+  const Real scalar =
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+      _scaling_vector ? (*_scaling_vector)(dof) :
+#endif
+                      1.;
+  value *= scalar;
+
+  for (const auto tag_id : tags)
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(tag_id);
+
+    _cached_residual_values[tag._type_id].push_back(value);
+    _cached_residual_rows[tag._type_id].push_back(dof);
+  }
+}
+
 void
 Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
 {
@@ -4762,6 +4783,16 @@ template void coordTransformFactor<Point, Real>(const SubProblem & s,
                                                 Real & factor,
                                                 SubdomainID neighbor_sub_id);
 template void coordTransformFactor<ADPoint, ADReal>(const SubProblem & s,
+                                                    SubdomainID sub_id,
+                                                    const ADPoint & point,
+                                                    ADReal & factor,
+                                                    SubdomainID neighbor_sub_id);
+template void coordTransformFactor<Point, Real>(const MooseMesh & mesh,
+                                                SubdomainID sub_id,
+                                                const Point & point,
+                                                Real & factor,
+                                                SubdomainID neighbor_sub_id);
+template void coordTransformFactor<ADPoint, ADReal>(const MooseMesh & mesh,
                                                     SubdomainID sub_id,
                                                     const ADPoint & point,
                                                     ADReal & factor,
