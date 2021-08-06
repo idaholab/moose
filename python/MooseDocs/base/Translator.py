@@ -195,10 +195,17 @@ class Translator(mixins.ConfigObject):
                 return None
 
         elif len(nodes) > 1:
+            # If multiple Directory objects are found and all have the same local path, this should
+            # be fine as they are functionally no different from each other. In any other situation,
+            # however, we need to raise an exception here.
+            if all([isinstance(node, pages.Directory) for node in nodes]) \
+               and [node.local for node in nodes].count(nodes[0].local) == len(nodes):
+                return nodes[0]
             msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
             for node in nodes:
                 msg += '\n  {}'.format(node.local)
             raise exceptions.MooseDocsException(msg)
+
         return nodes[0]
 
     def init(self, nodes=None):

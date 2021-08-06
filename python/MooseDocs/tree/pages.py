@@ -97,6 +97,9 @@ class Text(Page):
 class Directory(Page):
     """
     Directory nodes.
+
+    Warning: Try not to do anything special here and avoid external modification to these objects as
+             this could create problems if there are multiple translators.
     """
     COLOR = 'CYAN'
 
