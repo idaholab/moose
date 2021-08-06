@@ -1,0 +1,7 @@
+[Tests]
+  [./piston]
+    type = RunApp
+    input = 'piston_params.i'
+    check_input = True
+  [../]
+[]
