@@ -59,12 +59,16 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    #Stress divergence kernels
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
+[Modules/TensorMechanics/Master]
+      # parameters that apply to all subblocks are specified at this level. They
+      # can be overwritten in the subblocks.
+      add_variables = true
+      strain = FINITE
+      generate_output = 'vonmises_stress'
+      [./block]
+      block = 1
+      []
+  []
 
 [AuxVariables]
   [./von_mises]
@@ -118,19 +122,13 @@
 []
 
 [Materials]
-  active = 'density_steel stress strain elasticity_tensor_steel'
+  active = 'density_steel stress elasticity_tensor_steel'
   [./elasticity_tensor_steel]
     #Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
-  [./strain]
-    #Computes the strain, assuming small strains
-    type = ComputeFiniteStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     #Computes the stress, using linear elasticity
