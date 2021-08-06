@@ -64,4 +64,18 @@ public:
       ss << ":" << suffix;
     return ss.str();
   }
+
+  /**
+   * Build a name from strings that is safe to use in input files (i.e. can be exposed to users)
+   */
+  std::string genSafeName(const std::string & prefix,
+                          const std::string & middle,
+                          const std::string & suffix = "") const
+  {
+    std::stringstream ss;
+    ss << prefix << "_" << middle;
+    if (!suffix.empty())
+      ss << "_" << suffix;
+    return ss.str();
+  }
 };

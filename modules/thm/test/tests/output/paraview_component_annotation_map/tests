@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = JSONDiff
+    input = 'test.i'
+    jsondiff = 'test_map.json'
+  []
+[]
