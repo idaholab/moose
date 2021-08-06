@@ -1,0 +1,8 @@
+Content:
+    tutorial02_multiapps:
+        root_dir: !include tutorials/tutorial02_multiapps/doc/config.yml Content tutorial02_multiapps root_dir
+        content:
+            - getting_started/examples_and_tutorials/tutorial02_multiapps/**
+
+Renderer: !include tutorials/tutorial02_multiapps/doc/config.yml Renderer
+Extensions: !include tutorials/tutorial02_multiapps/doc/config.yml Extensions

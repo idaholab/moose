@@ -110,5 +110,3 @@ The graphic on the next slide should help...
 Same problem solved again - but now the sub-app is taking smaller timesteps and it sub_cycling.
 
 Everything still works - even in parallel!
-
-!---
