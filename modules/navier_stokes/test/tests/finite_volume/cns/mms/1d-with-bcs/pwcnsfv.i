@@ -125,9 +125,8 @@ cp=${fparse gamma*R_specific/(gamma-1)}
 [FVBCs]
   [mass]
     variable = pressure
-    type = PWCNSFVStrongBC
+    type = PINSFVStrongBC
     boundary = 'left right'
-    T_fluid = T_fluid
     superficial_vel_x = sup_vel_x
     pressure = pressure
     eqn = 'mass'
@@ -135,9 +134,8 @@ cp=${fparse gamma*R_specific/(gamma-1)}
   []
   [momentum]
     variable = sup_vel_x
-    type = PWCNSFVStrongBC
+    type = PINSFVStrongBC
     boundary = 'left right'
-    T_fluid = T_fluid
     superficial_vel_x = sup_vel_x
     pressure = pressure
     eqn = 'momentum'
