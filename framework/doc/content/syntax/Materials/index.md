@@ -205,6 +205,34 @@ e.g. the producer material will execute before the consumer material. If a
 cyclic dependency is detected between two materials, then MOOSE will produce an
 error.
 
+## Functor Material Properties id=functor-props
+
+Functor material properties are properties that are evaluated
+on-the-fly. E.g. they can be viewed as functions of the current location in
+space (and time). Functor material properties provide several overloads of the
+`operator()` method for different "geometric quantities". One example of a
+"geometric quantity" is a `const Elem *`, e.g. for an `FVElementalKernel`, the
+value of a functor material property in a cell-averaged sense can be obtained by
+the syntax
+
+- `_foo(_current_elem)`
+
+where here `_foo` is a functor material property data member of the kernel. The
+functor material property system introduces APIs very similar to the traditional
+material property system for declaring and getting properties. To declare a
+functor property:
+
+- `declareFunctorProperty<TYPE>`
+
+where `TYPE` can be anything such as `Real, ADReal, RealVectorValue, ADRealVectorValue`
+etc. To get a functor material property:
+
+- `getFunctorMaterialProperty<TYPE>`
+
+It's worth noting that whereas the traditional regular material property system
+has different methods to declare/get non-AD and AD properties, the new functor
+system has single APIs for both non-AD and AD property types.
+
 ## Advanced Topics
 
 ### Evaluation of Material Properties on Element Faces
