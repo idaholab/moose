@@ -44,21 +44,6 @@
   []
 [../]
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
 [Modules/TensorMechanics/Master]
       # parameters that apply to all subblocks are specified at this level. They
       # can be overwritten in the subblocks.
