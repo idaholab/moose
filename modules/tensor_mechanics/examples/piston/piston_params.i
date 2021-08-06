@@ -48,7 +48,8 @@
       # parameters that apply to all subblocks are specified at this level. They
       # can be overwritten in the subblocks.
       add_variables = true
-      strain = FINITE
+      incremental = false
+      strain = SMALL
       generate_output = 'vonmises_stress'
       [./block]
       block = 1
@@ -97,7 +98,7 @@
   [../]
   [./stress]
     #Computes the stress, using linear elasticity
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
     block = 1
   [../]
 []
