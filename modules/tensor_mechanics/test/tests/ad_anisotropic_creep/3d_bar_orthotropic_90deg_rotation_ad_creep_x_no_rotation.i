@@ -52,7 +52,6 @@
     type = HillConstants
     # F G H L M N
     hill_constants = "0.25 0.4 0.65 1.5 1.5 1.5"
-    use_large_rotation = true
   []
   [trial_creep]
     type = ADHillCreepStressUpdate
@@ -65,7 +64,6 @@
     relative_tolerance = 1e-18
     # Force it to not use integration error
     max_integration_error = 100.0
-    use_transformation = true
   []
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor

@@ -88,6 +88,7 @@
     csvdiff = ad_aniso_creep_integration_error_out.csv
     requirement = 'Moose shall be capable of enforcing a time step such that the creep rate '
                   'integration error is controled by the user with the aid of a soft terminator.'
+    heavy = true
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
   []
@@ -157,6 +158,20 @@
                   'orientation of Hill parameters even when there is no rigid body rotation. This '
                   'test also serves as a reference to verify the updates to the Hill parameters when '
                   'there is significant rigid body motion'
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-10
+    heavy = true
+  []
+  [3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_no_transformation]
+    type = 'CSVDiff'
+    input = '3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation.i'
+    csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_no_transformation_out.csv
+    cli_args = "Materials/hill_tensor/use_large_rotation=false "
+               "Materials/trial_creep/use_transformation=false "
+               "Outputs/file_base=3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_no_transfo"
+               "rmation_out"
+    requirement = 'Moose shall be capable of not using large deformation rotation to define the '
+                  'orientation of Hill parameters even when there is no rigid body rotation. '
     rel_err = 1.0e-3
     abs_zero = 1.0e-10
     heavy = true

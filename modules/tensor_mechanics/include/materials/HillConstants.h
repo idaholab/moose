@@ -11,6 +11,7 @@
 
 #include "ADMaterial.h"
 #include "Function.h"
+#include "RotationTensor.h"
 
 /**
  * This class defines a Hill tensor material object with a given base name.
@@ -33,7 +34,7 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  /// Flag to determine whether to rotate Hill's coefficients with large strain kinematics
+  /// Flag to determine whether to rotate Hill's tensor with large strain kinematics
   const bool _use_large_rotation;
 
   /// Rotation up to current step "n" to compute Hill tensor
@@ -45,16 +46,17 @@ protected:
   const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
 
   /// Hill constants for orthotropic inelasticity
-  std::vector<Real> _hill_constants_input;
-  std::vector<Real> _hill_constants;
+  const std::vector<Real> _hill_constants_input;
   DenseMatrix<Real> _hill_tensor;
 
-  /// material property for storing hill constants
+  /// Material property for storing hill constants (unrotated)
   MaterialProperty<std::vector<Real>> & _hill_constant_material;
+
+  /// Material property for storing transformed Hill tensor
   MaterialProperty<DenseMatrix<Real>> & _hill_tensor_material;
 
-  /// Angles for transformation of hill tensor
-  RealVectorValue _zyx_angles;
+  /// Euler angles for transformation of hill tensor
+  RealVectorValue _zxz_angles;
 
   /// Transformation matrix
   DenseMatrix<Real> _transformation_tensor;
@@ -74,7 +76,6 @@ protected:
   /// The functions describing the temperature dependence
   std::vector<const Function *> _functions;
 
-private:
-  /// Compute Euler angles in <Z Y X> sequence from strain kinematic rotation matrix
-  std::array<Real, 3> computeZYXAngles(const RankTwoTensor & rotation_matrix);
+  // Initial rigid body rotation of the structural element
+  RotationTensor _rigid_body_rotation_tensor;
 };

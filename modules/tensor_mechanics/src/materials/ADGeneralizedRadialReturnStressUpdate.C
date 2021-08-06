@@ -40,7 +40,7 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
       "Name of the material property that stores the inelastic strain rate");
   params.addParam<bool>(
       "use_transformation",
-      false,
+      true,
       "Whether to employ updated Hill's tensor due to rigid body or large "
       "deformation kinematic rotations. If an initial rigid body rotation is provided by the user "
       "in increments of 90 degrees (e.g. 90, 180, 270), this option can be set to false, in which "
