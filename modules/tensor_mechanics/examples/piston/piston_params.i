@@ -70,25 +70,6 @@
       []
   []
 
-[AuxVariables]
-  [./von_mises]
-    #Dependent variable used to visualize the Von Mises stress
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./von_mises_kernel]
-    #Calculates the von mises stress and assigns it to von_mises
-    type = RankTwoScalarAux
-    variable = von_mises
-    rank_two_tensor = stress
-    execute_on = timestep_end
-    scalar_type = VonMisesStress
-  [../]
-[]
-
 [BCs]
   [./Pressure]
     [./load]
