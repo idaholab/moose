@@ -62,7 +62,6 @@
       #Applies the pressure
       boundary = load_surf
       function = 't*550e5'
-      displacements = 'disp_x disp_y disp_z'
     [../]
   [../]
   [./symmetry_x]
