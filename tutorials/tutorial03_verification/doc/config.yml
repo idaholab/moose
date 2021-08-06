@@ -1,15 +1,16 @@
 Content:
-    tutorial03:
+    tutorial03_verification:
         root_dir: ${MOOSE_DIR}/tutorials/tutorial03_verification/doc/content
     darcy_thermo_mech:
         root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
+        content:
+            - workshop/intro/**
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - contrib/**
             - css/**
             - js/**
-            - bib/**
     modules:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
@@ -21,6 +22,7 @@ Content:
             - tutorials/darcy_thermo_mech/*
             - tutorials/INL_poster_40x30.png
             - python/mms/*
+
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple
@@ -34,7 +36,8 @@ Extensions:
     MooseDocs.extensions.media: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.include: default
-    MooseDocs.extensions.bibtex: default
+    MooseDocs.extensions.bibtex:
+        duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
     MooseDocs.extensions.katex: default
     MooseDocs.extensions.style: default
     MooseDocs.extensions.autolink: default
@@ -48,4 +51,5 @@ Extensions:
     MooseDocs.extensions.listing:
         modal-link: False
     MooseDocs.extensions.reveal:
+        translate: getting_started/examples_and_tutorials/tutorial03_verification/presentation/index.md
         background_image: INL_poster_40x30.png
