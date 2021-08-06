@@ -82,19 +82,12 @@
   [../]
 []
 
-[Functions]
-  [./rampLinear]
-    type = ParsedFunction
-    value = t*550e5
-  []
-[]
-
 [BCs]
   [./Pressure]
     [./load]
       #Applies the pressure
       boundary = load_surf
-      function = rampLinear
+      function = 't*550e5'
       displacements = 'disp_x disp_y disp_z'
     [../]
   [../]
