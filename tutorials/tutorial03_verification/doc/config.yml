@@ -20,7 +20,7 @@ Content:
         content:
             - tutorials/tutorial03_verification/*
             - tutorials/darcy_thermo_mech/*
-            - tutorials/INL_poster_40x30.png
+            - tutorials/INL_Hex_Light_Presentation_Background.jpg
             - python/mms/*
 
 Renderer:
@@ -52,4 +52,4 @@ Extensions:
         modal-link: False
     MooseDocs.extensions.reveal:
         translate: getting_started/examples_and_tutorials/tutorial03_verification/presentation/index.md
-        background_image: INL_poster_40x30.png
+        background_image: INL_Hex_Light_Presentation_Background.jpg

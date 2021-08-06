@@ -6,6 +6,7 @@ Content:
         content:
             - large_media/testing/*
             - large_media/framework/multiapps_positions.png
+            - large_media/tutorials/INL_Hex_Light_Presentation_Background.jpg
             - contrib/**
             - css/**
             - js/**
@@ -43,3 +44,4 @@ Extensions:
         modal-link: False
     MooseDocs.extensions.reveal:
         translate: getting_started/examples_and_tutorials/tutorial02_multiapps/presentation/index.md
+        background_image: INL_Hex_Light_Presentation_Background.jpg

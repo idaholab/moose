@@ -6,6 +6,7 @@ Content:
         content:
             - large_media/tutorials/darcy_thermo_mech/*
             - large_media/testing/*
+            - large_media/tutorials/INL_Hex_Light_Presentation_Background.jpg
             - contrib/**
             - css/**
             - js/**
@@ -53,4 +54,5 @@ Extensions:
         modal-link: False
     MooseDocs.extensions.reveal:
         translate: workshop/index.md
+        background_image: INL_Hex_Light_Presentation_Background.jpg
     MooseDocs.extensions.datetime: default
