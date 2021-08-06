@@ -271,6 +271,7 @@ Eigenvalue::execute()
     TIME_SECTION(_final_timer)
     _eigen_problem.execMultiApps(EXEC_FINAL);
     _eigen_problem.finalizeMultiApps();
+    _eigen_problem.postExecute();
     _eigen_problem.execute(EXEC_FINAL);
     _time = _time_step;
     _eigen_problem.outputStep(EXEC_FINAL);

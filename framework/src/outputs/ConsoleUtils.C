@@ -81,22 +81,49 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     // clang-format on
   }
 
-  oss << std::setw(console_field_width) << "  Nodes:" << '\n'
-      << std::setw(console_field_width) << "    Total:" << mesh.n_nodes() << '\n'
-      << std::setw(console_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
-      << std::setw(console_field_width) << "  Elems:" << '\n'
-      << std::setw(console_field_width) << "    Total:" << mesh.n_active_elem() << '\n'
-      << std::setw(console_field_width) << "    Local:" << mesh.n_active_local_elem() << '\n';
+  if (mesh.n_processors() > 1)
+  {
+    dof_id_type nnodes = mesh.n_nodes();
+    dof_id_type nnodes_local = mesh.n_local_nodes();
+    oss << std::setw(console_field_width) << "  Nodes:" << '\n'
+        << std::setw(console_field_width) << "    Total:" << nnodes << '\n';
+    oss << std::setw(console_field_width) << "    Local:" << nnodes_local << '\n';
+    dof_id_type min_nnodes = nnodes_local, max_nnodes = nnodes_local;
+    mesh.comm().min(min_nnodes);
+    mesh.comm().max(max_nnodes);
+    if (mesh.processor_id() == 0)
+      oss << std::setw(console_field_width) << "    Min/Max/Avg:" << min_nnodes << '/' << max_nnodes
+          << '/' << nnodes / mesh.n_processors() << '\n';
+  }
+  else
+    oss << std::setw(console_field_width) << "  Nodes:" << mesh.n_nodes() << '\n';
+
+  if (mesh.n_processors() > 1)
+  {
+    dof_id_type nelems = mesh.n_active_elem();
+    dof_id_type nelems_local = mesh.n_active_local_elem();
+    oss << std::setw(console_field_width) << "  Elems:" << '\n'
+        << std::setw(console_field_width) << "    Total:" << nelems << '\n';
+    oss << std::setw(console_field_width) << "    Local:" << nelems_local << '\n';
+    dof_id_type min_nelems = nelems_local, max_nelems = nelems_local;
+    mesh.comm().min(min_nelems);
+    mesh.comm().max(max_nelems);
+    if (mesh.processor_id() == 0)
+      oss << std::setw(console_field_width) << "    Min/Max/Avg:" << min_nelems << '/' << max_nelems
+          << '/' << nelems / mesh.n_processors() << '\n';
+  }
+  else
+    oss << std::setw(console_field_width) << "  Elems:" << mesh.n_active_elem() << '\n';
 
   if (verbose)
   {
 
     oss << std::setw(console_field_width)
-        << "  Num Subdomains: " << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-        << std::setw(console_field_width)
-        << "  Num Partitions: " << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
-    if (problem.n_processors() > 1)
-      oss << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
+        << "  Num Subdomains: " << static_cast<std::size_t>(mesh.n_subdomains()) << '\n';
+    if (mesh.n_processors() > 1)
+      oss << std::setw(console_field_width)
+          << "  Num Partitions: " << static_cast<std::size_t>(mesh.n_partitions()) << '\n'
+          << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
           << (moose_mesh.isPartitionerForced() ? " (forced) " : "") << '\n';
   }
 

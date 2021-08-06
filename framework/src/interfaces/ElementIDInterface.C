@@ -27,7 +27,8 @@ ElementIDInterface::validParams()
 
 ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
   : _obj_parameters(moose_object->parameters()),
-    _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh())
+    _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh()),
+    _ei_name(moose_object->name())
 {
 }
 
@@ -59,7 +60,8 @@ ElementIDInterface::getElementIDIndexByName(const std::string & id_name) const
   }
 
   if (!mesh_base.has_elem_integer(id_name))
-    mooseError("Mesh does not have an element integer names as ", id_name);
+    mooseError(
+        "Mesh does not have an element integer names as ", id_name, " but required by ", _ei_name);
 
   auto id = mesh_base.get_elem_integer_index(id_name);
 
