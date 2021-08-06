@@ -5,8 +5,11 @@
 ## can be downloaded freely from Zenodo at:
 ## https://doi.org/10.5281/zenodo.3886965
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
-  displacements = 'disp_x disp_y disp_z' #Define displacements for deformed mesh
   type = FileMesh #Read in mesh from file
   file = piston_coarse.e
 []
