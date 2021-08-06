@@ -115,13 +115,6 @@
     type = ComputeFiniteStrainElasticStress
     block = 1
   [../]
-  [./density_steel]
-    #Defines the density of steel
-    type = GenericConstantMaterial
-    block = 1
-    prop_names = density
-    prop_values = 7850 # kg/m^3
-  [../]
 []
 
 [Preconditioning]
