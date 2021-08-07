@@ -31,7 +31,6 @@ NSFVHeatFluxBC::validParams()
       "parameter values");
 
   params.addCoupledVar(NS::porosity, "porosity");
-
   params.addParam<PostprocessorName>("average_porosity",
                                      "postprocessor that provides domain-averaged proosity");
   params.addParam<PostprocessorName>(
@@ -46,7 +45,6 @@ NSFVHeatFluxBC::validParams()
       "conductivity");
   params.addClassDescription("Constant heat flux boundary condition with phase splitting "
                              "for fluid and solid energy equations");
-
   return params;
 }
 
@@ -56,7 +54,6 @@ NSFVHeatFluxBC::NSFVHeatFluxBC(const InputParameters & parameters)
     _phase(getParam<MooseEnum>("phase").getEnum<NS::phase::PhaseEnum>()),
     _split_type(getParam<MooseEnum>("splitting").getEnum<NS::splitting::SplittingEnum>()),
     _locality(getParam<MooseEnum>("locality").getEnum<NS::settings::LocalityEnum>()),
-
     // quantities needed for global evaluations
     _average_eps(_locality == NS::settings::global &&
                          _split_type != NS::splitting::thermal_conductivity
@@ -77,7 +74,6 @@ NSFVHeatFluxBC::NSFVHeatFluxBC(const InputParameters & parameters)
                            _split_type == NS::splitting::effective_thermal_conductivity
                        ? &getPostprocessorValue("average_kappa")
                        : nullptr),
-
     // quantities needed for local evaluations
     _eps(_locality == NS::settings::local && _split_type != NS::splitting::thermal_conductivity
              ? coupledValue(NS::porosity)
