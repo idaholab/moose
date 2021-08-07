@@ -69,6 +69,11 @@ main {
     vertical-align:bottom;
 }
 
+.moose-tight-inline-icon {
+    font-size:inherit;
+    line-height:inherit;
+}
+
 .tabs .tab a:hover, .tabs .tab a.active {
 	background-color: transparent;
   color: var(--inl-blue);
