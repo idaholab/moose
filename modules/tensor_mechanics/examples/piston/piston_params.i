@@ -16,98 +16,97 @@
 []
 
 # This is where mesh adaptivity magic happens
-[./Adaptivity]
+[Adaptivity]
   steps = 1
   max_h_level = 3
   cycles_per_step = 1
   initial_marker = uniform
   marker = errorFraction
-  [./Markers]
-    [./uniform]
+  [Markers]
+    [uniform]
       type = UniformMarker
       mark = refine
-    [../]
-    
-    [./errorFraction]
+    []
+    [errorFraction]
       type = ErrorFractionMarker
       coarsen = 0.5
       indicator = gradientJump
       refine = 0.5
-    [] 
- [../]
+    []
+  []
 
-  [./Indicators]
-    [./gradientJump]
+  [Indicators]
+    [gradientJump]
       type = GradientJumpIndicator
       variable = disp_y
     []
   []
-[../]
+[]
 
 [Modules/TensorMechanics/Master]
-      # Parameters that apply to all subblocks are specified at this level.
-      # They can be overwritten in the subblocks.
-      add_variables = true
-      incremental = false
-      strain = SMALL
-      generate_output = 'vonmises_stress'
-      [./block]
-      block = 1
-      []
+  # Parameters that apply to all subblocks are specified at this level.
+  # They can be overwritten in the subblocks.
+  add_variables = true
+  incremental = false
+  strain = SMALL
+  generate_output = 'vonmises_stress'
+  [block]
+    block = 1
   []
+[]
 
 [BCs]
-  [./Pressure]
-    [./load]
+  [Pressure]
+    [load]
       # Applies the pressure
       boundary = load_surf
       function = 't*550e5'
-    [../]
-  [../]
-  [./symmetry_x]
+    []
+  []
+  [symmetry_x]
     # Applies symmetry on the xmin faces
     type = DirichletBC
     variable = disp_x
     boundary = 'xmin'
     value = 0.0
-  [../]
-  [./hold_y]
+  []
+  [hold_y]
     # Anchors the bottom against deformation in the y-direction
     type = DirichletBC
     variable = disp_y
     boundary = 'ymin'
     value = 0.0
-  [../]
-  [./symmetry_z]
+  []
+  [symmetry_z]
     # Applies symmetry on the zmin faces
     type = DirichletBC
     variable = disp_z
     boundary = 'zmin'
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_steel]
+  [elasticity_tensor_steel]
     # Creates the elasticity tensor using steel parameters
     youngs_modulus = 210e9 #Pa
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 1
-  [../]
-  [./stress]
+  []
+  [stress]
     # Computes the stress, using linear elasticity
     type = ComputeLinearElasticStress
     block = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     # Creates the entire Jacobian, for the Newton solve
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
