@@ -1,24 +1,24 @@
 [Mesh]
-  second_order = false
+  second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 4
-    ny = 4
-    nz = 4
-    xmin = -0.6
-    xmax = -0.1
-    ymin = 0.25
-    ymax = 0.75
-    zmin = 0.25
-    zmax = 0.75
-    elem_type = TET4
+    nx = 1
+    ny = 2
+    nz = 2
+    xmin = 0
+    xmax = 0.3
+    ymin = 0
+    ymax = .5
+    zmin = 0
+    zmax = .5
+    elem_type = TET10
   [../]
   [./left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
-    old_boundary = '0 1 3 4 5'
-    new_boundary = 'lb_back lb_bottom lb_top lb_left lb_front'
+    old_boundary = '0 1 2 3 4 5'
+    new_boundary = 'lb_bottom lb_back lb_right lb_front lb_left lb_top'
   [../]
   [./left_block_id]
     type = SubdomainIDGenerator
@@ -28,21 +28,21 @@
   [./right_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 5
-    ny = 9
-    nz = 9
-    xmin = 0
-    xmax = 0.5
+    nx = 1
+    ny = 2
+    nz = 2
+    xmin = 0.3
+    xmax = 0.6
     ymin = 0
-    ymax = 1
+    ymax = .5
     zmin = 0
-    zmax = 1
-    elem_type = HEX8
+    zmax = .5
+    elem_type = TET10
   [../]
   [./right_block_id]
     type = SubdomainIDGenerator
     input = right_block
-    subdomain_id = 901
+    subdomain_id = 2
   [../]
   [right_block_change_boundary_id]
     type = RenameBoundaryGenerator
@@ -57,19 +57,12 @@
   [./block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 901'
+    old_block_id = '1 2'
     new_block_name = 'left_block right_block'
   [../]
-  [left_right_sideset]
-    type = SideSetsAroundSubdomainGenerator
-    input = block_rename
-    new_boundary = lb_right
-    block = left_block
-    normal = '1 0 0'
-  []
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator
-    input = left_right_sideset
+    input = block_rename
     new_boundary = rb_right
     block = right_block
     normal = '1 0 0'
@@ -86,42 +79,42 @@
     input = right_left_sideset
     new_boundary = rb_top
     block = right_block
-    normal = '0 1 0'
+    normal = '0 0 1'
   []
   [right_bottom_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_top_sideset
     new_boundary = rb_bottom
     block = right_block
-    normal = '0 -1 0'
+    normal = '0 0 -1'
   []
   [right_front_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_bottom_sideset
     new_boundary = rb_front
     block = right_block
-    normal = '0 0 1'
+    normal = '0 1 0'
   []
   [right_back_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = right_front_sideset
     new_boundary = rb_back
     block = right_block
-    normal = '0 0 -1'
+    normal = '0 -1 0'
   []
   [secondary]
     input = right_back_sideset
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'lb_right'
-    new_block_id = '10001'
-    new_block_name = 'secondary_lower'
+    new_block_id = '12'
+    new_block_name = 'secondary'
   []
   [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'rb_left'
-    new_block_id = '10000'
-    new_block_name = 'primary_lower'
+    new_block_id = '11'
+    new_block_name = 'primary'
   []
 []
 
@@ -131,21 +124,20 @@
 
 [Variables]
   [./T]
-    block = '1 901'
-    order = FIRST
+    block = '1 2'
+    order = SECOND
   [../]
   [./lambda]
-    block = 'secondary_lower'
+    block = 'secondary'
     family = LAGRANGE
-    order = FIRST
-    use_dual = true
+    order = SECOND
   [../]
 []
 
 [BCs]
   [./neumann]
     type = FunctionGradientNeumannBC
-    exact_solution = exact_soln
+    exact_solution = exact_soln_primal
     variable = T
     boundary = 'lb_back lb_front lb_left lb_top lb_bottom rb_right rb_top rb_bottom rb_front rb_back'
   [../]
@@ -155,30 +147,34 @@
   [./conduction]
     type = Diffusion
     variable = T
-    block = '1 901'
+    block = '1 2'
   [../]
   [./sink]
     type = Reaction
     variable = T
-    block = '1 901'
+    block = '1 2'
   [../]
   [./forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
-    block = '1 901'
+    block = '1 2'
   [../]
 []
 
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    value = '-8 + x^2 + y^2 + z^2'
+    value = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
   [../]
-  [./exact_soln]
+  [./exact_soln_primal]
     type = ParsedFunction
-    value = 'x^2 + y^2 + z^2'
+    value = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
   [../]
+  [exact_soln_lambda]
+    type = ParsedFunction
+    value = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
+  []
 []
 
 [Debug]
@@ -190,10 +186,11 @@
     type = EqualValueConstraint
     primary_boundary = 'rb_left'
     secondary_boundary = 'lb_right'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
+    primary_subdomain = '11'
+    secondary_subdomain = '12'
     variable = lambda
     secondary_variable = T
+    delta = .1
   [../]
 []
 
@@ -213,8 +210,25 @@
 
 [Outputs]
   exodus = true
-  [dofmap]
-    type = DOFMap
-    execute_on = 'initial'
+[]
+
+[Postprocessors]
+  [L2lambda]
+    type = ElementL2Error
+    variable = lambda
+    function = exact_soln_lambda
+    execute_on = 'timestep_end'
+    block = 'secondary'
+  []
+  [L2u]
+    type = ElementL2Error
+    variable = T
+    function = exact_soln_primal
+    execute_on = 'timestep_end'
+    block = 'left_block right_block'
+  []
+  [h]
+    type = AverageElementSize
+    block = 'left_block right_block'
   []
 []
