@@ -19,10 +19,12 @@ While first-order, QUAD4 faces are (in general) not linear. The 'twisting' or 'p
 !media media/framework/constraints/Linearized-Quad.jpg
 
 ### Second Order Geometries (TRI6 and QUAD9 faces)
-Elements defined on second order geometries are curvilinear so, to simplify the 'clipping' procedure, both secondary and primary face elements are subdivided into first-order face elements, then subsequently linearized (see below). The same clipping and triangularization routine is then applied on the linearized sub-elements.
+
+Elements defined on second order geometries are curvilinear so, to simplify the 'clipping' procedure, both secondary and primary face elements are subdivided into first-order face elements then subsequently linearized (see below). The same clipping and triangularization routine is then applied on the linearized sub-elements to create the mortar segments.
 
 !media media/framework/constraints/Second-Order-Linearized.jpg
 
+Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements. Additional information on mortar integration is given in ...
 
 !syntax description /Constraints/AutomaticMortarGeneration
 

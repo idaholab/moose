@@ -6,10 +6,10 @@ The mortar system in MOOSE uses a segment-based approach for evaluation of morta
 
 ### Overview
 
-An excellent overview of the conservative mortar constraint implementation in MOOSE is given in
-[!cite](osti_1468630). We have verified that the MOOSE mortar implementation satisfies *a priori*
-error estimates (see discussion and plots on
-[this github issue](https://github.com/idaholab/moose/issues/13080)):
+An excellent overview of the conservative mortar constraint implementation in MOOSE for 2D problems is given in
+[!cite](osti_1468630). We have verified that the MOOSE mortar implementation satisfies the following *a priori*
+error estimates for 2D problems and (see discussion and plots on
+[this github issue](https://github.com/idaholab/moose/issues/13080)) and for 3D problems on *hexahedral* meshes:
 
 | Primal FE Type | Lagrange Multiplier (LM) FE Type | Primal L2 Convergence Rate | LM L2 Convergence Rate |
 | --- | --- | --- | --- |
@@ -17,6 +17,20 @@ error estimates (see discussion and plots on
 | Second order Lagrange | Constant monomial | 3 | 1 |
 | First order Lagrange | First order Lagrange | 2 | 1.5 |
 | First order Lagrange | Constant monomial | 2 | 1.5 |
+
+General meshes in 3D—especially meshes with triangular face elements on the mortar interface—require additional care to ensure convergence.
+Triangular elements on the mortar interface typically exhibit the infamous (and well documented) 'locking' phenomenon; resulting in singular systems that require stabilization or other special treatment.
+
+The above *primal* convergence rates were realized on tetrahedral and mixed meshes using a stabilization with `delta = 0.1` for the `EqualValueConstraint`, under the additional assumption that meshes (both generated and unstructured) are re-generated for each experiment.
+Uniform refinement of tetrahedral meshes were typically observed to result in *divergence* of the Lagrange multiplier and degradation of primal convergence rates.
+Adaptive refinement of meshes with triangular faces on the mortar interface has not been thoroughly studied in MOOSE and should be approached with caution.
+
+Based on these observations the following recommendations are provided for using *3D* mortar in MOOSE:
+
+1. When possible, discretize the secondary side of the mortar interface with QUAD elements (i.e. use HEX elements or carefully oriented PRISM and PYRAMID elements for volume discretization).
+2. When TRI elements are present on the mortar interface, verify the wellposedness of the problem and use stabilization if necessary.
+3. Avoid uniformly refining mesh, instead regenerate meshes when a refined mesh is needed.
+
 
 ### Parameters
 
