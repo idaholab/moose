@@ -27,15 +27,13 @@
 [Variables]
   [./T]
     block = '1 2'
+    family = LAGRANGE
     order = SECOND
   [../]
   [./lambda]
     block = 'secondary'
-    # family = MONOMIAL
-    # order = CONSTANT
     family = LAGRANGE
-    order = SECOND
-    # use_dual = true
+    order = FIRST
   [../]
 []
 
@@ -44,7 +42,7 @@
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln_primal
     variable = T
-    boundary = '1 2 101 102'
+    boundary = '1 2'
   [../]
 []
 
@@ -68,18 +66,18 @@
 []
 
 [Functions]
- [./forcing_function]
- type = ParsedFunction
- value = 'x^2 + y^2 + z^2-6'
- [../]
- [./exact_soln_primal]
- type = ParsedFunction
- value = 'x^2 + y^2 + z^2'
- [../]
- [exact_soln_lambda]
- type = ParsedFunction
- value = '4'
- []
+  [./forcing_function]
+    type = ParsedFunction
+    value = 'x^2 + y^2 + z^2 - 6'
+  [../]
+  [./exact_soln_primal]
+    type = ParsedFunction
+    value = 'x^2 + y^2 + z^2'
+  [../]
+  [exact_soln_lambda]
+    type = ParsedFunction
+    value = '4'
+  []
 []
 
 [Debug]
@@ -95,7 +93,6 @@
     secondary_subdomain = '11'
     variable = lambda
     secondary_variable = T
-    delta = .1
   [../]
 []
 
@@ -114,15 +111,7 @@
 []
 
 [Outputs]
- [dofmap]
-   type = DOFMap
-   execute_on = 'initial'
- []
- [oversample]
-    type = Exodus
-    refinements = 1
- []
- exodus = true
+  exodus = true
 []
 
 [Postprocessors]

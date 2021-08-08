@@ -1,8 +1,8 @@
 [Mesh]
-  second_order = true
+  second_order = false
   [./file]
     type = FileMeshGenerator
-    file = hex_mesh.e
+    file = spheres_hex8.e
   [../]
   [./secondary]
     input = file
@@ -27,15 +27,9 @@
 [Variables]
   [./T]
     block = '1 2'
-    order = SECOND
   [../]
   [./lambda]
     block = 'secondary'
-    # family = MONOMIAL
-    # order = CONSTANT
-    family = LAGRANGE
-    order = SECOND
-    use_dual = true
   [../]
 []
 
@@ -70,15 +64,15 @@
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    value = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    value = 'x^2 + y^2 + z^2 - 6'
   [../]
   [./exact_soln_primal]
     type = ParsedFunction
-    value = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    value = 'x^2 + y^2 + z^2'
   [../]
   [exact_soln_lambda]
     type = ParsedFunction
-    value = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
+    value = '4'
   []
 []
 
@@ -95,7 +89,6 @@
     secondary_subdomain = '11'
     variable = lambda
     secondary_variable = T
-    # delta = 0.1
   [../]
 []
 
@@ -115,7 +108,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Postprocessors]
