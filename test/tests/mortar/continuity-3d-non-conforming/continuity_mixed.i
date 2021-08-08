@@ -1,8 +1,8 @@
 [Mesh]
-  second_order = true
+  second_order = false
   [./file]
     type = FileMeshGenerator
-    file = hex_mesh.e
+    file = mixed_mesh.e
   [../]
   [./secondary]
     input = file
@@ -27,15 +27,9 @@
 [Variables]
   [./T]
     block = '1 2'
-    order = SECOND
   [../]
   [./lambda]
     block = 'secondary'
-    # family = MONOMIAL
-    # order = CONSTANT
-    family = LAGRANGE
-    order = SECOND
-    use_dual = true
   [../]
 []
 
@@ -95,7 +89,7 @@
     secondary_subdomain = '11'
     variable = lambda
     secondary_variable = T
-    # delta = 0.1
+    delta = 0.1
   [../]
 []
 
@@ -115,7 +109,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Postprocessors]

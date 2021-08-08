@@ -58,8 +58,8 @@
     secondary_variable = u
     primary_boundary = top
     secondary_boundary = bottom
-    primary_subdomain = '12'
-    secondary_subdomain = '11'
+    primary_subdomain = 12
+    secondary_subdomain = 11
 
     periodic = true
   []

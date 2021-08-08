@@ -19,18 +19,30 @@ class TestContinuity(unittest.TestCase):
             'Functions/exact_soln_primal/value="' + mms.fparser(exact) + '"',
             'Functions/exact_soln_lambda/value="' + mms.fparser(lm) + '"']
         self.gold_values = {
-            'p1p0-u_0' : 1.9377283124612794,
-            'p1p0-lm_0' : 1.077753324242711,
-            'p1p0-u_0.4' : 1.9333420708370546,
-            'p1p0-lm_0.4' : 1.0119801248538074,
-            'p1p1-u_0' : 1.9863327490325773,
-            'p1p1-lm_0' : 1.9981889938191515,
-            'p1p1-u_0.4' : 1.9700137771303148,
-            'p1p1-lm_0.4' : 1.6806101907253725,
-            'p1p1dual-u_0' : 1.9917618834617183,
-            'p1p1dual-lm_0' : 1.5211652338088115,
-            'p1p1dual-u_0.4' : 1.9725965200427749,
-            'p1p1dual-lm_0.4' : 1.5755342813487287
+            'p1p0_hex-u_0.1' : 1.9305390060119176,
+            'p1p0_hex-lm_0.1' : 1.0272242755193284,
+            'p1p0_hex_non-u_0.1' : 2.0694003778178534,
+            'p1p0_hex_non-lm_0.1' : 1.0719372819043176,
+            'p1p1_hex-u_0.1' : 1.90978686865625,
+            'p1p1_hex-lm_0.1' : 3.0413581999654924,
+            'p1p1_hex_non-u_0.1' : 1.9421386178496052,
+            'p1p1_hex_non-lm_0.1' : 2.001745263935625,
+            'p1p1dual_hex-u_0.1' : 1.8956170085743176,
+            'p1p1dual_hex-lm_0.1' : 1.4802316459242533,
+            'p1p1dual_hex_non-u_0.1' : 1.9009463364413586,
+            'p1p1dual_hex_non-lm_0.1' : 1.4766123810566583,
+            'p2p0_hex-u_0.1' : 3.044201176042964,
+            'p2p0_hex-lm_0.1' : 1.019296943618726,
+            'p2p0_hex_non-u_0.1' : 2.9750765225049074,
+            'p2p0_hex_non-lm_0.1' : 1.019447305041749,
+            'p2p1_hex-u_0.1' : 2.9717861674588906,
+            'p2p1_hex-lm_0.1' : 2.032637929038658,
+            'p2p1_hex_non-u_0.1' : 2.9413624940907344,
+            'p2p1_hex_non-lm_0.1' : 2.0321190357379546,
+            'p2p2_hex-u_0.1' : 2.939071712671479,
+            'p2p2_hex-lm_0.1' : 3.0514171179331036,
+            'p2p2_hex_non-u_0.1' : 2.90086020890949,
+            'p2p2_hex_non-lm_0.1' : 2.130510552719881
         }
 
         self.tolerance = 1e-3
@@ -48,21 +60,20 @@ class TestContinuity(unittest.TestCase):
                     slope_precision=1,
                     marker='o')
     def secondary_and_primary_plots(self,
-                               fine,
                                num_refinements,
                                additional_cli_args,
                                name,
                                plots_to_do=None,
                                mpi=1):
         fig = mms.ConvergencePlot('Element Size ($h$)', ylabel='$L_2$ Error')
-        second_order = False
+        has_tets = True
         for cli_arg in additional_cli_args:
-            if "SECOND" in cli_arg:
-                second_order = True
-        if second_order:
-            deltas = [0, 0.1]
+            if "hex" in cli_arg:
+                has_tets = False
+        if has_tets:
+            deltas = [0.1]
         else:
-            deltas = [0, 0.4]
+            deltas = [0.1]
         for delta in deltas:
             self.do_plot('continuity.i',
                          num_refinements,
@@ -73,41 +84,51 @@ class TestContinuity(unittest.TestCase):
         fig.set_title(name)
         fig.save(name+'.png')
         return fig
-    def run_geometric_discretization(self, geom_disc, fine_values, num_refinements, mpi=1):
+    def run_geometric_discretization(self, geom_disc, elem_types, num_refinements, mpi=1):
         if geom_disc == "p1p0":
             cli_args = ["Variables/T/order=FIRST",
                         "Variables/lambda/family=MONOMIAL",
                         "Variables/lambda/order=CONSTANT",
                         "Variables/lambda/use_dual=false",
-                        "Mesh/left_block/elem_type=HEX8",
-                        "Mesh/right_block/elem_type=HEX8"]
+                        "Mesh/file/place_holder"]
         elif geom_disc == "p1p1":
             cli_args = ["Variables/T/order=FIRST",
                         "Variables/lambda/family=LAGRANGE",
                         "Variables/lambda/order=FIRST",
                         "Variables/lambda/use_dual=false",
-                        "Mesh/left_block/elem_type=HEX8",
-                        "Mesh/right_block/elem_type=HEX8"]
+                        "Mesh/file/place_holder"]
         elif geom_disc == "p1p1dual":
             cli_args = ["Variables/T/order=FIRST",
                         "Variables/lambda/family=LAGRANGE",
                         "Variables/lambda/order=FIRST",
                         "Variables/lambda/use_dual=true",
-                        "Mesh/left_block/elem_type=HEX8",
-                        "Mesh/right_block/elem_type=HEX8"]
+                        "Mesh/file/place_holder"]
+        elif geom_disc == "p2p0":
+            cli_args = ["Mesh/second_order=true",
+                        "Variables/T/order=SECOND",
+                        "Variables/lambda/family=MONOMIAL",
+                        "Variables/lambda/order=CONSTANT",
+                        "Variables/lambda/use_dual=false",
+                        "Mesh/file/place_holder"]
         elif geom_disc == "p2p1":
             cli_args = ["Mesh/second_order=true",
                         "Variables/T/order=SECOND",
                         "Variables/lambda/family=LAGRANGE",
                         "Variables/lambda/order=FIRST",
                         "Variables/lambda/use_dual=false",
-                        "Mesh/left_block/elem_type=HEX8",
-                        "Mesh/right_block/elem_type=HEX8"]
+                        "Mesh/file/place_holder"]
+        elif geom_disc == "p2p2":
+            cli_args = ["Mesh/second_order=true",
+                        "Variables/T/order=SECOND",
+                        "Variables/lambda/family=LAGRANGE",
+                        "Variables/lambda/order=SECOND",
+                        "Variables/lambda/use_dual=false",
+                        "Mesh/file/place_holder"]
         name_to_slope = {}
-        for fine_value in fine_values:
-            name = geom_disc
-            fig = self.secondary_and_primary_plots(fine_value,
-                                              num_refinements,
+        for elem_type in elem_types:
+            name = geom_disc + "_" + elem_type
+            cli_args[-1] = "Mesh/file/file=" + elem_type + "_mesh.e"
+            fig = self.secondary_and_primary_plots(num_refinements,
                                               cli_args,
                                               name,
                                               mpi=mpi)
@@ -118,37 +139,34 @@ class TestContinuity(unittest.TestCase):
             gold_value = self.gold_values.get(key)
             self.assertIsNotNone(gold_value)
             self.assertTrue(fuzzyEqual(test_value, gold_value, self.tolerance))
-    def do_it_all(self, fine_values, num_refinements, mpi=1):
-         self.run_geometric_discretization("p1p0", fine_values, num_refinements, mpi)
-         self.run_geometric_discretization("p1p1", fine_values, num_refinements, mpi)
-         self.run_geometric_discretization("p1p1dual", fine_values, num_refinements, mpi)
-         self.run_geometric_discretization("p2p1", fine_values, num_refinements, mpi)
+    def do_it_all(self, elem_types, num_refinements, mpi=1):
+         self.run_geometric_discretization("p1p0", elem_types, num_refinements, mpi)
+         self.run_geometric_discretization("p1p1", elem_types, num_refinements, mpi)
+         self.run_geometric_discretization("p1p1dual", elem_types, num_refinements, mpi)
+         self.run_geometric_discretization("p2p0", elem_types, num_refinements, mpi)
+         self.run_geometric_discretization("p2p1", elem_types, num_refinements, mpi)
+         self.run_geometric_discretization("p2p2", elem_types, num_refinements, mpi)
          for key, test_value in self.gold_values.items():
              print("{} : {}".format(key, test_value))
 
 class P1P0(TestContinuity):
-    def testP1P0(self, fine_values=[2], num_refinements=4, mpi=1):
-        self.run_geometric_discretization("p1p0", fine_values, num_refinements, mpi)
+    def testP1P0(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p1p0", elem_types, num_refinements, mpi)
 class P1P1(TestContinuity):
-    def testP1P1(self, fine_values=[2], num_refinements=4, mpi=1):
-        self.run_geometric_discretization("p1p1", fine_values, num_refinements, mpi)
+    def testP1P1(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p1p1", elem_types, num_refinements, mpi)
 class P1P1dual(TestContinuity):
-    def testP1P1(self, fine_values=[2], num_refinements=4, mpi=1):
-        self.run_geometric_discretization("p1p1dual", fine_values, num_refinements, mpi)
+    def testP1P1(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p1p1dual", elem_types, num_refinements, mpi)
+class P2P0(TestContinuity):
+    def testP2P0(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p2p0", elem_types, num_refinements, mpi)
 class P2P1(TestContinuity):
-    def testP2P1(self, fine_values=[2], num_refinements=4, mpi=0):
-        self.run_geometric_discretization("p2p1", fine_values, num_refinements, mpi)
+    def testP2P1(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p2p1", elem_types, num_refinements, mpi)
+class P2P2(TestContinuity):
+    def testP2P2(self, elem_types=["hex", "hex_non"], num_refinements=3, mpi=1):
+        self.run_geometric_discretization("p2p2", elem_types, num_refinements, mpi)
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
-# instance = TestContinuity()
-# instance.do_it_all([3], 8, 32)
-# # instance.secondary_and_primary_plots(2,
-# #                                 8,
-# #                                 "Mesh/second_order=false " + \
-# #                                 "Variables/T/order=FIRST " + \
-# #                                 "Variables/lambda/family=MONOMIAL " + \
-# #                                 "Variables/lambda/order=CONSTANT",
-# #                                 "p1p0-asymptotic-same",
-# #                                 ['same'],
-# #                                 32)
