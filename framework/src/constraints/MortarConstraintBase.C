@@ -12,6 +12,8 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 
+#include "libmesh/string_to_enum.h"
+
 defineLegacyParams(MortarConstraintBase);
 
 InputParameters
@@ -74,6 +76,12 @@ MortarConstraintBase::validParams()
       "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
       "used, and then the _normals member should be indexed with _i instead of _qp");
+  params.addParam<MooseEnum>("quadrature", MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
+      "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended. "
+      "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
+      "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
+      "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
+      "quadrature for SECOND order variables.");
   return params;
 }
 
@@ -122,6 +130,17 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
+  // Note parameter is space order, we then convert to quadrature order
+  const MooseEnum p_order = getParam<MooseEnum>("quadrature");
+  // If quadrature not DEFAULT, set mortar qrule
+  if (p_order != "DEFAULT")
+  {
+    if (_var->useDual())
+      mooseError("Using custom mortar quadrature order not supported with dual shape functions");
+
+    Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
+    _assembly.setMortarQRule(q_order);
+  }
 }
 
 void
