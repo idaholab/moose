@@ -89,19 +89,6 @@ ComputeMortarFunctor::operator()()
     // original mesh.
     const Elem * msm_elem = *el;
 
-    // We may eventually allow zero-length segments in the
-    // MSM. They are OK connectivity-wise, and they don't
-    // contribute to the mortar segment integrals, but we don't
-    // want to do reinit() on them or there will be a negative
-    // Jacobian error.
-    // NOTE: calling volume is fine here because elem_volume is only
-    // used to check if it is very, very small. Distinction between
-    // coordinates systems do not matter.
-    Real elem_volume = msm_elem->volume();
-
-    if (elem_volume < TOLERANCE)
-      continue;
-
     // Get a reference to the MortarSegmentInfo for this Elem.
     const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
@@ -121,6 +108,24 @@ ComputeMortarFunctor::operator()()
     // The lower-dimensional secondary side element associated with this
     // mortar segment is simply msinfo.secondary_elem.
     const Elem * secondary_face_elem = msinfo.secondary_elem;
+
+    // We may eventually allow zero-length segments in the
+    // MSM. They are OK connectivity-wise, and they don't
+    // contribute to the mortar segment integrals, but we don't
+    // want to do reinit() on them or there will be a negative
+    // Jacobian error.
+    // NOTE: calling volume is fine here because elem_volume is only
+    // used to check if it is very, very small. Distinction between
+    // coordinates systems do not matter.
+    Real elem_volume = msm_elem->volume();
+
+    // Get secondary face elem volume to non-dimensionalize Tolerance
+    Real secondary_volume = secondary_face_elem->volume();
+
+    // TODO: make 1e-8 a tolerance, other tolerance was too small for
+    // non-dimensionalized tolerancing
+    if (elem_volume/secondary_volume < 1e-8)
+      continue;
 
     // These only get initialized if there is a primary Elem associated to this segment.
     const Elem * primary_ip = libmesh_nullptr;
@@ -425,7 +430,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
                            u(2) * normal(0) - u(0) * normal(2),
                            u(0) * normal(1) - u(1) * normal(0));
 
-      if (F.norm() < 1e-12)
+      if (MetaPhysicL::raw_value(F).norm() < 1e-12)
         break;
 
       RealEigenMatrix J(3, 2);

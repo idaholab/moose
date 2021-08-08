@@ -145,6 +145,8 @@ public:
   // TODO: function info
   void buildMortarSegmentMesh3d();
 
+  void msmStatistics();
+
   /**
    * Clears the mortar segment mesh and accompanying data structures
    */
