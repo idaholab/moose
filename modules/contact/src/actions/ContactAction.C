@@ -472,6 +472,9 @@ ContactAction::addMortarContact()
 
         if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
+          params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+
         params.set<bool>("use_displaced_mesh") = true;
 
         _problem->addConstraint("ComputeWeightedGapLMMechanicalContact",
@@ -522,6 +525,8 @@ ContactAction::addMortarContact()
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
         if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
+          params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("friction_lm") = {
@@ -572,6 +577,8 @@ ContactAction::addMortarContact()
         params.set<VariableName>("secondary_variable") = displacements[0];
         if (ndisp > 1)
           params.set<NonlinearVariableName>("secondary_disp_y") = displacements[1];
+        if (ndisp > 2)
+          params.set<NonlinearVariableName>("secondary_disp_z") = displacements[2];
         // secondary_disp_z is not implemented for tangential (yet).
 
         _problem->addConstraint(

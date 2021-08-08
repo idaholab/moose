@@ -22,6 +22,10 @@ NormalMortarLMMechanicalContact::validParams()
                                          "The y displacement variable on the secondary face");
   params.addParam<NonlinearVariableName>("primary_disp_y",
                                          "The y displacement variable on the primary face");
+  params.addParam<NonlinearVariableName>("secondary_disp_z",
+                                         "The z displacement variable on the secondary face");
+  params.addParam<NonlinearVariableName>("primary_disp_z",
+                                         "The z displacement variable on the primary face");
   MooseEnum ncp_type("min fb", "min");
   params.addParam<MooseEnum>("ncp_function_type",
                              ncp_type,
@@ -42,6 +46,17 @@ NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputPara
                         : isParamValid("secondary_disp_y")
                               ? &this->_subproblem.getStandardVariable(
                                     _tid, parameters.getMooseType("secondary_disp_y"))
+                              : nullptr),
+    _secondary_disp_z(isParamValid("secondary_disp_z")
+                          ? &this->_subproblem.getStandardVariable(
+                                _tid, parameters.getMooseType("secondary_disp_z"))
+                          : nullptr),
+    _primary_disp_z(isParamValid("primary_disp_z")
+                        ? &this->_subproblem.getStandardVariable(
+                              _tid, parameters.getMooseType("primary_disp_z"))
+                        : isParamValid("secondary_disp_z")
+                              ? &this->_subproblem.getStandardVariable(
+                                    _tid, parameters.getMooseType("secondary_disp_z"))
                               : nullptr),
     _computing_gap_dependence(false),
     _secondary_disp_y_sln(nullptr),
@@ -79,6 +94,8 @@ NormalMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type
               _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
           gap_vec(1).derivatives() = (*_primary_disp_y_sln)[_qp].derivatives() -
                                      (*_secondary_disp_y_sln)[_qp].derivatives();
+          gap_vec(2).derivatives() = (*_primary_disp_z_sln)[_qp].derivatives() -
+                                     (*_secondary_disp_z_sln)[_qp].derivatives();
         }
 
         auto gap = gap_vec * _normals[_qp];
