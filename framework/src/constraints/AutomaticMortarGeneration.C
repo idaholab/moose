@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
+#include "FormattedTable.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/explicit_system.h"
@@ -31,6 +32,7 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/enum_to_string.h"
+#include "libmesh/statistics.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -758,7 +760,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           normal += nodal_normals[n];
         }
         center /= secondary_side_elem->n_vertices();
-        normal /= secondary_side_elem->n_vertices();
+        normal.unit();
 
         // Build and store linearized sub-elements for later use
         mortar_segment_helper[sel] = new MortarSegmentHelper(nodes, center, normal);
@@ -850,7 +852,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         std::vector<Point> nodal_points;
 
         // Initialize map from mortar segmenet elements to nodes
-        std::vector<std::array<unsigned int, 3>> elem_to_node_map;
+        std::vector< std::vector<unsigned int> > elem_to_node_map;
 
         // Initialize list of secondary and primary sub-elements that formed each mortar segment
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
@@ -937,14 +939,19 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           {
             // Create new triangular element
             Elem * new_elem;
-            new_elem = new Tri3;
+            if (elem_to_node_map[el].size() == 3)
+              new_elem = new Tri3;
+            else
+              mooseError("Active mortar segments only supports TRI elements, 3 nodes expected "
+                         "but: ", elem_to_node_map[el].size(), " provided.");
+
             new_elem->processor_id() = secondary_side_elem->processor_id();
             new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
             new_elem->set_id(local_id_index++);
             new_elem->set_unique_id(new_elem->id());
 
             // Attach newly created nodes
-            for (auto i : make_range(3))
+            for (auto i : make_range(elem_to_node_map[el].size()))
               new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
 
             // Add elements to mortar segment mesh
@@ -980,9 +987,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           if (remainder == 1.0)
             mooseDoOnce(
                 mooseWarning("Some secondary elements on mortar interface were unable to identify"
-                             "a corresponding primary element; this may be expected depending on "
-                             "problem geometry"
-                             "but may indicate a failure of the element search or projection"));
+                             " a corresponding primary element; this may be expected depending on"
+                             " problem geometry but may indicate a failure of the element search"
+                             " or projection"));
 
           std::vector<Node *> new_nodes;
           for (auto n : make_range(secondary_side_elem->n_vertices()))
@@ -1039,31 +1046,34 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   mortar_segment_mesh->allow_find_neighbors(false);
   mortar_segment_mesh->prepare_for_use();
 
-  // Output plotting commands for mortar segment mesh
-  // This is a simple (temporary) hack for debugging since exodus mesh output don't work
-  // with the disconnected mesh produced here
+#ifndef NDEBUG
+  // Output mortar segment mesh
+  if(_debug)
+  {
+    // Check that all elements are triangular, if not skip outputting
+    // (ExodusII does not support mixed element types on a single block)
+    bool is_tri_mesh = true;
+    for (const auto msm_el : mortar_segment_mesh->active_local_element_ptr_range())
+    {
+      if (msm_el->type() != TRI3)
+      {
+        is_tri_mesh = false;
+        break;
+      }
+    }
 
-  // Moose::out << "from mpl_toolkits import mplot3d" << std::endl;
-  // Moose::out << "import numpy as np" << std::endl;
-  // Moose::out << "import matplotlib.pyplot as plt" << std::endl << std::endl;
-  // Moose::out << "fig = plt.figure()" << std::endl;
-  // Moose::out << "ax = plt.axes(projection='3d')" << std::endl << std::endl;
-  // for (auto el : mortar_segment_mesh->element_ptr_range())
-  // {
-  //   Moose::out << "ax.plot([";
-  //   for (auto n : make_range(el->n_nodes()))
-  //     Moose::out << el->point(n)(0) << ", ";
-  //   Moose::out << el->point(0)(0) << "], [";
-  //
-  //   for (auto n : make_range(el->n_nodes()))
-  //     Moose::out << el->point(n)(1) << ", ";
-  //   Moose::out << el->point(0)(1) << "], [";
-  //
-  //   for (auto n : make_range(el->n_nodes()))
-  //     Moose::out << el->point(n)(2) << ", ";
-  //   Moose::out << el->point(0)(2) << "])" << std::endl;
-  // }
-  // Moose::out << "plt.show()" << std::endl;
+    if (is_tri_mesh)
+    {
+      ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
+      mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
+    }
+    else
+    {
+      mooseWarning("Mortar segment mesh contains mixed element types thus cannot be "
+                   "output using ExodusII");
+    }
+  }
+#endif
 
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from secondary elements to the primary Elems which they are
@@ -1093,6 +1103,108 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       mortar_interface_coupling.insert(
           std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
     }
+  }
+
+#ifndef NDEBUG
+  // Print mortar segment mesh statistics
+  if (_debug)
+  {
+    if (mesh.n_processors() == 1)
+      msmStatistics();
+    else
+      mooseWarning("Mortar segment mesh is only constructed on local elements; "
+                   "statistics are only valid in serial.");
+  }
+#endif
+}
+
+void
+AutomaticMortarGeneration::msmStatistics()
+{
+  // Print boundary pairs
+  Moose::out << "Mortar Interface Statistics:" << std::endl;
+
+  // Count number of elements on primary and secondary sides
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  {
+    const auto primary_subd_id = pr.first;
+    const auto secondary_subd_id = pr.second;
+
+    // Allocate statistics vectors for primary lower, secondary lower, and msm meshes
+    StatisticsVector<Real> primary; //primary.reserve(mesh.n_elem());
+    StatisticsVector<Real> secondary; //secondary.reserve(mesh.n_elem());
+    StatisticsVector<Real> msm; //msm.reserve(mortar_segment_mesh->n_elem());
+
+    // Number of elements dropped by compute mortar functor
+    unsigned int msm_dropped = 0;
+
+    // Number of secondary elements partially or fully lacking corresponding primary elems
+    unsigned int lacking_full = 0;
+    unsigned int lacking_partial = 0;
+
+// TODO: modify for parallel
+    for (auto el : mesh.active_element_ptr_range())
+    {
+      // Add secondary and primary elem volumes to statistics vector
+      if (el->subdomain_id() == secondary_subd_id)
+        secondary.push_back(el->volume());
+      else if (el->subdomain_id() == primary_subd_id)
+        primary.push_back(el->volume());
+    }
+
+    // Note: when we allow more than one primary secondary pair will need to make
+    // separate mortar segment mesh for each
+    for (auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+    {
+      // Add msm elem volume to statistic vector
+      msm.push_back(msm_elem->volume());
+
+      // Get associated secondary element
+      const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+      auto secondary_elem = msinfo.secondary_elem;
+
+      // Check if msm_elem dropped in compute mortar functor
+      Real secondary_volume = secondary_elem->volume();
+      if (msm_elem->volume()/secondary_volume < 1e-8)
+        msm_dropped++;
+
+      // Check if partially or fully lacking primary element
+      if (!msinfo.hasPrimary())
+      {
+        if (msinfo.fudge_factor == 1)
+          lacking_full++;
+        else
+          lacking_partial++;
+      }
+    }
+
+    Moose::out << "secondary subdomain: " << secondary_subd_id
+               << " \tprimary subdomain: " << primary_subd_id << std::endl;
+    std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median", "dropped"};
+    std::vector<std::string> subds = {"secondary_lower", "primary_lower", "mortar_segement"};
+    std::vector<size_t> n_elems = {secondary.size(), primary.size(), msm.size()};
+    std::vector<Real> maxs = {secondary.maximum(), primary.maximum(), msm.maximum()};
+    std::vector<Real> mins = {secondary.minimum(), primary.minimum(), msm.minimum()};
+    std::vector<Real> medians = {secondary.median(), primary.median(), msm.median()};
+    std::vector<unsigned int> dropped = {0, 0, msm_dropped};
+
+    FormattedTable table;
+    table.clear();
+    for (auto i : make_range(subds.size()))
+    {
+      table.addRow(i);
+      table.addData<std::string>(col_names[0], subds[i]);
+      table.addData<size_t>(col_names[1], n_elems[i]);
+      table.addData<Real>(col_names[2], maxs[i]);
+      table.addData<Real>(col_names[3], mins[i]);
+      table.addData<Real>(col_names[4], medians[i]);
+      table.addData<unsigned int>(col_names[5], dropped[i]);
+    }
+
+    table.printTable(Moose::out, subds.size());
+
+    Moose::out << "\t secondary elems partially lacking primary elems: " << lacking_partial << std::endl;
+    Moose::out << "\t secondary elems fully lacking primary elems: " << lacking_full << std::endl;
   }
 }
 

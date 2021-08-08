@@ -7,6 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+
+/*
+TODO:
+ - fix dual shape functions, second order dual, mixed meshes
+ - enable contact on non-dual basis
+ - for contact action enable specifying lowerD blocks
+*/
 #include "MortarSegmentHelper.h"
 #include <vector>
 
@@ -39,7 +46,12 @@ MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_node
   // Initialize area of secondary polygon
   _remaining_area_fraction = 1.0;
   _secondary_area = area(_secondary_poly);
-  _scaled_tol = _tolerance * _secondary_area;
+
+  // Tolerance for quantities with area dimensions
+  _area_tol = _tolerance * _secondary_area;
+
+  // Tolerance for quantites with length dimensions
+  _length_tol = _tolerance * sqrt(_secondary_area);
 }
 
 Point
@@ -50,15 +62,15 @@ MortarSegmentHelper::getIntersection(
   Point dq = q2 - q1;
   Real cp1q1 = p1(0) * q1(1) - p1(1) * q1(0);
   Real cp1q2 = p1(0) * q2(1) - p1(1) * q2(0);
-  Real cp1p2 = p1(0) * p2(1) - p1(1) * p2(0);
   Real cq1q2 = q1(0) * q2(1) - q1(1) * q2(0);
   Real alpha = 1. / (dp(0) * dq(1) - dp(1) * dq(0));
   s = -alpha * (cp1q2 - cp1q1 - cq1q2);
 
-  if (alpha > 1e12)
-    mooseWarning("MortarSegmentHelper intersection calculation is poorly conditioned");
-
-  return alpha * (cq1q2 * dp - cp1p2 * dq);
+  // Intersection should be between p1 and p2, if it's not (due to poor conditioning), simply
+  // move it to one of the end points
+  s = s > 1 ? 1. : s;
+  s = s < 0 ? 0. : s;
+  return p1 + s * dp;
 }
 
 bool
@@ -66,8 +78,8 @@ MortarSegmentHelper::isInsideSecondary(const Point pt) const
 {
   for (auto i : make_range(_secondary_poly.size()))
   {
-    const Point & q1 = _secondary_poly[(i - 1) % _secondary_poly.size()];
-    const Point & q2 = _secondary_poly[i];
+    const Point & q1 = _secondary_poly[i];
+    const Point & q2 = _secondary_poly[(i + 1) % _secondary_poly.size()];
 
     Point e1 = q2 - q1;
     Point e2 = pt - q1;
@@ -76,7 +88,7 @@ MortarSegmentHelper::isInsideSecondary(const Point pt) const
     if (e2.norm() < _tolerance)
       return true;
 
-    bool inside = (e1(0) * e2(1) - e1(1) * e2(0)) < _scaled_tol;
+    bool inside = (e1(0) * e2(1) - e1(1) * e2(0)) < _area_tol;
     if (!inside)
       return false;
   }
@@ -86,12 +98,13 @@ MortarSegmentHelper::isInsideSecondary(const Point pt) const
 bool
 MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
 {
-  for (auto i : make_range(poly.size()))
+  for (auto i : make_range(_secondary_poly.size()))
   {
     // Get edge to check
-    const Point edg = poly[(i + 1) % poly.size()] - poly[i];
-    const Real cp =
-        poly[(i + 1) % poly.size()](0) * poly[i](1) - poly[(i + 1) % poly.size()](1) * poly[i](0);
+    const Point & q1 = _secondary_poly[i];
+    const Point & q2 = _secondary_poly[(i + 1) % _secondary_poly.size()];
+    const Point edg = q2 - q1;
+    const Real cp = q2(0) * q1(1) - q2(1) * q1(0);
 
     // If more optimization needed, could store these values for later
     // Check if point is to the left of (or on) clip_edge
@@ -100,9 +113,9 @@ MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
     };
 
     bool all_outside = true;
-    for (auto pt : _secondary_poly)
+    for (auto pt : poly)
     {
-      if (is_inside(pt, _scaled_tol))
+      if (is_inside(pt, _area_tol))
         all_outside = false;
     }
 
@@ -112,9 +125,8 @@ MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
   return false;
 }
 
-void
-MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
-                              std::vector<Point> & clipped_poly) const
+std::vector<Point>
+MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
 {
   // Check orientation of primary_poly
   Point e1 = primary_nodes[0] - primary_nodes[1];
@@ -134,10 +146,13 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
   }
 
   if (isDisjoint(primary_poly))
-    return;
+  {
+    primary_poly.clear();
+    return primary_poly;
+  }
 
   // Initialize clipped poly with secondary poly (secondary is target poly)
-  clipped_poly = _secondary_poly;
+  std::vector<Point> clipped_poly = _secondary_poly;
 
   // Loop through clipping edges
   for (auto i : make_range(primary_poly.size()))
@@ -146,7 +161,7 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
     if (clipped_poly.size() < 3)
     {
       clipped_poly.clear();
-      return;
+      return clipped_poly;
     }
 
     // Set input poly to current clipped poly
@@ -163,8 +178,7 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
     /*
      * Note that use of tolerance here is to avoid degenerate case when lines are
      * essentially on top of each other (common when meshes match across interface)
-     * since finding intersection is ill-conditioned in this case. Dividing by
-     * secondary_area is to non-dimensionalize before tolerancing
+     * since finding intersection is ill-conditioned in this case.
      */
     auto is_inside = [&edg, cp](const Point & pt, Real tol) {
       return pt(0) * edg(1) - pt(1) * edg(0) + cp < tol;
@@ -178,8 +192,8 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
       const Point prev_pt = input_poly[j];
 
       // TODO: Don't need to calculate both each loop
-      bool is_current_inside = is_inside(curr_pt, _scaled_tol);
-      bool is_previous_inside = is_inside(prev_pt, _scaled_tol);
+      bool is_current_inside = is_inside(curr_pt, _area_tol);
+      bool is_previous_inside = is_inside(prev_pt, _area_tol);
 
       if (is_current_inside)
       {
@@ -215,6 +229,30 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes,
       }
     }
   }
+
+  // return clipped_poly;
+  // Make sure final clipped poly is not trivial
+  if (clipped_poly.size() < 3)
+  {
+    clipped_poly.clear();
+    return clipped_poly;
+  }
+
+  // Clean up result by removing any duplicate nodes
+  std::vector<Point> cleaned_poly;
+
+  cleaned_poly.push_back(clipped_poly.back());
+  for (auto i : make_range(clipped_poly.size() - 1))
+  {
+    const Point prev_pt = cleaned_poly.back();
+    const Point curr_pt = clipped_poly[i];
+
+    // If points are sufficiently distanced, add to output
+    if ((curr_pt - prev_pt).norm() > _length_tol)
+      cleaned_poly.push_back(curr_pt);
+  }
+
+  return cleaned_poly;
 }
 
 void
@@ -234,35 +272,59 @@ MortarSegmentHelper::plotPoly(const std::vector<Point> & poly) const
 
 void
 MortarSegmentHelper::plotTriangulation(const std::vector<Point> & nodes,
-                                       const std::vector<std::array<int, 3>> & elem_to_nodes) const
+                                       const std::vector< std::vector<unsigned int> > & elem_to_nodes) const
 {
   for (auto el : elem_to_nodes)
   {
     std::vector<Point> poly;
-    poly.push_back(nodes[el[0]]);
-    poly.push_back(nodes[el[1]]);
-    poly.push_back(nodes[el[2]]);
+    for (auto i : make_range(el.size()))
+      poly.push_back(nodes[el[i]]);
     plotPoly(poly);
   }
 }
 
 void
 MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
-                                     unsigned int offset,
-                                     std::vector<std::array<unsigned int, 3>> & tri_map) const
+                                     const unsigned int offset,
+                                     std::vector< std::vector<unsigned int> > & tri_map) const
 {
-  // If fewer than 3 nodes, error
+  // Note offset is important because it converts from list of nodes on local poly to list of
+  // nodes on entire element. This is a sloppy and error-prone way to do this.
+  // Could be redesigned by just building and adding elements inside helper, but leaving for now
+  // to keep buildMortarSegmentMesh similar for 2D and 3D
+
+  // Fewer than 3 nodes can't be triangulated
   if (poly_nodes.size() < 3)
   {
     mooseError("Can't triangulate poly with fewer than 3 nodes");
   }
-  // If three nodes, already a triangle, simply pass back map
+  // If 3 nodes, already a triangle, simply pass back map
   else if (poly_nodes.size() == 3)
   {
-    tri_map.push_back({{0 + offset, 1 + offset, 2 + offset}});
+    tri_map.push_back({0 + offset, 1 + offset, 2 + offset});
     return;
   }
-  // Otherwise add center point node and make simple triangulation
+  // // If 4 nodes, split along shortest diagonal
+  // else if (poly_nodes.size() == 4)
+  // {
+  //   const Point diag1 = poly_nodes[2] - poly_nodes[0];
+  //   const Point diag2 = poly_nodes[3] - poly_nodes[1];
+  //   if (diag1.norm() < diag2.norm())
+  //   {
+  //     tri_map.push_back({0 + offset, 1 + offset, 2 + offset});
+  //     tri_map.push_back({0 + offset, 2 + offset, 3 + offset});
+  //   }
+  //   else
+  //   {
+  //     tri_map.push_back({0 + offset, 1 + offset, 3 + offset});
+  //     tri_map.push_back({1 + offset, 2 + offset, 3 + offset});
+  //   }
+  //   return;
+  // }
+  // Otherwise use simple center point triangulation
+  // Note: Could use better algorithm to reduce number of triangles
+  //    - Delaunay produces good quality triangulation but might be a bit overkill
+  //    - Monotone polygon triangulation algorithm is O(N) but quality is not guaranteed
   else
   {
     Point poly_center;
@@ -275,7 +337,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 
     // Add triangles formed by outer edge and center point
     for (auto i : make_range(n_verts))
-      tri_map.push_back({{i + offset, (i + 1) % n_verts + offset, n_verts + offset}});
+      tri_map.push_back({i + offset, (i + 1) % n_verts + offset, n_verts + offset});
 
     // Add center point to list of polygon nodes
     poly_nodes.push_back(poly_center);
@@ -286,22 +348,17 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 void
 MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
                                        std::vector<Point> & nodes,
-                                       std::vector<std::array<unsigned int, 3>> & elem_to_nodes)
+                                       std::vector< std::vector<unsigned int> > & elem_to_nodes)
 {
   // Clip primary elem against secondary elem
-  std::vector<Point> clipped_poly;
-  clipPoly(primary_nodes, clipped_poly);
+  std::vector<Point> clipped_poly = clipPoly(primary_nodes);
   if (clipped_poly.size() < 3)
     return;
 
   if (_debug)
-  {
     for (auto pt : clipped_poly)
-    {
       if (!isInsideSecondary(pt))
         mooseError("Clipped polygon not inside linearized secondary element");
-    }
-  }
 
   // Compute area of clipped polygon, update remaining area fraction
   _remaining_area_fraction -= area(clipped_poly) / _secondary_area;
