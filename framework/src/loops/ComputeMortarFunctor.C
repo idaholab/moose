@@ -72,9 +72,14 @@ ComputeMortarFunctor::operator()()
   // Array to hold custom quadrature point locations on the secondary and primary sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  auto secondary_sub_elem_ind =
-      _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
-  auto primary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem");
+  // For 3D mortar get index for retrieving sub-element info
+  unsigned int secondary_sub_elem_ind, primary_sub_elem_ind;
+  if (_amg.dim() == 3)
+  {
+    secondary_sub_elem_ind =
+        _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
+    primary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem");
+  }
 
   unsigned int num_cached = 0;
 
