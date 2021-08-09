@@ -111,11 +111,10 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
     mooseAssert(_i < 1, "Elemental variables must be CONSTANT order.");
 
   // Get the _dof_to_weighted_gap map
-  const DofObject * const dof = _var->isNodal() ?
-                                static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i)) :
-                                static_cast<const DofObject *>(_lower_secondary_elem);
+  const DofObject * const dof =
+      _var->isNodal() ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                      : static_cast<const DofObject *>(_lower_secondary_elem);
   _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
-
 
   // For non-dual contact assemble weighted traction (lambda represents traction)
   if (!_var->useDual())

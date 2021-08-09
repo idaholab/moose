@@ -81,7 +81,7 @@ protected:
   ADReal _qp_gap;
 
   /// A map from node to weighted gap (and weighted traction for non-dual)
-  std::unordered_map<const DofObject *, std::pair<ADReal, ADReal> > _dof_to_weighted_gap;
+  std::unordered_map<const DofObject *, std::pair<ADReal, ADReal>> _dof_to_weighted_gap;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

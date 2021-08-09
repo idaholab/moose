@@ -45,12 +45,12 @@ protected:
   virtual void enforceConstraintOnDof(const DofObject * dof) override;
 
   /// A map from node to weighted gap
-  std::unordered_map<const DofObject *, std::pair<ADReal, ADReal> > _dof_to_weighted_tangential_velocity;
+  std::unordered_map<const DofObject *, std::pair<ADReal, ADReal>>
+      _dof_to_weighted_tangential_velocity;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
   const ADReal * _tangential_traction_ptr = nullptr;
-
 
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;

@@ -92,14 +92,15 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
     mooseAssert(_i < 1, "Elemental variables must be CONSTANT order.");
 
   // Get the _dof_to_weighted_tangential_velocity map
-  const DofObject * const dof = _friction_var->isNodal() ?
-                                static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i)) :
-                                static_cast<const DofObject *>(_lower_secondary_elem);
+  const DofObject * const dof =
+      _friction_var->isNodal() ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                               : static_cast<const DofObject *>(_lower_secondary_elem);
   _dof_to_weighted_tangential_velocity[dof].first += _test[_i][_qp] * _qp_tangential_velocity;
 
   // For non-dual contact also assemble weighted pressure
   if (!_friction_var->useDual())
-    _dof_to_weighted_tangential_velocity[dof].second += _test[_i][_qp] * _friction_var->adSlnLower()[_qp];
+    _dof_to_weighted_tangential_velocity[dof].second +=
+        _test[_i][_qp] * _friction_var->adSlnLower()[_qp];
   // For dual, on first quadrature point evaluation store nodal value in place of weighted traction
   else if (/*_friction_var->useDual() &&*/ _qp == 0)
   {
