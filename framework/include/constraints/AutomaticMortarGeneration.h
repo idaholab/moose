@@ -214,7 +214,7 @@ public:
     return msm_elem_to_info;
   }
 
-  int dim() { return mesh.mesh_dimension(); }
+  int dim() const { return mesh.mesh_dimension(); } 
 
 private:
   // Reference to the mesh stored in equation_systems.
