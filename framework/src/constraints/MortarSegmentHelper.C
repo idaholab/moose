@@ -304,6 +304,8 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
     tri_map.push_back({0 + offset, 1 + offset, 2 + offset});
     return;
   }
+  // This was removed because it was observed to adversely affect convergence of
+  // problems on displaced mesh.
   // // If 4 nodes, split along shortest diagonal
   // else if (poly_nodes.size() == 4)
   // {
