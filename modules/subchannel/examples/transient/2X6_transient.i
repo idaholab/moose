@@ -16,31 +16,6 @@ P_out = 101325 # Pa
   spacer_k = '0.0 '
 []
 
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-[]
-
 [Modules]
   [FluidProperties]
     [water]
@@ -49,7 +24,7 @@ P_out = 101325 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
@@ -167,18 +142,20 @@ P_out = 101325 # Pa
 
 [Outputs]
   exodus = true
-  [mdot_MATRIX]
-    type = NormalSliceValuesCSV
+  [mdot]
+    type = QuadSubChannelPointValues
     variable = mdot
+    nx = 3
+    ny = 1
     execute_on = TIMESTEP_END
-    file_base = "mdot.csv"
+    file_base = "mdot"
     height = 0.4953
   []
-    [mdot_In_MATRIX]
-    type = NormalSliceValuesCSV
+    [mdot_in]
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = TIMESTEP_END
-    file_base = "mdot_in.csv"
+    file_base = "mdot_in"
     height = 0.0
   []
 []

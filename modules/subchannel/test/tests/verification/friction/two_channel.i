@@ -131,21 +131,21 @@ P_out = 155e+5 # Pa
 [Outputs]
   exodus = true
   [Temp_Out_MATRIX]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
     height = 10.0
   []
   [mdot_Out_MATRIX]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_Out.txt"
     height = 10.0
   []
   [mdot_In_MATRIX]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_In.txt"

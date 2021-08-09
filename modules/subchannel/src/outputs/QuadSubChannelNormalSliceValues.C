@@ -1,11 +1,11 @@
-#include "NormalSliceValues.h"
+#include "QuadSubChannelNormalSliceValues.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("SubChannelApp", NormalSliceValues);
+registerMooseObject("SubChannelApp", QuadSubChannelNormalSliceValues);
 
 InputParameters
-NormalSliceValues::validParams()
+QuadSubChannelNormalSliceValues::validParams()
 {
   InputParameters params = FileOutput::validParams();
   params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
@@ -15,7 +15,7 @@ NormalSliceValues::validParams()
   return params;
 }
 
-NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
+QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputParameters & parameters)
   : FileOutput(parameters),
     _mesh(dynamic_cast<QuadSubChannelMesh &>(*_mesh_ptr)),
     _variable(getParam<VariableName>("variable")),
@@ -25,7 +25,7 @@ NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
 }
 
 void
-NormalSliceValues::output(const ExecFlagType & /*type*/)
+QuadSubChannelNormalSliceValues::output(const ExecFlagType & /*type*/)
 {
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
   auto nz = _mesh.getNumOfAxialCells();
@@ -76,8 +76,8 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
     }
   }
 
-  std::ofstream myfile1;
-  myfile1.open(_file_base, std::ofstream::trunc);
-  myfile1 << std::setprecision(6) << std::fixed << _exit_value << "\n \n";
-  myfile1.close();
+  std::ofstream myfile;
+  myfile.open(_file_base, std::ofstream::trunc);
+  myfile << std::setprecision(6) << std::fixed << _exit_value << "\n";
+  myfile.close();
 }
