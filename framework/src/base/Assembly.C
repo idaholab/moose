@@ -718,8 +718,11 @@ Assembly::setMortarQRule(Order order)
       _fe_msm->attach_quadrature_rule(_qrule_msm);
     }
     else
-      mooseError("Mortar quadrature_order: ", order, " does not match previously specified quadrature_order: ",
-          _qrule_msm->get_order(), ". Quadrature_order (when specified) must match for all mortar constraints.");
+      mooseError("Mortar quadrature_order: ",
+                 order,
+                 " does not match previously specified quadrature_order: ",
+                 _qrule_msm->get_order(),
+                 ". Quadrature_order (when specified) must match for all mortar constraints.");
   }
 }
 

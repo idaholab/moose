@@ -852,7 +852,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         std::vector<Point> nodal_points;
 
         // Initialize map from mortar segmenet elements to nodes
-        std::vector< std::vector<unsigned int> > elem_to_node_map;
+        std::vector<std::vector<unsigned int>> elem_to_node_map;
 
         // Initialize list of secondary and primary sub-elements that formed each mortar segment
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
@@ -943,7 +943,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
               new_elem = new Tri3;
             else
               mooseError("Active mortar segments only supports TRI elements, 3 nodes expected "
-                         "but: ", elem_to_node_map[el].size(), " provided.");
+                         "but: ",
+                         elem_to_node_map[el].size(),
+                         " provided.");
 
             new_elem->processor_id() = secondary_side_elem->processor_id();
             new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
@@ -1048,7 +1050,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
 #ifndef NDEBUG
   // Output mortar segment mesh
-  if(_debug)
+  if (_debug)
   {
     // Check that all elements are triangular, if not skip outputting
     // (ExodusII does not support mixed element types on a single block)
@@ -1131,9 +1133,9 @@ AutomaticMortarGeneration::msmStatistics()
     const auto secondary_subd_id = pr.second;
 
     // Allocate statistics vectors for primary lower, secondary lower, and msm meshes
-    StatisticsVector<Real> primary; //primary.reserve(mesh.n_elem());
-    StatisticsVector<Real> secondary; //secondary.reserve(mesh.n_elem());
-    StatisticsVector<Real> msm; //msm.reserve(mortar_segment_mesh->n_elem());
+    StatisticsVector<Real> primary;   // primary.reserve(mesh.n_elem());
+    StatisticsVector<Real> secondary; // secondary.reserve(mesh.n_elem());
+    StatisticsVector<Real> msm;       // msm.reserve(mortar_segment_mesh->n_elem());
 
     // Number of elements dropped by compute mortar functor
     unsigned int msm_dropped = 0;
@@ -1142,7 +1144,7 @@ AutomaticMortarGeneration::msmStatistics()
     unsigned int lacking_full = 0;
     unsigned int lacking_partial = 0;
 
-// TODO: modify for parallel
+    // TODO: modify for parallel
     for (auto el : mesh.active_element_ptr_range())
     {
       // Add secondary and primary elem volumes to statistics vector
@@ -1165,7 +1167,7 @@ AutomaticMortarGeneration::msmStatistics()
 
       // Check if msm_elem dropped in compute mortar functor
       Real secondary_volume = secondary_elem->volume();
-      if (msm_elem->volume()/secondary_volume < 1e-8)
+      if (msm_elem->volume() / secondary_volume < 1e-8)
         msm_dropped++;
 
       // Check if partially or fully lacking primary element
@@ -1203,7 +1205,8 @@ AutomaticMortarGeneration::msmStatistics()
 
     table.printTable(Moose::out, subds.size());
 
-    Moose::out << "\t secondary elems partially lacking primary elems: " << lacking_partial << std::endl;
+    Moose::out << "\t secondary elems partially lacking primary elems: " << lacking_partial
+               << std::endl;
     Moose::out << "\t secondary elems fully lacking primary elems: " << lacking_full << std::endl;
   }
 }

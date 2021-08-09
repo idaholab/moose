@@ -76,8 +76,7 @@ ComputeMortarFunctor::operator()()
   unsigned int secondary_sub_elem_ind, primary_sub_elem_ind;
   if (_amg.dim() == 3)
   {
-    secondary_sub_elem_ind =
-        _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
+    secondary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
     primary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("primary_sub_elem");
   }
 
@@ -129,7 +128,7 @@ ComputeMortarFunctor::operator()()
 
     // TODO: make 1e-8 a tolerance, other tolerance was too small for
     // non-dimensionalized tolerancing
-    if (elem_volume/secondary_volume < 1e-8)
+    if (elem_volume / secondary_volume < 1e-8)
       continue;
 
     // These only get initialized if there is a primary Elem associated to this segment.

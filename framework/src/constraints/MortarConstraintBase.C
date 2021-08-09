@@ -76,7 +76,9 @@ MortarConstraintBase::validParams()
       "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
       "used, and then the _normals member should be indexed with _i instead of _qp");
-  params.addParam<MooseEnum>("quadrature", MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
+  params.addParam<MooseEnum>(
+      "quadrature",
+      MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
       "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended. "
       "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
       "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
