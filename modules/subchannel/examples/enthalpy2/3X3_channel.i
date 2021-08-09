@@ -152,56 +152,56 @@ P_out = 101325 # Pa
 [Outputs]
   exodus = true
   [h_3]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = h
     execute_on = final
     file_base = "h_3.txt"
     height = 10.0
   []
   [h_2]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = h
     execute_on = final
     file_base = "h_2.txt"
     height = 7.5
   []
   [h_1]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = h
     execute_on = final
     file_base = "h_1.txt"
     height = 2.5
   []
   [h_0]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = h
     execute_on = final
     file_base = "h_0.txt"
     height = 0.0
   []
   [mdot_3]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_3.txt"
     height = 10.0
   []
   [mdot_2]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_2.txt"
     height = 7.5
   []
   [mdot_1]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_1.txt"
     height = 2.5
   []
   [mdot_0]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_0.txt"

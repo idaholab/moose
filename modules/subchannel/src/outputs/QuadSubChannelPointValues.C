@@ -1,34 +1,39 @@
-#include "NormalSliceValuesCSV.h"
+#include "QuadSubChannelPointValues.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("SubChannelApp", NormalSliceValuesCSV);
+registerMooseObject("SubChannelApp", QuadSubChannelPointValues);
 
 InputParameters
-NormalSliceValuesCSV::validParams()
+QuadSubChannelPointValues::validParams()
 {
   InputParameters params = FileOutput::validParams();
   params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
   params.addRequiredParam<Real>("height", "Axial location of normal slice [m]");
-  params.addClassDescription("Prints out a user selected value at a user selected axial height in "
-                             "a CSV line format to be used for post-processing");
+  params.addRequiredParam<int>("nx",
+                               "Location of sub_channel in the x direction, 0 being first [-]");
+  params.addRequiredParam<int>("ny",
+                               "Location of sub_channel in the y direction, 0 being first [-]");
+  params.addClassDescription(
+      "Prints out a user selected value of specified sub-channel at a user selected axial height");
   return params;
 }
 
-NormalSliceValuesCSV::NormalSliceValuesCSV(const InputParameters & parameters)
+QuadSubChannelPointValues::QuadSubChannelPointValues(const InputParameters & parameters)
   : FileOutput(parameters),
     _mesh(dynamic_cast<QuadSubChannelMesh &>(*_mesh_ptr)),
     _variable(getParam<VariableName>("variable")),
-    _height(getParam<Real>("height"))
+    _height(getParam<Real>("height")),
+    _nx(getParam<int>("nx")),
+    _ny(getParam<int>("ny"))
 {
   _exit_value.resize(_mesh.getNy(), _mesh.getNx());
 }
 
 void
-NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
+QuadSubChannelPointValues::output(const ExecFlagType & /*type*/)
 {
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
-
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto n_channels = _mesh.getNumOfChannels();
@@ -77,19 +82,9 @@ NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
     }
   }
 
-  Eigen::MatrixXd exit_value;
-  exit_value.resize(1, _mesh.getNy() * _mesh.getNx());
-
-  for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-  {
-    unsigned int i = (i_ch / _mesh.getNx());   // row
-    unsigned int j = i_ch - i * _mesh.getNx(); // column
-    exit_value(0, i_ch) = _exit_value(i, j);
-  }
-
-  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
-  std::ofstream myfile1;
-  myfile1.open(_file_base, std::ofstream::trunc);
-  myfile1 << std::setprecision(6) << std::fixed << exit_value.format(CSVFormat) << "\n";
-  myfile1.close();
+  std::ofstream myfile;
+  myfile.open(_file_base, std::ofstream::app);
+  myfile << "time:  " << time() << "  " << _variable << ":  " << std::setprecision(6) << std::fixed
+         << _exit_value(_ny, _nx) << "\n";
+  myfile.close();
 }

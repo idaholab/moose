@@ -29,18 +29,20 @@ T_in = 359.15
 
 [Outputs]
   exodus = true
-  [Temp_Out_CSV]
-    type = NormalSliceValuesCSV
+  [Temp_Out_Point]
+    type = QuadSubChannelPointValues
     variable = T
+    nx = 1
+    ny = 1
     execute_on = final
-    file_base = "Temp_Out.csv"
+    file_base = "Temp_out_point"
     height = 3.658
   []
   [Temp_Out_MATRIX]
-    type = NormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
-    file_base = "Temp_Out.txt"
+    file_base = "Temp_out_matrix"
     height = 3.658
   []
 []
