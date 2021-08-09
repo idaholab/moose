@@ -27,7 +27,6 @@ protected:
   /// are overriden to define the sodium friction factor
   virtual double computeMassFlowForDPDZ(double dpdz, int i_ch) override;
   virtual void enforceUniformDPDZAtInlet() override;
-  /// turbulent-mixing cross flow model
   virtual void computeWijPrime(int iz) override;
   ///
   virtual void computeH(int iz) override;

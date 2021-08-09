@@ -160,7 +160,7 @@ LiquidMetalSubChannel1PhaseProblem::computeH(int iz)
           name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", iz);
     }
     // Update the solution vectors at the outlet of the cell
-    h_soln->set(node_out, h_out); // J/kg
+    h_soln->set(node_out, h_out);
   }
 }
 
@@ -211,7 +211,7 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iz)
                             (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
                               (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
                              (Si + Sj)) *
-                            Sij; // Kg/sec
+                            Sij;
     }
   }
 }
