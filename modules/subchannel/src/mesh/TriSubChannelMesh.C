@@ -549,36 +549,22 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;
       }
-      else if (_gap_to_chan_map[k1].second == k)
+      else
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
       }
-      else
-      {
-        mooseError(name(),
-                   " TriMesh could not form the channel pairs for the sweeping flow for the "
-                   "subchannel number ",
-                   k);
-      }
+
       if (_gap_to_chan_map[k2].first == k)
       {
         _chan_pairs_sf[k].second = _gap_to_chan_map[k2].second;
       }
-      else if (_gap_to_chan_map[k2].second == k)
-      {
-        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
-      }
       else
       {
-        mooseError(name(),
-                   " TriMesh could not form the channel pairs for the sweeping flow for the "
-                   "subchannel number ",
-                   k);
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
       }
     }
     else if (_subch_type[k] == EChannelType::CORNER)
     {
-
       _gap_pairs_sf[k].first = _chan_to_gap_map[k][1];
       _gap_pairs_sf[k].second = _chan_to_gap_map[k][0];
 
@@ -589,32 +575,18 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;
       }
-      else if (_gap_to_chan_map[k1].second == k)
-      {
-        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
-      }
       else
       {
-        mooseError(name(),
-                   " TriMesh could not form the channel pairs for the sweeping flow for the "
-                   "subchannel number ",
-                   k);
+        _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
       }
 
       if (_gap_to_chan_map[k2].first == k)
       {
         _chan_pairs_sf[k].second = _gap_to_chan_map[k2].second;
       }
-      else if (_gap_to_chan_map[k2].second == k)
-      {
-        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
-      }
       else
       {
-        mooseError(name(),
-                   " TriMesh could not form the channel pairs for the sweeping flow for the "
-                   "subchannel number ",
-                   k);
+        _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
       }
     }
   }

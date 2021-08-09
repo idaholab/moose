@@ -2,8 +2,6 @@ T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
-#mass_flow_in = 13.898 #kg/sec
-# total axial coolant flow area is computed as 0.0029431 m2
 [Mesh]
   type = TriSubChannelMesh
   nrings = 4
@@ -111,13 +109,6 @@ P_out = 2.0e5 # Pa
     fp = sodium
   []
 
-#  [mdot_ic]
-#    type = MassFlowRateIC
-#    variable = mdot
-#    area = S
-#    mass_flux = ${mass_flux_in}
-#  []
-
   [mdot_ic]
     type = ConstantIC
     variable = mdot
@@ -152,27 +143,6 @@ P_out = 2.0e5 # Pa
 
 [Outputs]
   exodus = true
- # [Temp_Out_MATRIX]
- #   type = NormalSliceValues
- #   variable = T
- #   execute_on = final
- #   file_base = "Temp_Out.txt"
- #   height = 3.658
- # []
- # [mdot_Out_MATRIX]
- #   type = NormalSliceValues
- #   variable = mdot
- #   execute_on = final
- #   file_base = "mdot_Out.txt"
- #   height = 3.658
- # []
- # [mdot_In_MATRIX]
- #   type = NormalSliceValues
- #   variable = mdot
- #   execute_on = final
- #   file_base = "mdot_In.txt"
- #   height = 0.0
- # []
 []
 
 [Executioner]
