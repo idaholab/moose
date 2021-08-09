@@ -78,6 +78,7 @@
 
 [Outputs]
   file_base = '1phase'
+  velocity_as_vector = false
   execute_on = 'initial timestep_end'
   [out]
     type = Exodus

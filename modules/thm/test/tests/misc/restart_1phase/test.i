@@ -154,4 +154,5 @@
 
 [Outputs]
   exodus = true
+  velocity_as_vector = false
 []

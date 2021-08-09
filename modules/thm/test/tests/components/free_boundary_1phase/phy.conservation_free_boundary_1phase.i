@@ -209,4 +209,5 @@
     type = Console
     show = 'mass_conservation momentum_conservation energy_conservation'
   []
+  velocity_as_vector = false
 []

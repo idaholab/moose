@@ -83,4 +83,5 @@
     type = Exodus
     show = 'vel T p'
   []
+  velocity_as_vector = false
 []

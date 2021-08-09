@@ -89,4 +89,5 @@
   exodus = true
   show = 'p T vel'
   execute_on = 'initial timestep_end'
+  velocity_as_vector = false
 []

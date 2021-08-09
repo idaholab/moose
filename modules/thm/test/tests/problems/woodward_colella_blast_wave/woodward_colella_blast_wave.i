@@ -83,6 +83,7 @@
 
 [Outputs]
   file_base = 'woodward_colella_blast_wave'
+  velocity_as_vector = false
   execute_on = 'initial timestep_end'
   [out]
     type = Exodus

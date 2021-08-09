@@ -86,6 +86,7 @@ time = ${fparse num_steps * dt}
 []
 
 [Outputs]
+  velocity_as_vector = false
   [out]
     type = CSV
     execute_on = 'FINAL'

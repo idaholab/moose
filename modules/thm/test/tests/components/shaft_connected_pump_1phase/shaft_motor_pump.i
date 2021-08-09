@@ -189,3 +189,7 @@ dt = 1.e-2
     order = SECOND
   []
 []
+
+[Outputs]
+  velocity_as_vector = false
+[]

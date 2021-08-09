@@ -84,6 +84,9 @@ protected:
   // Names of variables for which derivative material properties need to be created
   std::vector<VariableName> _derivative_vars;
 
+  /// True if we output velocity as a vector-value field, false for outputting velocity as a scalar
+  const bool & _output_vector_velocity;
+
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /**
