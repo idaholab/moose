@@ -89,8 +89,6 @@ protected:
   const MooseEnum _model;
   /// Contact formulation type enum
   const MooseEnum _formulation;
-  /// Contact system type enum
-  const MooseEnum _system;
   /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
   /// Mortar approach (weighted --variationally consistent-- or legacy)
