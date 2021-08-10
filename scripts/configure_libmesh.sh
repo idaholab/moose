@@ -47,6 +47,7 @@ function configure_libmesh()
                --enable-petsc-hypre-required \
                --enable-metaphysicl-required \
                --with-cxx-std-min=2014 \
+               --without-gdb-command \
                --with-methods="${METHODS}" \
                INSTALL="${INSTALL_BINARY}" \
                $*
