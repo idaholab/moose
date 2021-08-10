@@ -35,7 +35,7 @@ RhoFromPTFunctorMaterial::RhoFromPTFunctorMaterial(const InputParameters & param
     _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _rho(declareFunctorProperty<ADReal>(NS::density))
 {
-  _rho.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
     return _fluid.rho_from_p_T(_pressure(geom_quantity), _temperature(geom_quantity));
   });
 }

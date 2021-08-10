@@ -500,14 +500,6 @@ const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty<Real>(const std::string & name);
 
 template <>
-const FunctorMaterialProperty<Real> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty<Real>(const std::string & name);
-
-template <>
-const FunctorMaterialProperty<ADReal> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty<ADReal>(const std::string & name);
-
-template <>
 const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty<Real>(const std::string & name);
 
@@ -518,6 +510,14 @@ MaterialPropertyInterface::defaultMaterialProperty<RealVectorValue>(const std::s
 template <>
 const ADMaterialProperty<RealVectorValue> *
 MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
+
+template <>
+const FunctorMaterialProperty<Real> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty<Real>(const std::string & name);
+
+template <>
+const FunctorMaterialProperty<ADReal> *
+MaterialPropertyInterface::defaultFunctorMaterialProperty<ADReal>(const std::string & name);
 
 template <typename T>
 const MaterialProperty<T> &

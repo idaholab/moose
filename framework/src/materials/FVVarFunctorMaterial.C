@@ -11,7 +11,7 @@
 #include "MooseVariableFV.h"
 #include "FunctorMaterialProperty.h"
 
-registerMooseObject("MooseTestApp", FVVarFunctorMaterial);
+registerMooseObject("MooseApp", FVVarFunctorMaterial);
 
 InputParameters
 FVVarFunctorMaterial::validParams()
@@ -20,6 +20,8 @@ FVVarFunctorMaterial::validParams()
   params.addRequiredCoupledVar("var", "The finite volume variable to be coupled in");
   params.addRequiredParam<MaterialPropertyName>("mat_prop_name",
                                                 "The name of the material property to produce");
+  params.addClassDescription("Creates a functor material property whose evaluation corresponds to "
+                             "the evaluation of the coupled variable at a given location");
   return params;
 }
 
@@ -28,7 +30,7 @@ FVVarFunctorMaterial::FVVarFunctorMaterial(const InputParameters & parameters)
     _var(*getVarHelper<MooseVariableFV<Real>>("var", 0)),
     _functor_prop(declareFunctorProperty<ADReal>("mat_prop_name"))
 {
-  _functor_prop.setFunction(
+  _functor_prop.setFunctor(
       _mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal { return _var(geom_quantity); });
 }
 

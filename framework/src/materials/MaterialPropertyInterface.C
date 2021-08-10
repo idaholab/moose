@@ -109,9 +109,9 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   if (ss >> real_value && ss.eof())
   {
     auto & prop = _mi_subproblem.declareFunctorProperty<Real>(name, _mi_tid);
-    prop.setFunction(_mi_subproblem.mesh(),
-                     _mi_block_ids,
-                     [real_value](auto /*geom_quantity*/) -> Real { return real_value; });
+    prop.setFunctor(_mi_subproblem.mesh(),
+                    _mi_block_ids,
+                    [real_value](auto /*geom_quantity*/) -> Real { return real_value; });
     return &prop;
   }
 
@@ -129,9 +129,9 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   if (ss >> real_value && ss.eof())
   {
     auto & prop = _mi_subproblem.declareFunctorProperty<ADReal>(name, _mi_tid);
-    prop.setFunction(_mi_subproblem.mesh(),
-                     _mi_block_ids,
-                     [real_value](auto /*geom_quantity*/) -> ADReal { return real_value; });
+    prop.setFunctor(_mi_subproblem.mesh(),
+                    _mi_block_ids,
+                    [real_value](auto /*geom_quantity*/) -> ADReal { return real_value; });
     return &prop;
   }
 

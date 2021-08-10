@@ -20,6 +20,10 @@
 #include <unordered_map>
 #include <functional>
 
+/**
+ * A non-templated base class for functor material properties that allow an owner object to hold
+ * different class template instantiations of \p FunctorMaterialProperty in a single container
+ */
 class FunctorPropertyValue
 {
 public:
@@ -28,6 +32,9 @@ public:
   virtual ~FunctorPropertyValue() = default;
 };
 
+/**
+ * A material property that is evaluated on-the-fly via calls to various overloads of \p operator()
+ */
 template <typename T>
 class FunctorMaterialProperty : public FunctorPropertyValue, public GenericFunctor<T>
 {

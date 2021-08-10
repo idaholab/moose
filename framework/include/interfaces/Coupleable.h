@@ -1455,6 +1455,11 @@ private:
 
   const MooseObject * const _obj;
 
+  /// Container holding default functors. These default functors allow a user to specify a scalar
+  /// value in their input file in place of a coupled variable, and then retrieval/use of this
+  /// scalar value when the Coupleable::getFunctor API is used. This is the same behavior as when a
+  /// user specifies a scalar value in their input and Coupleable::coupledValue or
+  /// Coupleable::adCoupledValue is used
   mutable std::unordered_map<std::string, std::unique_ptr<FunctorInterface<ADReal>>>
       _default_ad_functor;
 };

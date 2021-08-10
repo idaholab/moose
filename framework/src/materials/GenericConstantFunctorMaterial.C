@@ -45,7 +45,7 @@ GenericConstantFunctorMaterialTempl<is_ad>::GenericConstantFunctorMaterialTempl(
   for (const auto i : make_range(_num_props))
   {
     auto & prop = declareFunctorProperty<GenericReal<is_ad>>(_prop_names[i]);
-    prop.setFunction(_mesh, blockIDs(), [this, i](auto & /*geom_quantity*/) -> GenericReal<is_ad> {
+    prop.setFunctor(_mesh, blockIDs(), [this, i](auto & /*geom_quantity*/) -> GenericReal<is_ad> {
       return _prop_values[i];
     });
   }

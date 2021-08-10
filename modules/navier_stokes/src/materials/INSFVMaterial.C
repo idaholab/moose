@@ -51,9 +51,9 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
   if (_mesh.dimension() >= 3 && !_w_vel)
     mooseError("If the mesh dimension is 3, then a 'w' variable parameter must be supplied");
 
-  _p.setFunction(
+  _p.setFunctor(
       _mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal { return _p_var(geom_quantity); });
-  _velocity.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADRealVectorValue {
+  _velocity.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADRealVectorValue {
     ADRealVectorValue velocity(_u_vel(geom_quantity));
     if (_mesh.dimension() >= 2)
       velocity(1) = (*_v_vel)(geom_quantity);
@@ -61,23 +61,23 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
       velocity(2) = (*_w_vel)(geom_quantity);
     return velocity;
   });
-  _rho_u.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho_u.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
     return _rho(geom_quantity) * _u_vel(geom_quantity);
   });
-  _rho_v.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho_v.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
     if (_mesh.dimension() >= 2)
       return _rho(geom_quantity) * (*_v_vel)(geom_quantity);
     else
       return 0;
   });
-  _rho_w.setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho_w.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
     if (_mesh.dimension() >= 3)
       return _rho(geom_quantity) * (*_w_vel)(geom_quantity);
     else
       return 0;
   });
   if (_has_temperature)
-    _rho_cp_temp->setFunction(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+    _rho_cp_temp->setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
       return _rho(geom_quantity) * (*_cp)(geom_quantity) * (*_temperature)(geom_quantity);
     });
 }
