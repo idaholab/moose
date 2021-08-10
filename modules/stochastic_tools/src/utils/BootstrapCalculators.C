@@ -161,21 +161,20 @@ Percentile<InType, OutType>::compute(const InType & data, const bool is_distribu
 }
 
 // BIASCORRECTEDACCELERATED ////////////////////////////////////////////////////////////////////////
-template <typename InType, typename OutType>
-std::vector<OutType>
-BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
-                                                   const bool is_distributed)
+template <typename InType>
+std::vector<Real>
+BiasCorrectedAccelerated<InType, Real>::compute(const InType & data, const bool is_distributed)
 {
   if (is_distributed)
     mooseError("Due to the computational demands, the BiasCorrectedAccelerated does not work with "
                "distributed data.");
 
   // Bootstrap estimates
-  const std::vector<OutType> values = this->computeBootstrapEstimates(data, is_distributed);
+  const std::vector<Real> values = this->computeBootstrapEstimates(data, is_distributed);
 
   // Compute bias-correction, Efron and Tibshirani (2003), Eq. 14.14, p. 186
-  const OutType value = this->_calc.compute(data, is_distributed);
-  const Real count = std::count_if(values.begin(), values.end(), [&value](OutType v) {
+  const Real value = this->_calc.compute(data, is_distributed);
+  const Real count = std::count_if(values.begin(), values.end(), [&value](Real v) {
     return v < value;
   }); // use Real for non-integer division below
   const Real bias = NormalDistribution::quantile(count / this->_replicates, 0, 1);
@@ -184,7 +183,7 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
   const Real acc = data.empty() ? 0. : acceleration(data, is_distributed);
 
   // Compute intervals, Efron and Tibshirani (2003), Eq. 14.10, p. 185
-  std::vector<OutType> output;
+  std::vector<Real> output;
   for (const Real & level : this->_levels)
   {
     const Real z = NormalDistribution::quantile(level, 0, 1);
@@ -197,10 +196,9 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
   return output;
 }
 
-template <typename InType, typename OutType>
+template <typename InType>
 Real
-BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
-                                                        const bool is_distributed)
+BiasCorrectedAccelerated<InType, Real>::acceleration(const InType & data, const bool is_distributed)
 {
   // Jackknife statistics
   InType theta_i(data.size());
@@ -257,17 +255,6 @@ makeBootstrapCalculator(const MooseEnum & item,
 
   return ptr;
 }
-
-#define createBootstrapCalculators(InType, OutType)                                                \
-  template class Percentile<InType, OutType>;                                                      \
-  template class BiasCorrectedAccelerated<InType, OutType>;                                        \
-  template std::unique_ptr<BootstrapCalculator<InType, OutType>>                                   \
-  makeBootstrapCalculator<InType, OutType>(const MooseEnum &,                                      \
-                                           const libMesh::ParallelObject &,                        \
-                                           const std::vector<Real> &,                              \
-                                           unsigned int,                                           \
-                                           unsigned int,                                           \
-                                           StochasticTools::Calculator<InType, OutType> &)
 
 createBootstrapCalculators(std::vector<Real>, Real);
 createBootstrapCalculators(std::vector<int>, Real);

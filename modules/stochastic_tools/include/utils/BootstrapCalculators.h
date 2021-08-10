@@ -83,14 +83,32 @@ public:
 };
 
 /*
- * Implement BCa method of Efron and Tibshirani (2003), Chapter 14.
+ * This is placeholder class for BCa with general data types. Will throw an error if
+ * used. Actual implementation is with OutType = Real which can be seen below.
  */
 template <typename InType, typename OutType>
 class BiasCorrectedAccelerated : public BootstrapCalculator<InType, OutType>
 {
 public:
   using BootstrapCalculator<InType, OutType>::BootstrapCalculator;
-  virtual std::vector<OutType> compute(const InType &, const bool) override;
+  virtual std::vector<OutType> compute(const InType &, const bool) override
+  {
+    mooseError(
+        "Cannot compute bias corrected accelerated statistics with calculator output value type ",
+        MooseUtils::prettyCppType<OutType>(),
+        ".");
+  }
+};
+
+/*
+ * Implement BCa method of Efron and Tibshirani (2003), Chapter 14.
+ */
+template <typename InType>
+class BiasCorrectedAccelerated<InType, Real> : public BootstrapCalculator<InType, Real>
+{
+public:
+  using BootstrapCalculator<InType, Real>::BootstrapCalculator;
+  virtual std::vector<Real> compute(const InType &, const bool) override;
 
 private:
   // Compute the acceleration, see Efron and Tibshirani (2003), Ch. 14, Eq. 14.15, p 186.
@@ -105,4 +123,15 @@ makeBootstrapCalculator(const MooseEnum &,
                         unsigned int,
                         unsigned int,
                         StochasticTools::Calculator<InType, OutType> & calc);
+
+#define createBootstrapCalculators(InType, OutType)                                                \
+  template class Percentile<InType, OutType>;                                                      \
+  template class BiasCorrectedAccelerated<InType, OutType>;                                        \
+  template std::unique_ptr<BootstrapCalculator<InType, OutType>>                                   \
+  makeBootstrapCalculator<InType, OutType>(const MooseEnum &,                                      \
+                                           const libMesh::ParallelObject &,                        \
+                                           const std::vector<Real> &,                              \
+                                           unsigned int,                                           \
+                                           unsigned int,                                           \
+                                           StochasticTools::Calculator<InType, OutType> &)
 } // namespace

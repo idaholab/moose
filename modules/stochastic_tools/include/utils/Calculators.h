@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
+#include "MathUtils.h"
 #include <vector>
 
 class MooseEnumItem;
@@ -22,6 +23,11 @@ namespace StochasticTools
  * Free function that returns the available statistics available to the Statistics object(s)
  */
 MultiMooseEnum makeCalculatorEnum();
+
+template <typename T1, typename T2>
+class CalculatorValue;
+template <typename InType, typename OutType>
+using CValue = CalculatorValue<typename InType::value_type, OutType>;
 
 /* Base class for computing statistics (e.g., mean, min) for use with Statistics object
  *
@@ -48,7 +54,7 @@ public:
   }
 
   virtual ~Calculator() = default;
-  virtual OutType compute(const InType &, bool) const = 0;
+  OutType compute(const InType &, bool);
 
   virtual void initialize() {}
   virtual void update(const typename InType::value_type &) = 0;
@@ -66,16 +72,15 @@ class Mean : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _count == 0 ? OutType() : _sum / _count; }
+  virtual OutType get() const override { return _sum.get(); }
 
 protected:
   dof_id_type _count;
-  OutType _sum;
+  CValue<InType, OutType> _sum;
 };
 
 template <typename InType, typename OutType>
@@ -83,15 +88,14 @@ class Min : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _min; };
+  virtual OutType get() const override { return _min.get(); };
 
 protected:
-  OutType _min;
+  CValue<InType, OutType> _min;
 };
 
 template <typename InType, typename OutType>
@@ -99,15 +103,14 @@ class Max : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max; };
+  virtual OutType get() const override { return _max.get(); };
 
 protected:
-  OutType _max;
+  CValue<InType, OutType> _max;
 };
 
 template <typename InType, typename OutType>
@@ -115,15 +118,14 @@ class Sum : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _sum; };
+  virtual OutType get() const override { return _sum.get(); };
 
 protected:
-  OutType _sum;
+  CValue<InType, OutType> _sum;
 };
 
 template <typename InType, typename OutType>
@@ -131,17 +133,16 @@ class StdDev : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _count <= 1 ? OutType() : std::sqrt((_sum_of_square - _sum * _sum / _count) / (_count - 1)); };
+  virtual OutType get() const override { return _sum_of_square.get(); };
 
 protected:
   dof_id_type _count;
-  OutType _sum;
-  OutType _sum_of_square;
+  CValue<InType, OutType> _sum;
+  CValue<InType, OutType> _sum_of_square;
 };
 
 template <typename InType, typename OutType>
@@ -149,9 +150,8 @@ class StdErr : public StdDev<InType, OutType>
 {
 public:
   using StdDev<InType, OutType>::StdDev;
-  virtual OutType compute(const InType &, bool) const override;
 
-  virtual OutType get() const override { return this->_count == 0 ? OutType() : StdDev<InType, OutType>::get() / std::sqrt(this->_count); };
+  virtual void finalize(bool is_distributed) override;
 };
 
 template <typename InType, typename OutType>
@@ -159,16 +159,15 @@ class Ratio : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max / _min; };
+  virtual OutType get() const override { return _max.get(); };
 
 protected:
-  OutType _min;
-  OutType _max;
+  CValue<InType, OutType> _min;
+  CValue<InType, OutType> _max;
 };
 
 template <typename InType, typename OutType>
@@ -176,15 +175,14 @@ class L2Norm : public Calculator<InType, OutType>
 {
 public:
   using Calculator<InType, OutType>::Calculator;
-  virtual OutType compute(const InType &, bool) const override;
 
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _l2_norm; };
+  virtual OutType get() const override { return _l2_norm.get(); };
 
 protected:
-  OutType _l2_norm;
+  CValue<InType, OutType> _l2_norm;
 };
 
 /*
@@ -196,4 +194,99 @@ template <typename InType = std::vector<Real>, typename OutType = Real>
 std::unique_ptr<Calculator<InType, OutType>>
 makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
 
+/**
+ * This class is used as a general interface for doing arithmetic needed for Calculators.
+ * The idea is that instead of redefining each calculator method for new in-out data types,
+ * one can just redefine these simple operations. The operations defined here are just
+ * for scalar value types like Real and int.
+ *
+ * @tparam T1 the "in-value" type, this is the Intype::value_type in the Calculators
+ * @tparam T2 the "out-value" type, this is underlying type of this class and is what
+ *            is returned with the get() function. This is the OutType in the Calculators
+ */
+template <typename T1, typename T2>
+class CalculatorValue
+{
+public:
+  CalculatorValue() : _value() {}
+
+  /// Returns a reference to the value computed
+  const T2 & get() const { return _value; }
+
+  /**
+   * These are functions that do modifications on the value that do not depend
+   * on the in-type @tparam T1.
+   */
+  ///@{
+  /// Set the value to zero
+  void zero() { _value = T2(); }
+  /// Divide the value by a interger value
+  void divide(dof_id_type num) { _value /= num; }
+  /// Perfoming a exponential operation: _value = _value^p
+  void pow(int p) { _value = MathUtils::pow(_value, p); }
+  /// Square root of the value
+  void sqrt() { _value = std::sqrt(_value); }
+  /// Setting the value to the minimum of the data type
+  void min() { _value = std::numeric_limits<T2>::min(); }
+  /// Setting the value to the maximum of the data type
+  void max() { _value = std::numeric_limits<T2>::max(); }
+  ///@}
+
+  /**
+   * These are functions that modify the value with an in-type value
+   */
+  ///@{
+  /// _value += a
+  void add(const T1 & a) { _value += static_cast<T2>(a); }
+  /// _value += a^p
+  void addPow(const T1 & a, int p) { _value += MathUtils::pow(static_cast<T2>(a), p); }
+  /// _value = min(_value, a)
+  void min(const T1 & a) { _value = std::min(static_cast<T2>(a), _value); }
+  /// _value = max(_value, a)
+  void max(const T1 & a) { _value = std::max(static_cast<T2>(a), _value); }
+  ///@}
+
+  /**
+   * These are overloaded operators that modify the value based on out-type values
+   */
+  ///@{
+  CalculatorValue<T1, T2> & operator-=(const T2 & b)
+  {
+    _value -= b;
+    return *this;
+  }
+  CalculatorValue<T1, T2> & operator/=(const T2 & b)
+  {
+    _value /= b;
+    return *this;
+  }
+  ///@}
+
+  /**
+   * These are MPI operations
+   */
+  ///@{
+  void sum(const libMesh::Parallel::Communicator & comm) { comm.sum(_value); }
+  void min(const libMesh::Parallel::Communicator & comm) { comm.min(_value); }
+  void max(const libMesh::Parallel::Communicator & comm) { comm.max(_value); }
+  ///@}
+
+private:
+  T2 _value;
+};
+
 } // namespace
+
+#define createCalculators(InType, OutType)                                                         \
+  template class CalculatorValue<typename InType::value_type, OutType>;                            \
+  template class Calculator<InType, OutType>;                                                      \
+  template class Mean<InType, OutType>;                                                            \
+  template class Max<InType, OutType>;                                                             \
+  template class Min<InType, OutType>;                                                             \
+  template class Sum<InType, OutType>;                                                             \
+  template class StdDev<InType, OutType>;                                                          \
+  template class StdErr<InType, OutType>;                                                          \
+  template class Ratio<InType, OutType>;                                                           \
+  template class L2Norm<InType, OutType>;                                                          \
+  template std::unique_ptr<Calculator<InType, OutType>> makeCalculator<InType, OutType>(           \
+      const MooseEnumItem &, const libMesh::ParallelObject &)

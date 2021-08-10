@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "Calculators.h"
+
 #include <numeric>
 
 #include "libmesh/auto_ptr.h"
@@ -26,27 +28,24 @@ makeCalculatorEnum()
   return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7");
 }
 
-// MEAN ////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 OutType
-Mean<InType, OutType>::compute(const InType & data, bool is_distributed) const
+Calculator<InType, OutType>::compute(const InType & data, bool is_distributed)
 {
-  auto local_count = data.size();
-  auto local_sum = std::accumulate(data.begin(), data.end(), OutType());
-  if (is_distributed)
-  {
-    this->_communicator.sum(local_count);
-    this->_communicator.sum(local_sum);
-  }
-  return local_count == 0 ? 0.0 : local_sum / local_count;
+  initialize();
+  for (const auto & val : data)
+    update(val);
+  finalize(is_distributed);
+  return get();
 }
 
+// MEAN ////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
 Mean<InType, OutType>::initialize()
 {
   _count = 0;
-  _sum = OutType();
+  _sum.zero();
 }
 
 template <typename InType, typename OutType>
@@ -54,7 +53,7 @@ void
 Mean<InType, OutType>::update(const typename InType::value_type & val)
 {
   _count++;
-  _sum += val;
+  _sum.add(val);
 }
 
 template <typename InType, typename OutType>
@@ -64,34 +63,27 @@ Mean<InType, OutType>::finalize(bool is_distributed)
   if (is_distributed)
   {
     this->_communicator.sum(_count);
-    this->_communicator.sum(_sum);
+    _sum.sum(this->_communicator);
   }
+  if (_count > 0)
+    _sum.divide(_count);
+  else
+    _sum.zero();
 }
 
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-Min<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto local_min = data.empty() ? std::numeric_limits<OutType>::max()
-                                : *std::min_element(data.begin(), data.end());
-  if (is_distributed)
-    this->_communicator.min(local_min);
-  return local_min;
-}
-
-template <typename InType, typename OutType>
 void
 Min<InType, OutType>::initialize()
 {
-  _min = std::numeric_limits<OutType>::max();
+  _min.max();
 }
 
 template <typename InType, typename OutType>
 void
 Min<InType, OutType>::update(const typename InType::value_type & val)
 {
-  _min = std::min(_min, static_cast<OutType>(val));
+  _min.min(val);
 }
 
 template <typename InType, typename OutType>
@@ -99,33 +91,22 @@ void
 Min<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
-    this->_communicator.min(_min);
+    _min.min(this->_communicator);
 }
 
 // MAX /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-Max<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto local_max = data.empty() ? std::numeric_limits<OutType>::min()
-                                : *std::max_element(data.begin(), data.end());
-  if (is_distributed)
-    this->_communicator.max(local_max);
-  return local_max;
-}
-
-template <typename InType, typename OutType>
 void
 Max<InType, OutType>::initialize()
 {
-  _max = std::numeric_limits<OutType>::min();
+  _max.min();
 }
 
 template <typename InType, typename OutType>
 void
 Max<InType, OutType>::update(const typename InType::value_type & val)
 {
-  _max = std::max(_max, static_cast<OutType>(val));
+  _max.max(val);
 }
 
 template <typename InType, typename OutType>
@@ -133,32 +114,22 @@ void
 Max<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
-    this->_communicator.max(_max);
+    _max.max(this->_communicator);
 }
 
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-Sum<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto local_sum = std::accumulate(data.begin(), data.end(), OutType());
-  if (is_distributed)
-    this->_communicator.sum(local_sum);
-  return local_sum;
-}
-
-template <typename InType, typename OutType>
 void
 Sum<InType, OutType>::initialize()
 {
-  _sum = OutType();
+  _sum.zero();
 }
 
 template <typename InType, typename OutType>
 void
 Sum<InType, OutType>::update(const typename InType::value_type & val)
 {
-  _sum += val;
+  _sum.add(val);
 }
 
 template <typename InType, typename OutType>
@@ -166,38 +137,17 @@ void
 Sum<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
-    this->_communicator.sum(_sum);
+    _sum.sum(this->_communicator);
 }
 
 // STDDEV //////////////////////////////////////////////////////////////////////////////////////////
-template <typename InType, typename OutType>
-OutType
-StdDev<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto count = data.size();
-  auto sum = OutType();
-  auto sum_of_square = OutType();
-  for (const auto & val : data)
-  {
-    sum += val;
-    sum_of_square += val * val;
-  }
-  if (is_distributed)
-  {
-    this->_communicator.sum(count);
-    this->_communicator.sum(sum);
-    this->_communicator.sum(sum_of_square);
-  }
-  return count <= 1 ? OutType() : std::sqrt((sum_of_square - sum * sum / count) / (count - 1));
-}
-
 template <typename InType, typename OutType>
 void
 StdDev<InType, OutType>::initialize()
 {
   _count = 0;
-  _sum = OutType();
-  _sum_of_square = OutType();
+  _sum.zero();
+  _sum_of_square.zero();
 }
 
 template <typename InType, typename OutType>
@@ -205,8 +155,8 @@ void
 StdDev<InType, OutType>::update(const typename InType::value_type & val)
 {
   _count++;
-  _sum += val;
-  _sum_of_square += val * val;
+  _sum.add(val);
+  _sum_of_square.addPow(val, 2);
 }
 
 template <typename InType, typename OutType>
@@ -216,53 +166,62 @@ StdDev<InType, OutType>::finalize(bool is_distributed)
   if (is_distributed)
   {
     this->_communicator.sum(_count);
-    this->_communicator.sum(_sum);
-    this->_communicator.sum(_sum_of_square);
+    _sum.sum(this->_communicator);
+    _sum_of_square.sum(this->_communicator);
+  }
+
+  if (_count <= 1)
+    _sum_of_square.zero();
+  else
+  {
+    _sum.pow(2);
+    _sum.divide(_count);
+    _sum_of_square -= _sum.get();
+    _sum_of_square.divide(_count - 1);
+    _sum_of_square.sqrt();
   }
 }
 
 // STDERR //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-StdErr<InType, OutType>::compute(const InType & data, bool is_distributed) const
+void
+StdErr<InType, OutType>::finalize(bool is_distributed)
 {
-  auto count = data.size();
   if (is_distributed)
-    this->_communicator.sum(count);
-  return count == 0 ? OutType() : StdDev<InType, OutType>::compute(data, is_distributed) / std::sqrt(count);
+  {
+    this->_communicator.sum(this->_count);
+    this->_sum.sum(this->_communicator);
+    this->_sum_of_square.sum(this->_communicator);
+  }
+
+  if (this->_count <= 1)
+    this->_sum_of_square.zero();
+  else
+  {
+    this->_sum.pow(2);
+    this->_sum.divide(this->_count);
+    this->_sum_of_square -= this->_sum.get();
+    this->_sum_of_square.divide(this->_count - 1);
+    this->_sum_of_square.divide(this->_count);
+    this->_sum_of_square.sqrt();
+  }
 }
 
 // RATIO ///////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-Ratio<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto local_max = data.empty() ? std::numeric_limits<OutType>::min()
-                                : *std::max_element(data.begin(), data.end());
-  auto local_min = data.empty() ? std::numeric_limits<OutType>::max()
-                                : *std::min_element(data.begin(), data.end());
-  if (is_distributed)
-  {
-    this->_communicator.min(local_min);
-    this->_communicator.max(local_max);
-  }
-  return local_max / local_min;
-}
-
-template <typename InType, typename OutType>
 void
 Ratio<InType, OutType>::initialize()
 {
-  _min = std::numeric_limits<OutType>::max();
-  _max = std::numeric_limits<OutType>::min();
+  _min.max();
+  _max.min();
 }
 
 template <typename InType, typename OutType>
 void
 Ratio<InType, OutType>::update(const typename InType::value_type & val)
 {
-  _min = std::min(_min, static_cast<OutType>(val));
-  _max = std::max(_max, static_cast<OutType>(val));
+  _min.min(val);
+  _max.max(val);
 }
 
 template <typename InType, typename OutType>
@@ -271,39 +230,25 @@ Ratio<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
   {
-    this->_communicator.min(_min);
-    this->_communicator.max(_max);
+    _min.min(this->_communicator);
+    _max.max(this->_communicator);
   }
+  _max /= _min.get();
 }
 
 // L2NORM //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
-OutType
-L2Norm<InType, OutType>::compute(const InType & data, bool is_distributed) const
-{
-  auto local_sum = std::accumulate(
-      data.begin(), data.end(), OutType(), [](OutType running_value, OutType current_value) {
-        return running_value + current_value * current_value;
-      });
-
-  if (is_distributed)
-    this->_communicator.sum(local_sum);
-
-  return std::sqrt(local_sum);
-}
-
-template <typename InType, typename OutType>
 void
 L2Norm<InType, OutType>::initialize()
 {
-  _l2_norm = OutType();
+  _l2_norm.zero();
 }
 
 template <typename InType, typename OutType>
 void
 L2Norm<InType, OutType>::update(const typename InType::value_type & val)
 {
-  _l2_norm += val * val;
+  _l2_norm.addPow(val, 2);
 }
 
 template <typename InType, typename OutType>
@@ -311,8 +256,8 @@ void
 L2Norm<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
-    this->_communicator.sum(_l2_norm);
-  _l2_norm = std::sqrt(_l2_norm);
+    _l2_norm.sum(this->_communicator);
+  _l2_norm.sqrt();
 }
 
 // makeCalculator //////////////////////////////////////////////////////////////////////////////////
@@ -347,19 +292,6 @@ makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;
 }
-
-#define createCalculators(InType, OutType)                                                         \
-  template class Calculator<InType, OutType>;                                                      \
-  template class Mean<InType, OutType>;                                                            \
-  template class Max<InType, OutType>;                                                             \
-  template class Min<InType, OutType>;                                                             \
-  template class Sum<InType, OutType>;                                                             \
-  template class StdDev<InType, OutType>;                                                          \
-  template class StdErr<InType, OutType>;                                                          \
-  template class Ratio<InType, OutType>;                                                           \
-  template class L2Norm<InType, OutType>;                                                          \
-  template std::unique_ptr<Calculator<InType, OutType>> makeCalculator<InType, OutType>(           \
-      const MooseEnumItem &, const libMesh::ParallelObject &)
 
 createCalculators(std::vector<Real>, Real);
 createCalculators(std::vector<int>, Real);

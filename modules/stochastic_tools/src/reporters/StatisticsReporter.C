@@ -108,6 +108,8 @@ StatisticsReporter::initialize()
         declareValueHelper<std::vector<Real>, Real>(r_name);
       else if (hasReporterValueByName<std::vector<int>>(r_name))
         declareValueHelper<std::vector<int>, Real>(r_name);
+      else if (hasReporterValueByName<std::vector<std::vector<Real>>>(r_name))
+        declareValueHelper<std::vector<std::vector<Real>>, std::vector<Real>>(r_name);
       else
         unsupported_types.emplace_back(r_name.getCombinedName());
     }
