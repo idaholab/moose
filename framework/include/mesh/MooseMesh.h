@@ -486,7 +486,14 @@ public:
   /**
    * Set uniform refinement level
    */
-  void setUniformRefineLevel(unsigned int);
+  void setUniformRefineLevel(unsigned int, bool deletion = true);
+
+  /**
+   * Return a flag indicating whether or not we should have a remote deletion
+   * after uniform refinements. Note: If the flag is false (no remote deletion),
+   * uniform refinements will run more efficient.
+   */
+  bool uniformRefineRemoteDeletion() const { return _uniform_refine_remote_deletion; }
 
   /**
    * Whether or not skip uniform refinements when using a pre-split mesh
@@ -1129,6 +1136,9 @@ protected:
 
   /// Whether or not to skip uniform refinements when using a pre-split mesh
   bool _skip_refine_when_use_split;
+
+  /// Whether or not delete remote "extra" elements after uniform refinements
+  bool _uniform_refine_remote_deletion;
 
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;

@@ -84,6 +84,15 @@ SetupMeshAction::validParams()
 
   params.addParam<unsigned int>(
       "uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
+
+  params.addParam<bool>(
+      "uniform_refine_remote_deletion",
+      true,
+      "If it is false, remote deletion will be avoided for efficiency of uniform refinements. "
+      "This flag has no impact on a replicated mesh. For a distributed mesh, the remote elements "
+      "are already deleted, "
+      "and the mesh is already distributed properly, before uniform refinements.");
+
   params.addParam<bool>("skip_partitioning",
                         false,
                         "If true the mesh won't be partitioned. This may cause large load "
@@ -130,7 +139,7 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
   // Did they specify extra refinement levels on the command-line?
   level += _app.getParam<unsigned int>("refinements");
 
-  mesh->setUniformRefineLevel(level);
+  mesh->setUniformRefineLevel(level, getParam<bool>("uniform_refine_remote_deletion"));
 #endif // LIBMESH_ENABLE_AMR
 
   // Add entity names to the mesh

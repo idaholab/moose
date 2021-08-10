@@ -269,9 +269,16 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
   if (level == libMesh::invalid_uint)
     level = mesh->uniformRefineLevel();
 
-  mesh->getMesh().skip_partitioning(true);
-  mesh->getMesh().allow_remote_element_removal(false);
-  mesh->needsRemoteElemDeletion(false);
+  // Remote deletion and repartition for uniformly refined meshs
+  // are not necessary while they time-consuming. Have a optional
+  // parameter to allow users turn them off.
+  if (!mesh->uniformRefineRemoteDeletion())
+  {
+    mesh->getMesh().skip_partitioning(true);
+    mesh->getMesh().allow_remote_element_removal(false);
+    mesh->needsRemoteElemDeletion(false);
+  }
+
   mesh_refinement.uniformly_refine(level);
 }
 
