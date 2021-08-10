@@ -43,7 +43,8 @@ MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
     _need_u_old(false),
     _need_u_older(false),
     _need_dual(false),
-    _need_dual_u(false)
+    _need_dual_u(false),
+    _need_dual_u_dot(false)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -335,6 +336,20 @@ MooseVariableScalar::computeAD(bool
 #endif
     }
   }
+
+  if (_need_dual_u_dot)
+  {
+    _dual_u_dot.resize(n_dofs);
+    for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
+    {
+      _dual_u_dot[i] = _u_dot[i];
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+      Moose::derivInsert(_dual_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
+#else
+      Moose::derivInsert(_dual_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
+#endif
+    }
+  }
 }
 
 void
@@ -414,6 +429,19 @@ MooseVariableScalar::matrixTagSln(TagID tag) const
 {
   _need_matrix_tag_u[tag] = true;
   return _matrix_tag_u[tag];
+}
+
+const ADVariableValue &
+MooseVariableScalar::adUDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_dual = _need_dual_u_dot = _need_u_dot = true;
+    return _dual_u_dot;
+  }
+  else
+    mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
+               "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
 }
 
 const VariableValue &
