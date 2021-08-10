@@ -64,6 +64,7 @@ EOF`
 
 ../configure ${BUILD_CONFIG} \
                      --prefix=${PREFIX}/libmesh \
+                     --with-future-timpi-dir=${PREFIX}/libmesh \
                      --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
                      --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
                      --with-methods="opt oprof devel dbg" \
