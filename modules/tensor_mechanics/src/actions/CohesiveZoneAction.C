@@ -348,11 +348,11 @@ CohesiveZoneAction::actOutputMatProp()
 
       // CZMRealVectorScalar
       if (setupOutput(
-              out, _vector_scalar_table, [&](std::string prop_name, std::string scalar_type) {
+              out, _vector_direction_table, [&](std::string prop_name, std::string direction) {
                 auto type = "CZMRealVectorScalar";
                 params = _factory.getValidParams(type);
                 params.set<std::string>("real_vector_value") = prop_name;
-                params.set<MooseEnum>("scalar_type") = scalar_type;
+                params.set<MooseEnum>("direction") = direction;
                 params.set<MaterialPropertyName>("property_name") = addBaseName(out);
                 params.set<std::vector<BoundaryName>>("boundary") = _boundary;
                 params.set<std::string>("base_name") = _base_name;

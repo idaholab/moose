@@ -23,7 +23,6 @@ public:
 
 protected:
   void computeQpProperties() override;
-  void initQpStatefulProperties() override;
 
   /// Base name of the material system
   const std::string _base_name;

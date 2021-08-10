@@ -23,17 +23,16 @@ public:
 
 protected:
   void computeQpProperties() override;
-  void initQpStatefulProperties() override;
 
   /// Base name of the material system
   const std::string _base_name;
 
   /// scalar options
-  enum class ScalarType
+  enum class DirectionType
   {
     Normal,
     Tangent
-  } _scalar_type;
+  } _direction;
 
   /// the property created by this material
   MaterialProperty<Real> & _property;
@@ -43,7 +42,4 @@ protected:
 
   /// the material property defining the czm normal
   const MaterialProperty<RankTwoTensor> & _czm_rotation;
-
-  /// the material property defining the czm normal
-  const RealVectorValue _unit_vector;
 };

@@ -18,14 +18,14 @@ const std::map<std::string, std::string>
     CohesiveZoneActionBase::_real_vector_cartesian_component_table = {
         {"traction", "traction_global"},
         {"jump", "displacement_jump_global"},
-        {"interface_jump", "interface_displacement_jump"},
         {"pk1_traction", "PK1traction"}};
 
 // map aux variable name prefixes to CZM vector scalar options and list of permitted tensor name
 // shortcuts
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    CohesiveZoneActionBase::_vector_scalar_table = {{"normal", {"Normal", {"traction", "jump"}}},
-                                                    {"tangent", {"Tangent", {"traction", "jump"}}}};
+    CohesiveZoneActionBase::_vector_direction_table = {
+        {"normal", {"Normal", {"traction", "jump"}}},
+        {"tangent", {"Tangent", {"traction", "jump"}}}};
 
 const std::vector<char> CohesiveZoneActionBase::_component_table = {'x', 'y', 'z'};
 
@@ -130,7 +130,7 @@ CohesiveZoneActionBase::outputPropertiesType()
     for (unsigned int a = 0; a < 3; ++a)
       options += (options == "" ? "" : " ") + vc.first + '_' + _component_table[a];
 
-  for (auto & vi : _vector_scalar_table)
+  for (auto & vi : _vector_direction_table)
     for (auto & t : vi.second.second)
       options += " " + vi.first + "_" + t;
 

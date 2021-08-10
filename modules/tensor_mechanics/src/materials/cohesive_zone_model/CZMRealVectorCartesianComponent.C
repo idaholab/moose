@@ -38,12 +38,6 @@ CZMRealVectorCartesianComponent::CZMRealVectorCartesianComponent(const InputPara
 }
 
 void
-CZMRealVectorCartesianComponent::initQpStatefulProperties()
-{
-  _property[_qp] = 0.0;
-}
-
-void
 CZMRealVectorCartesianComponent::computeQpProperties()
 {
   _property[_qp] = _vector[_qp](_index);

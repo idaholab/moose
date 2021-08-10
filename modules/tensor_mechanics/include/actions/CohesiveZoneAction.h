@@ -27,13 +27,13 @@ protected:
   void actOutputGeneration();
   void actOutputMatProp();
 
-  /// adds the required interfacekernels based on teh selected strain formulation
+  /// adds the required interfacekernels based on the selected strain formulation
   void addRequiredCZMInterfaceKernels();
 
-  /// adds the required interface materials based on teh selected strain formulation
+  /// adds the required interface materials based on the selected strain formulation
   void addRequiredCZMInterfaceMaterials();
 
-  /// verifies oreder of family of output variables
+  /// verifies order and family of output variables
   void verifyOrderAndFamilyOutputs();
 
   /// method to prepare save_in and diag_save_in inputs for the interface kernel
