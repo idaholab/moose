@@ -41,10 +41,10 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// Trial gradient averaging
-  virtual void precalculateJacobian();
+  virtual void precalculateJacobian() override;
 
   /// Stabilize a generic gradient tensor
-  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga);
+  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
 
   /// Calculate the full test gradient (could later be modified for stabilization)
   RankTwoTensor testGrad(unsigned int i);

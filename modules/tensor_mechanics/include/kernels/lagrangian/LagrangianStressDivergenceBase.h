@@ -38,10 +38,10 @@ protected:
   virtual void computeOffDiagJacobian(const unsigned int jvar) override;
 
   /// Override with any initial setup for the residual
-  virtual void precalculateResidual();
+  virtual void precalculateResidual() override;
 
   /// Override with any initial setup for the kernel
-  virtual void precalculateJacobian();
+  virtual void precalculateJacobian() override;
 
   /// Helper to assemble the stabilized gradient operator
   virtual RankTwoTensor fullGrad(unsigned int m,
