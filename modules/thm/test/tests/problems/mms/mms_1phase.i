@@ -195,4 +195,5 @@ cv = ${fparse cp / gamma}
 [Outputs]
   csv = true
   execute_on = 'FINAL'
+  velocity_as_vector = false
 []

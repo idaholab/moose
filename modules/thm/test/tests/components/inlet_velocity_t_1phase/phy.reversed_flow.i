@@ -82,4 +82,5 @@
     file_base = phy.reversed_flow
     show = 'vel T p'
   []
+  velocity_as_vector = false
 []

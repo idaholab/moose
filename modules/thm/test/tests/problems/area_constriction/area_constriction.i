@@ -101,5 +101,6 @@ p_outlet = 1e5
 
 [Outputs]
   exodus = true
+  velocity_as_vector = false
   show = 'A rho vel p'
 []

@@ -24,7 +24,7 @@
     exodiff = 'turbine_startup_out.e'
     rel_err = 4e-3
     abs_zero = 1e-9
-    cli_args = 'Outputs/exodus=true'
+    cli_args = 'Outputs/exodus=true Outputs/velocity_as_vector=false'
     heavy = true
   []
 

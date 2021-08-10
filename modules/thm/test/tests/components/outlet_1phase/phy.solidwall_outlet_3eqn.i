@@ -81,7 +81,7 @@
 
 [Outputs]
   file_base = 'phy.solidwall_outlet_3eqn'
-
+  velocity_as_vector = false
   [exodus]
     type = Exodus
     show = 'p T vel'

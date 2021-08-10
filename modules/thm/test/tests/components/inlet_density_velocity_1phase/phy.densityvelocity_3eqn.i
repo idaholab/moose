@@ -77,5 +77,6 @@
 [Outputs]
   exodus = true
   execute_on = 'final'
+  velocity_as_vector = false
   show = 'rho vel'
 []

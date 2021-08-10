@@ -186,4 +186,5 @@
     sync_only = true
     sync_times = '1 2 3 4 5'
   []
+  velocity_as_vector = false
 []

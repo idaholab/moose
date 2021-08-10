@@ -14,6 +14,8 @@ FlowModel::validParams()
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
   params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
                                      "Slope reconstruction type for rDG");
+  params.addRequiredParam<bool>("output_vector_velocity",
+                                "True if velocity is put out as a vector field.");
   params.registerBase("THM:flow_model");
   return params;
 }
@@ -40,7 +42,8 @@ FlowModel::FlowModel(const InputParameters & params)
     _gravity_magnitude(_gravity_vector.norm()),
     _lump_mass_matrix(_flow_channel.getParam<bool>("lump_mass_matrix")),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
-    _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
+    _numerical_flux_name(params.get<UserObjectName>("numerical_flux")),
+    _output_vector_velocity(params.get<bool>("output_vector_velocity"))
 {
 }
 
