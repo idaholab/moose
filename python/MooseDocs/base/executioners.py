@@ -485,9 +485,13 @@ class ParallelBarrier(Executioner):
 class ParallelPipe(Executioner):
     """
     Parallel execution that performs operations and transfers data using multiprocessing.Pipe
-    """
-    STOP = float('inf')
 
+    Follows Pipe example with wait():
+    https://docs.python.org/3/library/multiprocessing.html#multiprocessing.connection.wait
+
+    Note: 'ForkContext' objects do not have the attribute 'connection'. However,
+    `multiprocessing.connection.wait(receivers) == [r for r in receivers if r.poll() or r.closed]`
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._global_attributes = self._ctx.Manager().dict()
@@ -518,23 +522,33 @@ class ParallelPipe(Executioner):
         t = time.time()
         LOG.info('%s using %s threads...', prefix, num_threads)
 
-        # Tokenization
-        jobs = []
-        conn1, conn2 = self._ctx.Pipe(False)
+        # Create connection objects representing the receiver and sender ends of the pipe.
+        receivers = []
+        random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = self._ctx.Process(target=target, args=(chunk, conn2))
-            p.start()
-            jobs.append(p)
+            r, s = self._ctx.Pipe(False)
+            receivers.append(r)
+            self._ctx.Process(target=target, args=(chunk, s)).start()
+            s.close() # need to close this instance because a copy was sent to the Process() object
 
-        while any(job.is_alive() for job in jobs):
-            if conn1.poll():
-                for uid, attributes, out in conn1.recv():
-                    for node in nodes:
-                        if uid == node.uid:
-                            node.attributes.update(attributes)
-                            break
-                    if container is not None:
-                        container[uid] = out
+        # Iterate through the list of ready connection objects, i.e., those that either have data to
+        # receive or their corresponding sender connection has been closed, until all are removed
+        # from the list of pending connections. If there is no data to receive and the sender has
+        # been closed, then an EOFError is raised indicating that the receiver can be removed.
+        while receivers:
+            for r in [r for r in receivers if r.poll() or r.closed]:
+                try:
+                    data = r.recv()
+                except EOFError:
+                    receivers.remove(r)
+                else:
+                    for uid, attributes, out in data:
+                        for node in nodes:
+                            if uid == node.uid:
+                                node.attributes.update(attributes)
+                                break
+                        if container is not None:
+                            container[uid] = out
 
         LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
 
@@ -546,8 +560,7 @@ class ParallelPipe(Executioner):
             content = self.read(node)
             data.append((node.uid, node.attributes, content))
 
-        with self._lock:
-            conn.send(data)
+        conn.send(data)
 
     def _tokenize_target(self, nodes, conn):
         """Function for calling self.tokenize with Connection object"""
@@ -557,8 +570,7 @@ class ParallelPipe(Executioner):
             ast = self.tokenize(node, self._page_content[node.uid])
             data.append((node.uid, node.attributes, ast))
 
-        with self._lock:
-            conn.send(data)
+        conn.send(data)
 
     def _render_target(self, nodes, conn):
         """Function for calling self.tokenize with Connection object"""
@@ -568,8 +580,7 @@ class ParallelPipe(Executioner):
             result = self.render(node, self._page_ast[node.uid])
             data.append((node.uid, node.attributes, result))
 
-        with self._lock:
-            conn.send(data)
+        conn.send(data)
 
     def _write_target(self, nodes, conn):
         """Function for calling self.write with Connection object"""
@@ -579,5 +590,4 @@ class ParallelPipe(Executioner):
             self.write(node, self._page_result[node.uid])
             data.append((node.uid, node.attributes, None))
 
-        with self._lock:
-            conn.send(data)
+        conn.send(data)
