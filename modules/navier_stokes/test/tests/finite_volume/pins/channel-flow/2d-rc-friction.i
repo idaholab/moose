@@ -92,7 +92,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [u_friction]
-    type = PINSFVMomentumFriction
+    type = PNSFVMomentumFriction
     variable = u
     momentum_component = 'x'
     porosity = porosity
@@ -129,7 +129,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [v_friction]
-    type = PINSFVMomentumFriction
+    type = PNSFVMomentumFriction
     variable = v
     momentum_component = 'y'
     porosity = porosity
