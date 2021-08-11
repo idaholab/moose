@@ -5,7 +5,7 @@
     csvdiff = 'cook_small_out.csv'
     requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./cook_large_updated]
     type = CSVDiff
@@ -13,6 +13,6 @@
     csvdiff = 'cook_large_out.csv'
     requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
 []

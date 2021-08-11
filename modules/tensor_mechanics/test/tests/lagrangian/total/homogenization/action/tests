@@ -6,7 +6,7 @@
     requirement = "Action produces identical results for a 3D, large deformation problem with mixed constraints."
     abs_zero = 1e-6
     issues = '#17473'
-    design = 'actions/TensorMechanicsAction'
+    design = 'source/actions/TensorMechanicsAction.md'
   [../]
   [./compare_2d]
     type = Exodiff
@@ -15,6 +15,6 @@
     requirement = "Action produces identical results for a 2D, small deformation problem with mixed constraints."
     abs_zero = 1e-6
     issues = '#17473'
-    design = 'actions/TensorMechanicsAction'
+    design = 'source/actions/TensorMechanicsAction.md'
   [../]
 []

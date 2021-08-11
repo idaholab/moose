@@ -28,7 +28,7 @@ TEST_F(RankFourTensorTest, invSymm1)
   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }
 
-TEST_F(RankFourTensor, inverse)
+TEST_F(RankFourTensorTest, inverse)
 {
   // Invert a random-ish rank 4 tensor
   RankFourTensor A(
@@ -51,7 +51,7 @@ TEST_F(RankFourTensor, inverse)
   EXPECT_NEAR(0, (C - RankFourTensor::IdentityFour()).L2norm(), 1E-5);
 }
 
-TEST_F(RankFourTensor, invSymm2)
+TEST_F(RankFourTensorTest, invSymm2)
 {
   // following (basically random) "a" tensor has symmetry
   // a_ijkl = a_jikl = a_ijlk

@@ -7,7 +7,7 @@
     cli_args = 'GlobalParams/stabilize_strain=false'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./sd-stress_no_stab]
     type = PetscJacobianTester
@@ -17,7 +17,7 @@
     cli_args = 'GlobalParams/stabilize_strain=false'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./ld-strain_no_stab]
     type = PetscJacobianTester
@@ -27,7 +27,7 @@
     cli_args = 'GlobalParams/stabilize_strain=false'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./ld-stress_no_stab]
     type = PetscJacobianTester
@@ -37,7 +37,7 @@
     cli_args = 'GlobalParams/stabilize_strain=false'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./sd-strain_right_stab]
     type = PetscJacobianTester
@@ -47,7 +47,7 @@
     cli_args = 'GlobalParams/stabilize_strain=true'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./sd-stress_right_stab]
     type = PetscJacobianTester
@@ -57,7 +57,7 @@
     cli_args = 'GlobalParams/stabilize_strain=true'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./ld-strain_right_stab]
     type = PetscJacobianTester
@@ -67,7 +67,7 @@
     cli_args = 'GlobalParams/stabilize_strain=true'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./ld-stress_right_stab]
     type = PetscJacobianTester
@@ -77,6 +77,6 @@
     cli_args = 'GlobalParams/stabilize_strain=true'
     requirement = 'Jacobian is exact'
     issues = '#17473'
-    design = 'scalarkernels/lagrangian/HomogenizationConstraintScalarKernel'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
 []

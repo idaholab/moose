@@ -5,7 +5,7 @@
     csvdiff = 'dirichlet_out.csv'
     requirement = "Quadratic convergence in 2D for DirichletBCs, SMP matches FDP."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./neumann]
     type = CSVDiff
@@ -13,6 +13,6 @@
     csvdiff = 'neumann_out.csv'
     requirement = "Quadratic convergence in 2D for NeumannBCs, SMP matches FDP."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
 []

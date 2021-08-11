@@ -5,7 +5,7 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeLagrangianElasticSmallStress'
+    design = 'source/materials/lagrangian/ComputeLagrangianElasticSmallStress'
     requirement = 'Correct Jacobian coming from the material model'
   [../]
   [./pk_stvenant]
@@ -14,7 +14,7 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeStVenantKirchhoffStress'
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress'
     requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
   [../]
   [./pk_stvenant_small]
@@ -23,7 +23,7 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeStVenantKirchhoffStress'
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress'
     requirement = 'Correct Jacobian coming from the material model for linear kinematics'
   [../]
   [./neohookean]
@@ -32,7 +32,7 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeNeoHookeanStress'
+    design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
     requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
   [../]
   [./neohookean_small]
@@ -41,7 +41,7 @@
     ratio_tol = 1E-4
     difference_tol = 1E10
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeNeoHookeanStress'
+    design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
     requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics'
   [../]
 []

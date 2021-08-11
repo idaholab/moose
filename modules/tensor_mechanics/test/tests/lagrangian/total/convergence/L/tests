@@ -5,7 +5,7 @@
     csvdiff = 'large_out.csv'
     requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry, SMP matches FDP."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./L-small]
     type = CSVDiff
@@ -13,6 +13,6 @@
     csvdiff = 'small_out.csv'
     requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry, SMP matches FDP."
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
 []

@@ -5,6 +5,6 @@
     expect_err = 'ComputeStVenantKirchhoffStress requires an isotropic elasticity'
     requirement = 'Throw an error if you do not provide an isotropic tensor to ComputeStVenantKirchhoffStress'
     issues = '#17472'
-    design = 'materials/lagrangian/ComputeStVenantKirchhoffStress'
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
   [../]
 []

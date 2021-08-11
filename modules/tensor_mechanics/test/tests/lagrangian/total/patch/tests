@@ -6,7 +6,7 @@
     requirement = "Small strain uniaxial patch test"
     abs_zero = 1e-6
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./large]
     type = Exodiff
@@ -15,6 +15,6 @@
     requirement = "Large strain uniaxial patch test"
     abs_zero = 1e-6
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
 []

@@ -7,7 +7,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./neumann_small_neither]
     type = PetscJacobianTester
@@ -17,7 +17,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./dirichlet_large_neither]
     type = PetscJacobianTester
@@ -27,7 +27,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./neumann_large_neither]
     type = PetscJacobianTester
@@ -37,7 +37,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./dirichlet_small_right]
     type = PetscJacobianTester
@@ -47,7 +47,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./neumann_small_right]
     type = PetscJacobianTester
@@ -57,7 +57,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./dirichlet_large_right]
     type = PetscJacobianTester
@@ -67,7 +67,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
   [./neumann_large_right]
     type = PetscJacobianTester
@@ -77,6 +77,6 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
     requirement = 'Jacobian is exact'
     issues = '#17472'
-    design = 'kernels/lagrangian/TotalLagrangianStressDivergence'
+    design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   [../]
 []
