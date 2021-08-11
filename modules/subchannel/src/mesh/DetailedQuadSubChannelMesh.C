@@ -1,5 +1,4 @@
 #include "DetailedQuadSubChannelMesh.h"
-
 #include <array>
 #include <cmath>
 #include "libmesh/cell_prism6.h"

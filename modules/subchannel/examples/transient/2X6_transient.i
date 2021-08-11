@@ -100,7 +100,7 @@ P_out = 101325 # Pa
   [mdot_ic]
     type = ConstantIC
     variable = mdot
-    value = 0.0
+    value = 0.012101767481985
   []
 []
 
@@ -140,24 +140,20 @@ P_out = 101325 # Pa
   []
 []
 
-[Outputs]
-  exodus = true
+[Postprocessors]
   [mdot]
-    type = QuadSubChannelPointValues
+    type = QuadSubChannelPointValue
     variable = mdot
-    nx = 3
-    ny = 1
-    execute_on = TIMESTEP_END
-    file_base = "mdot"
+    ix = 3
+    iy = 1
+    execute_on = 'initial timestep_end'
     height = 0.4953
   []
-    [mdot_in]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = TIMESTEP_END
-    file_base = "mdot_in"
-    height = 0.0
-  []
+[]
+
+[Outputs]
+    exodus = true
+    csv = true
 []
 
 [Executioner]
