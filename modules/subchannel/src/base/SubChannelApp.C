@@ -6,7 +6,7 @@
 #include "SubChannelSyntax.h"
 
 const std::string SubChannelApp::MASS_FLOW_RATE = "mdot";
-const std::string SubChannelApp::ENTROPY = "S";
+const std::string SubChannelApp::SURFACE_AREA = "S";
 const std::string SubChannelApp::SUM_CROSSFLOW = "SumWij";
 const std::string SubChannelApp::PRESSURE = "P";
 const std::string SubChannelApp::PRESSURE_DROP = "DP";

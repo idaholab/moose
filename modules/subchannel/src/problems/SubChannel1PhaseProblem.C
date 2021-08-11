@@ -121,7 +121,7 @@ SubChannel1PhaseProblem::initialSetup()
   _T_soln = new SolutionHandle(getVariable(0, SubChannelApp::TEMPERATURE));
   _rho_soln = new SolutionHandle(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = new SolutionHandle(getVariable(0, SubChannelApp::VISCOSITY));
-  _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTROPY));
+  _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::SURFACE_AREA));
   _w_perim_soln = new SolutionHandle(getVariable(0, SubChannelApp::WETTED_PERIMETER));
   _q_prime_soln = new SolutionHandle(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
 }
