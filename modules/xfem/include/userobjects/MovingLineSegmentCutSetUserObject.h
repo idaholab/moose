@@ -32,6 +32,9 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  virtual const std::vector<RealVectorValue>
+  getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
+
   virtual Real cutFraction(unsigned int cut_num) const override;
 
   virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;

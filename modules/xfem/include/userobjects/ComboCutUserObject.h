@@ -69,6 +69,11 @@ public:
     mooseError("getCrackFrontPoints() is not implemented for this object.");
   }
 
+  virtual const std::vector<RealVectorValue> getCrackPlaneNormals(unsigned int) const override
+  {
+    mooseError("getCrackPlaneNormals() is not implemented for this object.");
+  }
+
   // Get the CutSubdomainID for each provided geometric cut, then lookup the resulting
   // combo CutSubdomainID in the user-specified dictionary.
   virtual CutSubdomainID getCutSubdomainID(const Node * node) const override;

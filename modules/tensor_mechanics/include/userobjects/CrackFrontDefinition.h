@@ -42,6 +42,12 @@ public:
   virtual void execute() override;
 
   /**
+   * Change the number of crack front nodes. As the crack grows, the number of crack fronts nodes
+   * may keep increasing in many cases.
+   */
+  void updateNumberOfCrackFrontPoints(const std::size_t num_points);
+
+  /**
    * Get the node pointer for a specified node on the crack front
    * @param node_index Index of the node
    * @return Pointer to node
@@ -235,6 +241,11 @@ public:
                                           std::size_t ring_index,
                                           const Node * const current_node) const;
 
+  /**
+    Set the value of _is_cutter_modified
+   */
+  void isCutterModified(const bool is_cutter_modified);
+
 protected:
   /// Enum used to define the method for computing the crack extension direction
   const enum class DIRECTION_METHOD {
@@ -247,7 +258,8 @@ protected:
   /// at the ends of the crack
   const enum class END_DIRECTION_METHOD {
     NO_SPECIAL_TREATMENT,
-    END_CRACK_DIRECTION_VECTOR
+    END_CRACK_DIRECTION_VECTOR,
+    END_CRACK_TANGENT_VECTOR
   } _end_direction_method;
 
   /// Enum used to define the type of the nodes on the crack front (end or middle)
@@ -298,6 +310,10 @@ protected:
   RealVectorValue _crack_direction_vector_end_1;
   /// Fixed vector optionally used to define crack extension direction at end 2 of crack front
   RealVectorValue _crack_direction_vector_end_2;
+  /// Fixed vector optionally used to define crack tangent direction at end 1 of crack front
+  RealVectorValue _crack_tangent_vector_end_1;
+  /// Fixed vector optionally used to define crack tangent direction at end 2 of crack front
+  RealVectorValue _crack_tangent_vector_end_2;
   /// Names of boundaries used to define location of crack mouth
   std::vector<BoundaryName> _crack_mouth_boundary_names;
   /// IDs of boundaries used to define location of crack mouth
@@ -308,10 +324,16 @@ protected:
   std::vector<BoundaryID> _intersecting_boundary_ids;
   /// Coordinates of crack mouth
   RealVectorValue _crack_mouth_coordinates;
-  /// Vector normal to crack plane
+  /// Vector normal to the crack plane of a planar crack
   RealVectorValue _crack_plane_normal;
+  /// Vector normals to a nonplanar crack described by the cutter mesh when _use_mesh_cutter = true
+  std::vector<RealVectorValue> _crack_plane_normals;
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
+  /// Whether to describe the 3D crack as a mesh cutter
+  bool _use_mesh_cutter;
+  /// Indicator that shows if the cutter mesh is modified or not in the calculation step
+  bool _is_cutter_modified;
   /// Whether the crack forms a closed loop
   bool _closed_loop;
   /// Out of plane axis when crack is treated as 2D
@@ -417,11 +439,14 @@ protected:
   /**
    * Compute the direction of crack extension for a given point on the crack front.
    * @param crack_front_point Point on the crack front
-   * @param dir0 First coordinate direction in which to order the coordinates
+   * @param tangent_direction Tangent direction vector for the crack front point
+   * @param ntype Node type such as MIDDLE_NODE, END_1_NODE, END_2_NODE
+   * @param crack_front_point_index Index of the point on the crack front
    */
   RealVectorValue calculateCrackFrontDirection(const Point & crack_front_point,
                                                const RealVectorValue & tangent_direction,
-                                               const CRACK_NODE_TYPE ntype) const;
+                                               const CRACK_NODE_TYPE ntype,
+                                               const std::size_t crack_front_point_index = 0) const;
 
   /**
    * Compute the strain in the direction tangent to the crack at all points on the

@@ -5,8 +5,8 @@
 
 [XFEM]
   geometric_cut_userobjects = 'cut_mesh'
-  output_cut_plane = true
   qrule = volfrac
+  output_cut_plane = true
 []
 
 [Mesh]
@@ -14,43 +14,47 @@
   dim = 3
   nx = 5
   ny = 5
-  nz = 5
+  nz = 2
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
-  zmin = -0.4
-  zmax = 0.6
+  zmin = 0.0
+  zmax = 0.2
   elem_type = HEX8
 []
 
 [UserObjects]
   [./cut_mesh]
-    type = MeshCut3DUserObject
-    mesh_file = mesh_grow.xda
-    function_x = growth_func_x
-    function_y = growth_func_y
-    function_z = growth_func_z
-# The current gold file does not grow the cutting mesh, but this is something
-# that needs to be tested more in the future.
-#    size_control = 0.05
-#    n_step_growth = 50
+    type = CrackMeshCut3DUserObject
+    mesh_file = mesh_edge_crack.xda
+    growth_dir_method = 'max_hoop_stress'
+    size_control = 1
+    n_step_growth = 1
+    function_v = growth_func_v
+    crack_front_nodes = '7 6 5 4'
   [../]
 []
 
 [Functions]
-  [./growth_func_x]
+  [./growth_func_v]
     type = ParsedFunction
-    value = 5*(x-0.3)+z
+    value = 0.15
   [../]
-  [./growth_func_y]
-    type = ParsedFunction
-    value = 5*(y-0.5)+(z+x)/2
-  [../]
-  [./growth_func_z]
-    type = ParsedFunction
-    value = 5*(z-0.1)+x
-  [../]
+[]
+
+[DomainIntegral]
+  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
+  displacements = 'disp_x disp_y disp_z'
+  crack_front_points_provider = cut_mesh
+  number_points_from_provider = 4
+  crack_direction_method = CurvedCrackFront
+  radius_inner = '0.15'
+  radius_outer = '0.45'
+  poissons_ratio = 0.3
+  youngs_modulus = 207000
+  block = 0
+  incremental = true
 []
 
 [Modules/TensorMechanics/Master]
@@ -62,14 +66,24 @@
 []
 
 [Functions]
+  [./top_trac_x]
+    type = ConstantFunction
+    value = 100
+  [../]
   [./top_trac_y]
     type = ConstantFunction
-    value = 10
+    value = 0
   [../]
 []
 
 
 [BCs]
+  [./top_x]
+    type = FunctionNeumannBC
+    boundary = top
+    variable = disp_x
+    function = top_trac_x
+  [../]
   [./top_y]
     type = FunctionNeumannBC
     boundary = top
@@ -101,9 +115,11 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
+    block = 0
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
+    block = 0
   [../]
 []
 
@@ -133,11 +149,12 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 1.0
+  end_time = 4.0
+  max_xfem_update = 1
 []
 
 [Outputs]
-  file_base = mesh_grow
+  file_base = edge_crack_3d_mhs_out
   execute_on = 'timestep_end'
   exodus = true
   [./console]
