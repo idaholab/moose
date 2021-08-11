@@ -42,6 +42,18 @@
                             ]
                         },
                         {
+                            "name": "const_value_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.0,
+                                [
+                                    2.0,
+                                    4.0
+                                ]
+                            ]
+                        },
+                        {
                             "name": "const_value_MIN",
                             "stat": "MIN",
                             "type": "std::pair<double, std::vector<double> >",

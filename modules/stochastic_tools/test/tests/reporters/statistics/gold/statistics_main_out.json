@@ -13,7 +13,7 @@
                             "stat": "MAX",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                5.0,
+                                6.0,
                                 []
                             ]
                         },
@@ -22,7 +22,16 @@
                             "stat": "MEAN",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                3.0,
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
                                 []
                             ]
                         },
@@ -40,7 +49,7 @@
                             "stat": "NORM2",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                7.416198487095663,
+                                9.539392014169456,
                                 []
                             ]
                         },
@@ -49,7 +58,7 @@
                             "stat": "RATIO",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                5.0,
+                                6.0,
                                 []
                             ]
                         },
@@ -58,7 +67,7 @@
                             "stat": "STDDEV",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                1.5811388300841898,
+                                1.8708286933869707,
                                 []
                             ]
                         },
@@ -67,7 +76,7 @@
                             "stat": "STDERR",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                0.7071067811865476,
+                                0.7637626158259734,
                                 []
                             ]
                         },
@@ -76,7 +85,7 @@
                             "stat": "SUM",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                15.0,
+                                21.0,
                                 []
                             ]
                         },
@@ -85,7 +94,7 @@
                             "stat": "MAX",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                5.0,
+                                6.0,
                                 []
                             ]
                         },
@@ -94,7 +103,16 @@
                             "stat": "MEAN",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                3.0,
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
                                 []
                             ]
                         },
@@ -112,7 +130,7 @@
                             "stat": "NORM2",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                7.416198487095663,
+                                9.539392014169456,
                                 []
                             ]
                         },
@@ -121,7 +139,7 @@
                             "stat": "RATIO",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                5.0,
+                                6.0,
                                 []
                             ]
                         },
@@ -130,7 +148,7 @@
                             "stat": "STDDEV",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                1.5811388300841898,
+                                1.8708286933869707,
                                 []
                             ]
                         },
@@ -139,7 +157,7 @@
                             "stat": "STDERR",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                0.7071067811865476,
+                                0.7637626158259734,
                                 []
                             ]
                         },
@@ -148,7 +166,7 @@
                             "stat": "SUM",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                15.0,
+                                21.0,
                                 []
                             ]
                         },
@@ -158,13 +176,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0
                                 ],
                                 []
                             ]
@@ -175,13 +193,30 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    3.0,
-                                    3.0,
-                                    3.0,
-                                    3.0,
-                                    3.0,
-                                    3.0,
-                                    3.0
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5
                                 ],
                                 []
                             ]
@@ -209,13 +244,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    7.416198487095663,
-                                    7.416198487095663,
-                                    7.416198487095663,
-                                    7.416198487095663,
-                                    7.416198487095663,
-                                    7.416198487095663,
-                                    7.416198487095663
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456
                                 ],
                                 []
                             ]
@@ -226,13 +261,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0,
-                                    5.0
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0
                                 ],
                                 []
                             ]
@@ -243,13 +278,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    1.5811388300841898,
-                                    1.5811388300841898,
-                                    1.5811388300841898,
-                                    1.5811388300841898,
-                                    1.5811388300841898,
-                                    1.5811388300841898,
-                                    1.5811388300841898
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707
                                 ],
                                 []
                             ]
@@ -260,13 +295,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    0.7071067811865476,
-                                    0.7071067811865476,
-                                    0.7071067811865476,
-                                    0.7071067811865476,
-                                    0.7071067811865476,
-                                    0.7071067811865476,
-                                    0.7071067811865476
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734
                                 ],
                                 []
                             ]
@@ -277,13 +312,13 @@
                             "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
                             "value": [
                                 [
-                                    15.0,
-                                    15.0,
-                                    15.0,
-                                    15.0,
-                                    15.0,
-                                    15.0,
-                                    15.0
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0
                                 ],
                                 []
                             ]

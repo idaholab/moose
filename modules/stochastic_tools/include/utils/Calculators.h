@@ -92,7 +92,7 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _min.get(); };
+  virtual OutType get() const override { return _min.get(); }
 
 protected:
   CValue<InType, OutType> _min;
@@ -107,7 +107,7 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max.get(); };
+  virtual OutType get() const override { return _max.get(); }
 
 protected:
   CValue<InType, OutType> _max;
@@ -122,7 +122,7 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _sum.get(); };
+  virtual OutType get() const override { return _sum.get(); }
 
 protected:
   CValue<InType, OutType> _sum;
@@ -137,7 +137,7 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _sum_of_square.get(); };
+  virtual OutType get() const override { return _sum_of_square.get(); }
 
 protected:
   dof_id_type _count;
@@ -163,7 +163,7 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max.get(); };
+  virtual OutType get() const override { return _max.get(); }
 
 protected:
   CValue<InType, OutType> _min;
@@ -179,10 +179,26 @@ public:
   virtual void initialize() override;
   virtual void update(const typename InType::value_type & val) override;
   virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _l2_norm.get(); };
+  virtual OutType get() const override { return _l2_norm.get(); }
 
 protected:
   CValue<InType, OutType> _l2_norm;
+};
+
+template <typename InType, typename OutType>
+class Median : public Calculator<InType, OutType>
+{
+public:
+  using Calculator<InType, OutType>::Calculator;
+
+  virtual void initialize() override;
+  virtual void update(const typename InType::value_type & val) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual OutType get() const override { return _median.get(); }
+
+protected:
+  std::vector<CValue<InType, OutType>> _storage;
+  CValue<InType, OutType> _median;
 };
 
 /*
@@ -250,6 +266,11 @@ public:
    * These are overloaded operators that modify the value based on out-type values
    */
   ///@{
+  CalculatorValue<T1, T2> & operator+=(const T2 & b)
+  {
+    _value += b;
+    return *this;
+  }
   CalculatorValue<T1, T2> & operator-=(const T2 & b)
   {
     _value -= b;
@@ -260,6 +281,7 @@ public:
     _value /= b;
     return *this;
   }
+  bool less_than(const T2 & b) const { return _value < b; }
   ///@}
 
   /**
@@ -269,6 +291,10 @@ public:
   void sum(const libMesh::Parallel::Communicator & comm) { comm.sum(_value); }
   void min(const libMesh::Parallel::Communicator & comm) { comm.min(_value); }
   void max(const libMesh::Parallel::Communicator & comm) { comm.max(_value); }
+  void broadcast(const libMesh::Parallel::Communicator & comm, processor_id_type root_id)
+  {
+    comm.broadcast(_value, root_id);
+  }
   ///@}
 
 private:
@@ -288,5 +314,6 @@ private:
   template class StdErr<InType, OutType>;                                                          \
   template class Ratio<InType, OutType>;                                                           \
   template class L2Norm<InType, OutType>;                                                          \
+  template class Median<InType, OutType>;                                                          \
   template std::unique_ptr<Calculator<InType, OutType>> makeCalculator<InType, OutType>(           \
       const MooseEnumItem &, const libMesh::ParallelObject &)

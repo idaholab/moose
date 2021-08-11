@@ -26,20 +26,26 @@ public:
   void divide(dof_id_type num);
   void pow(int p);
   void sqrt();
-  void min() { _value.assign(_value.size(), std::numeric_limits<T2>::min()); }
-  void max() { _value.assign(_value.size(), std::numeric_limits<T2>::max()); }
+  void min() { _value.assign(1, std::numeric_limits<T2>::min()); }
+  void max() { _value.assign(1, std::numeric_limits<T2>::max()); }
 
   void add(const std::vector<T1> & a);
   void addPow(const std::vector<T1> & a, int p);
   void min(const std::vector<T1> & a);
   void max(const std::vector<T1> & a);
 
+  CalculatorValue<std::vector<T1>, std::vector<T2>> & operator+=(const std::vector<T2> & b);
   CalculatorValue<std::vector<T1>, std::vector<T2>> & operator-=(const std::vector<T2> & b);
   CalculatorValue<std::vector<T1>, std::vector<T2>> & operator/=(const std::vector<T2> & b);
+  bool less_than(const std::vector<T2> & b) const { return _value < b; };
 
   void sum(const libMesh::Parallel::Communicator & comm);
   void min(const libMesh::Parallel::Communicator & comm);
   void max(const libMesh::Parallel::Communicator & comm);
+  void broadcast(const libMesh::Parallel::Communicator & comm, processor_id_type root_id)
+  {
+    comm.broadcast(_value, root_id);
+  }
 
 private:
   std::vector<T2> _value;

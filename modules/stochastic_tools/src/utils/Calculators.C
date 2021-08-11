@@ -25,7 +25,7 @@ namespace StochasticTools
 MultiMooseEnum
 makeCalculatorEnum()
 {
-  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7");
+  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7 median=8");
 }
 
 template <typename InType, typename OutType>
@@ -260,6 +260,148 @@ L2Norm<InType, OutType>::finalize(bool is_distributed)
   _l2_norm.sqrt();
 }
 
+// MEDIAN //////////////////////////////////////////////////////////////////////////////////////////
+template <typename InType, typename OutType>
+void
+Median<InType, OutType>::initialize()
+{
+  _storage.clear();
+}
+
+template <typename InType, typename OutType>
+void
+Median<InType, OutType>::update(const typename InType::value_type & val)
+{
+  _storage.emplace_back();
+  _storage.back().add(val);
+}
+
+template <typename InType, typename OutType>
+void
+Median<InType, OutType>::finalize(bool is_distributed)
+{
+  // Make sure we aren't doing anything silly like taking the median of an empty vector
+  _median.zero();
+  auto count = _storage.size();
+  if (is_distributed)
+    this->_communicator.sum(count);
+  if (count == 0)
+    return;
+
+  if (!is_distributed || this->n_processors() == 1)
+  {
+    std::sort(_storage.begin(),
+              _storage.end(),
+              [](const CValue<InType, OutType> & a, const CValue<InType, OutType> & b) {
+                return a.less_than(b.get());
+              });
+    if (count % 2)
+      _median += _storage[count / 2].get();
+    else
+    {
+      _median += _storage[count / 2].get();
+      _median += _storage[count / 2 - 1].get();
+      _median.divide(2);
+    }
+    return;
+  }
+
+  dof_id_type kgt = count % 2 ? (count / 2) : (count / 2 - 1);
+  dof_id_type klt = kgt;
+  while (true)
+  {
+    // Gather all sizes and figure out current number of values
+    std::vector<std::size_t> sz = {_storage.size()};
+    this->_communicator.allgather(sz);
+    dof_id_type n = std::accumulate(sz.begin(), sz.end(), 0);
+
+    // Choose the first value for the first processor with values
+    _median.zero();
+    for (const auto & i : index_range(sz))
+      if (sz[i])
+      {
+        if (this->processor_id() == i)
+          _median += _storage[0].get();
+        _median.broadcast(this->_communicator, i);
+        break;
+      }
+
+    // Count number of values greater than, less than, and equal to _median
+    std::vector<dof_id_type> m(3, 0);
+    for (const auto & val : _storage)
+    {
+      if (_median.less_than(val.get()))
+        m[0]++;
+      else if (val.less_than(_median.get()))
+        m[1]++;
+    }
+    this->_communicator.sum(m);
+    m[2] = n - m[0] - m[1];
+
+    // Remove greater than equal to
+    if ((m[0] + m[2]) <= kgt)
+    {
+      _storage.erase(std::remove_if(_storage.begin(),
+                                    _storage.end(),
+                                    [this](const CValue<InType, OutType> & val) {
+                                      return !val.less_than(_median.get());
+                                    }),
+                     _storage.end());
+      kgt -= m[0] + m[2];
+    }
+    // Remove less than equal to
+    else if ((m[1] + m[2]) <= klt)
+    {
+      _storage.erase(std::remove_if(_storage.begin(),
+                                    _storage.end(),
+                                    [this](const CValue<InType, OutType> & val) {
+                                      return !_median.less_than(val.get());
+                                    }),
+                     _storage.end());
+      klt -= m[1] + m[2];
+    }
+    // If the number of points is odd, then we've found it
+    else if (count % 2)
+      break;
+    // Get average of the two middle numbers
+    else
+    {
+      CValue<InType, OutType> num2;
+      // Find the next greater than
+      if (m[0] > kgt)
+      {
+        num2.max();
+        for (const auto & val : _storage)
+          if (_median.less_than(val.get()) && val.less_than(num2.get()))
+          {
+            num2.zero();
+            num2 += val.get();
+          }
+        num2.min(this->_communicator);
+      }
+      // Find the next less than
+      else if (m[1] > klt)
+      {
+        num2.min();
+        for (const auto & val : _storage)
+          if (val.less_than(_median.get()) && num2.less_than(val.get()))
+          {
+            num2.zero();
+            num2 += val.get();
+          }
+        num2.max(this->_communicator);
+      }
+      // Otherwise we know the other number is equal
+      else
+        num2 += _median.get();
+
+      _median += num2.get();
+      _median.divide(2);
+      break;
+    }
+  }
+}
+
 // makeCalculator //////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 std::unique_ptr<Calculator<InType, OutType>>
@@ -288,6 +430,9 @@ makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other
 
   else if (item == "ratio")
     return libmesh_make_unique<Ratio<InType, OutType>>(other, item);
+
+  else if (item == "median")
+    return libmesh_make_unique<Median<InType, OutType>>(other, item);
 
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;

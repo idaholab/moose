@@ -9,7 +9,7 @@
 [Reporters/stats]
   type = StatisticsReporter
   vectorpostprocessors = 'const'
-  compute = 'min max sum mean stddev norm2 ratio stderr'
+  compute = 'min max sum mean stddev norm2 ratio stderr median'
   ci_method = percentile
 []
 

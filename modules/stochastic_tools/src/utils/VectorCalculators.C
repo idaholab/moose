@@ -79,6 +79,17 @@ CalculatorValue<std::vector<T1>, std::vector<T2>>::max(const std::vector<T1> & a
 
 template <typename T1, typename T2>
 CalculatorValue<std::vector<T1>, std::vector<T2>> &
+CalculatorValue<std::vector<T1>, std::vector<T2>>::operator+=(const std::vector<T2> & b)
+{
+  if (b.size() > _value.size())
+    _value.resize(b.size(), T2());
+  for (const auto & i : index_range(b))
+    _value[i] += b[i];
+  return *this;
+}
+
+template <typename T1, typename T2>
+CalculatorValue<std::vector<T1>, std::vector<T2>> &
 CalculatorValue<std::vector<T1>, std::vector<T2>>::operator-=(const std::vector<T2> & b)
 {
   if (b.size() > _value.size())
