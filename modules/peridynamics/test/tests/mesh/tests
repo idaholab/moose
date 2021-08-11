@@ -123,8 +123,8 @@
     input = 'Error_nonexisting_blockID.i'
     cli_args = '--mesh-only'
     expect_err = "Block ID 3 in the 'blocks_to_pd' does not exist in the FE mesh!"
-    requirement = 'MeshGeneratorPD shall generate related error message when
-                   the exception is caught during runtime'
+    requirement = 'MeshGeneratorPD shall generate an error message when
+                   a block specified to be converted does not exist in the mesh'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#17723'
   [../]
@@ -134,8 +134,8 @@
     input = 'Error_wrong_bonding_blockID.i'
     cli_args = '--mesh-only'
     expect_err = "Block ID 3 in the 'bonding_block_pairs' does not exist in the FE mesh!"
-    requirement = 'MeshGeneratorPD shall generate related error message when
-                   the exception is caught during runtime'
+    requirement = 'MeshGeneratorPD shall generate an error message when
+                   a block specified for bonding pairs does not exist in the mesh'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#17723'
   [../]
@@ -145,8 +145,8 @@
     input = 'Error_nonexisting_sideset.i'
     cli_args = '--mesh-only'
     expect_err = "Sideset ID 3 in the 'sidesets_to_pd' does not exist in the finite element mesh!"
-    requirement = 'MeshGeneratorPD shall generate related error message when
-                   the exception is caught during runtime'
+    requirement = 'MeshGeneratorPD shall generate an error message when
+                   a specified sideset does not exist in the mesh'
     design = 'modules/peridynamics/MeshGeneratorPD.md'
     issues = '#17723'
   [../]
