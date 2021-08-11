@@ -152,7 +152,7 @@ P_out = 4.923e6 # Pa
   exodus = true
   checkpoint = true
   [Temp_Out_MATRIX]
-    type =  QuadSubChannelNormalSliceValues
+    type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"

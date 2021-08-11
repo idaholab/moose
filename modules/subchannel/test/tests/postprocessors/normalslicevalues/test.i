@@ -14,7 +14,7 @@ T_in = 359.15
   spacer_z = '0'
 []
 
-[Variables]
+[AuxVariables]
   [T]
   []
 []
@@ -27,21 +27,30 @@ T_in = 359.15
   []
 []
 
-[Outputs]
-  exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
+[Problem]
+  type = NoSolveProblem
+[]
+
+[Postprocessors]
+  [T]
+    type = QuadSubChannelPointValue
     variable = T
-    execute_on = final
-    file_base = "Temp_out_matrix"
-    height = 3.658
+    ix = 1
+    iy = 1
+    execute_on = 'initial timestep_end'
+    height = 0.5
   []
 []
 
-[Problem]
-  solve = false
+[Outputs]
+  csv = true
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  nl_rel_tol = 0.9
+  l_tol = 0.9
+  start_time = 0.0
+  end_time = 10.0
+  dt = 1.0
 []
