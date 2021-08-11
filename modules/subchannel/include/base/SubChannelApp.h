@@ -16,8 +16,8 @@ public:
 
   /// mass flow rate
   static const std::string MASS_FLOW_RATE;
-  /// entropy
-  static const std::string ENTROPY;
+  /// surface area
+  static const std::string SURFACE_AREA;
   /// sum of diversion crossflow
   static const std::string SUM_CROSSFLOW;
   /// pressure

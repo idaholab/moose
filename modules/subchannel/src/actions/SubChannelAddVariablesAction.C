@@ -24,7 +24,7 @@ void
 SubChannelAddVariablesAction::act()
 {
   std::vector<std::string> var_names = {SubChannelApp::MASS_FLOW_RATE,
-                                        SubChannelApp::ENTROPY,
+                                        SubChannelApp::SURFACE_AREA,
                                         SubChannelApp::SUM_CROSSFLOW,
                                         SubChannelApp::PRESSURE,
                                         SubChannelApp::PRESSURE_DROP,
