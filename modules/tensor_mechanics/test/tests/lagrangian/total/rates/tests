@@ -6,7 +6,7 @@
     requirement = "Classical Jaumann response to pure shear"
     abs_zero = 1e-6
     issues = '#17472'
-    design = 'source/materials/lagrangian/ComputeLagrangainStressSmall.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
   [../]
   [./truesdell_shear]
     type = CSVDiff
@@ -15,7 +15,7 @@
     requirement = "Classical Truesdell response to pure shear"
     abs_zero = 1e-6
     issues = '#17472'
-    design = 'source/materials/lagrangian/ComputeLagrangainStressSmall.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
   [../]
   [./truesdell_jacobian]
     type = PetscJacobianTester
@@ -24,7 +24,7 @@
     difference_tol = 1E10
     requirement = "Treusdell tangent is exact"
     issues = '#17472'
-    design = 'source/materials/lagrangian/ComputeLagrangainStressSmall.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
   [../]
   [./jaumann_jacobian]
     type = PetscJacobianTester
@@ -33,6 +33,6 @@
     difference_tol = 1E10
     requirement = "Jaumann tangent is exact"
     issues = '#17472'
-    design = 'source/materials/lagrangian/ComputeLagrangainStressSmall.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
   [../]
 []

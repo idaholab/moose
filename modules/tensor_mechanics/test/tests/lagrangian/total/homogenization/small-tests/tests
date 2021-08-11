@@ -5,7 +5,7 @@
     csvdiff = '1d-strain_out.csv'
     requirement = "Strain field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./1d-stress]
     type = CSVDiff
@@ -13,7 +13,7 @@
     csvdiff = '1d-stress_out.csv'
     requirement = "Stress field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
 
   [./2d-strain]
@@ -22,7 +22,7 @@
     csvdiff = '2d-strain_out.csv'
     requirement = "Strain field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./2d-stress]
     type = CSVDiff
@@ -30,7 +30,7 @@
     csvdiff = '2d-stress_out.csv'
     requirement = "Stress field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
  [./2d-mixed]
     type = CSVDiff
@@ -38,7 +38,7 @@
     csvdiff = '2d-mixed_out.csv'
     requirement = "Stress and strain field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
 
   [./3d-strain]
@@ -47,7 +47,7 @@
     csvdiff = '3d-strain_out.csv'
     requirement = "Strain field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
   [./3d-stress]
     type = CSVDiff
@@ -55,7 +55,7 @@
     csvdiff = '3d-stress_out.csv'
     requirement = "Stress field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
  [./3d-mixed]
     type = CSVDiff
@@ -63,6 +63,6 @@
     csvdiff = '3d-mixed_out.csv'
     requirement = "Stress and strain field hits the targets"
     issues = '#17473'
-    design = 'source/scalarkernels/lagrangian/HomogenizedConstraintScalarKernel.md'
+    design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
   [../]
 []

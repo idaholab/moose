@@ -102,7 +102,6 @@ LagrangianStressDivergenceBase::fullGrad(unsigned int m,
 
   // Unstabilized first
   RankTwoTensor G = gradOp(m, base_grad);
-  ;
 
   // And this adds  stabilization, only if required
   if (use_stable)

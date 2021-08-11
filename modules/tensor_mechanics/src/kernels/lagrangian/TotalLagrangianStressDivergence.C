@@ -19,7 +19,7 @@ TotalLagrangianStressDivergence::TotalLagrangianStressDivergence(const InputPara
   : LagrangianStressDivergenceBase(parameters),
     _pk1(getMaterialPropertyByName<RankTwoTensor>(_base_name + "pk1_stress")),
     _dpk1(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian")),
-    _avg_grad_trial(_phi.size()),
+    _avg_grad_trial(_grad_phi.size()),
     _uF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient"))
 {
@@ -95,7 +95,11 @@ TotalLagrangianStressDivergence::trialGrad(unsigned int k)
   // other displacement components).  However for the
   // stabilized methods the "trace" term introduces non-zeros on
   // k indices other than the current trial function index...
-  return fullGrad(k, _stabilize_strain, _grad_phi[_j][_qp], _avg_grad_trial[_j]);
+  if (_stabilize_strain)
+    return fullGrad(k, _stabilize_strain, _grad_phi[_j][_qp], _avg_grad_trial[_j]);
+  // Don't need the averaged value
+  else
+    return fullGrad(k, _stabilize_strain, _grad_phi[_j][_qp], RealVectorValue());
 }
 
 void

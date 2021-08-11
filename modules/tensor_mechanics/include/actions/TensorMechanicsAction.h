@@ -156,8 +156,7 @@ protected:
   bool _lk_homogenization;
 
   // Helper to translate into MOOSE talk
-  inline static const std::map<unsigned int, std::string> _order_mapper = {
-      {1, "FIRST"}, {3, "THIRD"}, {4, "FOURTH"}, {6, "SIXTH"}, {9, "NINTH"}};
+  static const std::map<unsigned int, std::string> _order_mapper;
   // Name of the homogenization scalar variable
   const std::string _hname = "hvar";
   // Name of the integrator

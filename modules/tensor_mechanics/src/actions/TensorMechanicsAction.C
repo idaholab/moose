@@ -122,6 +122,9 @@ TensorMechanicsAction::validParams()
   return params;
 }
 
+const std::map<unsigned int, std::string> TensorMechanicsAction::_order_mapper = {
+    {1, "FIRST"}, {3, "THIRD"}, {4, "FOURTH"}, {6, "SIXTH"}, {9, "NINTH"}};
+
 TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   : TensorMechanicsActionBase(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),

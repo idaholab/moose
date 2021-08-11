@@ -15,7 +15,7 @@ UpdatedLagrangianStressDivergence::validParams()
 UpdatedLagrangianStressDivergence::UpdatedLagrangianStressDivergence(
     const InputParameters & parameters)
   : LagrangianStressDivergenceBase(parameters),
-    _avg_grad_trial(_phi.size()),
+    _avg_grad_trial(_grad_phi.size()),
     _uF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "cauchy_stress")),
@@ -121,7 +121,11 @@ UpdatedLagrangianStressDivergence::trialGrad(unsigned int m, bool stabilize)
 {
   // We need the switch here because the "geometric" part of the tangent
   // doesn't take the stabilization
-  return fullGrad(m, stabilize, _grad_phi[_j][_qp], _avg_grad_trial[_j]);
+  if (stabilize)
+    return fullGrad(m, stabilize, _grad_phi[_j][_qp], _avg_grad_trial[_j]);
+  // Don't need the average value
+  else
+    return fullGrad(m, stabilize, _grad_phi[_j][_qp], RealVectorValue());
 }
 
 void

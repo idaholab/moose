@@ -34,7 +34,7 @@
     input = 'action_L.i'
     exodiff = 'L_small_nostab.e'
     requirement = "Action produces identical results for small deformations/no stabilization"
-    abs_zero = 1e-6
+    abs_zero = 1e-4
     cli_args = "Outputs/out/file_base=L_small_nostab Modules/TensorMechanics/Master/all/strain=SMALL Modules/TensorMechanics/Master/all/formulation=TOTAL Modules/TensorMechanics/Master/all/volumetric_locking_correction=false"
     issues = '#17472'
     design = 'source/actions/TensorMechanicsAction.md'
