@@ -100,10 +100,14 @@
     variable = temperature
     sort_by = id
   []
+
 []
 
 [Outputs]
   console = true
   exodus = true
   file_base = 'adjoint'
+  print_linear_converged_reason = false
+  print_nonlinear_converged_reason = false
+  print_linear_residuals = false
 []

@@ -102,6 +102,14 @@
     # y_coord_name = measure_data/measurement_ycoord
     # z_coord_name = measure_data/measurement_zcoord
   []
+  [vertical]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0.5 0 0'
+    end_point = '0.5 1.4 0'
+    num_points = 21
+    sort_by = y
+  [../]
 []
 
 [Reporters]
@@ -116,5 +124,12 @@
   json=false
   console = true
   exodus = false
+<<<<<<< HEAD:test/tests/optimizationreporter/objective_gradient_minimize/point_loads/forward.i
+=======
+  csv=true
+>>>>>>> 9811d3b (updated tests to output the point load figures included in the ldrd seed poster and report):test/tests/formfunction/objective_gradient_minimize/point_loads/forward.i
   file_base = 'forward'
+  print_linear_converged_reason = false
+  print_nonlinear_converged_reason = false
+  print_linear_residuals = false
 []
