@@ -58,9 +58,6 @@ PerfGraphRegistry::actuallyRegisterSection(const std::string & section_name,
     _section_name_to_id.emplace(section_name, id);
   }
 
-  if (id == 4)
-    libMesh::out << "ID4: " << section_name << std::endl;
-
   {
     std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
 

@@ -89,7 +89,6 @@ Action::Action(InputParameters parameters)
 void
 Action::timedAct()
 {
-  _console << "act_timer: " << _act_timer << std::endl;
   TIME_SECTION(_act_timer);
   act();
 }

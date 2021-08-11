@@ -45,8 +45,7 @@ outputFrameworkInformation(const MooseApp & app)
       << std::setw(console_field_width)
       << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width)
-      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
-      << std::endl;
+      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << std::endl;
 
   return oss.str();
 }
@@ -66,7 +65,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     bool pre_split = problem.getMooseApp().isUseSplit();
 
     // clang-format off
-    oss << "\n\nMesh: " << '\n'
+    oss << "\nMesh: " << '\n'
         << std::setw(console_field_width)
         << "  Parallel Type: " << (moose_mesh.isDistributedMesh() ? "distributed" : "replicated")
         << (forced || pre_split ? " (" : "")
