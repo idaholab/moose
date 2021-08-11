@@ -222,7 +222,7 @@ ComputeStrainBaseNOSPD::computeBondHorizonQpDeformationGradient()
     _multi[_qp] = _horizon_radius[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1] *
                   dg_sub_vol / _horizon_vol[_qp];
   else if (_stabilization == "BOND_HORIZON_II")
-    _multi[_qp] = _node_vol[0] * _node_vol[1] * dg_sub_vol / dg_sub_vol_sum;
+    _multi[_qp] = _node_vol[_qp] * dg_sub_vol / dg_sub_vol_sum;
 }
 
 void
