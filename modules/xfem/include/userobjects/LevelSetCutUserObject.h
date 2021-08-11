@@ -34,6 +34,9 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  virtual const std::vector<RealVectorValue>
+  getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
+
   /**
    * If the levelset value is positive, return 1, otherwise return 0.
    * @param node Pointer to the node

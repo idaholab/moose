@@ -92,3 +92,9 @@ RectangleCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_point
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
 }
+
+const std::vector<RealVectorValue>
+RectangleCutUserObject::getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackPlaneNormals() is not implemented for this object.");
+}
