@@ -88,12 +88,20 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     mooseError("MUST provide at least one matrix_tag for Kernel: ", _moose_object.name());
 
   for (auto & matrix_tag_name : matrix_tag_names)
-    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name.name()));
+  {
+    const auto tag_id = _subproblem.getMatrixTagID(matrix_tag_name.name());
+    _matrix_tags.insert(tag_id);
+    _matrix_tag_to_coeff[tag_id] = 1;
+  }
 
   auto & extra_matrix_tags = _tag_params.get<std::vector<TagName>>("extra_matrix_tags");
 
   for (auto & matrix_tag_name : extra_matrix_tags)
-    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
+  {
+    const auto tag_id = _subproblem.getMatrixTagID(matrix_tag_name);
+    _matrix_tags.insert(tag_id);
+    _matrix_tag_to_coeff[tag_id] = 1;
+  }
 
   _re_blocks.resize(_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
@@ -103,25 +111,59 @@ void
 TaggingInterface::useVectorTag(const TagName & tag_name)
 {
   if (!_subproblem.vectorTagExists(tag_name))
-    mooseError("Vector tag ", tag_name, " does not exsit in system");
+    mooseError("Vector tag ", tag_name, " does not exist in system");
 
   _vector_tags.insert(_subproblem.getVectorTagID(tag_name));
+}
+
+bool
+TaggingInterface::hasVectorTag(const TagName & tag_name) const
+{
+  if (!_subproblem.vectorTagExists(tag_name))
+    mooseError("Vector tag ", tag_name, " does not exist in system");
+
+  return _vector_tags.find(_subproblem.getVectorTagID(tag_name)) != _vector_tags.end();
+}
+
+void
+TaggingInterface::eraseVectorTag(const TagName & tag_name)
+{
+  if (!_subproblem.vectorTagExists(tag_name))
+    mooseError("Vector tag ", tag_name, " does not exist in system");
+
+  _vector_tags.erase(_subproblem.getVectorTagID(tag_name));
 }
 
 void
 TaggingInterface::useMatrixTag(const TagName & tag_name)
 {
   if (!_subproblem.matrixTagExists(tag_name))
-    mooseError("Matrix tag ", tag_name, " does not exsit in system");
+    mooseError("Matrix tag ", tag_name, " does not exist in system");
 
   _matrix_tags.insert(_subproblem.getMatrixTagID(tag_name));
+}
+
+void
+TaggingInterface::assignMatrixCoeff(const TagName & tag_name, const Real coeff)
+{
+  if (!_subproblem.matrixTagExists(tag_name))
+    mooseError("Matrix tag ", tag_name, " does not exist in system");
+
+  const auto tag_id = _subproblem.getMatrixTagID(tag_name);
+  if (_matrix_tags.find(tag_id) == _matrix_tags.end())
+    mooseError("Attempting to assign coeff to matrix tag name ",
+               tag_name,
+               " but this object isn't using that tag name. If you want to use that tag name, "
+               "please call 'useMatrixTag' first");
+
+  _matrix_tag_to_coeff[tag_id] = coeff;
 }
 
 void
 TaggingInterface::useVectorTag(TagID tag_id)
 {
   if (!_subproblem.vectorTagExists(tag_id))
-    mooseError("Vector tag ", tag_id, " does not exsit in system");
+    mooseError("Vector tag ", tag_id, " does not exist in system");
 
   _vector_tags.insert(tag_id);
 }
@@ -130,7 +172,7 @@ void
 TaggingInterface::useMatrixTag(TagID tag_id)
 {
   if (!_subproblem.matrixTagExists(tag_id))
-    mooseError("Matrix tag ", tag_id, " does not exsit in system");
+    mooseError("Matrix tag ", tag_id, " does not exist in system");
 
   _matrix_tags.insert(tag_id);
 }
@@ -238,15 +280,20 @@ TaggingInterface::assignTaggedLocalResidual()
 void
 TaggingInterface::accumulateTaggedLocalMatrix()
 {
-  for (auto & ke : _ke_blocks)
-    *ke += _local_ke;
+  auto mat_tags_it = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_tags_it)
+    _ke_blocks[i]->add(_matrix_tag_to_coeff[*mat_tags_it], _local_ke);
 }
 
 void
 TaggingInterface::assignTaggedLocalMatrix()
 {
-  for (auto & ke : _ke_blocks)
-    *ke = _local_ke;
+  auto mat_tags_it = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_tags_it)
+  {
+    _ke_blocks[i]->zero();
+    _ke_blocks[i]->add(_matrix_tag_to_coeff[*mat_tags_it], _local_ke);
+  }
 }
 
 TaggingInterface::~TaggingInterface() {}
