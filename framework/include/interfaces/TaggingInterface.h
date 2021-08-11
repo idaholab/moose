@@ -36,13 +36,17 @@ public:
 
   static InputParameters validParams();
 
+  bool hasVectorTag(const TagName & tag_name) const;
   void useVectorTag(const TagName & tag_name);
+  void eraseVectorTag(const TagName & tag_name);
 
   void useMatrixTag(const TagName & tag_name);
 
   void useVectorTag(TagID tag_id);
 
   void useMatrixTag(TagID tag_id);
+
+  void assignMatrixCoeff(const TagName & tag_name, Real coeff);
 
   bool isVectorTagged() { return _vector_tags.size() > 0; }
 
@@ -157,6 +161,9 @@ protected:
 
   /// Holds residual entries as they are accumulated by this Kernel
   DenseMatrix<Number> _local_ke;
+
+  /// Holds map from matrix tag to accumulation coefficient
+  std::unordered_map<TagID, Real> _matrix_tag_to_coeff;
 };
 
 #define usingTaggingInterfaceMembers                                                               \

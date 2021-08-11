@@ -698,7 +698,8 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
   {
     auto & vec = getVector(tag);
 
-    if (type != ParallelType::AUTOMATIC && vec.type() != type)
+    if (type != ParallelType::AUTOMATIC && vec.type() != ParallelType::AUTOMATIC &&
+        vec.type() != type)
       mooseError("Cannot add tagged vector '",
                  _subproblem.vectorTagName(tag),
                  "', in system '",
