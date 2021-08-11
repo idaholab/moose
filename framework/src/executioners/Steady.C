@@ -88,7 +88,7 @@ Steady::execute()
 
     if (!lastSolveConverged())
     {
-      _console << "Aborting as solve did not converge\n";
+      _console << "Aborting as solve did not converge" << std::endl;
       break;
     }
 
