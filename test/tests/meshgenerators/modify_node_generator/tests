@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#11640'
+  design = 'meshgenerators/ElementGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
+                  'points, element types, and connectivity,'
+
+    [single_element]
+      type = 'Exodiff'
+      input = 'element_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'element_generator_in.e'
+      recover = false
+
+      detail = 'resulting in a single element mesh, or'
+
+    []
+
+    [multi_elem_multi_gen]
+      type = 'Exodiff'
+      input = 'eg2.i'
+      cli_args = '--mesh-only'
+      exodiff = 'eg2_in.e'
+      recover = false
+
+      detail = 'resulting in a mesh with multiple disconnected elements.'
+    []
+  []
+[]
