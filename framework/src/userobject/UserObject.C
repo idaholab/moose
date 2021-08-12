@@ -41,19 +41,16 @@ UserObject::validParams()
                         "before the IC and again after mesh adaptivity (if applicable).");
   params.declareControllable("enable");
 
+  params.addParam<bool>("force_preaux", false, "Forces the UserObject to be executed in PREAUX");
+  params.addParam<bool>("force_postaux", false, "Forces the UserObject to be executed in POSTAUX");
   params.addParam<bool>(
-      "force_preaux", false, "Forces the UserObject to be executed in PREAUX");
-  params.addParam<bool>(
-      "force_postaux", false, "Forces the UserObject to be executed in POSTAUX");
-  params.addParam<bool>(
-      "force_preic",
-      false,
-      "Forces the UserObject to be executed in PREIC during initial setup");
+      "force_preic", false, "Forces the UserObject to be executed in PREIC during initial setup");
 
   params.registerBase("UserObject");
   params.registerSystemAttributeName("UserObject");
 
-  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial force_preaux force_postaux force_preic",
+  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial "
+                              "force_preaux force_postaux force_preic",
                               "Advanced");
   return params;
 }
@@ -83,8 +80,9 @@ UserObject::UserObject(const InputParameters & parameters)
   // Check the pre/post aux flag
   if (!parameters.isParamSetByAddParam("force_preaux") &&
       !parameters.isParamSetByAddParam("force_postaux"))
-    paramError("force_preaux", "A user object may be specified as executing before or after "
-        "AuxKernels, not both.");
+    paramError("force_preaux",
+               "A user object may be specified as executing before or after "
+               "AuxKernels, not both.");
 }
 
 std::set<UserObjectName>
