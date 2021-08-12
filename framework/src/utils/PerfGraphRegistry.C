@@ -14,6 +14,14 @@ getPerfGraphRegistry()
   return perf_graph_registry_singleton;
 }
 
+PerfGraphRegistry::PerfGraphRegistry()
+{
+  // Reserve space so that re-allocation doesn't need to happen much
+  // This does not take much memory and, for most cases, will keep a single
+  // reallocation from happening
+  _id_to_section_info.reserve(5000);
+}
+
 unsigned int
 PerfGraphRegistry::registerSection(const std::string & section_name, unsigned int level)
 {
@@ -60,14 +68,7 @@ PerfGraphRegistry::actuallyRegisterSection(const std::string & section_name,
 
   {
     std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
-
-    auto & section_info = _id_to_section_info[id];
-
-    section_info._id = id;
-    section_info._name = section_name;
-    section_info._level = level;
-    section_info._live_message = live_message;
-    section_info._print_dots = print_dots;
+    _id_to_section_info.emplace_back(id, section_name, level, live_message, print_dots);
   }
 
   return id;
@@ -116,7 +117,7 @@ PerfGraphRegistry::sectionExists(const PerfID section_id) const
 {
   std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
 
-  return _id_to_section_info.count(section_id);
+  return section_id < _id_to_section_info.size();
 }
 
 long unsigned int
@@ -125,6 +126,12 @@ PerfGraphRegistry::numSections() const
   std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
 
   return _id_to_section_info.size();
+}
+
+const PerfGraphRegistry::SectionInfo &
+PerfGraphRegistry::readSectionInfo(PerfID section_id)
+{
+  return _id_to_section_info[section_id];
 }
 
 }

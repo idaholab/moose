@@ -63,7 +63,7 @@ PerfGraph::~PerfGraph() { disableLivePrint(); }
 const std::string &
 PerfGraph::sectionName(const PerfID id) const
 {
-  return _perf_graph_registry.sectionInfo(id)._name;
+  return _perf_graph_registry.readSectionInfo(id)._name;
 }
 
 void
@@ -229,9 +229,9 @@ PerfGraph::push(const PerfID id)
 
   _stack[_current_position] = new_node;
 
-  // Add this to the execution list
+  // Add this to the execution list unless the message is empty - but pre-emted by live_print_all
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_perf_graph_registry.sectionInfo(id)._live_message.empty() || _live_print_all))
+      (!_perf_graph_registry.readSectionInfo(id)._live_message.empty() || _live_print_all))
     addToExecutionList(id, IncrementState::STARTED, current_time, start_memory);
 }
 
@@ -263,7 +263,7 @@ PerfGraph::pop()
 
   // Add this to the exection list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_perf_graph_registry.sectionInfo(current_node->id())._live_message.empty() ||
+      (!_perf_graph_registry.readSectionInfo(current_node->id())._live_message.empty() ||
        _live_print_all))
   {
     addToExecutionList(current_node->id(), IncrementState::FINISHED, current_time, current_memory);
@@ -340,7 +340,7 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto children_memory = current_node->childrenMemory();
   auto total_memory = current_node->totalMemory();
 
-  auto & section_info = _perf_graph_registry.sectionInfo(id);
+  auto & section_info = _perf_graph_registry.readSectionInfo(id);
 
   // RHS insertion on purpose
   auto & section_time = _section_time[section_info._name];
@@ -367,7 +367,7 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
   mooseAssert(_perf_graph_registry.sectionExists(current_node->id()),
               "Unable to find section name!");
 
-  auto & current_section_info = _perf_graph_registry.sectionInfo(current_node->id());
+  auto & current_section_info = _perf_graph_registry.readSectionInfo(current_node->id());
 
   auto & name = current_section_info._name;
   auto & node_level = current_section_info._level;

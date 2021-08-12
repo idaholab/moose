@@ -221,6 +221,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
 
   while (p != _current_execution_list_end)
   {
+    // The ternary here is for wrapping around
     auto next_p = p + 1 < MAX_EXECUTION_LIST_SIZE ? p + 1 : 0;
 
     auto & section_increment = _execution_list[p];
