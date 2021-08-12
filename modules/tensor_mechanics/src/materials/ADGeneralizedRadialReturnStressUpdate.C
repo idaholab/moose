@@ -123,10 +123,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(
   {
     returnMappingSolve(stress_dev, stress_new_vector, delta_gamma, _console);
 
-    if (delta_gamma != 0.0)
-      computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
-    else
-      inelastic_strain_increment.zero();
+    computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
   }
   else
     inelastic_strain_increment.zero();
