@@ -153,9 +153,13 @@ MultiApp::validParams()
 
   params.addParam<std::vector<std::string>>(
       "cli_args",
-      std::vector<std::string>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
+
+  params.addParam<std::vector<FileName>>("cli_args_files",
+                                             "File names that should be looked in for additional command line arguments "
+                                             "to pass to the sub apps. Each line of a file is set to each sub app. If only "
+                                             "one line is provided, it will be applied to all sub apps.");
 
   params.addRangeCheckedParam<Real>("relaxation_factor",
                                     1.0,
@@ -229,7 +233,11 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _perf_backup(registerTimedSection("backup", 3)),
+    _perf_restore(registerTimedSection("restore", 3)),
+    _perf_init(registerTimedSection("init", 3)),
+    _perf_reset_app(registerTimedSection("resetApp", 3))
 {
 }
 
@@ -246,10 +254,6 @@ MultiApp::init(unsigned int num_apps, bool batch_mode)
 
   _has_bounding_box.resize(_my_num_apps, false);
   _bounding_box.resize(_my_num_apps);
-
-  if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
-    paramError("cli_args",
-               "The number of items supplied must be 1 or equal to the number of sub apps.");
 }
 
 void
@@ -268,6 +272,9 @@ MultiApp::createApps()
 {
   if (!_has_an_app)
     return;
+
+  // Read commandLine arguments that will be used when creating apps
+  readCommandLineArguments();
 
   Moose::ScopedCommSwapper swapper(_my_comm);
 
@@ -292,6 +299,61 @@ MultiApp::initialSetup()
     // if not using positions, we create the sub-apps in initialSetup instead of right after
     // construction of MultiApp
     createApps();
+}
+
+void
+MultiApp::readCommandLineArguments()
+{
+  if (isParamValid("cli_args") && isParamValid("cli_args_files"))
+    paramError("cli_args",
+        "Both 'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ",
+        name());
+
+  // Clear up old stuffs
+  _cli_args.clear();
+
+  if (isParamValid("cli_args"))
+  {
+    _cli_args = getParam<std::vector<std::string>>("cli_args");
+
+    if (_cli_args.size() !=1 && _cli_args.size() != _total_num_apps)
+       paramError("cli_args",
+           " The number of commandLine arguments must either be only one or match the total number of apps ",
+           name());
+
+  } else if (isParamValid("cli_args_files"))
+  {
+    std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
+
+    if (!cli_args_files.size())
+      paramError("cli_args_files", "You need to privde at least on file name ");
+
+    for (unsigned int p_file_it = 0; p_file_it < cli_args_files.size(); p_file_it++)
+    {
+      std::string cli_args_file = cli_args_files[p_file_it];
+
+      // Read the file on the root processor then broadcast it
+      if (processor_id() == 0)
+      {
+        MooseUtils::checkFileReadable(cli_args_file);
+
+        std::ifstream is(cli_args_file.c_str());
+        std::copy(std::istream_iterator<std::string>(is),
+                  std::istream_iterator<std::string>(),
+                  std::back_inserter(_cli_args));
+      }
+    }
+
+    // Broad cast all arguments to everyone
+    _communicator.broadcast(_cli_args);
+
+    if (!_cli_args.size())
+      paramError("cli_args_files","There is no commandLine argument in file");
+
+    if (_cli_args.size()!=1 && _cli_args.size() != _total_num_apps)
+      paramError("cli_args_files",
+        " The number of commandLine arguments must either be only one or match the total number of apps ");
+  }
 }
 
 void
@@ -799,6 +861,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
 std::string
 MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
+
+  mooseAssert(_cli_args.size(),"There is no commandLine argument \n");
 
   // Single set of "cli_args" to be applied to all sub apps
   if (_cli_args.size() == 1)

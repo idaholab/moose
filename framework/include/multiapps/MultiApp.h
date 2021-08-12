@@ -350,6 +350,11 @@ protected:
   virtual void fillPositions();
 
   /**
+   * Fill command line arguments for sub apps
+   */
+  void readCommandLineArguments();
+
+  /**
    * Helper function for creating an App instance.
    *
    * @param i The local app number to create.
@@ -503,8 +508,8 @@ protected:
   /// Backups for each local App
   SubAppBackups & _backups;
 
-  /// Storage for command line arguments
-  const std::vector<std::string> & _cli_args;
+  /// CommandLine arguments
+  std::vector<std::string> _cli_args;
 
   /// Flag indicates if or not restart from the latest solution
   bool _keep_solution_during_restore;
