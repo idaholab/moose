@@ -122,16 +122,16 @@ protected:
   /// Whether or not the older solution is needed
   mutable bool _need_u_older;
 
-  /// Whether any dual number calculations are needed
-  mutable bool _need_dual;
-  /// whether dual_u is needed
-  mutable bool _need_dual_u;
-  /// whether dual_u_dot is needed
-  mutable bool _need_dual_u_dot;
+  /// Whether any AD calculations are needed
+  mutable bool _need_ad;
+  /// whether ad_u is needed
+  mutable bool _need_ad_u;
+  /// whether ad_u_dot is needed
+  mutable bool _need_ad_u_dot;
   /// The scalar solution with derivative information
-  ADVariableValue _dual_u;
+  ADVariableValue _ad_u;
   /// The first derivative of the scalar solution with derivative information
-  ADVariableValue _dual_u_dot;
+  ADVariableValue _ad_u_dot;
 
 private:
   /**

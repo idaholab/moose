@@ -42,9 +42,9 @@ MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
     _need_du_dotdot_du(false),
     _need_u_old(false),
     _need_u_older(false),
-    _need_dual(false),
-    _need_dual_u(false),
-    _need_dual_u_dot(false)
+    _need_ad(false),
+    _need_ad_u(false),
+    _need_ad_u_dot(false)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -88,7 +88,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
   {
     // We've already calculated everything in an earlier reinit. All we have to do is re-sort the
     // derivative vector for AD calculations
-    if (_need_dual)
+    if (_need_ad)
       computeAD(/*nodal_ordering=*/true);
     return;
   }
@@ -306,7 +306,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
   }
 
   // Automatic differentiation
-  if (_need_dual)
+  if (_need_ad)
     computeAD(/*nodal_ordering=*/false);
 }
 
@@ -323,30 +323,30 @@ MooseVariableScalar::computeAD(bool
 #endif
   auto n_dofs = _dof_indices.size();
 
-  if (_need_dual_u)
+  if (_need_ad_u)
   {
-    _dual_u.resize(n_dofs);
+    _ad_u.resize(n_dofs);
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
-      _dual_u[i] = _u[i];
+      _ad_u[i] = _u[i];
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_dual_u[i].derivatives(), _dof_indices[i], 1.);
+      Moose::derivInsert(_ad_u[i].derivatives(), _dof_indices[i], 1.);
 #else
-      Moose::derivInsert(_dual_u[i].derivatives(), ad_offset + i, 1.);
+      Moose::derivInsert(_ad_u[i].derivatives(), ad_offset + i, 1.);
 #endif
     }
   }
 
-  if (_need_dual_u_dot)
+  if (_need_ad_u_dot)
   {
-    _dual_u_dot.resize(n_dofs);
+    _ad_u_dot.resize(n_dofs);
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
-      _dual_u_dot[i] = _u_dot[i];
+      _ad_u_dot[i] = _u_dot[i];
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_dual_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
+      Moose::derivInsert(_ad_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
 #else
-      Moose::derivInsert(_dual_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
+      Moose::derivInsert(_ad_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
 #endif
     }
   }
@@ -399,8 +399,8 @@ MooseVariableScalar::insert(NumericVector<Number> & soln)
 const ADVariableValue &
 MooseVariableScalar::adSln() const
 {
-  _need_dual = _need_dual_u = true;
-  return _dual_u;
+  _need_ad = _need_ad_u = true;
+  return _ad_u;
 }
 
 const VariableValue &
@@ -436,8 +436,8 @@ MooseVariableScalar::adUDot() const
 {
   if (_sys.solutionUDot())
   {
-    _need_dual = _need_dual_u_dot = _need_u_dot = true;
-    return _dual_u_dot;
+    _need_ad = _need_ad_u_dot = _need_u_dot = true;
+    return _ad_u_dot;
   }
   else
     mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
