@@ -24,6 +24,11 @@ public:
   virtual const std::vector<Real> & getKGrid() const { return _k_grid; }
 
   /**
+   * Return lateral loss coefficient
+   */
+  virtual const Real & getKij() const { return _kij; }
+
+  /**
    * Return the number of axial cells
    */
   virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
@@ -124,6 +129,8 @@ protected:
   const std::vector<Real> & _spacer_z;
   /// form loss coefficient of the spacers
   const std::vector<Real> & _spacer_k;
+  /// Lateral form loss coefficient
+  const Real & _kij;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter

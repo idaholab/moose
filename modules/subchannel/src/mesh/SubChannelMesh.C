@@ -14,6 +14,7 @@ SubChannelMesh::validParams()
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   return params;
@@ -26,6 +27,7 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
+    _kij(getParam<Real>("Kij")),
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
@@ -61,6 +63,7 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
     _k_grid(other_mesh._k_grid),
     _spacer_z(other_mesh._spacer_z),
     _spacer_k(other_mesh._spacer_k),
+    _kij(other_mesh._kij),
     _pitch(other_mesh._pitch),
     _rod_diameter(other_mesh._rod_diameter),
     _n_cells(other_mesh._n_cells),

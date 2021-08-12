@@ -53,10 +53,12 @@ protected:
                                          libMesh::DenseVector<Real> & root);
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
+  SubChannelMesh & _subchannel_mesh;
   libMesh::DenseMatrix<Real> & _Wij;
   libMesh::DenseMatrix<Real> _Wij_old;
   libMesh::DenseMatrix<Real> _WijPrime;
   const Real _g_grav;
+  const Real & _kij;
   unsigned int _n_cells;
   unsigned int _n_blocks;
   unsigned int _n_gaps;
@@ -77,7 +79,6 @@ protected:
   const Real & _dt;
   /// Outlet Pressure
   const Real & _P_out;
-  SubChannelMesh & _subchannel_mesh;
   /// Thermal diffusion coefficient used in turbulent crossflow
   const Real & _beta;
   /// Turbulent modeling parameter used in axial momentum equation
