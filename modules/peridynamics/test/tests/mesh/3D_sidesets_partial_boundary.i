@@ -4,15 +4,12 @@
 
   [./fmg]
     type = FileMeshGenerator
-    file = 2D_2blocks.e
+    file = cylinder.e
   [../]
-  [./gpd]
+  [./mgpd]
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = false
-    convert_block_ids = '1 2'
+    construct_pd_sidesets = true
   [../]
 []
-
-# This input file is intended to be run with the "--mesh-only" option so
-# no other sections are required

@@ -10,7 +10,8 @@
     type = MeshGeneratorPD
     input = fmg
     retain_fe_mesh = true
-    convert_block_ids = 2
+    blocks_to_pd = 2
+    #blocks_as_fe = 1
   [../]
 []
 

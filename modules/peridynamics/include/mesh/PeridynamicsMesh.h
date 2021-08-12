@@ -48,11 +48,10 @@ public:
    * @param fe_mesh   The finite element mesh based on which the peridynamics mesh will be created
    * @param converted_elem_id  The IDs of finite elements to be converted to peridynamics mesh
    */
-  void
-  createPeridynamicsMeshData(MeshBase & fe_mesh,
-                             std::set<dof_id_type> converted_elem_id,
-                             std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
-                             std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs);
+  void createPeridynamicsMeshData(MeshBase & fe_mesh,
+                                  std::set<dof_id_type> converted_elem_id,
+                                  std::multimap<SubdomainID, SubdomainID> bonding_block_pairs,
+                                  std::multimap<SubdomainID, SubdomainID> non_bonding_block_pairs);
 
   /**
    * Function to return neighbor nodes indices for node node_id
@@ -227,11 +226,11 @@ protected:
 
   /**
    * Function to create neighbors and other data for each material point with given horizon
-   * @param connect_block_id_pairs   ID pairs of blocks to be connected via interfacial bonds
-   * @param non_connect_block_id_pairs   ID pairs of blocks not to be connected
+   * @param bonding_block_pairs   ID pairs of blocks to be connected via interfacial bonds
+   * @param non_bonding_block_pairs   ID pairs of blocks not to be connected
    */
-  void createNodeHorizBasedData(std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
-                                std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs);
+  void createNodeHorizBasedData(std::multimap<SubdomainID, SubdomainID> bonding_block_pairs,
+                                std::multimap<SubdomainID, SubdomainID> non_bonding_block_pairs);
 
   /**
    * Function to check existence of interface between two blocks
