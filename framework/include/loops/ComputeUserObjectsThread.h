@@ -103,7 +103,7 @@ groupUserObjects(TheWarehouse & w,
   //
   // This function attempts to sort a UO based on any ICs or AuxKernels which depend on
   // it. Alternatively, a user may select which group to execute their object with by
-  // controlling the force_preic and force_preaux input parameters.
+  // controlling the force_preic, force_preaux and force_postaux input parameters.
   //
   for (const auto obj : objs)
   {
@@ -122,6 +122,12 @@ groupUserObjects(TheWarehouse & w,
     {
       w.update(obj, AttribPreAux(w, true));
       w.update(obj, AttribPostAux(w, false));
+    }
+
+    if (obj->isParamValid("force_postaux") && obj->template getParam<bool>("force_postaux"))
+    {
+      w.update(obj, AttribPreAux(w, false));
+      w.update(obj, AttribPostAux(w, true));
     }
   }
 }
