@@ -156,10 +156,11 @@ MultiApp::validParams()
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
-  params.addParam<std::vector<FileName>>("cli_args_files",
-                                             "File names that should be looked in for additional command line arguments "
-                                             "to pass to the sub apps. Each line of a file is set to each sub app. If only "
-                                             "one line is provided, it will be applied to all sub apps.");
+  params.addParam<std::vector<FileName>>(
+      "cli_args_files",
+      "File names that should be looked in for additional command line arguments "
+      "to pass to the sub apps. Each line of a file is set to each sub app. If only "
+      "one line is provided, it will be applied to all sub apps.");
 
   params.addRangeCheckedParam<Real>("relaxation_factor",
                                     1.0,
@@ -305,7 +306,8 @@ void
 MultiApp::readCommandLineArguments()
 {
   if (isParamValid("cli_args") && isParamValid("cli_args_files"))
-    paramError("cli_args",
+    paramError(
+        "cli_args",
         "Both 'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ",
         name());
 
@@ -316,12 +318,13 @@ MultiApp::readCommandLineArguments()
   {
     _cli_args = getParam<std::vector<std::string>>("cli_args");
 
-    if (_cli_args.size() !=1 && _cli_args.size() != _total_num_apps)
-       paramError("cli_args",
-           " The number of commandLine arguments must either be only one or match the total number of apps ",
-           name());
-
-  } else if (isParamValid("cli_args_files"))
+    if (_cli_args.size() != 1 && _cli_args.size() != _total_num_apps)
+      paramError("cli_args",
+                 " The number of commandLine arguments must either be only one or match the total "
+                 "number of apps ",
+                 name());
+  }
+  else if (isParamValid("cli_args_files"))
   {
     std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
 
@@ -348,11 +351,12 @@ MultiApp::readCommandLineArguments()
     _communicator.broadcast(_cli_args);
 
     if (!_cli_args.size())
-      paramError("cli_args_files","There is no commandLine argument in file");
+      paramError("cli_args_files", "There is no commandLine argument in file");
 
-    if (_cli_args.size()!=1 && _cli_args.size() != _total_num_apps)
+    if (_cli_args.size() != 1 && _cli_args.size() != _total_num_apps)
       paramError("cli_args_files",
-        " The number of commandLine arguments must either be only one or match the total number of apps ");
+                 " The number of commandLine arguments must either be only one or match the total "
+                 "number of apps ");
   }
 }
 
@@ -862,7 +866,7 @@ std::string
 MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
 
-  mooseAssert(_cli_args.size(),"There is no commandLine argument \n");
+  mooseAssert(_cli_args.size(), "There is no commandLine argument \n");
 
   // Single set of "cli_args" to be applied to all sub apps
   if (_cli_args.size() == 1)
