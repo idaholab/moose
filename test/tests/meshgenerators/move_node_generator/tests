@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#18577'
+  design = 'meshgenerators/MoveNodeGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to modify node(s) coordinates'
+
+    [single_element]
+      type = 'Exodiff'
+      input = 'test.i'
+      cli_args = '--mesh-only'
+      exodiff = 'test_in.e'
+      recover = false
+      mesh_type = replicated
+
+      detail = 'in a mesh with a single first order element'
+
+    []
+    [3d]
+      type = 'Exodiff'
+      input = 'test2.i'
+      exodiff = 'test2_out.e'
+
+      detail = 'in a Cartesian 3D mesh.'
+    []
+  []
+[]
