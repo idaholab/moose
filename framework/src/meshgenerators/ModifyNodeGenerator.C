@@ -38,13 +38,14 @@ ModifyNodeGenerator::ModifyNodeGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 ModifyNodeGenerator::generate()
 {
-  if (_node_id.size() != _new_position.size()) mooseError("Node ids and new positions sizes do not match. Please check your input");
+  if (_node_id.size() != _new_position.size())
+    mooseError("Node ids and new positions sizes do not match. Please check your input");
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  
 
   // get the node
-  for (int i=0; i < int(_node_id.size());i++){
-    auto *node=mesh->query_node_ptr(_node_id[i]);
+  for (int i = 0; i < int(_node_id.size()); i++)
+  {
+    auto * node = mesh->query_node_ptr(_node_id[i]);
 
     // change the position of the acquired node
     node->assign(_new_position[i]);

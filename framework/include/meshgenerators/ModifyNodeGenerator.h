@@ -34,6 +34,4 @@ protected:
 
   /// The new position of the node
   const std::vector<Point> _new_position;
-
 };
-
