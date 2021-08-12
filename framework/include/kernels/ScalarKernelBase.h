@@ -13,12 +13,9 @@
 #include "ScalarCoupleable.h"
 #include "MooseVariableScalar.h"
 
-// Forward declarations
-class ScalarKernelBase;
-
-template <>
-InputParameters validParams<ScalarKernelBase>();
-
+/**
+ * Base class shared by AD and non-AD scalar kernels
+ */
 class ScalarKernelBase : public ResidualObject, public ScalarCoupleable
 {
 public:
@@ -26,6 +23,9 @@ public:
 
   ScalarKernelBase(const InputParameters & parameters);
 
+  /**
+   * Reinitialization method called before each call to computeResidual()
+   */
   virtual void reinit() = 0;
 
   /**
