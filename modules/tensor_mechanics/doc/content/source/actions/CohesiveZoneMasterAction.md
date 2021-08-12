@@ -2,7 +2,7 @@
 
 ## Description
 
-The `CohesiveZoneMaster` action simplifies the input file syntax by adding the appropriate kernels required by a cohesive zone model. See [CohesiveZoneMaster](CohesiveZoneMaster/index.md) for more details.
+The `CohesiveZoneAction` simplifies the input file syntax by adding the appropriate `CZMInterfaceKernels`, `ComputeDisplacementJump`, and `ComputeGlobalTraction` objects depending on the selected kinematic. See [CohesiveZoneMaster](CohesiveZoneMaster/index.md) for more details.
 
-!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
-!syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneMasterAction
+!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
+!syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
