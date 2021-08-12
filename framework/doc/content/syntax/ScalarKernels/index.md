@@ -26,6 +26,9 @@ be used in a scalar equation.
 To create an AD scalar kernel, derive from `ADScalarKernel` and implement the
 method `computeQpResidual()`.
 
+!alert warning title=AD global indexing required
+`ADScalarKernel` only works with MOOSE configured with global AD indexing (the default).
+
 !alert warning title=Using values computed by user objects
 As a caution, if using user objects to compute
 `ADReal` values, be sure to execute those user objects on `NONLINEAR` to
