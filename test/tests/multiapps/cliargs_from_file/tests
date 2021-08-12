@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#18596'
+  design = 'syntax/MultiApps/index.md'
+
+  [./multiline_file]
+    type = 'Exodiff'
+    input = 'cliargs_master.i'
+    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+
+    requirement = "The system shall support reading command-line arguments from a file with multiple lines"
+  [../]
+
+  [./one_line_file]
+    type = 'Exodiff'
+    input = 'cliargs_master.i'
+    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    cli_args = 'MultiApps/sub_app/cli_args_files=cliargs_oneline.txt'
+    requirement = "The system shall support reading command-line arguments from a file with a single line"
+  [../]
+
+  [./two_files]
+    type = 'Exodiff'
+    input = 'cliargs_master.i'
+    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    cli_args = 'MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt"'
+    requirement = "The system shall support reading command-line arguments from multiple files"
+  [../]
+[]
