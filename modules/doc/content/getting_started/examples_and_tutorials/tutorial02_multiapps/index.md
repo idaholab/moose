@@ -5,4 +5,4 @@ used to couple multiphysics applications together across differing time or lengt
 tutorial is currently a stand-alone slide set as linked below.
 
 !style halign=center fontsize=150%
-[Tutorial 2: MultiApps Presentation](https://www.mooseframework.org/workshop/multiapps)
+[Tutorial 2: MultiApps Presentation](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)

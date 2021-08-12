@@ -1,12 +1,12 @@
 # Code Verification with MOOSE\\ (a practical guide) id=title
 
 !style halign=center
-www.mooseframework.org
+[www.mooseframework.org](index.md exact=True)
 
 !--
 
 !style halign=center fontsize=150%
-[Tutorial 3: Code Verification](https://mooseframework.inl.gov/getting_started/examples_and_tutorials/tutorial03_verification)
+[Tutorial 3: Code Verification](tutorial03_verification/index.md alternative=https://mooseframework.inl.gov/getting_started/examples_and_tutorials/tutorial03_verification)
 
 !---
 

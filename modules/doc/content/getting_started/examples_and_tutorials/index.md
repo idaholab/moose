@@ -91,10 +91,10 @@ This tutorial guides the user through some commonly-used aspects of the [Porous 
 
 The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the training presentation, a recent video recording of the training, and other targeted more advanced workshop presentations.
 
-- [MOOSE Training Workshop](https://www.mooseframework.org/workshop)
+- [MOOSE Training Workshop](workshop/index.md alternative=missing_config.md)
 - [MOOSE Training Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
-- [MOOSE MultiApps Workshop](https://www.mooseframework.org/workshop/multiapps)
-- [MOOSE Verification Workshop](https://www.mooseframework.org/workshop/verification)
+- [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
+- [MOOSE Verification Workshop](tutorial03_verification/presentation/index.md alternative=missing_config.md)
 
 MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
 
