@@ -73,10 +73,9 @@ class Translator(mixins.ConfigObject):
         if executioner is None:
             self.__executioner = ParallelBarrier()
 
-        # Populate the content list and set the translator key for the page objects
+        # Populate the content list
         for p in content:
             self.addPage(p)
-            p.translator = self
 
         # Caching for page searches (see findPages)
         self.__page_cache = dict()
@@ -119,7 +118,7 @@ class Translator(mixins.ConfigObject):
         """Add an additional page to the list of available pages."""
         self.__executioner.addPage(page)
         if self.__initialized:
-            self.__executioner.init([page], self.destination)
+            self.__executioner.init([page])
 
     def getPages(self):
         """Return the Page objects"""
@@ -255,7 +254,7 @@ class Translator(mixins.ConfigObject):
             self.__checkRequires(ext)
 
         # Initialize the Page objects
-        self.__executioner.init(nodes or self.getPages(), self.destination)
+        self.__executioner.init(nodes or self.getPages())
         self.__initialized = True
 
     def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):

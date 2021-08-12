@@ -107,7 +107,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self._page_result = dict()
         self._global_attributes = dict()
 
-    def init(self, nodes, destination):
+    def init(self, nodes):
         """Initialize the Page objects."""
 
         # Call Extension init() method
@@ -120,8 +120,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         LOG.info('Executing extension initPage() methods...')
         t = time.time()
         for node in nodes:
-            # Setup destination and output extension
-            node.base = destination
+            # Assign translator instance, destination root, and output extension
+            node.translator = self.translator
+            node.base = self.translator.destination
             if isinstance(node, pages.Source):
                 node.output_extension = self.translator.renderer.EXTENSION
 

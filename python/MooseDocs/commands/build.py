@@ -141,9 +141,6 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 if source == fname:
                     key = fname.replace(root, '').strip('/')
                     page = common.create_file_page(key, fname, self._primary.reader.EXTENSIONS)
-                    page.translator = self._primary
-                    if isinstance(page, pages.Source):
-                        page.output_extension = self._primary.renderer.EXTENSION
                     self._primary.addPage(page)
                     self._contents.append(page)
                     return page

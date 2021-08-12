@@ -20,10 +20,10 @@ class Page(object):
     This classes uses properties to minimize modifications after construction.
     """
     def __init__(self, fullname, **kwargs):
-        self.base = kwargs.pop('base', None) # set by Translator.init()
+        self.base = kwargs.pop('base', None) # set by Translator.init() or addPage()
         self.source = kwargs.pop('source') # supplied source file/directory
         self.external = kwargs.pop('external', False) # set by get_content.py used by appsyntax.py
-        self.translator = kwargs.pop('translator', None) # set by Translator.__init__() or addPage()
+        self.translator = kwargs.pop('translator', None) # set by Translator.init() or addPage()
         self.attributes = kwargs
         self._fullname = fullname            # local path of the node
         self._name = fullname.split('/')[-1] # folder/file name
