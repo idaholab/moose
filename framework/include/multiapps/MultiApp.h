@@ -509,7 +509,7 @@ protected:
   SubAppBackups & _backups;
 
   /// CommandLine arguments
-  std::vector<std::string> _cli_args;
+  const std::vector<std::string> & _cli_args;
 
   /// Flag indicates if or not restart from the latest solution
   bool _keep_solution_during_restore;

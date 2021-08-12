@@ -153,6 +153,7 @@ MultiApp::validParams()
 
   params.addParam<std::vector<std::string>>(
       "cli_args",
+      std::vector<std::string>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -240,6 +241,13 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _perf_init(registerTimedSection("init", 3)),
     _perf_reset_app(registerTimedSection("resetApp", 3))
 {
+
+  if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
+      parameters.isParamValid("cli_args_files"))
+    paramError(
+        "cli_args",
+        "Both 'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ",
+        name());
 }
 
 void
@@ -305,27 +313,12 @@ MultiApp::initialSetup()
 void
 MultiApp::readCommandLineArguments()
 {
-  if (isParamValid("cli_args") && isParamValid("cli_args_files"))
-    paramError(
-        "cli_args",
-        "Both 'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ",
-        name());
-
-  // Clear up old stuffs
-  _cli_args.clear();
-
-  if (isParamValid("cli_args"))
+  if (isParamValid("cli_args_files"))
   {
-    _cli_args = getParam<std::vector<std::string>>("cli_args");
+    auto & cli_args = const_cast<std::vector<std::string> &>(_cli_args);
 
-    if (_cli_args.size() != 1 && _cli_args.size() != _total_num_apps)
-      paramError("cli_args",
-                 " The number of commandLine arguments must either be only one or match the total "
-                 "number of apps ",
-                 name());
-  }
-  else if (isParamValid("cli_args_files"))
-  {
+    cli_args.clear();
+
     std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
 
     if (!cli_args_files.size())
@@ -343,21 +336,21 @@ MultiApp::readCommandLineArguments()
         std::ifstream is(cli_args_file.c_str());
         std::copy(std::istream_iterator<std::string>(is),
                   std::istream_iterator<std::string>(),
-                  std::back_inserter(_cli_args));
+                  std::back_inserter(cli_args));
       }
     }
 
     // Broad cast all arguments to everyone
-    _communicator.broadcast(_cli_args);
+    _communicator.broadcast(cli_args);
 
-    if (!_cli_args.size())
+    if (!cli_args.size())
       paramError("cli_args_files", "There is no commandLine argument in file");
-
-    if (_cli_args.size() != 1 && _cli_args.size() != _total_num_apps)
-      paramError("cli_args_files",
-                 " The number of commandLine arguments must either be only one or match the total "
-                 "number of apps ");
   }
+
+  if (_cli_args.size() && _cli_args.size() != 1 && _cli_args.size() != _total_num_apps)
+    mooseError("cli_args",
+               " The number of commandLine arguments must either be only one or match the total "
+               "number of sub apps ");
 }
 
 void

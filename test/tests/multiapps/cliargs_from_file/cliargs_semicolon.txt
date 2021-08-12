@@ -1,0 +1,4 @@
+BCs/left/value=0;BCs/right/value=0.5
+BCs/left/value=0;BCs/right/value=1
+BCs/left/value=0;BCs/right/value=2
+BCs/left/value=0;BCs/right/value=3
