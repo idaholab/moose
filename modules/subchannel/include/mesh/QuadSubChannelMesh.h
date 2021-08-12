@@ -36,7 +36,6 @@ public:
 
   const unsigned int & getNx() const { return _nx; }
   const unsigned int & getNy() const { return _ny; }
-
   const Real & getGap() const { return _gap; }
 
   /**

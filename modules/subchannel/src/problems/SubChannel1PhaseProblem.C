@@ -73,8 +73,10 @@ SubChannel1PhaseProblem::validParams()
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
+    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
+    _kij(_subchannel_mesh.getKij()),
     _one(1.0),
     _TR(isTransient() ? 1. : 0.),
     _compute_density(getParam<bool>("compute_density")),
@@ -82,7 +84,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_power(getParam<bool>("compute_power")),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
@@ -222,11 +223,9 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto volume = dz * (*_S_flow_soln)(node_in);
-      double am = 1.0; // means no damping
       auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
       // Wij positive out of i into j;
-      auto mdot_out = am * ((*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out)-time_term) +
-                      (1.0 - am) * (*_mdot_soln)(node_out);
+      auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out)-time_term;
       if (mdot_out < 0)
       {
         _console << "Wij = : " << _Wij << "\n";
@@ -302,12 +301,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
           dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) / rho_in / _dt;
 
-      auto Mass_Term1 =
+      auto mass_term1 =
           std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
-      auto Mass_Term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
+      auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
 
-      auto CrossFlow_Term = 0.0;
-      auto Turbulent_Term = 0.0;
+      auto crossflow_term = 0.0;
+      auto turbulent_term = 0.0;
 
       unsigned int counter = 0;
       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -323,31 +322,31 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto rho_j = (*_rho_soln)(node_in_j);
         auto Si = (*_S_flow_soln)(node_in_i);
         auto Sj = (*_S_flow_soln)(node_in_j);
-        auto U_star = 0.0;
+        auto u_star = 0.0;
         // figure out donor axial velocity
         if (_Wij(i_gap, iz) > 0.0)
-          U_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
+          u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
         else
-          U_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
+          u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
 
-        CrossFlow_Term +=
-            _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * U_star;
+        crossflow_term +=
+            _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
 
-        Turbulent_Term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
+        turbulent_term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
                                                   (*_mdot_soln)(node_out_j) / Sj / rho_j -
                                                   (*_mdot_soln)(node_out_i) / Si / rho_i);
         counter++;
       }
-      Turbulent_Term *= _CT;
+      turbulent_term *= _CT;
 
       auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
       auto fi = computeFrictionFactor(Re);
       auto ki = k_grid[iz - 1];
-      auto Friction_Term = (fi * dz / Dh_i + ki) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
+      auto friction_term = (fi * dz / Dh_i + ki) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
                            (S * (*_rho_soln)(node_out));
-      auto Gravity_Term = _g_grav * (*_rho_soln)(node_out)*dz * S;
-      auto DP = std::pow(S, -1.0) * (time_term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
-                                     Turbulent_Term + Friction_Term + Gravity_Term); // Pa
+      auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
+      auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
+                                     turbulent_term + friction_term + gravity_term); // Pa
       _DP_soln->set(node_out, DP);
     }
   }
@@ -575,16 +574,8 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
       auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
       auto Lij = pitch;
       // total local form loss in the ij direction
-      auto Kij = 0.5;
-
-      // apply lateral pressure difference damping
-      auto asp = 1.0; // means no damping
-      auto DPi = (*_DP_soln)(node_out_i);
-      auto DPj = (*_DP_soln)(node_out_j);
-      auto DPij_out = (*_P_soln)(node_out_i) - (*_P_soln)(node_out_j);
-      auto DPij_in = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
-      auto DPij = (1 - asp) * (DPij_out + DPi - DPj) + asp * DPij_in;
-
+      auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
+      auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
       // Figure out donor cell density
       auto rho_star = 0.0;
       if (_Wij(i_gap, iz) > 0.0)
@@ -594,19 +585,19 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
       else
         rho_star = (rho_i + rho_j) / 2.0;
 
-      auto Mass_Term_out =
+      auto mass_term_out =
           (*_mdot_soln)(node_out_i) / Si / rho_i + (*_mdot_soln)(node_out_j) / Sj / rho_j;
-      auto Mass_Term_in =
+      auto mass_term_in =
           (*_mdot_soln)(node_in_i) / Si / rho_i + (*_mdot_soln)(node_in_j) / Sj / rho_j;
-      auto Term_out = Sij * rho_star * (Lij / dz) * Mass_Term_out;
-      auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * _Wij(i_gap, iz - 1);
-      auto Pressure_Term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
+      auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
+      auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
+      auto inertia_term = term_out - term_in;
+      auto pressure_term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
       auto time_term =
           _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
 
       Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) =
-          time_term + Kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz)) +
-          Term_out * _Wij(i_gap, iz) - Term_in - Pressure_Term;
+          time_term + friction_term + inertia_term - pressure_term;
     }
   }
 
