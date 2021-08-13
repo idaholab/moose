@@ -140,8 +140,8 @@ void
 PeridynamicsMesh::createPeridynamicsMeshData(
     MeshBase & fe_mesh,
     std::set<dof_id_type> converted_elem_id,
-    std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
-    std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs)
+    std::multimap<SubdomainID, SubdomainID> bonding_block_pairs,
+    std::multimap<SubdomainID, SubdomainID> non_bonding_block_pairs)
 {
   _dim = fe_mesh.mesh_dimension();
   _n_pdnodes = converted_elem_id.size();
@@ -217,7 +217,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(
   }
 
   // search node neighbors and create other nodal data
-  createNodeHorizBasedData(connect_block_id_pairs, non_connect_block_id_pairs);
+  createNodeHorizBasedData(bonding_block_pairs, non_bonding_block_pairs);
 
   createNeighborHorizonBasedData(); // applies to non-ordinary state-based model only.
 
@@ -241,8 +241,8 @@ PeridynamicsMesh::createPeridynamicsMeshData(
 
 void
 PeridynamicsMesh::createNodeHorizBasedData(
-    std::multimap<SubdomainID, SubdomainID> connect_block_id_pairs,
-    std::multimap<SubdomainID, SubdomainID> non_connect_block_id_pairs)
+    std::multimap<SubdomainID, SubdomainID> bonding_block_pairs,
+    std::multimap<SubdomainID, SubdomainID> non_bonding_block_pairs)
 {
   // search neighbors
   for (unsigned int i = 0; i < _n_pdnodes; ++i)
@@ -254,13 +254,13 @@ PeridynamicsMesh::createNodeHorizBasedData(
       if (dis <= 1.0001 * _pdnode_horizon_radius[i] && j != i)
       {
         bool is_interface = false;
-        if (!connect_block_id_pairs.empty())
+        if (!bonding_block_pairs.empty())
           is_interface =
-              checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], connect_block_id_pairs);
+              checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], bonding_block_pairs);
 
-        if (!non_connect_block_id_pairs.empty())
+        if (!non_bonding_block_pairs.empty())
           is_interface =
-              !checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], non_connect_block_id_pairs);
+              !checkInterface(_pdnode_blockID[i], _pdnode_blockID[j], non_bonding_block_pairs);
 
         if (_pdnode_blockID[i] == _pdnode_blockID[j] || is_interface)
         {

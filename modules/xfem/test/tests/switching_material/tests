@@ -20,6 +20,16 @@
     design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md'
     issues = '#17041'
   []
+  [one_cut_moving_using_mesh_cut]
+    type = Exodiff
+    input = one_cut_moving_using_mesh_cut.i
+    exodiff = 'one_cut_moving_using_mesh_cut_out.e one_cut_moving_using_mesh_cut_out.e-s002 one_cut_moving_using_mesh_cut_out.e-s003 one_cut_moving_using_mesh_cut_out_cut.e'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall allow switching materials based on the side of an interface for a single moving cut defined using a mesh as the cutting object.'
+    design = 'XFEMCutSwitchingMaterial.md CutSubdomainIDAux.md '
+    issues = '#17041 #17797'
+  []
   [two_cuts_stationary]
     type = Exodiff
     input = two_cuts_stationary.i
