@@ -78,8 +78,7 @@ UserObject::UserObject(const InputParameters & parameters)
     _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {
   // Check the pre/post aux flag
-  if (!parameters.isParamSetByAddParam("force_preaux") &&
-      !parameters.isParamSetByAddParam("force_postaux"))
+  if (getParam<bool>("force_preaux") && getParam<bool>("force_postaux"))
     paramError("force_preaux",
                "A user object may be specified as executing before or after "
                "AuxKernels, not both.");
