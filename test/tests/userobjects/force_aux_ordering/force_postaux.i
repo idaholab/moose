@@ -7,6 +7,8 @@
   ymin = 0
   ymax = 1
   ny = 5
+
+  allow_renumbering = false
 []
 
 [Variables]
