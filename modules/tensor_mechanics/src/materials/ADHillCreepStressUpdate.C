@@ -47,7 +47,9 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
     _exponential(1.0),
     _exp_time(1.0),
     _hill_constants(getMaterialPropertyByName<std::vector<Real>>(_base_name + "hill_constants")),
-    _hill_tensor(getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor")),
+    _hill_tensor(_use_transformation
+                     ? &getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor")
+                     : nullptr),
     _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
@@ -101,7 +103,7 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
   else
   {
     ADDenseVector Ms(6);
-    _hill_tensor[_qp].vector_mult(Ms, stress_new);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
     qsigma_square = Ms.dot(stress_new);
   }
 
@@ -153,7 +155,7 @@ ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_tri
   else
   {
     ADDenseVector Ms(6);
-    _hill_tensor[_qp].vector_mult(Ms, stress_new);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
     qsigma_square = Ms.dot(stress_new);
   }
 
@@ -196,11 +198,10 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
   else
   {
     ADDenseVector Ms(6);
-    _hill_tensor[_qp].vector_mult(Ms, stress_dev);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
     qsigma_square = Ms.dot(stress_dev);
   }
 
-  qsigma_square = std::sqrt(qsigma_square);
   if (qsigma_square == 0)
   {
     inelasticStrainIncrement.zero();
@@ -214,7 +215,7 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
   }
 
   // Use Hill-type flow rule to compute the time step inelastic increment.
-  ADReal prefactor = delta_gamma / qsigma_square;
+  ADReal prefactor = delta_gamma / std::sqrt(qsigma_square);
 
   if (!_use_transformation)
   {
@@ -244,7 +245,7 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
   {
     ADDenseVector inelastic_strain_increment(6);
     ADDenseVector Ms(6);
-    _hill_tensor[_qp].vector_mult(Ms, stress_dev);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
 
     for (unsigned int i = 0; i < 6; i++)
       inelastic_strain_increment(i) = Ms(i) * prefactor;

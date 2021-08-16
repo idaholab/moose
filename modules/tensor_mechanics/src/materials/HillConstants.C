@@ -58,7 +58,9 @@ HillConstants::HillConstants(const InputParameters & parameters)
     _hill_constants_input(getParam<std::vector<Real>>("hill_constants")),
     _hill_tensor(6, 6),
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
-    _hill_tensor_material(declareProperty<DenseMatrix<Real>>(_base_name + "hill_tensor")),
+    _hill_tensor_material(_use_large_rotation
+                              ? &declareProperty<DenseMatrix<Real>>(_base_name + "hill_tensor")
+                              : nullptr),
     _zxz_angles(isParamValid("rotation_angles") ? getParam<RealVectorValue>("rotation_angles")
                                                 : RealVectorValue(0.0, 0.0, 0.0)),
     _transformation_tensor(6, 6),
@@ -129,7 +131,8 @@ HillConstants::computeQpProperties()
     rotateHillConstants(_hill_constant_material[_qp]);
 
   // Update material coefficients whether or not they are temperature-dependent
-  _hill_tensor_material[_qp] = _hill_tensor;
+  if (_use_large_rotation)
+    (*_hill_tensor_material)[_qp] = _hill_tensor;
 
   // To be used only for simple cases (axis-aligned, small deformation)
   if (!_use_large_rotation)

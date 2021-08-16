@@ -125,9 +125,6 @@ protected:
   ADReal _yield_condition;
   ADReal _yield_stress;
 
-  /// Hill constant material
-  const MaterialProperty<std::vector<Real>> & _hill_constants;
-
   /// Hill tensor, when global axes do not (somehow) align with those of the material
   /// Example: Large rotation due to rigid body and/or large deformation kinematics
   const MaterialProperty<DenseMatrix<Real>> & _hill_tensor;

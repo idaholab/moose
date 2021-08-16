@@ -42,7 +42,6 @@ ADHillPlasticityStressUpdate::ADHillPlasticityStressUpdate(const InputParameters
     _hardening_slope(0.0),
     _yield_condition(1.0),
     _yield_stress(getParam<Real>("yield_stress")),
-    _hill_constants(getMaterialPropertyByName<std::vector<Real>>(_base_name + "hill_constants")),
     _hill_tensor(getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor")),
     _stress_np1(6)
 {

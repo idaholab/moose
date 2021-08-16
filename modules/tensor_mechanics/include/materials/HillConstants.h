@@ -53,7 +53,7 @@ protected:
   MaterialProperty<std::vector<Real>> & _hill_constant_material;
 
   /// Material property for storing transformed Hill tensor
-  MaterialProperty<DenseMatrix<Real>> & _hill_tensor_material;
+  MaterialProperty<DenseMatrix<Real>> * _hill_tensor_material;
 
   /// Euler angles for transformation of hill tensor
   RealVectorValue _zxz_angles;
