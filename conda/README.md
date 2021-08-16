@@ -7,17 +7,17 @@ This directory contains the conda recipes necessary for MOOSE Application based 
 
 - [Install Miniconda or Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (we recommend Miniconda)
 
-- Configure Conda to work with conda-forge, and our MOOSE Framework server:
+- Configure Conda to work with conda-forge, and our INL public server:
 
   ```bash
   conda config --add channels conda-forge
-  conda config --add channels idaholab
+  conda config --add channels https://conda.software.inl.gov/public
   ```
 
-- Install the moose-env package from Idaholab and name your environment 'moose':
+- Install moose-libmesh, moose-tools package and name your environment 'moose':
 
   ```bash
-  conda create --name moose-libmesh moose-tools
+  conda create --name moose moose-libmesh moose-tools
   ```
 
 - Activate the moose environment +(do this for any new terminal opened)+:
