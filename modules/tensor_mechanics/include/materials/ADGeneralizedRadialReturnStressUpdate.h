@@ -184,4 +184,7 @@ protected:
 
   /// Maximum integration error time step
   Real _max_integration_error_time_step;
+
+  /// Whether to use fully transformed Hill's tensor due to rigid body or large deformation kinematic rotation
+  const bool _use_transformation;
 };

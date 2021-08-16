@@ -47,6 +47,9 @@ ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & paramet
     _exponential(1.0),
     _exp_time(1.0),
     _hill_constants(getMaterialPropertyByName<std::vector<Real>>(_base_name + "hill_constants")),
+    _hill_tensor(_use_transformation
+                     ? &getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor")
+                     : nullptr),
     _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
@@ -79,20 +82,30 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
                                          const ADDenseVector & stress_new,
                                          const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real & F = _hill_constants[_qp][0];
-  const Real & G = _hill_constants[_qp][1];
-  const Real & H = _hill_constants[_qp][2];
-  const Real & L = _hill_constants[_qp][3];
-  const Real & M = _hill_constants[_qp][4];
-  const Real & N = _hill_constants[_qp][5];
+  ADReal qsigma_square;
+  if (!_use_transformation)
+  {
+    // Hill constants, some constraints apply
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
-  ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
-  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
-  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
-  qsigma_square += 2 * L * stress_new(4) * stress_new(4);
-  qsigma_square += 2 * M * stress_new(5) * stress_new(5);
-  qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+    qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
+    qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
+    qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
+    qsigma_square += 2 * L * stress_new(4) * stress_new(4);
+    qsigma_square += 2 * M * stress_new(5) * stress_new(5);
+    qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+  }
+  else
+  {
+    ADDenseVector Ms(6);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
+    qsigma_square = Ms.dot(stress_new);
+  }
 
   qsigma_square = std::sqrt(qsigma_square);
   qsigma_square -= 1.5 * _two_shear_modulus * delta_gamma;
@@ -101,7 +114,6 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
 
   _inelastic_strain_rate[_qp] = MetaPhysicL::raw_value(creep_rate);
-
   // Return iteration difference between creep strain and inelastic strain multiplier
   return creep_rate * _dt - delta_gamma;
 }
@@ -121,21 +133,31 @@ ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_tri
                                            const ADDenseVector & stress_new,
                                            const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real & F = _hill_constants[_qp][0];
-  const Real & G = _hill_constants[_qp][1];
-  const Real & H = _hill_constants[_qp][2];
-  const Real & L = _hill_constants[_qp][3];
-  const Real & M = _hill_constants[_qp][4];
-  const Real & N = _hill_constants[_qp][5];
+  ADReal qsigma_square;
+  if (!_use_transformation)
+  {
+    // Hill constants, some constraints apply
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
-  // Equivalent deviatoric stress function.
-  ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
-  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
-  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
-  qsigma_square += 2 * L * stress_new(4) * stress_new(4);
-  qsigma_square += 2 * M * stress_new(5) * stress_new(5);
-  qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+    // Equivalent deviatoric stress function.
+    qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
+    qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
+    qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
+    qsigma_square += 2 * L * stress_new(4) * stress_new(4);
+    qsigma_square += 2 * M * stress_new(5) * stress_new(5);
+    qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+  }
+  else
+  {
+    ADDenseVector Ms(6);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
+    qsigma_square = Ms.dot(stress_new);
+  }
 
   qsigma_square = std::sqrt(qsigma_square);
   qsigma_square -= 1.5 * _two_shear_modulus * delta_gamma;
@@ -154,24 +176,32 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
                                                const ADDenseVector & stress_dev,
                                                const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real & F = _hill_constants[_qp][0];
-  const Real & G = _hill_constants[_qp][1];
-  const Real & H = _hill_constants[_qp][2];
-  const Real & L = _hill_constants[_qp][3];
-  const Real & M = _hill_constants[_qp][4];
-  const Real & N = _hill_constants[_qp][5];
+  ADReal qsigma_square;
+  if (!_use_transformation)
+  {
+    // Hill constants, some constraints apply
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
-  // Equivalent deviatoric stress function.
-  ADReal qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));
-  qsigma_square += G * (stress(2, 2) - stress(0, 0)) * (stress(2, 2) - stress(0, 0));
-  qsigma_square += H * (stress(0, 0) - stress(1, 1)) * (stress(0, 0) - stress(1, 1));
-  qsigma_square += 2 * L * stress(1, 2) * stress(1, 2);
-  qsigma_square += 2 * M * stress(0, 2) * stress(0, 2);
-  qsigma_square += 2 * N * stress(0, 1) * stress(0, 1);
+    // Equivalent deviatoric stress function.
+    qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));
+    qsigma_square += G * (stress(2, 2) - stress(0, 0)) * (stress(2, 2) - stress(0, 0));
+    qsigma_square += H * (stress(0, 0) - stress(1, 1)) * (stress(0, 0) - stress(1, 1));
+    qsigma_square += 2 * L * stress(1, 2) * stress(1, 2);
+    qsigma_square += 2 * M * stress(0, 2) * stress(0, 2);
+    qsigma_square += 2 * N * stress(0, 1) * stress(0, 1);
+  }
+  else
+  {
+    ADDenseVector Ms(6);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
+    qsigma_square = Ms.dot(stress_dev);
+  }
 
-  // moose assert > 0
-  qsigma_square = std::sqrt(qsigma_square);
   if (qsigma_square == 0)
   {
     inelasticStrainIncrement.zero();
@@ -185,28 +215,49 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
   }
 
   // Use Hill-type flow rule to compute the time step inelastic increment.
-  const ADReal prefactor = delta_gamma / qsigma_square;
+  ADReal prefactor = delta_gamma / std::sqrt(qsigma_square);
 
-  // Reference for plastic multiplier:
-  // Finite element modelling investigation of the effects of cladding texture on creep in PWR fuel
-  // pins Anna Antoniou, Masters degree, 2015.
+  if (!_use_transformation)
+  {
+    // Hill constants, some constraints apply
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
-  inelasticStrainIncrement(0, 0) =
-      prefactor / std::sqrt(H + G) *
-      (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
-  inelasticStrainIncrement(1, 1) =
-      prefactor / std::sqrt(F + H) *
-      (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
-  inelasticStrainIncrement(2, 2) =
-      prefactor / std::sqrt(F + G) *
-      (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
+    inelasticStrainIncrement(0, 0) =
+        prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
+    inelasticStrainIncrement(1, 1) =
+        prefactor * (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
+    inelasticStrainIncrement(2, 2) =
+        prefactor * (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
 
-  inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) =
-      prefactor / std::sqrt(2 * N) * 2.0 * N * stress(0, 1);
-  inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
-      prefactor / std::sqrt(2 * M) * 2.0 * M * stress(0, 2);
-  inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
-      prefactor / std::sqrt(2 * L) * 2.0 * L * stress(1, 2);
+    inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) =
+        prefactor * 2.0 * N * stress(0, 1);
+    inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
+        prefactor * 2.0 * M * stress(0, 2);
+    inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
+        prefactor * 2.0 * L * stress(1, 2);
+  }
+  else
+  {
+    ADDenseVector inelastic_strain_increment(6);
+    ADDenseVector Ms(6);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
+
+    for (unsigned int i = 0; i < 6; i++)
+      inelastic_strain_increment(i) = Ms(i) * prefactor;
+
+    inelasticStrainIncrement(0, 0) = inelastic_strain_increment(0);
+    inelasticStrainIncrement(1, 1) = inelastic_strain_increment(1);
+    inelasticStrainIncrement(2, 2) = inelastic_strain_increment(2);
+
+    inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) = inelastic_strain_increment(3);
+    inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) = inelastic_strain_increment(4);
+    inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) = inelastic_strain_increment(5);
+  }
 
   ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);
