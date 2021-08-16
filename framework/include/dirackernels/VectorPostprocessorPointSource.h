@@ -35,10 +35,16 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
+  /// values at each xyz coordinate
   const std::vector<Real> & _vpp_values;
+  /// x coordinate
   const std::vector<Real> & _x_coord;
+  /// y coordinate
   const std::vector<Real> & _y_coord;
+  ///z coordinate
   const std::vector<Real> & _z_coord;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
+  /// helper function to read in data
+  const std::vector<Real> & getPointDataHelper(const std::string & param);
 };

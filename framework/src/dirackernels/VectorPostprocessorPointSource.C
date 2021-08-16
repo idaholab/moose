@@ -52,29 +52,10 @@ VectorPostprocessorPointSource::validParams()
 VectorPostprocessorPointSource::VectorPostprocessorPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
-    _vpp_values(
-        isParamValid("vector_postprocessor")
-            ? getReporterValueByName<std::vector<Real>>(
-                  getParam<std::string>("vector_postprocessor") + "/" +
-                  getParam<std::string>("value_name"))
-            : getReporterValueByName<std::vector<Real>>(getParam<std::string>("value_name"))),
-    _x_coord(
-        isParamValid("vector_postprocessor")
-            ? getReporterValueByName<std::vector<Real>>(
-                  getParam<std::string>("vector_postprocessor") + "/" +
-                  getParam<std::string>("x_coord_name"))
-            : getReporterValueByName<std::vector<Real>>(getParam<std::string>("x_coord_name"))),
-    _y_coord(
-        isParamValid("vector_postprocessor")
-            ? getReporterValueByName<std::vector<Real>>(
-                  getParam<std::string>("vector_postprocessor") + "/" +
-                  getParam<std::string>("y_coord_name"))
-            : getReporterValueByName<std::vector<Real>>(getParam<std::string>("y_coord_name"))),
-    _z_coord(isParamValid("vector_postprocessor")
-                 ? getReporterValueByName<std::vector<Real>>(
-                       getParam<std::string>("vector_postprocessor") + "/" +
-                       getParam<std::string>("z_coord_name"))
-                 : getReporterValueByName<std::vector<Real>>(getParam<std::string>("z_coord_name")))
+    _vpp_values(getPointDataHelper("value_name")),
+    _x_coord(getPointDataHelper("x_coord_name")),
+    _y_coord(getPointDataHelper("y_coord_name")),
+    _z_coord(getPointDataHelper("z_coord_name"))
 {
 }
 
@@ -112,4 +93,14 @@ VectorPostprocessorPointSource::computeQpResidual()
 {
   //  This is negative because it's a forcing function that has been brought over to the left side
   return -_test[_i][_qp] * _vpp_values[_point_to_index[_current_point]];
+}
+
+const std::vector<Real> &
+VectorPostprocessorPointSource::getPointDataHelper(const std::string & param)
+{
+  ReporterName rname = isParamValid("vector_postprocessor")
+                           ? ReporterName(getParam<std::string>("vector_postprocessor"),
+                                          getParam<std::string>(param))
+                           : ReporterName(getParam<std::string>(param));
+  return getReporterValueByName<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED);
 }
