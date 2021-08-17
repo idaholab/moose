@@ -620,6 +620,26 @@ MooseVariableData<OutputType>::computeADAveraging()
       for (unsigned int qp = 0; qp < nqp; qp++)
         _ad_u_average[qp] = value_temp;
     }
+
+    if (_need_ad_grad_u)
+    {
+      _ad_grad_u_average.resize(nqp);
+
+      for (unsigned int qp = 0; qp < nqp; qp++)
+      {
+        _ad_grad_u_average[qp] = _ad_zero;
+      }
+
+      auto value_temp = _ad_grad_u[0];
+      value_temp = 0.0;
+
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        value_temp += _ad_JxW[qp] * _ad_coord[qp] * _ad_grad_u[qp];
+      value_temp /= _current_elem_volume;
+
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        _ad_grad_u_average[qp] = value_temp;
+    }
   }
 }
 
