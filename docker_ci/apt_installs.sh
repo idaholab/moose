@@ -30,7 +30,8 @@ apt-get install -y \
   flex \
   libboost-all-dev \
   emacs \
-  libgtest-dev
+  libgtest-dev \
+  sudo
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*
