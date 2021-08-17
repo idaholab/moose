@@ -1,6 +1,6 @@
 ## This example is documented on YouTube at:
 ## https://www.youtube.com/watch?v=L9plLYkAbvQ
-## 
+##
 ## Additional files (e.g. the CAD model, results)
 ## can be downloaded freely from Zenodo at:
 ## https://doi.org/10.5281/zenodo.3886965
