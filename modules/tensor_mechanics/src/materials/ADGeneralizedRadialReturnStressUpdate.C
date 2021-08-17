@@ -38,6 +38,13 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "inelastic_strain_rate_name",
       "Name of the material property that stores the inelastic strain rate");
+  params.addParam<bool>(
+      "use_transformation",
+      true,
+      "Whether to employ updated Hill's tensor due to rigid body or large "
+      "deformation kinematic rotations. If an initial rigid body rotation is provided by the user "
+      "in increments of 90 degrees (e.g. 90, 180, 270), this option can be set to false, in which "
+      "case the Hill's coefficients are extracted from the transformed Hill's tensor.");
 
   return params;
 }
@@ -56,7 +63,8 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
         _base_name + getParam<std::string>("inelastic_strain_rate_name"))),
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _max_integration_error(getParam<Real>("max_integration_error")),
-    _max_integration_error_time_step(std::numeric_limits<Real>::max())
+    _max_integration_error_time_step(std::numeric_limits<Real>::max()),
+    _use_transformation(getParam<bool>("use_transformation"))
 {
 }
 
@@ -115,10 +123,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(
   {
     returnMappingSolve(stress_dev, stress_new_vector, delta_gamma, _console);
 
-    if (delta_gamma != 0.0)
-      computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
-    else
-      inelastic_strain_increment.zero();
+    computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
   }
   else
     inelastic_strain_increment.zero();

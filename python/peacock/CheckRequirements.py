@@ -55,7 +55,7 @@ def check_vtk():
             print("You can create a new conda environment by doing (with the miniconda module loaded):")
             print("\n\tconda create --clone root -n <env_name>")
             print("\tsource activate <env_name>")
-            print("\tconda install -c idaholab vtk=7.1.1.opengl")
+            print("\tconda install -c https://conda.software.inl.gov/public vtk=7.1.1.opengl")
             print("\nThen you can try running peacock again.")
             print("Note that this VTK package may have various rendering problems and some peacock tests will fail.")
             return False

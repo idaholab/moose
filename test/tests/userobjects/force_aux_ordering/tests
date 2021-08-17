@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#10360 #18593 #18594'
+  design = 'UserObject.md'
+  [test_force]
+    requirement = 'The system shall support overriding the inter-system dependency resolution to allow for developers to decide when specific calculations should be forced into a specific order,'
+    [preaux]
+      type = 'CSVDiff'
+      input = 'force_preaux.i'
+      csvdiff = 'force_preaux_out.csv'
+
+      detail = 'by forcing a user object to execute before auxiliary kernels'
+    []
+    [postaux]
+      type = 'CSVDiff'
+      input = 'force_postaux.i'
+      csvdiff = 'force_postaux_out.csv'
+      detail = 'by forcing a user object to execute after auxiliary kernels'
+    []
+  []
+[]

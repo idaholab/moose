@@ -50,6 +50,10 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [creep_strain_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -74,6 +78,13 @@
     index_j = 1
   []
   [creep_strain_yy]
+    type = ADRankTwoAux
+    rank_two_tensor = creep_strain
+    variable = creep_strain_yy
+    index_i = 1
+    index_j = 1
+  []
+  [creep_strain_zz]
     type = ADRankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_yy
@@ -136,7 +147,7 @@
     absolute_tolerance = 1e-20
     relative_tolerance = 1e-20
     # Force it to not use integration error
-    max_integration_error = 100.0
+    max_integration_error = 0.000001
   []
 []
 
