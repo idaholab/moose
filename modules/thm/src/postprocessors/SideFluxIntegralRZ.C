@@ -14,7 +14,7 @@ SideFluxIntegralRZ::validParams()
 }
 
 SideFluxIntegralRZ::SideFluxIntegralRZ(const InputParameters & parameters)
-  : SideFluxIntegral(parameters), RZSymmetry(parameters)
+  : SideFluxIntegral(parameters), RZSymmetry(this, parameters)
 {
 }
 

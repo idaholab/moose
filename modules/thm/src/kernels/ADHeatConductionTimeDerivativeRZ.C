@@ -12,7 +12,7 @@ ADHeatConductionTimeDerivativeRZ::validParams()
 
 ADHeatConductionTimeDerivativeRZ::ADHeatConductionTimeDerivativeRZ(
     const InputParameters & parameters)
-  : ADHeatConductionTimeDerivative(parameters), RZSymmetry(parameters)
+  : ADHeatConductionTimeDerivative(parameters), RZSymmetry(this, parameters)
 {
 }
 

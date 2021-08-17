@@ -11,7 +11,7 @@ ADHeatStructureHeatSourceRZ::validParams()
 }
 
 ADHeatStructureHeatSourceRZ::ADHeatStructureHeatSourceRZ(const InputParameters & parameters)
-  : ADHeatStructureHeatSource(parameters), RZSymmetry(parameters)
+  : ADHeatStructureHeatSource(parameters), RZSymmetry(this, parameters)
 {
 }
 

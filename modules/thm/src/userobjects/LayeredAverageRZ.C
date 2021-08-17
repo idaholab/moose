@@ -13,7 +13,7 @@ LayeredAverageRZ::validParams()
 }
 
 LayeredAverageRZ::LayeredAverageRZ(const InputParameters & parameters)
-  : LayeredAverage(parameters), RZSymmetry(parameters)
+  : LayeredAverage(parameters), RZSymmetry(this, parameters)
 {
   _direction_min = getParam<Point>("axis_point")(_direction);
   _direction_max = _direction_min + getParam<Real>("length");

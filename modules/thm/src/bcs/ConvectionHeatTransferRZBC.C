@@ -14,7 +14,7 @@ ConvectionHeatTransferRZBC::validParams()
 }
 
 ConvectionHeatTransferRZBC::ConvectionHeatTransferRZBC(const InputParameters & parameters)
-  : ConvectionHeatTransferBC(parameters), RZSymmetry(parameters)
+  : ConvectionHeatTransferBC(parameters), RZSymmetry(this, parameters)
 {
 }
 
