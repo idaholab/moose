@@ -71,9 +71,18 @@ PerfGraph::disableLivePrint()
 {
   if (_pid == 0 && !_disable_live_print)
   {
-    _done.set_value(true);
-
-    _destructing = true;
+    {
+      // Unlike using atomics for execution_thread_end
+      // here we actually lock to ensure that either the print thread
+      // immediately sees that we are destructing or is immediately
+      // notified with the below notification.  Without doing this
+      // it would be possible (but unlikely) for the print thread to
+      // hang for 1 second at the end of execution (which would not be
+      // good anytime you are running lots of fast calculations back-to-back
+      // like during testing or stochastic sampling).
+      std::lock_guard<std::mutex> lock(_destructing_mutex);
+      _destructing = true;
+    }
 
     _finished_section.notify_one();
 

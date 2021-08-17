@@ -15,8 +15,7 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _perf_graph(perf_graph),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _execution_list(perf_graph._execution_list),
-    _done_future(perf_graph._done.get_future()),
-    _destructing(perf_graph._destructing),
+    _currently_destructing(false),
     _should_print(true),
     _time_limit(perf_graph._live_print_time_limit),
     _mem_limit(perf_graph._live_print_mem_limit),
@@ -167,7 +166,7 @@ PerfGraphLivePrint::printStack()
 
   for (unsigned int s = 0; s < _stack_level; s++)
   {
-    auto & section = *_print_thread_stack[s];
+    auto & section = _print_thread_stack[s];
 
     auto & section_info = _perf_graph_registry.sectionInfo(section._id);
 
@@ -186,7 +185,7 @@ PerfGraphLivePrint::printStackUpToLast()
   // We need to print out everything on the stack before this that hasn't already been printed...
   for (unsigned int s = 0; s < _stack_level - 1; s++)
   {
-    auto & section = *_print_thread_stack[s];
+    auto & section = _print_thread_stack[s];
 
     if (section._state == PerfGraph::IncrementState::STARTED) // Hasn't been printed at all
       printLiveMessage(section);
@@ -209,7 +208,7 @@ PerfGraphLivePrint::inSamePlace()
   {
     printStackUpToLast();
 
-    printLiveMessage(*_print_thread_stack[_stack_level - 1]);
+    printLiveMessage(_print_thread_stack[_stack_level - 1]);
   }
 }
 
@@ -232,7 +231,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
       section_increment._print_stack_level = _stack_level;
 
       // Store this increment in the stack
-      _print_thread_stack[_stack_level] = &section_increment;
+      _print_thread_stack[_stack_level] = section_increment;
 
       _stack_level++;
     }
@@ -240,7 +239,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
     {
       // Get the beginning information for this section... it is the thing currently on the top of
       // the stack
-      auto & section_increment_start = *_print_thread_stack[_stack_level - 1];
+      auto & section_increment_start = _print_thread_stack[_stack_level - 1];
 
       auto time_increment =
           std::chrono::duration<double>(section_increment._time - section_increment_start._time)
@@ -269,26 +268,44 @@ void
 PerfGraphLivePrint::start()
 {
   // Keep going until we're signaled to end
-  while (_done_future.wait_for(std::chrono::duration<Real>(0.)) == std::future_status::timeout)
+  // Note that _currently_destructing can only be set to true in this thread
+  // Which means that by the time we make it back to the top of the loop, either
+  // there was nothing to process or everything has been processed.
+  while (!_currently_destructing)
   {
-    std::unique_lock<std::mutex> lock(_perf_graph._print_thread_mutex);
+    std::unique_lock<std::mutex> lock(_perf_graph._destructing_mutex);
 
     // Wait for one second, or until notified that a section is finished
     // For a section to have finished the execution list has to have been appended to
     // This keeps spurious wakeups from happening
+    // Note that the `lock` is only protecting _destructing since the execution list uses atomics.
+    // It must be atomic in order to keep the main thread from having to lock as it
+    // executes.  The only downside to this is that it is possible for this thread to wake,
+    // check the condition, miss the notification, then wait.  In our case this is not detrimental,
+    // as the only thing that will happen is we will wait 1 more second.  This is also very
+    // unlikely.
+    // One other thing: wait_for() is not guaranteed to wait for 1 second.  "Spurious" wakeups
+    // can occur - but the predicate here keeps us from doing anything in that case.
+    // This will either wait until 1 second has passed, the signal is sent, _or_ a spurious
+    // wakeup happens to find that there is work to do.
     _perf_graph._finished_section.wait_for(lock, std::chrono::duration<Real>(1.), [this] {
+      // Get destructing first so that the execution_list will be in sync
+      this->_currently_destructing = _perf_graph._destructing;
+
       // The end will be one past the last
       this->_current_execution_list_end =
           _perf_graph._execution_list_end.load(std::memory_order_relaxed);
 
       // If we are destructing or there is new work to do... allow moving on
-      return _destructing || this->_last_execution_list_end != this->_current_execution_list_end;
+      return this->_currently_destructing ||
+             this->_last_execution_list_end != this->_current_execution_list_end;
     });
 
     // If the PerfGraph is destructing and we don't have anything left to print - we need to quit
     // Otherwise, if there are still things to print - do it... afterwards, the loop above
     // will end because _done_future has been set in PerfGraph.
-    if (_destructing && this->_last_execution_list_end == this->_current_execution_list_end)
+    if (this->_currently_destructing &&
+        this->_last_execution_list_end == this->_current_execution_list_end)
       return;
 
     // We store this off for one execution of this loop so that it's consistent all for the whole

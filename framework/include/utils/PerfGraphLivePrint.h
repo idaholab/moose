@@ -76,11 +76,8 @@ protected:
   /// Convenience reference to the execution_list within the PerfGraph
   std::array<PerfGraph::SectionIncrement, MAX_EXECUTION_LIST_SIZE> & _execution_list;
 
-  /// This will be true when we should stop printing
-  std::future<bool> _done_future;
-
   /// True when we should stop printing
-  const std::atomic<bool> & _destructing;
+  bool _currently_destructing;
 
   /// Whether or not printing is currently turned on
   /// This shadows PerfGraph._live_print_active so that we have consistency
@@ -97,7 +94,7 @@ protected:
   unsigned int _stack_level;
 
   /// The current stack for what the print thread has seen
-  std::array<PerfGraph::SectionIncrement *, MAX_STACK_SIZE> _print_thread_stack;
+  std::array<PerfGraph::SectionIncrement, MAX_STACK_SIZE> _print_thread_stack;
 
   /// The end of the execution list
   /// This is (safely) copied from PerfGraph so that it is consistent for an

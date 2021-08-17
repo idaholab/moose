@@ -452,10 +452,10 @@ protected:
   std::promise<bool> _done;
 
   /// Tell the print thread to teardown
-  std::atomic<bool> _destructing;
+  bool _destructing;
 
-  /// The mutex to use with a condition_variable for waking up the print thread
-  std::mutex _print_thread_mutex;
+  /// The mutex to use with a condition_variable predicate to guard _destructing
+  std::mutex _destructing_mutex;
 
   /// The condition_variable to wake the print thread
   std::condition_variable _finished_section;
