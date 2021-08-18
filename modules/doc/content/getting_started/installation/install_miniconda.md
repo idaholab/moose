@@ -26,7 +26,7 @@ Configure Conda to work with conda-forge, and our INL public channel:
 
 ```bash
 conda config --add channels conda-forge
-conda config --add channels https://conda.software.inl.gov
+conda config --add channels https://conda.software.inl.gov/public
 ```
 
 !alert warning title=sudo conda
