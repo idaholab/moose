@@ -890,18 +890,20 @@ const static struct AnyType
 
 template <typename T1, typename T2>
 bool
-wildcardEqual(T1 a, T2 b)
+wildcardEqual(const T1 & a, const T2 & b)
 {
   return a == b;
 }
 
 template <typename T>
-bool wildcardEqual(T, AnyType)
+bool
+wildcardEqual(const T &, AnyType)
 {
   return true;
 }
 template <typename T>
-bool wildcardEqual(AnyType, T)
+bool
+wildcardEqual(AnyType, const T &)
 {
   return true;
 }
@@ -912,7 +914,7 @@ bool wildcardEqual(AnyType, T)
  */
 template <typename C, typename M1, typename M2>
 typename C::iterator
-findPair(C & container, M1 first, M2 second)
+findPair(C & container, const M1 & first, const M2 & second)
 {
   return std::find_if(container.begin(), container.end(), [&](auto & item) {
     return wildcardEqual(first, item.first) && wildcardEqual(second, item.second);

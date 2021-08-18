@@ -95,20 +95,14 @@ public:
    */
   template <typename T1, typename T2>
   std::vector<std::pair<T1, T2>> getParamPairs(const std::string & param1,
-                                               const std::string & param2) const
-  {
-    return _pars.getPairs<T1, T2>(param1, param2);
-  }
+                                               const std::string & param2) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */
   template <typename T>
-  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
-  {
-    return parameters().getCheckedPointerParam<T>(name, error_string);
-  }
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const;
 
   /**
    * Test if the supplied parameter is valid
@@ -290,4 +284,19 @@ void
 MooseObject::paramInfo(const std::string & param, Args... args) const
 {
   mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
+}
+
+template <typename T1, typename T2>
+std::vector<std::pair<T1, T2>>
+MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
+{
+  return _pars.getPairs<T1, T2>(param1, param2);
+}
+
+template <typename T>
+T
+MooseObject::getCheckedPointerParam(const std::string & name,
+                                    const std::string & error_string) const
+{
+  return parameters().getCheckedPointerParam<T>(name, error_string);
 }

@@ -1593,8 +1593,8 @@ template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
 InputParameters::getPairs(const std::string & param1, const std::string & param2) const
 {
-  auto v1 = get<V1>(param1);
-  auto v2 = get<V2>(param2);
+  const auto & v1 = get<V1>(param1);
+  const auto & v2 = get<V2>(param2);
 
   auto controllable = getControllableParameters();
   if (controllable.count(param1) || controllable.count(param2))
