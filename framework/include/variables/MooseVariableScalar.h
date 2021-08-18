@@ -65,6 +65,11 @@ public:
   const VariableValue & duDotDotDu() const;
 
   /**
+   * Return the first derivative of the solution with derivative information
+   */
+  const ADVariableValue & adUDot() const;
+
+  /**
    * Set the nodal value for this variable (to keep everything up to date
    */
   void setValue(unsigned int i, Number value);
@@ -117,12 +122,16 @@ protected:
   /// Whether or not the older solution is needed
   mutable bool _need_u_older;
 
-  /// Whether any dual number calculations are needed
-  mutable bool _need_dual;
-  /// whether dual_u is needed
-  mutable bool _need_dual_u;
+  /// Whether any AD calculations are needed
+  mutable bool _need_ad;
+  /// whether ad_u is needed
+  mutable bool _need_ad_u;
+  /// whether ad_u_dot is needed
+  mutable bool _need_ad_u_dot;
   /// The scalar solution with derivative information
-  ADVariableValue _dual_u;
+  ADVariableValue _ad_u;
+  /// The first derivative of the scalar solution with derivative information
+  ADVariableValue _ad_u_dot;
 
 private:
   /**
