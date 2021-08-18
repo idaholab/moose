@@ -51,4 +51,20 @@ private:
   std::vector<T2> _value;
 };
 
+template <typename T1, typename T2>
+class Median<typename std::vector<std::vector<T1>>, typename std::vector<T2>>
+  : public Calculator<typename std::vector<std::vector<T1>>, typename std::vector<T2>>
+{
+public:
+  using Calculator<std::vector<std::vector<T1>>, std::vector<T2>>::Calculator;
+
+  virtual void initialize() override;
+  virtual void update(const std::vector<T1> & data) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual std::vector<T2> get() const override { return _median; }
+
+protected:
+  std::vector<T2> _median;
+  std::vector<Median<std::vector<T1>, T2>> _median_calcs;
+};
 } // namespace

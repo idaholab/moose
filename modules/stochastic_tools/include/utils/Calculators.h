@@ -207,8 +207,8 @@ protected:
  * Explicit instantiations in C file.
  */
 template <typename InType = std::vector<Real>, typename OutType = Real>
-std::unique_ptr<Calculator<InType, OutType>>
-makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other);
+std::unique_ptr<Calculator<InType, OutType>> makeCalculator(const MooseEnumItem & item,
+                                                            const libMesh::ParallelObject & other);
 
 /**
  * This class is used as a general interface for doing arithmetic needed for Calculators.

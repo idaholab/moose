@@ -55,8 +55,7 @@ private:
   std::unique_ptr<StochasticTools::Calculator<InType, OutType>> _calc_ptr;
 
   /// Storage for the BootstrapCalculator for the desired confidence interval calculations (optional)
-  std::unique_ptr<StochasticTools::BootstrapCalculator<InType, OutType>> _ci_calc_ptr =
-      nullptr;
+  std::unique_ptr<StochasticTools::BootstrapCalculator<InType, OutType>> _ci_calc_ptr = nullptr;
 };
 
 template <typename InType, typename OutType>

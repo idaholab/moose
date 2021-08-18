@@ -19,6 +19,7 @@
 #include "MooseError.h"
 #include "MooseRandom.h"
 #include "NormalDistribution.h"
+#include "StochasticToolsUtils.h"
 
 namespace StochasticTools
 {
@@ -60,85 +61,18 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
 
   // Compute replicate statistics
   std::vector<OutType> values(_replicates);
+  auto calc_update = [this](const typename InType::value_type & val) { _calc.update(val); };
   for (std::size_t i = 0; i < _replicates; ++i)
-    values[i] = resample(_calc, data, generator, is_distributed);
-  std::sort(values.begin(), values.end());
+  {
+    _calc.initialize();
+    MooseUtils::resampleAct(
+        data, calc_update, generator, 0, is_distributed ? &this->_communicator : nullptr);
+    _calc.finalize(is_distributed);
+    values[i] = _calc.get();
+  }
+  inplaceSort(values);
   return values;
 }
-
-template <typename InType, typename OutType>
-OutType
-BootstrapCalculator<InType, OutType>::resample(StochasticTools::Calculator<InType, OutType> & calc,
-                                               const InType & data,
-                                               MooseRandom & generator,
-                                               const bool is_distributed)
-{
-  const std::size_t seed_index = 0;
-  const std::size_t n_local = data.size();
-
-  calc.initialize();
-
-  if (!is_distributed)
-  {
-    for (std::size_t j = 0; j < n_local; ++j)
-    {
-      auto index = generator.randl(seed_index, 0, n_local);
-      calc.update(data[index]);
-    }
-  }
-  else
-  {
-    // Compute the global size of the vector
-    std::size_t n_global = n_local;
-    this->_communicator.sum(n_global);
-
-    // Compute the vector data offsets, the scope cleans up the "n_local" vector
-    std::vector<std::size_t> offsets(this->_communicator.size());
-    {
-      std::vector<std::size_t> local_sizes;
-      this->_communicator.allgather(n_local, local_sizes);
-      for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
-        offsets[i + 1] = offsets[i] + local_sizes[i];
-    }
-
-    // Advance the random number generator to the current offset
-    const auto rank = this->_communicator.rank();
-    for (std::size_t i = 0; i < offsets[rank]; ++i)
-      generator.randl(seed_index, 0, n_global);
-
-    // Compute the needs for this processor
-    std::unordered_map<processor_id_type, std::vector<std::size_t>> indices;
-    for (std::size_t i = 0; i < n_local; ++i)
-    {
-      const auto idx = generator.randl(seed_index, 0, n_global); // random global index
-
-      // Locate the rank and local index of the data desired
-      const auto idx_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx));
-      const auto idx_rank = std::distance(offsets.begin(), idx_offset_iter);
-      const auto idx_local_idx = idx - *idx_offset_iter;
-
-      // Push back the index to appropriate rank
-      indices[idx_rank].push_back(idx_local_idx);
-    }
-
-    // Advance the random number generator to the end of the global vector
-    for (std::size_t i = offsets[rank] + n_local; i < n_global; ++i)
-      generator.randl(seed_index, 0, n_global);
-
-    // Send the indices to the appropriate rank and have the calculator do its work
-    auto calc_functor =
-        [&data, &calc](processor_id_type /*pid*/,
-                       const std::vector<std::size_t> & indices) {
-          for (const auto & idx : indices)
-            calc.update(data[idx]);
-        };
-    Parallel::push_parallel_vector_data(this->_communicator, indices, calc_functor);
-  }
-
-  calc.finalize(is_distributed);
-  return calc.get();
-}
-
 
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>

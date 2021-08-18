@@ -63,3 +63,24 @@ TEST(MooseUtils, resample)
   out = resample<int>(x, generator, 1);
   EXPECT_EQ(out, gold_1949);
 }
+
+TEST(MooseUtils, resampleAct)
+{
+  MooseRandom generator;
+  generator.seed(0, 1980);
+  generator.seed(1, 1949);
+
+  const std::vector<int> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::vector<int> gold_1980 = {1, 1, 7, 2, 9, 6, 6, 0, 8, 9};
+  const std::vector<int> gold_1949 = {9, 2, 5, 2, 0, 7, 1, 2, 1, 1};
+
+  std::vector<int> out;
+  auto act = [&out](const int & val) { out.push_back(val); };
+
+  resampleAct(x, act, generator);
+  EXPECT_EQ(out, gold_1980);
+
+  out.clear();
+  resampleAct(x, act, generator, 1);
+  EXPECT_EQ(out, gold_1949);
+}

@@ -81,8 +81,7 @@ TEST(StochasticTools, Calculators)
                                               {5, 2, 6, 1, 7, 3, 4},
                                               {2, 6, 1, 7, 3, 4, 5}};
     const std::vector<Real> expect = {
-        4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259};
-    const std::vector<Real> median = x[4];
+        4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259, 4};
 
     auto result = calculate<std::vector<std::vector<Real>>, std::vector<Real>>(x, compute);
     for (unsigned int i = 0; i < expect.size(); ++i)
@@ -91,10 +90,5 @@ TEST(StochasticTools, Calculators)
         EXPECT_EQ(result.first[i][j], expect[i]);
         EXPECT_EQ(result.second[i][j], expect[i]);
       }
-    for (unsigned int j = 0; j < x[0].size(); ++j)
-    {
-      EXPECT_EQ(result.first.back()[j], median[j]);
-      EXPECT_EQ(result.second.back()[j], median[j]);
-    }
   }
 }

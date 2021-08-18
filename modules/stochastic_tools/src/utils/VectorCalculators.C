@@ -140,6 +140,40 @@ CalculatorValue<std::vector<T1>, std::vector<T2>>::max(const libMesh::Parallel::
   comm.max(_value);
 }
 
+template <typename T1, typename T2>
+void
+Median<std::vector<std::vector<T1>>, std::vector<T2>>::initialize()
+{
+  _median.clear();
+  _median_calcs.clear();
+}
+
+template <typename T1, typename T2>
+void
+Median<std::vector<std::vector<T1>>, std::vector<T2>>::update(const std::vector<T1> & data)
+{
+  for (unsigned int i = _median_calcs.size(); i < data.size(); ++i)
+  {
+    _median_calcs.emplace_back(*this, "MEDIAN_" + std::to_string(i));
+    _median_calcs.back().initialize();
+  }
+
+  for (const auto & i : index_range(data))
+    _median_calcs[i].update(data[i]);
+}
+
+template <typename T1, typename T2>
+void
+Median<std::vector<std::vector<T1>>, std::vector<T2>>::finalize(bool is_distributed)
+{
+  _median.reserve(_median_calcs.size());
+  for (auto & calc : _median_calcs)
+  {
+    calc.finalize(is_distributed);
+    _median.push_back(calc.get());
+  }
+}
+
 createCalculators(std::vector<std::vector<Real>>, std::vector<Real>);
 createBootstrapCalculators(std::vector<std::vector<Real>>, std::vector<Real>);
 

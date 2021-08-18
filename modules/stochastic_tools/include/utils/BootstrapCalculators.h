@@ -52,9 +52,6 @@ protected:
   // Compute Bootstrap estimates of a statistic
   std::vector<OutType> computeBootstrapEstimates(const InType &, const bool);
 
-  // Randomly shuffle a vector of data and apply calculator
-  OutType resample(StochasticTools::Calculator<InType, OutType> &, const InType &, MooseRandom &, const bool);
-
   // Confidence levels to compute in range (0, 1)
   const std::vector<Real> _levels;
 
