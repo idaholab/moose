@@ -82,7 +82,7 @@ protected:
    */
   virtual void calculateStateVariableEvolutionRateComponent() override;
 
-  /*
+  /**
    * Finalizes the values of the state variables and slip system resistance
    * for the current timestep after convergence has been reached.
    */
