@@ -18,7 +18,7 @@ protected:
   /// Solution variable arhouA
   const VariableValue & _arhouA;
   /// Direction
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
   /// Vector component to use
   const unsigned int _component;
 

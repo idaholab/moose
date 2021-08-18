@@ -18,7 +18,7 @@ ADOneD3EqnMomentumAreaGradient::validParams()
 ADOneD3EqnMomentumAreaGradient::ADOneD3EqnMomentumAreaGradient(const InputParameters & parameters)
   : ADKernel(parameters),
     _area_grad(coupledGradient("A")),
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _pressure(getADMaterialProperty<Real>("p"))
 {
 }

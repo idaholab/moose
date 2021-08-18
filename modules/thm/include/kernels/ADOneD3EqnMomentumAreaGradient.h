@@ -21,7 +21,7 @@ protected:
   const VariableGradient & _area_grad;
 
   /// The direction of the flow channel
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
 
   const ADMaterialProperty<Real> & _pressure;
 

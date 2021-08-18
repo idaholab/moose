@@ -58,7 +58,7 @@ ADGateValve1PhaseUserObject::ADGateValve1PhaseUserObject(const InputParameters &
 
     _component_name(getParam<std::string>("component_name")),
 
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _solutions(_n_connections),
     _fluxes(_n_connections, std::vector<ADReal>(THM3Eqn::N_EQ, 0)),
@@ -116,7 +116,7 @@ ADGateValve1PhaseUserObject::execute()
 
   // Store direction and area of channel at junction (used for error-checking)
   _areas[c] = _A[0];
-  _directions[c] = MetaPhysicL::raw_value(_dir[0]);
+  _directions[c] = _dir[0];
 
   _stored_p[c] = _p[0];
 }

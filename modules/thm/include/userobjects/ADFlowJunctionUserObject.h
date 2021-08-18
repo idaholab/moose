@@ -51,7 +51,7 @@ protected:
   /// Flow channel outward normals or junction inward normals
   const std::vector<Real> & _normal;
   /// Direction of the element connected to the junction
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
   /// Number of connected flow channels
   const unsigned int _n_connections;
 

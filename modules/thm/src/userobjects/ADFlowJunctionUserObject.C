@@ -20,7 +20,7 @@ ADFlowJunctionUserObject::ADFlowJunctionUserObject(const InputParameters & param
     _bnd_ids_vector(_mesh.getBoundaryIDs(boundaryNames(), false)),
     _n_bnd_ids(_bnd_ids_vector.size()),
     _normal(getParam<std::vector<Real>>("normals")),
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _n_connections(_normal.size())
 {
 }

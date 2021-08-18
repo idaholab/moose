@@ -51,7 +51,7 @@ protected:
   const std::string & _component_name;
 
   /// Direction material property
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
 
   /// Solution vectors for each connection
   std::vector<std::vector<ADReal>> _solutions;

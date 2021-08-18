@@ -21,7 +21,7 @@ ADOneD3EqnEnergyGravity::ADOneD3EqnEnergyGravity(const InputParameters & paramet
     _A(adCoupledValue("A")),
     _rho(getADMaterialProperty<Real>("rho")),
     _vel(getADMaterialProperty<Real>("vel")),
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _gravity_vector(getParam<RealVectorValue>("gravity_vector"))
 {
 }

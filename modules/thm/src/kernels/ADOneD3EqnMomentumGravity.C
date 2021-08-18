@@ -19,7 +19,7 @@ ADOneD3EqnMomentumGravity::ADOneD3EqnMomentumGravity(const InputParameters & par
   : ADKernel(parameters),
     _A(adCoupledValue("A")),
     _rho(getADMaterialProperty<Real>("rho")),
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _gravity_vector(getParam<RealVectorValue>("gravity_vector"))
 {
 }

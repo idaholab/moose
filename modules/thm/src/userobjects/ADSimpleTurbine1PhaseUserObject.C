@@ -35,7 +35,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 
   if ((c == 0) && _on)
   {
-    const Point di = MetaPhysicL::raw_value(_dir[0]);
+    const Point di = _dir[0];
     const ADRealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
 
     // energy source

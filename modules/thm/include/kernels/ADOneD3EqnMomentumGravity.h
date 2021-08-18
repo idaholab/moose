@@ -18,7 +18,7 @@ protected:
   const ADMaterialProperty<Real> & _rho;
 
   /// The direction of the flow channel
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
   /// Gravitational acceleration vector
   const RealVectorValue & _gravity_vector;
 

@@ -46,7 +46,7 @@ ADJunctionOneToOne1PhaseUserObject::ADJunctionOneToOne1PhaseUserObject(
 
     _junction_name(getParam<std::string>("junction_name")),
 
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _solutions(_n_connections),
     _fluxes(_n_connections),
@@ -96,7 +96,7 @@ ADJunctionOneToOne1PhaseUserObject::execute()
 
   // Store direction and area of channel at junction (used for error-checking)
   _areas[c] = _A[0];
-  _directions[c] = MetaPhysicL::raw_value(_dir[0]);
+  _directions[c] = _dir[0];
 }
 
 void

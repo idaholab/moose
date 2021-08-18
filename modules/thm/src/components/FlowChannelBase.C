@@ -334,7 +334,7 @@ FlowChannelBase::addCommonObjects()
   ts_execute_on = {EXEC_TIMESTEP_BEGIN, EXEC_INITIAL};
 
   {
-    std::string class_name = "ADDirectionMaterial";
+    std::string class_name = "DirectionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     _sim.addMaterial(class_name, genName(name(), "dir_mat"), params);

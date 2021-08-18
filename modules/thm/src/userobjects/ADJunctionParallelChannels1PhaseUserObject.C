@@ -72,7 +72,7 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
   const Real din = _normal[c];
-  const Point di = MetaPhysicL::raw_value(_dir[0]);
+  const Point di = _dir[0];
   const Point ni = di * din;
 
   const ADReal vJ = THM::v_from_rhoA_A(_rhoV[0], _volume);
@@ -93,7 +93,7 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
       _d_flow = _dir[0] * _rhouA[0] / std::abs(_rhouA[0]);
   }
 
-  if (!THM::areParallelVectors(_dir_c0, MetaPhysicL::raw_value(_dir[0])))
+  if (!THM::areParallelVectors(_dir_c0, _dir[0]))
     mooseError(_component_name,
                ": Connected flow channels are not parallel, use VolumeJunction1Phase "
                "component instead.");
@@ -155,7 +155,7 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
 
   ADReal p_wall = 0;
   ADReal A_wall = 0;
-  Point d_wall;
+  ADRealVectorValue d_wall;
 
   if (Aout_total > Ain_total)
   {
@@ -169,7 +169,7 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
       p_wall = 0;
     }
     A_wall = Aout_total - Ain_total;
-    d_wall = MetaPhysicL::raw_value(_d_flow);
+    d_wall = _d_flow;
   }
   else
   {
@@ -183,7 +183,7 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
       p_wall = 0;
     }
     A_wall = Ain_total - Aout_total;
-    d_wall = -MetaPhysicL::raw_value(_d_flow);
+    d_wall = -_d_flow;
   }
 
   ADVolumeJunctionBaseUserObject::_residual[VolumeJunction1Phase::RHOUV_INDEX] -=

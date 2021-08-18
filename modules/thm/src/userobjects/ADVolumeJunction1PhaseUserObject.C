@@ -84,7 +84,7 @@ void
 ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
   const Real din = _normal[c];
-  const Point di = MetaPhysicL::raw_value(_dir[0]);
+  const Point di = _dir[0];
   const Point ni = di * din;
   const Real nJi_dot_di = -din;
 

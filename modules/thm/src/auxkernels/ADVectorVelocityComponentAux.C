@@ -20,7 +20,7 @@ ADVectorVelocityComponentAux::ADVectorVelocityComponentAux(const InputParameters
   : AuxKernel(parameters),
     _arhoA(coupledValue("arhoA")),
     _arhouA(coupledValue("arhouA")),
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _component(getParam<unsigned int>("component"))
 {
   if (isNodal())
@@ -30,5 +30,5 @@ ADVectorVelocityComponentAux::ADVectorVelocityComponentAux(const InputParameters
 Real
 ADVectorVelocityComponentAux::computeValue()
 {
-  return MetaPhysicL::raw_value(_dir[_qp])(_component) * _arhouA[_qp] / _arhoA[_qp];
+  return _dir[_qp](_component) * _arhouA[_qp] / _arhoA[_qp];
 }
