@@ -13,22 +13,16 @@
 #include "DiracKernel.h"
 #include "ReporterInterface.h"
 
-// Forward Declarations
-class VectorPostprocessorPointSource;
-
-template <>
-InputParameters validParams<VectorPostprocessorPointSource>();
-
 /**
- * A VectorPostprocessorPointSource DiracKernel is used to create variable valued point sources.
- * Coordinates and values are given by a vector Postprocessor.  Values and coordinates for the point
- * source are allowed change as the vector Postprocessor is updated.
+ * A ReporterPointSource DiracKernel is used to create variable valued point sources.
+ * Coordinates and values are given by a Reporter.  Values and coordinates for the point
+ * source are allowed change as the Reporter is updated.
  */
-class VectorPostprocessorPointSource : public DiracKernel, public ReporterInterface
+class ReporterPointSource : public DiracKernel, public ReporterInterface
 {
 public:
   static InputParameters validParams();
-  VectorPostprocessorPointSource(const InputParameters & parameters);
+  ReporterPointSource(const InputParameters & parameters);
   virtual void addPoints() override;
 
 protected:
@@ -36,7 +30,7 @@ protected:
 
 private:
   /// values at each xyz coordinate
-  const std::vector<Real> & _vpp_values;
+  const std::vector<Real> & _values;
   /// x coordinate
   const std::vector<Real> & _x_coord;
   /// y coordinate
@@ -45,6 +39,4 @@ private:
   const std::vector<Real> & _z_coord;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
-  /// helper function to read in data
-  const std::vector<Real> & getPointDataHelper(const std::string & param);
 };

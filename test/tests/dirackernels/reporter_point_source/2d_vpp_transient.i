@@ -1,38 +1,40 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
   uniform_refine = 4
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [dot]
-    type=TimeDerivative
+    type = TimeDerivative
     variable = u
   []
 []
 
 [DiracKernels]
-  [./vpp_point_source]
-    type = VectorPostprocessorPointSource
+  [vpp_point_source]
+    type = ReporterPointSource
     variable = u
-    vector_postprocessor = point_sample_source
-    value_name = u
-  [../]
+    value_name = point_sample_source/u
+    x_coord_name = point_sample_source/x
+    y_coord_name = point_sample_source/y
+    z_coord_name = point_sample_source/z
+  []
 []
 
 [VectorPostprocessors]
@@ -42,7 +44,7 @@
     points = '0.2 0.8 0.0  0.2 0.2 0.0'
     sort_by = id
     execute_on = 'timestep_begin'
-    outputs=none
+    outputs = none
   []
   [point_sample_out]
     type = PointValueSampler
@@ -63,18 +65,18 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = left
     function = left_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
