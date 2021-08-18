@@ -79,4 +79,16 @@
     design = 'Pump1Phase.md'
     issues = '#684'
   []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 2e-8
+    difference_tol = 20
+    cli_args = 'Debug/check_jacobian=true'
+    max_parallel = 1
+    requirement = 'The system shall allow for controlling the pump head'
+    design = 'Pump1Phase.md'
+    issues = '#684'
+  []
 []
