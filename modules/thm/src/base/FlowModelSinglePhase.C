@@ -356,7 +356,7 @@ FlowModelSinglePhase::addMooseObjects()
       std::vector<AuxVariableName> var_names = {VELOCITY_X, VELOCITY_Y, VELOCITY_Z};
       for (unsigned int i = 0; i < LIBMESH_DIM; i++)
       {
-        std::string class_name = "VectorVelocityComponentAux";
+        std::string class_name = "ADVectorVelocityComponentAux";
         InputParameters params = _factory.getValidParams(class_name);
         params.set<AuxVariableName>("variable") = var_names[i];
         params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
