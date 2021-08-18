@@ -548,7 +548,8 @@ moosePetscSNESFormMatricesTags(
   {
     jacobians.emplace_back(std::make_unique<PetscMatrix<Number>>(mat, sys.comm()));
     jacobians.back()->attach_dof_map(sys.get_dof_map());
-    jacobians.back()->zero();
+    if (!eigen_problem->constJacobian())
+      jacobians.back()->zero();
   }
 
   eigen_problem->computeMatricesTags(*sys.current_local_solution.get(), jacobians, tags);
