@@ -16,7 +16,7 @@ InputParameters
 FVThermalResistanceBC::validParams()
 {
   auto params = FVFluxBC::validParams();
-  params.addRequiredParam<Real>("temperature", "temperature variable");
+  params.addRequiredCoupledVar("temperature", "temperature variable");
   params.addRequiredParam<Real>(HeatConduction::T_ambient, "constant ambient temperature");
   params.addRequiredParam<MaterialPropertyName>("htc", "heat transfer coefficient");
 

@@ -49,7 +49,7 @@ protected:
   const Real _inner_radius;
 
   /// temperature variable
-  const ADVariableValue _T;
+  const ADVariableValue & _T;
 
   /// ambient temperature for convection and radiation heat transfer
   const Real _T_ambient;
