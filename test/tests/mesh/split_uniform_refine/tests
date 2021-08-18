@@ -4,7 +4,7 @@
  [./square]
    type = 'Exodiff'
    input = '3d_diffusion.i'
-   cli_args = '-r 1 Mesh/allow_uniform_refine_when_use_split=true --use-split  --split-file square'
+   cli_args = '-r 1 Mesh/skip_refine_when_use_split=false --use-split  --split-file square'
    exodiff = '3d_diffusion_out.e'
    # Pre-split mesh was generated for this particular configuration.
    # MOOSE will check these when we read meshes from cpr files

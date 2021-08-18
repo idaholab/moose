@@ -489,9 +489,9 @@ public:
   void setUniformRefineLevel(unsigned int);
 
   /**
-   * Whether or not allow uniform refinements when using a pre-split mesh
+   * Whether or not skip uniform refinements when using a pre-split mesh
    */
-  bool allowUniformRefineWhenUseSplit() const { return _allow_uniform_refine_when_use_split; }
+  bool skipRefineWhenUseSplit() const { return _skip_refine_when_use_split; }
 
   /**
    * This will add the boundary ids to be ghosted to this processor
@@ -1127,8 +1127,8 @@ protected:
   /// The level of uniform refinement requested (set to zero if AMR is disabled)
   unsigned int _uniform_refine_level;
 
-  /// Whether or not to allow uniform refinements when using a pre-split mesh
-  bool _allow_uniform_refine_when_use_split;
+  /// Whether or not to skip uniform refinements when using a pre-split mesh
+  bool _skip_refine_when_use_split;
 
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;

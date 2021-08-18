@@ -145,9 +145,9 @@ MooseMesh::validParams()
                         false,
                         "True to build the lower-dimensional mesh for all sides.");
 
-  params.addParam<bool>("allow_uniform_refine_when_use_split",
-                        false,
-                        "True to allow uniform refinements when using a pre-split mesh.");
+  params.addParam<bool>("skip_refine_when_use_split",
+                        true,
+                        "True to skip uniform refinements when using a pre-split mesh.");
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
   // derived types that do so.
@@ -177,7 +177,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
-    _allow_uniform_refine_when_use_split(getParam<bool>("allow_uniform_refine_when_use_split")),
+    _skip_refine_when_use_split(getParam<bool>("skip_refine_when_use_split")),
     _is_nemesis(getParam<bool>("nemesis")),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
@@ -246,7 +246,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _partitioner_overridden(other_mesh._partitioner_overridden),
     _custom_partitioner_requested(other_mesh._custom_partitioner_requested),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
-    _allow_uniform_refine_when_use_split(other_mesh._allow_uniform_refine_when_use_split),
+    _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _is_nemesis(false),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
