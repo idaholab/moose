@@ -55,7 +55,7 @@ FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
     _geometry(getParam<MooseEnum>("geometry").getEnum<Moose::CoordinateSystemType>()),
     _inner_radius(
         _geometry == Moose::CoordinateSystemType::COORD_RZ ? getParam<Real>("inner_radius") : 1.0),
-    _T(coupledValue("temperature")),
+    _T(adCoupledValue("temperature")),
     _T_ambient(getParam<Real>(HeatConduction::T_ambient)),
     _k(getParam<std::vector<Real>>("thermal_conductivities")),
     _dx(getParam<std::vector<Real>>("conduction_thicknesses")),
