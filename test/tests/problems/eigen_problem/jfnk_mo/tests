@@ -11,4 +11,24 @@
     expect_out = 'PJFNK\s+with\s+matrix\s+only'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation"
   []
+
+  [ne_coupled_mo]
+    type = 'CSVDiff'
+    input = 'ne_coupled_mo.i'
+    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled problems"
+  []
+
+  [ne_coupled_mo_full]
+    type = 'CSVDiff'
+    input = 'ne_coupled_mo.i'
+    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    prereq = 'ne_coupled_mo'
+    cli_args = 'Preconditioning/active='''
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "The system shall support use of matrix-vector multiplication with full-coupled matrices (by default) as residual evaluation for coupled problems"
+  []
 []

@@ -228,6 +228,9 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
     eigen_problem.solverParams()._eigen_matrix_free = true;
     eigen_problem.solverParams()._precond_matrix_free = false;
     eigen_problem.solverParams()._eigen_matrix_vector_mult = true;
+    // By default, we need to form full matrices, otherwise residual
+    // evaluations will be not accurate
+    eigen_problem.setCoupling(Moose::COUPLING_FULL);
   }
 }
 
