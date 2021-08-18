@@ -34,6 +34,9 @@ protected:
    */
   virtual Real coefficient() const = 0;
 
+  /// temperature variable
+  const ADVariableValue _T;
+  
   /// Stefan-Boltzmann constant
   const Real _sigma_stefan_boltzmann;
 

@@ -15,6 +15,7 @@ InputParameters
 FVRadiativeHeatFluxBCBase::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addRequiredParam<Real>("temperature", "temperature variable");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
   params.addParam<FunctionName>(
       "Tinfinity", "0", "Temperature of the body in radiative heat transfer.");
@@ -26,6 +27,7 @@ FVRadiativeHeatFluxBCBase::validParams()
 
 FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & parameters)
   : FVFluxBC(parameters),
+    _T(adCoupledValue("temperature")),
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
     _tinf(getFunction("Tinfinity")),
     _eps_boundary(getParam<Real>("boundary_emissivity"))
@@ -35,7 +37,7 @@ FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & par
 ADReal
 FVRadiativeHeatFluxBCBase::computeQpResidual()
 {
-  const auto T4 = Utility::pow<4>(_u[_qp]);
+  const auto T4 = Utility::pow<4>(_T[_qp]);
   const auto T4inf = Utility::pow<4>(_tinf.value(_t, _face_info->faceCentroid()));
   return _sigma_stefan_boltzmann * coefficient() * (T4 - T4inf);
 }
