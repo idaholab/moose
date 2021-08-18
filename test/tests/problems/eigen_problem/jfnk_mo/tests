@@ -31,4 +31,14 @@
     slepc_version = '>=3.11.0'
     requirement = "The system shall support use of matrix-vector multiplication with full-coupled matrices (by default) as residual evaluation for coupled problems"
   []
+
+  [non-homogeneous]
+    type = 'CSVDiff'
+    input = 'ne_coupled_mo.i'
+    csvdiff = 'non-homogeneous_eigenvalues_0001.csv'
+    cli_args = 'Outputs/file_base="non-homogeneous" Kernels/b/type="BodyForce" Kernels/b/variable=u Preconditioning/active='''
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for non-homogeneous problems"
+  []
 []
