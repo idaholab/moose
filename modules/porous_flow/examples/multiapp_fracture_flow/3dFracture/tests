@@ -1,0 +1,24 @@
+[Tests]
+  [fracture_only]
+    type = CSVDiff
+    input = fracture_only_aperture_changing.i
+    csvdiff = fracture_only_aperture_changing_out.csv
+    cli_args = 'Executioner/end_time=1 Outputs/inactive=ex'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to simulate flow and heat transport in a 2D fracture network including the case when the fracture aperture depends on porepressure'
+    issues = '#17928'
+    design = 'porous_flow/multiapp_fracture_flow_PorousFlow_3D.md'
+  []
+  [matrix]
+    type = CSVDiff
+    input = matrix_app.i
+    csvdiff = matrix_app_out_fracture_app0.csv
+    cli_args = 'Executioner/end_time=1'
+    threading = '!pthreads'
+    heavy = true
+    recover = false
+    requirement = 'PorousFlow shall be able to simulate flow and heat transport in a 2D fracture network sitting within a 3D porous matrix, using MultiApps, including the case when the fracture aperture depends on porepressure'
+    issues = '#17928'
+    design = 'porous_flow/multiapp_fracture_flow_PorousFlow_3D.md'
+  []
+[]

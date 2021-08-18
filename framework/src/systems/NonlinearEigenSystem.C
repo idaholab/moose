@@ -21,7 +21,7 @@
 #include "TimeIntegrator.h"
 #include "SlepcSupport.h"
 #include "DGKernelBase.h"
-#include "ScalarKernel.h"
+#include "ScalarKernelBase.h"
 #include "MooseVariableScalar.h"
 #include "ResidualObject.h"
 

@@ -1,0 +1,3 @@
+# File for testing primary content overwrite
+
+A page by the same local name as this one is also built by the [MooseDocs Test Pages site](python/MooseDocs/test/config.yml language=yaml). Although this page is specified in the configuration file [`python/MooseDocs/test/subconfig/config.yml`](python/MooseDocs/test/subconfig/config.yml language=yaml), it should not be added to any subtranslators when [this website](subsite/index.md) is built as a subconfiguration according to the `load_configs()` method of [`load_config.py`](python/MooseDocs/common/load_config.py). Hence, the content settings are reconfigured in [`python/MooseDocs/test/subsite_config.yml`](python/MooseDocs/test/subsite_config.yml language=yaml).

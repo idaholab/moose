@@ -23,7 +23,7 @@
     multi_app = sub
     sampler = sample
     stochastic_reporter = storage
-    from_reporter = 'pp/value constant/str mesh/sidesets'
+    from_reporter = 'pp/value constant/str'
   []
   [runner]
     type = SamplerParameterTransfer
@@ -37,6 +37,7 @@
 [Reporters]
   [storage]
     type = StochasticReporter
+    parallel_type = ROOT
   []
 []
 
@@ -44,5 +45,6 @@
   [out]
     type = JSON
     execute_system_information_on = none
+    execute_on = timestep_end
   []
 []

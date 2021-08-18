@@ -29,7 +29,6 @@
 # Regarding the "log" - it comes from preserving fluid mass
 #
 # Note that the PorousFlowMassVolumetricExpansion and PorousFlowHeatVolumetricExpansion Kernels are used
-# Note too that the Postprocessors have use_displaced_mesh = true
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -340,20 +339,17 @@
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'initial timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
   [total_heat]
     type = PorousFlowHeatEnergy
     phase = 0
     execute_on = 'initial timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
   [rock_heat]
     type = PorousFlowHeatEnergy
     execute_on = 'initial timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
   [fluid_heat]
@@ -361,7 +357,6 @@
     include_porous_skeleton = false
     phase = 0
     execute_on = 'initial timestep_end'
-    use_displaced_mesh = true
     outputs = 'console csv'
   []
 []

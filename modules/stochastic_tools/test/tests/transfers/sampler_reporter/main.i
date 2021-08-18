@@ -28,7 +28,7 @@
     multi_app = sub
     sampler = sample
     stochastic_reporter = storage
-    from_reporter = 'pp/value vpp/vec constant/str constant/int mesh/sidesets'
+    from_reporter = 'pp/value vpp/vec constant/str constant/int'
   []
 []
 
@@ -46,6 +46,8 @@
 [Reporters]
   [storage]
     type = StochasticReporter
+    execute_on = 'initial timestep_end'
+    parallel_type = ROOT
   []
 []
 

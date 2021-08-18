@@ -29,46 +29,58 @@
  * Press, pg. 146 - 149.
  */
 
-class IsotropicPlasticityStressUpdate : public RadialReturnStressUpdate
+template <bool is_ad>
+class IsotropicPlasticityStressUpdateTempl : public RadialReturnStressUpdateTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  IsotropicPlasticityStressUpdate(const InputParameters & parameters);
+  IsotropicPlasticityStressUpdateTempl(const InputParameters & parameters);
+
+  using Material::_qp;
+  using RadialReturnStressUpdateTempl<is_ad>::_base_name;
+  using RadialReturnStressUpdateTempl<is_ad>::_three_shear_modulus;
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(const Real & effective_trial_stress,
-                                       const RankFourTensor & elasticity_tensor) override;
-  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override;
-  virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) override;
-  virtual void iterationFinalize(Real scalar) override;
-  virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
+  virtual void
+  computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
+                          const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
+  virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                             const GenericReal<is_ad> & scalar) override;
+  virtual GenericReal<is_ad> computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
+                                               const GenericReal<is_ad> & scalar) override;
+  virtual void iterationFinalize(GenericReal<is_ad> scalar) override;
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
-  virtual void computeYieldStress(const RankFourTensor & elasticity_tensor);
-  virtual Real computeHardeningValue(Real scalar);
-  virtual Real computeHardeningDerivative(Real scalar);
+  virtual void computeYieldStress(const GenericRankFourTensor<is_ad> & elasticity_tensor);
+  virtual GenericReal<is_ad> computeHardeningValue(const GenericReal<is_ad> & scalar);
+  virtual GenericReal<is_ad> computeHardeningDerivative(const GenericReal<is_ad> & scalar);
 
   /// a string to prepend to the plastic strain Material Property name
   const std::string _plastic_prepend;
 
   const Function * _yield_stress_function;
-  Real _yield_stress;
+  GenericReal<is_ad> _yield_stress;
   const Real _hardening_constant;
   const Function * const _hardening_function;
 
-  Real _yield_condition;
-  Real _hardening_slope;
+  GenericReal<is_ad> _yield_condition;
+  GenericReal<is_ad> _hardening_slope;
 
   /// plastic strain in this model
-  MaterialProperty<RankTwoTensor> & _plastic_strain;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _plastic_strain;
 
   /// old value of plastic strain
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
-  MaterialProperty<Real> & _hardening_variable;
+  GenericMaterialProperty<Real, is_ad> & _hardening_variable;
   const MaterialProperty<Real> & _hardening_variable_old;
-  const VariableValue & _temperature;
+  const GenericVariableValue<is_ad> & _temperature;
 };
+
+typedef IsotropicPlasticityStressUpdateTempl<false> IsotropicPlasticityStressUpdate;
+typedef IsotropicPlasticityStressUpdateTempl<true> ADIsotropicPlasticityStressUpdate;

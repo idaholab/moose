@@ -20,7 +20,7 @@ import platform
 
 import MooseDocs
 from ..tree import pages
-from ..common import exceptions, mixins
+from ..common import mixins
 
 LOG = logging.getLogger('MooseDocs.Executioner')
 
@@ -76,9 +76,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
       ParallelQueue:   187 / 163
        ParallelPipe:   296 / 269
     """
-    #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
-    #  as well as during directory creation.
-    LOCK = multiprocessing.Lock()
 
     @staticmethod
     def defaultConfig():
@@ -91,12 +88,26 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         mixins.TranslatorObject.__init__(self)
         self._page_objects = list()
 
-        # The get/setGlobalAttribute methods assume that self._global_attributes behaves
-        # like a dict(), the type should actually be updated to work in parallel, for example
-        # in ParallelBarrier it is a multiprocessing Manger.dict() object.
+        # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
+        # MooseDocs does not work with this combination. This will be fixed in moosetools migration.
+        if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
+            self._ctx = multiprocessing.get_context('fork')
+        else:
+            self._ctx = multiprocessing
+
+        # A lock used prior to caching items or during directory creation to prevent race conditions
+        self._lock = self._ctx.Lock()
+
+        # Containers for storing the ouputs from the read, tokenize, and render methods, as well as
+        # another for storing miscellaneous data, respectively. For parallel executioners, these are
+        # reset as multiprocessing ('self._ctx') Manager().dict() objects so that modifications are
+        # properly handled and communicated across processors.
+        self._page_content = dict()
+        self._page_ast = dict()
+        self._page_result = dict()
         self._global_attributes = dict()
 
-    def init(self, destination):
+    def init(self, nodes, destination):
         """Initialize the Page objects."""
 
         # Call Extension init() method
@@ -108,14 +119,13 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # Initialize Page objects
         LOG.info('Executing extension initPage() methods...')
         t = time.time()
-        for node in self._page_objects:
-
+        for node in nodes:
             # Setup destination and output extension
             node.base = destination
             if isinstance(node, pages.Source):
                 node.output_extension = self.translator.renderer.EXTENSION
 
-            # Setup Page Config
+            # Setup page attributes
             config = dict()
             for ext in self.translator.extensions:
                 node.attributes['__{}__'.format(ext.name)] = dict()
@@ -125,7 +135,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     def addPage(self, page):
         """Add a Page object to be Translated."""
-        page._Page__unique_id = len(self._page_objects)
         self._page_objects.append(page)
 
     def getPages(self):
@@ -134,7 +143,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     def setGlobalAttribute(self, key, value):
         """Set a global attribute to be communicated across processors."""
-        self._global_attributes[key] = value
+        with self._lock:
+            mooseutils.recursive_update(self._global_attributes, {key: value})
 
     def getGlobalAttribute(self, key, default=None):
         """Get a global attribute that was communicated across processors."""
@@ -144,7 +154,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Return iterator to underlying global attribute dict."""
         return self._global_attributes.items()
 
-    def execute(self, nodes, num_threads=1):
+    def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """
         Perform the translation.
 
@@ -154,33 +164,34 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         raise NotImplementedError("The execute method must be defined.")
 
-    def __call__(self, nodes, num_threads=1):
+    def __call__(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """
         Called by Translator object, this executes the steps listed in the class description.
         """
         total = time.time()
         self.assertInitialized()
-        self.translator.executeMethod('preExecute', log=True)
 
-        nodes = nodes or self.getPages()
+        if read:
+            self.translator.executeMethod('preExecute', log=True)
+
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
-        other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
-
         if source_nodes:
             t = time.time()
-            LOG.info('Translating using %s threads...', num_threads)
             n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
-            self.execute(source_nodes, n)
+            LOG.info('Translating using %s threads...', n)
+            self.execute(source_nodes, n, read, tokenize, render, write)
             LOG.info('Translating complete [%s sec.]', time.time() - t)
 
         # Indexing/copying
-        if other_nodes:
-            LOG.info('Copying content...')
-            n = len(other_nodes) if num_threads > len(other_nodes) else num_threads
-            t = self.finalize(other_nodes, n)
-            LOG.info('Copying Finished [%s sec.]', t)
+        if write:
+            other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
+            if other_nodes:
+                LOG.info('Copying content...')
+                n = len(other_nodes) if num_threads > len(other_nodes) else num_threads
+                t = self.finalize(other_nodes, n)
+                LOG.info('Copying Finished [%s sec.]', t)
 
-        self.translator.executeMethod('postExecute', log=True)
+            self.translator.executeMethod('postExecute', log=True)
 
         LOG.info('Total Time [%s sec.]', time.time() - total)
 
@@ -235,20 +246,17 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         return time.time() - start
 
 class Serial(Executioner):
-    """Simple serial Executioner, this is useful for debugging."""
+    """Simple serial Executioner, this is useful for debugging or for very small builds."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._page_content = dict()
-        self._page_ast = dict()
-        self._page_result = dict()
-
-    def execute(self, nodes, num_threads=1):
-        """Perform the translation, in serial."""
-        self._run(nodes, self._readHelper, 'Read')
-        self._run(nodes, self._tokenizeHelper, 'Tokenize')
-        self._run(nodes, self._renderHelper, 'Render')
-        self._run(nodes, self._writeHelper, 'Write')
+    def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
+        if read:
+            self._run(nodes, self._readHelper, 'Read')
+        if tokenize:
+            self._run(nodes, self._tokenizeHelper, 'Tokenize')
+        if render:
+            self._run(nodes, self._renderHelper, 'Render')
+        if write:
+            self._run(nodes, self._writeHelper, 'Write')
 
     def _run(self, nodes, target, prefix):
         """Run and optionally profile a function"""
@@ -293,39 +301,34 @@ class ParallelQueue(Executioner):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._page_content = None
-        self._page_ast = None
-        self._page_result = None
+        self._global_attributes = self._ctx.Manager().dict()
 
-        self._manager = multiprocessi.Manger()
-        self._global_attributes = self._manager.dict()
+    def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
+        if read:
+            if not self._page_content:
+                self._page_content = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_content, self._read_target, num_threads,
+                      lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
+                      "Reading")
 
-    def execute(self, nodes, num_threads=1):
+        if tokenize:
+            if not self._page_ast:
+                self._page_ast = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
+                      lambda n: -len(self._page_content[n.uid]),
+                      "Tokenizing")
 
-        n = len(self.getPages())
-        self._page_content = [None]*n
-        self._page_ast = [None]*n
-        self._page_result = [None]*n
+        if render:
+            if not self._page_result:
+                self._page_result = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_result, self._render_target, num_threads,
+                      lambda n: -self._page_ast[n.uid].count,
+                      "Rendering")
 
-        # READ
-        self._run(nodes, self._page_content, self._read_target, num_threads,
-                  lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
-                  "Reading")
-
-        # TOKENIZE
-        self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
-                  lambda n: -len(self._page_content[n.uid]),
-                  "Tokenizing")
-
-        # RENDER
-        self._run(nodes, self._page_result, self._render_target, num_threads,
-                  lambda n: -self._page_ast[n.uid].count,
-                  "Rendering")
-
-        # WRITE
-        self._run(nodes, None, self._write_target, num_threads,
-                  lambda n: -self._page_result[n.uid].count,
-                  "Writing")
+        if write:
+            self._run(nodes, None, self._write_target, num_threads,
+                      lambda n: -self._page_result[n.uid].count,
+                      "Writing")
 
     def _run(self, nodes, container, target, num_threads=1, key=None, prefix='Running'):
         """Helper function for running in parallel using Queues"""
@@ -335,8 +338,8 @@ class ParallelQueue(Executioner):
         LOG.info('%s using %s threads...', prefix, num_threads)
 
         # Input/Output Queue object
-        page_queue = multiprocessing.Queue()
-        output_queue = multiprocessing.Queue()
+        page_queue = self._ctx.Queue()
+        output_queue = self._ctx.Queue()
 
         # Populate the input Queue with the ids for the nodes to be read
         random.shuffle(nodes)
@@ -345,15 +348,14 @@ class ParallelQueue(Executioner):
 
         # Create Processes for each thread that reads the data and updates the Queue objects
         for i in range(num_threads):
-            multiprocessing.Process(target=target, args=(page_queue, output_queue)).start()
+            self._ctx.Process(target=target, args=(page_queue, output_queue)).start()
 
         # Extract the data from the output Queue object and update Page object attributes
         for i in range(len(nodes)):
             uid, attributes, out = output_queue.get()
+            self.__get_node(uid).attributes.update(attributes)
             if container is not None:
                 container[uid] = out
-            node = self._page_objects[uid]
-            node.attributes.update(attributes)
 
         for i in range(num_threads):
             page_queue.put(ParallelQueue.STOP)
@@ -362,9 +364,8 @@ class ParallelQueue(Executioner):
 
     def _read_target(self, qin, qout):
         """Function for calling self.read with Queue objects."""
-
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self._page_objects[uid]
+            node = self.__get_node(uid)
             content = self.read(node)
             qout.put((uid, node.attributes, content))
 
@@ -372,28 +373,31 @@ class ParallelQueue(Executioner):
         """Function for calling self.tokenize with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self._page_objects[uid]
-            content = self._page_content[uid]
-            ast = self.tokenize(node, content)
+            node = self.__get_node(uid)
+            ast = self.tokenize(node, self._page_content[uid])
             qout.put((uid, node.attributes, ast))
 
     def _render_target(self, qin, qout):
         """Function for calling self.tokenize with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self._page_objects[uid]
-            ast = self._page_ast[uid]
-            result = self.render(node, ast)
+            node = self.__get_node(uid)
+            result = self.render(node, self._page_ast[uid])
             qout.put((uid, node.attributes, result))
 
     def _write_target(self, qin, qout):
         """Function for calling self.write with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self._page_objects[uid]
-            result = self._page_result[uid]
-            ast = self.write(node, result)
+            node = self.__get_node(uid)
+            ast = self.write(node, self._page_result[uid])
             qout.put((uid, node.attributes, None))
+
+    def __get_node(self, uid):
+        """Helper for finding a node from the available list of page objects based on its UID."""
+        for page in self._page_objects:
+            if uid == page.uid:
+                return page
 
 class ParallelBarrier(Executioner):
     """
@@ -402,30 +406,28 @@ class ParallelBarrier(Executioner):
     tokenization and rendering steps to be sure that the data is completed
     for all pages prior to beginning the various steps.
     """
-    def execute(self, nodes, num_threads=1):
-        """Perform the translation with multiprocessing."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._manager = self._ctx.Manager()
+        self._global_attributes = self._manager.dict()
 
-        # The method for spawning processes changed to "spawn" for macOS in python 3.9, currently
-        # MooseDocs does npt work with this combination. This will be remedied in moosetools
-        # migration.
-        if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
-            ctx = multiprocessing.get_context('fork')
-        else:
-            ctx = multiprocessing
+    def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
+        if read and not self._page_content:
+            self._page_content = self._manager.dict({p.uid: None for p in self._page_objects})
+        if tokenize and not self._page_ast:
+            self._page_ast = self._manager.dict({p.uid: None for p in self._page_objects})
+        if render and not self._page_result:
+            self._page_result = self._manager.dict({p.uid: None for p in self._page_objects})
 
-        barrier = ctx.Barrier(num_threads)
-        manager = ctx.Manager()
-        page_attributes = manager.list([None]*len(self._page_objects))
-        self._global_attributes = manager.dict()
+        # Initialize a manager object dictionary with the current attributes of Page objects
+        page_attributes = self._manager.dict({p.uid: p.attributes for p in self._page_objects})
 
-        # Initialize the page attributes container using the existing list of Page node objects
-        for i in range(len(page_attributes)):
-            page_attributes[i] = self._page_objects[i].attributes
-
+        # Distribute nodes to threads and process the execute methods on each
         jobs = []
         random.shuffle(nodes)
+        args = (self._ctx.Barrier(num_threads), page_attributes, read, tokenize, render, write)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = ctx.Process(target=self._target, args=(chunk, barrier, page_attributes))
+            p = self._ctx.Process(target=self._target, args=(chunk, *args))
             jobs.append(p)
             p.start()
 
@@ -441,90 +443,77 @@ class ParallelBarrier(Executioner):
         # processes.
         self._updateAttributes(page_attributes)
 
-    def _target(self, nodes, barrier, page_attributes):
+    def _target(self, nodes, barrier, page_attributes, read, tokenize, render, write):
         """Target function for multiprocessing.Process calls."""
 
-        local_content = dict()
-        local_ast = dict()
-        local_result = dict()
+        if read:
+            for node in nodes:
+                self._page_content[node.uid] = self.read(node)
+                page_attributes[node.uid] = node.attributes
 
-        # READ
-        for node in nodes:
-            content = self.read(node)
-            page_attributes[node.uid] = node.attributes
-            local_content[node.uid] = content
+            barrier.wait()
+            self._updateAttributes(page_attributes)
 
-        barrier.wait()
-        self._updateAttributes(page_attributes)
+        if tokenize:
+            for node in nodes:
+                node.attributes.update(page_attributes[node.uid])
+                self._page_ast[node.uid] = self.tokenize(node, self._page_content[node.uid])
+                page_attributes[node.uid] = node.attributes
 
-        # TOKENIZE
-        for node in nodes:
-            content = local_content.pop(node.uid)
-            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
-            ast = self.tokenize(node, content)
-            page_attributes[node.uid] = node.attributes
-            local_ast[node.uid] = ast
+            barrier.wait()
+            self._updateAttributes(page_attributes)
 
-        barrier.wait()
-        self._updateAttributes(page_attributes)
+        if render:
+            for node in nodes:
+                node.attributes.update(page_attributes[node.uid])
+                self._page_result[node.uid] = self.render(node, self._page_ast[node.uid])
+                page_attributes[node.uid] = node.attributes
 
-        # RENDER
-        for node in nodes:
-            ast = local_ast.pop(node.uid)
-            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
-            result = self.render(node, ast)
-            page_attributes[node.uid] = node.attributes
-            local_result[node.uid] = result
+            barrier.wait()
+            self._updateAttributes(page_attributes)
 
-        barrier.wait()
-        self._updateAttributes(page_attributes)
-
-        # WRITE
-        for node in nodes:
-            result = local_result.pop(node.uid)
-            mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
-            result = self.write(node, result)
+        if write:
+            for node in nodes:
+                node.attributes.update(page_attributes[node.uid])
+                self.write(node, self._page_result[node.uid])
 
     def _updateAttributes(self, page_attributes):
         """Update the local page objects with attributes gathered from the other processes"""
-        for i, page in enumerate(self._page_objects):
-            if page_attributes[i] is not None:
-                page.update(page_attributes[i])
+        for page in self._page_objects:
+            mooseutils.recursive_update(page.attributes, page_attributes[page.uid])
 
 class ParallelPipe(Executioner):
     """
     Parallel execution that performs operations and transfers data using multiprocessing.Pipe
-    """
-    STOP = float('inf')
 
+    Follows Pipe example with wait():
+    https://docs.python.org/3/library/multiprocessing.html#multiprocessing.connection.wait
+
+    Note: 'ForkContext' objects do not have the attribute 'connection'. However,
+    `multiprocessing.connection.wait(receivers) == [r for r in receivers if r.poll() or r.closed]`
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._global_attributes = self._ctx.Manager().dict()
 
-        self._page_content = None
-        self._page_ast = None
-        self._page_result = None
+    def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
+        if read:
+            if not self._page_content:
+                self._page_content = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
 
-        self._manager = multiprocessi.Manger()
-        self._global_attributes = self._manager.dict()
+        if tokenize:
+            if not self._page_ast:
+                self._page_ast = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
 
-    def execute(self, nodes, num_threads=1):
+        if render:
+            if not self._page_result:
+                self._page_result = {p.uid: None for p in self._page_objects}
+            self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
 
-        n = len(self.getPages())
-        self._page_content = [None]*n
-        self._page_ast = [None]*n
-        self._page_result = [None]*n
-
-        # READ
-        self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
-
-        # TOKENIZE
-        self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
-
-        # RENDER
-        self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
-
-        # WRITE
-        self._run(nodes, None, self._write_target, num_threads, "Writing")
+        if write:
+            self._run(nodes, None, self._write_target, num_threads, "Writing")
 
     def _run(self, nodes, container, target, num_threads=1, prefix='Running'):
         """Helper function for running in parallel using Pipe"""
@@ -533,23 +522,33 @@ class ParallelPipe(Executioner):
         t = time.time()
         LOG.info('%s using %s threads...', prefix, num_threads)
 
-        # Tokenization
-        jobs = []
-        conn1, conn2 = multiprocessing.Pipe(False)
+        # Create connection objects representing the receiver and sender ends of the pipe.
+        receivers = []
+        random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
-            p = multiprocessing.Process(target=target, args=(chunk, conn2))
-            p.start()
-            jobs.append(p)
+            r, s = self._ctx.Pipe(False)
+            receivers.append(r)
+            self._ctx.Process(target=target, args=(chunk, s)).start()
+            s.close() # need to close this instance because a copy was sent to the Process() object
 
-        while any(job.is_alive() for job in jobs):
-            if conn1.poll():
-                data = conn1.recv()
-                for uid, attributes, out in data:
-                    node = self._page_objects[uid]
-                    node.attributes.update(attributes)
-
-                    if container is not None:
-                        container[uid] = out
+        # Iterate through the list of ready connection objects, i.e., those that either have data to
+        # receive or their corresponding sender connection has been closed, until all are removed
+        # from the list of pending connections. If there is no data to receive and the sender has
+        # been closed, then an EOFError is raised indicating that the receiver can be removed.
+        while receivers:
+            for r in [r for r in receivers if r.poll() or r.closed]:
+                try:
+                    data = r.recv()
+                except EOFError:
+                    receivers.remove(r)
+                else:
+                    for uid, attributes, out in data:
+                        for node in nodes:
+                            if uid == node.uid:
+                                node.attributes.update(attributes)
+                                break
+                        if container is not None:
+                            container[uid] = out
 
         LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
 
@@ -561,41 +560,34 @@ class ParallelPipe(Executioner):
             content = self.read(node)
             data.append((node.uid, node.attributes, content))
 
-        with self.LOCK:
-            conn.send(data)
+        conn.send(data)
 
     def _tokenize_target(self, nodes, conn):
         """Function for calling self.tokenize with Connection object"""
 
         data = list()
         for node in nodes:
-            content = self._page_content[node.uid]
-            ast = self.tokenize(node, content)
+            ast = self.tokenize(node, self._page_content[node.uid])
             data.append((node.uid, node.attributes, ast))
 
-        with self.LOCK:
-            conn.send(data)
+        conn.send(data)
 
     def _render_target(self, nodes, conn):
         """Function for calling self.tokenize with Connection object"""
 
         data = list()
         for node in nodes:
-            ast = self._page_ast[node.uid]
-            result = self.render(node, ast)
+            result = self.render(node, self._page_ast[node.uid])
             data.append((node.uid, node.attributes, result))
 
-        with self.LOCK:
-            conn.send(data)
+        conn.send(data)
 
     def _write_target(self, nodes, conn):
         """Function for calling self.write with Connection object"""
 
         data = list()
         for node in nodes:
-            result = self._page_result[node.uid]
-            self.write(node, result)
+            self.write(node, self._page_result[node.uid])
             data.append((node.uid, node.attributes, None))
 
-        with self.LOCK:
-            conn.send(data)
+        conn.send(data)

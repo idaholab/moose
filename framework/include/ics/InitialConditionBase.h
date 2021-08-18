@@ -18,6 +18,7 @@
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
+#include "MaterialPropertyInterface.h"
 #include "MooseTypes.h"
 #include "ElementIDInterface.h"
 
@@ -42,6 +43,7 @@ InputParameters validParams<InitialConditionBase>();
 class InitialConditionBase : public MooseObject,
                              public BlockRestrictable,
                              public Coupleable,
+                             public MaterialPropertyInterface,
                              public FunctionInterface,
                              public UserObjectInterface,
                              public PostprocessorInterface,

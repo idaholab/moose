@@ -1,0 +1,26 @@
+[Tests]
+[no_multiapp]
+  type = CSVDiff
+  input = no_multiapp.i
+  csvdiff = no_multiapp_frac_T_frac_T_0002.csv
+  requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh conforms with the matrix mesh, without using a MultiApp approach"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+[]
+[conforming_dirac]
+  type = CSVDiff
+  input = matrix_app_dirac.i
+  csvdiff = matrix_app_dirac_out_fracture_app0_frac_T_frac_T_0001.csv
+  requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh conforms with the matrix mesh, using a MultiApp approach"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+[]
+[non_conforming_dirac]
+  type = CSVDiff
+  input = matrix_app_nonconforming.i
+  csvdiff = matrix_app_nonconforming_out_fracture_app0_frac_T_frac_T_0001.csv
+  requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh does not conform with the matrix mesh, using a MultiApp approach"
+  issues = '#17928'
+  design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+[]
+[]

@@ -35,8 +35,8 @@
   [evaluate]
     type = CSVDiff
     input = trans_diff_surr.i
-    cli_args = "Samplers/sample/num_rows=10"
-    csvdiff = 'trans_diff_surr_out_eval_surr_stats_0001.csv trans_diff_surr_out_eval_surr_0001.csv'
+    cli_args = "Samplers/sample/num_rows=10 Outputs/csv=true"
+    csvdiff = 'trans_diff_surr_out_eval_surr_0001.csv'
     prereq = train
 
     detail = "and evaluating the surrogate models"

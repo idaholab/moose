@@ -17,7 +17,7 @@ import types
 import re
 
 from .. import common
-from ..tree import tokens, pages
+from ..tree import tokens
 
 LOG = logging.getLogger(__name__)
 

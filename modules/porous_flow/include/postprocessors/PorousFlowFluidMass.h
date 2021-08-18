@@ -32,6 +32,12 @@ protected:
   const unsigned int _fluid_component;
   /// The phase indices that this Postprocessor is restricted to
   std::vector<unsigned int> _phase_index;
+  /// base name used in the Tensor Mechanics strain calculator
+  const std::string _base_name;
+  /// Whether there is a Material called _base_name_total_strain
+  const bool _has_total_strain;
+  /// Value of total strain calculated by a Tensor Mechanics strain calculator, if it exists, otherwise nullptr
+  const MaterialProperty<RankTwoTensor> * const _total_strain;
   /// Porosity
   const MaterialProperty<Real> & _porosity;
   /// Phase density (kg/m^3)

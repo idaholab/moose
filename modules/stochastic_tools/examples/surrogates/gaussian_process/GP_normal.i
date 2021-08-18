@@ -46,12 +46,6 @@
 
 # Computing statistics
 [VectorPostprocessors]
-  [samp_avg]
-    type = EvaluateSurrogate
-    model = GP_avg
-    sampler = sample
-    output_samples = true
-  []
   [GP_avg_hyperparams]
     type = GaussianProcessData
     gp_name = 'GP_avg'

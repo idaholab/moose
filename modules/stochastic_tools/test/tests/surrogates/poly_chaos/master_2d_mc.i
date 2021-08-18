@@ -52,20 +52,13 @@
 [Reporters]
   [storage]
     type = StochasticReporter
-  []
-[]
-
-[VectorPostprocessors]
-  [pc_coeff]
-    type = PolynomialChaosData
-    pc_name = poly_chaos
-    execute_on = final
+    outputs = none
   []
   [pc_samp]
     type = EvaluateSurrogate
     model = poly_chaos
     sampler = sample
-    output_samples = true
+    parallel_type = ROOT
     execute_on = final
   []
 []

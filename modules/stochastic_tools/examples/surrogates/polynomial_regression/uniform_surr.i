@@ -44,29 +44,37 @@
 []
 
 # Computing statistics
-[VectorPostprocessors]
+[Reporters]
   [pc_max_res]
     type = EvaluateSurrogate
     model = pc_max
     sampler = sample
+    parallel_type = ROOT
   []
   [pr_max_res]
     type = EvaluateSurrogate
     model = pr_max
     sampler = sample
+    parallel_type = ROOT
   []
+  [pr_max_stats]
+    type = StatisticsReporter
+    reporters = 'pr_max_res/pr_max'
+    compute = 'mean stddev'
+  []
+[]
+
+[VectorPostprocessors]
   [pc_max_stats]
     type = PolynomialChaosStatistics
     pc_name = 'pc_max'
     compute = 'mean stddev'
   []
-  [pr_max_stats]
-    type = Statistics
-    vectorpostprocessors = pr_max_res
-    compute = 'mean stddev'
-  []
 []
 
 [Outputs]
+  [out]
+    type = JSON
+  []
   csv = true
 []

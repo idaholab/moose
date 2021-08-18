@@ -13,7 +13,7 @@
 #include "gtest_include.h"
 
 // Moose includes
-#include "EBSDMesh.h"
+#include "EBSDMeshGenerator.h"
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "PhaseFieldApp.h"
@@ -39,10 +39,10 @@ protected:
       oss << name << "_" << i;
 
       // generate input parameter set
-      InputParameters params = validParams<EBSDMesh>();
+      InputParameters params = validParams<EBSDMeshGenerator>();
       params.addPrivateParam("_moose_app", _app.get());
       params.set<std::string>("_object_name") = oss.str();
-      params.set<std::string>("_type") = "EBSDMesh";
+      params.set<std::string>("_type") = "EBSDMeshGenerator";
 
       // set a single parameter
       params.set<T>(param_list[i]) = T(1.0);
@@ -53,7 +53,7 @@ protected:
       try
       {
         // construct mesh object
-        std::unique_ptr<EBSDMesh> mesh = libmesh_make_unique<EBSDMesh>(params);
+        auto mesh = std::make_unique<EBSDMeshGenerator>(params);
         // TODO: fix and uncomment this - it was missing before.
         // FAIL() << "mesh construction should have failed but didn't";
       }

@@ -10,6 +10,8 @@
 #pragma once
 
 #include "ParsedMaterialHelper.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
+
 #include "libmesh/fparser_ad.hh"
 
 #define usingDerivativeParsedMaterialHelperMembers(T)                                              \
@@ -29,6 +31,8 @@ protected:
   usingParsedMaterialHelperMembers(is_ad);
 
 public:
+  typedef DerivativeMaterialPropertyNameInterface::SymbolName SymbolName;
+
   DerivativeParsedMaterialHelperTempl(
       const InputParameters & parameters,
       VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES);
@@ -63,6 +67,12 @@ protected:
   /// next available variable number for automatically created material property derivative variables
   unsigned int _dmatvar_index;
 
+  /**
+   * list of all indices into _variable_names to take derivatives, w.r.t. By default this always
+   * includes 0.._nargs-1, which are the coupled variables
+   */
+  std::vector<std::size_t> _derivative_symbol_table;
+
 private:
   // for bulk registration of material property derivatives
   std::vector<MaterialPropertyDerivativeRule> _bulk_rules;
@@ -73,7 +83,7 @@ struct DerivativeParsedMaterialHelperTempl<is_ad>::Derivative
 {
   GenericMaterialProperty<Real, is_ad> * _mat_prop;
   SymFunctionPtr _F;
-  std::vector<VariableName> _darg_names;
+  std::vector<SymbolName> _darg_names;
 };
 
 template <bool is_ad>

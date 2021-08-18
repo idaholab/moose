@@ -10,12 +10,13 @@
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [results]
     type = EvaluateSurrogate
     model = surrogate
     sampler = test
     execute_on = final
+    parallel_type = ROOT
   []
 []
 

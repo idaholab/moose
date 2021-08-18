@@ -18,11 +18,13 @@ public:
 
   PolynomialRegressionSurrogate(const InputParameters & parameters);
 
+  using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
+  virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const override;
 
 protected:
   /// Coefficients of regression model
-  const std::vector<Real> & _coeff;
+  const std::vector<std::vector<Real>> & _coeff;
 
   /// The power matrix for the terms in the polynomial expressions
   const std::vector<std::vector<unsigned int>> & _power_matrix;

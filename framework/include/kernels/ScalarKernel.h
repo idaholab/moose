@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "ResidualObject.h"
-#include "ScalarCoupleable.h"
-#include "MooseVariableScalar.h"
+#include "ScalarKernelBase.h"
 
 // Forward declarations
 class ScalarKernel;
@@ -19,39 +17,14 @@ class ScalarKernel;
 template <>
 InputParameters validParams<ScalarKernel>();
 
-class ScalarKernel : public ResidualObject, public ScalarCoupleable
+class ScalarKernel : public ScalarKernelBase
 {
 public:
   static InputParameters validParams();
 
   ScalarKernel(const InputParameters & parameters);
 
-  virtual void reinit() = 0;
-
-  /**
-   * The variable that this kernel operates on.
-   */
-  virtual const MooseVariableScalar & variable() const override { return _var; }
-
-  /**
-   * Use this to enable/disable the constraint
-   * @return true if the constrain is active
-   */
-  virtual bool isActive() { return true; }
-
-  /**
-   * Retrieves the old value of the variable that this ScalarKernel operates on.
-   *
-   * Store this as a _reference_ in the constructor.
-   */
-  const VariableValue & uOld() const;
-
 protected:
-  /// Scalar variable
-  MooseVariableScalar & _var;
-
-  unsigned int _i, _j;
-
   /// The current solution (old solution if explicit)
   const VariableValue & _u;
 };

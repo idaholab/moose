@@ -41,7 +41,15 @@ PorousFlowFluidMass::validParams()
                                 "the fluid-mass kernel.  This is required only in the unusual "
                                 "situation where a variety of different finite-element "
                                 "interpolation schemes are employed in the simulation");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<std::string>(
+      "base_name",
+      "For non-mechanically-coupled systems with no TensorMechanics strain calculators, base_name "
+      "need not be set.  For mechanically-coupled systems, base_name should be the same base_name "
+      "as given to the TensorMechanics object that computes strain, so that this Postprocessor can "
+      "correctly account for changes in mesh volume.  For non-mechanically-coupled systems, "
+      "base_name should not be the base_name of any TensorMechanics strain calculators.");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Calculates the mass of a fluid component in a region");
   return params;
 }
@@ -52,6 +60,11 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters)
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _fluid_component(getParam<unsigned int>("fluid_component")),
     _phase_index(getParam<std::vector<unsigned int>>("phase")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _has_total_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain(_has_total_strain
+                      ? &getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")
+                      : nullptr),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _fluid_density(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
     _fluid_saturation(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")),
@@ -143,7 +156,13 @@ PorousFlowFluidMass::computeIntegral()
   {
     Real nodal_volume = 0.0;
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      nodal_volume += _JxW[_qp] * _coord[_qp] * test[node][_qp];
+    {
+      const Real n_v = _JxW[_qp] * _coord[_qp] * test[node][_qp];
+      if (_has_total_strain)
+        nodal_volume += n_v * (1.0 + (*_total_strain)[_qp].trace());
+      else
+        nodal_volume += n_v;
+    }
 
     Real mass = 0.0;
     for (auto ph : _phase_index)

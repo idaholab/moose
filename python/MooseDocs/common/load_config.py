@@ -14,7 +14,9 @@ import logging
 import collections
 from mooseutils import recursive_update
 from mooseutils.yaml_load import yaml_load
+
 import MooseDocs
+from ..tree import pages
 from ..common import exceptions
 
 LOG = logging.getLogger(__name__)
@@ -84,6 +86,65 @@ def load_config(filename, **kwargs):
                                    content, reader, renderer, extensions, executioner)
 
     return translator, config
+
+def load_configs(filenames, **kwargs):
+    """
+    Read the YAML files listed in filenames and create unique Translator objects for each. Each
+    configuration should specify the same translator destination unless it is set globally via the
+    kwargs. The kwargs are applied the same to all configurations (see the load_config() method).
+
+    The content specified by each configuration is added to a common pool of content and then
+    distributed to each Translator object. The contents output is a list of lists containing the
+    pages that a corresponding translator is responsible for. Each translator creates independent
+    Extensions, Reader, Renderer, and Executioner objects to build its designated page objects, but
+    they still should have access to those built by any other translator.
+
+    The local names of all page objects must be unique within the global content pool. The only
+    exceptions are pages.Directory objects, for which duplicates may occur.
+    """
+    destination = kwargs.get('Translator', dict()).get('destination')
+    destined = False
+    translators = list()
+    configurations = list()
+    for file in filenames:
+        trans, config = load_config(file, **kwargs)
+
+        # Make sure translators are all outputting to the same destination
+        current = config.get('Translator', dict()).get('destination')
+        if current is not None:
+            if destined and current != destination:
+                msg = "The translator destination '{}' was specified by {}, but another " \
+                      "configuration file used '{}'. Please specify a value in only one file or " \
+                      "the same value in all files. Otherwise, use the kwargs to override all."
+                raise exceptions.MooseDocsException(msg, current, file, destination)
+            elif destination is None:
+                destination = current
+                destined = True
+
+        translators.append(trans)
+        configurations.append(config)
+
+    if destined:
+        for translator in translators:
+            translator.update(destination=destination)
+
+    # Set contents for each translator then loop through and distribute their contents to all others
+    contents = [[page for page in translator.getPages()] for translator in translators]
+    pooled = list() # initialize global content pool
+    for index, translator in enumerate(translators):
+        cotranslators = [t for t in translators if t is not translator]
+        for page in contents[index]:
+            if page.local in pooled:
+                if not isinstance(page, pages.Directory):
+                    msg = "A page or file '{}' was specified by {}, but one by the same name had " \
+                          "already been added to the content pool by another configuration file."
+                    raise exceptions.MooseDocsException(msg, page.local, filenames[index])
+            else:
+                pooled.append(page.local)
+                for ct in cotranslators:
+                    ct.addPage(page)
+
+    return translators, contents, configurations
 
 def load_extensions(ext_list, ext_configs=None):
     """
@@ -173,7 +234,6 @@ def _yaml_load_object(name, config, default, *args):
     except NameError:
         msg = "ERROR: The %s block must contain a valid object name."
         LOG.error(msg, name)
-
 
 def _yaml_load_content(config, in_ext):
     """Load the 'Content' section."""

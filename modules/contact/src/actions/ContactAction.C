@@ -76,11 +76,6 @@ ContactAction::validParams()
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
 
-  params.addDeprecatedParam<MooseEnum>(
-      "system",
-      ContactAction::getSystemEnum(),
-      "System to use for constraint enforcement",
-      "The only available system in the contact action is constraint");
   params.addParam<bool>("normalize_penalty",
                         false,
                         "Whether to normalize the penalty parameter with the nodal area.");
@@ -144,7 +139,6 @@ ContactAction::ContactAction(const InputParameters & params)
     _secondary(getParam<std::vector<BoundaryName>>("secondary")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
-    _system(getParam<MooseEnum>("system")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
     _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
     _use_dual(getParam<bool>("use_dual")),
@@ -160,10 +154,6 @@ ContactAction::ContactAction(const InputParameters & params)
 
   if (_formulation == "tangential_penalty")
   {
-    if (_system != "Constraint")
-      paramError(
-          "formulation",
-          "The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
     if (_model != "coulomb")
       paramError("formulation",
                  "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
@@ -171,9 +161,6 @@ ContactAction::ContactAction(const InputParameters & params)
 
   if (_formulation == "mortar")
   {
-    if (_system != "constraint")
-      paramError("formulation",
-                 "The 'mortar' formulation can only be used with the 'Constraint' system");
     if (_mesh_gen_name.empty())
       paramError("mesh", "The 'mortar' formulation requires 'mesh' to be supplied");
     if (_model == "glued")

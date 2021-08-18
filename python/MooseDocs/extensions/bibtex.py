@@ -52,16 +52,15 @@ class BibtexExtension(command.CommandExtension):
         self.__bib_file_database = dict()
 
     def preExecute(self):
+        set_strict_mode(False) # allow incorrectly formatted author/editor names
 
-        duplicates = self.get('duplicates', list())
-        set_strict_mode(False)
-        self.__database = BibliographyData()
-
+        # If this is invoked during a live serve, we need to recompile the list of '.bib' files and
+        # read them again, otherwise there's no way to distinguish existing entries from duplicates
         self.__bib_files = []
-        for node in self.translator.getPages():
-            if node.source.endswith('.bib'):
-                self.__bib_files.append(node.source)
+        for node in self.translator.findPages(lambda p: p.source.endswith('.bib')):
+            self.__bib_files.append(node.source)
 
+        self.__database = BibliographyData()
         for bfile in self.__bib_files:
             try:
                 db = parse_file(bfile)
@@ -72,15 +71,12 @@ class BibtexExtension(command.CommandExtension):
 
             #TODO: https://bitbucket.org/pybtex-devs/pybtex/issues/93/
             #      databaseadd_entries-method-not-considering
-            warn = self.get('duplicate_warning')
             for key in db.entries:
-                duplicate_key = key in self.__database.entries
-                duplicate_key_allowed = key in duplicates
-                if duplicate_key and (not duplicate_key_allowed):
-                    if warn:
+                if key in self.__database.entries:
+                    if self.get('duplicate_warning') and (key not in self.get('duplicates')):
                         msg = "The BibTeX entry '%s' defined in %s already exists."
                         LOG.warning(msg, key, bfile)
-                elif not duplicate_key:
+                else:
                     self.__database.add_entry(key, db.entries[key])
 
     def preTokenize(self, page, ast):

@@ -22,11 +22,11 @@ With Miniconda installed to your home directory, export PATH, so that it may be 
 export PATH=$HOME/miniconda3/bin:$PATH
 ```
 
-Configure Conda to work with conda-forge, and our idaholab channel:
+Configure Conda to work with conda-forge, and our INL public channel:
 
 ```bash
 conda config --add channels conda-forge
-conda config --add channels idaholab
+conda config --add channels https://conda.software.inl.gov/public
 ```
 
 !alert warning title=sudo conda

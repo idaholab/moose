@@ -1,0 +1,16 @@
+[Tests]
+  design = 'ScalarKernels/index.md'
+  issues = '#18535'
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'ad_scalar_kernel.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-6
+    # TestADScalarKernelUserObject is limited to serial execution because there
+    # is currently no AD version for gatherSum(), which is needed in its finalize() method.
+    max_parallel = 1
+    # AD scalar kernels only work with global AD indexing
+    ad_indexing_type = 'global'
+    requirement = 'MOOSE shall be able to correctly compute the Jacobian of an ADScalarKernel using automatic differentiation.'
+  []
+[]

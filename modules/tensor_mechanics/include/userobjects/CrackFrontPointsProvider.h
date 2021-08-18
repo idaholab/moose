@@ -26,4 +26,10 @@ public:
    */
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const = 0;
+
+  /** get a set of normal vectors along a crack front from a XFEM GeometricCutUserObject
+   * @return A vector which contains all crack front normals
+   */
+  virtual const std::vector<RealVectorValue>
+  getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const = 0;
 };

@@ -32,6 +32,8 @@ UserObject::validParams()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
+
+  // Execution parameters
   params.addParam<bool>("allow_duplicate_execution_on_initial",
                         false,
                         "In the case where this UserObject is depended upon by an initial "
@@ -39,10 +41,16 @@ UserObject::validParams()
                         "before the IC and again after mesh adaptivity (if applicable).");
   params.declareControllable("enable");
 
+  params.addParam<bool>("force_preaux", false, "Forces the UserObject to be executed in PREAUX");
+  params.addParam<bool>("force_postaux", false, "Forces the UserObject to be executed in POSTAUX");
+  params.addParam<bool>(
+      "force_preic", false, "Forces the UserObject to be executed in PREIC during initial setup");
+
   params.registerBase("UserObject");
   params.registerSystemAttributeName("UserObject");
 
-  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial",
+  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial "
+                              "force_preaux force_postaux force_preic",
                               "Advanced");
   return params;
 }
@@ -69,6 +77,11 @@ UserObject::UserObject(const InputParameters & parameters)
     _coord_sys(_assembly.coordSystem()),
     _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {
+  // Check the pre/post aux flag
+  if (getParam<bool>("force_preaux") && getParam<bool>("force_postaux"))
+    paramError("force_preaux",
+               "A user object may be specified as executing before or after "
+               "AuxKernels, not both.");
 }
 
 std::set<UserObjectName>

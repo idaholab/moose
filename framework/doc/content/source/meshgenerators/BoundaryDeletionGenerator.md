@@ -2,8 +2,8 @@
 
 !syntax description /Mesh/BoundaryDeletionGenerator
 
-!syntax parameters /Mesh/RenameBoundaryGenerator
+!syntax parameters /Mesh/BoundaryDeletionGenerator
 
-!syntax inputs /Mesh/RenameBoundaryGenerator
+!syntax inputs /Mesh/BoundaryDeletionGenerator
 
-!syntax children /Mesh/RenameBoundaryGenerator
+!syntax children /Mesh/BoundaryDeletionGenerator

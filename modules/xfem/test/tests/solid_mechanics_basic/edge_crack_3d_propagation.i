@@ -26,13 +26,15 @@
 
 [UserObjects]
   [./cut_mesh]
-    type = MeshCut3DUserObject
+    type = CrackMeshCut3DUserObject
     mesh_file = mesh_edge_crack.xda
+    growth_dir_method = 'function'
     size_control = 0.1
     n_step_growth = 1
     function_x = growth_func_x
     function_y = growth_func_y
     function_z = growth_func_z
+    function_v = growth_func_v
   [../]
 []
 
@@ -48,6 +50,10 @@
   [./growth_func_z]
     type = ParsedFunction
     value = 0
+  [../]
+  [./growth_func_v]
+    type = ParsedFunction
+    value = 0.15
   [../]
 []
 
@@ -133,7 +139,7 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 5.0
+  end_time = 3.0
   max_xfem_update = 1
 []
 

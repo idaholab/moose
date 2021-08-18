@@ -49,6 +49,8 @@ and geomechanics.
 - [Convergence criteria](porous_flow/convergence.md)
 - [Nonlinear convergence problems](porous_flow/nonlinear_convergence_problems.md)
 - [Persistent variables](porous_flow/persistent_variables.md)
+- [Time derivative](porous_flow/time_derivative.md)
+- [Lagrangian coordinates](porous_flow/lagrangian_eulerian.md)
 - [Compositional flash](porous_flow/compositional_flash.md)
 
 !col-end!

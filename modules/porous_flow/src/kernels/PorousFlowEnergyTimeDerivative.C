@@ -24,8 +24,18 @@ PorousFlowEnergyTimeDerivative::validParams()
                         "is not necessary for simulations involving only linear lagrange elements. "
                         " If you set this to true, you will also want to set the same parameter to "
                         "true for related Kernels and Materials");
+  params.addParam<std::string>(
+      "base_name",
+      "For mechanically-coupled systems, this Kernel will depend on the volumetric strain.  "
+      "base_name should almost always be the same base_name as given to the TensorMechanics object "
+      "that computes strain.  Supplying a base_name to this Kernel but not defining an associated "
+      "TensorMechanics strain calculator means that this Kernel will not depend on volumetric "
+      "strain.  That could be useful when models contain solid mechanics that is not coupled to "
+      "porous flow, for example");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
+  params.set<bool>("use_displaced_mesh") = false;
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addClassDescription("Derivative of heat-energy-density wrt time");
   return params;
 }
@@ -37,6 +47,11 @@ PorousFlowEnergyTimeDerivative::PorousFlowEnergyTimeDerivative(const InputParame
     _num_phases(_dictator.numPhases()),
     _fluid_present(_num_phases > 0),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _has_total_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain_old(_has_total_strain
+                          ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")
+                          : nullptr),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
     _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")),
@@ -92,8 +107,9 @@ PorousFlowEnergyTimeDerivative::computeQpResidual()
     energy_old += (*_fluid_density_old)[_i][ph] * (*_fluid_saturation_nodal_old)[_i][ph] *
                   (*_energy_nodal_old)[_i][ph] * _porosity_old[_i];
   }
+  const Real strain = (_has_total_strain ? (*_total_strain_old)[_qp].trace() : 0.0);
 
-  return _test[_i][_qp] * (energy - energy_old) / _dt;
+  return _test[_i][_qp] * (1.0 + strain) * (energy - energy_old) / _dt;
 }
 
 Real
@@ -119,6 +135,8 @@ PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar) const
 {
   const unsigned nearest_qp = (_strain_at_nearest_qp ? (*_nearest_qp)[_i] : _i);
 
+  const Real strain = (_has_total_strain ? (*_total_strain_old)[_qp].trace() : 0.0);
+
   // porosity is dependent on variables that are lumped to the nodes,
   // but it can depend on the gradient
   // of variables, which are NOT lumped to the nodes, hence:
@@ -128,7 +146,7 @@ PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar) const
                (*_energy_nodal)[_i][ph] * _dporosity_dgradvar[_i][pvar] * _grad_phi[_j][nearest_qp];
 
   if (_i != _j)
-    return _test[_i][_qp] * denergy / _dt;
+    return _test[_i][_qp] * (1.0 + strain) * denergy / _dt;
 
   // As the fluid energy is lumped to the nodes, only non-zero terms are for _i==_j
   denergy += -_dporosity_dvar[_i][pvar] * _rock_energy_nodal[_i];
@@ -144,5 +162,5 @@ PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar) const
     denergy += (*_fluid_density)[_i][ph] * (*_fluid_saturation_nodal)[_i][ph] *
                (*_energy_nodal)[_i][ph] * _dporosity_dvar[_i][pvar];
   }
-  return _test[_i][_qp] * denergy / _dt;
+  return _test[_i][_qp] * (1.0 + strain) * denergy / _dt;
 }

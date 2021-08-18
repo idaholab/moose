@@ -39,7 +39,7 @@ MultiAppNearestNodeTransfer::validParams()
   params.addParam<BoundaryName>(
       "source_boundary",
       "The boundary we are transferring from (if not specified, whole domain is used).");
-  params.addParam<BoundaryName>(
+  params.addParam<std::vector<BoundaryName>>(
       "target_boundary",
       "The boundary we are transferring to (if not specified, whole domain is used).");
   params.addParam<bool>("fixed_meshes",
@@ -129,27 +129,14 @@ MultiAppNearestNodeTransfer::execute()
       if (fe_type.order > FIRST && !is_to_nodal)
         mooseError("We don't currently support second order or higher elemental variable ");
 
+      if (!is_to_nodal && isParamValid("target_boundary"))
+        paramWarning("target_boundary",
+                     "Setting a target boundary is only valid for receiving "
+                     "variables of the LAGRANGE basis");
+
       if (is_to_nodal)
       {
-        std::vector<Node *> target_local_nodes;
-
-        if (isParamValid("target_boundary"))
-        {
-          BoundaryID target_bnd_id =
-              _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
-
-          ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-          for (const auto & bnode : bnd_nodes)
-            if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
-              target_local_nodes.push_back(bnode->_node);
-        }
-        else
-        {
-          target_local_nodes.resize(to_mesh->n_local_nodes());
-          unsigned int i = 0;
-          for (auto & node : to_mesh->local_node_ptr_range())
-            target_local_nodes[i++] = node;
-        }
+        const std::vector<Node *> & target_local_nodes = getTargetLocalNodes(i_to);
 
         // For error checking: keep track of all target_local_nodes
         // which are successfully mapped to at least one domain where
@@ -503,25 +490,7 @@ MultiAppNearestNodeTransfer::execute()
 
     if (is_to_nodal)
     {
-      std::vector<Node *> target_local_nodes;
-
-      if (isParamValid("target_boundary"))
-      {
-        BoundaryID target_bnd_id =
-            _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
-
-        ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-        for (const auto & bnode : bnd_nodes)
-          if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
-            target_local_nodes.push_back(bnode->_node);
-      }
-      else
-      {
-        target_local_nodes.resize(to_mesh.n_local_nodes());
-        unsigned int i = 0;
-        for (auto & node : to_mesh.local_node_ptr_range())
-          target_local_nodes[i++] = node;
-      }
+      const std::vector<Node *> & target_local_nodes = getTargetLocalNodes(i_to);
 
       for (const auto & node : target_local_nodes)
       {
@@ -892,4 +861,36 @@ MultiAppNearestNodeTransfer::getLocalEntities(
         local_entities.emplace_back(elem->centroid(), elem);
     }
   }
+}
+
+const std::vector<Node *> &
+MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_id)
+{
+  _target_local_nodes.clear();
+  const MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
+
+  if (isParamValid("target_boundary"))
+  {
+    const std::vector<BoundaryName> & target_boundaries =
+        getParam<std::vector<BoundaryName>>("target_boundary");
+    ConstBndNodeRange & bnd_nodes = *(_to_meshes[to_problem_id])->getBoundaryNodeRange();
+
+    for (const auto & t : target_boundaries)
+    {
+      BoundaryID target_bnd_id = _to_meshes[to_problem_id]->getBoundaryID(t);
+
+      for (const auto & bnode : bnd_nodes)
+        if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
+          _target_local_nodes.push_back(bnode->_node);
+    }
+  }
+  else
+  {
+    _target_local_nodes.resize(to_mesh.n_local_nodes());
+    unsigned int i = 0;
+    for (auto & node : to_mesh.local_node_ptr_range())
+      _target_local_nodes[i++] = node;
+  }
+
+  return _target_local_nodes;
 }

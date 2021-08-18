@@ -164,6 +164,12 @@ private:
   /// Sampler data for the current row
   std::vector<Real> _row_data;
 
+  /// Whether or not we are skipping samples that have unconverged solutions
+  const bool _skip_unconverged;
+
+  /// Whether or not the current sample has a converged solution
+  const bool * _converged;
+
   /// Vector of reporter names and their corresponding values (to be filled by getTrainingData)
   std::unordered_map<ReporterName, std::shared_ptr<TrainingDataBase>> _training_data;
 };

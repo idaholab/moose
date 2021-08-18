@@ -4,11 +4,11 @@
 
 ## Overview
 
-The `XFEMPhaseTransitionMovingInterfaceVelocity` calculates an interface velocity that is given as $v = \frac{[[ {D}\nabla {u}\cdot\text{n}]]}{[[ {u}]] + u_0}$. The current implementation only supports the case in which the interface is moving horizontally.
+The `XFEMPhaseTransitionMovingInterfaceVelocity` calculates an interface velocity that is given as $v = \frac{[[ {D}\nabla {u}\cdot\text{n}]]}{[[ {u}]] + u_0}$.
 
 ## Example Input File Syntax
 
-!listing modules/xfem/test/tests/moving_interface/phase_transition.i block=UserObjects/velocity
+!listing modules/xfem/test/tests/moving_interface/phase_transition_2d.i block=UserObjects/velocity
 
 !syntax parameters /UserObjects/XFEMPhaseTransitionMovingInterfaceVelocity
 

@@ -16,6 +16,7 @@ class NearestPointSurrogate : public SurrogateModel
 public:
   static InputParameters validParams();
   NearestPointSurrogate(const InputParameters & parameters);
+  using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:

@@ -32,19 +32,6 @@ protected:
   template <typename T>
   std::vector<std::vector<T> *> declareConstantVectorReporterValues(const std::string & prefix);
   ///@}
-
-  /// Integer reporter data
-  std::vector<int *> _int;
-  /// Real reporter data
-  std::vector<Real *> _real;
-  /// String reporter data
-  std::vector<std::string *> _string;
-  /// Vector of integers reporter data
-  std::vector<std::vector<int> *> _int_vec;
-  /// Vector of reals reporter data
-  std::vector<std::vector<Real> *> _real_vec;
-  /// Vector of strings reporter data
-  std::vector<std::vector<std::string> *> _string_vec;
 };
 
 template <typename T>

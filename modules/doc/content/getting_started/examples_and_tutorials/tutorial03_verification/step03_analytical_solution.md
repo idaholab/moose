@@ -78,20 +78,20 @@ Within this file, the domain of the problem is defined using the [Mesh System](s
 using the `[Mesh]` block of the input file, as follows, which creates a one-dimensional mesh in the
 $x$-direction from 0 to 0.03 $m$ using 200 elements.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Mesh
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Mesh
 
 There is a single unknown, temperature ($T$), to compute. This unknown is declared using the
 [Variables System](syntax/Variables/index.md) in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable. Note, within this block the name of
 the variable is arbitrary; "T" was selected here to match the equation.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Variables
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Variables
 
 The "volumetric" portions of the weak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of two `Kernel` objects as follows.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Kernels
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Kernels
 
 The sub-block "T_time" defines the time derivative and "T_cond" defines the conduction portion
 of the equation, please refer to [tutorial03_verification/step01_heat_conduction.md] for details
@@ -104,7 +104,7 @@ The boundary portions of the weak form are defined using the
 Neumann condition is applied with a value of 7E5. The generated mesh, by default, labels the
 boundary at $x=0$ as "left".
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=BCs
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=BCs
 
 The natural boundary condition does not require definition, as the name suggests, this condition is
 applied naturally based on the weak form derivation.
@@ -113,12 +113,12 @@ The problem is solved using Newton's method with a second-order backward differe
 with a timestep of 0.01 seconds up to a simulation time of one second. These settings are applied
 within the `[Executioner]` block using the [Executioner System](syntax/Executioner/index.md).
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Executioner
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Executioner
 
 Finally, the output method is defined. In this case the ExodusII and CSV format are enabled within the
 `[Outputs]` block using the [Outputs System](syntax/Outputs/index.md).
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Outputs
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Outputs
 
 ### Simulation Execution
 
@@ -140,7 +140,7 @@ To be able to compute the error with respect to the known solution, [tutorial03-
 must be added to the input file. This is accomplished via a [functions/MooseParsedFunction.md] object
 that is added in the `[Functions]` block.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Functions
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Functions
 
 The "vars" and "vals" have a one-to-one relationship, e.g., $k=80.2$. If defined in this manner
 then the names in "vars" can be used in the definition of the equation in the "value" parameter.
@@ -150,7 +150,7 @@ can be computed using the [postprocessors/NodalL2Error.md] object within the `[P
 which computes the error of the given variable (e.g., "T") and the known solution defined in the
 "T_exact" function.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=Postprocessors
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors
 
 In addition to the computed error, the average element size is also output. As detailed
 previously, this quantity is necessary to perform the convergence study.
@@ -159,7 +159,7 @@ Another useful item to add to the input, especially for a one-dimensional proble
 along the length of the simulation for the computed and exact solution via the
 `[VectorPostprocessors]` block.
 
-!listing tutorial03_verification/step03_analytical/1d_analytical.i link=False block=VectorPostprocessors
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=VectorPostprocessors
 
 In this block the both the exact solution function ("T_exact") and the finite element solution ("T")
 are sampled along the length of the simulation. The $L_2$-norm as well as these line sampled values
@@ -182,7 +182,7 @@ with the finite element implementation. However, if the error is reduced at the 
 with decreasing mesh size and timestep size then it is reasonable that the finite element
 formulation and temporal numerical integration are implemented correctly.
 
-[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [mms.md] documentation.
+[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [python/mms.md] documentation.
 
 ### Spatial Convergence
 
@@ -201,7 +201,7 @@ is executed with six levels of uniform refinement (0--5). Notice that an extra
 argument `Mesh/nx=10` is supplied to reduce the number of elements to 10 for the initial mesh. The
 `console` flag suppress the screen output from the simulations.
 
-!listing tutorial03_verification/step03_analytical/step03_study.py id=tutorial03-analytical-spatial-code
+!listing tutorial03_verification/app/test/tests/step03_analytical/step03_study.py id=tutorial03-analytical-spatial-code
          caption=Example use of the `mms` package to run and plot spatial convergence.
          link=False start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=False
 
@@ -220,7 +220,7 @@ The temporal convergence study is nearly identical to the spatial, as shown in
 initial time step is set using `dt`; the number of elements is not altered. The resulting
 converge graph is shown in [tutorial03-analytical-temporal-graph].
 
-!listing tutorial03_verification/step03_analytical/step03_study.py id=tutorial03-analytical-temporal-code
+!listing tutorial03_verification/app/test/tests/step03_analytical/step03_study.py id=tutorial03-analytical-temporal-code
          caption=Example use of the `mms` package to run and plot temporal convergence.
          link=False start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=False
 

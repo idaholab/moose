@@ -1,0 +1,59 @@
+[Tests]
+  design = tutorial03_verification/index.md
+  issues = '#18276'
+
+  [2d_mms]
+    requirement = "The system shall include an example problem for verification from an computed solution using the method of manufacture solutions (MMS):"
+
+    [input]
+      type = Exodiff
+      input = 2d_main.i
+      exodiff = 2d_main_out.e
+      recover = false
+
+      detail = "based on a physically base system;"
+    []
+
+    [main_spatial]
+      type = Exodiff
+      input = '2d_main.i 2d_mms_spatial.i'
+      exodiff = 2d_mms_spatial_out.e
+      recover = false
+
+      detail = "with input for a spatial convergence study;"
+    []
+
+    [main_temporal]
+      type = Exodiff
+      input = '2d_main.i 2d_mms_temporal.i'
+      exodiff = 2d_mms_temporal_out.e
+      recover = false
+
+      detail = "with input for a temporal convergence study;"
+    []
+
+    [results]
+      type = CheckFiles
+      command = step04_results.py
+      check_files = 2d_main_054.png
+      prereq = 2d_mms/input
+      display_required = true
+      method = opt
+      required_python_packages = 'matplotlib numpy vtk'
+      recover = false
+
+      detail = "a graph comparing the simulated and exact results; and"
+    []
+
+    [study]
+      type = CheckFiles
+      command = step04_study.py
+      check_files = '2d_mms_spatial.png 2d_mms_temporal.png'
+      required_python_packages = 'matplotlib numpy sympy'
+      method = opt
+      recover = false
+
+      detail = "a spatial and temporal convergence study."
+    []
+  []
+[]

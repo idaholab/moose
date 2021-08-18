@@ -11,6 +11,7 @@
 
 #include "ADMaterial.h"
 #include "Function.h"
+#include "RotationTensor.h"
 
 /**
  * This class defines a Hill tensor material object with a given base name.
@@ -24,22 +25,38 @@ public:
   HillConstants(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
+
+  virtual void initQpStatefulProperties() override;
 
   virtual void rotateHillConstants(const std::vector<Real> & hill_constants_input);
 
   /// Base name of the material system
   const std::string _base_name;
 
-  /// Hill constants for orthotropic inelasticity
-  std::vector<Real> _hill_constants_input;
-  std::vector<Real> _hill_constants;
+  /// Flag to determine whether to rotate Hill's tensor with large strain kinematics
+  const bool _use_large_rotation;
 
-  /// material property for storing hill constants
+  /// Rotation up to current step "n" to compute Hill tensor
+  ADMaterialProperty<RankTwoTensor> * _rotation_total_hill;
+  /// Rotation up to "n - 1" (previous) step to compute Hill tensor
+  const MaterialProperty<RankTwoTensor> * _rotation_total_hill_old;
+
+  /// Strain increment material property
+  const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
+
+  /// Hill constants for orthotropic inelasticity
+  const std::vector<Real> _hill_constants_input;
+  DenseMatrix<Real> _hill_tensor;
+
+  /// Material property for storing hill constants (unrotated)
   MaterialProperty<std::vector<Real>> & _hill_constant_material;
 
-  /// Angles for transformation of hill tensor
-  RealVectorValue _zyx_angles;
+  /// Material property for storing transformed Hill tensor
+  MaterialProperty<DenseMatrix<Real>> * _hill_tensor_material;
+
+  /// Euler angles for transformation of hill tensor
+  RealVectorValue _zxz_angles;
 
   /// Transformation matrix
   DenseMatrix<Real> _transformation_tensor;
@@ -58,4 +75,7 @@ protected:
 
   /// The functions describing the temperature dependence
   std::vector<const Function *> _functions;
+
+  // Initial rigid body rotation of the structural element
+  RotationTensor _rigid_body_rotation_tensor;
 };

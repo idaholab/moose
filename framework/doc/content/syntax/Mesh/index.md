@@ -47,10 +47,10 @@ Since MOOSE contains a lot of ability to read/generate/modify meshes - it's ofte
 the Mesh related portions of the input file and then output the mesh.  This mesh can then be viewed (such as
 with Peacock) or used in other MOOSE input files for further combination/modification.
 
-This can be achieved by using the commandline option `--mesh-only`.  By default `--mesh-only` will write a
+This can be achieved by using the command line option `--mesh-only`.  By default `--mesh-only` will write a
 mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the output system)
 appended to the input file name.  You can also optionally provide a mesh filename to
-writeout using `--mesh-only output_file.e`.
+write out using `--mesh-only output_file.e`.
 
 Here are a couple of examples showing the usage of `--mesh-only`:
 
@@ -61,7 +61,7 @@ Here are a couple of examples showing the usage of `--mesh-only`:
 # Will do the same but write out mesh_file.e
 ./myapp-opt -i input_file.i --mesh-only mesh_file.e
 
-# Run in parallel and write out parllel checkpoint format (which can be read as a split)
+# Run in parallel and write out parallel checkpoint format (which can be read as a split)
 mpiexec -n 3 ./myapp-opt -i input_file.i Mesh/parallel_type=distributed --mesh-only mesh_file.cpr
 ```
 
@@ -98,8 +98,8 @@ the portion of the simulation that usually dominates memory demands.
 
 When running a simulation with `DistributedMesh` it is generally desirable to avoid serializing
 the mesh to the first rank for output. In the largest case this may cause your simulation to run
-out of memory, in smaller cases, it may just cause unecessary communication to serialize your
-parallel datastructure. The solution is to use "nemesis" output.
+out of memory, in smaller cases, it may just cause unnecessary communication to serialize your
+parallel data structure. The solution is to use "nemesis" output.
 
 Nemesis creates separate Exodus files that are automatically read by paraview and displayed as
 if a normal Exodus mesh had been output. The output files have the following naming convention:
@@ -117,7 +117,7 @@ out.e.4.3
 ## Mesh splitting
 
 For large meshes, MOOSE provides the ability to pre-split a mesh for use in the the "distributed"
-format/mode.  To split and use a mesh for distributed runs:
+format/mode. To split and use a mesh for distributed runs:
 
 ```
 // For input files with a file-based mesh:
@@ -128,7 +128,7 @@ Splitting 1000 ways...
     - writing 1000 files per process...
 ...
 
-// MOOSE automatically selects the pre-split mesh configuration based on MPI procs
+// MOOSE automatically selects the pre-split mesh configuration based on MPI processes
 $ mpiexec -n 1000 moose-app-opt -i your_input-file.i --use-split
 ```
 
@@ -161,7 +161,7 @@ There are two "first-class" id types for each mesh entity (elements or nodes): "
 and unique_id field are unique numbers for the current active set of mesh entities. Active entities are those
 that are currently representing the domain but doesn't include "coarse parents" of some elements that may become
 active during a coarsening step. The difference however is that unique_ids are never reused, but ids +might+ be.
-Generally the id is "good-enough" for almost all use, but if you need guarentees that an element id is never
+Generally the id is "good-enough" for almost all use, but if you need guarantees that an element id is never
 recycled (because it might be a key to an important map), you should use unique_id.
 
 ## Periodic Node Map
