@@ -1,27 +1,21 @@
 #pragma once
 
-#include "BoundaryFluxBase.h"
+#include "ADBoundaryFluxBase.h"
 #include "SinglePhaseFluidProperties.h"
 
 /**
  * Computes the 1-phase boundary flux directly from specified functions.
  */
-class BoundaryFlux3EqnFunction : public BoundaryFluxBase
+class BoundaryFlux3EqnFunction : public ADBoundaryFluxBase
 {
 public:
   BoundaryFlux3EqnFunction(const InputParameters & parameters);
 
   virtual void calcFlux(unsigned int iside,
                         dof_id_type ielem,
-                        const std::vector<Real> & U1,
+                        const std::vector<ADReal> & U1,
                         const RealVectorValue & normal,
-                        std::vector<Real> & flux) const override;
-
-  virtual void calcJacobian(unsigned int iside,
-                            dof_id_type ielem,
-                            const std::vector<Real> & U1,
-                            const RealVectorValue & normal,
-                            DenseMatrix<Real> & jac1) const override;
+                        std::vector<ADReal> & flux) const override;
 
 protected:
   const Function & _rho_fn;
