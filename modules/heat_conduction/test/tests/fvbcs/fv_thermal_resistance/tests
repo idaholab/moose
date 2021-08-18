@@ -2,7 +2,7 @@
   [thermal_resistance]
     issues = '#18626'
     design = 'FVThermalResistanceBC.md'
-    requirement = 'The system shall be able to solve a diffusion problem with diffusion/conduction/radiation combined thermal resistance boundary conditions.'
+    requirement = 'The system shall be able to solve a heat conduction problem with diffusion/conduction/radiation combined thermal resistance boundary conditions.'
     type = Exodiff
     input = test.i
     exodiff = 'test_out.e'

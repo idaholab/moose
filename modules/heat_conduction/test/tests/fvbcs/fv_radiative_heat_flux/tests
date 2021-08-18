@@ -1,0 +1,11 @@
+[Tests]
+  [infinite_cylinder_radiation]
+    issues = '#18626'
+    design = 'FVInfiniteCylinderRadiativeBC.md'
+    requirement = 'The system shall be able to solve a heat conduction problem with boundary conditions representing radiation to an infinite cylinder.'
+    type = Exodiff
+    input = test.i
+    exodiff = 'test_out.e'
+    ad_indexing_type = 'global'
+  []
+[]
