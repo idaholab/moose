@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "MultiMooseEnum.h"
+#include "Conversion.h"
 #include "gtest/gtest.h"
 
 TEST(InputParameters, checkControlParamPrivateError)
@@ -316,6 +317,26 @@ TEST(InputParameters, getPairs)
   {
     EXPECT_EQ(pairs[i].first, num_words[i]);
     EXPECT_EQ(pairs[i].second, i);
+  }
+}
+
+TEST(InputParameters, getPairsMultiMooseEnum)
+{
+  std::vector<std::string> v1{"zero", "one", "two", "three"};
+  auto s1 = Moose::stringify(v1, " ");
+  std::vector<std::string> v2{"null", "eins", "zwei", "drei"};
+  auto s2 = Moose::stringify(v2, " ");
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<MultiMooseEnum>("first", MultiMooseEnum(s1, s1), "");
+  p.addParam<MultiMooseEnum>("second", MultiMooseEnum(s2, s2), "");
+
+  auto pairs = p.getPairs<MooseEnumItem, MooseEnumItem>("first", "second");
+
+  for (int i = 0; i < 4; ++i)
+  {
+    EXPECT_EQ(pairs[i].first, v1[i]);
+    EXPECT_EQ(pairs[i].second, v2[i]);
   }
 }
 
