@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "MultiMooseEnum.h"
+#include "Conversion.h"
 #include "gtest/gtest.h"
 
 TEST(InputParameters, checkControlParamPrivateError)
@@ -300,4 +301,89 @@ TEST(InputParameters, setPPandVofPP)
   */
 
   // EXPECT_EQ(p1.getDefaultPostprocessorValue("pp_name"), 1);
+}
+
+TEST(InputParameters, getPairs)
+{
+  std::vector<std::string> num_words{"zero", "one", "two", "three"};
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<std::vector<std::string>>("first", num_words, "");
+  p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
+
+  auto pairs = p.getPairs<std::string, int>("first", "second");
+
+  for (int i = 0; i < 4; ++i)
+  {
+    EXPECT_EQ(pairs[i].first, num_words[i]);
+    EXPECT_EQ(pairs[i].second, i);
+  }
+}
+
+TEST(InputParameters, getPairsMultiMooseEnum)
+{
+  std::vector<std::string> v1{"zero", "one", "two", "three"};
+  auto s1 = Moose::stringify(v1, " ");
+  std::vector<std::string> v2{"null", "eins", "zwei", "drei"};
+  auto s2 = Moose::stringify(v2, " ");
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<MultiMooseEnum>("first", MultiMooseEnum(s1, s1), "");
+  p.addParam<MultiMooseEnum>("second", MultiMooseEnum(s2, s2), "");
+
+  auto pairs = p.getPairs<MooseEnumItem, MooseEnumItem>("first", "second");
+
+  for (int i = 0; i < 4; ++i)
+  {
+    EXPECT_EQ(pairs[i].first, v1[i]);
+    EXPECT_EQ(pairs[i].second, v2[i]);
+  }
+}
+
+TEST(InputParameters, getPairsLength)
+{
+  std::vector<std::string> num_words{"zero", "one", "two"};
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<std::vector<std::string>>("first", num_words, "");
+  p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
+
+  try
+  {
+    auto pairs = p.getPairs<std::string, int>("first", "second");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Vector parameters first:(size: 3) and second:(size: 4) are of different lengths") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST(InputParameters, getPairsControllable)
+{
+  std::vector<std::string> num_words{"zero", "one", "two", "three"};
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<std::vector<std::string>>("first", num_words, "");
+  p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
+  p.declareControllable("first");
+
+  try
+  {
+    auto pairs = p.getPairs<std::string, int>("first", "second");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("first: and/or second: are controllable parameters and cannot be "
+                         "retireved using MooseObject::getParamPairs/InputParameters::getPairs") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }

@@ -743,6 +743,18 @@ public:
                                                const std::vector<T> * the_type);
   ///@}
 
+  /// Combine two vector parameters into a single vector of pairs
+  template <typename R1,
+            typename R2,
+            typename V1 = typename std::conditional<std::is_same<R1, MooseEnumItem>::value,
+                                                    MultiMooseEnum,
+                                                    std::vector<R1>>::type,
+            typename V2 = typename std::conditional<std::is_same<R2, MooseEnumItem>::value,
+                                                    MultiMooseEnum,
+                                                    std::vector<R2>>::type>
+  std::vector<std::pair<R1, R2>> getPairs(const std::string & param1,
+                                          const std::string & param2) const;
+
   /**
    * Return list of controllable parameters
    */
@@ -806,6 +818,9 @@ public:
   }
   std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; }
   ///@}
+
+  /// generate error message prefix with parameter name and location (if available)
+  std::string errorPrefix(const std::string & param) const;
 
   /**
    * Get/set a string representing the raw, unmodified token text for the given param.  This is
@@ -1572,6 +1587,38 @@ InputParameters::getParamHelper(const std::string & name,
                                 const std::vector<T> *)
 {
   return pars.get<std::vector<T>>(name);
+}
+
+template <typename R1, typename R2, typename V1, typename V2>
+std::vector<std::pair<R1, R2>>
+InputParameters::getPairs(const std::string & param1, const std::string & param2) const
+{
+  const auto & v1 = get<V1>(param1);
+  const auto & v2 = get<V2>(param2);
+
+  auto controllable = getControllableParameters();
+  if (controllable.count(param1) || controllable.count(param2))
+    mooseError(errorPrefix(param1),
+               " and/or ",
+               errorPrefix(param2) + " are controllable parameters and cannot be retireved using "
+                                     "MooseObject::getParamPairs/InputParameters::getPairs");
+
+  if (v1.size() != v2.size())
+    mooseError("Vector parameters ",
+               errorPrefix(param1),
+               "(size: ",
+               v1.size(),
+               ") and " + errorPrefix(param2),
+               "(size: ",
+               v2.size(),
+               ") are of different lengths \n");
+
+  std::vector<std::pair<R1, R2>> parameter_pairs;
+  auto i1 = v1.begin();
+  auto i2 = v2.begin();
+  for (; i1 != v1.end() && i2 != v2.end(); ++i1, ++i2)
+    parameter_pairs.emplace_back(std::make_pair(*i1, *i2));
+  return parameter_pairs;
 }
 
 InputParameters emptyInputParameters();
