@@ -1,19 +1,23 @@
 #-----------------------------------------------------------------------------#
 # This Dockerfile builds MPICH, PETSc, Libmesh, and finally MOOSE in a way that
-# is designed to take advantage of Docker's build caching.  Nominally, one 
+# is designed to take advantage of Docker's build caching.  Nominally, one
 # would clone MOOSE, then run the build scripts.  This approach would result in
-# unnecessary rebuilding of upstream dependencies due to changes that only 
-# involve MOOSE, leading to unneccessary, redundant use of computating 
+# unnecessary rebuilding of upstream dependencies due to changes that only
+# involve MOOSE, leading to unneccessary, redundant use of computating
 # resources, bandwidth, and storage.
 #
-# To build a MOOSE image, there is one optional argument and two required 
-# arguments to be set using the --build-arg flag.  
+# To build a MOOSE image, there is one optional argument and two required
+# arguments to be set using the --build-arg flag.
 #
 # DISTRO_NAME: Optional.  Linux distribution (ubuntu, centos)
 # DISTRO_VERSION: Optional with above (20.04, 8 respectively)
 # MOOSE_JOBS: Optional.  Sets number of cores for running make.
+# METHODS: Optional. Methods with which to build; defaults to opt.
 # PETSC_REV: Commit hash of submodule petsc.
+# PETSC_OPTIONS: Optional. Options to pass to update_and_rebuild_petsc.sh.
 # LIBMESH_REV: Commit hash of submodule libmesh.
+# LIBMESH_OPTIONS: Optional. Options to pass to update_and_rebuild_libmesh.sh.
+# BUILD_MODULES: Optional. Set to build all MOOSE modules.
 #-----------------------------------------------------------------------------#
 ARG DISTRO_NAME=ubuntu
 ARG DISTRO_VERSION=20.04
@@ -23,6 +27,7 @@ FROM ${DISTRO_NAME}:${DISTRO_VERSION}
 WORKDIR /opt
 
 ARG MOOSE_JOBS=1
+ARG METHODS=opt
 
 #-----------------------------------------------------------------------------#
 # Add user dev
@@ -35,11 +40,8 @@ chown -R dev:dev /home/dev
 #-----------------------------------------------------------------------------#
 # Install managed packages and clear cache
 #-----------------------------------------------------------------------------#
-
-COPY docker_ci/*.sh ./
-
-RUN chmod +x *.sh ; \
-./install_packages.sh
+COPY docker_ci/install_packages.sh docker_ci/apt_installs.sh docker_ci/yum_installs.sh ./
+RUN ./install_packages.sh; rm *.sh
 
 #-----------------------------------------------------------------------------#
 # Install mpich-3.3 to system path
@@ -82,10 +84,11 @@ WORKDIR ${MOOSE_DIR}
 # Install PETSc to system path
 #-----------------------------------------------------------------------------#
 ARG PETSC_REV
+ARG PETSC_OPTIONS
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
 cd petsc && git checkout ${PETSC_REV} && cd .. ; \
-PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ; \
+PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
 rm -rf petsc/* petsc/.* || true
 
 ENV PETSC_DIR=/usr/local
@@ -94,6 +97,7 @@ ENV PETSC_DIR=/usr/local
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
 ARG LIBMESH_REV
+ARG LIBMESH_OPTIONS
 ENV LIBMESH_DIR=/usr/local \
 libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
 
@@ -104,30 +108,24 @@ cd libmesh ; \
 git checkout ${LIBMESH_REV} ; \
 git submodule update --init ; \
 cd .. ; \
-./scripts/update_and_rebuild_libmesh.sh ; \
+./scripts/update_and_rebuild_libmesh.sh ${LIBMESH_OPTIONS} ; \
 rm -rf libmesh/* libmesh/.* || true
 
 #-----------------------------------------------------------------------------#
- # Copy and build moosetools
- #-----------------------------------------------------------------------------#
- ARG MOOSETOOLS_REV
- RUN git clone https://github.com/idaholab/moosetools.git ; \
- cd moosetools ; \
- git checkout ${MOOSETOOLS_REV}
-
-#-----------------------------------------------------------------------------#
-# Copy and build MOOSE framework and tests
+# Copy and build MOOSE framework, test, and optionally modules
 #-----------------------------------------------------------------------------#
 RUN chown -R dev:dev /opt /home/dev
 
 USER dev
 COPY --chown=dev:dev . ${MOOSE_DIR}
-RUN cd test ; make -j ${MOOSE_JOBS}
-USER root
+
+ARG BUILD_MODULES
+RUN ./docker_ci/build_moose.sh
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment
 #-----------------------------------------------------------------------------#
+USER root
 RUN for CURR_VAR in $(env | grep 'CC\|CXX\|_DIR'); do \
     echo "$CURR_VAR" >> /etc/environment ; \
 done

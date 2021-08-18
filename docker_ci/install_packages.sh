@@ -11,6 +11,18 @@ for MGR in "${MGR_ARY[@]}"; do
 done
 
 # Do pip3 installs
-pip3 install \
+pip3 --no-cache-dir install \
     python-consul \
-    python-nomad
+    python-nomad \
+    beautifulsoup4 \
+    jinja2 \
+    livereload \
+    lxml \
+    matplotlib \
+    mock \
+    numpy \
+    pandas \
+    pybtex \
+    pylatexenc \
+    pyyaml \
+    scikit-image
