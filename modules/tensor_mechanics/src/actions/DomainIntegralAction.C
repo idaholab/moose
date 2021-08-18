@@ -94,6 +94,9 @@ DomainIntegralAction::validParams()
   params.addParam<std::vector<MaterialName>>(
       "inelastic_models",
       "The material objects to use to calculate the strain energy rate density.");
+  params.addParam<MaterialPropertyName>("eigenstrain_gradient",
+                                        "Material defining gradient of eigenstrain tensor");
+  params.addParam<MaterialPropertyName>("body_force", "Material defining body force");
   return params;
 }
 
@@ -263,6 +266,24 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     if (!poissons_ratio_set)
       _poissons_ratio = getParam<Real>("poissons_ratio");
   }
+
+  if (_integrals.count(J_INTEGRAL) != 0 || _integrals.count(C_INTEGRAL) != 0 ||
+      _integrals.count(K_FROM_J_INTEGRAL) != 0)
+  {
+    if (isParamValid("eigenstrain_gradient"))
+      paramError("eigenstrain_gradient",
+                 "'eigenstrain_gradient' cannot be specified when the computed integrals include "
+                 "JIntegral, CIntegral, or KFromJIntegral");
+    if (isParamValid("body_force"))
+      paramError("body_force",
+                 "'body_force' cannot be specified when the computed integrals include JIntegral, "
+                 "CIntegral, or KFromJIntegral");
+  }
+  if (isParamValid("eigenstrain_gradient") && (_temp != "" || isParamValid("eigenstrain_names")))
+    paramError("eigenstrain_gradient",
+               "'eigenstrain_gradient' cannot be specified together with 'temperature' or "
+               "'eigenstrain_names'. These are for separate, mutually exclusive systems for "
+               "including the effect of eigenstrains");
 }
 
 DomainIntegralAction::~DomainIntegralAction() {}
@@ -641,6 +662,11 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName>>("displacements") = _displacements;
       if (_temp != "")
         params.set<std::vector<VariableName>>("temperature") = {_temp};
+
+      params.set<MaterialPropertyName>("eigenstrain_gradient") =
+          parameters().get<MaterialPropertyName>("eigenstrain_gradient");
+      params.set<MaterialPropertyName>("body_force") =
+          parameters().get<MaterialPropertyName>("body_force");
 
       for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
       {
