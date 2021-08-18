@@ -4,6 +4,7 @@
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_erk2_heavy.e'
     cli_args = '
+      Executioner/TimeIntegrator/order=2
       Outputs/file_base=sod_shock_tube_erk2_heavy
       Outputs/execute_on=final'
     abs_zero = 1e-10
@@ -18,6 +19,7 @@
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_erk2_light.e'
     cli_args = '
+      Executioner/TimeIntegrator/order=2
       Executioner/num_steps=5
       Outputs/file_base=sod_shock_tube_erk2_light'
     abs_zero = 1e-10
@@ -34,6 +36,7 @@
       Functions/T_ic_fn/axis=y
       Components/pipe/position="1 0 0"
       Components/pipe/orientation="0 1 0"
+      Executioner/TimeIntegrator/order=2
       Executioner/num_steps=5
       Outputs/file_base=non_x_direction_1phase'
     abs_zero = 1e-10
@@ -48,8 +51,7 @@
     cli_args = '
       Preconditioning/pc/type=SMP
       Preconditioning/pc/full=true
-      Executioner/scheme=implicit-euler
-      Executioner/solve_type=PJFNK
+      Executioner/TimeIntegrator/type=ImplicitEuler
       Executioner/num_steps=5
       Outputs/file_base=sod_shock_tube_be'
     abs_zero = 1e-7

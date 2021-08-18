@@ -60,7 +60,10 @@
 
 [Executioner]
   type = Transient
-  scheme = explicit-midpoint
+  [TimeIntegrator]
+    type = ExplicitSSPRungeKutta
+    order = 2
+  []
   solve_type = LINEAR
 
   l_tol = 1e-4
