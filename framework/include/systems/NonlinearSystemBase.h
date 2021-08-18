@@ -37,7 +37,7 @@ class DirichletBCBase;
 class ADDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
-class ScalarKernel;
+class ScalarKernelBase;
 class DiracKernel;
 class NodalKernelBase;
 class Split;
@@ -800,7 +800,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
+  MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
 

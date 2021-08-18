@@ -9,22 +9,15 @@
 
 #pragma once
 
-#include "ScalarKernelBase.h"
+#include "ADScalarTimeKernel.h"
 
-// Forward declarations
-class ScalarKernel;
-
-template <>
-InputParameters validParams<ScalarKernel>();
-
-class ScalarKernel : public ScalarKernelBase
+class ADScalarTimeDerivative : public ADScalarTimeKernel
 {
 public:
   static InputParameters validParams();
 
-  ScalarKernel(const InputParameters & parameters);
+  ADScalarTimeDerivative(const InputParameters & parameters);
 
 protected:
-  /// The current solution (old solution if explicit)
-  const VariableValue & _u;
+  virtual ADReal computeQpResidual() override;
 };

@@ -9,22 +9,16 @@
 
 #pragma once
 
-#include "ScalarKernelBase.h"
+#include "ADScalarKernel.h"
 
-// Forward declarations
-class ScalarKernel;
-
-template <>
-InputParameters validParams<ScalarKernel>();
-
-class ScalarKernel : public ScalarKernelBase
+class ADScalarTimeKernel : public ADScalarKernel
 {
 public:
   static InputParameters validParams();
 
-  ScalarKernel(const InputParameters & parameters);
+  ADScalarTimeKernel(const InputParameters & parameters);
 
 protected:
-  /// The current solution (old solution if explicit)
-  const VariableValue & _u;
+  /// Time derivative of the kernel variable
+  const ADVariableValue & _u_dot;
 };

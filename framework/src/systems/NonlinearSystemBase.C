@@ -49,7 +49,7 @@
 #include "NodeElemConstraint.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
-#include "ScalarKernel.h"
+#include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
 #include "FieldSplitPreconditioner.h"
@@ -486,8 +486,8 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
                                      const std::string & name,
                                      InputParameters & parameters)
 {
-  std::shared_ptr<ScalarKernel> kernel =
-      _factory.create<ScalarKernel>(kernel_name, name, parameters);
+  std::shared_ptr<ScalarKernelBase> kernel =
+      _factory.create<ScalarKernelBase>(kernel_name, name, parameters);
   postAddResidualObject(*kernel);
   _scalar_kernels.addObject(kernel);
 }
@@ -1514,7 +1514,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       TIME_SECTION(_scalar_kernels_timer);
 
-      MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
+      MooseObjectWarehouse<ScalarKernelBase> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
       // kernels
       // Should redo this based on Warehouse
@@ -2332,7 +2332,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 void
 NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 {
-  MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
+  MooseObjectWarehouse<ScalarKernelBase> * scalar_kernel_warehouse;
 
   if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
     scalar_kernel_warehouse = &_scalar_kernels;
