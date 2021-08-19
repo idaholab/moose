@@ -105,7 +105,8 @@ groupUserObjects(TheWarehouse & w,
   // PRE_AUX objects are run before the dependent AuxKernels exec flag
   //
   // POST_AUX objects are run after AuxKernels on any given exec flag time, and is the
-  // default group for UOs.
+  // default group for UOs. Dependencies that would otherwise move a UO into the
+  // PRE_AUX group can be overridden by specifying the parameter force_postaux
   //
   // This function attempts to sort a UO based on any ICs or AuxKernels which depend on
   // it. Alternatively, a user may select which group to execute their object with by
@@ -158,16 +159,21 @@ groupUserObjects(TheWarehouse & w,
       for (const ExecFlagType & flag : execute_flags.items())
         pre_aux_dependencies[obj].insert(flag);
     }
+    else if (obj->isParamValid("force_postaux") && obj->template getParam<bool>("force_postaux"))
+    {
+      pre_aux_dependencies[obj].clear();
+      for (const ExecFlagType & flag : execute_flags.items())
+        post_aux_dependencies[obj].insert(flag);
+    }
     else
     {
+      // If at this point, then check if the UO has already been set to execute
+      // by either the force_preic param, an IC dependency, or a dependency
+      // already found for exec flage EXEC_INITIAL. If none of these are true,
+      // then is_pre_ic.at(obj) is false and the UO is added to the default
+      // post_aux group for the EXEC_INITIAL flag
       if (!is_pre_ic.at(obj))
         post_aux_dependencies[obj].insert(EXEC_INITIAL);
-    }
-
-    if (obj->isParamValid("force_postaux") && obj->template getParam<bool>("force_postaux"))
-    {
-      w.update(obj, AttribPreAux(w, false));
-      w.update(obj, AttribPostAux(w, true));
     }
   }
 

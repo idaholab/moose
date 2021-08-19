@@ -314,30 +314,24 @@ AttribPreIC::isEqual(const Attribute & other) const
 bool
 AttribPreAux::isMatch(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPreAux *>(&other);
+  const auto a = dynamic_cast<const AttribPreAux *>(&other);
 
-  if (!a)
-    return false;
+  bool is_match = false;
 
-  mooseAssert(a->_vals.size() == 1,
-              "Anticipated this function being passed an AttribPreAux object with a _vals member "
-              "containing only one item");
+  if (a && !_vals.empty() && !a->_vals.empty())
+  {
+    is_match = std::includes(_vals.begin(), _vals.end(), a->_vals.begin(), a->_vals.end()) ||
+               std::includes(a->_vals.begin(), a->_vals.end(), _vals.begin(), _vals.end());
+  }
 
-  auto cond = *a->_vals.begin();
-
-  if (_vals.find(cond) != _vals.end())
-    return true;
-  return false;
+  return is_match;
 }
 
 bool
 AttribPreAux::isEqual(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPreAux *>(&other);
-  if (!a)
-    return false;
-
-  return _vals == a->_vals;
+  const auto a = dynamic_cast<const AttribPreAux *>(&other);
+  return a && a->_vals == _vals;
 }
 
 void
@@ -348,30 +342,24 @@ AttribPreAux::initFrom(const MooseObject * /*obj*/)
 bool
 AttribPostAux::isMatch(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPostAux *>(&other);
+  const auto a = dynamic_cast<const AttribPostAux *>(&other);
 
-  if (!a)
-    return false;
+  bool is_match = false;
 
-  mooseAssert(a->_vals.size() == 1,
-              "Anticipated this function being passed an AttribPostAux object with a _vals member "
-              "containing only one item");
+  if (a && !_vals.empty() && !a->_vals.empty())
+  {
+    is_match = std::includes(_vals.begin(), _vals.end(), a->_vals.begin(), a->_vals.end()) ||
+               std::includes(a->_vals.begin(), a->_vals.end(), _vals.begin(), _vals.end());
+  }
 
-  auto cond = *a->_vals.begin();
-
-  if (_vals.find(cond) != _vals.end())
-    return true;
-  return false;
+  return is_match;
 }
 
 bool
 AttribPostAux::isEqual(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPostAux *>(&other);
-  if (!a)
-    return false;
-
-  return _vals == a->_vals;
+  const auto a = dynamic_cast<const AttribPostAux *>(&other);
+  return a && a->_vals == _vals;
 }
 
 void
