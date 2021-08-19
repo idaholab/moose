@@ -609,8 +609,14 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     CHKERRQ(ierr);
 
     EPS eps = eigen_nl.getEPS();
+    ST st;
     Mat A, B;
     PetscBool aisshell, bisshell;
+    // Rest ST state so that we can restrieve matrices
+    ierr = EPSGetST(eps, &st);
+    CHKERRQ(ierr);
+    ierr = STResetMatrixState(st);
+    CHKERRQ(ierr);
     ierr = EPSGetOperators(eps, &A, &B);
     CHKERRQ(ierr);
     ierr = PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell);
@@ -814,8 +820,14 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
   if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
   {
     EPS eps = eigen_nl.getEPS();
+    ST st;
     Mat B;
 
+    // Rest ST state so that we can restrieve matrices
+    ierr = EPSGetST(eps, &st);
+    CHKERRQ(ierr);
+    ierr = STResetMatrixState(st);
+    CHKERRQ(ierr);
     ierr = EPSGetOperators(eps, NULL, &B);
     CHKERRQ(ierr);
 
@@ -847,7 +859,14 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
   {
     EPS eps = eigen_nl.getEPS();
+    ST st;
     Mat A, B;
+
+    // Rest ST state so that we can restrieve matrices
+    ierr = EPSGetST(eps, &st);
+    CHKERRQ(ierr);
+    ierr = STResetMatrixState(st);
+    CHKERRQ(ierr);
 
     ierr = EPSGetOperators(eps, &A, &B);
     CHKERRQ(ierr);
