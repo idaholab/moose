@@ -61,7 +61,13 @@ ADFluidProperties3EqnMaterial::computeQpProperties()
 
   _v[_qp] = 1.0 / _rho[_qp];
 
+  _vel[_qp] = _rhouA[_qp] / _rhoA[_qp];
+
+  _e[_qp] = (_rhoEA[_qp] - 0.5 * _rhouA[_qp] * _rhouA[_qp] / _rhoA[_qp]) / _rhoA[_qp];
+
   _p[_qp] = _fp.p_from_v_e(_v[_qp], _e[_qp]);
+
+  _T[_qp] = _fp.T_from_v_e(_v[_qp], _e[_qp]);
 
   _h[_qp] = _e[_qp] + _p[_qp] / _rho[_qp];
 
