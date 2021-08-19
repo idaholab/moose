@@ -15,9 +15,9 @@
     csvdiff = 'clg.ctrl_p_3eqn_out.csv'
   []
 
-  [jac:p_3eqn]
+  [jacobian]
     type = 'PetscJacobianTester'
-    input = 'jac.p_3eqn.i'
+    input = 'jacobian.i'
     ratio_tol = 1e-6
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
