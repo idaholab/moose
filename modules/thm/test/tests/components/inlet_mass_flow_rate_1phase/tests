@@ -22,4 +22,12 @@
     input = 'clg.ctrl_T_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
   []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-4
+    difference_tol = 7e3
+    cli_args = 'Debug/check_jacobian=true'
+  []
 []
