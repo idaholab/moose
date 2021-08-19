@@ -9,7 +9,7 @@
     slepc = true
     slepc_version = '>=3.11.0'
     expect_out = 'PJFNK\s+with\s+matrix\s+only'
-    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation"
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations"
   []
 
   [ne_coupled_mo]
@@ -18,7 +18,7 @@
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     slepc = true
     slepc_version = '>=3.11.0'
-    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled problems"
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for coupled eigenvalue problems"
   []
 
   [ne_coupled_mo_full]
@@ -29,7 +29,7 @@
     cli_args = 'Preconditioning/active='''
     slepc = true
     slepc_version = '>=3.11.0'
-    requirement = "The system shall support use of matrix-vector multiplication with full-coupled matrices (by default) as residual evaluation for coupled problems"
+    requirement = "The system shall support use of matrix-vector multiplication with full-coupled matrices (by default) as residual evaluation for coupled eigenvalue problems"
   []
 
   [non-homogeneous]

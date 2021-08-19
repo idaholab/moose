@@ -222,7 +222,7 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
     eigen_problem.solverParams()._eigen_matrix_free = true;
     eigen_problem.solverParams()._precond_matrix_free = true;
   }
-  // We indeed matrices so that we can implement residual evaluations
+  // We need matrices so that we can implement residual evaluations
   if (params.get<MooseEnum>("solve_type") == "PJFNKMO")
   {
     eigen_problem.solverParams()._eigen_matrix_free = true;
