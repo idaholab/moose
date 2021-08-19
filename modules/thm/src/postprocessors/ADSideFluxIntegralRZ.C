@@ -14,7 +14,7 @@ ADSideFluxIntegralRZ::validParams()
 }
 
 ADSideFluxIntegralRZ::ADSideFluxIntegralRZ(const InputParameters & parameters)
-  : ADSideFluxIntegral(parameters), RZSymmetry(parameters)
+  : ADSideFluxIntegral(parameters), RZSymmetry(this, parameters)
 {
 }
 

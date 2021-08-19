@@ -16,7 +16,7 @@ ADRadiativeHeatFluxRZBC::validParams()
 }
 
 ADRadiativeHeatFluxRZBC::ADRadiativeHeatFluxRZBC(const InputParameters & parameters)
-  : ADRadiativeHeatFluxBC(parameters), RZSymmetry(parameters)
+  : ADRadiativeHeatFluxBC(parameters), RZSymmetry(this, parameters)
 {
 }
 

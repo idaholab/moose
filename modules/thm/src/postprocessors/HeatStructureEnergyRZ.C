@@ -12,7 +12,7 @@ HeatStructureEnergyRZ::validParams()
 }
 
 HeatStructureEnergyRZ::HeatStructureEnergyRZ(const InputParameters & parameters)
-  : HeatStructureEnergyBase(parameters), RZSymmetry(parameters)
+  : HeatStructureEnergyBase(parameters), RZSymmetry(this, parameters)
 {
 }
 

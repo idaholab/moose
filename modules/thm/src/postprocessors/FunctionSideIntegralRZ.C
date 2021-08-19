@@ -15,7 +15,7 @@ FunctionSideIntegralRZ::validParams()
 }
 
 FunctionSideIntegralRZ::FunctionSideIntegralRZ(const InputParameters & parameters)
-  : FunctionSideIntegral(parameters), RZSymmetry(parameters)
+  : FunctionSideIntegral(parameters), RZSymmetry(this, parameters)
 {
 }
 

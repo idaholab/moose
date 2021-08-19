@@ -21,7 +21,7 @@ HeatRateConvectionRZ::validParams()
 
 HeatRateConvectionRZ::HeatRateConvectionRZ(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    RZSymmetry(parameters),
+    RZSymmetry(this, parameters),
 
     _T(coupledValue("T")),
     _T_ambient_fn(getFunction("T_ambient")),

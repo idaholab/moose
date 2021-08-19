@@ -16,7 +16,7 @@ HSHeatFluxRZBC::validParams()
 }
 
 HSHeatFluxRZBC::HSHeatFluxRZBC(const InputParameters & parameters)
-  : HSHeatFluxBC(parameters), RZSymmetry(parameters)
+  : HSHeatFluxBC(parameters), RZSymmetry(this, parameters)
 {
 }
 

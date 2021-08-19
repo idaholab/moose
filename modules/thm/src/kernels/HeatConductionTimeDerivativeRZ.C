@@ -11,7 +11,7 @@ HeatConductionTimeDerivativeRZ::validParams()
 }
 
 HeatConductionTimeDerivativeRZ::HeatConductionTimeDerivativeRZ(const InputParameters & parameters)
-  : HeatConductionTimeDerivative(parameters), RZSymmetry(parameters)
+  : HeatConductionTimeDerivative(parameters), RZSymmetry(this, parameters)
 {
 }
 

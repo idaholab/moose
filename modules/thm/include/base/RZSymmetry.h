@@ -10,7 +10,7 @@
 class RZSymmetry
 {
 public:
-  RZSymmetry(const InputParameters & parameters);
+  RZSymmetry(const MooseObject * moose_object, const InputParameters & parameters);
 
 protected:
   virtual Real computeCircumference(const RealVectorValue & pt);

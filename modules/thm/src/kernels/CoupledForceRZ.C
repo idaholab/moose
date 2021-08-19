@@ -11,7 +11,7 @@ CoupledForceRZ::validParams()
 }
 
 CoupledForceRZ::CoupledForceRZ(const InputParameters & parameters)
-  : CoupledForce(parameters), RZSymmetry(parameters)
+  : CoupledForce(parameters), RZSymmetry(this, parameters)
 {
 }
 
