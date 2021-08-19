@@ -14,4 +14,12 @@
     csvdiff = 'clg.densityvelocity_3eqn_out.csv'
     rel_err = 1e-5
   []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 5e-4
+    difference_tol = 4e4
+    cli_args = 'Debug/check_jacobian=true'
+  []
 []
