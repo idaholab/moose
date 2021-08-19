@@ -32,4 +32,15 @@
       detail = "3rd order"
     []
   []
+
+  [invalid_solve_type]
+    type = RunException
+    input = 'explicit_ssp_runge_kutta.i'
+    cli_args = "Executioner/solve_type=NEWTON"
+    expect_err = "The chosen time integrator requires 'solve_type = LINEAR'"
+
+    requirement = "The system shall provide an informative error message when "
+      "a user uses an invalid solve type for an explicit time integrator."
+    issues = '#18646'
+  []
 []
