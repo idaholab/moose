@@ -9,6 +9,7 @@
 #include "gtest/gtest.h"
 #include <vector>
 #include "Calculators.h"
+#include "VectorCalculators.h"
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 

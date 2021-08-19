@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Calculators.h"
+#include "BootstrapCalculators.h"
 
 namespace StochasticTools
 {

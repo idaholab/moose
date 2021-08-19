@@ -9,7 +9,7 @@
 #include "SobolCalculators.h"
 
 #include "libmesh/dense_matrix.h"
-#include "libmesh/petsc_vector.h"
+#include "libmesh/parallel.h"
 
 namespace StochasticTools
 {

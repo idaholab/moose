@@ -10,8 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "Calculators.h"
-#include "BootstrapCalculators.h"
+#include "VectorCalculators.h"
 
 #include "nlohmann/json.h"
 

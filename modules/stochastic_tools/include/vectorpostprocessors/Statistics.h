@@ -10,7 +10,6 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
-#include "Calculators.h"
 #include "BootstrapCalculators.h"
 
 /**

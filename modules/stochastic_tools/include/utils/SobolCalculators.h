@@ -29,7 +29,7 @@ public:
   virtual void initialize() override;
   virtual void update(const Real & data) override;
   virtual void finalize(bool is_distributed) override;
-  virtual std::vector<Real> get() const { return _sobol; }
+  virtual std::vector<Real> get() const override { return _sobol; }
 
 private:
   /// Number of rows per sample matrix (n), see Saltelli (2002)
