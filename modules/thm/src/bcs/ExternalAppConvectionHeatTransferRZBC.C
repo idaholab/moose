@@ -16,7 +16,7 @@ ExternalAppConvectionHeatTransferRZBC::validParams()
 
 ExternalAppConvectionHeatTransferRZBC::ExternalAppConvectionHeatTransferRZBC(
     const InputParameters & parameters)
-  : ExternalAppConvectionHeatTransferBC(parameters), RZSymmetry(parameters)
+  : ExternalAppConvectionHeatTransferBC(parameters), RZSymmetry(this, parameters)
 {
 }
 

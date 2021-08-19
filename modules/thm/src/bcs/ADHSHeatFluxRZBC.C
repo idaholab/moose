@@ -16,7 +16,7 @@ ADHSHeatFluxRZBC::validParams()
 }
 
 ADHSHeatFluxRZBC::ADHSHeatFluxRZBC(const InputParameters & parameters)
-  : ADHSHeatFluxBC(parameters), RZSymmetry(parameters)
+  : ADHSHeatFluxBC(parameters), RZSymmetry(this, parameters)
 {
 }
 

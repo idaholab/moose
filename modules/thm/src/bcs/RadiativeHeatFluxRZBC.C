@@ -16,7 +16,7 @@ RadiativeHeatFluxRZBC::validParams()
 }
 
 RadiativeHeatFluxRZBC::RadiativeHeatFluxRZBC(const InputParameters & parameters)
-  : RadiativeHeatFluxBC(parameters), RZSymmetry(parameters)
+  : RadiativeHeatFluxBC(parameters), RZSymmetry(this, parameters)
 {
 }
 

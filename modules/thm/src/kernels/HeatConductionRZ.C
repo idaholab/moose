@@ -11,7 +11,7 @@ HeatConductionRZ::validParams()
 }
 
 HeatConductionRZ::HeatConductionRZ(const InputParameters & parameters)
-  : HeatConductionKernel(parameters), RZSymmetry(parameters)
+  : HeatConductionKernel(parameters), RZSymmetry(this, parameters)
 {
 }
 

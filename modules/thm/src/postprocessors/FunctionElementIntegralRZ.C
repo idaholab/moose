@@ -15,7 +15,7 @@ FunctionElementIntegralRZ::validParams()
 }
 
 FunctionElementIntegralRZ::FunctionElementIntegralRZ(const InputParameters & parameters)
-  : FunctionElementIntegral(parameters), RZSymmetry(parameters)
+  : FunctionElementIntegral(parameters), RZSymmetry(this, parameters)
 {
 }
 

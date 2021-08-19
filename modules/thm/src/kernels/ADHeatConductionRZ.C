@@ -11,7 +11,7 @@ ADHeatConductionRZ::validParams()
 }
 
 ADHeatConductionRZ::ADHeatConductionRZ(const InputParameters & parameters)
-  : ADHeatConduction(parameters), RZSymmetry(parameters)
+  : ADHeatConduction(parameters), RZSymmetry(this, parameters)
 {
 }
 

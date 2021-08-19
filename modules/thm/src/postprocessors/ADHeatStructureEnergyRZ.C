@@ -12,7 +12,7 @@ ADHeatStructureEnergyRZ::validParams()
 }
 
 ADHeatStructureEnergyRZ::ADHeatStructureEnergyRZ(const InputParameters & parameters)
-  : ADHeatStructureEnergyBase(parameters), RZSymmetry(parameters)
+  : ADHeatStructureEnergyBase(parameters), RZSymmetry(this, parameters)
 {
 }
 

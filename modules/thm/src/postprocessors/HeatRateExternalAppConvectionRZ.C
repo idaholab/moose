@@ -20,7 +20,7 @@ HeatRateExternalAppConvectionRZ::validParams()
 
 HeatRateExternalAppConvectionRZ::HeatRateExternalAppConvectionRZ(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    RZSymmetry(parameters),
+    RZSymmetry(this, parameters),
 
     _T(coupledValue("T")),
     _T_ext(coupledValue("T_ext")),

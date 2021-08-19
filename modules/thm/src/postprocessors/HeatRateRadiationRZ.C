@@ -23,7 +23,7 @@ HeatRateRadiationRZ::validParams()
 
 HeatRateRadiationRZ::HeatRateRadiationRZ(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    RZSymmetry(parameters),
+    RZSymmetry(this, parameters),
 
     _T(coupledValue("T")),
     _T_ambient(getFunction("T_ambient")),
