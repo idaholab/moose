@@ -1,0 +1,21 @@
+[Tests]
+  design = 'Mesh/index.md Mesh/splitting.md'
+
+ [./square]
+   type = 'Exodiff'
+   input = '3d_diffusion.i'
+   cli_args = '-r 1 Mesh/skip_refine_when_use_split=false --use-split  --split-file square'
+   exodiff = '3d_diffusion_out.e'
+   # Pre-split mesh was generated for this particular configuration.
+   # MOOSE will check these when we read meshes from cpr files
+   # if (_error_on_different_number_of_processors && (this_n_procs != n_procs))
+   #  mooseError("Cannot restart using a different number of processors!");
+   # if (_error_on_different_number_of_threads && (this_n_threads != n_threads))
+   #  mooseError("Cannot restart using a different number of threads!");
+   min_parallel = 3
+   max_parallel = 3
+   max_threads = 1
+   issues = '#18575'
+   requirement = 'The system shall support optionally allowing uniform refinements when using a pre-split mesh'
+ [../]
+[]
