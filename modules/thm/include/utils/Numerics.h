@@ -371,6 +371,7 @@ void h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_
  * @param normal Outward normal vector
  */
 bool isInlet(Real vel, Real normal);
+bool isInlet(ADReal vel, Real normal);
 
 /**
  * Determine if outlet boundary condition should be applied
@@ -380,4 +381,5 @@ bool isInlet(Real vel, Real normal);
  * @param normal Outward normal vector
  */
 bool isOutlet(Real vel, Real normal);
+bool isOutlet(ADReal vel, Real normal);
 }
