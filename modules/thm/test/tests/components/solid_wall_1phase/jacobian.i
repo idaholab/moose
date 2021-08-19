@@ -31,7 +31,7 @@
     f = 0.0
 
     length = 1
-    n_elems = 2
+    n_elems = 3
   []
 
   [inlet]
@@ -49,8 +49,6 @@
   [SMP_PJFNK]
     type = SMP
     full = true
-    petsc_options_iname = '-snes_type -snes_test_err'
-    petsc_options_value = 'test       1e-10'
   []
 []
 
@@ -69,4 +67,7 @@
 
   l_tol = 1e-3
   l_max_its = 100
+
+  petsc_options_iname = '-snes_type -snes_test_err'
+  petsc_options_value = 'test       1e-11'
 []
