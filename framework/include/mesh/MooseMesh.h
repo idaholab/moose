@@ -495,8 +495,8 @@ public:
    * be extra ghosting elements. The number of layers of additional ghosting
    * elements depends on the number of uniform refinement levels.  This flag
    * should be used only when you have a "fine enough" coarse mesh and want
-   * to refine the mesh by a couple of levels (less than five levels). Otherwise,
-   * it might introduce an unbalanced workload and too large ghosting domain.
+   * to refine the mesh by a few levels. Otherwise, it might introduce an
+   * unbalanced workload and too large ghosting domain.
    */
   bool skipDeletionRepartitionAfterRefine() const
   {
