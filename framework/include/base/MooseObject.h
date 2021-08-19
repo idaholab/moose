@@ -31,7 +31,7 @@ InputParameters validParams<MooseObject>();
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
 /**
- * Generates a canonical paramError prefix for param-related error/warning/info messages.
+ * Get canonical paramError prefix for param-related error/warning/info messages.
  *
  * Use this for building custom messages when the default paramError isn't
  * quite what you need.
@@ -102,10 +102,7 @@ public:
    * The template parameter must be a pointer or an error will be thrown.
    */
   template <typename T>
-  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
-  {
-    return parameters().getCheckedPointerParam<T>(name, error_string);
-  }
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const;
 
   /**
    * Test if the supplied parameter is valid
@@ -265,25 +262,6 @@ MooseObject::getParam(const std::string & name) const
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
-template <typename T1, typename T2>
-std::vector<std::pair<T1, T2>>
-MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
-{
-  auto v1 = getParam<std::vector<T1>>(param1);
-  auto v2 = getParam<std::vector<T2>>(param2);
-
-  if (v1.size() != v2.size())
-    callMooseErrorRaw("Vector parameters " + paramErrorPrefix(_pars, param1) +
-                          "(size: " + v1.size() + ") and " + paramErrorPrefix(_pars, param2) +
-                          "(size: " + v2.size() + ") are of different lengths \n",
-                      &_app);
-
-  std::vector<std::pair<T1, T2>> parameter_pair;
-  for (std::size_t i = 0; i < v1.size(); ++i)
-    parameter_pair.emplace_back(std::make_pair(v1[i], v2[i]));
-  return parameter_pair;
-}
-
 template <typename... Args>
 [[noreturn]] void
 MooseObject::paramError(const std::string & param, Args... args) const
@@ -306,4 +284,19 @@ void
 MooseObject::paramInfo(const std::string & param, Args... args) const
 {
   mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
+}
+
+template <typename T1, typename T2>
+std::vector<std::pair<T1, T2>>
+MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
+{
+  return _pars.getPairs<T1, T2>(param1, param2);
+}
+
+template <typename T>
+T
+MooseObject::getCheckedPointerParam(const std::string & name,
+                                    const std::string & error_string) const
+{
+  return parameters().getCheckedPointerParam<T>(name, error_string);
 }

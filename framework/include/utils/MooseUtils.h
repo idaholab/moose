@@ -883,16 +883,54 @@ struct canBroadcast<std::vector<T>>
                                 std::is_same<T, std::string>::value;
 };
 
+///@{ Comparison helpers that support the MooseUtils::Any wildcard which will match any value
+const static struct AnyType
+{
+} Any;
+
+template <typename T1, typename T2>
+bool
+wildcardEqual(const T1 & a, const T2 & b)
+{
+  return a == b;
+}
+
+template <typename T>
+bool
+wildcardEqual(const T &, AnyType)
+{
+  return true;
+}
+template <typename T>
+bool
+wildcardEqual(AnyType, const T &)
+{
+  return true;
+}
+///@}
+
+/**
+ * Find a specific pair in a container matching on first, second or both pair components
+ */
+template <typename C, typename M1, typename M2>
+typename C::iterator
+findPair(C & container, const M1 & first, const M2 & second)
+{
+  return std::find_if(container.begin(), container.end(), [&](auto & item) {
+    return wildcardEqual(first, item.first) && wildcardEqual(second, item.second);
+  });
+}
+
 /**
  * Construct a valid bounding box from 2 arbitrary points
  *
  * If you have 2 points in space and you wish to construct a bounding box, you should use
  * this method to avoid unexpected behavior of the underlying BoundingBox class in libMesh.
- * BoundingBox class expect 2 points whose coordinates are "sorted" (i.e., x-, y- and -z coordinates
- * of the first point are smaller then the corresponding coordinates of the second point).
- * If this "sorting" is not present, the BoundingBox class will build an empty box and any further
- * testing of points inside the box will fail. This method will allow you to obtain the correct
- * bounding box for any valid combination of 2 corner points of a box.
+ * BoundingBox class expect 2 points whose coordinates are "sorted" (i.e., x-, y- and -z
+ * coordinates of the first point are smaller then the corresponding coordinates of the second
+ * point). If this "sorting" is not present, the BoundingBox class will build an empty box and
+ * any further testing of points inside the box will fail. This method will allow you to obtain
+ * the correct bounding box for any valid combination of 2 corner points of a box.
  *
  * @param p1 First corner of the constructed bounding box
  * @param p2 Second corner of the constructed bounding box
