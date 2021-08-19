@@ -86,12 +86,15 @@ SetupMeshAction::validParams()
       "uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
 
   params.addParam<bool>(
-      "uniform_refine_remote_deletion",
-      true,
-      "If it is false, remote deletion will be avoided for efficiency of uniform refinements. "
-      "This flag has no impact on a replicated mesh. For a distributed mesh, the remote elements "
-      "are already deleted, "
-      "and the mesh is already distributed properly, before uniform refinements.");
+      "skip_deletion_repartition_after_refine",
+      false,
+      "If the flag is true, uniform refinements will run more efficiently, "
+      "but at the same time, there might be extra ghosting elements. "
+      "The number of layers of additional ghosting elements depends "
+      "on the number of uniform refinement levels.  This flag "
+      "should be used only when you have a 'fine enough' coarse mesh and want "
+      "to refine the mesh by a couple of levels (less than five levels). Otherwise, "
+      "it might introduce an unbalanced workload and too large ghosting domain. ");
 
   params.addParam<bool>("skip_partitioning",
                         false,
@@ -139,7 +142,7 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
   // Did they specify extra refinement levels on the command-line?
   level += _app.getParam<unsigned int>("refinements");
 
-  mesh->setUniformRefineLevel(level, getParam<bool>("uniform_refine_remote_deletion"));
+  mesh->setUniformRefineLevel(level, getParam<bool>("skip_deletion_repartition_after_refine"));
 #endif // LIBMESH_ENABLE_AMR
 
   // Add entity names to the mesh

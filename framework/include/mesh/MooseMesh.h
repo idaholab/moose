@@ -489,11 +489,19 @@ public:
   void setUniformRefineLevel(unsigned int, bool deletion = true);
 
   /**
-   * Return a flag indicating whether or not we should have a remote deletion
-   * after uniform refinements. Note: If the flag is false (no remote deletion),
-   * uniform refinements will run more efficient.
+   * Return a flag indicating whether or not we should skip remote deletion
+   * and repartition after uniform refinements. If the flag is true, uniform
+   * refinements will run more efficiently, but at the same time, there might
+   * be extra ghosting elements. The number of layers of additional ghosting
+   * elements depends on the number of uniform refinement levels.  This flag
+   * should be used only when you have a "fine enough" coarse mesh and want
+   * to refine the mesh by a couple of levels (less than five levels). Otherwise,
+   * it might introduce an unbalanced workload and too large ghosting domain.
    */
-  bool uniformRefineRemoteDeletion() const { return _uniform_refine_remote_deletion; }
+  bool skipDeletionRepartitionAfterRefine() const
+  {
+    return _skip_deletion_repartition_after_refine;
+  }
 
   /**
    * Whether or not skip uniform refinements when using a pre-split mesh
@@ -1137,8 +1145,8 @@ protected:
   /// Whether or not to skip uniform refinements when using a pre-split mesh
   bool _skip_refine_when_use_split;
 
-  /// Whether or not delete remote "extra" elements after uniform refinements
-  bool _uniform_refine_remote_deletion;
+  /// Whether or not skip remote deletion and repartition after uniform refinements
+  bool _skip_deletion_repartition_after_refine;
 
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
