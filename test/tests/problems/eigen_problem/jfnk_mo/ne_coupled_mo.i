@@ -78,6 +78,7 @@
 [Executioner]
   type = Eigenvalue
   solve_type = PJFNKMO
+  nl_rel_tol = 1e-6
 []
 
 [VectorPostprocessors]
