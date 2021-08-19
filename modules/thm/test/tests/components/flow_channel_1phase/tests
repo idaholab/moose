@@ -32,10 +32,9 @@
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
   []
 
-  # jacobians
-  [jac:3eqn]
+  [jacobian]
     type = 'PetscJacobianTester'
-    input = 'jac.3eqn.i'
+    input = 'jacobian.i'
     ratio_tol = 7e-8
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'

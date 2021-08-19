@@ -41,8 +41,6 @@
   [SMP_PJFNK]
     type = SMP
     full = true
-    petsc_options_iname = '-snes_type -snes_test_err'
-    petsc_options_value = 'test       1e-11'
   []
 []
 
@@ -61,4 +59,7 @@
 
   l_tol = 1e-3
   l_max_its = 100
+
+  petsc_options_iname = '-snes_type -snes_test_err'
+  petsc_options_value = 'test       1e-11'
 []
