@@ -268,8 +268,21 @@ isInlet(Real vel, Real normal)
 }
 
 bool
+isInlet(ADReal vel, Real normal)
+{
+  return (MetaPhysicL::raw_value(vel) * normal) < 0;
+}
+
+bool
 isOutlet(Real vel, Real normal)
 {
   return (vel * normal) >= 0;
 }
+
+bool
+isOutlet(ADReal vel, Real normal)
+{
+  return (MetaPhysicL::raw_value(vel) * normal) >= 0;
+}
+
 } // namespace THM
