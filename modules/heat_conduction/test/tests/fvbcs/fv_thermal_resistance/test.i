@@ -32,7 +32,6 @@
     type = FVThermalResistanceBC
     geometry = 'cartesian'
     variable = u
-    temperature = 'u'
     T_ambient = 10
     htc = 'htc'
     emissivity = 0.2
@@ -49,6 +48,7 @@
     type = FVThermalResistanceBC
     geometry = 'cartesian'
     variable = u
+    # Test setting it separately
     temperature = 'u'
     T_ambient = 14
     htc = 'htc'

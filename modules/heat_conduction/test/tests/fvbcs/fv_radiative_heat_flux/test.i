@@ -31,7 +31,6 @@
   [left]
     type = FVInfiniteCylinderRadiativeBC
     variable = u
-    temperature = 'u'
     boundary = 'left'
     boundary_radius = 1
     cylinder_radius = 12
@@ -40,6 +39,7 @@
   [top]
     type = FVInfiniteCylinderRadiativeBC
     variable = u
+    # Test setting it separately
     temperature = 'u'
     boundary = 'top'
     boundary_radius = 1
