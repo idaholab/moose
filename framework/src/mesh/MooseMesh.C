@@ -178,6 +178,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
     _skip_refine_when_use_split(getParam<bool>("skip_refine_when_use_split")),
+    _skip_deletion_repartition_after_refine(false),
     _is_nemesis(getParam<bool>("nemesis")),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
@@ -247,6 +248,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _custom_partitioner_requested(other_mesh._custom_partitioner_requested),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
+    _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
     _is_nemesis(false),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
@@ -2696,9 +2698,10 @@ MooseMesh::uniformRefineLevel() const
 }
 
 void
-MooseMesh::setUniformRefineLevel(unsigned int level)
+MooseMesh::setUniformRefineLevel(unsigned int level, bool deletion)
 {
   _uniform_refine_level = level;
+  _skip_deletion_repartition_after_refine = deletion;
 }
 
 void
