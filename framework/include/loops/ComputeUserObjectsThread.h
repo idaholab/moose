@@ -11,8 +11,12 @@
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
+#include "ExecFlagEnum.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/elem_range.h"
+
+#include <map>
 
 class InternalSideUserObject;
 class ElementUserObject;
@@ -83,9 +87,10 @@ private:
 template <typename T>
 void
 groupUserObjects(TheWarehouse & w,
+                 AuxiliarySystem & aux,
+                 const ExecFlagEnum & execute_flags,
                  const std::vector<T *> & objs,
-                 const std::set<std::string> & ic_deps,
-                 const std::set<std::string> & aux_deps)
+                 const std::set<std::string> & ic_deps)
 {
   // These flags indicate when a user object will be executed for a given exec flag time.
   // The attributes are set by this function and their values are queried in
@@ -93,41 +98,88 @@ groupUserObjects(TheWarehouse & w,
   // three groups: PRE_IC, PRE_AUX, or POST_AUX, then that UO is executed with that group.
   //
   // PRE_IC objects are run before initial conditions during the "INITIAL" exec flag time.
-  // On any other exec flag time, they are run along with the POST_AUX group after
-  // AuxKernels have ran.
+  // On any other exec flag time, they are run in POST_AUX by default or if there is
+  // an dependency for some exec flag or if force_preaux is set, they are run in
+  // PRE_AUX
   //
-  // PRE_AUX objects are run before AuxKernels on any given exec flag time.
+  // PRE_AUX objects are run before the dependent AuxKernels exec flag
   //
   // POST_AUX objects are run after AuxKernels on any given exec flag time, and is the
-  // default group for UOs.
+  // default group for UOs. Dependencies that would otherwise move a UO into the
+  // PRE_AUX group can be overridden by specifying the parameter force_postaux
   //
   // This function attempts to sort a UO based on any ICs or AuxKernels which depend on
   // it. Alternatively, a user may select which group to execute their object with by
   // controlling the force_preic, force_preaux and force_postaux input parameters.
   //
+
+  std::map<T *, std::set<unsigned int>> pre_aux_dependencies;
+  std::map<T *, std::set<unsigned int>> post_aux_dependencies;
+  // This map is used to indicate, after all dependencies have
+  // been looked through, whether the UO has been flagged to
+  // execute on EXEC_INITIAL, either through a dependency or
+  // because force_preic was indicated. If neither of these
+  // are true, the UO needs to be run in POST_AUX for EXEC_INITIAL
+  std::map<T *, bool> is_pre_ic;
+
+  for (const auto obj : objs)
+    is_pre_ic[obj] = false;
+
+  for (const ExecFlagType & flag : execute_flags.items())
+  {
+    std::set<std::string> depend_objects_aux = aux.getDependObjects(flag);
+    for (const auto obj : objs)
+    {
+      if (depend_objects_aux.count(obj->name()) > 0)
+      {
+        pre_aux_dependencies[obj].insert(flag);
+        if (flag == EXEC_INITIAL)
+          is_pre_ic.at(obj) = true;
+      }
+      else if (flag != EXEC_INITIAL)
+        // default is for UO to be post_aux. If EXEC_INITIAL, check first if UO
+        // will be dependent on IC or have force_preic before deciding to put in
+        // post_aux
+        post_aux_dependencies[obj].insert(flag);
+    }
+  }
+
   for (const auto obj : objs)
   {
-    // any object shall, by default, be post-aux unless it is assigned to another below
-    w.update(obj, AttribPostAux(w, true));
-
     if (ic_deps.count(obj->name()) > 0 ||
         (obj->isParamValid("force_preic") && obj->template getParam<bool>("force_preic")))
     {
       w.update(obj, AttribPreIC(w, true));
-      w.update(obj, AttribPostAux(w, false));
+      is_pre_ic.at(obj) = true;
     }
 
-    if ((obj->isParamValid("force_preaux") && obj->template getParam<bool>("force_preaux")) ||
-        aux_deps.count(obj->name()) > 0 || ic_deps.count(obj->name()) > 0)
+    if ((obj->isParamValid("force_preaux") && obj->template getParam<bool>("force_preaux")))
     {
-      w.update(obj, AttribPreAux(w, true));
-      w.update(obj, AttribPostAux(w, false));
+      post_aux_dependencies[obj].clear();
+      for (const ExecFlagType & flag : execute_flags.items())
+        pre_aux_dependencies[obj].insert(flag);
     }
-
-    if (obj->isParamValid("force_postaux") && obj->template getParam<bool>("force_postaux"))
+    else if (obj->isParamValid("force_postaux") && obj->template getParam<bool>("force_postaux"))
     {
-      w.update(obj, AttribPreAux(w, false));
-      w.update(obj, AttribPostAux(w, true));
+      pre_aux_dependencies[obj].clear();
+      for (const ExecFlagType & flag : execute_flags.items())
+        post_aux_dependencies[obj].insert(flag);
+    }
+    else
+    {
+      // If at this point, then check if the UO has already been set to execute
+      // by either the force_preic param, an IC dependency, or a dependency
+      // already found for exec flage EXEC_INITIAL. If none of these are true,
+      // then is_pre_ic.at(obj) is false and the UO is added to the default
+      // post_aux group for the EXEC_INITIAL flag
+      if (!is_pre_ic.at(obj))
+        post_aux_dependencies[obj].insert(EXEC_INITIAL);
     }
   }
+
+  for (auto & item : pre_aux_dependencies)
+    w.update(item.first, AttribPreAux(w, item.second));
+
+  for (auto & item : post_aux_dependencies)
+    w.update(item.first, AttribPostAux(w, item.second));
 }
