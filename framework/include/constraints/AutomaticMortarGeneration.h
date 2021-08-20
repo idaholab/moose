@@ -185,6 +185,18 @@ public:
                                 const std::vector<Real> & oned_xi1_pts) const;
 
   /**
+   * Get list of secondary nodes that don't contribute to interaction with any primary element.
+   * Used to enforce zero values on inactive DoFs of nodal variables.
+   */
+  void computeInactiveLMNodes();
+
+  /**
+   * Get list of secondary elems without any corresponding primary elements.
+   * Used to enforce zero values on inactive DoFs of elemental variables.
+   */
+  void computeInactiveLMElems();
+
+  /**
    * @return The mortar interface coupling
    */
   const std::unordered_multimap<dof_id_type, dof_id_type> & mortarInterfaceCoupling() const
@@ -214,7 +226,11 @@ public:
     return msm_elem_to_info;
   }
 
-  int dim() const { return mesh.mesh_dimension(); } 
+  int dim() const { return mesh.mesh_dimension(); }
+
+  const std::unordered_set<dof_id_type> & getInactiveLMNodes() const { return inactive_local_lm_nodes; }
+
+  const std::unordered_set<const Elem *> & getInactiveLMElems() const { return inactive_local_lm_elems; }
 
 private:
   // Reference to the mesh stored in equation_systems.
@@ -296,6 +312,13 @@ private:
 
   // Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> secondary_node_to_nodal_normal;
+
+  // List of inactive lagrange multiplier nodes (for nodal variables)
+  std::unordered_set<dof_id_type> inactive_local_lm_nodes;
+
+  // List of inactive lagrange multiplier nodes (for elemental variables)
+  std::unordered_set<const Elem *> inactive_local_lm_elems;
+
 
   /**
    * Helper function responsible for projecting secondary nodes

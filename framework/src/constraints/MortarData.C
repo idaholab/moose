@@ -165,6 +165,8 @@ MortarData::update(AutomaticMortarGeneration & amg)
   {
     mooseError("Invalid mesh dimension for mortar constraint");
   }
+
+  amg.getInactiveLMDofs;
 }
 
 const std::set<SubdomainID> &
