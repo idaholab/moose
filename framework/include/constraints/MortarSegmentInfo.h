@@ -67,13 +67,6 @@ struct MortarSegmentInfo
   const Elem * secondary_elem;
   const Elem * primary_elem;
 
-  /**
-   * For 3D mortar, holds remaining area of secondary elem after all mortar segments
-   * corresponding to primary elements have been subtracted. Fudge factor used to weight
-   * the integration over elements to simulate creating mortar segments for the remainder
-   */
-  Real fudge_factor = 1.0;
-
   // A magic number to let us determine when xi values have not been
   // initialized yet.
   static const Real invalid_xi;

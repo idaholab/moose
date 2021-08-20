@@ -36,6 +36,9 @@
 
 #include "metaphysicl/dualnumber.h"
 
+#include "timpi/communicator.h"
+#include "timpi/parallel_sync.h"
+
 #include <array>
 
 using namespace libMesh;
@@ -334,7 +337,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Make sure we found one.
     if (current_mortar_segment == nullptr)
+    {
+      std::cout << "xi1: " << xi1 << "      xi1_a: " << info->xi1_a << "      xi1_b: " << info->xi1_b << std::endl;
       mooseError("Unable to find appropriate mortar segment during linear search!");
+    }
+
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
@@ -573,6 +580,34 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     mortar_segment_set.insert(new_elem_right);
   }
 
+  // Remove all MSM elements without a primary contribution
+  /**
+   * This was a change to how inactive LM DoFs are handled. Now mortar segment elements
+   * are not used in assembly if there is no corresponding primary element and inactive
+   * LM DoFs (those with no contribution to an active primary element) are zeroed.
+   */
+  for (auto msm_elem : mortar_segment_mesh->active_element_ptr_range())
+  {
+    MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
+    if (primary_elem == nullptr)
+    {
+      mortar_segment_mesh->delete_elem(msm_elem);
+      msm_elem_to_info.erase(msm_elem);
+    }
+
+  }
+
+#ifndef NDEBUG
+  // Verify that all segments without primary contribution have been deleted
+  for (auto msm_elem : mortar_segment_mesh->active_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    mooseAssert(msinfo.primary_elem != nullptr, "All mortar segment elements should have valid "
+              "primary element.");
+  }
+#endif
+
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh->allow_renumbering(true);
   mortar_segment_mesh->skip_partitioning(true);
@@ -613,13 +648,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       // PrimaryLower
       mortar_interface_coupling.insert(
           std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
-
-      // SecondaryPrimary
-      mortar_interface_coupling.insert(std::make_pair(secondary_elem->interior_parent()->id(),
-                                                      primary_elem->interior_parent()->id()));
-      // PrimarySecondary
-      mortar_interface_coupling.insert(std::make_pair(primary_elem->interior_parent()->id(),
-                                                      secondary_elem->interior_parent()->id()));
     }
   }
 }
@@ -635,7 +663,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // Number of new msm elems can be created by clipping and triangulating
   // secondary node with primary node
   // Note this parameter is subject to change, just a heuristic for now
-  const int multiplicity = 8;
+  const int multiplicity = 16;
 
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
@@ -727,6 +755,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
          ++el)
     {
       const Elem * secondary_side_elem = *el;
+
+      const Real secondary_volume = secondary_side_elem->volume();
 
       // If this Elem is not in the current secondary subdomain, go on to the next one.
       if (secondary_side_elem->subdomain_id() != secondary_subd_id)
@@ -956,6 +986,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             for (auto i : make_range(elem_to_node_map[el].size()))
               new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
 
+            // If element is smaller than tolerance, don't add to msm
+            if (new_elem->volume() / secondary_volume < TOLERANCE)
+              continue;
+
             // Add elements to mortar segment mesh
             mortar_segment_mesh->add_elem(new_elem);
             new_elem->set_extra_integer(secondary_sub_elem, sub_elem_map[el].first);
@@ -974,68 +1008,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // End loop through primary element candidates
       }
 
-      /**
-       * Step 1.4: Create mortar segments with no corresponding primary element
-       *
-       * If secondary sub-element has significant area remaining without associated primary element,
-       * add the entire sub-element to MSM but set weight equal to remaining area fraction.
-       */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
-        Real remainder = mortar_segment_helper[sel]->remainder();
-        if (remainder > 1e-8)
-        {
-          // Increment counter of secondary elements either partially or fully lacking primary
-          if (remainder == 1.0)
-            mooseDoOnce(
-                mooseWarning("Some secondary elements on mortar interface were unable to identify"
-                             " a corresponding primary element; this may be expected depending on"
-                             " problem geometry but may indicate a failure of the element search"
-                             " or projection"));
-
-          std::vector<Node *> new_nodes;
-          for (auto n : make_range(secondary_side_elem->n_vertices()))
-          {
-            new_nodes.push_back(
-                mortar_segment_mesh->add_point(mortar_segment_helper[sel]->point(n),
-                                               mortar_segment_mesh->max_node_id(),
-                                               secondary_side_elem->processor_id()));
-            Node * const new_node = new_nodes.back();
-            new_node->set_unique_id(new_node->id() + node_unique_id_offset);
-          }
-
-          Elem * new_elem;
-
-          if (secondary_side_elem->type() == TRI3 || secondary_side_elem->type() == TRI6)
-            new_elem = new Tri3;
-          else if (secondary_side_elem->type() == QUAD4 || secondary_side_elem->type() == QUAD9)
-            new_elem = new Quad4;
-          else
-            mooseError("Unsupported face element type:", secondary_side_elem->type());
-
-          new_elem->processor_id() = secondary_side_elem->processor_id();
-          new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
-          new_elem->set_id(local_id_index++);
-          new_elem->set_unique_id(new_elem->id());
-
-          // Attach newly created nodes
-          for (auto i : make_range(new_elem->n_vertices()))
-            new_elem->set_node(i) = new_nodes[i];
-
-          // Add elements to mortar segment mesh
-          mortar_segment_mesh->add_elem(new_elem);
-          new_elem->set_extra_integer(secondary_sub_elem, sel);
-
-          // Fill out mortar segment info
-          MortarSegmentInfo msinfo;
-          msinfo.secondary_elem = secondary_side_elem;
-          msinfo.primary_elem = nullptr;
-          msinfo.fudge_factor = remainder;
-          msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
-
-          // Associate this MSM elem with the MortarSegmentInfo.
-          msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
-        }
+        // Check if any segments failed to project
+        if (mortar_segment_helper[sel]->remainder() == 1.0)
+          mooseDoOnce(
+              mooseWarning("Some secondary elements on mortar interface were unable to identify"
+                           " a corresponding primary element; this may be expected depending on"
+                           " problem geometry but may indicate a failure of the element search"
+                           " or projection"));
       }
       // End loop through secondary elements
     }
@@ -1052,28 +1033,19 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // Output mortar segment mesh
   if (_debug)
   {
-    // Check that all elements are triangular, if not skip outputting
-    // (ExodusII does not support mixed element types on a single block)
-    bool is_tri_mesh = true;
+    // If element is not triangular, increment subdomain id
+    // (ExodusII does not support mixed element types in a single subdomain)
     for (const auto msm_el : mortar_segment_mesh->active_local_element_ptr_range())
-    {
       if (msm_el->type() != TRI3)
-      {
-        is_tri_mesh = false;
-        break;
-      }
-    }
+        msm_el->subdomain_id()++;
 
-    if (is_tri_mesh)
-    {
-      ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
-      mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
-    }
-    else
-    {
-      mooseWarning("Mortar segment mesh contains mixed element types thus cannot be "
-                   "output using ExodusII");
-    }
+    ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
+    mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
+
+    // Undo increment
+    for (const auto msm_el : mortar_segment_mesh->active_local_element_ptr_range())
+      if (msm_el->type() != TRI3)
+        msm_el->subdomain_id()--;
   }
 #endif
 
@@ -1114,8 +1086,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     if (mesh.n_processors() == 1)
       msmStatistics();
     else
-      mooseWarning("Mortar segment mesh is only constructed on local elements; "
-                   "statistics are only valid in serial.");
+      mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
+      "parallel will only provide statistics for local mortar segment mesh.");
   }
 #endif
 }
@@ -1137,14 +1109,6 @@ AutomaticMortarGeneration::msmStatistics()
     StatisticsVector<Real> secondary; // secondary.reserve(mesh.n_elem());
     StatisticsVector<Real> msm;       // msm.reserve(mortar_segment_mesh->n_elem());
 
-    // Number of elements dropped by compute mortar functor
-    unsigned int msm_dropped = 0;
-
-    // Number of secondary elements partially or fully lacking corresponding primary elems
-    unsigned int lacking_full = 0;
-    unsigned int lacking_partial = 0;
-
-    // TODO: modify for parallel
     for (auto el : mesh.active_element_ptr_range())
     {
       // Add secondary and primary elem volumes to statistics vector
@@ -1160,35 +1124,15 @@ AutomaticMortarGeneration::msmStatistics()
     {
       // Add msm elem volume to statistic vector
       msm.push_back(msm_elem->volume());
-
-      // Get associated secondary element
-      const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
-      auto secondary_elem = msinfo.secondary_elem;
-
-      // Check if msm_elem dropped in compute mortar functor
-      Real secondary_volume = secondary_elem->volume();
-      if (msm_elem->volume() / secondary_volume < 1e-8)
-        msm_dropped++;
-
-      // Check if partially or fully lacking primary element
-      if (!msinfo.hasPrimary())
-      {
-        if (msinfo.fudge_factor == 1)
-          lacking_full++;
-        else
-          lacking_partial++;
-      }
     }
 
-    Moose::out << "secondary subdomain: " << secondary_subd_id
-               << " \tprimary subdomain: " << primary_subd_id << std::endl;
-    std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median", "dropped"};
+    // Create table
+    std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median"};
     std::vector<std::string> subds = {"secondary_lower", "primary_lower", "mortar_segement"};
     std::vector<size_t> n_elems = {secondary.size(), primary.size(), msm.size()};
     std::vector<Real> maxs = {secondary.maximum(), primary.maximum(), msm.maximum()};
     std::vector<Real> mins = {secondary.minimum(), primary.minimum(), msm.minimum()};
     std::vector<Real> medians = {secondary.median(), primary.median(), msm.median()};
-    std::vector<unsigned int> dropped = {0, 0, msm_dropped};
 
     FormattedTable table;
     table.clear();
@@ -1200,15 +1144,124 @@ AutomaticMortarGeneration::msmStatistics()
       table.addData<Real>(col_names[2], maxs[i]);
       table.addData<Real>(col_names[3], mins[i]);
       table.addData<Real>(col_names[4], medians[i]);
-      table.addData<unsigned int>(col_names[5], dropped[i]);
     }
 
+    Moose::out << "secondary subdomain: " << secondary_subd_id
+               << " \tprimary subdomain: " << primary_subd_id << std::endl;
     table.printTable(Moose::out, subds.size());
-
-    Moose::out << "\t secondary elems partially lacking primary elems: " << lacking_partial
-               << std::endl;
-    Moose::out << "\t secondary elems fully lacking primary elems: " << lacking_full << std::endl;
   }
+}
+
+void
+AutomaticMortarGeneration::computeInactiveLMNodes()
+{
+  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
+  const auto my_pid = mesh.processor_id();
+
+  // List of active nodes on local secondary elements
+  std::unordered_set<dof_id_type> active_local_nodes;
+
+  // std::unordered_map<const Elem *, Real> active_volume;
+  //
+  // // Compute fraction of elements with corresponding primary elements
+  // for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  // {
+  //   const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+  //   const Elem * secondary_elem = msinfo.secondary_elem;
+  //
+  //   active_volume[secondary_elem] += msm_elem->volume();
+  // }
+
+  // Mark all active local nodes
+  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const Elem * secondary_elem = msinfo.secondary_elem;
+
+    // if (active_volume[secondary_elem] / secondary_elem->volume() < 0.5)
+    //   continue;
+
+    for (auto n : make_range(secondary_elem->n_nodes()))
+      active_local_nodes.insert(secondary_elem->node_id(n));
+  }
+
+  // Assemble list of procs that nodes contribute to
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  {
+    const auto secondary_subd_id = pr.second;
+
+    // Loop through all elements not on my processor
+    for (const auto el : mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
+    {
+      // Get processor_id
+      const auto pid = el->processor_id();
+
+      // If element is in my subdomain, skip
+      if (pid == my_pid)
+        continue;
+
+      // If element on proc pid shares any of my active nodes, mark to send
+      for (const auto n : make_range(el->n_nodes()))
+      {
+        const auto node_id = el->node_id(n);
+        if (active_local_nodes.find(node_id) != active_local_nodes.end())
+          proc_to_active_nodes_set[pid].insert(node_id);
+      }
+    }
+  }
+
+  // Send list of active nodes
+  {
+    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
+    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_active_nodes_vector;
+    for (const auto & proc_set : proc_to_active_nodes_set)
+    {
+      proc_to_active_nodes_vector[proc_set.first].reserve(proc_to_active_nodes_set.size());
+      for (const auto node_id : proc_set.second)
+        proc_to_active_nodes_vector[proc_set.first].push_back(node_id);
+    }
+
+    // First push data
+    auto action_functor = [this, &active_local_nodes](const processor_id_type libmesh_dbg_var(pid),
+                                 const std::vector<dof_id_type> & sent_data) {
+      mooseAssert(pid != mesh.processor_id(), "We do not send messages to ourself here");
+      for (const auto pr : sent_data)
+        active_local_nodes.insert(pr);
+    };
+    TIMPI::push_parallel_vector_data(mesh.comm(), proc_to_active_nodes_vector, action_functor);
+  }
+
+  // Every proc has correct list of active local nodes, now take complement (list of inactive nodes)
+  // and store to use later to zero LM DoFs on inactive nodes
+  inactive_local_lm_nodes.clear();
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+      for (const auto n : make_range(el->n_nodes()))
+        if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
+          inactive_local_lm_nodes.insert(el->node_id(n));
+}
+
+// Note: could be combined with previous routine, keeping separate for clarity (for now)
+void
+AutomaticMortarGeneration::computeInactiveLMElems()
+{
+  // Mark all active secondary elements
+  std::unordered_set<const Elem *> active_local_elems;
+
+  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const Elem * secondary_elem = msinfo.secondary_elem;
+
+    active_local_elems.insert(secondary_elem);
+  }
+
+  // Take complement of active elements in active local subdomain to get inactive local elements
+  inactive_local_lm_elems.clear();
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+      if (active_local_elems.find(el) == active_local_elems.end())
+        inactive_local_lm_elems.insert(el);
 }
 
 void

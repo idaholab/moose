@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+
 /*
 TODO:
  - fix dual shape functions, second order dual, mixed meshes
- - enable contact on non-dual basis
  - for contact action enable specifying lowerD blocks
 */
 #include "MortarSegmentHelper.h"
@@ -270,9 +270,8 @@ MortarSegmentHelper::plotPoly(const std::vector<Point> & poly) const
 }
 
 void
-MortarSegmentHelper::plotTriangulation(
-    const std::vector<Point> & nodes,
-    const std::vector<std::vector<unsigned int>> & elem_to_nodes) const
+MortarSegmentHelper::plotTriangulation(const std::vector<Point> & nodes,
+                                       const std::vector< std::vector<unsigned int> > & elem_to_nodes) const
 {
   for (auto el : elem_to_nodes)
   {
@@ -286,7 +285,7 @@ MortarSegmentHelper::plotTriangulation(
 void
 MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
                                      const unsigned int offset,
-                                     std::vector<std::vector<unsigned int>> & tri_map) const
+                                     std::vector< std::vector<unsigned int> > & tri_map) const
 {
   // Note offset is important because it converts from list of nodes on local poly to list of
   // nodes on entire element. This is a sloppy and error-prone way to do this.
@@ -350,7 +349,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 void
 MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
                                        std::vector<Point> & nodes,
-                                       std::vector<std::vector<unsigned int>> & elem_to_nodes)
+                                       std::vector< std::vector<unsigned int> > & elem_to_nodes)
 {
   // Clip primary elem against secondary elem
   std::vector<Point> clipped_poly = clipPoly(primary_nodes);
