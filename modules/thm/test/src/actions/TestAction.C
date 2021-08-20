@@ -21,6 +21,7 @@ TestAction::validParams()
                                             "List of material property names");
   params.addParam<std::vector<FunctionName>>("mat_property_values",
                                              "List of values of the material properties");
+  params.addParam<bool>("ad", false, "Setup for AD or non-AD testing");
 
   params.addPrivateParam<std::string>("fe_family");
   params.addPrivateParam<std::string>("fe_order");
@@ -41,7 +42,8 @@ TestAction::TestAction(InputParameters params)
     _mat_property_names(getParam<std::vector<std::string>>("mat_property_names")),
     _mat_property_values(getParam<std::vector<FunctionName>>("mat_property_values")),
     _fe_family(getParam<std::string>("fe_family")),
-    _fe_order(getParam<std::string>("fe_order"))
+    _fe_order(getParam<std::string>("fe_order")),
+    _ad(getParam<bool>("ad"))
 {
   if (_scalar_variables.size() != _scalar_variable_values.size())
     mooseError(name(),

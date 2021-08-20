@@ -17,6 +17,9 @@ protected:
   virtual void addMaterials() override;
   virtual void addOutput() override;
 
+  void setupOutput();
+  void setupADOutput();
+
   /// Name of the dummy variable that is solved for
   const VariableName _dummy_name;
   /// Wall temperature
@@ -32,6 +35,8 @@ protected:
   const Real & _q_wall;
   /// List of material properties to output
   const std::vector<std::string> & _output_properties;
+  /// List of AD material properties to output
+  const std::vector<std::string> & _output_ad_properties;
 
 public:
   static InputParameters validParams();
