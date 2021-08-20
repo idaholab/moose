@@ -181,6 +181,7 @@ ADReal wallHeatTransferCoefficient(ADReal Nu, ADReal k, ADReal D_h);
  * @return Dean number
  */
 Real Dean(Real Re, Real doD);
+ADReal Dean(ADReal Re, ADReal doD);
 
 /**
  * Computes velocity and its derivatives from alpha*rho*A and alpha*rho*u*A
