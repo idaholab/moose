@@ -9,14 +9,16 @@
 
 #pragma once
 
-#include "ElementIntegralPostprocessor.h"
-#include "ComponentUtils.h"
+#include "SideIntegralPostprocessor.h"
+#include "MaterialPropertyInterface.h"
+
+#include "IndexableProperty.h"
 
 /**
  * Computes the integral of a material property over a side set.
  */
-template <typename T, bool is_ad>
-class SideIntegralMaterialPropertyTempl : public SideIntegralPostprocessor, public ComponentUtils<T>
+template <bool is_ad>
+class SideIntegralMaterialPropertyTempl : public SideIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
@@ -26,28 +28,8 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  const GenericMaterialProperty<T, is_ad> & _prop;
+  const IndexableProperty<SideIntegralPostprocessor, is_ad> _prop;
 };
 
-typedef SideIntegralMaterialPropertyTempl<Real, false> SideIntegralMaterialRealProperty;
-typedef SideIntegralMaterialPropertyTempl<Real, true> ADSideIntegralMaterialRealProperty;
-
-typedef SideIntegralMaterialPropertyTempl<RealVectorValue, false>
-    SideIntegralMaterialRealVectorValueProperty;
-typedef SideIntegralMaterialPropertyTempl<RealVectorValue, true>
-    ADSideIntegralMaterialRealVectorValueProperty;
-
-typedef SideIntegralMaterialPropertyTempl<RankTwoTensor, false>
-    SideIntegralMaterialRankTwoTensorProperty;
-typedef SideIntegralMaterialPropertyTempl<RankTwoTensor, true>
-    ADSideIntegralMaterialRankTwoTensorProperty;
-
-typedef SideIntegralMaterialPropertyTempl<RankThreeTensor, false>
-    SideIntegralMaterialRankThreeTensorProperty;
-typedef SideIntegralMaterialPropertyTempl<RankThreeTensor, true>
-    ADSideIntegralMaterialRankThreeTensorProperty;
-
-typedef SideIntegralMaterialPropertyTempl<RankFourTensor, false>
-    SideIntegralMaterialRankFourTensorProperty;
-typedef SideIntegralMaterialPropertyTempl<RankFourTensor, true>
-    ADSideIntegralMaterialRankFourTensorProperty;
+typedef SideIntegralMaterialPropertyTempl<false> SideIntegralMaterialProperty;
+typedef SideIntegralMaterialPropertyTempl<true> ADSideIntegralMaterialProperty;

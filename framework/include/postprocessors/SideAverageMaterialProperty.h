@@ -14,8 +14,8 @@
 /**
  * Computes the average of a material property over a side set.
  */
-template <typename T, bool is_ad>
-class SideAverageMaterialPropertyTempl : public SideIntegralMaterialPropertyTempl<T, is_ad>
+template <bool is_ad>
+class SideAverageMaterialPropertyTempl : public SideIntegralMaterialPropertyTempl<is_ad>
 {
 public:
   static InputParameters validParams();
@@ -32,25 +32,5 @@ protected:
   Real _area;
 };
 
-typedef SideAverageMaterialPropertyTempl<Real, false> SideAverageMaterialRealProperty;
-typedef SideAverageMaterialPropertyTempl<Real, true> ADSideAverageMaterialRealProperty;
-
-typedef SideAverageMaterialPropertyTempl<RealVectorValue, false>
-    SideAverageMaterialRealVectorValueProperty;
-typedef SideAverageMaterialPropertyTempl<RealVectorValue, true>
-    ADSideAverageMaterialRealVectorValueProperty;
-
-typedef SideAverageMaterialPropertyTempl<RankTwoTensor, false>
-    SideAverageMaterialRankTwoTensorProperty;
-typedef SideAverageMaterialPropertyTempl<RankTwoTensor, true>
-    ADSideAverageMaterialRankTwoTensorProperty;
-
-typedef SideAverageMaterialPropertyTempl<RankThreeTensor, false>
-    SideAverageMaterialRankThreeTensorProperty;
-typedef SideAverageMaterialPropertyTempl<RankThreeTensor, true>
-    ADSideAverageMaterialRankThreeTensorProperty;
-
-typedef SideAverageMaterialPropertyTempl<RankFourTensor, false>
-    SideAverageMaterialRankFourTensorProperty;
-typedef SideAverageMaterialPropertyTempl<RankFourTensor, true>
-    ADSideAverageMaterialRankFourTensorProperty;
+typedef SideAverageMaterialPropertyTempl<false> SideAverageMaterialProperty;
+typedef SideAverageMaterialPropertyTempl<true> ADSideAverageMaterialProperty;

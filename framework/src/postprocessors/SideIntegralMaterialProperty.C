@@ -11,52 +11,32 @@
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("MooseApp", SideIntegralMaterialRealProperty);
-registerMooseObject("MooseApp", ADSideIntegralMaterialRealProperty);
-registerMooseObject("MooseApp", SideIntegralMaterialRealVectorValueProperty);
-registerMooseObject("MooseApp", ADSideIntegralMaterialRealVectorValueProperty);
-registerMooseObject("MooseApp", SideIntegralMaterialRankTwoTensorProperty);
-registerMooseObject("MooseApp", ADSideIntegralMaterialRankTwoTensorProperty);
-registerMooseObject("MooseApp", SideIntegralMaterialRankThreeTensorProperty);
-registerMooseObject("MooseApp", ADSideIntegralMaterialRankThreeTensorProperty);
-registerMooseObject("MooseApp", SideIntegralMaterialRankFourTensorProperty);
-registerMooseObject("MooseApp", ADSideIntegralMaterialRankFourTensorProperty);
+registerMooseObject("MooseApp", SideIntegralMaterialProperty);
+registerMooseObject("MooseApp", ADSideIntegralMaterialProperty);
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 InputParameters
-SideIntegralMaterialPropertyTempl<T, is_ad>::validParams()
+SideIntegralMaterialPropertyTempl<is_ad>::validParams()
 {
-  InputParameters params = SideIntegralPostprocessor::validParams();
-  params += ComponentUtils<T>::validParams();
-  params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
-  params.addClassDescription(
-      "Compute the integral of the material property over the domain (scalar/component)");
+  InputParameters params = IndexableProperty<SideIntegralPostprocessor, is_ad>::validParams();
+  params.addClassDescription("Compute the integral of a scalar material property component over "
+                             "the domain.");
   return params;
 }
 
-template <typename T, bool is_ad>
-SideIntegralMaterialPropertyTempl<T, is_ad>::SideIntegralMaterialPropertyTempl(
+template <bool is_ad>
+SideIntegralMaterialPropertyTempl<is_ad>::SideIntegralMaterialPropertyTempl(
     const InputParameters & parameters)
-  : SideIntegralPostprocessor(parameters),
-    ComponentUtils<T>(parameters),
-    _prop(getGenericMaterialProperty<T, is_ad>("mat_prop"))
+  : SideIntegralPostprocessor(parameters), _prop(this)
 {
 }
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 Real
-SideIntegralMaterialPropertyTempl<T, is_ad>::computeQpIntegral()
+SideIntegralMaterialPropertyTempl<is_ad>::computeQpIntegral()
 {
-  return this->getComponent(MetaPhysicL::raw_value(_prop[_qp]));
+  return MetaPhysicL::raw_value(_prop[_qp]);
 }
 
-template class SideIntegralMaterialPropertyTempl<Real, false>;
-template class SideIntegralMaterialPropertyTempl<Real, true>;
-template class SideIntegralMaterialPropertyTempl<RealVectorValue, false>;
-template class SideIntegralMaterialPropertyTempl<RealVectorValue, true>;
-template class SideIntegralMaterialPropertyTempl<RankTwoTensor, false>;
-template class SideIntegralMaterialPropertyTempl<RankTwoTensor, true>;
-template class SideIntegralMaterialPropertyTempl<RankThreeTensor, false>;
-template class SideIntegralMaterialPropertyTempl<RankThreeTensor, true>;
-template class SideIntegralMaterialPropertyTempl<RankFourTensor, false>;
-template class SideIntegralMaterialPropertyTempl<RankFourTensor, true>;
+template class SideIntegralMaterialPropertyTempl<false>;
+template class SideIntegralMaterialPropertyTempl<true>;

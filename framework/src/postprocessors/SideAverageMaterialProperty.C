@@ -9,80 +9,64 @@
 
 #include "SideAverageMaterialProperty.h"
 
-registerMooseObject("MooseApp", SideAverageMaterialRealProperty);
-registerMooseObject("MooseApp", ADSideAverageMaterialRealProperty);
-registerMooseObject("MooseApp", SideAverageMaterialRealVectorValueProperty);
-registerMooseObject("MooseApp", ADSideAverageMaterialRealVectorValueProperty);
-registerMooseObject("MooseApp", SideAverageMaterialRankTwoTensorProperty);
-registerMooseObject("MooseApp", ADSideAverageMaterialRankTwoTensorProperty);
-registerMooseObject("MooseApp", SideAverageMaterialRankThreeTensorProperty);
-registerMooseObject("MooseApp", ADSideAverageMaterialRankThreeTensorProperty);
-registerMooseObject("MooseApp", SideAverageMaterialRankFourTensorProperty);
-registerMooseObject("MooseApp", ADSideAverageMaterialRankFourTensorProperty);
+registerMooseObject("MooseApp", SideAverageMaterialProperty);
+registerMooseObject("MooseApp", ADSideAverageMaterialProperty);
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 InputParameters
-SideAverageMaterialPropertyTempl<T, is_ad>::validParams()
+SideAverageMaterialPropertyTempl<is_ad>::validParams()
 {
-  InputParameters params = SideIntegralMaterialPropertyTempl<T, is_ad>::validParams();
+  InputParameters params = SideIntegralMaterialPropertyTempl<is_ad>::validParams();
   params.addClassDescription("Computes the average of a material property over a side set.");
   return params;
 }
 
-template <typename T, bool is_ad>
-SideAverageMaterialPropertyTempl<T, is_ad>::SideAverageMaterialPropertyTempl(
+template <bool is_ad>
+SideAverageMaterialPropertyTempl<is_ad>::SideAverageMaterialPropertyTempl(
     const InputParameters & parameters)
-  : SideIntegralMaterialPropertyTempl<T, is_ad>(parameters), _area(0.0)
+  : SideIntegralMaterialPropertyTempl<is_ad>(parameters), _area(0.0)
 {
 }
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 void
-SideAverageMaterialPropertyTempl<T, is_ad>::initialize()
+SideAverageMaterialPropertyTempl<is_ad>::initialize()
 {
-  SideIntegralMaterialPropertyTempl<T, is_ad>::initialize();
+  SideIntegralMaterialPropertyTempl<is_ad>::initialize();
 
   _area = 0.0;
 }
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 void
-SideAverageMaterialPropertyTempl<T, is_ad>::execute()
+SideAverageMaterialPropertyTempl<is_ad>::execute()
 {
-  SideIntegralMaterialPropertyTempl<T, is_ad>::execute();
+  SideIntegralMaterialPropertyTempl<is_ad>::execute();
 
   _area += this->_current_side_volume;
 }
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 Real
-SideAverageMaterialPropertyTempl<T, is_ad>::getValue()
+SideAverageMaterialPropertyTempl<is_ad>::getValue()
 {
-  const Real integral = SideIntegralMaterialPropertyTempl<T, is_ad>::getValue();
+  const Real integral = SideIntegralMaterialPropertyTempl<is_ad>::getValue();
 
-  SideIntegralMaterialPropertyTempl<T, is_ad>::gatherSum(_area);
+  SideIntegralMaterialPropertyTempl<is_ad>::gatherSum(_area);
 
   return integral / _area;
 }
 
-template <typename T, bool is_ad>
+template <bool is_ad>
 void
-SideAverageMaterialPropertyTempl<T, is_ad>::threadJoin(const UserObject & y)
+SideAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  SideIntegralMaterialPropertyTempl<T, is_ad>::threadJoin(y);
+  SideIntegralMaterialPropertyTempl<is_ad>::threadJoin(y);
 
-  const SideAverageMaterialPropertyTempl<T, is_ad> & pps =
-      static_cast<const SideAverageMaterialPropertyTempl<T, is_ad> &>(y);
+  const SideAverageMaterialPropertyTempl<is_ad> & pps =
+      static_cast<const SideAverageMaterialPropertyTempl<is_ad> &>(y);
   _area += pps._area;
 }
 
-template class SideAverageMaterialPropertyTempl<Real, false>;
-template class SideAverageMaterialPropertyTempl<Real, true>;
-template class SideAverageMaterialPropertyTempl<RealVectorValue, false>;
-template class SideAverageMaterialPropertyTempl<RealVectorValue, true>;
-template class SideAverageMaterialPropertyTempl<RankTwoTensor, false>;
-template class SideAverageMaterialPropertyTempl<RankTwoTensor, true>;
-template class SideAverageMaterialPropertyTempl<RankThreeTensor, false>;
-template class SideAverageMaterialPropertyTempl<RankThreeTensor, true>;
-template class SideAverageMaterialPropertyTempl<RankFourTensor, false>;
-template class SideAverageMaterialPropertyTempl<RankFourTensor, true>;
+template class SideAverageMaterialPropertyTempl<false>;
+template class SideAverageMaterialPropertyTempl<true>;
