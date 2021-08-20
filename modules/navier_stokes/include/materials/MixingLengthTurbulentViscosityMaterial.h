@@ -11,12 +11,12 @@
 
 #include "ADMaterial.h"
 
-class INSADMixingLengthTurbulentViscosityMaterial : public ADMaterial
+class MixingLengthTurbulentViscosityMaterial : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  INSADMixingLengthTurbulentViscosityMaterial(const InputParameters & parameters);
+  MixingLengthTurbulentViscosityMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

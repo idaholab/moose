@@ -16,8 +16,7 @@ InputParameters
 INSFVMixingLengthTurbulentViscosityAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Computes the turbulent viscosity for the mixing length model.");
+  params.addClassDescription("Computes the turbulent viscosity for the mixing length model.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -25,7 +24,8 @@ INSFVMixingLengthTurbulentViscosityAux::validParams()
   return params;
 }
 
-INSFVMixingLengthTurbulentViscosityAux::INSFVMixingLengthTurbulentViscosityAux(const InputParameters & params)
+INSFVMixingLengthTurbulentViscosityAux::INSFVMixingLengthTurbulentViscosityAux(
+    const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
@@ -68,20 +68,19 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-      auto grad_v = _v_var->adGradSln(&elem);
-      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_v(1))
-                                    + Utility::pow<2>(grad_v(0)+grad_u(1));
-      if (_dim >= 3)
-        {
-          auto grad_w = _w_var->adGradSln(&elem);
-          symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2))
-                                        + Utility::pow<2>(grad_u(2) + grad_w(0))
-                                        + Utility::pow<2>(grad_v(2) + grad_w(1));
-        }
+    auto grad_v = _v_var->adGradSln(&elem);
+    symmetric_strain_tensor_norm +=
+        2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
+    if (_dim >= 3)
+    {
+      auto grad_w = _w_var->adGradSln(&elem);
+      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
+                                      Utility::pow<2>(grad_u(2) + grad_w(0)) +
+                                      Utility::pow<2>(grad_v(2) + grad_w(1));
+    }
   }
 
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
-
 
   // Compute the eddy diffusivitiy
   ADReal eddy_diff = symmetric_strain_tensor_norm * _mixing_len[_qp] * _mixing_len[_qp];

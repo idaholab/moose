@@ -66,18 +66,13 @@ WallDistanceMixingLengthAux::computeValue()
       min_sq_dist = std::min(min_sq_dist, sq_dist);
     }
   }
-<<<<<<< HEAD
-  // Return the mixing length
-  return _von_karman_const * std::sqrt(min_sq_dist);
-=======
 
-    if (std::sqrt(min_sq_dist)/_delta <= _von_karman_const_0/_von_karman_const)
-    {
-      return _von_karman_const * std::sqrt(min_sq_dist);
-    }
-    else
-    {
-      return _von_karman_const_0 * _delta;
-    }
->>>>>>> Modifications
+  if (std::sqrt(min_sq_dist) / _delta <= _von_karman_const_0 / _von_karman_const)
+  {
+    return _von_karman_const * std::sqrt(min_sq_dist);
+  }
+  else
+  {
+    return _von_karman_const_0 * _delta;
+  }
 }

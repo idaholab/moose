@@ -24,16 +24,16 @@ public:
 protected:
   virtual Real computeValue();
 
-    /// the dimension of the simulation
-    const unsigned int _dim;
+  /// the dimension of the simulation
+  const unsigned int _dim;
 
-    /// x-velocity
-    const INSFVVelocityVariable * const _u_var;
-    /// y-velocity
-    const INSFVVelocityVariable * const _v_var;
-    /// z-velocity
-    const INSFVVelocityVariable * const _w_var;
+  /// x-velocity
+  const INSFVVelocityVariable * const _u_var;
+  /// y-velocity
+  const INSFVVelocityVariable * const _v_var;
+  /// z-velocity
+  const INSFVVelocityVariable * const _w_var;
 
-    /// Turbulent eddy mixing length
-    const VariableValue & _mixing_len;
+  /// Turbulent eddy mixing length
+  const VariableValue & _mixing_len;
 };

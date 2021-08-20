@@ -73,21 +73,21 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
-  
+
   const auto & grad_u = _u_var->adGradSln(*_face_info);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-      auto grad_v = _v_var->adGradSln(*_face_info);
-      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_v(1))
-                                    + Utility::pow<2>(grad_v(0)+grad_u(1));
-      if (_dim >= 3)
-        {
-          auto grad_w = _w_var->adGradSln(*_face_info);
-          symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2))
-                                        + Utility::pow<2>(grad_u(2) + grad_w(0))
-                                        + Utility::pow<2>(grad_v(2) + grad_w(1));
-        }
+    auto grad_v = _v_var->adGradSln(*_face_info);
+    symmetric_strain_tensor_norm +=
+        2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
+    if (_dim >= 3)
+    {
+      auto grad_w = _w_var->adGradSln(*_face_info);
+      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
+                                      Utility::pow<2>(grad_u(2) + grad_w(0)) +
+                                      Utility::pow<2>(grad_v(2) + grad_w(1));
+    }
   }
 
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
@@ -102,7 +102,7 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
               true);
 
   // Compute the eddy diffusivitiy
-  //ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
+  // ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
 
   // Compute the dot product of the strain rate tensor and the normal vector
