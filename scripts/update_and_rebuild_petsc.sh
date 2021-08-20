@@ -12,6 +12,7 @@ function exitIfExitCode() {
     fi
 }
 
+
 PFX_STR=''
 # Set go_fast flag if "--fast" is found in command line args.
 for i in "$@"

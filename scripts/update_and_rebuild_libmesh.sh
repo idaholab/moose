@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 DIAGNOSTIC_LOG="libmesh_diagnostic.log"
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Set go_fast flag if "--fast" is found in command line args.
