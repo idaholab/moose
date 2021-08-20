@@ -40,10 +40,10 @@ ReporterPointSource::validParams()
 ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
-    _values(getReporterValue<std::vector<Real>>("value_name")),
-    _x_coord(getReporterValue<std::vector<Real>>("x_coord_name")),
-    _y_coord(getReporterValue<std::vector<Real>>("y_coord_name")),
-    _z_coord(getReporterValue<std::vector<Real>>("z_coord_name"))
+    _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
+    _x_coord(getReporterValue<std::vector<Real>>("x_coord_name", REPORTER_MODE_REPLICATED)),
+    _y_coord(getReporterValue<std::vector<Real>>("y_coord_name", REPORTER_MODE_REPLICATED)),
+    _z_coord(getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_REPLICATED))
 {
 }
 
