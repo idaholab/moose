@@ -185,14 +185,14 @@ PerfGraph::addToExecutionList(const PerfID id,
 
   // All of the above memory operations will be seen by the
   // printing thread before the printing thread sees this new value
-  //
-  // Note fetch_add is a _post_-increment operation.  The +1 here is to add to the previous value
-  // so we can get the next value.
-  auto next_execution_list_end = _execution_list_end.fetch_add(1, std::memory_order_relaxed) + 1;
+
+  auto next_execution_list_end = _execution_list_end + 1;
 
   // Are we at the end of our circular buffer?
   if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
-    _execution_list_end.store(0, std::memory_order_relaxed);
+    next_execution_list_end = 0;
+
+  _execution_list_end.store(next_execution_list_end, std::memory_order_relaxed);
 }
 
 void

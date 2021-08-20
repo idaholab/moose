@@ -237,6 +237,8 @@ PerfGraphLivePrint::iterateThroughExecutionList()
     }
     else // This means it's finished need to see if we need to print it
     {
+      mooseAssert(_stack_level, "Popping beyond the beginning of the stack!");
+
       // Get the beginning information for this section... it is the thing currently on the top of
       // the stack
       auto & section_increment_start = _print_thread_stack[_stack_level - 1];
