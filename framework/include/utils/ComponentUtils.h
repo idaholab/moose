@@ -7,60 +7,74 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComponentUtils.h"
+#pragma once
 
-namespace ComponentUtils
+#include "MooseTypes.h"
+
+class InputParameters;
+
+template <typename T>
+class ComponentUtils;
+
+template <>
+class ComponentUtils<Real>
 {
+public:
+  static InputParameters validParams();
 
-ComponentReal::ComponentReal(const & InputParameters params) {}
-Real
-ComponentReal::getComponent(const Real & v)
+protected:
+  ComponentUtils(const InputParameters & params);
+  Real getComponent(const Real & v);
+};
+
+template <>
+class ComponentUtils<RealVectorValue> : public ComponentUtils<Real>
 {
-  return v;
-}
+public:
+  static InputParameters validParams();
 
-ComponentRealVectorValue::ComponentRealVectorValue(const & InputParameters params)
-  : ComponentReal(params), _component_i(params.getParam<unsigned int>("i"))
+protected:
+  ComponentUtils(const InputParameters & params);
+  Real getComponent(const RealVectorValue & v);
+
+  unsigned int _component_i;
+};
+
+template <>
+class ComponentUtils<RankTwoTensor> : public ComponentUtils<RealVectorValue>
 {
-}
+public:
+  static InputParameters validParams();
 
-Real
-ComponentRealVectorValue::getComponent(const Real & v)
+protected:
+  ComponentUtils(const InputParameters & params);
+  Real getComponent(const RankTwoTensor & v);
+
+  unsigned int _component_j;
+};
+
+template <>
+class ComponentUtils<RankThreeTensor> : public ComponentUtils<RankTwoTensor>
 {
-  return v(_component_i);
-}
+public:
+  static InputParameters validParams();
 
-ComponentRankTwoTensor::ComponentRankTwoTensor(const & InputParameters params)
-  : ComponentRealVectorValue(params), _component_j(params.getParam<unsigned int>("j"))
+protected:
+  ComponentUtils(const InputParameters & params);
+  Real getComponent(const RankThreeTensor & v);
+
+  unsigned int _component_k;
+};
+
+template <>
+class ComponentUtils<RankFourTensor> : public ComponentUtils<RankThreeTensor>
 {
-}
+public:
+  static InputParameters validParams();
 
-Real
-ComponentRankTwoTensor::getComponent(const RankTwoTensor & v)
-{
-  return v(_component_i, _component_j);
-}
+protected:
+  ComponentUtils(const InputParameters & params);
+  Real getComponent(const RankFourTensor & v);
 
-ComponentRankThreeTensor::ComponentRankThreeTensor(const & InputParameters params)
-  : ComponentRankTwoTensor(params), _component_k(params.getParam<unsigned int>("k"))
-{
-}
-
-Real
-ComponentRankThreeTensor::getComponent(const RankThreeTensor & v)
-{
-  return v(_component_i, _component_j, _component_k);
-}
-
-ComponentRankFourTensor::ComponentRankFourTensor(const & InputParameters params)
-  : ComponentRankThreeTensor(params), _component_l(params.getParam<unsigned int>("l"))
-{
-}
-
-Real
-ComponentRankFourTensor::getComponent(const ComponentRankFourTensor & v)
-{
-  return v(_component_i, _component_j, _component_k, _component_l);
-}
-
-} // namespace ComponentUtils
+  unsigned int _component_l;
+};

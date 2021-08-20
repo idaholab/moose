@@ -7,61 +7,100 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "ComponentUtils.h"
+#include "InputParameters.h"
+#include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
+#include "RankFourTensor.h"
 
-template <typename T>
-struct ComponentHelper;
+#include "libmesh/vector_value.h"
 
-template <>
-struct ComponentHelper<Real>
+InputParameters
+ComponentUtils<Real>::validParams()
 {
-  typedef ComponentUtils::ComponentReal type;
-};
+  return emptyInputParameters();
+}
 
-namespace ComponentUtils
+ComponentUtils<Real>::ComponentUtils(const InputParameters &) {}
+
+Real
+ComponentUtils<Real>::getComponent(const Real & v)
 {
+  return v;
+}
 
-class ComponentReal
+InputParameters
+ComponentUtils<RealVectorValue>::validParams()
 {
-protected:
-  ComponentReal(const & InputParameters params);
-  getComponent(const Real & v);
-};
+  auto params = ComponentUtils<Real>::validParams();
+  params.addRequiredRangeCheckedParam<unsigned int>("i", "i<3", "The first component to extract");
+  return params;
+}
 
-class ComponentRealVectorValue : public ComponentReal
+ComponentUtils<RealVectorValue>::ComponentUtils(const InputParameters & params)
+  : ComponentUtils<Real>(params), _component_i(params.get<unsigned int>("i"))
 {
-protected:
-  ComponentRealVectorValue(const & InputParameters params);
-  Real getComponent(const Real & v);
+}
 
-  unsigned int _component_i;
-};
-
-class ComponentRankTwoTensor : public ComponentRealVectorValue
+Real
+ComponentUtils<RealVectorValue>::getComponent(const RealVectorValue & v)
 {
-protected:
-  ComponentRankTwoTensor(const & InputParameters params);
-  Real getComponent(const RankTwoTensor & v);
+  return v(_component_i);
+}
 
-  unsigned int _component_j;
-};
-
-class ComponentRankThreeTensor : public ComponentRankTwoTensor
+InputParameters
+ComponentUtils<RankTwoTensor>::validParams()
 {
-protected:
-  ComponentRankThreeTensor(const & InputParameters params);
-  Real getComponent(const RankThreeTensor & v);
+  auto params = ComponentUtils<RealVectorValue>::validParams();
+  params.addRequiredRangeCheckedParam<unsigned int>("j", "j<3", "The second component to extract");
+  return params;
+}
 
-  unsigned int _component_k;
-};
-
-class ComponentRankFourTensor : public ComponentRankThreeTensor
+ComponentUtils<RankTwoTensor>::ComponentUtils(const InputParameters & params)
+  : ComponentUtils<RealVectorValue>(params), _component_j(params.get<unsigned int>("j"))
 {
-protected:
-  ComponentRankFourTensor(const & InputParameters params);
-  Real getComponent(const ComponentRankFourTensor & v);
+}
 
-  unsigned int _component_l;
-};
+Real
+ComponentUtils<RankTwoTensor>::getComponent(const RankTwoTensor & v)
+{
+  return v(_component_i, _component_j);
+}
 
-} // namespace ComponentUtils
+InputParameters
+ComponentUtils<RankThreeTensor>::validParams()
+{
+  auto params = ComponentUtils<RankTwoTensor>::validParams();
+  params.addRequiredRangeCheckedParam<unsigned int>("k", "k<3", "The third component to extract");
+  return params;
+}
+
+ComponentUtils<RankThreeTensor>::ComponentUtils(const InputParameters & params)
+  : ComponentUtils<RankTwoTensor>(params), _component_k(params.get<unsigned int>("k"))
+{
+}
+
+Real
+ComponentUtils<RankThreeTensor>::getComponent(const RankThreeTensor & v)
+{
+  return v(_component_i, _component_j, _component_k);
+}
+
+InputParameters
+ComponentUtils<RankFourTensor>::validParams()
+{
+  auto params = ComponentUtils<RankThreeTensor>::validParams();
+  params.addRequiredRangeCheckedParam<unsigned int>("l", "l<3", "The fourth component to extract");
+  return params;
+}
+
+ComponentUtils<RankFourTensor>::ComponentUtils(const InputParameters & params)
+  : ComponentUtils<RankThreeTensor>(params), _component_l(params.get<unsigned int>("l"))
+{
+}
+
+Real
+ComponentUtils<RankFourTensor>::getComponent(const RankFourTensor & v)
+{
+  return v(_component_i, _component_j, _component_k, _component_l);
+}
