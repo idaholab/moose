@@ -1,9 +1,18 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #-----------------------------------------------------------------------------#
 # This Dockerfile builds MPICH, PETSc, Libmesh, and finally MOOSE in a way that
 # is designed to take advantage of Docker's build caching.  Nominally, one
 # would clone MOOSE, then run the build scripts.  This approach would result in
 # unnecessary rebuilding of upstream dependencies due to changes that only
-# involve MOOSE, leading to unneccessary, redundant use of computating
+# involve MOOSE, leading to unneccessary, redundant use of computing
 # resources, bandwidth, and storage.
 #
 # To build a MOOSE image, there is one optional argument and two required
