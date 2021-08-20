@@ -1,0 +1,14 @@
+[Tests]
+  design = 'Mesh/index.md'
+
+  [./square]
+    type = 'Exodiff'
+    input = '3d_diffusion.i'
+    cli_args = '-r 1 Mesh/skip_deletion_repartition_after_refine=true Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=3'
+    exodiff = '3d_diffusion_out.e.3.0	3d_diffusion_out.e.3.1	3d_diffusion_out.e.3.2'
+    min_parallel = 3
+    max_parallel = 3
+    issues = '#18571'
+    requirement = 'The system shall support avoiding repartitioning the mesh and deleting remote elements after uniform refinements'
+  [../]
+[]

@@ -268,6 +268,20 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
   MeshRefinement mesh_refinement(*mesh);
   if (level == libMesh::invalid_uint)
     level = mesh->uniformRefineLevel();
+
+  // Skip deletion and repartition will make uniform refinements will run more
+  // efficiently, but at the same time, there might be extra ghosting elements.
+  // The number of layers of additional ghosting elements depends on the number
+  // of uniform refinement levels. This should happen only when you have a "fine enough"
+  // coarse mesh and want to refine the mesh by a few levels. Otherwise, it might
+  // introduce an unbalanced workload and too large ghosting domain.
+  if (mesh->skipDeletionRepartitionAfterRefine())
+  {
+    mesh->getMesh().skip_partitioning(true);
+    mesh->getMesh().allow_remote_element_removal(false);
+    mesh->needsRemoteElemDeletion(false);
+  }
+
   mesh_refinement.uniformly_refine(level);
 }
 
