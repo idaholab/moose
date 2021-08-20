@@ -131,7 +131,7 @@ ADReal Grashof(ADReal beta,
                ADReal D_h,
                ADReal rho_liquid,
                ADReal mu_liquid,
-               ADReal gravity_magnitude);
+               Real gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)
