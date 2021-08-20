@@ -98,7 +98,6 @@ ComputeMortarFunctor::operator()()
 
     // There may be no contribution from the primary side if it is not "in contact".
     bool has_secondary = msinfo.secondary_elem ? true : false;
-    _has_primary = msinfo.hasPrimary();
 
     if (!has_secondary)
       mooseError("Error, mortar segment has no secondary element associated with it!");
@@ -126,41 +125,20 @@ ComputeMortarFunctor::operator()()
     // Get secondary face elem volume to non-dimensionalize Tolerance
     Real secondary_volume = secondary_face_elem->volume();
 
-    // TODO: make 1e-8 a tolerance, other tolerance was too small for
-    // non-dimensionalized tolerancing
-    if (elem_volume / secondary_volume < 1e-8)
+    if (elem_volume / secondary_volume < TOLERANCE)
       continue;
 
     // These only get initialized if there is a primary Elem associated to this segment.
     const Elem * primary_ip = libmesh_nullptr;
     unsigned int primary_side_id = libMesh::invalid_uint;
 
-    if (_has_primary)
-    {
-      // Set the primary interior parent and side ids.
-      primary_ip = msinfo.primary_elem->interior_parent();
-      primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
-    }
+    // Set the primary interior parent and side ids.
+    primary_ip = msinfo.primary_elem->interior_parent();
+    primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
 
     // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
     // the secondary face!)
-    // fudge_factor is a convenient way of handling secondary elements with only partial overlap
-    // Instead of adding fractional mortar segment elements we add the full element and fractionally
-    // weight the quadrature points
-    if (!_has_primary && msinfo.fudge_factor < 1.0)
-    {
-      // Get quadrature points and weights
-      const std::vector<Point> pts = _qrule_msm->get_points();
-      const std::vector<Real> wts = _qrule_msm->get_weights();
-
-      // Modify weights by fudge factor
-      std::vector<Real> new_wts(_qrule_msm->n_points());
-      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
-        new_wts[qp] = msinfo.fudge_factor * wts[qp];
-      _subproblem.reinitMortarElem(msm_elem, &pts, &new_wts);
-    }
-    else
-      _subproblem.reinitMortarElem(msm_elem);
+    _subproblem.reinitMortarElem(msm_elem);
 
     // Compute custom integration points for the secondary side
     custom_xi1_pts.resize(_qrule_msm->n_points());
@@ -194,41 +172,38 @@ ComputeMortarFunctor::operator()()
                                   TOLERANCE,
                                   &custom_xi1_pts);
 
-    if (_has_primary)
+    //  Compute custom integration points for the primary side
+    custom_xi2_pts.resize(_qrule_msm->n_points());
+
+    if (msm_elem->dim() == 1)
     {
-      //  Compute custom integration points for the primary side
-      custom_xi2_pts.resize(_qrule_msm->n_points());
-
-      if (msm_elem->dim() == 1)
+      for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
       {
-        for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
-        {
-          Real eta = _qrule_msm->qp(qp)(0);
-          Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
-          custom_xi2_pts[qp] = xi2_eta;
-        }
+        Real eta = _qrule_msm->qp(qp)(0);
+        Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
+        custom_xi2_pts[qp] = xi2_eta;
       }
-      else
-        projectQPoints3d(msm_elem, msinfo.primary_elem, primary_sub_elem_ind, custom_xi2_pts);
-
-      const Elem * reinit_primary_elem = primary_ip;
-
-      // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
-      // calling _fe_problem.reinitElemFaceRef
-      if (_displaced)
-        reinit_primary_elem = _fe_problem.mesh().elemPtr(reinit_primary_elem->id());
-
-      // reinit the variables/residuals/jacobians on the primary interior
-      _fe_problem.reinitNeighborFaceRef(
-          reinit_primary_elem, primary_side_id, _primary_boundary_id, TOLERANCE, &custom_xi2_pts);
-
-      // reinit neighbor materials, but be careful not to execute stateful materials since
-      // conceptually they don't make sense with mortar (they're not interpolary)
-      _fe_problem.reinitMaterialsNeighbor(primary_ip->subdomain_id(),
-                                          /*tid=*/0,
-                                          /*swap_stateful=*/false,
-                                          /*execute_stateful=*/false);
     }
+    else
+      projectQPoints3d(msm_elem, msinfo.primary_elem, primary_sub_elem_ind, custom_xi2_pts);
+
+    const Elem * reinit_primary_elem = primary_ip;
+
+    // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
+    // calling _fe_problem.reinitElemFaceRef
+    if (_displaced)
+      reinit_primary_elem = _fe_problem.mesh().elemPtr(reinit_primary_elem->id());
+
+    // reinit the variables/residuals/jacobians on the primary interior
+    _fe_problem.reinitNeighborFaceRef(
+        reinit_primary_elem, primary_side_id, _primary_boundary_id, TOLERANCE, &custom_xi2_pts);
+
+    // reinit neighbor materials, but be careful not to execute stateful materials since
+    // conceptually they don't make sense with mortar (they're not interpolary)
+    _fe_problem.reinitMaterialsNeighbor(primary_ip->subdomain_id(),
+                                        /*tid=*/0,
+                                        /*swap_stateful=*/false,
+                                        /*execute_stateful=*/false);
 
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
     // the secondary face. This must be done last after the dof indices have been prepared for the
@@ -238,8 +213,7 @@ ComputeMortarFunctor::operator()()
     // All this does currently is sets the neighbor/primary lower dimensional elem in Assembly and
     // computes its volume for potential use in the MortarConstraints. Solution continuity
     // stabilization for example relies on being able to access the volume
-    if (_has_primary)
-      _subproblem.reinitNeighborLowerDElem(msinfo.primary_elem);
+    _subproblem.reinitNeighborLowerDElem(msinfo.primary_elem);
 
     // reinit higher-dimensional secondary face/boundary materials. Do this after we reinit lower-d
     // variables in case we want to pull the lower-d variable values into the secondary
@@ -258,7 +232,7 @@ ComputeMortarFunctor::operator()()
       for (auto * const mc : _mortar_constraints)
       {
         mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
-        mc->computeResidual(_has_primary);
+        mc->computeResidual();
       }
 
       _assembly.cacheResidual();
@@ -273,7 +247,7 @@ ComputeMortarFunctor::operator()()
       for (auto * const mc : _mortar_constraints)
       {
         mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
-        mc->computeJacobian(_has_primary);
+        mc->computeJacobian();
       }
 
       _assembly.cacheJacobianMortar();
@@ -285,7 +259,10 @@ ComputeMortarFunctor::operator()()
 
   // Call any post operations for our mortar constraints
   for (auto * const mc : _mortar_constraints)
+  {
+    mc->zeroInactiveLMDofs(_amg.getInactiveLMNodes(), _amg.getInactiveLMElems());
     mc->post();
+  }
 
   // Make sure any remaining cached residuals/Jacobians get added
   if (!_fe_problem.currentlyComputingJacobian())
@@ -442,7 +419,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           F(1).derivatives()[1], F(2).derivatives()[0], F(2).derivatives()[1];
       RealEigenVector f(3);
       f << F(0).value(), F(1).value(), F(2).value();
-      RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
+      const RealEigenVector dxi = -J.colPivHouseholderQr().solve(f);
 
       xi(0) += dxi(0);
       xi(1) += dxi(1);
@@ -452,22 +429,40 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     {
       // Transfer quadrature point from sub-element to element and store
       q_pts[qp] = transform_qp(xi(0).value(), xi(1).value());
+
+      // The following checks if quadrature point falls in correct domain.
+      // On small mortar segment elements with very distorted elements this can fail, instead of erroring
+      // simply truncate quadrature point, these points typically have very small contributions to integrals
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
         if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 || q_pts[qp](0) + q_pts[qp](1) > 1)
-          mooseError("Quadrature point: ", q_pts[qp], " out of bounds");
+        {
+          mooseWarning("Quadrature point: ", q_pts[qp], " out of bounds, truncating.");
+          q_pts[qp](0) = std::max(0., q_pts[qp](0));
+          q_pts[qp](1) = std::max(0., q_pts[qp](1));
+          if (q_pts[qp](0) + q_pts[qp](1) > 1)
+            q_pts[qp](0) = 1 - q_pts[qp](1);
+        }
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
       {
         if (q_pts[qp](0) < -1 || q_pts[qp](0) > 1 || q_pts[qp](1) < -1 || q_pts[qp](1) > 1)
-          mooseError("Quadrature point: ", q_pts[qp], " out of bounds");
+        {
+          mooseWarning("Quadrature point: ", q_pts[qp], " out of bounds, truncating");
+          q_pts[qp](0) = std::max(0., q_pts[qp](0));
+          q_pts[qp](0) = std::min(1., q_pts[qp](0));
+          q_pts[qp](1) = std::max(0., q_pts[qp](1));
+          q_pts[qp](1) = std::min(1., q_pts[qp](1));
+        }
       }
     }
     else
+    {
       mooseError("Newton iteration for mortar quadrature mapping msm_elem: ",
                  msm_elem->id(),
                  " to elem: ",
                  primal_elem->id(),
-                 " didn't converge");
+                 " didn't converge. MSM element volume: ", msm_elem->volume());
+    }
   }
 }

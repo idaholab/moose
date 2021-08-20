@@ -85,7 +85,4 @@ private:
 
   /// The primary boundary id needed for reiniting the MOOSE systems on the neighbor (primary) face
   BoundaryID _primary_boundary_id;
-
-  /// boolean flag for holding whether our current mortar segment projects onto a primary element
-  bool _has_primary;
 };
