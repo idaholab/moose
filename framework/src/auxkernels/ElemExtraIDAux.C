@@ -31,5 +31,5 @@ ElemExtraIDAux::ElemExtraIDAux(const InputParameters & parameters)
 Real
 ElemExtraIDAux::computeValue()
 {
-  return _id;
+  return (_id == DofObject::invalid_id) ? -1.0 : _id;
 }
