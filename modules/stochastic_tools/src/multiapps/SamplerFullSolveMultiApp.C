@@ -48,10 +48,21 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _local_batch_app_index(0),
     _solved_once(false)
 {
+  if (getParam<unsigned int>("min_procs_per_app") !=
+          _sampler.getParam<unsigned int>("min_procs_per_row") ||
+      getParam<unsigned int>("max_procs_per_app") !=
+          _sampler.getParam<unsigned int>("max_procs_per_row"))
+    paramError("sampler",
+               "Sampler and multiapp communicator configuration inconsistent. Please ensure that "
+               "'MultiApps/",
+               name(),
+               "/min(max)_procs_per_app' and 'Samplers/",
+               _sampler.name(),
+               "/min(max)_procs_per_row' are the same.");
+
   init(_sampler.getNumberOfRows(),
-       _mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-           _mode == StochasticTools::MultiAppMode::BATCH_RESTORE);
-  checkRankConfig();
+       _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+                              _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
   _number_of_sampler_rows = _sampler.getNumberOfRows();
 }
 
@@ -62,9 +73,8 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
   if (num_rows != _number_of_sampler_rows)
   {
     init(num_rows,
-         _mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-             _mode == StochasticTools::MultiAppMode::BATCH_RESTORE);
-    checkRankConfig();
+         _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+                                _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
     _number_of_sampler_rows = num_rows;
     _row_data.clear();
   }
@@ -169,26 +179,6 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->finalizeFromMultiapp();
 
   return last_solve_converged;
-}
-
-void
-SamplerFullSolveMultiApp::checkRankConfig()
-{
-  // Logic:
-  //  - If the processor is not root, then the sampler shouldn't have rows
-  //  - Check number of sims versus number of local rows
-  //  - Check first sim versus first row
-  if ((!_rank_config.is_first_local_rank && _sampler.getNumberOfLocalRows() > 0) ||
-      (_rank_config.is_first_local_rank &&
-       _rank_config.num_local_sims != _sampler.getNumberOfLocalRows()) ||
-      (_rank_config.first_local_sim_index != _sampler.getLocalRowBegin()))
-    paramError("sampler",
-               "Sampler and multiapp communicator configuration inconsistent. Please ensure that "
-               "'MultiApps/",
-               name(),
-               "/min_procs_per_app' and 'Samplers/",
-               _sampler.name(),
-               "/min_procs_per_row' are the same.");
 }
 
 std::vector<std::shared_ptr<StochasticToolsTransfer>>

@@ -367,7 +367,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  LocalRankConfig buildComm(bool batch_mode);
+  void buildComm();
 
   /**
    * Map a global App number to the local number.
@@ -392,6 +392,11 @@ protected:
    * Build communicators and reserve backups.
    */
   void init(unsigned int num_apps, bool batch_mode = false);
+
+  /**
+   * Same as other init method, except defining a custom rank configuration
+   */
+  void init(unsigned int num_apps, const LocalRankConfig & config);
 
   /**
    * Create the provided number of apps.

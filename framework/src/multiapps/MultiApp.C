@@ -248,10 +248,19 @@ MultiApp::MultiApp(const InputParameters & parameters)
 void
 MultiApp::init(unsigned int num_apps, bool batch_mode)
 {
+  auto config = rankConfig(
+      processor_id(), n_processors(), num_apps, _min_procs_per_app, _max_procs_per_app, batch_mode);
+  init(num_apps, config);
+}
+
+void
+MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
+{
   TIME_SECTION("init", 3, "Initializing MultiApp");
 
   _total_num_apps = num_apps;
-  _rank_config = buildComm(batch_mode);
+  _rank_config = config;
+  buildComm();
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
@@ -964,8 +973,8 @@ rankConfig(dof_id_type rank,
   return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank};
 }
 
-LocalRankConfig
-MultiApp::buildComm(bool batch_mode)
+void
+MultiApp::buildComm()
 {
   int ierr;
 
@@ -986,22 +995,16 @@ MultiApp::buildComm(bool batch_mode)
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
-  auto config = rankConfig(_orig_rank,
-                           _orig_num_procs,
-                           _total_num_apps,
-                           _min_procs_per_app,
-                           _max_procs_per_app,
-                           batch_mode);
-  _my_num_apps = config.num_local_apps;
-  _first_local_app = config.first_local_app_index;
+  _my_num_apps = _rank_config.num_local_apps;
+  _first_local_app = _rank_config.first_local_app_index;
 
-  _has_an_app = config.num_local_apps > 0;
-  if (config.first_local_app_index >= _total_num_apps)
+  _has_an_app = _rank_config.num_local_apps > 0;
+  if (_rank_config.first_local_app_index >= _total_num_apps)
     mooseError("Internal error, a processor has an undefined app.");
 
   if (_has_an_app)
   {
-    _communicator.split(config.first_local_app_index, rank, _my_communicator);
+    _communicator.split(_rank_config.first_local_app_index, rank, _my_communicator);
     ierr = MPI_Comm_rank(_my_comm, &_my_rank);
     mooseCheckMPIErr(ierr);
   }
@@ -1010,7 +1013,6 @@ MultiApp::buildComm(bool batch_mode)
     _communicator.split(MPI_UNDEFINED, rank, _my_communicator);
     _my_rank = 0;
   }
-  return config;
 }
 
 unsigned int

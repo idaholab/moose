@@ -88,7 +88,7 @@
       input = main.i
       cli_args = 'MultiApps/sub/min_procs_per_app=2 Samplers/sample/min_procs_per_row=1'
       allow_test_objects = true
-      expect_err = "Sampler and multiapp communicator configuration inconsistent. Please ensure that 'MultiApps/sub/min_procs_per_app' and 'Samplers/sample/min_procs_per_row' are the same."
+      expect_err = "Sampler and multiapp communicator configuration inconsistent. Please ensure that 'MultiApps/sub/min\(max\)_procs_per_app' and 'Samplers/sample/min\(max\)_procs_per_row' are the same."
       min_parallel = 2
       detail = 'error when partitionings do not match;'
     []
@@ -156,7 +156,7 @@
       input = main_transient.i
       cli_args = 'MultiApps/sub/min_procs_per_app=2 Samplers/sample/min_procs_per_row=1'
       allow_test_objects = true
-      expect_err = "Sampler and multiapp communicator configuration inconsistent. Please ensure that 'MultiApps/sub/min_procs_per_app' and 'Samplers/sample/min_procs_per_row' are the same."
+      expect_err = "Sampler and multiapp communicator configuration inconsistent. Please ensure that 'MultiApps/sub/min\(max\)_procs_per_app' and 'Samplers/sample/min\(max\)_procs_per_row' are the same."
       min_parallel = 2
       detail = 'error when partitionings do not match;'
     []
