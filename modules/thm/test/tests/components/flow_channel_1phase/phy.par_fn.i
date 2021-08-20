@@ -86,7 +86,7 @@ D_h = 5
 
 [Postprocessors]
   [D_h]
-    type = ADElementIntegralMaterialProperty
+    type = ElementIntegralMaterialProperty
     mat_prop = D_h
     block = pipe
   []

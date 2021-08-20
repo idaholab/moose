@@ -41,7 +41,7 @@
     value = 5
   []
   [D_h_mat]
-    type = ADConstantMaterial
+    type = ConstantMaterial
     property_name = D_h
     value = 0.002
   []

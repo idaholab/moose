@@ -19,7 +19,7 @@ ADOneD3EqnMomentumFriction::validParams()
 ADOneD3EqnMomentumFriction::ADOneD3EqnMomentumFriction(const InputParameters & parameters)
   : ADKernel(parameters),
     _A(adCoupledValue("A")),
-    _D_h(getADMaterialProperty<Real>("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
     _rho(getADMaterialProperty<Real>("rho")),
     _vel(getADMaterialProperty<Real>("vel")),
     _f_D(getADMaterialProperty<Real>("f_D"))

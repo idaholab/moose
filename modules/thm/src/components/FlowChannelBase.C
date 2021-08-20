@@ -308,7 +308,7 @@ FlowChannelBase::setupDh()
 
   if (_has_Dh)
   {
-    const std::string class_name = "ADGenericFunctionMaterial";
+    const std::string class_name = "GenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {FlowModel::HYDRAULIC_DIAMETER};
@@ -319,7 +319,7 @@ FlowChannelBase::setupDh()
   }
   else
   {
-    const std::string class_name = "ADHydraulicDiameterCircularMaterial";
+    const std::string class_name = "HydraulicDiameterCircularMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
