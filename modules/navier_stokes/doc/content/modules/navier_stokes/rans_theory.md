@@ -258,12 +258,13 @@ This model is useful for analysis of simple geometries, but it is inconvenient
 to apply for general meshes where the walls may take an arbitrary shape.  This
 is because there is no clear way to define directions parallel and perpendicular
 to the wall in the general case (e.g. consider a mesh cell with walls on two
-sides).  Consequently, a different model is adopted here which uses a normalized
-isotropic velocity gradient,
+sides).  Consequently, we use Smagorinsky's velocity scale:
 \begin{equation}
-  \epsilon_m = -l_m^2 \sqrt{ \nabla v_x \cdot \nabla v_x
-  + \nabla v_y \cdot \nabla v_y + \nabla v_z \cdot \nabla v_z}
+  \epsilon_m = -l_m^2 |2 S_{ij}:S_{ij}|
 \end{equation}
+
+where $S_{ij} = 0.5 \cdot \left( \frac{\partial u_i}{\partial x_j} +
+  \frac{\partial u_j}{\partial x_i} \right)$
 
 This momentum diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md)
 kernel. The corresponding model for diffusivity of passive scalars (like energy)
@@ -276,8 +277,23 @@ assume the mixing length is proportional to the distance from the nearest wall,
   l_m = k d
 \end{equation}
 where $d$ is the wall-distance and $k$ is known as the von Kármán constant.  A
-von Kármán of $k = 0.42$ is often used for the near-wall region
+von Kármán of $k = 0.41$ is often used for the near-wall region
 [!citep](todreas2011_ch10).
+
+A modification to this model was done by [!citep](escudier1966), who claims
+that the mixing length grows linearly in the boundary layer region and then it
+takes a constant value. This prevents an excessive growth of Prandtl's original
+mixing length model. The equations for the mixing length are then
+
+\begin{equation}
+  l_m = \kappa y_d \quad if \: \kappa y_d < \kappa_0 \delta \\
+  l_m = \kappa_0 \delta \quad if \: \kappa y_d \geq \kappa_0 \delta
+\end{equation}
+
+where $\kappa = 0.41$ is the Von Karman constant, $\kappa_0 = 0.09$ as in
+Escudier's model and $\delta$ has length units and represents the thickness of
+the velocity boundary layer. Note that for large values of $\delta$, the mixing
+length in Prandtl's original model is obtained.
 
 This mixing length is implemented in the [WallDistanceMixingLengthAux](source/auxkernels/WallDistanceMixingLengthAux.md)
 auxiliary kernel. Note that the wall-distance calculation can be expensive for
