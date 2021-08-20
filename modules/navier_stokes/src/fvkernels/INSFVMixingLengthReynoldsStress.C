@@ -101,8 +101,7 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
               *_face_info,
               true);
 
-  // Compute the eddy diffusivitiy
-  // ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
+  // Compute the eddy diffusivity
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
 
   // Compute the dot product of the strain rate tensor and the normal vector

@@ -10,7 +10,8 @@
 #pragma once
 
 #include "ADMaterial.h"
-
+// Class to compute the total viscosity which considers molecular and
+// mixing length model turbulent viscosity.
 class MixingLengthTurbulentViscosityMaterial : public ADMaterial
 {
 public:

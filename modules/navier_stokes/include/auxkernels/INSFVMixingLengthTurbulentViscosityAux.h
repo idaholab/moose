@@ -11,7 +11,7 @@
 
 #include "AuxKernel.h"
 
-// Forward declare variable class
+// Computes the value of the eddy viscosity for the mixing length model.
 class INSFVVelocityVariable;
 
 class INSFVMixingLengthTurbulentViscosityAux : public AuxKernel

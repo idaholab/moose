@@ -16,11 +16,12 @@ WallDistanceMixingLengthAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the turbulent mixing length by assuming that it is "
-                             "proportional to the distance from the nearest wall.");
+                             "proportional to the distance from the nearest wall. The mixing
+                             length is capped at a distance proportional to delta");
   params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
-  params.addParam<Real>("von_karman_const", 0.4, "");
-  params.addParam<Real>("von_karman_const_0", 0.09, "");
-  params.addParam<Real>("delta", 1e9, "");
+  params.addParam<Real>("von_karman_const", 0.41, ""); //Von Karman constant
+  params.addParam<Real>("von_karman_const_0", 0.09, "");//Escudier' model parameter
+  params.addParam<Real>("delta", 1e9, ""); //Tunable parameter related to the thickness of the boundary layer
   return params;
 }
 

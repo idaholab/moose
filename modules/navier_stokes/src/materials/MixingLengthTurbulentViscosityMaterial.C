@@ -15,8 +15,9 @@ InputParameters
 MixingLengthTurbulentViscosityMaterial::validParams()
 {
   InputParameters params = ADMaterial::validParams();
-  params.addClassDescription("Computes the material corresponding to the turbulent viscosity"
-                             "for the mixing length model.");
+  params.addClassDescription("Computes the material corresponding to the total viscosity"
+                             "comprising the mixing length model turbulent total_viscosity"
+                             "and the molecular viscosity.");
   params.addRequiredCoupledVar("u", "The x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
