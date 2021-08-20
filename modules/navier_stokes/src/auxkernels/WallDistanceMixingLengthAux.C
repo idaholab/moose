@@ -19,13 +19,17 @@ WallDistanceMixingLengthAux::validParams()
                              "proportional to the distance from the nearest wall.");
   params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
   params.addParam<Real>("von_karman_const", 0.4, "");
+  params.addParam<Real>("von_karman_const_0", 0.09, "");
+  params.addParam<Real>("delta", 1e9, "");
   return params;
 }
 
 WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _von_karman_const(getParam<Real>("von_karman_const"))
+    _von_karman_const(getParam<Real>("von_karman_const")),
+    _von_karman_const_0(getParam<Real>("von_karman_const_0")),
+    _delta(getParam<Real>("delta"))
 {
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
@@ -67,16 +71,13 @@ WallDistanceMixingLengthAux::computeValue()
   return _von_karman_const * std::sqrt(min_sq_dist);
 =======
 
-    // Return the mixing length
-    Real delta = 0.1; //arbitrary boundary layer thickness based on geometry
-    Real _von_karman_const_0 = 0.05;
-    if (std::sqrt(min_sq_dist)/delta <= _von_karman_const_0/_von_karman_const)
+    if (std::sqrt(min_sq_dist)/_delta <= _von_karman_const_0/_von_karman_const)
     {
       return _von_karman_const * std::sqrt(min_sq_dist);
     }
     else
     {
-      return _von_karman_const_0 * delta;
+      return _von_karman_const_0 * _delta;
     }
 >>>>>>> Modifications
 }
