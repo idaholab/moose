@@ -23,16 +23,14 @@ BiLinearMixedModeTraction::validParams()
   params.addRequiredParam<Real>("normal_strength", "Tensile strength in normal direction.");
   params.addRequiredParam<Real>("shear_strength", "Tensile strength in shear direction.");
   params.addRequiredParam<Real>("eta", "The B-K power law parameter.");
-  params.addCoupledVar("normal_strength_scale_factor", "Scale factor for normal strength.");
+  params.addCoupledVar("normal_strength_scale_factor", 1.0, "Scale factor for normal strength.");
   params.addClassDescription("Mixed mode bilinear traction separation law.");
   return params;
 }
 
 BiLinearMixedModeTraction::BiLinearMixedModeTraction(const InputParameters & parameters)
   : CZMComputeLocalTractionTotalBase(parameters),
-    _scale_factor(isCoupled("normal_strength_scale_factor")
-                      ? &coupledValue("normal_strength_scale_factor")
-                      : nullptr),
+    _scale_factor(coupledValue("normal_strength_scale_factor")),
     _stiffness(getParam<Real>("penalty_stiffness")),
     _d(declareProperty<Real>("damage")),
     _d_old(getMaterialPropertyOld<Real>("damage")),
@@ -77,10 +75,7 @@ BiLinearMixedModeTraction::computeTraction()
 {
   _beta_sq = 0.0;
 
-  Real delta_normal0 = _delta_normal0;
-
-  if (_scale_factor != nullptr)
-    delta_normal0 *= (*_scale_factor)[_qp];
+  const Real delta_normal0 = _delta_normal0 * _scale_factor[_qp];
 
   const Real eff_shear_disp = std::sqrt(Utility::pow<2>(_interface_displacement_jump[_qp](1)) +
                                         Utility::pow<2>(_interface_displacement_jump[_qp](2)));

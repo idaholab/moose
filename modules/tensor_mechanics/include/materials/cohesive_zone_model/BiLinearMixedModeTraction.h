@@ -34,7 +34,7 @@ protected:
   RankTwoTensor computeTractionDerivatives();
 
   /// scale factor to vary normal_strength
-  const VariableValue * const _scale_factor;
+  const VariableValue & _scale_factor;
 
   /// penalty elastic stiffness
   const Real _stiffness;
