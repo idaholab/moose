@@ -134,10 +134,7 @@ BiLinearMixedModeTraction::computeTraction()
         (_maximum_mixed_mode_relative_displacement[_qp] *
          (_eff_disp_full_degradation[_qp] - _eff_disp_damage_init[_qp]));
 
-  if (d < 0)
-    d = 0.0;
-  else if (d > 1)
-    d = 1.0;
+  d = MathUtils::clamp(d, 0.0, 1.0);
 
   // viscous regularization
   d = (d + _viscosity * _d_old[_qp] / _dt) / (_viscosity / _dt + 1.0);
