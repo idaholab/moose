@@ -49,7 +49,13 @@ SetupMeshCompleteAction::act()
   {
     // we don't need to run mesh modifiers *again* after they ran already during the mesh
     // splitting process
-    if (_app.isUseSplit())
+    // A uniform refinement is helpful for some instances when using a pre-split mesh.
+    // For example, a 'coarse' mesh might completely resolve geometry (also is large)
+    // but does not have enough resolution for the interior. For this scenario,
+    // we pre-split the coarse mesh, and load the pre-split mesh in parallel,
+    // and then do a few levels of uniform refinements to have a fine mesh that
+    // potentially resolves physics features.
+    if (_app.isUseSplit() && _mesh->skipRefineWhenUseSplit())
       return;
 
     // uniform refinement has been done on master, so skip
