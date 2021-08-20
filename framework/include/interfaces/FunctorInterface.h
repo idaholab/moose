@@ -133,6 +133,17 @@ public:
   T operator()(const unsigned int & qp) const override final;
   T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
 
+protected:
+  /**
+   * Whether to check for multiple definitions of the lambda on a given block. When this is a
+   * ConstantFunctor it means that this was most likely created because the user provided a \p Real
+   * for a \p MaterialPropertyName or variable. We want to allow the user to do this multiple times
+   * in the input file for a given property/variable for a given block. However if this is a
+   * FunctorMaterialProperty<T> then we will certainly want to check for multiple defintions of a
+   * functor property on a given block
+   */
+  virtual bool checkMultipleDefinitions() const = 0;
+
 private:
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
@@ -164,7 +175,14 @@ GenericFunctor<T>::setFunctor(const MooseMesh & mesh,
                               PolymorphicLambda my_lammy)
 {
   auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
-    _elem_functor.emplace(block_id, my_lammy);
+    auto pr = _elem_functor.emplace(block_id, my_lammy);
+    if (checkMultipleDefinitions() && !pr.second)
+      mooseError(
+          "No insertion for the functor property '",
+          _name,
+          "' for block id ",
+          block_id,
+          ". Another producer (e.g. material) must already produce this property on that block.");
     _elem_and_face_functor.emplace(block_id, my_lammy);
   };
 
@@ -231,3 +249,16 @@ GenericFunctor<T>::operator()(const std::pair<Moose::ElementType, unsigned int> 
 {
   return _tqp_functor(tqp);
 }
+
+/**
+ * Class template for creating constants
+ */
+template <typename T>
+class ConstantFunctor : public GenericFunctor<T>
+{
+public:
+  ConstantFunctor(const std::string & name) : GenericFunctor<T>(name) {}
+
+protected:
+  bool checkMultipleDefinitions() const override final { return false; }
+};

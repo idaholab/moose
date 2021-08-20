@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
 template <typename>
 class MooseVariableFV;
@@ -19,7 +19,7 @@ class FunctorMaterialProperty;
 /**
  * A material that couples a variable
  */
-class FVVarFunctorMaterial : public Material
+class FVVarFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
@@ -27,8 +27,6 @@ public:
   FVVarFunctorMaterial(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties() override;
-
   const MooseVariableFV<Real> & _var;
   FunctorMaterialProperty<ADReal> & _functor_prop;
 };

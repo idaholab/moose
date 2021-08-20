@@ -39,12 +39,19 @@ template <typename T>
 class FunctorMaterialProperty : public FunctorPropertyValue, public GenericFunctor<T>
 {
 public:
-  FunctorMaterialProperty(const std::string & name)
-    : FunctorPropertyValue(), GenericFunctor<T>(name)
+  FunctorMaterialProperty(const std::string & name, const bool default_property = false)
+    : FunctorPropertyValue(), GenericFunctor<T>(name), _default_property(default_property)
   {
   }
 
   using typename GenericFunctor<T>::FaceArg;
   using typename GenericFunctor<T>::FunctorType;
   using typename GenericFunctor<T>::FunctorReturnType;
+
+protected:
+  bool checkMultipleDefinitions() const override final { return !_default_property; }
+
+  /// whether this functor material property is a default material property, e.g. one created when a
+  /// user supplied a constant in the input file to a \p MaterialPropertyName parameter
+  const bool _default_property;
 };

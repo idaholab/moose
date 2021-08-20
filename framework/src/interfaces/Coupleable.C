@@ -2181,9 +2181,9 @@ Coupleable::getDefaultFunctor(const std::string & var_name) const
   auto default_value_it = _default_ad_functor.find(var_name);
   if (default_value_it == _default_ad_functor.end())
   {
-    auto value = libmesh_make_unique<GenericFunctor<ADReal>>(var_name);
+    auto value = libmesh_make_unique<ConstantFunctor<ADReal>>(var_name);
     default_value_it = _default_ad_functor.insert(std::make_pair(var_name, std::move(value))).first;
-    auto & functor = static_cast<GenericFunctor<ADReal> &>(*default_value_it->second);
+    auto & functor = static_cast<ConstantFunctor<ADReal> &>(*default_value_it->second);
     const auto default_value = _c_parameters.defaultCoupledValue(var_name);
     functor.setFunctor(_c_fe_problem.mesh(), {Moose::ANY_BLOCK_ID}, [default_value](auto &) {
       return default_value;

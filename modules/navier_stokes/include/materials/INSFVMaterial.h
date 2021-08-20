@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
-class INSFVMaterial : public Material
+class INSFVMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();

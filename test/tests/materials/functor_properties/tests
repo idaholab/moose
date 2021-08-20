@@ -1,0 +1,19 @@
+[Tests]
+  design = FVVarFunctorMaterial.md
+  issues = '#16809'
+  [exo]
+    type = Exodiff
+    ad_indexing_type = 'global'
+    input = 1d_dirichlet.i
+    exodiff = 1d_dirichlet_out.e
+    requirement = 'The system shall be able to create material properties that can be evaluated on-the-fly provided geometric arguments.'
+  []
+  [multiple_definitions]
+    type = RunException
+    expect_err = 'No insertion for the functor property'
+    input = 1d_dirichlet.i
+    prereq = 'exo'
+    requirement = 'The system shall error if multiple definitions are given for a functor material property on a given subdomain.'
+    cli_args = "Materials/active='functor overlapping_functor'"
+  []
+[]

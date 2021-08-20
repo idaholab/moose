@@ -14,7 +14,7 @@ registerMooseObject("MooseTestApp", ADCoupledVelocityMaterial);
 InputParameters
 ADCoupledVelocityMaterial::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = FunctorMaterial::validParams();
   params.addRequiredCoupledVar("vel_x", "the x velocity");
   params.addCoupledVar("vel_y", "the y velocity");
   params.addCoupledVar("vel_z", "the z velocity");
@@ -32,7 +32,7 @@ ADCoupledVelocityMaterial::validParams()
 }
 
 ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & parameters)
-  : Material(parameters),
+  : FunctorMaterial(parameters),
     _velocity(
         declareFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
     _rho_u(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"))),

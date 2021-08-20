@@ -16,7 +16,7 @@ template <bool is_ad>
 InputParameters
 GenericConstantFunctorMaterialTempl<is_ad>::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
       "Declares material properties based on names and values prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
@@ -29,7 +29,7 @@ GenericConstantFunctorMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 GenericConstantFunctorMaterialTempl<is_ad>::GenericConstantFunctorMaterialTempl(
     const InputParameters & parameters)
-  : Material(parameters),
+  : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values"))
 {

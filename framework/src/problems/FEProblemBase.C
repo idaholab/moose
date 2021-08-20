@@ -30,6 +30,7 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
+#include "FunctorMaterial.h"
 #include "ConstantIC.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
@@ -3125,8 +3126,9 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 
     bool discrete = !material->getParam<bool>("compute");
 
-    // If the object is boundary restricted do not create the neighbor and face objects
-    if (material->boundaryRestricted())
+    // If the object is boundary restricted or if it is a functor material we do not create the
+    // neighbor and face objects
+    if (material->boundaryRestricted() || dynamic_cast<FunctorMaterial *>(material.get()))
     {
       _all_materials.addObject(material, tid);
       if (discrete)

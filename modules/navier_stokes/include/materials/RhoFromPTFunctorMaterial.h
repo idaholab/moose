@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
 class SinglePhaseFluidProperties;
 
 /**
  * Computes the speed of sound from other Navier-Stokes material properties
  */
-class RhoFromPTFunctorMaterial : public Material
+class RhoFromPTFunctorMaterial : public FunctorMaterial
 {
 public:
   RhoFromPTFunctorMaterial(const InputParameters & parameters);

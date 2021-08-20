@@ -11,9 +11,7 @@
 
 [Variables]
   [v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 
@@ -54,9 +52,14 @@
 []
 
 [Materials]
+  active = 'functor'
   [functor]
     type = FVVarFunctorMaterial
     var = sink
+  []
+  [overlapping_functor]
+    type = FVVarFunctorMaterial
+    var = v
   []
 []
 

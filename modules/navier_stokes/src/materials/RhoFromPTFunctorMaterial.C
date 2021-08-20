@@ -19,7 +19,7 @@ registerMooseObject("NavierStokesApp", RhoFromPTFunctorMaterial);
 InputParameters
 RhoFromPTFunctorMaterial::validParams()
 {
-  auto params = Material::validParams();
+  auto params = FunctorMaterial::validParams();
   params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
   params.addClassDescription(
       "Computes the density from coupled pressure and temperature variables");
@@ -29,7 +29,7 @@ RhoFromPTFunctorMaterial::validParams()
 }
 
 RhoFromPTFunctorMaterial::RhoFromPTFunctorMaterial(const InputParameters & parameters)
-  : Material(parameters),
+  : FunctorMaterial(parameters),
     _pressure(*getVarHelper<MooseVariableFV<Real>>(NS::pressure, 0)),
     _temperature(*getVarHelper<MooseVariableFV<Real>>(NS::temperature, 0)),
     _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),

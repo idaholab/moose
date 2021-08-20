@@ -108,11 +108,15 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    auto & prop = _mi_subproblem.declareFunctorProperty<Real>(name, _mi_tid);
-    prop.setFunctor(_mi_subproblem.mesh(),
-                    _mi_block_ids,
-                    [real_value](auto /*geom_quantity*/) -> Real { return real_value; });
-    return &prop;
+    _default_functor_real_properties.emplace_back(
+        libmesh_make_unique<FunctorMaterialProperty<Real>>(name, true));
+    auto & default_property = _default_functor_real_properties.back();
+
+    default_property->setFunctor(
+        _mi_subproblem.mesh(), _mi_block_ids, [real_value](auto /*geom_quantity*/) -> Real {
+          return real_value;
+        });
+    return default_property.get();
   }
 
   return nullptr;
@@ -128,11 +132,15 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    auto & prop = _mi_subproblem.declareFunctorProperty<ADReal>(name, _mi_tid);
-    prop.setFunctor(_mi_subproblem.mesh(),
-                    _mi_block_ids,
-                    [real_value](auto /*geom_quantity*/) -> ADReal { return real_value; });
-    return &prop;
+    _default_functor_ad_real_properties.emplace_back(
+        libmesh_make_unique<FunctorMaterialProperty<ADReal>>(name, true));
+    auto & default_property = _default_functor_ad_real_properties.back();
+
+    default_property->setFunctor(
+        _mi_subproblem.mesh(), _mi_block_ids, [real_value](auto /*geom_quantity*/) -> ADReal {
+          return real_value;
+        });
+    return default_property.get();
   }
 
   return nullptr;

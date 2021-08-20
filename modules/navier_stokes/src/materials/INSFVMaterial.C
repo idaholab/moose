@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", INSFVMaterial);
 InputParameters
 INSFVMaterial::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("This is the material class used to compute advected quantities for "
                              "the finite-volume implementation of the Navier-Stokes equations.");
   params.addRequiredCoupledVar("u", "The x-velocity");
@@ -29,7 +29,7 @@ INSFVMaterial::validParams()
 }
 
 INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
-  : Material(parameters),
+  : FunctorMaterial(parameters),
     _u_vel(*getVarHelper<MooseVariableFVReal>("u", 0)),
     _v_vel(isCoupled("v") ? getVarHelper<MooseVariableFVReal>("v", 0) : nullptr),
     _w_vel(isCoupled("w") ? getVarHelper<MooseVariableFVReal>("w", 0) : nullptr),

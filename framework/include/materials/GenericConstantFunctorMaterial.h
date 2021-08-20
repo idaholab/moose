@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
 /**
  * This material automatically declares as material properties whatever is passed to it
@@ -17,7 +17,7 @@
  * for those properties.
  */
 template <bool is_ad>
-class GenericConstantFunctorMaterialTempl : public Material
+class GenericConstantFunctorMaterialTempl : public FunctorMaterial
 {
 public:
   static InputParameters validParams();

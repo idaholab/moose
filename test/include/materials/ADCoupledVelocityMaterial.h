@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
-class ADCoupledVelocityMaterial : public Material
+class ADCoupledVelocityMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();

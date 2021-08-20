@@ -356,6 +356,11 @@ protected:
   std::vector<std::unique_ptr<ADMaterialProperty<RealVectorValue>>>
       _default_ad_real_vector_properties;
 
+  /// Storage vector for FunctorMaterialProperty<Real> default objects
+  std::vector<std::unique_ptr<FunctorMaterialProperty<Real>>> _default_functor_real_properties;
+  /// Storage vector for FunctorMaterialProperty<ADReal> default objects
+  std::vector<std::unique_ptr<FunctorMaterialProperty<ADReal>>> _default_functor_ad_real_properties;
+
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
