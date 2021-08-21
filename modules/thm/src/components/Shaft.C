@@ -10,6 +10,7 @@ Shaft::validParams()
   InputParameters params = Component::validParams();
   params.addParam<Real>("scaling_factor_omega", 1.0, "Scaling factor for omega [-]");
   params.addParam<Real>("initial_speed", "Initial shaft speed");
+  params.addParam<bool>("ad", true, "Use AD version or not");
   params.addRequiredParam<std::vector<std::string>>("connected_components",
                                                     "Names of the connected components");
   params.addClassDescription("Component that connects torque of turbomachinery components");
@@ -90,21 +91,43 @@ Shaft::addMooseObjects()
     uo_names.push_back(scc.getShaftConnectedUserObjectName());
   }
 
+  if (getParam<bool>("ad"))
   {
-    std::string class_name = "ADShaftTimeDerivativeScalarKernel";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = _omega_var_name;
-    params.set<std::vector<UserObjectName>>("uo_names") = {uo_names};
-    _sim.addScalarKernel(class_name, genName(name(), "td"), params);
-  }
+    {
+      std::string class_name = "ADShaftTimeDerivativeScalarKernel";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = _omega_var_name;
+      params.set<std::vector<UserObjectName>>("uo_names") = {uo_names};
+      _sim.addScalarKernel(class_name, genName(name(), "td"), params);
+    }
 
-  for (std::size_t i = 0; i < uo_names.size(); i++)
+    for (std::size_t i = 0; i < uo_names.size(); i++)
+    {
+      std::string class_name = "ADShaftComponentTorqueScalarKernel";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = _omega_var_name;
+      params.set<UserObjectName>("shaft_connected_component_uo") = uo_names[i];
+      _sim.addScalarKernel(class_name, genName(name(), i, "shaft_speed"), params);
+    }
+  }
+  else
   {
-    std::string class_name = "ADShaftComponentTorqueScalarKernel";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = _omega_var_name;
-    params.set<UserObjectName>("shaft_connected_component_uo") = uo_names[i];
-    _sim.addScalarKernel(class_name, genName(name(), i, "shaft_speed"), params);
+    {
+      std::string class_name = "ShaftTimeDerivativeScalarKernel";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = _omega_var_name;
+      params.set<std::vector<UserObjectName>>("uo_names") = {uo_names};
+      _sim.addScalarKernel(class_name, genName(name(), "td"), params);
+    }
+
+    for (std::size_t i = 0; i < uo_names.size(); i++)
+    {
+      std::string class_name = "ShaftComponentTorqueScalarKernel";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<NonlinearVariableName>("variable") = _omega_var_name;
+      params.set<UserObjectName>("shaft_connected_component_uo") = uo_names[i];
+      _sim.addScalarKernel(class_name, genName(name(), i, "shaft_speed"), params);
+    }
   }
 }
 
