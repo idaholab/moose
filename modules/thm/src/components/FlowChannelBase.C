@@ -368,6 +368,12 @@ FlowChannelBase::addCommonObjects()
 
     setupDh();
   }
+}
+
+void
+FlowChannelBase::addMooseObjects()
+{
+  addCommonObjects();
 
   ExecFlagEnum execute_on_initial_linear(MooseUtils::getDefaultExecFlagEnum());
   execute_on_initial_linear = {EXEC_INITIAL, EXEC_LINEAR};
@@ -407,12 +413,6 @@ FlowChannelBase::addCommonObjects()
       _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
     }
   }
-}
-
-void
-FlowChannelBase::addMooseObjects()
-{
-  addCommonObjects();
 
   _flow_model->addMooseObjects();
   _closures->addMooseObjects(*this);
