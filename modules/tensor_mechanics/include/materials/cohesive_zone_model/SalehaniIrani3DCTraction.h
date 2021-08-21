@@ -22,14 +22,12 @@ public:
   SalehaniIrani3DCTraction(const InputParameters & parameters);
 
 protected:
-  /// method computing the total traction and its derivatives
   void computeInterfaceTractionAndDerivatives() override;
 
   /// method computing the total traction
   RealVectorValue computeTraction();
 
-  /// method computing the total traction derivatives w.r.t. the interface
-  /// displacement jump
+  /// method computing the total traction derivatives w.r.t. the interface displacement jump
   RankTwoTensor computeTractionDerivatives();
 
   /// the displacement jump associated to the maximum traction
