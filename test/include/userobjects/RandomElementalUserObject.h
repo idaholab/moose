@@ -12,7 +12,7 @@
 #include "ElementUserObject.h"
 
 /**
- * An Elemental user object tha uses built-in Random number generation.
+ * An Elemental user object that uses built-in Random number generation.
  */
 class RandomElementalUserObject : public ElementUserObject
 {

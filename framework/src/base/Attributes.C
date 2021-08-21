@@ -28,6 +28,8 @@
 #include "Reporter.h"
 #include "SystemBase.h"
 
+#include <algorithm>
+
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
 {
@@ -309,38 +311,60 @@ AttribPreIC::isEqual(const Attribute & other) const
   return isMatch(other);
 }
 
-void
-AttribPreAux::initFrom(const MooseObject * /*obj*/)
-{
-}
 bool
 AttribPreAux::isMatch(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPreAux *>(&other);
-  return a && (a->_val == _val);
+  const auto a = dynamic_cast<const AttribPreAux *>(&other);
+
+  bool is_match = false;
+
+  if (a && !_vals.empty() && !a->_vals.empty())
+  {
+    is_match = std::includes(_vals.begin(), _vals.end(), a->_vals.begin(), a->_vals.end()) ||
+               std::includes(a->_vals.begin(), a->_vals.end(), _vals.begin(), _vals.end());
+  }
+
+  return is_match;
 }
 
 bool
 AttribPreAux::isEqual(const Attribute & other) const
 {
-  return isMatch(other);
+  const auto a = dynamic_cast<const AttribPreAux *>(&other);
+  return a && a->_vals == _vals;
 }
 
 void
-AttribPostAux::initFrom(const MooseObject * /*obj*/)
+AttribPreAux::initFrom(const MooseObject * /*obj*/)
 {
 }
+
 bool
 AttribPostAux::isMatch(const Attribute & other) const
 {
-  auto a = dynamic_cast<const AttribPostAux *>(&other);
-  return a && (a->_val == _val);
+  const auto a = dynamic_cast<const AttribPostAux *>(&other);
+
+  bool is_match = false;
+
+  if (a && !_vals.empty() && !a->_vals.empty())
+  {
+    is_match = std::includes(_vals.begin(), _vals.end(), a->_vals.begin(), a->_vals.end()) ||
+               std::includes(a->_vals.begin(), a->_vals.end(), _vals.begin(), _vals.end());
+  }
+
+  return is_match;
 }
 
 bool
 AttribPostAux::isEqual(const Attribute & other) const
 {
-  return isMatch(other);
+  const auto a = dynamic_cast<const AttribPostAux *>(&other);
+  return a && a->_vals == _vals;
+}
+
+void
+AttribPostAux::initFrom(const MooseObject * /*obj*/)
+{
 }
 
 void
