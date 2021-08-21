@@ -49,7 +49,7 @@ protected:
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
   /// Material property storing the advected quantity
-  const FunctorMaterialProperty<ADReal> & _advected_material_property;
+  const FunctorInterface<ADReal> & _advected_material_property;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

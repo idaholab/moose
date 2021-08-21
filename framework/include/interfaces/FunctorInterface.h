@@ -96,169 +96,37 @@ public:
 };
 
 /**
- * This derivative of the \p FunctorInterface template allows a user to provide a function object
- * that will be used whenever \p operator() overloads are called
+ * Class template for creating constants
  */
 template <typename T>
-class GenericFunctor : public FunctorInterface<T>
+class ConstantFunctor : public FunctorInterface<T>
 {
 public:
-  GenericFunctor(const std::string & name) : _name(name) {}
-
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemAndFaceArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
-  using ElemFn = std::function<T(const Elem * const &)>;
-  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
-  using FaceFn = std::function<T(const FaceArg &)>;
-  using QpFn = std::function<T(const unsigned int &)>;
-  using TQpFn = std::function<T(const std::pair<Moose::ElementType, unsigned int> &)>;
+  ConstantFunctor(const T & value) : _value(value) {}
+  ConstantFunctor(T && value) : _value(value) {}
 
-  /**
-   * Set the functor that will be used in calls to \p operator() overloads
-   * @param mesh The mesh that the functor is defined on
-   * @param block_ids The block/subdomain IDs that the user-provided functor is valid for
-   * @param my_lammy The functor that defines this object's \p operator() evaluations
-   */
-  template <typename PolymorphicLambda>
-  void setFunctor(const MooseMesh & mesh,
-                  const std::set<SubdomainID> & block_ids,
-                  PolymorphicLambda my_lammy);
+  virtual T operator()(const libMesh::Elem * const &) const override final { return _value; }
 
-  T operator()(const Elem * const & elem) const override final;
-  T operator()(const ElemAndFaceArg & elem_and_face) const override final;
-  T operator()(const FaceArg & face) const override final;
-  T operator()(const unsigned int & qp) const override final;
-  T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
+  T operator()(const ElemAndFaceArg &) const override final { return _value; }
 
-protected:
-  /**
-   * Whether to check for multiple definitions of the lambda on a given block. When this is a
-   * ConstantFunctor it means that this was most likely created because the user provided a \p Real
-   * for a \p MaterialPropertyName or variable. We want to allow the user to do this multiple times
-   * in the input file for a given property/variable for a given block. However if this is a
-   * FunctorMaterialProperty<T> then we will certainly want to check for multiple defintions of a
-   * functor property on a given block
-   */
-  virtual bool checkMultipleDefinitions() const = 0;
-
-private:
-  /// Functors that return element average values (or cell centroid values or whatever the
-  /// implementer wants to return for a given element argument)
-  std::unordered_map<SubdomainID, ElemFn> _elem_functor;
-
-  /// Functors that return the value on the requested element that will perform any necessary
-  /// ghosting operations if this object is not technically defined on the requested subdomain
-  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
-
-  /// Functors that return potentially limited interpolations at faces
-  FaceFn _face_functor;
-
-  /// Functors that will index elemental data at a provided quadrature point index
-  QpFn _qp_functor;
-
-  /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
-  /// quadrature point index
-  TQpFn _tqp_functor;
-
-  /// The name of this object
-  std::string _name;
-};
-
-template <typename T>
-template <typename PolymorphicLambda>
-void
-GenericFunctor<T>::setFunctor(const MooseMesh & mesh,
-                              const std::set<SubdomainID> & block_ids,
-                              PolymorphicLambda my_lammy)
-{
-  auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
-    auto pr = _elem_functor.emplace(block_id, my_lammy);
-    if (checkMultipleDefinitions() && !pr.second)
-      mooseError(
-          "No insertion for the functor property '",
-          _name,
-          "' for block id ",
-          block_id,
-          ". Another producer (e.g. material) must already produce this property on that block.");
-    _elem_and_face_functor.emplace(block_id, my_lammy);
-  };
-
-  for (const auto block_id : block_ids)
+  T operator()(
+      const std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool> &) const override final
   {
-    if (block_id == Moose::ANY_BLOCK_ID)
-    {
-      const auto & inner_block_ids = mesh.meshSubdomains();
-      for (const auto inner_block_id : inner_block_ids)
-        add_lammy(inner_block_id);
-    }
-    else
-      add_lammy(block_id);
+    return _value;
   }
 
-  _face_functor = my_lammy;
-  _qp_functor = my_lammy;
-  _tqp_functor = my_lammy;
-}
+  T operator()(const unsigned int &) const override final { return _value; }
 
-template <typename T>
-T
-GenericFunctor<T>::operator()(const Elem * const & elem) const
-{
-  mooseAssert(elem && elem != libMesh::remote_elem,
-              "The element must be non-null and non-remote in functor material properties");
-  auto it = _elem_functor.find(elem->subdomain_id());
-  mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
-  return it->second(elem);
-}
+  T operator()(const std::pair<Moose::ElementType, unsigned int> &) const override final
+  {
+    return _value;
+  }
 
-template <typename T>
-T
-GenericFunctor<T>::operator()(const ElemAndFaceArg & elem_and_face) const
-{
-  mooseAssert((std::get<0>(elem_and_face) && std::get<0>(elem_and_face) != libMesh::remote_elem) ||
-                  std::get<1>(elem_and_face),
-              "The element must be non-null and non-remote or the face must be non-null in functor "
-              "material properties");
-  auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
-  mooseAssert(it != _elem_and_face_functor.end(),
-              "The provided subdomain ID doesn't exist in the map!");
-  return it->second(elem_and_face);
-}
-
-template <typename T>
-T
-GenericFunctor<T>::operator()(const GenericFunctor<T>::FaceArg & face) const
-{
-  mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
-  return _face_functor(face);
-}
-
-template <typename T>
-T
-GenericFunctor<T>::operator()(const unsigned int & qp) const
-{
-  return _qp_functor(qp);
-}
-
-template <typename T>
-T
-GenericFunctor<T>::operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const
-{
-  return _tqp_functor(tqp);
-}
-
-/**
- * Class template for creating constants
- */
-template <typename T>
-class ConstantFunctor : public GenericFunctor<T>
-{
-public:
-  ConstantFunctor(const std::string & name) : GenericFunctor<T>(name) {}
-
-protected:
-  bool checkMultipleDefinitions() const override final { return false; }
+private:
+  T _value;
 };

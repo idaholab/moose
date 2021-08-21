@@ -47,11 +47,11 @@ protected:
   FunctorMaterialProperty<ADReal> & _p;
 
   /// density
-  const FunctorMaterialProperty<ADReal> & _rho;
+  const FunctorInterface<ADReal> & _rho;
 
   const bool _has_temperature;
 
   const MooseVariableFVReal * const _temperature;
-  const FunctorMaterialProperty<ADReal> * const _cp;
+  const FunctorInterface<ADReal> * const _cp;
   FunctorMaterialProperty<ADReal> * const _rho_cp_temp;
 };

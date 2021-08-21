@@ -20,7 +20,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const FunctorMaterialProperty<ADRealVectorValue> & _vel;
+  const FunctorInterface<ADRealVectorValue> & _vel;
 
   /// The advected quantity on the elem
   const FunctorInterface<ADReal> & _adv_quant;

@@ -99,7 +99,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 }
 
 template <>
-const FunctorMaterialProperty<Real> *
+const FunctorInterface<Real> *
 MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
@@ -109,13 +109,8 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   if (ss >> real_value && ss.eof())
   {
     _default_functor_real_properties.emplace_back(
-        libmesh_make_unique<FunctorMaterialProperty<Real>>(name, true));
+        libmesh_make_unique<ConstantFunctor<Real>>(real_value));
     auto & default_property = _default_functor_real_properties.back();
-
-    default_property->setFunctor(
-        _mi_subproblem.mesh(), _mi_block_ids, [real_value](auto /*geom_quantity*/) -> Real {
-          return real_value;
-        });
     return default_property.get();
   }
 
@@ -123,7 +118,7 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
 }
 
 template <>
-const FunctorMaterialProperty<ADReal> *
+const FunctorInterface<ADReal> *
 MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
@@ -133,13 +128,8 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
   if (ss >> real_value && ss.eof())
   {
     _default_functor_ad_real_properties.emplace_back(
-        libmesh_make_unique<FunctorMaterialProperty<ADReal>>(name, true));
+        libmesh_make_unique<ConstantFunctor<ADReal>>(real_value));
     auto & default_property = _default_functor_ad_real_properties.back();
-
-    default_property->setFunctor(
-        _mi_subproblem.mesh(), _mi_block_ids, [real_value](auto /*geom_quantity*/) -> ADReal {
-          return real_value;
-        });
     return default_property.get();
   }
 

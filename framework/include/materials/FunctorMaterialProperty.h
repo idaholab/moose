@@ -36,22 +36,141 @@ public:
  * A material property that is evaluated on-the-fly via calls to various overloads of \p operator()
  */
 template <typename T>
-class FunctorMaterialProperty : public FunctorPropertyValue, public GenericFunctor<T>
+class FunctorMaterialProperty : public FunctorPropertyValue, public FunctorInterface<T>
 {
 public:
-  FunctorMaterialProperty(const std::string & name, const bool default_property = false)
-    : FunctorPropertyValue(), GenericFunctor<T>(name), _default_property(default_property)
+  FunctorMaterialProperty(const std::string & name) : FunctorPropertyValue(), _name(name) {}
+
+  using typename FunctorInterface<T>::FaceArg;
+  using typename FunctorInterface<T>::ElemAndFaceArg;
+  using typename FunctorInterface<T>::FunctorType;
+  using typename FunctorInterface<T>::FunctorReturnType;
+
+  using ElemFn = std::function<T(const Elem * const &)>;
+  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
+  using FaceFn = std::function<T(const FaceArg &)>;
+  using QpFn = std::function<T(const unsigned int &)>;
+  using TQpFn = std::function<T(const std::pair<Moose::ElementType, unsigned int> &)>;
+
+  /**
+   * Set the functor that will be used in calls to \p operator() overloads
+   * @param mesh The mesh that the functor is defined on
+   * @param block_ids The block/subdomain IDs that the user-provided functor is valid for
+   * @param my_lammy The functor that defines this object's \p operator() evaluations
+   */
+  template <typename PolymorphicLambda>
+  void setFunctor(const MooseMesh & mesh,
+                  const std::set<SubdomainID> & block_ids,
+                  PolymorphicLambda my_lammy);
+
+  T operator()(const Elem * const & elem) const override final;
+  T operator()(const ElemAndFaceArg & elem_and_face) const override final;
+  T operator()(const FaceArg & face) const override final;
+  T operator()(const unsigned int & qp) const override final;
+  T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
+
+private:
+  /// Functors that return element average values (or cell centroid values or whatever the
+  /// implementer wants to return for a given element argument)
+  std::unordered_map<SubdomainID, ElemFn> _elem_functor;
+
+  /// Functors that return the value on the requested element that will perform any necessary
+  /// ghosting operations if this object is not technically defined on the requested subdomain
+  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
+
+  /// Functors that return potentially limited interpolations at faces
+  FaceFn _face_functor;
+
+  /// Functors that will index elemental data at a provided quadrature point index
+  QpFn _qp_functor;
+
+  /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
+  /// quadrature point index
+  TQpFn _tqp_functor;
+
+  /// The name of this object
+  std::string _name;
+};
+
+template <typename T>
+template <typename PolymorphicLambda>
+void
+FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
+                                       const std::set<SubdomainID> & block_ids,
+                                       PolymorphicLambda my_lammy)
+{
+  auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
+    auto pr = _elem_functor.emplace(block_id, my_lammy);
+    if (!pr.second)
+      mooseError("No insertion for the functor material property '",
+                 _name,
+                 "' for block id ",
+                 block_id,
+                 ". Another material must already declare this property on that block.");
+    _elem_and_face_functor.emplace(block_id, my_lammy);
+  };
+
+  for (const auto block_id : block_ids)
   {
+    if (block_id == Moose::ANY_BLOCK_ID)
+    {
+      const auto & inner_block_ids = mesh.meshSubdomains();
+      for (const auto inner_block_id : inner_block_ids)
+        add_lammy(inner_block_id);
+    }
+    else
+      add_lammy(block_id);
   }
 
-  using typename GenericFunctor<T>::FaceArg;
-  using typename GenericFunctor<T>::FunctorType;
-  using typename GenericFunctor<T>::FunctorReturnType;
+  _face_functor = my_lammy;
+  _qp_functor = my_lammy;
+  _tqp_functor = my_lammy;
+}
 
-protected:
-  bool checkMultipleDefinitions() const override final { return !_default_property; }
+template <typename T>
+T
+FunctorMaterialProperty<T>::operator()(const Elem * const & elem) const
+{
+  mooseAssert(elem && elem != libMesh::remote_elem,
+              "The element must be non-null and non-remote in functor material properties");
+  auto it = _elem_functor.find(elem->subdomain_id());
+  mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  return it->second(elem);
+}
 
-  /// whether this functor material property is a default material property, e.g. one created when a
-  /// user supplied a constant in the input file to a \p MaterialPropertyName parameter
-  const bool _default_property;
-};
+template <typename T>
+T
+FunctorMaterialProperty<T>::operator()(const ElemAndFaceArg & elem_and_face) const
+{
+  mooseAssert((std::get<0>(elem_and_face) && std::get<0>(elem_and_face) != libMesh::remote_elem) ||
+                  std::get<1>(elem_and_face),
+              "The element must be non-null and non-remote or the face must be non-null in functor "
+              "material properties");
+  auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
+  mooseAssert(it != _elem_and_face_functor.end(),
+              "The provided subdomain ID doesn't exist in the map!");
+  return it->second(elem_and_face);
+}
+
+template <typename T>
+T
+FunctorMaterialProperty<T>::operator()(const FunctorMaterialProperty<T>::FaceArg & face) const
+{
+  mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
+  return _face_functor(face);
+}
+
+template <typename T>
+T
+FunctorMaterialProperty<T>::operator()(const unsigned int & qp) const
+{
+  return _qp_functor(qp);
+}
+
+template <typename T>
+T
+FunctorMaterialProperty<T>::operator()(
+    const std::pair<Moose::ElementType, unsigned int> & tqp) const
+{
+  return _tqp_functor(tqp);
+}

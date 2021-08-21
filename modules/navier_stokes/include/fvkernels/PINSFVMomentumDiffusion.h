@@ -25,7 +25,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the current element viscosity
-  const FunctorMaterialProperty<ADReal> & _mu;
+  const FunctorInterface<ADReal> & _mu;
 
   /// the porosity
   const FunctorInterface<ADReal> & _eps;
@@ -35,7 +35,7 @@ protected:
   const int _index;
 
   /// Velocity as material properties
-  const FunctorMaterialProperty<ADRealVectorValue> * const _vel;
+  const FunctorInterface<ADRealVectorValue> * const _vel;
 
   /// the porosity as a variable to be able to compute a face gradient
   const MooseVariableFVReal * const _eps_var;

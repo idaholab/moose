@@ -25,7 +25,7 @@ protected:
   const FunctorInterface<ADReal> * const _sup_vel_y;
   const FunctorInterface<ADReal> * const _sup_vel_z;
   const FunctorInterface<ADReal> & _pressure;
-  const FunctorMaterialProperty<ADReal> & _rho;
+  const FunctorInterface<ADReal> & _rho;
   const FunctorInterface<ADReal> & _eps;
   const MooseEnum _eqn;
   const unsigned int _index;

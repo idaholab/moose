@@ -20,5 +20,5 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const FunctorMaterialProperty<ADReal> & _functor_prop;
+  const FunctorInterface<ADReal> & _functor_prop;
 };

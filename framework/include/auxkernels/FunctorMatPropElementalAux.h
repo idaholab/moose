@@ -24,5 +24,5 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  const FunctorMaterialProperty<ADReal> & _mat_prop;
+  const FunctorInterface<ADReal> & _mat_prop;
 };

@@ -44,7 +44,7 @@ protected:
   void jacobianSetup() override final { clearRCCoeffs(); }
 
   /// The dynamic viscosity
-  const FunctorMaterialProperty<ADReal> & _mu;
+  const FunctorInterface<ADReal> & _mu;
 
   /**
    * Returns the Rhie-Chow 'a' coefficient for the requested element \p elem
@@ -77,7 +77,7 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const FunctorMaterialProperty<ADReal> & _rho;
+  const FunctorInterface<ADReal> & _rho;
 
   /// the dimension of the simulation
   const unsigned int _dim;

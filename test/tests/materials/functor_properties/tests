@@ -10,7 +10,7 @@
   []
   [multiple_definitions]
     type = RunException
-    expect_err = 'No insertion for the functor property'
+    expect_err = 'No insertion for the functor material property'
     input = 1d_dirichlet.i
     prereq = 'exo'
     requirement = 'The system shall error if multiple definitions are given for a functor material property on a given subdomain.'
