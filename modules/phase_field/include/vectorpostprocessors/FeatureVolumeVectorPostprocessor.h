@@ -13,6 +13,8 @@
 #include "MooseVariableDependencyInterface.h"
 #include "BoundaryRestrictable.h"
 
+#include <array>
+
 // Forward Declarations
 class FeatureFloodCount;
 
@@ -90,4 +92,6 @@ private:
   const MooseArray<Real> & _coord;
   const QBase * const & _qrule_face;
   const MooseArray<Real> & _JxW_face;
+
+  std::array<VectorPostprocessorValue *, 3> _centroid;
 };
