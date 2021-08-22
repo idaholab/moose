@@ -73,6 +73,11 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
   _coupled_sln.reserve(_vars.size());
   for (auto & var : _feature_counter.getCoupledVars())
     _coupled_sln.push_back(&var->sln());
+
+  const std::array<std::string, 3> suffix = {{"x", "y", "z"}};
+  if (_output_centroids)
+    for (unsigned int i = 0; i < 3; ++i)
+      _centroid[i] = &declareVector("centroid_" + suffix[i]);
 }
 
 void
@@ -108,19 +113,13 @@ FeatureVolumeVectorPostprocessor::execute()
 
   if (_output_centroids)
   {
-    VectorPostprocessorValue & center_x = declareVector("centroid_x");
-    center_x.resize(num_features);
-    VectorPostprocessorValue & center_y = declareVector("centroid_y");
-    center_y.resize(num_features);
-    VectorPostprocessorValue & center_z = declareVector("centroid_z");
-    center_z.resize(num_features);
-
-    for (MooseIndex(_var_num) feature_num = 0; feature_num < num_features; ++feature_num)
+    for (std::size_t i = 0; i < 3; ++i)
+      _centroid[i]->resize(num_features);
+    for (std::size_t feature_num = 0; feature_num < num_features; ++feature_num)
     {
       auto p = _feature_counter.featureCentroid(feature_num);
-      center_x[feature_num] = p(0);
-      center_y[feature_num] = p(1);
-      center_z[feature_num] = p(2);
+      for (std::size_t i = 0; i < 3; ++i)
+        (*_centroid[i])[feature_num] = p(i);
     }
   }
 

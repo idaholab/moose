@@ -1,101 +1,118 @@
 [Tests]
-  [./centroid_output_test]
+  [centroid_output_test]
     type = 'CSVDiff'
     input = 'feature_volume_vpp_test.i'
     csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
 
     issues = "#11395"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations when requested."
+    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
+                  "when requested."
     design = "/FeatureVolumeVectorPostprocessor.md"
-  [../]
+  []
 
-  [./centroid_output_test_parallel]
+  [centroid_output_test_parallel]
     type = 'CSVDiff'
     input = 'feature_volume_vpp_test.i'
     csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
 
     issues = "#11395"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations when requested."
+    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
+                  "when requested."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
     prereq = 'centroid_output_test'
-  [../]
+  []
 
-  [./percolation_test]
+  [percolation_test]
     type = 'CSVDiff'
     input = 'percolation_test.i'
     csvdiff = 'percolation_test_out_features_0000.csv'
 
     issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
-                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
+    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
+                  "exists between specified primary_percolation_boundaries and "
+                  "secondary_percolation_boundaries."
     design = "/FeatureVolumeVectorPostprocessor.md"
-  [../]
+  []
 
-  [./percolation_test_parallel]
+  [percolation_test_parallel]
     type = 'CSVDiff'
     input = 'percolation_test.i'
     csvdiff = 'percolation_test_out_features_0000.csv'
 
     issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway exists between
-                    specified primary_percolation_boundaries and secondary_percolation_boundaries."
+    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
+                  "exists between specified primary_percolation_boundaries and "
+                  "secondary_percolation_boundaries."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
     prereq = 'percolation_test'
-  [../]
+  []
 
-  [./boundary_area_2D_test]
+  [boundary_area_2D_test]
     type = 'CSVDiff'
     input = 'boundary_area_2D.i'
     csvdiff = 'boundary_area_2D_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
-                    by each feature by integrating the corresponding order parameter on the boundary."
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+                  "boundary  by each feature by integrating the corresponding order parameter on the "
+                  "boundary."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
-  [../]
+  []
 
-  [./boundary_area_2D_single_test]
+  [boundary_area_2D_single_test]
     type = 'CSVDiff'
     input = 'boundary_area_2D_single.i'
     csvdiff = 'boundary_area_2D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
-                    by each feature by calulating the area/length of boundary elements."
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+                  "boundary by each feature by calulating the area/length of boundary elements."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
-  [../]
+  []
 
-  [./boundary_area_3D_test]
+  [boundary_area_3D_test]
     type = 'CSVDiff'
     input = 'boundary_area_3D.i'
     csvdiff = 'boundary_area_3D_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
-                    by each feature by integrating the corresponding order parameter on the boundary."
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+                  "boundary by each feature by integrating the corresponding order parameter on the "
+                  "boundary."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
-  [../]
+  []
 
-  [./boundary_area_3D_single_test]
+  [boundary_area_3D_single_test]
     type = 'CSVDiff'
     input = 'boundary_area_3D_single.i'
     csvdiff = 'boundary_area_3D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied boundary
-                    by each feature by calulating the area/length of boundary elements."
+    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+                  "boundary by each feature by calulating the area/length of boundary elements."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
-  [../]
+  []
+
+  [centroid]
+    type = 'CSVDiff'
+    input = 'centroid.i'
+    csvdiff = 'centroid_out_grain_volumes_0004.csv'
+
+    issues = "#13202"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output grain centroid locations over "
+                  "multiple time steps"
+    design = "/FeatureVolumeVectorPostprocessor.md"
+  []
 []
