@@ -16,4 +16,20 @@
     requirement = 'The system shall error if multiple definitions are given for a functor material property on a given subdomain.'
     cli_args = "Materials/active='functor overlapping_functor'"
   []
+  [qp_functor]
+    requirement = 'The system shall be able to solve a diffusion problem with different diffusivities on different subdomains and obtain the same results using'
+    [regular]
+      detail = 'material properties bound to references'
+      type = Exodiff
+      input = traditional-mat-props.i
+      exodiff = traditional-mat-props_out.e
+    []
+    [functor]
+      detail = 'material properties evaluated with geometric position information'
+      type = Exodiff
+      input = functor-mat-props.i
+      exodiff = functor-mat-props_out.e
+      ad_indexing_type = 'global'
+    []
+  []
 []

@@ -116,7 +116,8 @@ VolumetricFlowRate::computeQpIntegral()
     {
       // FIXME The material property would need to be computed on the face #16809
       // This requires knowing the neighbor value, (1)MaterialInterface cant do that
-      advected_quantity = MetaPhysicL::raw_value(_advected_material_property(_qp));
+      advected_quantity = MetaPhysicL::raw_value(
+          _advected_material_property(std::make_pair(_qp, _current_elem->subdomain_id())));
     }
     else
       advected_quantity = 1;
@@ -130,7 +131,8 @@ VolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (_advected_mat_prop_supplied)
-      return MetaPhysicL::raw_value(_advected_material_property(_qp)) *
+      return MetaPhysicL::raw_value(
+                 _advected_material_property(std::make_pair(_qp, _current_elem->subdomain_id()))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

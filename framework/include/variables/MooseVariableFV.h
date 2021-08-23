@@ -457,8 +457,9 @@ public:
   ADReal operator()(const Elem * const & elem) const override final { return getElemValue(elem); }
   ADReal operator()(const ElemAndFaceArg & elem_and_face) const override final;
   ADReal operator()(const FaceArg & face) const override final;
-  ADReal operator()(const unsigned int & qp) const override final { return adSln()[qp]; }
-  ADReal operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
+  ADReal operator()(const std::pair<unsigned int, SubdomainID> & qp) const override final;
+  ADReal operator()(
+      const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const override final;
 
   /**
    * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor

@@ -67,8 +67,13 @@ INSFVMomentumAdvectionOutflowBC::computeQpResidual()
   if (_w_var)
     v(2) = _w_var->getBoundaryFaceValue(*_face_info);
 
-  const auto adv_quant_boundary =
-      _adv_quant(std::make_tuple(_face_info, nullptr, v * _face_info->normal() > 0));
+  const bool out_of_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+
+  const auto adv_quant_boundary = _adv_quant(std::make_tuple(
+      _face_info,
+      nullptr,
+      v * _face_info->normal() > 0,
+      out_of_elem ? _face_info->elem().subdomain_id() : _face_info->neighborPtr()->subdomain_id()));
 
   mooseAssert(_normal * v >= 0,
               "This boundary condition is for outflow but the flow is in the opposite direction of "

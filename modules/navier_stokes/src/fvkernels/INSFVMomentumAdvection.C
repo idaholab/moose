@@ -293,17 +293,13 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff,
-                         &elem_velocity,
-#ifndef NDEBUG
-                         &elem,
-#endif
-                         this](const Elem & libmesh_dbg_var(functor_elem),
-                               const Elem * const neighbor,
-                               const FaceInfo * const fi,
-                               const Point & surface_vector,
-                               Real libmesh_dbg_var(coord),
-                               const bool elem_has_info) {
+  auto action_functor = [&coeff, &elem_velocity, &elem, this](
+                            const Elem & libmesh_dbg_var(functor_elem),
+                            const Elem * const neighbor,
+                            const FaceInfo * const fi,
+                            const Point & surface_vector,
+                            Real libmesh_dbg_var(coord),
+                            const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),
@@ -321,8 +317,8 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
           "Let's make sure our normal is what we think it is");
 #endif
 
-    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true));
-    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true));
+    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true, elem.subdomain_id()));
+    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true, elem.subdomain_id()));
 
     // Unless specified otherwise, "elem" here refers to the element we're computing the
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)

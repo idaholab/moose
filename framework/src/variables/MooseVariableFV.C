@@ -1107,11 +1107,21 @@ MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) co
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(
-    const std::pair<Moose::ElementType, unsigned int> & tqp) const
+MooseVariableFV<OutputType>::operator()(const std::pair<unsigned int, SubdomainID> & qp) const
 {
-  const auto elem_type = tqp.first;
-  const auto qp = tqp.second;
+  mooseAssert(this->hasBlocks(qp.second), "This variable doesn't exist in the requested block!");
+  return adSln()[qp.first];
+}
+
+template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::operator()(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
+{
+  mooseAssert(this->hasBlocks(std::get<2>(tqp)),
+              "This variable doesn't exist in the requested block!");
+  const auto elem_type = std::get<0>(tqp);
+  const auto qp = std::get<1>(tqp);
   switch (elem_type)
   {
     case Moose::ElementType::Element:

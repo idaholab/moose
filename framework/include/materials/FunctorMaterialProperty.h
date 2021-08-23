@@ -49,8 +49,8 @@ public:
   using ElemFn = std::function<T(const Elem * const &)>;
   using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
   using FaceFn = std::function<T(const FaceArg &)>;
-  using QpFn = std::function<T(const unsigned int &)>;
-  using TQpFn = std::function<T(const std::pair<Moose::ElementType, unsigned int> &)>;
+  using QpFn = std::function<T(const std::pair<unsigned int, SubdomainID> &)>;
+  using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &)>;
 
   /**
    * Set the functor that will be used in calls to \p operator() overloads
@@ -66,8 +66,9 @@ public:
   T operator()(const Elem * const & elem) const override final;
   T operator()(const ElemAndFaceArg & elem_and_face) const override final;
   T operator()(const FaceArg & face) const override final;
-  T operator()(const unsigned int & qp) const override final;
-  T operator()(const std::pair<Moose::ElementType, unsigned int> & tqp) const override final;
+  T operator()(const std::pair<unsigned int, SubdomainID> & qp) const override final;
+  T operator()(
+      const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const override final;
 
 private:
   /// Functors that return element average values (or cell centroid values or whatever the
@@ -79,14 +80,14 @@ private:
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
 
   /// Functors that return potentially limited interpolations at faces
-  FaceFn _face_functor;
+  std::unordered_map<SubdomainID, FaceFn> _face_functor;
 
   /// Functors that will index elemental data at a provided quadrature point index
-  QpFn _qp_functor;
+  std::unordered_map<SubdomainID, QpFn> _qp_functor;
 
   /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
   /// quadrature point index
-  TQpFn _tqp_functor;
+  std::unordered_map<SubdomainID, TQpFn> _tqp_functor;
 
   /// The name of this object
   std::string _name;
@@ -108,6 +109,9 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
                  block_id,
                  ". Another material must already declare this property on that block.");
     _elem_and_face_functor.emplace(block_id, my_lammy);
+    _face_functor.emplace(block_id, my_lammy);
+    _qp_functor.emplace(block_id, my_lammy);
+    _tqp_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -121,10 +125,6 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
     else
       add_lammy(block_id);
   }
-
-  _face_functor = my_lammy;
-  _qp_functor = my_lammy;
-  _tqp_functor = my_lammy;
 }
 
 template <typename T>
@@ -154,23 +154,29 @@ FunctorMaterialProperty<T>::operator()(const ElemAndFaceArg & elem_and_face) con
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::operator()(const FunctorMaterialProperty<T>::FaceArg & face) const
+FunctorMaterialProperty<T>::operator()(const FaceArg & face) const
 {
   mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
-  return _face_functor(face);
+  auto it = _face_functor.find(std::get<3>(face));
+  mooseAssert(it != _face_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  return it->second(face);
 }
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::operator()(const unsigned int & qp) const
+FunctorMaterialProperty<T>::operator()(const std::pair<unsigned int, SubdomainID> & qp) const
 {
-  return _qp_functor(qp);
+  auto it = _qp_functor.find(qp.second);
+  mooseAssert(it != _qp_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  return it->second(qp);
 }
 
 template <typename T>
 T
 FunctorMaterialProperty<T>::operator()(
-    const std::pair<Moose::ElementType, unsigned int> & tqp) const
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
 {
-  return _tqp_functor(tqp);
+  auto it = _tqp_functor.find(std::get<2>(tqp));
+  mooseAssert(it != _tqp_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  return it->second(tqp);
 }
