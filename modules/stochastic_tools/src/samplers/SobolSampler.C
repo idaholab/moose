@@ -27,11 +27,11 @@ SobolSampler::validParams()
 
 SobolSampler::SobolSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    _m1_matrix(0, 0),
-    _m2_matrix(0, 0),
     _sampler_a(getSampler("sampler_a")),
     _sampler_b(getSampler("sampler_b")),
-    _resample(getParam<bool>("resample"))
+    _resample(getParam<bool>("resample")),
+    _num_matrices(_resample ? 2 * _sampler_a.getNumberOfCols() + 2
+                            : _sampler_a.getNumberOfCols() + 2)
 {
   if (_sampler_a.getNumberOfCols() != _sampler_b.getNumberOfCols())
     paramError("sampler_a", "The supplied Sampler objects must have the same number of columns.");
@@ -39,71 +39,87 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
   if (_sampler_a.getNumberOfRows() != _sampler_b.getNumberOfRows())
     paramError("sampler_a", "The supplied Sampler objects must have the same number of rows.");
 
-  // Compute the number of matrices
-  const dof_id_type num_cols = _sampler_a.getNumberOfCols();
-  _num_matrices = _resample ? 2 * num_cols + 2 : num_cols + 2;
-  _num_rows_per_matrix = _sampler_a.getNumberOfRows();
+  if (_sampler_a.name() == _sampler_b.name())
+    paramError("sampler_a", "The supplied sampler matrices must not be the same.");
 
   // Initialize this object
   setNumberOfCols(_sampler_a.getNumberOfCols());
-  setNumberOfRows(_num_rows_per_matrix * _num_matrices);
-}
-
-void
-SobolSampler::sampleSetUp(const Sampler::SampleMode)
-{
-  TIME_SECTION("sampleSetup", 3, "Setting Up Sobol Sampler");
-
-  // These must call getGlobalSamples because the matrix partition between the supplied objects
-  // and this object differ.
-  _m1_matrix = _sampler_a.getGlobalSamples();
-  _m2_matrix = _sampler_b.getGlobalSamples();
-
-  if (_m1_matrix == _m2_matrix)
-    mooseError("The supplied sampler matrices must not be the same.");
+  setNumberOfRows(_sampler_a.getNumberOfRows() * _num_matrices);
 }
 
 Real
 SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  dof_id_type matrix_index = row_index / _num_rows_per_matrix;
-  dof_id_type r = row_index - matrix_index * _num_rows_per_matrix;
+  const dof_id_type matrix_index = row_index % _num_matrices;
+
+  if (matrix_index == 0 && col_index == 0)
+  {
+    _row_a = _sampler_a.getNextLocalRow();
+    _row_b = _sampler_b.getNextLocalRow();
+    if (std::equal(_row_a.begin(), _row_a.end(), _row_b.begin()))
+      paramError("sampler_a", "The supplied sampler matrices must not be the same.");
+  }
 
   // M2 Matrix
   if (matrix_index == 0)
-    return _m2_matrix(r, col_index);
+    return _row_b[col_index];
 
   // M1 Matrix
   else if (matrix_index == _num_matrices - 1)
-    return _m1_matrix(r, col_index);
+    return _row_a[col_index];
 
   // N_-i Matrices
   else if (matrix_index > getNumberOfCols())
   {
     if (col_index == (matrix_index - getNumberOfCols() - 1))
-      return _m2_matrix(r, col_index);
+      return _row_b[col_index];
     else
-      return _m1_matrix(r, col_index);
+      return _row_a[col_index];
   }
 
   // N_i Matrices
-  else // if (matrix_index < _num_inputs + 1)
+  else if (matrix_index <= getNumberOfCols())
   {
     if (col_index == matrix_index - 1)
-      return _m1_matrix(r, col_index);
+      return _row_a[col_index];
     else
-      return _m2_matrix(r, col_index);
+      return _row_b[col_index];
   }
 
-  mooseError("Invalid row and column index, if you are seeing this Andrew messed up because this "
+  mooseError("Invalid row and column index, if you are seeing this Zach messed up because this "
              "should be impossible to reach.");
+  return 0;
 }
 
-void
-SobolSampler::sampleTearDown(const Sampler::SampleMode)
+LocalRankConfig
+SobolSampler::constructRankConfig(bool batch_mode) const
 {
-  TIME_SECTION("sampleTearDown", 3, "Tearing Down Sobol Sampler");
+  std::vector<LocalRankConfig> all_rc(processor_id() + 1);
+  for (processor_id_type r = 0; r <= processor_id(); ++r)
+    all_rc[r] = rankConfig(r,
+                           n_processors(),
+                           _sampler_a.getNumberOfRows(),
+                           _min_procs_per_row,
+                           _max_procs_per_row,
+                           batch_mode);
+  LocalRankConfig & rc = all_rc.back();
 
-  _m1_matrix.resize(0, 0);
-  _m2_matrix.resize(0, 0);
+  rc.num_local_sims *= _num_matrices;
+  bool found_first = false;
+  for (auto it = all_rc.rbegin(); it != all_rc.rend(); ++it)
+    if (it->is_first_local_rank)
+    {
+      if (found_first)
+        rc.first_local_sim_index += it->num_local_sims * (_num_matrices - 1);
+      else
+        found_first = true;
+    }
+
+  if (!batch_mode)
+  {
+    rc.num_local_apps = rc.num_local_sims;
+    rc.first_local_app_index = rc.first_local_sim_index;
+  }
+
+  return rc;
 }

@@ -60,9 +60,13 @@ SobolStatistics::execute()
 {
   TIME_SECTION("execute", 3, "Executing Sobol Statistics");
 
-  StochasticTools::SobolCalculator calc(
-      *this, "SOBOL", _sobol_sampler.getNumberOfCols(), _sobol_sampler.resample());
+  StochasticTools::SobolCalculator calc(*this, "SOBOL", _sobol_sampler.resample());
   for (std::size_t i = 0; i < _result_vectors.size(); ++i)
-    (*_sobol_stat_vectors[i]) =
-        calc.compute(*(_result_vectors[i].first), _result_vectors[i].second);
+  {
+    const std::size_t ncol = _sobol_sampler.resample() ? 2 * _sobol_sampler.getNumberOfCols() + 2
+                                                       : _sobol_sampler.getNumberOfCols() + 2;
+    const std::vector<std::vector<Real>> data =
+        StochasticTools::reshapeVector(*(_result_vectors[i].first), ncol, /*row_major =*/true);
+    (*_sobol_stat_vectors[i]) = calc.compute(data, _result_vectors[i].second);
+  }
 }

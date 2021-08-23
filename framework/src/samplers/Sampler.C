@@ -67,6 +67,10 @@ Sampler::Sampler(const InputParameters & parameters)
     DistributionInterface(this),
     PerfGraphInterface(this),
     SamplerInterface(this),
+    _min_procs_per_row(getParam<unsigned int>("min_procs_per_row") > n_processors()
+                           ? n_processors()
+                           : getParam<unsigned int>("min_procs_per_row")),
+    _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),
@@ -77,10 +81,6 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
-    _min_procs_per_row(getParam<unsigned int>("min_procs_per_row") > n_processors()
-                           ? n_processors()
-                           : getParam<dof_id_type>("min_procs_per_row")),
-    _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
     _auto_advance_generators(true)
 {
 }

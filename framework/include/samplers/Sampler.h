@@ -243,6 +243,11 @@ protected:
    */
   virtual LocalRankConfig constructRankConfig(bool batch_mode) const;
 
+  /// The minimum number of processors that are associated with a set of rows
+  const dof_id_type _min_procs_per_row;
+  /// The maximum number of processors that are associated with a set of rows
+  const dof_id_type _max_procs_per_row;
+
 private:
   ///@{
   /**
@@ -325,11 +330,6 @@ private:
 
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
-
-  /// The minimum number of processors that are associated with a set of rows
-  const dof_id_type _min_procs_per_row;
-  /// The maximum number of processors that are associated with a set of rows
-  const dof_id_type _max_procs_per_row;
 
   /// The partitioning of the sampler matrix, built in reinit()
   /// first is for normal mode and send is for batch mode

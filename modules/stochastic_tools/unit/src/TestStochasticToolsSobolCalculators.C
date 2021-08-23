@@ -10,6 +10,7 @@
 
 #include "gtest/gtest.h"
 #include "SobolCalculators.h"
+#include "StochasticToolsUtils.h"
 #include "MooseRandom.h"
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
@@ -40,7 +41,7 @@ model_association_index(const std::vector<Real> & data, std::size_t count)
   return 1 - std::accumulate(data.begin(), data.begin() + count, 0.);
 }
 
-std::vector<Real>
+std::vector<std::vector<Real>>
 sobolidx(const std::vector<Real> & q_vector, std::size_t K, bool resample = true)
 {
   MooseRandom generator;
@@ -87,19 +88,19 @@ sobolidx(const std::vector<Real> & q_vector, std::size_t K, bool resample = true
   // aK
   evaluate(q_vector, M1, data);
 
-  return data;
+  return reshapeVector(data, K, false);
 }
 
 TEST(StochasticTools, Sobol_Saltelli2002)
 {
   // Compute SOBOL vectors of g_function
   std::vector<Real> q_vector = {0, 0.5, 3, 9, 99, 99};
-  std::vector<Real> data = sobolidx(q_vector, 100000);
+  std::vector<std::vector<Real>> data = sobolidx(q_vector, 100000);
 
   // Compute SOBOL indices
   Parallel::Communicator comm;
   ParallelObject po(comm);
-  SobolCalculator calc(po, "SOBOL", q_vector.size(), true);
+  SobolCalculator calc(po, "SOBOL", true);
   std::vector<Real> sobol = calc.compute(data, false);
 
   // This tests the C++ against the results from the TestSobolCalculator.py script, these values
@@ -155,8 +156,8 @@ TEST(StochasticTools, Sobol_Analytical)
   {
     // Compute SOBOL vectors of g_function
     std::vector<Real> q_vector = {0, 0, 0, 0};
-    std::vector<Real> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", q_vector.size(), true);
+    std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
+    SobolCalculator calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -182,8 +183,8 @@ TEST(StochasticTools, Sobol_Analytical)
   {
     // Compute SOBOL vectors of g_function
     std::vector<Real> q_vector = {0, 0, 0, 0};
-    std::vector<Real> data = sobolidx(q_vector, 1000000, false);
-    SobolCalculator calc(po, "SOBOL", q_vector.size(), false);
+    std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000, false);
+    SobolCalculator calc(po, "SOBOL", false);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -201,8 +202,8 @@ TEST(StochasticTools, Sobol_Analytical)
 
   {
     std::vector<Real> q_vector = {0, 0, 0, 0, 0, 0, 0, 0};
-    std::vector<Real> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", q_vector.size(), true);
+    std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
+    SobolCalculator calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -248,8 +249,8 @@ TEST(StochasticTools, Sobol_Analytical)
 
   {
     std::vector<Real> q_vector = {0, 0, 3, 9, 9, 9, 9, 9};
-    std::vector<Real> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", q_vector.size(), true);
+    std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
+    SobolCalculator calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
