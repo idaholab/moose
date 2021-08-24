@@ -1,0 +1,12 @@
+[Tests]
+  [./element_extra_integer_aux_test]
+    type = 'Exodiff'
+    input = 'elem_extra_integer_aux.i'
+    exodiff = 'elem_extra_integer_aux_out.e'
+    requirement = 'The system shall have the capability of visualizing element integers in an auxiliary variable.'
+    design = 'auxkernels/ElemExtraIDAux.md'
+    issues = '#18665'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
