@@ -16,7 +16,7 @@ Host *
   ControlPath ~/.ssh/master-%r@%h:%p
 
 ## HPC Entry Point
-Host hpclogin
+Host hpclogin hpclogin.inl.gov
   Hostname hpclogin.inl.gov
   DynamicForward 5555
 
