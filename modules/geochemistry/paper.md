@@ -148,7 +148,39 @@ Spatially-varying geochemistry simulations use a large amount of memory since th
 
 ![CPU time required to solve a reactive-transport simulation using the PorousFlow and geochemistry modules.\label{fig:scaling_eg}](joss_paper_scaling.png){ width=60% }
 
-# Example: cooling with feldspars
+# Building and using the code
+
+Building the geochemistry module is a two-step process:
+
+1. Download and install the entire MOOSE package.  Detailed instructions are at the [MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).  Even if only in geochemistry is of interest (without transport, solid mechanics, etc) MOOSE comes as a complete package, so needs to be installed in its entirety.  Depending on the computer setup, this can be straightfoward (on a personal Mac computer) or complicated (on an administered supercomputer).
+
+2. During the installation of MOOSE in part 1, only the "framework" will have been compiled.  To compile all the physics modules, including the geochemistry module, use the following instructions run from the command line:
+```
+cd ~/projects/moose/modules
+make
+cd ~/projects/moose/modules/geochemistry
+make
+```
+(If your computer has $N$ cores, the `make` process may be sped up by using the command `make -j`$N$ instead of simply `make`.)
+
+Check that the geochemistry module is correctly compiled using the following instructions:
+```
+cd ~/projects/moose/modules/geochemistry
+./run_tests
+```
+Virtually all the tests should run and pass.  Some may be "skipped" due to a particular computer setup (for instance, not enough threads).
+
+The geochemistry executable is called `geochemistry-opt` and is found at `~/projects/moose/modules/geochemistry`.  This may be used to run pure geochemistry simulations.  For coupled reactive-transport simulations, the `combined-opt` executable must be used.  For example, to run the Weber-Tensleep GeoTES example from the command line:
+```
+cd ~/projects/moose/modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep
+../../../combined-opt -i exchanger.i
+```
+
+# Tests and examples
+
+The geochemistry module's [code coverage](https://mooseframework.inl.gov/docs/coverage/geochemistry/index.html) currently exceeds 96%.  Many of the more complicated benchmark tests and examples are [comprehensively documented](https://mooseframework.inl.gov/modules/geochemistry/tests_and_examples/index.html) and the sections below present one benchmark study and one example by way of illustration.
+
+# Benchmark: cooling with feldspars
 
 One of the geochemistry [tests and examples](https://mooseframework.org/modules/geochemistry/tests_and_examples/index.html) involves slowly cooling an aqueous solution from 300$^{\circ}$C to 25$^{\circ}$C.  The aqueous solution is in equilibrium contact with albite, maximum microcline, muscovite and quartz.  This example is documented in Section 14.1 of @bethke_2007.  \autoref{fig:feldspar_eg} shows the comparison of the results from MOOSE's geochemistry module and the Geochemist's Workbench.
 
@@ -162,7 +194,7 @@ The major ions in the Weber-Tensleep Formation water are Cl$^{-}$, Na$^{+}$, SO$
 
 [//]: # (reviewer comment: this (the ionic strength) could exceed the comfortable/applicable limit of D-H/B-t dot models. Unless Pitzer/HMW capability is implemented, people will have questions when this module is used for a high IS system.  Andy replies: i agree, and have added a comment above.)
 
-The 3D MOOSE model involves coupling 3 models representing: (1) the heat exchanger; (2) injection, production and transport of water through the formation; (3) a geochemical model of the reservoir.  These three models are loosely coupled using MOOSE's "multiapp" approach, using the geochemistry and PorousFlow modules.  The coupled modelling reveals that anhydrite is the main precipitate in the heat exchanger, that illite and kaolinite dissolve around the injection well, and that K-feldspar and quartz precipitate around the injection well.  \autoref{fig:weber_tensleep_eg} illustrates the results.
+The 3D MOOSE model involves coupling 3 models representing: (1) the heat exchanger; (2) injection, production and transport of water through the formation; (3) a geochemical model of the reservoir.  These three models are loosely coupled using MOOSE's "multiapp" approach, using the geochemistry and PorousFlow modules.  The coupled modelling reveals that anhydrite is the main precipitate in the heat exchanger, that illite and kaolinite dissolve around the injection well, and that K-feldspar and quartz precipitate around the injection well.  \autoref{fig:weber_tensleep_eg} illustrates the results.  (These results are derived using a higher resolution than the example included in the test suite, since the latter must be small enough to rapidly pass MOOSE's automatic regression testing.)
 
 ![Temperature, free volume of Quartz, and porosity after 90 days of hot water injection in the Weber-Tensleep aquifer.  The gray areas represent low-permeability cap rocks above and below the aquifer.\label{fig:weber_tensleep_eg}](joss_paper_weber_tensleep.png)
 
