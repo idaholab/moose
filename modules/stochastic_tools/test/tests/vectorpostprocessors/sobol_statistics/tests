@@ -10,4 +10,12 @@
 
     requirement = "The system shall support the ability to compute first, second, and total-effect Sobol sensitivity indices."
   []
+  [sobol_bootstrap]
+    type = CSVDiff
+    input = sobol_bootstrap.i
+    csvdiff = sobol_bootstrap_out_sobol_0002.csv
+    allow_test_objects = true
+
+    requirement = "The system shall support the ability to compute confidence intervals on Sobol sensitivity indices."
+  []
 []
