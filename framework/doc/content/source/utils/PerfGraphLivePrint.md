@@ -6,7 +6,7 @@ The `PerfGraphLivePrint` (PGLP) object is responsible for printing information t
 
 By default, PGLP prints information any time a section takes longer than one second to execute.  It will print out the "live print message" at that point, then it will print a single `.` for every second until the section ends.  When the section ends, both the memory and the time will be printed.
 
-The other reason that PGLP prints is for a large increase in memory (by default 100MB).  If, after a section executes, the memory use was seend to go up by more than the limit, then PGLP will print the live print message and show how much memory and time was used by the section.  The memory limit is configurable from the input file.
+The other reason that PGLP prints is for a large increase in memory (by default 100MB).  If, after a section executes, the memory usage increaed by more than the limit, then PGLP will print the live print message and show how much memory and time was used by the section.  The memory limit is configurable from the input file.
 
 The PGLP primarily works by waking up every second and inspecting what the program has done / is currently doing, printing any necessary information and then going back to sleep.  It should be lightweight enough that it should not significantly disrupt the operation of the program.
 
