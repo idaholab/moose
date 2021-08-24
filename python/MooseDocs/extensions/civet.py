@@ -93,13 +93,13 @@ class CivetExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Collecting CIVET results...")
         branch = self.get('branch')
+        remotes = mooseutils.git_remotes()
         for name, category in self.get('remotes').items():
             LOG.info("Gathering CIVET results for '%s'.", name)
             if category.get('download_test_results', self.get('download_test_results', True)):
                 repo_url = category.get('repo_url', 'https://github.com').rstrip('/')
                 repo_url += '/{}'.format(category.get('repo'))
 
-                remotes = mooseutils.git_remotes()
                 remote = remotes.get(repo_url, None)
                 if remote is None:
                     remote = '__MooseDocs.extensions.civet__'
