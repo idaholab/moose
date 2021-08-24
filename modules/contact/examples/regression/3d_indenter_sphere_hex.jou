@@ -1,0 +1,60 @@
+reset
+
+#{width=40}
+#{height=25}
+#{ind_height=5*3.5}
+#{ind_radius=10.87}
+
+
+sphere radius {ind_radius}
+
+section volume all xplane
+section volume all yplane
+section volume all zplane
+merge all
+# vol all scheme polyhedron
+vol all scheme tetmesh
+vol all size 1.5
+mesh vol all
+volume all copy reflect x
+volume all copy reflect y
+volume all copy reflect z
+merge all
+
+# Add parameters to control discretization
+# vol all size 0.3
+# volume 6  scheme Polyhedron
+# mesh volume 6
+
+move Volume 1 2 3 4 5 6 7 8 x 0 y 0 z {height/2 + ind_radius*1.0 + 0.01} include_merged
+
+
+# Create base material
+create cylinder height {height} radius {width}
+merge all
+# horizontal lines
+curve 53 54 size 1.5
+mesh volume 9
+
+block 1 volume 9
+merge all
+
+# refine element with z_coord < 12.5 and z_coord > 7 and x_coord > -8 and x_coord < 8 and y_coord < 8 and y_coord > -8 bias 2 numsplit 1
+# refine element with z_coord < 12.5 and z_coord > 10 and x_coord > -4 and x_coord < 4 and y_coord < 4 and y_coord > -4 size 0.5
+# refine element with z_coord < 12.5 and z_coord > 7 and x_coord > -7 and x_coord < 7 and y_coord < 7 and y_coord > -7 size 1.4
+
+delete volume 1 2 3 4
+
+block 2 volume 5 6 7 8
+block 1 element type HEX8
+block 2 element type HEX8
+
+Sideset 101 surface 40
+Sideset 102 surface 41
+Sideset 201 surface 11 15 19 7
+Sideset 202 surface 26 30 34 38
+
+# undo group begin
+# set large exodus file off
+# export mesh "/Users/jianw/projects/indenter/3d_berkovich_z22.e" overwrite
+# undo group end

@@ -1,0 +1,55 @@
+reset
+
+#{width=40}
+#{height=25}
+#{ind_height=5*3.5}
+#{ind_radius=10.87*3.5}
+
+create cylinder height {height} radius {width}
+create pyramid height {ind_height} sides 3 radius {ind_radius} top 0
+rotate Volume 2 angle 180 about X include_merged
+move Volume 2 x 0 y 0 z {height/2 + ind_height/2 + 0.001} include_merged
+
+webcut volume 1  with plane vertex 1 5 6 noimprint nomerge
+webcut volume 1 3 with plane normal to curve 4 from vertex 6 noimprint nomerge
+webcut volume 3 4  with plane vertex 4 6 13 noimprint nomerge
+
+merge all
+
+
+# horizontal lines
+curve 9 21 23 25 26 27 39 53 11 65 35 40 55 66 52 56 63 67 74 size 8
+curve 24 28 33 38 54 64 size 4
+mesh surface 16 17 18 19 20 23 26 32 34 35 36 37 38 39 41 42 43 44 45 46 47 49 50  51
+
+mesh volume 1 3 4 5 6 7
+
+block 1 volume 1 3 4 5 6 7
+
+refine element with z_coord < 12.5 and z_coord > 7 and x_coord > -6 and x_coord < 6 and y_coord < 6 and y_coord > -6 bias 6 numsplit 2
+refine element with z_coord < 12.5 and z_coord > 11 and x_coord > -2 and x_coord < 2 and y_coord < 2 and y_coord > -2 size 0.6
+
+# optional below
+# refine element with z_coord < 12.5 and z_coord > 11 and x_coord > -2 and x_coord < 2 and y_coord < 2 and y_coord > -2 size 0.25
+
+# volume 2 size 500 # No need for refinement here
+volume 2 size 3.5 # No need for refinement here
+
+volume 2 scheme tetmesh
+mesh volume 2
+
+merge all
+
+block 2 volume 2
+block 1 element type HEX8
+block 2 element type TETRA4
+
+Sideset 101 surface 18 32 39 41 47 49
+Sideset 102 surface 20 34 37 43 46 50
+Sideset 201 surface 4
+Sideset 202 surface 5 6 7
+
+# undo group begin
+# set large exodus file off
+export mesh "/Users/marta3/Repositories/projects/moose/ldrd_contact/3d/3d_berkovich_check.e" overwrite
+# undo group end

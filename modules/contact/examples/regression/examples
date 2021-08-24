@@ -1,0 +1,55 @@
+[Examples]
+  issues = '#18648'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [indenter_force_control]
+    type = CSVDiff
+    input = 'indenter_force_control.i'
+    csvdiff = 'indenter_force_control_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall avoid regression in a Berkovich indenter problem '
+                  'pushed into a crystal plasticity substrate driven by a force, which is activated '
+                  'by using using MOOSE controls. '
+    max_time = 4800
+    min_parallel = 6
+    max_parallel = 8
+  []
+  [indenter_spherical_fine]
+    type = CSVDiff
+    input = 'indenter_spherical_fine.i'
+    csvdiff = 'indenter_spherical_fine_out.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall avoid regression in a spherical indenter problem '
+                  'pushed into a crystal plasticity substrate driven by a force. '
+    max_time = 4800
+    min_parallel = 6
+    max_parallel = 8
+  []
+  [indenter_displacement_control]
+    type = CSVDiff
+    input = 'indenter_displacement_control.i'
+    csvdiff = 'indenter_displacement_control_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall avoid regression in a Berkovich indenter problem '
+                  'pushed into a crystal plasticity substrate driven by Dirichlet boundary '
+                  'conditions (i.e. displacement control). '
+    max_time = 4800
+    min_parallel = 6
+    max_parallel = 8
+  []
+  [hertz_contact_hex27_verification]
+    type = CSVDiff
+    input = 'hertz_contact_hex27_verification.i'
+    csvdiff = 'hertz_contact_hex27_verification_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall reproduce verified results of an elastic sphere '
+                  'pressed onto a flat plane according to Herz formulae when the element is second '
+                  'order HEX27. '
+    max_time = 4800
+    min_parallel = 6
+    max_parallel = 8
+  []
+[]
