@@ -76,6 +76,22 @@ public:
                                                     const bool) override;
 };
 
+/*
+ * Implement BCa method of Efron and Tibshirani (2003), Chapter 14.
+ */
+template <typename InType, typename OutType>
+class BiasCorrectedAccelerated<std::vector<InType>, std::vector<OutType>>
+  : public BootstrapCalculator<std::vector<InType>, std::vector<OutType>>
+{
+public:
+  using BootstrapCalculator<std::vector<InType>, std::vector<OutType>>::BootstrapCalculator;
+  virtual std::vector<std::vector<OutType>> compute(const std::vector<InType> &,
+                                                    const bool) override;
+
+private:
+  std::vector<OutType> acceleration(const std::vector<InType> &, const bool);
+};
+
 template <typename InType, typename OutType>
 struct CalculatorBuilder<std::vector<InType>, std::vector<OutType>>
 {

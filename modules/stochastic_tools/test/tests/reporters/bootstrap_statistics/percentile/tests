@@ -12,6 +12,13 @@
 
       detail = "of a vector of data"
     []
+    [vector]
+      type = JSONDiff
+      input = percentile_main.i
+      jsondiff = percentile_main_out.json
+
+      detail = "of a vector of vector data"
+    []
 
     # These two tests are restricted to 3 processors because the Test VPP creates unique data
     # depending on the number of cores used
