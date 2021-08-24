@@ -13,7 +13,7 @@
 - Open Sourced February 12, 2014
 
 !media images/moose.png
-       style=width:40%;margin-left:auto;margin-right:auto;display:block;
+       style=width:40%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !---
 
@@ -39,7 +39,7 @@
 
 !col width=50%
 !media images/coupling.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 

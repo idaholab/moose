@@ -42,7 +42,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !col width=20%
 !media images/transfers_01_meshfunction.png
-       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 
@@ -146,7 +146,7 @@ The final class of Transfers, those moving scalar values, play a role here.  "Sa
 
 !col width=20%
 !media images/transfers_04_multiscale.png
-       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 

@@ -32,7 +32,7 @@ No problem!
 
 !col width=50%
 !media images/coupling.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 
@@ -72,7 +72,7 @@ One caveat: in order for this to work, both apps need to have Backup/Restore cap
 ## Picard Cont.
 
 !media images/coupling_02_picard.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 
 !---
@@ -101,7 +101,7 @@ The graphic on the next slide should help...
 ## Picard With Subcycling Cont.
 
 !media images/coupling_03_subcycling_picard.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !---
 

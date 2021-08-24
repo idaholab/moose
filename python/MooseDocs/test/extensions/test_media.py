@@ -125,7 +125,7 @@ class TestVideo(MooseDocsTestCase):
 
     def setupContent(self):
         """Virtual method for populating Content section in configuration."""
-        config = [dict(root_dir='large_media', content=['testing/Flag_of_Idaho.*'])]
+        config = [dict(root_dir='large_media', content=['testing/*'])]
         return common.get_content(config, '.md')
 
 
@@ -134,6 +134,11 @@ class TestVideo(MooseDocsTestCase):
         ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm")
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Video', src='http://clips.vorwaerts-gmbh.de/VfE.webm')
+
+        # poster
+        ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm poster=big_buck_bunny.jpg")
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'Video', src='http://clips.vorwaerts-gmbh.de/VfE.webm', poster='big_buck_bunny.jpg')
 
         # latex_src
         ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm latex_src=Flag_of_Idaho.pdf")
@@ -161,38 +166,44 @@ class TestVideo(MooseDocsTestCase):
         self.assertToken(ast(1,0), 'String', content='Flag 1')
 
     def testHTML(self):
-        # no float
-        _, res = self.execute("!media http://clips.vorwaerts-gmbh.de/VfE.webm")
+        # no float with poster
+        _, res = self.execute("!media http://clips.vorwaerts-gmbh.de/VfE.webm poster=big_buck_bunny.jpg")
         self.assertHTMLTag(res, 'body', size=1)
-        self.assertHTMLTag(res(0), 'video', size=1, width='100%', controls=True)
-        self.assertHTMLTag(res(0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
+        self.assertHTMLTag(res(0), 'div', size=1, class_='moose-video-div')
+        self.assertHTMLTag(res(0,0), 'video', size=1, class_='moose-video', width='100%',
+                           controls=True, poster='/testing/big_buck_bunny.jpg')
+        self.assertHTMLTag(res(0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
 
         # in float
         _, res = self.execute("!media http://clips.vorwaerts-gmbh.de/VfE.webm caption=test id=idaho")
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'div', size=2, class_='moose-float-div', id_='idaho')
-        self.assertHTMLTag(res(0,0), 'video', size=1, width='100%', controls=True)
-        self.assertHTMLTag(res(0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
+        self.assertHTMLTag(res(0,0), 'div', size=1, class_='moose-video-div')
+        self.assertHTMLTag(res(0,0,0), 'video', size=1, class_='moose-video', width='100%', controls=True)
+        self.assertHTMLTag(res(0,0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
         self.assertHTMLTag(res(0,1), 'p', size=2, class_='moose-caption')
         self.assertHTMLTag(res(0,1,0), 'span', size=1, class_='moose-caption-heading', string='Figure 1: ')
         self.assertHTMLTag(res(0,1,1), 'span', size=1, class_='moose-caption-text', string='test')
 
     def testMaterialize(self):
-        # no float
-        ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm")
+        # no float with poster
+        ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm poster=big_buck_bunny.jpg")
         res = self.render(ast, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=1, class_='moose-content')
-        self.assertHTMLTag(res(0), 'video', size=1)
-        self.assertHTMLTag(res(0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
+        self.assertHTMLTag(res(0), 'div', size=1, class_='moose-video-div')
+        self.assertHTMLTag(res(0,0), 'video', size=1, class_='moose-video', width='100%',
+                           controls=True, poster='/testing/big_buck_bunny.jpg')
+        self.assertHTMLTag(res(0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
 
         # in float
         ast = self.tokenize("!media http://clips.vorwaerts-gmbh.de/VfE.webm caption=test id=idaho")
         res = self.render(ast, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=1, class_='moose-content')
-        self.assertHTMLTag(res(0), 'div', size=1, class_='card moose-float')
+        self.assertHTMLTag(res(0), 'div', size=1, class_='card moose-float', id_='idaho')
         self.assertHTMLTag(res(0,0), 'div', size=2, class_='card-image')
-        self.assertHTMLTag(res(0,0,0), 'video', size=1)
-        self.assertHTMLTag(res(0,0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
+        self.assertHTMLTag(res(0,0,0), 'div', size=1, class_='moose-video-div')
+        self.assertHTMLTag(res(0,0,0,0), 'video', size=1, class_='moose-video', width='100%', controls=True)
+        self.assertHTMLTag(res(0,0,0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
         self.assertHTMLTag(res(0,0,1), 'p', size=2, class_='moose-caption')
         self.assertHTMLTag(res(0,0,1,0), 'span', size=1, class_='moose-caption-heading', string='Figure 1: ')
         self.assertHTMLTag(res(0,0,1,1), 'span', size=1, class_='moose-caption-text', string='test')

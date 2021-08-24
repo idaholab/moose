@@ -56,7 +56,7 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Example Code
 
-!media darcy_thermo_mech/moose_code.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_code.png style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !---
 
@@ -85,8 +85,8 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !---
 
-!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
