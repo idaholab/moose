@@ -43,4 +43,15 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./subdomain_bounding_box_element_integer_test]
+    type = 'Exodiff'
+    input = 'bounding_box_integers.i'
+    exodiff = 'bounding_box_integers_out.e'
+    requirement = 'The system shall include the ability to assign extra element integers within a regular bounding box.'
+    design = 'meshgenerators/SubdomainBoundingBoxGenerator.md'
+    issues = '#13764'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
 []

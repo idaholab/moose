@@ -1,13 +1,24 @@
 /*
+* This file is part of the MOOSE framework
+* https://www.mooseframework.org
+*
+* All rights reserved, see COPYRIGHT for full restrictions
+* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+*
+* Licensed under LGPL 2.1, please see LICENSE for details
+* https://www.gnu.org/licenses/lgpl-2.1.html
+*/
+
+/*
 This pipeline builds a Docker image of MOOSE, runs the standard suite of tests,
-and pushes the image to the registry prescribed by $DOCKER_TAG.  A second push 
-is also done, with the tag suffix set to the commit hash of the MOOSE working 
+and pushes the image to the registry prescribed by $DOCKER_TAG.  A second push
+is also done, with the tag suffix set to the commit hash of the MOOSE working
 tree.
 
-For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
+For this all to work, $DOCKER_TAG must be prescribed as a pipeline
 parameter in Jenkins.  Additionally, $DISTRO_NAME and $DISTRO_VERSION need to
-be defined, e.g. Ubuntu and 18.04, respectively.  Supported package managers 
-are apt and yum.  Distros that should work include Ubuntu, Debian, CentOS, 
+be defined, e.g. Ubuntu and 18.04, respectively.  Supported package managers
+are apt and yum.  Distros that should work include Ubuntu, Debian, CentOS,
 and Amazon Linux.
 */
 
@@ -18,18 +29,18 @@ pipeline {
         SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
         SLACK_ERR = "Slack not configured.\n"
     }
-    
+
     stages {
-        
+
         // Run 'docker build' on the Dockerfile in this repository
         // with args for core count and submodule commit hashes
         stage('Build Image')
-        {            
+        {
             steps {
                 sh '''
                 # Setup for getting submodule commit hashes
                 sub_rev() { git ls-files -s $1 | awk '{print $2}' ; }
-                
+
                 # Build MOOSE image with max cores and compatible submodules
                 docker build \
                 --build-arg DISTRO_NAME=$DISTRO_NAME \
@@ -43,10 +54,10 @@ pipeline {
                 '''
             }
         }
-        
+
         // Pipes output from MOOSE tests into a readable, accessible file
         stage('Run Tests')
-        {            
+        {
             steps {
                 ansiColor('xterm') {
                     sh '''
@@ -60,21 +71,21 @@ pipeline {
                 }
             }
         }
-        
+
         // Pushes given tag to registry and also for the current MOOSE commit
         stage('Push to Docker Registry')
-        {            
+        {
             steps {
                 sh '''
                 # Get Docker repo prefix and tag string for current revision
                 DOCKER_REPO=$(echo $DOCKER_TAG | awk -F ':' '{print $1}')
                 DOCKER_COMMIT_TAG="$DOCKER_REPO:$(git rev-parse HEAD)"
-                
+
                 # Push given tag and also tag by commit
                 docker push $DOCKER_TAG
                 docker tag $DOCKER_TAG $DOCKER_COMMIT_TAG
                 docker push $DOCKER_COMMIT_TAG
-                
+
                 # Clean up artifacts from the build
                 docker system prune -f
                 docker rmi $DOCKER_COMMIT_TAG
@@ -86,7 +97,7 @@ pipeline {
     post {
         success {
             script {
-                try {   
+                try {
                     // Send message build was successful
                     slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
                 } catch (Exception e) {
@@ -97,7 +108,7 @@ pipeline {
 
         failure {
             script {
-                try {        
+                try {
                     MOOSE_COMMIT = sh(
                         script: 'git rev-parse HEAD',
                         returnStdout: true
