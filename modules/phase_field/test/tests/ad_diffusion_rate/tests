@@ -1,9 +1,11 @@
 [Tests]
   design = 'ADDiffusionRate.md'
-  issue = '#16167'
+  issues = '#16167'
   [diffusionrate]
     type = 'CSVDiff'
     input = 'diffusion_rate.i'
     csvdiff = 'diffusion_rate.csv'
+    requirement = 'The phase field module shall be able to compute the Laplacian of the time rate of '
+                  'change of the order parameter using automatic differentiation.'
   []
 []
