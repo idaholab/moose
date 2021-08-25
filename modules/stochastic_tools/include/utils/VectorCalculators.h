@@ -20,10 +20,11 @@ class VectorCalculator : public Calculator<std::vector<InType>, std::vector<OutT
 public:
   using Calculator<std::vector<InType>, std::vector<OutType>>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const InType & data) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual std::vector<OutType> get() const override { return _values; }
+protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const InType & data) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual std::vector<OutType> getValue() const override { return _values; }
 
 private:
   std::vector<CalcType<InType, OutType>> _calcs;
@@ -32,7 +33,7 @@ private:
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::initialize()
+VectorCalculator<InType, OutType, CalcType>::initializeCalculator()
 {
   _calcs.clear();
   _values.clear();
@@ -40,7 +41,7 @@ VectorCalculator<InType, OutType, CalcType>::initialize()
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::update(const InType & data)
+VectorCalculator<InType, OutType, CalcType>::updateCalculator(const InType & data)
 {
   for (const auto & i : index_range(data))
   {
@@ -55,7 +56,7 @@ VectorCalculator<InType, OutType, CalcType>::update(const InType & data)
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::finalize(bool is_distributed)
+VectorCalculator<InType, OutType, CalcType>::finalizeCalculator(bool is_distributed)
 {
   _values.reserve(_calcs.size());
   for (auto & cc : _calcs)

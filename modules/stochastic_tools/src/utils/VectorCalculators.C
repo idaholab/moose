@@ -92,15 +92,6 @@ BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>::build(
 }
 
 #define createVectorCalculators(InType, OutType)                                                   \
-  template class VectorCalculator<InType, OutType, Mean>;                                          \
-  template class VectorCalculator<InType, OutType, Max>;                                           \
-  template class VectorCalculator<InType, OutType, Min>;                                           \
-  template class VectorCalculator<InType, OutType, Sum>;                                           \
-  template class VectorCalculator<InType, OutType, StdDev>;                                        \
-  template class VectorCalculator<InType, OutType, StdErr>;                                        \
-  template class VectorCalculator<InType, OutType, Ratio>;                                         \
-  template class VectorCalculator<InType, OutType, L2Norm>;                                        \
-  template class VectorCalculator<InType, OutType, Median>;                                        \
   template class Percentile<std::vector<InType>, std::vector<OutType>>;                            \
   template struct CalculatorBuilder<std::vector<InType>, std::vector<OutType>>;                    \
   template struct BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>

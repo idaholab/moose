@@ -21,7 +21,7 @@ makeCalculatorEnum()
 // MEAN ////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Mean<InType, OutType>::initialize()
+Mean<InType, OutType>::initializeCalculator()
 {
   _count = 0;
   _sum = OutType();
@@ -29,7 +29,7 @@ Mean<InType, OutType>::initialize()
 
 template <typename InType, typename OutType>
 void
-Mean<InType, OutType>::update(const typename InType::value_type & val)
+Mean<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _count++;
   _sum += static_cast<OutType>(val);
@@ -37,7 +37,7 @@ Mean<InType, OutType>::update(const typename InType::value_type & val)
 
 template <typename InType, typename OutType>
 void
-Mean<InType, OutType>::finalize(bool is_distributed)
+Mean<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
   {
@@ -51,21 +51,21 @@ Mean<InType, OutType>::finalize(bool is_distributed)
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Min<InType, OutType>::initialize()
+Min<InType, OutType>::initializeCalculator()
 {
   _min = std::numeric_limits<OutType>::max();
 }
 
 template <typename InType, typename OutType>
 void
-Min<InType, OutType>::update(const typename InType::value_type & val)
+Min<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _min = std::min(_min, static_cast<OutType>(val));
 }
 
 template <typename InType, typename OutType>
 void
-Min<InType, OutType>::finalize(bool is_distributed)
+Min<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.min(_min);
@@ -74,21 +74,21 @@ Min<InType, OutType>::finalize(bool is_distributed)
 // MAX /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Max<InType, OutType>::initialize()
+Max<InType, OutType>::initializeCalculator()
 {
   _max = std::numeric_limits<OutType>::min();
 }
 
 template <typename InType, typename OutType>
 void
-Max<InType, OutType>::update(const typename InType::value_type & val)
+Max<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _max = std::max(_max, static_cast<OutType>(val));
 }
 
 template <typename InType, typename OutType>
 void
-Max<InType, OutType>::finalize(bool is_distributed)
+Max<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.max(_max);
@@ -97,7 +97,7 @@ Max<InType, OutType>::finalize(bool is_distributed)
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Sum<InType, OutType>::finalize(bool is_distributed)
+Sum<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.sum(this->_sum);
@@ -106,7 +106,7 @@ Sum<InType, OutType>::finalize(bool is_distributed)
 // STDDEV //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-StdDev<InType, OutType>::initialize()
+StdDev<InType, OutType>::initializeCalculator()
 {
   _count = 0;
   _sum = OutType();
@@ -115,7 +115,7 @@ StdDev<InType, OutType>::initialize()
 
 template <typename InType, typename OutType>
 void
-StdDev<InType, OutType>::update(const typename InType::value_type & val)
+StdDev<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _count++;
   _sum += static_cast<OutType>(val);
@@ -124,7 +124,7 @@ StdDev<InType, OutType>::update(const typename InType::value_type & val)
 
 template <typename InType, typename OutType>
 void
-StdDev<InType, OutType>::finalize(bool is_distributed)
+StdDev<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
   {
@@ -142,16 +142,16 @@ StdDev<InType, OutType>::finalize(bool is_distributed)
 // STDERR //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-StdErr<InType, OutType>::finalize(bool is_distributed)
+StdErr<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
-  StdDev<InType, OutType>::finalize(is_distributed);
+  StdDev<InType, OutType>::finalizeCalculator(is_distributed);
   this->_sum_of_square /= std::sqrt(this->_count);
 }
 
 // RATIO ///////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Ratio<InType, OutType>::initialize()
+Ratio<InType, OutType>::initializeCalculator()
 {
   _min = std::numeric_limits<OutType>::max();
   _max = std::numeric_limits<OutType>::min();
@@ -159,7 +159,7 @@ Ratio<InType, OutType>::initialize()
 
 template <typename InType, typename OutType>
 void
-Ratio<InType, OutType>::update(const typename InType::value_type & val)
+Ratio<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   if (_min > val)
     _min = static_cast<OutType>(val);
@@ -169,7 +169,7 @@ Ratio<InType, OutType>::update(const typename InType::value_type & val)
 
 template <typename InType, typename OutType>
 void
-Ratio<InType, OutType>::finalize(bool is_distributed)
+Ratio<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
   {
@@ -181,21 +181,21 @@ Ratio<InType, OutType>::finalize(bool is_distributed)
 // L2NORM //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-L2Norm<InType, OutType>::initialize()
+L2Norm<InType, OutType>::initializeCalculator()
 {
   _l2_norm = OutType();
 }
 
 template <typename InType, typename OutType>
 void
-L2Norm<InType, OutType>::update(const typename InType::value_type & val)
+L2Norm<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _l2_norm += MathUtils::pow(static_cast<OutType>(val), 2);
 }
 
 template <typename InType, typename OutType>
 void
-L2Norm<InType, OutType>::finalize(bool is_distributed)
+L2Norm<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.sum(_l2_norm);
@@ -205,21 +205,21 @@ L2Norm<InType, OutType>::finalize(bool is_distributed)
 // MEDIAN //////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 void
-Median<InType, OutType>::initialize()
+Median<InType, OutType>::initializeCalculator()
 {
   _storage.clear();
 }
 
 template <typename InType, typename OutType>
 void
-Median<InType, OutType>::update(const typename InType::value_type & val)
+Median<InType, OutType>::updateCalculator(const typename InType::value_type & val)
 {
   _storage.push_back(static_cast<OutType>(val));
 }
 
 template <typename InType, typename OutType>
 void
-Median<InType, OutType>::finalize(bool is_distributed)
+Median<InType, OutType>::finalizeCalculator(bool is_distributed)
 {
   // Make sure we aren't doing anything silly like taking the median of an empty vector
   _median = OutType();

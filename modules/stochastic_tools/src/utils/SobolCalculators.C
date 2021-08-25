@@ -24,19 +24,19 @@ SobolCalculator::SobolCalculator(const ParallelObject & other,
 }
 
 void
-SobolCalculator::initialize()
+SobolCalculator::initializeCalculator()
 {
   _data.clear();
 }
 
 void
-SobolCalculator::update(const Real & data)
+SobolCalculator::updateCalculator(const Real & data)
 {
   _data.push_back(data);
 }
 
 void
-SobolCalculator::finalize(bool is_distributed)
+SobolCalculator::finalizeCalculator(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.gather(0, _data);

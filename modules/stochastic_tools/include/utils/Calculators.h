@@ -40,7 +40,7 @@ MultiMooseEnum makeCalculatorEnum();
  * the makeCalculator function.
  *
  * To create new Calculator objects first create the Calculator class and then update the
- * above free functions above.
+ * the initializeCalculator, updateCalculator, finalizeCalculator, and getValue virtual functions
  *
  * Explicit instantiations are generated in the C file.
  */
@@ -49,22 +49,36 @@ class Calculator : public libMesh::ParallelObject
 {
 public:
   Calculator(const libMesh::ParallelObject & other, const std::string & name)
-    : libMesh::ParallelObject(other), _name(name)
+    : libMesh::ParallelObject(other), _name(name), _state(CalculatorState::NONE)
   {
   }
 
   virtual ~Calculator() = default;
   OutType compute(const InType &, bool);
 
-  virtual void initialize() {}
-  virtual void update(const typename InType::value_type &) = 0;
-  virtual void finalize(bool) {}
-  virtual OutType get() const = 0;
+  void initialize();
+  void update(const typename InType::value_type &);
+  void finalize(bool);
+  OutType get() const;
 
   const std::string & name() const { return _name; }
 
+protected:
+  virtual void initializeCalculator() = 0;
+  virtual void updateCalculator(const typename InType::value_type &) = 0;
+  virtual void finalizeCalculator(bool) = 0;
+  virtual OutType getValue() const = 0;
+
 private:
+  enum CalculatorState
+  {
+    NONE,
+    INITIALIZED,
+    FINALIZED
+  };
+
   const std::string _name;
+  CalculatorState _state;
 };
 
 template <typename InType, typename OutType>
@@ -73,12 +87,12 @@ class Mean : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _sum; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _sum; }
+
   dof_id_type _count;
   OutType _sum;
 };
@@ -89,12 +103,12 @@ class Min : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _min; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _min; }
+
   OutType _min;
 };
 
@@ -104,12 +118,12 @@ class Max : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _max; }
+
   OutType _max;
 };
 
@@ -119,7 +133,8 @@ class Sum : public Mean<InType, OutType>
 public:
   using Mean<InType, OutType>::Mean;
 
-  virtual void finalize(bool is_distributed) override;
+protected:
+  virtual void finalizeCalculator(bool is_distributed) override;
 };
 
 template <typename InType, typename OutType>
@@ -128,12 +143,12 @@ class StdDev : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _sum_of_square; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _sum_of_square; }
+
   dof_id_type _count;
   OutType _sum;
   OutType _sum_of_square;
@@ -145,7 +160,8 @@ class StdErr : public StdDev<InType, OutType>
 public:
   using StdDev<InType, OutType>::StdDev;
 
-  virtual void finalize(bool is_distributed) override;
+protected:
+  virtual void finalizeCalculator(bool is_distributed) override;
 };
 
 template <typename InType, typename OutType>
@@ -154,12 +170,12 @@ class Ratio : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _max / _min; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _max / _min; }
+
   OutType _min;
   OutType _max;
 };
@@ -170,12 +186,12 @@ class L2Norm : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _l2_norm; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _l2_norm; }
+
   OutType _l2_norm;
 };
 
@@ -185,12 +201,12 @@ class Median : public Calculator<InType, OutType>
 public:
   using Calculator<InType, OutType>::Calculator;
 
-  virtual void initialize() override;
-  virtual void update(const typename InType::value_type & val) override;
-  virtual void finalize(bool is_distributed) override;
-  virtual OutType get() const override { return _median; }
-
 protected:
+  virtual void initializeCalculator() override;
+  virtual void updateCalculator(const typename InType::value_type & val) override;
+  virtual void finalizeCalculator(bool is_distributed) override;
+  virtual OutType getValue() const override { return _median; }
+
   std::vector<OutType> _storage;
   OutType _median;
 };
@@ -224,6 +240,41 @@ Calculator<InType, OutType>::compute(const InType & data, bool is_distributed)
     update(val);
   finalize(is_distributed);
   return get();
+}
+
+template <typename InType, typename OutType>
+void
+Calculator<InType, OutType>::initialize()
+{
+  initializeCalculator();
+  _state = CalculatorState::INITIALIZED;
+}
+
+template <typename InType, typename OutType>
+void
+Calculator<InType, OutType>::update(const typename InType::value_type & val)
+{
+  mooseAssert(_state == CalculatorState::INITIALIZED, "Calculator is in wrong state.");
+  updateCalculator(val);
+}
+
+template <typename InType, typename OutType>
+void
+Calculator<InType, OutType>::finalize(bool is_distributed)
+{
+  if (_state != CalculatorState::INITIALIZED)
+    ::mooseError("Calculator is in wrong state.");
+  finalizeCalculator(is_distributed);
+  _state = CalculatorState::FINALIZED;
+}
+
+template <typename InType, typename OutType>
+OutType
+Calculator<InType, OutType>::get() const
+{
+  if (_state != CalculatorState::FINALIZED)
+    ::mooseError("Calculator is in wrong state.");
+  return getValue();
 }
 
 // makeCalculator //////////////////////////////////////////////////////////////////////////////////
