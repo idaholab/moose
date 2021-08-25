@@ -3,5 +3,6 @@
     type = 'RunException'
     input = 'err.no_connected_components.i'
     expect_err = "shaft: No components are connected to the shaft."
+    max_parallel = 1
   []
 []

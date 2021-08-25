@@ -6,6 +6,7 @@
     ratio_tol = 1e-12
     difference_tol = 1e-12
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_free_inflow]
@@ -14,6 +15,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -24,6 +26,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_free_outflow]
@@ -32,6 +35,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -43,6 +47,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_mass_flow_rate_temperature_reversed]
@@ -52,6 +57,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -63,6 +69,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_density_velocity_reversed]
@@ -72,6 +79,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -82,6 +90,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_velocity_temperature_reversed]
@@ -91,6 +100,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -101,6 +111,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -112,6 +123,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [boundary_flux_3eqn_ghost_stagnation_pressure_temperature_reversed]
@@ -121,6 +133,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -131,6 +144,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -141,6 +155,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -154,6 +169,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # left star region
@@ -164,6 +180,7 @@
     ratio_tol = 1
     difference_tol = 25
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # right star region
@@ -174,6 +191,7 @@
     ratio_tol = 1
     difference_tol = 25
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # right region
@@ -184,6 +202,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -197,6 +216,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # left star region
@@ -207,6 +227,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # right star region
@@ -217,6 +238,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # right region
@@ -227,6 +249,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   # unequal area
@@ -245,6 +268,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

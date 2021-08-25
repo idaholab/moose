@@ -5,6 +5,7 @@
     exodiff = 'single_block_out.e-s005'
     abs_zero = 1e-9
     recover = false
+    max_parallel = 1
   []
 
   [multiple_blocks]
@@ -14,5 +15,6 @@
     recover = false
     method = 'opt'
     skip = '#709'
+    max_parallel = 1
   []
 []

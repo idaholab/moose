@@ -82,21 +82,6 @@ Simulation::buildMesh()
   if (_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
     _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
   _mesh.prep();
-
-  // augment the sparsity pattern
-  {
-    const std::string class_name = "AugmentSparsityBetweenElements";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MooseMesh *>("mesh") = &_mesh;
-    params.set<std::string>("for_whom") = "thm:simualtion";
-    params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::COUPLING;
-    params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
-        &_sparsity_elem_augmentation;
-    auto obj = _factory.create<RelationshipManager>(
-        class_name, genName(_fe_problem.name(), "rm_elem2elem"), params);
-    _app.addRelationshipManager(obj);
-  }
 }
 
 void

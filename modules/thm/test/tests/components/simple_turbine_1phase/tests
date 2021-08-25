@@ -6,17 +6,20 @@
     override_columns = 'energy_diff mass_diff'
     override_abs_zero = '1e-4 1e-10'
     override_rel_err = '0 0'
+    max_parallel = 1
   []
 
   [phy:test]
     type = 'Exodiff'
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
+    max_parallel = 1
   []
 
   [clg:test]
     type = 'CSVDiff'
     input = 'clg.test.i'
     csvdiff = 'clg.test_csv.csv'
+    max_parallel = 1
   []
 []

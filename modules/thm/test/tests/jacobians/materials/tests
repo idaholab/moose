@@ -5,6 +5,7 @@
     ratio_tol = 1e-14
     difference_tol = 1e-14
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [density_3eqn_material]
@@ -14,6 +15,7 @@
     ratio_tol = 5e-9
     difference_tol = 5e-10
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [dynamic_viscosity]
@@ -22,6 +24,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-7
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [linear_test_material]
@@ -30,6 +33,7 @@
     ratio_tol = 5e-14
     difference_tol = 5e-14
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [pressure_3eqn_material]
@@ -39,6 +43,7 @@
     ratio_tol = 1e-8
     difference_tol = 8e-4
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [specific_internal_energy_3eqn]
@@ -48,6 +53,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-7
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [specific_volume_3eqn]
@@ -57,6 +63,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-14
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [velocity_3eqn]
@@ -66,6 +73,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-8
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [enthalpy_3eqn]
@@ -75,6 +83,7 @@
     ratio_tol = 1e-7
     difference_tol = 5e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [reynolds_number]
@@ -83,6 +92,7 @@
     ratio_tol = 5e-8
     difference_tol = 1e-8
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [temperature_3eqn_material]
@@ -92,6 +102,7 @@
     ratio_tol = 2e-8
     difference_tol = 3e-10
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [total_enthalpy_3eqn]
@@ -101,6 +112,7 @@
     ratio_tol = 5e-8
     difference_tol = 1e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [wall_friction_function]
@@ -109,6 +121,7 @@
     ratio_tol = 1e-14
     difference_tol = 1e-14
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [wall_friction_churchill]
@@ -117,6 +130,7 @@
     ratio_tol = 2e-10
     difference_tol = 2e-10
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

@@ -4,6 +4,7 @@
     input = 'heat_structure_energy_plate.i'
     csvdiff = 'heat_structure_energy_plate.csv'
     recover = false
+    max_parallel = 1
   []
   [heat_structure_energy_plate_T_ref]
     type = 'CSVDiff'
@@ -11,6 +12,7 @@
     cli_args = 'Postprocessors/E_tot/T_ref=0.5 Outputs/file_base=heat_structure_energy_plate_T_ref'
     csvdiff = 'heat_structure_energy_plate_T_ref.csv'
     recover = false
+    max_parallel = 1
   []
   [heat_structure_energy_cylinder]
     type = 'CSVDiff'
@@ -18,5 +20,6 @@
     csvdiff = 'heat_structure_energy_cylinder.csv'
     rel_err = 1e-5
     recover = false
+    max_parallel = 1
   []
 []

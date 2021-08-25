@@ -7,5 +7,6 @@
     cli_args = 'Debug/check_jacobian=true'
     allow_test_objects = true
     max_threads = 1
+    max_parallel = 1
   []
 []

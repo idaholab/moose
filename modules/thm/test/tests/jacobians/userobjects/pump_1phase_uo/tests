@@ -6,6 +6,7 @@
     ratio_tol = 1e-11
     difference_tol = 1e-11
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
     group = 'pump1phase'
   []
@@ -20,6 +21,7 @@
     ratio_tol = 4e-10
     difference_tol = 2e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
     group = 'pump1phase'
   []
@@ -34,6 +36,7 @@
     ratio_tol = 4e-10
     difference_tol = 1e-6
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
     group = 'pump1phase'
   []
@@ -47,6 +50,7 @@
     ratio_tol = 3e-10
     difference_tol = 9e-7
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
     group = 'pump1phase'
   []

@@ -4,6 +4,7 @@
     input = 'phy.standalone.i'
     exodiff = 'phy.standalone_out.e'
     mesh_mode = 'REPLICATED'
+    max_parallel = 1
   []
 
   [err:2d_mesh]
@@ -11,6 +12,7 @@
     input = 'phy.standalone.i'
     cli_args = 'Components/blk/file=square.e'
     expect_err = "blk: File '(.+)square\.e' does not contain a 3D mesh\."
+    max_parallel = 1
   []
 
   [err:non_existing_file]
@@ -18,5 +20,6 @@
     input = 'phy.standalone.i'
     cli_args = 'Components/blk/file=no-file.e'
     expect_err = "blk: Could not open '(.+)no-file\.e'\. Check that the file exists and that you have permission to open it\."
+    max_parallel = 1
   []
 []

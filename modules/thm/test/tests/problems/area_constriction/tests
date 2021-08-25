@@ -3,10 +3,12 @@
     type = 'Exodiff'
     input = 'area_constriction.i'
     exodiff = 'area_constriction_out.e'
+    max_parallel = 1
   []
   [with_junction]
     type = 'Exodiff'
     input = 'area_constriction_junction.i'
     exodiff = 'area_constriction_junction_out.e'
+    max_parallel = 1
   []
 []

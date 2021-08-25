@@ -6,6 +6,7 @@
     exodiff = 'phy.cylinder_power_shape_fn_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
+    max_parallel = 1
 
     requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
   []
@@ -15,6 +16,7 @@
     exodiff = 'phy.plate_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
+    max_parallel = 1
 
     requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
   []
@@ -30,6 +32,7 @@
       Outputs/file_base=phy.conservation_plate"
     csvdiff = 'phy.conservation_plate.csv'
     abs_zero = 1e-7
+    max_parallel = 1
     # because output has execute_on = 'initial final'
     recover = false
   []
@@ -45,6 +48,7 @@
       Outputs/file_base=phy.conservation_cylinder"
     csvdiff = 'phy.conservation_cylinder.csv'
     abs_zero = 1e-7
+    max_parallel = 1
     # because output has execute_on = 'initial final'
     recover = false
   []
@@ -53,6 +57,7 @@
     input = 'phy.conservation_from_file_3d.i'
     csvdiff = 'phy.conservation_from_file_3d_out.csv'
     abs_zero = 1e-7
+    max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
   []
@@ -63,17 +68,20 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' Components/hgen/power=reactor"
     expect_err = "hgen: The component 'reactor' is not of type 'HeatStructureBase'"
+    max_parallel = 1
   []
   [err:wrong_block_name]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf' Components/hgen/power=reactor"
     expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
+    max_parallel = 1
   []
   [err:wrong_power_comp]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
     expect_err = "hgen: The component 'hs' is not of type 'TotalPowerBase'"
+    max_parallel = 1
   []
 []

@@ -17,6 +17,7 @@
       Outputs/file_base=part1_out'
     recover = false
     abs_zero = 1e-7
+    max_parallel = 1
   []
 
   [part2]
@@ -30,6 +31,7 @@
     abs_zero = 1e-7
     prereq = 'part1'
     recover = false
+    max_parallel = 1
   []
 
   [part2_ics]
@@ -53,5 +55,6 @@
     prereq = 'part1'
     recover = false
     abs_zero = 1e-7
+    max_parallel = 1
   []
 []

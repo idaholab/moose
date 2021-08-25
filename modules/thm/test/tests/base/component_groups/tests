@@ -11,6 +11,7 @@
 \s+hx/secondary
 \s+sec_inlet
 \s+sec_outlet"
+    max_parallel = 1
 
     requirement = 'The system shall allow nesting components into groups in input files'
     design = 'ComponentGroup.md'

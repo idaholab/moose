@@ -5,6 +5,7 @@
     ratio_tol = 4e-8
     difference_tol = 3e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhouV]
@@ -16,6 +17,7 @@
     ratio_tol = 1e-8
     difference_tol = 2e-2
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhovV]
@@ -27,6 +29,7 @@
     ratio_tol = 1e-8
     difference_tol = 2e-2
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhowV]
@@ -38,6 +41,7 @@
     ratio_tol = 2e-8
     difference_tol = 5e-2
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhoEV]
@@ -49,6 +53,7 @@
     ratio_tol = 1e-7
     difference_tol = 20
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

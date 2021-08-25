@@ -5,5 +5,6 @@
     exodiff = 'test_in.e'
     cli_args = '--mesh-only'
     recover = False
+    max_parallel = 1
   []
 []

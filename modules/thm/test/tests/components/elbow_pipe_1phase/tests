@@ -4,5 +4,6 @@
     input = 'phy.position.i'
     exodiff = 'phy.position_out.e'
     custom_cmp = 'phy.position.exodiff'
+    max_parallel = 1
   []
 []

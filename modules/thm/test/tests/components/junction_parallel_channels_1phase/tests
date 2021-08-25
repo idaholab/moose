@@ -5,6 +5,7 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
+    max_parallel = 1
   []
 
   [phy:unequal_area]
@@ -14,6 +15,7 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
+    max_parallel = 1
   []
 
   [phy:shower_syntax]
@@ -22,6 +24,7 @@
     check_input = true
     recover = false
     max_threads = 1
+    max_parallel = 1
   []
 
   [phy:shower]
@@ -30,6 +33,7 @@
     csvdiff = 'phy.shower_out.csv'
     abs_zero = 8e-8
     rel_err = 0
+    max_parallel = 1
     heavy = true
   []
 
@@ -39,6 +43,7 @@
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
     abs_zero = 2e-8
+    max_parallel = 1
   []
 
   [phy.form_loss]
@@ -48,6 +53,7 @@
     cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.1'
     rel_err = 1e-3
     recover = false
+    max_parallel = 1
   []
 
   # error checking
@@ -55,6 +61,7 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+    max_parallel = 1
   []
 
   [err.missing_A_ref]
@@ -62,6 +69,7 @@
     input = 'phy.form_loss.i'
     cli_args = 'Components/junction/K=1'
     expect_err = "junction: With specified form loss factor 'K', parameter 'A_ref' is required."
+    max_parallel = 1
   []
 
   [err.missing_K]
@@ -69,6 +77,7 @@
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
     expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
+    max_parallel = 1
   []
 
   [err.non_parallel_channels]
@@ -77,6 +86,7 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
+    max_parallel = 1
   []
 
   # jacobian test
@@ -88,5 +98,6 @@
     cli_args = 'Debug/check_jacobian=true'
     allow_test_objects = true
     max_threads = 1
+    max_parallel = 1
   []
 []
