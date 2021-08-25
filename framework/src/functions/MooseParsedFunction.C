@@ -41,19 +41,19 @@ MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters)
 Real
 MooseParsedFunction::value(Real t, const Point & p) const
 {
-  return _function_ptr->evaluate<Real>(t, p);
+  return _function_ptr->evaluate<Real>(t, getOutputPoint(p));
 }
 
 RealGradient
 MooseParsedFunction::gradient(Real t, const Point & p) const
 {
-  return _function_ptr->evaluateGradient(t, p);
+  return _function_ptr->evaluateGradient(t, getOutputPoint(p));
 }
 
 Real
 MooseParsedFunction::timeDerivative(Real t, const Point & p) const
 {
-  return _function_ptr->evaluateDot(t, p);
+  return _function_ptr->evaluateDot(t, getOutputPoint(p));
 }
 
 RealVectorValue

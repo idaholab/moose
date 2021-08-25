@@ -15,6 +15,7 @@
 
 // MOOSE includes
 #include "MooseError.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -56,6 +57,13 @@ public:
 
 protected:
   /**
+   * Get the point at which to evaluate the function given a point in the App's frame
+   * @param[in] p point in App's (untranslated) frame
+   * @return point in coordinate frame of master app
+   */
+  const Point getOutputPoint(const Point & p) const;
+
+  /**
   * A helper method to check if the function value contains quotes. This method should
   * be called from within the initialization list of the object inheriting the
   * MooseParsedFunctionInterface
@@ -73,6 +81,9 @@ protected:
 
   /// Values passed by the user, they may be Reals for Postprocessors
   const std::vector<std::string> _vals;
+
+  /// Whether the x, y, z coordinates should be offset according to the App's offset
+  const bool & _use_app_position_offset;
 
   /// Pointer to the Parsed function wrapper object for the scalar
   std::unique_ptr<MooseParsedFunctionWrapper> _function_ptr;

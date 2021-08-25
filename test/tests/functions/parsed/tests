@@ -63,4 +63,12 @@
     requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
     issues = '#14169'
   [../]
+
+  [./offset_function]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out_sub0.e
+    requirement = "The ParsedFunction object shall evaluate using offset coordinates relative to a master application."
+    issues = '#18699'
+  [../]
 []

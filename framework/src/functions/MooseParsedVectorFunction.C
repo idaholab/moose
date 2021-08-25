@@ -44,13 +44,13 @@ MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & par
 RealVectorValue
 MooseParsedVectorFunction::vectorValue(Real t, const Point & p) const
 {
-  return _function_ptr->evaluate<RealVectorValue>(t, p);
+  return _function_ptr->evaluate<RealVectorValue>(t, getOutputPoint(p));
 }
 
 RealVectorValue
 MooseParsedVectorFunction::vectorCurl(Real t, const Point & p) const
 {
-  return _curl_function_ptr->evaluate<RealVectorValue>(t, p);
+  return _curl_function_ptr->evaluate<RealVectorValue>(t, getOutputPoint(p));
 }
 
 RealGradient

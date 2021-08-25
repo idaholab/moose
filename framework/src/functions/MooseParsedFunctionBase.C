@@ -13,6 +13,7 @@
 #include "InputParameters.h"
 #include "MooseError.h"
 #include "MooseParsedFunctionWrapper.h"
+#include "FEProblemBase.h"
 
 defineLegacyParams(MooseParsedFunctionBase);
 
@@ -26,13 +27,18 @@ MooseParsedFunctionBase::validParams()
       "items in the vals vector.");
   params.addParam<std::vector<std::string>>(
       "vals", "Constant numeric values, postprocessor names, or function names for vars.");
+  params.addParam<bool>(
+      "use_app_position_offset",
+      false,
+      "Whether to evaluate the spatial coordinate based on the position offset in a master app.");
   return params;
 }
 
 MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters)
   : _pfb_feproblem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vars(parameters.get<std::vector<std::string>>("vars")),
-    _vals(parameters.get<std::vector<std::string>>("vals"))
+    _vals(parameters.get<std::vector<std::string>>("vals")),
+    _use_app_position_offset(parameters.get<bool>("use_app_position_offset"))
 {
   if (_vars.size() != _vals.size())
     mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
@@ -42,9 +48,23 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & paramet
     if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
       mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use "
                  "and must not be declared in \"vars\"");
+
+  if (_use_app_position_offset && !_pfb_feproblem.getMooseApp().hasOutputPosition())
+    mooseError("use_app_position_offset",
+               "Using the 'use_app_position_offset' requires the output "
+               "to be offset in the master app.");
 }
 
 MooseParsedFunctionBase::~MooseParsedFunctionBase() {}
+
+const Point
+MooseParsedFunctionBase::getOutputPoint(const Point & p) const
+{
+  if (_use_app_position_offset)
+    return p + _pfb_feproblem.getMooseApp().getOutputPosition();
+  else
+    return p;
+}
 
 const std::string
 MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
