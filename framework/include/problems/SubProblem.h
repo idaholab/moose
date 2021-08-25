@@ -48,7 +48,7 @@ class SystemBase;
 class LineSearch;
 class FaceInfo;
 class MooseObjectName;
-class FunctorPropertyValue;
+class FunctorBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -913,7 +913,7 @@ protected:
   bool _have_ad_objects;
 
   /// Functor material properties for this problem
-  std::vector<std::unordered_map<std::string, std::unique_ptr<FunctorPropertyValue>>>
+  std::vector<std::unordered_map<std::string, std::unique_ptr<FunctorBase>>>
       _functor_material_properties;
 
 private:

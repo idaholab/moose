@@ -32,12 +32,32 @@ class Limiter;
 }
 
 /**
+ * A non-templated base class for functors that allow an owner object to hold
+ * different class template instantiations of \p FunctorInterface in a single container
+ */
+class FunctorBase
+{
+public:
+  FunctorBase() = default;
+  virtual ~FunctorBase() = default;
+
+  ///@{
+  /**
+   * Virtual methods meant to be used for handling functor evaluation cache clearance
+   */
+  virtual void timestepSetup() = 0;
+  virtual void residualSetup() = 0;
+  virtual void jacobianSetup() = 0;
+  ///@}
+};
+
+/**
  * Base class template for functor objects. This class template defines various \p operator()
  * overloads that allow a user to evaluate the functor at arbitrary geometric locations. This
  * template is meant to enable highly flexible on-the-fly variable and material property evaluations
  */
 template <typename T>
-class FunctorInterface
+class FunctorInterface : public FunctorBase
 {
 public:
   using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool, SubdomainID>;
@@ -46,12 +66,35 @@ public:
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
   virtual ~FunctorInterface() = default;
+  FunctorInterface() : _clearance_schedule({EXEC_ALWAYS}) {}
 
+  ///@{
+  /**
+   * Same as their \p evaluate overloads with the same argument but allows for caching
+   * implementation. These are the methods a user will call
+   */
+  T operator()(const libMesh::Elem * const & elem) const;
+  T operator()(const ElemAndFaceArg & elem_and_face) const;
+  T operator()(const FaceArg & face) const;
+  T operator()(const QpArg & qp) const;
+  T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const;
+  ///@}
+
+  void residualSetup() override;
+  void jacobianSetup() override;
+  void timestepSetup() override;
+
+  /**
+   * Set how often to clear the functor evaluation cache
+   */
+  void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
+
+private:
   /**
    * Evaluate the functor with a given element. A possible implementation of this method could
    * compute an element-average
    */
-  virtual T operator()(const libMesh::Elem * const & elem) const = 0;
+  virtual T evaluate(const libMesh::Elem * const & elem) const = 0;
 
   /**
    * @param elem_and_face This is a tuple packing an element, \p FaceInfo, and subdomain ID
@@ -64,7 +107,7 @@ public:
    * D_E evaluation on the N side of the face. By providing the subdomain ID corresponding to E, the
    * flux kernel ensures that it will retrieve a D_E evaluation, even on the N side of the face.
    */
-  virtual T operator()(const ElemAndFaceArg & elem_and_face) const = 0;
+  virtual T evaluate(const ElemAndFaceArg & elem_and_face) const = 0;
 
   /**
    * @param face A tuple packing a \p FaceInfo, a \p Limiter, and a boolean denoting whether the
@@ -75,14 +118,14 @@ public:
    * make two calls to the \p elem_and_face overload (one for element and one for neighbor) and
    * then use the global interpolate functions in the \p Moose::FV namespace
    */
-  virtual T operator()(const FaceArg & face) const = 0;
+  virtual T evaluate(const FaceArg & face) const = 0;
 
   /**
    * Evaluate the functor at the current qp point. Unlike the above overloads, there is a caveat to
    * calling this overload. Any variables involved in the functor evaluation must have their
    * elemental data properly pre-initialized at the desired quadrature point
    */
-  virtual T operator()(const QpArg & qp) const = 0;
+  virtual T evaluate(const QpArg & qp) const = 0;
 
   /**
    * @param tqp A pair with the first member corresponding to an \p ElementType, either Element,
@@ -93,8 +136,144 @@ public:
    * their requested element data type properly pre-initialized at the desired quadrature point
    */
   virtual T
-  operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const = 0;
+  evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const = 0;
+
+  /**
+   * clear cache data
+   */
+  void clearCacheData();
+
+  /// How often to clear the material property cache
+  std::set<ExecFlagType> _clearance_schedule;
+
+  // Data for traditional element-quadrature point property evaluations which are useful for caching
+  // implementation
+
+  /// Current quadrature point element (current cache key)
+  mutable dof_id_type _current_qp_elem = DofObject::invalid_id;
+
+  /// Current quadrature point element data (current cache value)
+  mutable std::vector<std::pair<bool, T>> * _current_qp_elem_data = nullptr;
+
+  /// Cached element quadrature point functor property evaluations. The map key is the element
+  /// id. The map values should have size corresponding to the number of quadrature points on the
+  /// element. The vector elements are pairs. The first member of the pair indicates whether a
+  /// cached value has been computed. The second member of the pair is the (cached) value. If the
+  /// boolean is false, then the value cannot be trusted
+  mutable std::unordered_map<dof_id_type, std::vector<std::pair<bool, T>>> _qp_to_value;
 };
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const Elem * const & elem) const
+{
+  return evaluate(elem);
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const ElemAndFaceArg & elem_and_face) const
+{
+  return evaluate(elem_and_face);
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const FaceArg & face) const
+{
+  return evaluate(face);
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const QpArg & elem_and_qp) const
+{
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(elem_and_qp);
+
+  const auto elem_id = elem_and_qp.first->id();
+  if (elem_id != _current_qp_elem)
+  {
+    _current_qp_elem = elem_id;
+    _current_qp_elem_data = &_qp_to_value[elem_id];
+  }
+  auto & qp_elem_data_ref = *_current_qp_elem_data;
+  const auto qp = elem_and_qp.second;
+
+  // Check and see whether we even have sized for this quadrature point. If we haven't then we must
+  // evaluate
+  if (qp >= qp_elem_data_ref.size())
+  {
+    mooseAssert(qp == qp_elem_data_ref.size(),
+                "I believe that we always iterate over quadrature points in a contiguous fashion");
+    qp_elem_data_ref.resize(qp + 1);
+    auto & pr = qp_elem_data_ref.back();
+    pr.second = evaluate(elem_and_qp);
+    pr.first = true;
+    return pr.second;
+  }
+
+  // We've already sized for this qp, so let's see whether we have a valid cache value
+  auto & pr = qp_elem_data_ref[qp];
+  if (pr.first)
+    return pr.second;
+
+  // No valid cache value so evaluate
+  pr.second = evaluate(elem_and_qp);
+  pr.first = true;
+  return pr.second;
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
+{
+  return evaluate(tqp);
+}
+
+template <typename T>
+void
+FunctorInterface<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
+{
+  _clearance_schedule = clearance_schedule;
+}
+
+template <typename T>
+void
+FunctorInterface<T>::clearCacheData()
+{
+  for (auto & map_pr : _qp_to_value)
+    for (auto & pr : map_pr.second)
+      pr.first = false;
+
+  _current_qp_elem = DofObject::invalid_id;
+  _current_qp_elem_data = nullptr;
+}
+
+template <typename T>
+void
+FunctorInterface<T>::timestepSetup()
+{
+  if (_clearance_schedule.count(EXEC_TIMESTEP_BEGIN))
+    clearCacheData();
+}
+
+template <typename T>
+void
+FunctorInterface<T>::residualSetup()
+{
+  if (_clearance_schedule.count(EXEC_LINEAR))
+    clearCacheData();
+}
+
+template <typename T>
+void
+FunctorInterface<T>::jacobianSetup()
+{
+  if (_clearance_schedule.count(EXEC_NONLINEAR))
+    clearCacheData();
+}
 
 /**
  * Class template for creating constants
@@ -112,16 +291,12 @@ public:
   ConstantFunctor(const T & value) : _value(value) {}
   ConstantFunctor(T && value) : _value(value) {}
 
-  virtual T operator()(const libMesh::Elem * const &) const override final { return _value; }
-
-  T operator()(const ElemAndFaceArg &) const override final { return _value; }
-
-  T operator()(const FaceArg &) const override final { return _value; }
-
-  T operator()(const QpArg &) const override final { return _value; }
-
-  T
-  operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &) const override final
+private:
+  T evaluate(const libMesh::Elem * const &) const override final { return _value; }
+  T evaluate(const ElemAndFaceArg &) const override final { return _value; }
+  T evaluate(const FaceArg &) const override final { return _value; }
+  T evaluate(const QpArg &) const override final { return _value; }
+  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &) const override final
   {
     return _value;
   }

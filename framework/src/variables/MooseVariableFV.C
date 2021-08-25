@@ -1068,7 +1068,7 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(const MooseVariableFV<OutputType>::FaceArg & face) const
+MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
@@ -1085,7 +1085,7 @@ MooseVariableFV<OutputType>::operator()(const MooseVariableFV<OutputType>::FaceA
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) const
+MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face) const
 {
   const Elem * const requested_elem = std::get<0>(elem_and_face);
   mooseAssert(requested_elem != remote_elem,
@@ -1107,7 +1107,7 @@ MooseVariableFV<OutputType>::operator()(const ElemAndFaceArg & elem_and_face) co
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(const QpArg & qp) const
+MooseVariableFV<OutputType>::evaluate(const QpArg & qp) const
 {
   mooseAssert(this->hasBlocks(qp.first->subdomain_id()),
               "This variable doesn't exist in the requested block!");
@@ -1116,7 +1116,7 @@ MooseVariableFV<OutputType>::operator()(const QpArg & qp) const
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::operator()(
+MooseVariableFV<OutputType>::evaluate(
     const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
 {
   mooseAssert(this->hasBlocks(std::get<2>(tqp)),

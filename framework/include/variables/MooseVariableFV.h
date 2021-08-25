@@ -455,11 +455,11 @@ public:
 
   using FunctorInterface<ADReal>::FaceArg;
   using FunctorInterface<ADReal>::QpArg;
-  ADReal operator()(const Elem * const & elem) const override final { return getElemValue(elem); }
-  ADReal operator()(const ElemAndFaceArg & elem_and_face) const override final;
-  ADReal operator()(const FaceArg & face) const override final;
-  ADReal operator()(const QpArg & qp) const override final;
-  ADReal operator()(
+  ADReal evaluate(const Elem * const & elem) const override final { return getElemValue(elem); }
+  ADReal evaluate(const ElemAndFaceArg & elem_and_face) const override final;
+  ADReal evaluate(const FaceArg & face) const override final;
+  ADReal evaluate(const QpArg & qp) const override final;
+  ADReal evaluate(
       const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const override final;
 
   /**
