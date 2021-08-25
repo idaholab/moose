@@ -66,8 +66,8 @@ PINSFVMomentumDiffusion::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
-  const auto elem_face = makeElemAndFace(&_face_info->elem());
-  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
   const auto mu_elem = _mu(elem_face);
   const auto mu_neighbor = _mu(neighbor_face);
   const auto eps_elem = _eps(elem_face);

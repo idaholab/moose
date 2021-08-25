@@ -302,7 +302,7 @@ FVFluxKernel::gradUDotNormal() const
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxKernel::makeElemAndFace(const Elem * elem) const
+FVFluxKernel::makeSidedFace(const Elem * const elem) const
 {
   if (elem && this->hasBlocks(elem->subdomain_id()))
     return std::make_tuple(elem, _face_info, elem->subdomain_id());
@@ -314,4 +314,16 @@ FVFluxKernel::makeElemAndFace(const Elem * elem) const
                 "How are there no elements with subs on here!");
     return std::make_tuple(elem, _face_info, elem_across->subdomain_id());
   }
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxKernel::elemFace() const
+{
+  return makeSidedFace(&_face_info->elem());
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxKernel::neighborFace() const
+{
+  return makeSidedFace(_face_info->neighborPtr());
 }

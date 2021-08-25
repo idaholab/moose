@@ -36,8 +36,8 @@ INSFVMassAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal rho_interface;
 
-  const auto elem_face = makeElemAndFace(&_face_info->elem());
-  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   this->interpolate(_velocity_interp_method, v);
   Moose::FV::interpolate(_advected_interp_method,

@@ -64,9 +64,6 @@ protected:
 
   const ADRealVectorValue & normal() const { return _normal; }
 
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-  makeElemAndFace(const Elem * elem) const;
-
   MooseVariableFV<Real> & _var;
 
   const unsigned int _qp = 0;
@@ -90,7 +87,29 @@ protected:
    */
   bool onBoundary(const FaceInfo & fi) const;
 
+  /**
+   * @return the value of \p makeSidedFace called with the face info element
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFace() const;
+
+  /**
+   * @return the value of \p makeSidedFace called with the face info neighbor
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFace() const;
+
 private:
+  /**
+   * This creates a tuple of an element, \p FaceInfo, and subdomain ID. The element returned will
+   * correspond to the method argument. The \p FaceInfo part of the tuple will simply correspond to
+   * the current \p _face_info. The subdomain ID part of the tuple will correspond to the subdomain
+   * ID of the method element argument except in the case that the subdomain ID does not correspond
+   * to a subdomain ID that this flux kernel is defined on. In that case the subdomain ID of the
+   * tuple will correspond to the subdomain ID of the element across the face, on which this objects
+   * *is* defined
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+  makeSidedFace(const Elem * elem) const;
+
   /// Computes the Jacobian contribution for every coupled variable.
   ///
   /// @param type Either ElementElement, ElementNeighbor, NeighborElement, or NeighborNeighbor. As an

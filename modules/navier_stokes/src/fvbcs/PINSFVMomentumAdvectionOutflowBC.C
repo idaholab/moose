@@ -63,8 +63,8 @@ PINSFVMomentumAdvectionOutflowBC::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
-  const auto elem_face = makeElemAndFace(true);
-  const auto neighbor_face = makeElemAndFace(false);
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
   if (_v_var)

@@ -60,8 +60,8 @@ FVMatAdvectionOutflowBC::computeQpResidual()
   ADRealVectorValue v;
   ADReal adv_quant_boundary;
 
-  const auto elem_face = makeElemAndFace(true);
-  const auto neighbor_face = makeElemAndFace(false);
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   // Currently only Average is supported for the velocity
   interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);

@@ -224,7 +224,7 @@ FVFluxBC::uOnGhost() const
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxBC::makeElemAndFace(const bool fi_elem) const
+FVFluxBC::makeSidedFace(const bool fi_elem) const
 {
   const auto ft = _face_info->faceType(_var.name());
   const Elem * const elem = fi_elem ? &_face_info->elem() : _face_info->neighborPtr();
@@ -243,4 +243,16 @@ FVFluxBC::makeElemAndFace(const bool fi_elem) const
                 "for this variable defined on it");
     return std::make_tuple(elem, _face_info, elem_across->subdomain_id());
   }
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxBC::elemFace() const
+{
+  return makeSidedFace(true);
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxBC::neighborFace() const
+{
+  return makeSidedFace(false);
 }

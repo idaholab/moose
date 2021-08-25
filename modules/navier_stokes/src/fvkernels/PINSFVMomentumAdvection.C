@@ -260,8 +260,8 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValu
     return;
   }
 
-  const auto elem_face = makeElemAndFace(elem);
-  const auto neighbor_face = makeElemAndFace(neighbor);
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
@@ -355,8 +355,8 @@ PINSFVMomentumAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal adv_quant_interface;
 
-  const auto elem_face = makeElemAndFace(&_face_info->elem());
-  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   // Superficial velocity interpolation
   this->interpolate(_velocity_interp_method, v);

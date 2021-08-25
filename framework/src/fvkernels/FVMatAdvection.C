@@ -60,8 +60,8 @@ FVMatAdvection::computeQpResidual()
 
   using namespace Moose::FV;
 
-  const auto elem_face = makeElemAndFace(&_face_info->elem());
-  const auto neighbor_face = makeElemAndFace(_face_info->neighborPtr());
+  const auto elem_face = elemFace();
+  const auto neighbor_face = neighborFace();
 
   // Currently only Average is supported for the velocity
   interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
