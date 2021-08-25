@@ -55,3 +55,14 @@ RotationMatrix::rotVec1ToVec2(RealVectorValue vec1, RealVectorValue vec2)
   RealTensorValue rot2_to_z = rotVecToZ(vec2);
   return rot2_to_z.transpose() * rot1_to_z;
 }
+
+RealTensorValue
+RotationMatrix::rotVec2DToX(const RealVectorValue & vec)
+// provides a rotation matrix that will rotate the vector `vec` to the [1,0,0], assuming vec[2]==0
+{
+  const Real theta = std::atan2(vec(1), vec(0));
+  const Real st = std::sin(theta);
+  const Real ct = std::cos(theta);
+  RealTensorValue rot(ct, st, 0., -st, ct, 0., 0., 0., 1.);
+  return rot;
+}

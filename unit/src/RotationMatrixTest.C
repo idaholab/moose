@@ -25,6 +25,20 @@ rotVtoU(RealVectorValue v, RealVectorValue u)
   EXPECT_EQ(r.transpose() * r, ident);
 }
 
+void
+rotV2DtoX(RealVectorValue v)
+{
+  RealVectorValue u(1, 0, 0);
+  RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  RealVectorValue vhat = v / v.norm();
+  RealTensorValue r = RotationMatrix::rotVec2DToX(v);
+  RealVectorValue rotated_v = r * vhat;
+  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+    EXPECT_NEAR(rotated_v(i), u(i), 0.0001);
+  EXPECT_EQ(r * r.transpose(), ident);
+  EXPECT_EQ(r.transpose() * r, ident);
+}
+
 TEST(RotationMatrix, rotVecToVec)
 {
   // rotations of unit vectors to the x, y and z axes
@@ -63,4 +77,23 @@ TEST(RotationMatrix, rotVecToVec)
           RealVectorValue(-0.8023314181426899, 0.23569860131733256, 0.24585385679502592));
   rotVtoU(RealVectorValue(0.9115348224777013, -0.1785871095274909, -0.9938009520887727),
           RealVectorValue(0.7000797283703248, -0.4967869392655946, -0.18288272103373449));
+}
+
+TEST(RotationMatrix, rotV2DtoX)
+{
+  // rotations of unit vectors to the x, and y axes
+  rotV2DtoX(RealVectorValue(1, 0, 0));
+  rotV2DtoX(RealVectorValue(-1, 0, 0));
+  rotV2DtoX(RealVectorValue(0, 1, 0));
+  rotV2DtoX(RealVectorValue(0, -1, 0));
+
+  // more arbitrary vectors
+  rotV2DtoX(RealVectorValue(1, 2, 0));
+  rotV2DtoX(RealVectorValue(-1, 2, 0));
+  rotV2DtoX(RealVectorValue(9, 2, 0));
+  rotV2DtoX(RealVectorValue(-0.7455566879693396, -0.16322143154726376, 0));
+  rotV2DtoX(RealVectorValue(-0.7669989857132189, -0.8822797825649573, 0));
+  rotV2DtoX(RealVectorValue(-0.6195038399590516, 0.24354357871534127, 0));
+  rotV2DtoX(RealVectorValue(0.6418447552756121, 0.9825056348051839, 0));
+  rotV2DtoX(RealVectorValue(0.9115348224777013, -0.1785871095274909, 0));
 }

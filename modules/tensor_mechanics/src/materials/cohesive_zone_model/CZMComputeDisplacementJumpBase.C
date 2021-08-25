@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CZMComputeDisplacementJumpBase.h"
-#include "RotationMatrix.h"
+#include "CohesiveZoneModelTools.h"
 
 InputParameters
 CZMComputeDisplacementJumpBase::validParams()
@@ -85,5 +85,6 @@ CZMComputeDisplacementJumpBase::computeQpProperties()
 void
 CZMComputeDisplacementJumpBase::computeRotationMatrices()
 {
-  _czm_total_rotation[_qp] = RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
+  _czm_total_rotation[_qp] =
+      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _ndisp);
 }

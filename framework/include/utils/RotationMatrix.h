@@ -23,5 +23,7 @@ RealTensorValue rotVecToZ(RealVectorValue vec);
 
 /// provides a rotation matrix that will rotate the vector vec1 to vec2
 RealTensorValue rotVec1ToVec2(RealVectorValue vec1, RealVectorValue vec2);
-}
 
+/// provides a rotation matrix that will rotate the vector vec1 to the [1,0,0], assuming vec1[2]==0
+RealTensorValue rotVec2DToX(const RealVectorValue & vec);
+}

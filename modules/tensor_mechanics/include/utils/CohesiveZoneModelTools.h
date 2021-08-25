@@ -41,4 +41,8 @@ RealVectorValue computeNormalComponents(const RealVectorValue & normal,
 RealVectorValue computeTangentComponents(const RealVectorValue & normal,
                                          const RealVectorValue & vector);
 
+/// compute the czm reference rotation based on the normal in the undeformed configuration and the mesh dimension
+RankTwoTensor computeReferenceRotation(const RealVectorValue & normal,
+                                       const unsigned int mesh_dimension);
+
 } // namespace CohesiveZoneModelTools

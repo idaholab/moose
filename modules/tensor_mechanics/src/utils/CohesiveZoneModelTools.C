@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CohesiveZoneModelTools.h"
+#include "RotationMatrix.h"
 
 namespace CohesiveZoneModelTools
 {
@@ -88,6 +89,25 @@ RealVectorValue
 computeTangentComponents(const RealVectorValue & normal, const RealVectorValue & vector)
 {
   return vector - computeNormalComponents(normal, vector);
+}
+
+RankTwoTensor
+computeReferenceRotation(const RealVectorValue & normal, const unsigned int mesh_dimension)
+{
+  RankTwoTensor rot;
+  switch (mesh_dimension)
+  {
+    case 3:
+      rot = RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), normal);
+      break;
+    case 2:
+      rot = RotationMatrix::rotVec2DToX(normal).transpose();
+      break;
+    case 1:
+      rot = RankTwoTensor::Identity();
+      break;
+  }
+  return rot;
 }
 
 } // namespace CohesiveZoneModelTools
