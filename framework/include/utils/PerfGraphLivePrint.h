@@ -32,7 +32,7 @@ public:
   /// Start printing
   void start();
 
-protected:
+private:
   /**
    * Print the live message
    */
