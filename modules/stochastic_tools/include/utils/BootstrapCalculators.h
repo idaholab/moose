@@ -166,7 +166,7 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
   for (std::size_t i = 0; i < _replicates; ++i)
   {
     _calc.initialize();
-    MooseUtils::resampleAct(
+    MooseUtils::resampleWithFunctor(
         data, calc_update, generator, 0, is_distributed ? &this->_communicator : nullptr);
     _calc.finalize(is_distributed);
     values[i] = _calc.get();
