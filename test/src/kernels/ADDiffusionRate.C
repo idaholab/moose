@@ -9,7 +9,7 @@
 
 #include "ADDiffusionRate.h"
 
-registerMooseObject("MooseApp", ADDiffusionRate);
+registerMooseObject("MooseTestApp", ADDiffusionRate);
 
 InputParameters
 ADDiffusionRate::validParams()

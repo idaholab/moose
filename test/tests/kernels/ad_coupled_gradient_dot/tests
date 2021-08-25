@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Coupleable.md'
+  issues = '#16167'
+  [diffusionrate]
+    type = 'CSVDiff'
+    input = 'diffusion_rate.i'
+    csvdiff = 'diffusion_rate.csv'
+    requirement = 'The framework shall be able to compute the gradient of the rate of the variable '
+                  'using automatic differentiation.'
+  []
+[]
