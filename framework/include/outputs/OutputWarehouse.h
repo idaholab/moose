@@ -368,7 +368,7 @@ private:
   bool _last_message_ended_in_newline;
 
   /// What the last buffer was that was printed
-  std::ostringstream * _last_buffer;
+  const std::ostringstream * _last_buffer;
 
   /// Number of times the stream has been printed to
   std::atomic<unsigned long long int> _num_printed;
