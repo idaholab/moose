@@ -12,168 +12,99 @@
 namespace StochasticTools
 {
 
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::divide(dof_id_type num)
+template <typename InType, typename OutType>
+std::vector<std::vector<OutType>>
+Percentile<std::vector<InType>, std::vector<OutType>>::compute(const std::vector<InType> & data,
+                                                               const bool is_distributed)
 {
-  for (auto & val : _value)
-    val /= static_cast<T2>(num);
+  // Bootstrap estimates
+  const auto values = this->computeBootstrapEstimates(data, is_distributed);
+
+  // Extract percentiles
+  std::vector<std::vector<OutType>> output;
+  if (this->processor_id() == 0)
+    for (const Real & level : this->_levels)
+    {
+      long unsigned int index = std::lrint(level * (this->_replicates - 1));
+      output.push_back(values[index]);
+    }
+
+  return output;
 }
 
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::pow(int p)
+template <typename InType, typename OutType>
+std::unique_ptr<Calculator<std::vector<InType>, std::vector<OutType>>>
+CalculatorBuilder<std::vector<InType>, std::vector<OutType>>::build(
+    const MooseEnumItem & item, const libMesh::ParallelObject & other)
 {
-  for (auto & val : _value)
-    val = MathUtils::pow(val, p);
+  if (item == "min")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Min>>(other, item);
+
+  else if (item == "max")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Max>>(other, item);
+
+  else if (item == "sum")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Sum>>(other, item);
+
+  else if (item == "mean" || item == "average") // average is deprecated
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Mean>>(other, item);
+
+  else if (item == "stddev")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, StdDev>>(other, item);
+
+  else if (item == "stderr")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, StdErr>>(other, item);
+
+  else if (item == "norm2")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, L2Norm>>(other, item);
+
+  else if (item == "ratio")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Ratio>>(other, item);
+
+  else if (item == "median")
+    return libmesh_make_unique<VectorCalculator<InType, OutType, Median>>(other, item);
+
+  ::mooseError("Failed to create Statistics::Calculator object for ", item);
+  return nullptr;
 }
 
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::sqrt()
+template <typename InType, typename OutType>
+std::unique_ptr<BootstrapCalculator<std::vector<InType>, std::vector<OutType>>>
+BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>::build(
+    const MooseEnum & item,
+    const libMesh::ParallelObject & other,
+    const std::vector<Real> & levels,
+    unsigned int replicates,
+    unsigned int seed,
+    StochasticTools::Calculator<std::vector<InType>, std::vector<OutType>> & calc)
 {
-  for (auto & val : _value)
-    val = std::sqrt(val);
+  std::unique_ptr<BootstrapCalculator<std::vector<InType>, std::vector<OutType>>> ptr = nullptr;
+  if (item == "percentile")
+    ptr = libmesh_make_unique<Percentile<std::vector<InType>, std::vector<OutType>>>(
+        other, item, levels, replicates, seed, calc);
+  else if (item == "bca")
+    ::mooseError("BiasCorrectedAccelerated bootstrap calculator has not been implemented for "
+                 "vector-type quantities.");
+  else
+    ::mooseError("Failed to create Statistics::BootstrapCalculator object for ", item);
+
+  return ptr;
 }
 
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::add(const std::vector<T1> & a)
-{
-  if (a.size() > _value.size())
-    _value.resize(a.size(), T2());
-  for (const auto & i : index_range(a))
-    _value[i] += static_cast<T2>(a[i]);
-}
+#define createVectorCalculators(InType, OutType)                                                   \
+  template class VectorCalculator<InType, OutType, Mean>;                                          \
+  template class VectorCalculator<InType, OutType, Max>;                                           \
+  template class VectorCalculator<InType, OutType, Min>;                                           \
+  template class VectorCalculator<InType, OutType, Sum>;                                           \
+  template class VectorCalculator<InType, OutType, StdDev>;                                        \
+  template class VectorCalculator<InType, OutType, StdErr>;                                        \
+  template class VectorCalculator<InType, OutType, Ratio>;                                         \
+  template class VectorCalculator<InType, OutType, L2Norm>;                                        \
+  template class VectorCalculator<InType, OutType, Median>;                                        \
+  template class Percentile<std::vector<InType>, std::vector<OutType>>;                            \
+  template struct CalculatorBuilder<std::vector<InType>, std::vector<OutType>>;                    \
+  template struct BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>
 
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::addPow(const std::vector<T1> & a, int p)
-{
-  if (a.size() > _value.size())
-    _value.resize(a.size(), T2());
-  for (const auto & i : index_range(a))
-    _value[i] += MathUtils::pow(static_cast<T2>(a[i]), p);
-}
-
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::min(const std::vector<T1> & a)
-{
-  if (a.size() > _value.size())
-    _value.resize(a.size(), std::numeric_limits<T2>::max());
-  for (const auto & i : index_range(a))
-    _value[i] = std::min(static_cast<T2>(a[i]), _value[i]);
-}
-
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::max(const std::vector<T1> & a)
-{
-  if (a.size() > _value.size())
-    _value.resize(a.size(), std::numeric_limits<T2>::min());
-  for (const auto & i : index_range(a))
-    _value[i] = std::max(static_cast<T2>(a[i]), _value[i]);
-}
-
-template <typename T1, typename T2>
-CalculatorValue<std::vector<T1>, std::vector<T2>> &
-CalculatorValue<std::vector<T1>, std::vector<T2>>::operator+=(const std::vector<T2> & b)
-{
-  if (b.size() > _value.size())
-    _value.resize(b.size(), T2());
-  for (const auto & i : index_range(b))
-    _value[i] += b[i];
-  return *this;
-}
-
-template <typename T1, typename T2>
-CalculatorValue<std::vector<T1>, std::vector<T2>> &
-CalculatorValue<std::vector<T1>, std::vector<T2>>::operator-=(const std::vector<T2> & b)
-{
-  if (b.size() > _value.size())
-    _value.resize(b.size(), T2());
-  for (const auto & i : index_range(b))
-    _value[i] -= b[i];
-  return *this;
-}
-
-template <typename T1, typename T2>
-CalculatorValue<std::vector<T1>, std::vector<T2>> &
-CalculatorValue<std::vector<T1>, std::vector<T2>>::operator/=(const std::vector<T2> & b)
-{
-  if (b.size() > _value.size())
-    _value.resize(b.size(), T2());
-  for (const auto & i : index_range(b))
-    _value[i] /= b[i];
-  return *this;
-}
-
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::sum(const libMesh::Parallel::Communicator & comm)
-{
-  auto sz = _value.size();
-  comm.max(sz);
-  _value.resize(sz, T2());
-  comm.sum(_value);
-}
-
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::min(const libMesh::Parallel::Communicator & comm)
-{
-  auto sz = _value.size();
-  comm.max(sz);
-  _value.resize(sz, std::numeric_limits<T2>::max());
-  comm.min(_value);
-}
-
-template <typename T1, typename T2>
-void
-CalculatorValue<std::vector<T1>, std::vector<T2>>::max(const libMesh::Parallel::Communicator & comm)
-{
-  auto sz = _value.size();
-  comm.max(sz);
-  _value.resize(sz, std::numeric_limits<T2>::min());
-  comm.max(_value);
-}
-
-template <typename T1, typename T2>
-void
-Median<std::vector<std::vector<T1>>, std::vector<T2>>::initialize()
-{
-  _median.clear();
-  _median_calcs.clear();
-}
-
-template <typename T1, typename T2>
-void
-Median<std::vector<std::vector<T1>>, std::vector<T2>>::update(const std::vector<T1> & data)
-{
-  for (unsigned int i = _median_calcs.size(); i < data.size(); ++i)
-  {
-    _median_calcs.emplace_back(*this, "MEDIAN_" + std::to_string(i));
-    _median_calcs.back().initialize();
-  }
-
-  for (const auto & i : index_range(data))
-    _median_calcs[i].update(data[i]);
-}
-
-template <typename T1, typename T2>
-void
-Median<std::vector<std::vector<T1>>, std::vector<T2>>::finalize(bool is_distributed)
-{
-  _median.reserve(_median_calcs.size());
-  for (auto & calc : _median_calcs)
-  {
-    calc.finalize(is_distributed);
-    _median.push_back(calc.get());
-  }
-}
-
-createCalculators(std::vector<std::vector<Real>>, std::vector<Real>);
-createBootstrapCalculators(std::vector<std::vector<Real>>, std::vector<Real>);
+createVectorCalculators(std::vector<Real>, Real);
 
 } // StocasticTools namespace

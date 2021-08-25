@@ -67,7 +67,7 @@
                             "stat": "STDERR",
                             "type": "std::pair<double, std::vector<double> >",
                             "value": [
-                                15.171339434271617,
+                                15.17133943427162,
                                 []
                             ]
                         },

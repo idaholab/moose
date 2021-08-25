@@ -14,57 +14,84 @@
 namespace StochasticTools
 {
 
-template <typename T1, typename T2>
-class CalculatorValue<typename std::vector<T1>, typename std::vector<T2>>
+template <typename InType, typename OutType, template <typename, typename> class CalcType>
+class VectorCalculator : public Calculator<std::vector<InType>, std::vector<OutType>>
 {
 public:
-  CalculatorValue() : _value() {}
-
-  const std::vector<T2> & get() const { return _value; }
-
-  void zero() { _value.clear(); }
-  void divide(dof_id_type num);
-  void pow(int p);
-  void sqrt();
-  void min() { _value.assign(1, std::numeric_limits<T2>::min()); }
-  void max() { _value.assign(1, std::numeric_limits<T2>::max()); }
-
-  void add(const std::vector<T1> & a);
-  void addPow(const std::vector<T1> & a, int p);
-  void min(const std::vector<T1> & a);
-  void max(const std::vector<T1> & a);
-
-  CalculatorValue<std::vector<T1>, std::vector<T2>> & operator+=(const std::vector<T2> & b);
-  CalculatorValue<std::vector<T1>, std::vector<T2>> & operator-=(const std::vector<T2> & b);
-  CalculatorValue<std::vector<T1>, std::vector<T2>> & operator/=(const std::vector<T2> & b);
-  bool less_than(const std::vector<T2> & b) const { return _value < b; };
-
-  void sum(const libMesh::Parallel::Communicator & comm);
-  void min(const libMesh::Parallel::Communicator & comm);
-  void max(const libMesh::Parallel::Communicator & comm);
-  void broadcast(const libMesh::Parallel::Communicator & comm, processor_id_type root_id)
-  {
-    comm.broadcast(_value, root_id);
-  }
-
-private:
-  std::vector<T2> _value;
-};
-
-template <typename T1, typename T2>
-class Median<typename std::vector<std::vector<T1>>, typename std::vector<T2>>
-  : public Calculator<typename std::vector<std::vector<T1>>, typename std::vector<T2>>
-{
-public:
-  using Calculator<std::vector<std::vector<T1>>, std::vector<T2>>::Calculator;
+  using Calculator<std::vector<InType>, std::vector<OutType>>::Calculator;
 
   virtual void initialize() override;
-  virtual void update(const std::vector<T1> & data) override;
+  virtual void update(const InType & data) override;
   virtual void finalize(bool is_distributed) override;
-  virtual std::vector<T2> get() const override { return _median; }
+  virtual std::vector<OutType> get() const override { return _values; }
 
-protected:
-  std::vector<T2> _median;
-  std::vector<Median<std::vector<T1>, T2>> _median_calcs;
+private:
+  std::vector<CalcType<InType, OutType>> _calcs;
+  std::vector<OutType> _values;
 };
+
+template <typename InType, typename OutType, template <typename, typename> class CalcType>
+void
+VectorCalculator<InType, OutType, CalcType>::initialize()
+{
+  _calcs.clear();
+  _values.clear();
+}
+
+template <typename InType, typename OutType, template <typename, typename> class CalcType>
+void
+VectorCalculator<InType, OutType, CalcType>::update(const InType & data)
+{
+  for (const auto & i : index_range(data))
+  {
+    if (i >= _calcs.size())
+    {
+      _calcs.emplace_back(*this, this->name() + "_" + std::to_string(i));
+      _calcs.back().initialize();
+    }
+    _calcs[i].update(data[i]);
+  }
+}
+
+template <typename InType, typename OutType, template <typename, typename> class CalcType>
+void
+VectorCalculator<InType, OutType, CalcType>::finalize(bool is_distributed)
+{
+  _values.reserve(_calcs.size());
+  for (auto & cc : _calcs)
+  {
+    cc.finalize(is_distributed);
+    _values.push_back(cc.get());
+  }
+}
+
+template <typename InType, typename OutType>
+class Percentile<std::vector<InType>, std::vector<OutType>>
+  : public BootstrapCalculator<std::vector<InType>, std::vector<OutType>>
+{
+public:
+  using BootstrapCalculator<std::vector<InType>, std::vector<OutType>>::BootstrapCalculator;
+  virtual std::vector<std::vector<OutType>> compute(const std::vector<InType> &,
+                                                    const bool) override;
+};
+
+template <typename InType, typename OutType>
+struct CalculatorBuilder<std::vector<InType>, std::vector<OutType>>
+{
+  static std::unique_ptr<Calculator<std::vector<InType>, std::vector<OutType>>>
+  build(const MooseEnumItem & item, const libMesh::ParallelObject & other);
+};
+
+template <typename InType, typename OutType>
+struct BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>
+{
+  static std::unique_ptr<BootstrapCalculator<std::vector<InType>, std::vector<OutType>>>
+  build(const MooseEnum &,
+        const libMesh::ParallelObject &,
+        const std::vector<Real> &,
+        unsigned int,
+        unsigned int,
+        StochasticTools::Calculator<std::vector<InType>, std::vector<OutType>> &);
+};
+
 } // namespace
