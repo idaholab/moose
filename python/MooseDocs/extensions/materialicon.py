@@ -14,7 +14,7 @@ from . import command, core
 def make_extension(**kwargs):
     return MaterialIconExtension(**kwargs)
 
-Icon = tokens.newToken('Icon', icon='', faicon='')
+Icon = tokens.newToken('Icon', icon='', tight=False, faicon='')
 
 class MaterialIconExtension(command.CommandExtension):
     "Adds ability to include material icons."""
@@ -39,6 +39,7 @@ class IconCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['tight'] = (False, "Use the same font size and line height of the parent element.")
         settings['faicon'] = (None, "When the LaTeX renderer is used, this will override the " \
                                     "supplied subcommand item. The name should exist in the " \
                                     "LaTeX fontawesome package.")
@@ -47,7 +48,9 @@ class IconCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         if info.pattern not in ('InlineCommand', 'OldInlineCommand', 'OlderInlineCommand'):
             core.Paragraph(parent)
-        return Icon(parent, icon=info['subcommand'], faicon=self.settings['faicon'])
+        return Icon(parent, icon=info['subcommand'],
+                    tight=self.settings['tight'],
+                    faicon=self.settings['faicon'])
 
 class RenderIcon(components.RenderComponent):
     def createHTML(self, parent, token, page):
@@ -57,6 +60,8 @@ class RenderIcon(components.RenderComponent):
         i = html.Tag(parent, 'i', token, string=token['icon'])
         i.addClass('material-icons')
         i.addClass('moose-inline-icon')
+        if token['tight']:
+            i.addClass('moose-tight-inline-icon')
 
     def createLatex(self, parent, token, page):
         icon = token['faicon'] or token['icon']

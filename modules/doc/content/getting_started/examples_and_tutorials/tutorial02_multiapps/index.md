@@ -4,4 +4,5 @@ In this tutorial the [Multiapp](MultiApps/index.md) and [Transfer](Transfers/ind
 used to couple multiphysics applications together across differing time or length scales. This
 tutorial is currently a stand-alone slide set as linked below.
 
-[Tutorial 2: MOOSE MultiApps](https://mooseframework.org/workshop/multiapps)
+!style halign=center fontsize=150%
+[Tutorial 2: MultiApps Presentation](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)

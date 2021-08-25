@@ -4,7 +4,7 @@ In this tutorial the use of analytical solutions and the [!ac](MMS) are presente
 code verification methods.
 
 !style halign=center fontsize=150%
-[Tutorial 3: Code Verification Presentation](https://mooseframework.inl.gov/workshop/verification)
+[Tutorial 3: Code Verification Presentation](tutorial03_verification/presentation/index.md alternative=missing_config.md)
 
 ## Tutorial Contents id=contents
 

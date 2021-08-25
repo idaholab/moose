@@ -27,8 +27,8 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
-ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6,
-                                 hide=[], no_prefix=[], no_count=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, recursive=False, pages=list(),
+                                 max_level=1, hide=[], no_prefix=[], no_count=[])
 PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False,
                                   margins=['24px', '24px'])
 
@@ -176,6 +176,7 @@ class ContentOutlineCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build outline.")
+        settings['recursive'] = (False, "Include content from the location subdirectories recursively.")
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
         settings['max_level'] = (1, 'Maximum heading level to display.')
         settings['hide'] = ('', "A list of heading ids to hide.")
@@ -190,6 +191,9 @@ class ContentOutlineCommand(command.CommandComponent):
         if self.settings['location'] is not None and self.settings['pages']:
             msg = "The 'location' and 'pages' settings must be used exclusively."
             raise exceptions.MooseDocsException(msg)
+        if self.settings['recursive'] and self.settings['pages']:
+            msg = "Setting 'recursive=True' has no effect when the 'pages' setting is used."
+            LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
 
         # split strings into lists and convert floats to ints to lists of strings
         no_prefix = self.settings['no_prefix']
@@ -205,6 +209,7 @@ class ContentOutlineCommand(command.CommandComponent):
 
         return ContentOutline(parent,
                               location=self.settings['location'],
+                              recursive=self.settings['recursive'],
                               pages=self.settings['pages'].split(),
                               max_level=int(self.settings['max_level']),
                               hide=self.settings['hide'].split(),
@@ -366,7 +371,11 @@ class RenderContentOutline(components.RenderComponent):
 
     def createHTMLHelper(self, parent, token, page):
         if token['location'] is not None and not token['pages']:
-            func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
+            if token['recursive']:
+                func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
+            else:
+                location = token['location'].rstrip('/')
+                func = lambda p: os.path.dirname(p.local) == location and isinstance(p, pages.Source)
             nodes = self.translator.findPages(func)
         elif token['pages'] and token['location'] is None:
             nodes = [self.translator.findPage(p) for p in token['pages']]

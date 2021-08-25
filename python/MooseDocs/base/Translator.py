@@ -73,10 +73,9 @@ class Translator(mixins.ConfigObject):
         if executioner is None:
             self.__executioner = ParallelBarrier()
 
-        # Populate the content list and set the translator key for the page objects
+        # Populate the content list
         for p in content:
             self.addPage(p)
-            p.translator = self
 
         # Caching for page searches (see findPages)
         self.__page_cache = dict()
@@ -119,7 +118,7 @@ class Translator(mixins.ConfigObject):
         """Add an additional page to the list of available pages."""
         self.__executioner.addPage(page)
         if self.__initialized:
-            self.__executioner.init([page], self.destination)
+            self.__executioner.init([page])
 
     def getPages(self):
         """Return the Page objects"""
@@ -146,7 +145,7 @@ class Translator(mixins.ConfigObject):
             exact[bool]: (False) When True an exact path match is required.
         """
         if isinstance(arg, str):
-            items = self.__page_cache.get(arg, None)
+            items = self.__page_cache.get(arg, None) if not exact else None
             if items is None:
                 func = lambda p: (p.local == arg) or \
                                  (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
@@ -195,10 +194,17 @@ class Translator(mixins.ConfigObject):
                 return None
 
         elif len(nodes) > 1:
+            # If multiple Directory objects are found and all have the same local path, this should
+            # be fine as they are functionally no different from each other. In any other situation,
+            # however, we need to raise an exception here.
+            if all([isinstance(node, pages.Directory) for node in nodes]) \
+               and [node.local for node in nodes].count(nodes[0].local) == len(nodes):
+                return nodes[0]
             msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
             for node in nodes:
                 msg += '\n  {}'.format(node.local)
             raise exceptions.MooseDocsException(msg)
+
         return nodes[0]
 
     def init(self, nodes=None):
@@ -248,7 +254,7 @@ class Translator(mixins.ConfigObject):
             self.__checkRequires(ext)
 
         # Initialize the Page objects
-        self.__executioner.init(nodes or self.getPages(), self.destination)
+        self.__executioner.init(nodes or self.getPages())
         self.__initialized = True
 
     def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):

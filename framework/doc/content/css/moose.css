@@ -69,6 +69,11 @@ main {
     vertical-align:bottom;
 }
 
+.moose-tight-inline-icon {
+    font-size:inherit;
+    line-height:inherit;
+}
+
 .tabs .tab a:hover, .tabs .tab a.active {
 	background-color: transparent;
   color: var(--inl-blue);
@@ -189,6 +194,10 @@ div.moose-modal-button {
 }
 html, body {
   height: 100%;
+}
+
+.moose-video-div video.moose-video {
+  display: block;
 }
 
 img.moose-image{
@@ -813,11 +822,12 @@ li p {
 
 
 /*https://coderwall.com/p/ovxeha/fit-to-container-video-image-in-css-aspect-ratio-friendly*/
-.moose-card div.card-image{
+.moose-card div.card-image,
+.moose-card div.card-image div.moose-video-div{
     height:420px;
     text-align:center;
 }
-.moose-card div.card-image:before{
+.moose-card div.card-image div.moose-video-div:before{
     content:"";
     width:1px;
     height:100%;
@@ -825,7 +835,7 @@ li p {
     vertical-align:middle;
     margin-left:-1px;
 }
-.moose-card div.card-image video,
+.moose-card div.card-image div.moose-video-div video.moose-video,
 .moose-card div.card-image div.material-placeholder{
     max-width:100%;
     max-height:100%;
@@ -939,60 +949,6 @@ span.badge.new.pass{
 #moose-markdown-content ul.collapsible li {
   list-style-type: none;
 }
-
-.reveal .slides{
-  position: relative;
-  text-align: left;
-}
-
-.reveal .slides not(.overview){
-  overflow: scroll;
-}
-
-.reveal h1 {
-    font-size:3rem;
-    font-weight:600;
-}
-
-.reveal h2 {
-    font-size:2.5rem;
-    font-weight:300;
-}
-
-.reveal h3 {
-    font-size:2.0rem;
-    font-weight:300;
-}
-
-.reveal h4 {
-    font-size:1.5rem;
-    font-weight:300;
-}
-
-.reveal p, .reveal a, .reveal li{
-    font-size:1.5rem;
-}
-
-.reveal pre{
-  font-size: 1.0rem;
-  line-height: normal;
-  width: 100%;
-}
-
-.reveal ul:not(.browser-default) li{
-  list-style-type: disc;
-}
-
-.reveal section img{
-  border: none;
-  box-shadow: none;
-}
-
-.reveal .moose-copy-button{
-    bottom: 0;
-    left: 0;
-}
-
 
 /* COLLAPSIBLE SECTIONS */
 summary {

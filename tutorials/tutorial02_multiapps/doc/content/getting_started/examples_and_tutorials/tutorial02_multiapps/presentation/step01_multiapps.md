@@ -86,7 +86,7 @@ Each application will march forward in time together, solve, and output
 
 !col width=50%
 !media multiapps_01_hierarchy.png
-       style=width:70%;margin-left:auto;margin-right:auto;display:block;
+       style=width:70%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 
@@ -130,7 +130,7 @@ Let's modify the sub-app to have a smaller timestep and see what happens
 - Note the timestep being used by each app
 
 !media multiapps_02_timesteps.png
-       style=width:50%;margin-left:auto;margin-right:auto;display:block;
+       style=width:50%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 
 !---
@@ -186,7 +186,7 @@ There are two options for specifying input files for the positions:
          caption=04_master_multiple.i
 
 !media multiapps_04_hierarchy.png
-       style=width:50%;margin-left:auto;margin-right:auto;display:block;
+       style=width:50%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !---
 
@@ -217,7 +217,7 @@ To achieve this, the available processors are evenly split among the sub-apps wi
 
 !col width=50%
 !media multiapps_05_parallelism.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !row-end!
 
@@ -256,7 +256,7 @@ To show how this works, we'll execute `06_master_twoapps.i` which will run a hie
          caption=06_master_twoapps.i
 
 !media multiapps_06_hierarchy.png
-       style=width:60%;margin-left:auto;margin-right:auto;display:block;
+       style=width:60%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !---
 

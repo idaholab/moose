@@ -57,6 +57,11 @@ Idaho: [idaho-flag]
 ## Videos
 
 !media https://upload.wikimedia.org/wikipedia/commons/c/c0/Big_Buck_Bunny_4K.webm
+       poster=big_buck_bunny.jpg
+       latex_src=big_buck_bunny.jpg
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+
+!media https://upload.wikimedia.org/wikipedia/commons/c/c0/Big_Buck_Bunny_4K.webm
        id=big-bug-bunny
        poster=big_buck_bunny.jpg
        latex_src=big_buck_bunny.jpg

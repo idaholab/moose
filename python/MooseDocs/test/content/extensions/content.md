@@ -63,9 +63,9 @@ If new headings are created or deleted during a live serve, the outline won't up
 
 ## Outline Directory id=outline-directory
 
-The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in alphabetical order of the names of MooseDown files which create those headings.
+The following is a list of all level 1 & 2 headings in the "extensions" directory and its subdirectories, except this section's heading, in alphabetical order of the names of MooseDown files which create those headings.
 
-!content outline location=extensions max_level=2 hide=outline-directory
+!content outline location=extensions/ recursive=True max_level=2 hide=outline-directory
 
 ## Next/Previous (Pagination)
 

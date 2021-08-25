@@ -23,7 +23,7 @@
 - [getting_started/examples_and_tutorials/tutorial01_app_development/index.md]
 - [getting_started/examples_and_tutorials/tutorial02_multiapps/index.md]
 - [getting_started/examples_and_tutorials/tutorial03_verification/index.md]
-- [Workshop Slides](https://www.mooseframework.org/workshop)
+- [Workshop Slides](workshop/index.md alternative=missing_config.md)
 - [Workshop Video](https://www.youtube.com/watch?v=2tJwBsYaLaI)
 !col-end!
 
