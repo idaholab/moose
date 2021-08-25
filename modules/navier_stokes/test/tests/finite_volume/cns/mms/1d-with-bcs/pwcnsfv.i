@@ -125,7 +125,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
 [FVBCs]
   [mass]
     variable = pressure
-    type = PINSFVStrongBC
+    type = PINSFVFunctorBC
     boundary = 'left right'
     superficial_vel_x = sup_vel_x
     pressure = pressure
@@ -134,7 +134,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
   []
   [momentum]
     variable = sup_vel_x
-    type = PINSFVStrongBC
+    type = PINSFVFunctorBC
     boundary = 'left right'
     superficial_vel_x = sup_vel_x
     pressure = pressure
@@ -143,7 +143,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     porosity = porosity
   []
 
-  # help gradient reconstruction *and* create Dirichlet values for use in PWCNSFVStrongBC
+  # help gradient reconstruction *and* create Dirichlet values for use in PINSFVFunctorBC
   [pressure_right]
     type = FVFunctionDirichletBC
     variable = pressure

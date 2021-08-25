@@ -7,22 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVStrongBC.h"
+#include "PINSFVFunctorBC.h"
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
 #include "MfrPostprocessor.h"
 
-registerMooseObject("NavierStokesApp", PINSFVStrongBC);
+registerMooseObject("NavierStokesApp", PINSFVFunctorBC);
 
 InputParameters
-PINSFVStrongBC::validParams()
+PINSFVFunctorBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params += INSFVFlowBC::validParams();
-  params.addClassDescription("Computes the residual of advective term using finite volume method.");
+  params.addClassDescription("Computes the residual of the advective and pressure term (the latter "
+                             "when this object is added for the momentum equation) on a boundary.");
   params.addParam<MaterialPropertyName>(NS::density, NS::density, "The density material property");
-  MooseEnum eqn("mass momentum energy");
+  MooseEnum eqn("mass momentum");
   params.addRequiredParam<MooseEnum>("eqn", eqn, "The equation you're solving.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addParam<MooseEnum>("momentum_component",
@@ -37,7 +38,7 @@ PINSFVStrongBC::validParams()
   return params;
 }
 
-PINSFVStrongBC::PINSFVStrongBC(const InputParameters & params)
+PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
   : FVFluxBC(params),
     INSFVFlowBC(params),
     _sup_vel_x(getFunctor<MooseVariableFVReal>(NS::superficial_velocity_x, 0)),
@@ -63,7 +64,7 @@ PINSFVStrongBC::PINSFVStrongBC(const InputParameters & params)
 }
 
 ADReal
-PINSFVStrongBC::computeQpResidual()
+PINSFVFunctorBC::computeQpResidual()
 {
   const auto ft = _face_info->faceType(_var.name());
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);

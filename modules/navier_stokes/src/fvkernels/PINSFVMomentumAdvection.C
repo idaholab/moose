@@ -84,7 +84,6 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),
                 "Surely the element has to match one of the face information's elements right?");
-    static const ADReal dummy = 0;
 
     const Point normal = elem_has_info ? fi->normal() : Point(-fi->normal());
     const Point & rc_centroid = elem_has_info ? fi->elemCentroid() : fi->neighborCentroid();

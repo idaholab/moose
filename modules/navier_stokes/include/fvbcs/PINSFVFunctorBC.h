@@ -12,21 +12,34 @@
 #include "FVFluxBC.h"
 #include "INSFVFlowBC.h"
 
-class PINSFVStrongBC : public FVFluxBC, public INSFVFlowBC
+/**
+ *  Evaluates boundary mass or momentum fluxes through functor evaluation of the superficial
+ * velocities, pressure, density, and porosity
+ */
+class PINSFVFunctorBC : public FVFluxBC, public INSFVFlowBC
 {
 public:
   static InputParameters validParams();
-  PINSFVStrongBC(const InputParameters & params);
+  PINSFVFunctorBC(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// The x component of the superficial velocity
   const FunctorInterface<ADReal> & _sup_vel_x;
+  /// The y component of the superficial velocity
   const FunctorInterface<ADReal> * const _sup_vel_y;
+  /// The z component of the superficial velocity
   const FunctorInterface<ADReal> * const _sup_vel_z;
+  /// The pressure
   const FunctorInterface<ADReal> & _pressure;
+  /// The density
   const FunctorInterface<ADReal> & _rho;
+  /// The porosity
   const FunctorInterface<ADReal> & _eps;
+  /// Denotes the equation we're computing the boundary fluxes for. Options are either "mass" or "momentum"
   const MooseEnum _eqn;
+  /// If computing the boundary fluxes for the momentum equation, this denotes the component of the
+  /// momentum equation we are computing for
   const unsigned int _index;
 };

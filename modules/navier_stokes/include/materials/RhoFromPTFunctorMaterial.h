@@ -14,7 +14,7 @@
 class SinglePhaseFluidProperties;
 
 /**
- * Computes the speed of sound from other Navier-Stokes material properties
+ * Computes the density using the fluid properties at a specified location
  */
 class RhoFromPTFunctorMaterial : public FunctorMaterial
 {

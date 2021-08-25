@@ -116,7 +116,7 @@ velocity_interp_method='rc'
 [FVBCs]
   [mass]
     variable = pressure
-    type = PINSFVStrongBC
+    type = PINSFVFunctorBC
     boundary = 'left right'
     superficial_vel_x = u
     pressure = pressure
@@ -125,7 +125,7 @@ velocity_interp_method='rc'
   []
   [momentum]
     variable = u
-    type = PINSFVStrongBC
+    type = PINSFVFunctorBC
     boundary = 'left right'
     superficial_vel_x = u
     pressure = pressure
