@@ -680,7 +680,7 @@ FEProblemBase::initialSetup()
   }
 
   {
-    TIME_SECTION("resizingVarValues", 5, "Resizing Variable Vlues");
+    TIME_SECTION("resizingVarValues", 5, "Resizing Variable Values");
 
     for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     {
