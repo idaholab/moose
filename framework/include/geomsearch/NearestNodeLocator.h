@@ -116,11 +116,4 @@ public:
 
   // The list of ghosted elements added during a time step for iteration patch update strategy
   std::vector<dof_id_type> _new_ghosted_elems;
-
-  // Timers
-  PerfID _find_nodes_timer;
-  PerfID _update_patch_timer;
-  PerfID _reinit_timer;
-  PerfID _update_ghosted_elems_timer;
 };
-

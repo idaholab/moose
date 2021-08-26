@@ -77,6 +77,8 @@ MultiPlasticityDebugger::outputAndCheckDebugParameters()
   Moose::err << "finite-differencing parameter(s) for internal-parameter(s):\n";
   for (unsigned model = 0; model < _num_models; ++model)
     Moose::err << _fspb_debug_intnl_change[model] << "\n";
+
+  Moose::err << std::flush;
 }
 
 void
@@ -153,6 +155,8 @@ MultiPlasticityDebugger::checkDerivatives()
     Moose::err << "Finite difference:\n";
     fddr_dintnl[surface].print();
   }
+
+  Moose::err << std::flush;
 }
 
 void
@@ -213,6 +217,8 @@ MultiPlasticityDebugger::checkJacobian(const RankFourTensor & E_inv,
       Moose::err << fdjac[row][col] << " ";
     Moose::err << "\n";
   }
+
+  Moose::err << std::flush;
 }
 
 void
@@ -510,7 +516,8 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
     L2_numer += Utility::pow<2>(orig_rhs[i] - fd_times_x[i]);
     L2_denom += Utility::pow<2>(orig_rhs[i] + fd_times_x[i]);
   }
-  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
+  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5
+             << std::endl;
 }
 
 void

@@ -177,7 +177,7 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
   _console << "Solid kinetic reactions:\n";
   for (unsigned int i = 0; i < _num_reactions; ++i)
     _console << "  Reaction " << i + 1 << ": " << _reactions[i] << "\n";
-  _console << "\n";
+  _console << std::endl;
 
   // Check that all secondary species read from the reaction network have been added
   // as AuxVariables. Note: can't sort the _solid_kinetic_species vector as it throws

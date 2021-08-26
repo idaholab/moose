@@ -242,7 +242,7 @@ Eigenvalue::execute()
     _last_solve_converged = _fixed_point_solve->solve();
     if (!lastSolveConverged())
     {
-      _console << "Aborting as solve did not converge\n";
+      _console << "Aborting as solve did not converge" << std::endl;
       break;
     }
 

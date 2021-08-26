@@ -1023,9 +1023,6 @@ private:
 
   /// Timing
   //@{
-  PerfID _execute_study_timer;
-  PerfID _generate_timer;
-  PerfID _propagate_timer;
   std::chrono::steady_clock::time_point _execution_start_time;
   std::chrono::steady_clock::duration _execution_time;
   std::chrono::steady_clock::duration _generation_time;

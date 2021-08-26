@@ -64,9 +64,6 @@ protected:
   /// The system that stores the field data
   ExplicitSystem * _sys;
 
-  /// Timer for outputting the mesh to be used by the derived classes
-  PerfID _output_mesh_timer;
-
 private:
   /**
    * Build the inflated neighbor bounding boxes stored in _inflated_neighbor_bboxes for the purposes
@@ -101,15 +98,6 @@ private:
   void startingIDs(const TraceData & trace_data,
                    dof_id_type & start_node_id,
                    dof_id_type & start_elem_id) const;
-
-  /// Timing
-  //@{
-  PerfID _build_bboxes_timer;
-  PerfID _build_segment_mesh_timer;
-  PerfID _setup_equation_system_timer;
-  PerfID _fill_fields_timer;
-  PerfID _build_id_map_timer;
-  //@}
 
   /// The variable index in _sys for the Ray's ID (if any)
   unsigned int _ray_id_var;

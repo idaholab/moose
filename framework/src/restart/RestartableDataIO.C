@@ -29,10 +29,7 @@ RestartableDataIO::RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_pr
     _moose_app(moose_app),
     _fe_problem_ptr(fe_problem_ptr),
     _is_header_read(false),
-    _use_binary_ext(true),
-    _restart_es_timer(registerTimedSection("restartEquationSystems", 3)),
-    _restart_data_timer(registerTimedSection("readRestartableData", 3))
-
+    _use_binary_ext(true)
 {
 }
 
@@ -302,7 +299,7 @@ void
 RestartableDataIO::readRestartableData(const RestartableDataMaps & restartable_datas,
                                        const DataNames & recoverable_data)
 {
-  TIME_SECTION(_restart_data_timer);
+  TIME_SECTION("readRestartableData", 3, "Reading RestartableData");
 
   if (!_is_header_read)
     mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "
@@ -398,7 +395,7 @@ RestartableDataIO::useAsciiExtension()
 void
 RestartableDataIO::restartEquationSystemsObject()
 {
-  TIME_SECTION(_restart_es_timer);
+  TIME_SECTION("restartEquationSystems", 3, "Restarting EquationSystems");
 
   if (!_is_header_read)
     mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling "

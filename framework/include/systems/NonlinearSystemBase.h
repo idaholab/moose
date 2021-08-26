@@ -909,20 +909,6 @@ protected:
 
   std::vector<dof_id_type> _var_all_dof_indices;
 
-  /// Timers
-  PerfID _compute_residual_tags_timer;
-  PerfID _compute_residual_internal_timer;
-  PerfID _kernels_timer;
-  PerfID _scalar_kernels_timer;
-  PerfID _nodal_kernels_timer;
-  PerfID _nodal_kernel_bcs_timer;
-  PerfID _nodal_bcs_timer;
-  PerfID _compute_jacobian_tags_timer;
-  PerfID _compute_jacobian_blocks_timer;
-  PerfID _compute_dampers_timer;
-  PerfID _compute_dirac_timer;
-  PerfID _compute_scaling_timer;
-
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;
 

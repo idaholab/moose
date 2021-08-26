@@ -24,6 +24,4 @@ public:
   SetupMeshCompleteAction(InputParameters params);
 
   virtual void act() override;
-
-  PerfID _uniform_refine_timer;
 };

@@ -102,7 +102,7 @@ LStableDirk3::solve()
     // parameters for PETSc.
     _fe_problem.initPetscOutput();
 
-    _console << "Stage " << _stage << "\n";
+    _console << "Stage " << _stage << std::endl;
 
     // Set the time for this stage
     _fe_problem.time() = time_old + _c[_stage - 1] * _dt;

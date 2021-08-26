@@ -213,7 +213,7 @@ CompositeSeriesBasisInterface::formatCoefficients(std::ostream & stream,
   }
   // clang-format on
 
-  stream << orders.str() << domains.str() << formatted.str();
+  stream << orders.str() << domains.str() << formatted.str() << std::flush;
 }
 
 bool

@@ -380,6 +380,8 @@ MonotoneCubicInterpolation::dumpCSV(std::string filename, const std::vector<Real
     yppnew[i] = sample2ndDerivative(xnew[i]);
     out << xnew[i] << ", " << ynew[i] << ", " << ypnew[i] << ", " << yppnew[i] << "\n";
   }
+
+  out << std::flush;
   out.close();
 }
 

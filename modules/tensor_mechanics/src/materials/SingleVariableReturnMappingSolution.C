@@ -147,7 +147,7 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
   {
     // the solve did not fail but the user requested debug output anyways
     outputIterationSummary(iter_output.get(), _iteration);
-    console << iter_output->str();
+    console << iter_output->str() << std::flush;
   }
 }
 
@@ -347,7 +347,7 @@ SingleVariableReturnMappingSolution::outputIterationSummary(std::stringstream * 
 {
   if (iter_output)
     *iter_output << "In " << total_it << " iterations the residual went from " << _initial_residual
-                 << " to " << _residual << " in '" << _svrms_name << "'.\n";
+                 << " to " << _residual << " in '" << _svrms_name << "'." << std::endl;
 }
 
 void

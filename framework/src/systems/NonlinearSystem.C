@@ -16,7 +16,6 @@
 #include "PetscSupport.h"
 #include "ComputeResidualFunctor.h"
 #include "ComputeFDResidualFunctor.h"
-#include "TimedPrint.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
@@ -139,7 +138,7 @@ NonlinearSystem::solve()
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
-    CONSOLE_TIMED_PRINT("Computing initial residual")
+    TIME_SECTION("nlInitialResidual", 3, "Computing Initial Residual");
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
     _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
@@ -148,7 +147,7 @@ NonlinearSystem::solve()
     _initial_residual_before_preset_bcs = _nl_implicit_sys.rhs->l2_norm();
     if (_compute_initial_residual_before_preset_bcs)
       _console << "Initial residual before setting preset BCs: "
-               << _initial_residual_before_preset_bcs << '\n';
+               << _initial_residual_before_preset_bcs << std::endl;
   }
 
   // Clear the iteration counters

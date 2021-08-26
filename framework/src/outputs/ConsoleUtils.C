@@ -45,8 +45,7 @@ outputFrameworkInformation(const MooseApp & app)
       << std::setw(console_field_width)
       << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width)
-      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
-      << '\n';
+      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << std::endl;
 
   return oss.str();
 }
@@ -66,7 +65,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     bool pre_split = problem.getMooseApp().isUseSplit();
 
     // clang-format off
-    oss << "Mesh: " << '\n'
+    oss << "\nMesh: " << '\n'
         << std::setw(console_field_width)
         << "  Parallel Type: " << (moose_mesh.isDistributedMesh() ? "distributed" : "replicated")
         << (forced || pre_split ? " (" : "")
@@ -127,7 +126,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
           << (moose_mesh.isPartitionerForced() ? " (forced) " : "") << '\n';
   }
 
-  oss << '\n';
+  oss << std::endl;
 
   return oss.str();
 }
@@ -255,7 +254,7 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
       curr_string_pos = oss.tellp();
       insertNewline(oss, begin_string_pos, curr_string_pos);
     }
-    oss << "\n\n";
+    oss << "\n" << std::endl;
   }
 
   return oss.str();
@@ -272,7 +271,7 @@ outputNonlinearSystemInformation(FEProblemBase & problem)
   {
     oss << std::setw(console_field_width)
         << "  AD size required: " << problem.getNonlinearSystemBase().requiredDerivativeSize()
-        << "\n";
+        << std::endl;
   }
 #endif
   return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase().system());
@@ -300,7 +299,7 @@ outputRelationshipManagerInformation(const MooseApp & app)
           << "  " + MooseUtils::underscoreToCamelCase(MooseUtils::toLower(info_pair.first), true) +
                  ":"
           << info_pair.second << '\n';
-    oss << '\n';
+    oss << std::endl;
   }
 
   return oss.str();
@@ -339,7 +338,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
       oss << " (auto)";
     oss << '\n';
   }
-  oss << '\n';
+  oss << std::endl;
 
   return oss.str();
 }
@@ -366,7 +365,7 @@ outputOutputInformation(MooseApp & app)
       for (const auto & adv_it : adv_on)
         if (execute_on != adv_it.second)
           oss << "    " << std::setw(console_field_width - 4) << adv_it.first + ":"
-              << "\"" << adv_it.second << "\"\n";
+              << "\"" << adv_it.second << "\"" << std::endl;
     }
   }
 
@@ -388,7 +387,7 @@ outputLegacyInformation(MooseApp & app)
            "files that contain material property output for which output occurs on INITIAL, then "
            "these will generate diffs due to zero values being stored, and these tests should be "
            "re-golded.\n"
-        << COLOR_DEFAULT << '\n';
+        << COLOR_DEFAULT << std::endl;
   }
 
   return oss.str();

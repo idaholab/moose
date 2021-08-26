@@ -261,6 +261,17 @@ MooseApp::validParams()
                                            30,
                                            "Pauses the application during startup for the "
                                            "specified time to allow for connection of debuggers.");
+
+  params.addCommandLineParam<bool>("perf_graph_live_all",
+                                   "--perf-graph-live-all",
+                                   false,
+                                   "Forces printing of ALL progress messages.");
+
+  params.addCommandLineParam<bool>("disable_perf_graph_live",
+                                   "--disable-perf-graph-live",
+                                   false,
+                                   "Disables PerfGraph Live Printing.");
+
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
@@ -292,20 +303,24 @@ MooseApp::validParams()
 
 MooseApp::MooseApp(InputParameters parameters)
   : ConsoleStreamInterface(*this),
+    PerfGraphInterface(_perf_graph, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
     _pars(parameters),
     _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
-    _perf_graph(type() + " (" + name() + ')'),
-    _rank_map(*_comm, _perf_graph),
     _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
     _output_warehouse(*this),
+    _perf_graph(type() + " (" + name() + ')',
+                *this,
+                getParam<bool>("perf_graph_live_all"),
+                !getParam<bool>("disable_perf_graph_live")),
+    _rank_map(*_comm, _perf_graph),
     _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
@@ -340,17 +355,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
-    _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2)),
-    _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
-    _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
-    _execute_timer(_perf_graph.registerSection("MooseApp::execute", 2)),
-    _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
-    _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
-    _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
-    _execute_mesh_generators_timer(
-        _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
-    _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
-    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
@@ -546,11 +550,14 @@ MooseApp::MooseApp(InputParameters parameters)
                     "Remove said parameter in ",
                     name(),
                     " to remove this deprecation warning.");
+
+  Moose::out << std::flush;
 }
 
 void
 MooseApp::checkRegistryLabels()
 {
+  TIME_SECTION("MooseApp::checkRegistryLabels", 5, "Checking Registry Labels");
   Registry::checkLabels();
 }
 
@@ -598,7 +605,7 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
-  TIME_SECTION(_setup_options_timer);
+  TIME_SECTION("setupOptions", 5, "Setting Up Options");
 
   // MOOSE was updated to have the ability to register execution flags in similar fashion as
   // objects. However, this change requires all *App.C/h files to be updated with the new
@@ -719,14 +726,24 @@ MooseApp::setupOptions()
       param_search = following_arg;
 
     JsonSyntaxTree tree(param_search);
-    _parser.buildJsonSyntaxTree(tree);
+
+    {
+      TIME_SECTION("dump", 1, "Building Syntax Tree");
+      _parser.buildJsonSyntaxTree(tree);
+    }
+
+    // Turn off live printing so that it doesn't mess with the dump
+    _perf_graph.disableLivePrint();
+
     JsonInputFileFormatter formatter;
-    Moose::out << "### START DUMP DATA ###\n"
-               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###\n";
+    Moose::out << "\n### START DUMP DATA ###\n"
+               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
     _ready_to_exit = true;
   }
   else if (isParamValid("registry"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::out << "Label\tType\tName\tClass\tFile\n";
 
     auto & objmap = Registry::allObjects();
@@ -757,6 +774,8 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("registry_hit"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::out << "### START REGISTRY DATA ###\n";
 
     hit::Section root("");
@@ -810,6 +829,8 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("definition"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
     _parser.buildJsonSyntaxTree(tree);
@@ -820,6 +841,8 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("yaml"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::perf_log.disable_logging();
 
     _parser.initSyntaxFormatter(Parser::YAML, true);
@@ -839,6 +862,8 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("json"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::perf_log.disable_logging();
 
     // Get command line argument following --json on command line
@@ -858,6 +883,8 @@ MooseApp::setupOptions()
   }
   else if (getParam<bool>("syntax"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::perf_log.disable_logging();
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
@@ -869,6 +896,8 @@ MooseApp::setupOptions()
   }
   else if (getParam<bool>("apptype"))
   {
+    _perf_graph.disableLivePrint();
+
     Moose::perf_log.disable_logging();
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
@@ -956,6 +985,8 @@ MooseApp::setupOptions()
     _command_line->printUsage();
     _ready_to_exit = true;
   }
+
+  Moose::out << std::flush;
 }
 
 void
@@ -977,7 +1008,7 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 void
 MooseApp::runInputFile()
 {
-  TIME_SECTION(_run_input_file_timer);
+  TIME_SECTION("runInputFile", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1016,7 +1047,7 @@ MooseApp::errorCheck()
 void
 MooseApp::executeExecutioner()
 {
-  TIME_SECTION(_execute_executioner_timer);
+  TIME_SECTION("executeExecutioner", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1101,7 +1132,7 @@ MooseApp::backup()
 void
 MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
-  TIME_SECTION(_restore_timer);
+  TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = _executioner->feProblem();
@@ -1140,7 +1171,7 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  TIME_SECTION(_run_timer);
+  TIME_SECTION("run", 3);
   if (isParamValid("show_docs") && getParam<bool>("show_docs"))
   {
     auto binname = appBinaryName();
@@ -1245,7 +1276,7 @@ MooseApp::run()
 
   try
   {
-    TIME_SECTION(_setup_timer);
+    TIME_SECTION("setup", 2, "Setting Up");
     setupOptions();
     runInputFile();
   }
@@ -1256,7 +1287,7 @@ MooseApp::run()
 
   if (!_check_input)
   {
-    TIME_SECTION(_execute_timer);
+    TIME_SECTION("execute", 2, "Executing");
     executeExecutioner();
   }
   else
@@ -1711,7 +1742,7 @@ MooseApp::createMeshGeneratorOrder()
   if (_ordered_generators.size() > 0)
     return;
 
-  TIME_SECTION(_execute_mesh_generators_timer);
+  TIME_SECTION("executeMeshGenerators", 1, "Executing Mesh Generators");
 
   DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
 
@@ -1945,7 +1976,7 @@ MooseApp::restoreCachedBackup()
   if (!_cached_backup.get())
     mooseError("No cached Backup to restore!");
 
-  TIME_SECTION(_restore_cached_backup_timer);
+  TIME_SECTION("restoreCachedBackup", 2, "Restoring Cached Backup");
 
   restore(_cached_backup, isRestarting());
 
@@ -1956,7 +1987,7 @@ MooseApp::restoreCachedBackup()
 void
 MooseApp::createMinimalApp()
 {
-  TIME_SECTION(_create_minimal_app_timer);
+  TIME_SECTION("createMinimalApp", 3, "Creating Minimal App");
 
   // SetupMeshAction
   {

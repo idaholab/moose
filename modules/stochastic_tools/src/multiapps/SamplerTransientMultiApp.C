@@ -49,11 +49,7 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
     _sampler(getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
-    _number_of_sampler_rows(_sampler.getNumberOfRows()),
-    _perf_solve_step(registerTimedSection("solveStep", 1)),
-    _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
-    _perf_initial_setup(registerTimedSection("initialSetup", 2)),
-    _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
+    _number_of_sampler_rows(_sampler.getNumberOfRows())
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
     paramError("mode",
@@ -69,7 +65,7 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
 void
 SamplerTransientMultiApp::initialSetup()
 {
-  TIME_SECTION(_perf_initial_setup);
+  TIME_SECTION("initialSetup", 2, "Setting Up SamplerTransientMultiApp");
 
   TransientMultiApp::initialSetup();
 
@@ -87,7 +83,7 @@ SamplerTransientMultiApp::initialSetup()
 bool
 SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
-  TIME_SECTION(_perf_solve_step);
+  TIME_SECTION("solveStep", 3, "Solving SamplerTransientMultiApp");
 
   if (_sampler.getNumberOfRows() != _number_of_sampler_rows)
     mooseError("The size of the sampler has changed; SamplerTransientMultiApp object do not "
@@ -104,7 +100,7 @@ SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
-  TIME_SECTION(_perf_solve_batch_step);
+  TIME_SECTION("solveStepBatch", 3, "Solving Step Batch For SamplerTransientMultiApp");
 
   // Value to return
   bool last_solve_converged = true;
@@ -213,8 +209,6 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  TIME_SECTION(_perf_command_line_args);
-
   std::string args;
 
   // With multiple processors per app, there are no local rows for non-root processors

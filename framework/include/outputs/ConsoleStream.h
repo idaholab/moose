@@ -9,12 +9,14 @@
 
 #pragma once
 
+// MOOSE includes
+class OutputWarehouse;
+
 // C++ includes
 #include <iostream>
 #include <sstream>
-
-// MOOSE includes
-class OutputWarehouse;
+#include <memory>
+#include <mutex>
 
 // this is the type of s t d :: c o u t
 typedef std::basic_ostream<char, std::char_traits<char>> CoutType;
@@ -58,7 +60,7 @@ public:
    */
   void unsetf(std::ios_base::fmtflags mask) const;
 
-  std::streampos tellp() const { return _oss.tellp(); }
+  std::streampos tellp() const { return _oss->tellp(); }
 
   /**
    * Return the current precision
@@ -80,18 +82,30 @@ public:
    */
   std::ios_base::fmtflags flags(std::ios_base::fmtflags new_flags) const;
 
+  /**
+   * The number of times something has been printed
+   */
+  unsigned long long int numPrinted() const;
+
 private:
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;
 
   /// The stream for buffering the message
-  std::ostringstream & _oss;
+  /// This stupidly has to be a shared pointer because
+  /// of something in AutomaticMortarGeneration that requires
+  /// this to be trivially copyable.
+  mutable std::shared_ptr<std::ostringstream> _oss;
 };
+
+extern std::mutex _stream_mutex;
 
 template <typename StreamType>
 const ConsoleStream &
 ConsoleStream::operator<<(const StreamType & s) const
 {
-  _oss << s;
+  std::lock_guard<std::mutex> lock(_stream_mutex);
+
+  (*_oss) << s;
   return *this;
 }

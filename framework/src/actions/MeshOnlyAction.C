@@ -12,7 +12,6 @@
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "Exodus.h"
-#include "TimedPrint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/checkpoint_io.h"
@@ -36,7 +35,7 @@ MeshOnlyAction::act()
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
-  _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2);
+  _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
   bool should_generate = false;
   // If no argument specified or if the argument following --mesh-only starts
@@ -68,23 +67,17 @@ MeshOnlyAction::act()
    */
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
+    TIME_SECTION("act", 1, "Writing Exodus");
+
     ExodusII_IO exio(mesh_ptr->getMesh());
 
     Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
-
-    TimedPrint tp(std ::cout,
-                  std::chrono::duration<double>(0.),
-                  std::chrono::duration<double>(1.),
-                  "Writing Exodus");
 
     exio.write(mesh_file);
   }
   else if (mesh_file.find(".cpr") + 4 == mesh_file.size())
   {
-    TimedPrint tp(std ::cout,
-                  std::chrono::duration<double>(0.),
-                  std::chrono::duration<double>(1.),
-                  "Writing Checkpoint");
+    TIME_SECTION("act", 1, "Writing Checkpoint");
 
     CheckpointIO io(mesh_ptr->getMesh(), true);
 

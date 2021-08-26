@@ -138,12 +138,12 @@ AStableDirk4::solve()
 
       if (current_stage < 4)
       {
-        _console << "Stage " << _stage << "\n";
+        _console << "Stage " << _stage << std::endl;
         _fe_problem.time() = time_old + _c[_stage - 1] * _dt;
       }
       else
       {
-        _console << "Update Stage.\n";
+        _console << "Update Stage." << std::endl;
         _fe_problem.time() = time_old + _dt;
       }
 

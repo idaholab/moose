@@ -37,7 +37,4 @@ protected:
 
   /// Vectors computed by this object
   std::vector<VectorPostprocessorValue *> _sobol_stat_vectors;
-
-  /// PrefGraph timer
-  const PerfID _perf_execute;
 };

@@ -58,12 +58,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _do_free_power_iteration(false),
     _output_inverse_eigenvalue(false),
-    _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
-    _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
-    _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
-    _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
-    _solve_timer(registerTimedSection("solve", 1)),
-    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _has_normalization(false),
     _normal_factor(1.0),
     _first_solve(declareRestartableData<bool>("first_solve", true))
@@ -153,7 +147,7 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
                                  SparseMatrix<Number> & jacobian,
                                  TagID tag)
 {
-  TIME_SECTION(_compute_jacobian_tag_timer);
+  TIME_SECTION("computeJacobianTag", 3);
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
@@ -184,7 +178,7 @@ EigenProblem::computeMatricesTags(
     const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
     const std::set<TagID> & tags)
 {
-  TIME_SECTION(_compute_jacobian_tag_timer);
+  TIME_SECTION("computeMatricesTags", 3);
 
   if (jacobians.size() != tags.size())
     mooseError("The number of matrices ",
@@ -214,7 +208,7 @@ EigenProblem::computeMatricesTags(
 void
 EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
-  TIME_SECTION(_compute_jacobian_blocks_timer);
+  TIME_SECTION("computeJacobianBlocks", 3);
 
   if (_displaced_problem)
     _aux->compute(EXEC_PRE_DISPLACE);
@@ -235,7 +229,7 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
                                 TagID tagA,
                                 TagID tagB)
 {
-  TIME_SECTION(_compute_jacobian_ab_timer);
+  TIME_SECTION("computeJacobianAB", 3);
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
@@ -268,7 +262,7 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
                                  NumericVector<Number> & residual,
                                  TagID tag)
 {
-  TIME_SECTION(_compute_residual_tag_timer);
+  TIME_SECTION("computeResidualTag", 3);
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
@@ -300,7 +294,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
                                 TagID tagA,
                                 TagID tagB)
 {
-  TIME_SECTION(_compute_residual_ab_timer);
+  TIME_SECTION("computeResidualAB", 3);
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
@@ -511,7 +505,7 @@ EigenProblem::solve()
 
   if (_solve)
   {
-    TIME_SECTION(_solve_timer);
+    TIME_SECTION("solve", 1);
 
     // Set necessary slepc callbacks
     // We delay this call as much as possible because libmesh

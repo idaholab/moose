@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = RunApp
+    input = perf_graph_live_print.i
+    expect_out = "Testing Slowness"
+
+    issues = '#15444'
+    design = 'utils/PerfGraph.md'
+    requirement = 'The system shall allow for timing sections of code and having automated print-outs when they take too long or use too much memory'
+  [../]
+[]

@@ -42,7 +42,7 @@ void
 PolycrystalRandomICAction::act()
 {
 #ifdef DEBUG
-  Moose::err << "Inside the PolycrystalRandomICAction Object\n";
+  Moose::err << "Inside the PolycrystalRandomICAction Object" << std::endl;
 #endif
 
   // Loop through the number of order parameters

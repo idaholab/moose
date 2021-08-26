@@ -118,6 +118,12 @@ CommonOutputAction::validParams()
   params.addParam<bool>(
       "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
 
+  params.addParam<bool>("perf_graph_live", true, "Enables printing of live progress messages");
+  params.addParam<Real>(
+      "perf_graph_live_time_limit", 1.0, "Time (in seconds) to wait before printing a message.");
+  params.addParam<unsigned int>(
+      "perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
+
   params.addParam<bool>("print_mesh_changed_info",
                         false,
                         "When true, each time the mesh is changed the mesh information is printed");
@@ -223,6 +229,14 @@ CommonOutputAction::act()
         (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
          _app.getParam<bool>("timing")))
       create("PerfGraphOutput");
+
+    if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
+      _perf_graph.setLivePrintActive(true);
+    else
+      _perf_graph.setLivePrintActive(false);
+
+    _perf_graph.setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
+    _perf_graph.setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
 
     if (!getParam<bool>("color"))
       Moose::setColorConsole(false);
