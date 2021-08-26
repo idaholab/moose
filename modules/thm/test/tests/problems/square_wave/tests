@@ -7,6 +7,7 @@
     cli_args = 'Executioner/num_steps=5 Outputs/file_base=square_wave_minmod'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
 
@@ -18,6 +19,7 @@
     cli_args = 'Executioner/num_steps=5 GlobalParams/rdg_slope_reconstruction=none Outputs/file_base=square_wave_none'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
 
@@ -29,6 +31,7 @@
     cli_args = 'Executioner/num_steps=5 GlobalParams/rdg_slope_reconstruction=mc Outputs/file_base=square_wave_mc'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
 
@@ -40,6 +43,7 @@
     cli_args = 'Executioner/num_steps=5 GlobalParams/rdg_slope_reconstruction=superbee Outputs/file_base=square_wave_superbee'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
 []

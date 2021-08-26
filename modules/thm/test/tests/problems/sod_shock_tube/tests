@@ -10,6 +10,7 @@
     rel_err = 1e-5
     heavy = true
     recover = false
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
   [sod_shock_tube_erk2_light]
@@ -21,6 +22,7 @@
       Outputs/file_base=sod_shock_tube_erk2_light'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
   [non_x_direction_1phase]
@@ -36,6 +38,7 @@
       Outputs/file_base=non_x_direction_1phase'
     abs_zero = 1e-10
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
   []
   [sod_shock_tube_be]
@@ -51,6 +54,7 @@
       Outputs/file_base=sod_shock_tube_be'
     abs_zero = 1e-7
     rel_err = 1e-5
+    max_parallel = 1
     group = '1phase rdg implicit pipe free_boundary'
   []
 []

@@ -3,5 +3,6 @@
     type = JSONDiff
     input = 'test.i'
     jsondiff = 'test_map.json'
+    max_parallel = 1
   []
 []

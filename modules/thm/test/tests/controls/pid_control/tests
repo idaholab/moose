@@ -4,5 +4,6 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     rel_err = 1e-4
+    max_parallel = 1
   []
 []

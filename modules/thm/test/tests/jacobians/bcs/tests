@@ -5,6 +5,7 @@
     ratio_tol = 5e-10
     difference_tol = 1e-9
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_momentum_free_bc]
@@ -13,6 +14,7 @@
     ratio_tol = 1e-7
     difference_tol = 0.2
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_free_bc]
@@ -21,6 +23,7 @@
     ratio_tol = 4e-8
     difference_tol = 0.15
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -30,6 +33,7 @@
     ratio_tol = 1e-13
     difference_tol = 1e-13
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -39,6 +43,7 @@
     ratio_tol = 5e-7
     difference_tol = 1
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -48,6 +53,7 @@
     ratio_tol = 2e-7
     difference_tol = 3
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -57,6 +63,7 @@
     ratio_tol = 1e-13
     difference_tol = 1e-13
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_momentum_hrhou_bc]
@@ -65,6 +72,7 @@
     ratio_tol = 1e-6
     difference_tol = 5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_hrhou_bc]
@@ -73,6 +81,7 @@
     ratio_tol = 1e-13
     difference_tol = 1e-13
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -82,6 +91,7 @@
     ratio_tol = 2e-7
     difference_tol = 5e-8
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_densityvelocity_bc]
@@ -90,6 +100,7 @@
     ratio_tol = 3e-8
     difference_tol = 4e-8
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -99,6 +110,7 @@
     ratio_tol = 1e-13
     difference_tol = 1e-13
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_momentum_massflowrate_bc]
@@ -107,6 +119,7 @@
     ratio_tol = 5e-13
     difference_tol = 5e-13
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_massflowrate_bc]
@@ -115,6 +128,7 @@
     ratio_tol = 5e-6
     difference_tol = 0.01
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -124,6 +138,7 @@
     ratio_tol = 2e-9
     difference_tol = 2e-9
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_momentum_stagnation_pt_bc_3eqn]
@@ -132,6 +147,7 @@
     ratio_tol = 3.4e-5
     difference_tol = 2.2e-4
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_stagnation_pt_bc_3eqn]
@@ -140,6 +156,7 @@
     ratio_tol = 1e-4
     difference_tol = 1e-3
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 
@@ -149,6 +166,7 @@
     ratio_tol = 1e-9
     difference_tol = 2e-9
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

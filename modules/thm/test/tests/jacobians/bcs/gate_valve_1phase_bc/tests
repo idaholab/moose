@@ -5,6 +5,7 @@
     ratio_tol = 1e-6
     difference_tol = 1e15
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhouA]
@@ -14,6 +15,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e15
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [rhoEA]
@@ -23,6 +25,7 @@
     ratio_tol = 1e-5
     difference_tol = 1e15
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

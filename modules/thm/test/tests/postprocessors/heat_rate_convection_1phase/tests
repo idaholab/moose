@@ -4,5 +4,6 @@
     input = 'heat_rate_convection_1phase.i'
     csvdiff = 'heat_rate_convection_1phase_out.csv'
     recover = false
+    max_parallel = 1
   []
 []

@@ -7,6 +7,7 @@
     cli_args = "Outputs/out/type=CSV Outputs/out/execute_on=final Outputs/out/show='mass_conservation energy_conservation'"
     abs_zero = 1e-8
     rel_err = 0
+    max_parallel = 1
   []
 
   [phy:loop]
@@ -16,6 +17,7 @@
     rel_err = 1e-3
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true'
+    max_parallel = 1
   []
 
   # jacobian test
@@ -27,5 +29,6 @@
     cli_args = 'Debug/check_jacobian=true'
     allow_test_objects = true
     max_threads = 1
+    max_parallel = 1
   []
 []
