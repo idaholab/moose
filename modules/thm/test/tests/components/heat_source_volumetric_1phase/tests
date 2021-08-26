@@ -5,6 +5,7 @@
     input = 'phy.conservation.1phase.i'
     csvdiff = 'phy.conservation.1phase_out.csv'
     abs_zero = 1e-9
+    max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
   []
@@ -15,6 +16,7 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=asdf"
     expect_err = "hs: The component 'asdf' does not exist"
+    max_parallel = 1
   []
 
   [err:not_a_flow_channel]
@@ -22,5 +24,6 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=total_power"
     expect_err = "hs: The component 'total_power' is not of type 'FlowChannel1Phase'"
+    max_parallel = 1
   []
 []

@@ -5,6 +5,7 @@
     ratio_tol = 6e-8
     difference_tol = 0.09
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_momentum_area_gradient]
@@ -13,6 +14,7 @@
     ratio_tol = 0.0005
     difference_tol = 3e5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_momentum_friction]
@@ -21,6 +23,7 @@
     ratio_tol = 4e-8
     difference_tol = 1
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_energy_flux]
@@ -29,6 +32,7 @@
     ratio_tol = 2e-8
     difference_tol = 2e-4
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_energy_wall_heating]
@@ -37,6 +41,7 @@
     ratio_tol = 2e-7
     difference_tol = 8e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_momentum_gravity]
@@ -45,6 +50,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-5
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_energy_gravity]
@@ -53,6 +59,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-2
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
   [one_d_3eqn_energy_heat_source]
@@ -61,6 +68,7 @@
     ratio_tol = 1e-20
     difference_tol = 1e-20
     max_threads = 1
+    max_parallel = 1
     allow_test_objects = true
   []
 []

@@ -3,5 +3,6 @@
     type = 'RunException'
     input = 'non_existent_par_name.i'
     expect_err = "Either component 'inlet' does not exist or parameter 'p' does not exist in that component."
+    max_parallel = 1
   []
 []

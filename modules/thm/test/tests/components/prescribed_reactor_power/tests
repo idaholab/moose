@@ -3,5 +3,6 @@
     type = 'RunException'
     input = 'err.deprecated.i'
     expect_err = "total_power: Deprecated component, use 'type = TotalPower' instead."
+    max_parallel = 1
   []
 []

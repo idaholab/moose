@@ -4,5 +4,6 @@
     input = 'phy.form_loss_1phase.i'
     csvdiff = 'phy.form_loss_1phase_out.csv'
     rel_err = 1e-3
+    max_parallel = 1
   []
 []

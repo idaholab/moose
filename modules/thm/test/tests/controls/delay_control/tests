@@ -3,6 +3,7 @@
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    max_parallel = 1
   []
 
   [err.negative_tau]
@@ -10,5 +11,6 @@
     input = 'test.i'
     cli_args = 'ControlLogic/delay_ctrl/tau=-1'
     expect_err = "Negative values of 'tau' are not allowed\."
+    max_parallel = 1
   []
 []
