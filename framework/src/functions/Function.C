@@ -115,16 +115,39 @@ Function::evaluate(const FaceArg & face, const unsigned int state) const
 }
 
 Real
-Function::evaluate(const QpArg & /*qp*/, unsigned int /*state*/) const
+Function::evaluate(const QpArg & qp_arg, const unsigned int state) const
 {
-  mooseError("Not yet implemented");
+  const Elem * const elem = std::get<0>(qp_arg);
+  const auto qp = std::get<1>(qp_arg);
+  if (elem != _current_functor_elem)
+  {
+    _current_functor_elem = elem;
+    const QBase * const qrule_template = std::get<2>(qp_arg);
+
+    const FEFamily mapping_family = FEMap::map_fe_type(*elem);
+    const FEType fe_type(elem->default_order(), mapping_family);
+
+    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+    std::unique_ptr<QBase> qrule(QBase::build(
+        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+
+    const auto & xyz = fe->get_xyz();
+    fe->attach_quadrature_rule(qrule.get());
+    fe->reinit(elem);
+    _current_functor_xyz = xyz;
+  }
+  mooseAssert(qp < _current_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return value(getTime(state), _current_functor_xyz[qp]);
 }
 
 Real
 Function::evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
                    unsigned int /*state*/) const
 {
-  mooseError("Not yet implemented");
+  mooseError(
+      "The ElementType evaluate overload is not supported by Function because there is no simple "
+      "way to determine the location of quadrature points without being provided an element");
 }
 
 void

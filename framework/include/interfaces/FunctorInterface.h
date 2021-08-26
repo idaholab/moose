@@ -62,7 +62,7 @@ class FunctorInterface : public FunctorBase
 public:
   using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool, SubdomainID>;
   using ElemAndFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
-  using QpArg = std::pair<const libMesh::Elem *, unsigned int>;
+  using QpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
   virtual ~FunctorInterface() = default;
@@ -193,14 +193,14 @@ FunctorInterface<T>::operator()(const QpArg & elem_and_qp, const unsigned int st
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_and_qp, state);
 
-  const auto elem_id = elem_and_qp.first->id();
+  const auto elem_id = std::get<0>(elem_and_qp)->id();
   if (elem_id != _current_qp_elem)
   {
     _current_qp_elem = elem_id;
     _current_qp_elem_data = &_qp_to_value[elem_id];
   }
   auto & qp_elem_data_ref = *_current_qp_elem_data;
-  const auto qp = elem_and_qp.second;
+  const auto qp = std::get<1>(elem_and_qp);
 
   // Check and see whether we even have sized for this quadrature point. If we haven't then we must
   // evaluate

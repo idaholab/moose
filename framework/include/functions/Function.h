@@ -132,4 +132,12 @@ private:
   Real evaluate(const QpArg & qp, unsigned int state) const override final;
   Real evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                 unsigned int state) const override final;
+
+  /// Keep track of the current functor element in order to enable local element caching (e.g. if we
+  /// call evaluate on the same element, but just with a different quadrature point, we can return
+  /// previously computed results indexed at the different qp
+  mutable const Elem * _current_functor_elem = nullptr;
+
+  /// The location of the quadrature points in physical space for the \p _current_functor_elem
+  mutable std::vector<Point> _current_functor_xyz;
 };

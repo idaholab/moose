@@ -28,5 +28,5 @@ FunctorMatDiffusion::FunctorMatDiffusion(const InputParameters & parameters)
 ADReal
 FunctorMatDiffusion::computeQpResidual()
 {
-  return _diff(std::make_pair(_current_elem, _qp)) * _grad_test[_i][_qp] * _grad_u[_qp];
+  return _diff(std::make_tuple(_current_elem, _qp, _qrule)) * _grad_test[_i][_qp] * _grad_u[_qp];
 }

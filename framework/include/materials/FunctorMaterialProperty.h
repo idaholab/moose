@@ -159,7 +159,7 @@ template <typename T>
 T
 FunctorMaterialProperty<T>::evaluate(const QpArg & elem_and_qp, unsigned int state) const
 {
-  auto it = _qp_functor.find(elem_and_qp.first->subdomain_id());
+  auto it = _qp_functor.find(std::get<0>(elem_and_qp)->subdomain_id());
   mooseAssert(it != _qp_functor.end(),
               "The provided element has a subdomain ID that doesn't exist in the map!");
   return it->second(elem_and_qp, state);
