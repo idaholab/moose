@@ -64,7 +64,8 @@
     exodiff = 'ad_newmark_action_out.e'
     abs_zero = 1e-09
 
-    requirement = "The dynamic tensor mechanics action shall support automatic differentiation."
+    requirement = "The dynamic tensor mechanics action shall support automatic differentiation using "
+                  "the Newmark-Beta time integrator."
     design = "Dynamics.md"
     issues = "#18687"
   []

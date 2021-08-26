@@ -83,6 +83,7 @@
 
 [Executioner]
   type = Transient
+  solve_type = NEWTON
   start_time = 0
   end_time = 2
   dt = 0.1
