@@ -85,7 +85,7 @@ Split::Split(const InputParameters & parameters)
 {
   _petsc_options.flags = getParam<MultiMooseEnum>("petsc_options");
   _petsc_options.pairs =
-      getParamPairs<std::string, std::string>("petsc_options_iname", "petsc_options_value");
+      getParam<std::string, std::string>("petsc_options_iname", "petsc_options_value");
 }
 
 void

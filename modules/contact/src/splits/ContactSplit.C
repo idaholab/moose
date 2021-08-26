@@ -43,11 +43,10 @@ ContactSplit::validParams()
 
 ContactSplit::ContactSplit(const InputParameters & params)
   : Split(params),
-    _contact_pairs(
-        getParamPairs<BoundaryName, BoundaryName>("contact_primary", "contact_secondary")),
+    _contact_pairs(getParam<BoundaryName, BoundaryName>("contact_primary", "contact_secondary")),
     _contact_displaced(getParam<std::vector<int>>("contact_displaced")),
     _uncontact_pairs(
-        getParamPairs<BoundaryName, BoundaryName>("uncontact_primary", "uncontact_secondary")),
+        getParam<BoundaryName, BoundaryName>("uncontact_primary", "uncontact_secondary")),
     _uncontact_displaced(getParam<std::vector<int>>("uncontact_displaced")),
     _include_all_contact_nodes(getParam<bool>("include_all_contact_nodes"))
 {

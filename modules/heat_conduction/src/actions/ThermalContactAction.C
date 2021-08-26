@@ -110,7 +110,7 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
     _penetration_var_name(_quadrature ? "qpoint_penetration" : "penetration"),
     _gap_value_name("paired_" + getParam<NonlinearVariableName>("variable")),
     _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable")),
-    _boundary_pairs(getParamPairs<BoundaryName, BoundaryName>("primary", "secondary"))
+    _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary"))
 {
 }
 

@@ -612,7 +612,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // The parameters contained in the Action
   const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
   const auto & petsc_pair_options =
-      params.getPairs<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
+      params.get<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value");
 
   // A reference to the PetscOptions object that contains the settings that will be used in the
   // solve

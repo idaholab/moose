@@ -135,7 +135,7 @@ ContactAction::validParams()
 
 ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
-    _boundary_pairs(getParamPairs<BoundaryName, BoundaryName>("primary", "secondary")),
+    _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
