@@ -1,16 +1,19 @@
 Content:
-    workshop:
+    tutorial02_multiapps:
         root_dir: ${MOOSE_DIR}/tutorials/tutorial02_multiapps/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - large_media/testing/*
+            - large_media/framework/multiapps_positions.png
+            - large_media/tutorials/INL_Hex_Light_Presentation_Background.jpg
             - contrib/**
             - css/**
             - js/**
-            - bib/**
-    large_media:
-        root_dir: ${MOOSE_DIR}/large_media
+            # - bib/**
+
+Executioner:
+    type: MooseDocs.base.Serial
 
 Renderer:
     type: MooseDocs.base.RevealRenderer
@@ -25,7 +28,7 @@ Extensions:
     MooseDocs.extensions.media: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.include: default
-    MooseDocs.extensions.bibtex: default
+    # MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.katex:
         macros:
             \vec: "\\bar" # TODO: \vec doesn't render
@@ -42,4 +45,6 @@ Extensions:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.listing:
         modal-link: False
-    MooseDocs.extensions.reveal: default
+    MooseDocs.extensions.reveal:
+        translate: getting_started/examples_and_tutorials/tutorial02_multiapps/presentation/index.md
+        background_image: INL_Hex_Light_Presentation_Background.jpg

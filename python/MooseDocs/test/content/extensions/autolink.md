@@ -14,7 +14,7 @@
 
 [core.md#ordered-single-level-lists]
 
-[this is local](core.md#unordered-single-level-lists)
+[this is non-local](core.md#unordered-single-level-lists)
 
 ## Source Filename
 
@@ -35,3 +35,15 @@
 [index.md exact=True]
 
 [Home](index.md exact=True)
+
+## Alternative Links
+
+[this is a local alternative](not_a_real_file_name.md alternative=#local-headings)
+
+[this is an alternative](not_a_real_file_name.md alternative=core.md#unordered-single-level-lists)
+
+[this is an exact alternative](not_a_real_file_name.md alternative=extensions/core.md exact=True)
+
+[this is an optional alternative](not_a_real_file_name.md alternative=also_not_real.md optional=True)
+
+[this is an alternative link to Google](not_a_real_file_name.md alternative=https://www.google.com/)

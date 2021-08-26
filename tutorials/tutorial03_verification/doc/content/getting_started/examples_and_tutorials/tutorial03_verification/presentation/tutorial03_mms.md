@@ -24,12 +24,13 @@ The [!ac](MMS) can be summarized into three basic steps:
 
    !equation
    \begin{align*}
-   \frac{\partial T}{\partial x} + t &= 0 \\
-   \frac{\partial}{\partial x}(2tx^2) + t &= 4tx
+   \frac{\partial T}{\partial x} + t &= 0
+   \quad \xrightarrow{\clap{assume}} \quad
+   \frac{\partial}{\partial x}(2tx^2) + t = 4tx
    \end{align*}
 
-3. Apply the negative of the computed function and perform the desired convergence study. For example,
-   the example [!ac](PDE) above becomes:
+3. Add the negative of the computed function and perform the desired convergence study. For example,
+   the [!ac](PDE) above becomes:
 
    !equation
    \frac{\partial T}{\partial x} + t - 4tx = 0

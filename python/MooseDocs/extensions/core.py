@@ -180,13 +180,24 @@ class HeadingBlock(components.ReaderComponent):
     Hash style markdown headings with settings.
 
     # Heading Level One with=settings
+
+    The regex reads inline commands, such as autolinks, as part of the header text, e.g.,
+
+        ## [Home](index.md exact=True) id=home-link
+
+    The trick is that header settings need to be distinguished from inline command settings. This is
+    accomplished by doing a negative lookahead for a "]" or ")" following the 'key=value' match. It
+    should be safe to say that inputs for header settings (currently, 'style', 'class', or 'id') can
+    never contain a "]" or ")", since HTML classes and CSS grammar do not allow them in names (see
+    https://www.w3.org/TR/CSS21/grammar.html#scanner).
     """
     TOKEN = Heading
-    RE = re.compile(r'(?:\A|\n{2,})'             # start of string or empty line
-                    r'^(?P<level>#{1,6}) '       # match 1 to 6 #'s at the beginning of line
-                    r'(?P<inline>.*?) *'         # heading text that will be inline parsed
-                    r'(?P<settings>\s+\w+=.*?)?' # optional match key, value settings
-                    r'(?=\n*\Z|\n{2,})',         # match up to end of string or newline(s)
+    RE = re.compile(r'(?:\A|\n{2,})'            # start of string or empty line
+                    r'^(?P<level>#{1,6}) '      # hashes indicating header level
+                    r'(?P<inline>.*?) *'        # heading text to be inline parsed
+                    r'(?!\w+=[^\n]*?(?:\]|\)))' # inline command settings lookahead
+                    r'(?P<settings>\w+=.*?)?'   # optional 'key=value' settings
+                    r'(?=\n*\Z|\n{2,})',        # end of string or newline(s)
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
 
     def createToken(self, parent, info, page):

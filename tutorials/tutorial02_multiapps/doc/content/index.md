@@ -1,22 +1,4 @@
-# MOOSE MultiApps
+# Welcome to the MultiApps Tutorial
 
-!style halign=center
-www.mooseframework.org
-
-!---
-
-!include intro.md
-
-!---
-
-!include step01_multiapps.md
-
-!---
-
-!include step02_transfers.md
-
-!---
-
-!include step03_coupling.md
-
-!bibtex bibliography title-level=1
+!style halign=center fontsize=150%
+[ENTER](getting_started/examples_and_tutorials/tutorial02_multiapps/presentation/index.md exact=True)

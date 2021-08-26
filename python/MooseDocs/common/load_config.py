@@ -100,7 +100,8 @@ def load_configs(filenames, **kwargs):
     they still should have access to those built by any other translator.
 
     The local names of all page objects must be unique within the global content pool. The only
-    exceptions are pages.Directory objects, for which duplicates may occur.
+    exceptions are pages.Directory objects, for which duplicates may occur. Directories will simply
+    be written out by the first translator that encounters them.
     """
     destination = kwargs.get('Translator', dict()).get('destination')
     destined = False

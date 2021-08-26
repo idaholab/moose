@@ -12,7 +12,7 @@ element software more work is necessary.
 The weak form must be discretized using a set of "basis functions" amenable for manipulation by a
 computer.
 
-!media darcy_thermo_mech/fem_hat_function.png style=width:100%;
+!media darcy_thermo_mech/fem_hat_function.png style=width:100%;background:white;
 
 !style fontsize=60%
 *Images copyright [!citet](becker1981finite)*
@@ -20,7 +20,7 @@ computer.
 !col-end!
 
 !col width=50%
-!media darcy_thermo_mech/fem_basis_functions.png style=width:65%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_basis_functions.png style=width:65%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !row-end!
 
@@ -77,15 +77,15 @@ coefficients correspond to the values of the functions at the nodes.
 
 ## Example 1D Shape Functions
 
-!media darcy_thermo_mech/fem_linear_lagrange.png style=width:49%;margin-left:1%;display:inline;
+!media darcy_thermo_mech/fem_linear_lagrange.png style=width:49%;margin-left:auto;margin-right:1%;display:inline;background:white;
 
-!media darcy_thermo_mech/fem_quadratic_lagrange.png style=width:49%;display:inline;
+!media darcy_thermo_mech/fem_quadratic_lagrange.png style=width:49%;margin-left:1%;margin-right:auto;display:inline;background:white;
 
 !---
 
-!media darcy_thermo_mech/fem_cubic_lagrange.png style=width:49%;margin-left:1%;display:inline;
+!media darcy_thermo_mech/fem_cubic_lagrange.png style=width:49%;margin-left:auto;margin-right:1%;display:inline;background:white;
 
-!media darcy_thermo_mech/fem_cubic_hermite.png style=width:49%;display:inline;
+!media darcy_thermo_mech/fem_cubic_hermite.png style=width:49%;margin-left:1%;margin-right:auto;display:inline;background:white;
 
 !---
 

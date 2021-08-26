@@ -21,7 +21,7 @@ def make_extension(**kwargs):
 
 Image = tokens.newToken('Image', src='', tex='', dark='')
 Video = tokens.newToken('Video', src='', tex='', youtube=False,
-                        controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
+                        controls=True, poster=None, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
     """
@@ -212,13 +212,19 @@ class RenderVideo(components.RenderComponent):
         elif tstop:
             src += '#t=0,{}'.format(tstop)
 
-        video = html.Tag(parent, 'video', token, class_='moose-video')
+        # Need to place HTML video elements in their own div element so that the controls render
+        # properly (they can overlap with the video container and cause weird looking artifacts).
+        div = html.Tag(parent, 'div', token, class_='moose-video-div')
+        video = html.Tag(div, 'video', class_='moose-video')
         _, ext = os.path.splitext(src)
         source = html.Tag(video, 'source', src=src)
 
         source["type"] = "video/{}".format(ext[1:])
 
+        # Set attributes for HTML video element
         video['width'] = '100%'
+        if token['poster'] is not None:
+            video['poster'] = "/" + self.translator.findPage(token['poster']).local
 
         # Ensure that bool flags are boolean
         for key in ['controls', 'loop', 'autoplay']:

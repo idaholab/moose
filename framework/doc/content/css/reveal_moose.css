@@ -1,3 +1,7 @@
+:root{
+    --object-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+}
+
 /* fallback */
 @font-face {
   font-family: 'Material Icons';
@@ -6,8 +10,11 @@
   src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
 }
 
-
-.material-icons {
+/*
+  Do we even do anything with material icons in MooseDocs slidesets? The '!icon' command only
+  works for Materialize renderers. [crswong888]
+*/
+.material-icons{
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
@@ -56,11 +63,21 @@
 .reveal{
     font-family: 'Roboto', sans-serif;
     font-weight:300;
-    font-size:18pt;
+    font-size:16pt;
+}
+
+.reveal .slides{
+    text-align:left;
 }
 
 .reveal .katex{
     font-family: KaTeX_Main;
+}
+
+.reveal .moose-katex-block-equation{
+  display: flex;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 .reveal strong{
@@ -111,20 +128,29 @@
     margin-top:0;
 }
 
-
-.reveal section img{
+.reveal section img,
+.reveal section iframe{
+    background: none;
     border: none;
-    box-shadow: none;
+    box-shadow: var(--object-shadow);
 }
 
-.reveal .moose-katex-equation,
-{
-    padding-top:10px;
-    padding-bottom:10px;
+/*
+  Copying the width/height constraints from the simple reveal theme for the video containter.
+  Padding is added so that the video controls render properly in the presence of a box-shadow.
+*/
+.reveal section .moose-video-div{
+    padding: 1%;
+    max-width: 95%;
+    max-height: 95%;
 }
 
-.reveal .slides{
-    text-align: left;
+/* Unsetting max-width/height here since the div container already enforces it. */
+.reveal section .moose-video-div video.moose-video{
+    display: block;
+    max-width: unset;
+    max-height: unset;
+    box-shadow: var(--object-shadow);
 }
 
 .reveal pre code{
@@ -132,13 +158,21 @@
 }
 
 .reveal .moose-bibliography{
-    overflow:scroll;
-    height:40vh;
+    overflow-y:scroll;
+    height:45vh;
+    background-color: rgba(0, 88, 151, 0.1);
+    box-shadow: var(--object-shadow);
 }
 
 .reveal .moose-bibliography li{
     font-size:medium;
     font-weight:100;
+    margin-right: 2em;
+}
+
+.reveal .moose-table-div table{
+    background-color: white;
+    box-shadow: var(--object-shadow);
 }
 
 .reveal .moose-syntax-list-item-syntax{
