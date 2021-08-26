@@ -9,15 +9,19 @@
 
 #include "ADKernel.h"
 
-class FunctorMatDiffusion : public ADKernel
+template <bool is_ad>
+class FunctorMatDiffusionTempl : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  FunctorMatDiffusion(const InputParameters & parameters);
+  FunctorMatDiffusionTempl(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;
 
-  const FunctorInterface<Real> & _diff;
+  const FunctorInterface<GenericReal<is_ad>> & _diff;
 };
+
+typedef FunctorMatDiffusionTempl<false> FunctorMatDiffusion;
+typedef FunctorMatDiffusionTempl<true> ADFunctorMatDiffusion;

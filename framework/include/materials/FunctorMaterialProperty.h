@@ -64,6 +64,12 @@ private:
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
              unsigned int state) const override final;
 
+  /**
+   * Provide a useful error message about lack of functor material property on the provided
+   * subdomain \p sub_id
+   */
+  std::string subdomainErrorMessage(SubdomainID sub_id) const;
+
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
@@ -121,13 +127,23 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
 }
 
 template <typename T>
+std::string
+FunctorMaterialProperty<T>::subdomainErrorMessage(const SubdomainID sub_id) const
+{
+  return "The provided subdomain ID " + std::to_string(sub_id) +
+         " doesn't exist in the map for material property " + _name +
+         "! This is likely because you did not provide a functor material "
+         "definition on that subdomain";
+}
+
+template <typename T>
 T
 FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int state) const
 {
   mooseAssert(elem && elem != libMesh::remote_elem,
               "The element must be non-null and non-remote in functor material properties");
   auto it = _elem_functor.find(elem->subdomain_id());
-  mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  mooseAssert(it != _elem_functor.end(), subdomainErrorMessage(elem->subdomain_id()));
   return it->second(elem, state);
 }
 
@@ -141,7 +157,7 @@ FunctorMaterialProperty<T>::evaluate(const ElemAndFaceArg & elem_and_face, unsig
               "material properties");
   auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
   mooseAssert(it != _elem_and_face_functor.end(),
-              "The provided subdomain ID doesn't exist in the map!");
+              subdomainErrorMessage(std::get<2>(elem_and_face)));
   return it->second(elem_and_face, state);
 }
 
@@ -151,7 +167,7 @@ FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) c
 {
   mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
   auto it = _face_functor.find(std::get<3>(face));
-  mooseAssert(it != _face_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(std::get<3>(face)));
   return it->second(face, state);
 }
 
@@ -161,7 +177,7 @@ FunctorMaterialProperty<T>::evaluate(const QpArg & elem_and_qp, unsigned int sta
 {
   auto it = _qp_functor.find(std::get<0>(elem_and_qp)->subdomain_id());
   mooseAssert(it != _qp_functor.end(),
-              "The provided element has a subdomain ID that doesn't exist in the map!");
+              subdomainErrorMessage(std::get<0>(elem_and_qp)->subdomain_id()));
   return it->second(elem_and_qp, state);
 }
 
@@ -171,6 +187,6 @@ FunctorMaterialProperty<T>::evaluate(
     const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {
   auto it = _tqp_functor.find(std::get<2>(tqp));
-  mooseAssert(it != _tqp_functor.end(), "The provided subdomain ID doesn't exist in the map!");
+  mooseAssert(it != _tqp_functor.end(), subdomainErrorMessage(std::get<2>(tqp)));
   return it->second(tqp, state);
 }

@@ -138,6 +138,18 @@ protected:
    */
   void processDerivatives(const ADReal & resid, dof_id_type dof_index);
 
+  /**
+   * @return a tuple corresponding to the face info element, the face info, and the face info
+   * element subdomain id for use with functors
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFace() const;
+
+  /**
+   * @return a tuple corresponding to the face info neighbor, the face info, and the face info
+   * neighbor subdomain id for use with functors
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFace() const;
+
   /// To be consistent with FE interfaces we introduce this quadrature point member. However, for FV
   /// calculations there should every only be one qudrature point and it should be located at the
   /// face centroid

@@ -87,13 +87,13 @@
 
 [Materials]
   [left]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     prop_names = 'coeff_left'
     prop_values = '1'
     block = 0
   []
   [right]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     prop_names = 'coeff_right'
     prop_values = '1'
     block = 1

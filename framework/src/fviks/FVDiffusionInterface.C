@@ -27,18 +27,16 @@ FVDiffusionInterface::validParams()
 
 FVDiffusionInterface::FVDiffusionInterface(const InputParameters & params)
   : FVInterfaceKernel(params),
-    _coeff1_elem(getADMaterialProperty<Real>("coeff1")),
-    _coeff2_elem(getADMaterialProperty<Real>("coeff2")),
-    _coeff1_neighbor(getNeighborADMaterialProperty<Real>("coeff1")),
-    _coeff2_neighbor(getNeighborADMaterialProperty<Real>("coeff2"))
+    _coeff1(getFunctorMaterialProperty<ADReal>("coeff1")),
+    _coeff2(getFunctorMaterialProperty<ADReal>("coeff2"))
 {
 }
 
 ADReal
 FVDiffusionInterface::computeQpResidual()
 {
-  const auto & coef_elem = elemIsOne() ? _coeff1_elem : _coeff2_elem;
-  const auto & coef_neighbor = elemIsOne() ? _coeff2_neighbor : _coeff1_neighbor;
+  const auto & coef_elem = elemIsOne() ? _coeff1 : _coeff2;
+  const auto & coef_neighbor = elemIsOne() ? _coeff2 : _coeff1;
 
   // Form a finite difference gradient across the interface
   Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
@@ -53,8 +51,8 @@ FVDiffusionInterface::computeQpResidual()
   ADReal diffusivity;
   interpolate(Moose::FV::InterpMethod::Average,
               diffusivity,
-              coef_elem[_qp],
-              coef_neighbor[_qp],
+              coef_elem(elemFace()),
+              coef_neighbor(neighborFace()),
               *_face_info,
               true);
 

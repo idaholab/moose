@@ -14,7 +14,6 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataFV.h"
-#include "FunctorInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -50,7 +49,7 @@ class NumericVector;
 /// RealVectorValue     RealVectorValue       Real
 /// RealEigenVector      Real                  RealEigenVector
 template <typename OutputType>
-class MooseVariableFV : public MooseVariableField<OutputType>, public FunctorInterface<ADReal>
+class MooseVariableFV : public MooseVariableField<OutputType>
 {
 public:
   using OutputGradient = typename MooseVariableField<OutputType>::OutputGradient;
@@ -482,6 +481,7 @@ public:
                                       const FaceInfo & fi,
                                       const ADReal & elem_value) const;
 
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::FaceArg;
   ADReal getInternalFaceValue(const FaceArg & face) const;
 
 protected:
@@ -508,17 +508,17 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
-  using FunctorInterface<ADReal>::FaceArg;
-  using FunctorInterface<ADReal>::QpArg;
-  ADReal evaluate(const Elem * const & elem, unsigned int) const override final
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemAndFaceArg;
+  using MooseVariableField<OutputType>::evaluate;
+  typename Moose::ADType<OutputType>::type evaluate(const Elem * const & elem,
+                                                    unsigned int) const override final
   {
     return getElemValue(elem);
   }
-  ADReal evaluate(const ElemAndFaceArg & elem_and_face, unsigned int) const override final;
-  ADReal evaluate(const FaceArg & face, unsigned int) const override final;
-  ADReal evaluate(const QpArg & qp, unsigned int state) const override final;
-  ADReal evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                  unsigned int state) const override final;
+  typename Moose::ADType<OutputType>::type evaluate(const ElemAndFaceArg & elem_and_face,
+                                                    unsigned int) const override final;
+  typename Moose::ADType<OutputType>::type evaluate(const FaceArg & face,
+                                                    unsigned int) const override final;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi

@@ -90,7 +90,7 @@ public:
    */
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
-private:
+protected:
   /**
    * Evaluate the functor with a given element. A possible implementation of this method could
    * compute an element-average
@@ -139,6 +139,7 @@ private:
   virtual T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                      unsigned int state) const = 0;
 
+private:
   /**
    * clear cache data
    */

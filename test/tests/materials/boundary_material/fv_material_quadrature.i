@@ -53,7 +53,7 @@
 
 [Materials]
   [k1]
-    type = ADGenericFunctionMaterial
+    type = ADGenericFunctionFunctorMaterial
     prop_names = 'k1'
     prop_values = linear_x
     block = 0

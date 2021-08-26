@@ -255,13 +255,13 @@ hot_temp=310
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'k alpha'
-    prop_values = '${k} ${alpha}'
+    prop_names = 'alpha'
+    prop_values = '${alpha}'
   []
   [const_functor]
     type = ADGenericConstantFunctorMaterial
-    prop_names = 'cp'
-    prop_values = '${cp}'
+    prop_names = 'cp k'
+    prop_values = '${cp} ${k}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial

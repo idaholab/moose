@@ -18,8 +18,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _coeff1_elem;
-  const ADMaterialProperty<Real> & _coeff2_elem;
-  const ADMaterialProperty<Real> & _coeff1_neighbor;
-  const ADMaterialProperty<Real> & _coeff2_neighbor;
+  const FunctorInterface<ADReal> & _coeff1;
+  const FunctorInterface<ADReal> & _coeff2;
 };

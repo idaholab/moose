@@ -203,3 +203,16 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
   processDerivatives(r, elem_dof_indices[0]);
   processDerivatives(-r, neigh_dof_indices[0]);
 }
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVInterfaceKernel::elemFace() const
+{
+  return std::make_tuple(&_face_info->elem(), _face_info, _face_info->elem().subdomain_id());
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVInterfaceKernel::neighborFace() const
+{
+  return std::make_tuple(
+      _face_info->neighborPtr(), _face_info, _face_info->neighborPtr()->subdomain_id());
+}

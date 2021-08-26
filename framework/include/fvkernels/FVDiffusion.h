@@ -30,6 +30,5 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _coeff_elem;
-  const ADMaterialProperty<Real> & _coeff_neighbor;
+  const FunctorInterface<ADReal> & _coeff;
 };

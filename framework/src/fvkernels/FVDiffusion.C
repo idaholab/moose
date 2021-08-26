@@ -22,9 +22,7 @@ FVDiffusion::validParams()
 }
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
-  : FVFluxKernel(params),
-    _coeff_elem(getADMaterialProperty<Real>("coeff")),
-    _coeff_neighbor(getNeighborADMaterialProperty<Real>("coeff"))
+  : FVFluxKernel(params), _coeff(getFunctorMaterialProperty<ADReal>("coeff"))
 {
 }
 
@@ -39,8 +37,8 @@ FVDiffusion::computeQpResidual()
   ADReal k;
   interpolate(Moose::FV::InterpMethod::Average,
               k,
-              _coeff_elem[_qp],
-              _coeff_neighbor[_qp],
+              _coeff(elemFace()),
+              _coeff(neighborFace()),
               *_face_info,
               true);
 

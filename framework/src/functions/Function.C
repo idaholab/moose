@@ -105,7 +105,8 @@ Function::evaluate(const Elem * const & elem, const unsigned int state) const
 Real
 Function::evaluate(const ElemAndFaceArg & elem_and_face, const unsigned int state) const
 {
-  return value(getTime(state), std::get<0>(elem_and_face)->centroid());
+  mooseAssert(std::get<1>(elem_and_face), "We must have a non-null face information pointer");
+  return value(getTime(state), std::get<1>(elem_and_face)->faceCentroid());
 }
 
 Real

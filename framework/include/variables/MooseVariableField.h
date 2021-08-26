@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableData.h"
+#include "FunctorInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -35,7 +36,9 @@
  *
  */
 template <typename OutputType>
-class MooseVariableField : public MooseVariableFieldBase
+class MooseVariableField : public MooseVariableFieldBase,
+                           public FunctorInterface<typename Moose::ADType<OutputType>::type>
+
 {
 public:
   // type for gradient, second and divergence of template class OutputType
@@ -329,4 +332,12 @@ public:
    */
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
+
+  using FunctorInterface<typename Moose::ADType<OutputType>::type>::evaluate;
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::QpArg;
+  typename Moose::ADType<OutputType>::type evaluate(const QpArg & qp,
+                                                    unsigned int state) const override final;
+  typename Moose::ADType<OutputType>::type
+  evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+           unsigned int state) const override final;
 };

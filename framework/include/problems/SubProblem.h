@@ -960,7 +960,9 @@ SubProblem::declareFunctorProperty(const std::string & name, const THREAD_ID tid
       functor_material_properties.emplace(name, std::make_unique<FunctorMaterialProperty<T>>(name));
   auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(pr.first->second.get());
   if (!property)
-    mooseError("Inconsistent material property types");
+    mooseError("Inconsistent types for functor material property ",
+               name,
+               ". Did you declare and retrieve the property with different types?");
   return *property;
 }
 

@@ -10,23 +10,30 @@
 #include "FunctorMatDiffusion.h"
 
 registerMooseObject("MooseTestApp", FunctorMatDiffusion);
+registerMooseObject("MooseTestApp", ADFunctorMatDiffusion);
 
+template <bool is_ad>
 InputParameters
-FunctorMatDiffusion::validParams()
+FunctorMatDiffusionTempl<is_ad>::validParams()
 {
   auto params = ADKernel::validParams();
-  params.addParam<MaterialPropertyName>(
+  params.template addParam<MaterialPropertyName>(
       "diffusivity", "D", "The diffusivity value or material property");
   return params;
 }
 
-FunctorMatDiffusion::FunctorMatDiffusion(const InputParameters & parameters)
-  : ADKernel(parameters), _diff(getFunctorMaterialProperty<Real>("diffusivity"))
+template <bool is_ad>
+FunctorMatDiffusionTempl<is_ad>::FunctorMatDiffusionTempl(const InputParameters & parameters)
+  : ADKernel(parameters), _diff(getFunctorMaterialProperty<GenericReal<is_ad>>("diffusivity"))
 {
 }
 
+template <bool is_ad>
 ADReal
-FunctorMatDiffusion::computeQpResidual()
+FunctorMatDiffusionTempl<is_ad>::computeQpResidual()
 {
   return _diff(std::make_tuple(_current_elem, _qp, _qrule)) * _grad_test[_i][_qp] * _grad_u[_qp];
 }
+
+template class FunctorMatDiffusionTempl<false>;
+template class FunctorMatDiffusionTempl<true>;

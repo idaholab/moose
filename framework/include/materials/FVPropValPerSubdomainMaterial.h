@@ -9,23 +9,19 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
 #include <unordered_map>
 
 template <bool is_ad>
-class FVPropValPerSubdomainMaterialTempl : public Material
+class FVPropValPerSubdomainMaterialTempl : public FunctorMaterial
 {
 public:
   FVPropValPerSubdomainMaterialTempl(const InputParameters & parameters);
   static InputParameters validParams();
 
-protected:
-  virtual void computeQpProperties() override;
-
 private:
-  GenericMaterialProperty<Real, is_ad> & _prop;
-  std::unordered_map<SubdomainID, Real> _sub_id_to_prop;
+  FunctorMaterialProperty<GenericReal<is_ad>> & _prop;
 };
 
 typedef FVPropValPerSubdomainMaterialTempl<false> FVPropValPerSubdomainMaterial;
