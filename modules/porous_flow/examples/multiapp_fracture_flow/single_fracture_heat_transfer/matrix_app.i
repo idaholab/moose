@@ -33,10 +33,12 @@
 
 [DiracKernels]
   [heat_from_fracture]
-    type = VectorPostprocessorPointSource
+    type = ReporterPointSource
     variable = matrix_T
-    vector_postprocessor = heat_transfer_rate
-    value_name = transferred_joules_per_s
+    value_name = heat_transfer_rate/transferred_joules_per_s
+    x_coord_name = heat_transfer_rate/x
+    y_coord_name = heat_transfer_rate/y
+    z_coord_name = heat_transfer_rate/z
   []
 []
 

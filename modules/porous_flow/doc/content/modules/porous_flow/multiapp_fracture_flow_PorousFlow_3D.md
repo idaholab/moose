@@ -195,7 +195,7 @@ Most of the matrix input file is standard by now.  The physics is governed by [P
 
 !listing 3dFracture/matrix_app.i block=PorousFlowFullySaturated
 
-along with the familiar [VectorPostprocessorPointSource](VectorPostprocessorPointSource.md):
+along with the familiar [ReporterPointSource](ReporterPointSource.md):
 
 !listing 3dFracture/matrix_app.i block=DiracKernels
 
@@ -307,7 +307,7 @@ This page has described a sample model and workflow for simulating mixed-dimensi
 
 - It is likely that the aperture is temperature-dependent, since when the cooled matrix contracts, the fracture will dilate.  This effect (if linear) can easily be modelled using [PorousFlowPorosityLinear](PorousFlowPorosityLinear.md).
 
-- No mechanical effects have been included, except via [eqn.frac.open].  A different approach would be to treat the matrix as a THM system, transferring the fracture porepressure as an "external" normal stress, $\sigma_{nn}$, applied in matrix elements containing the fracture.  This could be applied as [VectorPostprocessorPointSources](VectorPostprocessorPointSource.md).  The matrix deforms in response to this as well as changes in matrix temperature.  The normal component of the strain, $\epsilon_{nn}$, could be interpreted as an aperture changed, and transferred back to the fracture.  This approach contains a few subtleties:
+- No mechanical effects have been included, except via [eqn.frac.open].  A different approach would be to treat the matrix as a THM system, transferring the fracture porepressure as an "external" normal stress, $\sigma_{nn}$, applied in matrix elements containing the fracture.  This could be applied as [ReporterPointSources](ReporterPointSource.md).  The matrix deforms in response to this as well as changes in matrix temperature.  The normal component of the strain, $\epsilon_{nn}$, could be interpreted as an aperture changed, and transferred back to the fracture.  This approach contains a few subtleties:
 
   - Is matrix strain a good measure of fracture opening?
   - The matrix element containing the fracture probably needs to be prescribed a modified stiffness, to ensure it adequately models a "fractured element"
