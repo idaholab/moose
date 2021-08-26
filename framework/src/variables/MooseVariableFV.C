@@ -1068,7 +1068,8 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg & face) const
+MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg & face,
+                                      unsigned int) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
@@ -1085,7 +1086,7 @@ MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face) const
+MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face, unsigned int) const
 {
   const Elem * const requested_elem = std::get<0>(elem_and_face);
   mooseAssert(requested_elem != remote_elem,
@@ -1107,17 +1108,31 @@ MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face) cons
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::evaluate(const QpArg & qp) const
+MooseVariableFV<OutputType>::evaluate(const QpArg & qp, unsigned int state) const
 {
   mooseAssert(this->hasBlocks(qp.first->subdomain_id()),
               "This variable doesn't exist in the requested block!");
-  return adSln()[qp.second];
+
+  switch (state)
+  {
+    case 0:
+      return adSln()[qp.second];
+
+    case 1:
+      return slnOld()[qp.second];
+
+    case 2:
+      return slnOlder()[qp.second];
+
+    default:
+      mooseError("Unsupported state ", state, " in MooseVariableFV::evaluate");
+  }
 }
 
 template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {
   mooseAssert(this->hasBlocks(std::get<2>(tqp)),
               "This variable doesn't exist in the requested block!");
@@ -1126,10 +1141,37 @@ MooseVariableFV<OutputType>::evaluate(
   switch (elem_type)
   {
     case Moose::ElementType::Element:
-      return adSln()[qp];
+    {
+      switch (state)
+      {
+        case 0:
+          return adSln()[qp];
+
+        case 1:
+          return slnOld()[qp];
+
+        case 2:
+          return slnOlder()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableFV::evaluate");
+      }
+    }
 
     case Moose::ElementType::Neighbor:
-      return adSlnNeighbor()[qp];
+    {
+      switch (state)
+      {
+        case 0:
+          return adSlnNeighbor()[qp];
+
+        case 1:
+          return slnOldNeighbor()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableFV::evaluate");
+      }
+    }
 
     default:
       mooseError("Unrecognized element type");

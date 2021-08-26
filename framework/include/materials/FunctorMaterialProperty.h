@@ -32,18 +32,6 @@ class FunctorMaterialProperty : public FunctorInterface<T>
 public:
   FunctorMaterialProperty(const std::string & name) : _name(name) {}
 
-  using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemAndFaceArg;
-  using typename FunctorInterface<T>::QpArg;
-  using typename FunctorInterface<T>::FunctorType;
-  using typename FunctorInterface<T>::FunctorReturnType;
-
-  using ElemFn = std::function<T(const Elem * const &)>;
-  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &)>;
-  using FaceFn = std::function<T(const FaceArg &)>;
-  using QpFn = std::function<T(const QpArg &)>;
-  using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &)>;
-
   /**
    * Set the functor that will be used in calls to \p evaluate overloads
    * @param mesh The mesh that the functor is defined on
@@ -55,14 +43,27 @@ public:
                   const std::set<SubdomainID> & block_ids,
                   PolymorphicLambda my_lammy);
 
-  T evaluate(const Elem * const & elem) const override final;
-  T evaluate(const ElemAndFaceArg & elem_and_face) const override final;
-  T evaluate(const FaceArg & face) const override final;
-  T evaluate(const QpArg & qp) const override final;
-  T evaluate(
-      const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const override final;
-
 private:
+  using typename FunctorInterface<T>::FaceArg;
+  using typename FunctorInterface<T>::ElemAndFaceArg;
+  using typename FunctorInterface<T>::QpArg;
+  using typename FunctorInterface<T>::FunctorType;
+  using typename FunctorInterface<T>::FunctorReturnType;
+
+  using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
+  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &, const unsigned int &)>;
+  using FaceFn = std::function<T(const FaceArg &, const unsigned int &)>;
+  using QpFn = std::function<T(const QpArg &, const unsigned int &)>;
+  using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
+                                const unsigned int &)>;
+
+  T evaluate(const Elem * const & elem, unsigned int state) const override final;
+  T evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const override final;
+  T evaluate(const FaceArg & face, unsigned int state) const override final;
+  T evaluate(const QpArg & qp, unsigned int state) const override final;
+  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+             unsigned int state) const override final;
+
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
@@ -121,18 +122,18 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const Elem * const & elem) const
+FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int state) const
 {
   mooseAssert(elem && elem != libMesh::remote_elem,
               "The element must be non-null and non-remote in functor material properties");
   auto it = _elem_functor.find(elem->subdomain_id());
   mooseAssert(it != _elem_functor.end(), "The provided subdomain ID doesn't exist in the map!");
-  return it->second(elem);
+  return it->second(elem, state);
 }
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const ElemAndFaceArg & elem_and_face) const
+FunctorMaterialProperty<T>::evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const
 {
   mooseAssert((std::get<0>(elem_and_face) && std::get<0>(elem_and_face) != libMesh::remote_elem) ||
                   std::get<1>(elem_and_face),
@@ -141,35 +142,35 @@ FunctorMaterialProperty<T>::evaluate(const ElemAndFaceArg & elem_and_face) const
   auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
   mooseAssert(it != _elem_and_face_functor.end(),
               "The provided subdomain ID doesn't exist in the map!");
-  return it->second(elem_and_face);
+  return it->second(elem_and_face, state);
 }
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const FaceArg & face) const
+FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) const
 {
   mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
   auto it = _face_functor.find(std::get<3>(face));
   mooseAssert(it != _face_functor.end(), "The provided subdomain ID doesn't exist in the map!");
-  return it->second(face);
+  return it->second(face, state);
 }
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const QpArg & elem_and_qp) const
+FunctorMaterialProperty<T>::evaluate(const QpArg & elem_and_qp, unsigned int state) const
 {
   auto it = _qp_functor.find(elem_and_qp.first->subdomain_id());
   mooseAssert(it != _qp_functor.end(),
               "The provided element has a subdomain ID that doesn't exist in the map!");
-  return it->second(elem_and_qp);
+  return it->second(elem_and_qp, state);
 }
 
 template <typename T>
 T
 FunctorMaterialProperty<T>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {
   auto it = _tqp_functor.find(std::get<2>(tqp));
   mooseAssert(it != _tqp_functor.end(), "The provided subdomain ID doesn't exist in the map!");
-  return it->second(tqp);
+  return it->second(tqp, state);
 }

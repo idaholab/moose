@@ -17,6 +17,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "ScalarCoupleable.h"
+#include "FunctorInterface.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -44,7 +45,8 @@ class Function : public MooseObject,
                  public UserObjectInterface,
                  public Restartable,
                  public MeshChangedInterface,
-                 public ScalarCoupleable
+                 public ScalarCoupleable,
+                 public FunctorInterface<Real>
 {
 public:
   /**
@@ -109,4 +111,25 @@ public:
 
   // Not defined
   virtual Real average() const;
+
+  void timestepSetup() override;
+  void residualSetup() override;
+  void jacobianSetup() override;
+
+private:
+  using typename FunctorInterface<Real>::FaceArg;
+  using typename FunctorInterface<Real>::ElemAndFaceArg;
+  using typename FunctorInterface<Real>::QpArg;
+
+  /**
+   * @return the time associated with the requested \p state
+   */
+  Real getTime(unsigned int state) const;
+
+  Real evaluate(const Elem * const & elem, unsigned int state) const override final;
+  Real evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const override final;
+  Real evaluate(const FaceArg & face, unsigned int state) const override final;
+  Real evaluate(const QpArg & qp, unsigned int state) const override final;
+  Real evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                unsigned int state) const override final;
 };

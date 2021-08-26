@@ -52,32 +52,33 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     mooseError("If the mesh dimension is 3, then a 'w' variable parameter must be supplied");
 
   _p.setFunctor(
-      _mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal { return _p_var(geom_quantity); });
-  _velocity.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADRealVectorValue {
-    ADRealVectorValue velocity(_u_vel(geom_quantity));
-    if (_mesh.dimension() >= 2)
-      velocity(1) = (*_v_vel)(geom_quantity);
-    if (_mesh.dimension() >= 3)
-      velocity(2) = (*_w_vel)(geom_quantity);
-    return velocity;
+      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal { return _p_var(r, t); });
+  _velocity.setFunctor(
+      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {
+        ADRealVectorValue velocity(_u_vel(r, t));
+        if (_mesh.dimension() >= 2)
+          velocity(1) = (*_v_vel)(r, t);
+        if (_mesh.dimension() >= 3)
+          velocity(2) = (*_w_vel)(r, t);
+        return velocity;
+      });
+  _rho_u.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    return _rho(r, t) * _u_vel(r, t);
   });
-  _rho_u.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
-    return _rho(geom_quantity) * _u_vel(geom_quantity);
-  });
-  _rho_v.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho_v.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     if (_mesh.dimension() >= 2)
-      return _rho(geom_quantity) * (*_v_vel)(geom_quantity);
+      return _rho(r, t) * (*_v_vel)(r, t);
     else
       return 0;
   });
-  _rho_w.setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
+  _rho_w.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     if (_mesh.dimension() >= 3)
-      return _rho(geom_quantity) * (*_w_vel)(geom_quantity);
+      return _rho(r, t) * (*_w_vel)(r, t);
     else
       return 0;
   });
   if (_has_temperature)
-    _rho_cp_temp->setFunctor(_mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal {
-      return _rho(geom_quantity) * (*_cp)(geom_quantity) * (*_temperature)(geom_quantity);
+    _rho_cp_temp->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+      return _rho(r, t) * (*_cp)(r, t) * (*_temperature)(r, t);
     });
 }

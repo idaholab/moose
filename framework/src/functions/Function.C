@@ -79,3 +79,68 @@ Function::average() const
   mooseError("Average method not defined for function ", name());
   return 0;
 }
+
+Real
+Function::getTime(const unsigned int state) const
+{
+  switch (state)
+  {
+    case 0:
+      return _ti_feproblem.time();
+
+    case 1:
+      return _ti_feproblem.timeOld();
+
+    default:
+      mooseError("unhandled state ", state, " in Function::getTime");
+  }
+}
+
+Real
+Function::evaluate(const Elem * const & elem, const unsigned int state) const
+{
+  return value(getTime(state), elem->centroid());
+}
+
+Real
+Function::evaluate(const ElemAndFaceArg & elem_and_face, const unsigned int state) const
+{
+  return value(getTime(state), std::get<0>(elem_and_face)->centroid());
+}
+
+Real
+Function::evaluate(const FaceArg & face, const unsigned int state) const
+{
+  return value(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+Real
+Function::evaluate(const QpArg & /*qp*/, unsigned int /*state*/) const
+{
+  mooseError("Not yet implemented");
+}
+
+Real
+Function::evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
+                   unsigned int /*state*/) const
+{
+  mooseError("Not yet implemented");
+}
+
+void
+Function::timestepSetup()
+{
+  FunctorInterface<Real>::timestepSetup();
+}
+
+void
+Function::residualSetup()
+{
+  FunctorInterface<Real>::residualSetup();
+}
+
+void
+Function::jacobianSetup()
+{
+  FunctorInterface<Real>::jacobianSetup();
+}

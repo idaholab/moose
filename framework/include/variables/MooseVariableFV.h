@@ -453,15 +453,6 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
-  using FunctorInterface<ADReal>::FaceArg;
-  using FunctorInterface<ADReal>::QpArg;
-  ADReal evaluate(const Elem * const & elem) const override final { return getElemValue(elem); }
-  ADReal evaluate(const ElemAndFaceArg & elem_and_face) const override final;
-  ADReal evaluate(const FaceArg & face) const override final;
-  ADReal evaluate(const QpArg & qp) const override final;
-  ADReal evaluate(
-      const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const override final;
-
   /**
    * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
    * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
@@ -517,6 +508,18 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
+  using FunctorInterface<ADReal>::FaceArg;
+  using FunctorInterface<ADReal>::QpArg;
+  ADReal evaluate(const Elem * const & elem, unsigned int) const override final
+  {
+    return getElemValue(elem);
+  }
+  ADReal evaluate(const ElemAndFaceArg & elem_and_face, unsigned int) const override final;
+  ADReal evaluate(const FaceArg & face, unsigned int) const override final;
+  ADReal evaluate(const QpArg & qp, unsigned int state) const override final;
+  ADReal evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                  unsigned int state) const override final;
+
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */

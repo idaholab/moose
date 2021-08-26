@@ -73,11 +73,12 @@ public:
    * Same as their \p evaluate overloads with the same argument but allows for caching
    * implementation. These are the methods a user will call
    */
-  T operator()(const libMesh::Elem * const & elem) const;
-  T operator()(const ElemAndFaceArg & elem_and_face) const;
-  T operator()(const FaceArg & face) const;
-  T operator()(const QpArg & qp) const;
-  T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const;
+  T operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  T operator()(const ElemAndFaceArg & elem_and_face, unsigned int state = 0) const;
+  T operator()(const FaceArg & face, unsigned int state = 0) const;
+  T operator()(const QpArg & qp, unsigned int state = 0) const;
+  T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+               unsigned int state = 0) const;
   ///@}
 
   void residualSetup() override;
@@ -94,7 +95,7 @@ private:
    * Evaluate the functor with a given element. A possible implementation of this method could
    * compute an element-average
    */
-  virtual T evaluate(const libMesh::Elem * const & elem) const = 0;
+  virtual T evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
 
   /**
    * @param elem_and_face This is a tuple packing an element, \p FaceInfo, and subdomain ID
@@ -107,7 +108,7 @@ private:
    * D_E evaluation on the N side of the face. By providing the subdomain ID corresponding to E, the
    * flux kernel ensures that it will retrieve a D_E evaluation, even on the N side of the face.
    */
-  virtual T evaluate(const ElemAndFaceArg & elem_and_face) const = 0;
+  virtual T evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const = 0;
 
   /**
    * @param face A tuple packing a \p FaceInfo, a \p Limiter, and a boolean denoting whether the
@@ -118,14 +119,14 @@ private:
    * make two calls to the \p elem_and_face overload (one for element and one for neighbor) and
    * then use the global interpolate functions in the \p Moose::FV namespace
    */
-  virtual T evaluate(const FaceArg & face) const = 0;
+  virtual T evaluate(const FaceArg & face, unsigned int state) const = 0;
 
   /**
    * Evaluate the functor at the current qp point. Unlike the above overloads, there is a caveat to
    * calling this overload. Any variables involved in the functor evaluation must have their
    * elemental data properly pre-initialized at the desired quadrature point
    */
-  virtual T evaluate(const QpArg & qp) const = 0;
+  virtual T evaluate(const QpArg & qp, unsigned int state) const = 0;
 
   /**
    * @param tqp A pair with the first member corresponding to an \p ElementType, either Element,
@@ -135,8 +136,8 @@ private:
    * \p qp overload, there is a caveat: any variables involved in the functor evaluation must have
    * their requested element data type properly pre-initialized at the desired quadrature point
    */
-  virtual T
-  evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const = 0;
+  virtual T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                     unsigned int state) const = 0;
 
   /**
    * clear cache data
@@ -165,31 +166,32 @@ private:
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const Elem * const & elem) const
+FunctorInterface<T>::operator()(const Elem * const & elem, const unsigned int state) const
 {
-  return evaluate(elem);
+  return evaluate(elem, state);
 }
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const ElemAndFaceArg & elem_and_face) const
+FunctorInterface<T>::operator()(const ElemAndFaceArg & elem_and_face,
+                                const unsigned int state) const
 {
-  return evaluate(elem_and_face);
+  return evaluate(elem_and_face, state);
 }
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const FaceArg & face) const
+FunctorInterface<T>::operator()(const FaceArg & face, const unsigned int state) const
 {
-  return evaluate(face);
+  return evaluate(face, state);
 }
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const QpArg & elem_and_qp) const
+FunctorInterface<T>::operator()(const QpArg & elem_and_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
-    return evaluate(elem_and_qp);
+    return evaluate(elem_and_qp, state);
 
   const auto elem_id = elem_and_qp.first->id();
   if (elem_id != _current_qp_elem)
@@ -208,7 +210,7 @@ FunctorInterface<T>::operator()(const QpArg & elem_and_qp) const
                 "I believe that we always iterate over quadrature points in a contiguous fashion");
     qp_elem_data_ref.resize(qp + 1);
     auto & pr = qp_elem_data_ref.back();
-    pr.second = evaluate(elem_and_qp);
+    pr.second = evaluate(elem_and_qp, state);
     pr.first = true;
     return pr.second;
   }
@@ -219,7 +221,7 @@ FunctorInterface<T>::operator()(const QpArg & elem_and_qp) const
     return pr.second;
 
   // No valid cache value so evaluate
-  pr.second = evaluate(elem_and_qp);
+  pr.second = evaluate(elem_and_qp, state);
   pr.first = true;
   return pr.second;
 }
@@ -227,9 +229,10 @@ FunctorInterface<T>::operator()(const QpArg & elem_and_qp) const
 template <typename T>
 T
 FunctorInterface<T>::operator()(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp) const
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+    const unsigned int state) const
 {
-  return evaluate(tqp);
+  return evaluate(tqp, state);
 }
 
 template <typename T>
@@ -282,21 +285,22 @@ template <typename T>
 class ConstantFunctor : public FunctorInterface<T>
 {
 public:
+  ConstantFunctor(const T & value) : _value(value) {}
+  ConstantFunctor(T && value) : _value(value) {}
+
+private:
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemAndFaceArg;
   using typename FunctorInterface<T>::QpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
-  ConstantFunctor(const T & value) : _value(value) {}
-  ConstantFunctor(T && value) : _value(value) {}
-
-private:
-  T evaluate(const libMesh::Elem * const &) const override final { return _value; }
-  T evaluate(const ElemAndFaceArg &) const override final { return _value; }
-  T evaluate(const FaceArg &) const override final { return _value; }
-  T evaluate(const QpArg &) const override final { return _value; }
-  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &) const override final
+  T evaluate(const libMesh::Elem * const &, unsigned int) const override final { return _value; }
+  T evaluate(const ElemAndFaceArg &, unsigned int) const override final { return _value; }
+  T evaluate(const FaceArg &, unsigned int) const override final { return _value; }
+  T evaluate(const QpArg &, unsigned int) const override final { return _value; }
+  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
+             unsigned int) const override final
   {
     return _value;
   }

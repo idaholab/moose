@@ -31,5 +31,5 @@ FVVarFunctorMaterial::FVVarFunctorMaterial(const InputParameters & parameters)
     _functor_prop(declareFunctorProperty<ADReal>("mat_prop_name"))
 {
   _functor_prop.setFunctor(
-      _mesh, blockIDs(), [this](auto & geom_quantity) -> ADReal { return _var(geom_quantity); });
+      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal { return _var(r, t); });
 }
