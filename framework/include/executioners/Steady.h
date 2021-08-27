@@ -58,8 +58,6 @@ protected:
   int & _time_step;
   Real & _time;
 
-  PerfID _final_timer;
-
 private:
   bool _last_solve_converged;
 };

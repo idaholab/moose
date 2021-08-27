@@ -148,6 +148,7 @@ DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
   for (const auto & system_pair : pathit->second)
     Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
   Moose::out << "**END DUMP DATA**\n";
+  Moose::out << std::flush;
 }
 
 std::map<std::string, std::string>

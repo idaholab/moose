@@ -55,7 +55,6 @@
     design = 'RelationshipManager.md'
     requirement = 'If a RelationshipManager with sufficient coverage has already been added through a MooseObjectAction, then the CouplingFunctorCheck action shall not add any relationship managers, avoiding reinitialization of system vectors and the system matrix'
     mesh_mode = replicated
-    absent_out = 'Reinitializing'
   []
   [proper_ghosting_with_action_serial_distributed]
     type = 'Exodiff'
@@ -88,6 +87,5 @@
     design = 'RelationshipManager.md'
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no addition of rms by the CouplingFunctorCheckAction'
     mesh_mode = distributed
-    absent_out = 'Reinitializing'
   []
 []

@@ -29,7 +29,7 @@ CartesianProductSampler::validParams()
 }
 
 CartesianProductSampler::CartesianProductSampler(const InputParameters & parameters)
-  : Sampler(parameters), _perf_compute_sample(registerTimedSection("computeSample", 4))
+  : Sampler(parameters)
 {
   const std::vector<Real> & items = getParam<std::vector<Real>>("linear_space_items");
   if (items.size() % 3 != 0)

@@ -59,9 +59,4 @@ private:
 
   /// Number of matrices
   dof_id_type _num_matrices;
-
-  /// PerfGraph timer
-  const PerfID _perf_sample_setup;
-  const PerfID _perf_sample_teardown;
-  const PerfID _perf_compute_sample;
 };

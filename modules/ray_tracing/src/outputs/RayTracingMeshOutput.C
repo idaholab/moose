@@ -53,12 +53,6 @@ RayTracingMeshOutput::RayTracingMeshOutput(const InputParameters & params)
     _output_data(getParam<bool>("output_data")),
     _output_aux_data(getParam<bool>("output_aux_data")),
     _output_data_nodal(getParam<bool>("output_data_nodal")),
-    _output_mesh_timer(registerTimedSection("outputMesh", 3)),
-    _build_bboxes_timer(registerTimedSection("buildBoundingBoxes", 3)),
-    _build_segment_mesh_timer(registerTimedSection("buildSegmentMesh", 3)),
-    _setup_equation_system_timer(registerTimedSection("setupEquationSystem", 3)),
-    _fill_fields_timer(registerTimedSection("fillFields", 3)),
-    _build_id_map_timer(registerTimedSection("buildIDMap", 3)),
     _ray_id_var(invalid_uint),
     _intersections_var(invalid_uint),
     _pid_var(invalid_uint),
@@ -143,7 +137,7 @@ RayTracingMeshOutput::output(const ExecFlagType & type)
 void
 RayTracingMeshOutput::buildIDMap()
 {
-  TIME_SECTION(_build_id_map_timer);
+  TIME_SECTION("buildIDMap", 3, "Building RayTracing ID Map");
 
   // Build the maximum number of nodes required to represent each one of my local Rays
   std::map<RayID, dof_id_type> local_ray_needed_nodes;
@@ -251,7 +245,7 @@ RayTracingMeshOutput::buildIDMap()
 void
 RayTracingMeshOutput::buildSegmentMesh()
 {
-  TIME_SECTION(_build_segment_mesh_timer);
+  TIME_SECTION("buildSegmentMesh", 3, "Building RayTracing Mesh Output");
 
   // Tally nodes and elems for the local mesh ahead of time so we can reserve
   // Each segment requires an element, and we need one more node than elems
@@ -446,7 +440,7 @@ RayTracingMeshOutput::buildSegmentMesh()
 void
 RayTracingMeshOutput::setupEquationSystem()
 {
-  TIME_SECTION(_setup_equation_system_timer);
+  TIME_SECTION("setupEquationSystem", 3, "Setting Up Ray Tracing MeshOutput Equation System");
 
   _es = libmesh_make_unique<EquationSystems>(*_segment_mesh);
   _sys = &_es->add_system<libMesh::ExplicitSystem>("sys");
@@ -503,7 +497,7 @@ RayTracingMeshOutput::setupEquationSystem()
 void
 RayTracingMeshOutput::fillFields()
 {
-  TIME_SECTION(_fill_fields_timer);
+  TIME_SECTION("fillFields", 3, "Filling RayTracing MeshOutput Fields");
 
   const auto sys_num = _sys->number();
   auto & solution = _sys->solution;
@@ -580,7 +574,7 @@ RayTracingMeshOutput::fillFields()
 void
 RayTracingMeshOutput::buildBoundingBoxes()
 {
-  TIME_SECTION(_build_bboxes_timer);
+  TIME_SECTION("buildBoundingBoxes", 3, "Building Bounding Boxes for RayTracing Mesh Output");
 
   // Not used in the one proc case
   if (_communicator.size() == 1)

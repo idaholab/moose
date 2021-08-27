@@ -245,13 +245,6 @@ private:
 
   /// Data structure to hold element ID ranges when using Distributed Mesh (populated on rank 0 only)
   std::vector<std::pair<dof_id_type, dof_id_type>> _all_ranges;
-
-  /// Timers
-  const PerfID _finalize_timer;
-  const PerfID _remap_timer;
-  const PerfID _track_grains;
-  const PerfID _broadcast_update;
-  const PerfID _update_field_info;
 };
 
 /**

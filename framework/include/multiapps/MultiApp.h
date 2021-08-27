@@ -514,12 +514,6 @@ protected:
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
-
-private:
-  PerfID _perf_backup;
-  PerfID _perf_restore;
-  PerfID _perf_init;
-  PerfID _perf_reset_app;
 };
 
 template <>

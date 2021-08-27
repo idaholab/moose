@@ -13,7 +13,6 @@
 #include "DisplacedProblem.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
-#include "TimedPrint.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/equation_systems.h"
@@ -81,8 +80,6 @@ OversampleOutput::initialSetup()
 void
 OversampleOutput::outputStep(const ExecFlagType & type)
 {
-  CONSOLE_TIMED_PRINT("Outputting ", name());
-
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)
     return;
@@ -99,7 +96,7 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   // FileOutput)
   if (shouldOutput(type))
   {
-    TIME_SECTION(_output_step_timer);
+    TIME_SECTION("outputStep", 1);
     updateOversample();
     output(type);
   }

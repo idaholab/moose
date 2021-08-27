@@ -663,7 +663,7 @@ TensorMechanicsAction::actEigenstrainNames()
   Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***"
              << "\n"
              << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
-             << COLOR_DEFAULT;
+             << COLOR_DEFAULT << std::flush;
 }
 
 void
@@ -698,7 +698,7 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
     Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
                << "\n"
                << _name << ": " << Moose::stringify(_material_output_order) << "\n"
-               << COLOR_DEFAULT;
+               << COLOR_DEFAULT << std::flush;
 
   // if no value was provided, chose the default MONOMIAL
   if (_material_output_family.size() == 0)
@@ -713,7 +713,7 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
     Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
                << "\n"
                << _name << ": " << Moose::stringify(_material_output_family) << "\n"
-               << COLOR_DEFAULT;
+               << COLOR_DEFAULT << std::flush;
 }
 
 void

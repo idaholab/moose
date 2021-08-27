@@ -241,6 +241,8 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
+    TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
+
     if (_app.masterMesh())
       _mesh = _app.masterMesh()->safeClone();
     else
@@ -292,6 +294,8 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
+    TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
+
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
       // We want to set the MeshBase object to that coming from mesh generators when the following
@@ -335,6 +339,8 @@ SetupMeshAction::act()
 
   else if (_current_task == "init_mesh")
   {
+    TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
+
     if (_app.masterMesh())
     {
       if (_app.masterDisplacedMesh())

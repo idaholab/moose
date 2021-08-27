@@ -2,6 +2,8 @@
 
 ## Overview
 
+Note: this is API/developer documentation intended for those developing code using MOOSE.  For end-user focused documentation see [/PerfGraphOutput.md].
+
 The `PerfGraph` object holds timing data for MOOSE.  The idea behind the design is to create a nested set of timing data that faithfully represents the call structure in MOOSE.
 
 The performance graph is part of an ecosystem of objects:
@@ -12,17 +14,18 @@ The performance graph is part of an ecosystem of objects:
 - `PerfGraphInterface`: An interface class for gaining access to the `PerfGraph` for adding timers and pulling timing data
 - [/PerfGraphOutput.md]: Responsible for printing out the graph
 - [/PerfGraphData.md]: `Postprocessor` for outputting time from the graph
+- [/PerfGraphLivePrint.md]: Object responsible for printing performance information duruing the run
 
-The `PerfGraph` works by registering "sections" of code using unique (`std::string`) names.  The registration of a section returns a `PerfID` unique ID that is then used when referring to that section of code for starting and stopping timing.  It's normal to save the `PerfID` in a member variable as a variable called `*_timer`.
+The `PerfGraph` works by utilizing the `TIME_SECTION` macro to specify that the current scope should be timed (see below for more information).  The timed sections are placed in an execution tree and the current "stack" of sections is kept up to date.  When timing starts, a snapshot of both the memory and current time are taken then these are compared when the current scope ends in order to tally time for that section of code.  The `PerfGraphLivePrint` object is watching the stream of what is executing and possibly printing out what is happening if it takes too long (or uses too much memory).  At the end of the run the `PerfGraphOutput` object is responsible for dumping out the relevant information.
 
 !alert warning
-`PerfGraph` based timing should NOT be used inside tight compute loops or anything called inside a tight compute loop (i.e. don't use it in `computeQpResidual()`).  It takes about 1e-6 seconds for the timing itself to happen.  That's in the MHz range... meaning that your calculation can't run any faster than that wherever this timer is!  As a general rule... that means that you should have >1000 operations going on inside a timed section.
+`PerfGraph` based timing should NOT be used inside tight compute loops or anything called inside a tight compute loop (i.e. don't use it in `computeQpResidual()`).  It takes about 1e-6 seconds for the timing itself to happen.  That's in the 1 MHz range... meaning that your calculation can't run any faster than that wherever this timer is!  As a general rule... that means that you should have >1000 operations going on inside a timed section.
 
 ## Inheriting From `PerfGraphInterface`
 
 To use for timing, make sure that your system inherits from `PerfGraphInterface`.  There are a couple of different constructors for `PerfGraphInterface`:
 
-The first one allows you to pass in a `MooseObject*` and *infer* a "prefix" based on the `type()` of the object (the name of the object).  The "prefix" is prependended to any call to `registerTimedSection()` to give uniform naming from each object
+The first one allows you to pass in a `MooseObject*` and *infer* a "prefix" based on the `type()` of the object (the name of the object).  The "prefix" is prependended to the name of the timed sections to give uniform naming from each object
 
 !listing framework/include/interfaces/PerfGraphInterface.h line=PerfGraphInterface(const MooseObject * moose_object);
 
@@ -34,20 +37,9 @@ The final one is for when your object is NOT a `MooseObject` inherited object.  
 
 !listing framework/include/interfaces/PerfGraphInterface.h line=PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix = "");
 
-## Timing a Section
+## Logging Levels
 
-Timing a section is a two part process:
-
-1.  Register the section and save off the `PerfID`
-2.  Using the `TIME_SECTION` macro to start timing a `PerfID`
-
-### Registration
-
-Registering the section of code to be timed is accomplished by calling:
-
-!listing framework/include/interfaces/PerfGraphInterface.h line=registerTimedSection
-
-The `section_name` names the section of code.  The `prefix + section_name` must be globally unique.  `level` is the "log level" of the section.  A higher number represents a more detailed log level.  Here are some quick guidelines for selecting `level`:
+The `PerfGraph` relies on loggging "levels" to determine how verbose the output should be.  When timing a section, be sure to set the level appropriately so that users are not inundated with too much noise.  The levels are:
 
 - 0: Just the "root" - the whole application time
 - 1: Minimal set of the most important routines (residual/jacobian computation, etc.)
@@ -57,6 +49,61 @@ The `section_name` names the section of code.  The `prefix + section_name` must 
 - 5: Fairly unimportant, or less used routines
 - 6: Routines that rarely take up much time
 
+## Timing a Section
+
+There are two different methods for timing: on-the-fly registration and pre-registration.  On-the-fly registration is the preferred method and should be used whenever possible.
+
+### On-The-Fly Section Timing
+
+Timing a section is as simple as using the `TIME_SECTION` macro within a C++ scope.  `TIME_SECTION` can take between one and four arguments.  The single argument version is used when doing pre-registration of sections.  For on-the-fly you invoke `TIME_SECTION` like so:
+
+`TIME_SECTION(section_name, level, live_message="", print_dots=true)`
+
+- `section_name`: The short name of the section.  This is the name used in the final table.  It is normally the function name or some other short name.
+- `level`: The logging level
+- `live_message`: OPTIONAL - but highly recommended.  This is the message `PerfGraphLivePrint` will print to the screen (if necessary).  It should be descriptive, title-cased, and written in an active way, e.g. "Calculating Lama Heights"
+- `print_dots`: OPTIONAL - defaults to true.  This controls whether or not progress dots will be printed for this section.  Only turn this off if printing dots would intermingle with some screen output that is out of MOOSE's control (for instance, in a library that you are calling into).
+
+An example showing the most-often use-case for `TIME_SECTION`:
+
+```c++
+void
+Dog::clean()
+{
+  TIME_SECTION("clean", 2, "Cleaning the Dog");
+  ...
+
+  {
+    TIME_SECTION("soap", 3, "Soaping the Dog");
+    ...
+  }
+
+  {
+    TIME_SECTION("rinse", 3, "Rinsing the Dog");
+    ...
+  }
+  ...
+}
+```
+
+What `TIME_SECTION` is doing is creating a static variable to hold a `PerfID` that is initialized by registering the section with the `PerfGraphRegistry`.  Since this is a static variable the registration only happens the very first time that line of code is hit .  Every time after that it simply creates `PerfGuard` object using the passed in `PerfID`.  The `PerfGuard` tells the `PerfGraph` about the new scope and the timing is then started for that section.  At the end of the function the `PerfGuard` dies and in the destructor it tells the `PerfGraph` to remove that scope.  Timing this way means that it is exception safe and impossible to "foul up" because there are no "push/pop" methods to match.
+
+### Pre-registered Timing
+
+This type of timing should _only_ be utilized when absolutely necessary.  The main case where this comes up is timing in base classes that main get instantiated multiple times through different derived classes.  An example is the `Action` base class.
+
+Timing a section using pre-registration is a two part process:
+
+1.  Register the section and save off the `PerfID`
+2.  Using the `TIME_SECTION` macro to start timing a `PerfID`
+
+#### Registration
+
+Registering the section of code to be timed is accomplished by calling:
+
+!listing framework/include/interfaces/PerfGraphInterface.h line=registerTimedSection
+
+The `section_name` names the section of code.  The `prefix + section_name` must be globally unique.  `level` is the "log level" of the section.  A higher number represents a more detailed log level.  Here are some quick guidelines for selecting `level`:
 
 `registerTimedSection()` returns a `PerfID` that is a unique identifier that identifies that code section.  This `PerfID` should typically get saved as a member variable of the class that is registering the section... this is normally done by initializing a `PerfID` member variable using `registerTimedSection()` in the initialization list of a constructor like so:
 
@@ -64,7 +111,7 @@ The `section_name` names the section of code.  The `prefix + section_name` must 
 MyClass::MyClass() : _slow_function_timer(registerTimedSection("slowFunction")) {}
 ```
 
-### Timing
+#### Timing
 
 Once a timed section is registered and a `PerfID` is captured the section can be timed using the `TIME_SECTION` macro like so:
 
@@ -86,11 +133,11 @@ An object that inherits from `PerfGraphInterface` can retrieve the time for a re
 
 ## The `PerfGraph` Internals
 
-The `PerfGraph` object's main purpose is to store the complete call-graph of `PerfNode`s and the current call-stack of `PerfNode`s.  The graph is held by holding onto the `_root_node`.  The `_root_node` (which is named `App`) is created at the time the `PerfGraph` is created (in the `MooseApp` constructor).  All other scopes that are pushed into the graph are then children/descendents of the `_root_node`.
+The `PerfGraph` object's main purpose is to store the complete call-graph of `PerfNode`s and the current call-stack of `PerfNode`s.  The graph is held by holding onto the `_root_node`.  All other scopes that are pushed into the graph are then children/descendents of the `_root_node`.
 
-The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there.
+The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope, the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there. When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessrry.
 
-When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessrry.
+In addition, the `_execution_list` is keeping a running list of every section that executes.  This is utilized by `PerfGraphLivePrint` to print messages out that are multiple levels deep.
 
 ## Printing
 
@@ -99,22 +146,22 @@ Some other capability the `PerfGraph` has is the ability to print formatted tabl
 The `print()` method prints out an indented set of section names and shows their timing like so:
 
 ```
--------------------------------------------------------------------------------------------------------------
-|                 Section                |   Self(s)  |    %   | Children(s) |    %   |  Total(s)  |    %   |
--------------------------------------------------------------------------------------------------------------
-| App                                    |      0.004 |   1.95 |       0.207 |  98.05 |      0.212 | 100.00 |
-|   FEProblem::computeUserObjects        |      0.000 |   0.07 |       0.000 |   0.00 |      0.000 |   0.07 |
-|   FEProblem::solve                     |      0.014 |   6.59 |       0.119 |  56.44 |      0.133 |  63.03 |
-|     FEProblem::computeResidualInternal |      0.000 |   0.01 |       0.079 |  37.45 |      0.079 |  37.45 |
-|     FEProblem::computeJacobianInternal |      0.000 |   0.01 |       0.040 |  18.83 |      0.040 |  18.84 |
-|     Console::outputStep                |      0.000 |   0.12 |       0.000 |   0.00 |      0.000 |   0.12 |
-|   FEProblem::outputStep                |      0.000 |   0.04 |       0.001 |   0.42 |      0.001 |   0.46 |
-|     PerfGraphOutput::outputStep        |      0.000 |   0.00 |       0.000 |   0.00 |      0.000 |   0.00 |
-|     Console::outputStep                |      0.001 |   0.32 |       0.000 |   0.00 |      0.001 |   0.32 |
-|     CSV::outputStep                    |      0.000 |   0.10 |       0.000 |   0.00 |      0.000 |   0.10 |
--------------------------------------------------------------------------------------------------------------
+Performance Graph:
+----------------------------------------------------------------------------------------------------------------------------------------------
+|                  Section                 | Calls |   Self(s)  |   Avg(s)   |    %   | Mem(MB) |  Total(s)  |   Avg(s)   |    %   | Mem(MB) |
+----------------------------------------------------------------------------------------------------------------------------------------------
+| MooseTestApp (main)                      |     1 |      0.008 |      0.008 |   0.66 |       1 |      1.259 |      1.259 | 100.00 |      67 |
+|   FEProblem::outputStep                  |     2 |      0.001 |      0.000 |   0.04 |       0 |      0.064 |      0.032 |   5.09 |       8 |
+|   Steady::PicardSolve                    |     1 |      0.000 |      0.000 |   0.01 |       0 |      0.717 |      0.717 |  56.92 |      32 |
+|     FEProblem::solve                     |     1 |      0.134 |      0.134 |  10.61 |      29 |      0.716 |      0.716 |  56.89 |      32 |
+|       FEProblem::computeResidualInternal |    14 |      0.000 |      0.000 |   0.01 |       0 |      0.458 |      0.033 |  36.34 |       1 |
+|       FEProblem::computeJacobianInternal |     2 |      0.000 |      0.000 |   0.00 |       0 |      0.125 |      0.062 |   9.91 |       2 |
+|     FEProblem::outputStep                |     1 |      0.000 |      0.000 |   0.02 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+|   Steady::final                          |     1 |      0.000 |      0.000 |   0.00 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+|     FEProblem::outputStep                |     1 |      0.000 |      0.000 |   0.01 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+----------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
-`Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `%` columns represent the percent of the total run-time of the app for the number in the column to the left.
+`Calls` is the number of times that section was run. `Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `Avg` and `%` columns represent the average and percent of the total run-time of the app for the number in the column to the left. `Mem` is the memory (in Megabytes) for the column to the left (Self or Total).
 
 There are also two other ways to print information out about the graph using `printHeaviestBranch()` and `printHeaviestSections()`.  These are described well over on the [/PerfGraphOutput.md] page.

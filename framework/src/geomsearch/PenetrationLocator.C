@@ -48,10 +48,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
     _normal_smoothing_method(NSM_EDGE_BASED),
-    _patch_update_strategy(_mesh.getPatchUpdateStrategy()),
-    _detect_penetration_timer(registerTimedSection("detectPenetration", 3)),
-    _reinit_timer(registerTimedSection("reinit", 3))
-
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
   // element
@@ -91,7 +88,7 @@ PenetrationLocator::~PenetrationLocator()
 void
 PenetrationLocator::detectPenetration()
 {
-  TIME_SECTION(_detect_penetration_timer);
+  TIME_SECTION("detectPenetration", 3, "Detecting Penetration");
 
   // Get list of boundary (elem, side, id) tuples.
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
@@ -157,7 +154,7 @@ PenetrationLocator::detectPenetration()
 void
 PenetrationLocator::reinit()
 {
-  TIME_SECTION(_reinit_timer);
+  TIME_SECTION("reinit", 3, "Reinitializing PenetrationLocator");
 
   // Delete the PenetrationInfo objects we own before clearing the
   // map, or we have a memory leak.

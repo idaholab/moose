@@ -172,7 +172,6 @@ Transient::Transient(const InputParameters & parameters)
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
-    _final_timer(registerTimedSection("final", 1)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
@@ -345,7 +344,7 @@ Transient::execute()
 
   if (!_app.halfTransient())
   {
-    TIME_SECTION(_final_timer);
+    TIME_SECTION("final", 1, "Executing Final Objects");
     _problem.execMultiApps(EXEC_FINAL);
     _problem.finalizeMultiApps();
     _problem.execute(EXEC_FINAL);
@@ -442,7 +441,7 @@ Transient::takeStep(Real input_dt)
 
   if (!lastSolveConverged())
   {
-    _console << "Aborting as solve did not converge\n";
+    _console << "Aborting as solve did not converge" << std::endl;
     return;
   }
 

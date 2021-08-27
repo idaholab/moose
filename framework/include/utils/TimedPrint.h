@@ -1,163 +1,19 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
-#include "Moose.h" // Color constants
-#include "ConsoleStream.h"
-#include "StreamArguments.h"
-
-#include "libmesh/auto_ptr.h" // libmesh_make_unique
-
-#include <atomic>
-#include <chrono>
-#include <iostream>
-#include <thread>
-#include <future>
-#include <ios>
-#include <iomanip>
-
-#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
-    !defined(__clang__)
-// See note on GCC 4.8.4 workaround below
-#include <tuple>
-#endif
+#include "MooseError.h"
 
 #define CONTROLLED_CONSOLE_TIMED_PRINT(initial_wait, dot_interval, ...)                            \
-  std::unique_ptr<TimedPrint> tpc =                                                                \
-      _communicator.rank() == 0                                                                    \
-          ? libmesh_make_unique<TimedPrint>(_console,                                              \
-                                            std::chrono::duration<double>(initial_wait),           \
-                                            std::chrono::duration<double>(dot_interval),           \
-                                            __VA_ARGS__)                                           \
-          : nullptr;
+  mooseDeprecated("TIMED_PRINT is deprecated, use TIME_SECTION instead");
 
 #define CONSOLE_TIMED_PRINT(...) CONTROLLED_CONSOLE_TIMED_PRINT(1, 1, __VA_ARGS__)
 
-/**
- * Object to print a message after enough time has passed.
- * Should help when there is a long running process.
- * It will wait to print a message, then it will start
- * print dots.
- *
- * Use it as a scope guard.  As long as it is alive it
- * will print out periodically
- */
+/// Dummy TimedPrint Class - use TIME_SECTION instead
 class TimedPrint final
 {
 public:
-  /**
-   * Start the timing and printing
-   *
-   * @param message The message to print out
-   * @param initial_wait The amount of time (in seconds) to wait before printing
-   * message
-   * @param dot_interval The amount of time (in seconds) to wait before printing
-   * each dot
-   */
   template <class StreamType, typename... Args>
-  TimedPrint(StreamType & out,
-             std::chrono::duration<double> initial_wait,
-             std::chrono::duration<double> dot_interval,
-             Args &&... args_in)
+  TimedPrint(StreamType &, std::chrono::duration<double>, std::chrono::duration<double>, Args &&...)
   {
-#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9) && !defined(__INTEL_COMPILER) &&  \
-    !defined(__clang__)
-    /**
-     * There's a bug in GCC 4.8.4 (our current minimum compiler as of 6/18/2019) where we can't
-     * capture the argument pack in the thread lambda. The workaround is to copy the argument
-     * pack into a tuple. We want to avoid this for other compilers since it is a copy.
-     */
-    std::tuple<Args...> args(args_in...);
-#define ARGS args
-
-#else
-#define ARGS args_in...
-
-#endif
-    if (_active_instance)
-      return;
-
-    _active_instance = this;
-
-    // This is using move assignment
-    _thread = std::thread{[&out, initial_wait, dot_interval, this, ARGS] {
-      const unsigned int WRAP_LENGTH = 90; // Leave a few characters for the duration
-      auto done_future = this->_done.get_future();
-      auto start = std::chrono::steady_clock::now();
-
-      unsigned int offset = 0;
-      if (done_future.wait_for(initial_wait) == std::future_status::timeout ||
-          initial_wait == std::chrono::duration<double>::zero())
-      {
-        streamArguments(out, ARGS);
-        offset = out.tellp();
-
-        out << ' ' << std::flush;
-        ++offset;
-      }
-      else // This means the section ended before we printed anything... so just exit
-        return;
-
-      while (done_future.wait_for(dot_interval) == std::future_status::timeout)
-      {
-        if (offset >= WRAP_LENGTH)
-        {
-          out << '\n';
-          offset = 0;
-        }
-        out << '.' << std::flush;
-        ++offset;
-      }
-
-      // Finish the line
-      if (offset)
-      {
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> duration = end - start;
-
-        auto original_precision = out.precision();
-        auto original_flags = out.flags();
-
-        out << std::setw(WRAP_LENGTH - offset) << ' ' << " [" << COLOR_YELLOW << std::setw(6)
-            << std::fixed << std::setprecision(2) << duration.count() << " s" << COLOR_DEFAULT
-            << ']';
-
-        // Restore the original stream state
-        out.precision(original_precision);
-        out.flags(original_flags);
-      }
-
-      out << std::endl;
-    }};
-  }
-
-  /**
-   * Stop the printing
-   */
-  ~TimedPrint()
-  {
-    if (_active_instance == this)
-    {
-      // Tell the thread to end
-      _done.set_value(true);
-
-      // Wait for it to end
-      _thread.join();
-
-      _active_instance = nullptr;
+    mooseDeprecated("TimedPrint is deprecated, use TIME_SECTION instead");
     }
-  }
-
-private:
-  std::promise<bool> _done;
-  std::thread _thread;
-
-  static TimedPrint * _active_instance;
 };

@@ -28,7 +28,4 @@ protected:
 private:
   /// Data read in from the CSV file
   std::vector<std::vector<Real>> _data;
-
-  /// PerfGraph timer
-  const PerfID _perf_compute_sample;
 };

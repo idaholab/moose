@@ -1020,7 +1020,7 @@ XFEM::healMesh()
         {
           if (deleted_elem_count == 0)
             _console << "\n";
-          _console << "XFEM healing deleted element: " << deleted_elem_id << "\n";
+          _console << "XFEM healing deleted element: " << deleted_elem_id << std::endl;
         }
         ++deleted_elem_count;
         mesh_changed = true;
@@ -1035,7 +1035,7 @@ XFEM::healMesh()
     _mesh->get_boundary_info().remove(node_to_delete);
     _mesh->delete_node(node_to_delete);
     if (_debug_output_level > 1)
-      _console << "XFEM healing deleted node: " << deleted_node_id << "\n";
+      _console << "XFEM healing deleted node: " << deleted_node_id << std::endl;
   }
 
   if (_displaced_mesh)
@@ -1159,7 +1159,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id, new_node));
     if (_debug_output_level > 1)
-      _console << "XFEM added new node: " << new_node->id() << "\n";
+      _console << "XFEM added new node: " << new_node->id() << std::endl;
     if (_displaced_mesh)
     {
       const Node * parent_node2 = _displaced_mesh->node_ptr(parent_id);
@@ -1303,7 +1303,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     }
 
     if (_debug_output_level > 1)
-      _console << "XFEM added new element: " << libmesh_elem->id() << "\n";
+      _console << "XFEM added new element: " << libmesh_elem->id() << std::endl;
 
     XFEMCutElem * xfce = NULL;
     if (_mesh->mesh_dimension() == 2)
@@ -1451,7 +1451,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     unsigned int deleted_elem_id = elem_to_delete->id();
     _mesh->delete_elem(elem_to_delete);
     if (_debug_output_level > 1)
-      _console << "XFEM deleted element: " << deleted_elem_id << "\n";
+      _console << "XFEM deleted element: " << deleted_elem_id << std::endl;
 
     if (_displaced_mesh)
     {
