@@ -1,0 +1,40 @@
+[Tests]
+  design = 'ReporterPointSource.md'
+  issues = '#15831 #18528'
+  [reporterPointSource]
+    requirement = 'The system shall support point sources with locations and values given by a Reporter '
+    [2dConstantReporter]
+      type = 'Exodiff'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source_err vpp_point_source'"
+      exodiff = '2d_vpp_out.e'
+      detail = 'in a steady state 2D problem, reading data from a reporter and reproducing the constantPointSource.'
+    []
+    [2dConstantVPP]
+      type = 'Exodiff'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source_err reporter_point_source'"
+      exodiff = '2d_vpp_out.e'
+      detail = 'in a steady state 2D problem, reading data from a vectorPostProcessor and reproducing the constantPointSource.'
+    []
+    [3dConstant]
+      type = 'Exodiff'
+      input = '3d_vpp.i'
+      exodiff = '3d_vpp_out.e'
+      detail = "in steady state 3D problem, reproducing the constantPointSource."
+    []
+    [2dTransient]
+      type = 'CSVDiff'
+      input = '2d_vpp_transient.i'
+      csvdiff = '2d_vpp_transient_out_point_sample_out.csv'
+      detail = "in a transient problem with the vpp source value changing as the vpp changes."
+    []
+    [wrong_size_error]
+      type = 'RunException'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source'"
+      expect_err = "The value and coordinate vectors are a different size"
+      detail = "and shall report an error if the input arrays are not the same size"
+    []
+  []
+[]

@@ -42,10 +42,13 @@
 
 [DiracKernels]
   [point_source]
-    type = VectorPostprocessorPointSource
+    type = ReporterPointSource
     variable = u
-    vector_postprocessor = source
     block = 1
+    value_name = source/value
+    x_coord_name = source/x
+    y_coord_name = source/y
+    z_coord_name = source/z
     # The VPP contains the following information
     # x,y,z,value
     # 0.25,0.25,0.0,1

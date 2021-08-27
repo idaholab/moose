@@ -121,7 +121,7 @@ The matrix input file has the following features
 
 !listing fracture_diffusion/matrix_app_dirac.i block=Transfers
 
-- This latter `Transfer` writes its information into a `VectorPostprocessor` in the matrix App.  That is then converted to a Dirac source by a `VectorPostprocessorPointSource` `DiracKernel`:
+- This latter `Transfer` writes its information into a `VectorPostprocessor` in the matrix App.  That is then converted to a Dirac source by a `ReporterPointSource` `DiracKernel`:
 
 !listing fracture_diffusion/matrix_app_dirac.i block=DiracKernels
 
