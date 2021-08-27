@@ -62,7 +62,7 @@ problem has an affine decomposition. For more information about affine decomposi
 [PODReducedBasisTrainer.md]. Luckily, the problem at hand has an affine decomposition in
 the following form:
 
-!equation id=fom_problem
+!equation
 -\sum\limits_{i=1}^{4}\nabla \cdot\left[D_i(\textbf{r})\nabla\psi(\textbf{r})\right]+\sum\limits_{i=1}^{4}\Sigma_{a,i}(\textbf{r})\psi(\textbf{r}) = \sum\limits_{i=1}^{3}q_i(\textbf{r}) \,, \quad \textbf{r}\in\Omega
 
 where $D_i(\textbf{r})$, $\Sigma_{a,i}(\textbf{r})$ and $q_i(\textbf{r})$ take the values of $D_i$, $\Sigma_{a,i}$ and $q_i$

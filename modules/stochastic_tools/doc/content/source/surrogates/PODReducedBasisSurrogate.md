@@ -7,7 +7,7 @@
 This surrogate takes the reduced operators and bases from [PODReducedBasisTrainer.md]
 and assembles the reduced equation system for a new parameter sample ($\boldsymbol{\mu^* }$):
 
-!equation id=rom_affine_decomp_final
+!equation id=rom_affine_decomp
 \left(\sum \limits_{i=1}^{N_A} f^A_i(\boldsymbol{\mu^* })\textbf{A}_i^r\right)\textbf{c}(\boldsymbol{\mu^* }) =
 \sum \limits_{i=1}^{N_b} f^b_i(\boldsymbol{\mu^* })\textbf{b}_i^r.
 

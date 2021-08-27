@@ -153,12 +153,13 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         """
         pass
 
-    def preTokenize(self, page, ast):
+    def preTokenize(self, page, content, ast):
         """
         Called by Translator prior to tokenization.
 
         Inputs:
             page[pages.Source]: The source object representing the content
+            content[str]: A copy of the content read from the page
             ast[tokens.Token]: The root node of the token tree
         """
         pass

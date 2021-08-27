@@ -12,7 +12,7 @@ import unittest
 import logging
 from MooseDocs import MOOSE_DIR, common, base
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, floats, include, listing, modal
+from MooseDocs.extensions import core, shortcut, command, floats, include, listing, modal
 logging.basicConfig()
 
 def extractContent(filename, opts=dict()):
@@ -23,7 +23,7 @@ def extractContent(filename, opts=dict()):
     return content
 
 class TestListingNumbers(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, include, listing, modal]
+    EXTENSIONS = [core, shortcut, command, floats, include, listing, modal]
 
     # also testing a listing from an '!include' file and referencing its id number chronologically
     SHORTCUTS = ['one', 'two', 'three']
@@ -108,7 +108,7 @@ class TestListingNumbers(MooseDocsTestCase):
             self.assertLatexString(res(j,0), content=s)
 
 class TestListingCaptions(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing, modal]
+    EXTENSIONS = [core, shortcut, command, floats, listing, modal]
     CODE = ['no caption',
             'caption with inline content',
             'caption with prefix and number']

@@ -223,11 +223,11 @@ The displacement, velocity and acceleration, as the function of time, at the fre
 
 ## Small strain massless beam damped vibration with a lumped mass having rotational moment of inertia
 
-A 1D cantilever beam of 4 m is modeled using beam elements in MOOSE. The beam is massless with a lumped mass of 0.01899772 kgs at its free end whose moment of inertia about X, Y and Z axis is 0.2 ${m}^4$,0.1 ${m}^4$ and 0.1 ${m}^4$, . The beam has a moment of inertia about Y and Z axis of 1$\times$10$^-$$^4$ ${m}^4$, Young's modulus of elasticity of 1$\times$10$^4$ N/${m}^2$, poisson's ratio of -0.99, shear modulus of  4$\times$10$^7$ N/${m}^2$ and shear coefficient of 1. An impulse load with a peak value of 0.01 N at 0.1 s as shown in [fig:impulseload3] is applied at the free end of the beam in Y direction. The Newmark time integration parameters used in the problem correspond to the Newmark's average acceleration method, i.e., `beta=0.25` and `gamma=0.5` and vibration is damping using the mass proportional coefficient `eta=0.1`.
+A 1D cantilever beam of 4 m is modeled using beam elements in MOOSE. The beam is massless with a lumped mass of 0.01899772 kgs at its free end whose moment of inertia about X, Y and Z axis is 0.2 ${m}^4$,0.1 ${m}^4$ and 0.1 ${m}^4$, . The beam has a moment of inertia about Y and Z axis of 1$\times$10$^-$$^4$ ${m}^4$, Young's modulus of elasticity of 1$\times$10$^4$ N/${m}^2$, poisson's ratio of -0.99, shear modulus of  4$\times$10$^7$ N/${m}^2$ and shear coefficient of 1. An impulse load with a peak value of 0.01 N at 0.1 s as shown in [fig:impulseload4] is applied at the free end of the beam in Y direction. The Newmark time integration parameters used in the problem correspond to the Newmark's average acceleration method, i.e., `beta=0.25` and `gamma=0.5` and vibration is damping using the mass proportional coefficient `eta=0.1`.
 
 !media media/tensor_mechanics/vandv/massless_small_impulse.png
       style=width:450px;margin-left:110px;float:center;
-      id=fig:impulseload3
+      id=fig:impulseload4
       caption=Impulse load pattern applied at the free end of the beam.
 
 !listing dyn_euler_small_added_mass_inertia_damping.i

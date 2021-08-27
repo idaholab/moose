@@ -214,7 +214,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
         ast = self.translator.reader.getRoot()
         if node.attributes.get('active', True):
-            self.translator.executePageMethod('preTokenize', node, args=(ast,))
+            self.translator.executePageMethod('preTokenize', node, args=(content, ast))
             if node.attributes.get('tokenize', True):
                 self.translator.reader.tokenize(ast, content, node)
             self.translator.executePageMethod('postTokenize', node, args=(ast,))
@@ -226,7 +226,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
         result = self.translator.renderer.getRoot()
         if node.attributes.get('active', True):
-            self.translator.executePageMethod('preRender', node, args=(result,))
+            self.translator.executePageMethod('preRender', node, args=(ast, result))
             if node.attributes.get('render', True):
                 self.translator.renderer.render(result, ast, node)
             self.translator.executePageMethod('postRender', node, args=(result,))
@@ -460,7 +460,7 @@ class ParallelBarrier(Executioner):
 
         if tokenize:
             for node in nodes:
-                node.attributes.update(page_attributes[node.uid])
+                mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
                 self._page_ast[node.uid] = self.tokenize(node, self._page_content[node.uid])
                 page_attributes[node.uid] = node.attributes
 
@@ -469,7 +469,7 @@ class ParallelBarrier(Executioner):
 
         if render:
             for node in nodes:
-                node.attributes.update(page_attributes[node.uid])
+                mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
                 self._page_result[node.uid] = self.render(node, self._page_ast[node.uid])
                 page_attributes[node.uid] = node.attributes
 
@@ -478,13 +478,13 @@ class ParallelBarrier(Executioner):
 
         if write:
             for node in nodes:
-                node.attributes.update(page_attributes[node.uid])
+                mooseutils.recursive_update(node.attributes, page_attributes[node.uid])
                 self.write(node, self._page_result[node.uid])
 
     def _updateAttributes(self, page_attributes):
         """Update the local page objects with attributes gathered from the other processes"""
         for page in self._page_objects:
-            mooseutils.recursive_update(page.attributes, page_attributes[page.uid])
+            page.attributes.update(page_attributes[page.uid])
 
 class ParallelPipe(Executioner):
     """

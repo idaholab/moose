@@ -49,6 +49,7 @@ Extensions:
     MooseDocs.extensions.graph:
         draft: True
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
     MooseDocs.extensions.gallery: disable
     MooseDocs.extensions.template:
         active: True
