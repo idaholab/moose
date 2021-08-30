@@ -197,3 +197,11 @@ p_out = 1e6
     order = SECOND
   []
 []
+
+[Outputs]
+  [console]
+    type = Console
+    max_rows = 1
+  []
+  print_linear_residuals = false
+[]
