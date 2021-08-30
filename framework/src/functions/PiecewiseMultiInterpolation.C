@@ -61,19 +61,28 @@ PiecewiseMultiInterpolation::PiecewiseMultiInterpolation(const InputParameters &
 
 PiecewiseMultiInterpolation::~PiecewiseMultiInterpolation() {}
 
-Real
-PiecewiseMultiInterpolation::value(Real t, const Point & p) const
+void
+PiecewiseMultiInterpolation::updatePointInGrid(Real t,
+                                               const Point & p,
+                                               std::vector<Real> & point_in_grid) const
 {
   // convert the inputs to an input to the sample function using _axes
-  std::vector<Real> pt_in_grid(_dim);
+  mooseAssert(point_in_grid.size() == _dim, "Invalid grid location vector size.");
   for (unsigned int i = 0; i < _dim; ++i)
   {
     if (_axes[i] < 3)
-      pt_in_grid[i] = p(_axes[i]);
+      point_in_grid[i] = p(_axes[i]);
     else if (_axes[i] == 3) // the time direction
-      pt_in_grid[i] = t;
+      point_in_grid[i] = t;
   }
-  return sample(pt_in_grid);
+}
+
+Real
+PiecewiseMultiInterpolation::value(Real t, const Point & p) const
+{
+  std::vector<Real> point_in_grid(_dim);
+  updatePointInGrid(t, p, point_in_grid);
+  return sample(point_in_grid);
 }
 
 void
