@@ -20,5 +20,13 @@
       unique_id = true
       detail = 'and spatially varying value defined by a function.'
     []
+    [block_restriction]
+      type = Exodiff
+      input = 2d_constant_block.i
+      exodiff = '2d_constant_block_out.e'
+      map = false
+      unique_id = true
+      detail = 'It should also respect block restriction.'
+    []
   []
 []
