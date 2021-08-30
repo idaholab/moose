@@ -5,8 +5,6 @@
   initial_p = 7e6
   initial_vel = 0
 
-  scaling_factor_1phase = '1 1 1e-5'
-
   closures = simple
 []
 
@@ -32,7 +30,7 @@
     D_h  = 1.1283791671e-02
     f = 0.1
     length = 1
-    n_elems = 100
+    n_elems = 20
   []
 
   [in]
@@ -63,9 +61,9 @@
 
   dt = 0.1
   start_time = 0.0
-  end_time = 5
+  num_steps = 30
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 0
   nl_abs_tol = 1e-6

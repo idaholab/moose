@@ -22,11 +22,6 @@
 []
 
 [Components]
-  [sw1]
-    type = SolidWall1Phase
-    input = fch1:in
-  []
-
   [fch1]
     type = FlowChannel1Phase
     position = '0 0 0'
@@ -68,11 +63,6 @@
     length = 1
     n_elems = 2
     A = 1
-  []
-
-  [sw2]
-    type = SolidWall1Phase
-    input = fch2:out
   []
 
   [shaft]

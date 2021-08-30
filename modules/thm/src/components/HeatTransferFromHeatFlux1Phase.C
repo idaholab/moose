@@ -24,7 +24,7 @@ HeatTransferFromHeatFlux1Phase::addMooseObjects()
   HeatTransfer1PhaseBase::addMooseObjects();
 
   {
-    const std::string class_name = "GenericFunctionMaterial";
+    const std::string class_name = "ADGenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<std::string>>("prop_names") = {_q_wall_name};
@@ -34,7 +34,7 @@ HeatTransferFromHeatFlux1Phase::addMooseObjects()
 
   // wall heat transfer kernel
   {
-    const std::string class_name = "OneDEnergyWallHeatFlux";
+    const std::string class_name = "ADOneDEnergyWallHeatFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;

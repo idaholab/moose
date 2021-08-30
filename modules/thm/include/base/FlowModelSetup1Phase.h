@@ -60,6 +60,9 @@ protected:
   /// Name of dynamic viscosity variable
   const VariableName _mu_name;
 
+  /// True for setting up testing with AD, false otherwise
+  const bool & _ad;
+
 public:
   static InputParameters validParams();
 };

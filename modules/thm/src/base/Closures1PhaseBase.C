@@ -17,21 +17,18 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & fl
   const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
   flow_channel.makeFunctionControllableIfConstant(f_D_fn_name, "f");
 
-  const std::string class_name = "WallFrictionFunctionMaterial";
+  const std::string class_name = "ADWallFrictionFunctionMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
   params.set<FunctionName>("function") = f_D_fn_name;
-  params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
-  params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
-  params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
   _sim.addMaterial(class_name, genName(flow_channel.name(), "f_wall_fn_mat"), params);
 }
 
 void
 Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const
 {
-  const std::string class_name = "AverageWallTemperature3EqnMaterial";
+  const std::string class_name = "ADAverageWallTemperature3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<std::vector<VariableName>>("T_wall_sources") = flow_channel.getWallTemperatureNames();

@@ -83,14 +83,14 @@
   # hand calcs show that Isp should start at 274.3 at 600 K
   # and rise to 316.7 at 800 K.
   [Isp]
-    type = SpecificImpulse1Phase
+    type = ADSpecificImpulse1Phase
     p_exit = 1e6
     fp = eos
     boundary = outlet
   []
 
   [Isp_inst]
-    type = SpecificImpulse1Phase
+    type = ADSpecificImpulse1Phase
     p_exit = 1e6
     fp = eos
     cumulative = false

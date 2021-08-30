@@ -121,7 +121,7 @@
   solve_type = 'newton'
   line_search = 'basic'
   nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-5
   nl_max_its = 20
 
   l_tol = 1e-3

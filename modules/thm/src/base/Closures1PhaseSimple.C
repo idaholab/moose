@@ -81,7 +81,7 @@ Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer,
   const FunctionName & Hw_fn_name = heat_transfer.getParam<FunctionName>("Hw");
 
   {
-    const std::string class_name = "GenericFunctionMaterial";
+    const std::string class_name = "ADGenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {
@@ -98,7 +98,7 @@ void
 Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(
     const FlowChannel1Phase & flow_channel) const
 {
-  const std::string class_name = "TemperatureWall3EqnMaterial";
+  const std::string class_name = "ADTemperatureWall3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;

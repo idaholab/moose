@@ -1,5 +1,5 @@
 #include "Turbine1PhaseDeltaPAux.h"
-#include "ShaftConnectedTurbine1PhaseUserObject.h"
+#include "ADShaftConnectedTurbine1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Turbine1PhaseDeltaPAux);
 
@@ -14,12 +14,12 @@ Turbine1PhaseDeltaPAux::validParams()
 
 Turbine1PhaseDeltaPAux::Turbine1PhaseDeltaPAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _turbine_uo(getUserObject<ShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
+    _turbine_uo(getUserObject<ADShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
 {
 }
 
 Real
 Turbine1PhaseDeltaPAux::computeValue()
 {
-  return _turbine_uo.getTurbineDeltaP();
+  return MetaPhysicL::raw_value(_turbine_uo.getTurbineDeltaP());
 }

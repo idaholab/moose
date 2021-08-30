@@ -26,7 +26,7 @@ FormLossFromFunction1Phase::addMooseObjects()
   FormLoss1PhaseBase::addMooseObjects();
 
   {
-    const std::string class_name = "GenericFunctionMaterial";
+    const std::string class_name = "ADGenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<std::string>>("prop_names") = {"K_prime"};

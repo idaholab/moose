@@ -38,7 +38,7 @@ Outlet1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnGhostPressure";
+    const std::string class_name = "ADBoundaryFlux3EqnGhostPressure";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("p") = getParam<Real>("p");
     params.set<Real>("normal") = _normal;

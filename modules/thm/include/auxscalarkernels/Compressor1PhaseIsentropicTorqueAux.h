@@ -2,7 +2,7 @@
 
 #include "AuxScalarKernel.h"
 
-class ShaftConnectedCompressor1PhaseUserObject;
+class ADShaftConnectedCompressor1PhaseUserObject;
 
 /**
  * Isentropic torque computed in the 1-phase shaft-connected compressor
@@ -15,7 +15,7 @@ public:
 protected:
   virtual Real computeValue();
   /// 1-phase shaft-connected compressor user object
-  const ShaftConnectedCompressor1PhaseUserObject & _compressor_uo;
+  const ADShaftConnectedCompressor1PhaseUserObject & _compressor_uo;
 
 public:
   static InputParameters validParams();

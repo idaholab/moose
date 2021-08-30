@@ -1,5 +1,5 @@
 #include "PumpHeadAux.h"
-#include "ShaftConnectedPump1PhaseUserObject.h"
+#include "ADShaftConnectedPump1PhaseUserObject.h"
 
 registerMooseObject("THMApp", PumpHeadAux);
 
@@ -14,12 +14,12 @@ PumpHeadAux::validParams()
 
 PumpHeadAux::PumpHeadAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _pump_uo(getUserObject<ShaftConnectedPump1PhaseUserObject>("pump_uo"))
+    _pump_uo(getUserObject<ADShaftConnectedPump1PhaseUserObject>("pump_uo"))
 {
 }
 
 Real
 PumpHeadAux::computeValue()
 {
-  return _pump_uo.getPumpHead();
+  return MetaPhysicL::raw_value(_pump_uo.getPumpHead());
 }

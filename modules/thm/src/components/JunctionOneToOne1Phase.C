@@ -76,7 +76,7 @@ JunctionOneToOne1Phase::addMooseObjects()
 
   // Add user object for computing and storing the fluxes
   {
-    const std::string class_name = "JunctionOneToOne1PhaseUserObject";
+    const std::string class_name = "ADJunctionOneToOne1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
@@ -99,7 +99,7 @@ JunctionOneToOne1Phase::addMooseObjects()
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
     for (std::size_t j = 0; j < var_names.size(); j++)
     {
-      const std::string class_name = "JunctionOneToOne1PhaseBC";
+      const std::string class_name = "ADJunctionOneToOne1PhaseBC";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];

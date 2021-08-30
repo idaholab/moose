@@ -131,7 +131,7 @@ ADReal Grashof(ADReal beta,
                ADReal D_h,
                ADReal rho_liquid,
                ADReal mu_liquid,
-               ADReal gravity_magnitude);
+               Real gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)
@@ -181,6 +181,7 @@ ADReal wallHeatTransferCoefficient(ADReal Nu, ADReal k, ADReal D_h);
  * @return Dean number
  */
 Real Dean(Real Re, Real doD);
+ADReal Dean(ADReal Re, ADReal doD);
 
 /**
  * Computes velocity and its derivatives from alpha*rho*A and alpha*rho*u*A
@@ -232,6 +233,15 @@ void rho_from_arhoA_alpha_A(
  * @param[out] dv_drhoA   derivative of specific volume w.r.t. rho*A
  */
 void v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA);
+
+/**
+ * Computes specific volume and its derivatives from rho*A, and area.
+ *
+ * @param[in] rhoA   rho*A
+ * @param[in] A      area
+ * @return v         specific volume
+ */
+ADReal v_from_rhoA_A(ADReal rhoA, ADReal A);
 
 /**
  * Computes specific volume and its derivatives from alpha*rho*A, volume fraction, and area.
@@ -291,6 +301,8 @@ void e_from_arhoA_arhouA_arhoEA(Real arhoA,
                                 Real & de_darhoA,
                                 Real & de_darhouA,
                                 Real & de_darhoEA);
+
+ADReal e_from_arhoA_arhouA_arhoEA(ADReal arhoA, ADReal arhouA, ADReal arhoEA);
 
 /**
  * Computes specific internal energy and its derivatives from specific total energy and velocity
@@ -362,6 +374,8 @@ void E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel);
  * @param[out] dh_drho   derivative of specific enthalpy w.r.t. density
  */
 void h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho);
+
+ADReal h_from_e_p_rho(ADReal e, ADReal p, ADReal rho);
 
 /**
  * Determine if inlet boundary condition should be applied

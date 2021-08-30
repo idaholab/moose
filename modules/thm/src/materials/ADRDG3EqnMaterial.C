@@ -42,7 +42,7 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
     _rhouA_var(getVar("rhouA", 0)),
     _rhoEA_var(getVar("rhoEA", 0)),
 
-    _dir(getADMaterialProperty<RealVectorValue>("direction")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _rhoA(declareADProperty<Real>("rhoA")),
     _rhouA(declareADProperty<Real>("rhouA")),

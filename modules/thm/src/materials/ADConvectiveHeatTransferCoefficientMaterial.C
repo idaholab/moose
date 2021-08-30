@@ -19,7 +19,7 @@ ADConvectiveHeatTransferCoefficientMaterial::ADConvectiveHeatTransferCoefficient
   : Material(parameters),
     _Hw(declareADProperty<Real>("Hw")),
     _Nu(getADMaterialProperty<Real>("Nu")),
-    _D_h(getADMaterialProperty<Real>("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
     _k(getADMaterialProperty<Real>("k"))
 {
 }

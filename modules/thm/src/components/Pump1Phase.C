@@ -31,7 +31,7 @@ Pump1Phase::buildVolumeJunctionUserObject()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   {
-    const std::string class_name = "Pump1PhaseUserObject";
+    const std::string class_name = "ADPump1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;

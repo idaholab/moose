@@ -45,7 +45,8 @@ FlowModelSetup1Phase::FlowModelSetup1Phase(InputParameters params)
     _v_name("v"),
     _e_name("e"),
     _H_name("H"),
-    _mu_name("mu")
+    _mu_name("mu"),
+    _ad(getParam<bool>("ad"))
 {
 }
 
@@ -356,7 +357,10 @@ FlowModelSetup1Phase::addMaterials()
   // fluid properties
   {
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "FluidProperties3EqnMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADFluidProperties3EqnMaterial";
+    else
+      params.set<std::string>("type") = "FluidProperties3EqnMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _this_action_factory.create(class_name, "fluid_properties_material", params));
@@ -376,14 +380,21 @@ FlowModelSetup1Phase::addMaterials()
     const std::string class_name = "AddMaterialAction";
 
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "DynamicViscosityMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADDynamicViscosityMaterial";
+    else
+      params.set<std::string>("type") = "DynamicViscosityMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _this_action_factory.create(class_name, "mu_material", params));
 
-    action->getObjectParams().set<std::vector<VariableName>>("arhoA") = {_rhoA_name};
-    action->getObjectParams().set<std::vector<VariableName>>("arhouA") = {_rhouA_name};
-    action->getObjectParams().set<std::vector<VariableName>>("arhoEA") = {_rhoEA_name};
+    if (!_ad)
+    {
+      action->getObjectParams().set<std::vector<VariableName>>("arhoA") = {_rhoA_name};
+      action->getObjectParams().set<std::vector<VariableName>>("arhouA") = {_rhouA_name};
+      action->getObjectParams().set<std::vector<VariableName>>("arhoEA") = {_rhoEA_name};
+    }
+
     action->getObjectParams().set<MaterialPropertyName>("mu") = {_mu_name};
     action->getObjectParams().set<MaterialPropertyName>("v") = {_v_name};
     action->getObjectParams().set<MaterialPropertyName>("e") = {_e_name};

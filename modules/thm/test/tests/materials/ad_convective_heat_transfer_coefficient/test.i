@@ -48,10 +48,16 @@
 []
 
 [Materials]
+  [D_h]
+    type = GenericConstantMaterial
+    prop_names = 'D_h'
+    prop_values = '20'
+  []
+
   [props]
     type = ADGenericConstantMaterial
-    prop_names = 'Nu k D_h'
-    prop_values = '1000 2 20'
+    prop_names = 'Nu k'
+    prop_values = '1000 2'
   []
 
   [Hw_material]

@@ -368,6 +368,12 @@ FlowChannelBase::addCommonObjects()
 
     setupDh();
   }
+}
+
+void
+FlowChannelBase::addMooseObjects()
+{
+  addCommonObjects();
 
   ExecFlagEnum execute_on_initial_linear(MooseUtils::getDefaultExecFlagEnum());
   execute_on_initial_linear = {EXEC_INITIAL, EXEC_LINEAR};
@@ -389,7 +395,7 @@ FlowChannelBase::addCommonObjects()
   {
     if (_n_heat_transfer_connections > 1)
     {
-      const std::string class_name = "WeightedAverageMaterial";
+      const std::string class_name = "ADWeightedAverageMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<MaterialPropertyName>("prop_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
@@ -399,7 +405,7 @@ FlowChannelBase::addCommonObjects()
     }
     else if (_n_heat_transfer_connections == 0)
     {
-      const std::string class_name = "ConstantMaterial";
+      const std::string class_name = "ADConstantMaterial";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
@@ -407,12 +413,6 @@ FlowChannelBase::addCommonObjects()
       _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
     }
   }
-}
-
-void
-FlowChannelBase::addMooseObjects()
-{
-  addCommonObjects();
 
   _flow_model->addMooseObjects();
   _closures->addMooseObjects(*this);

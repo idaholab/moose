@@ -40,7 +40,7 @@ InletStagnationPressureTemperature1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnGhostStagnationPressureTemperature";
+    const std::string class_name = "ADBoundaryFlux3EqnGhostStagnationPressureTemperature";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("p0") = getParam<Real>("p0");
     params.set<Real>("T0") = getParam<Real>("T0");

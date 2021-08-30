@@ -97,12 +97,12 @@ p_out = 7e6
 
 [Postprocessors]
   [inlet_in_m_dot]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = 'inlet_bc'
     equation = mass
   []
   [inlet_out_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'inlet:out'
     connection_index = 0
     junction = inlet_plenum
@@ -110,14 +110,14 @@ p_out = 7e6
   []
 
   [channel1_in_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'channel1:in'
     connection_index = 1
     junction = inlet_plenum
     equation = mass
   []
   [channel1_out_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'channel1:out'
     connection_index = 0
     junction = outlet_plenum
@@ -125,14 +125,14 @@ p_out = 7e6
   []
 
   [channel2_in_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'channel2:in'
     connection_index = 2
     junction = inlet_plenum
     equation = mass
   []
   [channel2_out_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'channel2:out'
     connection_index = 1
     junction = outlet_plenum
@@ -140,14 +140,14 @@ p_out = 7e6
   []
 
   [outlet_in_m_dot]
-    type = FlowJunctionFlux1Phase
+    type = ADFlowJunctionFlux1Phase
     boundary = 'outlet:in'
     connection_index = 2
     junction = outlet_plenum
     equation = mass
   []
   [outlet_out_m_dot]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = 'outlet_bc'
     equation = mass
   []
