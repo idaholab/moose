@@ -1594,7 +1594,7 @@ MooseMesh::buildTypedMesh(unsigned int dim)
     // Set custom partitioner
     if (!_custom_partitioner.get())
       mooseError("Custom partitioner requested but not set!");
-    mesh->partitioner().reset(_custom_partitioner.release());
+    mesh->partitioner() = _custom_partitioner->clone();
   }
   else
     setPartitionerHelper(mesh.get());
