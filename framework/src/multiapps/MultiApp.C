@@ -235,18 +235,13 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
-    _perf_backup(registerTimedSection("backup", 3)),
-    _perf_restore(registerTimedSection("restore", 3)),
-    _perf_init(registerTimedSection("init", 3)),
-    _perf_reset_app(registerTimedSection("resetApp", 3))
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
 {
 
   if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
       parameters.isParamValid("cli_args_files"))
-    paramError(
-        "cli_args",
-        "Both 'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
+    paramError("cli_args",
+               "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
 }
 
 void
@@ -262,6 +257,10 @@ MultiApp::init(unsigned int num_apps, bool batch_mode)
 
   _has_bounding_box.resize(_my_num_apps, false);
   _bounding_box.resize(_my_num_apps);
+
+  if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
+    paramError("cli_args",
+               "The number of items supplied must be 1 or equal to the number of sub apps.");
 }
 
 void
@@ -319,17 +318,20 @@ MultiApp::readCommandLineArguments()
     std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
     std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
 
-    // If we multiple input files, then we need to check if the number of input files
-    // match with the number of argument files
-    if (input_files.size() != 1 && cli_args_files.size() != input_files.size())
-      paramError(cli_args_files,
-                 "Number of commandLine argument files for MultiApp ",
-                 name(),
-                 " must either be only one or match the number of input files");
-
     // If we use parameter "cli_args_files", at least one file should be provided
     if (!cli_args_files.size())
-      paramError("cli_args_files", "You need to privde at least on file name ");
+      paramError("cli_args_files", "You need to provide at least one commandLine argument file ");
+
+    // If we multiple input files, then we need to check if the number of input files
+    // match with the number of argument files
+    if (cli_args_files.size() != 1 && cli_args_files.size() != input_files.size())
+      paramError("cli_args_files",
+                 "The number of commandLine argument files ",
+                 cli_args_files.size(),
+                 " for MultiApp ",
+                 name(),
+                 " must either be only one or match the number of input files ",
+                 input_files.size());
 
     // Go through all argument files
     std::vector<std::string> cli_args;
@@ -349,8 +351,10 @@ MultiApp::readCommandLineArguments()
                   std::back_inserter(cli_args));
 
         // We do not allow empty files
-        if (!_cli_args_from_file.size())
-          paramError("cli_args_files", "There is no commandLine argument in files");
+        if (!cli_args.size())
+          paramError("cli_args_files",
+                     "There is no commandLine argument in the commandLine argument file ",
+                     cli_args_file);
 
         // If we have position files, we need to
         // make sure the number of commandLine argument strings
@@ -368,9 +372,11 @@ MultiApp::readCommandLineArguments()
               _cli_args_from_file.push_back(cli_arg);
           else if (cli_args.size() != num_positions)
             paramError("cli_args_files",
-                       "The number of commandLine argument strings",
+                       "The number of commandLine argument strings ",
                        cli_args.size(),
-                       " does not equal to the number of positions ",
+                       " in the file ",
+                       cli_args_file,
+                       " must either be only one or match the number of positions ",
                        num_positions);
         }
         else
@@ -385,15 +391,11 @@ MultiApp::readCommandLineArguments()
 
     // Broad cast all arguments to everyone
     _communicator.broadcast(_cli_args_from_file);
-
-    // We do not allow empty files
-    if (!_cli_args_from_file.size())
-      paramError("cli_args_files", "There is no commandLine argument in files");
   }
 
   if (_cli_args_from_file.size() && _cli_args_from_file.size() != 1 &&
       _cli_args_from_file.size() != _total_num_apps)
-    mooseError(" The number of commandLine arguments ",
+    mooseError(" The number of commandLine argument strings ",
                _cli_args_from_file.size(),
                " must either be only one or match the total "
                "number of sub apps ",

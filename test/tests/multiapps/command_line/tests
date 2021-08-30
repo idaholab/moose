@@ -18,7 +18,7 @@
   [wrong_size]
     type = RunException
     input = master_wrong_size.i
-    expect_err = 'The number of commandLine arguments must either be only one or match the total number of sub apps'
+    expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
     requirement = "The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps."
   []
 []
