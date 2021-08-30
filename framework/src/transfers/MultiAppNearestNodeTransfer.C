@@ -880,7 +880,8 @@ MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_i
       BoundaryID target_bnd_id = _to_meshes[to_problem_id]->getBoundaryID(t);
 
       for (const auto & bnode : bnd_nodes)
-        if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
+        if (bnode->_bnd_id == target_bnd_id &&
+            bnode->_node->processor_id() == _to_meshes[to_problem_id]->processor_id())
           _target_local_nodes.push_back(bnode->_node);
     }
   }
