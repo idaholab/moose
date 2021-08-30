@@ -106,6 +106,10 @@ computeReferenceRotation(const RealVectorValue & normal, const unsigned int mesh
     case 1:
       rot = RankTwoTensor::Identity();
       break;
+    default:
+      mooseError("computeReferenceRotation: mesh_dimension value should be 1, 2 or, 3. You "
+                 "provided " +
+                 std::to_string(mesh_dimension));
   }
   return rot;
 }

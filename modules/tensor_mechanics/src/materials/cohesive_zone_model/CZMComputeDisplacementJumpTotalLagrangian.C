@@ -67,7 +67,7 @@ CZMComputeDisplacementJumpTotalLagrangian::computeRotationMatrices()
 {
 
   _czm_reference_rotation[_qp] =
-      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _ndisp);
+      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _mesh.dimension());
   computeFandR();
   _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
 }

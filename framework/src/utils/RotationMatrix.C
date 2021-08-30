@@ -63,6 +63,6 @@ RotationMatrix::rotVec2DToX(const RealVectorValue & vec)
   const Real theta = std::atan2(vec(1), vec(0));
   const Real st = std::sin(theta);
   const Real ct = std::cos(theta);
-  RealTensorValue rot(ct, st, 0., -st, ct, 0., 0., 0., 1.);
-  return rot;
+  return RealTensorValue(ct, st, 0., -st, ct, 0., 0., 0., 1.);
+  ;
 }

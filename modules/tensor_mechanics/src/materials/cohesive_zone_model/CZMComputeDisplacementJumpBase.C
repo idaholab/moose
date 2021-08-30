@@ -86,5 +86,5 @@ void
 CZMComputeDisplacementJumpBase::computeRotationMatrices()
 {
   _czm_total_rotation[_qp] =
-      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _ndisp);
+      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _mesh.dimension());
 }
