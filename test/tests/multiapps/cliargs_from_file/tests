@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'cliargs_master.i'
     exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
-    cli_args = 'MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt"'
+    cli_args = 'MultiApps/sub_app/positions_file="positions_1.txt positions_2.txt" MultiApps/sub_app/input_files="cliargs_sub_1.i cliargs_sub_2.i" MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt"'
     prereq = one_line_file
     requirement = "The system shall support reading command-line arguments from multiple files"
   [../]
@@ -36,4 +36,6 @@
     prereq = two_files
     requirement = "The system shall support reading command-line arguments from a file with multiple parameters separated semicolon"
   [../]
+
+  
 []
