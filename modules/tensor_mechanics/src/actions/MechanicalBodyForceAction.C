@@ -31,7 +31,7 @@ MechanicalBodyForceAction::validParams()
       "function", "1", "Function to scale the coupled body force vector property");
   params.addParam<Real>(
       "hht_alpha", 0.0, "alpha parameter required for HHT time integration scheme");
-  params.addRequiredParam<MaterialPropertyName>("force_density", "Force per unit volume vector");
+  params.addRequiredParam<MaterialPropertyName>("body_force", "Force per unit volume vector");
   return params;
 }
 

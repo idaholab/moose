@@ -4,7 +4,9 @@
 
 ## Description
 
-The kernel `MechanicalBodyForce` provides a body force term in the stress divergence equilibrium.
+The kernel `MechanicalBodyForce` provides a body force term from a vector valued
+material property in the stress divergence equilibrium. Kernels for all spatial
+directions can be set up using the [MechanicalBodyForceAction.md].
 
 ## Example Input File Syntax
 

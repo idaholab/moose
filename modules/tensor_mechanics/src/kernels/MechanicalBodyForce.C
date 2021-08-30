@@ -16,12 +16,11 @@ MechanicalBodyForce::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Apply a body force vector to the coupled displacement component.");
-  // params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
   params.addParam<FunctionName>(
       "function", "1", "Function to scale the coupled body force vector property");
   params.addParam<Real>(
       "hht_alpha", 0.0, "alpha parameter required for HHT time integration scheme");
-  params.addRequiredParam<MaterialPropertyName>("force_vector", "Force per unit volume vector");
+  params.addRequiredParam<MaterialPropertyName>("body_force", "Force per unit volume vector");
   params.addCoupledVar("displacements", "The displacements");
   return params;
 }
