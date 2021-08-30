@@ -1,0 +1,26 @@
+[Examples]
+  issues = '#18648'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [hertz_contact_rz]
+    type = CSVDiff
+    input = 'hertz_contact_rz.i'
+    csvdiff = 'hertz_contact_rz_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall avoid regression in a verified sphere on plane Hertzian problem using axisymmetry on a linear mesh. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+  [hertz_contact_rz_quad8]
+    type = CSVDiff
+    input = 'hertz_contact_rz_quad8.i'
+    csvdiff = 'hertz_contact_rz_quad8_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall avoid regression in a verified sphere on plane Hertzian problem using axisymmetry on a second-order mesh. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+[]
