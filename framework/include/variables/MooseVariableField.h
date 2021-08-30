@@ -333,6 +333,7 @@ public:
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
 
+protected:
   using FunctorInterface<typename Moose::ADType<OutputType>::type>::evaluate;
   using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::QpArg;
   typename Moose::ADType<OutputType>::type evaluate(const QpArg & qp,
@@ -340,4 +341,13 @@ public:
   typename Moose::ADType<OutputType>::type
   evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
            unsigned int state) const override final;
+
+private:
+  /// Keep track of the current functor element in order to enable local element caching (e.g. if we
+  /// call evaluate on the same element, but just with a different quadrature point, we can return
+  /// previously computed results indexed at the different qp
+  mutable const Elem * _current_functor_elem = nullptr;
+
+  /// The values of the solution for the \p _current_functor_elem
+  mutable std::vector<typename Moose::ADType<OutputType>::type> _current_functor_sln;
 };

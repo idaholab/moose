@@ -165,9 +165,37 @@ template <typename T>
 T
 FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) const
 {
-  mooseAssert(std::get<0>(face), "FaceInfo must be non-null");
-  auto it = _face_functor.find(std::get<3>(face));
-  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(std::get<3>(face)));
+  const auto sub_id = std::get<3>(face);
+  auto it = _face_functor.find(sub_id);
+  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(sub_id));
+#ifndef NDEBUG
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "FaceInfo must be non-null");
+  auto elem_it = _face_functor.find(fi->elem().subdomain_id());
+  mooseAssert(elem_it != _face_functor.end(),
+              "The element subdomain id should be a key in the subdomain id to functor map");
+  auto assertion_message = [](const std::string & element) -> std::string {
+    return "The targets for the " + element +
+           " subdomain ID and requested subdomain ID should be the same. If they are not, this "
+           "means that you are requesting a material property at a face whose definitions on "
+           "either side are different. If you want to produce a value at a face between subdomains "
+           "with different property definitions, then you should call the ElemAndFaceArg overload "
+           "instead and then perform a manual interpolation to the face yourself.";
+  };
+  using TargetType = T (*)(const FaceArg &, const unsigned int &);
+  mooseAssert(elem_it->second.template target<TargetType>() ==
+                  it->second.template target<TargetType>(),
+              assertion_message("element"));
+  if (fi->neighborPtr())
+  {
+    auto neighbor_it = _face_functor.find(fi->neighborPtr()->subdomain_id());
+    mooseAssert(neighbor_it != _face_functor.end(),
+                "The neighbor subdomain id should be a key in the subdomain id to functor map");
+    mooseAssert(neighbor_it->second.template target<TargetType>() ==
+                    it->second.template target<TargetType>(),
+                assertion_message("neighbor"));
+  }
+#endif
   return it->second(face, state);
 }
 

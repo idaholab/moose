@@ -4,8 +4,8 @@
 
 ## Overview
 
-This object populates an elemental auxiliary variable by taking the cell-average
-of an AD functor material property.
+This object populates an elemental auxiliary variable by evaluating a functor
+material property with an element argument.
 
 !syntax parameters /AuxKernels/FunctorMatPropElementalAux
 

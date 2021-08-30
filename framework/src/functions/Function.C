@@ -132,10 +132,10 @@ Function::evaluate(const QpArg & qp_arg, const unsigned int state) const
     std::unique_ptr<QBase> qrule(QBase::build(
         qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
 
-    const auto & xyz = fe->get_xyz();
+    auto & xyz = fe->get_xyz();
     fe->attach_quadrature_rule(qrule.get());
     fe->reinit(elem);
-    _current_functor_xyz = xyz;
+    _current_functor_xyz = std::move(xyz);
   }
   mooseAssert(qp < _current_functor_xyz.size(),
               "The requested " << qp << " is outside our xyz size");

@@ -92,8 +92,8 @@ public:
 
 protected:
   /**
-   * Evaluate the functor with a given element. A possible implementation of this method could
-   * compute an element-average
+   * Evaluate the functor with a given element. Some example implementations of this method
+   * could compute an element-average or evaluate at the element centroid
    */
   virtual T evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
 

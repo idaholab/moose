@@ -16,7 +16,9 @@ InputParameters
 FunctorMatPropElementalAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Evalutes a functor material property at the element centroid");
+  params.addClassDescription(
+      "Evaluates a functor material property on the current element."
+      "For finite volume, this evaluates the material property at the centroid.");
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "The functor mat prop");
   return params;
 }

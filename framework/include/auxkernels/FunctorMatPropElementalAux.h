@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 
 /**
- * Evaluate functor mat prop at element centroid
+ * Evaluate a functor material property with the element as the functor argument
  */
 class FunctorMatPropElementalAux : public AuxKernel
 {
