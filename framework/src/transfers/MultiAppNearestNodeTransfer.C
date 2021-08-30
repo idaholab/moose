@@ -328,7 +328,6 @@ MultiAppNearestNodeTransfer::execute()
       _from_vars.emplace_back(from_var);
       getLocalEntitiesAndComponents(
           _from_meshes[i], local_entities[i], local_comps[i], is_to_nodal, is_constant);
-
     }
 
     // Quadrature points I will receive from remote processors
@@ -748,7 +747,8 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
       for (const auto & bnode : bnd_nodes)
       {
         unsigned int comp = 0;
-        if (bnode->_bnd_id == src_bnd_id && bnode->_node->processor_id() == mesh_base.processor_id())
+        if (bnode->_bnd_id == src_bnd_id &&
+            bnode->_node->processor_id() == mesh_base.processor_id())
         {
           local_entities.emplace_back(*bnode->_node, bnode->_node);
           local_comps.push_back(comp++);
@@ -761,7 +761,8 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
       for (const auto & belem : bnd_elems)
       {
         unsigned int comp = 0;
-        if (belem->_bnd_id == src_bnd_id && belem->_elem->processor_id() == mesh_base.processor_id())
+        if (belem->_bnd_id == src_bnd_id &&
+            belem->_elem->processor_id() == mesh_base.processor_id())
         {
           // CONSTANT Monomial
           if (is_constant)
@@ -834,14 +835,16 @@ MultiAppNearestNodeTransfer::getLocalEntities(
     {
       const ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
       for (const auto & bnode : bnd_nodes)
-        if (bnode->_bnd_id == src_bnd_id && bnode->_node->processor_id() == mesh_base.processor_id())
+        if (bnode->_bnd_id == src_bnd_id &&
+            bnode->_node->processor_id() == mesh_base.processor_id())
           local_entities.emplace_back(*bnode->_node, bnode->_node);
     }
     else
     {
       const ConstBndElemRange & bnd_elems = *mesh->getBoundaryElementRange();
       for (const auto & belem : bnd_elems)
-        if (belem->_bnd_id == src_bnd_id && belem->_elem->processor_id() == mesh_base.processor_id())
+        if (belem->_bnd_id == src_bnd_id &&
+            belem->_elem->processor_id() == mesh_base.processor_id())
           local_entities.emplace_back(belem->_elem->centroid(), belem->_elem);
     }
   }

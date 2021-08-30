@@ -101,4 +101,22 @@
     issues = '#18730'
     requirement = "The system shall support target boundary transfer when use multiple mpi ranks"
   [../]
+
+  [./source_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_master.i'
+    exodiff = 'source_boundary_master_out.e source_boundary_master_out_sub0.e source_boundary_master_out_sub1.e'
+    issues = '#18730'
+    requirement = "The system shall support source boundary transfer when use multiple mpi ranks"
+  [../]
+
+  [./source_target_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_master.i'
+    exodiff = 'source_target_boundary.e source_target_boundary_sub0.e source_target_boundary_sub1.e'
+    issues = '#18730'
+    cli_args = 'Transfers/source_boundary/target_boundary="right" Outputs/file_base="source_target_boundary"'
+    prereq = 'source_boundary'
+    requirement = "The system shall support source-and-target boundary transfer when use multiple mpi ranks"
+  [../]
 []
