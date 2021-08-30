@@ -210,7 +210,7 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     const ConstBndNodeRange & bnd_nodes = *_from_meshes[i]->getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
-      if (bnode->_bnd_id == boundary_id && bnode->_node->processor_id() == processor_id())
+      if (bnode->_bnd_id == boundary_id && bnode->_node->processor_id() == _from_meshes[i]->processor_id())
       {
         at_least_one = true;
         const auto & node = *bnode->_node;
