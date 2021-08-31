@@ -21,10 +21,10 @@ public:
   using Calculator<std::vector<InType>, std::vector<OutType>>::Calculator;
 
 protected:
-  virtual void initializeCalculator() override;
-  virtual void updateCalculator(const InType & data) override;
-  virtual void finalizeCalculator(bool is_distributed) override;
-  virtual std::vector<OutType> getValue() const override { return _values; }
+  virtual void initialize() override;
+  virtual void update(const InType & data) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual std::vector<OutType> get() const override { return _values; }
 
 private:
   std::vector<CalcType<InType, OutType>> _calcs;
@@ -33,7 +33,7 @@ private:
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::initializeCalculator()
+VectorCalculator<InType, OutType, CalcType>::initialize()
 {
   _calcs.clear();
   _values.clear();
@@ -41,28 +41,28 @@ VectorCalculator<InType, OutType, CalcType>::initializeCalculator()
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::updateCalculator(const InType & data)
+VectorCalculator<InType, OutType, CalcType>::update(const InType & data)
 {
   for (const auto & i : index_range(data))
   {
     if (i >= _calcs.size())
     {
       _calcs.emplace_back(*this, this->name() + "_" + std::to_string(i));
-      _calcs.back().initialize();
+      _calcs.back().initializeCalculator();
     }
-    _calcs[i].update(data[i]);
+    _calcs[i].updateCalculator(data[i]);
   }
 }
 
 template <typename InType, typename OutType, template <typename, typename> class CalcType>
 void
-VectorCalculator<InType, OutType, CalcType>::finalizeCalculator(bool is_distributed)
+VectorCalculator<InType, OutType, CalcType>::finalize(bool is_distributed)
 {
   _values.reserve(_calcs.size());
   for (auto & cc : _calcs)
   {
-    cc.finalize(is_distributed);
-    _values.push_back(cc.get());
+    cc.finalizeCalculator(is_distributed);
+    _values.push_back(cc.getValue());
   }
 }
 

@@ -162,14 +162,16 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
 
   // Compute replicate statistics
   std::vector<OutType> values(_replicates);
-  auto calc_update = [this](const typename InType::value_type & val) { _calc.update(val); };
+  auto calc_update = [this](const typename InType::value_type & val) {
+    _calc.updateCalculator(val);
+  };
   for (std::size_t i = 0; i < _replicates; ++i)
   {
-    _calc.initialize();
+    _calc.initializeCalculator();
     MooseUtils::resampleWithFunctor(
         data, calc_update, generator, 0, is_distributed ? &this->_communicator : nullptr);
-    _calc.finalize(is_distributed);
-    values[i] = _calc.get();
+    _calc.finalizeCalculator(is_distributed);
+    values[i] = _calc.getValue();
   }
   inplaceSort(values);
   return values;

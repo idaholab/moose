@@ -32,11 +32,11 @@ calculate(const InType & x, const std::vector<std::string> & compute)
   std::vector<OutType> result2;
   for (unsigned int i = 0; i < calcs.size(); ++i)
   {
-    calcs[i]->initialize();
+    calcs[i]->initializeCalculator();
     for (const auto & val : x)
-      calcs[i]->update(val);
-    calcs[i]->finalize(false);
-    result2.push_back(calcs[i]->get());
+      calcs[i]->updateCalculator(val);
+    calcs[i]->finalizeCalculator(false);
+    result2.push_back(calcs[i]->getValue());
   }
 
   return {result1, result2};

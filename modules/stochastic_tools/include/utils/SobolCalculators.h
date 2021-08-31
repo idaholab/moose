@@ -27,10 +27,10 @@ public:
                   bool resample);
 
 protected:
-  virtual void initializeCalculator() override;
-  virtual void updateCalculator(const Real & data) override;
-  virtual void finalizeCalculator(bool is_distributed) override;
-  virtual std::vector<Real> getValue() const override { return _sobol; }
+  virtual void initialize() override;
+  virtual void update(const Real & data) override;
+  virtual void finalize(bool is_distributed) override;
+  virtual std::vector<Real> get() const override { return _sobol; }
 
 private:
   /// Number of rows per sample matrix (n), see Saltelli (2002)
