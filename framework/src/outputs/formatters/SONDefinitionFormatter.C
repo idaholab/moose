@@ -114,14 +114,15 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // add MaxOccurs : NoLimit because more than one block of the same name is allowed
   addLine("MaxOccurs=NoLimit");
 
-  // ensure block has one string declarator node and if this is not a StarBlock then
-  // also ensure that the block [./declarator] is the expected block_decl from above
+  // ensure every block has no more than one string declarator node and if this is a
+  // TypeBlock but not a StarBlock then also ensure that the block [./declarator] is
+  // the expected block_decl from above which should be the name of the parent block
   addLine("decl{");
   _level++;
   addLine("MinOccurs=0");
   addLine("MaxOccurs=1");
   addLine("ValType=String");
-  if (!is_starblock)
+  if (is_typeblock && !is_starblock)
     addLine("ValEnums=[ \"" + block_decl + "\" ]");
   _level--;
   addLine("}");
@@ -182,18 +183,18 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 
   // add parameters ---
   // if this block has a "type=" parameter with a specified default "type=" name and
-  // if that default is also the name of a ["types"] child block then the parameters
-  // belonging to that default ["types"] child block are added to this block as well
-  // first  : start with default ["types"] child block's RegularParameters as a base
-  // second : add or overwrite with default ["types"] child block's ActionParameters
+  // if that default is also the name of a saved TypeBlock child then the parameters
+  // belonging to that default saved TypeBlock child are added to this block as well
+  // first  : start with default saved TypeBlock child's RegularParameters as a base
+  // second : add or overwrite with default saved TypeBlock child's ActionParameters
   // third  : add or overwrite with parameters that were stored above for this block
   // fourth : either add newly stored parameters or add previously stored parameters
   if (parameters.contains("type") && parameters["type"].contains("default") &&
-      block.contains("types") &&
-      block["types"].contains(nlohmann::to_string(parameters["type"]["default"])))
+      parameters["type"]["default"].is_string() &&
+      typeblocks.contains(parameters["type"]["default"].get<std::string>()))
   {
-    std::string type_default = nlohmann::to_string(parameters["type"]["default"]);
-    const nlohmann::json & default_block = block["types"][type_default];
+    std::string type_default = parameters["type"]["default"].get<std::string>();
+    const nlohmann::json & default_block = typeblocks[type_default];
     if (default_block.contains("parameters"))
     {
       nlohmann::json default_child_params = default_block["parameters"];
@@ -207,6 +208,14 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
               default_child_params[param_el.key()] = param_el.value();
         }
       }
+
+      // unrequire the 'file' parameter added to the Mesh via the FileMesh TypeBlock
+      // since MeshGenerators internally change the default block type from FileMesh
+      if (block_name == "Mesh" && default_child_params.contains("file") &&
+          default_child_params["file"].contains("required") &&
+          default_child_params["file"]["required"].is_boolean())
+        default_child_params["file"]["required"] = false;
+
       for (const auto & el : parameters.items())
         default_child_params[el.key()] = el.value();
       addParameters(default_child_params);
@@ -310,7 +319,7 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
       bool required = param["required"];
       if (required && def.empty())
         addLine("ChildAtLeastOne=[ \"" + backtrack(_level) + "GlobalParams/" + name +
-                "/value\"   \"" + name + "\" ]");
+                "/value\" \"" + name + "\" ]");
     }
 
     // *** open parameter
@@ -361,7 +370,7 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
 
     // *** ValEnums / InputChoices of parameter's value
     if (basic_type.find("Boolean") != std::string::npos)
-      addLine("ValEnums=[ true false 1 0 ]");
+      addLine("ValEnums=[ true false 1 0 on off ]");
     else
     {
       std::string options = param["options"];

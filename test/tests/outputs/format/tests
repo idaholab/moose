@@ -219,7 +219,7 @@
   [./definition_input_choices_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'InputChoices=\[\s*?"all"\s*?"none"\s*?PATH:"../../../../../Outputs/["*"]/decl"\s*?\]'
+    expect_out = '\'outputs\'{.*?\'value\'{.*?InputChoices=\[ "all" "none" PATH:"../../../../Outputs/["*"]/decl" \].*?}.*?} % end parameter outputs\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -233,7 +233,7 @@
   [./definition_childatleastone_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside"\s*?\]'
+    expect_out = '\'BoundaryMarker_type\'{.*?ChildAtLeastOne=\[ "../../../GlobalParams/next_to/value" "next_to" \].*?} % end block BoundaryMarker_type\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -331,7 +331,7 @@
   [./definition_block_type_maxoccurs_nolimit_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?ValEnums=\[ "AuxVariables" \]'
+    expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?\'active\'{'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -373,7 +373,7 @@
   [./definition_declarator_minoccurs_zero_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'Variables\'{.*?InputDefault="Variables".*?decl{.*?MinOccurs=0.*?ValEnums=\[ "Variables" \].*?}.*?\'active\'{.*?} % end parameter active.*?} % end block Variables'
+    expect_out = '\'Variables\'{.*?InputDefault="Variables".*?decl{.*?MinOccurs=0.*?}.*?\'active\'{.*?} % end parameter active.*?} % end block Variables\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -394,6 +394,62 @@
     max_buffer_size = -1
     issues = '#17324'
     requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Eigen::Matrix type MaxOccurs NoLimit'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_default_types_child_parameter_promotion_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'Mesh\'{.*?InputName="Mesh".*?\'ghosting_patch_size\'{.*?InputName="ghosting_patch_size".*?} % end parameter ghosting_patch_size.*?} % end block Mesh\n'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#18639'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default types child parameter promotion'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_default_subblock_types_child_parameter_promotion_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'AuxVariables\'{.*?InputName="AuxVariables".*?\'["*"]\'{.*?InputName="["*"]".*?\'block\'{.*?InputName="block".*?} % end parameter block.*?} % end block ["*"].*?} % end block AuxVariables\n'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#18639'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default subblock_types child parameter promotion'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_mesh_file_parameter_requirement_removal_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    absent_out = '\'Mesh\'{.*?ChildAtLeastOne=\[ "../GlobalParams/file/value" "file" \].*?} % end block Mesh\n'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#18639'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Mesh file parameter requirement removal'
+    design = 'SONDefinitionFormatter.md'
+    valgrind = 'NONE' # Tested in "definition_input_choices_test"
+  [../]
+
+  [./definition_boolean_type_valenum_choices_test]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '\'enable\'{.*?\'value\'{.*?ValEnums=\[ true false 1 0 on off \].*?}.*?} % end parameter enable\n'
+    cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
+    max_buffer_size = -1
+    issues = '#18639'
+    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Boolean type ValEnums choices'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
