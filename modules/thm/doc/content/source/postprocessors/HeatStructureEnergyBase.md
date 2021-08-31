@@ -11,6 +11,6 @@ specific heat capacity, $T$ is the temperature, and $V_i$ is the spatial domain 
 
 Optionally, one can supply a reference temperature $T_0$ (which is zero by
 default, yielding [eq:hs_total_energy]) to compute the energy *change*:
-\begin{equation}\label{eq:hs_total_energy}
+\begin{equation}\label{eq:hs_energy_change}
   \Delta E_{tot} = \sum\limits_i^N \int\limits_{V_i} \rho c_p (T - T_0) dV \,.
 \end{equation}
