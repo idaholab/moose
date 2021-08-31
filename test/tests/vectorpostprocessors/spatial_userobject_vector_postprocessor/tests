@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = spatial_userobject.i
+    csvdiff = spatial_userobject_out_vpp_0002.csv
+    issues = '#18473'
+    design = 'SpatialUserObjectVectorPostprocessor.md'
+    requirement = 'The system shall be able to query a spatial user object and aggregate the results into a vector postprocessor.'
+  []
+[]
