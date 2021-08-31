@@ -14,10 +14,12 @@
 #include "MooseError.h"
 #include "FunctorInterface.h"
 #include "Moose.h"
-#include "SetupInterface.h"
+#include "Limiter.h"
+#include "FVUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/remote_elem.h"
+#include "libmesh/tensor_tools.h"
 
 #include <unordered_map>
 #include <functional>
@@ -52,7 +54,6 @@ private:
 
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
   using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
-  using FaceFn = std::function<T(const FaceArg &, const unsigned int &)>;
   using QpFn = std::function<T(const QpArg &, const unsigned int &)>;
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 const unsigned int &)>;
@@ -77,9 +78,6 @@ private:
   /// Functors that return the value on the requested element that will perform any necessary
   /// ghosting operations if this object is not technically defined on the requested subdomain
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
-
-  /// Functors that return potentially limited interpolations at faces
-  std::unordered_map<SubdomainID, FaceFn> _face_functor;
 
   /// Functors that will index elemental data at a provided quadrature point index
   std::unordered_map<SubdomainID, QpFn> _qp_functor;
@@ -108,7 +106,6 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
                  block_id,
                  ". Another material must already declare this property on that block.");
     _elem_from_face_functor.emplace(block_id, my_lammy);
-    _face_functor.emplace(block_id, my_lammy);
     _qp_functor.emplace(block_id, my_lammy);
     _tqp_functor.emplace(block_id, my_lammy);
   };
@@ -149,12 +146,14 @@ FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int sta
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const
+FunctorMaterialProperty<T>::evaluate(const ElemFromFaceArg & elem_from_face,
+                                     unsigned int state) const
 {
-  mooseAssert((std::get<0>(elem_from_face) && std::get<0>(elem_from_face) != libMesh::remote_elem) ||
-                  std::get<1>(elem_from_face),
-              "The element must be non-null and non-remote or the face must be non-null in functor "
-              "material properties");
+  mooseAssert(
+      (std::get<0>(elem_from_face) && std::get<0>(elem_from_face) != libMesh::remote_elem) ||
+          std::get<1>(elem_from_face),
+      "The element must be non-null and non-remote or the face must be non-null in functor "
+      "material properties");
   auto it = _elem_from_face_functor.find(std::get<2>(elem_from_face));
   mooseAssert(it != _elem_from_face_functor.end(),
               subdomainErrorMessage(std::get<2>(elem_from_face)));
@@ -165,38 +164,44 @@ template <typename T>
 T
 FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) const
 {
-  const auto sub_id = std::get<3>(face);
-  auto it = _face_functor.find(sub_id);
-  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(sub_id));
-#ifndef NDEBUG
-  const FaceInfo * const fi = std::get<0>(face);
-  mooseAssert(fi, "FaceInfo must be non-null");
-  auto elem_it = _face_functor.find(fi->elem().subdomain_id());
-  mooseAssert(elem_it != _face_functor.end(),
-              "The element subdomain id should be a key in the subdomain id to functor map");
-  auto assertion_message = [](const std::string & element) -> std::string {
-    return "The targets for the " + element +
-           " subdomain ID and requested subdomain ID should be the same. If they are not, this "
-           "means that you are requesting a material property at a face whose definitions on "
-           "either side are different. If you want to produce a value at a face between subdomains "
-           "with different property definitions, then you should call the ElemFromFaceArg overload "
-           "instead and then perform a manual interpolation to the face yourself.";
-  };
-  using TargetType = T (*)(const FaceArg &, const unsigned int &);
-  mooseAssert(elem_it->second.template target<TargetType>() ==
-                  it->second.template target<TargetType>(),
-              assertion_message("element"));
-  if (fi->neighborPtr())
+  const auto elem_sub_id = std::get<3>(face).first;
+  const auto neighbor_sub_id = std::get<3>(face).second;
+  const auto * const limiter = std::get<1>(face);
+  mooseAssert(limiter,
+              "We must have a non-null limiter in order to decide how to interpolate a functor "
+              "material property");
+  const auto * const face_info = std::get<0>(face);
+  mooseAssert(face_info,
+              "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
+  const bool fi_elem_is_upwind = std::get<2>(face);
+  static const typename libMesh::TensorTools::IncrementRank<T>::type example_gradient(0);
+
+  switch (limiter->interpMethod())
   {
-    auto neighbor_it = _face_functor.find(fi->neighborPtr()->subdomain_id());
-    mooseAssert(neighbor_it != _face_functor.end(),
-                "The neighbor subdomain id should be a key in the subdomain id to functor map");
-    mooseAssert(neighbor_it->second.template target<TargetType>() ==
-                    it->second.template target<TargetType>(),
-                assertion_message("neighbor"));
+    case Moose::FV::InterpMethod::Average:
+    case Moose::FV::InterpMethod::Upwind:
+    {
+      const auto elem_from_face = std::make_tuple(&face_info->elem(), face_info, elem_sub_id);
+      const auto neighbor_from_face =
+          std::make_tuple(face_info->neighborPtr(), face_info, neighbor_sub_id);
+      const auto & upwind_elem = fi_elem_is_upwind ? elem_from_face : neighbor_from_face;
+      const auto & downwind_elem = fi_elem_is_upwind ? neighbor_from_face : elem_from_face;
+      return Moose::FV::interpolate(*limiter,
+                                    evaluate(upwind_elem, state),
+                                    evaluate(downwind_elem, state),
+                                    &example_gradient,
+                                    *face_info,
+                                    fi_elem_is_upwind);
+    }
+
+    default:
+    {
+      mooseAssert(!limiter->constant(),
+                  "If the limiter is constant, then we should be able to build it into the functor "
+                  "material property switch-case statement at faces");
+      mooseError("Unsported limiter type in FunctorMaterialProperty::evaluate(FaceArg)");
+    }
   }
-#endif
-  return it->second(face, state);
 }
 
 template <typename T>

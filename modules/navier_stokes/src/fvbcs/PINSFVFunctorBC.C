@@ -52,7 +52,8 @@ PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
     _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
     _eps(getFunctor<MooseVariableFVReal>(NS::porosity, 0)),
     _eqn(getParam<MooseEnum>("eqn")),
-    _index(getParam<MooseEnum>("momentum_component"))
+    _index(getParam<MooseEnum>("momentum_component")),
+    _cd_limiter()
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -69,12 +70,10 @@ PINSFVFunctorBC::computeQpResidual()
   const auto ft = _face_info->faceType(_var.name());
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
-  const auto sub_id =
-      out_of_elem ? _face_info->elem().subdomain_id() : _face_info->neighborPtr()->subdomain_id();
 
-  // No interpolation on a boundary so argument values to limiter and fi_elem_is_upwind do not
+  // No interpolation on a boundary so argument values to fi_elem_is_upwind do not
   // matter
-  const auto face = std::make_tuple(_face_info, nullptr, true, sub_id);
+  const auto face = std::make_tuple(_face_info, &_cd_limiter, true, faceArgSubdomains());
   const VectorValue<ADReal> sup_vel(_sup_vel_x(face),
                                     _sup_vel_y ? (*_sup_vel_y)(face) : ADReal(0),
                                     _sup_vel_z ? (*_sup_vel_z)(face) : ADReal(0));

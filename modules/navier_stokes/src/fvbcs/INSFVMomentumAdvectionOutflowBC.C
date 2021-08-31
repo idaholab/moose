@@ -33,7 +33,8 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))),
     _w_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))),
-    _dim(_subproblem.mesh().dimension())
+    _dim(_subproblem.mesh().dimension()),
+    _cd_limiter()
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -67,13 +68,8 @@ INSFVMomentumAdvectionOutflowBC::computeQpResidual()
   if (_w_var)
     v(2) = _w_var->getBoundaryFaceValue(*_face_info);
 
-  const bool out_of_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-
-  const auto adv_quant_boundary = _adv_quant(std::make_tuple(
-      _face_info,
-      nullptr,
-      v * _face_info->normal() > 0,
-      out_of_elem ? _face_info->elem().subdomain_id() : _face_info->neighborPtr()->subdomain_id()));
+  const auto adv_quant_boundary = _adv_quant(
+      std::make_tuple(_face_info, &_cd_limiter, v * _face_info->normal() > 0, faceArgSubdomains()));
 
   mooseAssert(_normal * v >= 0,
               "This boundary condition is for outflow but the flow is in the opposite direction of "

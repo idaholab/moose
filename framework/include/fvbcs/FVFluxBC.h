@@ -61,6 +61,16 @@ protected:
    */
   std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
 
+  /**
+   * Determine the subdomain ID pair that should be used when creating a face argument for a
+   * functor. The first member of the pair will correspond to the SubdomainID in the tuple returned
+   * by \p elemFromFace. The second member of the pair will correspond to the SubdomainID in the
+   * tuple returned by \p neighborFromFace. As explained in the doxygen for \p makeSidedFace these
+   * subdomain IDs do not simply correspond to the subdomain ID of the element; they must respect
+   * the block restriction of the variable this object is acting upon
+   */
+  std::pair<SubdomainID, SubdomainID> faceArgSubdomains() const;
+
 private:
   /**
    * This creates a tuple of an element, \p FaceInfo, and subdomain ID. The element returned will

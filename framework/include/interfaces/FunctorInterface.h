@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
-#include "FunctorInterface.h"
+#include "Limiter.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/remote_elem.h"
@@ -23,13 +23,6 @@
 #include <functional>
 
 class FaceInfo;
-namespace Moose
-{
-namespace FV
-{
-class Limiter;
-}
-}
 
 /**
  * A non-templated base class for functors that allow an owner object to hold
@@ -60,7 +53,11 @@ template <typename T>
 class FunctorInterface : public FunctorBase
 {
 public:
-  using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool, SubdomainID>;
+  using FaceArg =
+      std::tuple<const FaceInfo *,
+                 const Moose::FV::Limiter<typename Moose::FV::LimiterValueType<T>::value_type> *,
+                 bool,
+                 std::pair<SubdomainID, SubdomainID>>;
   using ElemFromFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
   using QpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
   using FunctorType = FunctorInterface<T>;

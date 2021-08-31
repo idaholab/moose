@@ -44,59 +44,54 @@ struct FEBaseHelper<RealVectorValue>
 
 template <typename OutputType>
 typename Moose::ADType<OutputType>::type
-MooseVariableField<OutputType>::evaluate(const QpArg & qp_arg, unsigned int state) const
+MooseVariableField<OutputType>::evaluate(const QpArg & qp_arg, const unsigned int state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(qp_arg)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
-  switch (state)
+  const Elem * const elem = std::get<0>(qp_arg);
+  const auto qp = std::get<1>(qp_arg);
+  if (elem != _current_functor_elem)
   {
-    case 0:
+    _current_functor_elem = elem;
+    const QBase * const qrule_template = std::get<2>(qp_arg);
+
+    using FEBaseType = typename FEBaseHelper<OutputType>::type;
+    std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
+    std::unique_ptr<QBase> qrule(QBase::build(
+        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+
+    const auto & phi = fe->get_phi();
+    fe->attach_quadrature_rule(qrule.get());
+    fe->reinit(elem);
+
+    std::vector<dof_id_type> dof_indices;
+    _dof_map.dof_indices(elem, dof_indices, _var_num);
+    std::vector<ADReal> dof_values;
+    // It's not safe to use solutionState(0) because it returns the libMesh System solution member
+    // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
+    // perturbs the solution vector we feed these perturbations into the current_local_solution
+    // while the libMesh solution is frozen in the non-perturbed state
+    const auto & solution = (state == 0) ? *_sys.currentSolution() : _sys.solutionState(state);
+    for (const auto dof_index : dof_indices)
     {
-      const Elem * const elem = std::get<0>(qp_arg);
-      const auto qp = std::get<1>(qp_arg);
-      if (elem != _current_functor_elem)
-      {
-        _current_functor_elem = elem;
-        const QBase * const qrule_template = std::get<2>(qp_arg);
-
-        using FEBaseType = typename FEBaseHelper<OutputType>::type;
-        std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
-        std::unique_ptr<QBase> qrule(QBase::build(
-            qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
-
-        const auto & phi = fe->get_phi();
-        fe->attach_quadrature_rule(qrule.get());
-        fe->reinit(elem);
-
-        std::vector<dof_id_type> dof_indices;
-        _dof_map.dof_indices(elem, dof_indices, _var_num);
-        std::vector<ADReal> dof_values;
-        for (const auto dof_index : dof_indices)
-        {
-          dof_values.push_back(ADReal((*_sys.currentSolution())(dof_index)));
-          Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
-        }
-
-        const auto n_qp = qrule->n_points();
-        _current_functor_sln.resize(n_qp);
-
-        for (const auto qp : make_range(n_qp))
-        {
-          _current_functor_sln[qp] = 0;
-          for (const auto i : index_range(dof_indices))
-            _current_functor_sln[qp] += dof_values[i] * phi[i][qp];
-        }
-      }
-      mooseAssert(qp < _current_functor_sln.size(),
-                  "The requested " << qp << " is outside our solution size");
-      return _current_functor_sln[qp];
+      dof_values.push_back(ADReal(solution(dof_index)));
+      Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     }
 
-    default:
-      mooseError("Old versions of the QpArg overload of evaluate have not yet been implemented in "
-                 "MooseVariables");
+    const auto n_qp = qrule->n_points();
+    _current_functor_sln.resize(n_qp);
+
+    for (const auto qp : make_range(n_qp))
+    {
+      _current_functor_sln[qp] = 0;
+      for (const auto i : index_range(dof_indices))
+        _current_functor_sln[qp] += dof_values[i] * phi[i][qp];
+    }
   }
+  mooseAssert(qp < _current_functor_sln.size(),
+              "The requested " << qp << " is outside our solution size");
+  return _current_functor_sln[qp];
 }
 
 #else

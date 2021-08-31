@@ -32,8 +32,8 @@ FVKTLimitedAdvection::validParams()
 FVKTLimitedAdvection::FVKTLimitedAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
-    _cd_limiter(Limiter::build(LimiterType::CentralDifference)),
+    _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _cd_limiter(Limiter<ADReal>::build(LimiterType::CentralDifference)),
     _grad_u_elem(_var.adGradSln()),
     _grad_u_neighbor(_var.adGradSlnNeighbor()),
     _max_abs_eig(getADMaterialProperty<Real>("max_abs_eig")),

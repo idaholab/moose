@@ -10,6 +10,7 @@
 #include "PINSFVMomentumAdvection.h"
 #include "INSFVPressureVariable.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NonMathFVUtils.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
 
@@ -73,13 +74,17 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff, &elem_velocity, &elem, this](
-                            const Elem & libmesh_dbg_var(functor_elem),
-                            const Elem * const neighbor,
-                            const FaceInfo * const fi,
-                            const Point & surface_vector,
-                            Real libmesh_dbg_var(coord),
-                            const bool elem_has_info) {
+  auto action_functor = [&coeff,
+                         &elem_velocity,
+#ifndef NDEBUG
+                         &elem,
+#endif
+                         this](const Elem & libmesh_dbg_var(functor_elem),
+                               const Elem * const neighbor,
+                               const FaceInfo * const fi,
+                               const Point & surface_vector,
+                               Real libmesh_dbg_var(coord),
+                               const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),
@@ -101,9 +106,9 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
 
-    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true, elem.subdomain_id()));
-    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true, elem.subdomain_id()));
-    const auto face_eps = _eps(std::make_tuple(fi, _cd_limiter.get(), true, elem.subdomain_id()));
+    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
+    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
+    const auto face_eps = _eps(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
 
     if (onBoundary(*fi))
     {
@@ -318,7 +323,7 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValu
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps =
-      _eps(std::make_tuple(_face_info, _cd_limiter.get(), true, _face_info->elem().subdomain_id()));
+      _eps(std::make_tuple(_face_info, _cd_limiter.get(), true, faceArgSubdomains()));
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))

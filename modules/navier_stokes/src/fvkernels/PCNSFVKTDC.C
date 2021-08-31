@@ -31,7 +31,7 @@ PCNSFVKTDC::validParams()
 
 PCNSFVKTDC::PCNSFVKTDC(const InputParameters & params)
   : PCNSFVKT(params),
-    _upwind_limiter(Limiter::build(LimiterType::Upwind)),
+    _upwind_limiter(Limiter<ADReal>::build(LimiterType::Upwind)),
     _old_upwind_fluxes(
         declareRestartableData<std::unordered_map<std::pair<dof_id_type, unsigned int>, Real>>(
             "old_upwind_fluxes")),

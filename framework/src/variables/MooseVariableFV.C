@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFV.h"
-#include <typeinfo>
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedSystem.h"
@@ -16,12 +15,14 @@
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "FVUtils.h"
+#include "NonMathFVUtils.h"
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
 
 #include "libmesh/numeric_vector.h"
 
 #include <climits>
+#include <typeinfo>
 
 registerMooseObject("MooseApp", MooseVariableFVReal);
 
@@ -564,7 +565,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceArg & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
-  const Moose::FV::Limiter * const limiter = std::get<1>(face);
+  const Moose::FV::Limiter<ADReal> * const limiter = std::get<1>(face);
   mooseAssert(limiter, "the limiter must be non-null");
   const bool elem_is_upwind = std::get<2>(face);
 

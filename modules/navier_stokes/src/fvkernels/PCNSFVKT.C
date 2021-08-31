@@ -78,7 +78,7 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _scalar_neighbor(_u_neighbor),
     _grad_scalar_elem((_eqn == "scalar") ? &_var.adGradSln() : nullptr),
     _grad_scalar_neighbor((_eqn == "scalar") ? &_var.adGradSlnNeighbor() : nullptr),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
     _knp_for_omega(getParam<bool>("knp_for_omega"))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))

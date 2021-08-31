@@ -67,3 +67,4 @@
 #endif
 
 GENERATE_HAS_MEMBER_TYPE(OutputShape);
+GENERATE_HAS_MEMBER_TYPE(value_type);

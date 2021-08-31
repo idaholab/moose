@@ -11,6 +11,7 @@
 #include "FaceInfo.h"
 #include "ADReal.h"
 #include "FVUtils.h"
+#include "NonMathFVUtils.h"
 #include "MooseError.h"
 #include "SubProblem.h"
 #include "INSFVNoSlipWallBC.h"

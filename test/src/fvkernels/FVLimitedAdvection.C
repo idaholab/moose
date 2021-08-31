@@ -30,7 +30,7 @@ FVLimitedAdvection::validParams()
 FVLimitedAdvection::FVLimitedAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
     _grad_u_elem(_var.adGradSln()),
     _grad_u_neighbor(_var.adGradSlnNeighbor())
 {

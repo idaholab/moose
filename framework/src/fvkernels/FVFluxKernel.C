@@ -302,28 +302,38 @@ FVFluxKernel::gradUDotNormal() const
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxKernel::makeSidedFace(const Elem * const elem) const
+FVFluxKernel::makeSidedFace(const Elem * const elem, const FaceInfo * const face_info) const
 {
   if (elem && this->hasBlocks(elem->subdomain_id()))
-    return std::make_tuple(elem, _face_info, elem->subdomain_id());
+    return std::make_tuple(elem, face_info, elem->subdomain_id());
   else
   {
     const Elem * const elem_across =
-        (elem == &_face_info->elem()) ? _face_info->neighborPtr() : &_face_info->elem();
+        (elem == &face_info->elem()) ? face_info->neighborPtr() : &face_info->elem();
     mooseAssert(elem_across && this->hasBlocks(elem_across->subdomain_id()),
                 "How are there no elements with subs on here!");
-    return std::make_tuple(elem, _face_info, elem_across->subdomain_id());
+    return std::make_tuple(elem, face_info, elem_across->subdomain_id());
   }
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
 FVFluxKernel::elemFromFace() const
 {
-  return makeSidedFace(&_face_info->elem());
+  return makeSidedFace(&_face_info->elem(), _face_info);
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
 FVFluxKernel::neighborFromFace() const
 {
-  return makeSidedFace(_face_info->neighborPtr());
+  return makeSidedFace(_face_info->neighborPtr(), _face_info);
+}
+
+std::pair<SubdomainID, SubdomainID>
+FVFluxKernel::faceArgSubdomains(const FaceInfo * const face_info) const
+{
+  if (!face_info)
+    return std::make_pair(std::get<2>(elemFromFace()), std::get<2>(neighborFromFace()));
+  else
+    return std::make_pair(std::get<2>(makeSidedFace(&face_info->elem(), face_info)),
+                          std::get<2>(makeSidedFace(face_info->neighborPtr(), face_info)));
 }

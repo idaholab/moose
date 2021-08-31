@@ -20,19 +20,21 @@ namespace FV
  * Implements the Van Leer limiter, defined by
  * $\beta(r_f) = \frac{r_f + \text{abs}(r_f)}{1 + \text{abs}(r_f)}$
  */
-class VanLeerLimiter : public Limiter
+template <typename T>
+class VanLeerLimiter : public Limiter<T>
 {
 public:
-  ADReal operator()(const ADReal & phi_upwind,
-                    const ADReal & phi_downwind,
-                    const ADRealVectorValue * grad_phi_upwind,
-                    const RealVectorValue & dCD) const override final
+  T operator()(const T & phi_upwind,
+               const T & phi_downwind,
+               const VectorValue<T> * grad_phi_upwind,
+               const RealVectorValue & dCD) const override final
   {
     mooseAssert(grad_phi_upwind, "Van Leer limiter requires a gradient");
     const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
     return (r_f + std::abs(r_f)) / (1. + std::abs(r_f));
   }
   bool constant() const override final { return false; }
+  InterpMethod interpMethod() const override final { return InterpMethod::VanLeer; }
 
   VanLeerLimiter() = default;
 };

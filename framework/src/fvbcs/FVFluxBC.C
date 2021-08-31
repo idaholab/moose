@@ -256,3 +256,9 @@ FVFluxBC::neighborFromFace() const
 {
   return makeSidedFace(false);
 }
+
+std::pair<SubdomainID, SubdomainID>
+FVFluxBC::faceArgSubdomains() const
+{
+  return std::make_pair(std::get<2>(elemFromFace()), std::get<2>(neighborFromFace()));
+}

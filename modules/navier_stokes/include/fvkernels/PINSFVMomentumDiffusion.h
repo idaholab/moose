@@ -44,5 +44,5 @@ protected:
   const bool _smooth_porosity;
 
   /// The object used to perform average/central-difference interpolations
-  Moose::FV::CentralDifferenceLimiter _cd_limiter;
+  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };
