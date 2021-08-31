@@ -9,83 +9,75 @@
 # which makes it trivial to check displacements.
 #
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 3
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+[]
+
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = true
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./gravity_y]
+  [gravity_y]
     type = Gravity
     variable = disp_y
     value = -9.81
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2.0387
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
   nl_abs_tol = 1e-10
   l_max_its = 20
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []
