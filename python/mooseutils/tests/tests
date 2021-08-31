@@ -77,4 +77,11 @@
 
     requirement = "The system shall include a tool for accessing CIVET testing results."
   []
+  [moose_deep_diff]
+    type = PythonUnitTest
+    input = test_MooseDeepDiff.py
+    required_python_packages = deepdiff
+    requirement = "The system shall include the capability to perform toleranced diffs of python data structures."
+    issues = '#11323'
+  []
 []
