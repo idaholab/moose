@@ -49,6 +49,6 @@ ModifyNodeGenerator::generate()
 
     // change the position of the acquired node
     node->assign(_new_position[i]);
-  } 
+  }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

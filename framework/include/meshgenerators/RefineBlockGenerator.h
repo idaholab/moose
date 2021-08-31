@@ -18,7 +18,11 @@ class RefineBlockGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
-  virtual std::unique_ptr<MeshBase> recurs_refine(std::vector<subdomain_id_type> block_ids, std::unique_ptr<MeshBase> &mesh, std::vector<int> _refinement, int max, int ref_step = 0);
+  virtual std::unique_ptr<MeshBase> recurs_refine(std::vector<subdomain_id_type> block_ids,
+                                                  std::unique_ptr<MeshBase> & mesh,
+                                                  std::vector<int> _refinement,
+                                                  int max,
+                                                  int ref_step = 0);
 
   RefineBlockGenerator(const InputParameters & parameters);
 
@@ -30,5 +34,4 @@ private:
   std::vector<SubdomainName> _block;
   std::vector<int> _refinement;
   bool _enable_neighbors;
-  
 };
