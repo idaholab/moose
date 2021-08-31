@@ -1,6 +1,4 @@
 # This test measures the pressure drop across the volume junction with K=1.
-# The observed value should be ~4.9892 Pa, which is the value computed by the
-# volume junction term 'K * (p0 - p)' in steady state.
 
 A = 0.1
 
@@ -16,7 +14,7 @@ A = 0.1
 
   initial_T = 300
   initial_p = 1e5
-  initial_vel = 0
+  initial_vel = 1
 
   n_elems = 20
   length = 1
@@ -24,7 +22,6 @@ A = 0.1
   f = 0
 
   fp = fp
-
   closures = simple
 []
 
@@ -61,20 +58,19 @@ A = 0.1
     connections = 'pipe1:out pipe2:in'
 
     position = '1 0 0'
-    volume = 0.37
+    volume = 0.005
 
     initial_p = 1e5
-    initial_vel_x = 0
+    initial_vel_x = 1
     initial_vel_y = 0
     initial_vel_z = 0
   []
 
   [pipe1_in]
-    type = InletStagnationPressureTemperature1Phase
+    type = InletVelocityTemperature1Phase
     input = 'pipe1:in'
-    p0 = 1.0001e5
-    T0 = 300
-    reversible = false
+    vel = 1
+    T = 300
   []
 
   [pipe2_out]
@@ -120,10 +116,10 @@ A = 0.1
   dt = 0.5
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   nl_rel_tol = 0
-  nl_abs_tol = 1e-6
-  nl_max_its = 10
+  nl_abs_tol = 1e-8
+  nl_max_its = 15
 
   l_tol = 1e-3
   l_max_its = 10
