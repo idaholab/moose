@@ -162,11 +162,7 @@ DelimitedFileReader::getDataAsPoints() const
     // where each point is the same length _and_ the total points is still divisible by 3.
     // This check here is more exact.
     if (_data.at(i).size() != LIBMESH_DIM)
-      mooseError("Each point in file ",
-                 _filename,
-                 " must have ",
-                 LIBMESH_DIM,
-                 " entries");
+      mooseError("Each point in file ", _filename, " must have ", LIBMESH_DIM, " entries");
 
     for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
       point(j) = _data.at(i).at(j);

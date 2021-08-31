@@ -26,9 +26,9 @@ public:
   static InputParameters validParams();
 
   /**
-    * Class constructor
-    * @param parameters The input parameters
-    */
+   * Class constructor
+   * @param parameters The input parameters
+   */
   SpatialUserObjectVectorPostprocessor(const InputParameters & parameters);
 
   /**

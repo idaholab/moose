@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SpatialUserObjectVectorPostprocessor.h"
+#include "DelimitedFileReader.h"
 #include "UserObjectInterface.h"
 
 registerMooseObject("MooseApp", SpatialUserObjectVectorPostprocessor);
@@ -19,8 +20,8 @@ SpatialUserObjectVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
 
-  params.addRequiredParam<UserObjectName>(
-      "userobject", "The userobject whose values are to be reported");
+  params.addRequiredParam<UserObjectName>("userobject",
+                                          "The userobject whose values are to be reported");
   params.addParam<std::vector<Point>>("points",
                                       "Computations will be lumped into values at these points.");
   params.addParam<FileName>("points_file",
@@ -33,7 +34,8 @@ SpatialUserObjectVectorPostprocessor::validParams()
   return params;
 }
 
-SpatialUserObjectVectorPostprocessor::SpatialUserObjectVectorPostprocessor(const InputParameters & parameters)
+SpatialUserObjectVectorPostprocessor::SpatialUserObjectVectorPostprocessor(
+    const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _uo_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("_object_name")))),
     _uo(getUserObject<UserObject>("userobject"))
