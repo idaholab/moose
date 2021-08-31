@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "NearestPointLayeredSideIntegral.h"
 #include "LayeredSideIntegral.h"
 
@@ -21,7 +20,7 @@ NearestPointLayeredSideIntegral::validParams()
   InputParameters params =
       nearestPointBaseValidParams<LayeredSideIntegral, SideIntegralVariableUserObject>();
 
-  params.addClassDescription("Compute layered side integrals for nearest-point based subdomains");
+  params.addClassDescription("Compute layered side integrals for nearest-point based sidesets");
 
   return params;
 }

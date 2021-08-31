@@ -9,12 +9,10 @@
 
 #pragma once
 
-// MOOSE includes
 #include "SideIntegralVariableUserObject.h"
 #include "NearestPointBase.h"
 #include "LayeredSideIntegral.h"
 
-// Forward Declarations
 class NearestPointLayeredSideIntegral;
 
 template <>
