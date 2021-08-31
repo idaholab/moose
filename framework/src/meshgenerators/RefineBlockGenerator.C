@@ -26,7 +26,8 @@ RefineBlockGenerator::validParams()
   params.addClassDescription("Mesh generator which removes elements from the specified subdomains");
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to modify");
   params.addRequiredParam<std::vector<SubdomainName>>("block", "The list of blocks to be modified");
-  params.addRequiredParam<std::vector<int>>("refinement", "foo");
+  params.addRequiredParam<std::vector<int>>("refinement", "The amount of times to refine each block, corresponding to their index in 'block'");
+  params.addParam<bool>("enable_neighbor_refinement", true, "Toggles whether neighboring level one elements should be refined or not. Defaults to true");
   
   return params;
 }
@@ -35,13 +36,12 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
      _input(getMesh("input")),
     _block(getParam<std::vector<SubdomainName>>("block")),
-    _refinement(getParam<std::vector<int>>("refinement"))
+    _refinement(getParam<std::vector<int>>("refinement")),
+    _enable_neighbors(getParam<bool>("enable_neighbor_refinement"))
   {}
 std::unique_ptr<MeshBase>
 RefineBlockGenerator::generate()
 {
-
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
 
     // Get the list of block ids from the block names
   const auto block_ids =
@@ -65,14 +65,28 @@ RefineBlockGenerator::generate()
                    getParam<SubdomainID>("block_id"),
                    "' was not found within the mesh");
     }
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
+  int max = *std::max_element(_refinement.begin(),_refinement.end());
 
-  for (const auto & elem : mesh->active_element_ptr_range())
-    for (auto i = 0; i < block_ids.size(); ++i)
-      elem->set_refinement_flag(Elem::REFINE);
+  return recurs_refine(block_ids,mesh, _refinement, max);
+}
 
+
+std::unique_ptr<MeshBase> 
+RefineBlockGenerator::recurs_refine(std::vector<subdomain_id_type> block_ids, std::unique_ptr<MeshBase> &mesh, std::vector<int> _refinement, int max, int ref_step){
+
+  if (ref_step == max) return dynamic_pointer_cast<MeshBase>(mesh);
+  for (auto i = 0; i < block_ids.size(); i++){
+    if (_refinement[i] > 0 && _refinement[i] > ref_step){
+      for (const auto & elem : mesh->active_subdomain_elements_ptr_range(block_ids[i]))
+        elem->set_refinement_flag(Elem::REFINE);
+    }
+  }
   MeshRefinement refinedmesh(*mesh);
+  if (!_enable_neighbors) refinedmesh.face_level_mismatch_limit() = 0;
   refinedmesh.refine_elements();
-
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  
+  ref_step++;
+  return recurs_refine(block_ids, mesh, _refinement, max, ref_step);
 }
 

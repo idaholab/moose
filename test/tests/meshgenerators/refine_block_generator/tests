@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#18686'
+  design = 'meshgenerators/RefineBlockGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to refine blocks'
+
+    [single_block]
+      type = 'Exodiff'
+      input = 'test_single.i'
+      exodiff = 'test_single_in.e'
+      cli_args = '--mesh-only'
+      detail = 'in a mesh with a single first order element'
+
+    []
+    [multiple_block]
+      type = 'Exodiff'
+      input = 'test_multi.i'
+      exodiff = 'test_multi_in.e'
+      cli_args = "--mesh-only"
+
+      detail = 'in a Cartesian 3D mesh.'
+    []
+    [neighbor_refinement]
+      type = 'Exodiff'
+      input = 'test_neighbor.i'
+      exodiff = 'test_neighbor_in.e'
+      cli_args = "--mesh-only"
+
+      detail = 'with the neighbor refinement on'
+    []
+
+  []
+[]
