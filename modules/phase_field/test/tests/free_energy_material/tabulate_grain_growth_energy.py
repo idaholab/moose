@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-import numpy as np
+try:
+    from numpy import linspace
+except:
+  # np.linspace shim
+  def linspace(a,b,n):
+    return [a+(b-a)*x/(n-1) for x in range(n)]
 
 def write_list(f, a):
     b = 0
@@ -15,10 +20,10 @@ def tabulate_function(filename, func):
     n = 15
     # define an n*n*n*n grid
     axis = [
-        ["AXIS X", np.linspace(0,1,n)],
-        ["AXIS Y", np.linspace(0,1,n)],
-        ["AXIS Z", np.linspace(0,1,n)],
-        ["AXIS T", np.linspace(0,1,n)]
+        ["AXIS X", linspace(0,1,n)],
+        ["AXIS Y", linspace(0,1,n)],
+        ["AXIS Z", linspace(0,1,n)],
+        ["AXIS T", linspace(0,1,n)]
     ]
 
     f = open(filename + ".data", mode = 'wt')
