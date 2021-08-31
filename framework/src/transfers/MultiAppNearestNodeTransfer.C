@@ -92,9 +92,10 @@ MultiAppNearestNodeTransfer::execute()
     bboxes = getFromBoundingBoxes();
 
   // Expand bounding boxes along all the directions by the same length
-  // That is because the nearest bounding box does not necessarily give
-  // you the closest node/element. It will depend on the partition and geometry.
-  // A node/element will more likely find its nearest source element/node by extending
+  // Non-zero values of this member may be necessary because the nearest
+  // bounding box does not necessarily give you the closest node/element.
+  // It will depend on the partition and geometry. A node/element will more
+  // likely find its nearest source element/node by extending
   // bounding boxes. If each of the bounding boxes covers the entire domain,
   // a node/element will be able to find its nearest source element/node for sure,
   // but at the same time, more communication will be involved and can be expensive.
