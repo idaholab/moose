@@ -61,7 +61,7 @@ class FunctorInterface : public FunctorBase
 {
 public:
   using FaceArg = std::tuple<const FaceInfo *, const Moose::FV::Limiter *, bool, SubdomainID>;
-  using ElemAndFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
+  using ElemFromFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
   using QpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
@@ -74,7 +74,7 @@ public:
    * implementation. These are the methods a user will call
    */
   T operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
-  T operator()(const ElemAndFaceArg & elem_and_face, unsigned int state = 0) const;
+  T operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   T operator()(const FaceArg & face, unsigned int state = 0) const;
   T operator()(const QpArg & qp, unsigned int state = 0) const;
   T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -98,7 +98,7 @@ protected:
   virtual T evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
 
   /**
-   * @param elem_and_face This is a tuple packing an element, \p FaceInfo, and subdomain ID
+   * @param elem_from_face This is a tuple packing an element, \p FaceInfo, and subdomain ID
    * @return For a variable: the value associated with the element argument of the tuple if the
    * variable exists on the element. If it does not, a ghost value is computed given that the
    * element across the face from the provided element supports the variable. For a material
@@ -108,7 +108,7 @@ protected:
    * D_E evaluation on the N side of the face. By providing the subdomain ID corresponding to E, the
    * flux kernel ensures that it will retrieve a D_E evaluation, even on the N side of the face.
    */
-  virtual T evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const = 0;
+  virtual T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
 
   /**
    * @param face A tuple packing a \p FaceInfo, a \p Limiter, and a boolean denoting whether the
@@ -116,7 +116,7 @@ protected:
    * @return A limited interpolation to the provided face of the variable or material property. If
    * the material property is a composite of variables, it's important to note that each variable
    * will be interpolated individually. If aggregate interpolation is desired, then the user should
-   * make two calls to the \p elem_and_face overload (one for element and one for neighbor) and
+   * make two calls to the \p elem_from_face overload (one for element and one for neighbor) and
    * then use the global interpolate functions in the \p Moose::FV namespace
    */
   virtual T evaluate(const FaceArg & face, unsigned int state) const = 0;
@@ -174,10 +174,10 @@ FunctorInterface<T>::operator()(const Elem * const & elem, const unsigned int st
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const ElemAndFaceArg & elem_and_face,
+FunctorInterface<T>::operator()(const ElemFromFaceArg & elem_from_face,
                                 const unsigned int state) const
 {
-  return evaluate(elem_and_face, state);
+  return evaluate(elem_from_face, state);
 }
 
 template <typename T>
@@ -291,13 +291,13 @@ public:
 
 private:
   using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemAndFaceArg;
+  using typename FunctorInterface<T>::ElemFromFaceArg;
   using typename FunctorInterface<T>::QpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
   T evaluate(const libMesh::Elem * const &, unsigned int) const override final { return _value; }
-  T evaluate(const ElemAndFaceArg &, unsigned int) const override final { return _value; }
+  T evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
   T evaluate(const FaceArg &, unsigned int) const override final { return _value; }
   T evaluate(const QpArg &, unsigned int) const override final { return _value; }
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,

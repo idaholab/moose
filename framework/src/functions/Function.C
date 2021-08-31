@@ -103,10 +103,12 @@ Function::evaluate(const Elem * const & elem, const unsigned int state) const
 }
 
 Real
-Function::evaluate(const ElemAndFaceArg & elem_and_face, const unsigned int state) const
+Function::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
-  mooseAssert(std::get<1>(elem_and_face), "We must have a non-null face information pointer");
-  return value(getTime(state), std::get<1>(elem_and_face)->faceCentroid());
+  const auto * const elem = std::get<0>(elem_from_face);
+  const auto * const fi = std::get<1>(elem_from_face);
+  mooseAssert(fi, "We must have a non-null face information pointer");
+  return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
 }
 
 Real

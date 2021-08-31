@@ -51,8 +51,8 @@ FVDiffusionInterface::computeQpResidual()
   ADReal diffusivity;
   interpolate(Moose::FV::InterpMethod::Average,
               diffusivity,
-              coef_elem(elemFace()),
-              coef_neighbor(neighborFace()),
+              coef_elem(elemFromFace()),
+              coef_neighbor(neighborFromFace()),
               *_face_info,
               true);
 

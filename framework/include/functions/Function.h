@@ -118,7 +118,7 @@ public:
 
 private:
   using typename FunctorInterface<Real>::FaceArg;
-  using typename FunctorInterface<Real>::ElemAndFaceArg;
+  using typename FunctorInterface<Real>::ElemFromFaceArg;
   using typename FunctorInterface<Real>::QpArg;
 
   /**
@@ -127,7 +127,7 @@ private:
   Real getTime(unsigned int state) const;
 
   Real evaluate(const Elem * const & elem, unsigned int state) const override final;
-  Real evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const override final;
+  Real evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override final;
   Real evaluate(const FaceArg & face, unsigned int state) const override final;
   Real evaluate(const QpArg & qp, unsigned int state) const override final;
   Real evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,

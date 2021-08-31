@@ -40,8 +40,8 @@ PINSFVEnergyAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal adv_quant_interface;
 
-  const auto elem_face = elemFace();
-  const auto neighbor_face = neighborFace();
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
 
   // Velocity interpolation
   this->interpolate(_velocity_interp_method, v);

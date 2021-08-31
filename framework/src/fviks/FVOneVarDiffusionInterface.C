@@ -48,8 +48,8 @@ FVOneVarDiffusionInterface::computeQpResidual()
   ADReal coef;
   interpolate(Moose::FV::InterpMethod::Average,
               coef,
-              coef_elem(elemFace()),
-              coef_neighbor(neighborFace()),
+              coef_elem(elemFromFace()),
+              coef_neighbor(neighborFromFace()),
               *_face_info,
               true);
 

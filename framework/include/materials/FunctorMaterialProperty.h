@@ -45,20 +45,20 @@ public:
 
 private:
   using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemAndFaceArg;
+  using typename FunctorInterface<T>::ElemFromFaceArg;
   using typename FunctorInterface<T>::QpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
-  using ElemAndFaceFn = std::function<T(const ElemAndFaceArg &, const unsigned int &)>;
+  using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
   using FaceFn = std::function<T(const FaceArg &, const unsigned int &)>;
   using QpFn = std::function<T(const QpArg &, const unsigned int &)>;
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 const unsigned int &)>;
 
   T evaluate(const Elem * const & elem, unsigned int state) const override final;
-  T evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const override final;
+  T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override final;
   T evaluate(const FaceArg & face, unsigned int state) const override final;
   T evaluate(const QpArg & qp, unsigned int state) const override final;
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -76,7 +76,7 @@ private:
 
   /// Functors that return the value on the requested element that will perform any necessary
   /// ghosting operations if this object is not technically defined on the requested subdomain
-  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_and_face_functor;
+  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
 
   /// Functors that return potentially limited interpolations at faces
   std::unordered_map<SubdomainID, FaceFn> _face_functor;
@@ -107,7 +107,7 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
                  "' for block id ",
                  block_id,
                  ". Another material must already declare this property on that block.");
-    _elem_and_face_functor.emplace(block_id, my_lammy);
+    _elem_from_face_functor.emplace(block_id, my_lammy);
     _face_functor.emplace(block_id, my_lammy);
     _qp_functor.emplace(block_id, my_lammy);
     _tqp_functor.emplace(block_id, my_lammy);
@@ -149,16 +149,16 @@ FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int sta
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const ElemAndFaceArg & elem_and_face, unsigned int state) const
+FunctorMaterialProperty<T>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const
 {
-  mooseAssert((std::get<0>(elem_and_face) && std::get<0>(elem_and_face) != libMesh::remote_elem) ||
-                  std::get<1>(elem_and_face),
+  mooseAssert((std::get<0>(elem_from_face) && std::get<0>(elem_from_face) != libMesh::remote_elem) ||
+                  std::get<1>(elem_from_face),
               "The element must be non-null and non-remote or the face must be non-null in functor "
               "material properties");
-  auto it = _elem_and_face_functor.find(std::get<2>(elem_and_face));
-  mooseAssert(it != _elem_and_face_functor.end(),
-              subdomainErrorMessage(std::get<2>(elem_and_face)));
-  return it->second(elem_and_face, state);
+  auto it = _elem_from_face_functor.find(std::get<2>(elem_from_face));
+  mooseAssert(it != _elem_from_face_functor.end(),
+              subdomainErrorMessage(std::get<2>(elem_from_face)));
+  return it->second(elem_from_face, state);
 }
 
 template <typename T>
@@ -179,7 +179,7 @@ FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) c
            " subdomain ID and requested subdomain ID should be the same. If they are not, this "
            "means that you are requesting a material property at a face whose definitions on "
            "either side are different. If you want to produce a value at a face between subdomains "
-           "with different property definitions, then you should call the ElemAndFaceArg overload "
+           "with different property definitions, then you should call the ElemFromFaceArg overload "
            "instead and then perform a manual interpolation to the face yourself.";
   };
   using TargetType = T (*)(const FaceArg &, const unsigned int &);

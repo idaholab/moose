@@ -317,13 +317,13 @@ FVFluxKernel::makeSidedFace(const Elem * const elem) const
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxKernel::elemFace() const
+FVFluxKernel::elemFromFace() const
 {
   return makeSidedFace(&_face_info->elem());
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxKernel::neighborFace() const
+FVFluxKernel::neighborFromFace() const
 {
   return makeSidedFace(_face_info->neighborPtr());
 }

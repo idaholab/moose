@@ -205,13 +205,13 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVInterfaceKernel::elemFace() const
+FVInterfaceKernel::elemFromFace() const
 {
   return std::make_tuple(&_face_info->elem(), _face_info, _face_info->elem().subdomain_id());
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVInterfaceKernel::neighborFace() const
+FVInterfaceKernel::neighborFromFace() const
 {
   return std::make_tuple(
       _face_info->neighborPtr(), _face_info, _face_info->neighborPtr()->subdomain_id());

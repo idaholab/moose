@@ -682,13 +682,13 @@ protected:
 
 private:
   using typename FunctorInterface<FunctorReturnType>::FaceArg;
-  using typename FunctorInterface<FunctorReturnType>::ElemAndFaceArg;
+  using typename FunctorInterface<FunctorReturnType>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
   FunctorReturnType evaluate(const Elem * const &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }
-  FunctorReturnType evaluate(const ElemAndFaceArg &, unsigned int) const override final
+  FunctorReturnType evaluate(const ElemFromFaceArg &, unsigned int) const override final
   {
     mooseError(
         "Elem-and-face-info functor overload not yet implemented for finite element variables");

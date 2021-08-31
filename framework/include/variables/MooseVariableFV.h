@@ -508,14 +508,14 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemAndFaceArg;
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
   typename Moose::ADType<OutputType>::type evaluate(const Elem * const & elem,
                                                     unsigned int) const override final
   {
     return getElemValue(elem);
   }
-  typename Moose::ADType<OutputType>::type evaluate(const ElemAndFaceArg & elem_and_face,
+  typename Moose::ADType<OutputType>::type evaluate(const ElemFromFaceArg & elem_from_face,
                                                     unsigned int) const override final;
   typename Moose::ADType<OutputType>::type evaluate(const FaceArg & face,
                                                     unsigned int) const override final;

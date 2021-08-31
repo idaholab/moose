@@ -54,12 +54,12 @@ protected:
   /**
    * @return the value of \p makeSidedFace with \p fi_elem = true
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFace() const;
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFromFace() const;
 
   /**
    * @return the value of \p makeSidedFace with \p fi_elem = false
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFace() const;
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
 
 private:
   /**

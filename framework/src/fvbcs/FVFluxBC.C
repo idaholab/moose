@@ -246,13 +246,13 @@ FVFluxBC::makeSidedFace(const bool fi_elem) const
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxBC::elemFace() const
+FVFluxBC::elemFromFace() const
 {
   return makeSidedFace(true);
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
-FVFluxBC::neighborFace() const
+FVFluxBC::neighborFromFace() const
 {
   return makeSidedFace(false);
 }

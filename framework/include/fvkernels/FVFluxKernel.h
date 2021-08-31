@@ -90,12 +90,12 @@ protected:
   /**
    * @return the value of \p makeSidedFace called with the face info element
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFace() const;
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFromFace() const;
 
   /**
    * @return the value of \p makeSidedFace called with the face info neighbor
    */
-  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFace() const;
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
 
 private:
   /**

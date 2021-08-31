@@ -1085,9 +1085,9 @@ MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg
 
 template <typename OutputType>
 typename Moose::ADType<OutputType>::type
-MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face, unsigned int) const
+MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const
 {
-  const Elem * const requested_elem = std::get<0>(elem_and_face);
+  const Elem * const requested_elem = std::get<0>(elem_from_face);
   mooseAssert(requested_elem != remote_elem,
               "If the requested element is remote then I think we've messed up our ghosting");
 
@@ -1095,7 +1095,7 @@ MooseVariableFV<OutputType>::evaluate(const ElemAndFaceArg & elem_and_face, unsi
     return getElemValue(requested_elem);
   else
   {
-    const FaceInfo * const fi = std::get<1>(elem_and_face);
+    const FaceInfo * const fi = std::get<1>(elem_from_face);
     mooseAssert(fi, "We need a FaceInfo");
     mooseAssert((requested_elem == &fi->elem()) || (requested_elem == fi->neighborPtr()),
                 "The requested element should match something from the FaceInfo");

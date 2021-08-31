@@ -466,8 +466,8 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
     return;
   }
 
-  const auto elem_face = elemFace();
-  const auto neighbor_face = neighborFace();
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
 
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
@@ -551,8 +551,8 @@ INSFVMomentumAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal adv_quant_interface;
 
-  const auto elem_face = elemFace();
-  const auto neighbor_face = neighborFace();
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
 
   this->interpolate(_velocity_interp_method, v);
   Moose::FV::interpolate(_advected_interp_method,
