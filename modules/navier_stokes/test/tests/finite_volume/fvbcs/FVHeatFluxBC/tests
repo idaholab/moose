@@ -1,5 +1,5 @@
 [Tests]
-  design = 'HeatFluxBC.md'
+  design = 'NSFVHeatFluxBC.md'
   issues = '#57'
   [./local_porosity]
     type = Exodiff
