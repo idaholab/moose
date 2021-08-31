@@ -45,7 +45,7 @@
     type = RunException
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points_file='bad_points.txt'"
-    expect_err = "Number of entries in 'points_file' \S+ must be divisible by 3."
+    expect_err = "Each point in file"
     prereq = test
     requirement = 'The system shall report an error when there is not enough coordinates specified in an external file specifing the point for computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
