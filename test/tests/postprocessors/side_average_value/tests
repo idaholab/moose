@@ -1,12 +1,50 @@
 [Tests]
-  issues = '#1405'
-  design = 'SideAverageValue.md'
-
   [./test]
     type = 'Exodiff'
     input = 'side_average_value_test.i'
     exodiff = 'out.e'
 
+    issues = '#1405'
+    design = 'SideAverageValue.md'
     requirement = 'The system shall compute the area-weighted average of the integral of a variable over a side.'
   [../]
+
+  [side_average_material_property]
+    issues = '#18649'
+    design = 'SideAverageMaterialProperty.md'
+    requirement = 'The system shall support computing the average of a material property over a '
+                  'side on the mesh.'
+    [real]
+      type = 'CSVDiff'
+      input = '../side_material.i side_average_material_property.i'
+      csvdiff = 'side_average_material_property_out.csv'
+      cli_args = 'Materials/active=real'
+      detail = 'if the material property is of `Real` type'
+    []
+    [realvector]
+      type = 'CSVDiff'
+      input = '../side_material.i side_average_material_property.i'
+      csvdiff = 'side_average_material_property_out.csv'
+      cli_args = 'Materials/active=realvector Postprocessors/average/component="1"'
+      detail = 'if the material property is of `RealVectorValue` type'
+    []
+    [ranktwo]
+      type = 'CSVDiff'
+      input = '../side_material.i side_average_material_property.i'
+      csvdiff = 'side_average_material_property_out.csv'
+      cli_args = 'Materials/active=ranktwo Postprocessors/average/component="2 2"'
+      detail = 'if the material property is of `RankTwoTensor` type'
+    []
+    [error]
+      type = 'RunException'
+      input = '../side_material.i side_average_material_property.i'
+      expect_err = "Material property 'prop' is 1 dimensional, but an index vector of size 3 was "
+                   "supplied to select a component. It looks like you were expecting the material "
+                   "property to have a different type."
+      cli_args = 'Materials/active=realvector Postprocessors/average/component="1 2 3"'
+      detail = 'And shall error out if the index components do not match teh dimension of the '
+               'supplied property'
+    []
+  []
+
 []
