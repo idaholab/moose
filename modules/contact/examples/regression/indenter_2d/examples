@@ -1,0 +1,30 @@
+[Examples]
+  issues = '#18648'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [indenter_rz_nodeface_friction_kinematic]
+    type = CSVDiff
+    input = 'indenter_rz_nodeface_friction_kinematic.i'
+    csvdiff = 'indenter_rz_nodeface_friction_kinematic_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall void regression on a two-dimensional problem of a '
+                  'spherical indenter with node-to-segment formulation and friction using a linear '
+                  'finite element mesh. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+  [indenter_rz_nodeface_friction_kinematic_second_order]
+    type = CSVDiff
+    input = 'indenter_rz_nodeface_friction_kinematic_second_order.i'
+    csvdiff = 'indenter_rz_nodeface_friction_kinematic_second_order_chkfile.csv'
+    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    requirement = 'Contact module action shall void regression on a two-dimensional problem of a '
+                  'spherical indenter with node-to-segment formulation and friction using a '
+                  'second-order finite element mesh. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+[]
