@@ -19,7 +19,7 @@ public:
   static InputParameters validParams();
 
   IndexableProperty(T * host,
-                    const std::string & mat_prop_param = "mat_prop",
+                    const std::string & property_param = "property",
                     const std::string & component_param = "component");
 
   GenericReal<is_ad> operator[](int i) const;
@@ -30,17 +30,17 @@ protected:
   void getPropertyHelper(const GenericMaterialProperty<P, is_ad> *& pointer,
                          unsigned int components);
 
-  const GenericMaterialProperty<Real, is_ad> * _mat_prop_real;
-  const GenericMaterialProperty<std::vector<Real>, is_ad> * _mat_prop_std_vector;
-  const GenericMaterialProperty<RealVectorValue, is_ad> * _mat_prop_real_vector_value;
-  const GenericMaterialProperty<RankTwoTensor, is_ad> * _mat_prop_rank_two_tensor;
-  const GenericMaterialProperty<RankThreeTensor, is_ad> * _mat_prop_rank_three_tensor;
-  const GenericMaterialProperty<RankFourTensor, is_ad> * _mat_prop_rank_four_tensor;
+  const GenericMaterialProperty<Real, is_ad> * _property_real;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _property_std_vector;
+  const GenericMaterialProperty<RealVectorValue, is_ad> * _property_real_vector_value;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> * _property_rank_two_tensor;
+  const GenericMaterialProperty<RankThreeTensor, is_ad> * _property_rank_three_tensor;
+  const GenericMaterialProperty<RankFourTensor, is_ad> * _property_rank_four_tensor;
 
   T * _host;
 
-  const std::string & _mat_prop_param;
-  const std::string & _mat_prop_name;
+  const std::string & _property_param;
+  const std::string & _property_name;
   const std::string & _component_param;
 
   const std::vector<unsigned int> _component;
@@ -51,7 +51,7 @@ InputParameters
 IndexableProperty<T, is_ad>::validParams()
 {
   auto params = T::validParams();
-  params.template addRequiredParam<MaterialPropertyName>("mat_prop",
+  params.template addRequiredParam<MaterialPropertyName>("property",
                                                          "The name of the material property");
   params.template addParam<std::vector<unsigned int>>(
       "component",
@@ -62,48 +62,48 @@ IndexableProperty<T, is_ad>::validParams()
 
 template <typename T, bool is_ad>
 IndexableProperty<T, is_ad>::IndexableProperty(T * host,
-                                               const std::string & mat_prop_param,
+                                               const std::string & property_param,
                                                const std::string & component_param)
   : _host(host),
-    _mat_prop_param(mat_prop_param),
-    _mat_prop_name(_host->template getParam<MaterialPropertyName>(_mat_prop_param)),
+    _property_param(property_param),
+    _property_name(_host->template getParam<MaterialPropertyName>(_property_param)),
     _component_param(component_param),
     _component(host->template getParam<std::vector<unsigned int>>(_component_param))
 {
-  getPropertyHelper<Real>(_mat_prop_real, 0);
-  getPropertyHelper<RealVectorValue>(_mat_prop_real_vector_value, 1);
-  getPropertyHelper<std::vector<Real>>(_mat_prop_std_vector, 1);
-  getPropertyHelper<RankTwoTensor>(_mat_prop_rank_two_tensor, 2);
-  getPropertyHelper<RankThreeTensor>(_mat_prop_rank_three_tensor, 3);
-  getPropertyHelper<RankFourTensor>(_mat_prop_rank_four_tensor, 4);
+  getPropertyHelper<Real>(_property_real, 0);
+  getPropertyHelper<RealVectorValue>(_property_real_vector_value, 1);
+  getPropertyHelper<std::vector<Real>>(_property_std_vector, 1);
+  getPropertyHelper<RankTwoTensor>(_property_rank_two_tensor, 2);
+  getPropertyHelper<RankThreeTensor>(_property_rank_three_tensor, 3);
+  getPropertyHelper<RankFourTensor>(_property_rank_four_tensor, 4);
 }
 
 template <typename T, bool is_ad>
 GenericReal<is_ad>
 IndexableProperty<T, is_ad>::operator[](int i) const
 {
-  if (_mat_prop_real)
-    return (*_mat_prop_real)[i];
-  if (_mat_prop_std_vector)
-    return (*_mat_prop_std_vector)[i][_component[0]];
-  if (_mat_prop_real_vector_value)
-    return (*_mat_prop_real_vector_value)[i](_component[0]);
-  if (_mat_prop_rank_two_tensor)
-    return (*_mat_prop_rank_two_tensor)[i](_component[0], _component[1]);
-  if (_mat_prop_rank_three_tensor)
-    return (*_mat_prop_rank_three_tensor)[i](_component[0], _component[1], _component[2]);
-  if (_mat_prop_rank_four_tensor)
-    return (*_mat_prop_rank_four_tensor)[i](
+  if (_property_real)
+    return (*_property_real)[i];
+  if (_property_std_vector)
+    return (*_property_std_vector)[i][_component[0]];
+  if (_property_real_vector_value)
+    return (*_property_real_vector_value)[i](_component[0]);
+  if (_property_rank_two_tensor)
+    return (*_property_rank_two_tensor)[i](_component[0], _component[1]);
+  if (_property_rank_three_tensor)
+    return (*_property_rank_three_tensor)[i](_component[0], _component[1], _component[2]);
+  if (_property_rank_four_tensor)
+    return (*_property_rank_four_tensor)[i](
         _component[0], _component[1], _component[2], _component[3]);
   mooseError(
-      "The ", is_ad ? "AD" : "non-AD", " material property '", _mat_prop_name, "' does not exist");
+      "The ", is_ad ? "AD" : "non-AD", " material property '", _property_name, "' does not exist");
 }
 
 template <typename T, bool is_ad>
 IndexableProperty<T, is_ad>::operator bool() const
 {
-  return _mat_prop_real || _mat_prop_std_vector || _mat_prop_real_vector_value ||
-         _mat_prop_rank_two_tensor || _mat_prop_rank_three_tensor || _mat_prop_rank_four_tensor;
+  return _property_real || _property_std_vector || _property_real_vector_value ||
+         _property_rank_two_tensor || _property_rank_three_tensor || _property_rank_four_tensor;
 }
 
 template <typename T, bool is_ad>
@@ -112,13 +112,13 @@ void
 IndexableProperty<T, is_ad>::getPropertyHelper(const GenericMaterialProperty<P, is_ad> *& pointer,
                                                unsigned int components)
 {
-  if (_host->template hasGenericMaterialProperty<P, is_ad>(_mat_prop_param))
+  if (_host->template hasGenericMaterialProperty<P, is_ad>(_property_param))
   {
-    pointer = &_host->template getGenericMaterialProperty<P, is_ad>(_mat_prop_param);
+    pointer = &_host->template getGenericMaterialProperty<P, is_ad>(_property_param);
 
     if (_component.size() != components)
       mooseError("Material property '",
-                 _mat_prop_name,
+                 _property_name,
                  "' is ",
                  components,
                  " dimensional, but an index vector of size ",

@@ -23,20 +23,20 @@ const IndexableProperty<Parent, is_ad> _prop;
 
 where `Parent` is the current class' parent class. `IndexableProperty` provides
 a  helper method to add the default parameters for coupling a material property
-and its component index. Use it as follows
+(`property`) and its component index (`component`). Use it as follows
 
 ```c++
 InputParameters params = IndexableProperty<Parent, is_ad>::validParams();
 ```
 
-This also adds `Parent::validParams()`. You may also choose to add your own
-parameters of type `MaterialPropertyName` and `std::vector<unsigned int>` with
-custom names and documentation strings.
+This also adds the `Parent` class parameters to `params`. You may also choose to
+add your own parameters of type `MaterialPropertyName` and `std::vector<unsigned int>`
+with custom names and documentation strings.
 
 ```c++
-params.addRequiredParam<MaterialPropertyName>("first_name",
+params.addRequiredParam<MaterialPropertyName>("first_property",
                                               "The name of the first material property");
-params.addRequiredParam<MaterialPropertyName>("second_name",
+params.addRequiredParam<MaterialPropertyName>("second_property",
                                               "The name of the second material property");
 params.addParam<std::vector<unsigned int>>(
     "first_component", "Index of the comonent of the first property");
@@ -55,8 +55,8 @@ name and component parameters, pass them in as the second and third arguments,
 like so
 
 ```
-  _first_prop(this, "first_name", "first_component")
-  _second_prop(this, "second_name", "second_component")
+  _first_prop(this, "first_property", "first_component")
+  _second_prop(this, "second_property", "second_component")
 ```
 
 An `IndexableProperty` object can be implicitly cast to `bool` to check if _any_
@@ -64,5 +64,5 @@ of the supported indexable properties was found.
 
 ```
 if (!_prop)
-  paramError("mat_prop", "No suitable material property was found");
+  paramError("property", "No suitable material property was found");
 ```
