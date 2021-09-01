@@ -61,5 +61,12 @@ ComputeElasticityTensorTempl<is_ad>::computeQpElasticityTensor()
   _elasticity_tensor[_qp] = _Cijkl;
 }
 
+template <bool is_ad>
+void
+ComputeElasticityTensorTempl<is_ad>::initQpStatefulProperties()
+{
+  computeQpElasticityTensor();
+}
+
 template class ComputeElasticityTensorTempl<false>;
 template class ComputeElasticityTensorTempl<true>;

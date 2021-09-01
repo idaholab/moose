@@ -24,6 +24,7 @@ public:
 
 protected:
   virtual void computeQpElasticityTensor() override;
+  virtual void initQpStatefulProperties() override;
 
   /// Individual material information
   RankFourTensor _Cijkl;
