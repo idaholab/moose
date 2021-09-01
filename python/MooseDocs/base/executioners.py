@@ -20,7 +20,7 @@ import platform
 
 import MooseDocs
 from ..tree import pages
-from ..common import mixins
+from ..common import mixins, exceptions
 
 LOG = logging.getLogger('MooseDocs.Executioner')
 
@@ -44,8 +44,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     the Executioner system was created to allow for the algorithm to be changed as well as
     new algorithms be developed.
 
-    In general, the conversion process is as follows. How this is achieved varies in each
-    Executioner
+    The exact translation process varies between Executioner objects and further depends on the
+    inputs they are constructed with, but all proceed through the following basic steps:
 
         1. Execute preExecute methods
         2. Reading raw content (following called for each Page object)
@@ -67,6 +67,17 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         5. Finalize the content, i.e., copy pages.File objects to the destination
         6. Execute postExecute methods
 
+    The various methods of this class and all those of its subclasses are designed to be invoked any
+    number of times while the MooseDocs application is running and on any subset of Page objects.
+    The main purpose of this design is to support translation of existing pages edited, or new pages
+    added, during a live reload (see the MooseDocsWatcher class in 'commands/build.py'). This design
+    also makes it possible to call the methods to perform specific steps of the translation process,
+    e.g., to perform only the read and tokenize steps. The rule, though, is that successive
+    invocations must follow the basic procedure: read -> tokenize -> render -> write. For example,
+    if only the read step has been performed, the Executioner must be called to tokenize before it
+    can be called to render. The progress checks that enforce this rule are reset during the write
+    step, and the entire procedure must be repeated if called upon thereafter.
+
     The following are the total and translation times for the various Executioners for the
     complete MOOSE website in modules/doc using 12 cores on a Mac trash can ("Mac Pro (Late 2013)"):
 
@@ -87,6 +98,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         mixins.ConfigObject.__init__(self, **kwargs)
         mixins.TranslatorObject.__init__(self)
         self._page_objects = list()
+        self._clear_progress()
 
         # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
         # MooseDocs does not work with this combination. This will be fixed in moosetools migration.
@@ -99,9 +111,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self._lock = self._ctx.Lock()
 
         # Containers for storing the ouputs from the read, tokenize, and render methods, as well as
-        # another for storing miscellaneous data, respectively. For parallel executioners, these are
-        # reset as multiprocessing ('self._ctx') Manager().dict() objects so that modifications are
-        # properly handled and communicated across processors.
+        # another for storing miscellaneous data, respectively. For parallel executioners, these may
+        # need to be reset as shared-memory multiprocessing ('self._ctx') Manager().dict() objects
+        # so that modifications are properly handled and communicated across processors.
         self._page_content = dict()
         self._page_ast = dict()
         self._page_result = dict()
@@ -170,13 +182,13 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         Called by Translator object, this executes the steps listed in the class description.
         """
         total = time.time()
-        self.assertInitialized()
 
         if read:
             self.translator.executeMethod('preExecute', log=True)
 
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         if source_nodes:
+            self._setupCall(source_nodes, read, tokenize, render, write)
             t = time.time()
             n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
             if isinstance(self, MooseDocs.base.Serial):
@@ -191,8 +203,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
             if other_nodes:
                 LOG.info('Copying content...')
-                n = len(other_nodes) if num_threads > len(other_nodes) else num_threads
-                t = self.finalize(other_nodes, n)
+                t = self.finalize(other_nodes)
                 LOG.info('Copying Finished [%s sec.]', t)
 
             self.translator.executeMethod('postExecute', log=True)
@@ -242,12 +253,62 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             self.translator.executePageMethod('postWrite', node)
         return result
 
-    def finalize(self, other_nodes, num_threads):
+    def finalize(self, other_nodes):
         """Complete copying of non-source (e.g., images) files."""
         start = time.time()
         for node in other_nodes:
             self.translator.renderer.write(node)
         return time.time() - start
+
+    def _clear_progress(self):
+        """Set the translation progress trackers to False."""
+        self._has_read = False
+        self._has_tokenized = False
+        self._has_rendered = False
+
+    def _setupCall(self, nodes, read, tokenize, render, write):
+        """
+        Helper that initializes the page output containers and asserts that the translation steps
+        are executed in the correct order, i.e., Read -> Tokenize -> Render -> Write.
+        """
+        def calloc(nodes, container):
+            uids = container.keys() # need only grab current uid keys, leave this out of node loop!!
+            for node in nodes:
+                if node.translator is self.translator:
+                    if node.uid not in uids:
+                        container[node.uid] = None
+                else:
+                    msg = "Bad translator reference for {} object with local name '{}'. Please " \
+                          "call the execute() method of the assosciated Translator instance."
+                    raise exceptions.MooseDocsException(msg, str(node).split(':')[0], node.local)
+
+        msg = 'The "{}" translation step must be executed before the "{}" step.'
+        if read:
+            calloc(nodes, self._page_content)
+            self._has_read = True
+
+        if tokenize:
+            if not self._has_read:
+                raise exceptions.MooseDocsException(msg, "read", "tokenize")
+            calloc(nodes, self._page_ast)
+            self._has_tokenized = True
+
+        if render:
+            if not self._has_tokenized:
+                raise exceptions.MooseDocsException(msg, "tokenize", "render")
+            calloc(nodes, self._page_result)
+            self._has_rendered = True
+
+        if write:
+            if not self._has_rendered:
+                raise exceptions.MooseDocsException(msg, "render", "write")
+            self._clear_progress()
+
+    def _getPage(self, uid):
+        """Retrieve a Page object from the global list by its UID."""
+        for page in self._page_objects:
+            if uid == page.uid:
+                return page
 
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging or for very small builds."""
@@ -309,26 +370,17 @@ class ParallelQueue(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
-            if not self._page_content:
-                self._page_content = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_content, self._read_target, num_threads,
                       lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
                       "Reading")
-
         if tokenize:
-            if not self._page_ast:
-                self._page_ast = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
                       lambda n: -len(self._page_content[n.uid]),
                       "Tokenizing")
-
         if render:
-            if not self._page_result:
-                self._page_result = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_result, self._render_target, num_threads,
                       lambda n: -self._page_ast[n.uid].count,
                       "Rendering")
-
         if write:
             self._run(nodes, None, self._write_target, num_threads,
                       lambda n: -self._page_result[n.uid].count,
@@ -357,7 +409,7 @@ class ParallelQueue(Executioner):
         # Extract the data from the output Queue object and update Page object attributes
         for i in range(len(nodes)):
             uid, attributes, out = output_queue.get()
-            self.__get_node(uid).attributes.update(attributes)
+            self._getPage(uid).attributes.update(attributes)
             if container is not None:
                 container[uid] = out
 
@@ -369,7 +421,7 @@ class ParallelQueue(Executioner):
     def _read_target(self, qin, qout):
         """Function for calling self.read with Queue objects."""
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self.__get_node(uid)
+            node = self._getPage(uid)
             content = self.read(node)
             qout.put((uid, node.attributes, content))
 
@@ -377,7 +429,7 @@ class ParallelQueue(Executioner):
         """Function for calling self.tokenize with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self.__get_node(uid)
+            node = self._getPage(uid)
             ast = self.tokenize(node, self._page_content[uid])
             qout.put((uid, node.attributes, ast))
 
@@ -385,7 +437,7 @@ class ParallelQueue(Executioner):
         """Function for calling self.tokenize with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self.__get_node(uid)
+            node = self._getPage(uid)
             result = self.render(node, self._page_ast[uid])
             qout.put((uid, node.attributes, result))
 
@@ -393,40 +445,30 @@ class ParallelQueue(Executioner):
         """Function for calling self.write with Queue objects."""
 
         for uid in iter(qin.get, ParallelQueue.STOP):
-            node = self.__get_node(uid)
+            node = self._getPage(uid)
             ast = self.write(node, self._page_result[uid])
             qout.put((uid, node.attributes, None))
 
-    def __get_node(self, uid):
-        """Helper for finding a node from the available list of page objects based on its UID."""
-        for page in self._page_objects:
-            if uid == page.uid:
-                return page
-
 class ParallelBarrier(Executioner):
     """
-    Parallel Executioner that uses shared multiprocessing.Manager dictionaries
-    for storing the Page data across processors and a parallel barrier between the
-    tokenization and rendering steps to be sure that the data is completed
-    for all pages prior to beginning the various steps.
+    Parallel Executioner that uses a shared multiprocessing.Manager().dict() container to store page
+    attributes gathered across processors and a multiprocessing.Barrier object to synchronize the
+    translation procedure. Once all processors complete a translation step, they're simultaneously
+    released and immediately update their local copies of the 'self._page_objects' container before
+    proceeding to the following step.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._manager = self._ctx.Manager()
+        self._page_content = self._manager.dict()
+        self._page_ast = self._manager.dict()
+        self._page_result = self._manager.dict()
         self._global_attributes = self._manager.dict()
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
-        if read and not self._page_content:
-            self._page_content = self._manager.dict({p.uid: None for p in self._page_objects})
-        if tokenize and not self._page_ast:
-            self._page_ast = self._manager.dict({p.uid: None for p in self._page_objects})
-        if render and not self._page_result:
-            self._page_result = self._manager.dict({p.uid: None for p in self._page_objects})
+        page_attributes = self._manager.dict({p.uid: p.attributes for p in nodes})
 
-        # Initialize a manager object dictionary with the current attributes of Page objects
-        page_attributes = self._manager.dict({p.uid: p.attributes for p in self._page_objects})
-
-        # Distribute nodes to threads and process the execute methods on each
+        # Distribute nodes to Barrier objects and run the _target() method on each.
         jobs = []
         random.shuffle(nodes)
         args = (self._ctx.Barrier(num_threads), page_attributes, read, tokenize, render, write)
@@ -438,17 +480,12 @@ class ParallelBarrier(Executioner):
         for job in jobs:
             job.join()
 
-        # This is needed to maintain the page attributes during live serving. In parallel, when the
-        # Executioner executes each process created above gets a copy of self._page_objects. Each
-        # process is running the _target method and keeping the attributes of the pages up to date
-        # across the processes. This call updates the attributes of the original pages that
-        # were copied when the processes start. Thus, when new processes are started during a
-        # live reload the attributes are correct when the copy is performed again for the new
-        # processes.
+        # The original copy of the 'self.page_objects' container needs to be updated to ensure that
+        # the class instance retains this information over succesive invocations of this method.
         self._updateAttributes(page_attributes)
 
     def _target(self, nodes, barrier, page_attributes, read, tokenize, render, write):
-        """Target function for multiprocessing.Process calls."""
+        """Target function for multiprocessing.Process() calls."""
 
         if read:
             for node in nodes:
@@ -482,9 +519,9 @@ class ParallelBarrier(Executioner):
                 self.write(node, self._page_result[node.uid])
 
     def _updateAttributes(self, page_attributes):
-        """Update the local page objects with attributes gathered from the other processes"""
-        for page in self._page_objects:
-            page.attributes.update(page_attributes[page.uid])
+        """Update the Page object attributes with those gathered from all processes."""
+        for uid, attributes in page_attributes.items():
+            self._getPage(uid).attributes.update(attributes)
 
 class ParallelPipe(Executioner):
     """
@@ -502,20 +539,11 @@ class ParallelPipe(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
-            if not self._page_content:
-                self._page_content = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
-
         if tokenize:
-            if not self._page_ast:
-                self._page_ast = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
-
         if render:
-            if not self._page_result:
-                self._page_result = {p.uid: None for p in self._page_objects}
             self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
-
         if write:
             self._run(nodes, None, self._write_target, num_threads, "Writing")
 
@@ -547,10 +575,7 @@ class ParallelPipe(Executioner):
                     receivers.remove(r)
                 else:
                     for uid, attributes, out in data:
-                        for node in nodes:
-                            if uid == node.uid:
-                                node.attributes.update(attributes)
-                                break
+                        self._getPage(uid).attributes.update(attributes)
                         if container is not None:
                             container[uid] = out
 
