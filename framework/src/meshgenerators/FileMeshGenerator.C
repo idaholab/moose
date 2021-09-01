@@ -33,12 +33,18 @@ FileMeshGenerator::validParams()
                         false,
                         "True to indicate that the mesh file this generator is reading can be used "
                         "for restarting variables");
+  params.addParam<bool>("skip_partitioning",
+                        false,
+                        "True to skip partitioning, only after this mesh generator, "
+                        "because the mesh was pre-split for example.");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
 
 FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters), _file_name(getParam<MeshFileName>("file"))
+  : MeshGenerator(parameters),
+  _file_name(getParam<MeshFileName>("file")),
+  _skip_partitioning(getParam<bool>("skip_partitioning"))
 {
 }
 
@@ -71,8 +77,11 @@ FileMeshGenerator::generate()
         exreader->read(_file_name);
       MeshCommunication().broadcast(*mesh);
     }
-
+    // Skip paritioning if the user requested it
+    if (_skip_partitioning)
+      mesh->skip_partitioning(true);
     mesh->prepare_for_use();
+    mesh->skip_partitioning(false);
   }
   else
   {
