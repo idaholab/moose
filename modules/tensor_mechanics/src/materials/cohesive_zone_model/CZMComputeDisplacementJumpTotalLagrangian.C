@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CZMComputeDisplacementJumpTotalLagrangian.h"
-#include "RotationMatrix.h"
+#include "CohesiveZoneModelTools.h"
 
 registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpTotalLagrangian);
 
@@ -65,8 +65,9 @@ CZMComputeDisplacementJumpTotalLagrangian::computeLocalDisplacementJump()
 void
 CZMComputeDisplacementJumpTotalLagrangian::computeRotationMatrices()
 {
+
   _czm_reference_rotation[_qp] =
-      RotationMatrix::rotVec1ToVec2(RealVectorValue(1, 0, 0), _normals[_qp]);
+      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _mesh.dimension());
   computeFandR();
   _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
 }
