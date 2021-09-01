@@ -12,6 +12,13 @@
 #include "MooseTypes.h"
 #include <vector>
 
+/**
+ * IndexableProperty is a helper (proxy) object to obtain a scalar component
+ * from a material property. Use it in objects that process a scalar quantity
+ * instead of a `Real` material property to allow the user to supply any material
+ * property of a type from the list below along with a component index parameter to
+ * select a scalar component from the property value.
+ */
 template <typename T, bool is_ad>
 class IndexableProperty
 {
@@ -22,7 +29,10 @@ public:
                     const std::string & property_param = "property",
                     const std::string & component_param = "component");
 
-  GenericReal<is_ad> operator[](int i) const;
+  /// getthe selected component value for the given quadrature point
+  GenericReal<is_ad> operator[](int qp) const;
+
+  /// returns true if a supported material property has been found and can be evaluated
   operator bool() const;
 
 protected:
@@ -30,19 +40,26 @@ protected:
   void getPropertyHelper(const GenericMaterialProperty<P, is_ad> *& pointer,
                          unsigned int components);
 
+  ///@{ only one of those pointers will be non-null and pointing to the selected property
   const GenericMaterialProperty<Real, is_ad> * _property_real;
   const GenericMaterialProperty<std::vector<Real>, is_ad> * _property_std_vector;
   const GenericMaterialProperty<RealVectorValue, is_ad> * _property_real_vector_value;
   const GenericMaterialProperty<RankTwoTensor, is_ad> * _property_rank_two_tensor;
   const GenericMaterialProperty<RankThreeTensor, is_ad> * _property_rank_three_tensor;
   const GenericMaterialProperty<RankFourTensor, is_ad> * _property_rank_four_tensor;
+  ///@}
 
+  /// pointer to the host object
   T * _host;
 
+  /// name of the input parameter containing the material property name
   const std::string & _property_param;
+  /// name of the coupled material property (for error reporting)
   const std::string & _property_name;
+  /// name of the input parameter containing the component index
   const std::string & _component_param;
 
+  /// Index of the selected scalar component of the material property
   const std::vector<unsigned int> _component;
 };
 
@@ -76,27 +93,33 @@ IndexableProperty<T, is_ad>::IndexableProperty(T * host,
   getPropertyHelper<RankTwoTensor>(_property_rank_two_tensor, 2);
   getPropertyHelper<RankThreeTensor>(_property_rank_three_tensor, 3);
   getPropertyHelper<RankFourTensor>(_property_rank_four_tensor, 4);
+
+  if (!*this)
+    mooseError("The ",
+               is_ad ? "AD" : "non-AD",
+               " material property '",
+               _property_name,
+               "' does not exist");
 }
 
 template <typename T, bool is_ad>
 GenericReal<is_ad>
-IndexableProperty<T, is_ad>::operator[](int i) const
+IndexableProperty<T, is_ad>::operator[](int qp) const
 {
   if (_property_real)
-    return (*_property_real)[i];
+    return (*_property_real)[qp];
   if (_property_std_vector)
-    return (*_property_std_vector)[i][_component[0]];
+    return (*_property_std_vector)[qp][_component[0]];
   if (_property_real_vector_value)
-    return (*_property_real_vector_value)[i](_component[0]);
+    return (*_property_real_vector_value)[qp](_component[0]);
   if (_property_rank_two_tensor)
-    return (*_property_rank_two_tensor)[i](_component[0], _component[1]);
+    return (*_property_rank_two_tensor)[qp](_component[0], _component[1]);
   if (_property_rank_three_tensor)
-    return (*_property_rank_three_tensor)[i](_component[0], _component[1], _component[2]);
+    return (*_property_rank_three_tensor)[qp](_component[0], _component[1], _component[2]);
   if (_property_rank_four_tensor)
-    return (*_property_rank_four_tensor)[i](
+    return (*_property_rank_four_tensor)[qp](
         _component[0], _component[1], _component[2], _component[3]);
-  mooseError(
-      "The ", is_ad ? "AD" : "non-AD", " material property '", _property_name, "' does not exist");
+  mooseError("internal error");
 }
 
 template <typename T, bool is_ad>
