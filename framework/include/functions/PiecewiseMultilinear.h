@@ -33,6 +33,11 @@ public:
 
   PiecewiseMultilinear(const InputParameters & parameters);
 
+  virtual RealGradient gradient(Real t, const Point & p) const override;
+  virtual Real timeDerivative(Real t, const Point & p) const override;
+
 protected:
   virtual Real sample(const std::vector<Real> & pt) const override;
+
+  const Real _epsilon;
 };

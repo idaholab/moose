@@ -11,6 +11,7 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include <fstream>
+#include <algorithm>
 
 /**
  * Creates a GriddedData object by reading info from file_name
@@ -67,8 +68,7 @@ void
 GriddedData::getAxes(std::vector<int> & axes)
 {
   axes.resize(_dim);
-  for (unsigned int i = 0; i < _dim; ++i)
-    axes[i] = _axes[i];
+  std::copy(_axes.begin(), _axes.end(), axes.begin());
 }
 
 void
@@ -78,8 +78,7 @@ GriddedData::getGrid(std::vector<std::vector<Real>> & grid)
   for (unsigned int i = 0; i < _dim; ++i)
   {
     grid[i].resize(_grid[i].size());
-    for (unsigned int j = 0; j < _grid[i].size(); ++j)
-      grid[i][j] = _grid[i][j];
+    std::copy(_grid[i].begin(), _grid[i].end(), grid[i].begin());
   }
 }
 
@@ -87,8 +86,7 @@ void
 GriddedData::getFcn(std::vector<Real> & fcn)
 {
   fcn.resize(_fcn.size());
-  for (unsigned int i = 0; i < _fcn.size(); ++i)
-    fcn[i] = _fcn[i];
+  std::copy(_fcn.begin(), _fcn.end(), fcn.begin());
 }
 
 Real
