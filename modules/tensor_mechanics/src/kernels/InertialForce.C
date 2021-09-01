@@ -13,11 +13,13 @@
 #include "NonlinearSystemBase.h"
 
 registerMooseObject("TensorMechanicsApp", InertialForce);
+registerMooseObject("TensorMechanicsApp", ADInertialForce);
 
+template <bool is_ad>
 InputParameters
-InertialForce::validParams()
+InertialForceTempl<is_ad>::validParams()
 {
-  InputParameters params = TimeKernel::validParams();
+  InputParameters params = InertialForceParent<is_ad>::validParams();
   params.addClassDescription("Calculates the residual for the inertial force "
                              "($M \\cdot acceleration$) and the contribution of mass"
                              " dependent Rayleigh damping and HHT time "
@@ -42,24 +44,25 @@ InertialForce::validParams()
   return params;
 }
 
-InertialForce::InertialForce(const InputParameters & parameters)
-  : TimeKernel(parameters),
-    _density(getMaterialProperty<Real>("density")),
-    _has_beta(isParamValid("beta")),
-    _has_gamma(isParamValid("gamma")),
-    _beta(_has_beta ? getParam<Real>("beta") : 0.1),
-    _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
-    _has_velocity(isParamValid("velocity")),
-    _has_acceleration(isParamValid("acceleration")),
-    _eta(getMaterialProperty<Real>("eta")),
-    _alpha(getParam<Real>("alpha")),
+template <bool is_ad>
+InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters)
+  : InertialForceParent<is_ad>(parameters),
+    _density(this->template getGenericMaterialProperty<Real, is_ad>("density")),
+    _has_beta(this->isParamValid("beta")),
+    _has_gamma(this->isParamValid("gamma")),
+    _beta(_has_beta ? this->template getParam<Real>("beta") : 0.1),
+    _gamma(_has_gamma ? this->template getParam<Real>("gamma") : 0.1),
+    _has_velocity(this->isParamValid("velocity")),
+    _has_acceleration(this->isParamValid("acceleration")),
+    _eta(this->template getGenericMaterialProperty<Real, is_ad>("eta")),
+    _alpha(this->template getParam<Real>("alpha")),
     _time_integrator(*_sys.getTimeIntegrator())
 {
   if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
-    _vel_old = &coupledValueOld("velocity");
-    _accel_old = &coupledValueOld("acceleration");
-    _u_old = &valueOld();
+    _vel_old = &this->coupledValueOld("velocity");
+    _accel_old = &this->coupledValueOld("acceleration");
+    _u_old = &this->valueOld();
   }
   else if (!_has_beta && !_has_gamma && !_has_velocity && !_has_acceleration)
   {
@@ -67,8 +70,8 @@ InertialForce::InertialForce(const InputParameters & parameters)
     _du_dot_du = &(_var.duDotDu());
     _du_dotdot_du = &(_var.duDotDotDu());
 
-    addFEVariableCoupleableVectorTag(_time_integrator.uDotFactorTag());
-    addFEVariableCoupleableVectorTag(_time_integrator.uDotDotFactorTag());
+    this->addFEVariableCoupleableVectorTag(_time_integrator.uDotFactorTag());
+    this->addFEVariableCoupleableVectorTag(_time_integrator.uDotDotFactorTag());
 
     _u_dot_factor = &_var.vectorTagValue(_time_integrator.uDotFactorTag());
     _u_dotdot_factor = &_var.vectorTagValue(_time_integrator.uDotDotFactorTag());
@@ -95,25 +98,27 @@ InertialForce::InertialForce(const InputParameters & parameters)
                "integrator.");
 }
 
-Real
-InertialForce::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+InertialForceTempl<is_ad>::computeQpResidual()
 {
   if (_dt == 0)
     return 0;
   else if (_has_beta)
   {
-    Real accel = 1. / _beta *
+    auto accel = 1.0 / _beta *
                  (((_u[_qp] - (*_u_old)[_qp]) / (_dt * _dt)) - (*_vel_old)[_qp] / _dt -
                   (*_accel_old)[_qp] * (0.5 - _beta));
-    Real vel = (*_vel_old)[_qp] + (_dt * (1 - _gamma)) * (*_accel_old)[_qp] + _gamma * _dt * accel;
+    auto vel =
+        (*_vel_old)[_qp] + (_dt * (1.0 - _gamma)) * (*_accel_old)[_qp] + _gamma * _dt * accel;
     return _test[_i][_qp] * _density[_qp] *
-           (accel + vel * _eta[_qp] * (1 + _alpha) - _alpha * _eta[_qp] * (*_vel_old)[_qp]);
+           (accel + vel * _eta[_qp] * (1.0 + _alpha) - _alpha * _eta[_qp] * (*_vel_old)[_qp]);
   }
 
   // Lumped mass option
   // Only lumping the masses here
   // will multiply by corresponding residual multiplier after lumping the matrix
-  else if (_time_integrator.isLumped() && _time_integrator.isExplicit())
+  else if (_time_integrator.isLumped() && _time_integrator.isExplicit() && !is_ad)
     return _test[_i][_qp] * _density[_qp];
 
   // Consistent mass option
@@ -124,8 +129,16 @@ InertialForce::computeQpResidual()
             _alpha * _eta[_qp] * (*_u_dot_old)[_qp]);
 }
 
+template <>
 void
-InertialForce::computeResidualAdditional()
+InertialForceTempl<true>::computeResidualAdditional()
+{
+  mooseError("Internal error");
+}
+
+template <>
+void
+InertialForceTempl<false>::computeResidualAdditional()
 {
   if (_dt == 0)
     return;
@@ -135,23 +148,34 @@ InertialForce::computeResidualAdditional()
     return;
 
   for (unsigned int i = 0; i < _test.size(); ++i)
-    _local_re(i) *= (*_u_dotdot_factor_dof)[i] + _eta[0] * (*_u_dot_factor_dof)[i];
+    this->_local_re(i) *= (*_u_dotdot_factor_dof)[i] + _eta[0] * (*_u_dot_factor_dof)[i];
 }
 
+template <>
 Real
-InertialForce::computeQpJacobian()
+InertialForceTempl<true>::computeQpJacobian()
+{
+  mooseError("Internal error");
+}
+
+template <>
+Real
+InertialForceTempl<false>::computeQpJacobian()
 {
   if (_dt == 0)
     return 0;
   else
   {
     if (_has_beta)
-      return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[_j][_qp] +
+      return _test[_i][_qp] * _density[_qp] / (_beta * _dt * _dt) * _phi[this->_j][_qp] +
              _eta[_qp] * (1 + _alpha) * _test[_i][_qp] * _density[_qp] * _gamma / _beta / _dt *
-                 _phi[_j][_qp];
+                 _phi[this->_j][_qp];
     else
-      return _test[_i][_qp] * _density[_qp] * (*_du_dotdot_du)[_qp] * _phi[_j][_qp] +
+      return _test[_i][_qp] * _density[_qp] * (*_du_dotdot_du)[_qp] * _phi[this->_j][_qp] +
              _eta[_qp] * (1 + _alpha) * _test[_i][_qp] * _density[_qp] * (*_du_dot_du)[_qp] *
-                 _phi[_j][_qp];
+                 _phi[this->_j][_qp];
   }
 }
+
+template class InertialForceTempl<false>;
+template class InertialForceTempl<true>;
