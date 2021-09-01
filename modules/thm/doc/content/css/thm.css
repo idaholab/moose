@@ -1,0 +1,61 @@
+.section {
+  padding-bottom: 0.5em
+}
+
+/* code block are light gray */
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    border: 1px solid #666;
+    border: 0;
+    background-color: #eee;
+}
+
+pre.moose-pre {
+    background-color: #eee;
+}
+
+code[class*="language-"] {
+    color: #444;
+    text-shadow: none
+}
+
+.token.punctuation {
+    color: #08080D;
+}
+/* redefine the little toolbar for code blocks */
+pre.code-toolbar:hover > .toolbar {
+    opacity: 1;
+}
+
+pre.code-toolbar > .toolbar a,
+pre.code-toolbar > .toolbar button,
+pre.code-toolbar > .toolbar span {
+    color: #eee;
+    font-size: .8em;
+    padding: 0 .5em;
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: none;
+    border-radius: .5em;
+}
+
+pre.code-toolbar > .toolbar a:hover,
+pre.code-toolbar > .toolbar a:focus,
+pre.code-toolbar > .toolbar button:hover,
+pre.code-toolbar > .toolbar button:focus,
+pre.code-toolbar > .toolbar span:hover,
+pre.code-toolbar > .toolbar span:focus {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* do not highlight the row on mouse hover */
+.moose-table-div tr:hover
+{
+    background: inherit;
+}
+
+/* no shadow for bread crumbs */
+nav {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
