@@ -53,13 +53,51 @@ template <typename T>
 class FunctorInterface : public FunctorBase
 {
 public:
+  /**
+   * A typedef defining a "face" evaluation calling argument. This is composed of
+   * - a face information object which defines our location in space
+   * - a limiter which defines how the functor evaluated on either side of the face should be\n
+   *   interpolated to the face
+   * - a boolean which states whether the face information element is upwind of the face
+   * - a pair of subdomain IDs. These do not always correspond to the face info element subdomain\n
+   *   ID and face info neighbor subdomain ID. For instance if a flux kernel is operating at a\n
+   *   subdomain boundary on which the kernel is defined on one side but not the other, the\n
+   *   passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is\n
+   *   defined on
+   */
   using FaceArg =
       std::tuple<const FaceInfo *,
                  const Moose::FV::Limiter<typename Moose::FV::LimiterValueType<T>::value_type> *,
                  bool,
                  std::pair<SubdomainID, SubdomainID>>;
+
+  /**
+   * People should think of this geometric argument as corresponding to the location in space of the
+   * provided element centroid, \b not as corresonding the location of the provided face
+   * information. Summary of data in this argument:
+   * - an element, whose centroid we should think of as the evaluation point. It is possible that\n
+   *   the element will be a nullptr in which case, the evaluation point should be thought of as\n
+   *   the location of a ghosted element centroid
+   * - a face information object. When the provided element is null or for instance when the\n
+   *   functoris a variable that does not exist on the provided element subdomain, this face\n
+   *   information object will be used to help construct a ghost value evaluation
+   * - a subdomain ID. This is useful when the functor is a material property and the user wants\n
+   *   to indicate which material property definition should be used to evaluate the functor. For\n
+   *   instance if we are using a flux kernel that is not defined on one side of the face, the\n
+   *   subdomain ID will allow us to compute a ghost material property evaluation
+   */
   using ElemFromFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
+
+  /**
+   * Argument for requesting functor evaluation at a quadrature point location in an element. Data
+   * in the argument:
+   * - The element containing the quadrature point
+   * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
+   *   evaluation of the ith point
+   * - The quadrature rule that can be used to initialize the functor on the given element
+   */
   using QpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
+
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
   virtual ~FunctorInterface() = default;
@@ -67,8 +105,8 @@ public:
 
   ///@{
   /**
-   * Same as their \p evaluate overloads with the same argument but allows for caching
-   * implementation. These are the methods a user will call
+   * Same as their \p evaluate overloads with the same arguments but allows for caching
+   * implementation. These are the methods a user will call in their code
    */
   T operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
   T operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
@@ -95,43 +133,37 @@ protected:
   virtual T evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
 
   /**
-   * @param elem_from_face This is a tuple packing an element, \p FaceInfo, and subdomain ID
-   * @return For a variable: the value associated with the element argument of the tuple if the
-   * variable exists on the element. If it does not, a ghost value is computed given that the
-   * element across the face from the provided element supports the variable. For a material
-   * property: the subdomain argument is critical. One can imagine having two different computations
-   * of diffusivity on different subdomains, let's call them D_E and D_N (denoting element and
-   * neighbor in MOOSE lingo). A flux kernel on a subdomain boundary may very well want a
-   * D_E evaluation on the N side of the face. By providing the subdomain ID corresponding to E, the
-   * flux kernel ensures that it will retrieve a D_E evaluation, even on the N side of the face.
+   * @param elem_from_face See the \p ElemFromFaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor evaluated at the requested time and space
    */
   virtual T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
 
   /**
-   * @param face A tuple packing a \p FaceInfo, a \p Limiter, and a boolean denoting whether the
-   * element side of the face is in the upwind direction
-   * @return A limited interpolation to the provided face of the variable or material property. If
-   * the material property is a composite of variables, it's important to note that each variable
-   * will be interpolated individually. If aggregate interpolation is desired, then the user should
-   * make two calls to the \p elem_from_face overload (one for element and one for neighbor) and
-   * then use the global interpolate functions in the \p Moose::FV namespace
+   * @param face See the \p FaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor evaluated at the requested time and space
    */
   virtual T evaluate(const FaceArg & face, unsigned int state) const = 0;
 
   /**
-   * Evaluate the functor at the current qp point. Unlike the above overloads, there is a caveat to
-   * calling this overload. Any variables involved in the functor evaluation must have their
-   * elemental data properly pre-initialized at the desired quadrature point
+   * @param qp See the \p QpArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor evaluated at the requested time and space
    */
   virtual T evaluate(const QpArg & qp, unsigned int state) const = 0;
 
   /**
-   * @param tqp A pair with the first member corresponding to an \p ElementType, either Element,
+   * @param tqp A tuple with the first member corresponding to an \p ElementType, either Element,
    * Neighbor, or Lower corresponding to the three different possible \p MooseVariableData
-   * instances. The second member corresponds to the desired quadrature point
-   * @return The requested element type data indexed at the requested quadrature point. As for the
-   * \p qp overload, there is a caveat: any variables involved in the functor evaluation must have
-   * their requested element data type properly pre-initialized at the desired quadrature point
+   * instances. The second member corresponds to the desired quadrature point. The third member
+   * corresponds to the subdomain that this functor is being evaluated on
+   * @return The requested element type data indexed at the requested quadrature point. There is a
+   * caveat with this \p evaluate overload: any variables involved in the functor evaluation must
+   * have their requested element data type properly pre-initialized at the desired quadrature point
    */
   virtual T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                      unsigned int state) const = 0;
