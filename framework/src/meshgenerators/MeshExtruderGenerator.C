@@ -73,8 +73,7 @@ MeshExtruderGenerator::generate()
 {
   std::unique_ptr<MeshBase> source_mesh = std::move(_input);
 
-  std::unique_ptr<MeshBase> dest_mesh = source_mesh->clone();
-  dest_mesh->clear();
+  auto dest_mesh = buildMeshBaseObject();
 
   if (source_mesh->mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh !");
