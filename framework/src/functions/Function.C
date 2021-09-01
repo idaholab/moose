@@ -118,14 +118,14 @@ Function::evaluate(const FaceArg & face, const unsigned int state) const
 }
 
 Real
-Function::evaluate(const QpArg & qp_arg, const unsigned int state) const
+Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
 {
-  const Elem * const elem = std::get<0>(qp_arg);
-  const auto qp = std::get<1>(qp_arg);
-  if (elem != _current_functor_elem)
+  const Elem * const elem = std::get<0>(elem_qp);
+  const auto qp = std::get<1>(elem_qp);
+  if (elem != _current_elem_qp_functor_elem)
   {
-    _current_functor_elem = elem;
-    const QBase * const qrule_template = std::get<2>(qp_arg);
+    _current_elem_qp_functor_elem = elem;
+    const QBase * const qrule_template = std::get<2>(elem_qp);
 
     const FEFamily mapping_family = FEMap::map_fe_type(*elem);
     const FEType fe_type(elem->default_order(), mapping_family);
@@ -137,11 +137,40 @@ Function::evaluate(const QpArg & qp_arg, const unsigned int state) const
     auto & xyz = fe->get_xyz();
     fe->attach_quadrature_rule(qrule.get());
     fe->reinit(elem);
-    _current_functor_xyz = std::move(xyz);
+    _current_elem_qp_functor_xyz = std::move(xyz);
   }
-  mooseAssert(qp < _current_functor_xyz.size(),
+  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
               "The requested " << qp << " is outside our xyz size");
-  return value(getTime(state), _current_functor_xyz[qp]);
+  return value(getTime(state), _current_elem_qp_functor_xyz[qp]);
+}
+
+Real
+Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  const Elem * const elem = std::get<0>(elem_side_qp);
+  const auto side = std::get<1>(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
+  if (elem != _current_elem_side_qp_functor_elem_side.first ||
+      side != _current_elem_side_qp_functor_elem_side.second)
+  {
+    _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);
+    const QBase * const qrule_template = std::get<3>(elem_side_qp);
+
+    const FEFamily mapping_family = FEMap::map_fe_type(*elem);
+    const FEType fe_type(elem->default_order(), mapping_family);
+
+    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+    std::unique_ptr<QBase> qrule(QBase::build(
+        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+
+    auto & xyz = fe->get_xyz();
+    fe->attach_quadrature_rule(qrule.get());
+    fe->reinit(elem, side);
+    _current_elem_side_qp_functor_xyz = std::move(xyz);
+  }
+  mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return value(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
 Real

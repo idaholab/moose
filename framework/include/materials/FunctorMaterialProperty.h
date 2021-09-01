@@ -48,20 +48,23 @@ public:
 private:
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemFromFaceArg;
-  using typename FunctorInterface<T>::QpArg;
+  using typename FunctorInterface<T>::ElemQpArg;
+  using typename FunctorInterface<T>::ElemSideQpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
   using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
-  using QpFn = std::function<T(const QpArg &, const unsigned int &)>;
+  using ElemQpFn = std::function<T(const ElemQpArg &, const unsigned int &)>;
+  using ElemSideQpFn = std::function<T(const ElemSideQpArg &, const unsigned int &)>;
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 const unsigned int &)>;
 
   T evaluate(const Elem * const & elem, unsigned int state) const override final;
   T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override final;
   T evaluate(const FaceArg & face, unsigned int state) const override final;
-  T evaluate(const QpArg & qp, unsigned int state) const override final;
+  T evaluate(const ElemQpArg & elem_qp, unsigned int state) const override final;
+  T evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
              unsigned int state) const override final;
 
@@ -79,8 +82,11 @@ private:
   /// ghosting operations if this object is not technically defined on the requested subdomain
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
 
-  /// Functors that will index elemental data at a provided quadrature point index
-  std::unordered_map<SubdomainID, QpFn> _qp_functor;
+  /// Functors that will evaluate elements at quadrature points
+  std::unordered_map<SubdomainID, ElemQpFn> _elem_qp_functor;
+
+  /// Functors that will evaluate elements at side quadrature points
+  std::unordered_map<SubdomainID, ElemSideQpFn> _elem_side_qp_functor;
 
   /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
   /// quadrature point index
@@ -106,7 +112,8 @@ FunctorMaterialProperty<T>::setFunctor(const MooseMesh & mesh,
                  block_id,
                  ". Another material must already declare this property on that block.");
     _elem_from_face_functor.emplace(block_id, my_lammy);
-    _qp_functor.emplace(block_id, my_lammy);
+    _elem_qp_functor.emplace(block_id, my_lammy);
+    _elem_side_qp_functor.emplace(block_id, my_lammy);
     _tqp_functor.emplace(block_id, my_lammy);
   };
 
@@ -206,12 +213,22 @@ FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) c
 
 template <typename T>
 T
-FunctorMaterialProperty<T>::evaluate(const QpArg & elem_and_qp, unsigned int state) const
+FunctorMaterialProperty<T>::evaluate(const ElemQpArg & elem_qp, unsigned int state) const
 {
-  auto it = _qp_functor.find(std::get<0>(elem_and_qp)->subdomain_id());
-  mooseAssert(it != _qp_functor.end(),
-              subdomainErrorMessage(std::get<0>(elem_and_qp)->subdomain_id()));
-  return it->second(elem_and_qp, state);
+  const auto sub_id = std::get<0>(elem_qp)->subdomain_id();
+  auto it = _elem_qp_functor.find(sub_id);
+  mooseAssert(it != _elem_qp_functor.end(), subdomainErrorMessage(sub_id));
+  return it->second(elem_qp, state);
+}
+
+template <typename T>
+T
+FunctorMaterialProperty<T>::evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const
+{
+  const auto sub_id = std::get<0>(elem_side_qp)->subdomain_id();
+  auto it = _elem_side_qp_functor.find(sub_id);
+  mooseAssert(it != _elem_side_qp_functor.end(), subdomainErrorMessage(sub_id));
+  return it->second(elem_side_qp, state);
 }
 
 template <typename T>
@@ -219,7 +236,8 @@ T
 FunctorMaterialProperty<T>::evaluate(
     const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {
-  auto it = _tqp_functor.find(std::get<2>(tqp));
-  mooseAssert(it != _tqp_functor.end(), subdomainErrorMessage(std::get<2>(tqp)));
+  const auto sub_id = std::get<2>(tqp);
+  auto it = _tqp_functor.find(sub_id);
+  mooseAssert(it != _tqp_functor.end(), subdomainErrorMessage(sub_id));
   return it->second(tqp, state);
 }

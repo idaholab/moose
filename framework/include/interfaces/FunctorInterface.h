@@ -96,7 +96,19 @@ public:
    *   evaluation of the ith point
    * - The quadrature rule that can be used to initialize the functor on the given element
    */
-  using QpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
+  using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
+
+  /**
+   * Argument for requesting functor evaluation at quadrature point locations on an element side.
+   * Data in the argument:
+   * - The element
+   * - The element side on which the quadrature points are located
+   * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
+   *   evaluation of the ith point
+   * - The quadrature rule that can be used to initialize the functor on the given element and side
+   */
+  using ElemSideQpArg =
+      std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
 
   using FunctorType = FunctorInterface<T>;
   using FunctorReturnType = T;
@@ -111,7 +123,8 @@ public:
   T operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
   T operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   T operator()(const FaceArg & face, unsigned int state = 0) const;
-  T operator()(const QpArg & qp, unsigned int state = 0) const;
+  T operator()(const ElemQpArg & qp, unsigned int state = 0) const;
+  T operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
   T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                unsigned int state = 0) const;
   ///@}
@@ -149,12 +162,20 @@ protected:
   virtual T evaluate(const FaceArg & face, unsigned int state) const = 0;
 
   /**
-   * @param qp See the \p QpArg doxygen
+   * @param qp See the \p ElemQpArg doxygen
    * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor evaluated at the requested time and space
    */
-  virtual T evaluate(const QpArg & qp, unsigned int state) const = 0;
+  virtual T evaluate(const ElemQpArg & qp, unsigned int state) const = 0;
+
+  /**
+   * @param side_qp See the \p ElemSideQpArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor evaluated at the requested time and space
+   */
+  virtual T evaluate(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
 
   /**
    * @param tqp A tuple with the first member corresponding to an \p ElementType, either Element,
@@ -174,17 +195,26 @@ private:
    */
   void clearCacheData();
 
+  /**
+   * check a qp cache and if invalid then evaluate
+   */
+  template <typename SpaceArg, typename TimeArg>
+  T queryQpCache(unsigned int qp,
+                 std::vector<std::pair<bool, T>> & qp_cache_data,
+                 const SpaceArg & space,
+                 const TimeArg & time) const;
+
   /// How often to clear the material property cache
   std::set<ExecFlagType> _clearance_schedule;
 
   // Data for traditional element-quadrature point property evaluations which are useful for caching
   // implementation
 
-  /// Current quadrature point element (current cache key)
-  mutable dof_id_type _current_qp_elem = DofObject::invalid_id;
+  /// Current key for qp map cache
+  mutable dof_id_type _current_qp_map_key = DofObject::invalid_id;
 
-  /// Current quadrature point element data (current cache value)
-  mutable std::vector<std::pair<bool, T>> * _current_qp_elem_data = nullptr;
+  /// Current value for qp mach cache
+  mutable std::vector<std::pair<bool, T>> * _current_qp_map_value = nullptr;
 
   /// Cached element quadrature point functor property evaluations. The map key is the element
   /// id. The map values should have size corresponding to the number of quadrature points on the
@@ -192,6 +222,24 @@ private:
   /// cached value has been computed. The second member of the pair is the (cached) value. If the
   /// boolean is false, then the value cannot be trusted
   mutable std::unordered_map<dof_id_type, std::vector<std::pair<bool, T>>> _qp_to_value;
+
+  // Data for traditional element-side-quadrature point property evaluations which are useful for
+  // caching implementation
+
+  /// Current key for side-qp map cache
+  mutable dof_id_type _current_side_qp_map_key = DofObject::invalid_id;
+
+  /// Current value for side-qp map cache
+  mutable std::vector<std::vector<std::pair<bool, T>>> * _current_side_qp_map_value = nullptr;
+
+  /// Cached element quadrature point functor property evaluations. The map key is the element
+  /// id. The map values are a multi-dimensional vector (or vector of vectors) with the first index
+  /// corresponding to the side and the second index corresponding to the quadrature point
+  /// index. The elements returned after double indexing are pairs. The first member of the pair
+  /// indicates whether a cached value has been computed. The second member of the pair is the
+  /// (cached) value. If the boolean is false, then the value cannot be trusted
+  mutable std::unordered_map<dof_id_type, std::vector<std::vector<std::pair<bool, T>>>>
+      _side_qp_to_value;
 };
 
 template <typename T>
@@ -217,43 +265,88 @@ FunctorInterface<T>::operator()(const FaceArg & face, const unsigned int state) 
 }
 
 template <typename T>
+template <typename SpaceArg, typename TimeArg>
 T
-FunctorInterface<T>::operator()(const QpArg & elem_and_qp, const unsigned int state) const
+FunctorInterface<T>::queryQpCache(const unsigned int qp,
+                                  std::vector<std::pair<bool, T>> & qp_cache_data,
+                                  const SpaceArg & space,
+                                  const TimeArg & time) const
 {
-  if (_clearance_schedule.count(EXEC_ALWAYS))
-    return evaluate(elem_and_qp, state);
-
-  const auto elem_id = std::get<0>(elem_and_qp)->id();
-  if (elem_id != _current_qp_elem)
-  {
-    _current_qp_elem = elem_id;
-    _current_qp_elem_data = &_qp_to_value[elem_id];
-  }
-  auto & qp_elem_data_ref = *_current_qp_elem_data;
-  const auto qp = std::get<1>(elem_and_qp);
-
   // Check and see whether we even have sized for this quadrature point. If we haven't then we must
   // evaluate
-  if (qp >= qp_elem_data_ref.size())
+  if (qp >= qp_cache_data.size())
   {
-    mooseAssert(qp == qp_elem_data_ref.size(),
-                "I believe that we always iterate over quadrature points in a contiguous fashion");
-    qp_elem_data_ref.resize(qp + 1);
-    auto & pr = qp_elem_data_ref.back();
-    pr.second = evaluate(elem_and_qp, state);
+    mooseAssert(qp_cache_data.size() == qp,
+                "We should only be resizing by one because we iterate over quadrature points in a "
+                "contiugous fashion");
+    qp_cache_data.resize(qp + 1);
+    auto & pr = qp_cache_data.back();
+    pr.second = evaluate(space, time);
     pr.first = true;
     return pr.second;
   }
 
   // We've already sized for this qp, so let's see whether we have a valid cache value
-  auto & pr = qp_elem_data_ref[qp];
+  auto & pr = qp_cache_data[qp];
   if (pr.first)
     return pr.second;
 
   // No valid cache value so evaluate
-  pr.second = evaluate(elem_and_qp, state);
+  pr.second = evaluate(space, time);
   pr.first = true;
   return pr.second;
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(elem_qp, state);
+
+  const auto elem_id = std::get<0>(elem_qp)->id();
+  if (elem_id != _current_qp_map_key)
+  {
+    _current_qp_map_key = elem_id;
+    _current_qp_map_value = &_qp_to_value[elem_id];
+  }
+  auto & qp_data = *_current_qp_map_value;
+  const auto qp = std::get<1>(elem_qp);
+
+  return queryQpCache(qp, qp_data, elem_qp, state);
+}
+
+template <typename T>
+T
+FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(elem_side_qp, state);
+
+  const auto elem_id = std::get<0>(elem_side_qp)->id();
+  if (elem_id != _current_side_qp_map_key)
+  {
+    _current_side_qp_map_key = elem_id;
+    _current_side_qp_map_value = &_side_qp_to_value[elem_id];
+  }
+  auto & side_qp_data = *_current_side_qp_map_value;
+  const auto side = std::get<1>(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
+
+  // Check and see whether we even have sized for this side. If we haven't then we must
+  // evaluate
+  if (side >= side_qp_data.size())
+  {
+    mooseAssert(side == side_qp_data.size(),
+                "I believe that we always iterate over sides in a contiguous fashion");
+    side_qp_data.resize(side + 1);
+    auto & qp_data = side_qp_data.back();
+    return queryQpCache(qp, qp_data, elem_side_qp, state);
+  }
+
+  // Ok we were sized enough for our side
+  auto & qp_data = side_qp_data[side];
+  return queryQpCache(qp, qp_data, elem_side_qp, state);
 }
 
 template <typename T>
@@ -280,8 +373,10 @@ FunctorInterface<T>::clearCacheData()
     for (auto & pr : map_pr.second)
       pr.first = false;
 
-  _current_qp_elem = DofObject::invalid_id;
-  _current_qp_elem_data = nullptr;
+  _current_qp_map_key = DofObject::invalid_id;
+  _current_qp_map_value = nullptr;
+  _current_side_qp_map_key = DofObject::invalid_id;
+  _current_side_qp_map_value = nullptr;
 }
 
 template <typename T>
@@ -321,14 +416,16 @@ public:
 private:
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemFromFaceArg;
-  using typename FunctorInterface<T>::QpArg;
+  using typename FunctorInterface<T>::ElemQpArg;
+  using typename FunctorInterface<T>::ElemSideQpArg;
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
   T evaluate(const libMesh::Elem * const &, unsigned int) const override final { return _value; }
   T evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
   T evaluate(const FaceArg &, unsigned int) const override final { return _value; }
-  T evaluate(const QpArg &, unsigned int) const override final { return _value; }
+  T evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
+  T evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
              unsigned int) const override final
   {

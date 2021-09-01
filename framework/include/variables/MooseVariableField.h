@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableData.h"
 #include "FunctorInterface.h"
+#include "MeshChangedInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -37,7 +38,8 @@
  */
 template <typename OutputType>
 class MooseVariableField : public MooseVariableFieldBase,
-                           public FunctorInterface<typename Moose::ADType<OutputType>::type>
+                           public FunctorInterface<typename Moose::ADType<OutputType>::type>,
+                           public MeshChangedInterface
 
 {
 public:
@@ -333,21 +335,47 @@ public:
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
 
+  void meshChanged() override;
+
 protected:
   using FunctorInterface<typename Moose::ADType<OutputType>::type>::evaluate;
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::QpArg;
-  typename Moose::ADType<OutputType>::type evaluate(const QpArg & qp,
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemQpArg;
+  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemSideQpArg;
+  typename Moose::ADType<OutputType>::type evaluate(const ElemQpArg & elem_qp,
+                                                    unsigned int state) const override final;
+  typename Moose::ADType<OutputType>::type evaluate(const ElemSideQpArg & elem_side_qp,
                                                     unsigned int state) const override final;
   typename Moose::ADType<OutputType>::type
   evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
            unsigned int state) const override final;
 
 private:
-  /// Keep track of the current functor element in order to enable local element caching (e.g. if we
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Compute the solution with provided shape functions
+   */
+  template <typename Shapes, typename Solution>
+  void computeSolution(const Elem * elem,
+                       const QBase *,
+                       unsigned int state,
+                       const Shapes & phi,
+                       Solution & soln) const;
+#endif
+
+  /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return
   /// previously computed results indexed at the different qp
-  mutable const Elem * _current_functor_elem = nullptr;
+  mutable const Elem * _current_elem_qp_functor_elem = nullptr;
 
-  /// The values of the solution for the \p _current_functor_elem
-  mutable std::vector<typename Moose::ADType<OutputType>::type> _current_functor_sln;
+  /// The values of the solution for the \p _current_elem_qp_functor_elem
+  mutable std::vector<typename Moose::ADType<OutputType>::type> _current_elem_qp_functor_sln;
+
+  /// Keep track of the current elem-side-qp functor element and side in order to enable local
+  /// caching (e.g. if we call evaluate with the same element and side, but just with a different
+  /// quadrature point, we can return previously computed results indexed at the different qp
+  mutable std::pair<const Elem *, unsigned int> _current_elem_side_qp_functor_elem_side{
+      nullptr, libMesh::invalid_uint};
+
+  /// The values of the solution for the \p _current_elem_side_qp_functor_elem_side
+  mutable std::vector<typename Moose::ADType<OutputType>::type> _current_elem_side_qp_functor_sln;
 };

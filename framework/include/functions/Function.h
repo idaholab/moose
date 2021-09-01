@@ -119,7 +119,8 @@ public:
 private:
   using typename FunctorInterface<Real>::FaceArg;
   using typename FunctorInterface<Real>::ElemFromFaceArg;
-  using typename FunctorInterface<Real>::QpArg;
+  using typename FunctorInterface<Real>::ElemQpArg;
+  using typename FunctorInterface<Real>::ElemSideQpArg;
 
   /**
    * @return the time associated with the requested \p state
@@ -129,15 +130,27 @@ private:
   Real evaluate(const Elem * const & elem, unsigned int state) const override final;
   Real evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override final;
   Real evaluate(const FaceArg & face, unsigned int state) const override final;
-  Real evaluate(const QpArg & qp, unsigned int state) const override final;
+  Real evaluate(const ElemQpArg & qp, unsigned int state) const override final;
+  Real evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   Real evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                 unsigned int state) const override final;
 
-  /// Keep track of the current functor element in order to enable local element caching (e.g. if we
+  /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return
-  /// previously computed results indexed at the different qp
-  mutable const Elem * _current_functor_elem = nullptr;
+  /// previously computed results indexed at the different qp)
+  mutable const Elem * _current_elem_qp_functor_elem = nullptr;
 
-  /// The location of the quadrature points in physical space for the \p _current_functor_elem
-  mutable std::vector<Point> _current_functor_xyz;
+  /// The location of the quadrature points in physical space for the
+  /// \p _current_elem_qp_functor_elem
+  mutable std::vector<Point> _current_elem_qp_functor_xyz;
+
+  /// Keep track of the current elem-side-qp functor element-side pair in order to enable local
+  /// caching (e.g. if we call evaluate on the same element and side, but just with a different
+  /// quadrature point, we can return previously computed results indexed at the different qp)
+  mutable std::pair<const Elem *, unsigned int> _current_elem_side_qp_functor_elem_side{
+      nullptr, libMesh::invalid_uint};
+
+  /// The location of the quadrature points in physical space for the
+  /// \p _current_elem_side_qp_functor_elem_side
+  mutable std::vector<Point> _current_elem_side_qp_functor_xyz;
 };

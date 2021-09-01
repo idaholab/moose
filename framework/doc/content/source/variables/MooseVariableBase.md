@@ -174,15 +174,15 @@ gradient. Some of these methods are exemplified below:
 Derived field classes of `MooseVariableBase`, e.g. derivatives of the class
 template `MooseVariableField<T>` inherit from the
 `FunctorInterface`. Quadrature-based overloads of the `evaluate` method are
-implemented in `MooseVariableField<T>`. The `QpArg` `evaluate` overload does a
+implemented in `MooseVariableField<T>`. The `ElemQpArg` `evaluate` overload does a
 true on-the-fly computation of the solution based on the information contained
-within the `QpArg`, e.g. the provided element and quadrature rule. The
+within the `ElemQpArg`, e.g. the provided element and quadrature rule. The
 `ElementType` overload, however, simply queries methods like `adSln()`,
 `slnOld()`, `slnOlder()`, `adSlnNeighbor()`, and `slnOldNeighbor()`. The success
 of this latter overload depends on the fact that the variable has already been
 reinit'd on the requested element or neighbor type. If a user is unsure whether
 this precondition will be met, then they should call the likely slower but more
-flexible `QpArg` overload.
+flexible `ElemQpArg` overload.
 
 Finite-volume-centric `evaluate` overloads are individually implemented in
 `MooseVariableFE<T>` and `MooseVariableFV<T>` class templates. The finite
