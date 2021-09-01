@@ -101,6 +101,16 @@ MultiAppNearestNodeTransfer::execute()
   // but at the same time, more communication will be involved and can be expensive.
   for (auto & box : bboxes)
   {
+    // libmesh set an invalid bounding box using this code
+    // for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    // {
+    //   this->first(i)  =  std::numeric_limits<Real>::max();
+    //   this->second(i) = -std::numeric_limits<Real>::max();
+    // }
+    // If it is an invalid box, we should skip it
+    if (box.first(0) == std::numeric_limits<Real>::max())
+      continue;
+
     auto width = box.second - box.first;
     box.second += width * _bbox_extend_factor;
     box.first -= width * _bbox_extend_factor;
@@ -268,7 +278,6 @@ MultiAppNearestNodeTransfer::execute()
                   // If this point already exist, we skip it
                   if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
                     continue;
-
                   node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                   outgoing_qps[i_proc].push_back(point + _to_positions[i_to]);
                   local_elems_found.insert(elem);
