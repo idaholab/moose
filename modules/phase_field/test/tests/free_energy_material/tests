@@ -114,6 +114,8 @@
       input = 'CoupledValueFunctionFreeEnergy.i'
       exodiff = 'CoupledValueFunctionFreeEnergy_out.e'
       detail = 'Using a pretabulated free energy through PiecewiseMultilinear functions'
+      # prepare_tabulation is always skipped in Valgrind testing, which would fail this test
+      valgrind = 'NONE'
     []
   []
 []
