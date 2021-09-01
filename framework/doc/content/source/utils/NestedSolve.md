@@ -40,6 +40,22 @@ being `Real` scalars), and for 3x3 systems (with the solution and residual bein
 `RealVectorValues` and Jacobians being `RankTwoTensor` values). The correct
 overload is picked based on the type `T` of the initial `guess` parameter.
 
+### Checking convergence state
+
+The state of a solve can be checked using the `getSolve()` method. This returns
+an enumeration describing how the solve converged or if it did not converge. The
+enumeration can take the following values:
+
+- `NestedSolve::State::NONE`: No solve has begun. This is the initial value.
+- `NestedSolve::State::CONVERGED_ABS`: The solve converged due to meeting an absolute tolerance.
+- `NestedSolve::State::CONVERGED_REL`: The solve converged due to meeting a relative tolerance.
+- `NestedSolve::State::EXACT_GUESS`: The solve converged due to the initial guess giving a
+  zero residual.
+- `NestedSolve::State::NOT_CONVERGED`: The solve did not converge.
+
+Note that in the case that both the absolute and relative tolerances being met
+simultaneously, the value `NestedSolve::State::CONVERGED_REL` will be returned.
+
 ## Example
 
 ### Basic usage
@@ -98,6 +114,15 @@ solver.nonlinear(solution, compute);
 
 `solution` will now be updated from the initial guess to the actual solution of
 the system.
+
+Then to check that the solve was successful, one can do the following:
+
+```
+if (solver.getState() == NestedSolve::State::NOT_CONVERGED)
+{
+  // Take some action for the case of no convergence.
+}
+```
 
 ### Powell's Dogleg method solver
 
