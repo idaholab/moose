@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = nearest_point_layered_side_integral.i
+    exodiff = nearest_point_layered_side_integral_out.e
+    requirement = 'The system shall compute layered side integrals that computed from the closest values for a list of points'
+    design = 'NearestPointLayeredSideIntegral.md'
+    issues = '#18702'
+  []
+[]
