@@ -13,8 +13,8 @@
     type = Exodiff
     input = 'ad_gravity_test.i'
     exodiff = 'ad_gravity_test_out.e'
-    requirement = 'We shall be able to reproduce gravity test results of the hand-coded simulation '
-                  'using automatic differentiation.'
+    requirement = 'The tensor mechanics module shall be able to reproduce gravity test results of '
+                  'the hand-coded jacobian using automatic differentiation.'
     design = 'ADGravity.md'
     issues = '#13100'
   []

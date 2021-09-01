@@ -26,7 +26,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  /// coordinte axis this Kernel acts on
+  /// coordinate axis this Kernel acts on
   unsigned int _component;
 
   /// coupled force density vector property

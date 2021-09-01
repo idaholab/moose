@@ -5,8 +5,7 @@
 #
 # The mesh is composed of one block with a single element.
 # The bottom is fixed in all three directions.  Poisson's ratio
-# is zero.
-# which makes it trivial to check displacements.
+# is zero, which makes it trivial to check displacements.
 #
 
 [GlobalParams]
