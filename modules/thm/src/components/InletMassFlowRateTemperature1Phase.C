@@ -40,7 +40,7 @@ InletMassFlowRateTemperature1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnGhostMassFlowRateTemperature";
+    const std::string class_name = "ADBoundaryFlux3EqnGhostMassFlowRateTemperature";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("mass_flow_rate") = getParam<Real>("m_dot");
     params.set<Real>("T") = getParam<Real>("T");

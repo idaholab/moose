@@ -28,7 +28,7 @@ void
 ClosuresBase::addZeroMaterial(const FlowChannelBase & flow_channel,
                               const std::string & property_name) const
 {
-  const std::string class_name = "ConstantMaterial";
+  const std::string class_name = "ADConstantMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<std::string>("property_name") = property_name;
@@ -42,7 +42,7 @@ ClosuresBase::addWeightedAverageMaterial(const FlowChannelBase & flow_channel,
                                          const std::vector<VariableName> & weights,
                                          const MaterialPropertyName & property_name) const
 {
-  const std::string class_name = "WeightedAverageMaterial";
+  const std::string class_name = "ADWeightedAverageMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<MaterialPropertyName>("prop_name") = property_name;
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
@@ -55,7 +55,7 @@ void
 ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannelBase & flow_channel,
                                                 unsigned int i) const
 {
-  const std::string class_name = "CoupledVariableValueMaterial";
+  const std::string class_name = "ADCoupledVariableValueMaterial";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
   params.set<MaterialPropertyName>("prop_name") = {flow_channel.getWallTemperatureNames()[i]};

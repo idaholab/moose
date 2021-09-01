@@ -146,4 +146,9 @@
     sync_only = true
     sync_times = '3 4 5'
   []
+  [console]
+    type = Console
+    max_rows = 1
+  []
+  print_linear_residuals = false
 []

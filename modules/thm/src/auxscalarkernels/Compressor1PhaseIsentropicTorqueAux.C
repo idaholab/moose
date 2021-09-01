@@ -1,5 +1,5 @@
 #include "Compressor1PhaseIsentropicTorqueAux.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Compressor1PhaseIsentropicTorqueAux);
 
@@ -16,12 +16,12 @@ Compressor1PhaseIsentropicTorqueAux::validParams()
 Compressor1PhaseIsentropicTorqueAux::Compressor1PhaseIsentropicTorqueAux(
     const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _compressor_uo(getUserObject<ShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
+    _compressor_uo(getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
 Real
 Compressor1PhaseIsentropicTorqueAux::computeValue()
 {
-  return _compressor_uo.getIsentropicTorque();
+  return MetaPhysicL::raw_value(_compressor_uo.getIsentropicTorque());
 }

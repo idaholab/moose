@@ -76,19 +76,19 @@
 
 [Postprocessors]
   [E_in]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = in
     equation = energy
     execute_on = 'initial timestep_end'
   []
   [E_out]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     boundary = out
     equation = energy
     execute_on = 'initial timestep_end'
   []
   [hf_pipe]
-    type = HeatRateConvection1Phase
+    type = ADHeatRateConvection1Phase
     block = fch
     T_wall = T_wall
     T = T

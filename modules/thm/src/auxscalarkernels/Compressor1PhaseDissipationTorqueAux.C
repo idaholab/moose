@@ -1,5 +1,5 @@
 #include "Compressor1PhaseDissipationTorqueAux.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Compressor1PhaseDissipationTorqueAux);
 
@@ -16,12 +16,12 @@ Compressor1PhaseDissipationTorqueAux::validParams()
 Compressor1PhaseDissipationTorqueAux::Compressor1PhaseDissipationTorqueAux(
     const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _compressor_uo(getUserObject<ShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
+    _compressor_uo(getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
 Real
 Compressor1PhaseDissipationTorqueAux::computeValue()
 {
-  return _compressor_uo.getDissipationTorque();
+  return MetaPhysicL::raw_value(_compressor_uo.getDissipationTorque());
 }

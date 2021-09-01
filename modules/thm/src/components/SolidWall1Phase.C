@@ -20,7 +20,7 @@ SolidWall1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnGhostWall";
+    const std::string class_name = "ADBoundaryFlux3EqnGhostWall";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<Real>("normal") = _normal;

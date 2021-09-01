@@ -1,7 +1,7 @@
 [Tests]
-  [jac:test]
+  [jacobian]
     type = 'PetscJacobianTester'
-    input = 'jac.test.i'
+    input = 'jacobian.i'
     ratio_tol = 1e-8
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'

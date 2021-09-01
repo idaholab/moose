@@ -2,13 +2,12 @@
 #include "FlowModelSinglePhase.h"
 #include "Numerics.h"
 #include "Shaft.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 #include "ScalarKernel.h"
 #include "GeometricalFlowComponent.h"
-#include "VolumeJunction1PhaseUserObject.h"
-#include "VolumeJunctionBaseUserObject.h"
+#include "ADVolumeJunction1PhaseUserObject.h"
 
 registerMooseObject("THMApp", ShaftConnectedCompressor1Phase);
 
@@ -114,7 +113,7 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   {
-    const std::string class_name = "ShaftConnectedCompressor1PhaseUserObject";
+    const std::string class_name = "ADShaftConnectedCompressor1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;

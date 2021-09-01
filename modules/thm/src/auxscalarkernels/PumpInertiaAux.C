@@ -1,5 +1,5 @@
 #include "PumpInertiaAux.h"
-#include "ShaftConnectedPump1PhaseUserObject.h"
+#include "ADShaftConnectedPump1PhaseUserObject.h"
 
 registerMooseObject("THMApp", PumpInertiaAux);
 
@@ -14,12 +14,12 @@ PumpInertiaAux::validParams()
 
 PumpInertiaAux::PumpInertiaAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _pump_uo(getUserObject<ShaftConnectedPump1PhaseUserObject>("pump_uo"))
+    _pump_uo(getUserObject<ADShaftConnectedPump1PhaseUserObject>("pump_uo"))
 {
 }
 
 Real
 PumpInertiaAux::computeValue()
 {
-  return _pump_uo.getMomentOfInertia();
+  return MetaPhysicL::raw_value(_pump_uo.getMomentOfInertia());
 }

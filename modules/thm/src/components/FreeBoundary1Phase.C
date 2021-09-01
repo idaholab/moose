@@ -23,7 +23,7 @@ FreeBoundary1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnFreeOutflow";
+    const std::string class_name = "ADBoundaryFlux3EqnFreeOutflow";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;

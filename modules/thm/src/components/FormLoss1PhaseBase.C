@@ -40,13 +40,10 @@ void
 FormLoss1PhaseBase::addMooseObjects()
 {
   {
-    const std::string class_name = "OneD3EqnMomentumFormLoss";
+    const std::string class_name = "ADOneD3EqnMomentumFormLoss";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
-    params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
-    params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
-    params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
     params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;

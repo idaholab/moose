@@ -74,12 +74,12 @@
 
 [Postprocessors]
   [mass_in]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     equation = mass
     boundary = inlet
   []
   [mass_out]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     equation = mass
     boundary = outlet
   []
@@ -90,12 +90,12 @@
   []
 
   [energy_in]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     equation = energy
     boundary = inlet
   []
   [energy_out]
-    type = FlowBoundaryFlux1Phase
+    type = ADFlowBoundaryFlux1Phase
     equation = energy
     boundary = outlet
   []

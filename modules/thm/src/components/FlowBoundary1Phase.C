@@ -57,7 +57,7 @@ FlowBoundary1Phase::init()
 void
 FlowBoundary1Phase::addWeakBC3Eqn()
 {
-  const std::string class_name = "BoundaryFlux3EqnBC";
+  const std::string class_name = "ADBoundaryFlux3EqnBC";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
   params.set<Real>("normal") = _normal;

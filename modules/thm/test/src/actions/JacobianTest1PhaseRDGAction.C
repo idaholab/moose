@@ -257,7 +257,10 @@ JacobianTest1PhaseRDGAction::addMaterials()
   {
     const std::string class_name = "AddMaterialAction";
     InputParameters params = _action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "FluidProperties3EqnMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADFluidProperties3EqnMaterial";
+    else
+      params.set<std::string>("type") = "FluidProperties3EqnMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create(class_name, "fluid_properties_material", params));

@@ -1,5 +1,5 @@
 #include "Turbine1PhaseFlowCoefficientAux.h"
-#include "ShaftConnectedTurbine1PhaseUserObject.h"
+#include "ADShaftConnectedTurbine1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Turbine1PhaseFlowCoefficientAux);
 
@@ -14,12 +14,12 @@ Turbine1PhaseFlowCoefficientAux::validParams()
 
 Turbine1PhaseFlowCoefficientAux::Turbine1PhaseFlowCoefficientAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _turbine_uo(getUserObject<ShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
+    _turbine_uo(getUserObject<ADShaftConnectedTurbine1PhaseUserObject>("turbine_uo"))
 {
 }
 
 Real
 Turbine1PhaseFlowCoefficientAux::computeValue()
 {
-  return _turbine_uo.getFlowCoefficient();
+  return MetaPhysicL::raw_value(_turbine_uo.getFlowCoefficient());
 }

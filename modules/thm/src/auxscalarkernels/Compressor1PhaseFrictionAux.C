@@ -1,5 +1,5 @@
 #include "Compressor1PhaseFrictionAux.h"
-#include "ShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADShaftConnectedCompressor1PhaseUserObject.h"
 
 registerMooseObject("THMApp", Compressor1PhaseFrictionAux);
 
@@ -14,12 +14,12 @@ Compressor1PhaseFrictionAux::validParams()
 
 Compressor1PhaseFrictionAux::Compressor1PhaseFrictionAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
-    _compressor_uo(getUserObject<ShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
+    _compressor_uo(getUserObject<ADShaftConnectedCompressor1PhaseUserObject>("compressor_uo"))
 {
 }
 
 Real
 Compressor1PhaseFrictionAux::computeValue()
 {
-  return _compressor_uo.getFrictionTorque();
+  return MetaPhysicL::raw_value(_compressor_uo.getFrictionTorque());
 }

@@ -84,7 +84,7 @@ L = 2.0
 
 [Postprocessors]
   [heat_rate]
-    type = HeatRateConvection1Phase
+    type = ADHeatRateConvection1Phase
     P_hf = P_hf
     execute_on = 'INITIAL'
   []

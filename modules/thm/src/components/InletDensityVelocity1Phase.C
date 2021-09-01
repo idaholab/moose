@@ -39,7 +39,7 @@ InletDensityVelocity1Phase::addMooseObjects()
 
   // boundary flux user object
   {
-    const std::string class_name = "BoundaryFlux3EqnGhostDensityVelocity";
+    const std::string class_name = "ADBoundaryFlux3EqnGhostDensityVelocity";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("rho") = getParam<Real>("rho");
     params.set<Real>("vel") = getParam<Real>("vel");

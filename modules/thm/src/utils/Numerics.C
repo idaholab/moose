@@ -130,6 +130,12 @@ Dean(Real Re, Real doD)
   return Re * std::sqrt(doD);
 }
 
+ADReal
+Dean(ADReal Re, ADReal doD)
+{
+  return Re * std::sqrt(doD);
+}
+
 void
 vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, Real & dvel_darhouA)
 {
@@ -165,6 +171,12 @@ v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA)
 {
   v = A / rhoA;
   dv_drhoA = -A / (rhoA * rhoA);
+}
+
+ADReal
+v_from_rhoA_A(ADReal rhoA, ADReal A)
+{
+  return A / rhoA;
 }
 
 void
@@ -208,6 +220,12 @@ e_from_arhoA_arhouA_arhoEA(Real arhoA,
   de_darhoA_val = de_darhoA(arhoA, arhouA, arhoEA);
   de_darhouA_val = de_darhouA(arhoA, arhouA);
   de_darhoEA_val = de_darhoEA(arhoA);
+}
+
+ADReal
+e_from_arhoA_arhouA_arhoEA(ADReal arhoA, ADReal arhouA, ADReal arhoEA)
+{
+  return arhoEA / arhoA - 0.5 * arhouA * arhouA / (arhoA * arhoA);
 }
 
 void
@@ -259,6 +277,12 @@ h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, R
   dh_de = 1.0;
   dh_dp = 1.0 / rho;
   dh_drho = -p / (rho * rho);
+}
+
+ADReal
+h_from_e_p_rho(ADReal e, ADReal p, ADReal rho)
+{
+  return e + p / rho;
 }
 
 bool

@@ -74,11 +74,14 @@
 []
 
 [Outputs]
-  exodus = true
-
   print_linear_converged_reason = false
   print_nonlinear_converged_reason = false
   print_linear_residuals = false
 
-  sync_times = '0 5 10 15 20 25'
+  [out]
+    type = Exodus
+    sync_only = false
+    sync_times = '0 5 10 15 20 25'
+    show = 'vel_x vel_y vel_z'
+  []
 []

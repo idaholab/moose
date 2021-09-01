@@ -141,6 +141,8 @@ protected:
   const std::string _fe_family;
   /// Default FE order
   const std::string _fe_order;
+  /// True for setting up testing with AD, false otherwise
+  const bool & _ad;
 
 public:
   static InputParameters validParams();

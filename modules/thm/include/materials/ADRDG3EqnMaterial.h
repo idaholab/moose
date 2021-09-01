@@ -38,7 +38,7 @@ protected:
   MooseVariable * _rhoEA_var;
 
   /// Flow channel direction
-  const ADMaterialProperty<RealVectorValue> & _dir;
+  const MaterialProperty<RealVectorValue> & _dir;
 
   // reconstructed variable values
   ADMaterialProperty<Real> & _rhoA;
