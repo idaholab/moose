@@ -22,13 +22,12 @@
 
 [DiracKernels]
   [pt]
-    type = VectorPostprocessorPointSource
+    type = ReporterPointSource
     variable = temperature
-    vector_postprocessor = point_source
-    x_coord_name = 'x'
-    y_coord_name = 'y'
-    z_coord_name = 'z'
-    value_name = 'value'
+    x_coord_name = 'point_source/x'
+    y_coord_name = 'point_source/y'
+    z_coord_name = 'point_source/z'
+    value_name = 'point_source/value'
   []
 []
 
@@ -85,7 +84,7 @@
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '0.0 0.0 0.0; 0.3 0.5 1.0; 0 0 0 0; 10 10 10 10'
+    value = '0.0 0.0 0.0; 0.3 0.5 1.0; 0 0 0; 10 10 10'
   []
   [data_pt]
     type = PointValueSampler

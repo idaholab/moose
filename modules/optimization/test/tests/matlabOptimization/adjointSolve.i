@@ -26,10 +26,12 @@
 
 [DiracKernels]
   [force_0]
-    type = VectorPostprocessorPointSource
-    variable = 'temperature'
-    value_name = 'value'
-    vector_postprocessor = 'csv_reader'
+    type = ReporterPointSource
+    variable = temperature
+    value_name = csv_reader/value 
+    x_coord_name = csv_reader/x
+    y_coord_name = csv_reader/y
+    z_coord_name = csv_reader/z
   []
 []
 
