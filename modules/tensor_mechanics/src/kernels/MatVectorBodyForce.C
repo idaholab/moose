@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MechanicalBodyForce.h"
+#include "MatVectorBodyForce.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", MechanicalBodyForce);
+registerMooseObject("TensorMechanicsApp", MatVectorBodyForce);
 
 InputParameters
-MechanicalBodyForce::validParams()
+MatVectorBodyForce::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Apply a body force vector to the coupled displacement component.");
@@ -26,7 +26,7 @@ MechanicalBodyForce::validParams()
   return params;
 }
 
-MechanicalBodyForce::MechanicalBodyForce(const InputParameters & parameters)
+MatVectorBodyForce::MatVectorBodyForce(const InputParameters & parameters)
   : Kernel(parameters),
     _component(libMesh::invalid_uint),
     _force_density(getMaterialProperty<RealVectorValue>("force_density")),
@@ -43,7 +43,7 @@ MechanicalBodyForce::MechanicalBodyForce(const InputParameters & parameters)
 }
 
 Real
-MechanicalBodyForce::computeQpResidual()
+MatVectorBodyForce::computeQpResidual()
 {
   Real factor = _function.value(_t + _alpha * _dt, _q_point[_qp]);
   return _force_density[_qp](_component) * _test[_i][_qp] * factor;

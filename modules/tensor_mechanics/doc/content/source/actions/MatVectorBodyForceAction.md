@@ -3,4 +3,4 @@
 ## Description
 
 See the description, example use, and parameters on the
-[MechanicalBodyForce](/MechanicalBodyForce/index.md) action system page.
+[MatVectorBodyForce](/MatVectorBodyForce/index.md) action system page.

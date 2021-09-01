@@ -73,8 +73,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CommonCohesiveZoneAction", "Modules/TensorMechanics/CohesiveZoneMaster");
   registerSyntax("CohesiveZoneAction", "Modules/TensorMechanics/CohesiveZoneMaster/*");
 
-  registerSyntax("EmptyAction", "Modules/TensorMechanics/MechanicalBodyForce");
-  registerSyntax("MechanicalBodyForceAction", "Modules/TensorMechanics/MechanicalBodyForce/*");
+  registerSyntax("EmptyAction", "Modules/TensorMechanics/MatVectorBodyForce");
+  registerSyntax("MatVectorBodyForceAction", "Modules/TensorMechanics/MatVectorBodyForce/*");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");

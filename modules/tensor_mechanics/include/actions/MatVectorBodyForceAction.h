@@ -11,12 +11,12 @@
 
 #include "Action.h"
 
-class MechanicalBodyForceAction : public Action
+class MatVectorBodyForceAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  MechanicalBodyForceAction(const InputParameters & params);
+  MatVectorBodyForceAction(const InputParameters & params);
 
   virtual void act() override;
 };

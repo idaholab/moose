@@ -29,13 +29,13 @@
     design = 'ADGravity.md'
     cli_args = "Outputs/active=''"
   []
-  [mechanical_body_force]
+  [mat_vector_body_force]
     type = Exodiff
-    input = 'mechanical_body_force.i'
-    exodiff = 'mechanical_body_force_out.e'
+    input = 'mat_vector_body_force.i'
+    exodiff = 'mat_vector_body_force_out.e'
     requirement = 'The system shall provide a way to apply a vector valued body force density to a '
                   'volume'
     issues = '#13100'
-    design = 'MechanicalBodyForce.md'
+    design = 'MatVectorBodyForce.md'
   []
 []
