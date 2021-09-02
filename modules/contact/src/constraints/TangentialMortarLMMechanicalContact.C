@@ -70,51 +70,44 @@ TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_
   {
     case Moose::MortarType::Lower:
     {
-      // Check whether we project onto a primary face
-      if (_has_primary)
+      // Check whether we are actually in contact
+      if (_contact_pressure[_qp] > TOLERANCE * TOLERANCE)
       {
-        // Check whether we are actually in contact
-        if (_contact_pressure[_qp] > TOLERANCE * TOLERANCE)
-        {
-          // Build the velocity vector
-          ADRealVectorValue relative_velocity(_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                                              _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                                              0);
+        // Build the velocity vector
+        ADRealVectorValue relative_velocity(_secondary_x_dot[_qp] - _primary_x_dot[_qp],
+                                            _secondary_y_dot[_qp] - _primary_y_dot[_qp],
+                                            0);
 
-          // Get the component in the tangential direction
-          auto tangential_velocity = relative_velocity * _tangents[_qp][0];
+        // Get the component in the tangential direction
+        auto tangential_velocity = relative_velocity * _tangents[_qp][0];
 
-          // NCP part 1: requirement that either there is no slip **or** slip velocity and
-          // frictional force exerted **by** the secondary side are in the same direction
-          ADReal a;
-          if (tangential_velocity * _lambda[_qp] < 0)
-            a = -std::abs(tangential_velocity);
-          else
-          {
-            if (tangential_velocity == 0)
-              // Avoid a singular Jacobian entry
-              tangential_velocity += _epsilon;
-            a = std::abs(tangential_velocity);
-          }
-          a *= _c;
-
-          // NCP part 2: require that the frictional force can never exceed the frictional
-          // coefficient times the normal force
-          auto b = _friction_coeff * _contact_pressure[_qp] - std::abs(_lambda[_qp]);
-
-          ADReal fb_function;
-          if (_ncp_type == "fb")
-            // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
-            // constant > 0 into the root function, then it is
-            fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
-          else
-            fb_function = std::min(a, b);
-
-          return _test[_i][_qp] * fb_function;
-        }
+        // NCP part 1: requirement that either there is no slip **or** slip velocity and
+        // frictional force exerted **by** the secondary side are in the same direction
+        ADReal a;
+        if (tangential_velocity * _lambda[_qp] < 0)
+          a = -std::abs(tangential_velocity);
         else
-          // If not in contact then we force the tangential lagrange multiplier to zero
-          return _test[_i][_qp] * _lambda[_qp];
+        {
+          if (tangential_velocity == 0)
+            // Avoid a singular Jacobian entry
+            tangential_velocity += _epsilon;
+          a = std::abs(tangential_velocity);
+        }
+        a *= _c;
+
+        // NCP part 2: require that the frictional force can never exceed the frictional
+        // coefficient times the normal force
+        auto b = _friction_coeff * _contact_pressure[_qp] - std::abs(_lambda[_qp]);
+
+        ADReal fb_function;
+        if (_ncp_type == "fb")
+          // The FB function (in its pure form) is not differentiable at (0, 0) but if we add some
+          // constant > 0 into the root function, then it is
+          fb_function = a + b - std::sqrt(a * a + b * b + _epsilon);
+        else
+          fb_function = std::min(a, b);
+
+        return _test[_i][_qp] * fb_function;
       }
       else
         // If not in contact then we force the tangential lagrange multiplier to zero (if we don't
