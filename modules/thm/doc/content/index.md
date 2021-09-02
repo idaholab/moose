@@ -14,12 +14,11 @@ The basic capabilities include:
 
 - Component-based approach to build thermal-hydraulic simulations.
 - 1-phase, variable-area, inviscid, compressible flow model.
-- 2-phase, variable-area, inviscid, compressible flow via the "7-equation" model.
 
   - with non-condensable vapor mixture.
 
 - 2-D (Cartesian or axisymmetric) heat conduction.
-- 3-D heat conduction (in progress).
+- 3-D heat conduction.
 - Control logic system.
 - Extensibility:
 
