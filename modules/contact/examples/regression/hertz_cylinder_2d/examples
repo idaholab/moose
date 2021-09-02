@@ -1,0 +1,33 @@
+[Examples]
+  issues = '#18648'
+  design = 'syntax/Contact/index.md ComputeFrictionalForceLMMechanicalContact.md '
+           'MechanicalContactConstraint.md'
+  [cylinder_friction_mortar]
+    type = CSVDiff
+    input = 'cylinder_friction_mortar.i'
+    csvdiff = 'cylinder_friction_mortar_chkfile_friction_0002.csv'
+    abs_zero = 5.0
+    rel_err = 1.0e-3
+    requirement = 'Contact module shall compute mortar frictional forces according to reference solution '
+                  'when a cylinder is pressed onto a rigid plane. Similar reference solution can be '
+                  'consulted in section 3.6 of 2008, Hueber, Discretization techniques and efficient '
+                  'algorithms for contact problems. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+  [cylinder_friction_nodetosegment_penalty]
+    type = CSVDiff
+    input = 'cylinder_friction_nodetosegment_penalty.i'
+    csvdiff = 'cylinder_friction_nodetosegment_penalty_chkfile_friction_force_0002.csv'
+    abs_zero = 1.0e-3
+    rel_err = 1.0e-3
+    requirement = 'Contact module shall compute node-to-segment frictional forces according to reference solution '
+                  'when a cylinder is pressed onto a rigid plane. Similar reference solution can be '
+                  'consulted in section 3.6 of 2008, Hueber, Discretization techniques and efficient '
+                  'algorithms for contact problems. '
+    max_time = 4800
+    min_parallel = 2
+    max_parallel = 8
+  []
+[]
