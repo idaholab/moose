@@ -7,22 +7,39 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "SobolCalculators.h"
-#include "MooseError.h"
 
-#include <numeric>
+#include "libmesh/dense_matrix.h"
+#include "libmesh/parallel.h"
 
 namespace StochasticTools
 {
-SobolCalculator::SobolCalculator(const ParallelObject & other, std::size_t n, bool resample)
-  : ParallelObject(other), _num_rows_per_matrix(n), _resample(resample)
+SobolCalculator::SobolCalculator(const ParallelObject & other,
+                                 const std::string & name,
+                                 std::size_t n,
+                                 bool resample)
+  : Calculator<std::vector<Real>, std::vector<Real>>(other, name),
+    _num_rows_per_matrix(n),
+    _resample(resample)
 {
 }
 
-std::vector<Real>
-SobolCalculator::compute(const std::vector<Real> & data, bool is_distributed) const
+void
+SobolCalculator::initialize()
+{
+  _data.clear();
+}
+
+void
+SobolCalculator::update(const Real & data)
+{
+  _data.push_back(data);
+}
+
+void
+SobolCalculator::finalize(bool is_distributed)
 {
   if (is_distributed)
-    mooseError("Distributed VPP data is not yet supported for Sobol indice calculation.");
+    this->_communicator.gather(0, _data);
 
   // Set local convience variable
   const std::size_t n = _num_rows_per_matrix;
@@ -31,7 +48,7 @@ SobolCalculator::compute(const std::vector<Real> & data, bool is_distributed) co
   const std::size_t s = _resample ? 2 * n + 2 : n + 2;
 
   // The number of replicates per matrix
-  const std::size_t K = data.size() / s;
+  const std::size_t K = _data.size() / s;
 
   // These data structures correspond to the comments in the calculations of the various indices;
   // they are useful keeping around for debugging since the names match up with literature.
@@ -49,17 +66,20 @@ SobolCalculator::compute(const std::vector<Real> & data, bool is_distributed) co
 
   // Compute the necessary dot products of result vectors
   DenseMatrix<double> A(s, s);
-  for (std::size_t c = 0; c < A.n(); ++c)
-    for (std::size_t r = 0; r <= c; ++r)
-    {
-      const std::size_t row_offset = r * K;
-      const std::size_t col_offset = c * K;
-      A(r, c) = 1. / K *
-                std::inner_product(data.begin() + row_offset,
-                                   data.begin() + row_offset + K,
-                                   data.begin() + col_offset,
-                                   0.);
-    }
+  if (processor_id() == 0 || !is_distributed)
+    for (std::size_t c = 0; c < A.n(); ++c)
+      for (std::size_t r = 0; r <= c; ++r)
+      {
+        const std::size_t row_offset = r * K;
+        const std::size_t col_offset = c * K;
+        A(r, c) = 1. / K *
+                  std::inner_product(_data.begin() + row_offset,
+                                     _data.begin() + row_offset + K,
+                                     _data.begin() + col_offset,
+                                     0.);
+      }
+  if (is_distributed)
+    _communicator.broadcast(A.get_values(), 0, true);
 
   // The data to output
   DenseMatrix<Real> S(n, n);
@@ -132,28 +152,29 @@ SobolCalculator::compute(const std::vector<Real> & data, bool is_distributed) co
   }
 
   // Output the data
-  std::vector<Real> output;
+  _sobol.clear();
   if (_resample)
-    output.reserve(n * (1 + n));
+    _sobol.reserve(n * (1 + n));
   else
-    output.reserve(2 * n);
+    _sobol.reserve(2 * n);
 
   // First-order
   for (std::size_t i = 0; i < n; ++i)
-    output.push_back(S(i, i));
+    _sobol.push_back(S(i, i));
 
   // Total-effect
   for (std::size_t i = 0; i < n; ++i)
-    output.push_back(ST[i]);
+    _sobol.push_back(ST[i]);
 
   // Second-order
   if (_resample)
   {
     for (std::size_t i = 0; i < n; ++i)
       for (std::size_t j = i + 1; j < n; ++j)
-        output.push_back(S(i, j));
+        _sobol.push_back(S(i, j));
   }
-
-  return output;
 }
+
+template class Calculator<std::vector<Real>, std::vector<Real>>;
+
 } // namespace

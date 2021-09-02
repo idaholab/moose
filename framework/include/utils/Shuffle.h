@@ -114,6 +114,40 @@ std::vector<T> resample(const std::vector<T> & data,
                         const std::size_t seed_index,
                         const libMesh::Parallel::Communicator * comm_ptr);
 //@}
+
+///@{
+/**
+ * Randomly resample a vector of data and apply a functor, allowing a value to be repeated.
+ * @param data The vector on which the values are to be swapped
+ * @param functor Functor to apply to each entry of the resampled vector
+ * @param generator Random number generator to use for shuffle
+ * @param seed_index (default: 0) The seed index to use for calls to randl
+ * @param comm_ptr Optional Communicator, if provided and running with multiple processors the
+ *                 vector is assumed to be distributed
+ */
+template <typename T, typename ActionFunctor>
+void resampleWithFunctor(const std::vector<T> & data,
+                         const ActionFunctor & functor,
+                         MooseRandom & generator,
+                         const std::size_t seed_index = 0);
+template <typename T, typename ActionFunctor>
+void resampleWithFunctor(const std::vector<T> & data,
+                         const ActionFunctor & functor,
+                         MooseRandom & generator,
+                         const libMesh::Parallel::Communicator & comm);
+template <typename T, typename ActionFunctor>
+void resampleWithFunctor(const std::vector<T> & data,
+                         const ActionFunctor & functor,
+                         MooseRandom & generator,
+                         const std::size_t seed_index,
+                         const libMesh::Parallel::Communicator & comm);
+template <typename T, typename ActionFunctor>
+void resampleWithFunctor(const std::vector<T> & data,
+                         const ActionFunctor & functor,
+                         MooseRandom & generator,
+                         const std::size_t seed_index,
+                         const libMesh::Parallel::Communicator * comm_ptr);
+//@}
 }
 
 template <typename T>
@@ -385,6 +419,73 @@ MooseUtils::resample(const std::vector<T> & data,
   return replicate;
 }
 
+template <typename T, typename ActionFunctor>
+void
+MooseUtils::resampleWithFunctor(const std::vector<T> & data,
+                                const ActionFunctor & functor,
+                                MooseRandom & generator,
+                                const std::size_t seed_index,
+                                const libMesh::Parallel::Communicator * comm_ptr)
+{
+  const std::size_t n_local = data.size();
+
+  if (!comm_ptr || comm_ptr->size() == 1)
+  {
+    for (std::size_t j = 0; j < n_local; ++j)
+    {
+      auto index = generator.randl(seed_index, 0, n_local);
+      functor(data[index]);
+    }
+  }
+  else
+  {
+    // Compute the global size of the vector
+    std::size_t n_global = n_local;
+    comm_ptr->sum(n_global);
+
+    // Compute the vector data offsets, the scope cleans up the "n_local" vector
+    std::vector<std::size_t> offsets(comm_ptr->size());
+    {
+      std::vector<std::size_t> local_sizes;
+      comm_ptr->allgather(n_local, local_sizes);
+      for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
+        offsets[i + 1] = offsets[i] + local_sizes[i];
+    }
+
+    // Advance the random number generator to the current offset
+    const auto rank = comm_ptr->rank();
+    for (std::size_t i = 0; i < offsets[rank]; ++i)
+      generator.randl(seed_index, 0, n_global);
+
+    // Compute the needs for this processor
+    std::unordered_map<processor_id_type, std::vector<std::size_t>> indices;
+    for (std::size_t i = 0; i < n_local; ++i)
+    {
+      const auto idx = generator.randl(seed_index, 0, n_global); // random global index
+
+      // Locate the rank and local index of the data desired
+      const auto idx_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx));
+      const auto idx_rank = std::distance(offsets.begin(), idx_offset_iter);
+      const auto idx_local_idx = idx - *idx_offset_iter;
+
+      // Push back the index to appropriate rank
+      indices[idx_rank].push_back(idx_local_idx);
+    }
+
+    // Advance the random number generator to the end of the global vector
+    for (std::size_t i = offsets[rank] + n_local; i < n_global; ++i)
+      generator.randl(seed_index, 0, n_global);
+
+    // Send the indices to the appropriate rank and have the calculator do its work
+    auto act_functor = [&functor, &data](processor_id_type /*pid*/,
+                                         const std::vector<std::size_t> & indices) {
+      for (const auto & idx : indices)
+        functor(data[idx]);
+    };
+    Parallel::push_parallel_vector_data(*comm_ptr, indices, act_functor);
+  }
+}
+
 template <typename T>
 void
 MooseUtils::swap(std::vector<T> & data,
@@ -447,4 +548,35 @@ MooseUtils::resample(const std::vector<T> & data,
                      const libMesh::Parallel::Communicator & comm)
 {
   return MooseUtils::resample(data, generator, seed_index, &comm);
+}
+
+template <typename T, typename ActionFunctor>
+void
+MooseUtils::resampleWithFunctor(const std::vector<T> & data,
+                                const ActionFunctor & functor,
+                                MooseRandom & generator,
+                                const std::size_t seed_index)
+{
+  return MooseUtils::resampleWithFunctor(data, functor, generator, seed_index, nullptr);
+}
+
+template <typename T, typename ActionFunctor>
+void
+MooseUtils::resampleWithFunctor(const std::vector<T> & data,
+                                const ActionFunctor & functor,
+                                MooseRandom & generator,
+                                const libMesh::Parallel::Communicator & comm)
+{
+  return MooseUtils::resampleWithFunctor(data, functor, generator, 0, &comm);
+}
+
+template <typename T, typename ActionFunctor>
+void
+MooseUtils::resampleWithFunctor(const std::vector<T> & data,
+                                const ActionFunctor & functor,
+                                MooseRandom & generator,
+                                const std::size_t seed_index,
+                                const libMesh::Parallel::Communicator & comm)
+{
+  return MooseUtils::resampleWithFunctor(data, functor, generator, seed_index, &comm);
 }

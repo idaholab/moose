@@ -10,6 +10,7 @@
 #include "SobolStatistics.h"
 #include "SobolSampler.h"
 #include "SobolCalculators.h"
+#include "BootstrapCalculators.h"
 
 // MOOSE includes
 #include "MooseVariable.h"
@@ -47,8 +48,9 @@ SobolStatistics::initialSetup()
   const std::set<std::string> & vpp_vectors = vpp_object.getVectorNames();
   for (const auto & vec_name : vpp_vectors)
   {
-    _result_vectors.push_back(std::make_pair(&getVectorPostprocessorValueByName(vpp_name, vec_name),
-                                             vpp_object.isDistributed()));
+    ReporterName rname(vpp_name, vec_name);
+    _result_vectors.push_back(std::make_pair(
+        &getReporterValueByName<VectorPostprocessorValue>(rname), vpp_object.isDistributed()));
     _sobol_stat_vectors.push_back(&declareVector(vpp_name + "_" + vec_name));
   }
 }
@@ -59,7 +61,7 @@ SobolStatistics::execute()
   TIME_SECTION("execute", 3, "Executing Sobol Statistics");
 
   StochasticTools::SobolCalculator calc(
-      *this, _sobol_sampler.getNumberOfCols(), _sobol_sampler.resample());
+      *this, "SOBOL", _sobol_sampler.getNumberOfCols(), _sobol_sampler.resample());
   for (std::size_t i = 0; i < _result_vectors.size(); ++i)
     (*_sobol_stat_vectors[i]) =
         calc.compute(*(_result_vectors[i].first), _result_vectors[i].second);

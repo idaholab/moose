@@ -1,0 +1,333 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "stats": {
+                    "info": {
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "storage_data:const:int_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                9.539392014169456,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.8708286933869707,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                0.7637626158259734,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:int_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                21.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.5,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                9.539392014169456,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                6.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.8708286933869707,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                0.7637626158259734,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:num_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                21.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_MEDIAN",
+                            "stat": "MEDIAN",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5,
+                                    3.5
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456,
+                                    9.539392014169456
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_RATIO",
+                            "stat": "RATIO",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0,
+                                    6.0
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707,
+                                    1.8708286933869707
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_STDERR",
+                            "stat": "STDERR",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734,
+                                    0.7637626158259734
+                                ],
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:const:vec_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<std::vector<double>, std::vector<std::vector<double>> >",
+                            "value": [
+                                [
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0,
+                                    21.0
+                                ],
+                                []
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

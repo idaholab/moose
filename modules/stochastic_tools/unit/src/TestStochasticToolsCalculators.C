@@ -9,54 +9,87 @@
 #include "gtest/gtest.h"
 #include <vector>
 #include "Calculators.h"
+#include "VectorCalculators.h"
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 
 using namespace StochasticTools;
 
-TEST(StochasticTools, Calculators)
+template <typename InType, typename OutType>
+std::pair<std::vector<OutType>, std::vector<OutType>>
+calculate(const InType & x, const std::vector<std::string> & compute)
 {
-  const std::vector<Real> x = {6, 1, 7, 3, 4, 5, 2};
   Parallel::Communicator comm;
   ParallelObject po(comm);
+  std::vector<std::unique_ptr<StochasticTools::Calculator<InType, OutType>>> calcs;
+  for (const auto & stat : compute)
+    calcs.push_back(StochasticTools::makeCalculator<InType, OutType>(stat, po));
+
+  std::vector<OutType> result1;
+  for (unsigned int i = 0; i < calcs.size(); ++i)
+    result1.push_back(calcs[i]->compute(x, false));
+
+  std::vector<OutType> result2;
+  for (unsigned int i = 0; i < calcs.size(); ++i)
+  {
+    calcs[i]->initializeCalculator();
+    for (const auto & val : x)
+      calcs[i]->updateCalculator(val);
+    calcs[i]->finalizeCalculator(false);
+    result2.push_back(calcs[i]->getValue());
+  }
+
+  return {result1, result2};
+}
+
+TEST(StochasticTools, Calculators)
+{
+  const std::vector<std::string> compute = {
+      "mean", "min", "max", "sum", "stddev", "stderr", "ratio", "norm2", "median"};
 
   {
-    Mean<std::vector<Real>, Real> calc(po, "mean");
-    EXPECT_EQ(calc.compute(x, false), 4);
+    const std::vector<Real> x = {6, 1, 7, 3, 4, 5, 2};
+    const std::vector<Real> expect = {
+        4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259, 4};
+
+    auto result = calculate<std::vector<Real>, Real>(x, compute);
+    for (unsigned int i = 0; i < expect.size(); ++i)
+    {
+      EXPECT_EQ(result.first[i], expect[i]);
+      EXPECT_EQ(result.second[i], expect[i]);
+    }
   }
 
   {
-    Min<std::vector<Real>, Real> calc(po, "min");
-    EXPECT_EQ(calc.compute(x, false), 1);
+    const std::vector<int> x = {6, 1, 7, 3, 4, 5, 2};
+    const std::vector<Real> expect = {
+        4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259, 4};
+
+    auto result = calculate<std::vector<int>, Real>(x, compute);
+    for (unsigned int i = 0; i < expect.size(); ++i)
+    {
+      EXPECT_EQ(result.first[i], expect[i]);
+      EXPECT_EQ(result.second[i], expect[i]);
+    }
   }
 
   {
-    Max<std::vector<Real>, Real> calc(po, "max");
-    EXPECT_EQ(calc.compute(x, false), 7);
-  }
+    const std::vector<std::vector<Real>> x = {{6, 1, 7, 3, 4, 5, 2},
+                                              {1, 7, 3, 4, 5, 2, 6},
+                                              {7, 3, 4, 5, 2, 6, 1},
+                                              {3, 4, 5, 2, 6, 1, 7},
+                                              {4, 5, 2, 6, 1, 7, 3},
+                                              {5, 2, 6, 1, 7, 3, 4},
+                                              {2, 6, 1, 7, 3, 4, 5}};
+    const std::vector<Real> expect = {
+        4, 1, 7, 28, 2.1602468994692869408, 0.81649658092772603446, 7, 11.832159566199232259, 4};
 
-  {
-    Sum<std::vector<Real>, Real> calc(po, "sum");
-    EXPECT_EQ(calc.compute(x, false), 28);
-  }
-
-  {
-    StdDev<std::vector<Real>, Real> calc(po, "stddev");
-    EXPECT_EQ(calc.compute(x, false), 2.1602468994692869408);
-  }
-
-  {
-    StdErr<std::vector<Real>, Real> calc(po, "stderr");
-    EXPECT_EQ(calc.compute(x, false), 0.81649658092772603446);
-  }
-
-  {
-    Ratio<std::vector<Real>, Real> calc(po, "ratio");
-    EXPECT_EQ(calc.compute(x, false), 7);
-  }
-
-  {
-    L2Norm<std::vector<Real>, Real> calc(po, "l2norm");
-    EXPECT_EQ(calc.compute(x, false), 11.832159566199232259);
+    auto result = calculate<std::vector<std::vector<Real>>, std::vector<Real>>(x, compute);
+    for (unsigned int i = 0; i < expect.size(); ++i)
+      for (unsigned int j = 0; j < x[0].size(); ++j)
+      {
+        EXPECT_EQ(result.first[i][j], expect[i]);
+        EXPECT_EQ(result.second[i][j], expect[i]);
+      }
   }
 }
