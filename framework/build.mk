@@ -54,6 +54,22 @@ else
 endif
 endif
 
+# Google Test relies on static construction of objects in test
+# compilation units to register those tests, but with some Linux
+# distributions (Ubuntu 21.04 for me; others in
+# https://github.com/idaholab/moose/issues/16092 ) shared libraries
+# don't get loaded by default (and thus don't call constructors of
+# static objects by default) unless the shared library satisfies a
+# missing symbol, or unless we force it to load with a special linker
+# flag.  The flag may require GCC or GNU ld, and if we don't support
+# it it's not safe to use it, so test first.
+NO_AS_NEEDED_FLAG = -Wl,--no-as-needed
+HAVE_NO_AS_NEEDED := $(shell echo 'int main(void){return 0;}' > as_needed_test.C; if $(libmesh_CXX) $(NO_AS_NEEDED_FLAG) as_needed_test.C -o as_needed_test.x 2>/dev/null; then echo yes; else echo no; fi; rm -f as_needed_test.C as_needed_test.x)
+
+ifeq ($(HAVE_NO_AS_NEEDED),yes)
+  libmesh_LDFLAGS += $(NO_AS_NEEDED_FLAG)
+endif
+
 # Make.common used to provide an obj-suffix which was related to the
 # machine in question (from config.guess, i.e. @host@ in
 # contrib/utils/Make.common.in) and the $(METHOD).
