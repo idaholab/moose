@@ -23,7 +23,8 @@
 #include "libmesh/string_to_enum.h"
 
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
-  : LoggingInterface(_log),
+  : ParallelObject(fe_problem.comm()),
+    LoggingInterface(_log),
     _mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
     _app(static_cast<THMApp &>(*pars.get<MooseApp *>("_moose_app"))),
@@ -81,7 +82,6 @@ Simulation::buildMesh()
   // Make sure all node sets have their corresponding side sets
   if (_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
     _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
-  _mesh.prep();
 }
 
 void
@@ -696,18 +696,21 @@ Simulation::integrityCheck() const
 
   if (_log.getNumberOfErrors() > 0)
   {
-    Moose::err << COLOR_RED
-               << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
-               << std::endl
-               << std::endl;
-    _log.print();
-    Moose::err << std::endl;
+    if (processor_id() == 0)
+    {
+      Moose::err << COLOR_RED
+                 << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
+                 << std::endl
+                 << std::endl;
+      _log.print();
+      Moose::err << std::endl;
+    }
 
     MPI_Finalize();
     exit(1);
   }
 
-  if (_log.getNumberOfWarnings() > 0)
+  if ((_log.getNumberOfWarnings() > 0) && (processor_id() == 0))
   {
     _log.print();
     Moose::err << std::endl;

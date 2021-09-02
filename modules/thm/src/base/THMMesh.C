@@ -62,12 +62,6 @@ THMMesh::buildMesh()
   getMesh().set_spatial_dimension(_dim);
 }
 
-void
-THMMesh::prep()
-{
-  prepare(true);
-}
-
 dof_id_type
 THMMesh::getNextNodeId()
 {
