@@ -46,6 +46,9 @@ public:
   virtual Real value(Real t, const Point & pt) const override;
 
 protected:
+  /// convert cartesian+time coordinates into grid coordinates
+  void updatePointInGrid(Real t, const Point & p, std::vector<Real> & point_in_grid) const;
+
   /**
    * This does the core work.  Given a point, pt, defined
    * on the grid (not the MOOSE simulation reference frame),

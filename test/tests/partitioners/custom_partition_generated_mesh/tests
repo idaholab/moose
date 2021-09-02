@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'custom_partition_generated_mesh.i'
+    exodiff = 'custom_partition_generated_mesh_out.e'
+    min_parallel = 4
+    max_parallel = 4
+
+    issues = '#18696'
+    design = 'Mesh/Partitioner/index.md'
+    requirement = 'The system shall allow custom partitioners to work with mesh generators'
+  [../]
+[]

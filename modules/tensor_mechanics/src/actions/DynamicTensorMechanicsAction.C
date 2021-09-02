@@ -176,7 +176,7 @@ DynamicTensorMechanicsAction::act()
   {
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      auto kernel_type = "InertialForce";
+      auto kernel_type = _use_ad ? "ADInertialForce" : "InertialForce";
       auto params = _factory.getValidParams(kernel_type);
 
       params.set<NonlinearVariableName>("variable") = _displacements[i];

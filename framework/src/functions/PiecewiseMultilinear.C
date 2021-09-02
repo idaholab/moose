@@ -23,11 +23,13 @@ PiecewiseMultilinear::validParams()
       "data.  The data_file specifies the axes directions and the function "
       "values.  If a point lies outside the data range, the appropriate end "
       "value is used.");
+  params.addParam<Real>(
+      "epsilon", 1e-12, "Finite differencing parameter for gradient and time derivative");
   return params;
 }
 
 PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters)
-  : PiecewiseMultiInterpolation(parameters)
+  : PiecewiseMultiInterpolation(parameters), _epsilon(getParam<Real>("epsilon"))
 {
 }
 
@@ -89,4 +91,37 @@ PiecewiseMultilinear::sample(const std::vector<Real> & pt) const
       weight *= 1;
 
   return f / weight;
+}
+
+RealGradient
+PiecewiseMultilinear::gradient(Real t, const Point & p) const
+{
+  RealGradient grad;
+  std::vector<Real> pg(_dim);
+
+  // sample center point
+  updatePointInGrid(t, p, pg);
+  auto s1 = sample(pg);
+
+  // sample epsilon steps in all directions
+  for (const auto dir : _axes)
+    if (dir < 3)
+    {
+      Point pp = p;
+      pp(dir) += _epsilon;
+      updatePointInGrid(t, pp, pg);
+      grad(dir) = (sample(pg) - s1) / _epsilon;
+    }
+
+  return grad;
+}
+
+Real
+PiecewiseMultilinear::timeDerivative(Real t, const Point & p) const
+{
+  std::vector<Real> p1(_dim);
+  std::vector<Real> p2(_dim);
+  updatePointInGrid(t, p, p1);
+  updatePointInGrid(t + _epsilon, p, p2);
+  return (sample(p2) - sample(p1)) / _epsilon;
 }

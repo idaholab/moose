@@ -157,6 +157,12 @@ MultiApp::validParams()
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
+  params.addParam<std::vector<FileName>>(
+      "cli_args_files",
+      "File names that should be looked in for additional command line arguments "
+      "to pass to the sub apps. Each line of a file is set to each sub app. If only "
+      "one line is provided, it will be applied to all sub apps.");
+
   params.addRangeCheckedParam<Real>("relaxation_factor",
                                     1.0,
                                     "relaxation_factor>0 & relaxation_factor<2",
@@ -231,6 +237,11 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
 {
+
+  if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
+      parameters.isParamValid("cli_args_files"))
+    paramError("cli_args",
+               "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
 }
 
 void
@@ -269,6 +280,9 @@ MultiApp::createApps()
   if (!_has_an_app)
     return;
 
+  // Read commandLine arguments that will be used when creating apps
+  readCommandLineArguments();
+
   Moose::ScopedCommSwapper swapper(_my_comm);
 
   _apps.resize(_my_num_apps);
@@ -292,6 +306,103 @@ MultiApp::initialSetup()
     // if not using positions, we create the sub-apps in initialSetup instead of right after
     // construction of MultiApp
     createApps();
+}
+
+void
+MultiApp::readCommandLineArguments()
+{
+  if (isParamValid("cli_args_files"))
+  {
+    _cli_args_from_file.clear();
+
+    std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
+    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
+
+    // If we use parameter "cli_args_files", at least one file should be provided
+    if (!cli_args_files.size())
+      paramError("cli_args_files", "You need to provide at least one commandLine argument file ");
+
+    // If we multiple input files, then we need to check if the number of input files
+    // match with the number of argument files
+    if (cli_args_files.size() != 1 && cli_args_files.size() != input_files.size())
+      paramError("cli_args_files",
+                 "The number of commandLine argument files ",
+                 cli_args_files.size(),
+                 " for MultiApp ",
+                 name(),
+                 " must either be only one or match the number of input files ",
+                 input_files.size());
+
+    // Go through all argument files
+    std::vector<std::string> cli_args;
+    for (unsigned int p_file_it = 0; p_file_it < cli_args_files.size(); p_file_it++)
+    {
+      std::string cli_args_file = cli_args_files[p_file_it];
+      // Clear up
+      cli_args.clear();
+      // Read the file on the root processor then broadcast it
+      if (processor_id() == 0)
+      {
+        MooseUtils::checkFileReadable(cli_args_file);
+
+        std::ifstream is(cli_args_file.c_str());
+        std::copy(std::istream_iterator<std::string>(is),
+                  std::istream_iterator<std::string>(),
+                  std::back_inserter(cli_args));
+
+        // We do not allow empty files
+        if (!cli_args.size())
+          paramError("cli_args_files",
+                     "There is no commandLine argument in the commandLine argument file ",
+                     cli_args_file);
+
+        // If we have position files, we need to
+        // make sure the number of commandLine argument strings
+        // match with the number of positions
+        if (_npositions_inputfile.size())
+        {
+          auto num_positions = _npositions_inputfile[p_file_it];
+          // Check if the number of commandLine argument strings equal to
+          // the number of positions
+          if (cli_args.size() == 1)
+            for (MooseIndex(num_positions) num = 0; num < num_positions; num++)
+              _cli_args_from_file.push_back(cli_args.front());
+          else if (cli_args.size() == num_positions)
+            for (auto && cli_arg : cli_args)
+              _cli_args_from_file.push_back(cli_arg);
+          else if (cli_args.size() != num_positions)
+            paramError("cli_args_files",
+                       "The number of commandLine argument strings ",
+                       cli_args.size(),
+                       " in the file ",
+                       cli_args_file,
+                       " must either be only one or match the number of positions ",
+                       num_positions);
+        }
+        else
+        {
+          // If we do not have position files, we will check if the number of
+          // commandLine argument strings match with the total number of subapps
+          for (auto && cli_arg : cli_args)
+            _cli_args_from_file.push_back(cli_arg);
+        }
+      }
+    }
+
+    // Broad cast all arguments to everyone
+    _communicator.broadcast(_cli_args_from_file);
+  }
+
+  if (_cli_args_from_file.size() && _cli_args_from_file.size() != 1 &&
+      _cli_args_from_file.size() != _total_num_apps)
+    mooseError(" The number of commandLine argument strings ",
+               _cli_args_from_file.size(),
+               " must either be only one or match the total "
+               "number of sub apps ",
+               _total_num_apps);
+
+  if (_cli_args_from_file.size() && _cli_args.size())
+    mooseError("Can not set commandLine arguments from both input_file and external files");
 }
 
 void
@@ -356,6 +467,8 @@ MultiApp::fillPositions()
       // Bradcast the vector to all processors
       std::size_t num_positions = positions_vec.size();
       _communicator.broadcast(num_positions);
+      // Save the number of positions for this input file
+      _npositions_inputfile.push_back(num_positions / LIBMESH_DIM);
       positions_vec.resize(num_positions);
       _communicator.broadcast(positions_vec);
 
@@ -722,7 +835,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_cli->initForMultiApp(full_name);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
-  if (_cli_args.size() > 0)
+  if (_cli_args.size() > 0 || _cli_args_from_file.size() > 0)
   {
     for (const std::string & str : MooseUtils::split(getCommandLineArgsParamHelper(i), ";"))
     {
@@ -800,13 +913,19 @@ std::string
 MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
 
+  mooseAssert(_cli_args.size() || _cli_args_from_file.size(),
+              "There is no commandLine argument \n");
+
   // Single set of "cli_args" to be applied to all sub apps
   if (_cli_args.size() == 1)
     return _cli_args[0];
-
-  // Unique set of "cli_args" to be applied to each sub apps
-  else
+  else if (_cli_args_from_file.size() == 1)
+    return _cli_args_from_file[0];
+  else if (_cli_args.size())
+    // Unique set of "cli_args" to be applied to each sub apps
     return _cli_args[local_app + _first_local_app];
+  else
+    return _cli_args_from_file[local_app + _first_local_app];
 }
 
 LocalRankConfig

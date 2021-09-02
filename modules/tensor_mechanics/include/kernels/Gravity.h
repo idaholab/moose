@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 class Function;
 
@@ -17,20 +17,31 @@ class Function;
  * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the
  * density
  */
-class Gravity : public Kernel
+template <bool is_ad>
+class GravityTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  Gravity(const InputParameters & parameters);
+  GravityTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
-  const MaterialProperty<Real> & _density;
+  const GenericMaterialProperty<Real, is_ad> & _density;
   const Real _value;
   const Function & _function;
 
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;
+
+  using GenericKernel<is_ad>::_dt;
+  using GenericKernel<is_ad>::_i;
+  using GenericKernel<is_ad>::_q_point;
+  using GenericKernel<is_ad>::_qp;
+  using GenericKernel<is_ad>::_t;
+  using GenericKernel<is_ad>::_test;
 };
+
+using Gravity = GravityTempl<false>;
+using ADGravity = GravityTempl<true>;

@@ -1,9 +1,10 @@
 [Tests]
+  design = 'transfers/MultiAppNearestNodeTransfer.md'
+
   [./tosub]
     type = 'Exodiff'
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1866 #12245'
     requirement = "The system shall transfer both nodal and elemental fields to a SubApp from the Master App."
     max_parallel = 4 # Ticket #12523
@@ -13,7 +14,6 @@
     type = 'Exodiff'
     input = 'fromsub_master.i'
     exodiff = 'fromsub_master_out.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1866 #12245'
     requirement = "The system shall transfer both nodal and elemental fields from SubApps to the Master App."
   [../]
@@ -22,7 +22,6 @@
     type = 'Exodiff'
     input = 'fromsub_displaced_master.i'
     exodiff = 'fromsub_displaced_master_out.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1868'
     requirement = "The system shall transfer values from SubApps which set the displaced_source_mesh flag to true."
   [../]
@@ -32,7 +31,6 @@
     input = 'tosub_displaced_master.i'
     exodiff = 'tosub_displaced_master_out_sub0.e'
     deleted = 'Not yet implemented properly!'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1868'
     requirement = "The system shall transfer values from SubApps which set the displaced_target_mesh flag to true."
   [../]
@@ -41,7 +39,6 @@
     type = 'Exodiff'
     input = 'fromsub_fixed_meshes_master.i'
     exodiff = 'fromsub_fixed_meshes_master_out.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#2126'
     requirement = "The system shall support the 'fixed_meshes' flag which allows caching of nearest neighbors."
   [../]
@@ -50,7 +47,6 @@
     type = 'Exodiff'
     input = 'boundary_tosub_master.i'
     exodiff = 'boundary_tosub_master_out_sub0.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#6156'
     requirement = "The system shall transfer values to multiple SubApps from the Master App's boundary."
   [../]
@@ -59,7 +55,6 @@
     type = 'Exodiff'
     input = 'boundary_tomaster_master.i'
     exodiff = 'boundary_tomaster_master_out.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#6156'
     requirement = "The system shall transfer values from a SubApp boundary to the Master App."
   [../]
@@ -68,7 +63,6 @@
     type = 'Exodiff'
     input = 'to_multiple_boundaries_master.i'
     exodiff = 'to_multiple_boundaries_master_out.e to_multiple_boundaries_master_out_sub0.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#18467'
     requirement = "The system shall transfer values to multiple target boundaries in both the Master and Sub App."
   [../]
@@ -77,7 +71,6 @@
     type = 'Exodiff'
     input = 'two_way_many_apps_master.i'
     exodiff = 'two_way_many_apps_master_out.e two_way_many_apps_master_out_sub0.e two_way_many_apps_master_out_sub4.e'
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#5360'
     requirement = "The system shall work when there are multiple SubApps present."
     max_parallel = 4 # Ticket #12523
@@ -89,8 +82,34 @@
     exodiff = 'parallel_master_out.e'
     min_parallel = 2
     max_parallel = 2
-    design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#8004'
     requirement = "The system shall work in parallel between meshes with different spatial dimensions."
+  [../]
+
+  [./target_boundary]
+    type = 'Exodiff'
+    input = 'target_boundary_master.i'
+    exodiff = 'target_boundary_master_out.e target_boundary_master_out_sub0.e target_boundary_master_out_sub1.e'
+    cli_args = 'Transfers/target_boundary/bbox_extend_factor=0.1'
+    issues = '#18730'
+    requirement = "The system shall support target boundary transfer when use multiple mpi ranks"
+  [../]
+
+  [./source_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_master.i'
+    exodiff = 'source_boundary_master_out.e source_boundary_master_out_sub0.e source_boundary_master_out_sub1.e'
+    issues = '#18730'
+    requirement = "The system shall support source boundary transfer when use multiple mpi ranks"
+  [../]
+
+  [./source_target_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_master.i'
+    exodiff = 'source_target_boundary.e source_target_boundary_sub0.e source_target_boundary_sub1.e'
+    issues = '#18730'
+    cli_args = 'Transfers/source_boundary/target_boundary="right" Outputs/file_base="source_target_boundary"'
+    prereq = 'source_boundary'
+    requirement = "The system shall support source-and-target boundary transfer when use multiple mpi ranks"
   [../]
 []

@@ -56,3 +56,15 @@ PiecewiseMulticonstant::sample(const std::vector<Real> & pt) const
   // return the point
   return _gridded_data->evaluateFcn(arg);
 }
+
+RealGradient
+PiecewiseMulticonstant::gradient(Real, const Point &) const
+{
+  return 0.0;
+}
+
+Real
+PiecewiseMulticonstant::timeDerivative(Real, const Point &) const
+{
+  return 0.0;
+}

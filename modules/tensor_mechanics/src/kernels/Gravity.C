@@ -11,11 +11,13 @@
 #include "Function.h"
 
 registerMooseObject("TensorMechanicsApp", Gravity);
+registerMooseObject("TensorMechanicsApp", ADGravity);
 
+template <bool is_ad>
 InputParameters
-Gravity::validParams()
+GravityTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Apply gravity. Value is in units of acceleration.");
   params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
   params.addRequiredParam<Real>(
@@ -27,18 +29,23 @@ Gravity::validParams()
   return params;
 }
 
-Gravity::Gravity(const InputParameters & parameters)
-  : Kernel(parameters),
-    _density(getMaterialProperty<Real>("density")),
-    _value(getParam<Real>("value")),
-    _function(getFunction("function")),
-    _alpha(getParam<Real>("alpha"))
+template <bool is_ad>
+GravityTempl<is_ad>::GravityTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _density(this->template getGenericMaterialProperty<Real, is_ad>("density")),
+    _value(this->template getParam<Real>("value")),
+    _function(this->getFunction("function")),
+    _alpha(this->template getParam<Real>("alpha"))
 {
 }
 
-Real
-Gravity::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+GravityTempl<is_ad>::computeQpResidual()
 {
   Real factor = _value * _function.value(_t + _alpha * _dt, _q_point[_qp]);
   return _density[_qp] * _test[_i][_qp] * -factor;
 }
+
+template class GravityTempl<false>;
+template class GravityTempl<true>;
