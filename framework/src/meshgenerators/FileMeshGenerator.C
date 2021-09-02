@@ -43,8 +43,8 @@ FileMeshGenerator::validParams()
 
 FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-  _file_name(getParam<MeshFileName>("file")),
-  _skip_partitioning(getParam<bool>("skip_partitioning"))
+    _file_name(getParam<MeshFileName>("file")),
+    _skip_partitioning(getParam<bool>("skip_partitioning"))
 {
 }
 
@@ -77,7 +77,7 @@ FileMeshGenerator::generate()
         exreader->read(_file_name);
       MeshCommunication().broadcast(*mesh);
     }
-    // Skip paritioning if the user requested it
+    // Skip partitioning if the user requested it
     if (_skip_partitioning)
       mesh->skip_partitioning(true);
     mesh->prepare_for_use();
