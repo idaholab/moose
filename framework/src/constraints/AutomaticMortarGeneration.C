@@ -337,11 +337,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Make sure we found one.
     if (current_mortar_segment == nullptr)
-    {
-      Moose::out << "xi1: " << xi1 << "      xi1_a: " << info->xi1_a
-                 << "      xi1_b: " << info->xi1_b << std::endl;
       mooseError("Unable to find appropriate mortar segment during linear search!");
-    }
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
