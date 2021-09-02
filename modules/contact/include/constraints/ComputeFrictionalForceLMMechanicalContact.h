@@ -42,16 +42,20 @@ protected:
    * where we actually feed the node-based constraint information into the system residual and
    * Jacobian
    */
-  virtual void enforceConstraintOnNode(const Node * node) override;
+  void enforceConstraintOnDof(const dof_id_type friction_dof_index, const dof_id_type normal_dof_index);
 
   /// A map from node to weighted gap
-  std::unordered_map<const Node *, ADReal> _node_to_weighted_tangential_velocity;
+  std::unordered_map<std::pair<dof_id_type, dof_id_type>, std::pair<ADReal, ADReal>>
+      _dof_to_weighted_tangential_velocity;
 
-  /// A pointer member that can be used to help avoid copying ADReals
+  /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
+  const ADReal * _tangential_traction_ptr = nullptr;
 
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;
+  /// The value of the frictional LM at the current quadrature point
+  ADReal _qp_tangential_traction;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
@@ -70,6 +74,12 @@ protected:
 
   /// y-velocity on the primary face
   const ADVariableValue & _primary_y_dot;
+
+  /// z-velocity on the secondary face
+  const ADVariableValue * const _secondary_z_dot;
+
+  /// z-velocity on the primary face
+  const ADVariableValue * const _primary_z_dot;
 
   /// Small contact pressure value to trigger computation of frictional forces
   const Real _epsilon;
