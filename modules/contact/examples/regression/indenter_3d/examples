@@ -39,17 +39,4 @@
     min_parallel = 6
     max_parallel = 8
   []
-  [hertz_contact_hex27_verification]
-    type = CSVDiff
-    input = 'hertz_contact_hex27_verification.i'
-    csvdiff = 'hertz_contact_hex27_verification_chkfile.csv'
-    abs_zero = 1.0e-2
-    rel_err = 1.0e-3
-    requirement = 'Contact module action shall reproduce verified results of an elastic sphere '
-                  'pressed onto a flat plane according to Herz formulae when the element is second '
-                  'order HEX27. '
-    max_time = 4800
-    min_parallel = 6
-    max_parallel = 8
-  []
 []
