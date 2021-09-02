@@ -117,10 +117,10 @@ MaterialBase::initStatefulProperties(unsigned int n_points)
   for (auto & prop : _supplied_props)
     if (materialData().getMaterialPropertyStorage().isStatefulProp(prop) &&
         !_overrides_init_stateful_props)
-      mooseError(std::string("Material \"") + name() +
-                 "\" provides one or more stateful "
-                 "properties but initQpStatefulProperties() "
-                 "was not overridden in the derived class.");
+      mooseWarning(std::string("Material \"") + name() +
+                   "\" provides one or more stateful "
+                   "properties but initQpStatefulProperties() "
+                   "was not overridden in the derived class.");
 }
 
 void
