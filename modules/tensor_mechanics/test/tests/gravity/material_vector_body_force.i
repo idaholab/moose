@@ -1,12 +1,11 @@
 #
-# Gravity Test
+# MaterialVectorBodyForce Test
 #
-# This test is designed to apply a gravity body force.
+# This test is designed to apply gravity using the MaterialVectorBodyForce kernel/action.
 #
 # The mesh is composed of one block with a single element.
 # The bottom is fixed in all three directions.  Poisson's ratio
-# is zero and the density is 20/9.81
-# which makes it trivial to check displacements.
+# is zero, which makes it trivial to check displacements.
 #
 
 [GlobalParams]
@@ -18,17 +17,12 @@
   dim = 3
 []
 
-[Modules/TensorMechanics/Master]
-  [all]
+[Modules/TensorMechanics]
+  [Master/all]
     add_variables = true
   []
-[]
-
-[Kernels]
-  [gravity_y]
-    type = Gravity
-    variable = disp_y
-    value = -9.81
+  [MaterialVectorBodyForce/all]
+    body_force = force_density
   []
 []
 
@@ -62,10 +56,10 @@
   [stress]
     type = ComputeLinearElasticStress
   []
-  [density]
-    type = GenericConstantMaterial
-    prop_names = density
-    prop_values = 2.0387
+  [force_density]
+    type = GenericConstantVectorMaterial
+    prop_names = force_density
+    prop_values = '0 19.9995 0'
   []
 []
 

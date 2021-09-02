@@ -18,98 +18,68 @@
   dim = 3
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = true
+    use_automatic_differentiation = true
+  []
 []
 
 [Kernels]
-  # [./TensorMechanics]
-  # [../]
-  [./x]
-    type = ADStressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./y]
-    type = ADStressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./z]
-    type = ADStressDivergenceTensors
-    variable = disp_z
-    component = 2
-  [../]
-  [./gravity_y]
+  [gravity_y]
     type = ADGravity
     variable = disp_y
     value = -9.81
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = bottom
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
-  [./strain]
-    type = ADComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeLinearElasticStress
-  [../]
-  [./density]
+  []
+  [density]
     type = ADGenericConstantMaterial
     prop_names = density
     prop_values = 2.0387
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   nl_abs_tol = 1e-10
   l_max_its = 20
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []
