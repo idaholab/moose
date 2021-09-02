@@ -12,7 +12,7 @@ MOOSE_JOBS        ?= 8
 -include $(MOOSE_DIR)/conf_vars.mk
 
 # If the user has no environment variable
-# called METHOD, he gets optimized mode.
+# called METHOD, they get optimized mode.
 ifeq (x$(METHOD),x)
   METHOD := opt
 endif

@@ -207,7 +207,7 @@ AddPeriodicBCAction::act()
             getParam<std::vector<std::string>>("inv_transform_func");
         std::vector<std::string> fn_names = getParam<std::vector<std::string>>("transform_func");
 
-        // If the user provided a forward transformation, he must also provide an inverse -- we
+        // If the user provided a forward transformation, they must also provide an inverse -- we
         // can't form the inverse of an arbitrary function automatically...
         if (inv_fn_names == std::vector<std::string>())
           mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");

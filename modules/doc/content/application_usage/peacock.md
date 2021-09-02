@@ -6,7 +6,7 @@ Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows
 
 Adding Peacock to yout PATH will allow you to launch it from your application or "tests" directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need th specify your application as an argument, and simplifying Peacock usage.
 
-To add Peacock yo your PATH: assuming that $ MOOSE_DIR is the location of your git clone, navigate to the `$MOOSE_DIR/python/peacock` directory, and type: pwd. Whatever is printed out is the path to Peacock. Next, add he following to the end of your ~/bash_profile (Macintosh) or ~/.bashrc (Ubuntu) file:
+To add Peacock yo your PATH: assuming that $ MOOSE_DIR is the location of your git clone, navigate to the `$MOOSE_DIR/python/peacock` directory, and type: pwd. Whatever is printed out is the path to Peacock. Next, add the following to the end of your ~/bash_profile (Macintosh) or ~/.bashrc (Ubuntu) file:
 
 ```bash
 export PATH=pwd:$PATH
@@ -100,7 +100,7 @@ The "New Parameter" button will add a new row to the Parameter Table. You can fi
 
 ### Cancel Button
 
-Close the window without saving any changes. This is he same as just clicking the close button on the Peacock window.
+Close the window without saving any changes. This is the same as just clicking the close button on the Peacock window.
 
 ## Execute Tab
 
