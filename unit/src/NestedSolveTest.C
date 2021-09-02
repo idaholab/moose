@@ -169,3 +169,17 @@ TEST(NestedSolve, PlacementNew)
     for (unsigned int j = 0; j < 3; ++j)
       EXPECT_EQ(em(i, j), rt(i, j));
 }
+
+TEST(NestedSolve, NoConvergence)
+{
+  auto compute = [&](const Real & guess, Real & residual, Real & jacobian) {
+    residual = guess * guess + 1.0;
+    jacobian = 2.0 * guess;
+  };
+
+  NestedSolve solver;
+  Real solution = 1.0;
+  solver.nonlinear(solution, compute);
+
+  EXPECT_TRUE(solver.getState() == NestedSolve::State::NOT_CONVERGED);
+}
