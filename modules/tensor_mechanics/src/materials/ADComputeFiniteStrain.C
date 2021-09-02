@@ -147,9 +147,6 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
       const ADReal C1_squared =
           p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
           2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q);
-      mooseAssert(C1_squared >= 0.0,
-                  "Cannot take square root of a negative number. This may happen when elements "
-                  "become heavily distorted.");
       const ADReal C1 = std::sqrt(C1_squared);
 
       ADReal C2;
