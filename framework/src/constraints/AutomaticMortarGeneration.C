@@ -1163,24 +1163,11 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
   std::unordered_map<const Elem *, Real> active_volume;
 
-  // Compute fraction of elements with corresponding primary elements
-  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
-  {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
-    const Elem * secondary_elem = msinfo.secondary_elem;
-
-    active_volume[secondary_elem] += msm_elem->volume();
-  }
-
   // Mark all active local nodes
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
   {
     const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
-
-    const Real drop_tol = 0.5;
-    if (active_volume[secondary_elem] / secondary_elem->volume() < drop_tol)
-      continue;
 
     for (auto n : make_range(secondary_elem->n_nodes()))
       active_local_nodes.insert(secondary_elem->node_id(n));
