@@ -81,9 +81,8 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
       if (_stabilize)
       {
         // secondary
-        residual -=
-            _delta * _lower_secondary_volume * _test[_i][_qp] *
-            (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
+        residual -= _delta * _lower_secondary_volume * _test[_i][_qp] *
+                    (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
 
         // primary
         residual -=

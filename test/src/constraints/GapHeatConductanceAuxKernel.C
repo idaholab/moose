@@ -67,8 +67,7 @@ GapHeatConductanceAuxKernel::computeQpResidual(Moose::MortarType type)
         heat_transfer_coeff *= 0.5 * (_aux_variable[_qp] + _aux_variable_old[_qp]);
 
       return _test[_i][_qp] *
-             (_lambda[_qp] -
-              heat_transfer_coeff * (_u_secondary[_qp] - _u_primary[_qp]));
+             (_lambda[_qp] - heat_transfer_coeff * (_u_secondary[_qp] - _u_primary[_qp]));
     }
 
     default:
