@@ -389,10 +389,10 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
 
     // Use msm_elem quadrature point as initial guess
     // (will be correct for aligned meshes)
-    Dual2 xi1;
+    Dual2 xi1{};
     xi1.value() = _qrule_msm->qp(qp)(0);
     xi1.derivatives()[0] = 1.0;
-    Dual2 xi2;
+    Dual2 xi2{};
     xi2.value() = _qrule_msm->qp(qp)(1);
     xi2.derivatives()[1] = 1.0;
     VectorValue<Dual2> xi(xi1, xi2, 0);
