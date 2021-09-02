@@ -23,11 +23,15 @@ protected:
 
   const MooseVariableFE<Real> * const _secondary_disp_y;
   const MooseVariableFE<Real> * const _primary_disp_y;
+  const MooseVariableFE<Real> * const _secondary_disp_z;
+  const MooseVariableFE<Real> * const _primary_disp_z;
 
   bool _computing_gap_dependence;
 
   const ADVariableValue * _secondary_disp_y_sln;
   const ADVariableValue * _primary_disp_y_sln;
+  const ADVariableValue * _secondary_disp_z_sln;
+  const ADVariableValue * _primary_disp_z_sln;
 
   const Real _epsilon;
 
