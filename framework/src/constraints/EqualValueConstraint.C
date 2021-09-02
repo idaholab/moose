@@ -76,29 +76,22 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
 
     case Moose::MortarType::Lower:
     {
-      if (_has_primary)
+      auto residual = (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
+
+      if (_stabilize)
       {
-        auto residual = (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
+        // secondary
+        residual -=
+            _delta * _lower_secondary_volume * _test[_i][_qp] *
+            (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
 
-        if (_stabilize)
-        {
-          // secondary
-          residual -=
-              _delta * _lower_secondary_volume * _test[_i][_qp] *
-              (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
-
-          // primary
-          residual -=
-              _delta * _lower_primary_volume * _test[_i][_qp] *
-              (_lambda[_qp] + _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
-        }
-
-        return residual;
+        // primary
+        residual -=
+            _delta * _lower_primary_volume * _test[_i][_qp] *
+            (_lambda[_qp] + _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
       }
 
-      else
-        // There's no primary so let's just set the flux to zero
-        return _lambda[_qp];
+      return residual;
     }
 
     default:
