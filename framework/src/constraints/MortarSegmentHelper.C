@@ -6,13 +6,6 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
-
-/*
-TODO:
- - fix dual shape functions, second order dual, mixed meshes
- - for contact action enable specifying lowerD blocks
-*/
 #include "MortarSegmentHelper.h"
 #include <vector>
 
