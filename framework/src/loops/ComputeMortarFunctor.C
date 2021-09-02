@@ -431,8 +431,9 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       q_pts[qp] = transform_qp(xi(0).value(), xi(1).value());
 
       // The following checks if quadrature point falls in correct domain.
-      // On small mortar segment elements with very distorted elements this can fail, instead of erroring
-      // simply truncate quadrature point, these points typically have very small contributions to integrals
+      // On small mortar segment elements with very distorted elements this can fail, instead of
+      // erroring simply truncate quadrature point, these points typically have very small
+      // contributions to integrals
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
         if (q_pts[qp](0) < 0 || q_pts[qp](1) < 0 || q_pts[qp](0) + q_pts[qp](1) > 1)
@@ -462,7 +463,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
                  msm_elem->id(),
                  " to elem: ",
                  primal_elem->id(),
-                 " didn't converge. MSM element volume: ", msm_elem->volume());
+                 " didn't converge. MSM element volume: ",
+                 msm_elem->volume());
     }
   }
 }

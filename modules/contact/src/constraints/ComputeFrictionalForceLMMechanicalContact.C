@@ -62,9 +62,8 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
   // Compute the value of _qp_gap
   ComputeWeightedGapLMMechanicalContact::computeQpProperties();
 
-  ADRealVectorValue relative_velocity(_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                                      _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                                      0);
+  ADRealVectorValue relative_velocity(
+      _secondary_x_dot[_qp] - _primary_x_dot[_qp], _secondary_y_dot[_qp] - _primary_y_dot[_qp], 0);
   // Add derivative information
   relative_velocity(0).derivatives() =
       _secondary_x_dot[_qp].derivatives() - _primary_x_dot[_qp].derivatives();
@@ -110,9 +109,10 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
     _dof_to_weighted_tangential_velocity[dof_pair].second = friction_lm_value;
   }
   // For elemental varaibles assemble weighted traction
-  else //if (!_var->isNodal())
+  else // if (!_var->isNodal())
   {
-    _dof_to_weighted_tangential_velocity[dof_pair].second += _test[_i][_qp] * _qp_tangential_traction;
+    _dof_to_weighted_tangential_velocity[dof_pair].second +=
+        _test[_i][_qp] * _qp_tangential_traction;
   }
 }
 
@@ -152,8 +152,7 @@ ComputeFrictionalForceLMMechanicalContact::post()
 
 void
 ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
-  const dof_id_type friction_dof_index,
-  const dof_id_type normal_dof_index)
+    const dof_id_type friction_dof_index, const dof_id_type normal_dof_index)
 {
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(normal_dof_index);
 

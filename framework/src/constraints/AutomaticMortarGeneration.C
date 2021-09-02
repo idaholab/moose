@@ -338,10 +338,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Make sure we found one.
     if (current_mortar_segment == nullptr)
     {
-      Moose::out << "xi1: " << xi1 << "      xi1_a: " << info->xi1_a << "      xi1_b: " << info->xi1_b << std::endl;
+      Moose::out << "xi1: " << xi1 << "      xi1_a: " << info->xi1_a
+                 << "      xi1_b: " << info->xi1_b << std::endl;
       mooseError("Unable to find appropriate mortar segment during linear search!");
     }
-
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
@@ -595,7 +595,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       mortar_segment_mesh->delete_elem(msm_elem);
       msm_elem_to_info.erase(msm_elem);
     }
-
   }
 
 #ifndef NDEBUG
@@ -603,8 +602,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   for (auto msm_elem : mortar_segment_mesh->active_element_ptr_range())
   {
     const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
-    mooseAssert(msinfo.primary_elem != nullptr, "All mortar segment elements should have valid "
-              "primary element.");
+    mooseAssert(msinfo.primary_elem != nullptr,
+                "All mortar segment elements should have valid "
+                "primary element.");
   }
 #endif
 
@@ -1087,7 +1087,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       msmStatistics();
     else
       mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
-      "parallel will only provide statistics for local mortar segment mesh.");
+                   "parallel will only provide statistics for local mortar segment mesh.");
   }
 #endif
 }
@@ -1211,7 +1211,7 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
     // First push data
     auto action_functor = [this, &active_local_nodes](const processor_id_type libmesh_dbg_var(pid),
-                                 const std::vector<dof_id_type> & sent_data) {
+                                                      const std::vector<dof_id_type> & sent_data) {
       mooseAssert(pid != mesh.processor_id(), "We do not send messages to ourself here");
       for (const auto pr : sent_data)
         active_local_nodes.insert(pr);
@@ -1223,7 +1223,8 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
   // and store to use later to zero LM DoFs on inactive nodes
   inactive_local_lm_nodes.clear();
   for (const auto & pr : primary_secondary_subdomain_id_pairs)
-    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+    for (const auto el :
+         mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
           inactive_local_lm_nodes.insert(el->node_id(n));
@@ -1247,7 +1248,8 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   // Take complement of active elements in active local subdomain to get inactive local elements
   inactive_local_lm_elems.clear();
   for (const auto & pr : primary_secondary_subdomain_id_pairs)
-    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+    for (const auto el :
+         mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
       if (active_local_elems.find(el) == active_local_elems.end())
         inactive_local_lm_elems.insert(el);
 }
@@ -1729,9 +1731,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
           // Check that the candidate element is correctly oriented (that normals oppose each other)
           // this is to fix an issue where projection accepts wrong neighbor of nearest node when
-          // node projects onto both neighbors but one is oriented in the wrong direction (for example
-          // neighbors on bottom of a sphere when primary surface is a verticle wall)
-
+          // node projects onto both neighbors but one is oriented in the wrong direction (for
+          // example neighbors on bottom of a sphere when primary surface is a verticle wall)
 
           std::vector<Point> nodal_normals(secondary_elem_candidate->n_nodes());
           for (const auto n : make_range(secondary_elem_candidate->n_nodes()))

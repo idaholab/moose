@@ -88,10 +88,9 @@ NormalMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type
       {
         // Here we're assuming that the user provided the x-component as the secondary/primary
         // variable!
-        gap_vec(0).derivatives() =
-            _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
-        gap_vec(1).derivatives() = (*_primary_disp_y_sln)[_qp].derivatives() -
-                                   (*_secondary_disp_y_sln)[_qp].derivatives();
+        gap_vec(0).derivatives() = _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
+        gap_vec(1).derivatives() =
+            (*_primary_disp_y_sln)[_qp].derivatives() - (*_secondary_disp_y_sln)[_qp].derivatives();
         if (_primary_disp_z)
           gap_vec(2).derivatives() = (*_primary_disp_z_sln)[_qp].derivatives() -
                                      (*_secondary_disp_z_sln)[_qp].derivatives();

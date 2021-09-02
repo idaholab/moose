@@ -228,9 +228,15 @@ public:
 
   int dim() const { return mesh.mesh_dimension(); }
 
-  const std::unordered_set<dof_id_type> & getInactiveLMNodes() const { return inactive_local_lm_nodes; }
+  const std::unordered_set<dof_id_type> & getInactiveLMNodes() const
+  {
+    return inactive_local_lm_nodes;
+  }
 
-  const std::unordered_set<const Elem *> & getInactiveLMElems() const { return inactive_local_lm_elems; }
+  const std::unordered_set<const Elem *> & getInactiveLMElems() const
+  {
+    return inactive_local_lm_elems;
+  }
 
 private:
   // Reference to the mesh stored in equation_systems.
@@ -318,7 +324,6 @@ private:
 
   // List of inactive lagrange multiplier nodes (for elemental variables)
   std::unordered_set<const Elem *> inactive_local_lm_elems;
-
 
   /**
    * Helper function responsible for projecting secondary nodes

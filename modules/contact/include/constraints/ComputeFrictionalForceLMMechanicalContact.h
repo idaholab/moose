@@ -42,7 +42,8 @@ protected:
    * where we actually feed the node-based constraint information into the system residual and
    * Jacobian
    */
-  void enforceConstraintOnDof(const dof_id_type friction_dof_index, const dof_id_type normal_dof_index);
+  void enforceConstraintOnDof(const dof_id_type friction_dof_index,
+                              const dof_id_type normal_dof_index);
 
   /// A map from node to weighted gap
   std::unordered_map<std::pair<dof_id_type, dof_id_type>, std::pair<ADReal, ADReal>>

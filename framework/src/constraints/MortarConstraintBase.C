@@ -184,8 +184,8 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> &
                                          const std::unordered_set<const Elem *> & inactive_lm_elems)
 {
   if (_subproblem.currentlyComputingJacobian())
-    prepareMatrixTagLower(_assembly, _var->number(), _var->number(),
-                          Moose::ConstraintJacobianType::LowerLower);
+    prepareMatrixTagLower(
+        _assembly, _var->number(), _var->number(), Moose::ConstraintJacobianType::LowerLower);
   else
     prepareVectorTagLower(_assembly, _var->number());
 
