@@ -61,7 +61,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    max_parallel = 1
   []
 
   [err.missing_A_ref]
@@ -69,7 +68,6 @@
     input = 'phy.form_loss.i'
     cli_args = 'Components/junction/K=1'
     expect_err = "junction: With specified form loss factor 'K', parameter 'A_ref' is required."
-    max_parallel = 1
   []
 
   [err.missing_K]
@@ -77,7 +75,6 @@
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
     expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
-    max_parallel = 1
   []
 
   [err.non_parallel_channels]
@@ -86,7 +83,6 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
-    max_parallel = 1
   []
 
   # jacobian test

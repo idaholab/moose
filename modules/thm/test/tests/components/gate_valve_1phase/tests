@@ -41,7 +41,6 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe2_valve/connections='pipe1:in pipe2A:out pipe2B:in'"
     expect_err = "The number of connections \(3\) must equal 2"
-    max_parallel = 1
   []
 
   [err:not_parallel]
@@ -57,6 +56,5 @@
     input = 'gate_valve_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "GateValve1Phase cannot perform slope reconstruction"
-    max_parallel = 1
   []
 []

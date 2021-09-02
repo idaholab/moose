@@ -49,7 +49,6 @@
     type = RunException
     input = 'axial_regions.i'
     expect_err = "If there is more than 1 axial region, then the parameter 'axial_region_names' must be specified."
-    max_parallel = 1
   []
 
   [err:incorrect_size_axial_regions_parameter]
@@ -57,21 +56,18 @@
     input = 'axial_regions.i'
     cli_args = "Components/hs/axial_region_names='region1 region2'"
     expect_err = "The number of entries in parameter 'axial_region_names' \(2\) must equal the number of entries of parameter 'length' \(3\)"
-    max_parallel = 1
   []
 
   [err:no_2nd_order_with_trap]
     type = 'RunException'
     input = 'err.no_2nd_order_with_trap.i'
     expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
-    max_parallel = 1
   []
 
   [err:no_T_ic]
     type = 'RunException'
     input = 'err.no_T_ic.i'
     expect_err = "hs: Missing initial condition for temperature."
-    max_parallel = 1
   []
 
   [err:incorrect_size_of_n_part_elems]
@@ -79,7 +75,6 @@
     input = 'err.no_T_ic.i'
     cli_args = 'Components/hs/n_part_elems=1'
     expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'n_part_elems' \(1\)"
-    max_parallel = 1
   []
 
   [err:incorrect_size_of_widths]
@@ -87,7 +82,6 @@
     input = 'err.no_T_ic.i'
     cli_args = 'Components/hs/widths=1'
     expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'widths' \(1\)"
-    max_parallel = 1
   []
 
   [err:incorrect_size_of_materials]
@@ -95,6 +89,5 @@
     input = 'err.no_T_ic.i'
     cli_args = 'Components/hs/materials=a'
     expect_err = "hs: The number of entries in parameter 'names' \(3\) must equal the number of entries of parameter 'materials' \(1\)"
-    max_parallel = 1
   []
 []

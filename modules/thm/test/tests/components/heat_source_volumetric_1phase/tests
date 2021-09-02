@@ -16,7 +16,6 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=asdf"
     expect_err = "hs: The component 'asdf' does not exist"
-    max_parallel = 1
   []
 
   [err:not_a_flow_channel]
@@ -24,6 +23,5 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=total_power"
     expect_err = "hs: The component 'total_power' is not of type 'FlowChannel1Phase'"
-    max_parallel = 1
   []
 []

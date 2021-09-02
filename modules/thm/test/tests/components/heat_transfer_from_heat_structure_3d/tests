@@ -42,7 +42,6 @@
     cli_args = "Components/ht/flow_channels='in'"
     expect_err = "ht: The component 'in' is not of type 'FlowChannel1Phase'."
     prereq = mesh
-    max_parallel = 1
   []
   [err:fch_orientation]
     type = 'RunException'
@@ -50,41 +49,35 @@
     cli_args = "Components/fch/orientation='1 0 1'"
     expect_err = "ht: The flow channel 'fch' must be aligned with the x-, y-, or z- axis."
     prereq = mesh
-    max_parallel = 1
   []
   [err:not_3d_hs]
     type = 'RunException'
     input = 'err.not_a_3d_hs.i'
     expect_err = "ht: The component 'blk' is not a HeatStructureFromFile3D component."
-    max_parallel = 1
   []
   [err:non_existent_boundary]
     type = 'RunException'
     input = 'err.multi_fchs.i'
     cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/ht/boundary=asdf"
     expect_err = "ht: The boundary 'asdf' \(.+\) was not found."
-    max_parallel = 1
   []
   [err:differently_aligned_channels]
     type = 'RunException'
     input = 'err.multi_fchs.i'
     cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 1 0'"
     expect_err = "ht: Flow channel 'fch2' has a different axis alignment \(1\). Make sure all flow channels are aligned with the same axis."
-    max_parallel = 1
   []
   [err:different_n_elems]
     type = 'RunException'
     input = 'err.multi_fchs.i'
     cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/fch2/n_elems=7"
     expect_err = "ht: Flow channel 'fch2' has 7 elements which is inconsistent with the rest of the flow channels. Make sure all flow channels have the same number of elements."
-    max_parallel = 1
   []
   [err:different_lengths]
     type = 'RunException'
     input = 'err.multi_fchs.i'
     cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/fch2/length=2"
     expect_err = "ht: Flow channel 'fch2' has length equal to 2 which is inconsistent with the rest of the flow channels. Make sure all flow channels have the length."
-    max_parallel = 1
   []
   # Jacobians
   [jac]

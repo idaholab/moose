@@ -33,7 +33,6 @@
     type = 'RunException'
     input = 'err.wrong_fp.i'
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
-    max_parallel = 1
   []
 
   [jacobian]

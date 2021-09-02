@@ -11,6 +11,5 @@
     input = 'test.i'
     cli_args = 'ControlLogic/delay_ctrl/tau=-1'
     expect_err = "Negative values of 'tau' are not allowed\."
-    max_parallel = 1
   []
 []
