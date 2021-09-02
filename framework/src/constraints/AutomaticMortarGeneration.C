@@ -328,7 +328,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       {
         mooseError("MortarSegmentInfo not found for the mortar segment candidate");
       }
-      if (info->xi1_a < xi1 && xi1 < info->xi1_b)
+      if (info->xi1_a <= xi1 && xi1 <= info->xi1_b)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;
@@ -338,6 +338,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Make sure we found one.
     if (current_mortar_segment == nullptr)
       mooseError("Unable to find appropriate mortar segment during linear search!");
+
+    // If node lands on endpoint of segment, don't split
+    info = &msm_elem_to_info.at(current_mortar_segment);
+    if (info->xi1_a == xi1 || xi1 == info->xi1_b)
+      continue;
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
