@@ -120,7 +120,7 @@ CommonOutputAction::validParams()
 
   params.addParam<bool>("perf_graph_live", true, "Enables printing of live progress messages");
   params.addParam<Real>(
-      "perf_graph_live_time_limit", 1.0, "Time (in seconds) to wait before printing a message.");
+      "perf_graph_live_time_limit", 5.0, "Time (in seconds) to wait before printing a message.");
   params.addParam<unsigned int>(
       "perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
 

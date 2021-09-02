@@ -34,7 +34,7 @@
 
 [Problem]
   type = SlowProblem
-  seconds_to_sleep = 4
+  seconds_to_sleep = 7
 []
 
 [Executioner]
