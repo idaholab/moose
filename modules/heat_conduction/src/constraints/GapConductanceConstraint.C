@@ -56,29 +56,22 @@ GapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
       return -_lambda[_qp] * _test_secondary[_i][_qp];
     case Moose::MortarType::Lower:
     {
-      if (_has_primary)
-      {
-        // we are creating an AD version of phys points primary and secondary here...
-        ADRealVectorValue ad_phys_points_primary = _phys_points_primary[_qp];
-        ADRealVectorValue ad_phys_points_secondary = _phys_points_secondary[_qp];
+      // we are creating an AD version of phys points primary and secondary here...
+      ADRealVectorValue ad_phys_points_primary = _phys_points_primary[_qp];
+      ADRealVectorValue ad_phys_points_secondary = _phys_points_secondary[_qp];
 
-        // ...which uses the derivative vector of the primary and secondary displacements as
-        // an approximation of the true phys points derivatives when the mesh is displacing
-        if (_displaced)
-          for (unsigned int i = 0; i < _n_disp; ++i)
-          {
-            ad_phys_points_primary(i).derivatives() = (*_disp_primary[i])[_qp].derivatives();
-            ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
-          }
+      // ...which uses the derivative vector of the primary and secondary displacements as
+      // an approximation of the true phys points derivatives when the mesh is displacing
+      if (_displaced)
+        for (unsigned int i = 0; i < _n_disp; ++i)
+        {
+          ad_phys_points_primary(i).derivatives() = (*_disp_primary[i])[_qp].derivatives();
+          ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
+        }
 
-        auto l =
-            std::max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
-        return (_lambda[_qp] - _k * (_u_primary[_qp] - _u_secondary[_qp]) / l) * _test[_i][_qp];
-      }
-      else
-        // We don't have a corresponding primary elem so there should be nothing to transfer heat
-        // between, e.g. lambda should be driven to zero
-        return _lambda[_qp];
+      auto l =
+          std::max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
+      return (_lambda[_qp] - _k * (_u_primary[_qp] - _u_secondary[_qp]) / l) * _test[_i][_qp];
     }
 
     default:
