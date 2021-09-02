@@ -174,8 +174,8 @@
   l_max_its = 2
   l_tol = 1e-14
   nl_max_its = 30
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
   start_time = 0.0
   dt = 0.1
   end_time = 1.0

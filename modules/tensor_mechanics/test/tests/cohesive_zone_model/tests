@@ -297,7 +297,7 @@
     design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md'
     requirement = 'The MOOSE shall be able to model decohesion of composites using cohesive znoe '
                   'model.'
-    issues = '#18611'
+    issues = '#18611 #18763'
     [normal]
       type = Exodiff
       input = 'bilinear_mixed.i'
@@ -320,6 +320,22 @@
       cli_args = "Outputs/file_base=bilinear_mixed_shear_out BCs/fix_top/variable=disp_y BCs/top/variable=disp_x"
       abs_zero = 1e-6
       detail = "under mode II loading."
+    []
+    [normal_lag]
+      type = Exodiff
+      input = 'bilinear_mixed.i'
+      exodiff = bilinear_mixed_lag_out.e
+      cli_args = "Materials/czm/lag_seperation_state=true Outputs/file_base=bilinear_mixed_lag_out"
+      abs_zero = 1e-5
+      detail = "under mode I loading by lagging the seperation state."
+    []
+    [normal_power_law]
+      type = Exodiff
+      input = 'bilinear_mixed.i'
+      exodiff = bilinear_mixed_normal_power_law_out.e
+      cli_args = "Materials/czm/mixed_mode_criterion=POWER_LAW Outputs/file_base=bilinear_mixed_normal_power_law_out"
+      abs_zero = 1e-6
+      detail = "under mode I loading with power law propagation criterion."
     []
   []
 

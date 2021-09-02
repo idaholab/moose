@@ -63,11 +63,17 @@ protected:
   const Real _delta_shear0;
   ///@}
 
+  ///@{
   /// effective displacement at damage initiation
   MaterialProperty<Real> & _eff_disp_damage_init;
+  const MaterialProperty<Real> & _eff_disp_damage_init_old;
+  ///@}
 
+  ///@{
   /// effective displacement at full degradation
   MaterialProperty<Real> & _eff_disp_full_degradation;
+  const MaterialProperty<Real> & _eff_disp_full_degradation_old;
+  ///@}
 
   /// The B-K power law parameter
   const Real _eta;
@@ -89,4 +95,17 @@ protected:
 
   /// mode_mixity_ratio
   MaterialProperty<Real> & _beta;
+
+  /// mixed mode propagation criterion
+  enum class MixedModeCriterion
+  {
+    POWER_LAW,
+    BK
+  } _criterion;
+
+  /// Lag seperation state
+  const bool _lag_seperation_state;
+
+  /// interpenetration regularization parameter
+  const Real _alpha;
 };

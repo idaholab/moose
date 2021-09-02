@@ -46,7 +46,25 @@ The mixed-mode relative displacement corresponding to the onset of softening $\d
 
 ## Delamination propagation prediction
 
-The mixed-mode criterion proposed by Benzeggagh and Kenane is used here (B-K criterion):
+### Power law criterion
+
+The power law criterion is given as
+\begin{equation}
+\left(\frac{G_{I}}{G_{IC}}\right)^{\alpha} + \left(\frac{G_{II}}{G_{IIC}}\right)^{\alpha} = 1
+\end{equation}
+
+The mixed-mode displacements corresponding to total decohesion is given as:
+\begin{equation}
+\delta_m^f=
+\begin{cases}
+    \ \frac{2(1+\beta^2)}{K\delta_m^0}\left[\left(\frac{1}{G_{IC}}\right)^{\alpha} + \left(\frac{\beta^2}{G_{IIC}}\right)^{\alpha}\right]^{-1/\alpha} , & \delta_3> 0\\
+    \ \sqrt{(\delta_1^f)^2+(\delta_2^f)^2},              & \delta_3\leq 0
+\end{cases}
+\end{equation}
+
+### B-K criterion
+
+The mixed-mode criterion proposed by Benzeggagh and Kenane is given as (B-K criterion):
 \begin{equation}
 G_{IC}+(G_{IIC}-G_{IC})\left(\frac{G_{shear}}{G_T}\right)^{\eta} = G_C~\text{with}~G_T=G_I+G_{shear}
 \end{equation}
@@ -79,15 +97,26 @@ D_{sr} =
 
 \begin{equation}
 d= \frac{\delta_m^f(\delta_m^{max}-\delta_m^0)}{\delta_m^{max}(\delta_m^f-\delta_m^0)}, d\in[0,1]
+\label{damage}
 \end{equation}
 
-## Viscous regularization
+## Solver options
+
+### Viscous regularization
 
 Cohesive zone models exhibiting softening behavior and stiffness degradation often lead to convergence difficulties in an implicit solver. The traction-separation laws can be regularized using viscosity. The viscous damage variable $d_v$ is defined by
 \begin{equation}
 \dot{d_v}=\frac{1}{\mu}(d-d_v)
 \end{equation}
 where $\mu$ is the viscosity parameter representing the relaxation time of the viscous system. An analytical expression of $d_v$ can be obtained by using the backward Euler method. With viscous regularization, the $d$ will be replaced by $d_v$ in [traction] to compute traction.   
+
+### Lag separation state
+
+It is typically useful to improve convergence by lagging the separation state. When `lag_seperation_state = true`, the $\delta_3$, $\delta_m^{max}$, $\delta_m^0$ and $\delta_m^f$ will be replaced by their old values from previous time step.
+
+### Use Regularized Heavyside Function
+
+The step (heavyside) function $\frac{\langle-\delta_3\rangle}{-\delta_3}$ in [traction] usually makes convergence bad. In the code, we replaced it with the regularized heavside function which provides a C0 continuity. The regularization parameter can be set by `alpha` parameter.
 
 ## Examples
 
