@@ -1,7 +1,7 @@
 #
-# MatVectorBodyForce Test
+# MaterialVectorBodyForce Test
 #
-# This test is designed to apply gravity using the MatVectorBodyForce kernel/action.
+# This test is designed to apply gravity using the MaterialVectorBodyForce kernel/action.
 #
 # The mesh is composed of one block with a single element.
 # The bottom is fixed in all three directions.  Poisson's ratio
@@ -21,7 +21,7 @@
   [Master/all]
     add_variables = true
   []
-  [MatVectorBodyForce/all]
+  [MaterialVectorBodyForce/all]
     body_force = force_density
   []
 []

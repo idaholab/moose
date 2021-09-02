@@ -14,14 +14,14 @@
 class Function;
 
 /**
- * MatVectorBodyForce applies a body force (force/volume) given as a vector material property
+ * MaterialVectorBodyForce applies a body force (force/volume) given as a vector material property
  */
-class MatVectorBodyForce : public Kernel
+class MaterialVectorBodyForce : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MatVectorBodyForce(const InputParameters & parameters);
+  MaterialVectorBodyForce(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

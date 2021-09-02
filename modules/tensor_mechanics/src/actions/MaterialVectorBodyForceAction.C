@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MatVectorBodyForceAction.h"
+#include "MaterialVectorBodyForceAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Conversion.h"
 
-registerMooseAction("TensorMechanicsApp", MatVectorBodyForceAction, "add_kernel");
+registerMooseAction("TensorMechanicsApp", MaterialVectorBodyForceAction, "add_kernel");
 
 InputParameters
-MatVectorBodyForceAction::validParams()
+MaterialVectorBodyForceAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Set up volumetric body force kernels");
@@ -35,14 +35,15 @@ MatVectorBodyForceAction::validParams()
   return params;
 }
 
-MatVectorBodyForceAction::MatVectorBodyForceAction(const InputParameters & params) : Action(params)
+MaterialVectorBodyForceAction::MaterialVectorBodyForceAction(const InputParameters & params)
+  : Action(params)
 {
 }
 
 void
-MatVectorBodyForceAction::act()
+MaterialVectorBodyForceAction::act()
 {
-  std::string kernel_type = "MatVectorBodyForce";
+  std::string kernel_type = "MaterialVectorBodyForce";
 
   auto displacements = getParam<std::vector<VariableName>>("displacements");
   for (const auto & disp : displacements)
