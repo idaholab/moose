@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-/**
- * Compute the value of a variable at a specified location.
- *
- * Warning: This postprocessor may result in undefined behavior if utilized with
- * non-continuous elements and the point being located lies on an element boundary.
- */
 class AveragePointSeparation : public GeneralPostprocessor
 {
 public:
@@ -38,10 +32,10 @@ protected:
   /// A reference to the system containing the variable
   const System & _system;
 
-  /// The point to locate
+  /// The vectors of start and end points
   const std::vector<Point> & _first_point;
   const std::vector<Point> & _last_point;
 
-  /// The value of the variable at the desired location
+  /// The value of the average separation between the sets of points
   Real _value;
 };

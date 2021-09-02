@@ -40,7 +40,7 @@ AveragePointSeparation::validParams()
   params.addRequiredParam<std::vector<Point>>("last_point",
                                               "A list of last points in the numerical domain");
   params.addClassDescription(
-      "Compute the average separation between a list of two specified locations");
+      "Computes the average separation on deformed mesh between two sets of points");
   return params;
 }
 
@@ -62,6 +62,9 @@ AveragePointSeparation::AveragePointSeparation(const InputParameters & parameter
                                     Moose::VarKindType::VAR_ANY,
                                     Moose::VarFieldType::VAR_FIELD_STANDARD)
                        .number();
+
+  if(_first_point.size() != _last_point.size())
+    mooseerror("first point and last point array should have the same size.");
 }
 
 void
@@ -73,8 +76,8 @@ AveragePointSeparation::execute()
   {
     sq_diff = 0;
     for (unsigned int j = 0; j < _displacements.size(); ++j)
-      sq_diff += Utility::pow<2>(_system.point_value(_disp_num[j], _first_point[i], false) -
-                                 _system.point_value(_disp_num[j], _last_point[i], false));
+      sq_diff += Utility::pow<2>((_first_point[i](j) + _system.point_value(_disp_num[j], _first_point[i], false)) -
+                                 (_last_point[i](j) + _system.point_value(_disp_num[j], _last_point[i], false)));
 
     _value += std::sqrt(sq_diff);
   }
