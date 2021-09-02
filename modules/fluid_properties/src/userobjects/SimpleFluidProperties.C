@@ -94,15 +94,80 @@ SimpleFluidProperties::cp_from_p_T(
   dcp_dT = 0.0;
 }
 
+Real SimpleFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
+
+void
+SimpleFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
+{
+  cp = cp_from_v_e(v, e);
+  dcp_dv = 0.0;
+  dcp_de = 0.0;
+}
+
 Real SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _cv;
+}
+
+void
+SimpleFluidProperties::cv_from_p_T(
+    Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const
+{
+  cv = cv_from_p_T(pressure, temperature);
+  dcv_dp = 0.0;
+  dcv_dT = 0.0;
+}
+
+Real SimpleFluidProperties::cv_from_v_e(Real /*v*/, Real /*e*/) const { return _cv; }
+
+void
+SimpleFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
+{
+  cv = cv_from_v_e(v, e);
+  dcv_dv = 0.0;
+  dcv_de = 0.0;
 }
 
 Real
 SimpleFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return std::sqrt(_bulk_modulus / rho_from_p_T(pressure, temperature));
+}
+
+void
+SimpleFluidProperties::c_from_p_T(
+    Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const
+{
+  c = c_from_p_T(pressure, temperature);
+  dc_dp =
+      -std::exp(_thermal_expansion * temperature - pressure / _bulk_modulus) / 2 / _density0 /
+      std::sqrt(_bulk_modulus *
+                std::exp(_thermal_expansion * temperature - pressure / _bulk_modulus) / _density0);
+  dc_dT =
+      _thermal_expansion * _bulk_modulus *
+      std::exp(_thermal_expansion * temperature - pressure / _bulk_modulus) / 2 / _density0 /
+      std::sqrt(_bulk_modulus *
+                std::exp(_thermal_expansion * temperature - pressure / _bulk_modulus) / _density0);
+}
+
+Real
+SimpleFluidProperties::c_from_v_e(Real v, Real e) const
+{
+  Real T = T_from_v_e(v, e);
+  Real p = p_from_v_e(v, e);
+  return std::sqrt(_bulk_modulus / rho_from_p_T(p, T));
+}
+
+void
+SimpleFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
+{
+  Real T = T_from_v_e(v, e);
+  Real p = p_from_v_e(v, e);
+
+  c = std::sqrt(_bulk_modulus / rho_from_p_T(p, T));
+
+  dc_dv = 0.5 * std::sqrt(_bulk_modulus / v);
+  dc_de = 0.0;
 }
 
 Real SimpleFluidProperties::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
@@ -119,15 +184,43 @@ SimpleFluidProperties::k_from_p_T(
   dk_dT = 0;
 }
 
+Real SimpleFluidProperties::k_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _thermal_conductivity;
+}
+
+void
+SimpleFluidProperties::k_from_v_e(
+    Real /*v*/, Real /*e*/, Real & k, Real & dk_dv, Real & dk_de) const
+{
+  k = _thermal_conductivity;
+  dk_dv = 0;
+  dk_de = 0;
+}
+
 Real SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
 }
 
 void
-SimpleFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+SimpleFluidProperties::s_from_p_T(
+    Real /*p*/, Real /*T*/, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+  s = _specific_entropy;
+  ds_dp = 0;
+  ds_dT = 0;
+}
+
+Real SimpleFluidProperties::s_from_v_e(Real /*v*/, Real /*e*/) const { return _specific_entropy; }
+
+void
+SimpleFluidProperties::s_from_v_e(
+    Real /*v*/, Real /*e*/, Real & s, Real & ds_dv, Real & ds_de) const
+{
+  s = _specific_entropy;
+  ds_dv = 0;
+  ds_de = 0;
 }
 
 Real
@@ -143,6 +236,65 @@ SimpleFluidProperties::rho_from_p_T(
   rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = rho / _bulk_modulus;
   drho_dT = -_thermal_expansion * rho;
+}
+
+void
+SimpleFluidProperties::rho_from_p_T(const DualReal & pressure,
+                                    const DualReal & temperature,
+                                    DualReal & rho,
+                                    DualReal & drho_dp,
+                                    DualReal & drho_dT) const
+{
+  rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
+  drho_dp = rho / _bulk_modulus;
+  drho_dT = -_thermal_expansion * rho;
+}
+
+Real
+SimpleFluidProperties::T_from_v_e(Real /*v*/, Real e) const
+{
+  return e / _cv;
+}
+
+void
+SimpleFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
+{
+  T = T_from_v_e(v, e);
+  dT_dv = 0.0;
+  dT_de = 1.0 / _cv;
+}
+
+void
+SimpleFluidProperties::T_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
+{
+  T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  dT_dv = 0.0;
+  dT_de = 1.0 / _cv;
+}
+
+Real
+SimpleFluidProperties::p_from_v_e(Real v, Real e) const
+{
+  Real temperature = T_from_v_e(v, e);
+  return _bulk_modulus * (_thermal_expansion * temperature + std::log(1 / (v * _density0)));
+}
+
+void
+SimpleFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
+{
+  p = p_from_v_e(v, e);
+  dp_dv = -_bulk_modulus / v;
+  dp_de = _bulk_modulus * _thermal_expansion / _cv;
+}
+
+void
+SimpleFluidProperties::p_from_v_e(
+    const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
+{
+  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  dp_dv = -_bulk_modulus / v;
+  dp_de = _bulk_modulus * _thermal_expansion / _cv;
 }
 
 Real
@@ -172,6 +324,16 @@ SimpleFluidProperties::mu_from_p_T(
   mu = this->mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
   dmu_dT = 0.0;
+}
+
+Real SimpleFluidProperties::mu_from_v_e(Real /*v*/, Real /*e*/) const { return _viscosity; }
+
+void
+SimpleFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  mu = this->mu_from_v_e(v, e);
+  dmu_dv = 0.0;
+  dmu_de = 0.0;
 }
 
 Real
