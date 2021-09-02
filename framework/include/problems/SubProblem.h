@@ -798,12 +798,13 @@ public:
    */
   void clearAllDofIndices();
 
-  template <typename T>
-  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name, THREAD_ID tid);
+  template <typename T, template <typename> class P = FunctorMaterialProperty>
+  P<T> & declareFunctorProperty(const std::string & name, THREAD_ID tid, bool called_from_getter);
 
   template <typename T>
   const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name, THREAD_ID tid);
 
+  virtual void initialSetup();
   virtual void timestepSetup();
   virtual void residualSetup();
   virtual void jacobianSetup();
@@ -912,8 +913,13 @@ protected:
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
 
-  /// Functor material properties for this problem
-  std::vector<std::unordered_map<std::string, std::unique_ptr<FunctorBase>>>
+  /// Functor material properties for this problem. Outer vector is indexed by thread ID. Map key
+  /// corresponds to the functor material property name. Map values are pairs where the first member
+  /// of the pair is a boolean that indicates whether the functor property has been declared (if
+  /// we've created a name key then by the time we're setting up the problem this boolean must
+  /// evaluate to true or else it means someone has requested property that won't be provided) and
+  /// the second member of the pair is a unique pointer to the functor material property object
+  std::vector<std::unordered_map<std::string, std::pair<bool, std::unique_ptr<FunctorBase>>>>
       _functor_material_properties;
 
 private:
@@ -949,20 +955,67 @@ private:
   friend class Restartable;
 };
 
-template <typename T>
-FunctorMaterialProperty<T> &
-SubProblem::declareFunctorProperty(const std::string & name, const THREAD_ID tid)
+template <typename T, template <typename> class P>
+P<T> &
+SubProblem::declareFunctorProperty(const std::string & name,
+                                   const THREAD_ID tid,
+                                   const bool called_from_getter)
 {
   mooseAssert(tid < _functor_material_properties.size(),
               "Requested thread ID " << std::to_string(tid) << " too large");
+  const bool actually_declaring_property = !called_from_getter;
   auto & functor_material_properties = _functor_material_properties[tid];
-  auto pr =
-      functor_material_properties.emplace(name, std::make_unique<FunctorMaterialProperty<T>>(name));
-  auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(pr.first->second.get());
-  if (!property)
-    mooseError("Inconsistent types for functor material property ",
-               name,
-               ". Did you declare and retrieve the property with different types?");
+  auto it = functor_material_properties.find(name);
+  if (it == functor_material_properties.end())
+    // No material property created yet so create it
+    it = functor_material_properties
+             .emplace(name,
+                      std::make_pair(actually_declaring_property, std::make_unique<P<T>>(name)))
+             .first;
+  else
+  // The property already exists
+  {
+    auto & prop_pair = it->second;
+    bool & already_declared = prop_pair.first;
+    auto & base_property = prop_pair.second;
+
+    if (actually_declaring_property)
+    {
+      if (already_declared)
+      {
+        // We've already been declared previously so we need to make sure that we are the same type
+        auto * const property = dynamic_cast<P<T> *>(base_property.get());
+        if (!property)
+          mooseError("Inconsistent types for functor material property ",
+                     name,
+                     ". Did you declare this property name with different types in different "
+                     "FunctorMaterials?");
+      }
+      else
+      {
+        // Let's make sure we're the correct type T
+        auto * const functor_property =
+            dynamic_cast<FunctorMaterialProperty<T> *>(base_property.get());
+        if (!functor_property)
+          mooseError("Inconsistent types for functor material property ",
+                     name,
+                     ". Did you declare and retrieve the property with different types?");
+
+        // And let's make sure we're the correct template P. If we're not, this is the first
+        // declaration so we're free to re-create with the correct P (if we're not the correct P, it
+        // means P is a derived class of FunctorMaterialProperty)
+        auto * const property = dynamic_cast<P<T> *>(base_property.get());
+        if (!property)
+          base_property = std::make_unique<P<T>>(name);
+
+        // Now we can update the declaration status
+        already_declared = true;
+      }
+    }
+  }
+
+  auto * const property = dynamic_cast<P<T> *>(it->second.second.get());
+  mooseAssert(property, "We should have handled all cases");
   return *property;
 }
 
@@ -970,7 +1023,7 @@ template <typename T>
 const FunctorMaterialProperty<T> &
 SubProblem::getFunctorProperty(const std::string & name, const THREAD_ID tid)
 {
-  return declareFunctorProperty<T>(name, tid);
+  return declareFunctorProperty<T>(name, tid, true);
 }
 
 namespace Moose

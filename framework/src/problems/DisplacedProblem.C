@@ -1131,6 +1131,8 @@ DisplacedProblem::computingScalingResidual() const
 void
 DisplacedProblem::initialSetup()
 {
+  SubProblem::initialSetup();
+
   _displaced_nl.initialSetup();
   _displaced_aux.initialSetup();
 }

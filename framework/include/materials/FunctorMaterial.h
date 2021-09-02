@@ -28,11 +28,11 @@ protected:
   /**
    * Declare a functor material property that this object will responsible for providing
    */
-  template <typename T>
+  template <typename T, template <typename> class P = FunctorMaterialProperty>
   FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
 };
 
-template <typename T>
+template <typename T, template <typename> class P>
 FunctorMaterialProperty<T> &
 FunctorMaterial::declareFunctorProperty(const std::string & name)
 {
@@ -41,5 +41,5 @@ FunctorMaterial::declareFunctorProperty(const std::string & name)
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return _subproblem.declareFunctorProperty<T>(prop_name, _tid);
+  return _subproblem.declareFunctorProperty<T, P>(prop_name, _tid, false);
 }

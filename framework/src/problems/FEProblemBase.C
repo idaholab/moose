@@ -615,6 +615,8 @@ FEProblemBase::initialSetup()
 {
   TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
 
+  SubProblem::initialSetup();
+
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
                  "is used. If you receive a terse MPI error during execution, remove this "

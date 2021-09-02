@@ -1036,7 +1036,7 @@ SubProblem::timestepSetup()
 {
   for (auto & map : _functor_material_properties)
     for (auto & pr : map)
-      pr.second->timestepSetup();
+      pr.second.second->timestepSetup();
 }
 
 void
@@ -1044,7 +1044,7 @@ SubProblem::residualSetup()
 {
   for (auto & map : _functor_material_properties)
     for (auto & pr : map)
-      pr.second->residualSetup();
+      pr.second.second->residualSetup();
 }
 
 void
@@ -1052,5 +1052,14 @@ SubProblem::jacobianSetup()
 {
   for (auto & map : _functor_material_properties)
     for (auto & pr : map)
-      pr.second->jacobianSetup();
+      pr.second.second->jacobianSetup();
+}
+
+void
+SubProblem::initialSetup()
+{
+  for (const auto & functor_props : _functor_material_properties)
+    for (const auto & key_value : functor_props)
+      if (!key_value.second.first)
+        mooseError("Functor material property ", key_value.first, " has no declaration anywhere.");
 }

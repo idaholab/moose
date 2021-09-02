@@ -360,7 +360,7 @@ public:
    */
   virtual std::vector<VariableName> getVariableNames();
 
-  virtual void initialSetup();
+  void initialSetup() override;
   void timestepSetup() override;
   void residualSetup() override;
   void jacobianSetup() override;

@@ -337,7 +337,7 @@ public:
 
   bool computingScalingResidual() const override final;
 
-  virtual void initialSetup();
+  void initialSetup() override;
   void timestepSetup() override;
 
   using SubProblem::haveADObjects;
