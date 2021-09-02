@@ -1,0 +1,20 @@
+[Tests]
+  [indenter_force_control]
+    type = RunApp
+    input = 'indenter_force_control.i'
+    check_input = True
+    heavy = true
+  []
+  [indenter_spherical_fine]
+    type = RunApp
+    input = 'indenter_spherical_fine.i'
+    check_input = True
+    heavy = true
+  []
+  [indenter_displacement_control]
+    type = RunApp
+    input = 'indenter_displacement_control.i'
+    check_input = True
+    heavy = true
+  []
+[]

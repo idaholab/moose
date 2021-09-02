@@ -1,0 +1,17 @@
+[Tests]
+  design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md'
+  issues = '#18648'
+  [cylinder_friction_mortar]
+    type = RunApp
+    input = 'cylinder_friction_mortar.i'
+    check_input = True
+    ad_indexing_type = 'global'
+    heavy = true
+  []
+  [cylinder_friction_nodetosegment_penalty]
+    type = RunApp
+    input = 'cylinder_friction_nodetosegment_penalty.i'
+    check_input = True
+    heavy = true
+  []
+[]

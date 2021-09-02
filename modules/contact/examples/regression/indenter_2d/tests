@@ -1,0 +1,14 @@
+[Tests]
+  [indenter_rz_nodeface_friction_kinematic]
+    type = RunApp
+    input = 'indenter_rz_nodeface_friction_kinematic.i'
+    check_input = True
+    heavy = true
+  []
+  [indenter_rz_nodeface_friction_kinematic_second_order]
+    type = RunApp
+    input = 'indenter_rz_nodeface_friction_kinematic_second_order.i'
+    check_input = True
+    heavy = true
+  []
+[]

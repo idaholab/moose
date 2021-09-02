@@ -140,7 +140,7 @@
 [Postprocessors]
   [maxdisp]
     type = NodalVariableValue
-    nodeid = 6489
+    nodeid = 3200
     variable = disp_y
   []
   [resid_y]

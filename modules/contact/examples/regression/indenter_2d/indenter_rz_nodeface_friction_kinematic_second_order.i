@@ -14,6 +14,7 @@
   file = indenter_rz_fine_bigsideset.e
   displacements = 'disp_x disp_y'
   second_order = true
+  allow_renumbering = false
 []
 
 [Functions]
@@ -187,7 +188,7 @@
 [Postprocessors]
   [maxdisp]
     type = NodalVariableValue
-    nodeid = 39 # 40-1 where 40 is the exodus node number of the top-left node
+    nodeid = 1
     variable = disp_y
   []
   [resid_y]

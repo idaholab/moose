@@ -31,6 +31,7 @@
 
 [Mesh] #Comment
   file = hertz_contact_hex27_verification.e
+  allow_renumbering = false
 []
 
 [Functions]
@@ -189,7 +190,7 @@
 [Postprocessors]
   [maxdisp]
     type = NodalVariableValue
-    nodeid = 1082
+    nodeid = 11633
     variable = disp_y
   []
   [resid_y]

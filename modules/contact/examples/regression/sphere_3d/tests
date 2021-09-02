@@ -1,0 +1,8 @@
+[Tests]
+  [hertz_contact_hex27_verification]
+    type = RunApp
+    input = 'hertz_contact_hex27_verification.i'
+    check_input = True
+    heavy = true
+  []
+[]
