@@ -73,7 +73,7 @@ ComputeMortarFunctor::operator()()
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
   // For 3D mortar get index for retrieving sub-element info
-  unsigned int secondary_sub_elem_ind, primary_sub_elem_ind;
+  unsigned int secondary_sub_elem_ind = 0, primary_sub_elem_ind = 0;
   if (_amg.dim() == 3)
   {
     secondary_sub_elem_ind = _amg.mortarSegmentMesh().get_elem_integer_index("secondary_sub_elem");
@@ -382,7 +382,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
   for (auto qp : make_range(_qrule_msm->n_points()))
   {
     // Get physical point on msm_elem to project
-    VectorValue<Dual2> x0;
+    Point x0;
     for (MooseIndex(msm_elem->n_nodes()) n = 0; n < msm_elem->n_nodes(); ++n)
       x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) *
             msm_elem->point(n);
