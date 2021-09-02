@@ -17,6 +17,7 @@
 #include "Limiter.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/quadrature.h"
 #include "libmesh/remote_elem.h"
 
 #include <unordered_map>
@@ -200,6 +201,7 @@ private:
    */
   template <typename SpaceArg, typename TimeArg>
   T queryQpCache(unsigned int qp,
+                 const QBase & qrule,
                  std::vector<std::pair<bool, T>> & qp_cache_data,
                  const SpaceArg & space,
                  const TimeArg & time) const;
@@ -268,6 +270,7 @@ template <typename T>
 template <typename SpaceArg, typename TimeArg>
 T
 FunctorInterface<T>::queryQpCache(const unsigned int qp,
+                                  const QBase & qrule,
                                   std::vector<std::pair<bool, T>> & qp_cache_data,
                                   const SpaceArg & space,
                                   const TimeArg & time) const
@@ -276,11 +279,8 @@ FunctorInterface<T>::queryQpCache(const unsigned int qp,
   // evaluate
   if (qp >= qp_cache_data.size())
   {
-    mooseAssert(qp_cache_data.size() == qp,
-                "We should only be resizing by one because we iterate over quadrature points in a "
-                "contiugous fashion");
-    qp_cache_data.resize(qp + 1);
-    auto & pr = qp_cache_data.back();
+    qp_cache_data.resize(qrule.n_points(), std::make_pair(false, T()));
+    auto & pr = qp_cache_data[qp];
     pr.second = evaluate(space, time);
     pr.first = true;
     return pr.second;
@@ -312,8 +312,10 @@ FunctorInterface<T>::operator()(const ElemQpArg & elem_qp, const unsigned int st
   }
   auto & qp_data = *_current_qp_map_value;
   const auto qp = std::get<1>(elem_qp);
+  const auto * const qrule = std::get<2>(elem_qp);
+  mooseAssert(qrule, "qrule must be non-null");
 
-  return queryQpCache(qp, qp_data, elem_qp, state);
+  return queryQpCache(qp, *qrule, qp_data, elem_qp, state);
 }
 
 template <typename T>
@@ -332,21 +334,21 @@ FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsign
   auto & side_qp_data = *_current_side_qp_map_value;
   const auto side = std::get<1>(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
+  const auto * const qrule = std::get<3>(elem_side_qp);
+  mooseAssert(qrule, "qrule must be non-null");
 
   // Check and see whether we even have sized for this side. If we haven't then we must
   // evaluate
   if (side >= side_qp_data.size())
   {
-    mooseAssert(side == side_qp_data.size(),
-                "I believe that we always iterate over sides in a contiguous fashion");
-    side_qp_data.resize(side + 1);
-    auto & qp_data = side_qp_data.back();
-    return queryQpCache(qp, qp_data, elem_side_qp, state);
+    const auto * const elem = std::get<0>(elem_side_qp);
+    mooseAssert(elem, "elem must be non-null");
+    side_qp_data.resize(elem->n_sides());
   }
 
   // Ok we were sized enough for our side
   auto & qp_data = side_qp_data[side];
-  return queryQpCache(qp, qp_data, elem_side_qp, state);
+  return queryQpCache(qp, *qrule, qp_data, elem_side_qp, state);
 }
 
 template <typename T>
