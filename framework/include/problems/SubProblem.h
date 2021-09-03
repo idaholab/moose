@@ -798,8 +798,13 @@ public:
    */
   void clearAllDofIndices();
 
-  template <typename T, template <typename> class P = FunctorMaterialProperty>
-  P<T> & declareFunctorProperty(const std::string & name, THREAD_ID tid, bool called_from_getter);
+  template <typename T,
+            template <typename> class P = FunctorMaterialProperty,
+            class... ConstructionArgs>
+  P<T> & declareFunctorProperty(const std::string & name,
+                                THREAD_ID tid,
+                                bool called_from_getter,
+                                ConstructionArgs &&... construction_args);
 
   template <typename T>
   const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name, THREAD_ID tid);
@@ -955,11 +960,12 @@ private:
   friend class Restartable;
 };
 
-template <typename T, template <typename> class P>
+template <typename T, template <typename> class P, class... ConstructionArgs>
 P<T> &
 SubProblem::declareFunctorProperty(const std::string & name,
                                    const THREAD_ID tid,
-                                   const bool called_from_getter)
+                                   const bool called_from_getter,
+                                   ConstructionArgs &&... construction_args)
 {
   mooseAssert(tid < _functor_material_properties.size(),
               "Requested thread ID " << std::to_string(tid) << " too large");
@@ -969,8 +975,11 @@ SubProblem::declareFunctorProperty(const std::string & name,
   if (it == functor_material_properties.end())
     // No material property created yet so create it
     it = functor_material_properties
-             .emplace(name,
-                      std::make_pair(actually_declaring_property, std::make_unique<P<T>>(name)))
+             .emplace(
+                 name,
+                 std::make_pair(actually_declaring_property,
+                                std::make_unique<P<T>>(
+                                    name, std::forward<ConstructionArgs>(construction_args)...)))
              .first;
   else
   // The property already exists
@@ -1006,7 +1015,8 @@ SubProblem::declareFunctorProperty(const std::string & name,
         // means P is a derived class of FunctorMaterialProperty)
         auto * const property = dynamic_cast<P<T> *>(base_property.get());
         if (!property)
-          base_property = std::make_unique<P<T>>(name);
+          base_property =
+              std::make_unique<P<T>>(name, std::forward<ConstructionArgs>(construction_args)...);
 
         // Now we can update the declaration status
         already_declared = true;

@@ -45,7 +45,6 @@ public:
                   const std::set<SubdomainID> & block_ids,
                   PolymorphicLambda my_lammy);
 
-private:
   using typename FunctorInterface<T>::FaceArg;
   using typename FunctorInterface<T>::ElemFromFaceArg;
   using typename FunctorInterface<T>::ElemQpArg;
@@ -53,6 +52,7 @@ private:
   using typename FunctorInterface<T>::FunctorType;
   using typename FunctorInterface<T>::FunctorReturnType;
 
+protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
   using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const ElemQpArg &, const unsigned int &)>;
@@ -60,14 +60,15 @@ private:
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 const unsigned int &)>;
 
-  T evaluate(const Elem * const & elem, unsigned int state) const override final;
-  T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override final;
-  T evaluate(const FaceArg & face, unsigned int state) const override final;
-  T evaluate(const ElemQpArg & elem_qp, unsigned int state) const override final;
-  T evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  T evaluate(const Elem * const & elem, unsigned int state) const override;
+  T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
+  T evaluate(const FaceArg & face, unsigned int state) const override;
+  T evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
+  T evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
   T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-             unsigned int state) const override final;
+             unsigned int state) const override;
 
+private:
   /**
    * Provide a useful error message about lack of functor material property on the provided
    * subdomain \p sub_id

@@ -28,18 +28,22 @@ protected:
   /**
    * Declare a functor material property that this object will responsible for providing
    */
-  template <typename T, template <typename> class P = FunctorMaterialProperty>
-  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name);
+  template <typename T,
+            template <typename> class P = FunctorMaterialProperty,
+            class... ConstructionArgs>
+  P<T> & declareFunctorProperty(const std::string & name, ConstructionArgs &&... construction_args);
 };
 
-template <typename T, template <typename> class P>
-FunctorMaterialProperty<T> &
-FunctorMaterial::declareFunctorProperty(const std::string & name)
+template <typename T, template <typename> class P, class... ConstructionArgs>
+P<T> &
+FunctorMaterial::declareFunctorProperty(const std::string & name,
+                                        ConstructionArgs &&... construction_args)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = name;
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return _subproblem.declareFunctorProperty<T, P>(prop_name, _tid, false);
+  return _subproblem.declareFunctorProperty<T, P>(
+      prop_name, _tid, false, std::forward<ConstructionArgs>(construction_args)...);
 }
