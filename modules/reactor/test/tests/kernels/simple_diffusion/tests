@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Diffusion.md'
+  issues = '#108'
+  [test]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    requirement = 'The system shall be able to solve a simple diffusion problem.'
+  []
+[]
