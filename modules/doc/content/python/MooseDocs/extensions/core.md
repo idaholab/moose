@@ -95,7 +95,7 @@ to define a heading:
 
 
 Settings, as listed in [heading-settings], are be applied after the heading title text and as shown in
-[heading-multiline] headings may also span multiple lines.
+[heading-standard] headings may also span multiple lines as shown in [heading-multiline].
 
 !devel! example caption=Basic use of all six heading levels. id=heading-basic-example
 # Level One
@@ -112,7 +112,7 @@ Settings, as listed in [heading-settings], are be applied after the heading titl
 
 !devel-end!
 
-!devel example caption=Use of settings within heading. id=heading-settings
+!devel example caption=Use of settings within heading. id=heading-standard
 ## Level Two style=font-size:75pt;color:red; id=level-two
 
 !devel example caption=Use of settings within heading. id=heading-multiline

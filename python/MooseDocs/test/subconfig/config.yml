@@ -21,6 +21,7 @@ Extensions:
     MooseDocs.extensions.autolink: default
     MooseDocs.extensions.config: default
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
     MooseDocs.extensions.navigation:
         name: MooseDocs Subsite
         home: /subsite/index.md

@@ -106,7 +106,7 @@ parameters and then returns it in `computeQpResidual()`.
 !listing framework/src/fvbcs/FVNeumannBC.C
          start=#include
          end=""
-         id=fv_dirichlet_code
+         id=fv_neumann_code
          caption=Example source code for `FVNeumannBC`.
 
 ## FVBCs source code: FVBurgersOutflowBC

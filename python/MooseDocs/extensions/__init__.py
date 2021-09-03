@@ -32,6 +32,7 @@ from . import materialicon
 from . import media
 from . import navigation
 from . import package
+from . import shortcut
 from . import sqa
 from . import style
 from . import table

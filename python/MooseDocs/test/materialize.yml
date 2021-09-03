@@ -52,6 +52,7 @@ Extensions:
     MooseDocs.extensions.content: default
     MooseDocs.extensions.graph: default
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pdf: default
     MooseDocs.extensions.pysyntax: default

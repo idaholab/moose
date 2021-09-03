@@ -47,6 +47,7 @@ Extensions:
     MooseDocs.extensions.autolink: default
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
     MooseDocs.extensions.table: default
     MooseDocs.extensions.layout: default
     MooseDocs.extensions.content: default

@@ -24,7 +24,7 @@ The thermal Lagrangian strain that is associated with $\boldsymbol{F}^{N}$ is co
 
 In this class, the evolution of a typical thermal deformation gradient component, $\boldsymbol{F}^N$ (see [eqn:Ftheta_decomposition]) is expressed with respect to its lattice symmetry axis as
 \begin{equation}
-\label{eqn:F_theta}
+\label{eqn:FN}
     \dot{ \boldsymbol{F}} ^{N} {(\boldsymbol{F}^{N})}^{-1} = \dot{\theta} \boldsymbol{\beta},
 \end{equation}
 where $\dot{\theta}$ is the temperature rate, and  $\boldsymbol{\beta} = \text{diag} \left( \beta_1, \beta_2, \beta_3 \right)$ is a diagonal tensor for anisotropic thermal expansion coefficients.
@@ -44,16 +44,11 @@ Meanwhile, changes are required in the residual and Jacobian calculations in [Co
 
 ### 1. Time integration for $\boldsymbol{F}^{N}$
 
-The evolution of the thermal deformation gradient component $\boldsymbol{F} ^{N}$ is defined as
-\begin{equation}
-\label{eqn:F_theta}
-    \dot{ \boldsymbol{F} ^{N} } {(\boldsymbol{F}^{N})}^{-1} = \dot{\theta} \boldsymbol{\beta}.
-\end{equation}
-Similar to the time integration that has been implemented for $\boldsymbol{F}^p$, we start with a backward difference expression as an approximation for $\boldsymbol{F}^N$,
+The evolution of the thermal deformation gradient component $\boldsymbol{F} ^{N}$ is defined by [eqn:FN]. Similar to the time integration that has been implemented for $\boldsymbol{F}^p$, we start with a backward difference expression as an approximation for $\boldsymbol{F}^N$,
 \begin{equation}
     {\boldsymbol{F}^{N}_{n+1}} \approx \frac{ \boldsymbol{F} ^{N}_{n+1} - \boldsymbol{F} ^{N}_{n} }{\Delta t},
 \end{equation}
-where the subscripts $n$ and $n+1$ identifies the time steps. By substituting into [eqn:F_theta] and rearranging, we have
+where the subscripts $n$ and $n+1$ identifies the time steps. By substituting into [eqn:FN] and rearranging, we have
 \begin{equation}
      {(\boldsymbol{F}^{N}_{n+1})}^{-1} = {(\boldsymbol{F}^{N}_{n})}^{-1} \left( \boldsymbol{I} - \Delta \theta \boldsymbol{\beta} \right)
 \end{equation}

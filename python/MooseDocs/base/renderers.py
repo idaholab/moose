@@ -115,12 +115,13 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         """
         pass
 
-    def preRender(self, page, result):
+    def preRender(self, page, ast, result):
         """
         Called by Translator prior to rendering.
 
         Inputs:
             page[pages.Source]: The source object representing the content
+            ast[tokens.Token]: The root node of the token tree
             result[tree.base.NodeBase]: The root node of the result tree
         """
         pass

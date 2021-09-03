@@ -62,7 +62,7 @@ The equivalent [Geochemists Workbench](https://www.gwb.com/) file is
 
 !media quartz_deposition1.png caption=Change in free mass of SiO2(aq) as fluid flows through a fracture, changing temperature as it does so.  Compare with Bethke's Figure 26.3  id=quartz_deposition1.fig
 
-!media quartz_deposition2.png caption=Quartz reaction rate as fluid flows through a fracture, changing temperature as it does so.  Compare with Bethke's Figure 26.4  id=quartz_deposition1.fig
+!media quartz_deposition2.png caption=Quartz reaction rate as fluid flows through a fracture, changing temperature as it does so.  Compare with Bethke's Figure 26.4  id=quartz_deposition2.fig
 
 The accuracy of the `geochemistry` simulation depends on the time-step size.  The above figures were generated using a step size of 0.001$\,$yr.
 

@@ -105,12 +105,13 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         """
         pass
 
-    def preTokenize(self, page, ast):
+    def preTokenize(self, page, content, ast):
         """
         Called by Translator prior to tokenization.
 
         Inputs:
             page[pages.Source]: The source object representing the content
+            content[str]: The content read from the page
             ast[tokens.Token]: The root node of the token tree
         """
         pass
@@ -125,12 +126,13 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         """
         pass
 
-    def preRender(self, page, result):
+    def preRender(self, page, ast, result):
         """
         Called by Translator prior to rendering.
 
         Inputs:
             page[pages.Source]: The source object representing the content
+            ast[tokens.Token]: The root node of the token tree
             result[tree.base.NodeBase]: The root node of the result tree
         """
         pass

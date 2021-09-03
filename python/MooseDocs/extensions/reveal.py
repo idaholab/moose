@@ -83,7 +83,7 @@ class RevealExtension(command.CommandExtension):
                     else:
                         subchild.parent = section
 
-    def postRender(self, page, result):
+    def preWrite(self, page, result):
         """Update internal links to use slide numbers."""
 
         # The Reveal.js platform does not honor traditional anchors in links, so the following

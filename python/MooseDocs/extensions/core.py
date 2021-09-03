@@ -431,21 +431,15 @@ class RenderCode(components.RenderComponent):
                                  info=token.info)
 
 class RenderShortcutLink(components.RenderComponent):
-    def __init__(self, *args, **kwargs):
-        components.RenderComponent.__init__(self, *args, **kwargs)
-        self.__cache = dict()
-
     def createHTML(self, parent, token, page):
-        a = html.Tag(parent, 'a', token)
-        node = self.getShortcut(token)
-        a['href'] = node['link']
+        node = self._getShortcut(page, token['key'])
+        a = html.Tag(parent, 'a', token, href=node['link'])
         for child in node.children:
             self.renderer.render(a, child, page)
         return a
 
     def createLatex(self, parent, token, page):
-        node = self.getShortcut(token)
-
+        node = self._getShortcut(page, token['key'])
         link = node['link'].lstrip('#')
         if len(node) == 0:
             latex.String(parent, content='{}~'.format(node['prefix']), escape=False)
@@ -459,19 +453,14 @@ class RenderShortcutLink(components.RenderComponent):
                               info=token.info)
         return h
 
-    def getShortcut(self, token):
-        key = token['key']
-        if key in self.__cache:
-            return self.__cache[key]
+    @staticmethod
+    def _getShortcut(page, key):
+        """Helper to find Shortcut tokens added to the page attributes by the Shortcut extension."""
+        node = page.get('shortcuts', dict()).get(key)
+        if node is not None:
+            return node
 
-        #TODO: error if more than one found
-        for node in moosetree.iterate(token.root):
-            if node.name == 'Shortcut' and node['key'] == key:
-                self.__cache[key] = node
-                return node
-
-        msg = "The shortcut link key '{}' was not located in the list of shortcuts."
-        raise exceptions.MooseDocsException(msg, key)
+        raise exceptions.MooseDocsException("Shortcut link key '{}' not found.", key)
 
 class RenderShortcut(components.RenderComponent):
     def createHTML(self, parent, token, page):

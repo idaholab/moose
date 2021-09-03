@@ -14,7 +14,7 @@ import moosetree
 from .. import common
 from ..base import components, renderers
 from ..tree import tokens, html, latex
-from . import command, core, floats, heading
+from . import command, core, heading
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class KatexExtension(command.CommandExtension):
         """
         Add the necessary components for reading and rendering LaTeX.
         """
-        self.requires(core, floats, heading)
+        self.requires(core, heading)
         self.addCommand(reader, EquationCommand())
         self.addCommand(reader, EquationReferenceCommand())
 

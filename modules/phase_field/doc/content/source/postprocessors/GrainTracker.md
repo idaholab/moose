@@ -158,7 +158,7 @@ ensure that the same variable is never considered as a possible remapping option
 
 !row!
 !col! small=12 medium=12 large=12
-!table id=large_red style=border:4px solid black;width:350px; caption=Small light blue distances
+!table id=small_blue style=border:4px solid black;width:350px; caption=Small light blue distances
 | Variable | Distance |
 |----------|----------|
 | A        | 52.6     |
