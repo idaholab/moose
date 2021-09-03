@@ -796,7 +796,7 @@ TensorMechanicsAction::actOutputMatProp()
               }))
         continue;
 
-      mooseError("Unable to add output Material");
+      mooseError("Unable to add output Material for '", out, "'");
     }
   }
 }
