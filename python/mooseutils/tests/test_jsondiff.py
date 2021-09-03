@@ -11,7 +11,7 @@ import os
 import unittest
 import json
 import tempfile
-from mooseutils.jsondiff import JSONDiffer
+from mooseutils import JSONDiffer
 
 class TestJSONDiff(unittest.TestCase):
     """

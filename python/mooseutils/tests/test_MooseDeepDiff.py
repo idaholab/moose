@@ -11,7 +11,7 @@
 import sys
 import os
 import unittest
-from mooseutils.MooseDeepDiff import MooseDeepDiff
+from mooseutils import MooseDeepDiff
 
 
 class TestMooseDeepDiff(unittest.TestCase):
