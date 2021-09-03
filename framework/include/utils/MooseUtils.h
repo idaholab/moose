@@ -627,11 +627,22 @@ std::string getLatestAppCheckpointFileBase(const std::list<std::string> & checkp
  */
 bool wildCardMatch(std::string name, std::string search_string);
 
+/*
+ * Checks to see if a candidate string matches a pattern string, permitting glob
+ * wildcards (* and ?) anywhere in the pattern.
+ * @param candidate The name to check
+ * @param pattern The search string to check name candidate
+ */
+bool globCompare(const std::string & candidate,
+                 const std::string & pattern,
+                 std::size_t c = 0,
+                 std::size_t p = 0);
+
 /**
  * This function will split the passed in string on a set of delimiters appending the substrings
- * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In addition
- * if min_len is supplied, the minimum token length will be greater than the supplied value.
- * T should be std::string or a MOOSE derived string class.
+ * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In
+ * addition if min_len is supplied, the minimum token length will be greater than the supplied
+ * value. T should be std::string or a MOOSE derived string class.
  */
 template <typename T>
 void
