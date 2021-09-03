@@ -10,7 +10,6 @@
 from FileTester import FileTester
 from TestHarness import util
 import os
-from mooseutils import JSONDiffer
 
 class JSONDiff(FileTester):
 
