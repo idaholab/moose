@@ -42,7 +42,7 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _active(true),
     _live_print_active(true),
     _destructing(false),
-    _live_print_time_limit(1.0),
+    _live_print_time_limit(5.0),
     _live_print_mem_limit(100),
     _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
