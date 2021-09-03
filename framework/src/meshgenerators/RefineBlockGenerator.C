@@ -12,6 +12,7 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/mesh_refinement.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", RefineBlockGenerator);
 
