@@ -10,7 +10,10 @@
 #pragma once
 
 #include "AuxKernel.h"
-// Computes the mixing length for the mixing length turbulence model.
+
+/*
+ *Computes the mixing length for the mixing length turbulence model.
+ */
 class WallDistanceMixingLengthAux : public AuxKernel
 {
 public:
