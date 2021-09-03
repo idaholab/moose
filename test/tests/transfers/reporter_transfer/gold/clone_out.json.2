@@ -1,60 +1,54 @@
 {
     "number_of_parts": 6,
     "part": 2,
+    "reporters": {
+        "receiver": {
+            "type": "ConstantReporter",
+            "values": {
+                "multi_rep:from_sub_pp:value": {
+                    "type": "std::vector<double>"
+                },
+                "multi_rep:from_sub_rep:int": {
+                    "type": "std::vector<int>"
+                },
+                "multi_rep:from_sub_rep:str": {
+                    "type": "std::vector<std::string>"
+                },
+                "multi_vpp:from_sub_vpp:a": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "multi_vpp:from_sub_vpp:b": {
+                    "type": "std::vector<std::vector<double>>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "receiver": {
-                    "info": {
-                        "name": "receiver",
-                        "type": "ConstantReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "multi_rep:from_sub_pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                1.5707963
-                            ]
-                        },
-                        {
-                            "name": "multi_rep:from_sub_rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                11
-                            ]
-                        },
-                        {
-                            "name": "multi_rep:from_sub_rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "twenty"
-                            ]
-                        },
-                        {
-                            "name": "multi_vpp:from_sub_vpp:a",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    30.0,
-                                    30.0,
-                                    30.0
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "multi_vpp:from_sub_vpp:b",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    40.0,
-                                    40.0,
-                                    40.0
-                                ]
-                            ]
-                        }
+            "receiver": {
+                "multi_rep:from_sub_pp:value": [
+                    1.5707963
+                ],
+                "multi_rep:from_sub_rep:int": [
+                    11
+                ],
+                "multi_rep:from_sub_rep:str": [
+                    "twenty"
+                ],
+                "multi_vpp:from_sub_vpp:a": [
+                    [
+                        30.0,
+                        30.0,
+                        30.0
                     ]
-                }
+                ],
+                "multi_vpp:from_sub_vpp:b": [
+                    [
+                        40.0,
+                        40.0,
+                        40.0
+                    ]
+                ]
             },
             "time": 1.0,
             "time_step": 1

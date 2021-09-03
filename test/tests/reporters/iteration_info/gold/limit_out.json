@@ -1,77 +1,39 @@
 {
+    "reporters": {
+        "iteration_info": {
+            "type": "IterationInfo",
+            "values": {
+                "time": {
+                    "type": "double"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "iteration_info": {
-                    "info": {
-                        "name": "iteration_info",
-                        "type": "IterationInfo"
-                    },
-                    "values": [
-                        {
-                            "name": "time",
-                            "type": "double",
-                            "value": 0.0
-                        }
-                    ]
-                }
+            "iteration_info": {
+                "time": 0.0
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "iteration_info": {
-                    "info": {
-                        "name": "iteration_info",
-                        "type": "IterationInfo"
-                    },
-                    "values": [
-                        {
-                            "name": "time",
-                            "type": "double",
-                            "value": 1.0
-                        }
-                    ]
-                }
+            "iteration_info": {
+                "time": 1.0
             },
             "time": 1.0,
             "time_step": 1
         },
         {
-            "reporters": {
-                "iteration_info": {
-                    "info": {
-                        "name": "iteration_info",
-                        "type": "IterationInfo"
-                    },
-                    "values": [
-                        {
-                            "name": "time",
-                            "type": "double",
-                            "value": 2.0
-                        }
-                    ]
-                }
+            "iteration_info": {
+                "time": 2.0
             },
             "time": 2.0,
             "time_step": 2
         },
         {
-            "reporters": {
-                "iteration_info": {
-                    "info": {
-                        "name": "iteration_info",
-                        "type": "IterationInfo"
-                    },
-                    "values": [
-                        {
-                            "name": "time",
-                            "type": "double",
-                            "value": 3.0
-                        }
-                    ]
-                }
+            "iteration_info": {
+                "time": 3.0
             },
             "time": 3.0,
             "time_step": 3

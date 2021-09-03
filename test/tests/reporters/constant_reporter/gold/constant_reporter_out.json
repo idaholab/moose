@@ -1,80 +1,69 @@
 {
+    "reporters": {
+        "constant": {
+            "type": "ConstantReporter",
+            "values": {
+                "int_1": {
+                    "type": "int"
+                },
+                "int_2": {
+                    "type": "int"
+                },
+                "int_3": {
+                    "type": "int"
+                },
+                "int_vec": {
+                    "type": "std::vector<int>"
+                },
+                "num_1": {
+                    "type": "double"
+                },
+                "num_2": {
+                    "type": "double"
+                },
+                "str": {
+                    "type": "std::string"
+                },
+                "str_vec": {
+                    "type": "std::vector<std::string>"
+                },
+                "vec_1": {
+                    "type": "std::vector<double>"
+                },
+                "vec_2": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "constant": {
-                    "info": {
-                        "name": "constant",
-                        "type": "ConstantReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "int_1",
-                            "type": "int",
-                            "value": 1
-                        },
-                        {
-                            "name": "int_2",
-                            "type": "int",
-                            "value": 2
-                        },
-                        {
-                            "name": "int_3",
-                            "type": "int",
-                            "value": -3
-                        },
-                        {
-                            "name": "int_vec",
-                            "type": "std::vector<int>",
-                            "value": [
-                                7,
-                                8
-                            ]
-                        },
-                        {
-                            "name": "num_1",
-                            "type": "double",
-                            "value": 4.0
-                        },
-                        {
-                            "name": "num_2",
-                            "type": "double",
-                            "value": 5.0
-                        },
-                        {
-                            "name": "str",
-                            "type": "std::string",
-                            "value": "six"
-                        },
-                        {
-                            "name": "str_vec",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "ten",
-                                "eleven",
-                                "twelve",
-                                "thirteen"
-                            ]
-                        },
-                        {
-                            "name": "vec_1",
-                            "type": "std::vector<double>",
-                            "value": [
-                                8.0,
-                                80.0,
-                                800.0
-                            ]
-                        },
-                        {
-                            "name": "vec_2",
-                            "type": "std::vector<double>",
-                            "value": [
-                                9.0,
-                                90.0
-                            ]
-                        }
-                    ]
-                }
+            "constant": {
+                "int_1": 1,
+                "int_2": 2,
+                "int_3": -3,
+                "int_vec": [
+                    7,
+                    8
+                ],
+                "num_1": 4.0,
+                "num_2": 5.0,
+                "str": "six",
+                "str_vec": [
+                    "ten",
+                    "eleven",
+                    "twelve",
+                    "thirteen"
+                ],
+                "vec_1": [
+                    8.0,
+                    80.0,
+                    800.0
+                ],
+                "vec_2": [
+                    9.0,
+                    90.0
+                ]
             },
             "time": 1.0,
             "time_step": 1

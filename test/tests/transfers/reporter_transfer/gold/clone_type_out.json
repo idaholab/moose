@@ -1,38 +1,34 @@
 {
     "number_of_parts": 6,
     "part": 0,
+    "reporters": {
+        "receiver": {
+            "type": "ConstantReporter",
+            "values": {
+                "multi_rep:from_sub_pp:value": {
+                    "type": "std::vector<double>"
+                },
+                "multi_rep:from_sub_rep:int": {
+                    "type": "std::vector<int>"
+                },
+                "multi_rep:from_sub_rep:str": {
+                    "type": "std::vector<std::string>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "receiver": {
-                    "info": {
-                        "name": "receiver",
-                        "type": "ConstantReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "multi_rep:from_sub_pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                3.1415926
-                            ]
-                        },
-                        {
-                            "name": "multi_rep:from_sub_rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                10
-                            ]
-                        },
-                        {
-                            "name": "multi_rep:from_sub_rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "ten"
-                            ]
-                        }
-                    ]
-                }
+            "receiver": {
+                "multi_rep:from_sub_pp:value": [
+                    3.1415926
+                ],
+                "multi_rep:from_sub_rep:int": [
+                    10
+                ],
+                "multi_rep:from_sub_rep:str": [
+                    "ten"
+                ]
             },
             "time": 1.0,
             "time_step": 1

@@ -1,403 +1,316 @@
 {
+    "reporters": {
+        "storage": {
+            "type": "StochasticReporter",
+            "values": {
+                "data:constant:int": {
+                    "row_begin": 0,
+                    "row_end": 8
+                },
+                "data:constant:str": {
+                    "row_begin": 0,
+                    "row_end": 8
+                },
+                "data:converged": {
+                    "row_begin": 0,
+                    "row_end": 8
+                },
+                "data:pp:value": {
+                    "row_begin": 0,
+                    "row_end": 8
+                },
+                "data:vpp:vec": {
+                    "row_begin": 0,
+                    "row_end": 8
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1,
-                                2,
-                                2,
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2,
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2,
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
                     ]
-                }
+                ]
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1,
-                                2,
-                                2,
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2,
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2,
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
                     ]
-                }
+                ]
             },
             "time": 0.01,
             "time_step": 1
         },
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1,
-                                2,
-                                2,
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true,
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2,
-                                0.0,
-                                0.1,
-                                0.0,
-                                0.2
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 0,
-                            "row_end": 8,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ],
-                                [
-                                    2.0,
-                                    20.0,
-                                    200.0,
-                                    2000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2,
+                    0.0,
+                    0.1,
+                    0.0,
+                    0.2
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
+                    ],
+                    [
+                        2.0,
+                        20.0,
+                        200.0,
+                        2000.0
                     ]
-                }
+                ]
             },
             "time": 0.02,
             "time_step": 2
