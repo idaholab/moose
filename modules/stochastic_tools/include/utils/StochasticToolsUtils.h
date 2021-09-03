@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "MooseUtils.h"
 #include "libmesh/communicator.h"
 
@@ -205,6 +207,41 @@ stochasticAllGather(const libMesh::Parallel::Communicator & comm, std::vector<bo
   val.resize(temp.size());
   for (std::size_t i = 0; i < temp.size(); ++i)
     val[i] = temp[i] == 1;
+}
+
+/*
+ * Methods for sorting vectors of vectors with elements inplace. For example:
+ * {{7, 5, 2}, {3, 8, 6}, {9, 9, 1}} -> {{3, 5, 1}, {7, 8, 2}, {9, 9, 6}}
+ */
+template <typename T>
+void
+inplaceSort(std::vector<T> & values)
+{
+  std::sort(values.begin(), values.end());
+}
+template <typename T>
+void
+inplaceSort(std::vector<std::vector<T>> & values)
+{
+  if (values.empty())
+    return;
+
+  const std::size_t sz = values[0].size();
+  mooseAssert(std::find_if(values.begin(),
+                           values.end(),
+                           [&sz](const std::vector<T> & val) { return val.size() != sz; }) ==
+                  values.end(),
+              "All vectors must be same size to sort.");
+
+  std::vector<T> vals(values.size());
+  for (const auto & i : make_range(sz))
+  {
+    for (const auto & k : index_range(values))
+      vals[k] = values[k][i];
+    inplaceSort(vals);
+    for (const auto & k : index_range(values))
+      values[k][i] = std::move(vals[k]);
+  }
 }
 
 } // StochasticTools namespace

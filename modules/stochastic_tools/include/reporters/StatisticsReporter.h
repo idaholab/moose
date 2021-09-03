@@ -10,8 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "Calculators.h"
-#include "BootstrapCalculators.h"
+#include "VectorCalculators.h"
 
 #include "nlohmann/json.h"
 
@@ -52,11 +51,10 @@ private:
   const ReporterProducerEnum & _data_mode;
 
   /// Storage for the Calculator object for the desired stat, this is created in constructor
-  std::unique_ptr<const StochasticTools::Calculator<InType, OutType>> _calc_ptr;
+  std::unique_ptr<StochasticTools::Calculator<InType, OutType>> _calc_ptr;
 
   /// Storage for the BootstrapCalculator for the desired confidence interval calculations (optional)
-  std::unique_ptr<const StochasticTools::BootstrapCalculator<InType, OutType>> _ci_calc_ptr =
-      nullptr;
+  std::unique_ptr<StochasticTools::BootstrapCalculator<InType, OutType>> _ci_calc_ptr = nullptr;
 };
 
 template <typename InType, typename OutType>

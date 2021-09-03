@@ -25,4 +25,11 @@
       detail = 'distributed.'
     []
   []
+
+  [reporter]
+    type = JSONDiff
+    input = statistics_main.i
+    jsondiff = statistics_main_out.json
+    requirement = 'The system shall be capable of computing the statistics from vector reporter values.'
+  []
 []

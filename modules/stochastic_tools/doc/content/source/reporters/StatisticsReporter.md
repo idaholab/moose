@@ -72,6 +72,22 @@ parameter.  The current statistical measures the `StatisticsReporter` can comput
   `compute = ratio`\\
   Computes the ratio of the maximum to the minimu of the supplied data.
 
+- +median+
+
+  `compute = median`\\
+  Computes the median of the supplied vectors $\vec{v} = [v_1,...,v_N]$:
+
+  !equation
+  \mathrm{median}(\vec{v}) = \left\{ \begin{array}{ll}
+    w_{(N+1)/2}, & \text{if } N \text{ is odd} \\
+    \frac{w_{N/2} + w_{N/2+1}}{2}, & \text{if } N \text{ is even} \\
+    \end{array} \right .
+
+  where
+
+  !equation
+  \vec{w} = \mathrm{sort}(\vec{v})
+
 
 
 ## Confidence Levels

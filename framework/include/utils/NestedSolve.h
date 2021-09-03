@@ -85,6 +85,11 @@ public:
     NOT_CONVERGED
   };
 
+  /**
+   * Get the solver state
+   */
+  const State & getState() const { return _state; }
+
 protected:
   /// current solver state
   State _state;
