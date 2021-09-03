@@ -10,6 +10,7 @@
       input = 'test_single.i'
       exodiff = 'test_single_in.e'
       cli_args = '--mesh-only'
+      recover = false
       detail = 'in a mesh with a single first order element'
 
     []
@@ -17,6 +18,7 @@
       type = 'Exodiff'
       input = 'test_multi.i'
       exodiff = 'test_multi_in.e'
+      recover = false
       cli_args = "--mesh-only"
 
       detail = 'in a Cartesian 3D mesh.'
@@ -26,7 +28,7 @@
       input = 'test_neighbor.i'
       exodiff = 'test_neighbor_in.e'
       cli_args = "--mesh-only"
-
+      recover = false
       detail = 'with the neighbor refinement on'
     []
 
