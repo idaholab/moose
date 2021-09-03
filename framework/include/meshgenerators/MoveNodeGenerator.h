@@ -12,7 +12,7 @@
 #include "MeshGenerator.h"
 
 /**
- * Modifies the position of one node
+ * Modifies the position of one or more node(s)
  */
 class MoveNodeGenerator : public MeshGenerator
 {

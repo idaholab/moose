@@ -36,7 +36,7 @@ MoveNodeGenerator::MoveNodeGenerator(const InputParameters & parameters)
     _new_position(getParam<std::vector<Point>>("new_position"))
 {
   if (_node_id.size() != _new_position.size())
-    mooseError("Node ids and new positions sizes do not match. Please check your input");
+    paramError("node_id", "Must be the same length as 'new_position'.");
 }
 
 std::unique_ptr<MeshBase>

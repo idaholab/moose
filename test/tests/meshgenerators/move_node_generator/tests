@@ -11,7 +11,7 @@
       cli_args = '--mesh-only'
       exodiff = 'test_in.e'
       recover = false
-      mesh_type = replicated
+      mesh_mode = replicated
 
       detail = 'in a mesh with a single first order element'
 
