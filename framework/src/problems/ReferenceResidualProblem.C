@@ -32,9 +32,9 @@ ReferenceResidualProblem::validParams()
   params.addClassDescription("Problem that checks for convergence relative to "
                              "a user-supplied reference quantity rather than "
                              "the initial residual");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<NonlinearVariableName>>(
       "solution_variables", "Set of solution variables to be checked for relative convergence");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<AuxVariableName>>(
       "reference_residual_variables",
       "Set of variables that provide reference residuals for relative convergence check");
   params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
@@ -44,15 +44,21 @@ ReferenceResidualProblem::validParams()
   params.addParam<int>("acceptable_iterations",
                        0,
                        "Iterations after which convergence to acceptable limits is accepted");
-  params.addParam<std::vector<std::vector<std::string>>>(
+  params.addParam<std::vector<std::vector<NonlinearVariableName>>>(
       "group_variables",
       "Name of variables that are grouped together to check convergence. (Multiple groups can be "
       "provided, separated by semicolon)");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "converge_on",
+      "If supplied, use only these variables in the individual variable convergence check");
   return params;
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params)
-  : FEProblem(params), _use_group_variables(false), _reference_vector(nullptr)
+  : FEProblem(params),
+    _use_group_variables(false),
+    _reference_vector(nullptr),
+    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on"))
 {
   if (params.isParamValid("solution_variables"))
   {
@@ -60,7 +66,7 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
       mooseDeprecated("The `solution_variables` parameter is deprecated, has no effect when "
                       "the tagging system is used, and will be removed on January 1, 2020. "
                       "Please simply delete this parameter from your input file.");
-    _soln_var_names = params.get<std::vector<std::string>>("solution_variables");
+    _soln_var_names = params.get<std::vector<NonlinearVariableName>>("solution_variables");
   }
 
   if (params.isParamValid("reference_residual_variables") &&
@@ -77,7 +83,7 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
         "and will be removed on January 1, 2020. Please use the tagging system instead; "
         "specifically, please assign a TagName to the `reference_vector` parameter");
 
-    _ref_resid_var_names = params.get<std::vector<std::string>>("reference_residual_variables");
+    _ref_resid_var_names = params.get<std::vector<AuxVariableName>>("reference_residual_variables");
 
     if (_soln_var_names.size() != _ref_resid_var_names.size())
       mooseError("In ReferenceResidualProblem, size of solution_variables (",
@@ -96,41 +102,13 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
 
   if (params.isParamValid("group_variables"))
   {
-    _group_variables = params.get<std::vector<std::vector<std::string>>>("group_variables");
+    _group_variables =
+        params.get<std::vector<std::vector<NonlinearVariableName>>>("group_variables");
     _use_group_variables = true;
   }
 
   _accept_mult = params.get<Real>("acceptable_multiplier");
   _accept_iters = params.get<int>("acceptable_iterations");
-}
-
-ReferenceResidualProblem::~ReferenceResidualProblem() {}
-
-void
-ReferenceResidualProblem::addSolutionVariables(std::set<std::string> & sol_vars)
-{
-  for (const auto & var : sol_vars)
-    _soln_var_names.push_back(var);
-}
-
-void
-ReferenceResidualProblem::addReferenceResidualVariables(std::set<std::string> & ref_vars)
-{
-  for (const auto & var : ref_vars)
-    _ref_resid_var_names.push_back(var);
-}
-
-void
-ReferenceResidualProblem::addGroupVariables(std::set<std::string> & group_vars)
-{
-  std::vector<std::string> group_vars_vector;
-
-  for (const auto & var : group_vars)
-    group_vars_vector.push_back(var);
-
-  _group_variables.push_back(group_vars_vector);
-
-  _use_group_variables = true;
 }
 
 void
@@ -141,17 +119,16 @@ ReferenceResidualProblem::initialSetup()
   System & s = nonlinear_sys.system();
   auto & as = aux_sys.sys();
 
-  if (_soln_var_names.size() == 0)
+  if (_soln_var_names.empty())
   {
     // If the user provides reference_vector, that implies that they want the
     // individual variables compared against their reference quantities in the
     // tag vector. The code depends on having _soln_var_names populated,
     // so fill that out if they didn't specify solution_variables.
     if (_reference_vector)
-    {
       for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
         _soln_var_names.push_back(s.variable_name(var_num));
-    }
+
     // If they didn't provide reference_vector, that implies that they
     // want to skip the individual variable comparison, so leave it alone.
   }
@@ -162,7 +139,22 @@ ReferenceResidualProblem::initialSetup()
                s.n_vars(),
                ")");
 
-  _variable_group_num_index.resize(_soln_var_names.size());
+  const auto n_soln_vars = _soln_var_names.size();
+  _variable_group_num_index.resize(n_soln_vars);
+
+  if (!_converge_on.empty())
+  {
+    _converge_on_var.assign(n_soln_vars, false);
+    for (std::size_t i = 0; i < n_soln_vars; ++i)
+      for (const auto & c : _converge_on)
+        if (MooseUtils::globCompare(_soln_var_names[i], c))
+        {
+          _converge_on_var[i] = true;
+          break;
+        }
+  }
+  else
+    _converge_on_var.assign(n_soln_vars, true);
 
   unsigned int group_variable_num = 0;
   if (_use_group_variables)
@@ -176,18 +168,20 @@ ReferenceResidualProblem::initialSetup()
                    " is not grouped with other variables.");
     }
 
-    unsigned int size = _soln_var_names.size() - group_variable_num + _group_variables.size();
+    unsigned int size = n_soln_vars - group_variable_num + _group_variables.size();
     _group_ref_resid.resize(size);
     _group_resid.resize(size);
+    _group_output_resid.resize(size);
     _group_soln_var_names.resize(size);
     _group_ref_resid_var_names.resize(size);
   }
   else
   {
-    _group_ref_resid.resize(_soln_var_names.size());
-    _group_resid.resize(_soln_var_names.size());
-    _group_soln_var_names.resize(_soln_var_names.size());
-    _group_ref_resid_var_names.resize(_soln_var_names.size());
+    _group_ref_resid.resize(n_soln_vars);
+    _group_resid.resize(n_soln_vars);
+    _group_output_resid.resize(n_soln_vars);
+    _group_soln_var_names.resize(n_soln_vars);
+    _group_ref_resid_var_names.resize(n_soln_vars);
   }
 
   std::set<std::string> check_duplicate;
@@ -203,21 +197,17 @@ ReferenceResidualProblem::initialSetup()
   }
 
   _soln_vars.clear();
-  for (unsigned int i = 0; i < _soln_var_names.size(); ++i)
+  for (unsigned int i = 0; i < n_soln_vars; ++i)
   {
     bool foundMatch = false;
     for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-    {
       if (_soln_var_names[i] == s.variable_name(var_num))
       {
         _soln_vars.push_back(var_num);
-        _resid.push_back(0.0);
-        if (_reference_vector)
-          _ref_resid.push_back(0.);
         foundMatch = true;
         break;
       }
-    }
+
     if (!foundMatch)
       mooseError("Could not find solution variable '", _soln_var_names[i], "' in system");
   }
@@ -229,15 +219,13 @@ ReferenceResidualProblem::initialSetup()
     {
       bool foundMatch = false;
       for (unsigned int var_num = 0; var_num < as.n_vars(); var_num++)
-      {
         if (_ref_resid_var_names[i] == as.variable_name(var_num))
         {
           _ref_resid_vars.push_back(var_num);
-          _ref_resid.push_back(0.0);
           foundMatch = true;
           break;
         }
-      }
+
       if (!foundMatch)
         mooseError("Could not find variable '", _ref_resid_var_names[i], "' in auxiliary system");
     }
@@ -253,7 +241,6 @@ ReferenceResidualProblem::initialSetup()
     if (_use_group_variables)
     {
       for (unsigned int j = 0; j < _group_variables.size(); ++j)
-      {
         if (std::find(_group_variables[j].begin(),
                       _group_variables[j].end(),
                       s.variable_name(_soln_vars[i])) != _group_variables[j].end())
@@ -262,7 +249,7 @@ ReferenceResidualProblem::initialSetup()
           find_group = true;
           break;
         }
-      }
+
       if (!find_group)
       {
         _variable_group_num_index[i] = ungroup_index;
@@ -270,9 +257,7 @@ ReferenceResidualProblem::initialSetup()
       }
     }
     else
-    {
       _variable_group_num_index[i] = i;
-    }
   }
 
   if (_use_group_variables)
@@ -284,9 +269,7 @@ ReferenceResidualProblem::initialSetup()
       if (_group_variables[i].size() > 1)
       {
         for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
-        {
           for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-          {
             if (_group_variables[i][j] == s.variable_name(var_num))
             {
               if (nonlinear_sys.isScalarVariable(_soln_vars[var_num]))
@@ -295,8 +278,6 @@ ReferenceResidualProblem::initialSetup()
                 ++num_field_vars;
               break;
             }
-          }
-        }
       }
       if (num_scalar_vars > 0 && num_field_vars > 0)
         mooseWarning("In the 'group_variables' parameter, standard variables and scalar variables "
@@ -305,7 +286,7 @@ ReferenceResidualProblem::initialSetup()
     }
   }
 
-  for (unsigned int i = 0; i < _soln_var_names.size(); ++i)
+  for (unsigned int i = 0; i < n_soln_vars; ++i)
   {
     if (_group_soln_var_names[_variable_group_num_index[i]].empty())
     {
@@ -314,14 +295,11 @@ ReferenceResidualProblem::initialSetup()
         _group_soln_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
 
-    if (!_reference_vector)
+    if (!_reference_vector && _group_ref_resid_var_names[_variable_group_num_index[i]].empty())
     {
-      if (_group_ref_resid_var_names[_variable_group_num_index[i]].empty())
-      {
-        _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
-        if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
-          _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
-      }
+      _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
+      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
+        _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
   }
 
@@ -340,17 +318,6 @@ ReferenceResidualProblem::initialSetup()
 }
 
 void
-ReferenceResidualProblem::timestepSetup()
-{
-  for (unsigned int i = 0; i < _ref_resid.size(); ++i)
-  {
-    _ref_resid[i] = 0.0;
-    _resid[i] = 0.0;
-  }
-  FEProblemBase::timestepSetup();
-}
-
-void
 ReferenceResidualProblem::updateReferenceResidual()
 {
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
@@ -361,17 +328,21 @@ ReferenceResidualProblem::updateReferenceResidual()
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
   {
     _group_resid[i] = 0.0;
+    _group_output_resid[i] = 0.0;
     _group_ref_resid[i] = 0.0;
   }
 
   for (unsigned int i = 0; i < _soln_vars.size(); ++i)
   {
-    _resid[i] = s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2);
-    _group_resid[_variable_group_num_index[i]] += Utility::pow<2>(_resid[i]);
+    const auto resid =
+        Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
+    const auto group = _variable_group_num_index[i];
+    _group_resid[group] += _converge_on_var[i] ? resid : 0;
+    _group_output_resid[group] += resid;
     if (_reference_vector)
     {
-      _ref_resid[i] = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
-      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(_ref_resid[i]);
+      const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
+      _group_ref_resid[group] += Utility::pow<2>(ref_resid);
     }
   }
 
@@ -379,17 +350,18 @@ ReferenceResidualProblem::updateReferenceResidual()
   {
     for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
     {
-      const Real refResidual =
-          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2);
-      _ref_resid[i] = refResidual * _scaling_factors[i];
-      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(_ref_resid[i]);
+      const auto ref_resid =
+          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2) *
+          _scaling_factors[i];
+      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(ref_resid);
     }
   }
 
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
   {
-    _group_resid[i] = sqrt(_group_resid[i]);
-    _group_ref_resid[i] = sqrt(_group_ref_resid[i]);
+    _group_resid[i] = std::sqrt(_group_resid[i]);
+    _group_output_resid[i] = std::sqrt(_group_output_resid[i]);
+    _group_ref_resid[i] = std::sqrt(_group_ref_resid[i]);
   }
 }
 
@@ -430,9 +402,14 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     {
       auto ref_var_name =
           _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
-      _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":"
-               << _group_resid[i] << "  " << std::setw(maxwrv + 2) << ref_var_name + ":"
-               << _group_ref_resid[i] << '\n';
+      _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":";
+
+      if (_group_output_resid[i] == _group_resid[i])
+        _console << _group_output_resid[i];
+      else
+        _console << _group_resid[i] << " (" << _group_output_resid[i] << ')';
+      _console << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << _group_ref_resid[i]
+               << '\n';
     }
 
     _console << std::flush;
