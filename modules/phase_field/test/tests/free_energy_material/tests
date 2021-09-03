@@ -71,14 +71,14 @@
       type = 'Exodiff'
       input = 'RegularSolutionFreeEnergy.i'
       exodiff = 'RegularSolutionFreeEnergy_out.e'
-      detail = 'With a coupled temperature variable'
+      detail = 'with a coupled temperature variable'
     []
 
     [RegularSolutionFreeEnergy_const_T_default]
       type = 'Exodiff'
       input = 'RegularSolutionFreeEnergy_const_T.i'
       exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
-      detail = 'With a default temperature of 300K'
+      detail = 'with a default temperature of 300K'
     []
 
     [RegularSolutionFreeEnergy_const_T_specified]
@@ -86,14 +86,14 @@
       input = 'RegularSolutionFreeEnergy_const_T.i'
       exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
       cli_args = Materials/free_energy/T=300
-      detail = 'With a specified constant temperature'
+      detail = 'with a specified constant temperature'
     []
 
     [RegularSolutionFreeEnergy_plog]
       type = 'Exodiff'
       input = 'RegularSolutionFreeEnergy_plog.i'
       exodiff = 'RegularSolutionFreeEnergy_plog_out.e'
-      detail = 'With a the logarithm functions replaced by a Taylor expansion below a given '
+      detail = 'with a the logarithm functions replaced by a Taylor expansion below a given '
                'threshold value'
     []
   []
@@ -107,13 +107,13 @@
     [prepare_tabulation]
       type = 'RunCommand'
       command = './tabulate_grain_growth_energy.py'
-      detail = 'With a script for tabulating grain growth energies provided'
+      detail = 'with a script for tabulating grain growth energies provided'
     []
     [tabulated_grain_growth]
       type = 'Exodiff'
       input = 'CoupledValueFunctionFreeEnergy.i'
       exodiff = 'CoupledValueFunctionFreeEnergy_out.e'
-      detail = 'Using a pretabulated free energy through PiecewiseMultilinear functions'
+      detail = 'using a pre-tabulated free energy through PiecewiseMultilinear functions'
       # prepare_tabulation is always skipped in Valgrind testing, which would fail this test
       valgrind = 'NONE'
     []

@@ -56,7 +56,7 @@ TorqueTempl<is_ad>::TorqueTempl(const InputParameters & parameters)
   }
 
   if (_component == libMesh::invalid_uint)
-    this->paramError("variables",
+    this->paramError("variable",
                      "The kernel variable needs to be one of the 'displacements' variables");
   if (this->template getParam<bool>("use_displaced_mesh"))
     this->paramError("use_displaced_mesh", "This BC is only validated for small strains");

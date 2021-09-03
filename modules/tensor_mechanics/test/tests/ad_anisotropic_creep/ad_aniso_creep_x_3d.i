@@ -174,8 +174,8 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     superlu_dist'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err'
+  petsc_options_value = 'lu     superlu_dist                    1e-5'
 
   nl_rel_tol = 1.0e-14
   nl_abs_tol = 1.0e-14

@@ -40,8 +40,10 @@ TEST_F(SimpleFluidPropertiesTest, properties)
 
   const Real tol = REL_TOL_CONSISTENCY;
 
-  Real p = 1.0E3;
+  Real p = 8.56E7;
   Real T = 200.0;
+  Real e = 8.372E5;
+  Real v = 0.001;
 
   ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
@@ -56,9 +58,25 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->cp_from_v_e(v, e), cp, tol);
+  ABS_TEST(_fp->cv_from_v_e(v, e), cv, tol);
+  ABS_TEST(
+      _fp->c_from_v_e(v, e),
+      std::sqrt(bulk_modulus / _fp->rho_from_p_T(_fp->p_from_v_e(v, e), _fp->T_from_v_e(v, e))),
+      tol);
+  ABS_TEST(_fp->k_from_v_e(v, e), thermal_cond, tol);
+  ABS_TEST(_fp->s_from_v_e(v, e), entropy, tol);
+  ABS_TEST(_fp->T_from_v_e(v, e), T, tol);
+  ABS_TEST(_fp->p_from_v_e(v, e),
+           bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
+           tol);
+  ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 
-  p = 1.0E7;
+  p = 1.06841E9;
   T = 300.0;
+  e = 1.2558E6;
+  v = 6.25E-4;
+
   ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   ABS_TEST(_fp->cv_from_p_T(p, T), cv, tol);
@@ -72,6 +90,19 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->cp_from_v_e(v, e), cp, tol);
+  ABS_TEST(_fp->cv_from_v_e(v, e), cv, tol);
+  ABS_TEST(
+      _fp->c_from_v_e(v, e),
+      std::sqrt(bulk_modulus / _fp->rho_from_p_T(_fp->p_from_v_e(v, e), _fp->T_from_v_e(v, e))),
+      tol);
+  ABS_TEST(_fp->k_from_v_e(v, e), thermal_cond, tol);
+  ABS_TEST(_fp->s_from_v_e(v, e), entropy, tol);
+  ABS_TEST(_fp->T_from_v_e(v, e), T, tol);
+  ABS_TEST(_fp->p_from_v_e(v, e),
+           bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
+           tol);
+  ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 }
 
 /**
@@ -84,6 +115,8 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
 
   Real p = 1.0E7;
   Real T = 10.0;
+  Real e = 8.372E5;
+  Real v = 1.25E-3;
 
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
@@ -91,9 +124,22 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->c_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->c_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->k_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->s_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->T_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->p_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->mu_from_v_e, v, e, tol);
 
   p = 5.0E7;
   T = 90.0;
+  e = 1.6744E6;
+  v = 6.25E-4;
 
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
@@ -101,6 +147,17 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cv_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->c_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->cv_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->c_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->k_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->s_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->T_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->p_from_v_e, v, e, tol);
+  DERIV_TEST(_fp->mu_from_v_e, v, e, tol);
 }
 
 /**

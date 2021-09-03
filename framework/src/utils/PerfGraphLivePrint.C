@@ -290,7 +290,7 @@ PerfGraphLivePrint::start()
     // can occur - but the predicate here keeps us from doing anything in that case.
     // This will either wait until 1 second has passed, the signal is sent, _or_ a spurious
     // wakeup happens to find that there is work to do.
-    _perf_graph._finished_section.wait_for(lock, std::chrono::duration<Real>(1.), [this] {
+    _perf_graph._finished_section.wait_for(lock, std::chrono::duration<Real>(_time_limit), [this] {
       // Get destructing first so that the execution_list will be in sync
       this->_currently_destructing = _perf_graph._destructing;
 

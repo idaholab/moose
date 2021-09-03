@@ -2,47 +2,42 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables (one of the following)
-# PACKAGES_DIR  - Location of the MOOSE redistributable package
-#
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project
-# FRAMEWORK_DIR - Location of the MOOSE framework
+# MOOSE_DIR        - Root directory of the MOOSE project
+# MODULE_DIR       - Location of the MOOSE modules directory
+# FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################
-MOOSE_DIR          ?= $(shell dirname `pwd`)/../../../moose
+THIS_MODULE_DIR    ?= $(shell dirname `pwd`)
+MODULE_DIR         ?= $(shell dirname $(THIS_MODULE_DIR))
+MOOSE_DIR          ?= $(shell dirname $(MODULE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
+
+# Extra stuff for GTEST
+ADDITIONAL_INCLUDES	:= -isystem $(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_INCLUDES	:= -isystem $(MOOSE_DIR)/unit/include
+ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-RAY_TRACING               := yes
+RAY_TRACING := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
-# Extra stuff for GTEST
-ADDITIONAL_INCLUDES	:= -I$(FRAMEWORK_DIR)/contrib/gtest
-ADDITIONAL_INCLUDES	:= -isystem $(MOOSE_DIR)/unit/include
-ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
-
-# dep apps
-CURRENT_DIR        := $(shell pwd)
-APPLICATION_DIR    := $(CURRENT_DIR)/..
-APPLICATION_NAME   := ray_tracing
-include            $(FRAMEWORK_DIR)/app.mk
-
-APPLICATION_DIR    := $(CURRENT_DIR)
-APPLICATION_NAME   := ray_tracing-unit
-BUILD_EXEC         := yes
-
+APPLICATION_DIR  := $(shell pwd)
+APPLICATION_NAME := ray_tracing-unit
+BUILD_EXEC       := yes
+app_BASE_DIR     :=
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
-# Find all the RayTracing unit test source files and include their dependencies.
-ray_tracing_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit/src -name "*.C")
+# Find all the ray_tracing unit test source files and include their dependencies.
+ray_tracing_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
 ray_tracing_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(ray_tracing_unit_srcfiles))
 -include $(ray_tracing_unit_deps)
 
