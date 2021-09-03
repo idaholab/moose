@@ -26,6 +26,129 @@ SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & p
 SinglePhaseFluidProperties::~SinglePhaseFluidProperties() {}
 
 Real
+SinglePhaseFluidProperties::s_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return s_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real ds_dv, ds_de;
+  s_from_v_e(v, e, s, ds_dv, ds_de);
+  ds_dp = ds_dv * dv_dp + ds_de * de_dp;
+  ds_dT = ds_dv * dv_dT + ds_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::c_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return c_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::c_from_p_T(Real p, Real T, Real & c, Real & dc_dp, Real & dc_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real dc_dv, dc_de;
+  c_from_v_e(v, e, c, dc_dv, dc_de);
+  dc_dp = dc_dv * dv_dp + dc_de * de_dp;
+  dc_dT = dc_dv * dv_dT + dc_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::mu_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return mu_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::mu_from_p_T(
+    Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real dmu_dv, dmu_de;
+  mu_from_v_e(v, e, mu, dmu_dv, dmu_de);
+  dmu_dp = dmu_dv * dv_dp + dmu_de * de_dp;
+  dmu_dT = dmu_dv * dv_dT + dmu_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::cv_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return cv_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::cv_from_p_T(
+    Real p, Real T, Real & cv, Real & dcv_dp, Real & dcv_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real dcv_dv, dcv_de;
+  cv_from_v_e(v, e, cv, dcv_dv, dcv_de);
+  dcv_dp = dcv_dv * dv_dp + dcv_de * de_dp;
+  dcv_dT = dcv_dv * dv_dT + dcv_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::cp_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return cp_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::cp_from_p_T(
+    Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real dcp_dv, dcp_de;
+  cp_from_v_e(v, e, cp, dcp_dv, dcp_de);
+  dcp_dp = dcp_dv * dv_dp + dcp_de * de_dp;
+  dcp_dT = dcp_dv * dv_dT + dcp_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::k_from_p_T(Real p, Real T) const
+{
+  Real v, e;
+  v_e_from_p_T(p, T, v, e);
+  return k_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
+{
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real dk_dv, dk_de;
+  k_from_v_e(v, e, k, dk_dv, dk_de);
+  dk_dp = dk_dv * dv_dp + dk_de * de_dp;
+  dk_dT = dk_dv * dv_dT + dk_de * de_dT;
+}
+
+Real
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
 {
   const Real rho = rho_from_p_T(p, T);
