@@ -86,7 +86,7 @@ RefineBlockGenerator::recurs_refine(std::vector<subdomain_id_type> block_ids,
 
   if (ref_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);
-  for (auto i = 0; i < block_ids.size(); i++)
+  for (std::size_t i = 0; i < block_ids.size(); i++)
   {
     if (_refinement[i] > 0 && _refinement[i] > ref_step)
     {
