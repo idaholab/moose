@@ -308,7 +308,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = secondary_elems_to_mortar_segments[secondary_elem];
     Elem * current_mortar_segment = nullptr;
-    MortarSegmentInfo * info;
+    MortarSegmentInfo * info = nullptr;
 
     for (const auto & mortar_segment_candidate : mortar_segment_set)
     {
