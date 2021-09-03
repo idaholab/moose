@@ -238,6 +238,38 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
 }
 
 void
+SinglePhaseFluidProperties::v_e_from_p_T(Real p, Real T, Real & v, Real & e) const
+{
+  const Real rho = rho_from_p_T(p, T);
+  v = 1.0 / rho;
+  e = e_from_p_rho(p, rho);
+}
+
+void
+SinglePhaseFluidProperties::v_e_from_p_T(Real p,
+                                         Real T,
+                                         Real & v,
+                                         Real & dv_dp,
+                                         Real & dv_dT,
+                                         Real & e,
+                                         Real & de_dp,
+                                         Real & de_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+
+  v = 1.0 / rho;
+  const Real dv_drho = -1.0 / (rho * rho);
+  dv_dp = dv_drho * drho_dp;
+  dv_dT = dv_drho * drho_dT;
+
+  Real de_dp_partial, de_drho;
+  e_from_p_rho(p, rho, e, de_dp_partial, de_drho);
+  de_dp = de_dp_partial + de_drho * drho_dp;
+  de_dT = de_drho * drho_dT;
+}
+
+void
 SinglePhaseFluidProperties::rho_e_from_p_T(Real p,
                                            Real T,
                                            Real & rho,

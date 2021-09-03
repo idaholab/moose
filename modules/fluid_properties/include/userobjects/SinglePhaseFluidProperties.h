@@ -289,6 +289,16 @@ public:
    */
   virtual std::vector<Real> henryCoefficients() const;
 
+  virtual void v_e_from_p_T(Real p, Real T, Real & v, Real & e) const;
+  virtual void v_e_from_p_T(Real p,
+                            Real T,
+                            Real & v,
+                            Real & dv_dp,
+                            Real & dv_dT,
+                            Real & e,
+                            Real & de_dp,
+                            Real & de_dT) const;
+
   /**
    * Combined methods. These methods are particularly useful for the PorousFlow
    * module, where density and viscosity are typically both computed everywhere.
