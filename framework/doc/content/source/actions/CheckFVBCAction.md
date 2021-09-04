@@ -1,28 +1,13 @@
 # CheckFVBCAction
 
-!alert! construction title=Undocumented Action Class
-The CheckFVBCAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# CheckFVBCAction
-
 !syntax description /FVBCs/CheckFVBCAction
 
-## Overview
+Checking the integrity of finite volume boundary conditions can be requested in the
+`[Problem]` block as shown below.
 
-!! Replace these lines with information regarding the CheckFVBCAction action.
+!listing fvkernels/mms/advective-outflow/kt-limited-advection.i block=Problem
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the CheckFVBCAction action.
-
-!syntax parameters /FVBCs/CheckFVBCAction
-```
-!alert-end!
-
-!syntax description /FVBCs/CheckFVBCAction
+More information about finite volume boundary conditions may be found on the
+[FVBCs syntax documentation](syntax/FVBCs/index.md).
 
 !syntax parameters /FVBCs/CheckFVBCAction

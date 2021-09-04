@@ -1,28 +1,10 @@
 # AddDamperAction
 
-!alert! construction title=Undocumented Action Class
-The AddDamperAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddDamperAction
-
 !syntax description /Dampers/AddDamperAction
 
-## Overview
+`Dampers` are specified as an object inside the `[Dampers]` block.
 
-!! Replace these lines with information regarding the AddDamperAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddDamperAction action.
-
-!syntax parameters /Dampers/AddDamperAction
-```
-!alert-end!
-
-!syntax description /Dampers/AddDamperAction
+More information about `Dampers` may be found on the
+[Dampers syntax documentation](syntax/Dampers/index.md).
 
 !syntax parameters /Dampers/AddDamperAction

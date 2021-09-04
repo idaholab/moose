@@ -1,28 +1,13 @@
 # SetupTimeIntegratorAction
 
-!alert! construction title=Undocumented Action Class
-The SetupTimeIntegratorAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# SetupTimeIntegratorAction
-
 !syntax description /Executioner/TimeIntegrator/SetupTimeIntegratorAction
 
-## Overview
+A `TimeIntegrator` is specified as an object inside the `[TimeIntegrator]` block with the `[Executioner]` block
+as shown below
 
-!! Replace these lines with information regarding the SetupTimeIntegratorAction action.
+!listing test/tests/variables/time_derivatives_neighbor/test.i block=Executioner
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SetupTimeIntegratorAction action.
-
-!syntax parameters /Executioner/TimeIntegrator/SetupTimeIntegratorAction
-```
-!alert-end!
-
-!syntax description /Executioner/TimeIntegrator/SetupTimeIntegratorAction
+More information about TimeIntegrators may be found on the
+[TimeIntegrator syntax documentation](syntax/Executioner/TimeIntegrator/index.md).
 
 !syntax parameters /Executioner/TimeIntegrator/SetupTimeIntegratorAction

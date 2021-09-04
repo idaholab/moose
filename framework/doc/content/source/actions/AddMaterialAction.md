@@ -1,28 +1,10 @@
 # AddMaterialAction
 
-!alert! construction title=Undocumented Action Class
-The AddMaterialAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddMaterialAction
-
 !syntax description /Materials/AddMaterialAction
 
-## Overview
+`Materials` are specified as an object inside the `[Materials]` block.
 
-!! Replace these lines with information regarding the AddMaterialAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddMaterialAction action.
-
-!syntax parameters /Materials/AddMaterialAction
-```
-!alert-end!
-
-!syntax description /Materials/AddMaterialAction
+More information about `Materials` and their parameters can be found on the
+[Materials syntax documentation](syntax/Materials/index.md).
 
 !syntax parameters /Materials/AddMaterialAction

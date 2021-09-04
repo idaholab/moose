@@ -1,28 +1,10 @@
 # AddNodalKernelAction
 
-!alert! construction title=Undocumented Action Class
-The AddNodalKernelAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddNodalKernelAction
-
 !syntax description /NodalKernels/AddNodalKernelAction
 
-## Overview
+Kernels for nodal variables are specified as an object inside the `[NodalKernels]` block.
 
-!! Replace these lines with information regarding the AddNodalKernelAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddNodalKernelAction action.
-
-!syntax parameters /NodalKernels/AddNodalKernelAction
-```
-!alert-end!
-
-!syntax description /NodalKernels/AddNodalKernelAction
+More information about `NodalKernels` may be found on the
+[NodalKernels syntax documentation](syntax/NodalKernels/index.md).
 
 !syntax parameters /NodalKernels/AddNodalKernelAction

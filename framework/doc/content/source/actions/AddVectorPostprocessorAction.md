@@ -1,28 +1,11 @@
 # AddVectorPostprocessorAction
 
-!alert! construction title=Undocumented Action Class
-The AddVectorPostprocessorAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddVectorPostprocessorAction
-
 !syntax description /VectorPostprocessors/AddVectorPostprocessorAction
 
-## Overview
+Vectors of postprocessors, `VectorPostprocessors`, are specified as an object inside the
+`[VectorPostprocessors]` block.
 
-!! Replace these lines with information regarding the AddVectorPostprocessorAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddVectorPostprocessorAction action.
-
-!syntax parameters /VectorPostprocessors/AddVectorPostprocessorAction
-```
-!alert-end!
-
-!syntax description /VectorPostprocessors/AddVectorPostprocessorAction
+More information about `VectorPostprocessors` may be found on the
+[VectorPostprocessors syntax documentation](syntax/VectorPostprocessors/index.md).
 
 !syntax parameters /VectorPostprocessors/AddVectorPostprocessorAction

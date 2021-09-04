@@ -1,28 +1,10 @@
 # AddUserObjectAction
 
-!alert! construction title=Undocumented Action Class
-The AddUserObjectAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddUserObjectAction
-
 !syntax description /UserObjects/AddUserObjectAction
 
-## Overview
+`UserObjects` are specified as an object inside the `[UserObjects]` block.
 
-!! Replace these lines with information regarding the AddUserObjectAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddUserObjectAction action.
-
-!syntax parameters /UserObjects/AddUserObjectAction
-```
-!alert-end!
-
-!syntax description /UserObjects/AddUserObjectAction
+More information about `UserObjects` may be found on the
+[UserObjects syntax documentation](syntax/UserObjects/index.md).
 
 !syntax parameters /UserObjects/AddUserObjectAction
