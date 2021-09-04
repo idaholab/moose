@@ -91,11 +91,10 @@ class TableCommandComponent(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-
         content = info['block'] if 'block' in info else info['inline']
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   token_type=TableFloat)
-        self.reader.tokenize(flt, content, page, MarkdownReader.BLOCK)
+        self.reader.tokenize(flt, content, page, MarkdownReader.BLOCK, line=info.line)
 
         if flt is parent:
             parent(0).attributes.update(**self.attributes)
@@ -103,7 +102,7 @@ class TableCommandComponent(command.CommandComponent):
         return parent
 
 class TableComponent(components.ReaderComponent):
-    RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\Z|\n{2,})',
+    RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\n*\Z|\n{2,})',
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
     FORMAT_RE = re.compile(r'^(?P<format>\|[ \|:\-]+\|)$', flags=re.MULTILINE|re.UNICODE)
     SPLIT_RE = re.compile(r'(?:\A| )\|(?: |\Z)')

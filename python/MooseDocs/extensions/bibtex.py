@@ -79,7 +79,8 @@ class BibtexExtension(command.CommandExtension):
                 else:
                     self.__database.add_entry(key, db.entries[key])
 
-    def preTokenize(self, page, ast):
+    def preRead(self, page):
+        """Initialize the page citations list."""
         page['citations'] = list()
 
     def postTokenize(self, page, ast):

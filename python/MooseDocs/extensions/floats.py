@@ -81,6 +81,7 @@ class FloatExtension(Extension):
     in a uniform manner.
     """
     def extend(self, reader, renderer):
+        self.requires(core)
         renderer.add('Float', RenderFloat())
         renderer.add('FloatCaption', RenderFloatCaption())
 

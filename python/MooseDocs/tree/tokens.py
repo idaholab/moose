@@ -68,9 +68,7 @@ class Token(NodeBase):
         """Retrieve the Information object from a parent node."""
         node = self
         # use _info to prevent infinite loop
-        while node._info is None:
-            if node.parent is None:
-                break
+        while node._info is None and not node.is_root:
             node = node.parent
         return node._info
 

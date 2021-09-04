@@ -62,7 +62,7 @@ Burgers' equation. The Burgers' equation for speed `v` is given by:
 
 !listing test/tests/fvkernels/fv_burgers/fv_burgers.i
          block=FVKernels
-         id=first_fv_kernel_example
+         id=second_fv_kernel_example
          caption=Example of the FVKernels block in a MOOSE input file for solving one-dimensional Burgers' equation.
 
 Note that the `FVBurgers1D` kernel only works for one-dimensional problems. In

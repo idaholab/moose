@@ -89,7 +89,7 @@ different parameter samples and the solution vectors for each variable defined o
 [!param](/Trainers/PODReducedBasisTrainer/var_names) input parameter are saved into
 snapshot matrices
 
-!equation id=fom_parameterized
+!equation id=s-matrices
 \textbf{S}_i = [\textbf{u}_i(\boldsymbol{\mu}_1),...,\textbf{u}_i(\boldsymbol{\mu}_{N_s})].
 
 In this implementation, the solutions are obtained from a [PODFullSolveMultiApp.md] using a
