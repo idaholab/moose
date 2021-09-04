@@ -46,9 +46,10 @@ MooseVariableBase::validParams()
                              "Order of the FE shape function to use for this variable (additional "
                              "orders not listed here are allowed, depending on the family).");
 
-  MooseEnum family("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
-                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC",
-                   "LAGRANGE");
+  MooseEnum family(
+      "LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+      "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC RATIONAL_BERNSTEIN",
+      "LAGRANGE");
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
 
