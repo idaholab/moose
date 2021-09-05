@@ -638,6 +638,26 @@ bool globCompare(const std::string & candidate,
                  std::size_t c = 0,
                  std::size_t p = 0);
 
+template <typename T>
+void
+expandAllMatches(const std::vector<T> & candidates, std::vector<T> & patterns)
+{
+  std::set<T> expanded;
+  for (const auto & p : patterns)
+  {
+    unsigned int found = 0;
+    for (const auto & c : candidates)
+      if (globCompare(c, p))
+      {
+        expanded.insert(c);
+        found++;
+      }
+    if (!found)
+      throw std::invalid_argument(p);
+  }
+  patterns.assign(expanded.begin(), expanded.end());
+}
+
 /**
  * This function will split the passed in string on a set of delimiters appending the substrings
  * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In
