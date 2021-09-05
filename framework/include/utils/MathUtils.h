@@ -77,6 +77,29 @@ heavyside(T x)
 
 template <typename T>
 T
+regularizedHeavyside(T x, Real smoothing_length)
+{
+  if (x <= -smoothing_length)
+    return 0.0;
+  else if (x < smoothing_length)
+    return 0.5 * (1 + std::sin(libMesh::pi * x / 2 / smoothing_length));
+  else
+    return 1.0;
+}
+
+template <typename T>
+T
+regularizedHeavysideDerivative(T x, Real smoothing_length)
+{
+  if (x < smoothing_length && x > -smoothing_length)
+    return 0.25 * libMesh::pi / smoothing_length *
+           (std::cos(libMesh::pi * x / 2 / smoothing_length));
+  else
+    return 0.0;
+}
+
+template <typename T>
+T
 positivePart(T x)
 {
   return x > 0.0 ? x : 0.0;

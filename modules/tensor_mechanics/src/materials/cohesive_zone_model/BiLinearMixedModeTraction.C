@@ -22,7 +22,13 @@ BiLinearMixedModeTraction::validParams()
   params.addParam<Real>("viscosity", 0.0, "Viscosity.");
   params.addRequiredParam<Real>("normal_strength", "Tensile strength in normal direction.");
   params.addRequiredParam<Real>("shear_strength", "Tensile strength in shear direction.");
-  params.addRequiredParam<Real>("eta", "The B-K power law parameter.");
+  params.addRequiredParam<Real>("eta", "The power law parameter.");
+  params.addParam<Real>("alpha", 1.0e-10, "The interpenetration regularization parameter.");
+  params.addParam<bool>(
+      "lag_seperation_state", false, "Lag seperation sate: use their old values.");
+  MooseEnum criterion("POWER_LAW BK", "BK");
+  params.addParam<MooseEnum>(
+      "mixed_mode_criterion", criterion, "Option for mixed mode propagation criterion.");
   params.addCoupledVar("normal_strength_scale_factor", 1.0, "Scale factor for normal strength.");
   params.addClassDescription("Mixed mode bilinear traction separation law.");
   return params;
@@ -43,14 +49,21 @@ BiLinearMixedModeTraction::BiLinearMixedModeTraction(const InputParameters & par
     _delta_shear0(getParam<Real>("shear_strength") / _stiffness),
     _eff_disp_damage_init(
         declareProperty<Real>(_base_name + "effective_displacement_at_damage_initiation")),
+    _eff_disp_damage_init_old(
+        getMaterialPropertyOld<Real>(_base_name + "effective_displacement_at_damage_initiation")),
     _eff_disp_full_degradation(
         declareProperty<Real>(_base_name + "effective_displacement_at_full_degradation")),
+    _eff_disp_full_degradation_old(
+        getMaterialPropertyOld<Real>(_base_name + "effective_displacement_at_full_degradation")),
     _eta(getParam<Real>("eta")),
     _maximum_mixed_mode_relative_displacement(
         declareProperty<Real>(_base_name + "maximum_mixed_mode_relative_displacement")),
     _maximum_mixed_mode_relative_displacement_old(
         getMaterialPropertyOld<Real>(_base_name + "maximum_mixed_mode_relative_displacement")),
-    _beta(declareProperty<Real>("mode_mixity_ratio"))
+    _beta(declareProperty<Real>("mode_mixity_ratio")),
+    _criterion(getParam<MooseEnum>("mixed_mode_criterion").getEnum<MixedModeCriterion>()),
+    _lag_seperation_state(getParam<bool>("lag_seperation_state")),
+    _alpha(getParam<Real>("alpha"))
 {
 }
 
@@ -68,6 +81,8 @@ BiLinearMixedModeTraction::initQpStatefulProperties()
 
   _d[_qp] = 0.0;
   _maximum_mixed_mode_relative_displacement[_qp] = 0.0;
+  _eff_disp_damage_init[_qp] = 0.0;
+  _eff_disp_full_degradation[_qp] = 0.0;
 }
 
 RealVectorValue
@@ -89,9 +104,24 @@ BiLinearMixedModeTraction::computeTraction()
         delta_normal0 * _delta_shear0 *
         std::sqrt((1 + _beta_sq) /
                   (Utility::pow<2>(_delta_shear0) + _beta_sq * Utility::pow<2>(delta_normal0)));
-    _eff_disp_full_degradation[_qp] =
-        2.0 / (_stiffness * _eff_disp_damage_init[_qp]) *
-        (_GI_C + (_GII_C - _GI_C) * std::pow(_beta_sq / (1 + _beta_sq), _eta));
+
+    switch (_criterion)
+    {
+      case MixedModeCriterion::BK:
+      {
+        _eff_disp_full_degradation[_qp] =
+            2.0 / (_stiffness * _eff_disp_damage_init[_qp]) *
+            (_GI_C + (_GII_C - _GI_C) * std::pow(_beta_sq / (1 + _beta_sq), _eta));
+        break;
+      }
+      case MixedModeCriterion::POWER_LAW:
+      {
+        _eff_disp_full_degradation[_qp] =
+            (2.0 + 2.0 * _beta_sq) / (_stiffness * _eff_disp_damage_init[_qp]) *
+            std::pow(std::pow(1.0 / _GI_C, _eta) + std::pow(_beta_sq / _GII_C, _eta), -1.0 / _eta);
+        break;
+      }
+    }
   }
   else
   {
@@ -145,53 +175,71 @@ BiLinearMixedModeTraction::computeTraction()
   _D.zero();
   _dDdu.zero();
 
-  if (_maximum_mixed_mode_relative_displacement[_qp] <= _eff_disp_damage_init[_qp])
+  Real maximum_mixed_mode_relative_displacement = _maximum_mixed_mode_relative_displacement[_qp];
+  Real eff_disp_damage_init = _eff_disp_damage_init[_qp];
+  Real eff_disp_full_degradation = _eff_disp_full_degradation[_qp];
+  RealVectorValue interface_displacement_jump = _interface_displacement_jump[_qp];
+
+  if (_lag_seperation_state)
+  {
+    maximum_mixed_mode_relative_displacement = _maximum_mixed_mode_relative_displacement_old[_qp];
+    eff_disp_damage_init = _eff_disp_damage_init_old[_qp];
+    eff_disp_full_degradation = _eff_disp_full_degradation_old[_qp];
+    interface_displacement_jump = _interface_displacement_jump_old[_qp];
+  }
+
+  if (maximum_mixed_mode_relative_displacement <= eff_disp_damage_init)
   {
     _D.addIa(_stiffness);
   }
-  else if (_maximum_mixed_mode_relative_displacement[_qp] <= _eff_disp_full_degradation[_qp])
+  else if (maximum_mixed_mode_relative_displacement <= eff_disp_full_degradation)
   {
     _D.addIa((1 - _d[_qp]) * _stiffness);
+
     Real term = _stiffness * _d[_qp] *
-                (std::max(-_interface_displacement_jump[_qp](0), 0.0) /
-                 (-_interface_displacement_jump[_qp](0)));
+                MathUtils::regularizedHeavyside(-interface_displacement_jump(0), _alpha);
+
     _D(0, 0) += term;
     _D(0, 1) += term;
     _D(0, 2) += term;
 
-    if (!use_old_state)
+    if (!use_old_state && !_lag_seperation_state)
     {
       RealVectorValue dmax_du(
-          _interface_displacement_jump[_qp](0) > 0.0
-              ? _interface_displacement_jump[_qp](0) /
-                    _maximum_mixed_mode_relative_displacement[_qp]
+          interface_displacement_jump(0) > 0.0
+              ? interface_displacement_jump(0) / maximum_mixed_mode_relative_displacement
               : 0.0,
-          _interface_displacement_jump[_qp](1) / _maximum_mixed_mode_relative_displacement[_qp],
-          _interface_displacement_jump[_qp](2) / _maximum_mixed_mode_relative_displacement[_qp]);
+          interface_displacement_jump(1) / maximum_mixed_mode_relative_displacement,
+          interface_displacement_jump(2) / maximum_mixed_mode_relative_displacement);
 
-      dmax_du *= _eff_disp_full_degradation[_qp] * _eff_disp_damage_init[_qp] /
-                 (_eff_disp_full_degradation[_qp] - _eff_disp_damage_init[_qp]) /
-                 Utility::pow<2>(_maximum_mixed_mode_relative_displacement[_qp]);
+      dmax_du *= eff_disp_full_degradation * eff_disp_damage_init /
+                 (eff_disp_full_degradation - eff_disp_damage_init) /
+                 Utility::pow<2>(maximum_mixed_mode_relative_displacement);
 
-      if (_interface_displacement_jump[_qp](0) > 0.0)
-        _dDdu.vectorOuterProduct(-1.0 * _stiffness * _interface_displacement_jump[_qp], dmax_du);
-      else
-        _dDdu.vectorOuterProduct(
-            RealVectorValue(-1.0 * _stiffness * _interface_displacement_jump[_qp](0) +
-                                _stiffness * (_interface_displacement_jump[_qp](0) +
-                                              _interface_displacement_jump[_qp](1) +
-                                              _interface_displacement_jump[_qp](2)),
-                            -1.0 * _stiffness * _interface_displacement_jump[_qp](1),
-                            -1.0 * _stiffness * _interface_displacement_jump[_qp](2)),
-            dmax_du);
+      _dDdu.vectorOuterProduct(
+          RealVectorValue(
+              -1.0 * _stiffness * interface_displacement_jump(0) +
+                  _stiffness *
+                      MathUtils::regularizedHeavyside(-interface_displacement_jump(0), _alpha) *
+                      (interface_displacement_jump(0) + interface_displacement_jump(1) +
+                       interface_displacement_jump(2)),
+              -1.0 * _stiffness * interface_displacement_jump(1),
+              -1.0 * _stiffness * interface_displacement_jump(2)),
+          dmax_du);
+
+      _dDdu *= (_dt / (_viscosity + _dt));
     }
-
-    _dDdu *= (_dt / (_viscosity + _dt));
   }
-  else
+  else if (maximum_mixed_mode_relative_displacement > eff_disp_full_degradation)
   {
-    _D(0, 0) = _stiffness * (std::max(-_interface_displacement_jump[_qp](0), 0.0) /
-                             (-_interface_displacement_jump[_qp](0)));
+    _D(0, 0) =
+        _stiffness * MathUtils::regularizedHeavyside(-interface_displacement_jump(0), _alpha);
+
+    if (!_lag_seperation_state)
+      _dDdu(0, 0) =
+          -_stiffness *
+          MathUtils::regularizedHeavysideDerivative(-interface_displacement_jump(0), _alpha) *
+          interface_displacement_jump(0);
   }
 
   return _D * _interface_displacement_jump[_qp];
