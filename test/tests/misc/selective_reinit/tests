@@ -3,14 +3,9 @@
     type = 'Exodiff'
     input = 'selective_reinit_test.i'
     exodiff = 'selective_reinit_test_out.e'
-    max_parallel = 1
-    max_time = 20
-    compiler = 'GCC CLANG'
-    method = '!DBG'
-    valgrind = 'NONE'
 
     requirement = 'The system shall only reinitialize variables values that are consumed by other active objects in the system.'
     design = 'FEProblemBase.md'
-    issues = '#1386'
+    issues = '#1386 #18777'
   [../]
 []
