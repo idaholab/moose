@@ -183,6 +183,10 @@ void
 MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> & inactive_lm_nodes,
                                          const std::unordered_set<const Elem *> & inactive_lm_elems)
 {
+  // If no LM variable has been defined, skip
+  if (!_var)
+    return;
+
   if (_subproblem.currentlyComputingJacobian())
     prepareMatrixTagLower(
         _assembly, _var->number(), _var->number(), Moose::ConstraintJacobianType::LowerLower);

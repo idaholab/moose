@@ -88,7 +88,7 @@ name = 'small'
     secondary = block_left
     formulation = mortar
     mortar_approach = weighted
-    c_normal = 1e0
+    c_normal = 1e6
   []
 []
 
