@@ -88,7 +88,7 @@ mesh surf all
 
 sideset 1 curve 1
 sideset 2 curve 3
-sideset 3 curve 5 9 23 27
+sideset 3 curve 9 27
 sideset 4 curve 7 20 24 29
 
-export mesh '/Users/marta3/projects3/moose/modules/contact/test/tests/pdass_problems/hertz_cyl_coarser.e' overwrite
+export mesh '/Users/badgjc/projects/moose/modules/contact/test/tests/pdass_problems/hertz_cyl_coarser.e' overwrite

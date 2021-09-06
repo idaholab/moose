@@ -100,20 +100,7 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
   const std::pair<dof_id_type, dof_id_type> dof_pair(friction_dof_index, dof_index);
 
   _dof_to_weighted_tangential_velocity[dof_pair].first += _test[_i][_qp] * _qp_tangential_velocity;
-
-  // For nodal variables, use nodal value
-  if (_friction_var->useDual() && _qp == 0)
-  {
-    ADReal friction_lm_value = _friction_var->getNodalValue(*_lower_secondary_elem->node_ptr(_i));
-    Moose::derivInsert(friction_lm_value.derivatives(), friction_dof_index, 1.);
-    _dof_to_weighted_tangential_velocity[dof_pair].second = friction_lm_value;
-  }
-  // For elemental varaibles assemble weighted traction
-  else // if (!_var->isNodal())
-  {
-    _dof_to_weighted_tangential_velocity[dof_pair].second +=
-        _test[_i][_qp] * _qp_tangential_traction;
-  }
+  _dof_to_weighted_tangential_velocity[dof_pair].second += _test[_i][_qp] * _qp_tangential_traction;
 }
 
 void
@@ -162,23 +149,16 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
 
   // Get normal LM index
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const auto & weighted_traction = *_weighted_traction_ptr;
+  const auto & contact_pressure = *_weighted_traction_ptr;
 
-  ADReal dof_residual;
+  // Compute NCP residual
+  const auto term_1 = std::max(_mu * (contact_pressure - _c * weighted_gap),
+                               std::abs(friction_lm_value + _c_t * tangential_vel * _dt)) *
+                      friction_lm_value;
+  const auto term_2 = _mu * std::max(0.0, contact_pressure - _c * weighted_gap) *
+                      (friction_lm_value + _c_t * tangential_vel * _dt);
 
-  // Primal-dual active set strategy (PDASS)
-  if (weighted_traction < _epsilon)
-    dof_residual = friction_lm_value;
-  else
-  {
-    const auto term_1 = std::max(_mu * (weighted_traction + _c * weighted_gap),
-                                 std::abs(friction_lm_value + _c_t * tangential_vel * _dt)) *
-                        friction_lm_value;
-    const auto term_2 = _mu * std::max(0.0, weighted_traction + _c * weighted_gap) *
-                        (friction_lm_value + _c_t * tangential_vel * _dt);
-
-    dof_residual = term_1 - term_2;
-  }
+  const ADReal dof_residual = term_1 - term_2;
 
   if (_subproblem.currentlyComputingJacobian())
     _assembly.processDerivatives(dof_residual, friction_dof_index, _matrix_tags);

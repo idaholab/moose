@@ -111,19 +111,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
   const auto dof_index = node->dof_number(_sys.number(), _var->number(), comp);
 
   _dof_to_weighted_gap[dof_index].first += _test[_i][_qp] * _qp_gap;
-
-  // // For nodal variables use nodal value
-  // if (_var->useDual() && _qp == 0)
-  // {
-  //   ADReal lm_value = _var->getNodalValue(*_lower_secondary_elem->node_ptr(_i));
-  //   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
-  //   _dof_to_weighted_gap[dof_index].second = lm_value;
-  // }
-  // // For elemental variables assemble weighted traction (lambda represents traction)
-  // else //if (!_var->isNodal())
-  {
-    _dof_to_weighted_gap[dof_index].second += _test[_i][_qp] * _qp_traction;
-  }
+  _dof_to_weighted_gap[dof_index].second += _test[_i][_qp] * _qp_traction;
 }
 
 void
@@ -182,9 +170,9 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const dof_id_type dof_index)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const auto & weighted_traction = *_weighted_traction_ptr;
+  const auto & contact_pressure = *_weighted_traction_ptr;
 
-  const ADReal dof_residual = std::min(weighted_traction, weighted_gap * _c);
+  const ADReal dof_residual = std::min(contact_pressure, weighted_gap * _c);
 
   if (_subproblem.currentlyComputingJacobian())
     _assembly.processDerivatives(dof_residual, dof_index, _matrix_tags);
