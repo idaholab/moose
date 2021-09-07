@@ -132,7 +132,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
-  // Note parameter is space order, we then convert to quadrature order
+  // Note parameter is discretization order, we then convert to quadrature order
   const MooseEnum p_order = getParam<MooseEnum>("quadrature");
   // If quadrature not DEFAULT, set mortar qrule
   if (p_order != "DEFAULT")
