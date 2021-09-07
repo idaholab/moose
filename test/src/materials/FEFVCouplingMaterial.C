@@ -45,8 +45,11 @@ FEFVCouplingMaterial::FEFVCouplingMaterial(const InputParameters & parameters)
                         : nullptr)
 {
   if (_declared_prop)
+  {
     _declared_prop->setFunctor(
         _mesh, blockIDs(), [](const auto &, const auto &) -> ADReal { return 1.; });
+    _declared_prop->setCacheClearanceSchedule({EXEC_TIMESTEP_BEGIN});
+  }
   if (_fe_prop)
   {
     _fe_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {

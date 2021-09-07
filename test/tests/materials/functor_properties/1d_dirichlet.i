@@ -54,11 +54,11 @@
 [Materials]
   active = 'functor'
   [functor]
-    type = FVVarFunctorMaterial
+    type = VarFunctorMaterial
     var = sink
   []
   [overlapping_functor]
-    type = FVVarFunctorMaterial
+    type = VarFunctorMaterial
     var = v
   []
 []

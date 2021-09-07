@@ -7,17 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVVarFunctorMaterial.h"
+#include "VarFunctorMaterial.h"
 #include "MooseVariableFV.h"
 #include "FunctorMaterialProperty.h"
 
-registerMooseObject("MooseApp", FVVarFunctorMaterial);
+registerMooseObject("MooseApp", VarFunctorMaterial);
 
 InputParameters
-FVVarFunctorMaterial::validParams()
+VarFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addRequiredCoupledVar("var", "The finite volume variable to be coupled in");
+  params += SetupInterface::validParams();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
+  params.addRequiredCoupledVar("var", "The field variable to be coupled in");
   params.addRequiredParam<MaterialPropertyName>("mat_prop_name",
                                                 "The name of the material property to produce");
   params.addClassDescription("Creates a functor material property whose evaluation corresponds to "
@@ -25,11 +27,13 @@ FVVarFunctorMaterial::validParams()
   return params;
 }
 
-FVVarFunctorMaterial::FVVarFunctorMaterial(const InputParameters & parameters)
+VarFunctorMaterial::VarFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _var(*getVarHelper<MooseVariableFV<Real>>("var", 0)),
+    _var(getFunctor<MooseVariableField<Real>>("var", 0)),
     _functor_prop(declareFunctorProperty<ADReal>("mat_prop_name"))
 {
   _functor_prop.setFunctor(
       _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal { return _var(r, t); });
+  _functor_prop.setCacheClearanceSchedule(
+      std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
 }

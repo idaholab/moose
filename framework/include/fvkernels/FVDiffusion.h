@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "CentralDifferenceLimiter.h"
 
 /// FVDiffusion implements a standard diffusion term:
 ///
@@ -31,4 +32,8 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const FunctorInterface<ADReal> & _coeff;
+
+  /// A central difference limiter that will be passed to evaluation of \p _coeff in order to
+  /// perform central/average interpolations
+  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

@@ -1,5 +1,5 @@
 [Tests]
-  design = FVVarFunctorMaterial.md
+  design = VarFunctorMaterial.md
   issues = '#16809'
   [exo]
     type = Exodiff

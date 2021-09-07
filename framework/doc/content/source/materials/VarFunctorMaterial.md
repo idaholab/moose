@@ -1,6 +1,6 @@
-# FVVarFunctorMaterial
+# VarFunctorMaterial
 
-!syntax description /Materials/FVVarFunctorMaterial
+!syntax description /Materials/VarFunctorMaterial
 
 ## Overview
 
@@ -9,8 +9,8 @@ provided for the parameter `mat_prop_name`. The functor material property
 evaluation will be equivalent to the evaluation of the coupled variable `var` at
 the provided geometric argument.
 
-!syntax parameters /Materials/FVVarFunctorMaterial
+!syntax parameters /Materials/VarFunctorMaterial
 
-!syntax inputs /Materials/FVVarFunctorMaterial
+!syntax inputs /Materials/VarFunctorMaterial
 
-!syntax children /Materials/FVVarFunctorMaterial
+!syntax children /Materials/VarFunctorMaterial

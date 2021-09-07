@@ -325,7 +325,9 @@ FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsign
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_side_qp, state);
 
-  const auto elem_id = std::get<0>(elem_side_qp)->id();
+  const Elem * const elem = std::get<0>(elem_side_qp);
+  mooseAssert(elem, "elem must be non-null");
+  const auto elem_id = elem->id();
   if (elem_id != _current_side_qp_map_key)
   {
     _current_side_qp_map_key = elem_id;
@@ -337,14 +339,9 @@ FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsign
   const auto * const qrule = std::get<3>(elem_side_qp);
   mooseAssert(qrule, "qrule must be non-null");
 
-  // Check and see whether we even have sized for this side. If we haven't then we must
-  // evaluate
+  // Check and see whether we even have sized for this side
   if (side >= side_qp_data.size())
-  {
-    const auto * const elem = std::get<0>(elem_side_qp);
-    mooseAssert(elem, "elem must be non-null");
     side_qp_data.resize(elem->n_sides());
-  }
 
   // Ok we were sized enough for our side
   auto & qp_data = side_qp_data[side];
@@ -374,6 +371,14 @@ FunctorInterface<T>::clearCacheData()
   for (auto & map_pr : _qp_to_value)
     for (auto & pr : map_pr.second)
       pr.first = false;
+
+  for (auto & map_pr : _side_qp_to_value)
+  {
+    auto & side_vector = map_pr.second;
+    for (auto & qp_vector : side_vector)
+      for (auto & pr : qp_vector)
+        pr.first = false;
+  }
 
   _current_qp_map_key = DofObject::invalid_id;
   _current_qp_map_value = nullptr;

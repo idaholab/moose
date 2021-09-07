@@ -9,24 +9,18 @@
 
 #pragma once
 
-#include "FunctorMaterial.h"
+#include "ADIntegratedBC.h"
 
-template <typename>
-class MooseVariableFV;
-template <typename>
-class FunctorMaterialProperty;
-
-/**
- * A material that couples a variable
- */
-class FVVarFunctorMaterial : public FunctorMaterial
+class MatPropBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  FVVarFunctorMaterial(const InputParameters & parameters);
+  MatPropBC(const InputParameters & parameters);
 
 protected:
-  const MooseVariableFV<Real> & _var;
-  FunctorMaterialProperty<ADReal> & _functor_prop;
+  ADReal computeQpResidual() override;
+
+  const FunctorInterface<ADReal> & _coef;
+  const bool _use_preinitd_data;
 };
