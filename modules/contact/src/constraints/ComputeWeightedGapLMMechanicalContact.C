@@ -44,6 +44,14 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
+  params.addParam<bool>(
+      "normalize_c",
+      false,
+      "Whether to normalize c by weighting function norm. When unnormalized "
+      "the value of c effectively depends on element size since in the constraint we compare nodal "
+      "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
+      "element "
+      "size, where integrated values are dependent on element size).");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -59,7 +67,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _secondary_disp_z(_has_disp_z ? &adCoupledValue("disp_z") : nullptr),
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _normal_index(_interpolate_normals ? _qp : _i),
-    _c(getParam<Real>("c"))
+    _c(getParam<Real>("c")),
+    _normalize_c(getParam<bool>("normalize_c"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
@@ -70,6 +79,10 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     paramError(
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
+
+  if (!_var->isNodal())
+    if (_var->feType().order != static_cast<Order>(0))
+      mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
 }
 
 ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
@@ -91,7 +104,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
         (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
 
   _qp_gap = gap_vec * (_normals[_normal_index] * _JxW_msm[_qp] * _coord[_qp]);
-  _qp_traction = _lambda[_qp] * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
 
 void
@@ -102,16 +115,13 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
-  const DofObject * const node =
-      _var->isNodal() ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                      : static_cast<const DofObject *>(_lower_secondary_elem);
+  const DofObject * dof = _var->isNodal()
+                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                              : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  // If variable is nodal, only 1 node per dof; if variable is elemental, get _i-th component
-  const auto comp = _var->isNodal() ? 0 : _i;
-  const auto dof_index = node->dof_number(_sys.number(), _var->number(), comp);
-
-  _dof_to_weighted_gap[dof_index].first += _test[_i][_qp] * _qp_gap;
-  _dof_to_weighted_gap[dof_index].second += _test[_i][_qp] * _qp_traction;
+  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
+  if (_normalize_c)
+    _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
 
 void
@@ -160,19 +170,23 @@ ComputeWeightedGapLMMechanicalContact::post()
   for (const auto & pr : _dof_to_weighted_gap)
   {
     _weighted_gap_ptr = &pr.second.first;
-    _weighted_traction_ptr = &pr.second.second;
+    _normalization_ptr = &pr.second.second;
 
     enforceConstraintOnDof(pr.first);
   }
 }
 
 void
-ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const dof_id_type dof_index)
+ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const auto & contact_pressure = *_weighted_traction_ptr;
+  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
 
-  const ADReal dof_residual = std::min(contact_pressure, weighted_gap * _c);
+  const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
+  ADReal lm_value = (*_sys.currentSolution())(dof_index);
+  Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
+
+  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
 
   if (_subproblem.currentlyComputingJacobian())
     _assembly.processDerivatives(dof_residual, dof_index, _matrix_tags);

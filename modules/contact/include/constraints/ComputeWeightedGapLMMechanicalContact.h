@@ -51,7 +51,7 @@ protected:
    * using an NCP function. This is also where we actually feed the node-based constraint
    * information into the system residual and Jacobian
    */
-  void enforceConstraintOnDof(const dof_id_type dof_index);
+  void enforceConstraintOnDof(const DofObject * const dof);
 
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
@@ -80,12 +80,15 @@ protected:
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
   /// The value of the LM at the current quadrature point
-  ADReal _qp_traction;
+  Real _qp_factor;
 
-  /// A map from node to weighted gap (and weighted traction for non-dual)
-  std::unordered_map<dof_id_type, std::pair<ADReal, ADReal>> _dof_to_weighted_gap;
+  /// Whether to normalize weighted gap by weighting function norm
+  bool _normalize_c;
+
+  /// A map from node to weighted gap and normalization (if requested)
+  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;
-  const ADReal * _weighted_traction_ptr = nullptr;
+  const Real * _normalization_ptr = nullptr;
 };

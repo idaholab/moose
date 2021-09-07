@@ -42,12 +42,10 @@ protected:
    * where we actually feed the node-based constraint information into the system residual and
    * Jacobian
    */
-  void enforceConstraintOnDof(const dof_id_type friction_dof_index,
-                              const dof_id_type normal_dof_index);
+  void enforceConstraintOnDof(const DofObject * const dof);
 
   /// A map from node to weighted gap
-  std::unordered_map<std::pair<dof_id_type, dof_id_type>, std::pair<ADReal, ADReal>>
-      _dof_to_weighted_tangential_velocity;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
@@ -55,8 +53,6 @@ protected:
 
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;
-  /// The value of the frictional LM at the current quadrature point
-  ADReal _qp_tangential_traction;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
