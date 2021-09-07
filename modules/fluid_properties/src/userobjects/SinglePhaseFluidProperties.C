@@ -25,6 +25,9 @@ SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & p
 
 SinglePhaseFluidProperties::~SinglePhaseFluidProperties() {}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 Real
 SinglePhaseFluidProperties::s_from_p_T(Real p, Real T) const
 {
@@ -484,3 +487,5 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, R
   dT_dp = dT_dv * dv_dp + dT_de * de_dp;
   dT_dh = dT_dv * dv_dh + dT_de * de_dh;
 }
+
+#pragma GCC diagnostic pop
