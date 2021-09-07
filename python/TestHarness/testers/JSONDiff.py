@@ -22,6 +22,10 @@ class JSONDiff(FileTester):
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
+        if self.specs['required_python_packages'] is None:
+             self.specs['required_python_packages'] = 'deepdiff'
+        elif 'deepdiff' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' deepdiff'
 
     def getOutputFiles(self):
         return self.specs['jsondiff']

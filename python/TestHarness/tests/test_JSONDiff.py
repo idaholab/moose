@@ -11,18 +11,16 @@ import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
-    def testDiffs(self):
+    def testJSONDiff(self):
         """
-        Test for Exodiffs, CSVDiffs
+        Test for JSONDiff
         """
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'diffs')
+            self.runTests('-i', 'jsondiff')
 
         e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.exodiff.*?Running exodiff')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?Running csvdiff')
+        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.jsondiff.*?FAILED \(JSONDIFF\)')
+        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.jsondiff.*?Running jsondiff')
 
         # Verify return code is DIFF related (0x81)
         self.assertIs(0x81, e.returncode)

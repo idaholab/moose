@@ -9,9 +9,4 @@
     input = csvdiff.i
     csvdiff = csvdiff_out.csv
   []
-  [jsondiff]
-    type = JSONDiff
-    input = jsondiff.i
-    jsondiff = jsondiff_out.json
-  []
 []
