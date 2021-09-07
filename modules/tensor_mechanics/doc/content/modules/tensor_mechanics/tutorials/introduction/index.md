@@ -1,0 +1,23 @@
+# Introduction to Tensor Mechanics
+
+This tutorial aim to to guide new users through their first set of tensor mechanics simulations. We'll start with a minimal setup and work our way up in complexity to where this tutorial can hand off to the [Introduction to Contact](contact/tutorials/introduction/index.md optional=True).
+
+## [First Steps](introduction/step01.md)
+
+In this step we start off with a simple bare bones mechanics problem and think about
+units in MOOSE.
+
+## [Adding Boundary Condition](introduction/step02.md)
+
+Next we add boundary conditions and loading. We think about the validity of the
+strain formulation and make a quick excusion into automatic differentiation.
+
+## [Subdomains and subdomain-specific properties](introduction/step03.md)
+
+In this step we'll be setting up two subdomains (regions of our sample) with
+differing material properties.
+
+## [Multiple submeshes](introduction/step04.md)
+
+We'll set up a pair of mesh separate unconnected mesh blocks,as a final
+preparation before we start working with mechanical contact.

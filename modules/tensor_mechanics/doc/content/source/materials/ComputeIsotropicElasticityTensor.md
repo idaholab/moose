@@ -22,6 +22,8 @@ C_{ijkl}^{isotropic} = \begin{bmatrix}
 `ComputeIsotropicElasticityTensor` accepts as an argument two of five isotropic elastic constants: lambda $\lambda$, the shear modulus $\mu$, the bulk modulus $K$, the Young's modulus $E$, or the Poisson's ratio $\nu$.
 The material includes the conversions into Lame constants, see [!cite](slaughter2012linearized) for the conversion equations among the isotropic elastic constants.
 
+An automatic differentiation version of this object is available as `ADComputeIsotropicElasticityTensor`.
+
 ## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch_quadratic.i block=Materials/elast_tensor
