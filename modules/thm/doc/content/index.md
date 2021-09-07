@@ -14,12 +14,11 @@ The basic capabilities include:
 
 - Component-based approach to build thermal-hydraulic simulations.
 - 1-phase, variable-area, inviscid, compressible flow model.
-- 2-phase, variable-area, inviscid, compressible flow via the "7-equation" model.
 
   - with non-condensable vapor mixture.
 
 - 2-D (Cartesian or axisymmetric) heat conduction.
-- 3-D heat conduction (in progress).
+- 3-D heat conduction.
 - Control logic system.
 - Extensibility:
 
@@ -50,6 +49,15 @@ Use the modeling guide to explore how to piece your models together:
 !col-end!
 
 !row-end!
+
+## Announcements and News
+
+####  September 1, 2021
+
+THM was converted to use the automated differentiation (AD) system available in MOOSE.
+While this brings many improvements, it also breaks input files using the 1-phase flow formulation.
+Please use the [migration guide](howto/thm_ad_migration_guide.md) to update your input files.
+
 
 ### Developed by class=center style=font-size:90%;margin-bottom:0.5em;font-weight:100
 
